@@ -1,0 +1,20 @@
+{
+  "extends": [".eslintrc.json"],
+
+  "rules": {
+    "no-console": "error",
+    "no-debugger": "error",
+    "no-warning-comments": "error"
+  },
+
+  "overrides": [
+    {
+      "files": ["**/*.ts?(x)"],
+
+      "rules": {
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "error"
+      }
+    }
+  ]
+}
