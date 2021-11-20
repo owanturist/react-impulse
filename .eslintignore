@@ -1,0 +1,5 @@
+# production
+dist
+
+*.d.ts
+*.md
