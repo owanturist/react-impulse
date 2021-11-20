@@ -8,11 +8,25 @@ import {
 } from 'react'
 import { nanoid } from 'nanoid'
 
-import { warning } from './warning'
-
 export type Compare<T> = (prev: T, next: T) => boolean
 
 const isEqual = <T>(one: T, another: T): boolean => one === another
+
+const warning = (message: string): void => {
+  /* eslint-disable no-console */
+  if (typeof console !== 'undefined' && typeof console.error === 'function') {
+    console.error(message)
+  }
+  /* eslint-enable no-console */
+  try {
+    // This error was thrown as a convenience so that if you enable
+    // "break on all exceptions" in your console,
+    // it would pause the execution at this line.
+    throw new Error(message)
+  } catch {
+    // do nothing
+  }
+}
 
 const modInc = (x: number): number => {
   return (x + 1) % 123456789
@@ -198,9 +212,7 @@ export function useMicroUpdate<T>(
   compare: Compare<T> = isEqual
 ): Dispatch<SetStateAction<T>> {
   return useCallback(
-    (update): void => {
-      microStore?.setState(update, compare)
-    },
+    (update): void => microStore?.setState(update, compare),
     [microStore, compare]
   )
 }
