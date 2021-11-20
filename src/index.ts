@@ -64,21 +64,18 @@ class SynchronousContext {
     return value
   }
 
-  public static register<T>(microState: MicroStore<T>): void {
+  public static register<T>(store: InnerStore<T>): void {
     const current = SynchronousContext.current
 
     if (current?.listener == null) {
       return
     }
 
-    if (current.cleanups.has(microState.key)) {
-      current.deadCleanups.delete(microState.key)
+    if (current.cleanups.has(store.key)) {
+      current.deadCleanups.delete(store.key)
     } else {
       SynchronousContext.isWatcherSubscribing = true
-      current.cleanups.set(
-        microState.key,
-        microState.subscribe(current.listener)
-      )
+      current.cleanups.set(store.key, store.subscribe(current.listener))
       SynchronousContext.isWatcherSubscribing = false
     }
   }
@@ -117,14 +114,14 @@ class SynchronousContext {
   }
 }
 
-export class MicroStore<T> {
-  public static of<TValue>(value: TValue): MicroStore<TValue> {
+export class InnerStore<T> {
+  public static of<TValue>(value: TValue): InnerStore<TValue> {
     SynchronousContext.warning(
-      'You should not call MicroState.of(something) inside the useWatch(watcher) callback. ' +
-        'he useWatch(watcher) hook is for read-only operations but MicroState.of(something) creates one.'
+      'You should not call InnerStore.of(something) inside the useWatch(watcher) callback. ' +
+        'he useWatch(watcher) hook is for read-only operations but InnerStore.of(something) creates one.'
     )
 
-    return new MicroStore(value)
+    return new InnerStore(value)
   }
 
   private readonly subscribers = new Map<string, VoidFunction>()
@@ -137,10 +134,10 @@ export class MicroStore<T> {
     this.subscribers.forEach(listener => listener())
   }
 
-  public clone(): MicroStore<T>
-  public clone<R>(fn: (value: T) => R): MicroStore<R>
-  public clone<R>(fn?: (value: T) => R): MicroStore<T | R> {
-    return MicroStore.of(typeof fn === 'function' ? fn(this.value) : this.value)
+  public clone(): InnerStore<T>
+  public clone<R>(fn: (value: T) => R): InnerStore<R>
+  public clone<R>(fn?: (value: T) => R): InnerStore<T | R> {
+    return InnerStore.of(typeof fn === 'function' ? fn(this.value) : this.value)
   }
 
   public setState(
@@ -149,8 +146,8 @@ export class MicroStore<T> {
   ): void {
     if (
       SynchronousContext.warning(
-        'You may not call microState.setState(something) inside the useWatch(watcher) callback. ' +
-          'The useWatch(watcher) hook is for read-only operations but microState.setState(something) changes it.'
+        'You may not call InnerStore#setState(something) inside the useWatch(watcher) callback. ' +
+          'The useWatch(watcher) hook is for read-only operations but InnerStore#setState(something) changes it.'
       )
     ) {
       return
@@ -170,7 +167,7 @@ export class MicroStore<T> {
   public subscribe(listener: VoidFunction): VoidFunction {
     if (
       SynchronousContext.warning(
-        'You should not call microState.subscribe(listener) inside the useWatch(watcher) callback. ' +
+        'You should not call InnerStore#subscribe(listener) inside the useWatch(watcher) callback. ' +
           'The useWatch(watcher) hook is for read-only operations but not for creating subscriptions.'
       )
     ) {
@@ -197,27 +194,27 @@ export class MicroStore<T> {
   }
 }
 
-type UnpackDirect<T> = T extends MicroStore<infer R> ? R : T
+type ExtractDirect<T> = T extends InnerStore<infer R> ? R : T
 
-export type GetMicroState<T> = T extends MicroStore<infer R>
+export type ExtractInnerState<T> = T extends InnerStore<infer R>
   ? R
   : T extends Array<infer R>
-  ? Array<UnpackDirect<R>>
+  ? Array<ExtractDirect<R>>
   : T extends ReadonlyArray<infer R>
-  ? ReadonlyArray<UnpackDirect<R>>
-  : { [K in keyof T]: UnpackDirect<T[K]> }
+  ? ReadonlyArray<ExtractDirect<R>>
+  : { [K in keyof T]: ExtractDirect<T[K]> }
 
-export function useMicroUpdate<T>(
-  microStore: null | undefined | MicroStore<T>,
+export function useInnerUpdate<T>(
+  store: null | undefined | InnerStore<T>,
   compare: Compare<T> = isEqual
 ): Dispatch<SetStateAction<T>> {
   return useCallback(
-    (update): void => microStore?.setState(update, compare),
-    [microStore, compare]
+    (update): void => store?.setState(update, compare),
+    [store, compare]
   )
 }
 
-export function useMicroWatch<T>(
+export function useInnerWatch<T>(
   watcher: () => T,
   compare: Compare<T> = isEqual
 ): T {
@@ -283,61 +280,61 @@ export function useMicroWatch<T>(
   return valueRef.current!
 }
 
-export function useMicroState<T>(
-  microState: MicroStore<T>,
+export function useInnerState<T>(
+  store: InnerStore<T>,
   compare?: Compare<T>
 ): [T, Dispatch<SetStateAction<T>>]
-export function useMicroState<T>(
-  microState: null | MicroStore<T>,
+export function useInnerState<T>(
+  store: null | InnerStore<T>,
   compare?: Compare<T>
 ): [null | T, Dispatch<SetStateAction<T>>]
-export function useMicroState<T>(
-  microState: undefined | MicroStore<T>,
+export function useInnerState<T>(
+  store: undefined | InnerStore<T>,
   compare?: Compare<T>
 ): [undefined | T, Dispatch<SetStateAction<T>>]
-export function useMicroState<T>(
-  microState: null | undefined | MicroStore<T>,
+export function useInnerState<T>(
+  store: null | undefined | InnerStore<T>,
   compare?: Compare<T>
 ): [null | undefined | T, Dispatch<SetStateAction<T>>]
-export function useMicroState<T>(
-  microState: null | undefined | MicroStore<T>,
+export function useInnerState<T>(
+  store: null | undefined | InnerStore<T>,
   compare: Compare<T> = isEqual
 ): [null | undefined | T, Dispatch<SetStateAction<T>>] {
   const [, render] = useReducer(modInc, 0)
 
   useEffect(() => {
-    return microState?.subscribe(render)
-  }, [microState])
+    return store?.subscribe(render)
+  }, [store])
 
-  return [microState?.getState(), useMicroUpdate(microState, compare)]
+  return [store?.getState(), useInnerUpdate(store, compare)]
 }
 
-export function useMicroDispatch<T, A>(
-  microState: MicroStore<T>,
+export function useInnerDispatch<T, A>(
+  store: InnerStore<T>,
   update: (action: A, state: T) => T,
   compare?: Compare<T>
 ): [T, Dispatch<A>]
-export function useMicroDispatch<T, A>(
-  microState: null | MicroStore<T>,
+export function useInnerDispatch<T, A>(
+  store: null | InnerStore<T>,
   update: (action: A, state: T) => T,
   compare?: Compare<T>
 ): [null | T, Dispatch<A>]
-export function useMicroDispatch<T, A>(
-  microState: undefined | MicroStore<T>,
+export function useInnerDispatch<T, A>(
+  store: undefined | InnerStore<T>,
   update: (action: A, state: T) => T,
   compare?: Compare<T>
 ): [undefined | T, Dispatch<A>]
-export function useMicroDispatch<T, A>(
-  microState: null | undefined | MicroStore<T>,
+export function useInnerDispatch<T, A>(
+  store: null | undefined | InnerStore<T>,
   update: (action: A, state: T) => T,
   compare?: Compare<T>
 ): [null | undefined | T, Dispatch<A>]
-export function useMicroDispatch<T, A>(
-  microState: null | undefined | MicroStore<T>,
+export function useInnerDispatch<T, A>(
+  store: null | undefined | InnerStore<T>,
   update: (action: A, state: T) => T,
   compare: Compare<T> = isEqual
 ): [null | undefined | T, Dispatch<A>] {
-  const [state, setState] = useMicroState(microState, compare)
+  const [state, setState] = useInnerState(store, compare)
   const updateRef = useRef(update)
 
   useEffect(() => {
