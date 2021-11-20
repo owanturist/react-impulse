@@ -134,14 +134,22 @@ export class InnerStore<T> {
     this.subscribers.forEach(listener => listener())
   }
 
-  public clone(): InnerStore<T>
-  public clone<R>(fn: (value: T) => R): InnerStore<R>
-  public clone<R>(fn?: (value: T) => R): InnerStore<T | R> {
-    return InnerStore.of(typeof fn === 'function' ? fn(this.value) : this.value)
+  public clone(transform?: (value: T) => T): InnerStore<T> {
+    return InnerStore.of(
+      typeof transform === 'function' ? transform(this.value) : this.value
+    )
+  }
+
+  public getState(): T
+  public getState<R>(transform: (value: T) => R): R
+  public getState<R>(transform?: (value: T) => R): T | R {
+    SynchronousContext.register(this)
+
+    return typeof transform === 'function' ? transform(this.value) : this.value
   }
 
   public setState(
-    fnOrValue: T | ((value: T) => T),
+    transformOrValue: SetStateAction<T>,
     compare: Compare<T> = isEqual
   ): void {
     if (
@@ -154,9 +162,9 @@ export class InnerStore<T> {
     }
 
     const nextValue =
-      typeof fnOrValue === 'function'
-        ? (fnOrValue as (value: T) => T)(this.value)
-        : fnOrValue
+      typeof transformOrValue === 'function'
+        ? (transformOrValue as (value: T) => T)(this.value)
+        : transformOrValue
 
     if (!compare(this.value, nextValue)) {
       this.value = nextValue
@@ -184,14 +192,6 @@ export class InnerStore<T> {
       this.subscribers.delete(subscriberId)
     }
   }
-
-  public getState(): T
-  public getState<R>(fn: (value: T) => R): R
-  public getState<R>(fn?: (value: T) => R): T | R {
-    SynchronousContext.register(this)
-
-    return typeof fn === 'function' ? fn(this.value) : this.value
-  }
 }
 
 type ExtractDirect<T> = T extends InnerStore<infer R> ? R : T
@@ -204,13 +204,31 @@ export type ExtractInnerState<T> = T extends InnerStore<infer R>
   ? ReadonlyArray<ExtractDirect<R>>
   : { [K in keyof T]: ExtractDirect<T[K]> }
 
+type ExtractDeepDirect<T> = T extends InnerStore<infer R>
+  ? DeepExtractInnerState<R>
+  : T
+
+export type DeepExtractInnerState<T> = T extends InnerStore<infer R>
+  ? DeepExtractInnerState<R>
+  : T extends Array<infer R>
+  ? Array<ExtractDeepDirect<R>>
+  : T extends ReadonlyArray<infer R>
+  ? ReadonlyArray<ExtractDeepDirect<R>>
+  : { [K in keyof T]: ExtractDeepDirect<T[K]> }
+
 export function useInnerUpdate<T>(
   store: null | undefined | InnerStore<T>,
   compare: Compare<T> = isEqual
 ): Dispatch<SetStateAction<T>> {
+  const compareRef = useRef(compare)
+
+  useEffect(() => {
+    compareRef.current = compare
+  }, [compare])
+
   return useCallback(
-    (update): void => store?.setState(update, compare),
-    [store, compare]
+    (update): void => store?.setState(update, compareRef.current),
+    [store]
   )
 }
 
