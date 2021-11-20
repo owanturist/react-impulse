@@ -1,4 +1,5 @@
 import path from 'path'
+// eslint-disable-next-line
 import nodeResolve from '@rollup/plugin-node-resolve'
 import typescript from 'rollup-plugin-typescript2'
 import replace from 'rollup-plugin-replace'
@@ -13,11 +14,16 @@ const terserOptions = {
   }
 }
 
+const UMD_EXTERNALS = ['react']
+
 const UMD_GLOBALS = {
-  react: 'React'
+  react: 'React',
+  crypto: 'crypto'
 }
 
 const UMD_NAME = 'ReactInnerStore'
+
+const extensions = ['.ts']
 
 const isExternal = filePath => {
   return !filePath.startsWith('.') && !path.isAbsolute(filePath)
@@ -41,7 +47,7 @@ export default [
       exports: 'auto'
     },
     plugins: [
-      nodeResolve(),
+      nodeResolve({ extensions }),
       commonjs(),
       typescript({
         tsconfig,
@@ -65,7 +71,7 @@ export default [
       indent: false,
       sourcemap: true
     },
-    plugins: [nodeResolve(), commonjs(), typescript({ tsconfig })]
+    plugins: [nodeResolve({ extensions }), commonjs(), typescript({ tsconfig })]
   },
 
   // ES for Browsers
@@ -79,9 +85,13 @@ export default [
       sourcemap: true
     },
     plugins: [
-      nodeResolve(),
+      nodeResolve({ extensions }),
       commonjs(),
       typescript({ tsconfig }),
+      replace({
+        preventAssignment: true,
+        'process.env.NODE_ENV': JSON.stringify('production')
+      }),
       terser({ module: true, ...terserOptions })
     ]
   },
@@ -89,7 +99,7 @@ export default [
   // UMD Development
   {
     input,
-    external: Object.keys(UMD_GLOBALS),
+    external: UMD_EXTERNALS,
     output: {
       file: path.resolve(root, 'dist/index-dev.umd.js'),
       format: 'umd',
@@ -98,7 +108,7 @@ export default [
       globals: UMD_GLOBALS
     },
     plugins: [
-      nodeResolve(),
+      nodeResolve({ extensions }),
       commonjs(),
       typescript({ tsconfig }),
       replace({
@@ -111,7 +121,7 @@ export default [
   // UMD Production
   {
     input,
-    external: Object.keys(UMD_GLOBALS),
+    external: UMD_EXTERNALS,
     output: {
       file: path.resolve(root, 'dist/index-prod.umd.js'),
       format: 'umd',
@@ -120,7 +130,7 @@ export default [
       globals: UMD_GLOBALS
     },
     plugins: [
-      nodeResolve(),
+      nodeResolve({ extensions }),
       commonjs(),
       typescript({ tsconfig }),
       replace({
