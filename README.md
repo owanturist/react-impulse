@@ -410,7 +410,7 @@ type ArrayOfStores = InnerStore<Array<InnerStore<boolean>>>
 
 <!-- L I N K S -->
 
-[inner_store__subscribe]: #subscribe
-[inner_store__set_state]: #set_state
-[use_inner_watch]: #use-inner-watch
-[use_inner_state]: #use-inner-state
+[inner_store__subscribe]: #innerstoresubscribe
+[inner_store__set_state]: #innerstoresetstate
+[use_inner_watch]: #useinnerwatch
+[use_inner_state]: #useinnerstate
