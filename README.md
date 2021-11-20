@@ -189,7 +189,7 @@ const onSubmit = () => {
 InnerStore<T>#subscribe(listener: VoidFunction): VoidFunction
 ```
 
-An `InnerStore` instance's method that adds a listener that is called each time when the value is changed via [`InnerStore#setState`][inner_store__set_state].
+An `InnerStore` instance's method that adds a listener that is called each time when the value is changed via [`InnerStore#setState`][inner_store__set_state]. Returns an unsubscribe function that can be used to remove the listener.
 
 ```tsx
 const UsernameInput: React.VFC<{
@@ -250,7 +250,7 @@ const UsernameInput: React.VFC<{
 function useInnerWatch<T>(watcher: () => T, compare?: Compare<T>): T
 ```
 
-The hook that subscribes to all `InnerStore#getState` execution involved in the `watcher` call. Due to the mutable nature of `InnerStore` instances a parent component won't be re-rendered when a child's `InnerStore` value is changed. The hook gives a way to watch after deep changes in the store's values and trigger a re-render when the value is changed. The second optional argument is a `compare` function that is used to compare the new value with the current value. The store won't update if the new value is equal to the current value.
+The hook that subscribes to all [`InnerStore#getState`][inner_store__get_state] execution involved in the `watcher` call. Due to the mutable nature of `InnerStore` instances a parent component won't be re-rendered when a child's `InnerStore` value is changed. The hook gives a way to watch after deep changes in the store's values and trigger a re-render when the value is changed. The second optional argument is a `compare` function that is used to compare the new value with the current value. The store won't update if the watching value is not changed.
 
 ```tsx
 type State = {
@@ -412,5 +412,5 @@ type ArrayOfStores = InnerStore<Array<InnerStore<boolean>>>
 
 [inner_store__subscribe]: #innerstoresubscribe
 [inner_store__set_state]: #innerstoresetstate
+[inner_store__get_state]: #innerstoregetstate
 [use_inner_watch]: #useinnerwatch
-[use_inner_state]: #useinnerstate

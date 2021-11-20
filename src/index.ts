@@ -8,6 +8,11 @@ import {
 } from 'react'
 import { nanoid } from 'nanoid'
 
+/**
+ * A function that compares two values and returns `true` if they are equal.
+ * Depending on the type of the values it might be more efficient to use
+ * a custom compare function such as shallow-equal or deep-equal.
+ */
 export type Compare<T> = (prev: T, next: T) => boolean
 
 const isEqual = <T>(one: T, another: T): boolean => one === another
@@ -115,6 +120,10 @@ class SynchronousContext {
 }
 
 export class InnerStore<T> {
+  /**
+   * Creates a new `InnerStore` instance.
+   * The instance is mutable so once created it should be used for all future operations.
+   */
   public static of<TValue>(value: TValue): InnerStore<TValue> {
     SynchronousContext.warning(
       'You should not call InnerStore.of(something) inside the useWatch(watcher) callback. ' +
@@ -126,6 +135,13 @@ export class InnerStore<T> {
 
   private readonly subscribers = new Map<string, VoidFunction>()
 
+  /**
+   * A unique key per `InnerStore` instance.
+   * This key is used internally for useInnerWatch
+   * but can be used as the React key for the component.
+   *
+   * @see {@link useInnerWatch}
+   */
   public readonly key = nanoid()
 
   private constructor(private value: T) {}
@@ -134,13 +150,27 @@ export class InnerStore<T> {
     this.subscribers.forEach(listener => listener())
   }
 
+  /**
+   * Clones a `InnerStore` instance.
+   *
+   * @param transform optional function that is applied to the value before cloning
+   * @returns new `InnerStore` instance with the same value.
+   */
   public clone(transform?: (value: T) => T): InnerStore<T> {
     return InnerStore.of(
       typeof transform === 'function' ? transform(this.value) : this.value
     )
   }
 
+  /**
+   * An `InnerStore` instance's method that returns the current value.
+   */
   public getState(): T
+  /**
+   * An `InnerStore` instance's method that returns the current value.
+   *
+   * @param transform function that is applied to the value before returning.
+   */
   public getState<R>(transform: (value: T) => R): R
   public getState<R>(transform?: (value: T) => R): T | R {
     SynchronousContext.register(this)
@@ -148,6 +178,18 @@ export class InnerStore<T> {
     return typeof transform === 'function' ? transform(this.value) : this.value
   }
 
+  /**
+   * Sets the store's value.
+   * Each time when the value is changed all listeners defined with `InnerStore#subscribe` are called.
+   * If the new value is equal to the current value neither the value is set nor listeners are called.
+   *
+   * @param transformOrValue either a value or a `transform` function that is applied to the value before setting.
+   * @param compare function that is used to compare the new value with the current value.
+   * @returns `void` to emphasize that `InnerStore` instances are mutable.
+   *
+   * @see {@link InnerStore.subscribe}
+   * @see {@link Compare}
+   */
   public setState(
     transformOrValue: SetStateAction<T>,
     compare: Compare<T> = isEqual
@@ -172,6 +214,11 @@ export class InnerStore<T> {
     }
   }
 
+  /**
+   * Adds a listener that is called each time when the value is changed via `InnerStore#setState`.
+   *
+   * @returns an unsubscribe function that can be used to remove the listener.
+   */
   public subscribe(listener: VoidFunction): VoidFunction {
     if (
       SynchronousContext.warning(
@@ -196,6 +243,9 @@ export class InnerStore<T> {
 
 type ExtractDirect<T> = T extends InnerStore<infer R> ? R : T
 
+/**
+ * A helper type that shallowly extracts value type from `InnerStore`.
+ */
 export type ExtractInnerState<T> = T extends InnerStore<infer R>
   ? R
   : T extends Array<infer R>
@@ -208,6 +258,9 @@ type ExtractDeepDirect<T> = T extends InnerStore<infer R>
   ? DeepExtractInnerState<R>
   : T
 
+/**
+ * A helper that deeply extracts value type from `InnerStore`.
+ */
 export type DeepExtractInnerState<T> = T extends InnerStore<infer R>
   ? DeepExtractInnerState<R>
   : T extends Array<infer R>
@@ -216,6 +269,17 @@ export type DeepExtractInnerState<T> = T extends InnerStore<infer R>
   ? ReadonlyArray<ExtractDeepDirect<R>>
   : { [K in keyof T]: ExtractDeepDirect<T[K]> }
 
+/**
+ * The hooks that returns a function to update the store's value.
+ * Might be useful when you need a way to update the store's value without subscribing to its changes.
+ * The store won't update if the new value is equal to the current value.
+ *
+ * @param store the store to update
+ * @param compare function that is used to compare the new value with the current value.
+ * @returns
+ *
+ * @see {@link InnerStore.setState}
+ */
 export function useInnerUpdate<T>(
   store: null | undefined | InnerStore<T>,
   compare: Compare<T> = isEqual
@@ -232,6 +296,19 @@ export function useInnerUpdate<T>(
   )
 }
 
+/**
+ * The hook that subscribes to all `InnerStore#getState` execution involved in the `watcher` call.
+ * Due to the mutable nature of `InnerStore` instances a parent component won't be re-rendered
+ * when a child's `InnerStore` value is changed.
+ * The hook gives a way to watch after deep changes in the store's values
+ * and trigger a re-render when the value is changed.
+ * The store won't update if the watching value is not changed.
+ *
+ * @param watcher
+ * @param compare function that is used to compare the new value with the current value.
+ *
+ * @see {@link InnerStore.getState}
+ */
 export function useInnerWatch<T>(
   watcher: () => T,
   compare: Compare<T> = isEqual
@@ -298,22 +375,74 @@ export function useInnerWatch<T>(
   return valueRef.current!
 }
 
+/**
+ * The hook that is similar to `React.useState` but for `InnerStore` instances.
+ * It subscribes to the store and returns the current value and a function to set the value.
+ * The store won't update if the new value is equal to the current value.
+ *
+ * @param store the store to subscribe to.
+ * @param compare function that is used to compare the new value with the current value.
+ *
+ * @see {@link InnerStore.getState}
+ * @see {@link InnerStore.setState}
+ * @see {@link InnerStore.subscribe}
+ */
 export function useInnerState<T>(
   store: InnerStore<T>,
   compare?: Compare<T>
 ): [T, Dispatch<SetStateAction<T>>]
+
+/**
+ * The hook that is similar to `React.useState` but for `InnerStore` instances.
+ * It subscribes to the store and returns the current value and a function to set the value.
+ * The store won't update if the new value is equal to the current value.
+ *
+ * @param store the nullable store to subscribe to is a bypass when there is no need to subscribe to the store's changes.
+ * @param compare function that is used to compare the new value with the current value.
+ *
+ * @see {@link InnerStore.getState}
+ * @see {@link InnerStore.setState}
+ * @see {@link InnerStore.subscribe}
+ */
 export function useInnerState<T>(
   store: null | InnerStore<T>,
   compare?: Compare<T>
 ): [null | T, Dispatch<SetStateAction<T>>]
+
+/**
+ * The hook that is similar to `React.useState` but for `InnerStore` instances.
+ * It subscribes to the store and returns the current value and a function to set the value.
+ * The store won't update if the new value is equal to the current value.
+ *
+ * @param store the nullable store to subscribe to is a bypass when there is no need to subscribe to the store's changes.
+ * @param compare function that is used to compare the new value with the current value.
+ *
+ * @see {@link InnerStore.getState}
+ * @see {@link InnerStore.setState}
+ * @see {@link InnerStore.subscribe}
+ */
 export function useInnerState<T>(
   store: undefined | InnerStore<T>,
   compare?: Compare<T>
 ): [undefined | T, Dispatch<SetStateAction<T>>]
+
+/**
+ * The hook that is similar to `React.useState` but for `InnerStore` instances.
+ * It subscribes to the store and returns the current value and a function to set the value.
+ * The store won't update if the new value is equal to the current value.
+ *
+ * @param store the nullable store to subscribe to is a bypass when there is no need to subscribe to the store's changes.
+ * @param compare function that is used to compare the new value with the current value.
+ *
+ * @see {@link InnerStore.getState}
+ * @see {@link InnerStore.setState}
+ * @see {@link InnerStore.subscribe}
+ */
 export function useInnerState<T>(
   store: null | undefined | InnerStore<T>,
   compare?: Compare<T>
 ): [null | undefined | T, Dispatch<SetStateAction<T>>]
+
 export function useInnerState<T>(
   store: null | undefined | InnerStore<T>,
   compare: Compare<T> = isEqual
@@ -327,26 +456,82 @@ export function useInnerState<T>(
   return [store?.getState(), useInnerUpdate(store, compare)]
 }
 
+/**
+ * The hook that is similar to `React.useDispatch` but for `InnerStore` instances.
+ * It subscribes to the store and returns the current value and a function to dispatch an action.
+ * It won't trigger a re-render if the new value is equal to the current value.
+ *
+ * @param store the store to subscribe to.
+ * @param update the function that is used to update the store's value.
+ * @param compare function that is used to compare the new value with the current value.
+ *
+ * @see {@link InnerStore.getState}
+ * @see {@link InnerStore.setState}
+ * @see {@link InnerStore.subscribe}
+ */
 export function useInnerDispatch<T, A>(
   store: InnerStore<T>,
   update: (action: A, state: T) => T,
   compare?: Compare<T>
 ): [T, Dispatch<A>]
+
+/**
+ * The hook that is similar to `React.useDispatch` but for `InnerStore` instances.
+ * It subscribes to the store and returns the current value and a function to dispatch an action.
+ * It won't trigger a re-render if the new value is equal to the current value.
+ *
+ * @param store the nullable store to subscribe to is a bypass when there is no need to subscribe to the store's changes.
+ * @param update the function that is used to update the store's value.
+ * @param compare function that is used to compare the new value with the current value.
+ *
+ * @see {@link InnerStore.getState}
+ * @see {@link InnerStore.setState}
+ * @see {@link InnerStore.subscribe}
+ */
 export function useInnerDispatch<T, A>(
   store: null | InnerStore<T>,
   update: (action: A, state: T) => T,
   compare?: Compare<T>
 ): [null | T, Dispatch<A>]
+
+/**
+ * The hook that is similar to `React.useDispatch` but for `InnerStore` instances.
+ * It subscribes to the store and returns the current value and a function to dispatch an action.
+ * It won't trigger a re-render if the new value is equal to the current value.
+ *
+ * @param store the nullable store to subscribe to is a bypass when there is no need to subscribe to the store's changes.
+ * @param update the function that is used to update the store's value.
+ * @param compare function that is used to compare the new value with the current value.
+ *
+ * @see {@link InnerStore.getState}
+ * @see {@link InnerStore.setState}
+ * @see {@link InnerStore.subscribe}
+ */
 export function useInnerDispatch<T, A>(
   store: undefined | InnerStore<T>,
   update: (action: A, state: T) => T,
   compare?: Compare<T>
 ): [undefined | T, Dispatch<A>]
+
+/**
+ * The hook that is similar to `React.useDispatch` but for `InnerStore` instances.
+ * It subscribes to the store and returns the current value and a function to dispatch an action.
+ * It won't trigger a re-render if the new value is equal to the current value.
+ *
+ * @param store the nullable store to subscribe to is a bypass when there is no need to subscribe to the store's changes.
+ * @param update the function that is used to update the store's value.
+ * @param compare function that is used to compare the new value with the current value.
+ *
+ * @see {@link InnerStore.getState}
+ * @see {@link InnerStore.setState}
+ * @see {@link InnerStore.subscribe}
+ */
 export function useInnerDispatch<T, A>(
   store: null | undefined | InnerStore<T>,
   update: (action: A, state: T) => T,
   compare?: Compare<T>
 ): [null | undefined | T, Dispatch<A>]
+
 export function useInnerDispatch<T, A>(
   store: null | undefined | InnerStore<T>,
   update: (action: A, state: T) => T,
