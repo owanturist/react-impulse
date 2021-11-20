@@ -42,9 +42,7 @@
     "react": ">=16.8.0"
   },
   "dependencies": {
-    "deep-equal": "^2.0.5",
-    "nanoid": "^3.1.30",
-    "shallowequal": "^1.1.0"
+    "nanoid": "^3.1.30"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",
@@ -52,9 +50,7 @@
     "@babel/preset-react": "^7.16.0",
     "@babel/preset-typescript": "^7.16.0",
     "@rollup/plugin-node-resolve": "^13.0.6",
-    "@types/deep-equal": "^1.0.1",
     "@types/react": "^17.0.35",
-    "@types/shallowequal": "^1.1.1",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "eslint": "^8.2.0",

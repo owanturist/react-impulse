@@ -6,41 +6,13 @@ import {
   useEffect,
   useCallback
 } from 'react'
-import deepCompare from 'deep-equal'
-import shallowCompare from 'shallowequal'
 import { nanoid } from 'nanoid'
 
 import { warning } from './warning'
 
-export type Comparator<T> =
-  | 'strict'
-  | 'shallow'
-  | 'deep'
-  | ((prev: T, next: T) => boolean)
+export type Compare<T> = (prev: T, next: T) => boolean
 
-export const compare = <T>(
-  prev: T,
-  next: T,
-  comparator: Comparator<T> = 'strict'
-): boolean => {
-  switch (comparator) {
-    case 'strict': {
-      return prev === next
-    }
-
-    case 'shallow': {
-      return shallowCompare(prev, next)
-    }
-
-    case 'deep': {
-      return deepCompare(prev, next)
-    }
-
-    default: {
-      return comparator(prev, next)
-    }
-  }
-}
+const isEqual = <T>(one: T, another: T): boolean => one === another
 
 const modInc = (x: number): number => {
   return (x + 1) % 123456789
@@ -159,7 +131,7 @@ export class MicroStore<T> {
 
   public setState(
     fnOrValue: T | ((value: T) => T),
-    comparator: Comparator<T> = 'strict'
+    compare: Compare<T> = isEqual
   ): void {
     if (
       SynchronousContext.warning(
@@ -175,7 +147,7 @@ export class MicroStore<T> {
         ? (fnOrValue as (value: T) => T)(this.value)
         : fnOrValue
 
-    if (!compare(this.value, nextValue, comparator)) {
+    if (!compare(this.value, nextValue)) {
       this.value = nextValue
       this.emit()
     }
@@ -223,19 +195,19 @@ export type GetMicroState<T> = T extends MicroStore<infer R>
 
 export function useMicroUpdate<T>(
   microStore: null | undefined | MicroStore<T>,
-  comparator: Comparator<T> = 'strict'
+  compare: Compare<T> = isEqual
 ): Dispatch<SetStateAction<T>> {
   return useCallback(
     (update): void => {
-      microStore?.setState(update, comparator)
+      microStore?.setState(update, compare)
     },
-    [microStore, comparator]
+    [microStore, compare]
   )
 }
 
 export function useMicroWatch<T>(
   watcher: () => T,
-  comparator: Comparator<T> = 'strict'
+  compare: Compare<T> = isEqual
 ): T {
   const [x, render] = useReducer(modInc, 0)
   // the flag is shared across all .activate listeners
@@ -255,12 +227,12 @@ export function useMicroWatch<T>(
     contextRef.current = new SynchronousContext()
   }
 
-  // no need to re-register .getState calls when comparator changes
+  // no need to re-register .getState calls when compare changes
   // it is only needed when watcher calls inside .activate listener
-  const comparatorRef = useRef(comparator)
+  const compareRef = useRef(compare)
   useEffect(() => {
-    comparatorRef.current = comparator
-  }, [comparator])
+    compareRef.current = compare
+  }, [compare])
 
   useEffect(() => {
     isRenderTriggeredRef.current = false
@@ -275,7 +247,7 @@ export function useMicroWatch<T>(
       // the only one is enough to trigger the render
       if (
         !isRenderTriggeredRef.current &&
-        !compare(currentValue, nextValue, comparatorRef.current)
+        !compareRef.current(currentValue, nextValue)
       ) {
         isRenderTriggeredRef.current = true
         render()
@@ -301,23 +273,23 @@ export function useMicroWatch<T>(
 
 export function useMicroState<T>(
   microState: MicroStore<T>,
-  comparator?: Comparator<T>
+  compare?: Compare<T>
 ): [T, Dispatch<SetStateAction<T>>]
 export function useMicroState<T>(
   microState: null | MicroStore<T>,
-  comparator?: Comparator<T>
+  compare?: Compare<T>
 ): [null | T, Dispatch<SetStateAction<T>>]
 export function useMicroState<T>(
   microState: undefined | MicroStore<T>,
-  comparator?: Comparator<T>
+  compare?: Compare<T>
 ): [undefined | T, Dispatch<SetStateAction<T>>]
 export function useMicroState<T>(
   microState: null | undefined | MicroStore<T>,
-  comparator?: Comparator<T>
+  compare?: Compare<T>
 ): [null | undefined | T, Dispatch<SetStateAction<T>>]
 export function useMicroState<T>(
   microState: null | undefined | MicroStore<T>,
-  comparator: Comparator<T> = 'strict'
+  compare: Compare<T> = isEqual
 ): [null | undefined | T, Dispatch<SetStateAction<T>>] {
   const [, render] = useReducer(modInc, 0)
 
@@ -325,35 +297,35 @@ export function useMicroState<T>(
     return microState?.subscribe(render)
   }, [microState])
 
-  return [microState?.getState(), useMicroUpdate(microState, comparator)]
+  return [microState?.getState(), useMicroUpdate(microState, compare)]
 }
 
 export function useMicroDispatch<T, A>(
   microState: MicroStore<T>,
   update: (action: A, state: T) => T,
-  comparator?: Comparator<T>
+  compare?: Compare<T>
 ): [T, Dispatch<A>]
 export function useMicroDispatch<T, A>(
   microState: null | MicroStore<T>,
   update: (action: A, state: T) => T,
-  comparator?: Comparator<T>
+  compare?: Compare<T>
 ): [null | T, Dispatch<A>]
 export function useMicroDispatch<T, A>(
   microState: undefined | MicroStore<T>,
   update: (action: A, state: T) => T,
-  comparator?: Comparator<T>
+  compare?: Compare<T>
 ): [undefined | T, Dispatch<A>]
 export function useMicroDispatch<T, A>(
   microState: null | undefined | MicroStore<T>,
   update: (action: A, state: T) => T,
-  comparator?: Comparator<T>
+  compare?: Compare<T>
 ): [null | undefined | T, Dispatch<A>]
 export function useMicroDispatch<T, A>(
   microState: null | undefined | MicroStore<T>,
   update: (action: A, state: T) => T,
-  comparator: Comparator<T> = 'strict'
+  compare: Compare<T> = isEqual
 ): [null | undefined | T, Dispatch<A>] {
-  const [state, setState] = useMicroState(microState, comparator)
+  const [state, setState] = useMicroState(microState, compare)
   const updateRef = useRef(update)
 
   useEffect(() => {
