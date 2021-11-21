@@ -466,12 +466,12 @@ export function useInnerState<T>(
 }
 
 /**
- * A hook that is similar to `React.useDispatch` but for `InnerStore` instances.
+ * A hook that is similar to `React.useReducer` but for `InnerStore` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance.
- * @param update a function that transforms the current value and the dispatched action into the new value.
+ * @param reducer a function that transforms the current value and the dispatched action into the new value.
  * @param compare a function with strict check (`===`) by default.
  *
  * @see {@link InnerStore.getState}
@@ -479,19 +479,19 @@ export function useInnerState<T>(
  * @see {@link InnerStore.subscribe}
  * @see {@link Compare}
  */
-export function useInnerDispatch<A, T>(
+export function useInnerReducer<T, A>(
   store: InnerStore<T>,
-  update: (action: A, state: T) => T,
+  reducer: (state: T, action: A) => T,
   compare?: Compare<T>
 ): [T, Dispatch<A>]
 
 /**
- * A hook that is similar to `React.useDispatch` but for `InnerStore` instances.
+ * A hook that is similar to `React.useReducer` but for `InnerStore` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
- * @param update a function that transforms the current value and the dispatched action into the new value.
+ * @param reducer a function that transforms the current value and the dispatched action into the new value.
  * @param compare a function with strict check (`===`) by default.
  *
  * @see {@link InnerStore.getState}
@@ -499,19 +499,19 @@ export function useInnerDispatch<A, T>(
  * @see {@link InnerStore.subscribe}
  * @see {@link Compare}
  */
-export function useInnerDispatch<A, T>(
+export function useInnerReducer<T, A>(
   store: null | InnerStore<T>,
-  update: (action: A, state: T) => T,
+  reducer: (state: T, action: A) => T,
   compare?: Compare<T>
 ): [null | T, Dispatch<A>]
 
 /**
- * A hook that is similar to `React.useDispatch` but for `InnerStore` instances.
+ * A hook that is similar to `React.useReducer` but for `InnerStore` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
- * @param update a function that transforms the current value and the dispatched action into the new value.
+ * @param reducer a function that transforms the current value and the dispatched action into the new value.
  * @param compare a function with strict check (`===`) by default.
  *
  * @see {@link InnerStore.getState}
@@ -519,19 +519,19 @@ export function useInnerDispatch<A, T>(
  * @see {@link InnerStore.subscribe}
  * @see {@link Compare}
  */
-export function useInnerDispatch<A, T>(
+export function useInnerReducer<T, A>(
   store: undefined | InnerStore<T>,
-  update: (action: A, state: T) => T,
+  reducer: (state: T, action: A) => T,
   compare?: Compare<T>
 ): [undefined | T, Dispatch<A>]
 
 /**
- * A hook that is similar to `React.useDispatch` but for `InnerStore` instances.
+ * A hook that is similar to `React.useReducer` but for `InnerStore` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
- * @param update a function that transforms the current value and the dispatched action into the new value.
+ * @param reducer a function that transforms the current value and the dispatched action into the new value.
  * @param compare a function with strict check (`===`) by default.
  *
  * @see {@link InnerStore.getState}
@@ -539,29 +539,31 @@ export function useInnerDispatch<A, T>(
  * @see {@link InnerStore.subscribe}
  * @see {@link Compare}
  */
-export function useInnerDispatch<A, T>(
+export function useInnerReducer<T, A>(
   store: null | undefined | InnerStore<T>,
-  update: (action: A, state: T) => T,
+  reducer: (state: T, action: A) => T,
   compare?: Compare<T>
 ): [null | undefined | T, Dispatch<A>]
 
-export function useInnerDispatch<A, T>(
+export function useInnerReducer<T, A>(
   store: null | undefined | InnerStore<T>,
-  update: (action: A, state: T) => T,
+  reducer: (state: T, action: A) => T,
   compare: Compare<T> = isEqual
 ): [null | undefined | T, Dispatch<A>] {
   const [state, setState] = useInnerState(store, compare)
-  const updateRef = useRef(update)
+  const reducerRef = useRef(reducer)
 
   useEffect(() => {
-    updateRef.current = update
-  }, [update])
+    reducerRef.current = reducer
+  }, [reducer])
 
   return [
     state,
     useCallback(
       action => {
-        return setState(currentState => updateRef.current(action, currentState))
+        return setState(currentState =>
+          reducerRef.current(currentState, action)
+        )
       },
       [setState]
     )
