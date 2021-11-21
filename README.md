@@ -189,7 +189,7 @@ InnerStore<T>#setState(
 ): void
 ```
 
-An `InnerStore` instance's method that sets the value. Each time when the value is changed all of the store's listeners defined with [`InnerStore#subscribe`][inner_store__subscribe] are called.
+An `InnerStore` instance's method that sets the value. Each time when the value is changed all of the store's listeners passed via [`InnerStore#subscribe`][inner_store__subscribe] are called.
 
 - `valueOrTransform` is either the new value or a function that will be applied to the current value before setting.
 - `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. If the new value is comparably equal to the current value neither the value is set nor the listeners are called.
@@ -256,7 +256,7 @@ function useInnerState<T>(
 ): [null | undefined | T, React.Dispatch<React.SetStateAction<T>>]
 ```
 
-The hook that is similar to `React.useState` but for `InnerStore` instances. It subscribes to the store changes and returns the current value and a function to set the value.
+A hook that is similar to `React.useState` but for `InnerStore` instances. It subscribes to the store changes and returns the current value and a function to set the value.
 
 - `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
 - `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The store won't update if the new value is comparably equal to the current value.
@@ -283,7 +283,7 @@ const UsernameInput: React.VFC<{
 function useInnerWatch<T>(watcher: () => T, compare?: Compare<T>): T
 ```
 
-The hook that subscribes to all [`InnerStore#getState`][inner_store__get_state] execution involved in the `watcher` call. Due to the mutable nature of `InnerStore` instances a parent component won't be re-rendered when a child's `InnerStore` value is changed. The hook gives a way to watch after deep changes in the store's values and trigger a re-render when the returning value is changed.
+A hook that subscribes to all [`InnerStore#getState`][inner_store__get_state] execution involved in the `watcher` call. Due to the mutable nature of `InnerStore` instances a parent component won't be re-rendered when a child's `InnerStore` value is changed. The hook gives a way to watch after deep changes in the store's values and trigger a re-render when the returning value is changed.
 
 - `watcher` is a function to read only the watching value meaning that it never should call [`InnerStore.of`][inner_store__of], [`InnerStore#clone`][inner_store__clone], [`InnerStore#setState`][inner_store__set_state] or [`InnerStore#subscribe`][inner_store__subscribe] methods inside.
 - `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The hook won't trigger a re-render when the watching value is comparably equal to the current value.
@@ -297,7 +297,7 @@ const App: React.VFC<{
   state: State
 }> = React.memo(({ state }) => {
   // the component will re-render once the `count` is greater than 5
-  // and once the `count` is less than 5
+  // and once the `count` is less or equal to 5
   const isMoreThanFive = useInnerWatch(() => state.count.getState() > 5)
 
   return (
@@ -328,7 +328,7 @@ function useInnerDispatch<A, T>(
 ): [null | undefined | T, React.Dispatch<A>]
 ```
 
-The hook that is similar to `React.useDispatch` but for `InnerStore` instances. It subscribes to the store changes and returns the current value and a function to dispatch an action.
+A hook that is similar to `React.useDispatch` but for `InnerStore` instances. It subscribes to the store changes and returns the current value and a function to dispatch an action.
 
 - `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
 - `update` is a function that transforms the current value and the dispatched action into the new value.
@@ -371,7 +371,7 @@ function useInnerUpdate<T>(
 ): React.Dispatch<React.SetStateAction<T>>
 ```
 
-The hooks that returns a function to update the store's value. Might be useful when you need a way to update the store's value without subscribing to its changes.
+A hooks that returns a function to update the store's value. Might be useful when you need a way to update the store's value without subscribing to its changes.
 
 - `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
 - `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The store won't update if the new value is comparably equal to the current value.

@@ -209,7 +209,7 @@ export class InnerStore<T> {
 
   /**
    * Sets the store's value.
-   * Each time when the value is changed all of the store's listeners defined with `InnerStore#subscribe` are called.
+   * Each time when the value is changed all of the store's listeners passed via `InnerStore#subscribe` are called.
    * If the new value is comparably equal to the current value neither the value is set nor the listeners are called.
    *
    * @param valueOrTransform either the new value or a function that will be applied to the current value before setting.
@@ -276,7 +276,7 @@ export class InnerStore<T> {
 }
 
 /**
- * The hooks that returns a function to update the store's value.
+ * A hooks that returns a function to update the store's value.
  * Might be useful when you need a way to update the store's value without subscribing to its changes.
  * The store won't update if the new value is comparably equal to the current value.
  *
@@ -304,7 +304,7 @@ export function useInnerUpdate<T>(
 }
 
 /**
- * The hook that subscribes to all `InnerStore#getState` execution involved in the `watcher` call.
+ * A hook that subscribes to all `InnerStore#getState` execution involved in the `watcher` call.
  * Due to the mutable nature of `InnerStore` instances a parent component won't be re-rendered when a child's `InnerStore` value is changed.
  * The hook gives a way to watch after deep changes in the store's values and trigger a re-render when the returning value is changed.
  *
@@ -381,7 +381,7 @@ export function useInnerWatch<T>(
 }
 
 /**
- * The hook that is similar to `React.useState` but for `InnerStore` instances.
+ * A hook that is similar to `React.useState` but for `InnerStore` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
@@ -417,7 +417,7 @@ export function useInnerState<T>(
 ): [null | T, Dispatch<SetStateAction<T>>]
 
 /**
- * The hook that is similar to `React.useState` but for `InnerStore` instances.
+ * A hook that is similar to `React.useState` but for `InnerStore` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
@@ -435,7 +435,7 @@ export function useInnerState<T>(
 ): [undefined | T, Dispatch<SetStateAction<T>>]
 
 /**
- * The hook that is similar to `React.useState` but for `InnerStore` instances.
+ * A hook that is similar to `React.useState` but for `InnerStore` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
@@ -466,7 +466,7 @@ export function useInnerState<T>(
 }
 
 /**
- * The hook that is similar to `React.useDispatch` but for `InnerStore` instances.
+ * A hook that is similar to `React.useDispatch` but for `InnerStore` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
@@ -486,7 +486,7 @@ export function useInnerDispatch<A, T>(
 ): [T, Dispatch<A>]
 
 /**
- * The hook that is similar to `React.useDispatch` but for `InnerStore` instances.
+ * A hook that is similar to `React.useDispatch` but for `InnerStore` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
@@ -506,7 +506,7 @@ export function useInnerDispatch<A, T>(
 ): [null | T, Dispatch<A>]
 
 /**
- * The hook that is similar to `React.useDispatch` but for `InnerStore` instances.
+ * A hook that is similar to `React.useDispatch` but for `InnerStore` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
@@ -526,7 +526,7 @@ export function useInnerDispatch<A, T>(
 ): [undefined | T, Dispatch<A>]
 
 /**
- * The hook that is similar to `React.useDispatch` but for `InnerStore` instances.
+ * A hook that is similar to `React.useDispatch` but for `InnerStore` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
