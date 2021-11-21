@@ -21,7 +21,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --config=.eslintrc.prod.json --ext=js,jsx,ts,tsx,md",
     "prettify": "prettier . --write",
-    "typecheck": "tsc -p ./tsconfig.json --noEmit"
+    "typecheck": "tsc -p ./tsconfig.json --noEmit",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
