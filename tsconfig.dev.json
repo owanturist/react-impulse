@@ -5,7 +5,6 @@
     "module": "esnext",
     "moduleResolution": "node",
     "declaration": false,
-    "removeComments": true,
     "importHelpers": true,
     "downlevelIteration": true,
     "outDir": "build",
