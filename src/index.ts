@@ -450,6 +450,8 @@ export function useGetInnerState<T>(
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
  * @see {@link InnerStore.subscribe}
+ * @see {@link useGetInnerState}
+ * @see {@link useSetInnerState}
  * @see {@link Compare}
  */
 export function useInnerState<T>(
@@ -468,6 +470,8 @@ export function useInnerState<T>(
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
  * @see {@link InnerStore.subscribe}
+ * @see {@link useGetInnerState}
+ * @see {@link useSetInnerState}
  * @see {@link Compare}
  */
 export function useInnerState<T>(
@@ -486,6 +490,8 @@ export function useInnerState<T>(
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
  * @see {@link InnerStore.subscribe}
+ * @see {@link useGetInnerState}
+ * @see {@link useSetInnerState}
  * @see {@link Compare}
  */
 export function useInnerState<T>(
@@ -504,6 +510,8 @@ export function useInnerState<T>(
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
  * @see {@link InnerStore.subscribe}
+ * @see {@link useGetInnerState}
+ * @see {@link useSetInnerState}
  * @see {@link Compare}
  */
 export function useInnerState<T>(

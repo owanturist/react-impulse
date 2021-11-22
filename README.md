@@ -34,7 +34,7 @@ const Username: React.VFC<{
     <input
       type="text"
       value={username}
-      onChange={e => setUsername(e.target.value)}
+      onChange={event => setUsername(event.target.value)}
     />
   )
 })
@@ -236,7 +236,7 @@ const UsernameInput: React.VFC<{
       type="text"
       value={username}
       // all store.subscribe across the app will call their listeners
-      onChange={e => store.setState(e.target.value)}
+      onChange={event => store.setState(event.target.value)}
     />
   )
 })
@@ -306,11 +306,13 @@ const UsernameInput: React.VFC<{
     <input
       type="text"
       value={username}
-      onChange={e => setUsername(e.target.value)}
+      onChange={event => setUsername(event.target.value)}
     />
   )
 })
 ```
+
+> 💡 The hook is a combination of [`useGetInnerState`][use_get_inner_state] and [`useSetInnerState`][use_set_inner_state], so use them if you need to either get/subscribe or set the store's value.
 
 ### `useGetInnerState`
 
@@ -494,4 +496,6 @@ type ArrayOfStores = InnerStore<Array<InnerStore<boolean>>>
 [inner_store__set_state]: #innerstoresetstate
 [inner_store__subscribe]: #innerstoresubscribe
 [use_inner_watch]: #useinnerwatch
+[use_get_inner_state]: #usegetinnerstate
+[use_set_inner_state]: #usesetinnerstate
 [compare]: #compare
