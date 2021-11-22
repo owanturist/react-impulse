@@ -242,41 +242,6 @@ const UsernameInput: React.VFC<{
 })
 ```
 
-### `useInnerState`
-
-```ts
-function useInnerState<T>(
-  store: InnerStore<T>,
-  compare?: Compare<T>
-): [T, React.Dispatch<React.SetStateAction<T>>]
-
-function useInnerState<T>(
-  store: null | undefined | InnerStore<T>,
-  compare?: Compare<T>
-): [null | undefined | T, React.Dispatch<React.SetStateAction<T>>]
-```
-
-A hook that is similar to `React.useState` but for `InnerStore` instances. It subscribes to the store changes and returns the current value and a function to set the value.
-
-- `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
-- `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The store won't update if the new value is comparably equal to the current value.
-
-```tsx
-const UsernameInput: React.VFC<{
-  store: InnerStore<string>
-}> = React.memo(({ store }) => {
-  const [username, setUsername] = useInnerState(store)
-
-  return (
-    <input
-      type="text"
-      value={username}
-      onChange={e => setUsername(e.target.value)}
-    />
-  )
-})
-```
-
 ### `useInnerWatch`
 
 ```ts
@@ -312,52 +277,37 @@ const App: React.VFC<{
 
 > 💡 It is recommended to memoize the `watcher` function for better performance.
 
-### `useInnerReducer`
+### `useInnerState`
 
 ```ts
-function useInnerReducer<A, T>(
+function useInnerState<T>(
   store: InnerStore<T>,
-  reducer: (state: T, action: A) => T,
   compare?: Compare<T>
-): [T, React.Dispatch<A>]
+): [T, React.Dispatch<React.SetStateAction<T>>]
 
-function useInnerReducer<A, T>(
+function useInnerState<T>(
   store: null | undefined | InnerStore<T>,
-  reducer: (state: T, action: A) => T,
   compare?: Compare<T>
-): [null | undefined | T, React.Dispatch<A>]
+): [null | undefined | T, React.Dispatch<React.SetStateAction<T>>]
 ```
 
-A hook that is similar to `React.useReducer` but for `InnerStore` instances. It subscribes to the store changes and returns the current value and a function to dispatch an action.
+A hook that is similar to `React.useState` but for `InnerStore` instances. It subscribes to the store changes and returns the current value and a function to set the value.
 
 - `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
-- `reducer` is a function that transforms the current value and the dispatched action into the new value.
 - `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The store won't update if the new value is comparably equal to the current value.
 
 ```tsx
-type CounterAction = { type: 'INCREMENT' } | { type: 'DECREMENT' }
-
-const counterReducer = (state: number, action: CounterAction) => {
-  switch (action.type) {
-    case 'INCREMENT':
-      return state + 1
-
-    case 'DECREMENT':
-      return state - 1
-  }
-}
-
-const Counter: React.VFC<{
-  store: InnerStore<number>
+const UsernameInput: React.VFC<{
+  store: InnerStore<string>
 }> = React.memo(({ store }) => {
-  const [count, dispatch] = useInnerReducer(store, counterReducer)
+  const [username, setUsername] = useInnerState(store)
 
   return (
-    <div>
-      <button onClick={() => dispatch({ type: 'DECREMENT' })}>-</button>
-      <span>{count}</span>
-      <button onClick={() => dispatch({ type: 'INCREMENT' })}>+</button>
-    </div>
+    <input
+      type="text"
+      value={username}
+      onChange={e => setUsername(e.target.value)}
+    />
   )
 })
 ```
@@ -425,6 +375,56 @@ const App: React.VFC<{
       <Counter store={state.count} />
 
       <button onClick={() => setCount(0)}>Reset count</button>
+    </div>
+  )
+})
+```
+
+### `useInnerReducer`
+
+```ts
+function useInnerReducer<A, T>(
+  store: InnerStore<T>,
+  reducer: (state: T, action: A) => T,
+  compare?: Compare<T>
+): [T, React.Dispatch<A>]
+
+function useInnerReducer<A, T>(
+  store: null | undefined | InnerStore<T>,
+  reducer: (state: T, action: A) => T,
+  compare?: Compare<T>
+): [null | undefined | T, React.Dispatch<A>]
+```
+
+A hook that is similar to `React.useReducer` but for `InnerStore` instances. It subscribes to the store changes and returns the current value and a function to dispatch an action.
+
+- `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+- `reducer` is a function that transforms the current value and the dispatched action into the new value.
+- `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The store won't update if the new value is comparably equal to the current value.
+
+```tsx
+type CounterAction = { type: 'INCREMENT' } | { type: 'DECREMENT' }
+
+const counterReducer = (state: number, action: CounterAction) => {
+  switch (action.type) {
+    case 'INCREMENT':
+      return state + 1
+
+    case 'DECREMENT':
+      return state - 1
+  }
+}
+
+const Counter: React.VFC<{
+  store: InnerStore<number>
+}> = React.memo(({ store }) => {
+  const [count, dispatch] = useInnerReducer(store, counterReducer)
+
+  return (
+    <div>
+      <button onClick={() => dispatch({ type: 'DECREMENT' })}>-</button>
+      <span>{count}</span>
+      <button onClick={() => dispatch({ type: 'INCREMENT' })}>+</button>
     </div>
   )
 })
