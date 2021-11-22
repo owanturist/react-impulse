@@ -194,8 +194,6 @@ An `InnerStore` instance's method that sets the value. Each time when the value 
 - `valueOrTransform` is either the new value or a function that will be applied to the current value before setting.
 - `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. If the new value is comparably equal to the current value neither the value is set nor the listeners are called.
 
-> 💬 The method returns `void` to emphasize that `InnerStore` instances are mutable.
-
 ```ts
 const onSubmit = () => {
   signInFormStore.update(state => {
@@ -209,6 +207,8 @@ const onSubmit = () => {
   })
 }
 ```
+
+> 💬 The method returns `void` to emphasize that `InnerStore` instances are mutable.
 
 ### `InnerStore#subscribe`
 
