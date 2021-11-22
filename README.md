@@ -365,13 +365,11 @@ const Counter: React.VFC<{
 ### `useGetInnerState`
 
 ```ts
-function useGetInnerState<T>(
-  store: InnerStore<T>
-): [T, React.Dispatch<React.SetStateAction<T>>]
+function useGetInnerState<T>(store: InnerStore<T>): T
 
 function useGetInnerState<T>(
   store: null | undefined | InnerStore<T>
-): [null | undefined | T, React.Dispatch<React.SetStateAction<T>>]
+): null | undefined | T
 ```
 
 A hooks that subscribes to the store's changes and returns the current value.
