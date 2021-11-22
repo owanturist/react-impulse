@@ -276,34 +276,6 @@ export class InnerStore<T> {
 }
 
 /**
- * A hooks that returns a function to update the store's value.
- * Might be useful when you need a way to update the store's value without subscribing to its changes.
- * The store won't update if the new value is comparably equal to the current value.
- *
- * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
- * @param compare a function with strict check (`===`) by default.
- *
- * @see {@link InnerStore.getState}
- * @see {@link InnerStore.setState}
- * @see {@link Compare}
- */
-export function useInnerUpdate<T>(
-  store: null | undefined | InnerStore<T>,
-  compare: Compare<T> = isEqual
-): Dispatch<SetStateAction<T>> {
-  const compareRef = useRef(compare)
-
-  useEffect(() => {
-    compareRef.current = compare
-  }, [compare])
-
-  return useCallback(
-    (update): void => store?.setState(update, compareRef.current),
-    [store]
-  )
-}
-
-/**
  * A hook that subscribes to all `InnerStore#getState` execution involved in the `watcher` call.
  * Due to the mutable nature of `InnerStore` instances a parent component won't be re-rendered when a child's `InnerStore` value is changed.
  * The hook gives a way to watch after deep changes in the store's values and trigger a re-render when the returning value is changed.
@@ -378,6 +350,93 @@ export function useInnerWatch<T>(
   }, [])
 
   return valueRef.current!
+}
+
+/**
+ * A hooks that returns a function to update the store's value.
+ * Might be useful when you need a way to update the store's value without subscribing to its changes.
+ * The store won't update if the new value is comparably equal to the current value.
+ *
+ * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
+ * @param compare a function with strict check (`===`) by default.
+ *
+ * @see {@link InnerStore.setState}
+ * @see {@link Compare}
+ */
+export function useSetInnerState<T>(
+  store: null | undefined | InnerStore<T>,
+  compare: Compare<T> = isEqual
+): Dispatch<SetStateAction<T>> {
+  const compareRef = useRef(compare)
+
+  useEffect(() => {
+    compareRef.current = compare
+  }, [compare])
+
+  return useCallback(
+    (update): void => store?.setState(update, compareRef.current),
+    [store]
+  )
+}
+
+/**
+ * A hooks that subscribes to the store's changes and returns the current value.
+ *
+ * @param store an `InnerStore` instance.
+ *
+ * @see {@link InnerStore.getState}
+ * @see {@link InnerStore.subscribe}
+ */
+export function useGetInnerState<T>(store: InnerStore<T>): T
+
+/**
+ * A hooks that subscribes to the store's changes and returns the current value.
+ *
+ * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+ *
+ * @see {@link InnerStore.getState}
+ * @see {@link InnerStore.subscribe}
+ */
+export function useGetInnerState<T>(store: null | InnerStore<T>): null | T
+
+/**
+ * A hooks that subscribes to the store's changes and returns the current value.
+ *
+ * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+ *
+ * @see {@link InnerStore.getState}
+ * @see {@link InnerStore.subscribe}
+ */
+export function useGetInnerState<T>(
+  store: undefined | InnerStore<T>
+): undefined | T
+
+/**
+ * A hooks that subscribes to the store's changes and returns the current value.
+ *
+ * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+ *
+ * @see {@link InnerStore.getState}
+ * @see {@link InnerStore.subscribe}
+ */
+export function useGetInnerState<T>(
+  store: null | undefined | InnerStore<T>
+): null | undefined | T
+
+export function useGetInnerState<T>(
+  store: null | undefined | InnerStore<T>
+): null | undefined | T {
+  const [, render] = useReducer(modInc, 0)
+
+  useEffect(() => {
+    return store?.subscribe(render)
+  }, [store])
+
+  if (store == null) {
+    return store
+  }
+
+  return store.getState()
 }
 
 /**
@@ -456,13 +515,7 @@ export function useInnerState<T>(
   store: null | undefined | InnerStore<T>,
   compare: Compare<T> = isEqual
 ): [null | undefined | T, Dispatch<SetStateAction<T>>] {
-  const [, render] = useReducer(modInc, 0)
-
-  useEffect(() => {
-    return store?.subscribe(render)
-  }, [store])
-
-  return [store?.getState(), useInnerUpdate(store, compare)]
+  return [useGetInnerState(store), useSetInnerState(store, compare)]
 }
 
 /**
@@ -550,7 +603,7 @@ export function useInnerReducer<T, A>(
   reducer: (state: T, action: A) => T,
   compare: Compare<T> = isEqual
 ): [null | undefined | T, Dispatch<A>] {
-  const [state, setState] = useInnerState(store, compare)
+  const setState = useSetInnerState(store, compare)
   const reducerRef = useRef(reducer)
 
   useEffect(() => {
@@ -558,13 +611,9 @@ export function useInnerReducer<T, A>(
   }, [reducer])
 
   return [
-    state,
+    useGetInnerState(store),
     useCallback(
-      action => {
-        return setState(currentState =>
-          reducerRef.current(currentState, action)
-        )
-      },
+      action => setState(state => reducerRef.current(state, action)),
       [setState]
     )
   ]

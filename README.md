@@ -362,10 +362,45 @@ const Counter: React.VFC<{
 })
 ```
 
-### `useInnerUpdate`
+### `useGetInnerState`
 
 ```ts
-function useInnerUpdate<T>(
+function useGetInnerState<T>(
+  store: InnerStore<T>
+): [T, React.Dispatch<React.SetStateAction<T>>]
+
+function useGetInnerState<T>(
+  store: null | undefined | InnerStore<T>
+): [null | undefined | T, React.Dispatch<React.SetStateAction<T>>]
+```
+
+A hooks that subscribes to the store's changes and returns the current value.
+
+- `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+
+```tsx
+const App: React.VFC<{
+  left: InnerStore<number>
+  right: InnerStore<number>
+}> = React.memo(({ left }) => {
+  const countLeft = useGetInnerState(left)
+  const countRight = useGetInnerState(right)
+
+  return (
+    <div>
+      <Counter store={left} />
+      <Counter store={right} />
+
+      <p>Sum: {countLeft + countRight}</p>
+    </div>
+  )
+})
+```
+
+### `useSetInnerState`
+
+```ts
+function useSetInnerState<T>(
   store: null | undefined | InnerStore<T>,
   compare?: Compare<T>
 ): React.Dispatch<React.SetStateAction<T>>
@@ -385,13 +420,13 @@ const App: React.VFC<{
   state: State
 }> = React.memo(({ state }) => {
   // the component won't re-render on the count value change
-  const setCount = useInnerUpdate(state.count)
+  const setCount = useSetInnerState(state.count)
 
   return (
     <div>
       <Counter store={state.count} />
 
-      <button onClick={() => setCount(0)>Reset count</button>
+      <button onClick={() => setCount(0)}>Reset count</button>
     </div>
   )
 })
