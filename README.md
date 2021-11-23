@@ -34,7 +34,7 @@ const Username: React.VFC<{
     <input
       type="text"
       value={username}
-      onChange={e => setUsername(e.target.value)}
+      onChange={event => setUsername(event.target.value)}
     />
   )
 })
@@ -194,8 +194,6 @@ An `InnerStore` instance's method that sets the value. Each time when the value 
 - `valueOrTransform` is either the new value or a function that will be applied to the current value before setting.
 - `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. If the new value is comparably equal to the current value neither the value is set nor the listeners are called.
 
-> 💬 The method returns `void` to emphasize that `InnerStore` instances are mutable.
-
 ```ts
 const onSubmit = () => {
   signInFormStore.update(state => {
@@ -209,6 +207,8 @@ const onSubmit = () => {
   })
 }
 ```
+
+> 💬 The method returns `void` to emphasize that `InnerStore` instances are mutable.
 
 ### `InnerStore#subscribe`
 
@@ -236,42 +236,7 @@ const UsernameInput: React.VFC<{
       type="text"
       value={username}
       // all store.subscribe across the app will call their listeners
-      onChange={e => store.setState(e.target.value)}
-    />
-  )
-})
-```
-
-### `useInnerState`
-
-```ts
-function useInnerState<T>(
-  store: InnerStore<T>,
-  compare?: Compare<T>
-): [T, React.Dispatch<React.SetStateAction<T>>]
-
-function useInnerState<T>(
-  store: null | undefined | InnerStore<T>,
-  compare?: Compare<T>
-): [null | undefined | T, React.Dispatch<React.SetStateAction<T>>]
-```
-
-A hook that is similar to `React.useState` but for `InnerStore` instances. It subscribes to the store changes and returns the current value and a function to set the value.
-
-- `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
-- `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The store won't update if the new value is comparably equal to the current value.
-
-```tsx
-const UsernameInput: React.VFC<{
-  store: InnerStore<string>
-}> = React.memo(({ store }) => {
-  const [username, setUsername] = useInnerState(store)
-
-  return (
-    <input
-      type="text"
-      value={username}
-      onChange={e => setUsername(e.target.value)}
+      onChange={event => store.setState(event.target.value)}
     />
   )
 })
@@ -311,6 +276,111 @@ const App: React.VFC<{
 ```
 
 > 💡 It is recommended to memoize the `watcher` function for better performance.
+
+### `useInnerState`
+
+```ts
+function useInnerState<T>(
+  store: InnerStore<T>,
+  compare?: Compare<T>
+): [T, React.Dispatch<React.SetStateAction<T>>]
+
+function useInnerState<T>(
+  store: null | undefined | InnerStore<T>,
+  compare?: Compare<T>
+): [null | undefined | T, React.Dispatch<React.SetStateAction<T>>]
+```
+
+A hook that is similar to `React.useState` but for `InnerStore` instances. It subscribes to the store changes and returns the current value and a function to set the value.
+
+- `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+- `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The store won't update if the new value is comparably equal to the current value.
+
+```tsx
+const UsernameInput: React.VFC<{
+  store: InnerStore<string>
+}> = React.memo(({ store }) => {
+  const [username, setUsername] = useInnerState(store)
+
+  return (
+    <input
+      type="text"
+      value={username}
+      onChange={event => setUsername(event.target.value)}
+    />
+  )
+})
+```
+
+> 💡 The hook is a combination of [`useGetInnerState`][use_get_inner_state] and [`useSetInnerState`][use_set_inner_state], so use them if you need to either get/subscribe or set the store's value.
+
+### `useGetInnerState`
+
+```ts
+function useGetInnerState<T>(store: InnerStore<T>): T
+
+function useGetInnerState<T>(
+  store: null | undefined | InnerStore<T>
+): null | undefined | T
+```
+
+A hooks that subscribes to the store's changes and returns the current value.
+
+- `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+
+```tsx
+const App: React.VFC<{
+  left: InnerStore<number>
+  right: InnerStore<number>
+}> = React.memo(({ left }) => {
+  const countLeft = useGetInnerState(left)
+  const countRight = useGetInnerState(right)
+
+  return (
+    <div>
+      <Counter store={left} />
+      <Counter store={right} />
+
+      <p>Sum: {countLeft + countRight}</p>
+    </div>
+  )
+})
+```
+
+### `useSetInnerState`
+
+```ts
+function useSetInnerState<T>(
+  store: null | undefined | InnerStore<T>,
+  compare?: Compare<T>
+): React.Dispatch<React.SetStateAction<T>>
+```
+
+A hooks that returns a function to update the store's value. Might be useful when you need a way to update the store's value without subscribing to its changes.
+
+- `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
+- `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The store won't update if the new value is comparably equal to the current value.
+
+```tsx
+type State = {
+  count: InnerStore<number>
+}
+
+const App: React.VFC<{
+  state: State
+}> = React.memo(({ state }) => {
+  // the component won't re-render on the count value change
+  const setCount = useSetInnerState(state.count)
+
+  return (
+    <div>
+      <Counter store={state.count} />
+
+      <button onClick={() => setCount(0)}>Reset count</button>
+    </div>
+  )
+})
+```
 
 ### `useInnerReducer`
 
@@ -357,41 +427,6 @@ const Counter: React.VFC<{
       <button onClick={() => dispatch({ type: 'DECREMENT' })}>-</button>
       <span>{count}</span>
       <button onClick={() => dispatch({ type: 'INCREMENT' })}>+</button>
-    </div>
-  )
-})
-```
-
-### `useInnerUpdate`
-
-```ts
-function useInnerUpdate<T>(
-  store: null | undefined | InnerStore<T>,
-  compare?: Compare<T>
-): React.Dispatch<React.SetStateAction<T>>
-```
-
-A hooks that returns a function to update the store's value. Might be useful when you need a way to update the store's value without subscribing to its changes.
-
-- `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
-- `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The store won't update if the new value is comparably equal to the current value.
-
-```tsx
-type State = {
-  count: InnerStore<number>
-}
-
-const App: React.VFC<{
-  state: State
-}> = React.memo(({ state }) => {
-  // the component won't re-render on the count value change
-  const setCount = useInnerUpdate(state.count)
-
-  return (
-    <div>
-      <Counter store={state.count} />
-
-      <button onClick={() => setCount(0)>Reset count</button>
     </div>
   )
 })
@@ -461,4 +496,6 @@ type ArrayOfStores = InnerStore<Array<InnerStore<boolean>>>
 [inner_store__set_state]: #innerstoresetstate
 [inner_store__subscribe]: #innerstoresubscribe
 [use_inner_watch]: #useinnerwatch
+[use_get_inner_state]: #usegetinnerstate
+[use_set_inner_state]: #usesetinnerstate
 [compare]: #compare
