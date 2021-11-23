@@ -100,7 +100,7 @@ class SynchronousContext {
   public static register<T>(store: InnerStore<T>): void {
     const current = SynchronousContext.current
 
-    if (current?.listener == null) {
+    if (current == null) {
       return
     }
 
@@ -113,20 +113,19 @@ class SynchronousContext {
     }
   }
 
-  private listener: null | VoidFunction = null
+  public constructor(private readonly listener: VoidFunction) {}
+
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
 
-  public activate(listener: VoidFunction): void {
+  public activate(): void {
     SynchronousContext.current = this
-    this.listener = listener
 
     this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
   }
 
   public cleanupObsolete(): void {
     SynchronousContext.current = null
-    this.listener = null
 
     this.deadCleanups.forEach(key => {
       const clean = this.cleanups.get(key)
@@ -141,7 +140,6 @@ class SynchronousContext {
   }
 
   public cleanupAll(): void {
-    this.listener = null
     this.cleanups.forEach(cleanup => cleanup())
     this.deadCleanups.clear()
   }
@@ -302,12 +300,6 @@ export function useInnerWatch<T>(
     valueRef.current = SynchronousContext.executeWatcher(watcher)
   }
 
-  // permanent ref
-  const contextRef = useRef<SynchronousContext>()
-  if (contextRef.current == null) {
-    contextRef.current = new SynchronousContext()
-  }
-
   // no need to re-register .getState calls when compare changes
   // it is only needed when watcher calls inside .activate listener
   const compareRef = useRef(compare)
@@ -315,10 +307,10 @@ export function useInnerWatch<T>(
     compareRef.current = compare
   }, [compare])
 
-  useEffect(() => {
-    isRenderTriggeredRef.current = false
-
-    contextRef.current!.activate(() => {
+  // permanent ref
+  const contextRef = useRef<SynchronousContext>()
+  if (contextRef.current == null) {
+    contextRef.current = new SynchronousContext(() => {
       const currentValue = valueRef.current!
       const nextValue = SynchronousContext.executeWatcher(watcherRef.current!)
 
@@ -334,8 +326,13 @@ export function useInnerWatch<T>(
         render()
       }
     })
+  }
+
+  useEffect(() => {
+    isRenderTriggeredRef.current = false
 
     // register .getState() calls
+    contextRef.current!.activate()
     watcherRef.current = watcher
     valueRef.current = SynchronousContext.executeWatcher(watcher)
 
