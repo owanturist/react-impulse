@@ -100,11 +100,12 @@ class SynchronousContext {
   public static register<T>(store: InnerStore<T>): void {
     const current = SynchronousContext.current
 
-    if (current?.listener == null) {
+    if (current == null) {
       return
     }
 
     if (current.cleanups.has(store.key)) {
+      // still alive
       current.deadCleanups.delete(store.key)
     } else {
       SynchronousContext.isWatcherSubscribing = true
@@ -113,20 +114,42 @@ class SynchronousContext {
     }
   }
 
-  private listener: null | VoidFunction = null
+  private readonly listener: VoidFunction
+  private listenerTimeoutId: null | NodeJS.Timeout = null
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
 
-  public activate(listener: VoidFunction): void {
-    SynchronousContext.current = this
-    this.listener = listener
+  public constructor(listener: VoidFunction) {
+    // this.listener might be called many times per one update cycle
+    // for instance when multiple watched InnerStore are updated
+    // so the idea is to call the incoming listener only once per update cycle
+    this.listener = () => {
+      // it cancels the previous call
+      this.listenerCleanup()
+      // it schedules the next call
+      this.listenerTimeoutId = setTimeout(listener)
+    }
+  }
 
+  private listenerCleanup(): void {
+    if (this.listenerTimeoutId !== null) {
+      clearTimeout(this.listenerTimeoutId)
+      this.listenerTimeoutId = null
+    }
+  }
+
+  public activate(): void {
+    SynchronousContext.current = this
+
+    this.listenerCleanup()
+
+    // fill up dead cleanups with all of the current cleanups
+    // to keep only real dead once during .register() call
     this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
   }
 
   public cleanupObsolete(): void {
     SynchronousContext.current = null
-    this.listener = null
 
     this.deadCleanups.forEach(key => {
       const clean = this.cleanups.get(key)
@@ -141,7 +164,7 @@ class SynchronousContext {
   }
 
   public cleanupAll(): void {
-    this.listener = null
+    this.listenerCleanup()
     this.cleanups.forEach(cleanup => cleanup())
     this.deadCleanups.clear()
   }
@@ -291,21 +314,12 @@ export function useInnerWatch<T>(
   compare: Compare<T> = isEqual
 ): T {
   const [x, render] = useReducer(modInc, 0)
-  // the flag is shared across all .activate listeners
-  // created in different useEffect ticks
-  const isRenderTriggeredRef = useRef(false)
 
   // workaround to handle changes of the watcher returning value
   const valueRef = useRef<T>()
   const watcherRef = useRef<() => T>()
   if (watcherRef.current !== watcher) {
     valueRef.current = SynchronousContext.executeWatcher(watcher)
-  }
-
-  // permanent ref
-  const contextRef = useRef<SynchronousContext>()
-  if (contextRef.current == null) {
-    contextRef.current = new SynchronousContext()
   }
 
   // no need to re-register .getState calls when compare changes
@@ -315,27 +329,25 @@ export function useInnerWatch<T>(
     compareRef.current = compare
   }, [compare])
 
-  useEffect(() => {
-    isRenderTriggeredRef.current = false
-
-    contextRef.current!.activate(() => {
+  // permanent ref
+  const contextRef = useRef<SynchronousContext>()
+  if (contextRef.current == null) {
+    contextRef.current = new SynchronousContext(() => {
       const currentValue = valueRef.current!
       const nextValue = SynchronousContext.executeWatcher(watcherRef.current!)
 
-      valueRef.current = nextValue
-
       // no need to listen for all .getState updates
       // the only one is enough to trigger the render
-      if (
-        !isRenderTriggeredRef.current &&
-        !compareRef.current(currentValue, nextValue)
-      ) {
-        isRenderTriggeredRef.current = true
+      if (!compareRef.current(currentValue, nextValue)) {
+        valueRef.current = nextValue
         render()
       }
     })
+  }
 
+  useEffect(() => {
     // register .getState() calls
+    contextRef.current!.activate()
     watcherRef.current = watcher
     valueRef.current = SynchronousContext.executeWatcher(watcher)
 
