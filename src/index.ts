@@ -65,6 +65,10 @@ const modInc = (x: number): number => {
   return (x + 1) % 123456789
 }
 
+const noop = (): void => {
+  // do nothing
+}
+
 class SynchronousContext {
   private static current: null | SynchronousContext = null
   private static isWatcherExecuting = false
@@ -105,6 +109,7 @@ class SynchronousContext {
     }
 
     if (current.cleanups.has(store.key)) {
+      // still alive
       current.deadCleanups.delete(store.key)
     } else {
       SynchronousContext.isWatcherSubscribing = true
@@ -113,14 +118,37 @@ class SynchronousContext {
     }
   }
 
-  public constructor(private readonly listener: VoidFunction) {}
-
+  private readonly listener: VoidFunction
+  private listenerTimeoutId: null | NodeJS.Timeout = null
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
+
+  public constructor(listener: VoidFunction) {
+    // this.listener might be called many times per one update cycle
+    // for instance when multiple watched InnerStore are updated
+    // so the idea is to call the incoming listener only once per update cycle
+    this.listener = () => {
+      // it cancels the previous call
+      this.listenerCleanup()
+      // it schedules the next call
+      this.listenerTimeoutId = setTimeout(listener)
+    }
+  }
+
+  private listenerCleanup(): void {
+    if (this.listenerTimeoutId !== null) {
+      clearTimeout(this.listenerTimeoutId)
+      this.listenerTimeoutId = null
+    }
+  }
 
   public activate(): void {
     SynchronousContext.current = this
 
+    this.listenerCleanup()
+
+    // fill up dead cleanups with all of the current cleanups
+    // to keep only real dead once during .register() call
     this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
   }
 
@@ -140,6 +168,7 @@ class SynchronousContext {
   }
 
   public cleanupAll(): void {
+    this.listenerCleanup()
     this.cleanups.forEach(cleanup => cleanup())
     this.deadCleanups.clear()
   }
@@ -258,9 +287,7 @@ export class InnerStore<T> {
           'The useWatch(watcher) hook is for read-only operations but not for creating subscriptions.'
       )
     ) {
-      return () => {
-        // do nothing
-      }
+      return noop
     }
 
     const subscriberId = nanoid()
@@ -289,9 +316,6 @@ export function useInnerWatch<T>(
   compare: Compare<T> = isEqual
 ): T {
   const [x, render] = useReducer(modInc, 0)
-  // the flag is shared across all .activate listeners
-  // created in different useEffect ticks
-  const isRenderTriggeredRef = useRef(false)
 
   // workaround to handle changes of the watcher returning value
   const valueRef = useRef<T>()
@@ -314,23 +338,16 @@ export function useInnerWatch<T>(
       const currentValue = valueRef.current!
       const nextValue = SynchronousContext.executeWatcher(watcherRef.current!)
 
-      valueRef.current = nextValue
-
       // no need to listen for all .getState updates
       // the only one is enough to trigger the render
-      if (
-        !isRenderTriggeredRef.current &&
-        !compareRef.current(currentValue, nextValue)
-      ) {
-        isRenderTriggeredRef.current = true
+      if (!compareRef.current(currentValue, nextValue)) {
+        valueRef.current = nextValue
         render()
       }
     })
   }
 
   useEffect(() => {
-    isRenderTriggeredRef.current = false
-
     // register .getState() calls
     contextRef.current!.activate()
     watcherRef.current = watcher
