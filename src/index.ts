@@ -4,8 +4,7 @@ import {
   useRef,
   useReducer,
   useEffect,
-  useCallback,
-  useState
+  useCallback
 } from 'react'
 import { nanoid } from 'nanoid'
 
@@ -439,23 +438,17 @@ export function useGetInnerState<T>(
 export function useGetInnerState<T>(
   store: null | undefined | InnerStore<T>
 ): null | undefined | T {
-  const [state, setState] = useState(() => {
-    if (store == null) {
-      return store
-    }
-
-    return store.getState()
-  })
+  const [, render] = useReducer(modInc, 0)
 
   useEffect(() => {
-    if (store == null) {
-      return setState(store)
-    }
-
-    return store.subscribe(() => setState(store.getState()))
+    return store?.subscribe(render)
   }, [store])
 
-  return state
+  if (store == null) {
+    return store
+  }
+
+  return store.getState()
 }
 
 /**
