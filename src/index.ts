@@ -65,10 +65,6 @@ const modInc = (x: number): number => {
   return (x + 1) % 123456789
 }
 
-const noop = (): void => {
-  // do nothing
-}
-
 class SynchronousContext {
   private static current: null | SynchronousContext = null
   private static isWatcherExecuting = false
@@ -287,7 +283,9 @@ export class InnerStore<T> {
           'The useWatch(watcher) hook is for read-only operations but not for creating subscriptions.'
       )
     ) {
-      return noop
+      return () => {
+        // do nothing
+      }
     }
 
     const subscriberId = nanoid()
