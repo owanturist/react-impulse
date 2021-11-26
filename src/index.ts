@@ -1,10 +1,11 @@
-import {
+import React, {
   Dispatch,
   SetStateAction,
   useRef,
   useReducer,
   useEffect,
-  useCallback
+  useCallback,
+  useState
 } from 'react'
 import { nanoid } from 'nanoid'
 
@@ -184,7 +185,10 @@ export class InnerStore<T> {
     return new InnerStore(value)
   }
 
-  private readonly subscribers = new Map<string, VoidFunction>()
+  private readonly subscribers = new Map<
+    string,
+    React.Dispatch<(state: T) => T>
+  >()
 
   /**
    * A unique key per `InnerStore` instance.
@@ -197,8 +201,8 @@ export class InnerStore<T> {
 
   private constructor(private value: T) {}
 
-  private emit(): void {
-    this.subscribers.forEach(listener => listener())
+  private emit(transform: (state: T) => T): void {
+    this.subscribers.forEach(listener => listener(transform))
   }
 
   /**
@@ -263,7 +267,11 @@ export class InnerStore<T> {
 
     if (!compare(this.value, nextValue)) {
       this.value = nextValue
-      this.emit()
+      this.emit(
+        typeof valueOrTransform === 'function'
+          ? (valueOrTransform as (value: T) => T)
+          : () => nextValue
+      )
     }
   }
 
@@ -276,7 +284,7 @@ export class InnerStore<T> {
    *
    * @see {@link InnerStore.setState}
    */
-  public subscribe(listener: VoidFunction): VoidFunction {
+  public subscribe(listener: React.Dispatch<(state: T) => T>): VoidFunction {
     if (
       SynchronousContext.warning(
         'You should not call InnerStore#subscribe(listener) inside the useWatch(watcher) callback. ' +
@@ -438,17 +446,24 @@ export function useGetInnerState<T>(
 export function useGetInnerState<T>(
   store: null | undefined | InnerStore<T>
 ): null | undefined | T {
-  const [, render] = useReducer(modInc, 0)
+  // with && operation it is possible to return `null` or `undefined`
+  // but with ?. operation it might only return `undefined`
+  // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+  const [state, setState] = useState(() => store && store.getState())
 
   useEffect(() => {
-    return store?.subscribe(render)
+    // Because we're subscribing in a passive effect,
+    // it's possible that an update has occurred between render and our effect handler.
+    // Check for this and schedule an update if work has occurred.
+    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+    setState(store && store.getState())
+
+    return store?.subscribe(transform =>
+      setState(current => current && transform(current))
+    )
   }, [store])
 
-  if (store == null) {
-    return store
-  }
-
-  return store.getState()
+  return state
 }
 
 /**
