@@ -452,8 +452,6 @@ export function useGetInnerState<T>(
   })
 
   useEffect(() => {
-    let isListenersCleaned = false
-
     // Because we're subscribing in a passive effect,
     // it's possible that an update has occurred between render and our effect handler.
     // Check for this and schedule an update if work has occurred.
@@ -470,21 +468,9 @@ export function useGetInnerState<T>(
     })
 
     return store?.subscribe(update => {
-      if (isListenersCleaned) {
-        isListenersCleaned = false
-      } else {
-        isListenersCleaned = true
-
-        setState(current => {
-          if (!isListenersCleaned) {
-            return { value: store.getState() }
-          }
-
-          isListenersCleaned = false
-
-          return current && { value: update(current.value) }
-        })
-      }
+      setState(current => {
+        return current && { value: update(current.value) }
+      })
     })
   }, [store])
 
