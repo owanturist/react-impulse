@@ -446,24 +446,52 @@ export function useGetInnerState<T>(
 export function useGetInnerState<T>(
   store: null | undefined | InnerStore<T>
 ): null | undefined | T {
-  // with && operation it is possible to return `null` or `undefined`
-  // but with ?. operation it might only return `undefined`
-  // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-  const [state, setState] = useState(() => store && store.getState())
+  // the `value` field distinguishes between not defined store and nullable store's state
+  const [state, setState] = useState(() => {
+    return store && { value: store.getState() }
+  })
 
   useEffect(() => {
+    let isListenersCleaned = false
+
     // Because we're subscribing in a passive effect,
     // it's possible that an update has occurred between render and our effect handler.
     // Check for this and schedule an update if work has occurred.
-    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-    setState(store && store.getState())
+    setState(current => {
+      const next = store && { value: store.getState() }
 
-    return store?.subscribe(transform =>
-      setState(current => current && transform(current))
-    )
+      if (current == null || next == null) {
+        return next
+      }
+
+      // the store's state is compared inside `InnerStore`
+      // so it might check by strict equality here
+      return current.value === next.value ? current : next
+    })
+
+    return store?.subscribe(update => {
+      if (isListenersCleaned) {
+        isListenersCleaned = false
+      } else {
+        isListenersCleaned = true
+
+        setState(current => {
+          if (!isListenersCleaned) {
+            return { value: store.getState() }
+          }
+
+          isListenersCleaned = false
+
+          return current && { value: update(current.value) }
+        })
+      }
+    })
   }, [store])
 
-  return state
+  // with && operation it is possible to return `null` or `undefined`
+  // but with ?. operation it might only return `undefined`
+  // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+  return state && state.value
 }
 
 /**
