@@ -1,11 +1,10 @@
-import React, {
+import {
   Dispatch,
   SetStateAction,
   useRef,
-  useReducer,
   useEffect,
   useCallback,
-  useState
+  useReducer
 } from 'react'
 import { nanoid } from 'nanoid'
 
@@ -46,6 +45,8 @@ export type DeepExtractInnerState<T> = T extends InnerStore<infer R>
   ? ReadonlyArray<ExtractDeepDirect<R>>
   : { [K in keyof T]: ExtractDeepDirect<T[K]> }
 
+const modIncrement = (x: number): number => (x + 1) % 123456789
+
 const warning = (message: string): void => {
   /* eslint-disable no-console */
   if (typeof console !== 'undefined' && typeof console.error === 'function') {
@@ -60,10 +61,6 @@ const warning = (message: string): void => {
   } catch {
     // do nothing
   }
-}
-
-const modInc = (x: number): number => {
-  return (x + 1) % 123456789
 }
 
 class SynchronousContext {
@@ -99,24 +96,13 @@ class SynchronousContext {
   }
 
   public static register<T>(store: InnerStore<T>): void {
-    const current = SynchronousContext.current
-
-    if (current == null) {
-      return
-    }
-
-    if (current.cleanups.has(store.key)) {
-      // still alive
-      current.deadCleanups.delete(store.key)
-    } else {
-      SynchronousContext.isWatcherSubscribing = true
-      current.cleanups.set(store.key, store.subscribe(current.listener))
-      SynchronousContext.isWatcherSubscribing = false
-    }
+    SynchronousContext.isWatcherSubscribing = true
+    SynchronousContext.current?.register(store)
+    SynchronousContext.isWatcherSubscribing = false
   }
 
   private readonly listener: VoidFunction
-  private listenerTimeoutId: null | NodeJS.Timeout = null
+  private rafId: null | number = null
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
 
@@ -128,34 +114,31 @@ class SynchronousContext {
       // it cancels the previous call
       this.listenerCleanup()
       // it schedules the next call
-      this.listenerTimeoutId = setTimeout(listener)
+      this.rafId = requestAnimationFrame(listener)
     }
   }
 
   private listenerCleanup(): void {
-    if (this.listenerTimeoutId !== null) {
-      clearTimeout(this.listenerTimeoutId)
-      this.listenerTimeoutId = null
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId)
+      this.rafId = null
     }
   }
 
-  public activate(): void {
-    SynchronousContext.current = this
-
-    this.listenerCleanup()
-
-    // fill up dead cleanups with all of the current cleanups
-    // to keep only real dead once during .register() call
-    this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
+  private register<T>(store: InnerStore<T>): void {
+    if (this.cleanups.has(store.key)) {
+      // still alive
+      this.deadCleanups.delete(store.key)
+    } else {
+      this.cleanups.set(store.key, store.subscribe(this.listener))
+    }
   }
 
-  public cleanupObsolete(): void {
-    SynchronousContext.current = null
-
+  private cleanupObsolete(): void {
     this.deadCleanups.forEach(key => {
       const clean = this.cleanups.get(key)
 
-      if (typeof clean === 'function') {
+      if (clean != null) {
         clean()
         this.cleanups.delete(key)
       }
@@ -164,9 +147,28 @@ class SynchronousContext {
     this.deadCleanups.clear()
   }
 
-  public cleanupAll(): void {
+  public activate<T>(watcher: () => T): T {
+    SynchronousContext.current = this
+
+    this.listenerCleanup()
+
+    // fill up dead cleanups with all of the current cleanups
+    // to keep only real dead once during .register() call
+    this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
+
+    const value = SynchronousContext.executeWatcher(watcher)
+
+    this.cleanupObsolete()
+
+    SynchronousContext.current = null
+
+    return value
+  }
+
+  public cleanup(): void {
     this.listenerCleanup()
     this.cleanups.forEach(cleanup => cleanup())
+    this.cleanups.clear()
     this.deadCleanups.clear()
   }
 }
@@ -185,10 +187,7 @@ export class InnerStore<T> {
     return new InnerStore(value)
   }
 
-  private readonly subscribers = new Map<
-    string,
-    React.Dispatch<(state: T) => T>
-  >()
+  private readonly subscribers = new Map<string, VoidFunction>()
 
   /**
    * A unique key per `InnerStore` instance.
@@ -201,8 +200,8 @@ export class InnerStore<T> {
 
   private constructor(private value: T) {}
 
-  private emit(transform: (state: T) => T): void {
-    this.subscribers.forEach(listener => listener(transform))
+  private emit(): void {
+    this.subscribers.forEach(listener => listener())
   }
 
   /**
@@ -267,11 +266,7 @@ export class InnerStore<T> {
 
     if (!compare(this.value, nextValue)) {
       this.value = nextValue
-      this.emit(
-        typeof valueOrTransform === 'function'
-          ? (valueOrTransform as (value: T) => T)
-          : () => nextValue
-      )
+      this.emit()
     }
   }
 
@@ -284,7 +279,7 @@ export class InnerStore<T> {
    *
    * @see {@link InnerStore.setState}
    */
-  public subscribe(listener: React.Dispatch<(state: T) => T>): VoidFunction {
+  public subscribe(listener: VoidFunction): VoidFunction {
     if (
       SynchronousContext.warning(
         'You should not call InnerStore#subscribe(listener) inside the useWatch(watcher) callback. ' +
@@ -321,53 +316,42 @@ export function useInnerWatch<T>(
   watcher: () => T,
   compare: Compare<T> = isEqual
 ): T {
-  const [x, render] = useReducer(modInc, 0)
+  const [x, render] = useReducer(modIncrement, 0)
 
-  // workaround to handle changes of the watcher returning value
   const valueRef = useRef<T>()
-  const watcherRef = useRef<() => T>()
-  if (watcherRef.current !== watcher) {
-    valueRef.current = SynchronousContext.executeWatcher(watcher)
-  }
-
-  // no need to re-register .getState calls when compare changes
-  // it is only needed when watcher calls inside .activate listener
+  const xRef = useRef<number>()
   const compareRef = useRef(compare)
+  const watcherRef = useRef(watcher)
+
   useEffect(() => {
+    xRef.current = x
+    watcherRef.current = watcher
     compareRef.current = compare
-  }, [compare])
+  }, [x, watcher, compare])
 
   // permanent ref
   const contextRef = useRef<SynchronousContext>()
   if (contextRef.current == null) {
     contextRef.current = new SynchronousContext(() => {
       const currentValue = valueRef.current!
-      const nextValue = SynchronousContext.executeWatcher(watcherRef.current!)
+      const nextValue = SynchronousContext.executeWatcher(watcherRef.current)
 
-      // no need to listen for all .getState updates
-      // the only one is enough to trigger the render
       if (!compareRef.current(currentValue, nextValue)) {
-        valueRef.current = nextValue
         render()
       }
     })
   }
 
-  useEffect(() => {
-    // register .getState() calls
-    contextRef.current!.activate()
-    watcherRef.current = watcher
-    valueRef.current = SynchronousContext.executeWatcher(watcher)
-
-    contextRef.current!.cleanupObsolete()
-  }, [x, watcher])
-
   // cleanup everything when unmounts
   useEffect(() => {
     return () => {
-      contextRef.current!.cleanupAll()
+      contextRef.current!.cleanup()
     }
   }, [])
+
+  if (xRef.current !== x || watcherRef.current !== watcher) {
+    valueRef.current = contextRef.current.activate(watcher)
+  }
 
   return valueRef.current!
 }
@@ -447,37 +431,16 @@ export function useGetInnerState<T>(
   store: null | undefined | InnerStore<T>
 ): null | undefined | T {
   // the `value` field distinguishes between not defined store and nullable store's state
-  const [state, setState] = useState(() => {
-    return store && { value: store.getState() }
-  })
+  const [, render] = useReducer(modIncrement, 0)
 
   useEffect(() => {
-    // Because we're subscribing in a passive effect,
-    // it's possible that an update has occurred between render and our effect handler.
-    // Check for this and schedule an update if work has occurred.
-    setState(current => {
-      const next = store && { value: store.getState() }
-
-      if (current == null || next == null) {
-        return next
-      }
-
-      // the store's state is compared inside `InnerStore`
-      // so it might check by strict equality here
-      return current.value === next.value ? current : next
-    })
-
-    return store?.subscribe(update => {
-      setState(current => {
-        return current && { value: update(current.value) }
-      })
-    })
+    return store?.subscribe(render)
   }, [store])
 
   // with && operation it is possible to return `null` or `undefined`
   // but with ?. operation it might only return `undefined`
   // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-  return state && state.value
+  return store && store.getState()
 }
 
 /**
