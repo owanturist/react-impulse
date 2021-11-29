@@ -66,17 +66,9 @@ const warning = (message: string): void => {
 class SynchronousContext {
   private static current: null | SynchronousContext = null
   private static isWatcherExecuting = false
-  private static isWatcherSubscribing = false
 
   public static warning(message: string): boolean {
-    if (SynchronousContext.isWatcherSubscribing) {
-      return false
-    }
-
-    if (
-      SynchronousContext.current !== null ||
-      SynchronousContext.isWatcherExecuting
-    ) {
+    if (SynchronousContext.isWatcherExecuting) {
       if (process.env.NODE_ENV !== 'production') {
         warning(message)
       }
@@ -96,9 +88,7 @@ class SynchronousContext {
   }
 
   public static register<T>(store: InnerStore<T>): void {
-    SynchronousContext.isWatcherSubscribing = true
     SynchronousContext.current?.register(store)
-    SynchronousContext.isWatcherSubscribing = false
   }
 
   private readonly listener: VoidFunction
@@ -156,7 +146,7 @@ class SynchronousContext {
     // to keep only real dead once during .register() call
     this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
 
-    const value = SynchronousContext.executeWatcher(watcher)
+    const value = watcher()
 
     this.cleanupObsolete()
 
