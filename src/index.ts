@@ -323,12 +323,6 @@ export function useInnerWatch<T>(
   const compareRef = useRef(compare)
   const watcherRef = useRef(watcher)
 
-  useEffect(() => {
-    xRef.current = x
-    watcherRef.current = watcher
-    compareRef.current = compare
-  }, [x, watcher, compare])
-
   // permanent ref
   const contextRef = useRef<SynchronousContext>()
   if (contextRef.current == null) {
@@ -341,6 +335,12 @@ export function useInnerWatch<T>(
       }
     })
   }
+
+  useEffect(() => {
+    xRef.current = x
+    watcherRef.current = watcher
+    compareRef.current = compare
+  })
 
   // cleanup everything when unmounts
   useEffect(() => {
