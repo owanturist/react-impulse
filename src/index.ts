@@ -49,7 +49,11 @@ const modIncrement = (x: number): number => (x + 1) % 123456789
 
 const warning = (message: string): void => {
   /* eslint-disable no-console */
-  if (typeof console !== 'undefined' && typeof console.error === 'function') {
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    typeof console !== 'undefined' &&
+    typeof console.error === 'function'
+  ) {
     console.error(message)
   }
   /* eslint-enable no-console */
@@ -63,26 +67,36 @@ const warning = (message: string): void => {
   }
 }
 
+enum WatcherPermission {
+  AllowAll = 0,
+  AllowSubscribeOnly = 1,
+  RestrictAll = 2
+}
+
 class SynchronousContext {
   private static current: null | SynchronousContext = null
-  private static isWatcherExecuting = false
+  private static watcherPermission = WatcherPermission.AllowAll
 
-  public static warning(message: string): boolean {
-    if (SynchronousContext.isWatcherExecuting) {
-      if (process.env.NODE_ENV !== 'production') {
-        warning(message)
-      }
-
-      return true
+  public static warning(
+    message: string,
+    requiredPermission: WatcherPermission = WatcherPermission.AllowAll
+  ): boolean {
+    if (SynchronousContext.watcherPermission <= requiredPermission) {
+      return false
     }
 
-    return false
+    warning(message)
+
+    return true
   }
 
-  public static executeWatcher<T>(watcher: () => T): T {
-    SynchronousContext.isWatcherExecuting = true
+  public static executeWatcher<T>(
+    watcher: () => T,
+    permission = WatcherPermission.RestrictAll
+  ): T {
+    SynchronousContext.watcherPermission = permission
     const value = watcher()
-    SynchronousContext.isWatcherExecuting = false
+    SynchronousContext.watcherPermission = WatcherPermission.AllowAll
 
     return value
   }
@@ -146,7 +160,10 @@ class SynchronousContext {
     // to keep only real dead once during .register() call
     this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
 
-    const value = watcher()
+    const value = SynchronousContext.executeWatcher(
+      watcher,
+      WatcherPermission.AllowSubscribeOnly
+    )
 
     this.cleanupObsolete()
 
@@ -273,7 +290,8 @@ export class InnerStore<T> {
     if (
       SynchronousContext.warning(
         'You should not call InnerStore#subscribe(listener) inside the useWatch(watcher) callback. ' +
-          'The useWatch(watcher) hook is for read-only operations but not for creating subscriptions.'
+          'The useWatch(watcher) hook is for read-only operations but not for creating subscriptions.',
+        WatcherPermission.AllowSubscribeOnly
       )
     ) {
       return () => {
