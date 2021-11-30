@@ -2,9 +2,9 @@ import {
   Dispatch,
   SetStateAction,
   useRef,
+  useReducer,
   useEffect,
-  useCallback,
-  useReducer
+  useCallback
 } from 'react'
 import { nanoid } from 'nanoid'
 
@@ -45,8 +45,6 @@ export type DeepExtractInnerState<T> = T extends InnerStore<infer R>
   ? ReadonlyArray<ExtractDeepDirect<R>>
   : { [K in keyof T]: ExtractDeepDirect<T[K]> }
 
-const modIncrement = (x: number): number => (x + 1) % 123456789
-
 const warning = (message: string): void => {
   /* eslint-disable no-console */
   if (
@@ -65,6 +63,10 @@ const warning = (message: string): void => {
   } catch {
     // do nothing
   }
+}
+
+const modInc = (x: number): number => {
+  return (x + 1) % 123456789
 }
 
 enum WatcherPermission {
@@ -90,11 +92,8 @@ class SynchronousContext {
     return true
   }
 
-  public static executeWatcher<T>(
-    watcher: () => T,
-    permission = WatcherPermission.RestrictAll
-  ): T {
-    SynchronousContext.watcherPermission = permission
+  public static executeWatcher<T>(watcher: () => T): T {
+    SynchronousContext.watcherPermission = WatcherPermission.RestrictAll
     const value = watcher()
     SynchronousContext.watcherPermission = WatcherPermission.AllowAll
 
@@ -106,7 +105,7 @@ class SynchronousContext {
   }
 
   private readonly listener: VoidFunction
-  private rafId: null | number = null
+  private listenerCleanupId: null | number = null
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
 
@@ -118,14 +117,14 @@ class SynchronousContext {
       // it cancels the previous call
       this.listenerCleanup()
       // it schedules the next call
-      this.rafId = requestAnimationFrame(listener)
+      this.listenerCleanupId = requestAnimationFrame(listener)
     }
   }
 
   private listenerCleanup(): void {
-    if (this.rafId !== null) {
-      cancelAnimationFrame(this.rafId)
-      this.rafId = null
+    if (this.listenerCleanupId != null) {
+      cancelAnimationFrame(this.listenerCleanupId)
+      this.listenerCleanupId = null
     }
   }
 
@@ -134,7 +133,10 @@ class SynchronousContext {
       // still alive
       this.deadCleanups.delete(store.key)
     } else {
+      SynchronousContext.watcherPermission =
+        WatcherPermission.AllowSubscribeOnly
       this.cleanups.set(store.key, store.subscribe(this.listener))
+      SynchronousContext.watcherPermission = WatcherPermission.RestrictAll
     }
   }
 
@@ -160,10 +162,7 @@ class SynchronousContext {
     // to keep only real dead once during .register() call
     this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
 
-    const value = SynchronousContext.executeWatcher(
-      watcher,
-      WatcherPermission.AllowSubscribeOnly
-    )
+    const value = SynchronousContext.executeWatcher(watcher)
 
     this.cleanupObsolete()
 
@@ -187,8 +186,8 @@ export class InnerStore<T> {
    */
   public static of<TValue>(value: TValue): InnerStore<TValue> {
     SynchronousContext.warning(
-      'You should not call InnerStore.of(something) inside the useWatch(watcher) callback. ' +
-        'he useWatch(watcher) hook is for read-only operations but InnerStore.of(something) creates one.'
+      'You should not call InnerStore.of(something) inside the useInnerWatch(watcher) callback. ' +
+        'The useInnerWatch(watcher) hook is for read-only operations but InnerStore.of(something) creates one.'
     )
 
     return new InnerStore(value)
@@ -259,8 +258,8 @@ export class InnerStore<T> {
   ): void {
     if (
       SynchronousContext.warning(
-        'You may not call InnerStore#setState(something) inside the useWatch(watcher) callback. ' +
-          'The useWatch(watcher) hook is for read-only operations but InnerStore#setState(something) changes it.'
+        'You may not call InnerStore#setState(something) inside the useInnerWatch(watcher) callback. ' +
+          'The useInnerWatch(watcher) hook is for read-only operations but InnerStore#setState(something) changes it.'
       )
     ) {
       return
@@ -289,8 +288,8 @@ export class InnerStore<T> {
   public subscribe(listener: VoidFunction): VoidFunction {
     if (
       SynchronousContext.warning(
-        'You should not call InnerStore#subscribe(listener) inside the useWatch(watcher) callback. ' +
-          'The useWatch(watcher) hook is for read-only operations but not for creating subscriptions.',
+        'You should not call InnerStore#subscribe(listener) inside the useInnerWatch(watcher) callback. ' +
+          'The useInnerWatch(watcher) hook is for read-only operations but not for creating subscriptions.',
         WatcherPermission.AllowSubscribeOnly
       )
     ) {
@@ -324,7 +323,7 @@ export function useInnerWatch<T>(
   watcher: () => T,
   compare: Compare<T> = isEqual
 ): T {
-  const [x, render] = useReducer(modIncrement, 0)
+  const [x, render] = useReducer(modInc, 0)
 
   const valueRef = useRef<T>()
   const xRef = useRef<number>()
@@ -438,8 +437,7 @@ export function useGetInnerState<T>(
 export function useGetInnerState<T>(
   store: null | undefined | InnerStore<T>
 ): null | undefined | T {
-  // the `value` field distinguishes between not defined store and nullable store's state
-  const [, render] = useReducer(modIncrement, 0)
+  const [, render] = useReducer(modInc, 0)
 
   useEffect(() => {
     return store?.subscribe(render)
