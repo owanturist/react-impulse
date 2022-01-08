@@ -153,7 +153,7 @@ class SynchronousContext {
     this.deadCleanups.clear()
   }
 
-  public activate<T>(watcher: () => T): T {
+  public activate<T>(watcher: () => T): void {
     SynchronousContext.current = this
 
     this.listenerCleanup()
@@ -162,13 +162,11 @@ class SynchronousContext {
     // to keep only real dead once during .register() call
     this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
 
-    const value = SynchronousContext.executeWatcher(watcher)
+    SynchronousContext.executeWatcher(watcher)
 
     this.cleanupObsolete()
 
     SynchronousContext.current = null
-
-    return value
   }
 
   public cleanup(): void {
@@ -326,28 +324,35 @@ export function useInnerWatch<T>(
   const [x, render] = useReducer(modInc, 0)
 
   const valueRef = useRef<T>()
-  const xRef = useRef<number>()
+  const watcherRef = useRef<() => T>()
+  // workaround to handle changes of the watcher returning value
+  if (watcherRef.current !== watcher) {
+    valueRef.current = SynchronousContext.executeWatcher(watcher)
+  }
+
   const compareRef = useRef(compare)
-  const watcherRef = useRef(watcher)
+  useEffect(() => {
+    compareRef.current = compare
+  }, [compare])
 
   // permanent ref
   const contextRef = useRef<SynchronousContext>()
   if (contextRef.current == null) {
     contextRef.current = new SynchronousContext(() => {
       const currentValue = valueRef.current!
-      const nextValue = SynchronousContext.executeWatcher(watcherRef.current)
+      const nextValue = SynchronousContext.executeWatcher(watcherRef.current!)
 
       if (!compareRef.current(currentValue, nextValue)) {
+        valueRef.current = nextValue
         render()
       }
     })
   }
 
   useEffect(() => {
-    xRef.current = x
     watcherRef.current = watcher
-    compareRef.current = compare
-  })
+    contextRef.current!.activate(watcher)
+  }, [x, watcher])
 
   // cleanup everything when unmounts
   useEffect(() => {
@@ -355,10 +360,6 @@ export function useInnerWatch<T>(
       contextRef.current!.cleanup()
     }
   }, [])
-
-  if (xRef.current !== x || watcherRef.current !== watcher) {
-    valueRef.current = contextRef.current.activate(watcher)
-  }
 
   return valueRef.current!
 }
