@@ -488,6 +488,16 @@ type ArrayOfStores = InnerStore<Array<InnerStore<boolean>>>
 // DeepExtractInnerState<ArrayOfStores> === Array<boolean>
 ```
 
+## Publish
+
+Here are scripts you want to run for publishing a new version to NPM:
+
+1. `npm run build`
+2. `npm version {version}` ex: `npm version 1.0.0-beta.1`
+3. `npm publish --tag {tag}` ex: `npm publish --tag beta --tag latest`
+4. `git push`
+5. `git push --tags`
+
 <!-- L I N K S -->
 
 [inner_store__of]: #innerstoreof
