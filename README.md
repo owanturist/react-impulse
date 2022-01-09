@@ -89,6 +89,210 @@ ReactDOM.render(
 )
 ```
 
+## Motivation
+
+Another one React state management library... Why do you need it?
+
+Imagine you are building a stateful Input component that will be used in a form:
+
+```tsx
+import React from 'react'
+
+const Input: React.VFC = () => {
+  const [value, setValue] = React.useState('')
+
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={event => setValue(event.target.value)}
+    />
+  )
+}
+```
+
+That's fairly simple, but not quite useful since there is no way to get the input's value. You want to keep the state inside the component so the only way to get the value is to pass the `onChange` callback to the `Input` component:
+
+```tsx
+import React from 'react'
+
+const Input: React.VFC<{
+  onChange?(value: string): void
+}> = ({ onChange }) => {
+  const [value, setValue] = React.useState('')
+
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={event => {
+        setValue(event.target.value)
+        onChange?.(event.target.value)
+      }}
+    />
+  )
+}
+```
+
+Now you can get the value from the Input's parent component but you need a place to store it:
+
+```tsx
+import React from 'react'
+
+const Greeting = () => {
+  const [value, setValue] = React.useState('')
+
+  return (
+    <div>
+      <Input onChange={setValue} />
+      <span>Hello, {value}!</span>
+    </div>
+  )
+}
+```
+
+Two `React.useState` for storing the single value... seems a bit of overkill huh? Let's move on and say that it should be a way to not only read but set the Input's value from the outside:
+
+```tsx
+import React from 'react'
+
+const Input: React.VFC<{
+  value?: string
+  onChange?(value: string): void
+}> = ({ value: forcedValue = '', onChange }) => {
+  const [value, setValue] = React.useState(forcedValue)
+
+  React.useEffect(() => {
+    setValue(forcedValue)
+  }, [forcedValue])
+
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={event => {
+        setValue(event.target.value)
+        onChange?.(event.target.value)
+      }}
+    />
+  )
+}
+
+const Greeting = () => {
+  const [value, setValue] = React.useState('')
+
+  return (
+    <div>
+      <Input value={value} onChange={setValue} />
+      <button onClick={() => setValue('')}>Clear</button>
+      <span>Hello, {value}!</span>
+    </div>
+  )
+}
+```
+
+It is a complete implementation of two-way Input's state management. With more complex state the amount of hooks to support the two-way binding will grow dramatically.
+
+A brute-force workaround to reduce the two-way binding hustle is to store the Input's state outside the component. This way any component which passes the state and the dispatch callback might read and change the state's value:
+
+```tsx
+import React from 'react'
+
+type InputAction =
+  | {
+      type: 'CHANGE'
+      value: string
+    }
+  | { type: 'FOCUS' }
+  | { type: 'BLUR' }
+  | { type: 'CLEAR' }
+
+interface InputState {
+  value: string
+  isFocused: boolean
+  isTouched: boolean
+}
+
+const initialInputState: InputState = {
+  value: '',
+  isFocused: false,
+  isTouched: false
+}
+
+const inputReducer = (state: InputState, action: InputAction): InputState => {
+  switch (action.type) {
+    case 'CHANGE':
+      return {
+        ...state,
+        value: action.value,
+        isTouched: true
+      }
+    case 'FOCUS':
+      return {
+        ...state,
+        isFocused: true
+      }
+    case 'BLUR':
+      return {
+        ...state,
+        isFocused: false,
+        isTouched: true
+      }
+
+    case 'CLEAR':
+      return {
+        ...state,
+        value: ''
+      }
+  }
+}
+
+const Input: React.VFC<{
+  placeholder?: string
+  state: InputState
+  dispatch: React.Dispatch<InputAction>
+}> = ({ placeholder, state, dispatch }) => (
+  <input
+    type="text"
+    placeholder={placeholder}
+    value={state.value}
+    onChange={event => dispatch({ type: 'CHANGE', value: event.target.value })}
+    onFocus={() => dispatch({ type: 'FOCUS' })}
+    onBlur={() => dispatch({ type: 'BLUR' })}
+  />
+)
+
+const Greeting = () => {
+  const [firstNameState, firstNameDispatch] = React.useReducer(
+    inputReducer,
+    initialInputState
+  )
+  const [secondNameState, secondNameDispatch] = React.useReducer(
+    inputReducer,
+    initialInputState
+  )
+
+  return (
+    <div>
+      <Input
+        placeholder="First name"
+        state={firstNameState}
+        dispatch={firstNameDispatch}
+      />
+      <Input
+        placeholder="Second name"
+        state={secondNameState}
+        dispatch={secondNameDispatch}
+      />
+      <button onClick={() => {}}>Clear</button>
+      <span>
+        Hello, {firstNameState.value} {secondNameState.value}!
+      </span>
+    </div>
+  )
+}
+```
+
 ## API
 
 A core concept of the library is the `InnerStore` class. It is a mutable wrapper around a value that allows to prevent unnecessary re-renders. The class provides an API to get and set the value, and to observe changes. There are hooks built on top of the API for convenient usage in React components.
