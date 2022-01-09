@@ -162,41 +162,47 @@ class WatchContext {
  * A context that allows to collect setState subscribers and execute them all at once.
  * This is useful when multiple stores are updated at the same time.
  */
-class SetStateContext {
-  public static init(): VoidFunction {
-    if (SetStateContext.current != null) {
-      // the context already exists - it should not emit anything at this level
-      return noop
+abstract class SetStateContext {
+  private static subscribers: null | Array<Map<string, VoidFunction>> = null
+
+  public static init(): [Dispatch<Map<string, VoidFunction>>, VoidFunction] {
+    if (SetStateContext.subscribers != null) {
+      const { subscribers } = SetStateContext
+
+      // the context already exists - it should not emit anything at this point
+      return [
+        subs => {
+          subscribers.push(subs)
+        },
+        noop
+      ]
     }
 
     // the first setState call should create the context and emit the listeners
-    const context = new SetStateContext()
-    SetStateContext.current = context
+    SetStateContext.subscribers = []
 
-    return () => {
-      context.emit()
-      SetStateContext.current = null
-    }
-  }
+    const { subscribers } = SetStateContext
 
-  public static registerListeners(
-    listeners: ReadonlyArray<VoidFunction>
-  ): void {
-    SetStateContext.current?.listeners.push(...listeners)
-  }
+    return [
+      subs => {
+        subscribers.push(subs)
+      },
+      () => {
+        const calledListeners = new WeakSet<VoidFunction>()
 
-  private static current: null | SetStateContext = null
-  private readonly listeners: Array<VoidFunction> = []
+        for (const subs of subscribers) {
+          subs.forEach(listener => {
+            // don't emit the same listener twice, for instance when using `useInnerWatch`
+            if (!calledListeners.has(listener)) {
+              listener()
+              calledListeners.add(listener)
+            }
+          })
+        }
 
-  private emit(): void {
-    const calledListeners = new WeakSet<VoidFunction>()
-
-    for (const listener of this.listeners) {
-      if (!calledListeners.has(listener)) {
-        listener()
-        calledListeners.add(listener)
+        SetStateContext.subscribers = null
       }
-    }
+    ]
   }
 }
 
@@ -282,7 +288,7 @@ export class InnerStore<T> {
       return
     }
 
-    const emit = SetStateContext.init()
+    const [register, emit] = SetStateContext.init()
 
     const nextValue =
       typeof valueOrTransform === 'function'
@@ -291,9 +297,7 @@ export class InnerStore<T> {
 
     if (!compare(this.value, nextValue)) {
       this.value = nextValue
-      SetStateContext.registerListeners(
-        [...this.subscribers].map(([, listener]) => listener)
-      )
+      register(this.subscribers)
     }
 
     emit()
