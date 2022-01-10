@@ -587,48 +587,6 @@ const GameScore: React.VFC<{
     </div>
   )
 }
-
-interface AppState {
-  games: ReadonlyArray<InnerStore<GameScoreState>>
-}
-
-const prepareAppRequestPayload = (state: AppState) => ({
-  games: state.games.map(game => game.getState())
-})
-
-const App = () => {
-  const [store] = React.useState(() => InnerStore.of({ games: [] }))
-  const [state, setState] = useInnerState(store)
-
-  const addGame = () => {
-    setState({
-      ...state,
-      games: [...state.games, InnerStore.of(initGameScore())]
-    })
-  }
-
-  const resetAllGames = () => {
-    setState(currentState => {
-      currentState.games.forEach(game => resetGameScore(game.getState()))
-
-      return currentState
-    })
-  }
-
-  return (
-    <div>
-      <button onClick={addGame}>Add game</button>
-      <button onClick={resetAllGames}>Reset all</button>
-      <button onClick={() => sendGames(prepareAppRequestPayload(state))}>
-        Submit games
-      </button>
-
-      {state.games.map(game => (
-        <GameScore key={game.key} store={game} />
-      ))}
-    </div>
-  )
-}
 ```
 
 </td>
@@ -687,7 +645,63 @@ const GameScore: React.VFC<{
     </span>
   </div>
 )
+```
 
+</td>
+</tr>
+
+<tr>
+<td valign="top">
+
+```tsx
+interface AppState {
+  games: ReadonlyArray<InnerStore<GameScoreState>>
+}
+
+const prepareAppRequestPayload = (state: AppState) => ({
+  games: state.games.map(game => game.getState())
+})
+
+const App = () => {
+  const [store] = React.useState(() => InnerStore.of({ games: [] }))
+  const [state, setState] = useInnerState(store)
+
+  const addGame = () => {
+    setState({
+      ...state,
+      games: [...state.games, InnerStore.of(initGameScore())]
+    })
+  }
+
+  const resetAllGames = () => {
+    setState(currentState => {
+      currentState.games.forEach(game => resetGameScore(game.getState()))
+
+      return currentState
+    })
+  }
+
+  return (
+    <div>
+      <button onClick={addGame}>Add game</button>
+      <button onClick={resetAllGames}>Reset all</button>
+      <button onClick={() => sendGames(prepareAppRequestPayload(state))}>
+        Submit games
+      </button>
+
+      {state.games.map(game => (
+        <GameScore key={game.key} store={game} />
+      ))}
+    </div>
+  )
+}
+```
+
+</td>
+
+<td>
+
+```tsx
 interface AppState {
   games: ReadonlyArray<GameScoreState>
 }
