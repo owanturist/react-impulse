@@ -474,54 +474,54 @@ const Counter: React.VFC<{
 
 <td>
 
-```diff
-- type CounterId = string
+```tsx
+type CounterId = string
 
-- interface CounterState {
--   id: CounterId
--   count: number
-- }
+interface CounterState {
+  id: CounterId
+  count: number
+}
 
-- const initCounter = (): CounterState => ({
--   id: uuid(),
--   count: 0
-- })
+const initCounter = (): CounterState => ({
+  id: uuid(),
+  count: 0
+})
 
-- type CounterAction =
--   | { type: 'INCREMENT'; id: CounterId }
--   | { type: 'DECREMENT'; id: CounterId }
+type CounterAction =
+  | { type: 'INCREMENT'; id: CounterId }
+  | { type: 'DECREMENT'; id: CounterId }
 
-- const counterReducer = (state: CounterState, action: CounterAction) => {
--   switch (action.type) {
--     case 'INCREMENT':
--       return state.id === action.id
--         ? { ...state, count: state.count + 1 }
--         : state
--
--     case 'DECREMENT':
--       return state.id === action.id
--         ? { ...state, count: state.count - 1 }
--         : state
--
--     default:
--       return state
--   }
-- }
+const counterReducer = (state: CounterState, action: CounterAction) => {
+  switch (action.type) {
+    case 'INCREMENT':
+      return state.id === action.id
+        ? { ...state, count: state.count + 1 }
+        : state
 
-  const Counter: React.VFC<{
-    state: CounterState
--   dispatch: React.Dispatch<CounterAction>
-  }> = ({ state, dispatch }) => (
-    <div>
-      <button onClick={() => dispatch({ type: 'DECREMENT', id: state.id })}>
-        -
-      </button>
-      <span>{state.count}</span>
-      <button onClick={() => dispatch({ type: 'INCREMENT', id: state.id })}>
-        +
-      </button>
-    </div>
-  )
+    case 'DECREMENT':
+      return state.id === action.id
+        ? { ...state, count: state.count - 1 }
+        : state
+
+    default:
+      return state
+  }
+}
+
+const Counter: React.VFC<{
+  state: CounterState
+  dispatch: React.Dispatch<CounterAction>
+}> = ({ state, dispatch }) => (
+  <div>
+    <button onClick={() => dispatch({ type: 'DECREMENT', id: state.id })}>
+      -
+    </button>
+    <span>{state.count}</span>
+    <button onClick={() => dispatch({ type: 'INCREMENT', id: state.id })}>
+      +
+    </button>
+  </div>
+)
 ```
 
 </td>
@@ -536,6 +536,22 @@ It looks very alike the very [first Counter implementation](#simple-counter) wit
   <summary>
     Wanna see how the rest of the app code looks like? Click here!
   </summary>
+
+<table>
+<thead>
+<tr>
+<th>
+<code>react-inner-store</code>
+</th>
+
+<th>
+classic React
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td valign="top">
 
 ```tsx
 interface GameScoreState {
@@ -620,6 +636,126 @@ const App = () => {
   )
 }
 ```
+
+</td>
+
+<td>
+
+```tsx
+type GameScoreId = string
+
+interface GameScoreState {
+  id: GameScoreId
+  firstCounter: CounterState
+  secondCounter: CounterState
+}
+
+const initGameScore = (): GameScoreState => ({
+  id: uuid(),
+  firstCounter: initCounter(),
+  secondCounter: initCounter()
+})
+
+const resetGameScore = (state: GameScoreState) => ({
+  ...state,
+  firstCounter: { ...state.firstCounter, count: 0 },
+  secondCounter: { ...state.secondCounter, count: 0 }
+})
+
+type GameScoreAction = { type: 'RESET'; id: GameScoreId }
+
+const gameScoreReducer = (state: GameScoreState, action: GameScoreAction) => {
+  switch (action.type) {
+    case 'RESET':
+      return resetGameScore(state)
+
+    default:
+      return {
+        ...state,
+        firstCounter: counterReducer(state.firstCounter, action),
+        secondCounter: counterReducer(state.secondCounter, action)
+      }
+  }
+}
+
+const GameScore: React.VFC<{
+  state: GameScoreState
+  dispatch: React.Dispatch<GameScoreAction>
+}> = ({ state, dispatch }) => (
+  <div>
+    <Counter state={state.firstCounter} dispatch={dispatch} />
+    <Counter state={state.secondCounter} dispatch={dispatch} />
+    <button onClick={() => dispatch({ type: 'RESET', id: state.id })}>
+      Reset
+    </button>
+    <span>
+      Score: {state.firstCounter.count} vs {state.secondCounter.count}
+    </span>
+  </div>
+)
+
+interface AppState {
+  games: ReadonlyArray<GameScoreState>
+}
+
+const prepareAppRequestPayload = (state: AppState) => ({
+  games: state.games.map(game => ({
+    firstCounter: game.firstCounter.count,
+    secondCounter: game.secondCounter.count
+  }))
+})
+
+type AppAction = { type: 'ADD_GAME' } | { type: 'RESET_ALL_GAMES' }
+
+const appReducer = (state: AppState, action: AppAction) => {
+  switch (action.type) {
+    case 'ADD_GAME':
+      return {
+        ...state,
+        games: [...state.games, initGameScore()]
+      }
+
+    case 'RESET_ALL_GAMES':
+      return {
+        ...state,
+        games: state.games.map(resetGameScore)
+      }
+
+    default:
+      return {
+        ...state,
+        games: state.games.map(game => gameScoreReducer(game, action))
+      }
+  }
+}
+
+const App = () => {
+  const [state, dispatch] = React.useReducer(appReducer, {
+    games: []
+  })
+
+  return (
+    <div>
+      <button onClick={() => dispatch({ type: 'ADD_GAME' })}>Add game</button>
+      <button onClick={() => dispatch({ type: 'RESET_ALL_GAMES' })}>
+        Reset all
+      </button>
+      <button onClick={() => sendGames(prepareAppRequestPayload(state))}>
+        Submit games
+      </button>
+
+      {state.games.map(game => (
+        <GameScore key={game.id} state={game} dispatch={dispatch} />
+      ))}
+    </div>
+  )
+}
+```
+
+</td>
+</tr>
+</tbody>
+</table>
 
 </details>
 
