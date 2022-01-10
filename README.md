@@ -442,15 +442,11 @@ This is where `react-inner-store` comes to the rescue. It allows to work with a 
 <thead>
 <tr>
 <th>
-
-`react-inner-store`
-
+<code>react-inner-store</code>
 </th>
 
 <th>
-
 classic React
-
 </th>
 </tr>
 </thead>
@@ -478,54 +474,54 @@ const Counter: React.VFC<{
 
 <td>
 
-```tsx
-type CounterId = string
+```diff
+- type CounterId = string
 
-interface CounterState {
-  id: CounterId
-  count: number
-}
+- interface CounterState {
+-   id: CounterId
+-   count: number
+- }
 
-const initCounter = (): CounterState => ({
-  id: uuid(),
-  count: 0
-})
+- const initCounter = (): CounterState => ({
+-   id: uuid(),
+-   count: 0
+- })
 
-type CounterAction =
-  | { type: 'INCREMENT'; id: CounterId }
-  | { type: 'DECREMENT'; id: CounterId }
+- type CounterAction =
+-   | { type: 'INCREMENT'; id: CounterId }
+-   | { type: 'DECREMENT'; id: CounterId }
 
-const counterReducer = (state: CounterState, action: CounterAction) => {
-  switch (action.type) {
-    case 'INCREMENT':
-      return state.id === action.id
-        ? { ...state, count: state.count + 1 }
-        : state
+- const counterReducer = (state: CounterState, action: CounterAction) => {
+-   switch (action.type) {
+-     case 'INCREMENT':
+-       return state.id === action.id
+-         ? { ...state, count: state.count + 1 }
+-         : state
+-
+-     case 'DECREMENT':
+-       return state.id === action.id
+-         ? { ...state, count: state.count - 1 }
+-         : state
+-
+-     default:
+-       return state
+-   }
+- }
 
-    case 'DECREMENT':
-      return state.id === action.id
-        ? { ...state, count: state.count - 1 }
-        : state
-
-    default:
-      return state
-  }
-}
-
-const Counter: React.VFC<{
-  state: CounterState
-  dispatch: React.Dispatch<CounterAction>
-}> = ({ state, dispatch }) => (
-  <div>
-    <button onClick={() => dispatch({ type: 'DECREMENT', id: state.id })}>
-      -
-    </button>
-    <span>{state.count}</span>
-    <button onClick={() => dispatch({ type: 'INCREMENT', id: state.id })}>
-      +
-    </button>
-  </div>
-)
+  const Counter: React.VFC<{
+    state: CounterState
+-   dispatch: React.Dispatch<CounterAction>
+  }> = ({ state, dispatch }) => (
+    <div>
+      <button onClick={() => dispatch({ type: 'DECREMENT', id: state.id })}>
+        -
+      </button>
+      <span>{state.count}</span>
+      <button onClick={() => dispatch({ type: 'INCREMENT', id: state.id })}>
+        +
+      </button>
+    </div>
+  )
 ```
 
 </td>
