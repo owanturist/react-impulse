@@ -91,207 +91,534 @@ ReactDOM.render(
 
 ## Motivation
 
-Another one React state management library... Why do you need it?
+Another one React state management library... Why do you need it? That's a fair question and it needs a decent explanation. Let me walk you through it.
 
-Imagine you are building a stateful Input component that will be used in a form:
-
-```tsx
-import React from 'react'
-
-const Input: React.VFC = () => {
-  const [value, setValue] = React.useState('')
-
-  return (
-    <input
-      type="text"
-      value={value}
-      onChange={event => setValue(event.target.value)}
-    />
-  )
-}
-```
-
-That's fairly simple, but not quite useful since there is no way to get the input's value. You want to keep the state inside the component so the only way to get the value is to pass the `onChange` callback to the `Input` component:
+<a name="simple-counter"></a>Imagine you are building a stateful Counter component:
 
 ```tsx
 import React from 'react'
 
-const Input: React.VFC<{
-  onChange?(value: string): void
-}> = ({ onChange }) => {
-  const [value, setValue] = React.useState('')
-
-  return (
-    <input
-      type="text"
-      value={value}
-      onChange={event => {
-        setValue(event.target.value)
-        onChange?.(event.target.value)
-      }}
-    />
-  )
-}
-```
-
-Now you can get the value from the Input's parent component but you need a place to store it:
-
-```tsx
-import React from 'react'
-
-const Greeting = () => {
-  const [value, setValue] = React.useState('')
+const Counter: React.VFC = () => {
+  const [count, setCount] = React.useState(0)
 
   return (
     <div>
-      <Input onChange={setValue} />
-      <span>Hello, {value}!</span>
+      <button onClick={() => setCount(count - 1)}>-</button>
+      <span>{count}</span>
+      <button onClick={() => setCount(count + 1)}>+</button>
     </div>
   )
 }
 ```
 
-Two `React.useState` for storing the single value... seems a bit of overkill huh? Let's move on and say that it should be a way to not only read but set the Input's value from the outside:
+That's fairly simple, but not quite useful since there is no way to read the Counter's value. You want to keep the state inside the component so the only way to get the value is to pass the `onChange` callback to the `Counter` component:
 
 ```tsx
 import React from 'react'
 
-const Input: React.VFC<{
-  value?: string
-  onChange?(value: string): void
-}> = ({ value: forcedValue = '', onChange }) => {
-  const [value, setValue] = React.useState(forcedValue)
+const Counter: React.VFC<{
+  onChange?(count: number): void
+}> = React.memo(({ onChange }) => {
+  const [count, setCount] = React.useState(0)
+  const handleCount = nextCount => {
+    setCount(nextCount)
+    onChange?.(nextCount)
+  }
+
+  return (
+    <div>
+      <button onClick={() => handleCount(count - 1)}>-</button>
+      <span>{count}</span>
+      <button onClick={() => handleCount(count + 1)}>+</button>
+    </div>
+  )
+})
+```
+
+Now you can get the value from the Counter's parent component but you need a place to store it:
+
+```tsx
+import React from 'react'
+
+const GameScore = () => {
+  const [count, setCount] = React.useState(0)
+
+  return (
+    <div>
+      <Counter onChange={setCount} />
+      <span>Score: {count}</span>
+    </div>
+  )
+}
+```
+
+Two `React.useState` for storing a single value... seems a bit of overkill huh? Let's move on and say that it should be a way not only to read but to set the Counter's value from the outside:
+
+```tsx
+import React from 'react'
+
+const Counter: React.VFC<{
+  count?: number
+  onChange?(count: string): void
+}> = ({ count: forcedCount = 0, onChange }) => {
+  const [count, setCount] = React.useState(forcedCount)
+  const handleCount = nextCount => {
+    setCount(nextCount)
+    onChange?.(nextCount)
+  }
 
   React.useEffect(() => {
-    setValue(forcedValue)
-  }, [forcedValue])
-
-  return (
-    <input
-      type="text"
-      value={value}
-      onChange={event => {
-        setValue(event.target.value)
-        onChange?.(event.target.value)
-      }}
-    />
-  )
-}
-
-const Greeting = () => {
-  const [value, setValue] = React.useState('')
+    setValue(forcedCount)
+  }, [forcedCount])
 
   return (
     <div>
-      <Input value={value} onChange={setValue} />
-      <button onClick={() => setValue('')}>Clear</button>
-      <span>Hello, {value}!</span>
+      <button onClick={() => handleCount(count - 1)}>-</button>
+      <span>{count}</span>
+      <button onClick={() => handleCount(count + 1)}>+</button>
+    </div>
+  )
+}
+
+const GameScore = () => {
+  const [count, setCount] = React.useState(0)
+
+  return (
+    <div>
+      <Counter count={count} onChange={setCount} />
+      <button onClick={() => setCount(0)}>Reset</button>
+      <span>Score: {count}</span>
     </div>
   )
 }
 ```
 
-It is a complete implementation of two-way Input's state management. With more complex state the amount of hooks to support the two-way binding will grow dramatically.
+That is a complete implementation of two-way Counter's state management. With more complex state the amount of hooks to support the two-way binding will grow dramatically.
 
-A brute-force workaround to reduce the two-way binding hustle is to store the Input's state outside the component. This way any component which passes the state and the dispatch callback might read and change the state's value:
+A brute-force workaround to reduce the two-way binding hustle is to store the Input's state outside the component. This way any component which passes the state and the setState callback might read and change the state's value:
 
 ```tsx
 import React from 'react'
 
-type InputAction =
-  | {
-      type: 'CHANGE'
-      value: string
-    }
-  | { type: 'FOCUS' }
-  | { type: 'BLUR' }
-  | { type: 'CLEAR' }
-
-interface InputState {
-  value: string
-  isFocused: boolean
-  isTouched: boolean
-}
-
-const initialInputState: InputState = {
-  value: '',
-  isFocused: false,
-  isTouched: false
-}
-
-const inputReducer = (state: InputState, action: InputAction): InputState => {
-  switch (action.type) {
-    case 'CHANGE':
-      return {
-        ...state,
-        value: action.value,
-        isTouched: true
-      }
-    case 'FOCUS':
-      return {
-        ...state,
-        isFocused: true
-      }
-    case 'BLUR':
-      return {
-        ...state,
-        isFocused: false,
-        isTouched: true
-      }
-
-    case 'CLEAR':
-      return {
-        ...state,
-        value: ''
-      }
-  }
-}
-
-const Input: React.VFC<{
-  placeholder?: string
-  state: InputState
-  dispatch: React.Dispatch<InputAction>
-}> = ({ placeholder, state, dispatch }) => (
-  <input
-    type="text"
-    placeholder={placeholder}
-    value={state.value}
-    onChange={event => dispatch({ type: 'CHANGE', value: event.target.value })}
-    onFocus={() => dispatch({ type: 'FOCUS' })}
-    onBlur={() => dispatch({ type: 'BLUR' })}
-  />
+const Counter: React.VFC<{
+  count: number
+  setCount: React.Dispatch<React.SetStateAction<number>>
+}> = ({ count, setCount }) => (
+  <div>
+    <button onClick={() => setCount(count - 1)}>-</button>
+    <span>{count}</span>
+    <button onClick={() => setCount(count + 1)}>+</button>
+  </div>
 )
 
-const Greeting = () => {
-  const [firstNameState, firstNameDispatch] = React.useReducer(
-    inputReducer,
-    initialInputState
-  )
-  const [secondNameState, secondNameDispatch] = React.useReducer(
-    inputReducer,
-    initialInputState
-  )
+// The game score shows two Counters now
+const GameScore = () => {
+  const [firstCount, setFirstCount] = React.useState(0)
+  const [secondCount, setSecondCount] = React.useState(0)
 
   return (
     <div>
-      <Input
-        placeholder="First name"
-        state={firstNameState}
-        dispatch={firstNameDispatch}
-      />
-      <Input
-        placeholder="Second name"
-        state={secondNameState}
-        dispatch={secondNameDispatch}
-      />
-      <button onClick={() => {}}>Clear</button>
+      <Counter count={firstCount} setCount={setFirstCount} />
+      <Counter count={secondCount} setCount={setSecondCount} />
+      <button
+        onClick={() => {
+          setFirstCount(0)
+          setSecondCount(0)
+        }}
+      >
+        Reset
+      </button>
       <span>
-        Hello, {firstNameState.value} {secondNameState.value}!
+        Score: {firstCount} vs {secondCount}
       </span>
     </div>
   )
 }
 ```
+
+So far so good, is not it? The problem is that the approach does not scale well. What if it needs to read and write the GameStore's state from the outside:
+
+```tsx
+const GameScore: React.VFC<{
+  firstCount: number
+  secondCount: number
+  setFirstCount: React.Dispatch<React.SetStateAction<number>>
+  setSecondCount: React.Dispatch<React.SetStateAction<number>>
+}> = ({ firstCount, setFirstCount, secondCount, setSecondCount }) => (
+  <div>
+    <Counter count={firstCount} setCount={setFirstCount} />
+    <Counter count={secondCount} setCount={setSecondCount} />
+    <button
+      onClick={() => {
+        setFirstCount(0)
+        setSecondCount(0)
+      }}
+    >
+      Reset
+    </button>
+    <span>
+      Score: {firstCount} vs {secondCount}
+    </span>
+  </div>
+)
+```
+
+That's a props drilling - it grows exponentially and requires too much effort to maintain. We have to figure out how to stop the props amount from growing. We can switch from `React.useState` to `React.useReducer` and have a single state prop and a single dispatch prop. Assuming so, here is how the Counter looks like now:
+
+```tsx
+type CounterId = string
+
+interface CounterState {
+  id: CounterId
+  count: number
+}
+
+const initCounter = (): CounterState => ({
+  id: uuid(),
+  count: 0
+})
+
+type CounterAction =
+  | { type: 'INCREMENT'; id: CounterId }
+  | { type: 'DECREMENT'; id: CounterId }
+
+const counterReducer = (state: CounterState, action: CounterAction) => {
+  switch (action.type) {
+    case 'INCREMENT':
+      return state.id === action.id
+        ? { ...state, count: state.count + 1 }
+        : state
+
+    case 'DECREMENT':
+      return state.id === action.id
+        ? { ...state, count: state.count - 1 }
+        : state
+
+    default:
+      return state
+  }
+}
+
+const Counter: React.VFC<{
+  state: CounterState
+  dispatch: React.Dispatch<CounterAction>
+}> = ({ state, dispatch }) => (
+  <div>
+    <button onClick={() => dispatch({ type: 'DECREMENT', id: state.id })}>
+      -
+    </button>
+    <span>{state.count}</span>
+    <button onClick={() => dispatch({ type: 'INCREMENT', id: state.id })}>
+      +
+    </button>
+  </div>
+)
+```
+
+We exchanged props drilling to boilerplate code. But why does it need the extra `id` field in both state and actions? The answer is that we want to have reusable components and the Counter component will be used many times across the application. In fact it might be a different component rather than Counter with very complex state management. When we are done with the Counter let's convert GameScore in the same manner:
+
+```tsx
+type GameScoreId = string
+
+interface GameScoreState {
+  id: GameScoreId
+  firstCounter: CounterState
+  secondCounter: CounterState
+}
+
+const initGameScore = (): GameScoreState => ({
+  id: uuid(),
+  firstCounter: initCounter(),
+  secondCounter: initCounter()
+})
+
+const resetGameScore = (state: GameScoreState) => ({
+  ...state,
+  firstCounter: { ...state.firstCounter, count: 0 },
+  secondCounter: { ...state.secondCounter, count: 0 }
+})
+
+type GameScoreAction = { type: 'RESET'; id: GameScoreId }
+
+const gameScoreReducer = (state: GameScoreState, action: GameScoreAction) => {
+  switch (action.type) {
+    case 'RESET':
+      return resetGameScore(state)
+
+    default:
+      return {
+        ...state,
+        firstCounter: counterReducer(state.firstCounter, action),
+        secondCounter: counterReducer(state.secondCounter, action)
+      }
+  }
+}
+
+const GameScore: React.VFC<{
+  state: GameScoreState
+  dispatch: React.Dispatch<GameScoreAction>
+}> = ({ state, dispatch }) => (
+  <div>
+    <Counter state={state.firstCounter} dispatch={dispatch} />
+    <Counter state={state.secondCounter} dispatch={dispatch} />
+    <button onClick={() => dispatch({ type: 'RESET', id: state.id })}>
+      Reset
+    </button>
+    <span>
+      Score: {state.firstCounter.count} vs {state.secondCounter.count}
+    </span>
+  </div>
+)
+```
+
+Quite some boilerplate code again. But let's move on and finally make the App component:
+
+```tsx
+interface AppState {
+  games: ReadonlyArray<GameScoreState>
+}
+
+const prepareAppRequestPayload = (state: AppState) => ({
+  games: state.games.map(game => ({
+    firstCounter: game.firstCounter.count,
+    secondCounter: game.secondCounter.count
+  }))
+})
+
+type AppAction = { type: 'ADD_GAME' } | { type: 'RESET_ALL_GAMES' }
+
+const appReducer = (state: AppState, action: AppAction) => {
+  switch (action.type) {
+    case 'ADD_GAME':
+      return {
+        ...state,
+        games: [...state.games, initGameScore()]
+      }
+
+    case 'RESET_ALL_GAMES':
+      return {
+        ...state,
+        games: state.games.map(resetGameScore)
+      }
+
+    default:
+      return {
+        ...state,
+        games: state.games.map(game => gameScoreReducer(game, action))
+      }
+  }
+}
+
+const App = () => {
+  const [state, dispatch] = React.useReducer(appReducer, {
+    games: []
+  })
+
+  return (
+    <div>
+      <button onClick={() => dispatch({ type: 'ADD_GAME' })}>Add game</button>
+      <button onClick={() => dispatch({ type: 'RESET_ALL_GAMES' })}>
+        Reset all
+      </button>
+      <button onClick={() => sendGames(prepareAppRequestPayload(state))}>
+        Submit games
+      </button>
+
+      {state.games.map(game => (
+        <GameScore key={game.id} state={game} dispatch={dispatch} />
+      ))}
+    </div>
+  )
+}
+```
+
+From now and on any Counter increment will cause entire App to reconcile. It might be limited with bunch of React optimization techniques and extra checks in reducers, but this is an extra work and extra lines of code. You might also notice that any Counter's action dispatched will cause all Counter's reducers to handle the Counter's states instances.
+
+But the problems above are relatively small comparing to amount of boilerplate and effort required to develop an app in such way. It would not be a case if we'd deal with only local state components but the App needs an access to read and write deeply nested values, so we have no choice but define the state on App's level.
+
+This is where `react-inner-store` comes to the rescue. It allows to work with a propagated state in the same way as with local state. Let's transform Counter to use `react-inner-store`:
+
+<table>
+<thead>
+<tr>
+<th>After</th>
+<th>Before</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+```tsx
+const Counter: React.VFC<{
+  store: InnerStore<number>
+}> = ({ store }) => {
+  const [count, setCount] = useInnerState(store)
+
+  return (
+    <div>
+      <button onClick={() => setCount(count - 1)}>-</button>
+      <span>{state.count}</span>
+      <button onClick={() => setCount(count + 1)}>+</button>
+    </div>
+  )
+}
+```
+
+</td>
+
+<td>
+
+```tsx
+type CounterId = string
+
+interface CounterState {
+  id: CounterId
+  count: number
+}
+
+const initCounter = (): CounterState => ({
+  id: uuid(),
+  count: 0
+})
+
+type CounterAction =
+  | { type: 'INCREMENT'; id: CounterId }
+  | { type: 'DECREMENT'; id: CounterId }
+
+const counterReducer = (state: CounterState, action: CounterAction) => {
+  switch (action.type) {
+    case 'INCREMENT':
+      return state.id === action.id
+        ? { ...state, count: state.count + 1 }
+        : state
+
+    case 'DECREMENT':
+      return state.id === action.id
+        ? { ...state, count: state.count - 1 }
+        : state
+
+    default:
+      return state
+  }
+}
+
+const Counter: React.VFC<{
+  state: CounterState
+  dispatch: React.Dispatch<CounterAction>
+}> = ({ state, dispatch }) => (
+  <div>
+    <button onClick={() => dispatch({ type: 'DECREMENT', id: state.id })}>
+      -
+    </button>
+    <span>{state.count}</span>
+    <button onClick={() => dispatch({ type: 'INCREMENT', id: state.id })}>
+      +
+    </button>
+  </div>
+)
+```
+
+</td>
+</tr>
+</tbody>
+</table>
+
+It looks very alike the very [first Counter implementation](#simple-counter) with `React.useState` only, doesn't it? The key difference is that any component with access to the `store` might read or write the state exactly the same as `Counter` does!
+
+<details>
+
+  <summary>
+    Wanna see how the rest of the app code looks like? Click here!
+  </summary>
+
+```tsx
+interface GameScoreState {
+  firstCounter: InnerStore<number>
+  secondCounter: InnerStore<number>
+}
+
+const initGameScore = (): GameScoreState => ({
+  firstCounter: InnerStore.of(0),
+  secondCounter: InnerStore.of(0)
+})
+
+const resetGameScore = (state: GameScoreState): void => {
+  state.firstCounter.setState(0)
+  state.secondCounter.setState(0)
+}
+
+const GameScore: React.VFC<{
+  store: InnerStore<GameScoreState>
+}> = ({ store }) => {
+  const state = useGetInnerState(store)
+  const firstCount = useGetInnerState(state.firstCounter)
+  const secondCount = useGetInnerState(state.secondCounter)
+
+  return (
+    <div>
+      <Counter store={state.firstCounter} />
+      <Counter store={state.secondCounter} />
+      <button onClick={() => resetGameScore(state)}>Reset</button>
+      <span>
+        Score: {firstCount} vs {secondCount}
+      </span>
+    </div>
+  )
+}
+
+interface AppState {
+  games: ReadonlyArray<InnerStore<GameScoreState>>
+}
+
+const prepareAppRequestPayload = (state: AppState) => ({
+  games: state.games.map(game => game.getState())
+})
+
+const App = () => {
+  const [store] = React.useState(() => InnerStore.of({ games: [] }))
+  const [state, setState] = useInnerState(store)
+
+  return (
+    <div>
+      <button
+        onClick={() => {
+          setState(currentState => ({
+            ...currentState,
+            games: [...currentState.games, InnerStore.of(initGameScore())]
+          }))
+        }}
+      >
+        Add game
+      </button>
+
+      <button
+        onClick={() => {
+          setState(currentState => {
+            currentState.games.forEach(game => resetGameScore(game.getState()))
+
+            return currentState
+          })
+        }}
+      >
+        Reset all
+      </button>
+
+      <button onClick={() => sendGames(prepareAppRequestPayload(state))}>
+        Submit games
+      </button>
+
+      {state.games.map(game => (
+        <GameScore key={game.key} store={game} />
+      ))}
+    </div>
+  )
+}
+```
+
+</details>
+
+With `react-inner-store` we can now implement the same functionality without any boilerplate code but keeping control over the app state. Moreover any Counter's "action" will cause reconciliations only for its GameScore parent since no other components read the affected Counter's state.
 
 ## API
 
@@ -536,7 +863,7 @@ A hooks that subscribes to the store's changes and returns the current value.
 const App: React.VFC<{
   left: InnerStore<number>
   right: InnerStore<number>
-}> = React.memo(({ left }) => {
+}> = React.memo(({ left, right }) => {
   const countLeft = useGetInnerState(left)
   const countRight = useGetInnerState(right)
 
