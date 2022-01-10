@@ -17,6 +17,10 @@ export type Compare<T> = (prev: T, next: T) => boolean
 
 const isEqual = <T>(one: T, another: T): boolean => one === another
 
+const noop: VoidFunction = () => {
+  // do nothing
+}
+
 type ExtractDirect<T> = T extends InnerStore<infer R> ? R : T
 
 /**
@@ -75,15 +79,15 @@ enum WatcherPermission {
   RestrictAll = 2
 }
 
-class SynchronousContext {
-  private static current: null | SynchronousContext = null
+class WatchContext {
+  private static current: null | WatchContext = null
   private static watcherPermission = WatcherPermission.AllowAll
 
   public static warning(
     message: string,
     requiredPermission: WatcherPermission = WatcherPermission.AllowAll
   ): boolean {
-    if (SynchronousContext.watcherPermission <= requiredPermission) {
+    if (WatchContext.watcherPermission <= requiredPermission) {
       return false
     }
 
@@ -93,50 +97,30 @@ class SynchronousContext {
   }
 
   public static executeWatcher<T>(watcher: () => T): T {
-    SynchronousContext.watcherPermission = WatcherPermission.RestrictAll
+    WatchContext.watcherPermission = WatcherPermission.RestrictAll
     const value = watcher()
-    SynchronousContext.watcherPermission = WatcherPermission.AllowAll
+    WatchContext.watcherPermission = WatcherPermission.AllowAll
 
     return value
   }
 
   public static register<T>(store: InnerStore<T>): void {
-    SynchronousContext.current?.register(store)
+    WatchContext.current?.register(store)
   }
 
-  private readonly listener: VoidFunction
-  private listenerCleanupId: null | number = null
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
 
-  public constructor(listener: VoidFunction) {
-    // this.listener might be called many times per one update cycle
-    // for instance when multiple watched InnerStore are updated
-    // so the idea is to call the incoming listener only once per update cycle
-    this.listener = () => {
-      // it cancels the previous call
-      this.listenerCleanup()
-      // it schedules the next call
-      this.listenerCleanupId = requestAnimationFrame(listener)
-    }
-  }
-
-  private listenerCleanup(): void {
-    if (this.listenerCleanupId != null) {
-      cancelAnimationFrame(this.listenerCleanupId)
-      this.listenerCleanupId = null
-    }
-  }
+  public constructor(private readonly listener: VoidFunction) {}
 
   private register<T>(store: InnerStore<T>): void {
     if (this.cleanups.has(store.key)) {
       // still alive
       this.deadCleanups.delete(store.key)
     } else {
-      SynchronousContext.watcherPermission =
-        WatcherPermission.AllowSubscribeOnly
+      WatchContext.watcherPermission = WatcherPermission.AllowSubscribeOnly
       this.cleanups.set(store.key, store.subscribe(this.listener))
-      SynchronousContext.watcherPermission = WatcherPermission.RestrictAll
+      WatchContext.watcherPermission = WatcherPermission.RestrictAll
     }
   }
 
@@ -154,26 +138,71 @@ class SynchronousContext {
   }
 
   public activate<T>(watcher: () => T): void {
-    SynchronousContext.current = this
-
-    this.listenerCleanup()
+    WatchContext.current = this
 
     // fill up dead cleanups with all of the current cleanups
     // to keep only real dead once during .register() call
     this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
 
-    SynchronousContext.executeWatcher(watcher)
+    WatchContext.executeWatcher(watcher)
 
     this.cleanupObsolete()
 
-    SynchronousContext.current = null
+    WatchContext.current = null
   }
 
   public cleanup(): void {
-    this.listenerCleanup()
     this.cleanups.forEach(cleanup => cleanup())
     this.cleanups.clear()
     this.deadCleanups.clear()
+  }
+}
+
+/**
+ * A context that allows to collect setState subscribers and execute them all at once.
+ * This is useful when multiple stores are updated at the same time.
+ */
+abstract class SetStateContext {
+  private static subscribers: null | Array<Map<string, VoidFunction>> = null
+
+  public static init(): [Dispatch<Map<string, VoidFunction>>, VoidFunction] {
+    if (SetStateContext.subscribers != null) {
+      const { subscribers } = SetStateContext
+
+      // the context already exists - it should not emit anything at this point
+      return [
+        subs => {
+          subscribers.push(subs)
+        },
+        noop
+      ]
+    }
+
+    // the first setState call should create the context and emit the listeners
+    SetStateContext.subscribers = []
+
+    const { subscribers } = SetStateContext
+
+    return [
+      subs => {
+        subscribers.push(subs)
+      },
+      () => {
+        const calledListeners = new WeakSet<VoidFunction>()
+
+        for (const subs of subscribers) {
+          subs.forEach(listener => {
+            // don't emit the same listener twice, for instance when using `useInnerWatch`
+            if (!calledListeners.has(listener)) {
+              listener()
+              calledListeners.add(listener)
+            }
+          })
+        }
+
+        SetStateContext.subscribers = null
+      }
+    ]
   }
 }
 
@@ -183,7 +212,7 @@ export class InnerStore<T> {
    * The instance is mutable so once created it should be used for all future operations.
    */
   public static of<TValue>(value: TValue): InnerStore<TValue> {
-    SynchronousContext.warning(
+    WatchContext.warning(
       'You should not call InnerStore.of(something) inside the useInnerWatch(watcher) callback. ' +
         'The useInnerWatch(watcher) hook is for read-only operations but InnerStore.of(something) creates one.'
     )
@@ -203,10 +232,6 @@ export class InnerStore<T> {
   public readonly key = nanoid()
 
   private constructor(private value: T) {}
-
-  private emit(): void {
-    this.subscribers.forEach(listener => listener())
-  }
 
   /**
    * Clones a `InnerStore` instance.
@@ -232,7 +257,7 @@ export class InnerStore<T> {
    */
   public getState<R>(transform: (value: T) => R): R
   public getState<R>(transform?: (value: T) => R): T | R {
-    SynchronousContext.register(this)
+    WatchContext.register(this)
 
     return typeof transform === 'function' ? transform(this.value) : this.value
   }
@@ -255,13 +280,15 @@ export class InnerStore<T> {
     compare: Compare<T> = isEqual
   ): void {
     if (
-      SynchronousContext.warning(
+      WatchContext.warning(
         'You may not call InnerStore#setState(something) inside the useInnerWatch(watcher) callback. ' +
           'The useInnerWatch(watcher) hook is for read-only operations but InnerStore#setState(something) changes it.'
       )
     ) {
       return
     }
+
+    const [register, emit] = SetStateContext.init()
 
     const nextValue =
       typeof valueOrTransform === 'function'
@@ -270,8 +297,10 @@ export class InnerStore<T> {
 
     if (!compare(this.value, nextValue)) {
       this.value = nextValue
-      this.emit()
+      register(this.subscribers)
     }
+
+    emit()
   }
 
   /**
@@ -285,7 +314,7 @@ export class InnerStore<T> {
    */
   public subscribe(listener: VoidFunction): VoidFunction {
     if (
-      SynchronousContext.warning(
+      WatchContext.warning(
         'You should not call InnerStore#subscribe(listener) inside the useInnerWatch(watcher) callback. ' +
           'The useInnerWatch(watcher) hook is for read-only operations but not for creating subscriptions.',
         WatcherPermission.AllowSubscribeOnly
@@ -327,7 +356,7 @@ export function useInnerWatch<T>(
   const watcherRef = useRef<() => T>()
   // workaround to handle changes of the watcher returning value
   if (watcherRef.current !== watcher) {
-    valueRef.current = SynchronousContext.executeWatcher(watcher)
+    valueRef.current = WatchContext.executeWatcher(watcher)
   }
 
   const compareRef = useRef(compare)
@@ -336,11 +365,11 @@ export function useInnerWatch<T>(
   }, [compare])
 
   // permanent ref
-  const contextRef = useRef<SynchronousContext>()
+  const contextRef = useRef<WatchContext>()
   if (contextRef.current == null) {
-    contextRef.current = new SynchronousContext(() => {
+    contextRef.current = new WatchContext(() => {
       const currentValue = valueRef.current!
-      const nextValue = SynchronousContext.executeWatcher(watcherRef.current!)
+      const nextValue = WatchContext.executeWatcher(watcherRef.current!)
 
       if (!compareRef.current(currentValue, nextValue)) {
         valueRef.current = nextValue
