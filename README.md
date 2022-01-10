@@ -111,7 +111,7 @@ const Counter: React.VFC = () => {
 }
 ```
 
-That's fairly simple, but not quite useful since there is no way to read the Counter's value. You want to keep the state inside the component so the only way to get the value is to pass the `onChange` callback to the `Counter` component:
+That's fairly simple but not quite useful since there is no way to read the Counter's value. You want to keep the state inside the component, so the only way to get the value is to pass the `onChange` callback to the `Counter` component:
 
 ```tsx
 import React from 'react'
@@ -135,7 +135,7 @@ const Counter: React.VFC<{
 })
 ```
 
-Now you can get the value from the Counter's parent component but you need a place to store it:
+Now you can get the value from the Counter's parent component, but you need a place to store it:
 
 ```tsx
 import React from 'react'
@@ -152,7 +152,7 @@ const GameScore = () => {
 }
 ```
 
-Two `React.useState` for storing a single value... seems a bit of overkill huh? Let's move on and say that it should be a way not only to read but to set the Counter's value from the outside:
+Two `React.useState` for storing a single value... seems a bit of overkill, huh? Let's move on and say that it should be a way not only to read but to set the Counter's value from the outside:
 
 ```tsx
 import React from 'react'
@@ -193,9 +193,9 @@ const GameScore = () => {
 }
 ```
 
-That is a complete implementation of two-way Counter's state management. With more complex state the amount of hooks to support the two-way binding will grow dramatically.
+That is a complete implementation of two-way Counter's state management. The number of hooks to support the two-way binding grows dramatically with a more complex state.
 
-A brute-force workaround to reduce the two-way binding hustle is to store the Input's state outside the component. This way any component which passes the state and the setState callback might read and change the state's value:
+A brute-force workaround to reduce the two-way binding hustle is to store the Input's state outside the component. This way, any component which passes the state and the setState callback might read and change the state's value:
 
 ```tsx
 import React from 'react'
@@ -236,7 +236,7 @@ const GameScore = () => {
 }
 ```
 
-So far so good, is not it? The problem is that the approach does not scale well. What if it needs to read and write the GameStore's state from the outside:
+So far, so good, is not it? The problem is that the approach does not scale well. What if it needs to read and write the GameStore's state from the outside:
 
 ```tsx
 const GameScore: React.VFC<{
@@ -263,7 +263,7 @@ const GameScore: React.VFC<{
 )
 ```
 
-That's a props drilling - it grows exponentially and requires too much effort to maintain. We have to figure out how to stop the props amount from growing. We can switch from `React.useState` to `React.useReducer` and have a single state prop and a single dispatch prop. Assuming so, here is how the Counter looks like now:
+That's props drilling - it grows exponentially and requires too much effort to maintain. We have to figure out how to stop the props amount from growing. We can switch from `React.useState` to `React.useReducer` and have a single state prop and a single dispatch prop. Assuming so, here is how the Counter looks like now:
 
 ```tsx
 type CounterId = string
@@ -315,7 +315,7 @@ const Counter: React.VFC<{
 )
 ```
 
-We exchanged props drilling to boilerplate code. But why does it need the extra `id` field in both state and actions? The answer is that we want to have reusable components and the Counter component will be used many times across the application. In fact it might be a different component rather than Counter with very complex state management. When we are done with the Counter let's convert GameScore in the same manner:
+We exchanged props drilling to boilerplate code. But why does it need the extra `id` field in both state and actions? The answer is that we want to have reusable components, and the Counter component will be used many times across the application. It might be a different component, rather than Counter with very complex state management. When we have done with the Counter, let's convert GameScore in the same manner:
 
 ```tsx
 type GameScoreId = string
@@ -432,11 +432,11 @@ const App = () => {
 }
 ```
 
-From now and on any Counter increment will cause entire App to reconcile. It might be limited with bunch of React optimization techniques and extra checks in reducers, but this is an extra work and extra lines of code. You might also notice that any Counter's action dispatched will cause all Counter's reducers to handle the Counter's states instances.
+From now and on, any Counter increment will cause the entire App to reconcile. It might be limited to a bunch of React optimization techniques and extra checks in reducers, but this is extra work and extra lines of code. You might also notice that any Counter's action dispatched will cause all Counter's reducers to handle the Counter's states instances.
 
-But the problems above are relatively small comparing to amount of boilerplate and effort required to develop an app in such way. It would not be a case if we'd deal with only local state components but the App needs an access to read and write deeply nested values, so we have no choice but define the state on App's level.
+But the problems above are relatively small compared to the amount of boilerplate and effort required to develop an app in that way. It would not be a case if we'd deal with only local state components, but the App needs access to read and write deeply nested values, so we have no choice but to define the state on App's level.
 
-This is where `react-inner-store` comes to the rescue. It allows to work with a propagated state in the same way as with local state. Let's transform Counter to use `react-inner-store`:
+That is where `react-inner-store` comes to the rescue. It allows working with a propagated state in the same way as with a local state. Let's transform Counter to use `react-inner-store`:
 
 <table>
 <thead>
@@ -529,7 +529,7 @@ const Counter: React.VFC<{
 </tbody>
 </table>
 
-It looks very alike the very [first Counter implementation](#simple-counter) with `React.useState` only, doesn't it? The key difference is that any component with access to the `store` might read or write the state exactly the same as `Counter` does!
+It looks like the [first Counter implementation](#simple-counter) with `React.useState` only, doesn't it? A key difference is that any component with access to the `store` might read or write the state the same as `Counter` does!
 
 <details>
 
@@ -662,9 +662,10 @@ const prepareAppRequestPayload = (state: AppState) => ({
   games: state.games.map(game => game.getState())
 })
 
+const appStore = InnerStore.of({ games: [] })
+
 const App = () => {
-  const [store] = React.useState(() => InnerStore.of({ games: [] }))
-  const [state, setState] = useInnerState(store)
+  const [state, setState] = useInnerState(appStore)
 
   const addGame = () => {
     setState({
@@ -767,7 +768,7 @@ const App = () => {
 
 </details>
 
-With `react-inner-store` we can now implement the same functionality without any boilerplate code but keeping control over the app state. Moreover any Counter's "action" will cause reconciliations only for its GameScore parent since no other components read the affected Counter's state.
+With `react-inner-store` we can now implement the same functionality without any boilerplate code but keep control over the app state. Moreover, any Counter's "action" will cause reconciliations only for its GameScore parent since no other components read the affected Counter's state.
 
 ## API
 
