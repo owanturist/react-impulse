@@ -441,13 +441,22 @@ This is where `react-inner-store` comes to the rescue. It allows to work with a 
 <table>
 <thead>
 <tr>
-<th>After</th>
-<th>Before</th>
+<th>
+
+`react-inner-store`
+
+</th>
+
+<th>
+
+classic React
+
+</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>
+<td valign="top">
 
 ```tsx
 const Counter: React.VFC<{
