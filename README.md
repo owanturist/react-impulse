@@ -600,31 +600,25 @@ const App = () => {
   const [store] = React.useState(() => InnerStore.of({ games: [] }))
   const [state, setState] = useInnerState(store)
 
+  const addGame = () => {
+    setState({
+      ...state,
+      games: [...state.games, InnerStore.of(initGameScore())]
+    })
+  }
+
+  const resetAllGames = () => {
+    setState(currentState => {
+      currentState.games.forEach(game => resetGameScore(game.getState()))
+
+      return currentState
+    })
+  }
+
   return (
     <div>
-      <button
-        onClick={() => {
-          setState(currentState => ({
-            ...currentState,
-            games: [...currentState.games, InnerStore.of(initGameScore())]
-          }))
-        }}
-      >
-        Add game
-      </button>
-
-      <button
-        onClick={() => {
-          setState(currentState => {
-            currentState.games.forEach(game => resetGameScore(game.getState()))
-
-            return currentState
-          })
-        }}
-      >
-        Reset all
-      </button>
-
+      <button onClick={addGame}>Add game</button>
+      <button onClick={resetAllGames}>Reset all</button>
       <button onClick={() => sendGames(prepareAppRequestPayload(state))}>
         Submit games
       </button>
