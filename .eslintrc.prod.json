@@ -3,8 +3,7 @@
 
   "rules": {
     "no-console": "error",
-    "no-debugger": "error",
-    "no-warning-comments": "error"
+    "no-debugger": "error"
   },
 
   "overrides": [

@@ -4,115 +4,132 @@
     "node": true
   },
   "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    },
     "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "plugins": ["react"],
   "extends": [
     "eslint:recommended",
     "plugin:import/recommended",
+    "plugin:react/recommended",
     "plugin:react-hooks/recommended",
-    "prettier",
     "plugin:prettier/recommended"
   ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
   "rules": {
+    "padding-line-between-statements": [
+      "error",
+      {
+        "blankLine": "always",
+        "prev": "*",
+        "next": "return"
+      }
+    ],
     // Possible Errors
-    "no-extra-parens": "warn", // https://eslint.org/docs/rules/no-extra-parens
-    "no-template-curly-in-string": "error", // https://eslint.org/docs/rules/no-template-curly-in-string
+    "no-template-curly-in-string": "error",
     // Best Practices
-    "array-callback-return": "error", // https://eslint.org/docs/rules/array-callback-return
-    "class-methods-use-this": "error", // https://eslint.org/docs/rules/class-methods-use-this
-    "consistent-return": "error", // https://eslint.org/docs/rules/consistent-return
-    "curly": "error", // https://eslint.org/docs/rules/curly
-    "default-param-last": "error", // https://eslint.org/docs/rules/default-param-last
-    "dot-location": ["warn", "property"], // https://eslint.org/docs/rules/dot-location
+    "array-callback-return": "error",
+    "consistent-return": "error",
+    "curly": "error",
+    "default-param-last": "error",
     "dot-notation": [
       "error",
       {
         "allowKeywords": true
       }
-    ], // https://eslint.org/docs/rules/dot-notation
+    ],
     "eqeqeq": [
       "error",
       "always",
       {
         "null": "ignore"
       }
-    ], // https://eslint.org/docs/rules/eqeqeq
-    "guard-for-in": "error", // https://eslint.org/docs/rules/guard-for-in
-    "no-alert": "error", // https://eslint.org/docs/rules/no-alert
-    "no-caller": "error", // https://eslint.org/docs/rules/no-caller
-    "no-constructor-return": "error", // https://eslint.org/docs/rules/no-constructor-return
-    "no-console": "warn", // https://eslint.org/docs/rules/no-console
-    "no-debugger": "warn", // https://eslint.org/docs/rules/no-debugger
-    "no-else-return": "warn", // https://eslint.org/docs/rules/no-else-return
+    ],
+    "guard-for-in": "error",
+    "no-alert": "error",
+    "no-caller": "error",
+    "no-constructor-return": "error",
+    "no-console": "warn",
+    "no-debugger": "warn",
+    "no-else-return": "warn",
     "no-empty-function": [
       "warn",
       {
         "allow": ["constructors"]
       }
-    ], // https://eslint.org/docs/rules/no-empty-function
-    "no-eval": "error", // https://eslint.org/docs/rules/no-eval
-    "no-extend-native": "error", // https://eslint.org/docs/rules/no-extend-native
-    "no-extra-bind": "error", // https://eslint.org/docs/rules/no-extra-bind
-    "no-floating-decimal": "error", // https://eslint.org/docs/rules/no-floating-decimal
-    "no-implicit-coercion": "error", // https://eslint.org/docs/rules/no-implicit-coercion
-    "no-implied-eval": "error", // https://eslint.org/docs/rules/no-implied-eval
-    "no-invalid-this": "error", // https://eslint.org/docs/rules/no-invalid-this
-    "no-iterator": "error", // https://eslint.org/docs/rules/no-iterator
-    "no-labels": "error", // https://eslint.org/docs/rules/no-labels
-    "no-lone-blocks": "error", // https://eslint.org/docs/rules/no-lone-blocks
-    "no-loop-func": "error", // https://eslint.org/docs/rules/no-loop-func
-    "no-multi-spaces": "warn", // https://eslint.org/docs/rules/no-multi-spaces
-    "no-multi-str": "warn", // https://eslint.org/docs/rules/no-multi-str
-    "no-new": "error", // https://eslint.org/docs/rules/no-new
-    "no-new-func": "error", // https://eslint.org/docs/rules/no-new-func
-    "no-new-wrappers": "warn", // https://eslint.org/docs/rules/no-new-wrappers
-    "no-octal-escape": "warn", // https://eslint.org/docs/rules/no-octal-escape
-    "no-param-reassign": "error", // https://eslint.org/docs/rules/no-param-reassign
-    "no-proto": "error", // https://eslint.org/docs/rules/no-proto
-    "no-return-assign": "error", // https://eslint.org/docs/rules/no-return-assign
-    "no-script-url": "error", // https://eslint.org/docs/rules/no-script-url
-    "no-self-compare": "warn", // https://eslint.org/docs/rules/no-self-compare
-    "no-sequences": "error", // https://eslint.org/docs/rules/no-sequences
-    "no-unmodified-loop-condition": "error", // https://eslint.org/docs/rules/no-unmodified-loop-condition
-    "no-useless-call": "warn", // https://eslint.org/docs/rules/no-useless-call
-    "no-useless-concat": "warn", // https://eslint.org/docs/rules/no-useless-concat
-    "no-useless-return": "warn", // https://eslint.org/docs/rules/no-useless-return
-    "no-void": "error", // https://eslint.org/docs/rules/no-void
-    "no-warning-comments": "warn", // https://eslint.org/docs/rules/no-warning-comments
-    "prefer-arrow-callback": "error", // https://eslint.org/docs/rules/prefer-arrow-callback
-    "radix": "error", // https://eslint.org/docs/rules/radix
-    "require-await": "warn", // https://eslint.org/docs/rules/require-await
+    ],
+    "no-eval": "error",
+    "no-extend-native": "error",
+    "no-extra-bind": "error",
+    "no-floating-decimal": "error",
+    "no-implicit-coercion": "error",
+    "no-implied-eval": "error",
+    "no-invalid-this": "error",
+    "no-iterator": "error",
+    "no-labels": "error",
+    "no-lone-blocks": "error",
+    "no-loop-func": "error",
+    "no-multi-str": "warn",
+    "no-new": "error",
+    "no-new-func": "error",
+    "no-new-wrappers": "warn",
+    "no-octal-escape": "warn",
+    "no-param-reassign": "error",
+    "no-proto": "error",
+    "no-return-assign": "error",
+    "no-script-url": "error",
+    "no-self-compare": "warn",
+    "no-sequences": "error",
+    "no-unmodified-loop-condition": "error",
+    "no-useless-call": "warn",
+    "no-useless-concat": "warn",
+    "no-useless-return": "warn",
+    "no-void": "error",
+    "no-warning-comments": "warn",
+    "prefer-arrow-callback": "error",
+    "radix": "error",
+    "require-await": "warn",
 
     // Variables
-    "init-declarations": "error", // https://eslint.org/docs/rules/init-declarations
-    "no-shadow": "error", // https://eslint.org/docs/rules/no-shadow
-    "no-undefined": "error", // https://eslint.org/docs/rules/no-undefined
-    "no-unused-vars": "warn", // https://eslint.org/docs/rules/no-unused-vars
+    "init-declarations": "error",
+    "no-shadow": "error",
+    "no-undefined": "error",
+    "no-unused-vars": "warn",
 
     // ECMAScript 6
-    "no-var": "error", // https://eslint.org/docs/rules/no-var
-
-    // Typescript Eslint
-    "@typescript-eslint/explicit-function-return-type": "off",
+    "no-var": "error",
 
     // React Eslint
     "react/button-has-type": ["warn", { "reset": false }],
     "react/prop-types": "off",
-    "react/no-unescaped-entities": "off",
     "react/jsx-curly-brace-presence": "error",
     "react/display-name": "off",
 
-    // React-Hooks Eslint
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn",
-
     // Import
-    "import/order": "warn",
+    "import/order": [
+      "warn",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index",
+          "object"
+        ],
+        "pathGroups": [
+          {
+            "pattern": "~/**",
+            "group": "internal"
+          }
+        ],
+        "newlines-between": "always"
+      }
+    ],
     "import/no-relative-packages": "error",
     "import/no-extraneous-dependencies": [
       "error",
@@ -124,9 +141,8 @@
   "overrides": [
     {
       "files": ["**/*.ts?(x)"],
-      "parser": "@typescript-eslint/parser",
       "parserOptions": {
-        "project": ["./tsconfig.json", "./*/tsconfig.json"]
+        "project": "./tsconfig.json"
       },
       "env": {
         "es6": true,
@@ -134,29 +150,18 @@
         "node": false
       },
       "extends": [
-        "plugin:@typescript-eslint/eslint-recommended",
         "plugin:@typescript-eslint/recommended",
-        "prettier",
-        "plugin:prettier/recommended",
-        "plugin:import/typescript"
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:import/typescript",
+        "plugin:prettier/recommended"
       ],
-      "plugins": ["@typescript-eslint"],
       "rules": {
-        "no-unused-vars": "off",
         "array-callback-return": "off",
         "consistent-return": "off",
-        "padding-line-between-statements": [
-          "error",
-          {
-            "blankLine": "always",
-            "prev": "*",
-            "next": "return"
-          }
-        ],
-        // Typescript Eslint
         "no-shadow": "off",
+
+        // Typescript Eslint
         "@typescript-eslint/no-shadow": "error",
-        "@typescript-eslint/no-unused-vars": "warn",
         "@typescript-eslint/array-type": [
           "error",
           {

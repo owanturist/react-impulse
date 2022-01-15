@@ -432,7 +432,7 @@ const App = () => {
 }
 ```
 
-From now and on, any Counter increment will cause the entire App to reconcile. It might be limited to a bunch of React optimization techniques and extra checks in reducers, but this is extra work and extra lines of code. You might also notice that any Counter's action dispatched will cause all Counter's reducers to handle the Counter's states instances.
+From now and on, any Counter increment will cause the entire App to reconcile. It might be limited by applying a bunch of React optimization techniques and extra checks in reducers, but this is extra work and extra lines of code. You might also notice that any Counter's action dispatched will cause all Counter's reducers to handle the Counter's states instances.
 
 But the problems above are relatively small compared to the amount of boilerplate and effort required to develop an app in that way. It would not be a case if we'd deal with only local state components, but the App needs access to read and write deeply nested values, so we have no choice but to define the state on App's level.
 
