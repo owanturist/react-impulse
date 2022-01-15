@@ -100,7 +100,9 @@ export function useInnerReducer<T, A>(
   return [
     useGetInnerState(store),
     useCallback(
-      (action) => setState((state) => reducerRef.current(state, action)),
+      (action) => {
+        setState((state) => reducerRef.current(state, action))
+      },
       [setState],
     ),
   ]

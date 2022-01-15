@@ -84,7 +84,9 @@ export class WatchContext {
   }
 
   public cleanup(): void {
-    this.cleanups.forEach((cleanup) => cleanup())
+    this.cleanups.forEach((cleanup) => {
+      cleanup()
+    })
     this.cleanups.clear()
     this.deadCleanups.clear()
   }
