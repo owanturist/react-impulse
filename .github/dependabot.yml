@@ -1,13 +1,13 @@
 version: 2
 updates:
-  - package-ecosystem: 'npm'
-    directory: '/'
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
-      interval: 'weekly'
-      day: 'saturday'
-      time: '10:00'
-      timezone: 'Europe/Amsterdam'
+      interval: "weekly"
+      day: "saturday"
+      time: "10:00"
+      timezone: "Europe/Amsterdam"
     pull-request-branch-name:
-      separator: '-'
+      separator: "-"
     reviewers:
-      - 'owanturist'
+      - "owanturist"

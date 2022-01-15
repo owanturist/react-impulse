@@ -17,8 +17,8 @@ npm install react-inner-store
 And use it in your project:
 
 ```tsx
-import React from 'react'
-import { InnerStore, useInnerState } from 'react-inner-store'
+import React from "react"
+import { InnerStore, useInnerState } from "react-inner-store"
 
 type State = {
   username: InnerStore<string>
@@ -34,7 +34,7 @@ const Username: React.VFC<{
     <input
       type="text"
       value={username}
-      onChange={event => setUsername(event.target.value)}
+      onChange={(event) => setUsername(event.target.value)}
     />
   )
 })
@@ -81,11 +81,11 @@ const App: React.VFC<{
 ReactDOM.render(
   <App
     state={{
-      username: InnerStore.of(''),
-      count: InnerStore.of(0)
+      username: InnerStore.of(""),
+      count: InnerStore.of(0),
     }}
   />,
-  document.getElementById('root')
+  document.getElementById("root"),
 )
 ```
 
@@ -96,7 +96,7 @@ Another one React state management library... Why do you need it? That's a fair 
 <a name="simple-counter"></a>Imagine you are building a stateful Counter component:
 
 ```tsx
-import React from 'react'
+import React from "react"
 
 const Counter: React.VFC = () => {
   const [count, setCount] = React.useState(0)
@@ -114,13 +114,13 @@ const Counter: React.VFC = () => {
 That's fairly simple but not quite useful since there is no way to read the Counter's value. You want to keep the state inside the component, so the only way to get the value is to pass the `onChange` callback to the `Counter` component:
 
 ```tsx
-import React from 'react'
+import React from "react"
 
 const Counter: React.VFC<{
   onChange?(count: number): void
 }> = React.memo(({ onChange }) => {
   const [count, setCount] = React.useState(0)
-  const handleCount = nextCount => {
+  const handleCount = (nextCount) => {
     setCount(nextCount)
     onChange?.(nextCount)
   }
@@ -138,7 +138,7 @@ const Counter: React.VFC<{
 Now you can get the value from the Counter's parent component, but you need a place to store it:
 
 ```tsx
-import React from 'react'
+import React from "react"
 
 const GameScore = () => {
   const [count, setCount] = React.useState(0)
@@ -155,14 +155,14 @@ const GameScore = () => {
 Two `React.useState` for storing a single value... seems a bit of overkill, huh? Let's move on and say that it should be a way not only to read but to set the Counter's value from the outside:
 
 ```tsx
-import React from 'react'
+import React from "react"
 
 const Counter: React.VFC<{
   count?: number
   onChange?(count: string): void
 }> = ({ count: forcedCount = 0, onChange }) => {
   const [count, setCount] = React.useState(forcedCount)
-  const handleCount = nextCount => {
+  const handleCount = (nextCount) => {
     setCount(nextCount)
     onChange?.(nextCount)
   }
@@ -198,7 +198,7 @@ That is a complete implementation of two-way Counter's state management. The num
 A brute-force workaround to reduce the two-way binding hustle is to store the Input's state outside the component. This way, any component which passes the state and the setState callback might read and change the state's value:
 
 ```tsx
-import React from 'react'
+import React from "react"
 
 const Counter: React.VFC<{
   count: number
@@ -275,21 +275,21 @@ interface CounterState {
 
 const initCounter = (): CounterState => ({
   id: uuid(),
-  count: 0
+  count: 0,
 })
 
 type CounterAction =
-  | { type: 'INCREMENT'; id: CounterId }
-  | { type: 'DECREMENT'; id: CounterId }
+  | { type: "INCREMENT"; id: CounterId }
+  | { type: "DECREMENT"; id: CounterId }
 
 const counterReducer = (state: CounterState, action: CounterAction) => {
   switch (action.type) {
-    case 'INCREMENT':
+    case "INCREMENT":
       return state.id === action.id
         ? { ...state, count: state.count + 1 }
         : state
 
-    case 'DECREMENT':
+    case "DECREMENT":
       return state.id === action.id
         ? { ...state, count: state.count - 1 }
         : state
@@ -304,11 +304,11 @@ const Counter: React.VFC<{
   dispatch: React.Dispatch<CounterAction>
 }> = ({ state, dispatch }) => (
   <div>
-    <button onClick={() => dispatch({ type: 'DECREMENT', id: state.id })}>
+    <button onClick={() => dispatch({ type: "DECREMENT", id: state.id })}>
       -
     </button>
     <span>{state.count}</span>
-    <button onClick={() => dispatch({ type: 'INCREMENT', id: state.id })}>
+    <button onClick={() => dispatch({ type: "INCREMENT", id: state.id })}>
       +
     </button>
   </div>
@@ -329,27 +329,27 @@ interface GameScoreState {
 const initGameScore = (): GameScoreState => ({
   id: uuid(),
   firstCounter: initCounter(),
-  secondCounter: initCounter()
+  secondCounter: initCounter(),
 })
 
 const resetGameScore = (state: GameScoreState) => ({
   ...state,
   firstCounter: { ...state.firstCounter, count: 0 },
-  secondCounter: { ...state.secondCounter, count: 0 }
+  secondCounter: { ...state.secondCounter, count: 0 },
 })
 
-type GameScoreAction = { type: 'RESET'; id: GameScoreId }
+type GameScoreAction = { type: "RESET"; id: GameScoreId }
 
 const gameScoreReducer = (state: GameScoreState, action: GameScoreAction) => {
   switch (action.type) {
-    case 'RESET':
+    case "RESET":
       return resetGameScore(state)
 
     default:
       return {
         ...state,
         firstCounter: counterReducer(state.firstCounter, action),
-        secondCounter: counterReducer(state.secondCounter, action)
+        secondCounter: counterReducer(state.secondCounter, action),
       }
   }
 }
@@ -361,7 +361,7 @@ const GameScore: React.VFC<{
   <div>
     <Counter state={state.firstCounter} dispatch={dispatch} />
     <Counter state={state.secondCounter} dispatch={dispatch} />
-    <button onClick={() => dispatch({ type: 'RESET', id: state.id })}>
+    <button onClick={() => dispatch({ type: "RESET", id: state.id })}>
       Reset
     </button>
     <span>
@@ -379,52 +379,52 @@ interface AppState {
 }
 
 const prepareAppRequestPayload = (state: AppState) => ({
-  games: state.games.map(game => ({
+  games: state.games.map((game) => ({
     firstCounter: game.firstCounter.count,
-    secondCounter: game.secondCounter.count
-  }))
+    secondCounter: game.secondCounter.count,
+  })),
 })
 
-type AppAction = { type: 'ADD_GAME' } | { type: 'RESET_ALL_GAMES' }
+type AppAction = { type: "ADD_GAME" } | { type: "RESET_ALL_GAMES" }
 
 const appReducer = (state: AppState, action: AppAction) => {
   switch (action.type) {
-    case 'ADD_GAME':
+    case "ADD_GAME":
       return {
         ...state,
-        games: [...state.games, initGameScore()]
+        games: [...state.games, initGameScore()],
       }
 
-    case 'RESET_ALL_GAMES':
+    case "RESET_ALL_GAMES":
       return {
         ...state,
-        games: state.games.map(resetGameScore)
+        games: state.games.map(resetGameScore),
       }
 
     default:
       return {
         ...state,
-        games: state.games.map(game => gameScoreReducer(game, action))
+        games: state.games.map((game) => gameScoreReducer(game, action)),
       }
   }
 }
 
 const App = () => {
   const [state, dispatch] = React.useReducer(appReducer, {
-    games: []
+    games: [],
   })
 
   return (
     <div>
-      <button onClick={() => dispatch({ type: 'ADD_GAME' })}>Add game</button>
-      <button onClick={() => dispatch({ type: 'RESET_ALL_GAMES' })}>
+      <button onClick={() => dispatch({ type: "ADD_GAME" })}>Add game</button>
+      <button onClick={() => dispatch({ type: "RESET_ALL_GAMES" })}>
         Reset all
       </button>
       <button onClick={() => sendGames(prepareAppRequestPayload(state))}>
         Submit games
       </button>
 
-      {state.games.map(game => (
+      {state.games.map((game) => (
         <GameScore key={game.id} state={game} dispatch={dispatch} />
       ))}
     </div>
@@ -484,21 +484,21 @@ interface CounterState {
 
 const initCounter = (): CounterState => ({
   id: uuid(),
-  count: 0
+  count: 0,
 })
 
 type CounterAction =
-  | { type: 'INCREMENT'; id: CounterId }
-  | { type: 'DECREMENT'; id: CounterId }
+  | { type: "INCREMENT"; id: CounterId }
+  | { type: "DECREMENT"; id: CounterId }
 
 const counterReducer = (state: CounterState, action: CounterAction) => {
   switch (action.type) {
-    case 'INCREMENT':
+    case "INCREMENT":
       return state.id === action.id
         ? { ...state, count: state.count + 1 }
         : state
 
-    case 'DECREMENT':
+    case "DECREMENT":
       return state.id === action.id
         ? { ...state, count: state.count - 1 }
         : state
@@ -513,11 +513,11 @@ const Counter: React.VFC<{
   dispatch: React.Dispatch<CounterAction>
 }> = ({ state, dispatch }) => (
   <div>
-    <button onClick={() => dispatch({ type: 'DECREMENT', id: state.id })}>
+    <button onClick={() => dispatch({ type: "DECREMENT", id: state.id })}>
       -
     </button>
     <span>{state.count}</span>
-    <button onClick={() => dispatch({ type: 'INCREMENT', id: state.id })}>
+    <button onClick={() => dispatch({ type: "INCREMENT", id: state.id })}>
       +
     </button>
   </div>
@@ -561,7 +561,7 @@ interface GameScoreState {
 
 const initGameScore = (): GameScoreState => ({
   firstCounter: InnerStore.of(0),
-  secondCounter: InnerStore.of(0)
+  secondCounter: InnerStore.of(0),
 })
 
 const resetGameScore = (state: GameScoreState): void => {
@@ -605,27 +605,27 @@ interface GameScoreState {
 const initGameScore = (): GameScoreState => ({
   id: uuid(),
   firstCounter: initCounter(),
-  secondCounter: initCounter()
+  secondCounter: initCounter(),
 })
 
 const resetGameScore = (state: GameScoreState) => ({
   ...state,
   firstCounter: { ...state.firstCounter, count: 0 },
-  secondCounter: { ...state.secondCounter, count: 0 }
+  secondCounter: { ...state.secondCounter, count: 0 },
 })
 
-type GameScoreAction = { type: 'RESET'; id: GameScoreId }
+type GameScoreAction = { type: "RESET"; id: GameScoreId }
 
 const gameScoreReducer = (state: GameScoreState, action: GameScoreAction) => {
   switch (action.type) {
-    case 'RESET':
+    case "RESET":
       return resetGameScore(state)
 
     default:
       return {
         ...state,
         firstCounter: counterReducer(state.firstCounter, action),
-        secondCounter: counterReducer(state.secondCounter, action)
+        secondCounter: counterReducer(state.secondCounter, action),
       }
   }
 }
@@ -637,7 +637,7 @@ const GameScore: React.VFC<{
   <div>
     <Counter state={state.firstCounter} dispatch={dispatch} />
     <Counter state={state.secondCounter} dispatch={dispatch} />
-    <button onClick={() => dispatch({ type: 'RESET', id: state.id })}>
+    <button onClick={() => dispatch({ type: "RESET", id: state.id })}>
       Reset
     </button>
     <span>
@@ -659,7 +659,7 @@ interface AppState {
 }
 
 const prepareAppRequestPayload = (state: AppState) => ({
-  games: state.games.map(game => game.getState())
+  games: state.games.map((game) => game.getState()),
 })
 
 const appStore = InnerStore.of({ games: [] })
@@ -670,13 +670,13 @@ const App = () => {
   const addGame = () => {
     setState({
       ...state,
-      games: [...state.games, InnerStore.of(initGameScore())]
+      games: [...state.games, InnerStore.of(initGameScore())],
     })
   }
 
   const resetAllGames = () => {
-    setState(currentState => {
-      currentState.games.forEach(game => resetGameScore(game.getState()))
+    setState((currentState) => {
+      currentState.games.forEach((game) => resetGameScore(game.getState()))
 
       return currentState
     })
@@ -690,7 +690,7 @@ const App = () => {
         Submit games
       </button>
 
-      {state.games.map(game => (
+      {state.games.map((game) => (
         <GameScore key={game.key} store={game} />
       ))}
     </div>
@@ -708,52 +708,52 @@ interface AppState {
 }
 
 const prepareAppRequestPayload = (state: AppState) => ({
-  games: state.games.map(game => ({
+  games: state.games.map((game) => ({
     firstCounter: game.firstCounter.count,
-    secondCounter: game.secondCounter.count
-  }))
+    secondCounter: game.secondCounter.count,
+  })),
 })
 
-type AppAction = { type: 'ADD_GAME' } | { type: 'RESET_ALL_GAMES' }
+type AppAction = { type: "ADD_GAME" } | { type: "RESET_ALL_GAMES" }
 
 const appReducer = (state: AppState, action: AppAction) => {
   switch (action.type) {
-    case 'ADD_GAME':
+    case "ADD_GAME":
       return {
         ...state,
-        games: [...state.games, initGameScore()]
+        games: [...state.games, initGameScore()],
       }
 
-    case 'RESET_ALL_GAMES':
+    case "RESET_ALL_GAMES":
       return {
         ...state,
-        games: state.games.map(resetGameScore)
+        games: state.games.map(resetGameScore),
       }
 
     default:
       return {
         ...state,
-        games: state.games.map(game => gameScoreReducer(game, action))
+        games: state.games.map((game) => gameScoreReducer(game, action)),
       }
   }
 }
 
 const App = () => {
   const [state, dispatch] = React.useReducer(appReducer, {
-    games: []
+    games: [],
   })
 
   return (
     <div>
-      <button onClick={() => dispatch({ type: 'ADD_GAME' })}>Add game</button>
-      <button onClick={() => dispatch({ type: 'RESET_ALL_GAMES' })}>
+      <button onClick={() => dispatch({ type: "ADD_GAME" })}>Add game</button>
+      <button onClick={() => dispatch({ type: "RESET_ALL_GAMES" })}>
         Reset all
       </button>
       <button onClick={() => sendGames(prepareAppRequestPayload(state))}>
         Submit games
       </button>
 
-      {state.games.map(game => (
+      {state.games.map((game) => (
         <GameScore key={game.id} state={game} dispatch={dispatch} />
       ))}
     </div>
@@ -792,9 +792,9 @@ type SignInFormState = {
 
 const signInFormStore = InnerStore.of<SignInFormState>({
   isSubmitting: false,
-  username: InnerStore.of(''),
-  password: InnerStore.of(''),
-  rememberMe: InnerStore.of(false)
+  username: InnerStore.of(""),
+  password: InnerStore.of(""),
+  rememberMe: InnerStore.of(false),
 })
 ```
 
@@ -811,7 +811,7 @@ const Toggles: React.VFC<{
   options: Array<InnerStore<boolean>>
 }> = ({ options }) => (
   <>
-    {options.map(option => (
+    {options.map((option) => (
       <Toggle key={option.key} store={option} />
     ))}
   </>
@@ -834,8 +834,8 @@ const signInFormStoreClone = signInFormStore.clone(
     isSubmitting,
     username: username.clone(),
     password: password.clone(),
-    rememberMe: rememberMe.clone()
-  })
+    rememberMe: rememberMe.clone(),
+  }),
 )
 ```
 
@@ -856,8 +856,8 @@ const plainSignInState = signInFormStore.getState(
     isSubmitting,
     username: username.getState(),
     password: password.getState(),
-    rememberMe: rememberMe.getState()
-  })
+    rememberMe: rememberMe.getState(),
+  }),
 )
 ```
 
@@ -877,13 +877,13 @@ An `InnerStore` instance's method that sets the value. Each time when the value 
 
 ```ts
 const onSubmit = () => {
-  signInFormStore.update(state => {
+  signInFormStore.update((state) => {
     // reset password field
-    state.password.setState('')
+    state.password.setState("")
 
     return {
       ...state,
-      isSubmitting: true
+      isSubmitting: true,
     }
   })
 }
@@ -917,7 +917,7 @@ const UsernameInput: React.VFC<{
       type="text"
       value={username}
       // all store.subscribe across the app will call their listeners
-      onChange={event => store.setState(event.target.value)}
+      onChange={(event) => store.setState(event.target.value)}
     />
   )
 })
@@ -963,12 +963,12 @@ const App: React.VFC<{
 ```ts
 function useInnerState<T>(
   store: InnerStore<T>,
-  compare?: Compare<T>
+  compare?: Compare<T>,
 ): [T, React.Dispatch<React.SetStateAction<T>>]
 
 function useInnerState<T>(
   store: null | undefined | InnerStore<T>,
-  compare?: Compare<T>
+  compare?: Compare<T>,
 ): [null | undefined | T, React.Dispatch<React.SetStateAction<T>>]
 ```
 
@@ -987,7 +987,7 @@ const UsernameInput: React.VFC<{
     <input
       type="text"
       value={username}
-      onChange={event => setUsername(event.target.value)}
+      onChange={(event) => setUsername(event.target.value)}
     />
   )
 })
@@ -1001,7 +1001,7 @@ const UsernameInput: React.VFC<{
 function useGetInnerState<T>(store: InnerStore<T>): T
 
 function useGetInnerState<T>(
-  store: null | undefined | InnerStore<T>
+  store: null | undefined | InnerStore<T>,
 ): null | undefined | T
 ```
 
@@ -1033,7 +1033,7 @@ const App: React.VFC<{
 ```ts
 function useSetInnerState<T>(
   store: null | undefined | InnerStore<T>,
-  compare?: Compare<T>
+  compare?: Compare<T>,
 ): React.Dispatch<React.SetStateAction<T>>
 ```
 
@@ -1069,13 +1069,13 @@ const App: React.VFC<{
 function useInnerReducer<A, T>(
   store: InnerStore<T>,
   reducer: (state: T, action: A) => T,
-  compare?: Compare<T>
+  compare?: Compare<T>,
 ): [T, React.Dispatch<A>]
 
 function useInnerReducer<A, T>(
   store: null | undefined | InnerStore<T>,
   reducer: (state: T, action: A) => T,
-  compare?: Compare<T>
+  compare?: Compare<T>,
 ): [null | undefined | T, React.Dispatch<A>]
 ```
 
@@ -1086,14 +1086,14 @@ A hook that is similar to `React.useReducer` but for `InnerStore` instances. It 
 - `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The store won't update if the new value is comparably equal to the current value.
 
 ```tsx
-type CounterAction = { type: 'INCREMENT' } | { type: 'DECREMENT' }
+type CounterAction = { type: "INCREMENT" } | { type: "DECREMENT" }
 
 const counterReducer = (state: number, action: CounterAction) => {
   switch (action.type) {
-    case 'INCREMENT':
+    case "INCREMENT":
       return state + 1
 
-    case 'DECREMENT':
+    case "DECREMENT":
       return state - 1
   }
 }
@@ -1105,9 +1105,9 @@ const Counter: React.VFC<{
 
   return (
     <div>
-      <button onClick={() => dispatch({ type: 'DECREMENT' })}>-</button>
+      <button onClick={() => dispatch({ type: "DECREMENT" })}>-</button>
       <span>{count}</span>
-      <button onClick={() => dispatch({ type: 'INCREMENT' })}>+</button>
+      <button onClick={() => dispatch({ type: "INCREMENT" })}>+</button>
     </div>
   )
 })

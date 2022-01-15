@@ -4,9 +4,9 @@ import {
   useRef,
   useReducer,
   useEffect,
-  useCallback
-} from 'react'
-import { nanoid } from 'nanoid'
+  useCallback,
+} from "react"
+import { nanoid } from "nanoid"
 
 /**
  * A function that compares two values and returns `true` if they are equal.
@@ -52,9 +52,9 @@ export type DeepExtractInnerState<T> = T extends InnerStore<infer R>
 const warning = (message: string): void => {
   /* eslint-disable no-console */
   if (
-    process.env.NODE_ENV !== 'production' &&
-    typeof console !== 'undefined' &&
-    typeof console.error === 'function'
+    process.env.NODE_ENV !== "production" &&
+    typeof console !== "undefined" &&
+    typeof console.error === "function"
   ) {
     console.error(message)
   }
@@ -76,7 +76,7 @@ const modInc = (x: number): number => {
 enum WatcherPermission {
   AllowAll = 0,
   AllowSubscribeOnly = 1,
-  RestrictAll = 2
+  RestrictAll = 2,
 }
 
 class WatchContext {
@@ -85,7 +85,7 @@ class WatchContext {
 
   public static warning(
     message: string,
-    requiredPermission: WatcherPermission = WatcherPermission.AllowAll
+    requiredPermission: WatcherPermission = WatcherPermission.AllowAll,
   ): boolean {
     if (WatchContext.watcherPermission <= requiredPermission) {
       return false
@@ -125,7 +125,7 @@ class WatchContext {
   }
 
   private cleanupObsolete(): void {
-    this.deadCleanups.forEach(key => {
+    this.deadCleanups.forEach((key) => {
       const clean = this.cleanups.get(key)
 
       if (clean != null) {
@@ -152,7 +152,7 @@ class WatchContext {
   }
 
   public cleanup(): void {
-    this.cleanups.forEach(cleanup => cleanup())
+    this.cleanups.forEach((cleanup) => cleanup())
     this.cleanups.clear()
     this.deadCleanups.clear()
   }
@@ -171,10 +171,10 @@ abstract class SetStateContext {
 
       // the context already exists - it should not emit anything at this point
       return [
-        subs => {
+        (subs) => {
           subscribers.push(subs)
         },
-        noop
+        noop,
       ]
     }
 
@@ -184,14 +184,14 @@ abstract class SetStateContext {
     const { subscribers } = SetStateContext
 
     return [
-      subs => {
+      (subs) => {
         subscribers.push(subs)
       },
       () => {
         const calledListeners = new WeakSet<VoidFunction>()
 
         for (const subs of subscribers) {
-          subs.forEach(listener => {
+          subs.forEach((listener) => {
             // don't emit the same listener twice, for instance when using `useInnerWatch`
             if (!calledListeners.has(listener)) {
               listener()
@@ -201,7 +201,7 @@ abstract class SetStateContext {
         }
 
         SetStateContext.subscribers = null
-      }
+      },
     ]
   }
 }
@@ -213,8 +213,8 @@ export class InnerStore<T> {
    */
   public static of<TValue>(value: TValue): InnerStore<TValue> {
     WatchContext.warning(
-      'You should not call InnerStore.of(something) inside the useInnerWatch(watcher) callback. ' +
-        'The useInnerWatch(watcher) hook is for read-only operations but InnerStore.of(something) creates one.'
+      "You should not call InnerStore.of(something) inside the useInnerWatch(watcher) callback. " +
+        "The useInnerWatch(watcher) hook is for read-only operations but InnerStore.of(something) creates one.",
     )
 
     return new InnerStore(value)
@@ -242,7 +242,7 @@ export class InnerStore<T> {
    */
   public clone(transform?: (value: T) => T): InnerStore<T> {
     return InnerStore.of(
-      typeof transform === 'function' ? transform(this.value) : this.value
+      typeof transform === "function" ? transform(this.value) : this.value,
     )
   }
 
@@ -259,7 +259,7 @@ export class InnerStore<T> {
   public getState<R>(transform?: (value: T) => R): T | R {
     WatchContext.register(this)
 
-    return typeof transform === 'function' ? transform(this.value) : this.value
+    return typeof transform === "function" ? transform(this.value) : this.value
   }
 
   /**
@@ -277,12 +277,12 @@ export class InnerStore<T> {
    */
   public setState(
     valueOrTransform: SetStateAction<T>,
-    compare: Compare<T> = isEqual
+    compare: Compare<T> = isEqual,
   ): void {
     if (
       WatchContext.warning(
-        'You may not call InnerStore#setState(something) inside the useInnerWatch(watcher) callback. ' +
-          'The useInnerWatch(watcher) hook is for read-only operations but InnerStore#setState(something) changes it.'
+        "You may not call InnerStore#setState(something) inside the useInnerWatch(watcher) callback. " +
+          "The useInnerWatch(watcher) hook is for read-only operations but InnerStore#setState(something) changes it.",
       )
     ) {
       return
@@ -291,7 +291,7 @@ export class InnerStore<T> {
     const [register, emit] = SetStateContext.init()
 
     const nextValue =
-      typeof valueOrTransform === 'function'
+      typeof valueOrTransform === "function"
         ? (valueOrTransform as (value: T) => T)(this.value)
         : valueOrTransform
 
@@ -315,9 +315,9 @@ export class InnerStore<T> {
   public subscribe(listener: VoidFunction): VoidFunction {
     if (
       WatchContext.warning(
-        'You should not call InnerStore#subscribe(listener) inside the useInnerWatch(watcher) callback. ' +
-          'The useInnerWatch(watcher) hook is for read-only operations but not for creating subscriptions.',
-        WatcherPermission.AllowSubscribeOnly
+        "You should not call InnerStore#subscribe(listener) inside the useInnerWatch(watcher) callback. " +
+          "The useInnerWatch(watcher) hook is for read-only operations but not for creating subscriptions.",
+        WatcherPermission.AllowSubscribeOnly,
       )
     ) {
       return () => {
@@ -348,7 +348,7 @@ export class InnerStore<T> {
  */
 export function useInnerWatch<T>(
   watcher: () => T,
-  compare: Compare<T> = isEqual
+  compare: Compare<T> = isEqual,
 ): T {
   const [x, render] = useReducer(modInc, 0)
 
@@ -406,7 +406,7 @@ export function useInnerWatch<T>(
  */
 export function useSetInnerState<T>(
   store: null | undefined | InnerStore<T>,
-  compare: Compare<T> = isEqual
+  compare: Compare<T> = isEqual,
 ): Dispatch<SetStateAction<T>> {
   const compareRef = useRef(compare)
 
@@ -416,7 +416,7 @@ export function useSetInnerState<T>(
 
   return useCallback(
     (update): void => store?.setState(update, compareRef.current),
-    [store]
+    [store],
   )
 }
 
@@ -449,7 +449,7 @@ export function useGetInnerState<T>(store: null | InnerStore<T>): null | T
  * @see {@link InnerStore.subscribe}
  */
 export function useGetInnerState<T>(
-  store: undefined | InnerStore<T>
+  store: undefined | InnerStore<T>,
 ): undefined | T
 
 /**
@@ -461,11 +461,11 @@ export function useGetInnerState<T>(
  * @see {@link InnerStore.subscribe}
  */
 export function useGetInnerState<T>(
-  store: null | undefined | InnerStore<T>
+  store: null | undefined | InnerStore<T>,
 ): null | undefined | T
 
 export function useGetInnerState<T>(
-  store: null | undefined | InnerStore<T>
+  store: null | undefined | InnerStore<T>,
 ): null | undefined | T {
   const [, render] = useReducer(modInc, 0)
 
@@ -496,7 +496,7 @@ export function useGetInnerState<T>(
  */
 export function useInnerState<T>(
   store: InnerStore<T>,
-  compare?: Compare<T>
+  compare?: Compare<T>,
 ): [T, Dispatch<SetStateAction<T>>]
 
 /**
@@ -516,7 +516,7 @@ export function useInnerState<T>(
  */
 export function useInnerState<T>(
   store: null | InnerStore<T>,
-  compare?: Compare<T>
+  compare?: Compare<T>,
 ): [null | T, Dispatch<SetStateAction<T>>]
 
 /**
@@ -536,7 +536,7 @@ export function useInnerState<T>(
  */
 export function useInnerState<T>(
   store: undefined | InnerStore<T>,
-  compare?: Compare<T>
+  compare?: Compare<T>,
 ): [undefined | T, Dispatch<SetStateAction<T>>]
 
 /**
@@ -556,12 +556,12 @@ export function useInnerState<T>(
  */
 export function useInnerState<T>(
   store: null | undefined | InnerStore<T>,
-  compare?: Compare<T>
+  compare?: Compare<T>,
 ): [null | undefined | T, Dispatch<SetStateAction<T>>]
 
 export function useInnerState<T>(
   store: null | undefined | InnerStore<T>,
-  compare: Compare<T> = isEqual
+  compare: Compare<T> = isEqual,
 ): [null | undefined | T, Dispatch<SetStateAction<T>>] {
   return [useGetInnerState(store), useSetInnerState(store, compare)]
 }
@@ -583,7 +583,7 @@ export function useInnerState<T>(
 export function useInnerReducer<T, A>(
   store: InnerStore<T>,
   reducer: (state: T, action: A) => T,
-  compare?: Compare<T>
+  compare?: Compare<T>,
 ): [T, Dispatch<A>]
 
 /**
@@ -603,7 +603,7 @@ export function useInnerReducer<T, A>(
 export function useInnerReducer<T, A>(
   store: null | InnerStore<T>,
   reducer: (state: T, action: A) => T,
-  compare?: Compare<T>
+  compare?: Compare<T>,
 ): [null | T, Dispatch<A>]
 
 /**
@@ -623,7 +623,7 @@ export function useInnerReducer<T, A>(
 export function useInnerReducer<T, A>(
   store: undefined | InnerStore<T>,
   reducer: (state: T, action: A) => T,
-  compare?: Compare<T>
+  compare?: Compare<T>,
 ): [undefined | T, Dispatch<A>]
 
 /**
@@ -643,13 +643,13 @@ export function useInnerReducer<T, A>(
 export function useInnerReducer<T, A>(
   store: null | undefined | InnerStore<T>,
   reducer: (state: T, action: A) => T,
-  compare?: Compare<T>
+  compare?: Compare<T>,
 ): [null | undefined | T, Dispatch<A>]
 
 export function useInnerReducer<T, A>(
   store: null | undefined | InnerStore<T>,
   reducer: (state: T, action: A) => T,
-  compare: Compare<T> = isEqual
+  compare: Compare<T> = isEqual,
 ): [null | undefined | T, Dispatch<A>] {
   const setState = useSetInnerState(store, compare)
   const reducerRef = useRef(reducer)
@@ -661,8 +661,8 @@ export function useInnerReducer<T, A>(
   return [
     useGetInnerState(store),
     useCallback(
-      action => setState(state => reducerRef.current(state, action)),
-      [setState]
-    )
+      (action) => setState((state) => reducerRef.current(state, action)),
+      [setState],
+    ),
   ]
 }

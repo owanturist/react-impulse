@@ -1,38 +1,38 @@
-import path from 'path'
+import path from "path"
 // eslint-disable-next-line
-import nodeResolve from '@rollup/plugin-node-resolve'
-import typescript from 'rollup-plugin-typescript2'
-import replace from 'rollup-plugin-replace'
-import commonjs from 'rollup-plugin-commonjs'
-import { terser } from 'rollup-plugin-terser'
+import nodeResolve from "@rollup/plugin-node-resolve"
+import typescript from "rollup-plugin-typescript2"
+import replace from "rollup-plugin-replace"
+import commonjs from "rollup-plugin-commonjs"
+import { terser } from "rollup-plugin-terser"
 
 const terserOptions = {
   compress: {
     pure_getters: true,
     unsafe: true,
-    unsafe_comps: true
-  }
+    unsafe_comps: true,
+  },
 }
 
-const UMD_EXTERNALS = ['react']
+const UMD_EXTERNALS = ["react"]
 
 const UMD_GLOBALS = {
-  react: 'React',
-  crypto: 'crypto'
+  react: "React",
+  crypto: "crypto",
 }
 
-const UMD_NAME = 'ReactInnerStore'
+const UMD_NAME = "ReactInnerStore"
 
-const extensions = ['.ts']
+const extensions = [".ts"]
 
-const isExternal = filePath => {
-  return !filePath.startsWith('.') && !path.isAbsolute(filePath)
+const isExternal = (filePath) => {
+  return !filePath.startsWith(".") && !path.isAbsolute(filePath)
 }
 
 const root = __dirname
 
-const input = path.resolve(root, './src/index.ts')
-const tsconfig = path.resolve(root, './tsconfig.prod.json')
+const input = path.resolve(root, "./src/index.ts")
+const tsconfig = path.resolve(root, "./tsconfig.prod.json")
 
 export default [
   // CommonJS
@@ -40,11 +40,11 @@ export default [
     input,
     external: isExternal,
     output: {
-      file: path.resolve(root, 'dist/index.cjs'),
-      format: 'cjs',
+      file: path.resolve(root, "dist/index.cjs"),
+      format: "cjs",
       indent: false,
       sourcemap: true,
-      exports: 'auto'
+      exports: "auto",
     },
     plugins: [
       nodeResolve({ extensions }),
@@ -54,11 +54,11 @@ export default [
         useTsconfigDeclarationDir: true,
         tsconfigOverride: {
           compilerOptions: {
-            declaration: true
-          }
-        }
-      })
-    ]
+            declaration: true,
+          },
+        },
+      }),
+    ],
   },
 
   // ES
@@ -66,12 +66,16 @@ export default [
     input,
     external: isExternal,
     output: {
-      file: path.resolve(root, 'dist/index.mjs'),
-      format: 'es',
+      file: path.resolve(root, "dist/index.mjs"),
+      format: "es",
       indent: false,
-      sourcemap: true
+      sourcemap: true,
     },
-    plugins: [nodeResolve({ extensions }), commonjs(), typescript({ tsconfig })]
+    plugins: [
+      nodeResolve({ extensions }),
+      commonjs(),
+      typescript({ tsconfig }),
+    ],
   },
 
   // ES for Browsers
@@ -79,10 +83,10 @@ export default [
     input,
     external: isExternal,
     output: {
-      file: path.resolve(root, 'dist/index.js'),
-      format: 'es',
+      file: path.resolve(root, "dist/index.js"),
+      format: "es",
       indent: false,
-      sourcemap: true
+      sourcemap: true,
     },
     plugins: [
       nodeResolve({ extensions }),
@@ -90,10 +94,10 @@ export default [
       typescript({ tsconfig }),
       replace({
         preventAssignment: true,
-        'process.env.NODE_ENV': JSON.stringify('production')
+        "process.env.NODE_ENV": JSON.stringify("production"),
       }),
-      terser({ module: true, ...terserOptions })
-    ]
+      terser({ module: true, ...terserOptions }),
+    ],
   },
 
   // UMD Development
@@ -101,11 +105,11 @@ export default [
     input,
     external: UMD_EXTERNALS,
     output: {
-      file: path.resolve(root, 'dist/index-dev.umd.js'),
-      format: 'umd',
+      file: path.resolve(root, "dist/index-dev.umd.js"),
+      format: "umd",
       indent: false,
       name: UMD_NAME,
-      globals: UMD_GLOBALS
+      globals: UMD_GLOBALS,
     },
     plugins: [
       nodeResolve({ extensions }),
@@ -113,9 +117,9 @@ export default [
       typescript({ tsconfig }),
       replace({
         preventAssignment: true,
-        'process.env.NODE_ENV': JSON.stringify('development')
-      })
-    ]
+        "process.env.NODE_ENV": JSON.stringify("development"),
+      }),
+    ],
   },
 
   // UMD Production
@@ -123,11 +127,11 @@ export default [
     input,
     external: UMD_EXTERNALS,
     output: {
-      file: path.resolve(root, 'dist/index-prod.umd.js'),
-      format: 'umd',
+      file: path.resolve(root, "dist/index-prod.umd.js"),
+      format: "umd",
       indent: false,
       name: UMD_NAME,
-      globals: UMD_GLOBALS
+      globals: UMD_GLOBALS,
     },
     plugins: [
       nodeResolve({ extensions }),
@@ -135,9 +139,9 @@ export default [
       typescript({ tsconfig }),
       replace({
         preventAssignment: true,
-        'process.env.NODE_ENV': JSON.stringify('production')
+        "process.env.NODE_ENV": JSON.stringify("production"),
       }),
-      terser(terserOptions)
-    ]
-  }
+      terser(terserOptions),
+    ],
+  },
 ]
