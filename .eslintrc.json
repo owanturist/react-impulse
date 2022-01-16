@@ -201,6 +201,30 @@
         "@typescript-eslint/restrict-plus-operands": "error",
         "@typescript-eslint/switch-exhaustiveness-check": "error"
       }
+    },
+    {
+      "files": ["tests/**/*.ts?(x)"],
+      "env": {
+        "jest": true
+      },
+      "extends": [
+        "plugin:jest/recommended",
+        "plugin:jest/style",
+        "plugin:prettier/recommended"
+      ],
+      "rules": {
+        "jest/no-duplicate-hooks": "warn",
+        "jest/no-if": "error",
+        "jest/no-test-return-statement": "error",
+        "jest/prefer-comparison-matcher": "warn",
+        "jest/prefer-equality-matcher": "warn",
+        "jest/prefer-hooks-on-top": "warn",
+        "jest/prefer-spy-on": "error",
+        "jest/prefer-strict-equal": "error",
+        "jest/prefer-todo": "warn",
+        "jest/require-hook": "warn",
+        "jest/require-top-level-describe": "warn"
+      }
     }
   ]
 }
