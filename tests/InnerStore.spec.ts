@@ -1,24 +1,6 @@
-import { Compare, InnerStore } from "../src"
+import { InnerStore } from "../src"
 
-abstract class Counter {
-  public abstract readonly count: number
-
-  public static compare: Compare<Counter> = (prev, next) => {
-    return prev.count === next.count
-  }
-
-  public static clone(counter: Counter): Counter {
-    return { ...counter }
-  }
-
-  public static getCount(counter: Counter): number {
-    return counter.count
-  }
-
-  public static inc({ count }: Counter): Counter {
-    return { count: count + 1 }
-  }
-}
+import { Counter } from "./helpers"
 
 describe("InnerStore#key", () => {
   it("creates uniq store keys", () => {
@@ -297,5 +279,28 @@ describe("InnerStore#subscribe", () => {
     store.setState(Counter.inc)
     expect(spy_1).toHaveBeenCalledTimes(1)
     expect(spy_2).toHaveBeenCalledTimes(2)
+  })
+
+  it("does not emit when a state is comparably equal", () => {
+    const spy = jest.fn()
+    const spyCompare = jest.fn(Counter.compare)
+    const store = InnerStore.of({ count: 0 })
+    const unsubscribe = store.subscribe(spy)
+
+    store.setState(Counter.clone, spyCompare)
+    expect(spy).toHaveBeenCalledTimes(0)
+    expect(spyCompare).toHaveBeenCalledTimes(1)
+
+    store.setState(Counter.clone)
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spyCompare).toHaveBeenCalledTimes(1)
+
+    store.setState(Counter.clone, spyCompare)
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spyCompare).toHaveBeenCalledTimes(2)
+
+    unsubscribe()
+    store.setState(Counter.clone)
+    expect(spy).toHaveBeenCalledTimes(1)
   })
 })

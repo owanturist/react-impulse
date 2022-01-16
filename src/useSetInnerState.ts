@@ -25,7 +25,7 @@ export function useSetInnerState<T>(
   }, [compare])
 
   return useCallback(
-    (update): void => store?.setState(update, compareRef.current),
+    (update) => store?.setState(update, compareRef.current),
     [store],
   )
 }
