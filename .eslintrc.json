@@ -134,7 +134,7 @@
     "import/no-extraneous-dependencies": [
       "error",
       {
-        "devDependencies": ["tests/**/*.spec.ts", "./*.js"]
+        "devDependencies": ["tests/**/*.spec.{ts,tsx}", "./*.{js,ts}"]
       }
     ]
   },
@@ -216,6 +216,7 @@
       "extends": [
         "plugin:jest/recommended",
         "plugin:jest/style",
+        "plugin:jest-dom/recommended",
         "plugin:prettier/recommended"
       ],
       "rules": {
