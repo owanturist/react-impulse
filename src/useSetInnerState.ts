@@ -3,6 +3,8 @@ import { Dispatch, SetStateAction, useRef, useEffect, useCallback } from "react"
 import { Compare, isEqual } from "./utils"
 import { InnerStore } from "./InnerStore"
 
+export type SetInnerState<T> = Dispatch<SetStateAction<T>>
+
 /**
  * A hooks that returns a function to update the store's value.
  * Might be useful when you need a way to update the store's value without subscribing to its changes.
@@ -17,7 +19,7 @@ import { InnerStore } from "./InnerStore"
 export function useSetInnerState<T>(
   store: null | undefined | InnerStore<T>,
   compare: Compare<T> = isEqual,
-): Dispatch<SetStateAction<T>> {
+): SetInnerState<T> {
   const compareRef = useRef(compare)
 
   useEffect(() => {

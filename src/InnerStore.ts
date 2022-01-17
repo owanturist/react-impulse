@@ -33,6 +33,9 @@ export type DeepExtractInnerState<T> = T extends InnerStore<infer R>
   ? ReadonlyArray<ExtractDeepDirect<R>>
   : { [K in keyof T]: ExtractDeepDirect<T[K]> }
 
+/**
+ * @todo add comparator to constructor
+ */
 export class InnerStore<T> implements WatchStore {
   /**
    * Creates a new `InnerStore` instance.

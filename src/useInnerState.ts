@@ -1,9 +1,7 @@
-import { Dispatch, SetStateAction } from "react"
-
 import { Compare, isEqual } from "./utils"
 import { InnerStore } from "./InnerStore"
 import { useGetInnerState } from "./useGetInnerState"
-import { useSetInnerState } from "./useSetInnerState"
+import { SetInnerState, useSetInnerState } from "./useSetInnerState"
 
 /**
  * A hook that is similar to `React.useState` but for `InnerStore` instances.
@@ -23,7 +21,7 @@ import { useSetInnerState } from "./useSetInnerState"
 export function useInnerState<T>(
   store: InnerStore<T>,
   compare?: Compare<T>,
-): [T, Dispatch<SetStateAction<T>>]
+): [T, SetInnerState<T>]
 
 /**
  * The hook that is similar to `React.useState` but for `InnerStore` instances.
@@ -43,7 +41,7 @@ export function useInnerState<T>(
 export function useInnerState<T>(
   store: null | InnerStore<T>,
   compare?: Compare<T>,
-): [null | T, Dispatch<SetStateAction<T>>]
+): [null | T, SetInnerState<T>]
 
 /**
  * A hook that is similar to `React.useState` but for `InnerStore` instances.
@@ -63,7 +61,7 @@ export function useInnerState<T>(
 export function useInnerState<T>(
   store: undefined | InnerStore<T>,
   compare?: Compare<T>,
-): [undefined | T, Dispatch<SetStateAction<T>>]
+): [undefined | T, SetInnerState<T>]
 
 /**
  * A hook that is similar to `React.useState` but for `InnerStore` instances.
@@ -83,11 +81,11 @@ export function useInnerState<T>(
 export function useInnerState<T>(
   store: null | undefined | InnerStore<T>,
   compare?: Compare<T>,
-): [null | undefined | T, Dispatch<SetStateAction<T>>]
+): [null | undefined | T, SetInnerState<T>]
 
 export function useInnerState<T>(
   store: null | undefined | InnerStore<T>,
   compare: Compare<T> = isEqual,
-): [null | undefined | T, Dispatch<SetStateAction<T>>] {
+): [null | undefined | T, SetInnerState<T>] {
   return [useGetInnerState(store), useSetInnerState(store, compare)]
 }

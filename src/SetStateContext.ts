@@ -7,6 +7,7 @@ import { noop } from "./utils"
  * This is useful when multiple stores are updated at the same time.
  *
  * @private
+ * @todo convert to batch setState
  */
 export abstract class SetStateContext {
   private static subscribers: null | Array<Map<string, VoidFunction>> = null
