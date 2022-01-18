@@ -168,7 +168,7 @@ const Counter: React.VFC<{
   }
 
   React.useEffect(() => {
-    setValue(forcedCount)
+    setCount(forcedCount)
   }, [forcedCount])
 
   return (
@@ -332,7 +332,7 @@ const initGameScore = (): GameScoreState => ({
   secondCounter: initCounter(),
 })
 
-const resetGameScore = (state: GameScoreState) => ({
+const resetGameScore = (state: GameScoreState): GameScoreState => ({
   ...state,
   firstCounter: { ...state.firstCounter, count: 0 },
   secondCounter: { ...state.secondCounter, count: 0 },
@@ -659,7 +659,10 @@ interface AppState {
 }
 
 const prepareAppRequestPayload = (state: AppState) => ({
-  games: state.games.map((game) => game.getState()),
+  games: state.games.map((game) => game.getState((gameState) => ({
+    firstCounter: gameState.firstCounter.getState(),
+    secondCounter: gameState.secondCounter.getState(),
+  }))),
 })
 
 const appStore = InnerStore.of({ games: [] })
@@ -676,7 +679,7 @@ const App = () => {
 
   const resetAllGames = () => {
     setState((currentState) => {
-      currentState.games.forEach((game) => resetGameScore(game.getState()))
+      currentState.games.forEach((game) => game.getState(resetGameScore))
 
       return currentState
     })
