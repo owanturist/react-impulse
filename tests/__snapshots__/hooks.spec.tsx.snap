@@ -1,0 +1,606 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Nested stores Performs nested store management 1`] = `
+<div
+  data-testid="counters"
+>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      0
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`Nested stores Performs nested store management 2`] = `
+<div
+  data-testid="counters"
+>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      1
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`Nested stores Performs nested store management 3`] = `
+<div
+  data-testid="counters"
+>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      1
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      0
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`Nested stores Performs nested store management 4`] = `
+<div
+  data-testid="counters"
+>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      1
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      2
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`Nested stores Performs nested store management 5`] = `
+<div
+  data-testid="counters"
+>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      1
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      2
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      3
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`Nested stores Performs nested store management 6`] = `
+<div
+  data-testid="counters"
+>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      1
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      2
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      6
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`Nested stores Performs nested store management 7`] = `
+<div
+  data-testid="counters"
+>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      0
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      0
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      0
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`Nested stores Performs nested store management 8`] = `
+<div
+  data-testid="counters"
+>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      1
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      1
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      1
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`Single store Multiple Setters / Getters 1`] = `
+<div
+  data-testid="getters"
+>
+  <span>
+    0
+  </span>
+  <span>
+    0
+  </span>
+</div>
+`;
+
+exports[`Single store Multiple Setters / Getters 2`] = `
+<div
+  data-testid="getters"
+>
+  <span>
+    1
+  </span>
+  <span>
+    1
+  </span>
+</div>
+`;
+
+exports[`Single store Multiple Setters / Getters 3`] = `
+<div
+  data-testid="getters"
+>
+  <span>
+    2
+  </span>
+  <span>
+    2
+  </span>
+</div>
+`;
+
+exports[`Single store Multiple Setters / Getters 4`] = `
+<div
+  data-testid="getters"
+>
+  <span>
+    3
+  </span>
+  <span>
+    3
+  </span>
+</div>
+`;
+
+exports[`Single store Single Setter / Getter 1`] = `
+<div
+  data-testid="getter"
+>
+  <span>
+    0
+  </span>
+</div>
+`;
+
+exports[`Single store Single Setter / Getter 2`] = `
+<div
+  data-testid="getter"
+>
+  <span>
+    1
+  </span>
+</div>
+`;
+
+exports[`Single store Single Setter / Getter 3`] = `
+<div
+  data-testid="getter"
+>
+  <span>
+    2
+  </span>
+</div>
+`;
+
+exports[`Single store Single Setter / Getter 4`] = `
+<div
+  data-testid="getter"
+>
+  <span>
+    0
+  </span>
+</div>
+`;
+
+exports[`Single store Single Setter / Getter 5`] = `
+<div
+  data-testid="getter"
+>
+  <span>
+    0
+  </span>
+</div>
+`;
+
+exports[`Watch single store Performs single store watching 1`] = `
+<div
+  data-testid="app"
+>
+  <span>
+    less than four
+  </span>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      0
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`Watch single store Performs single store watching 2`] = `
+<div
+  data-testid="app"
+>
+  <span>
+    less than four
+  </span>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      1
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`Watch single store Performs single store watching 3`] = `
+<div
+  data-testid="app"
+>
+  <span>
+    more than one
+  </span>
+  <span>
+    less than four
+  </span>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      2
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`Watch single store Performs single store watching 4`] = `
+<div
+  data-testid="app"
+>
+  <span>
+    more than one
+  </span>
+  <span>
+    less than four
+  </span>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      3
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`Watch single store Performs single store watching 5`] = `
+<div
+  data-testid="app"
+>
+  <span>
+    more than one
+  </span>
+  <div
+    data-testid="counter"
+  >
+    <button
+      data-testid="decrement"
+      type="button"
+    />
+    <span
+      data-testid="count"
+    >
+      4
+    </span>
+    <button
+      data-testid="increment"
+      type="button"
+    />
+  </div>
+</div>
+`;

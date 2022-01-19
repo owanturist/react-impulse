@@ -7,6 +7,7 @@ import {
   useSetInnerState,
   useInnerState,
   useInnerReducer,
+  useInnerWatch,
 } from "../src"
 
 import { Counter } from "./helpers"
@@ -28,21 +29,47 @@ const useThrowAfterChanges = (
   }, deps) // eslint-disable-line react-hooks/exhaustive-deps
 }
 
-const getByTestIdAt = (id: string, position: number): HTMLElement => {
-  return screen.getAllByTestId(id)[position]!
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const withinNthCounter = (position: number) => {
+  return within(screen.getAllByTestId("counter")[position]!)
 }
+
+const CounterComponent: React.VFC<{
+  count: InnerStore<number>
+  onRender: VoidFunction
+}> = React.memo(({ count: countStore, onRender }) => {
+  const [count, setCount] = useInnerState(countStore)
+
+  useThrowAfterChanges(1, [setCount])
+  onRender()
+
+  return (
+    <div data-testid="counter">
+      <button
+        type="button"
+        data-testid="decrement"
+        onClick={() => setCount((x) => x - 1)}
+      />
+      <span data-testid="count">{count}</span>
+      <button
+        type="button"
+        data-testid="increment"
+        onClick={() => setCount(count + 1)}
+      />
+    </div>
+  )
+})
 
 describe("Single store", () => {
   const GetterComponent: React.VFC<{
-    name: string
     store: InnerStore<Counter>
-    onRender: React.Dispatch<Counter>
-  }> = ({ name, store, onRender }) => {
+    onRender: VoidFunction
+  }> = ({ store, onRender }) => {
     const state = useGetInnerState(store)
 
-    onRender(state)
+    onRender()
 
-    return <div data-testid={name}>{state.count}</div>
+    return <span>{state.count}</span>
   }
 
   const SetterComponent: React.VFC<{
@@ -75,14 +102,16 @@ describe("Single store", () => {
   const SingleSetterSingleGetter: React.VFC<{
     store: InnerStore<Counter>
     onRootRender: VoidFunction
-    onGetterRender: React.Dispatch<Counter>
+    onGetterRender: VoidFunction
     onSetterRender: VoidFunction
   }> = ({ store, onRootRender, onGetterRender, onSetterRender }) => {
     onRootRender()
 
     return (
       <div>
-        <GetterComponent name="count" store={store} onRender={onGetterRender} />
+        <div data-testid="getter">
+          <GetterComponent store={store} onRender={onGetterRender} />
+        </div>
         <SetterComponent
           name="controls"
           store={store}
@@ -111,42 +140,42 @@ describe("Single store", () => {
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
     expect(onGetterRender).toHaveBeenCalledTimes(1)
-    expect(onGetterRender).toHaveBeenNthCalledWith(1, { count: 0 })
+    expect(screen.getByTestId("getter")).toMatchSnapshot()
 
     // increment by from the component
     fireEvent.click(screen.getByTestId("increment"))
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
     expect(onGetterRender).toHaveBeenCalledTimes(2)
-    expect(onGetterRender).toHaveBeenNthCalledWith(2, { count: 1 })
+    expect(screen.getByTestId("getter")).toMatchSnapshot()
 
     // increment from the outside
     act(() => store.setState(Counter.inc))
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
     expect(onGetterRender).toHaveBeenCalledTimes(3)
-    expect(onGetterRender).toHaveBeenNthCalledWith(3, { count: 2 })
+    expect(screen.getByTestId("getter")).toMatchSnapshot()
 
     // reset from the component
     fireEvent.click(screen.getByTestId("reset"))
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
     expect(onGetterRender).toHaveBeenCalledTimes(4)
-    expect(onGetterRender).toHaveBeenNthCalledWith(4, { count: 0 })
+    expect(screen.getByTestId("getter")).toMatchSnapshot()
 
     // reset second time in a row
     fireEvent.click(screen.getByTestId("reset"))
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
     expect(onGetterRender).toHaveBeenCalledTimes(4)
-    expect(onGetterRender).toHaveBeenNthCalledWith(4, { count: 0 })
+    expect(screen.getByTestId("getter")).toMatchSnapshot()
   })
 
   const MultipleSetterMultipleGetter: React.VFC<{
     store: InnerStore<Counter>
     onRootRender: VoidFunction
-    onFirstGetterRender: React.Dispatch<Counter>
-    onSecondGetterRender: React.Dispatch<Counter>
+    onFirstGetterRender: VoidFunction
+    onSecondGetterRender: VoidFunction
     onFirstSetterRender: VoidFunction
     onSecondSetterRender: VoidFunction
   }> = ({
@@ -163,16 +192,10 @@ describe("Single store", () => {
 
     return (
       <div>
-        <GetterComponent
-          name="count-1"
-          store={store}
-          onRender={onFirstGetterRender}
-        />
-        <GetterComponent
-          name="count-2"
-          store={store}
-          onRender={onSecondGetterRender}
-        />
+        <div data-testid="getters">
+          <GetterComponent store={store} onRender={onFirstGetterRender} />
+          <GetterComponent store={store} onRender={onSecondGetterRender} />
+        </div>
         <SetterComponent
           name="controls-1"
           store={store}
@@ -212,8 +235,7 @@ describe("Single store", () => {
     expect(onSecondSetterRender).toHaveBeenCalledTimes(1)
     expect(onFirstGetterRender).toHaveBeenCalledTimes(1)
     expect(onSecondGetterRender).toHaveBeenCalledTimes(1)
-    expect(onFirstGetterRender).toHaveBeenNthCalledWith(1, { count: 0 })
-    expect(onSecondGetterRender).toHaveBeenNthCalledWith(1, { count: 0 })
+    expect(screen.getByTestId("getters")).toMatchSnapshot()
 
     // increment from the first component
     fireEvent.click(
@@ -224,8 +246,7 @@ describe("Single store", () => {
     expect(onSecondSetterRender).toHaveBeenCalledTimes(1)
     expect(onFirstGetterRender).toHaveBeenCalledTimes(2)
     expect(onSecondGetterRender).toHaveBeenCalledTimes(2)
-    expect(onFirstGetterRender).toHaveBeenNthCalledWith(2, { count: 1 })
-    expect(onSecondGetterRender).toHaveBeenNthCalledWith(2, { count: 1 })
+    expect(screen.getByTestId("getters")).toMatchSnapshot()
 
     // increment from the second component
     fireEvent.click(
@@ -236,8 +257,7 @@ describe("Single store", () => {
     expect(onSecondSetterRender).toHaveBeenCalledTimes(1)
     expect(onFirstGetterRender).toHaveBeenCalledTimes(3)
     expect(onSecondGetterRender).toHaveBeenCalledTimes(3)
-    expect(onFirstGetterRender).toHaveBeenNthCalledWith(3, { count: 2 })
-    expect(onSecondGetterRender).toHaveBeenNthCalledWith(3, { count: 2 })
+    expect(screen.getByTestId("getters")).toMatchSnapshot()
 
     // increment from the outside
     act(() => store.setState(Counter.inc))
@@ -246,11 +266,11 @@ describe("Single store", () => {
     expect(onSecondSetterRender).toHaveBeenCalledTimes(1)
     expect(onFirstGetterRender).toHaveBeenCalledTimes(4)
     expect(onSecondGetterRender).toHaveBeenCalledTimes(4)
-    expect(onFirstGetterRender).toHaveBeenNthCalledWith(4, { count: 3 })
-    expect(onSecondGetterRender).toHaveBeenNthCalledWith(4, { count: 3 })
+    expect(screen.getByTestId("getters")).toMatchSnapshot()
   })
 })
 
+// TODO use CounterComponent
 describe("Multiple stores", () => {
   const LoginForm: React.VFC<{
     email: InnerStore<string>
@@ -347,31 +367,6 @@ describe("Multiple stores", () => {
 })
 
 describe("Nested stores", () => {
-  const CounterComponent: React.VFC<{
-    count: InnerStore<number>
-    onRender: React.Dispatch<number>
-  }> = React.memo(({ count: countStore, onRender }) => {
-    const [count, setCount] = useInnerState(countStore)
-
-    useThrowAfterChanges(1, [setCount])
-    onRender(count)
-
-    return (
-      <div data-testid="counter">
-        <button
-          type="button"
-          data-testid="increment"
-          onClick={() => setCount(count + 1)}
-        />
-        <button
-          type="button"
-          data-testid="double"
-          onClick={() => setCount((x) => 2 * x)}
-        />
-      </div>
-    )
-  })
-
   interface AppState {
     counts: ReadonlyArray<InnerStore<number>>
   }
@@ -380,7 +375,7 @@ describe("Nested stores", () => {
   const App: React.VFC<{
     store: InnerStore<AppState>
     onRender: VoidFunction
-    onCountRender: React.Dispatch<number>
+    onCountRender: VoidFunction
   }> = ({ store, onRender, onCountRender }) => {
     const [state, dispatch] = useInnerReducer<AppState, AppAction>(
       store,
@@ -417,13 +412,15 @@ describe("Nested stores", () => {
           data-testid="reset-counters"
           onClick={() => dispatch({ type: "ResetCounters" })}
         />
-        {state.counts.map((count) => (
-          <CounterComponent
-            key={count.key}
-            count={count}
-            onRender={onCountRender}
-          />
-        ))}
+        <div data-testid="counters">
+          {state.counts.map((count) => (
+            <CounterComponent
+              key={count.key}
+              count={count}
+              onRender={onCountRender}
+            />
+          ))}
+        </div>
       </div>
     )
   }
@@ -444,31 +441,26 @@ describe("Nested stores", () => {
     fireEvent.click(screen.getByTestId("add-counter"))
     expect(onRender).toHaveBeenCalledTimes(2)
     expect(onCountRender).toHaveBeenCalledTimes(1)
-    expect(onCountRender).toHaveBeenNthCalledWith(1, 0)
+    expect(screen.getByTestId("counters")).toMatchSnapshot()
 
     // increment the first counter
-    fireEvent.click(
-      within(getByTestIdAt("counter", 0)).getByTestId("increment"),
-    )
+    fireEvent.click(withinNthCounter(0).getByTestId("increment"))
     expect(onRender).toHaveBeenCalledTimes(2)
     expect(onCountRender).toHaveBeenCalledTimes(2)
-    expect(onCountRender).toHaveBeenNthCalledWith(2, 1)
+    expect(screen.getByTestId("counters")).toMatchSnapshot()
 
     // add second counter
     fireEvent.click(screen.getByTestId("add-counter"))
     expect(onRender).toHaveBeenCalledTimes(3)
     expect(onCountRender).toHaveBeenCalledTimes(3)
-    expect(onCountRender).toHaveBeenNthCalledWith(3, 0)
+    expect(screen.getByTestId("counters")).toMatchSnapshot()
 
-    // increment and then double second counter
-    fireEvent.click(
-      within(getByTestIdAt("counter", 1)).getByTestId("increment"),
-    )
-    fireEvent.click(within(getByTestIdAt("counter", 1)).getByTestId("double"))
+    // double increment second counter
+    fireEvent.click(withinNthCounter(1).getByTestId("increment"))
+    fireEvent.click(withinNthCounter(1).getByTestId("increment"))
     expect(onRender).toHaveBeenCalledTimes(3)
     expect(onCountRender).toHaveBeenCalledTimes(5)
-    expect(onCountRender).toHaveBeenNthCalledWith(4, 1)
-    expect(onCountRender).toHaveBeenNthCalledWith(5, 2)
+    expect(screen.getByTestId("counters")).toMatchSnapshot()
 
     // add third counter from the outside
     act(() => {
@@ -479,7 +471,7 @@ describe("Nested stores", () => {
     })
     expect(onRender).toHaveBeenCalledTimes(4)
     expect(onCountRender).toHaveBeenCalledTimes(6)
-    expect(onCountRender).toHaveBeenNthCalledWith(6, 3)
+    expect(screen.getByTestId("counters")).toMatchSnapshot()
 
     // double the third counter from the outside
     act(() => {
@@ -487,15 +479,13 @@ describe("Nested stores", () => {
     })
     expect(onRender).toHaveBeenCalledTimes(4)
     expect(onCountRender).toHaveBeenCalledTimes(7)
-    expect(onCountRender).toHaveBeenNthCalledWith(7, 6)
+    expect(screen.getByTestId("counters")).toMatchSnapshot()
 
     // reset
     fireEvent.click(screen.getByTestId("reset-counters"))
     expect(onRender).toHaveBeenCalledTimes(4)
     expect(onCountRender).toHaveBeenCalledTimes(10)
-    expect(onCountRender).toHaveBeenNthCalledWith(8, 0)
-    expect(onCountRender).toHaveBeenNthCalledWith(9, 0)
-    expect(onCountRender).toHaveBeenNthCalledWith(10, 0)
+    expect(screen.getByTestId("counters")).toMatchSnapshot()
 
     // increment all from the outside
     act(() => {
@@ -503,8 +493,76 @@ describe("Nested stores", () => {
     })
     expect(onRender).toHaveBeenCalledTimes(4)
     expect(onCountRender).toHaveBeenCalledTimes(13)
-    expect(onCountRender).toHaveBeenNthCalledWith(11, 1)
-    expect(onCountRender).toHaveBeenNthCalledWith(12, 1)
-    expect(onCountRender).toHaveBeenNthCalledWith(13, 1)
+    expect(screen.getByTestId("counters")).toMatchSnapshot()
+  })
+})
+
+describe("Watch single store", () => {
+  const App: React.VFC<{
+    store: InnerStore<number>
+    onRender: VoidFunction
+    onCountRender: VoidFunction
+  }> = ({ store, onCountRender, onRender }) => {
+    const [moreThenOne, lessThanFour] = useInnerWatch(
+      () => {
+        const count = store.getState()
+
+        return [count > 1, count < 4]
+      },
+      ([left1, right1], [left2, right2]) => {
+        return left1 === left2 && right1 === right2
+      },
+    )
+    onRender()
+
+    return (
+      <div data-testid="app">
+        {moreThenOne && <span>more than one</span>}
+        {lessThanFour && <span>less than four</span>}
+
+        <CounterComponent count={store} onRender={onCountRender} />
+      </div>
+    )
+  }
+
+  it("Performs single store watching", () => {
+    const store = InnerStore.of(0)
+    const onCountRender = jest.fn()
+    const onRender = jest.fn()
+
+    render(
+      <App store={store} onCountRender={onCountRender} onRender={onRender} />,
+    )
+
+    // initial render and watcher setup
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onCountRender).toHaveBeenCalledTimes(1)
+    expect(screen.getByTestId("app")).toMatchSnapshot()
+
+    // increment
+    fireEvent.click(screen.getByTestId("increment"))
+    expect(onRender).toHaveBeenCalledTimes(1) // does not re-render
+    expect(onCountRender).toHaveBeenCalledTimes(2)
+    expect(screen.getByTestId("app")).toMatchSnapshot()
+
+    // increment again
+    fireEvent.click(screen.getByTestId("increment"))
+    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onCountRender).toHaveBeenCalledTimes(3)
+    expect(screen.getByTestId("app")).toMatchSnapshot()
+
+    // increment from the outside
+    act(() => {
+      store.setState((state) => state + 1)
+    })
+    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onCountRender).toHaveBeenCalledTimes(4)
+    expect(screen.getByTestId("app")).toMatchSnapshot()
+
+    // increment again
+    fireEvent.click(screen.getByTestId("increment"))
+    expect(onRender).toHaveBeenCalledTimes(3)
+    expect(onCountRender).toHaveBeenCalledTimes(5)
+    expect(screen.getByTestId("app")).toMatchSnapshot()
   })
 })
