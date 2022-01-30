@@ -1,9 +1,102 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Multiple stores Performs multi store management 1`] = `
+<div>
+  <input
+    data-testid="email"
+    type="email"
+    value=""
+  />
+  <input
+    data-testid="password"
+    type="password"
+    value=""
+  />
+  <button
+    data-testid="reset"
+    type="button"
+  />
+</div>
+`;
+
+exports[`Multiple stores Performs multi store management 2`] = `
+<div>
+  <input
+    data-testid="email"
+    type="email"
+    value="john-doe@gmail.com"
+  />
+  <input
+    data-testid="password"
+    type="password"
+    value=""
+  />
+  <button
+    data-testid="reset"
+    type="button"
+  />
+</div>
+`;
+
+exports[`Multiple stores Performs multi store management 3`] = `
+<div>
+  <input
+    data-testid="email"
+    type="email"
+    value="john-doe@gmail.com"
+  />
+  <input
+    data-testid="password"
+    type="password"
+    value="qwerty"
+  />
+  <button
+    data-testid="reset"
+    type="button"
+  />
+</div>
+`;
+
+exports[`Multiple stores Performs multi store management 4`] = `
+<div>
+  <input
+    data-testid="email"
+    type="email"
+    value="admin@gmail.com"
+  />
+  <input
+    data-testid="password"
+    type="password"
+    value="admin"
+  />
+  <button
+    data-testid="reset"
+    type="button"
+  />
+</div>
+`;
+
+exports[`Multiple stores Performs multi store management 5`] = `
+<div>
+  <input
+    data-testid="email"
+    type="email"
+    value=""
+  />
+  <input
+    data-testid="password"
+    type="password"
+    value=""
+  />
+  <button
+    data-testid="reset"
+    type="button"
+  />
+</div>
+`;
+
 exports[`Nested stores Performs nested store management 1`] = `
-<div
-  data-testid="counters"
->
+Array [
   <div
     data-testid="counter"
   >
@@ -20,14 +113,12 @@ exports[`Nested stores Performs nested store management 1`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
-</div>
+  </div>,
+]
 `;
 
 exports[`Nested stores Performs nested store management 2`] = `
-<div
-  data-testid="counters"
->
+Array [
   <div
     data-testid="counter"
   >
@@ -44,14 +135,12 @@ exports[`Nested stores Performs nested store management 2`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
-</div>
+  </div>,
+]
 `;
 
 exports[`Nested stores Performs nested store management 3`] = `
-<div
-  data-testid="counters"
->
+Array [
   <div
     data-testid="counter"
   >
@@ -68,7 +157,7 @@ exports[`Nested stores Performs nested store management 3`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
+  </div>,
   <div
     data-testid="counter"
   >
@@ -85,14 +174,12 @@ exports[`Nested stores Performs nested store management 3`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
-</div>
+  </div>,
+]
 `;
 
 exports[`Nested stores Performs nested store management 4`] = `
-<div
-  data-testid="counters"
->
+Array [
   <div
     data-testid="counter"
   >
@@ -109,7 +196,7 @@ exports[`Nested stores Performs nested store management 4`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
+  </div>,
   <div
     data-testid="counter"
   >
@@ -126,14 +213,12 @@ exports[`Nested stores Performs nested store management 4`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
-</div>
+  </div>,
+]
 `;
 
 exports[`Nested stores Performs nested store management 5`] = `
-<div
-  data-testid="counters"
->
+Array [
   <div
     data-testid="counter"
   >
@@ -150,7 +235,7 @@ exports[`Nested stores Performs nested store management 5`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
+  </div>,
   <div
     data-testid="counter"
   >
@@ -167,7 +252,7 @@ exports[`Nested stores Performs nested store management 5`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
+  </div>,
   <div
     data-testid="counter"
   >
@@ -184,14 +269,12 @@ exports[`Nested stores Performs nested store management 5`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
-</div>
+  </div>,
+]
 `;
 
 exports[`Nested stores Performs nested store management 6`] = `
-<div
-  data-testid="counters"
->
+Array [
   <div
     data-testid="counter"
   >
@@ -208,7 +291,7 @@ exports[`Nested stores Performs nested store management 6`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
+  </div>,
   <div
     data-testid="counter"
   >
@@ -225,7 +308,7 @@ exports[`Nested stores Performs nested store management 6`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
+  </div>,
   <div
     data-testid="counter"
   >
@@ -242,14 +325,12 @@ exports[`Nested stores Performs nested store management 6`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
-</div>
+  </div>,
+]
 `;
 
 exports[`Nested stores Performs nested store management 7`] = `
-<div
-  data-testid="counters"
->
+Array [
   <div
     data-testid="counter"
   >
@@ -266,7 +347,7 @@ exports[`Nested stores Performs nested store management 7`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
+  </div>,
   <div
     data-testid="counter"
   >
@@ -283,7 +364,7 @@ exports[`Nested stores Performs nested store management 7`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
+  </div>,
   <div
     data-testid="counter"
   >
@@ -300,14 +381,12 @@ exports[`Nested stores Performs nested store management 7`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
-</div>
+  </div>,
+]
 `;
 
 exports[`Nested stores Performs nested store management 8`] = `
-<div
-  data-testid="counters"
->
+Array [
   <div
     data-testid="counter"
   >
@@ -324,7 +403,7 @@ exports[`Nested stores Performs nested store management 8`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
+  </div>,
   <div
     data-testid="counter"
   >
@@ -341,7 +420,7 @@ exports[`Nested stores Performs nested store management 8`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
+  </div>,
   <div
     data-testid="counter"
   >
@@ -358,116 +437,112 @@ exports[`Nested stores Performs nested store management 8`] = `
       data-testid="increment"
       type="button"
     />
-  </div>
-</div>
+  </div>,
+]
 `;
 
 exports[`Single store Multiple Setters / Getters 1`] = `
-<div
-  data-testid="getters"
->
-  <span>
+Array [
+  <span
+    data-testid="getter"
+  >
     0
-  </span>
-  <span>
+  </span>,
+  <span
+    data-testid="getter"
+  >
     0
-  </span>
-</div>
+  </span>,
+]
 `;
 
 exports[`Single store Multiple Setters / Getters 2`] = `
-<div
-  data-testid="getters"
->
-  <span>
+Array [
+  <span
+    data-testid="getter"
+  >
     1
-  </span>
-  <span>
+  </span>,
+  <span
+    data-testid="getter"
+  >
     1
-  </span>
-</div>
+  </span>,
+]
 `;
 
 exports[`Single store Multiple Setters / Getters 3`] = `
-<div
-  data-testid="getters"
->
-  <span>
+Array [
+  <span
+    data-testid="getter"
+  >
     2
-  </span>
-  <span>
+  </span>,
+  <span
+    data-testid="getter"
+  >
     2
-  </span>
-</div>
+  </span>,
+]
 `;
 
 exports[`Single store Multiple Setters / Getters 4`] = `
-<div
-  data-testid="getters"
->
-  <span>
+Array [
+  <span
+    data-testid="getter"
+  >
     3
-  </span>
-  <span>
+  </span>,
+  <span
+    data-testid="getter"
+  >
     3
-  </span>
-</div>
+  </span>,
+]
 `;
 
 exports[`Single store Single Setter / Getter 1`] = `
-<div
+<span
   data-testid="getter"
 >
-  <span>
-    0
-  </span>
-</div>
+  0
+</span>
 `;
 
 exports[`Single store Single Setter / Getter 2`] = `
-<div
+<span
   data-testid="getter"
 >
-  <span>
-    1
-  </span>
-</div>
+  1
+</span>
 `;
 
 exports[`Single store Single Setter / Getter 3`] = `
-<div
+<span
   data-testid="getter"
 >
-  <span>
-    2
-  </span>
-</div>
+  2
+</span>
 `;
 
 exports[`Single store Single Setter / Getter 4`] = `
-<div
+<span
   data-testid="getter"
 >
-  <span>
-    0
-  </span>
-</div>
+  0
+</span>
 `;
 
 exports[`Single store Single Setter / Getter 5`] = `
-<div
+<span
   data-testid="getter"
 >
-  <span>
-    0
-  </span>
-</div>
+  0
+</span>
 `;
 
 exports[`Watch single store Performs single store watching 1`] = `
-<div
-  data-testid="app"
->
+<div>
   <span>
     less than four
   </span>
@@ -492,9 +567,7 @@ exports[`Watch single store Performs single store watching 1`] = `
 `;
 
 exports[`Watch single store Performs single store watching 2`] = `
-<div
-  data-testid="app"
->
+<div>
   <span>
     less than four
   </span>
@@ -519,9 +592,7 @@ exports[`Watch single store Performs single store watching 2`] = `
 `;
 
 exports[`Watch single store Performs single store watching 3`] = `
-<div
-  data-testid="app"
->
+<div>
   <span>
     more than one
   </span>
@@ -549,9 +620,7 @@ exports[`Watch single store Performs single store watching 3`] = `
 `;
 
 exports[`Watch single store Performs single store watching 4`] = `
-<div
-  data-testid="app"
->
+<div>
   <span>
     more than one
   </span>
@@ -579,9 +648,7 @@ exports[`Watch single store Performs single store watching 4`] = `
 `;
 
 exports[`Watch single store Performs single store watching 5`] = `
-<div
-  data-testid="app"
->
+<div>
   <span>
     more than one
   </span>
