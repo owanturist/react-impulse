@@ -411,36 +411,42 @@ describe("Nested stores", () => {
 
     expect(onRender).toHaveBeenCalledTimes(1)
     expect(onCounterRender).toHaveBeenCalledTimes(0)
+    expectCounts([])
+    jest.clearAllMocks()
 
     // add first counter
     fireEvent.click(screen.getByTestId("add-counter"))
-    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onRender).toHaveBeenCalledTimes(1)
     expect(onCounterRender).toHaveBeenCalledTimes(1)
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
-    expect(screen.getAllByTestId("counter")).toMatchSnapshot()
+    expectCounts([0])
+    jest.clearAllMocks()
 
     // increment the first counter
     fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
-    expect(onRender).toHaveBeenCalledTimes(2)
-    expect(onCounterRender).toHaveBeenCalledTimes(2)
-    expect(onCounterRender).toHaveBeenNthCalledWith(2, 0)
-    expect(screen.getAllByTestId("counter")).toMatchSnapshot()
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
+    expectCounts([1])
+    jest.clearAllMocks()
 
     // add second counter
     fireEvent.click(screen.getByTestId("add-counter"))
-    expect(onRender).toHaveBeenCalledTimes(3)
-    expect(onCounterRender).toHaveBeenCalledTimes(3)
-    expect(onCounterRender).toHaveBeenNthCalledWith(3, 1)
-    expect(screen.getAllByTestId("counter")).toMatchSnapshot()
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 1)
+    expectCounts([1, 0])
+    jest.clearAllMocks()
 
     // double increment second counter
     fireEvent.click(withinNth("counter", 1).getByTestId("increment"))
     fireEvent.click(withinNth("counter", 1).getByTestId("increment"))
-    expect(onRender).toHaveBeenCalledTimes(3)
-    expect(onCounterRender).toHaveBeenCalledTimes(5)
-    expect(onCounterRender).toHaveBeenNthCalledWith(4, 1)
-    expect(onCounterRender).toHaveBeenNthCalledWith(5, 1)
-    expect(screen.getAllByTestId("counter")).toMatchSnapshot()
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).toHaveBeenCalledTimes(2)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)
+    expectCounts([1, 2])
+    jest.clearAllMocks()
 
     // add third counter from the outside
     act(() => {
@@ -449,39 +455,42 @@ describe("Nested stores", () => {
         counts: [...state.counts, InnerStore.of(3)],
       }))
     })
-    expect(onRender).toHaveBeenCalledTimes(4)
-    expect(onCounterRender).toHaveBeenCalledTimes(6)
-    expect(onCounterRender).toHaveBeenNthCalledWith(6, 2)
-    expect(screen.getAllByTestId("counter")).toMatchSnapshot()
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 2)
+    expectCounts([1, 2, 3])
+    jest.clearAllMocks()
 
     // double the third counter from the outside
     act(() => {
       store.getState().counts[2]!.setState((x) => 2 * x)
     })
-    expect(onRender).toHaveBeenCalledTimes(4)
-    expect(onCounterRender).toHaveBeenCalledTimes(7)
-    expect(onCounterRender).toHaveBeenNthCalledWith(7, 2)
-    expect(screen.getAllByTestId("counter")).toMatchSnapshot()
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 2)
+    expectCounts([1, 2, 6])
+    jest.clearAllMocks()
 
     // reset
     fireEvent.click(screen.getByTestId("reset-counters"))
-    expect(onRender).toHaveBeenCalledTimes(4)
-    expect(onCounterRender).toHaveBeenCalledTimes(10)
-    expect(onCounterRender).toHaveBeenNthCalledWith(8, 0)
-    expect(onCounterRender).toHaveBeenNthCalledWith(9, 1)
-    expect(onCounterRender).toHaveBeenNthCalledWith(10, 2)
-    expect(screen.getAllByTestId("counter")).toMatchSnapshot()
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).toHaveBeenCalledTimes(3)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
+    expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(3, 2)
+    expectCounts([0, 0, 0])
+    jest.clearAllMocks()
 
     // increment all from the outside
     act(() => {
       store.getState().counts.forEach((count) => count.setState((x) => x + 1))
     })
-    expect(onRender).toHaveBeenCalledTimes(4)
-    expect(onCounterRender).toHaveBeenCalledTimes(13)
-    expect(onCounterRender).toHaveBeenNthCalledWith(11, 0)
-    expect(onCounterRender).toHaveBeenNthCalledWith(12, 1)
-    expect(onCounterRender).toHaveBeenNthCalledWith(13, 2)
-    expect(screen.getAllByTestId("counter")).toMatchSnapshot()
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).toHaveBeenCalledTimes(3)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
+    expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(3, 2)
+    expectCounts([1, 1, 1])
   })
 })
 
