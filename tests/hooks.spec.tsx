@@ -1054,7 +1054,7 @@ describe("Watch nested stores", () => {
     ["single memoized watcher", SingleMemoizedWatcherApp],
     ["multiple watchers", MultipleWatchersApp],
     ["multiple memoized watchers", MultipleMemoizedWatchersApp],
-  ])("watches single store with %s", (_, App) => {
+  ])("watches nested stores with %s", (_, App) => {
     const store = InnerStore.of<AppState>({
       counts: [],
     })
