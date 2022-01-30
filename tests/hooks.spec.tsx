@@ -17,30 +17,46 @@ const withinNth = (testId: string, position: number) => {
   return within(screen.getAllByTestId(testId)[position]!)
 }
 
+const expectCounts = (expecting: ReadonlyArray<number>): void => {
+  const counters = screen.queryAllByTestId("counter")
+
+  expect(counters).toHaveLength(expecting.length)
+
+  for (let i = 0; i < expecting.length; i++) {
+    expect(within(counters[i]!).getByTestId("count")).toHaveTextContent(
+      expecting[i]!.toString(),
+    )
+  }
+}
+
 const CounterComponent: React.VFC<{
   count: InnerStore<number>
   onRender: VoidFunction
-}> = React.memo(({ count: countStore, onRender }) => {
-  const [count, setCount] = useInnerState(countStore)
+}> = React.memo(
+  ({ count: countStore, onRender }) => {
+    const [count, setCount] = useInnerState(countStore)
 
-  onRender()
+    onRender()
 
-  return (
-    <div data-testid="counter">
-      <button
-        type="button"
-        data-testid="decrement"
-        onClick={() => setCount((x) => x - 1)}
-      />
-      <span data-testid="count">{count}</span>
-      <button
-        type="button"
-        data-testid="increment"
-        onClick={() => setCount(count + 1)}
-      />
-    </div>
-  )
-})
+    return (
+      <div data-testid="counter">
+        <button
+          type="button"
+          data-testid="decrement"
+          onClick={() => setCount((x) => x - 1)}
+        />
+        <span data-testid="count">{count}</span>
+        <button
+          type="button"
+          data-testid="increment"
+          onClick={() => setCount(count + 1)}
+        />
+      </div>
+    )
+  },
+  // onRender is ignored
+  (prevProps, nextProps) => prevProps.count === nextProps.count,
+)
 
 describe("Single store", () => {
   const GetterComponent: React.VFC<{
@@ -114,35 +130,53 @@ describe("Single store", () => {
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
     expect(onGetterRender).toHaveBeenCalledTimes(1)
-    expect(screen.getByTestId("getter")).toMatchSnapshot()
+    expect(screen.getByTestId("getter")).toHaveTextContent("0")
 
     // increment by from the component
     fireEvent.click(screen.getByTestId("increment"))
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
     expect(onGetterRender).toHaveBeenCalledTimes(2)
-    expect(screen.getByTestId("getter")).toMatchSnapshot()
+    expect(screen.getByTestId("getter")).toHaveTextContent("1")
 
     // increment from the outside
     act(() => store.setState(Counter.inc))
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
     expect(onGetterRender).toHaveBeenCalledTimes(3)
-    expect(screen.getByTestId("getter")).toMatchSnapshot()
+    expect(screen.getByTestId("getter")).toHaveTextContent("2")
 
     // reset from the component
     fireEvent.click(screen.getByTestId("reset"))
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
     expect(onGetterRender).toHaveBeenCalledTimes(4)
-    expect(screen.getByTestId("getter")).toMatchSnapshot()
+    expect(screen.getByTestId("getter")).toHaveTextContent("0")
 
     // reset second time in a row
     fireEvent.click(screen.getByTestId("reset"))
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
     expect(onGetterRender).toHaveBeenCalledTimes(4)
-    expect(screen.getByTestId("getter")).toMatchSnapshot()
+    expect(screen.getByTestId("getter")).toHaveTextContent("0")
+
+    // increment twice in a row
+    fireEvent.click(screen.getByTestId("increment"))
+    fireEvent.click(screen.getByTestId("increment"))
+    expect(onRootRender).toHaveBeenCalledTimes(1)
+    expect(onSetterRender).toHaveBeenCalledTimes(1)
+    expect(onGetterRender).toHaveBeenCalledTimes(6)
+    expect(screen.getByTestId("getter")).toHaveTextContent("2")
+
+    // increment twice in a row from the outside
+    act(() => {
+      store.setState(Counter.inc)
+      store.setState(Counter.inc)
+    })
+    expect(onRootRender).toHaveBeenCalledTimes(1)
+    expect(onSetterRender).toHaveBeenCalledTimes(1)
+    expect(onGetterRender).toHaveBeenCalledTimes(7)
+    expect(screen.getByTestId("getter")).toHaveTextContent("4")
   })
 
   const MultipleSetterMultipleGetter: React.VFC<{
@@ -160,9 +194,7 @@ describe("Single store", () => {
     onFirstSetterRender,
     onSecondSetterRender,
   }) => {
-    React.useEffect(() => {
-      onRootRender()
-    }, [onRootRender])
+    onRootRender()
 
     return (
       <div>
@@ -317,8 +349,8 @@ describe("Nested stores", () => {
   const App: React.VFC<{
     store: InnerStore<AppState>
     onRender: VoidFunction
-    onCountRender: VoidFunction
-  }> = ({ store, onRender, onCountRender }) => {
+    onCounterRender: React.Dispatch<number>
+  }> = ({ store, onRender, onCounterRender }) => {
     const [state, dispatch] = useInnerReducer<AppState, AppAction>(
       store,
       (currentState, action) => {
@@ -353,11 +385,11 @@ describe("Nested stores", () => {
           data-testid="reset-counters"
           onClick={() => dispatch({ type: "ResetCounters" })}
         />
-        {state.counts.map((count) => (
+        {state.counts.map((count, index) => (
           <CounterComponent
             key={count.key}
             count={count}
-            onRender={onCountRender}
+            onRender={() => onCounterRender(index)}
           />
         ))}
       </>
@@ -367,38 +399,47 @@ describe("Nested stores", () => {
   it("Performs nested store management", () => {
     const store = InnerStore.of<AppState>({ counts: [] })
     const onRender = jest.fn()
-    const onCountRender = jest.fn()
+    const onCounterRender = jest.fn()
 
     render(
-      <App store={store} onRender={onRender} onCountRender={onCountRender} />,
+      <App
+        store={store}
+        onRender={onRender}
+        onCounterRender={onCounterRender}
+      />,
     )
 
     expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCountRender).toHaveBeenCalledTimes(0)
+    expect(onCounterRender).toHaveBeenCalledTimes(0)
 
     // add first counter
     fireEvent.click(screen.getByTestId("add-counter"))
     expect(onRender).toHaveBeenCalledTimes(2)
-    expect(onCountRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expect(screen.getAllByTestId("counter")).toMatchSnapshot()
 
     // increment the first counter
     fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
     expect(onRender).toHaveBeenCalledTimes(2)
-    expect(onCountRender).toHaveBeenCalledTimes(2)
+    expect(onCounterRender).toHaveBeenCalledTimes(2)
+    expect(onCounterRender).toHaveBeenNthCalledWith(2, 0)
     expect(screen.getAllByTestId("counter")).toMatchSnapshot()
 
     // add second counter
     fireEvent.click(screen.getByTestId("add-counter"))
     expect(onRender).toHaveBeenCalledTimes(3)
-    expect(onCountRender).toHaveBeenCalledTimes(3)
+    expect(onCounterRender).toHaveBeenCalledTimes(3)
+    expect(onCounterRender).toHaveBeenNthCalledWith(3, 1)
     expect(screen.getAllByTestId("counter")).toMatchSnapshot()
 
     // double increment second counter
     fireEvent.click(withinNth("counter", 1).getByTestId("increment"))
     fireEvent.click(withinNth("counter", 1).getByTestId("increment"))
     expect(onRender).toHaveBeenCalledTimes(3)
-    expect(onCountRender).toHaveBeenCalledTimes(5)
+    expect(onCounterRender).toHaveBeenCalledTimes(5)
+    expect(onCounterRender).toHaveBeenNthCalledWith(4, 1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(5, 1)
     expect(screen.getAllByTestId("counter")).toMatchSnapshot()
 
     // add third counter from the outside
@@ -409,7 +450,8 @@ describe("Nested stores", () => {
       }))
     })
     expect(onRender).toHaveBeenCalledTimes(4)
-    expect(onCountRender).toHaveBeenCalledTimes(6)
+    expect(onCounterRender).toHaveBeenCalledTimes(6)
+    expect(onCounterRender).toHaveBeenNthCalledWith(6, 2)
     expect(screen.getAllByTestId("counter")).toMatchSnapshot()
 
     // double the third counter from the outside
@@ -417,13 +459,17 @@ describe("Nested stores", () => {
       store.getState().counts[2]!.setState((x) => 2 * x)
     })
     expect(onRender).toHaveBeenCalledTimes(4)
-    expect(onCountRender).toHaveBeenCalledTimes(7)
+    expect(onCounterRender).toHaveBeenCalledTimes(7)
+    expect(onCounterRender).toHaveBeenNthCalledWith(7, 2)
     expect(screen.getAllByTestId("counter")).toMatchSnapshot()
 
     // reset
     fireEvent.click(screen.getByTestId("reset-counters"))
     expect(onRender).toHaveBeenCalledTimes(4)
-    expect(onCountRender).toHaveBeenCalledTimes(10)
+    expect(onCounterRender).toHaveBeenCalledTimes(10)
+    expect(onCounterRender).toHaveBeenNthCalledWith(8, 0)
+    expect(onCounterRender).toHaveBeenNthCalledWith(9, 1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(10, 2)
     expect(screen.getAllByTestId("counter")).toMatchSnapshot()
 
     // increment all from the outside
@@ -431,7 +477,10 @@ describe("Nested stores", () => {
       store.getState().counts.forEach((count) => count.setState((x) => x + 1))
     })
     expect(onRender).toHaveBeenCalledTimes(4)
-    expect(onCountRender).toHaveBeenCalledTimes(13)
+    expect(onCounterRender).toHaveBeenCalledTimes(13)
+    expect(onCounterRender).toHaveBeenNthCalledWith(11, 0)
+    expect(onCounterRender).toHaveBeenNthCalledWith(12, 1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(13, 2)
     expect(screen.getAllByTestId("counter")).toMatchSnapshot()
   })
 })
@@ -594,7 +643,7 @@ describe("Watch single store", () => {
   })
 })
 
-describe("Watch multiple store", () => {
+describe("Watch multiple stores", () => {
   interface AppProps {
     firstCount: InnerStore<number>
     secondCount: InnerStore<number>
@@ -823,5 +872,356 @@ describe("Watch multiple store", () => {
     expect(screen.queryByText("less than seven")).not.toBeInTheDocument()
     expect(screen.getAllByTestId("count")[0]).toHaveTextContent("5")
     expect(screen.getAllByTestId("count")[1]).toHaveTextContent("4")
+  })
+})
+
+describe("Watch nested stores", () => {
+  abstract class AppState {
+    public abstract counts: ReadonlyArray<InnerStore<number>>
+
+    public static sum({ counts }: AppState): number {
+      return counts.reduce((acc, count) => acc + count.getState(), 0)
+    }
+  }
+
+  interface AppProps {
+    store: InnerStore<AppState>
+    onRender: VoidFunction
+    onCounterRender: React.Dispatch<number>
+  }
+
+  const GenericApp: React.VFC<
+    {
+      moreThanTen: boolean
+      lessThanTwenty: boolean
+    } & AppProps
+  > = ({ moreThanTen, lessThanTwenty, store, onRender, onCounterRender }) => {
+    const [state, setState] = useInnerState(store)
+
+    onRender()
+
+    return (
+      <>
+        {moreThanTen && <span>more than ten</span>}
+        {lessThanTwenty && <span>less than twenty</span>}
+
+        <button
+          type="button"
+          data-testid="add-counter"
+          onClick={() => {
+            setState({
+              ...state,
+              counts: [...state.counts, InnerStore.of(0)],
+            })
+          }}
+        />
+        <button
+          type="button"
+          data-testid="reset-counters"
+          onClick={() => {
+            state.counts.forEach((count) => {
+              count.setState(0)
+
+              return count
+            })
+          }}
+        />
+        <button
+          type="button"
+          data-testid="increment-all"
+          onClick={() => {
+            store.setState((current) => {
+              current.counts.forEach((count) => {
+                count.setState((x) => x + 1)
+
+                return count
+              })
+
+              return current
+            })
+          }}
+        />
+        {state.counts.map((count, index) => (
+          <CounterComponent
+            key={count.key}
+            count={count}
+            onRender={() => onCounterRender(index)}
+          />
+        ))}
+      </>
+    )
+  }
+
+  const SingleWatcherApp: React.VFC<AppProps> = (props) => {
+    const [moreThanTen, lessThanTwenty] = useInnerWatch(
+      () => {
+        const count = AppState.sum(props.store.getState())
+
+        return [count > 10, count < 20]
+      },
+      ([left1, right1], [left2, right2]) => {
+        return left1 === left2 && right1 === right2
+      },
+    )
+
+    return (
+      <GenericApp
+        moreThanTen={moreThanTen}
+        lessThanTwenty={lessThanTwenty}
+        {...props}
+      />
+    )
+  }
+
+  const SingleMemoizedWatcherApp: React.VFC<AppProps> = (props) => {
+    const [moreThanTen, lessThanTwenty] = useInnerWatch(
+      React.useCallback(() => {
+        const count = AppState.sum(props.store.getState())
+
+        return [count > 10, count < 20]
+      }, [props.store]),
+      React.useCallback(([left1, right1], [left2, right2]) => {
+        return left1 === left2 && right1 === right2
+      }, []),
+    )
+
+    return (
+      <GenericApp
+        moreThanTen={moreThanTen}
+        lessThanTwenty={lessThanTwenty}
+        {...props}
+      />
+    )
+  }
+
+  const MultipleWatchersApp: React.VFC<AppProps> = (props) => {
+    const moreThanTen = useInnerWatch(() => {
+      const count = props.store.getState(AppState.sum)
+
+      return count > 10
+    })
+    const lessThanTwenty = useInnerWatch(() => {
+      const count = AppState.sum(props.store.getState())
+
+      return count < 20
+    })
+
+    return (
+      <GenericApp
+        moreThanTen={moreThanTen}
+        lessThanTwenty={lessThanTwenty}
+        {...props}
+      />
+    )
+  }
+
+  const MultipleMemoizedWatchersApp: React.VFC<AppProps> = (props) => {
+    const moreThanTen = useInnerWatch(
+      React.useCallback(() => {
+        const count = props.store.getState(AppState.sum)
+
+        return count > 10
+      }, [props.store]),
+    )
+    const lessThanTwenty = useInnerWatch(
+      React.useCallback(() => {
+        const count = AppState.sum(props.store.getState())
+
+        return count < 20
+      }, [props.store]),
+    )
+
+    return (
+      <GenericApp
+        moreThanTen={moreThanTen}
+        lessThanTwenty={lessThanTwenty}
+        {...props}
+      />
+    )
+  }
+
+  it.each([
+    ["single watcher", SingleWatcherApp],
+    ["single memoized watcher", SingleMemoizedWatcherApp],
+    ["multiple watchers", MultipleWatchersApp],
+    ["multiple memoized watchers", MultipleMemoizedWatchersApp],
+  ])("watches single store with %s", (_, App) => {
+    const store = InnerStore.of<AppState>({
+      counts: [],
+    })
+    const onRender = jest.fn()
+    const onCounterRender = jest.fn()
+
+    render(
+      <App
+        store={store}
+        onRender={onRender}
+        onCounterRender={onCounterRender}
+      />,
+    )
+
+    // initial render and watcher setup
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledTimes(0)
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([])
+    jest.clearAllMocks()
+
+    // add first counter
+    fireEvent.click(screen.getByTestId("add-counter"))
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([0])
+    jest.clearAllMocks()
+
+    // increment first counter
+    fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([1])
+    jest.clearAllMocks()
+
+    // add second counter
+    fireEvent.click(screen.getByTestId("add-counter"))
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 1)
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([1, 0])
+    jest.clearAllMocks()
+
+    // increment all counters
+    fireEvent.click(screen.getByTestId("increment-all"))
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).toHaveBeenCalledTimes(2)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
+    expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([2, 1])
+    jest.clearAllMocks()
+
+    // add third counter
+    fireEvent.click(screen.getByTestId("add-counter"))
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 2)
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([2, 1, 0])
+    jest.clearAllMocks()
+
+    // reset counters
+    fireEvent.click(screen.getByTestId("reset-counters"))
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).toHaveBeenCalledTimes(2)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
+    expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([0, 0, 0])
+    jest.clearAllMocks()
+
+    // add fourth counter from the outside
+    act(() => {
+      store.setState((state) => ({
+        ...state,
+        counts: [...state.counts, InnerStore.of(9)],
+      }))
+    })
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 3)
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([0, 0, 0, 9])
+    jest.clearAllMocks()
+
+    // increment all counters
+    fireEvent.click(screen.getByTestId("increment-all"))
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledTimes(4)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
+    expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(3, 2)
+    expect(onCounterRender).toHaveBeenNthCalledWith(4, 3)
+    expect(screen.queryByText("more than ten")).toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([1, 1, 1, 10])
+    jest.clearAllMocks()
+
+    // add fifth counter
+    fireEvent.click(screen.getByTestId("add-counter"))
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 4)
+    expect(screen.queryByText("more than ten")).toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([1, 1, 1, 10, 0])
+    jest.clearAllMocks()
+
+    // increment all counters
+    fireEvent.click(screen.getByTestId("increment-all"))
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).toHaveBeenCalledTimes(5)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
+    expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(3, 2)
+    expect(onCounterRender).toHaveBeenNthCalledWith(4, 3)
+    expect(onCounterRender).toHaveBeenNthCalledWith(5, 4)
+    expect(screen.queryByText("more than ten")).toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([2, 2, 2, 11, 1])
+    jest.clearAllMocks()
+
+    // increment fifth counter
+    fireEvent.click(withinNth("counter", 4).getByTestId("increment"))
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 4)
+    expect(screen.queryByText("more than ten")).toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([2, 2, 2, 11, 2])
+    jest.clearAllMocks()
+
+    // increment fourth counter
+    fireEvent.click(withinNth("counter", 3).getByTestId("increment"))
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 3)
+    expect(screen.queryByText("more than ten")).toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).not.toBeInTheDocument()
+    expectCounts([2, 2, 2, 12, 2])
+    jest.clearAllMocks()
+
+    // reset all counters
+    fireEvent.click(screen.getByTestId("reset-counters"))
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledTimes(5)
+    expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
+    expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)
+    expect(onCounterRender).toHaveBeenNthCalledWith(3, 2)
+    expect(onCounterRender).toHaveBeenNthCalledWith(4, 3)
+    expect(onCounterRender).toHaveBeenNthCalledWith(5, 4)
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([0, 0, 0, 0, 0])
+    jest.clearAllMocks()
+
+    // reset all counters again
+    fireEvent.click(screen.getByTestId("reset-counters"))
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).not.toHaveBeenCalled()
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([0, 0, 0, 0, 0])
   })
 })

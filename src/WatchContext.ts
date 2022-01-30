@@ -40,16 +40,20 @@ export class WatchContext {
     WatchContext.current?.register(store)
   }
 
+  private readonly listener: VoidFunction
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
 
-  public constructor(private readonly listener: VoidFunction) {}
+  public constructor(listener: VoidFunction) {
+    this.listener = () => this.cycle(listener)
+  }
 
   private register(store: WatchStore): void {
     if (this.cleanups.has(store.key)) {
       // still alive
       this.deadCleanups.delete(store.key)
     } else {
+      // TODO change to WatcherPermission.AllowAll
       WatchContext.watcherPermission = WatcherPermission.AllowSubscribeOnly
       this.cleanups.set(store.key, store.subscribe(this.listener))
       WatchContext.watcherPermission = WatcherPermission.RestrictAll
@@ -69,24 +73,26 @@ export class WatchContext {
     this.deadCleanups.clear()
   }
 
-  public activate<T>(watcher: () => T): void {
+  private cycle(callback: VoidFunction): void {
     WatchContext.current = this
 
     // fill up dead cleanups with all of the current cleanups
     // to keep only real dead once during .register() call
     this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
 
-    WatchContext.executeWatcher(watcher)
+    callback()
 
     this.cleanupObsolete()
 
     WatchContext.current = null
   }
 
+  public activate<T>(watcher: () => T): void {
+    this.cycle(() => WatchContext.executeWatcher(watcher))
+  }
+
   public cleanup(): void {
-    this.cleanups.forEach((cleanup) => {
-      cleanup()
-    })
+    this.cleanups.forEach((cleanup) => cleanup())
     this.cleanups.clear()
     this.deadCleanups.clear()
   }
