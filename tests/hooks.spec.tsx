@@ -12,23 +12,6 @@ import {
 
 import { Counter } from "./helpers"
 
-const useThrowAfterChanges = (
-  throwAfterCount: number,
-  deps: ReadonlyArray<unknown>,
-): void => {
-  const count = React.useRef(0)
-
-  React.useEffect(() => {
-    count.current++
-
-    if (count.current > throwAfterCount) {
-      throw new Error(
-        `Changed ${count.current} times, when ${throwAfterCount} expected`,
-      )
-    }
-  }, deps) // eslint-disable-line react-hooks/exhaustive-deps
-}
-
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const withinNth = (testId: string, position: number) => {
   return within(screen.getAllByTestId(testId)[position]!)
@@ -40,7 +23,6 @@ const CounterComponent: React.VFC<{
 }> = React.memo(({ count: countStore, onRender }) => {
   const [count, setCount] = useInnerState(countStore)
 
-  useThrowAfterChanges(1, [setCount])
   onRender()
 
   return (
@@ -78,7 +60,6 @@ describe("Single store", () => {
   }> = ({ store, onRender }) => {
     const setState = useSetInnerState(store, Counter.compare)
 
-    useThrowAfterChanges(1, [setState])
     onRender()
 
     return (
@@ -258,7 +239,6 @@ describe("Multiple stores", () => {
     const [email, setEmail] = useInnerState(emailStore)
     const [password, setPassword] = useInnerState(passwordStore)
 
-    useThrowAfterChanges(1, [setEmail, setPassword])
     onRender()
 
     return (
@@ -359,7 +339,6 @@ describe("Nested stores", () => {
       },
     )
 
-    useThrowAfterChanges(1, [dispatch])
     onRender()
 
     return (
@@ -458,11 +437,17 @@ describe("Nested stores", () => {
 })
 
 describe("Watch single store", () => {
-  const App: React.VFC<{
+  interface AppProps {
     store: InnerStore<number>
     onRender: VoidFunction
     onCountRender: VoidFunction
-  }> = ({ store, onCountRender, onRender }) => {
+  }
+
+  const SingleWatcherApp: React.VFC<AppProps> = ({
+    store,
+    onCountRender,
+    onRender,
+  }) => {
     const [moreThenOne, lessThanFour] = useInnerWatch(
       () => {
         const count = store.getState()
@@ -485,31 +470,111 @@ describe("Watch single store", () => {
     )
   }
 
-  it("Performs single store watching", () => {
+  const SingleMemoizedWatcherApp: React.VFC<AppProps> = ({
+    store,
+    onCountRender,
+    onRender,
+  }) => {
+    const [moreThenOne, lessThanFour] = useInnerWatch(
+      React.useCallback(() => {
+        const count = store.getState()
+
+        return [count > 1, count < 4]
+      }, [store]),
+      React.useCallback(([left1, right1], [left2, right2]) => {
+        return left1 === left2 && right1 === right2
+      }, []),
+    )
+    onRender()
+
+    return (
+      <>
+        {moreThenOne && <span>more than one</span>}
+        {lessThanFour && <span>less than four</span>}
+
+        <CounterComponent count={store} onRender={onCountRender} />
+      </>
+    )
+  }
+
+  const MultipleWatchersApp: React.VFC<AppProps> = ({
+    store,
+    onCountRender,
+    onRender,
+  }) => {
+    const moreThenOne = useInnerWatch(() => store.getState() > 1)
+    const lessThanFour = useInnerWatch(() => store.getState() < 4)
+    onRender()
+
+    return (
+      <>
+        {moreThenOne && <span>more than one</span>}
+        {lessThanFour && <span>less than four</span>}
+
+        <CounterComponent count={store} onRender={onCountRender} />
+      </>
+    )
+  }
+
+  const MultipleMemoizedWatchersApp: React.VFC<AppProps> = ({
+    store,
+    onCountRender,
+    onRender,
+  }) => {
+    const moreThenOne = useInnerWatch(
+      React.useCallback(() => store.getState() > 1, [store]),
+    )
+    const lessThanFour = useInnerWatch(
+      React.useCallback(() => store.getState() < 4, [store]),
+    )
+    onRender()
+
+    return (
+      <>
+        {moreThenOne && <span>more than one</span>}
+        {lessThanFour && <span>less than four</span>}
+
+        <CounterComponent count={store} onRender={onCountRender} />
+      </>
+    )
+  }
+
+  it.each([
+    ["single watcher", SingleWatcherApp],
+    ["single memoized watcher", SingleMemoizedWatcherApp],
+    ["multiple watchers", MultipleWatchersApp],
+    ["multiple memoized watchers", MultipleMemoizedWatchersApp],
+  ])("watches single store with %s", (_, App) => {
     const store = InnerStore.of(0)
     const onCountRender = jest.fn()
     const onRender = jest.fn()
 
-    const { container } = render(
+    render(
       <App store={store} onCountRender={onCountRender} onRender={onRender} />,
     )
 
     // initial render and watcher setup
     expect(onRender).toHaveBeenCalledTimes(1)
     expect(onCountRender).toHaveBeenCalledTimes(1)
-    expect(container).toMatchSnapshot()
+    expect(screen.queryByText("more than one")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than four")).toBeInTheDocument()
+    expect(screen.getByTestId("count")).toHaveTextContent("0")
 
     // increment
     fireEvent.click(screen.getByTestId("increment"))
     expect(onRender).toHaveBeenCalledTimes(1) // does not re-render
     expect(onCountRender).toHaveBeenCalledTimes(2)
-    expect(container).toMatchSnapshot()
+    expect(screen.queryByText("more than one")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than four")).toBeInTheDocument()
+    expect(screen.getByTestId("count")).toHaveTextContent("1")
 
     // increment again
     fireEvent.click(screen.getByTestId("increment"))
     expect(onRender).toHaveBeenCalledTimes(2)
     expect(onCountRender).toHaveBeenCalledTimes(3)
-    expect(container).toMatchSnapshot()
+    expect(screen.queryByText("more than one")).toBeInTheDocument()
+    expect(screen.queryByText("less than four")).toBeInTheDocument()
+    expect(screen.getByTestId("count")).toHaveTextContent("2")
 
     // increment from the outside
     act(() => {
@@ -517,12 +582,16 @@ describe("Watch single store", () => {
     })
     expect(onRender).toHaveBeenCalledTimes(2)
     expect(onCountRender).toHaveBeenCalledTimes(4)
-    expect(container).toMatchSnapshot()
+    expect(screen.queryByText("more than one")).toBeInTheDocument()
+    expect(screen.queryByText("less than four")).toBeInTheDocument()
+    expect(screen.getByTestId("count")).toHaveTextContent("3")
 
     // increment again
     fireEvent.click(screen.getByTestId("increment"))
     expect(onRender).toHaveBeenCalledTimes(3)
     expect(onCountRender).toHaveBeenCalledTimes(5)
-    expect(container).toMatchSnapshot()
+    expect(screen.queryByText("more than one")).toBeInTheDocument()
+    expect(screen.queryByText("less than four")).not.toBeInTheDocument()
+    expect(screen.getByTestId("count")).toHaveTextContent("4")
   })
 })
