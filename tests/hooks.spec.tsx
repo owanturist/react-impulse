@@ -438,19 +438,33 @@ describe("Nested stores", () => {
 
 describe("Watch single store", () => {
   interface AppProps {
-    store: InnerStore<number>
+    count: InnerStore<number>
     onRender: VoidFunction
-    onCountRender: VoidFunction
+    onCounterRender: VoidFunction
   }
 
-  const SingleWatcherApp: React.VFC<AppProps> = ({
-    store,
-    onCountRender,
-    onRender,
-  }) => {
-    const [moreThenOne, lessThanFour] = useInnerWatch(
+  const GenericApp: React.VFC<
+    {
+      moreThanOne: boolean
+      lessThanFour: boolean
+    } & AppProps
+  > = ({ moreThanOne, lessThanFour, count, onRender, onCounterRender }) => {
+    onRender()
+
+    return (
+      <>
+        {moreThanOne && <span>more than one</span>}
+        {lessThanFour && <span>less than four</span>}
+
+        <CounterComponent count={count} onRender={onCounterRender} />
+      </>
+    )
+  }
+
+  const SingleWatcherApp: React.VFC<AppProps> = (props) => {
+    const [moreThanOne, lessThanFour] = useInnerWatch(
       () => {
-        const count = store.getState()
+        const count = props.count.getState()
 
         return [count > 1, count < 4]
       },
@@ -458,84 +472,64 @@ describe("Watch single store", () => {
         return left1 === left2 && right1 === right2
       },
     )
-    onRender()
 
     return (
-      <>
-        {moreThenOne && <span>more than one</span>}
-        {lessThanFour && <span>less than four</span>}
-
-        <CounterComponent count={store} onRender={onCountRender} />
-      </>
+      <GenericApp
+        moreThanOne={moreThanOne}
+        lessThanFour={lessThanFour}
+        {...props}
+      />
     )
   }
 
-  const SingleMemoizedWatcherApp: React.VFC<AppProps> = ({
-    store,
-    onCountRender,
-    onRender,
-  }) => {
-    const [moreThenOne, lessThanFour] = useInnerWatch(
+  const SingleMemoizedWatcherApp: React.VFC<AppProps> = (props) => {
+    const [moreThanOne, lessThanFour] = useInnerWatch(
       React.useCallback(() => {
-        const count = store.getState()
+        const count = props.count.getState()
 
         return [count > 1, count < 4]
-      }, [store]),
+      }, [props.count]),
       React.useCallback(([left1, right1], [left2, right2]) => {
         return left1 === left2 && right1 === right2
       }, []),
     )
-    onRender()
 
     return (
-      <>
-        {moreThenOne && <span>more than one</span>}
-        {lessThanFour && <span>less than four</span>}
-
-        <CounterComponent count={store} onRender={onCountRender} />
-      </>
+      <GenericApp
+        moreThanOne={moreThanOne}
+        lessThanFour={lessThanFour}
+        {...props}
+      />
     )
   }
 
-  const MultipleWatchersApp: React.VFC<AppProps> = ({
-    store,
-    onCountRender,
-    onRender,
-  }) => {
-    const moreThenOne = useInnerWatch(() => store.getState() > 1)
-    const lessThanFour = useInnerWatch(() => store.getState() < 4)
-    onRender()
+  const MultipleWatchersApp: React.VFC<AppProps> = (props) => {
+    const moreThanOne = useInnerWatch(() => props.count.getState() > 1)
+    const lessThanFour = useInnerWatch(() => props.count.getState() < 4)
 
     return (
-      <>
-        {moreThenOne && <span>more than one</span>}
-        {lessThanFour && <span>less than four</span>}
-
-        <CounterComponent count={store} onRender={onCountRender} />
-      </>
+      <GenericApp
+        moreThanOne={moreThanOne}
+        lessThanFour={lessThanFour}
+        {...props}
+      />
     )
   }
 
-  const MultipleMemoizedWatchersApp: React.VFC<AppProps> = ({
-    store,
-    onCountRender,
-    onRender,
-  }) => {
-    const moreThenOne = useInnerWatch(
-      React.useCallback(() => store.getState() > 1, [store]),
+  const MultipleMemoizedWatchersApp: React.VFC<AppProps> = (props) => {
+    const moreThanOne = useInnerWatch(
+      React.useCallback(() => props.count.getState() > 1, [props.count]),
     )
     const lessThanFour = useInnerWatch(
-      React.useCallback(() => store.getState() < 4, [store]),
+      React.useCallback(() => props.count.getState() < 4, [props.count]),
     )
-    onRender()
 
     return (
-      <>
-        {moreThenOne && <span>more than one</span>}
-        {lessThanFour && <span>less than four</span>}
-
-        <CounterComponent count={store} onRender={onCountRender} />
-      </>
+      <GenericApp
+        moreThanOne={moreThanOne}
+        lessThanFour={lessThanFour}
+        {...props}
+      />
     )
   }
 
@@ -545,17 +539,21 @@ describe("Watch single store", () => {
     ["multiple watchers", MultipleWatchersApp],
     ["multiple memoized watchers", MultipleMemoizedWatchersApp],
   ])("watches single store with %s", (_, App) => {
-    const store = InnerStore.of(0)
-    const onCountRender = jest.fn()
+    const count = InnerStore.of(0)
+    const onCounterRender = jest.fn()
     const onRender = jest.fn()
 
     render(
-      <App store={store} onCountRender={onCountRender} onRender={onRender} />,
+      <App
+        count={count}
+        onCounterRender={onCounterRender}
+        onRender={onRender}
+      />,
     )
 
     // initial render and watcher setup
     expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCountRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledTimes(1)
     expect(screen.queryByText("more than one")).not.toBeInTheDocument()
     expect(screen.queryByText("less than four")).toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("0")
@@ -563,7 +561,7 @@ describe("Watch single store", () => {
     // increment
     fireEvent.click(screen.getByTestId("increment"))
     expect(onRender).toHaveBeenCalledTimes(1) // does not re-render
-    expect(onCountRender).toHaveBeenCalledTimes(2)
+    expect(onCounterRender).toHaveBeenCalledTimes(2)
     expect(screen.queryByText("more than one")).not.toBeInTheDocument()
     expect(screen.queryByText("less than four")).toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("1")
@@ -571,17 +569,17 @@ describe("Watch single store", () => {
     // increment again
     fireEvent.click(screen.getByTestId("increment"))
     expect(onRender).toHaveBeenCalledTimes(2)
-    expect(onCountRender).toHaveBeenCalledTimes(3)
+    expect(onCounterRender).toHaveBeenCalledTimes(3)
     expect(screen.queryByText("more than one")).toBeInTheDocument()
     expect(screen.queryByText("less than four")).toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("2")
 
     // increment from the outside
     act(() => {
-      store.setState((state) => state + 1)
+      count.setState((state) => state + 1)
     })
     expect(onRender).toHaveBeenCalledTimes(2) // does not re-render
-    expect(onCountRender).toHaveBeenCalledTimes(4)
+    expect(onCounterRender).toHaveBeenCalledTimes(4)
     expect(screen.queryByText("more than one")).toBeInTheDocument()
     expect(screen.queryByText("less than four")).toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("3")
@@ -589,7 +587,7 @@ describe("Watch single store", () => {
     // increment again
     fireEvent.click(screen.getByTestId("increment"))
     expect(onRender).toHaveBeenCalledTimes(3)
-    expect(onCountRender).toHaveBeenCalledTimes(5)
+    expect(onCounterRender).toHaveBeenCalledTimes(5)
     expect(screen.queryByText("more than one")).toBeInTheDocument()
     expect(screen.queryByText("less than four")).not.toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("4")
@@ -601,20 +599,53 @@ describe("Watch multiple store", () => {
     firstCount: InnerStore<number>
     secondCount: InnerStore<number>
     onRender: VoidFunction
-    onFirstCountRender: VoidFunction
-    onSecondCountRender: VoidFunction
+    onFirstCounterRender: VoidFunction
+    onSecondCounterRender: VoidFunction
   }
 
-  const SingleWatcherApp: React.VFC<AppProps> = ({
+  const GenericApp: React.VFC<
+    {
+      moreThanOne: boolean
+      lessThanFour: boolean
+    } & AppProps
+  > = ({
+    moreThanOne,
+    lessThanFour,
     firstCount,
     secondCount,
-    onFirstCountRender,
-    onSecondCountRender,
     onRender,
+    onFirstCounterRender,
+    onSecondCounterRender,
   }) => {
-    const [moreThenOne, lessThanFour] = useInnerWatch(
+    onRender()
+
+    return (
+      <>
+        {moreThanOne && <span>more than two</span>}
+        {lessThanFour && <span>less than seven</span>}
+
+        <button
+          type="button"
+          data-testid="increment-both"
+          onClick={() => {
+            firstCount.setState((state) => state + 1)
+            secondCount.setState((state) => state + 1)
+          }}
+        />
+
+        <CounterComponent count={firstCount} onRender={onFirstCounterRender} />
+        <CounterComponent
+          count={secondCount}
+          onRender={onSecondCounterRender}
+        />
+      </>
+    )
+  }
+
+  const SingleWatcherApp: React.VFC<AppProps> = (props) => {
+    const [moreThanOne, lessThanFour] = useInnerWatch(
       () => {
-        const sum = firstCount.getState() + secondCount.getState()
+        const sum = props.firstCount.getState() + props.secondCount.getState()
 
         return [sum > 2, sum < 7]
       },
@@ -622,146 +653,80 @@ describe("Watch multiple store", () => {
         return left1 === left2 && right1 === right2
       },
     )
-    onRender()
 
     return (
-      <>
-        {moreThenOne && <span>more than two</span>}
-        {lessThanFour && <span>less than seven</span>}
-
-        <button
-          type="button"
-          data-testid="increment-both"
-          onClick={() => {
-            firstCount.setState((state) => state + 1)
-            secondCount.setState((state) => state + 1)
-          }}
-        />
-
-        <CounterComponent count={firstCount} onRender={onFirstCountRender} />
-        <CounterComponent count={secondCount} onRender={onSecondCountRender} />
-      </>
+      <GenericApp
+        moreThanOne={moreThanOne}
+        lessThanFour={lessThanFour}
+        {...props}
+      />
     )
   }
 
-  const SingleMemoizedWatcherApp: React.VFC<AppProps> = ({
-    firstCount,
-    secondCount,
-    onFirstCountRender,
-    onSecondCountRender,
-    onRender,
-  }) => {
-    const [moreThenOne, lessThanFour] = useInnerWatch(
+  const SingleMemoizedWatcherApp: React.VFC<AppProps> = (props) => {
+    const [moreThanOne, lessThanFour] = useInnerWatch(
       React.useCallback(() => {
-        const sum = firstCount.getState() + secondCount.getState()
+        const sum = props.firstCount.getState() + props.secondCount.getState()
 
         return [sum > 2, sum < 7]
-      }, [firstCount, secondCount]),
+      }, [props.firstCount, props.secondCount]),
       React.useCallback(([left1, right1], [left2, right2]) => {
         return left1 === left2 && right1 === right2
       }, []),
     )
-    onRender()
 
     return (
-      <>
-        {moreThenOne && <span>more than two</span>}
-        {lessThanFour && <span>less than seven</span>}
-
-        <button
-          type="button"
-          data-testid="increment-both"
-          onClick={() => {
-            firstCount.setState((state) => state + 1)
-            secondCount.setState((state) => state + 1)
-          }}
-        />
-
-        <CounterComponent count={firstCount} onRender={onFirstCountRender} />
-        <CounterComponent count={secondCount} onRender={onSecondCountRender} />
-      </>
+      <GenericApp
+        moreThanOne={moreThanOne}
+        lessThanFour={lessThanFour}
+        {...props}
+      />
     )
   }
 
-  const MultipleWatchersApp: React.VFC<AppProps> = ({
-    firstCount,
-    secondCount,
-    onFirstCountRender,
-    onSecondCountRender,
-    onRender,
-  }) => {
-    const moreThenOne = useInnerWatch(() => {
-      const sum = firstCount.getState() + secondCount.getState()
+  const MultipleWatchersApp: React.VFC<AppProps> = (props) => {
+    const moreThanOne = useInnerWatch(() => {
+      const sum = props.firstCount.getState() + props.secondCount.getState()
 
       return sum > 2
     })
     const lessThanFour = useInnerWatch(() => {
-      const sum = firstCount.getState() + secondCount.getState()
+      const sum = props.firstCount.getState() + props.secondCount.getState()
 
       return sum < 7
     })
-    onRender()
 
     return (
-      <>
-        {moreThenOne && <span>more than two</span>}
-        {lessThanFour && <span>less than seven</span>}
-
-        <button
-          type="button"
-          data-testid="increment-both"
-          onClick={() => {
-            firstCount.setState((state) => state + 1)
-            secondCount.setState((state) => state + 1)
-          }}
-        />
-
-        <CounterComponent count={firstCount} onRender={onFirstCountRender} />
-        <CounterComponent count={secondCount} onRender={onSecondCountRender} />
-      </>
+      <GenericApp
+        moreThanOne={moreThanOne}
+        lessThanFour={lessThanFour}
+        {...props}
+      />
     )
   }
 
-  const MultipleMemoizedWatchersApp: React.VFC<AppProps> = ({
-    firstCount,
-    secondCount,
-    onFirstCountRender,
-    onSecondCountRender,
-    onRender,
-  }) => {
-    const moreThenOne = useInnerWatch(
+  const MultipleMemoizedWatchersApp: React.VFC<AppProps> = (props) => {
+    const moreThanOne = useInnerWatch(
       React.useCallback(() => {
-        const sum = firstCount.getState() + secondCount.getState()
+        const sum = props.firstCount.getState() + props.secondCount.getState()
 
         return sum > 2
-      }, [firstCount, secondCount]),
+      }, [props.firstCount, props.secondCount]),
     )
     const lessThanFour = useInnerWatch(
       React.useCallback(() => {
-        const sum = firstCount.getState() + secondCount.getState()
+        const sum = props.firstCount.getState() + props.secondCount.getState()
 
         return sum < 7
-      }, [firstCount, secondCount]),
+      }, [props.firstCount, props.secondCount]),
     )
-    onRender()
 
     return (
-      <>
-        {moreThenOne && <span>more than two</span>}
-        {lessThanFour && <span>less than seven</span>}
-
-        <button
-          type="button"
-          data-testid="increment-both"
-          onClick={() => {
-            firstCount.setState((state) => state + 1)
-            secondCount.setState((state) => state + 1)
-          }}
-        />
-
-        <CounterComponent count={firstCount} onRender={onFirstCountRender} />
-        <CounterComponent count={secondCount} onRender={onSecondCountRender} />
-      </>
+      <GenericApp
+        moreThanOne={moreThanOne}
+        lessThanFour={lessThanFour}
+        {...props}
+      />
     )
   }
 
@@ -781,8 +746,8 @@ describe("Watch multiple store", () => {
       <App
         firstCount={firstCount}
         secondCount={secondCount}
-        onFirstCountRender={onFirstCountRender}
-        onSecondCountRender={onSecondCountRender}
+        onFirstCounterRender={onFirstCountRender}
+        onSecondCounterRender={onSecondCountRender}
         onRender={onRender}
       />,
     )
