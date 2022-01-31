@@ -234,7 +234,6 @@
         "jest/prefer-spy-on": "error",
         "jest/prefer-strict-equal": "error",
         "jest/prefer-todo": "warn",
-        "jest/require-hook": "warn",
         "jest/require-top-level-describe": "warn"
       }
     }

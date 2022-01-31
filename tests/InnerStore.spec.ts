@@ -30,86 +30,126 @@ describe("InnerStore#key", () => {
   })
 })
 
-describe("InnerStore#getState and InnerStore#setState", () => {
-  it("sets initial state", () => {
-    const store = InnerStore.of(0)
+describe("InnerStore#setState(value)", () => {
+  const store = InnerStore.of({ count: 0 })
 
-    expect(store.getState()).toBe(0)
+  it("updates state", () => {
+    const next = { count: 1 }
+    store.setState(next)
+    expect(store.getState()).toBe(next)
   })
 
-  it("changes state with setState(value)", () => {
-    const store = InnerStore.of(0)
-
-    store.setState(1)
-    expect(store.getState()).toBe(1)
-
-    store.setState(0)
-    expect(store.getState()).toBe(0)
-
-    store.setState(2)
-    expect(store.getState()).toBe(2)
+  it("updates with the same state", () => {
+    const next = { count: 1 }
+    store.setState(next)
+    expect(store.getState()).toBe(next)
   })
 
-  it("changes state with setState(transform)", () => {
-    const store = InnerStore.of(0)
-
-    store.setState((value) => value + 1)
-    expect(store.getState()).toBe(1)
-
-    store.setState((value) => value + 1)
-    expect(store.getState()).toBe(2)
-
-    store.setState((value) => value + 1)
-    expect(store.getState()).toBe(3)
+  it("updates with equal state", () => {
+    const prev = store.getState()
+    store.setState(prev)
+    expect(store.getState()).toBe(prev)
   })
+})
 
-  it("keeps the state with setState(value, compare)", () => {
-    const store = InnerStore.of({ count: 0 })
+describe("InnerStore#setState(transform)", () => {
+  const store = InnerStore.of({ count: 0 })
 
-    const prev_1 = store.getState()
-    const state_1 = Counter.clone(prev_1)
-    store.setState(state_1, Counter.compare)
-    expect(store.getState()).toBe(prev_1)
-    expect(store.getState()).not.toBe(state_1)
-
-    const prev_2 = store.getState()
-    const state_2 = { count: 1 }
-    store.setState(state_2, Counter.compare)
-    expect(store.getState()).toBe(state_2)
-    expect(store.getState()).not.toBe(prev_2)
-
-    const prev_3 = store.getState()
-    const state_3 = Counter.clone(prev_3)
-    store.setState(state_3)
-    expect(store.getState()).toBe(state_3)
-    expect(store.getState()).not.toBe(prev_3)
-  })
-
-  it("keeps the state with setState(transform, compare)", () => {
-    const store = InnerStore.of({ count: 0 })
-
-    const prev_1 = store.getState()
-    store.setState(Counter.clone, Counter.compare)
-    expect(store.getState()).toBe(prev_1)
-
-    const prev_2 = store.getState()
-    store.setState(Counter.inc, Counter.compare)
-    expect(store.getState()).not.toBe(prev_2)
+  it("updates state", () => {
+    store.setState(Counter.inc)
     expect(store.getState()).toStrictEqual({ count: 1 })
+  })
 
-    const prev_3 = store.getState()
+  it("keeps the state", () => {
+    const prev = store.getState()
+    store.setState((counter) => counter)
+    expect(store.getState()).toBe(prev)
+  })
+
+  it("updates with the same state", () => {
+    const prev = store.getState()
     store.setState(Counter.clone)
-    expect(store.getState()).not.toBe(prev_3)
+    expect(store.getState()).not.toBe(prev)
+    expect(store.getState()).toStrictEqual(prev)
+  })
+
+  it("updates with the equal state", () => {
+    const prev = store.getState()
+    store.setState(() => prev)
+    expect(store.getState()).toBe(prev)
+  })
+})
+
+describe("InnerStore#setState(value, compare)", () => {
+  let prev: Counter = { count: 0 }
+  const store = InnerStore.of(prev)
+
+  beforeEach(() => {
+    prev = store.getState()
+  })
+
+  it("keeps equal state", () => {
+    const clone = Counter.clone(prev)
+    store.setState(clone, Counter.compare)
+
+    expect(store.getState()).toBe(prev)
+    expect(store.getState()).not.toBe(clone)
+  })
+
+  it("replaces with not equal state", () => {
+    const replacement = { count: 1 }
+    store.setState(replacement, Counter.compare)
+
+    expect(store.getState()).toBe(replacement)
+    expect(store.getState()).not.toBe(prev)
+  })
+
+  it("replaces with same but not equal", () => {
+    const clone = Counter.clone(prev)
+    store.setState(clone)
+
+    expect(store.getState()).toBe(clone)
+    expect(store.getState()).not.toBe(prev)
+  })
+})
+
+describe("InnerStore#setState(transform, compare)", () => {
+  let prev: Counter = { count: 0 }
+  const store = InnerStore.of(prev)
+
+  beforeEach(() => {
+    prev = store.getState()
+  })
+
+  it("keeps equal state", () => {
+    store.setState(Counter.clone, Counter.compare)
+    expect(store.getState()).toBe(prev)
+  })
+
+  it("replaces with not equal state", () => {
+    store.setState(Counter.inc, Counter.compare)
+    expect(store.getState()).not.toBe(prev)
     expect(store.getState()).toStrictEqual({ count: 1 })
   })
 
-  it("transforms state when reads with getState(transform)", () => {
-    const store = InnerStore.of({ count: 0 })
+  it("replaces with same but not equal", () => {
+    store.setState(Counter.clone)
+    expect(store.getState()).not.toBe(prev)
+    expect(store.getState()).toStrictEqual({ count: 1 })
+  })
+})
 
-    expect(store.getState()).toStrictEqual({ count: 0 })
+describe("InnerStore#getState(transform)", () => {
+  const initial = { count: 0 }
+  const store = InnerStore.of(initial)
+
+  it("gets initial state", () => {
+    expect(store.getState()).toBe(initial)
     expect(store.getState(Counter.getCount)).toBe(0)
+  })
 
-    store.setState({ count: 1 })
+  it("gets updates state", () => {
+    store.setState(Counter.inc)
     expect(store.getState()).toStrictEqual({ count: 1 })
     expect(store.getState(Counter.getCount)).toBe(1)
   })

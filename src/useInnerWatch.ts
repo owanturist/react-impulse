@@ -18,7 +18,7 @@ export function useInnerWatch<T>(
   watcher: () => T,
   compare: Compare<T> = isEqual,
 ): T {
-  const [x, render] = useReducer(modInc, 0)
+  const [, render] = useReducer(modInc, 0)
 
   const valueRef = useRef<T>()
   const watcherRef = useRef<() => T>()
@@ -26,23 +26,6 @@ export function useInnerWatch<T>(
   if (watcherRef.current !== watcher) {
     valueRef.current = WatchContext.executeWatcher(watcher)
   }
-
-  const compareRef = useRef(compare)
-  useEffect(() => {
-    compareRef.current = compare
-  }, [compare])
-
-  useEffect(() => {
-    watcherRef.current = watcher
-    contextRef.current!.activate(watcher)
-  }, [x, watcher])
-
-  // cleanup everything when unmounts
-  useEffect(() => {
-    return () => {
-      contextRef.current!.cleanup()
-    }
-  }, [])
 
   // permanent ref
   const contextRef = useRef<WatchContext>()
@@ -57,6 +40,23 @@ export function useInnerWatch<T>(
       }
     })
   }
+
+  const compareRef = useRef(compare)
+  useEffect(() => {
+    compareRef.current = compare
+  }, [compare])
+
+  useEffect(() => {
+    watcherRef.current = watcher
+    contextRef.current!.activate(watcher)
+  }, [watcher])
+
+  // cleanup everything when unmounts
+  useEffect(() => {
+    return () => {
+      contextRef.current!.cleanup()
+    }
+  }, [])
 
   return valueRef.current!
 }
