@@ -156,7 +156,7 @@ describe("InnerStore#getState(transform)", () => {
 })
 
 describe("InnerStore#clone", () => {
-  it("creates new store instance with clone()", () => {
+  it.concurrent("creates new store instance with clone()", () => {
     const store_1 = InnerStore.of({ count: 0 })
     const store_2 = store_1.clone()
 
@@ -165,7 +165,7 @@ describe("InnerStore#clone", () => {
     expect(store_1.getState()).toBe(store_2.getState())
   })
 
-  it("creates new store instance with clone(transform)", () => {
+  it.concurrent("creates new store instance with clone(transform)", () => {
     const store_1 = InnerStore.of({ count: 0 })
     const store_2 = store_1.clone(Counter.clone)
 
@@ -175,44 +175,47 @@ describe("InnerStore#clone", () => {
     expect(store_1.getState()).toStrictEqual(store_2.getState())
   })
 
-  it("creates new nested store instance with clone(transform)", () => {
-    const store_1 = InnerStore.of({
-      count: InnerStore.of(0),
-      name: InnerStore.of("John"),
-    })
-    const store_2 = store_1.clone(({ count, name }) => ({
-      count: count.clone(),
-      name: name.clone(),
-    }))
+  it.concurrent(
+    "creates new nested store instance with clone(transform)",
+    () => {
+      const store_1 = InnerStore.of({
+        count: InnerStore.of(0),
+        name: InnerStore.of("John"),
+      })
+      const store_2 = store_1.clone(({ count, name }) => ({
+        count: count.clone(),
+        name: name.clone(),
+      }))
 
-    expect(store_1).not.toBe(store_2)
-    expect(store_1.key).not.toBe(store_2.key)
-    expect(store_1.getState()).not.toBe(store_2.getState())
-    expect(store_1.getState().count).not.toBe(store_2.getState().count)
-    expect(store_1.getState().name).not.toBe(store_2.getState().name)
-    expect(
-      store_1.getState(({ count, name }) => ({
-        count: count.getState(),
-        name: name.getState(),
-      })),
-    ).toStrictEqual(
-      store_2.getState(({ count, name }) => ({
-        count: count.getState(),
-        name: name.getState(),
-      })),
-    )
+      expect(store_1).not.toBe(store_2)
+      expect(store_1.key).not.toBe(store_2.key)
+      expect(store_1.getState()).not.toBe(store_2.getState())
+      expect(store_1.getState().count).not.toBe(store_2.getState().count)
+      expect(store_1.getState().name).not.toBe(store_2.getState().name)
+      expect(
+        store_1.getState(({ count, name }) => ({
+          count: count.getState(),
+          name: name.getState(),
+        })),
+      ).toStrictEqual(
+        store_2.getState(({ count, name }) => ({
+          count: count.getState(),
+          name: name.getState(),
+        })),
+      )
 
-    // the nested stores are independent
-    store_1.getState().count.setState(1)
-    expect(store_1.getState().count.getState()).toBe(1)
-    expect(store_2.getState().count.getState()).toBe(0)
+      // the nested stores are independent
+      store_1.getState().count.setState(1)
+      expect(store_1.getState().count.getState()).toBe(1)
+      expect(store_2.getState().count.getState()).toBe(0)
 
-    store_1.getState().name.setState("Doe")
-    expect(store_1.getState().name.getState()).toBe("Doe")
-    expect(store_2.getState().name.getState()).toBe("John")
-  })
+      store_1.getState().name.setState("Doe")
+      expect(store_1.getState().name.getState()).toBe("Doe")
+      expect(store_2.getState().name.getState()).toBe("John")
+    },
+  )
 
-  it("creates shallow nested store instance with clone()", () => {
+  it.concurrent("creates shallow nested store instance with clone()", () => {
     const store_1 = InnerStore.of({
       count: InnerStore.of(0),
       name: InnerStore.of("John"),
@@ -248,7 +251,7 @@ describe("InnerStore#clone", () => {
 })
 
 describe("InnerStore#subscribe", () => {
-  it("subscribes and unsubscribes to state changes", () => {
+  it.concurrent("subscribes and unsubscribes to state changes", () => {
     const store = InnerStore.of({ count: 0 })
     const spy = jest.fn()
 
@@ -268,7 +271,7 @@ describe("InnerStore#subscribe", () => {
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it("emits the same listener once", () => {
+  it.concurrent("emits the same listener once", () => {
     const spy = jest.fn()
     const store = InnerStore.of({ count: 0 })
     const unsubscribe_1 = store.subscribe(spy)
@@ -288,7 +291,7 @@ describe("InnerStore#subscribe", () => {
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it("ignores second unsubscribe call", () => {
+  it.concurrent("ignores second unsubscribe call", () => {
     const spy = jest.fn()
     const store = InnerStore.of({ count: 0 })
     const unsubscribe = store.subscribe(spy)
@@ -304,7 +307,7 @@ describe("InnerStore#subscribe", () => {
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it("subscribes multiple listeners", () => {
+  it.concurrent("subscribes multiple listeners", () => {
     const spy_1 = jest.fn()
     const spy_2 = jest.fn()
     const store = InnerStore.of({ count: 0 })
@@ -328,7 +331,7 @@ describe("InnerStore#subscribe", () => {
     expect(spy_2).not.toHaveBeenCalled()
   })
 
-  it("does not emit when a new state is comparably equal", () => {
+  it.concurrent("does not emit when a new state is comparably equal", () => {
     const spy = jest.fn()
     const spyCompare = jest.fn(Counter.compare)
     const store = InnerStore.of({ count: 0 })

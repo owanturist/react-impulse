@@ -6,7 +6,7 @@ import { Compare, InnerStore, useSetInnerState } from "../src"
 import { Counter } from "./helpers"
 
 describe("bypassed store", () => {
-  it("noop for null", () => {
+  it.concurrent("noop for null", () => {
     const { result } = renderHook(() => useSetInnerState<number>(null))
 
     expect(() => {
@@ -14,7 +14,7 @@ describe("bypassed store", () => {
     }).not.toThrow()
   })
 
-  it("noop for undefined", () => {
+  it.concurrent("noop for undefined", () => {
     // eslint-disable-next-line no-undefined
     const { result } = renderHook(() => useSetInnerState<number>(undefined))
 
@@ -25,7 +25,7 @@ describe("bypassed store", () => {
 })
 
 describe("defined store", () => {
-  it("keeps dispatch value over time", () => {
+  it.concurrent("keeps setState value over time", () => {
     const store = InnerStore.of(0)
     const onRender = jest.fn()
     const { result, rerender } = renderHook(() => {
@@ -38,98 +38,138 @@ describe("defined store", () => {
 
     expect(onRender).toHaveBeenCalledTimes(1)
     expect(result.all).toHaveLength(1)
+    jest.clearAllMocks()
 
     rerender()
-    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onRender).toHaveBeenCalledTimes(1)
     expect(result.all).toHaveLength(2)
     expect(result.current).toBe(dispatch)
+    jest.clearAllMocks()
 
     dispatch(1)
-    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onRender).not.toHaveBeenCalled()
     expect(result.all).toHaveLength(2)
     expect(result.current).toBe(dispatch)
+    jest.clearAllMocks()
 
     rerender()
-    expect(onRender).toHaveBeenCalledTimes(3)
+    expect(onRender).toHaveBeenCalledTimes(1)
     expect(result.all).toHaveLength(3)
     expect(result.current).toBe(dispatch)
   })
 
-  it("changes state with static value", () => {
-    const store = InnerStore.of({ count: 0 })
+  describe("calls setState(value)", () => {
+    let prev = { count: 0 }
+    const store = InnerStore.of(prev)
     const spy = jest.fn()
     const unsubscribe = store.subscribe(spy)
     const { result } = renderHook(() => useSetInnerState(store))
-    const dispatch = result.current
+    const setState = result.current
 
-    const prev_1 = store.getState()
-    act(() => {
-      dispatch({ count: 1 })
+    beforeEach(() => {
+      prev = store.getState()
+      jest.clearAllMocks()
     })
-    const state_1 = store.getState()
-    expect(state_1).not.toBe(prev_1)
-    expect(state_1).toStrictEqual({ count: 1 })
-    expect(spy).toHaveBeenCalledTimes(1)
 
-    const prev_2 = store.getState()
-    act(() => {
-      dispatch({ count: 2 })
+    it("sets new state", () => {
+      act(() => {
+        setState({ count: 1 })
+      })
+      const state = store.getState()
+      expect(state).not.toBe(prev)
+      expect(state).toStrictEqual({ count: 1 })
+      expect(spy).toHaveBeenCalledTimes(1)
     })
-    const state_2 = store.getState()
-    expect(state_2).not.toBe(prev_2)
-    expect(state_2).toStrictEqual({ count: 2 })
-    expect(spy).toHaveBeenCalledTimes(2)
 
-    unsubscribe()
-
-    const prev_3 = store.getState()
-    act(() => {
-      dispatch({ count: 3 })
+    it("sets same state", () => {
+      act(() => {
+        setState({ count: 1 })
+      })
+      const state = store.getState()
+      expect(state).not.toBe(prev)
+      expect(state).toStrictEqual({ count: 1 })
+      expect(spy).toHaveBeenCalledTimes(1)
     })
-    const state_3 = store.getState()
-    expect(state_3).not.toBe(prev_3)
-    expect(state_3).toStrictEqual({ count: 3 })
-    expect(spy).toHaveBeenCalledTimes(2)
+
+    it("sets equal state", () => {
+      act(() => {
+        setState(prev)
+      })
+      const state = store.getState()
+      expect(state).toBe(prev)
+      expect(spy).not.toHaveBeenCalled()
+    })
+
+    it("unsubscribes", () => {
+      unsubscribe()
+
+      act(() => {
+        setState({ count: 3 })
+      })
+      const state = store.getState()
+      expect(state).not.toBe(prev)
+      expect(state).toStrictEqual({ count: 3 })
+      expect(spy).not.toHaveBeenCalled()
+    })
   })
 
-  it("changes state with transform", () => {
-    const store = InnerStore.of({ count: 0 })
+  describe("calls setState(transform)", () => {
+    let prev = { count: 0 }
+    const store = InnerStore.of(prev)
     const spy = jest.fn()
     const unsubscribe = store.subscribe(spy)
     const { result } = renderHook(() => useSetInnerState(store))
-    const dispatch = result.current
+    const setState = result.current
 
-    const prev_1 = store.getState()
-    act(() => {
-      dispatch(Counter.inc)
+    beforeEach(() => {
+      prev = store.getState()
+      jest.clearAllMocks()
     })
-    const state_1 = store.getState()
-    expect(state_1).not.toBe(prev_1)
-    expect(state_1).toStrictEqual({ count: 1 })
-    expect(spy).toHaveBeenCalledTimes(1)
 
-    const prev_2 = store.getState()
-    act(() => {
-      dispatch(Counter.inc)
+    it("sets new state", () => {
+      act(() => {
+        setState(Counter.inc)
+      })
+      const state = store.getState()
+      expect(state).not.toBe(prev)
+      expect(state).toStrictEqual({ count: 1 })
+      expect(spy).toHaveBeenCalledTimes(1)
     })
-    const state_2 = store.getState()
-    expect(state_2).not.toBe(prev_2)
-    expect(state_2).toStrictEqual({ count: 2 })
-    expect(spy).toHaveBeenCalledTimes(2)
 
-    unsubscribe()
-
-    const prev_3 = store.getState()
-    act(() => {
-      dispatch(Counter.inc)
+    it("sets same state", () => {
+      act(() => {
+        setState(Counter.clone)
+      })
+      const state = store.getState()
+      expect(state).not.toBe(prev)
+      expect(state).toStrictEqual({ count: 1 })
+      expect(spy).toHaveBeenCalledTimes(1)
     })
-    const state_3 = store.getState()
-    expect(state_3).not.toBe(prev_3)
-    expect(state_3).toStrictEqual({ count: 3 })
-    expect(spy).toHaveBeenCalledTimes(2)
+
+    it("sets equal state", () => {
+      act(() => {
+        setState(() => prev)
+      })
+      const state = store.getState()
+      expect(state).toBe(prev)
+      expect(spy).not.toHaveBeenCalled()
+    })
+
+    it("unsubscribes", () => {
+      unsubscribe()
+
+      act(() => {
+        setState(Counter.inc)
+      })
+      const state = store.getState()
+      expect(state).not.toBe(prev)
+      expect(state).toStrictEqual({ count: 2 })
+      expect(spy).not.toHaveBeenCalled()
+    })
   })
 })
 
+// TODO continue from here
 describe("defined store with compare", () => {
   it("keeps dispatch value over time", () => {
     const store = InnerStore.of({ count: 0 })
