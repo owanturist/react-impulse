@@ -253,17 +253,19 @@ describe("InnerStore#subscribe", () => {
     const spy = jest.fn()
 
     store.setState(Counter.inc)
-    expect(spy).toHaveBeenCalledTimes(0)
+    expect(spy).not.toHaveBeenCalled()
+    jest.clearAllMocks()
 
     const unsubscribe = store.subscribe(spy)
 
     store.setState(Counter.inc)
     expect(spy).toHaveBeenCalledTimes(1)
+    jest.clearAllMocks()
 
     unsubscribe()
 
     store.setState(Counter.inc)
-    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).not.toHaveBeenCalled()
   })
 
   it("emits the same listener once", () => {
@@ -274,14 +276,16 @@ describe("InnerStore#subscribe", () => {
 
     store.setState(Counter.inc)
     expect(spy).toHaveBeenCalledTimes(1)
+    jest.clearAllMocks()
 
     unsubscribe_1()
     store.setState(Counter.inc)
-    expect(spy).toHaveBeenCalledTimes(2)
+    expect(spy).toHaveBeenCalledTimes(1)
+    jest.clearAllMocks()
 
     unsubscribe_2()
     store.setState(Counter.inc)
-    expect(spy).toHaveBeenCalledTimes(2)
+    expect(spy).not.toHaveBeenCalled()
   })
 
   it("ignores second unsubscribe call", () => {
@@ -291,12 +295,13 @@ describe("InnerStore#subscribe", () => {
 
     store.setState(Counter.inc)
     expect(spy).toHaveBeenCalledTimes(1)
+    jest.clearAllMocks()
 
     unsubscribe()
     unsubscribe()
 
     store.setState(Counter.inc)
-    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).not.toHaveBeenCalled()
   })
 
   it("subscribes multiple listeners", () => {
@@ -309,38 +314,46 @@ describe("InnerStore#subscribe", () => {
     store.setState(Counter.inc)
     expect(spy_1).toHaveBeenCalledTimes(1)
     expect(spy_2).toHaveBeenCalledTimes(1)
+    jest.clearAllMocks()
 
     unsubscribe_1()
     store.setState(Counter.inc)
-    expect(spy_1).toHaveBeenCalledTimes(1)
-    expect(spy_2).toHaveBeenCalledTimes(2)
+    expect(spy_1).not.toHaveBeenCalled()
+    expect(spy_2).toHaveBeenCalledTimes(1)
+    jest.clearAllMocks()
 
     unsubscribe_2()
     store.setState(Counter.inc)
-    expect(spy_1).toHaveBeenCalledTimes(1)
-    expect(spy_2).toHaveBeenCalledTimes(2)
+    expect(spy_1).not.toHaveBeenCalled()
+    expect(spy_2).not.toHaveBeenCalled()
   })
 
-  it("does not emit when a state is comparably equal", () => {
+  it("does not emit when a new state is comparably equal", () => {
     const spy = jest.fn()
     const spyCompare = jest.fn(Counter.compare)
     const store = InnerStore.of({ count: 0 })
     const unsubscribe = store.subscribe(spy)
 
     store.setState(Counter.clone, spyCompare)
-    expect(spy).toHaveBeenCalledTimes(0)
+    expect(spy).not.toHaveBeenCalled()
     expect(spyCompare).toHaveBeenCalledTimes(1)
+    expect(spyCompare).toHaveLastReturnedWith(true)
+    jest.clearAllMocks()
 
     store.setState(Counter.clone)
     expect(spy).toHaveBeenCalledTimes(1)
-    expect(spyCompare).toHaveBeenCalledTimes(1)
+    expect(spyCompare).not.toHaveBeenCalled()
+    jest.clearAllMocks()
 
+    expect(spy.mock.calls).toHaveLength(0)
     store.setState(Counter.clone, spyCompare)
-    expect(spy).toHaveBeenCalledTimes(1)
-    expect(spyCompare).toHaveBeenCalledTimes(2)
+    expect(spy).not.toHaveBeenCalled()
+    expect(spyCompare).toHaveBeenCalledTimes(1)
+    expect(spyCompare).toHaveLastReturnedWith(true)
+    jest.clearAllMocks()
 
     unsubscribe()
     store.setState(Counter.clone)
-    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).not.toHaveBeenCalled()
   })
 })
