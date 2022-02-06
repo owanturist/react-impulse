@@ -238,50 +238,99 @@ describe("defined store with compare", () => {
       )
     }
 
-    it.each([
+    describe.each([
       ["inline compare", useHook_1, store_1],
       ["memoized compare", useHook_2, store_2],
     ])("%s", (_, init, store) => {
       const spy = jest.fn()
-      const unsubscribe = store.subscribe(spy)
       const { result } = renderHook(init)
       const setState = result.current
 
-      const prev_1 = store.getState()
-      expect(spy).not.toHaveBeenCalled()
-      expect(spyCompare).not.toHaveBeenCalled()
-      act(() => {
-        setState(Counter.inc)
-      })
-      const state_1 = store.getState()
-      expect(state_1).not.toBe(prev_1)
-      expect(state_1).toStrictEqual({ count: 1 })
-      expect(spy).toHaveBeenCalledTimes(1)
-      expect(spyCompare).toHaveBeenCalledTimes(1)
-      jest.clearAllMocks()
+      let unsubscribe: VoidFunction = jest.fn()
+      let prev = store.getState()
 
-      const prev_2 = store.getState()
-      act(() => {
-        setState(Counter.clone)
+      beforeEach(() => {
+        prev = store.getState()
+        jest.clearAllMocks()
       })
-      const state_2 = store.getState()
-      expect(state_2).toBe(prev_2)
-      expect(state_2).toStrictEqual({ count: 1 })
-      expect(spy).not.toHaveBeenCalled() // does not emit listener
-      expect(spyCompare).toHaveBeenCalledTimes(1)
-      jest.clearAllMocks()
 
-      unsubscribe()
-
-      const prev_3 = store.getState()
-      act(() => {
-        setState({ count: 10 })
+      it("does not call listeners on init", () => {
+        expect(spy).not.toHaveBeenCalled()
       })
-      const state_3 = store.getState()
-      expect(state_3).not.toBe(prev_3)
-      expect(state_3).toStrictEqual({ count: 10 })
-      expect(spy).not.toHaveBeenCalled()
-      expect(spyCompare).toHaveBeenCalledTimes(1)
+
+      it("invoke comparator on state update", () => {
+        act(() => {
+          setState(Counter.inc)
+        })
+
+        const state = store.getState()
+        expect(state).not.toBe(prev)
+        expect(state).toStrictEqual({ count: 1 })
+        expect(spy).not.toHaveBeenCalled()
+        expect(spyCompare).toHaveBeenCalledTimes(1)
+      })
+
+      it("subscribes listener", () => {
+        unsubscribe = store.subscribe(spy)
+
+        expect(spy).not.toHaveBeenCalled()
+        expect(spyCompare).not.toHaveBeenCalled()
+      })
+
+      it("emits listeners by transforming the state", () => {
+        act(() => {
+          setState(Counter.inc)
+        })
+
+        const state = store.getState()
+        expect(state).not.toBe(prev)
+        expect(state).toStrictEqual({ count: 2 })
+        expect(spy).toHaveBeenCalledTimes(1)
+        expect(spyCompare).toHaveBeenCalledTimes(1)
+      })
+
+      it("does not emit listeners by cloning", () => {
+        act(() => {
+          setState(Counter.clone)
+        })
+
+        const state = store.getState()
+        expect(state).toBe(prev)
+        expect(state).toStrictEqual({ count: 2 })
+        expect(spy).not.toHaveBeenCalled()
+        expect(spyCompare).toHaveBeenCalledTimes(1)
+      })
+
+      it("emits listeners by setting the state", () => {
+        act(() => {
+          setState({ count: 3 })
+        })
+
+        const state = store.getState()
+        expect(state).not.toBe(prev)
+        expect(state).toStrictEqual({ count: 3 })
+        expect(spy).toHaveBeenCalledTimes(1)
+        expect(spyCompare).toHaveBeenCalledTimes(1)
+      })
+
+      it("unsubscribes the listener", () => {
+        unsubscribe()
+
+        expect(spy).not.toHaveBeenCalled()
+        expect(spyCompare).not.toHaveBeenCalled()
+      })
+
+      it("does not emit unsubscribed listener", () => {
+        act(() => {
+          setState({ count: 10 })
+        })
+
+        const state = store.getState()
+        expect(state).not.toBe(prev)
+        expect(state).toStrictEqual({ count: 10 })
+        expect(spy).not.toHaveBeenCalled()
+        expect(spyCompare).toHaveBeenCalledTimes(1)
+      })
     })
   })
 })
