@@ -12,7 +12,6 @@ import {
 
 import { Counter } from "./helpers"
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const withinNth = (testId: string, position: number) => {
   return within(screen.getAllByTestId(testId)[position]!)
 }
