@@ -21,8 +21,7 @@
     "test": "jest",
     "lint": "eslint . --config=.eslintrc.prod.json --ext=js,jsx,ts,tsx,md",
     "prettify": "prettier . --write",
-    "typecheck": "tsc -p ./tsconfig.json --noEmit",
-    "prepublish": "npm run build"
+    "typecheck": "tsc -p ./tsconfig.json --noEmit"
   },
   "repository": {
     "type": "git",

@@ -6,17 +6,12 @@ import { InnerStore, SetInnerState, useSetInnerState } from "../src"
 import { Counter } from "./helpers"
 
 describe("bypassed store", () => {
-  it.concurrent("noop for null", () => {
-    const { result } = renderHook(() => useSetInnerState<number>(null))
-
-    expect(() => {
-      result.current(1)
-    }).not.toThrow()
-  })
-
-  it.concurrent("noop for undefined", () => {
+  it.concurrent.each([
+    null,
     // eslint-disable-next-line no-undefined
-    const { result } = renderHook(() => useSetInnerState<number>(undefined))
+    undefined,
+  ])("noop for %s", (value) => {
+    const { result } = renderHook(() => useSetInnerState<number>(value))
 
     expect(() => {
       result.current(1)
