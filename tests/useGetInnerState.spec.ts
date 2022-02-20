@@ -28,6 +28,23 @@ describe("defined store", () => {
     expect(result.current).toStrictEqual({ count: 0 })
   })
 
+  it.concurrent("returns the same value when the hook re-renders", () => {
+    const store = InnerStore.of({ count: 0 })
+
+    const { result, rerender } = renderHook(() => useGetInnerState(store))
+    const firstResult = result.current
+
+    expect(result.all).toHaveLength(1)
+
+    rerender()
+
+    expect(result.all).toHaveLength(2)
+
+    expect(result.current).toBe(firstResult)
+    expect(result.current).toBe(store.getState())
+    expect(result.current).toStrictEqual({ count: 0 })
+  })
+
   it.concurrent("watches after store's updates", () => {
     const initial = { count: 0 }
     const store = InnerStore.of(initial)
