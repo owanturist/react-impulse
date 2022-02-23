@@ -33,6 +33,54 @@ export type DeepExtractInnerState<T> = T extends InnerStore<infer R>
   ? ReadonlyArray<ExtractDeepDirect<R>>
   : { [K in keyof T]: ExtractDeepDirect<T[K]> }
 
+const makeWarningMessage = ({
+  isCritical,
+  whatItDoes,
+  method,
+}: {
+  isCritical: boolean
+  whatItDoes: string
+  method: string
+}): string => {
+  return [
+    "You",
+    isCritical ? "may not" : "should not",
+    "call",
+    method,
+    "inside the useInnerWatch(watcher) callback.",
+    "The useInnerWatch(watcher) hook is for read-only operations but",
+    method,
+    whatItDoes,
+    ".",
+  ].join(" ")
+}
+
+export const WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING = makeWarningMessage({
+  isCritical: false,
+  whatItDoes: "creates a new store",
+  method: "InnerStore#of(something)",
+})
+
+export const WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING = makeWarningMessage({
+  isCritical: false,
+  whatItDoes: "creates a new store",
+  method: "InnerStore#clone(transform?)",
+})
+
+export const WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING =
+  makeWarningMessage({
+    isCritical: true,
+    whatItDoes: "changes an existing store",
+    method: "InnerStore#setState(something)",
+  })
+
+export const WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING =
+  makeWarningMessage({
+    isCritical: true,
+    whatItDoes: "subscribes to a store",
+    method: "InnerStore#subscribe(listener)",
+  })
+
 /**
  * @todo add comparator to constructor
  */
@@ -42,10 +90,7 @@ export class InnerStore<T> implements WatchStore {
    * The instance is mutable so once created it should be used for all future operations.
    */
   public static of<TValue>(value: TValue): InnerStore<TValue> {
-    WatchContext.warning(
-      "You should not call InnerStore.of(something) inside the useInnerWatch(watcher) callback. " +
-        "The useInnerWatch(watcher) hook is for read-only operations but InnerStore.of(something) creates one.",
-    )
+    WatchContext.warning(WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING)
 
     return new InnerStore(value)
   }
@@ -71,7 +116,9 @@ export class InnerStore<T> implements WatchStore {
    * @returns new `InnerStore` instance with the same value.
    */
   public clone(transform?: (value: T) => T): InnerStore<T> {
-    return InnerStore.of(
+    WatchContext.warning(WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING)
+
+    return new InnerStore(
       typeof transform === "function" ? transform(this.value) : this.value,
     )
   }
@@ -109,12 +156,7 @@ export class InnerStore<T> implements WatchStore {
     valueOrTransform: SetStateAction<T>,
     compare: Compare<T> = isEqual,
   ): void {
-    if (
-      WatchContext.warning(
-        "You may not call InnerStore#setState(something) inside the useInnerWatch(watcher) callback. " +
-          "The useInnerWatch(watcher) hook is for read-only operations but InnerStore#setState(something) changes it.",
-      )
-    ) {
+    if (WatchContext.warning(WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING)) {
       return
     }
 
@@ -145,8 +187,7 @@ export class InnerStore<T> implements WatchStore {
   public subscribe(listener: VoidFunction): VoidFunction {
     if (
       WatchContext.warning(
-        "You should not call InnerStore#subscribe(listener) inside the useInnerWatch(watcher) callback. " +
-          "The useInnerWatch(watcher) hook is for read-only operations but not for creating subscriptions.",
+        WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
         WatcherPermission.AllowSubscribeOnly,
       )
     ) {
