@@ -1,5 +1,5 @@
 import { useCallback } from "react"
-import { renderHook } from "@testing-library/react-hooks"
+import { act, renderHook } from "@testing-library/react-hooks"
 
 import { InnerStore, useInnerWatch } from "../src"
 import {
@@ -9,6 +9,8 @@ import {
   WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
 } from "../src/InnerStore"
 import { noop } from "../src/utils"
+
+import { Counter } from "./helpers"
 
 describe("no store is watching", () => {
   it.concurrent.each([
@@ -53,6 +55,314 @@ describe("no store is watching", () => {
     rerender({ value: 3 })
     expect(result.current).toBe(6)
   })
+})
+
+describe("watcher memoisation", () => {
+  it.concurrent("should call the inline watcher on each reconciliation", () => {
+    const spy = jest.fn()
+    const store = InnerStore.of({ count: 1 })
+
+    const { rerender } = renderHook(() => {
+      return useInnerWatch(() => {
+        spy()
+
+        return store.getState()
+      })
+    })
+
+    // 1st extracts the watcher result
+    // 2nd subscribes to the included stores' changes
+    expect(spy).toHaveBeenCalledTimes(2)
+
+    rerender()
+    expect(spy).toHaveBeenCalledTimes(4)
+
+    rerender()
+    expect(spy).toHaveBeenCalledTimes(6)
+
+    act(() => {
+      store.setState(Counter.inc)
+    })
+    // 1st executes watcher to extract new result
+    // --it causes reconciliation--
+    // 2nd extracts the watcher result
+    // 3rd subscribes to the included stores' changes
+    expect(spy).toHaveBeenCalledTimes(9)
+  })
+
+  it.concurrent(
+    "should not call the memoized watcher on each reconciliation",
+    () => {
+      const spy = jest.fn()
+      const store = InnerStore.of({ count: 1 })
+
+      const { rerender } = renderHook(() => {
+        return useInnerWatch(
+          useCallback(() => {
+            spy()
+
+            return store.getState()
+          }, []),
+        )
+      })
+
+      // 1st extracts the watcher result
+      // 2nd subscribes to the included stores' changes
+      expect(spy).toHaveBeenCalledTimes(2)
+
+      rerender()
+      expect(spy).toHaveBeenCalledTimes(2)
+
+      rerender()
+      expect(spy).toHaveBeenCalledTimes(2)
+
+      act(() => {
+        store.setState(Counter.inc)
+      })
+      // 1st executes watcher to extract new result
+      expect(spy).toHaveBeenCalledTimes(3)
+    },
+  )
+})
+
+describe("single store is watching", () => {
+  describe.each([
+    [
+      "inline",
+      ({ store }: { store: InnerStore<Counter> }) => {
+        return useInnerWatch(() => store.getState())
+      },
+    ],
+    [
+      "memoized",
+      ({ store }: { store: InnerStore<Counter> }) => {
+        return useInnerWatch(useCallback(() => store.getState(), [store]))
+      },
+    ],
+  ])("direct %s watcher", (_, hook) => {
+    it.concurrent("watches the store's changes", () => {
+      const store = InnerStore.of({ count: 1 })
+
+      const { result } = renderHook(hook, {
+        initialProps: { store },
+      })
+
+      expect(result.current).toStrictEqual({ count: 1 })
+
+      act(() => {
+        store.setState(Counter.inc)
+      })
+      expect(result.current).toStrictEqual({ count: 2 })
+
+      act(() => {
+        store.setState(({ count }) => ({ count: count * 2 }))
+      })
+      expect(result.current).toStrictEqual({ count: 4 })
+    })
+
+    it.concurrent("watches the replaced store changes", () => {
+      const store_1 = InnerStore.of({ count: 1 })
+      const store_2 = InnerStore.of({ count: 10 })
+
+      const { result, rerender } = renderHook(hook, {
+        initialProps: { store: store_1 },
+      })
+
+      rerender({ store: store_2 })
+      expect(result.current).toStrictEqual({ count: 10 })
+
+      act(() => {
+        store_1.setState(Counter.inc)
+      })
+      expect(result.current).toStrictEqual({ count: 10 })
+
+      act(() => {
+        store_2.setState(Counter.inc)
+      })
+      expect(result.current).toStrictEqual({ count: 11 })
+
+      rerender({ store: store_1 })
+      expect(result.current).toStrictEqual({ count: 2 })
+
+      act(() => {
+        store_1.setState(Counter.inc)
+      })
+      expect(result.current).toStrictEqual({ count: 3 })
+
+      act(() => {
+        store_2.setState(Counter.inc)
+      })
+      expect(result.current).toStrictEqual({ count: 3 })
+    })
+  })
+
+  describe("transform state's value inside watcher", () => {
+    const toTuple = ({ count }: Counter): [boolean, boolean] => {
+      return [count > 2, count < 5]
+    }
+
+    const compareTuple = (
+      [prevLeft, prevRight]: [boolean, boolean],
+      [nextLeft, nextRight]: [boolean, boolean],
+    ): boolean => {
+      return prevLeft === nextLeft && prevRight === nextRight
+    }
+
+    it.concurrent.each([
+      [
+        "inline",
+        ({ store }: { store: InnerStore<Counter> }) => {
+          return useInnerWatch(() => store.getState(toTuple))
+        },
+      ],
+      [
+        "memoized",
+        ({ store }: { store: InnerStore<Counter> }) => {
+          return useInnerWatch(
+            useCallback(() => store.getState(toTuple), [store]),
+          )
+        },
+      ],
+    ])(
+      "produces new value on each store's update with %s watcher",
+      (_, hook) => {
+        const store = InnerStore.of({ count: 1 })
+
+        const { result, rerender } = renderHook(hook, {
+          initialProps: { store },
+        })
+
+        let prev = result.current
+
+        // produces initial result
+        expect(result.current).toStrictEqual([false, true])
+
+        // increments 1 -> 2
+        prev = result.current
+        act(() => {
+          store.setState(Counter.inc)
+        })
+        expect(result.current).not.toBe(prev)
+        expect(result.current).toStrictEqual([false, true])
+
+        // increments 2 -> 3
+        prev = result.current
+        act(() => {
+          store.setState({ count: 3 })
+        })
+        expect(result.current).not.toBe(prev)
+        expect(result.current).toStrictEqual([true, true])
+
+        // rerender
+        rerender()
+        expect(result.current).toStrictEqual([true, true])
+
+        // increments 3 -> 4
+        prev = result.current
+        act(() => {
+          store.setState({ count: 4 })
+        })
+        expect(result.current).not.toBe(prev)
+        expect(result.current).toStrictEqual([true, true])
+
+        // increments 4 -> 5
+        prev = result.current
+        act(() => {
+          store.setState(Counter.inc)
+        })
+        expect(result.current).not.toBe(prev)
+        expect(result.current).toStrictEqual([true, false])
+      },
+    )
+
+    it.concurrent.each([
+      [
+        "inline watcher with inline comparator",
+        ({ store }: { store: InnerStore<Counter> }) => {
+          return useInnerWatch(
+            () => store.getState(toTuple),
+            (prev, next) => compareTuple(prev, next),
+          )
+        },
+      ],
+      [
+        "inline watcher with memoized comparator",
+        ({ store }: { store: InnerStore<Counter> }) => {
+          return useInnerWatch(() => store.getState(toTuple), compareTuple)
+        },
+      ],
+      [
+        "memoized watcher with inline comparator",
+        ({ store }: { store: InnerStore<Counter> }) => {
+          return useInnerWatch(
+            useCallback(() => store.getState(toTuple), [store]),
+            (prev, next) => compareTuple(prev, next),
+          )
+        },
+      ],
+      [
+        "memoized watcher with memoized comparator",
+        ({ store }: { store: InnerStore<Counter> }) => {
+          return useInnerWatch(
+            useCallback(() => store.getState(toTuple), [store]),
+            compareTuple,
+          )
+        },
+      ],
+    ])("keeps the old value when it is comparably equal when %s", (_, hook) => {
+      const store = InnerStore.of({ count: 1 })
+
+      const { result, rerender } = renderHook(hook, {
+        initialProps: { store },
+      })
+
+      let prev = result.current
+
+      // produces initial result
+      expect(result.current).toStrictEqual([false, true])
+
+      // increments 1 -> 2
+      prev = result.current
+      act(() => {
+        store.setState(Counter.inc)
+      })
+      expect(result.current).toBe(prev)
+      expect(result.current).toStrictEqual([false, true])
+
+      // increments 2 -> 3
+      prev = result.current
+      act(() => {
+        store.setState({ count: 3 })
+      })
+      expect(result.current).not.toBe(prev)
+      expect(result.current).toStrictEqual([true, true])
+
+      // rerender
+      rerender()
+      expect(result.current).toStrictEqual([true, true])
+
+      // increments 3 -> 4
+      prev = result.current
+      act(() => {
+        store.setState({ count: 4 })
+      })
+      expect(result.current).toBe(prev)
+      expect(result.current).toStrictEqual([true, true])
+
+      // increments 4 -> 5
+      prev = result.current
+      act(() => {
+        store.setState(Counter.inc)
+      })
+      expect(result.current).not.toBe(prev)
+      expect(result.current).toStrictEqual([true, false])
+    })
+  })
+
+  it.todo("clone state with InnerStore compare, should not trigger watcher")
+  it.todo(
+    "defined but not actually called store.getState() should not trigger watcher when store.setState",
+  )
 })
 
 describe("illegal usage", () => {
