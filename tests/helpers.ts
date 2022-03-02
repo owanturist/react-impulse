@@ -7,6 +7,10 @@ export abstract class Counter {
     return prev.count === next.count
   }
 
+  public static merge(left: Counter, right: Counter) {
+    return { count: left.count + right.count }
+  }
+
   public static clone(counter: Counter): Counter {
     return { ...counter }
   }
