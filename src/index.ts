@@ -1,6 +1,7 @@
 export type { Compare } from "./utils"
 export type { ExtractInnerState, DeepExtractInnerState } from "./InnerStore"
 export type { SetInnerState } from "./useSetInnerState"
+export { batch } from "./batch"
 export { InnerStore } from "./InnerStore"
 export { useGetInnerState } from "./useGetInnerState"
 export { useSetInnerState } from "./useSetInnerState"
