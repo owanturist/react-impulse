@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { InnerStore, useInnerWatch } from "../src"
+import { batch, InnerStore, useInnerWatch } from "../src"
 import {
   WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING,
@@ -16,8 +16,20 @@ interface WithStore<T = Counter> {
   store: InnerStore<T>
 }
 
-interface WithSpy<T = (counter: Counter) => Counter> {
-  spy: T
+interface WithFirst<T = Counter> {
+  first: InnerStore<T>
+}
+
+interface WithSecond<T = Counter> {
+  second: InnerStore<T>
+}
+
+interface WithThird<T = Counter> {
+  third: InnerStore<T>
+}
+
+interface WithSpy {
+  spy: VoidFunction
 }
 
 interface WithInitial<T = Counter> {
@@ -374,14 +386,22 @@ describe("single store is watching", () => {
       [
         "inline watcher",
         ({ spy, store }: WithStore & WithSpy) => {
-          return useInnerWatch(() => store.getState(spy))
+          return useInnerWatch(() => {
+            spy()
+
+            return store.getState()
+          })
         },
       ],
       [
         "inline watcher with inline comparator",
         ({ spy, store }: WithStore & WithSpy) => {
           return useInnerWatch(
-            () => store.getState(spy),
+            () => {
+              spy()
+
+              return store.getState()
+            },
             (prev, next) => Counter.compare(prev, next),
           )
         },
@@ -389,14 +409,22 @@ describe("single store is watching", () => {
       [
         "inline watcher with memoized comparator",
         ({ spy, store }: WithStore & WithSpy) => {
-          return useInnerWatch(() => store.getState(spy), Counter.compare)
+          return useInnerWatch(() => {
+            spy()
+
+            return store.getState()
+          }, Counter.compare)
         },
       ],
       [
         "memoized watcher",
         ({ spy, store }: WithStore & WithSpy) => {
           return useInnerWatch(
-            useCallback(() => store.getState(spy), [spy, store]),
+            useCallback(() => {
+              spy()
+
+              return store.getState()
+            }, [spy, store]),
           )
         },
       ],
@@ -404,7 +432,11 @@ describe("single store is watching", () => {
         "memoized watcher with inline comparator",
         ({ spy, store }: WithStore & WithSpy) => {
           return useInnerWatch(
-            useCallback(() => store.getState(spy), [spy, store]),
+            useCallback(() => {
+              spy()
+
+              return store.getState()
+            }, [spy, store]),
             (prev, next) => Counter.compare(prev, next),
           )
         },
@@ -413,7 +445,11 @@ describe("single store is watching", () => {
         "memoized watcher with memoized comparator",
         ({ spy, store }: WithStore & WithSpy) => {
           return useInnerWatch(
-            useCallback(() => store.getState(spy), [spy, store]),
+            useCallback(() => {
+              spy()
+
+              return store.getState()
+            }, [spy, store]),
             Counter.compare,
           )
         },
@@ -422,7 +458,7 @@ describe("single store is watching", () => {
       "should not trigger the %s when store sets comparably equal state",
       (_, hook) => {
         const store = InnerStore.of({ count: 1 })
-        const spy = jest.fn((counter: Counter) => counter)
+        const spy = jest.fn()
 
         renderHook(hook, {
           initialProps: { spy, store },
@@ -446,7 +482,9 @@ describe("single store is watching", () => {
       "inline watcher",
       ({ initial, spy, store }: WithStore & WithSpy & WithInitial) => {
         return useInnerWatch(() => {
-          return spy(initial ?? store.getState())
+          spy()
+
+          return initial ?? store.getState()
         })
       },
     ],
@@ -455,7 +493,9 @@ describe("single store is watching", () => {
       ({ initial, spy, store }: WithStore & WithSpy & WithInitial) => {
         return useInnerWatch(
           () => {
-            return spy(initial ?? store.getState())
+            spy()
+
+            return initial ?? store.getState()
           },
           (prev, next) => Counter.compare(prev, next),
         )
@@ -465,7 +505,9 @@ describe("single store is watching", () => {
       "inline watcher with memoized comparator",
       ({ initial, spy, store }: WithStore & WithSpy & WithInitial) => {
         return useInnerWatch(() => {
-          return spy(initial ?? store.getState())
+          spy()
+
+          return initial ?? store.getState()
         }, Counter.compare)
       },
     ],
@@ -474,7 +516,9 @@ describe("single store is watching", () => {
       ({ initial, spy, store }: WithStore & WithSpy & WithInitial) => {
         return useInnerWatch(
           useCallback(() => {
-            return spy(initial ?? store.getState())
+            spy()
+
+            return initial ?? store.getState()
           }, [initial, spy, store]),
         )
       },
@@ -484,7 +528,9 @@ describe("single store is watching", () => {
       ({ initial, spy, store }: WithStore & WithSpy & WithInitial) => {
         return useInnerWatch(
           useCallback(() => {
-            return spy(initial ?? store.getState())
+            spy()
+
+            return initial ?? store.getState()
           }, [initial, spy, store]),
           (prev, next) => Counter.compare(prev, next),
         )
@@ -495,7 +541,9 @@ describe("single store is watching", () => {
       ({ initial, spy, store }: WithStore & WithSpy & WithInitial) => {
         return useInnerWatch(
           useCallback(() => {
-            return spy(initial ?? store.getState())
+            spy()
+
+            return initial ?? store.getState()
           }, [initial, spy, store]),
           Counter.compare,
         )
@@ -506,7 +554,7 @@ describe("single store is watching", () => {
     (_, hook) => {
       const initial = { count: 0 }
       const store = InnerStore.of({ count: 1 })
-      const spy = jest.fn((counter: Counter) => counter)
+      const spy = jest.fn()
 
       const { result } = renderHook(hook, {
         initialProps: { initial, spy, store },
@@ -531,11 +579,17 @@ describe("single store is watching", () => {
       [
         "inline watcher",
         ({ spy, store }: WithStore & WithSpy) => {
-          return useInnerWatch(() => store.getState(spy))
+          return useInnerWatch(() => {
+            spy()
+
+            return store.getState()
+          })
         },
         ({ spy, store }: WithStore & WithSpy) => {
           return useInnerWatch(() => {
-            return spy(Counter.merge(store.getState(), store.getState()))
+            spy()
+
+            return Counter.merge(store.getState(), store.getState())
           })
         },
       ],
@@ -543,14 +597,20 @@ describe("single store is watching", () => {
         "inline watcher with inline comparator",
         ({ spy, store }: WithStore & WithSpy) => {
           return useInnerWatch(
-            () => store.getState(spy),
+            () => {
+              spy()
+
+              return store.getState()
+            },
             (prev, next) => Counter.compare(prev, next),
           )
         },
         ({ spy, store }: WithStore & WithSpy) => {
           return useInnerWatch(
             () => {
-              return spy(Counter.merge(store.getState(), store.getState()))
+              spy()
+
+              return Counter.merge(store.getState(), store.getState())
             },
             (prev, next) => Counter.compare(prev, next),
           )
@@ -559,11 +619,17 @@ describe("single store is watching", () => {
       [
         "inline watcher with memoized comparator",
         ({ spy, store }: WithStore & WithSpy) => {
-          return useInnerWatch(() => store.getState(spy), Counter.compare)
+          return useInnerWatch(() => {
+            spy()
+
+            return store.getState()
+          }, Counter.compare)
         },
         ({ spy, store }: WithStore & WithSpy) => {
           return useInnerWatch(() => {
-            return spy(Counter.merge(store.getState(), store.getState()))
+            spy()
+
+            return Counter.merge(store.getState(), store.getState())
           }, Counter.compare)
         },
       ],
@@ -571,13 +637,19 @@ describe("single store is watching", () => {
         "memoized watcher",
         ({ spy, store }: WithStore & WithSpy) => {
           return useInnerWatch(
-            useCallback(() => store.getState(spy), [spy, store]),
+            useCallback(() => {
+              spy()
+
+              return store.getState()
+            }, [spy, store]),
           )
         },
         ({ spy, store }: WithStore & WithSpy) => {
           return useInnerWatch(
             useCallback(() => {
-              return spy(Counter.merge(store.getState(), store.getState()))
+              spy()
+
+              return Counter.merge(store.getState(), store.getState())
             }, [spy, store]),
           )
         },
@@ -586,14 +658,20 @@ describe("single store is watching", () => {
         "memoized watcher with inline comparator",
         ({ spy, store }: WithStore & WithSpy) => {
           return useInnerWatch(
-            useCallback(() => store.getState(spy), [spy, store]),
+            useCallback(() => {
+              spy()
+
+              return store.getState()
+            }, [spy, store]),
             (prev, next) => Counter.compare(prev, next),
           )
         },
         ({ spy, store }: WithStore & WithSpy) => {
           return useInnerWatch(
             useCallback(() => {
-              return spy(Counter.merge(store.getState(), store.getState()))
+              spy()
+
+              return Counter.merge(store.getState(), store.getState())
             }, [spy, store]),
             (prev, next) => Counter.compare(prev, next),
           )
@@ -603,14 +681,20 @@ describe("single store is watching", () => {
         "memoized watcher with memoized comparator",
         ({ spy, store }: WithStore & WithSpy) => {
           return useInnerWatch(
-            useCallback(() => store.getState(spy), [spy, store]),
+            useCallback(() => {
+              spy()
+
+              return store.getState()
+            }, [spy, store]),
             Counter.compare,
           )
         },
         ({ spy, store }: WithStore & WithSpy) => {
           return useInnerWatch(
             useCallback(() => {
-              return spy(Counter.merge(store.getState(), store.getState()))
+              spy()
+
+              return Counter.merge(store.getState(), store.getState())
             }, [spy, store]),
             Counter.compare,
           )
@@ -619,8 +703,8 @@ describe("single store is watching", () => {
     ])(
       "multiple calls triggers %s the same amount as for a single call",
       (_, single, double) => {
-        const spySingle = jest.fn((counter: Counter) => counter)
-        const spyDouble = jest.fn((counter: Counter) => counter)
+        const spySingle = jest.fn()
+        const spyDouble = jest.fn()
         const store = InnerStore.of({ count: 1 })
 
         const { result: resultSingle } = renderHook(single, {
@@ -668,6 +752,313 @@ describe("single store is watching", () => {
       },
     )
   })
+})
+
+describe("multiple stores are watching", () => {
+  it.concurrent.each([
+    [
+      "inline watcher",
+      ({ first, second }: WithFirst & WithSecond) => {
+        return useInnerWatch(() => {
+          return (
+            first.getState(Counter.getCount) * second.getState(Counter.getCount)
+          )
+        })
+      },
+    ],
+    [
+      "memoized watcher",
+      ({ first, second }: WithFirst & WithSecond) => {
+        return useInnerWatch(
+          useCallback(() => {
+            return (
+              first.getState(Counter.getCount) *
+              second.getState(Counter.getCount)
+            )
+          }, [first, second]),
+        )
+      },
+    ],
+  ])("direct %s watching", (_, hook) => {
+    const first = InnerStore.of({ count: 2 })
+    const second = InnerStore.of({ count: 2 })
+    const { result } = renderHook(hook, {
+      initialProps: { first, second },
+    })
+
+    expect(result.current).toBe(4)
+
+    act(() => {
+      first.setState(Counter.inc)
+    })
+    expect(result.current).toBe(6)
+
+    act(() => {
+      second.setState(Counter.inc)
+    })
+    expect(result.current).toBe(9)
+
+    act(() => {
+      first.setState(Counter.inc)
+      second.setState(Counter.inc)
+    })
+    expect(result.current).toBe(16)
+  })
+
+  it.concurrent.each([
+    [
+      "inline watcher",
+      ({ spy, store }: WithStore & WithSpy) => {
+        return useInnerWatch(() => {
+          spy()
+
+          return store.getState()
+        })
+      },
+      ({
+        spy,
+        first,
+        second,
+        third,
+      }: WithFirst & WithSecond & WithThird & WithSpy) => {
+        return useInnerWatch(() => {
+          spy()
+
+          return Counter.merge(
+            first.getState(),
+            second.getState(),
+            third.getState(),
+          )
+        })
+      },
+    ],
+    [
+      "inline watcher with inline comparator",
+      ({ spy, store }: WithStore & WithSpy) => {
+        return useInnerWatch(
+          () => {
+            spy()
+
+            return store.getState()
+          },
+          (prev, next) => Counter.compare(prev, next),
+        )
+      },
+      ({
+        spy,
+        first,
+        second,
+        third,
+      }: WithFirst & WithSecond & WithThird & WithSpy) => {
+        return useInnerWatch(
+          () => {
+            spy()
+
+            return Counter.merge(
+              first.getState(),
+              second.getState(),
+              third.getState(),
+            )
+          },
+          (prev, next) => Counter.compare(prev, next),
+        )
+      },
+    ],
+    [
+      "inline watcher with memoized comparator",
+      ({ spy, store }: WithStore & WithSpy) => {
+        return useInnerWatch(() => {
+          spy()
+
+          return store.getState()
+        }, Counter.compare)
+      },
+      ({
+        spy,
+        first,
+        second,
+        third,
+      }: WithFirst & WithSecond & WithThird & WithSpy) => {
+        return useInnerWatch(() => {
+          spy()
+
+          return Counter.merge(
+            first.getState(),
+            second.getState(),
+            third.getState(),
+          )
+        }, Counter.compare)
+      },
+    ],
+    [
+      "memoized watcher",
+      ({ spy, store }: WithStore & WithSpy) => {
+        return useInnerWatch(
+          useCallback(() => {
+            spy()
+
+            return store.getState()
+          }, [spy, store]),
+        )
+      },
+      ({
+        spy,
+        first,
+        second,
+        third,
+      }: WithFirst & WithSecond & WithThird & WithSpy) => {
+        return useInnerWatch(
+          useCallback(() => {
+            spy()
+
+            return Counter.merge(
+              first.getState(),
+              second.getState(),
+              third.getState(),
+            )
+          }, [spy, first, second, third]),
+        )
+      },
+    ],
+    [
+      "memoized watcher with inline comparator",
+      ({ spy, store }: WithStore & WithSpy) => {
+        return useInnerWatch(
+          useCallback(() => {
+            spy()
+
+            return store.getState()
+          }, [spy, store]),
+          (prev, next) => Counter.compare(prev, next),
+        )
+      },
+      ({
+        spy,
+        first,
+        second,
+        third,
+      }: WithFirst & WithSecond & WithThird & WithSpy) => {
+        return useInnerWatch(
+          useCallback(() => {
+            spy()
+
+            return Counter.merge(
+              first.getState(),
+              second.getState(),
+              third.getState(),
+            )
+          }, [spy, first, second, third]),
+          (prev, next) => Counter.compare(prev, next),
+        )
+      },
+    ],
+    [
+      "memoized watcher with memoized comparator",
+      ({ spy, store }: WithStore & WithSpy) => {
+        return useInnerWatch(
+          useCallback(() => {
+            spy()
+
+            return store.getState()
+          }, [spy, store]),
+          Counter.compare,
+        )
+      },
+      ({
+        spy,
+        first,
+        second,
+        third,
+      }: WithFirst & WithSecond & WithThird & WithSpy) => {
+        return useInnerWatch(
+          useCallback(() => {
+            spy()
+
+            return Counter.merge(
+              first.getState(),
+              second.getState(),
+              third.getState(),
+            )
+          }, [spy, first, second, third]),
+          Counter.compare,
+        )
+      },
+    ],
+  ])(
+    "multiple stores with batch triggers %s the same amount as for a single store",
+    (_, single, multiple) => {
+      const first = InnerStore.of({ count: 1 })
+      const second = InnerStore.of({ count: 2 })
+      const third = InnerStore.of({ count: 3 })
+      const spySingle = jest.fn()
+      const spyMultiple = jest.fn()
+
+      const { result: resultSingle } = renderHook(single, {
+        initialProps: { store: first, spy: spySingle },
+      })
+
+      const { result: resultMultiple } = renderHook(multiple, {
+        initialProps: { first, second, third, spy: spyMultiple },
+      })
+
+      expect(resultSingle.current).toStrictEqual({ count: 1 })
+      expect(resultMultiple.current).toStrictEqual({ count: 6 })
+      expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+
+      act(() => {
+        first.setState(Counter.inc)
+      })
+      expect(resultSingle.current).toStrictEqual({ count: 2 })
+      expect(resultMultiple.current).toStrictEqual({ count: 7 })
+      expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+
+      act(() => {
+        batch(() => {
+          batch(() => {
+            first.setState(Counter.inc)
+            second.setState(Counter.inc)
+          })
+
+          third.setState(Counter.inc)
+        })
+      })
+      expect(resultSingle.current).toStrictEqual({ count: 3 })
+      expect(resultMultiple.current).toStrictEqual({ count: 10 })
+      expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+
+      act(() => {
+        batch(() => {
+          first.setState(Counter.inc)
+          second.setState(Counter.inc)
+        })
+      })
+      expect(resultSingle.current).toStrictEqual({ count: 4 })
+      expect(resultMultiple.current).toStrictEqual({ count: 12 })
+      expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+
+      act(() => {
+        batch(() => {
+          first.setState(Counter.inc)
+          third.setState(Counter.inc)
+        })
+      })
+      expect(resultSingle.current).toStrictEqual({ count: 5 })
+      expect(resultMultiple.current).toStrictEqual({ count: 14 })
+      expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+
+      act(() => {
+        batch(() => {
+          second.setState(Counter.inc)
+          third.setState(Counter.inc)
+        })
+      })
+      expect(resultSingle.current).toStrictEqual({ count: 5 })
+      expect(resultMultiple.current).toStrictEqual({ count: 16 })
+      expect(spyMultiple.mock.calls.length).toBeGreaterThan(
+        spySingle.mock.calls.length,
+      )
+    },
+  )
 })
 
 describe("illegal usage", () => {

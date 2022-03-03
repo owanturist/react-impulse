@@ -7,8 +7,12 @@ export abstract class Counter {
     return prev.count === next.count
   }
 
-  public static merge(left: Counter, right: Counter) {
-    return { count: left.count + right.count }
+  public static merge(left: Counter, right: Counter, ...rest: Array<Counter>) {
+    return {
+      count: [left, right, ...rest]
+        .map(Counter.getCount)
+        .reduce((acc, x) => acc + x, 0),
+    }
   }
 
   public static clone(counter: Counter): Counter {
