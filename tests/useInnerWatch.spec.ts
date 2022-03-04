@@ -184,39 +184,87 @@ describe("single store is watching", () => {
       expect(result.current).toStrictEqual({ count: 4 })
     })
 
-    it.concurrent("watches the replaced store changes", () => {
-      const store_1 = InnerStore.of({ count: 1 })
-      const store_2 = InnerStore.of({ count: 10 })
+    describe("watches the replaced store changes", () => {
+      const setup = () => {
+        const store_1 = InnerStore.of({ count: 1 })
+        const store_2 = InnerStore.of({ count: 10 })
 
-      const { result, rerender } = renderHook(hook, {
-        initialProps: { store: store_1 },
+        const { result, rerender } = renderHook(hook, {
+          initialProps: { store: store_1 },
+        })
+
+        return { store_1, store_2, result, rerender }
+      }
+
+      it.concurrent("initiates with correct result", () => {
+        const { result } = setup()
+
+        expect(result.current).toStrictEqual({ count: 1 })
       })
 
-      rerender({ store: store_2 })
-      expect(result.current).toStrictEqual({ count: 10 })
+      it.concurrent("replaces initial store_1 with store_2", () => {
+        const { store_2, result, rerender } = setup()
 
-      act(() => {
-        store_1.setState(Counter.inc)
+        rerender({ store: store_2 })
+        expect(result.current).toStrictEqual({ count: 10 })
       })
-      expect(result.current).toStrictEqual({ count: 10 })
 
-      act(() => {
-        store_2.setState(Counter.inc)
+      it.concurrent(
+        "stops watching store_1 changes after replacement with store_2",
+        () => {
+          const { store_1, store_2, result, rerender } = setup()
+
+          rerender({ store: store_2 })
+
+          act(() => {
+            store_1.setState(Counter.inc)
+          })
+
+          expect(store_1.getState()).toStrictEqual({ count: 2 })
+          expect(result.current).toStrictEqual({ count: 10 })
+        },
+      )
+
+      it.concurrent(
+        "starts watching store_2 changes after replacement of store_1",
+        () => {
+          const { store_1, store_2, result, rerender } = setup()
+
+          rerender({ store: store_2 })
+
+          act(() => {
+            store_2.setState(Counter.inc)
+          })
+
+          expect(store_1.getState()).toStrictEqual({ count: 1 })
+          expect(result.current).toStrictEqual({ count: 11 })
+        },
+      )
+
+      it.concurrent("replaces store_1 back", () => {
+        const { store_1, store_2, result, rerender } = setup()
+
+        rerender({ store: store_2 })
+        rerender({ store: store_1 })
+
+        expect(result.current).toStrictEqual({ count: 1 })
       })
-      expect(result.current).toStrictEqual({ count: 11 })
 
-      rerender({ store: store_1 })
-      expect(result.current).toStrictEqual({ count: 2 })
+      it.concurrent(
+        "stops watching store_2 after replacement back store_1",
+        () => {
+          const { store_1, store_2, result, rerender } = setup()
 
-      act(() => {
-        store_1.setState(Counter.inc)
-      })
-      expect(result.current).toStrictEqual({ count: 3 })
+          rerender({ store: store_2 })
+          rerender({ store: store_1 })
 
-      act(() => {
-        store_2.setState(Counter.inc)
-      })
-      expect(result.current).toStrictEqual({ count: 3 })
+          act(() => {
+            store_2.setState(Counter.inc)
+          })
+
+          expect(result.current).toStrictEqual({ count: 1 })
+        },
+      )
     })
   })
 
@@ -755,7 +803,7 @@ describe("single store is watching", () => {
 })
 
 describe("multiple stores are watching", () => {
-  it.concurrent.each([
+  describe.each([
     [
       "inline watcher",
       ({ first, second }: WithFirst & WithSecond) => {
@@ -780,32 +828,52 @@ describe("multiple stores are watching", () => {
       },
     ],
   ])("direct %s watching", (_, hook) => {
-    const first = InnerStore.of({ count: 2 })
-    const second = InnerStore.of({ count: 2 })
-    const { result } = renderHook(hook, {
-      initialProps: { first, second },
+    const setup = () => {
+      const first = InnerStore.of({ count: 2 })
+      const second = InnerStore.of({ count: 2 })
+      const { result } = renderHook(hook, {
+        initialProps: { first, second },
+      })
+
+      return { first, second, result }
+    }
+
+    it.concurrent("initiates with expected result", () => {
+      const { result } = setup()
+
+      expect(result.current).toBe(4)
     })
 
-    expect(result.current).toBe(4)
+    it.concurrent("increments only first", () => {
+      const { first, result } = setup()
 
-    act(() => {
-      first.setState(Counter.inc)
+      act(() => {
+        first.setState(Counter.inc)
+      })
+      expect(result.current).toBe(6)
     })
-    expect(result.current).toBe(6)
 
-    act(() => {
-      second.setState(Counter.inc)
-    })
-    expect(result.current).toBe(9)
+    it.concurrent("increments only second", () => {
+      const { second, result } = setup()
 
-    act(() => {
-      first.setState(Counter.inc)
-      second.setState(Counter.inc)
+      act(() => {
+        second.setState(Counter.inc)
+      })
+      expect(result.current).toBe(6)
     })
-    expect(result.current).toBe(16)
+
+    it.concurrent("increments both first and second", () => {
+      const { first, second, result } = setup()
+
+      act(() => {
+        first.setState(Counter.inc)
+        second.setState(Counter.inc)
+      })
+      expect(result.current).toBe(9)
+    })
   })
 
-  it.concurrent.each([
+  describe.each([
     [
       "inline watcher",
       ({ spy, store }: WithStore & WithSpy) => {
@@ -985,80 +1053,252 @@ describe("multiple stores are watching", () => {
       },
     ],
   ])(
-    "multiple stores with batch triggers %s the same amount as for a single store",
+    "triggering %s for multiple stores vs single store",
     (_, single, multiple) => {
-      const first = InnerStore.of({ count: 1 })
+      const setup = () => {
+        const first = InnerStore.of({ count: 1 })
+        const second = InnerStore.of({ count: 2 })
+        const third = InnerStore.of({ count: 3 })
+        const spySingle = jest.fn()
+        const spyMultiple = jest.fn()
+
+        const { result: resultSingle } = renderHook(single, {
+          initialProps: { store: first, spy: spySingle },
+        })
+
+        const { result: resultMultiple } = renderHook(multiple, {
+          initialProps: { first, second, third, spy: spyMultiple },
+        })
+
+        return {
+          first,
+          second,
+          third,
+          spySingle,
+          spyMultiple,
+          resultSingle,
+          resultMultiple,
+        }
+      }
+
+      it.concurrent("calls watchers the same amount when initiates", () => {
+        const { spySingle, spyMultiple, resultSingle, resultMultiple } = setup()
+
+        expect(resultSingle.current).toStrictEqual({ count: 1 })
+        expect(resultMultiple.current).toStrictEqual({ count: 6 })
+        expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+      })
+
+      it.concurrent(
+        "calls watchers the same amount when only first and second",
+        () => {
+          const {
+            first,
+            second,
+            spySingle,
+            spyMultiple,
+            resultSingle,
+            resultMultiple,
+          } = setup()
+
+          act(() => {
+            batch(() => {
+              first.setState(Counter.inc)
+              second.setState(Counter.inc)
+            })
+          })
+          expect(resultSingle.current).toStrictEqual({ count: 2 })
+          expect(resultMultiple.current).toStrictEqual({ count: 8 })
+          expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+        },
+      )
+
+      it.concurrent(
+        "calls watchers the same amount when only first and third",
+        () => {
+          const {
+            first,
+            third,
+            spySingle,
+            spyMultiple,
+            resultSingle,
+            resultMultiple,
+          } = setup()
+
+          act(() => {
+            batch(() => {
+              first.setState(Counter.inc)
+              third.setState(Counter.inc)
+            })
+          })
+          expect(resultSingle.current).toStrictEqual({ count: 2 })
+          expect(resultMultiple.current).toStrictEqual({ count: 8 })
+          expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+        },
+      )
+
+      it.concurrent(
+        "calls watchers the same amount when first, second and third",
+        () => {
+          const {
+            first,
+            second,
+            third,
+            spySingle,
+            spyMultiple,
+            resultSingle,
+            resultMultiple,
+          } = setup()
+
+          act(() => {
+            batch(() => {
+              batch(() => {
+                first.setState(Counter.inc)
+                second.setState(Counter.inc)
+              })
+
+              third.setState(Counter.inc)
+            })
+          })
+          expect(resultSingle.current).toStrictEqual({ count: 2 })
+          expect(resultMultiple.current).toStrictEqual({ count: 9 })
+          expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+        },
+      )
+
+      it.concurrent(
+        "doesn't call single watcher when changes only second and third",
+        () => {
+          const {
+            second,
+            third,
+            spySingle,
+            spyMultiple,
+            resultSingle,
+            resultMultiple,
+          } = setup()
+
+          spySingle.mockReset()
+          spyMultiple.mockReset()
+
+          act(() => {
+            batch(() => {
+              second.setState(Counter.inc)
+              third.setState(Counter.inc)
+            })
+          })
+          expect(resultSingle.current).toStrictEqual({ count: 1 })
+          expect(resultMultiple.current).toStrictEqual({ count: 8 })
+          expect(spySingle).not.toHaveBeenCalled()
+          expect(spyMultiple).toHaveBeenCalled()
+        },
+      )
+    },
+  )
+})
+
+describe("nested stores are watching", () => {
+  describe.each([
+    [
+      "inline watcher",
+      ({ store }: WithStore<WithFirst & WithSecond>) => {
+        return useInnerWatch(() => {
+          const { first, second } = store.getState()
+
+          return (
+            first.getState(Counter.getCount) * second.getState(Counter.getCount)
+          )
+        })
+      },
+    ],
+    [
+      "memoized watcher",
+      ({ store }: WithStore<WithFirst & WithSecond>) => {
+        return useInnerWatch(
+          useCallback(() => {
+            const { first, second } = store.getState()
+
+            return (
+              first.getState(Counter.getCount) *
+              second.getState(Counter.getCount)
+            )
+          }, [store]),
+        )
+      },
+    ],
+  ])("direct %s watching", (_, hook) => {
+    const setup = () => {
+      const first = InnerStore.of({ count: 2 })
       const second = InnerStore.of({ count: 2 })
-      const third = InnerStore.of({ count: 3 })
-      const spySingle = jest.fn()
-      const spyMultiple = jest.fn()
-
-      const { result: resultSingle } = renderHook(single, {
-        initialProps: { store: first, spy: spySingle },
+      const store = InnerStore.of({ first, second })
+      const { result } = renderHook(hook, {
+        initialProps: { store },
       })
 
-      const { result: resultMultiple } = renderHook(multiple, {
-        initialProps: { first, second, third, spy: spyMultiple },
-      })
+      return { store, first, second, result }
+    }
 
-      expect(resultSingle.current).toStrictEqual({ count: 1 })
-      expect(resultMultiple.current).toStrictEqual({ count: 6 })
-      expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+    it.concurrent("initiates with expected result", () => {
+      const { result } = setup()
+
+      expect(result.current).toBe(4)
+    })
+
+    it.concurrent("increments only first", () => {
+      const { first, result } = setup()
 
       act(() => {
         first.setState(Counter.inc)
       })
-      expect(resultSingle.current).toStrictEqual({ count: 2 })
-      expect(resultMultiple.current).toStrictEqual({ count: 7 })
-      expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+      expect(result.current).toBe(6)
+    })
+
+    it.concurrent("increments only second", () => {
+      const { second, result } = setup()
 
       act(() => {
-        batch(() => {
-          batch(() => {
-            first.setState(Counter.inc)
-            second.setState(Counter.inc)
-          })
-
-          third.setState(Counter.inc)
-        })
+        second.setState(Counter.inc)
       })
-      expect(resultSingle.current).toStrictEqual({ count: 3 })
-      expect(resultMultiple.current).toStrictEqual({ count: 10 })
-      expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+      expect(result.current).toBe(6)
+    })
+
+    it.concurrent("increments both first and second", () => {
+      const { first, second, result } = setup()
 
       act(() => {
-        batch(() => {
-          first.setState(Counter.inc)
-          second.setState(Counter.inc)
-        })
+        first.setState(Counter.inc)
+        second.setState(Counter.inc)
       })
-      expect(resultSingle.current).toStrictEqual({ count: 4 })
-      expect(resultMultiple.current).toStrictEqual({ count: 12 })
-      expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+      expect(result.current).toBe(9)
+    })
+
+    it.concurrent("replaces nested stores", () => {
+      const newFirst = InnerStore.of({ count: 4 })
+      const { store, result } = setup()
 
       act(() => {
-        batch(() => {
-          first.setState(Counter.inc)
-          third.setState(Counter.inc)
-        })
+        store.setState((state) => ({
+          ...state,
+          first: newFirst,
+        }))
       })
-      expect(resultSingle.current).toStrictEqual({ count: 5 })
-      expect(resultMultiple.current).toStrictEqual({ count: 14 })
-      expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+      expect(result.current).toBe(8)
+    })
+
+    it.concurrent("updates nested stores", () => {
+      const { store, result } = setup()
 
       act(() => {
-        batch(() => {
-          second.setState(Counter.inc)
-          third.setState(Counter.inc)
+        store.setState((state) => {
+          state.first.setState(Counter.inc)
+          state.second.setState(Counter.inc)
+
+          return state
         })
       })
-      expect(resultSingle.current).toStrictEqual({ count: 5 })
-      expect(resultMultiple.current).toStrictEqual({ count: 16 })
-      expect(spyMultiple.mock.calls.length).toBeGreaterThan(
-        spySingle.mock.calls.length,
-      )
-    },
-  )
+      expect(result.current).toBe(9)
+    })
+  })
 })
 
 describe("illegal usage", () => {
