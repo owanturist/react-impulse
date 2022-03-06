@@ -3,7 +3,7 @@ import { renderHook } from "@testing-library/react-hooks"
 
 import { useInnerWatch } from "../../src"
 
-describe("no store is watching", () => {
+describe("watching no stores", () => {
   it.concurrent.each([
     [
       "inline",
