@@ -11,20 +11,21 @@ export type SetInnerState<T> = Dispatch<SetStateAction<T>>
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function. Applies strict check (`===`) by default or when `null`.
  *
  * @see {@link InnerStore.setState}
  * @see {@link Compare}
  */
 export function useSetInnerState<T>(
   store: null | undefined | InnerStore<T>,
-  compare: Compare<T> = isEqual,
+  compare?: null | Compare<T>,
 ): SetInnerState<T> {
-  const compareRef = useRef(compare)
+  const finalCompare = compare ?? isEqual
+  const compareRef = useRef(finalCompare)
 
   useEffect(() => {
-    compareRef.current = compare
-  }, [compare])
+    compareRef.current = finalCompare
+  }, [finalCompare])
 
   return useCallback(
     (update) => store?.setState(update, compareRef.current),

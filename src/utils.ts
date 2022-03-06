@@ -12,6 +12,17 @@ export type Compare<T> = (prev: T, next: T) => boolean
  */
 export const isEqual = <T>(one: T, another: T): boolean => one === another
 
+export const overrideCompare = <T>(
+  original: Compare<T>,
+  override: undefined | null | Compare<T>,
+): Compare<T> => {
+  if (override === null) {
+    return isEqual
+  }
+
+  return override ?? original
+}
+
 /**
  * @private
  */

@@ -659,10 +659,12 @@ interface AppState {
 }
 
 const prepareAppRequestPayload = (state: AppState) => ({
-  games: state.games.map((game) => game.getState((gameState) => ({
-    firstCounter: gameState.firstCounter.getState(),
-    secondCounter: gameState.secondCounter.getState(),
-  }))),
+  games: state.games.map((game) =>
+    game.getState((gameState) => ({
+      firstCounter: gameState.firstCounter.getState(),
+      secondCounter: gameState.secondCounter.getState(),
+    })),
+  ),
 })
 
 const appStore = InnerStore.of({ games: [] })
@@ -775,15 +777,18 @@ With `react-inner-store` we can now implement the same functionality without any
 
 ## API
 
-A core concept of the library is the `InnerStore` class. It is a mutable wrapper around a value that allows to prevent unnecessary re-renders. The class provides an API to get and set the value, and to observe changes. There are hooks built on top of the API for convenient usage in React components.
+A core concept of the library is the `InnerStore` class. It is a mutable wrapper around a mutable value that allows to prevent unnecessary re-renders. The class provides an API to get and set the value, and to observe changes. There are hooks built on top of the API for convenient usage in React components.
 
 ### `InnerStore.of`
 
 ```ts
-InnerStore.of<T>(value: T): InnerStore<T>
+InnerStore.of<T>(value: T, compare?: null | Compare<T>): InnerStore<T>
 ```
 
 A static method that creates a new `InnerStore` instance. The instance is mutable so once created it should be used for all future operations.
+
+- `value` is the initial immutable value of the store.
+- `[compare]` is an optional [`Compare`][compare] function to set as [`InnerStore#compare`][inner_store__compare]. When the `compare` function is not defined or `null` it uses a strict equality check (`===`) function as a fallback.
 
 ```ts
 type SignInFormState = {
@@ -821,15 +826,27 @@ const Toggles: React.VFC<{
 )
 ```
 
+### `InnerStore#compare`
+
+```ts
+InnerStore<T>#compare: Compare<T>
+```
+
+The [`compare`][compare] function compares the value of the store with the new value given via [`InnerStore#setState`][inner_store__set_state]. If the function returns `true` the store will not be updated so no listeners subscribed via [`InnerStore#subscribe`][inner_store__subscribe] will be notified.
+
 ### `InnerStore#clone`
 
 ```ts
-InnerStore<T>#clone(transform?: (value: T) => T): InnerStore<T>
+InnerStore<T>#clone(
+  transform?: (value: T) => T,
+  compare?: null | Compare<T>
+): InnerStore<T>
 ```
 
 An `InnerStore` instance's method that creates a new `InnerStore` instance with the same value.
 
 - `[transform]` is an optional function that will be applied to the current value before cloning. It might be handy when cloning a `InnerStore` instance that contains mutable values (e.g. `InnerStore`).
+- `[compare]` an optional [`Compare`][compare] function to define [`InnerStore#compare`][inner_store__compare] of the cloned instance. If not defined the [`InnerStore#compare`][inner_store__compare] function of the source instance will be used. If `null` is passed the strict equality check function (`===`) will be used.
 
 ```ts
 const signInFormStoreClone = signInFormStore.clone(
@@ -869,14 +886,16 @@ const plainSignInState = signInFormStore.getState(
 ```ts
 InnerStore<T>#setState(
   valueOrTransform: React.SetStateAction<T>,
-  compare?: Compare<T>
+  compare?: null | Compare<T>
 ): void
 ```
 
 An `InnerStore` instance's method that sets the value. Each time when the value is changed all of the store's listeners passed via [`InnerStore#subscribe`][inner_store__subscribe] are called.
 
 - `valueOrTransform` is either the new value or a function that will be applied to the current value before setting.
-- `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. If the new value is comparably equal to the current value neither the value is set nor the listeners are called.
+- `[compare]` is an optional [`Compare`][compare] function to use for this call only.
+  If not defined the [`InnerStore#compare`][inner_store__compare] function of the instance will be used.
+  If `null` is passed the strict equality check function (`===`) will be used.
 
 ```ts
 const onSubmit = () => {
@@ -1185,6 +1204,7 @@ Here are scripts you want to run for publishing a new version to NPM:
 <!-- L I N K S -->
 
 [inner_store__of]: #innerstoreof
+[inner_store__compare]: #innerstorecompare
 [inner_store__clone]: #innerstoreclone
 [inner_store__get_state]: #innerstoregetstate
 [inner_store__set_state]: #innerstoresetstate

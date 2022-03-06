@@ -1,9 +1,10 @@
 import { InnerStore } from "../src"
+import { isEqual } from "../src/utils"
 
 import { Counter } from "./common"
 
 describe("InnerStore#key", () => {
-  it("creates uniq store keys", () => {
+  it.concurrent("creates uniq store keys", () => {
     const state = { count: 0 }
     const store_1 = InnerStore.of(state)
     const store_2 = InnerStore.of(state)
@@ -12,7 +13,7 @@ describe("InnerStore#key", () => {
     expect(store_1.getState()).toBe(store_2.getState())
   })
 
-  it("keeps key on methods call", () => {
+  it.concurrent("keeps key on methods call", () => {
     const store = InnerStore.of({ count: 0 })
     const key = store.key
 
@@ -27,6 +28,85 @@ describe("InnerStore#key", () => {
 
     store.clone()
     expect(store.key).toBe(key)
+  })
+})
+
+describe("InnerStore#compare", () => {
+  describe("when creating a store with InnerStore.of", () => {
+    it.concurrent("assigns isEqual by default", () => {
+      const store = InnerStore.of({ count: 0 })
+
+      expect(store.compare).toBe(isEqual)
+    })
+
+    it.concurrent("assigns isEqual by `null`", () => {
+      const store = InnerStore.of({ count: 0 }, null)
+
+      expect(store.compare).toBe(isEqual)
+    })
+
+    it.concurrent("assigns custom function", () => {
+      const store = InnerStore.of({ count: 0 }, Counter.compare)
+
+      expect(store.compare).toBe(Counter.compare)
+    })
+  })
+
+  describe("when creating a store with InnerStore.clone", () => {
+    it.concurrent("inherits default the source store compare", () => {
+      const store = InnerStore.of({ count: 0 })
+
+      expect(store.clone().compare).toBe(store.compare)
+      expect(store.clone().compare).toBe(isEqual)
+    })
+
+    it.concurrent("inherits custom the source store compare", () => {
+      const store = InnerStore.of({ count: 0 }, Counter.compare)
+
+      expect(store.clone().compare).toBe(store.compare)
+      expect(store.clone().compare).toBe(Counter.compare)
+    })
+
+    it.concurrent("assigns isEqual by `null`", () => {
+      const store = InnerStore.of({ count: 0 }, Counter.compare)
+
+      expect(store.clone(Counter.clone, null).compare).toBe(isEqual)
+    })
+
+    it.concurrent("assigns custom function", () => {
+      const store = InnerStore.of({ count: 0 })
+
+      expect(store.clone(Counter.clone, Counter.compare).compare).toBe(
+        Counter.compare,
+      )
+    })
+  })
+
+  describe("when using InnerStore#setState", () => {
+    it.concurrent("uses InnerStore#compare by default", () => {
+      const initial = { count: 0 }
+      const store = InnerStore.of(initial, Counter.compare)
+
+      store.setState(Counter.clone)
+      expect(store.getState()).toBe(initial)
+    })
+
+    it.concurrent("replaces with isEqual when `null`", () => {
+      const initial = { count: 0 }
+      const store = InnerStore.of(initial, Counter.compare)
+
+      store.setState(Counter.clone, null)
+      expect(store.getState()).not.toBe(initial)
+      expect(store.getState()).toStrictEqual(initial)
+    })
+
+    it.concurrent("replaces with custom function", () => {
+      const initial = { count: 0 }
+      const store = InnerStore.of(initial, Counter.compare)
+
+      store.setState(Counter.inc, () => true)
+      expect(store.getState()).toBe(initial)
+    })
   })
 })
 
