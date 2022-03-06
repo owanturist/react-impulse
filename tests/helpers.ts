@@ -52,10 +52,6 @@ export interface WithListener {
   listener: VoidFunction
 }
 
-export interface WithInitial<T = Counter> {
-  initial?: T
-}
-
 export interface WithIsActive {
   isActive: boolean
 }
