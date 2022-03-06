@@ -55,3 +55,7 @@ export interface WithListener {
 export interface WithInitial<T = Counter> {
   initial?: T
 }
+
+export interface WithIsActive {
+  isActive: boolean
+}
