@@ -2,32 +2,34 @@ import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
 import { Compare, InnerStore, useInnerWatch } from "../../src"
-import { Counter, WithIsActive, WithStore } from "../helpers"
+import { Counter, WithIsActive, WithStore, WithSpy } from "../helpers"
 
 describe.each([
   [
     "inline watcher",
     (
-      { store, isActive }: WithStore & WithIsActive,
+      { store, isActive, spy }: WithStore & WithIsActive & Partial<WithSpy>,
       compare?: Compare<Counter>,
     ) => {
-      return useInnerWatch(
-        () => (isActive ? store.getState() : { count: -1 }),
-        compare,
-      )
+      return useInnerWatch(() => {
+        spy?.()
+
+        return isActive ? store.getState() : { count: -1 }
+      }, compare)
     },
   ],
   [
     "memoized watcher",
     (
-      { store, isActive }: WithStore & WithIsActive,
+      { store, isActive, spy }: WithStore & WithIsActive & Partial<WithSpy>,
       compare?: Compare<Counter>,
     ) => {
       return useInnerWatch(
-        useCallback(
-          () => (isActive ? store.getState() : { count: -1 }),
-          [store, isActive],
-        ),
+        useCallback(() => {
+          spy?.()
+
+          return isActive ? store.getState() : { count: -1 }
+        }, [store, isActive, spy]),
         compare,
       )
     },
@@ -37,7 +39,7 @@ describe.each([
     ["without comparator", usePrepareHook],
     [
       "with inline comparator",
-      (props: WithStore & WithIsActive) => {
+      (props: WithStore & WithIsActive & Partial<WithSpy>) => {
         return usePrepareHook(props, (prev, next) =>
           Counter.compare(prev, next),
         )
@@ -45,7 +47,7 @@ describe.each([
     ],
     [
       "with memoized comparator",
-      (props: WithStore & WithIsActive) => {
+      (props: WithStore & WithIsActive & Partial<WithSpy>) => {
         return usePrepareHook(props, Counter.compare)
       },
     ],
@@ -99,7 +101,6 @@ describe.each([
 
       it.concurrent("should return fallback value when turns inactive", () => {
         const store = InnerStore.of({ count: 1 })
-
         const { result, rerender } = renderHook(useHook, {
           initialProps: { store, isActive: true },
         })
@@ -148,6 +149,24 @@ describe.each([
         })
         expect(result.current).toStrictEqual({ count: 2 })
       })
+
+      it.concurrent(
+        "should not trigger the watcher when the store updates",
+        () => {
+          const spy = jest.fn()
+          const store = InnerStore.of({ count: 1 })
+          renderHook(useHook, {
+            initialProps: { store, isActive: false, spy },
+          })
+
+          spy.mockReset()
+
+          act(() => {
+            store.setState(Counter.inc)
+          })
+          expect(spy).not.toHaveBeenCalled()
+        },
+      )
     })
   })
 })
