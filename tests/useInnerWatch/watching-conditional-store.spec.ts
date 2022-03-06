@@ -34,13 +34,13 @@ describe.each([
       )
     },
   ],
-])("direct %s", (_, usePrepareHook) => {
+])("direct %s", (_, useHookWithoutCompare) => {
   describe.each([
-    ["without comparator", usePrepareHook],
+    ["without comparator", useHookWithoutCompare],
     [
       "with inline comparator",
       (props: WithStore & WithIsActive & Partial<WithSpy>) => {
-        return usePrepareHook(props, (prev, next) =>
+        return useHookWithoutCompare(props, (prev, next) =>
           Counter.compare(prev, next),
         )
       },
@@ -48,7 +48,7 @@ describe.each([
     [
       "with memoized comparator",
       (props: WithStore & WithIsActive & Partial<WithSpy>) => {
-        return usePrepareHook(props, Counter.compare)
+        return useHookWithoutCompare(props, Counter.compare)
       },
     ],
   ])("%s", (__, useHook) => {
