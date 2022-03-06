@@ -357,7 +357,7 @@ describe("transform state's value inside watcher", () => {
   )
 })
 
-describe("multiple store#getState() calls", () => {
+describe("multiple InnerStore#getState() calls", () => {
   describe.each([
     [
       "inline watcher",
@@ -400,7 +400,7 @@ describe("multiple store#getState() calls", () => {
       },
     ],
   ])(
-    "triggering %s for multiple store#getState() calls the same as for a single",
+    "triggering %s for multiple InnerStore#getState() calls the same as for a single",
     (_, useSingleHookWithoutCompare, useDoubleHookWithoutCompare) => {
       describe.each([
         [
@@ -456,8 +456,8 @@ describe("multiple store#getState() calls", () => {
 
         it.concurrent.each([
           // eslint-disable-next-line no-undefined
-          ["without store#setState comparator", undefined],
-          ["with store#setState comparator", Counter.compare],
+          ["without InnerStore#setState comparator", undefined],
+          ["with InnerStore#setState comparator", Counter.compare],
         ])("increments %s", (___, compare) => {
           const { store, spySingle, spyDouble, resultSingle, resultDouble } =
             setup()
@@ -473,8 +473,8 @@ describe("multiple store#getState() calls", () => {
 
         it.concurrent.each([
           // eslint-disable-next-line no-undefined
-          ["without store#setState comparator", undefined],
-          ["with store#setState comparator", Counter.compare],
+          ["without InnerStore#setState comparator", undefined],
+          ["with InnerStore#setState comparator", Counter.compare],
         ])("clones %s", (___, compare) => {
           const { store, spySingle, spyDouble, resultSingle, resultDouble } =
             setup()
