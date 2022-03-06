@@ -9,7 +9,7 @@ import {
   WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
 } from "../../src/InnerStore"
 import { noop } from "../../src/utils"
-import { WithStore, WithListener } from "../helpers"
+import { WithStore, WithListener } from "../common"
 
 describe("illegal usage of useInnerWatch", () => {
   const console$error = jest

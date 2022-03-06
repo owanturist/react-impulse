@@ -2,7 +2,7 @@ import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
 import { InnerStore, useGetInnerState, useSetInnerState } from "../../src"
-import { Counter } from "../helpers"
+import { Counter } from "../common"
 
 import { withinNth } from "./common"
 

@@ -1,6 +1,6 @@
 import { InnerStore } from "../src"
 
-import { Counter } from "./helpers"
+import { Counter } from "./common"
 
 describe("InnerStore#key", () => {
   it("creates uniq store keys", () => {

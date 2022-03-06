@@ -9,7 +9,7 @@ import {
   WithSpy,
   WithStore,
   WithThird,
-} from "../helpers"
+} from "../common"
 
 describe.each([
   [

@@ -2,7 +2,7 @@ import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
 import { Compare, InnerStore, useInnerWatch } from "../../src"
-import { Counter, WithIsActive, WithStore, WithSpy } from "../helpers"
+import { Counter, WithIsActive, WithStore, WithSpy } from "../common"
 
 describe.each([
   [

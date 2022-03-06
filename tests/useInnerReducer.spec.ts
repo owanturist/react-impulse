@@ -3,7 +3,7 @@ import { useCallback } from "react"
 
 import { InnerStore, useInnerReducer } from "../src"
 
-import { Counter } from "./helpers"
+import { Counter } from "./common"
 
 describe("bypassed store", () => {
   it.concurrent.each([

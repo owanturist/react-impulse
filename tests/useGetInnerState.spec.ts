@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react-hooks"
 
 import { InnerStore, useGetInnerState } from "../src"
 
-import { Counter } from "./helpers"
+import { Counter } from "./common"
 
 describe("bypassed store", () => {
   it.concurrent.each([
