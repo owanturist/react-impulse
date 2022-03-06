@@ -3,7 +3,7 @@ import { useCallback } from "react"
 
 import { InnerStore, useInnerReducer } from "../src"
 
-import { Counter } from "./common"
+import { Counter, WithStore } from "./common"
 
 describe("bypassed store", () => {
   it.concurrent.each([
@@ -81,44 +81,32 @@ describe("defined store", () => {
   })
 
   describe("applies variables from clojure to a passed reducer function", () => {
-    const renderInline = (store: InnerStore<Counter>) => {
-      return renderHook(
-        ({ diff }) =>
-          useInnerReducer<Counter, Action>(store, (counter, action) =>
+    it.concurrent.each([
+      [
+        "inline",
+        ({ store, diff }: WithStore & { diff: number }) => {
+          return useInnerReducer<Counter, Action>(store, (counter, action) =>
             reducer(counter, action, diff),
-          ),
-        {
-          initialProps: {
-            diff: 1,
-          },
+          )
         },
-      )
-    }
-
-    const renderMemoized = (store: InnerStore<Counter>) => {
-      return renderHook(
-        ({ diff }) =>
-          useInnerReducer<Counter, Action>(
+      ],
+      [
+        "memoized",
+        ({ store, diff }: WithStore & { diff: number }) => {
+          return useInnerReducer<Counter, Action>(
             store,
             useCallback(
               (counter, action) => reducer(counter, action, diff),
               [diff],
             ),
-          ),
-        {
-          initialProps: {
-            diff: 1,
-          },
+          )
         },
-      )
-    }
-
-    it.concurrent.each([
-      ["inline", renderInline],
-      ["memoized", renderMemoized],
-    ])("when the reducer is %s", (_, renderUseInnerReducer) => {
+      ],
+    ])("when the reducer is %s", (_, useHook) => {
       const store = InnerStore.of({ count: 0 })
-      const { result, rerender } = renderUseInnerReducer(store)
+      const { result, rerender } = renderHook(useHook, {
+        initialProps: { store, diff: 1 },
+      })
 
       act(() => {
         result.current[1]("Increment")
@@ -126,7 +114,7 @@ describe("defined store", () => {
 
       expect(result.current[0]).toStrictEqual({ count: 1 })
 
-      rerender({ diff: 5 })
+      rerender({ store, diff: 5 })
 
       act(() => {
         result.current[1]("Increment")
