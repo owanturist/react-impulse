@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Multiple stores Performs multi store management 1`] = `
+exports[`multiple stores Performs multi store management 1`] = `
 <div>
   <input
     data-testid="email"
@@ -19,7 +19,7 @@ exports[`Multiple stores Performs multi store management 1`] = `
 </div>
 `;
 
-exports[`Multiple stores Performs multi store management 2`] = `
+exports[`multiple stores Performs multi store management 2`] = `
 <div>
   <input
     data-testid="email"
@@ -38,7 +38,7 @@ exports[`Multiple stores Performs multi store management 2`] = `
 </div>
 `;
 
-exports[`Multiple stores Performs multi store management 3`] = `
+exports[`multiple stores Performs multi store management 3`] = `
 <div>
   <input
     data-testid="email"
@@ -57,7 +57,7 @@ exports[`Multiple stores Performs multi store management 3`] = `
 </div>
 `;
 
-exports[`Multiple stores Performs multi store management 4`] = `
+exports[`multiple stores Performs multi store management 4`] = `
 <div>
   <input
     data-testid="email"
@@ -76,7 +76,7 @@ exports[`Multiple stores Performs multi store management 4`] = `
 </div>
 `;
 
-exports[`Multiple stores Performs multi store management 5`] = `
+exports[`multiple stores Performs multi store management 5`] = `
 <div>
   <input
     data-testid="email"
@@ -93,64 +93,4 @@ exports[`Multiple stores Performs multi store management 5`] = `
     type="button"
   />
 </div>
-`;
-
-exports[`Single store Multiple Setters / Getters 1`] = `
-Array [
-  <span
-    data-testid="getter"
-  >
-    0
-  </span>,
-  <span
-    data-testid="getter"
-  >
-    0
-  </span>,
-]
-`;
-
-exports[`Single store Multiple Setters / Getters 2`] = `
-Array [
-  <span
-    data-testid="getter"
-  >
-    1
-  </span>,
-  <span
-    data-testid="getter"
-  >
-    1
-  </span>,
-]
-`;
-
-exports[`Single store Multiple Setters / Getters 3`] = `
-Array [
-  <span
-    data-testid="getter"
-  >
-    2
-  </span>,
-  <span
-    data-testid="getter"
-  >
-    2
-  </span>,
-]
-`;
-
-exports[`Single store Multiple Setters / Getters 4`] = `
-Array [
-  <span
-    data-testid="getter"
-  >
-    3
-  </span>,
-  <span
-    data-testid="getter"
-  >
-    3
-  </span>,
-]
 `;
