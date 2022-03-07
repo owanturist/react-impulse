@@ -1,9 +1,9 @@
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { InnerStore, SetInnerState, useSetInnerState } from "../src"
+import { Compare, InnerStore, SetInnerState, useSetInnerState } from "../src"
 
-import { Counter } from "./common"
+import { Counter, WithCompare, WithStore } from "./common"
 
 describe("bypassed store", () => {
   it.concurrent.each([
@@ -327,5 +327,301 @@ describe("defined store with compare", () => {
         expect(spyCompare).toHaveBeenCalledTimes(1)
       })
     })
+  })
+
+  describe.each([
+    [
+      "inline",
+      ({ store, compare }: WithStore & WithCompare) => {
+        return useSetInnerState(
+          store,
+          compare && ((prev, next) => compare(prev, next)),
+        )
+      },
+    ],
+    [
+      "memoized",
+      ({ store, compare }: WithStore & WithCompare) => {
+        return useSetInnerState(
+          store,
+          useMemo(
+            () => compare && ((prev, next) => compare(prev, next)),
+            [compare],
+          ),
+        )
+      },
+    ],
+  ])("passes %s compare function", (_, useHook) => {
+    it.concurrent("no compare", () => {
+      const initial = { count: 0 }
+      const store = InnerStore.of(initial)
+      const { result } = renderHook(useHook, {
+        initialProps: { store },
+      })
+
+      act(() => {
+        result.current(Counter.clone)
+      })
+
+      expect(store.getState()).not.toBe(initial)
+      expect(store.getState()).toStrictEqual(initial)
+    })
+
+    describe("store level compare", () => {
+      const setup = ({
+        hookLevelCompare,
+      }: { hookLevelCompare?: null | Compare<Counter> } = {}) => {
+        const initial = { count: 0 }
+        const store = InnerStore.of(initial, Counter.compare)
+        const { result } = renderHook(useHook, {
+          initialProps: { store, compare: hookLevelCompare },
+        })
+
+        return { initial, store, result }
+      }
+
+      it.concurrent("keeps the same state", () => {
+        const { initial, store, result } = setup()
+
+        act(() => {
+          result.current(Counter.clone)
+        })
+        expect(store.getState()).toBe(initial)
+      })
+
+      it.concurrent("gets replaced by hook level 'null' compare", () => {
+        const { initial, store, result } = setup({ hookLevelCompare: null })
+
+        act(() => {
+          result.current(Counter.clone)
+        })
+        expect(store.getState()).not.toBe(initial)
+        expect(store.getState()).toStrictEqual(initial)
+      })
+
+      it.concurrent("gets replaced by hook level functional compare", () => {
+        const { initial, store, result } = setup({
+          hookLevelCompare: () => true,
+        })
+
+        act(() => {
+          result.current(Counter.inc)
+        })
+        expect(store.getState()).toBe(initial)
+      })
+
+      it.concurrent("gets replaced by setState level 'null' compare", () => {
+        const { initial, store, result } = setup()
+
+        act(() => {
+          result.current(Counter.clone, null)
+        })
+        expect(store.getState()).not.toBe(initial)
+        expect(store.getState()).toStrictEqual(initial)
+      })
+
+      it.concurrent(
+        "gets replaced by setState level functional compare",
+        () => {
+          const { initial, store, result } = setup()
+
+          act(() => {
+            result.current(Counter.inc, () => true)
+          })
+          expect(store.getState()).toBe(initial)
+        },
+      )
+    })
+
+    describe("hook level compare", () => {
+      const setup = ({
+        storeLevelCompare,
+      }: { storeLevelCompare?: null | Compare<Counter> } = {}) => {
+        const initial = { count: 0 }
+        const store = InnerStore.of(initial, storeLevelCompare)
+        const { result } = renderHook(useHook, {
+          initialProps: { store, compare: Counter.compare },
+        })
+
+        return { initial, store, result }
+      }
+
+      it.concurrent("keeps the same state", () => {
+        const { initial, store, result } = setup()
+
+        act(() => {
+          result.current(Counter.clone)
+        })
+        expect(store.getState()).toBe(initial)
+      })
+
+      it.concurrent(
+        "does not get replaced by store level 'null' compare",
+        () => {
+          const { initial, store, result } = setup({ storeLevelCompare: null })
+
+          act(() => {
+            result.current(Counter.clone)
+          })
+          expect(store.getState()).toBe(initial)
+        },
+      )
+
+      it.concurrent(
+        "does not get replaced by store level functional compare",
+        () => {
+          const { initial, store, result } = setup({
+            storeLevelCompare: () => false,
+          })
+
+          act(() => {
+            result.current(Counter.clone)
+          })
+          expect(store.getState()).toBe(initial)
+        },
+      )
+
+      it.concurrent("gets replaced by setState level 'null' compare", () => {
+        const { initial, store, result } = setup()
+
+        act(() => {
+          result.current(Counter.clone, null)
+        })
+        expect(store.getState()).not.toBe(initial)
+        expect(store.getState()).toStrictEqual(initial)
+      })
+
+      it.concurrent(
+        "gets replaced by setState level functional compare",
+        () => {
+          const { initial, store, result } = setup()
+
+          act(() => {
+            result.current(Counter.inc, () => true)
+          })
+          expect(store.getState()).toBe(initial)
+        },
+      )
+    })
+
+    describe("setState level compare", () => {
+      const setup = ({
+        storeLevelCompare,
+        hookLevelCompare,
+      }: {
+        storeLevelCompare?: null | Compare<Counter>
+        hookLevelCompare?: null | Compare<Counter>
+      } = {}) => {
+        const initial = { count: 0 }
+        const store = InnerStore.of(initial, storeLevelCompare)
+        const { result } = renderHook(useHook, {
+          initialProps: { store, compare: hookLevelCompare },
+        })
+
+        return { initial, store, result }
+      }
+
+      it.concurrent("keeps the same state", () => {
+        const { initial, store, result } = setup()
+
+        act(() => {
+          result.current(Counter.clone, Counter.compare)
+        })
+        expect(store.getState()).toBe(initial)
+      })
+
+      it.concurrent(
+        "does not get replaced by store level 'null' compare",
+        () => {
+          const { initial, store, result } = setup({ storeLevelCompare: null })
+
+          act(() => {
+            result.current(Counter.clone, Counter.compare)
+          })
+          expect(store.getState()).toBe(initial)
+        },
+      )
+
+      it.concurrent(
+        "does not get replaced by store level functional compare",
+        () => {
+          const { initial, store, result } = setup({
+            storeLevelCompare: () => false,
+          })
+
+          act(() => {
+            result.current(Counter.clone, Counter.compare)
+          })
+          expect(store.getState()).toBe(initial)
+        },
+      )
+
+      it.concurrent(
+        "does not get replaced by hook level 'null' compare",
+        () => {
+          const { initial, store, result } = setup({ hookLevelCompare: null })
+
+          act(() => {
+            result.current(Counter.clone, Counter.compare)
+          })
+          expect(store.getState()).toBe(initial)
+        },
+      )
+
+      it.concurrent(
+        "does not get replaced by hook level functional compare",
+        () => {
+          const { initial, store, result } = setup({
+            hookLevelCompare: () => false,
+          })
+
+          act(() => {
+            result.current(Counter.clone, Counter.compare)
+          })
+          expect(store.getState()).toBe(initial)
+        },
+      )
+    })
+
+    it.concurrent.each([
+      // eslint-disable-next-line no-undefined
+      ["undefined", undefined],
+      ["null", null],
+      ["() => false", () => false],
+    ])("replaces compare with %s on rerender", (__, compare) => {
+      let prev = { count: 0 }
+      const store = InnerStore.of(prev)
+      const { result, rerender } = renderHook(useHook, {
+        initialProps: { store, compare: Counter.compare },
+      })
+
+      rerender({ store, compare: compare! })
+      act(() => {
+        result.current(Counter.clone)
+      })
+      expect(store.getState()).not.toBe(prev)
+      expect(store.getState()).toStrictEqual(prev)
+
+      prev = store.getState()
+      rerender({ store, compare: Counter.compare })
+      act(() => {
+        result.current(Counter.clone)
+      })
+      expect(store.getState()).toBe(prev)
+    })
+
+    it.concurrent(
+      "keeps the same setState function over compare changes",
+      () => {
+        const store = InnerStore.of({ count: 0 })
+        const { result, rerender } = renderHook(useHook, {
+          initialProps: { store, compare: Counter.compare },
+        })
+
+        rerender({ store, compare: () => true })
+        expect(result.all).toHaveLength(2)
+        expect(result.all[0]).toBe(result.all[1])
+      },
+    )
   })
 })

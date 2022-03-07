@@ -32,6 +32,10 @@ export interface WithStore<T = Counter> {
   store: InnerStore<T>
 }
 
+export interface WithCompare<T = Counter> {
+  compare?: null | Compare<T>
+}
+
 export interface WithFirst<T = Counter> {
   first: InnerStore<T>
 }
