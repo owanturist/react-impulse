@@ -10,7 +10,7 @@ import { WatchContext } from "./WatchContext"
  *
  * @param watcher a function to read only the watching value meaning that it never should call `InnerStore.of`, `InnerStore#clone`, `InnerStore#setState` or `InnerStore#subscribe` methods inside.
  * @param compare an optional compare function.
- * If not defined or `null` the strict equality check function (`===`) will be used.
+ * The strict equality check function (`===`) will be used if `null` or not defined.
  *
  * @see {@link InnerStore.getState}
  * @see {@link Compare}

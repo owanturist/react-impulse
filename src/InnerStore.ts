@@ -93,7 +93,7 @@ export class InnerStore<T> implements WatchStore {
    *
    * @param value the initial immutable value.
    * @param compare an optional compare function with the lowest priority.
-   * If `null` is passed the strict equality check function (`===`) will be used.
+   * If not defined or `null` the strict equality check function (`===`) will be used.
    *
    * @see {@link Compare}
    * @see {@link InnerStore.setState}

@@ -14,7 +14,7 @@ import { useSetInnerState } from "./useSetInnerState"
  * @param reducer a function that transforms the current value and the dispatched action into the new value.
  * @param compare an optional compare function with medium priority.
  * If not defined it uses `InnerStore#compare`.
- * If `null` is passed the strict equality check function (`===`) will be used.
+ * The strict equality check function (`===`) will be used if `null`.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -36,7 +36,7 @@ export function useInnerReducer<T, A>(
  * @param reducer a function that transforms the current value and the dispatched action into the new value.
  * @param compare an optional compare function with medium priority.
  * If not defined it uses `InnerStore#compare`.
- * If `null` is passed the strict equality check function (`===`) will be used.
+ * The strict equality check function (`===`) will be used if `null`.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -58,7 +58,7 @@ export function useInnerReducer<T, A>(
  * @param reducer a function that transforms the current value and the dispatched action into the new value.
  * @param compare an optional compare function with medium priority.
  * If not defined it uses `InnerStore#compare`.
- * If `null` is passed the strict equality check function (`===`) will be used.
+ * The strict equality check function (`===`) will be used if `null`.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -80,7 +80,7 @@ export function useInnerReducer<T, A>(
  * @param reducer a function that transforms the current value and the dispatched action into the new value.
  * @param compare an optional compare function with medium priority.
  * If not defined it uses `InnerStore#compare`.
- * If `null` is passed the strict equality check function (`===`) will be used.
+ * The strict equality check function (`===`) will be used if `null`.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}

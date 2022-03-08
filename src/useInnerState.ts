@@ -1,7 +1,7 @@
-import { Compare } from "./utils"
+import { Compare, SetInnerState } from "./utils"
 import { InnerStore } from "./InnerStore"
 import { useGetInnerState } from "./useGetInnerState"
-import { SetInnerState, useSetInnerState } from "./useSetInnerState"
+import { useSetInnerState } from "./useSetInnerState"
 
 /**
  * A hook that is similar to `React.useState` but for `InnerStore` instances.
@@ -11,7 +11,7 @@ import { SetInnerState, useSetInnerState } from "./useSetInnerState"
  * @param store an `InnerStore` instance.
  * @param compare an optional compare function with medium priority.
  * If not defined it uses `InnerStore#compare`.
- * If `null` is passed the strict equality check function (`===`) will be used.
+ * The strict equality check function (`===`) will be used if `null`.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -33,7 +33,7 @@ export function useInnerState<T>(
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
  * @param compare an optional compare function with medium priority.
  * If not defined it uses `InnerStore#compare`.
- * If `null` is passed the strict equality check function (`===`) will be used.
+ * The strict equality check function (`===`) will be used if `null`.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -55,7 +55,7 @@ export function useInnerState<T>(
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
  * @param compare an optional compare function with medium priority.
  * If not defined it uses `InnerStore#compare`.
- * If `null` is passed the strict equality check function (`===`) will be used.
+ * The strict equality check function (`===`) will be used if `null`.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -77,7 +77,7 @@ export function useInnerState<T>(
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
  * @param compare an optional compare function with medium priority.
  * If not defined it uses `InnerStore#compare`.
- * If `null` is passed the strict equality check function (`===`) will be used.
+ * The strict equality check function (`===`) will be used if `null`.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
