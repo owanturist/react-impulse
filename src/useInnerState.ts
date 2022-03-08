@@ -1,4 +1,4 @@
-import { Compare, isEqual } from "./utils"
+import { Compare } from "./utils"
 import { InnerStore } from "./InnerStore"
 import { useGetInnerState } from "./useGetInnerState"
 import { SetInnerState, useSetInnerState } from "./useSetInnerState"
@@ -9,7 +9,9 @@ import { SetInnerState, useSetInnerState } from "./useSetInnerState"
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function with medium priority.
+ * If not defined it uses `InnerStore#compare`.
+ * If `null` is passed the strict equality check function (`===`) will be used.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -20,7 +22,7 @@ import { SetInnerState, useSetInnerState } from "./useSetInnerState"
  */
 export function useInnerState<T>(
   store: InnerStore<T>,
-  compare?: Compare<T>,
+  compare?: null | Compare<T>,
 ): [T, SetInnerState<T>]
 
 /**
@@ -29,7 +31,9 @@ export function useInnerState<T>(
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function with medium priority.
+ * If not defined it uses `InnerStore#compare`.
+ * If `null` is passed the strict equality check function (`===`) will be used.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -40,7 +44,7 @@ export function useInnerState<T>(
  */
 export function useInnerState<T>(
   store: null | InnerStore<T>,
-  compare?: Compare<T>,
+  compare?: null | Compare<T>,
 ): [null | T, SetInnerState<T>]
 
 /**
@@ -49,7 +53,9 @@ export function useInnerState<T>(
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function with medium priority.
+ * If not defined it uses `InnerStore#compare`.
+ * If `null` is passed the strict equality check function (`===`) will be used.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -60,7 +66,7 @@ export function useInnerState<T>(
  */
 export function useInnerState<T>(
   store: undefined | InnerStore<T>,
-  compare?: Compare<T>,
+  compare?: null | Compare<T>,
 ): [undefined | T, SetInnerState<T>]
 
 /**
@@ -69,7 +75,9 @@ export function useInnerState<T>(
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function with medium priority.
+ * If not defined it uses `InnerStore#compare`.
+ * If `null` is passed the strict equality check function (`===`) will be used.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -80,12 +88,12 @@ export function useInnerState<T>(
  */
 export function useInnerState<T>(
   store: null | undefined | InnerStore<T>,
-  compare?: Compare<T>,
+  compare?: null | Compare<T>,
 ): [null | undefined | T, SetInnerState<T>]
 
 export function useInnerState<T>(
   store: null | undefined | InnerStore<T>,
-  compare: Compare<T> = isEqual,
+  compare?: null | Compare<T>,
 ): [null | undefined | T, SetInnerState<T>] {
   return [useGetInnerState(store), useSetInnerState(store, compare)]
 }

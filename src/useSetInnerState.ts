@@ -9,10 +9,8 @@ import { InnerStore } from "./InnerStore"
  * @param valueOrTransform either the new value or a function that will be applied to the current value before setting.
  *
  * @param compare an optional compare function with the highest priority to use for this call only.
- * If not defined it uses `compare` from `useSetInnerState` or `useInnerState`
+ * If not defined it uses `compare` from `useSetInnerState` or `useInnerState`.
  * If `null` is passed the strict equality check function (`===`) will be used.
- *
- * @see {@link Compare}
  *
  * @example
  * import { useSetInnerState, useInnerState } from "use-inner-state"
@@ -20,6 +18,8 @@ import { InnerStore } from "./InnerStore"
  * const setState = useSetInnerState(store)
  * // or
  * const [state, setState] = useInnerState(store)
+ *
+ * @see {@link Compare}
  */
 export type SetInnerState<T> = (
   valueOrTransform: SetStateAction<T>,
@@ -32,7 +32,7 @@ export type SetInnerState<T> = (
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
- * @param compare an optional compare function with higher priority than `InnerStore#compare` and lower priority then `compare` in `SetInnerState`.
+ * @param compare an optional compare function with medium priority.
  * If not defined it uses `InnerStore#compare`.
  * If `null` is passed the strict equality check function (`===`) will be used.
  *

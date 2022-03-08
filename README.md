@@ -1053,6 +1053,7 @@ const App: React.VFC<{
 ### `useSetInnerState`
 
 ```ts
+// todo update return signature
 function useSetInnerState<T>(
   store: null | undefined | InnerStore<T>,
   compare?: Compare<T>,

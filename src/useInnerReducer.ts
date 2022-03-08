@@ -1,6 +1,6 @@
 import { Dispatch, useRef, useEffect, useCallback } from "react"
 
-import { Compare, isEqual } from "./utils"
+import { Compare } from "./utils"
 import { InnerStore } from "./InnerStore"
 import { useGetInnerState } from "./useGetInnerState"
 import { useSetInnerState } from "./useSetInnerState"
@@ -12,7 +12,9 @@ import { useSetInnerState } from "./useSetInnerState"
  *
  * @param store an `InnerStore` instance.
  * @param reducer a function that transforms the current value and the dispatched action into the new value.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function with medium priority.
+ * If not defined it uses `InnerStore#compare`.
+ * If `null` is passed the strict equality check function (`===`) will be used.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -22,7 +24,7 @@ import { useSetInnerState } from "./useSetInnerState"
 export function useInnerReducer<T, A>(
   store: InnerStore<T>,
   reducer: (state: T, action: A) => T,
-  compare?: Compare<T>,
+  compare?: null | Compare<T>,
 ): [T, Dispatch<A>]
 
 /**
@@ -32,7 +34,9 @@ export function useInnerReducer<T, A>(
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
  * @param reducer a function that transforms the current value and the dispatched action into the new value.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function with medium priority.
+ * If not defined it uses `InnerStore#compare`.
+ * If `null` is passed the strict equality check function (`===`) will be used.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -42,7 +46,7 @@ export function useInnerReducer<T, A>(
 export function useInnerReducer<T, A>(
   store: null | InnerStore<T>,
   reducer: (state: T, action: A) => T,
-  compare?: Compare<T>,
+  compare?: null | Compare<T>,
 ): [null | T, Dispatch<A>]
 
 /**
@@ -52,7 +56,9 @@ export function useInnerReducer<T, A>(
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
  * @param reducer a function that transforms the current value and the dispatched action into the new value.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function with medium priority.
+ * If not defined it uses `InnerStore#compare`.
+ * If `null` is passed the strict equality check function (`===`) will be used.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -62,7 +68,7 @@ export function useInnerReducer<T, A>(
 export function useInnerReducer<T, A>(
   store: undefined | InnerStore<T>,
   reducer: (state: T, action: A) => T,
-  compare?: Compare<T>,
+  compare?: null | Compare<T>,
 ): [undefined | T, Dispatch<A>]
 
 /**
@@ -72,7 +78,9 @@ export function useInnerReducer<T, A>(
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
  * @param reducer a function that transforms the current value and the dispatched action into the new value.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function with medium priority.
+ * If not defined it uses `InnerStore#compare`.
+ * If `null` is passed the strict equality check function (`===`) will be used.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -82,13 +90,13 @@ export function useInnerReducer<T, A>(
 export function useInnerReducer<T, A>(
   store: null | undefined | InnerStore<T>,
   reducer: (state: T, action: A) => T,
-  compare?: Compare<T>,
+  compare?: null | Compare<T>,
 ): [null | undefined | T, Dispatch<A>]
 
 export function useInnerReducer<T, A>(
   store: null | undefined | InnerStore<T>,
   reducer: (state: T, action: A) => T,
-  compare: Compare<T> = isEqual,
+  compare?: null | Compare<T>,
 ): [null | undefined | T, Dispatch<A>] {
   const setState = useSetInnerState(store, compare)
   const reducerRef = useRef(reducer)
@@ -100,9 +108,7 @@ export function useInnerReducer<T, A>(
   return [
     useGetInnerState(store),
     useCallback(
-      (action) => {
-        setState((state) => reducerRef.current(state, action))
-      },
+      (action) => setState((state) => reducerRef.current(state, action)),
       [setState],
     ),
   ]

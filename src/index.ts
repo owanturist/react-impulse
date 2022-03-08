@@ -1,3 +1,4 @@
+export type { Dispatch } from "react"
 export type { Compare } from "./utils"
 export type { ExtractInnerState, DeepExtractInnerState } from "./InnerStore"
 export type { SetInnerState } from "./useSetInnerState"

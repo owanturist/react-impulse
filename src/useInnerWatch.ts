@@ -9,14 +9,15 @@ import { WatchContext } from "./WatchContext"
  * The hook gives a way to watch after deep changes in the store's values and trigger a re-render when the returning value is changed.
  *
  * @param watcher a function to read only the watching value meaning that it never should call `InnerStore.of`, `InnerStore#clone`, `InnerStore#setState` or `InnerStore#subscribe` methods inside.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function.
+ * If not defined or `null` the strict equality check function (`===`) will be used.
  *
  * @see {@link InnerStore.getState}
  * @see {@link Compare}
  */
 export function useInnerWatch<T>(
   watcher: () => T,
-  compare: Compare<T> = isEqual,
+  compare?: null | Compare<T>,
 ): T {
   const [, render] = useReducer(modInc, 0)
 
@@ -41,9 +42,9 @@ export function useInnerWatch<T>(
     })
   }
 
-  const compareRef = useRef(compare)
+  const compareRef = useRef(compare ?? isEqual)
   useEffect(() => {
-    compareRef.current = compare
+    compareRef.current = compare ?? isEqual
   }, [compare])
 
   useEffect(() => {

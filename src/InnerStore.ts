@@ -92,7 +92,8 @@ export class InnerStore<T> implements WatchStore {
    * If the function returns `true` the store will not be updated so no listeners subscribed via `InnerStore#subscribe` will be notified.
    *
    * @param value the initial immutable value.
-   * @param compare an optional compare function. When `null` or not defined it applies a strict equality check function (`===`).
+   * @param compare an optional compare function with the lowest priority.
+   * If `null` is passed the strict equality check function (`===`) will be used.
    *
    * @see {@link Compare}
    * @see {@link InnerStore.setState}
@@ -134,7 +135,7 @@ export class InnerStore<T> implements WatchStore {
    *
    * @param transform a function that will be applied to the current value before cloning.
    * @param compare an optional compare function.
-   * If not defined the `compare` function of the source instance will be used.
+   * If not defined it uses `InnerStore#compare`.
    * If `null` is passed the strict equality check function (`===`) will be used.
    *
    * @returns new `InnerStore` instance with the same value.
@@ -176,8 +177,8 @@ export class InnerStore<T> implements WatchStore {
    * If the new value is comparably equal to the current value neither the value is set nor the listeners are called.
    *
    * @param valueOrTransform either the new value or a function that will be applied to the current value before setting.
-   * @param compare an optional compare function to use for this call only.
-   * If not defined the `InnerStore#compare` function of the instance will be used.
+   * @param compare an optional compare function with medium priority.
+   * If not defined it uses `InnerStore#compare`.
    * If `null` is passed the strict equality check function (`===`) will be used.
    *
    * @returns `void` to emphasize that `InnerStore` instances are mutable.
