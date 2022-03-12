@@ -57,11 +57,6 @@ const App: React.VFC<{
   state: State
 }> = React.memo(({ state }) => (
   <div>
-    <h1>
-      The app component will never re-render due to neither state.count nor
-      state.username change
-    </h1>
-
     <Username store={state.username} />
     <Counter store={state.count} />
 
@@ -70,7 +65,7 @@ const App: React.VFC<{
         const username = state.username.getState()
         const count = state.count.getState()
 
-        console.log(`User "${username}" get ${count} score.`)
+        console.log(`User "${username}" gets ${count} score.`)
       }}
     >
       Submit
@@ -834,7 +829,7 @@ InnerStore<T>#compare: Compare<T>
 
 The [`compare`][compare] function compares the value of the store with the new value given via [`InnerStore#setState`][inner_store__set_state]. If the function returns `true` the store will not be updated so no listeners subscribed via [`InnerStore#subscribe`][inner_store__subscribe] will be notified.
 
-> 💡 The `InnerStore#compare` function has the lowest priority.
+> 💬 The `InnerStore#compare` function has the lowest priority when [`InnerStore#setState`][inner_store__set_state], [`useInnerState`][use_inner_state], [`useSetInnerState`][use_set_inner_state] or [`useInnerReducer`][use_inner_reducer] are called.
 
 ### `InnerStore#clone`
 
@@ -917,7 +912,7 @@ const onSubmit = () => {
 
 > 💬 The method returns `void` to emphasize that `InnerStore` instances are mutable.
 
-> 💬 The second argument `compare` function has medium priority, so it will be used instead of `InnerStore#compare`.
+> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`InnerStore#compare`][inner_store__compare].
 
 ### `InnerStore#subscribe`
 
@@ -951,7 +946,7 @@ const UsernameInput: React.VFC<{
 })
 ```
 
-> 💬 The example above is for demonstration purposes only. In real life you better use [`useInnerState`][use_inner_state] hook instead.
+> 💬 The example above is for demonstration purposes only. In real world app it's usually better use provided hooks in most cases.
 
 ### `useInnerWatch`
 
@@ -988,8 +983,7 @@ const App: React.VFC<{
 
 > 💡 It is recommended to memoize the `watcher` function for better performance.
 
-> 💡 Keep in mind that the `watcher` function acts as a "reader" so you'd like to avoid heavy calculations inside it. Sometimes it might be a good idea to combine a watcher with memoization.
-> The same is true for the `compare` function - you should choose wisely between avoiding extra re-renders and heavy comparison.
+> 💡 Keep in mind that the `watcher` function acts as a "reader" so you'd like to avoid heavy calculations inside it. Sometimes it might be a good idea to pass a watcher result to a separated memoization hook. The same is true for the `compare` function - you should choose wisely between avoiding extra re-renders and heavy comparisons.
 
 ### `useInnerState`
 
@@ -1028,7 +1022,7 @@ const UsernameInput: React.VFC<{
 
 > 💡 The hook is a combination of [`useGetInnerState`][use_get_inner_state] and [`useSetInnerState`][use_set_inner_state], so use them if you need to either get+subscribe or set the store's value.
 
-> 💬 The second argument `compare` function has medium priority, so it will be used instead of `InnerStore#compare`.
+> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`InnerStore#compare`][inner_store__compare].
 
 ### `useGetInnerState`
 
@@ -1066,7 +1060,6 @@ const App: React.VFC<{
 ### `useSetInnerState`
 
 ```ts
-// todo update return signature
 function useSetInnerState<T>(
   store: null | undefined | InnerStore<T>,
   compare?: null | Compare<T>,
@@ -1099,7 +1092,7 @@ const App: React.VFC<{
 })
 ```
 
-> 💬 The second argument `compare` function has medium priority, so it will be used instead of `InnerStore#compare`.
+> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`InnerStore#compare`][inner_store__compare].
 
 ### `useInnerReducer`
 
@@ -1151,11 +1144,11 @@ const Counter: React.VFC<{
 })
 ```
 
-> 💬 The third argument `compare` function has medium priority, so it will be used instead of `InnerStore#compare`.
+> 💬 The third argument `compare` function has medium priority, so it will be used instead of [`InnerStore#compare`][inner_store__compare].
 
 ### `batch`
 
-The `batch` function is a helper to create a batch of actions, so a they can be dispatched at once.
+The `batch` function is a helper to optimise multiple stores' updates.
 
 ```tsx
 const LoginForm: React.VFC<{
@@ -1202,7 +1195,7 @@ const LoginForm: React.VFC<{
 type Compare<T> = (prev: T, next: T) => boolean
 ```
 
-A function that compares two values and returns `true` if they are equal. Depending on the type of the values it might be more efficient to use a custom compare function such as shallow-equal or deep-equal.
+A function that compares two values and returns `true` if they are equal. Depending on the type of the values it might be reasonable to use a custom compare function such as shallow-equal or deep-equal.
 
 ### `SetInnerState`
 
@@ -1222,7 +1215,7 @@ A function that similar to the `React.useState` callback but with extra [`compar
 
 > 💡 If `valueOrTransform` argument is a function it acts as [`batch`][batch].
 
-> 💬 The second argument `compare` function has the highest priority so it will be used instead of `InnerStore#compare` and any other `compare` passed via hooks.
+> 💬 The second argument `compare` function has the highest priority so it will be used instead of [`InnerStore#compare`][inner_store__compare] and any other `compare` passed via [`InnerStore#setState`][inner_store__set_state], [`useInnerState`][use_inner_state], [`useSetInnerState`][use_set_inner_state] or [`useInnerReducer`][use_inner_reducer].
 
 ### `ExtractInnerState`
 
@@ -1296,6 +1289,7 @@ Here are scripts you want to run for publishing a new version to NPM:
 [inner_store__subscribe]: #innerstoresubscribe
 [use_inner_watch]: #useinnerwatch
 [use_inner_state]: #useinnerstate
+[use_inner_reducer]: #useinnerreducer
 [use_get_inner_state]: #usegetinnerstate
 [use_set_inner_state]: #usesetinnerstate
 [batch]: #batch

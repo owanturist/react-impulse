@@ -81,9 +81,6 @@ export const WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING =
     method: "InnerStore#subscribe(listener)",
   })
 
-/**
- * @todo add comparator to constructor
- */
 export class InnerStore<T> implements WatchStore {
   /**
    * Creates a new `InnerStore` instance.
