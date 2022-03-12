@@ -30,11 +30,6 @@ export const CounterComponent: React.VFC<{
 
     return (
       <div data-testid="counter">
-        <button
-          type="button"
-          data-testid="decrement"
-          onClick={() => setCount((x) => x - 1)}
-        />
         <span data-testid="count">{count}</span>
         <button
           type="button"

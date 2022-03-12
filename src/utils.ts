@@ -60,12 +60,14 @@ export const noop: VoidFunction = () => {
  * @private
  */
 export const warning = (message: string): void => {
-  /* eslint-disable no-console */
+  /* istanbul ignore next */
   if (
     process.env.NODE_ENV !== "production" &&
     typeof console !== "undefined" &&
+    // eslint-disable-next-line no-console
     typeof console.error === "function"
   ) {
+    // eslint-disable-next-line no-console
     console.error(message)
   }
   /* eslint-enable no-console */
