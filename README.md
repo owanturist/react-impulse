@@ -57,11 +57,6 @@ const App: React.VFC<{
   state: State
 }> = React.memo(({ state }) => (
   <div>
-    <h1>
-      The app component will never re-render due to neither state.count nor
-      state.username change
-    </h1>
-
     <Username store={state.username} />
     <Counter store={state.count} />
 
@@ -70,7 +65,7 @@ const App: React.VFC<{
         const username = state.username.getState()
         const count = state.count.getState()
 
-        console.log(`User "${username}" get ${count} score.`)
+        console.log(`User "${username}" gets ${count} score.`)
       }}
     >
       Submit
@@ -659,10 +654,12 @@ interface AppState {
 }
 
 const prepareAppRequestPayload = (state: AppState) => ({
-  games: state.games.map((game) => game.getState((gameState) => ({
-    firstCounter: gameState.firstCounter.getState(),
-    secondCounter: gameState.secondCounter.getState(),
-  }))),
+  games: state.games.map((game) =>
+    game.getState((gameState) => ({
+      firstCounter: gameState.firstCounter.getState(),
+      secondCounter: gameState.secondCounter.getState(),
+    })),
+  ),
 })
 
 const appStore = InnerStore.of({ games: [] })
@@ -775,15 +772,18 @@ With `react-inner-store` we can now implement the same functionality without any
 
 ## API
 
-A core concept of the library is the `InnerStore` class. It is a mutable wrapper around a value that allows to prevent unnecessary re-renders. The class provides an API to get and set the value, and to observe changes. There are hooks built on top of the API for convenient usage in React components.
+A core concept of the library is the `InnerStore` class. It is a mutable wrapper around an immutable value that allows to prevent unnecessary re-renders. The class provides an API to get and set the value, and to observe changes. There are hooks built on top of the API for convenient usage in React components.
 
 ### `InnerStore.of`
 
 ```ts
-InnerStore.of<T>(value: T): InnerStore<T>
+InnerStore.of<T>(value: T, compare?: null | Compare<T>): InnerStore<T>
 ```
 
 A static method that creates a new `InnerStore` instance. The instance is mutable so once created it should be used for all future operations.
+
+- `value` is the initial immutable value of the store.
+- `[compare]` is an optional [`Compare`][compare] function to set as [`InnerStore#compare`][inner_store__compare]. If the `compare` function is not defined or `null` the strict equality check function (`===`) will be used.
 
 ```ts
 type SignInFormState = {
@@ -821,15 +821,29 @@ const Toggles: React.VFC<{
 )
 ```
 
+### `InnerStore#compare`
+
+```ts
+InnerStore<T>#compare: Compare<T>
+```
+
+The [`compare`][compare] function compares the value of the store with the new value given via [`InnerStore#setState`][inner_store__set_state]. If the function returns `true` the store will not be updated so no listeners subscribed via [`InnerStore#subscribe`][inner_store__subscribe] will be notified.
+
+> 💬 The `InnerStore#compare` function has the lowest priority when [`InnerStore#setState`][inner_store__set_state], [`useInnerState`][use_inner_state], [`useSetInnerState`][use_set_inner_state] or [`useInnerReducer`][use_inner_reducer] are called.
+
 ### `InnerStore#clone`
 
 ```ts
-InnerStore<T>#clone(transform?: (value: T) => T): InnerStore<T>
+InnerStore<T>#clone(
+  transform?: (value: T) => T,
+  compare?: null | Compare<T>
+): InnerStore<T>
 ```
 
 An `InnerStore` instance's method that creates a new `InnerStore` instance with the same value.
 
 - `[transform]` is an optional function that will be applied to the current value before cloning. It might be handy when cloning a `InnerStore` instance that contains mutable values (e.g. `InnerStore`).
+- `[compare]` an optional [`Compare`][compare] function to replace [`InnerStore#compare`][inner_store__compare] of the cloned instance. If not defined the `InnerStore#compare` function of the source instance will be used. If `null` is passed the strict equality check function (`===`) will be used.
 
 ```ts
 const signInFormStoreClone = signInFormStore.clone(
@@ -869,14 +883,16 @@ const plainSignInState = signInFormStore.getState(
 ```ts
 InnerStore<T>#setState(
   valueOrTransform: React.SetStateAction<T>,
-  compare?: Compare<T>
+  compare?: null | Compare<T>
 ): void
 ```
 
-An `InnerStore` instance's method that sets the value. Each time when the value is changed all of the store's listeners passed via [`InnerStore#subscribe`][inner_store__subscribe] are called.
+An `InnerStore` instance's method that sets the value. Each time when the value changes all of the store's listeners passed via [`InnerStore#subscribe`][inner_store__subscribe] are called.
 
-- `valueOrTransform` is either the new value or a function that will be applied to the current value before setting.
-- `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. If the new value is comparably equal to the current value neither the value is set nor the listeners are called.
+- `valueOrTransform` is the new value or a function that transforms the current value into the new value.
+- `[compare]` is an optional [`Compare`][compare] function to use for this call only.
+  If not defined the [`InnerStore#compare`][inner_store__compare] function of the instance will be used.
+  If `null` is passed the strict equality check function (`===`) will be used.
 
 ```ts
 const onSubmit = () => {
@@ -892,7 +908,11 @@ const onSubmit = () => {
 }
 ```
 
+> 💡 If `valueOrTransform` argument is a function it acts as [`batch`][batch].
+
 > 💬 The method returns `void` to emphasize that `InnerStore` instances are mutable.
+
+> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`InnerStore#compare`][inner_store__compare].
 
 ### `InnerStore#subscribe`
 
@@ -900,9 +920,9 @@ const onSubmit = () => {
 InnerStore<T>#subscribe(listener: VoidFunction): VoidFunction
 ```
 
-An `InnerStore` instance's method that subscribes to the store's value changes caused by [`InnerStore#setState`][inner_store__set_state] calls. Returns a cleanup function that can be used to unsubscribe the listener.
+An `InnerStore` instance's method that subscribes to the store's value changes caused by [`InnerStore#setState`][inner_store__set_state] calls. Returns a cleanup function that unsubscribes the listener.
 
-- `listener` is a function that will be called on store updates.
+- `listener` is a function that a store will call when the value changes.
 
 ```tsx
 const UsernameInput: React.VFC<{
@@ -926,16 +946,18 @@ const UsernameInput: React.VFC<{
 })
 ```
 
+> 💬 The example above is for demonstration purposes only. In real world app it's usually better use provided hooks in most cases.
+
 ### `useInnerWatch`
 
 ```ts
-function useInnerWatch<T>(watcher: () => T, compare?: Compare<T>): T
+function useInnerWatch<T>(watcher: () => T, compare?: null | Compare<T>): T
 ```
 
 A hook that subscribes to all [`InnerStore#getState`][inner_store__get_state] execution involved in the `watcher` call. Due to the mutable nature of `InnerStore` instances a parent component won't be re-rendered when a child's `InnerStore` value is changed. The hook gives a way to watch after deep changes in the store's values and trigger a re-render when the returning value is changed.
 
-- `watcher` is a function to read only the watching value meaning that it never should call [`InnerStore.of`][inner_store__of], [`InnerStore#clone`][inner_store__clone], [`InnerStore#setState`][inner_store__set_state] or [`InnerStore#subscribe`][inner_store__subscribe] methods inside.
-- `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The hook won't trigger a re-render when the watching value is comparably equal to the current value.
+- `watcher` is a function to read only the watching value meaning that it should never call [`InnerStore.of`][inner_store__of], [`InnerStore#clone`][inner_store__clone], [`InnerStore#setState`][inner_store__set_state] or [`InnerStore#subscribe`][inner_store__subscribe] methods inside.
+- `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default or when `null`. The hook won't trigger a re-render when the watching value is comparably equal to the current value.
 
 ```tsx
 type State = {
@@ -961,24 +983,26 @@ const App: React.VFC<{
 
 > 💡 It is recommended to memoize the `watcher` function for better performance.
 
+> 💡 Keep in mind that the `watcher` function acts as a "reader" so you'd like to avoid heavy calculations inside it. Sometimes it might be a good idea to pass a watcher result to a separated memoization hook. The same is true for the `compare` function - you should choose wisely between avoiding extra re-renders and heavy comparisons.
+
 ### `useInnerState`
 
 ```ts
 function useInnerState<T>(
   store: InnerStore<T>,
-  compare?: Compare<T>,
-): [T, React.Dispatch<React.SetStateAction<T>>]
+  compare?: null | Compare<T>,
+): [T, SetInnerState<T>]
 
 function useInnerState<T>(
   store: null | undefined | InnerStore<T>,
-  compare?: Compare<T>,
-): [null | undefined | T, React.Dispatch<React.SetStateAction<T>>]
+  compare?: null | Compare<T>,
+): [null | undefined | T, SetInnerState<T>]
 ```
 
 A hook that is similar to `React.useState` but for `InnerStore` instances. It subscribes to the store changes and returns the current value and a function to set the value.
 
 - `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
-- `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The store won't update if the new value is comparably equal to the current value.
+- `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `InnerStore#compare`. The strict equality check function (`===`) will be used if `null`.
 
 ```tsx
 const UsernameInput: React.VFC<{
@@ -996,7 +1020,9 @@ const UsernameInput: React.VFC<{
 })
 ```
 
-> 💡 The hook is a combination of [`useGetInnerState`][use_get_inner_state] and [`useSetInnerState`][use_set_inner_state], so use them if you need to either get/subscribe or set the store's value.
+> 💡 The hook is a combination of [`useGetInnerState`][use_get_inner_state] and [`useSetInnerState`][use_set_inner_state], so use them if you need to either get+subscribe or set the store's value.
+
+> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`InnerStore#compare`][inner_store__compare].
 
 ### `useGetInnerState`
 
@@ -1036,14 +1062,14 @@ const App: React.VFC<{
 ```ts
 function useSetInnerState<T>(
   store: null | undefined | InnerStore<T>,
-  compare?: Compare<T>,
-): React.Dispatch<React.SetStateAction<T>>
+  compare?: null | Compare<T>,
+): SetInnerState<T>
 ```
 
 A hooks that returns a function to update the store's value. Might be useful when you need a way to update the store's value without subscribing to its changes.
 
 - `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
-- `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The store won't update if the new value is comparably equal to the current value.
+- `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `InnerStore#compare`. The strict equality check function (`===`) will be used if `null`.
 
 ```tsx
 type State = {
@@ -1066,19 +1092,21 @@ const App: React.VFC<{
 })
 ```
 
+> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`InnerStore#compare`][inner_store__compare].
+
 ### `useInnerReducer`
 
 ```ts
 function useInnerReducer<A, T>(
   store: InnerStore<T>,
   reducer: (state: T, action: A) => T,
-  compare?: Compare<T>,
+  compare?: null | Compare<T>,
 ): [T, React.Dispatch<A>]
 
 function useInnerReducer<A, T>(
   store: null | undefined | InnerStore<T>,
   reducer: (state: T, action: A) => T,
-  compare?: Compare<T>,
+  compare?: null | Compare<T>,
 ): [null | undefined | T, React.Dispatch<A>]
 ```
 
@@ -1086,7 +1114,7 @@ A hook that is similar to `React.useReducer` but for `InnerStore` instances. It 
 
 - `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
 - `reducer` is a function that transforms the current value and the dispatched action into the new value.
-- `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default. The store won't update if the new value is comparably equal to the current value.
+- `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `InnerStore#compare`. The strict equality check function (`===`) will be used if `null`.
 
 ```tsx
 type CounterAction = { type: "INCREMENT" } | { type: "DECREMENT" }
@@ -1116,13 +1144,78 @@ const Counter: React.VFC<{
 })
 ```
 
+> 💬 The third argument `compare` function has medium priority, so it will be used instead of [`InnerStore#compare`][inner_store__compare].
+
+### `batch`
+
+The `batch` function is a helper to optimise multiple stores' updates.
+
+```tsx
+const LoginForm: React.VFC<{
+  email: InnerStore<string>
+  password: InnerStore<string>
+}> = ({ email: emailStore, password: passwordStore }) => {
+  const [email, setEmail] = useInnerState(emailStore)
+  const [password, setPassword] = useInnerState(passwordStore)
+
+  return (
+    <form>
+      <input
+        type="email"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+      />
+
+      <button
+        type="button"
+        onClick={() => {
+          api.login(email, password)
+
+          batch(() => {
+            setEmail("")
+            setPassword("")
+          })
+        }}
+      >
+        Submit
+      </button>
+    </form>
+  )
+}
+```
+
 ### `Compare`
 
 ```ts
 type Compare<T> = (prev: T, next: T) => boolean
 ```
 
-A function that compares two values and returns `true` if they are equal. Depending on the type of the values it might be more efficient to use a custom compare function such as shallow-equal or deep-equal.
+A function that compares two values and returns `true` if they are equal. Depending on the type of the values it might be reasonable to use a custom compare function such as shallow-equal or deep-equal.
+
+### `SetInnerState`
+
+```ts
+type SetInnerState<T> = (
+  valueOrTransform: React.SetStateAction<T>,
+  compare?: null | Compare<T>,
+) => void
+```
+
+A function that similar to the `React.useState` callback but with extra [`compare`][compare] function.
+
+- `valueOrTransform` is the new value or a function that transforms the current value into the new value.
+- `[compare]` is an optional [`Compare`][compare] function to use for this call only.
+  If not defined the `compare` function of the source hook will be used.
+  If `null` is passed the strict equality check function (`===`) will be used.
+
+> 💡 If `valueOrTransform` argument is a function it acts as [`batch`][batch].
+
+> 💬 The second argument `compare` function has the highest priority so it will be used instead of [`InnerStore#compare`][inner_store__compare] and any other `compare` passed via [`InnerStore#setState`][inner_store__set_state], [`useInnerState`][use_inner_state], [`useSetInnerState`][use_set_inner_state] or [`useInnerReducer`][use_inner_reducer].
 
 ### `ExtractInnerState`
 
@@ -1172,6 +1265,10 @@ type ArrayOfStores = InnerStore<Array<InnerStore<boolean>>>
 // DeepExtractInnerState<ArrayOfStores> === Array<boolean>
 ```
 
+### `Dispatch`
+
+Re-export of `React.Dispatch`.
+
 ## Publish
 
 Here are scripts you want to run for publishing a new version to NPM:
@@ -1185,11 +1282,15 @@ Here are scripts you want to run for publishing a new version to NPM:
 <!-- L I N K S -->
 
 [inner_store__of]: #innerstoreof
+[inner_store__compare]: #innerstorecompare
 [inner_store__clone]: #innerstoreclone
 [inner_store__get_state]: #innerstoregetstate
 [inner_store__set_state]: #innerstoresetstate
 [inner_store__subscribe]: #innerstoresubscribe
 [use_inner_watch]: #useinnerwatch
+[use_inner_state]: #useinnerstate
+[use_inner_reducer]: #useinnerreducer
 [use_get_inner_state]: #usegetinnerstate
 [use_set_inner_state]: #usesetinnerstate
+[batch]: #batch
 [compare]: #compare

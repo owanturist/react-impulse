@@ -1,6 +1,4 @@
-import { Dispatch, SetStateAction } from "react"
-
-import { Compare, isEqual } from "./utils"
+import { Compare, SetInnerState } from "./utils"
 import { InnerStore } from "./InnerStore"
 import { useGetInnerState } from "./useGetInnerState"
 import { useSetInnerState } from "./useSetInnerState"
@@ -11,7 +9,9 @@ import { useSetInnerState } from "./useSetInnerState"
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function with medium priority.
+ * If not defined it uses `InnerStore#compare`.
+ * The strict equality check function (`===`) will be used if `null`.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -22,8 +22,8 @@ import { useSetInnerState } from "./useSetInnerState"
  */
 export function useInnerState<T>(
   store: InnerStore<T>,
-  compare?: Compare<T>,
-): [T, Dispatch<SetStateAction<T>>]
+  compare?: null | Compare<T>,
+): [T, SetInnerState<T>]
 
 /**
  * The hook that is similar to `React.useState` but for `InnerStore` instances.
@@ -31,7 +31,9 @@ export function useInnerState<T>(
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function with medium priority.
+ * If not defined it uses `InnerStore#compare`.
+ * The strict equality check function (`===`) will be used if `null`.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -42,8 +44,8 @@ export function useInnerState<T>(
  */
 export function useInnerState<T>(
   store: null | InnerStore<T>,
-  compare?: Compare<T>,
-): [null | T, Dispatch<SetStateAction<T>>]
+  compare?: null | Compare<T>,
+): [null | T, SetInnerState<T>]
 
 /**
  * A hook that is similar to `React.useState` but for `InnerStore` instances.
@@ -51,7 +53,9 @@ export function useInnerState<T>(
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function with medium priority.
+ * If not defined it uses `InnerStore#compare`.
+ * The strict equality check function (`===`) will be used if `null`.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -62,8 +66,8 @@ export function useInnerState<T>(
  */
 export function useInnerState<T>(
   store: undefined | InnerStore<T>,
-  compare?: Compare<T>,
-): [undefined | T, Dispatch<SetStateAction<T>>]
+  compare?: null | Compare<T>,
+): [undefined | T, SetInnerState<T>]
 
 /**
  * A hook that is similar to `React.useState` but for `InnerStore` instances.
@@ -71,7 +75,9 @@ export function useInnerState<T>(
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function with medium priority.
+ * If not defined it uses `InnerStore#compare`.
+ * The strict equality check function (`===`) will be used if `null`.
  *
  * @see {@link InnerStore.getState}
  * @see {@link InnerStore.setState}
@@ -82,12 +88,12 @@ export function useInnerState<T>(
  */
 export function useInnerState<T>(
   store: null | undefined | InnerStore<T>,
-  compare?: Compare<T>,
-): [null | undefined | T, Dispatch<SetStateAction<T>>]
+  compare?: null | Compare<T>,
+): [null | undefined | T, SetInnerState<T>]
 
 export function useInnerState<T>(
   store: null | undefined | InnerStore<T>,
-  compare: Compare<T> = isEqual,
-): [null | undefined | T, Dispatch<SetStateAction<T>>] {
+  compare?: null | Compare<T>,
+): [null | undefined | T, SetInnerState<T>] {
   return [useGetInnerState(store), useSetInnerState(store, compare)]
 }

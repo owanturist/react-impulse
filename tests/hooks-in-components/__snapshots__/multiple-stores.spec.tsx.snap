@@ -1,0 +1,96 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`multiple stores Performs multi store management 1`] = `
+<div>
+  <input
+    data-testid="email"
+    type="email"
+    value=""
+  />
+  <input
+    data-testid="password"
+    type="password"
+    value=""
+  />
+  <button
+    data-testid="reset"
+    type="button"
+  />
+</div>
+`;
+
+exports[`multiple stores Performs multi store management 2`] = `
+<div>
+  <input
+    data-testid="email"
+    type="email"
+    value="john-doe@gmail.com"
+  />
+  <input
+    data-testid="password"
+    type="password"
+    value=""
+  />
+  <button
+    data-testid="reset"
+    type="button"
+  />
+</div>
+`;
+
+exports[`multiple stores Performs multi store management 3`] = `
+<div>
+  <input
+    data-testid="email"
+    type="email"
+    value="john-doe@gmail.com"
+  />
+  <input
+    data-testid="password"
+    type="password"
+    value="qwerty"
+  />
+  <button
+    data-testid="reset"
+    type="button"
+  />
+</div>
+`;
+
+exports[`multiple stores Performs multi store management 4`] = `
+<div>
+  <input
+    data-testid="email"
+    type="email"
+    value="admin@gmail.com"
+  />
+  <input
+    data-testid="password"
+    type="password"
+    value="admin"
+  />
+  <button
+    data-testid="reset"
+    type="button"
+  />
+</div>
+`;
+
+exports[`multiple stores Performs multi store management 5`] = `
+<div>
+  <input
+    data-testid="email"
+    type="email"
+    value=""
+  />
+  <input
+    data-testid="password"
+    type="password"
+    value=""
+  />
+  <button
+    data-testid="reset"
+    type="button"
+  />
+</div>
+`;

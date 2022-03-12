@@ -1,3 +1,5 @@
+import { SetStateAction } from "react"
+
 /**
  * A function that compares two values and returns `true` if they are equal.
  * Depending on the type of the values it might be more efficient to use
@@ -8,9 +10,44 @@
 export type Compare<T> = (prev: T, next: T) => boolean
 
 /**
+ * The setState function that can be used to set the state of the store.
+ *
+ * @param valueOrTransform either the new value or a function that will be applied to the current value before setting.
+ *
+ * @param compare an optional compare function with the highest priority to use for this call only.
+ * If not defined it uses `compare` from `useSetInnerState` or `useInnerState`.
+ * The strict equality check function (`===`) will be used if `null`.
+ *
+ * @example
+ * import { useSetInnerState, useInnerState } from "use-inner-state"
+ *
+ * const setState = useSetInnerState(store)
+ * // or
+ * const [state, setState] = useInnerState(store)
+ *
+ * @see {@link Compare}
+ * @public
+ */
+export type SetInnerState<T> = (
+  valueOrTransform: SetStateAction<T>,
+  compare?: null | Compare<T>,
+) => void
+
+/**
  * @private
  */
 export const isEqual = <T>(one: T, another: T): boolean => one === another
+
+export const overrideCompare = <T>(
+  original: Compare<T>,
+  override: undefined | null | Compare<T>,
+): Compare<T> => {
+  if (override === null) {
+    return isEqual
+  }
+
+  return override ?? original
+}
 
 /**
  * @private
@@ -23,12 +60,14 @@ export const noop: VoidFunction = () => {
  * @private
  */
 export const warning = (message: string): void => {
-  /* eslint-disable no-console */
+  /* istanbul ignore next */
   if (
     process.env.NODE_ENV !== "production" &&
     typeof console !== "undefined" &&
+    // eslint-disable-next-line no-console
     typeof console.error === "function"
   ) {
+    // eslint-disable-next-line no-console
     console.error(message)
   }
   /* eslint-enable no-console */

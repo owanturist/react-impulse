@@ -1,6 +1,6 @@
-import { Dispatch, SetStateAction, useRef, useEffect, useCallback } from "react"
+import { useRef, useEffect, useCallback } from "react"
 
-import { Compare, isEqual } from "./utils"
+import { Compare, overrideCompare, SetInnerState } from "./utils"
 import { InnerStore } from "./InnerStore"
 
 /**
@@ -9,23 +9,34 @@ import { InnerStore } from "./InnerStore"
  * The store won't update if the new value is comparably equal to the current value.
  *
  * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
- * @param compare a function with strict check (`===`) by default.
+ * @param compare an optional compare function with medium priority.
+ * If not defined it uses `InnerStore#compare`.
+ * The strict equality check function (`===`) will be used if `null`.
  *
  * @see {@link InnerStore.setState}
  * @see {@link Compare}
+ * @see {@link SetInnerState}
  */
 export function useSetInnerState<T>(
   store: null | undefined | InnerStore<T>,
-  compare: Compare<T> = isEqual,
-): Dispatch<SetStateAction<T>> {
-  const compareRef = useRef(compare)
+  compare?: null | Compare<T>,
+): SetInnerState<T> {
+  const hookLevelCompareRef = useRef(compare)
 
   useEffect(() => {
-    compareRef.current = compare
+    hookLevelCompareRef.current = compare
   }, [compare])
 
   return useCallback(
-    (update): void => store?.setState(update, compareRef.current),
+    (update, setStateLevelCompare) => {
+      store?.setState(
+        update,
+        overrideCompare(
+          overrideCompare(store.compare, hookLevelCompareRef.current),
+          setStateLevelCompare,
+        ),
+      )
+    },
     [store],
   )
 }
