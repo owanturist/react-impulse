@@ -2,7 +2,7 @@ import { SetStateAction } from "react"
 import { nanoid } from "nanoid"
 
 import { Compare, isEqual, noop, overrideCompare } from "./utils"
-import { WatchStore, WatchContext, WatcherPermission } from "./WatchContext"
+import { Subscriber, WatchContext } from "./WatchContext"
 import { SetStateContext } from "./SetStateContext"
 
 type ExtractDirect<T> = T extends InnerStore<infer R> ? R : T
@@ -81,7 +81,7 @@ export const WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING =
     method: "InnerStore#subscribe(listener)",
   })
 
-export class InnerStore<T> implements WatchStore {
+export class InnerStore<T> implements Subscriber {
   /**
    * Creates a new `InnerStore` instance.
    * The instance is mutable so once created it should be used for all future operations.
@@ -218,12 +218,7 @@ export class InnerStore<T> implements WatchStore {
    * @see {@link InnerStore.setState}
    */
   public subscribe(listener: VoidFunction): VoidFunction {
-    if (
-      WatchContext.warning(
-        WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
-        WatcherPermission.AllowSubscribeOnly,
-      )
-    ) {
+    if (WatchContext.warning(WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING)) {
       return noop
     }
 

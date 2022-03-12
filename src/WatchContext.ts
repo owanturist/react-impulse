@@ -1,42 +1,31 @@
 import { warning } from "./utils"
 
-export enum WatcherPermission {
-  AllowAll = 0,
-  AllowSubscribeOnly = 1,
-  RestrictAll = 2,
-}
-
-export interface WatchStore {
+export interface Subscriber {
   key: string
   subscribe(listener: VoidFunction): VoidFunction
 }
 
 export class WatchContext {
   private static current: null | WatchContext = null
-  private static watcherPermission = WatcherPermission.AllowAll
+  private static isReadonlyDuringWatcherCall = false
 
-  public static warning(
-    message: string,
-    requiredPermission: WatcherPermission = WatcherPermission.AllowAll,
-  ): boolean {
-    if (WatchContext.watcherPermission <= requiredPermission) {
-      return false
+  public static warning(message: string): boolean {
+    if (WatchContext.isReadonlyDuringWatcherCall) {
+      warning(message)
     }
 
-    warning(message)
-
-    return true
+    return WatchContext.isReadonlyDuringWatcherCall
   }
 
   public static executeWatcher<T>(watcher: () => T): T {
-    WatchContext.watcherPermission = WatcherPermission.RestrictAll
+    WatchContext.isReadonlyDuringWatcherCall = true
     const value = watcher()
-    WatchContext.watcherPermission = WatcherPermission.AllowAll
+    WatchContext.isReadonlyDuringWatcherCall = false
 
     return value
   }
 
-  public static register(store: WatchStore): void {
+  public static register(store: Subscriber): void {
     WatchContext.current?.register(store)
   }
 
@@ -48,15 +37,14 @@ export class WatchContext {
     this.listener = () => this.cycle(listener)
   }
 
-  private register(store: WatchStore): void {
+  private register(store: Subscriber): void {
     if (this.cleanups.has(store.key)) {
       // still alive
       this.deadCleanups.delete(store.key)
     } else {
-      // TODO change to WatcherPermission.AllowAll
-      WatchContext.watcherPermission = WatcherPermission.AllowSubscribeOnly
+      WatchContext.isReadonlyDuringWatcherCall = false
       this.cleanups.set(store.key, store.subscribe(this.listener))
-      WatchContext.watcherPermission = WatcherPermission.RestrictAll
+      WatchContext.isReadonlyDuringWatcherCall = true
     }
   }
 
