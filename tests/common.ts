@@ -1,4 +1,4 @@
-import { Compare, InnerStore } from "../src"
+import { Compare, Sweety } from "../src"
 
 export abstract class Counter {
   public abstract readonly count: number
@@ -29,7 +29,7 @@ export abstract class Counter {
 }
 
 export interface WithStore<T = Counter> {
-  store: InnerStore<T>
+  store: Sweety<T>
 }
 
 export interface WithCompare<T = Counter> {
@@ -37,15 +37,15 @@ export interface WithCompare<T = Counter> {
 }
 
 export interface WithFirst<T = Counter> {
-  first: InnerStore<T>
+  first: Sweety<T>
 }
 
 export interface WithSecond<T = Counter> {
-  second: InnerStore<T>
+  second: Sweety<T>
 }
 
 export interface WithThird<T = Counter> {
-  third: InnerStore<T>
+  third: Sweety<T>
 }
 
 export interface WithSpy {

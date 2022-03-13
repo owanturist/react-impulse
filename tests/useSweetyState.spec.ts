@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { InnerStore, useInnerState } from "../src"
+import { Sweety, useSweetyState } from "../src"
 
 import { Counter } from "./common"
 
@@ -10,7 +10,7 @@ describe("bypassed store", () => {
     // eslint-disable-next-line no-undefined
     undefined,
   ])("returns %s for %s", (value) => {
-    const { result } = renderHook(() => useInnerState<number>(value))
+    const { result } = renderHook(() => useSweetyState<number>(value))
 
     expect(result.current[0]).toBe(value)
   })
@@ -19,9 +19,9 @@ describe("bypassed store", () => {
 describe("defined store", () => {
   it.concurrent("returns initial state", () => {
     const initial = { count: 0 }
-    const store = InnerStore.of(initial)
+    const store = Sweety.of(initial)
 
-    const { result } = renderHook(() => useInnerState(store))
+    const { result } = renderHook(() => useSweetyState(store))
 
     expect(result.current[0]).toBe(initial)
     expect(result.current[0]).toBe(store.getState())
@@ -30,9 +30,9 @@ describe("defined store", () => {
 
   it.concurrent("returns the same values when the hook re-renders", () => {
     const initial = { count: 0 }
-    const store = InnerStore.of(initial)
+    const store = Sweety.of(initial)
 
-    const { result, rerender } = renderHook(() => useInnerState(store))
+    const { result, rerender } = renderHook(() => useSweetyState(store))
     const firstResult = result.current
 
     expect(result.all).toHaveLength(1)
@@ -49,9 +49,9 @@ describe("defined store", () => {
 
   it.concurrent("watches after store's updates", () => {
     const initial = { count: 0 }
-    const store = InnerStore.of(initial)
+    const store = Sweety.of(initial)
 
-    const { result } = renderHook(() => useInnerState(store))
+    const { result } = renderHook(() => useSweetyState(store))
 
     act(() => {
       store.setState(Counter.inc)
@@ -64,10 +64,10 @@ describe("defined store", () => {
   })
 
   it.concurrent("re-subscribes on new store", () => {
-    const store_1 = InnerStore.of({ count: 0 })
-    const store_2 = InnerStore.of({ count: 10 })
+    const store_1 = Sweety.of({ count: 0 })
+    const store_2 = Sweety.of({ count: 10 })
 
-    const { result, rerender } = renderHook((store) => useInnerState(store), {
+    const { result, rerender } = renderHook((store) => useSweetyState(store), {
       initialProps: store_1,
     })
     const firstResult = result.current
@@ -101,9 +101,9 @@ describe("defined store", () => {
   describe("clones state", () => {
     it.concurrent("without compare", () => {
       const initial = { count: 0 }
-      const store = InnerStore.of(initial)
+      const store = Sweety.of(initial)
 
-      const { result } = renderHook(() => useInnerState(store))
+      const { result } = renderHook(() => useSweetyState(store))
 
       act(() => {
         result.current[1](Counter.clone)
@@ -116,9 +116,11 @@ describe("defined store", () => {
 
     it.concurrent("with compare", () => {
       const initial = { count: 0 }
-      const store = InnerStore.of(initial)
+      const store = Sweety.of(initial)
 
-      const { result } = renderHook(() => useInnerState(store, Counter.compare))
+      const { result } = renderHook(() =>
+        useSweetyState(store, Counter.compare),
+      )
 
       act(() => {
         result.current[1](Counter.clone)

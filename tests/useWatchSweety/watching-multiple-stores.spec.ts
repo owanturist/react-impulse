@@ -1,23 +1,23 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Compare, InnerStore, useInnerWatch, batch } from "../../src"
+import { Compare, Sweety, useWatchSweety, batch } from "../../src"
 import { Counter } from "../common"
 
 interface WithStore<T = Counter> {
-  store: InnerStore<T>
+  store: Sweety<T>
 }
 
 interface WithFirst<T = Counter> {
-  first: InnerStore<T>
+  first: Sweety<T>
 }
 
 interface WithSecond<T = Counter> {
-  second: InnerStore<T>
+  second: Sweety<T>
 }
 
 interface WithThird<T = Counter> {
-  third: InnerStore<T>
+  third: Sweety<T>
 }
 
 interface WithSpy {
@@ -28,7 +28,7 @@ describe.each([
   [
     "inline watcher",
     ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
-      return useInnerWatch(() => {
+      return useWatchSweety(() => {
         return Counter.merge(first.getState(), second.getState())
       }, compare)
     },
@@ -36,7 +36,7 @@ describe.each([
   [
     "memoized watcher",
     ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
-      return useInnerWatch(
+      return useWatchSweety(
         useCallback(() => {
           return Counter.merge(first.getState(), second.getState())
         }, [first, second]),
@@ -63,8 +63,8 @@ describe.each([
     ],
   ])("%s", (__, useHook) => {
     const setup = () => {
-      const first = InnerStore.of({ count: 2 })
-      const second = InnerStore.of({ count: 3 })
+      const first = Sweety.of({ count: 2 })
+      const second = Sweety.of({ count: 3 })
       const { result } = renderHook(useHook, {
         initialProps: { first, second },
       })
@@ -112,7 +112,7 @@ describe.each([
   [
     "inline watcher",
     ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-      return useInnerWatch(() => {
+      return useWatchSweety(() => {
         spy()
 
         return store.getState()
@@ -127,7 +127,7 @@ describe.each([
       }: WithFirst & WithSecond & WithThird & WithSpy,
       compare?: Compare<Counter>,
     ) => {
-      return useInnerWatch(() => {
+      return useWatchSweety(() => {
         spy()
 
         return Counter.merge(
@@ -142,7 +142,7 @@ describe.each([
   [
     "memoized watcher",
     ({ spy, store }: WithStore & WithSpy) => {
-      return useInnerWatch(
+      return useWatchSweety(
         useCallback(() => {
           spy()
 
@@ -156,7 +156,7 @@ describe.each([
       second,
       third,
     }: WithFirst & WithSecond & WithThird & WithSpy) => {
-      return useInnerWatch(
+      return useWatchSweety(
         useCallback(() => {
           spy()
 
@@ -202,9 +202,9 @@ describe.each([
       ],
     ])("%s", (__, useSingleHook, useMultipleHook) => {
       const setup = () => {
-        const first = InnerStore.of({ count: 1 })
-        const second = InnerStore.of({ count: 2 })
-        const third = InnerStore.of({ count: 3 })
+        const first = Sweety.of({ count: 1 })
+        const second = Sweety.of({ count: 2 })
+        const third = Sweety.of({ count: 3 })
         const spySingle = jest.fn()
         const spyMultiple = jest.fn()
 

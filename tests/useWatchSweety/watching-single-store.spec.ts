@@ -1,20 +1,20 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Compare, InnerStore, useInnerWatch } from "../../src"
+import { Compare, Sweety, useWatchSweety } from "../../src"
 import { Counter, WithSpy, WithStore } from "../common"
 
 describe.each([
   [
     "inline watcher",
     ({ store }: WithStore, compare?: Compare<Counter>) => {
-      return useInnerWatch(() => store.getState(), compare)
+      return useWatchSweety(() => store.getState(), compare)
     },
   ],
   [
     "memoized watcher",
     ({ store }: WithStore, compare?: Compare<Counter>) => {
-      return useInnerWatch(
+      return useWatchSweety(
         useCallback(() => store.getState(), [store]),
         compare,
       )
@@ -39,7 +39,7 @@ describe.each([
     ],
   ])("%s", (__, useHook) => {
     it.concurrent("watches the store's changes", () => {
-      const store = InnerStore.of({ count: 1 })
+      const store = Sweety.of({ count: 1 })
 
       const { result } = renderHook(useHook, {
         initialProps: { store },
@@ -60,8 +60,8 @@ describe.each([
 
     describe("watches the replaced store changes", () => {
       const setup = () => {
-        const store_1 = InnerStore.of({ count: 1 })
-        const store_2 = InnerStore.of({ count: 10 })
+        const store_1 = Sweety.of({ count: 1 })
+        const store_2 = Sweety.of({ count: 10 })
 
         const { result, rerender } = renderHook(useHook, {
           initialProps: { store: store_1 },
@@ -159,13 +159,13 @@ describe("transform state's value inside watcher", () => {
     [
       "inline watcher",
       ({ store }: WithStore, compare?: Compare<[boolean, boolean]>) => {
-        return useInnerWatch(() => store.getState(toTuple), compare)
+        return useWatchSweety(() => store.getState(toTuple), compare)
       },
     ],
     [
       "memoized watcher",
       ({ store }: WithStore, compare?: Compare<[boolean, boolean]>) => {
-        return useInnerWatch(
+        return useWatchSweety(
           useCallback(() => store.getState(toTuple), [store]),
           compare,
         )
@@ -175,7 +175,7 @@ describe("transform state's value inside watcher", () => {
     it.concurrent(
       "produces new value on each store's update without comparator",
       () => {
-        const store = InnerStore.of({ count: 1 })
+        const store = Sweety.of({ count: 1 })
 
         const { result, rerender } = renderHook(useHookWithoutCompare, {
           initialProps: { store },
@@ -242,7 +242,7 @@ describe("transform state's value inside watcher", () => {
     ])(
       "keeps the old value when it is comparably equal when %s",
       (_, useHookWithCompare) => {
-        const store = InnerStore.of({ count: 1 })
+        const store = Sweety.of({ count: 1 })
 
         const { result, rerender } = renderHook(useHookWithCompare, {
           initialProps: { store },
@@ -296,7 +296,7 @@ describe("transform state's value inside watcher", () => {
     [
       "inline watcher",
       ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useInnerWatch(() => {
+        return useWatchSweety(() => {
           spy()
 
           return store.getState()
@@ -306,7 +306,7 @@ describe("transform state's value inside watcher", () => {
     [
       "memoized watcher",
       ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useInnerWatch(
+        return useWatchSweety(
           useCallback(() => {
             spy()
 
@@ -336,7 +336,7 @@ describe("transform state's value inside watcher", () => {
           },
         ],
       ])("should not trigger the watcher %s", () => {
-        const store = InnerStore.of({ count: 1 })
+        const store = Sweety.of({ count: 1 })
         const spy = jest.fn()
 
         renderHook(useHookWithoutCompare, {
@@ -357,19 +357,19 @@ describe("transform state's value inside watcher", () => {
   )
 })
 
-describe("multiple InnerStore#getState() calls", () => {
+describe("multiple Sweety#getState() calls", () => {
   describe.each([
     [
       "inline watcher",
       ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useInnerWatch(() => {
+        return useWatchSweety(() => {
           spy()
 
           return store.getState()
         }, compare)
       },
       ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useInnerWatch(() => {
+        return useWatchSweety(() => {
           spy()
 
           return Counter.merge(store.getState(), store.getState())
@@ -379,7 +379,7 @@ describe("multiple InnerStore#getState() calls", () => {
     [
       "memoized watcher",
       ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useInnerWatch(
+        return useWatchSweety(
           useCallback(() => {
             spy()
 
@@ -389,7 +389,7 @@ describe("multiple InnerStore#getState() calls", () => {
         )
       },
       ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useInnerWatch(
+        return useWatchSweety(
           useCallback(() => {
             spy()
 
@@ -400,7 +400,7 @@ describe("multiple InnerStore#getState() calls", () => {
       },
     ],
   ])(
-    "triggering %s for multiple InnerStore#getState() calls the same as for a single",
+    "triggering %s for multiple Sweety#getState() calls the same as for a single",
     (_, useSingleHookWithoutCompare, useDoubleHookWithoutCompare) => {
       describe.each([
         [
@@ -434,7 +434,7 @@ describe("multiple InnerStore#getState() calls", () => {
         const setup = () => {
           const spySingle = jest.fn()
           const spyDouble = jest.fn()
-          const store = InnerStore.of({ count: 1 })
+          const store = Sweety.of({ count: 1 })
 
           const { result: resultSingle } = renderHook(useSingleHook, {
             initialProps: { spy: spySingle, store },
@@ -456,8 +456,8 @@ describe("multiple InnerStore#getState() calls", () => {
 
         it.concurrent.each([
           // eslint-disable-next-line no-undefined
-          ["without InnerStore#setState comparator", undefined],
-          ["with InnerStore#setState comparator", Counter.compare],
+          ["without Sweety#setState comparator", undefined],
+          ["with Sweety#setState comparator", Counter.compare],
         ])("increments %s", (___, compare) => {
           const { store, spySingle, spyDouble, resultSingle, resultDouble } =
             setup()
@@ -473,8 +473,8 @@ describe("multiple InnerStore#getState() calls", () => {
 
         it.concurrent.each([
           // eslint-disable-next-line no-undefined
-          ["without InnerStore#setState comparator", undefined],
-          ["with InnerStore#setState comparator", Counter.compare],
+          ["without Sweety#setState comparator", undefined],
+          ["with Sweety#setState comparator", Counter.compare],
         ])("clones %s", (___, compare) => {
           const { store, spySingle, spyDouble, resultSingle, resultDouble } =
             setup()

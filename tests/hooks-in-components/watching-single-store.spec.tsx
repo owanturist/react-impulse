@@ -1,13 +1,13 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { InnerStore, useInnerWatch } from "../../src"
+import { Sweety, useWatchSweety } from "../../src"
 
 import { CounterComponent } from "./common"
 
 describe("watching single store", () => {
   interface AppProps {
-    count: InnerStore<number>
+    count: Sweety<number>
     onRender: VoidFunction
     onCounterRender: VoidFunction
   }
@@ -31,7 +31,7 @@ describe("watching single store", () => {
   }
 
   const SingleWatcherApp: React.VFC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useInnerWatch(
+    const [moreThanOne, lessThanFour] = useWatchSweety(
       () => {
         const count = props.count.getState()
 
@@ -52,7 +52,7 @@ describe("watching single store", () => {
   }
 
   const SingleMemoizedWatcherApp: React.VFC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useInnerWatch(
+    const [moreThanOne, lessThanFour] = useWatchSweety(
       React.useCallback(() => {
         const count = props.count.getState()
 
@@ -73,8 +73,8 @@ describe("watching single store", () => {
   }
 
   const MultipleWatchersApp: React.VFC<AppProps> = (props) => {
-    const moreThanOne = useInnerWatch(() => props.count.getState() > 1)
-    const lessThanFour = useInnerWatch(() => props.count.getState() < 4)
+    const moreThanOne = useWatchSweety(() => props.count.getState() > 1)
+    const lessThanFour = useWatchSweety(() => props.count.getState() < 4)
 
     return (
       <GenericApp
@@ -86,10 +86,10 @@ describe("watching single store", () => {
   }
 
   const MultipleMemoizedWatchersApp: React.VFC<AppProps> = (props) => {
-    const moreThanOne = useInnerWatch(
+    const moreThanOne = useWatchSweety(
       React.useCallback(() => props.count.getState() > 1, [props.count]),
     )
-    const lessThanFour = useInnerWatch(
+    const lessThanFour = useWatchSweety(
       React.useCallback(() => props.count.getState() < 4, [props.count]),
     )
 
@@ -108,7 +108,7 @@ describe("watching single store", () => {
     ["multiple watchers", MultipleWatchersApp],
     ["multiple memoized watchers", MultipleMemoizedWatchersApp],
   ])("watches single store with %s", (_, App) => {
-    const count = InnerStore.of(0)
+    const count = Sweety.of(0)
     const onCounterRender = jest.fn()
     const onRender = jest.fn()
 

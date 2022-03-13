@@ -5,12 +5,12 @@ import { Compare, isEqual, noop, overrideCompare } from "./utils"
 import { Subscriber, WatchContext } from "./WatchContext"
 import { SetStateContext } from "./SetStateContext"
 
-type ExtractDirect<T> = T extends InnerStore<infer R> ? R : T
+type ExtractDirect<T> = T extends Sweety<infer R> ? R : T
 
 /**
- * A helper type that shallowly extracts value type from `InnerStore`.
+ * A helper type that shallowly extracts value type from `Sweety`.
  */
-export type ExtractInnerState<T> = T extends InnerStore<infer R>
+export type ExtractSweetyState<T> = T extends Sweety<infer R>
   ? R
   : T extends Array<infer R>
   ? Array<ExtractDirect<R>>
@@ -18,15 +18,15 @@ export type ExtractInnerState<T> = T extends InnerStore<infer R>
   ? ReadonlyArray<ExtractDirect<R>>
   : { [K in keyof T]: ExtractDirect<T[K]> }
 
-type ExtractDeepDirect<T> = T extends InnerStore<infer R>
-  ? DeepExtractInnerState<R>
+type ExtractDeepDirect<T> = T extends Sweety<infer R>
+  ? DeepExtractSweetyState<R>
   : T
 
 /**
- * A helper that deeply extracts value type from `InnerStore`.
+ * A helper that deeply extracts value type from `Sweety`.
  */
-export type DeepExtractInnerState<T> = T extends InnerStore<infer R>
-  ? DeepExtractInnerState<R>
+export type DeepExtractSweetyState<T> = T extends Sweety<infer R>
+  ? DeepExtractSweetyState<R>
   : T extends Array<infer R>
   ? Array<ExtractDeepDirect<R>>
   : T extends ReadonlyArray<infer R>
@@ -47,8 +47,8 @@ const makeWarningMessage = ({
     isCritical ? "may not" : "should not",
     "call",
     method,
-    "inside the useInnerWatch(watcher) callback.",
-    "The useInnerWatch(watcher) hook is for read-only operations but",
+    "inside the useWatchSweety(watcher) callback.",
+    "The useWatchSweety(watcher) hook is for read-only operations but",
     method,
     whatItDoes,
     ".",
@@ -58,61 +58,61 @@ const makeWarningMessage = ({
 export const WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING = makeWarningMessage({
   isCritical: false,
   whatItDoes: "creates a new store",
-  method: "InnerStore#of(something)",
+  method: "Sweety#of",
 })
 
 export const WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING = makeWarningMessage({
   isCritical: false,
   whatItDoes: "creates a new store",
-  method: "InnerStore#clone(transform?)",
+  method: "Sweety#clone",
 })
 
 export const WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING =
   makeWarningMessage({
     isCritical: true,
     whatItDoes: "changes an existing store",
-    method: "InnerStore#setState(something)",
+    method: "Sweety#setState",
   })
 
 export const WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING =
   makeWarningMessage({
     isCritical: true,
     whatItDoes: "subscribes to a store",
-    method: "InnerStore#subscribe(listener)",
+    method: "Sweety#subscribe",
   })
 
-export class InnerStore<T> implements Subscriber {
+export class Sweety<T> implements Subscriber {
   /**
-   * Creates a new `InnerStore` instance.
+   * Creates a new `Sweety` store instance.
    * The instance is mutable so once created it should be used for all future operations.
-   * The `compare` function compares the value of the store with the new value given via `InnerStore#setState`.
-   * If the function returns `true` the store will not be updated so no listeners subscribed via `InnerStore#subscribe` will be notified.
+   * The `compare` function compares the value of the store with the new value given via `Sweety#setState`.
+   * If the function returns `true` the store will not be updated so no listeners subscribed via `Sweety#subscribe` will be notified.
    *
    * @param value the initial immutable value.
    * @param compare an optional compare function with the lowest priority.
    * If not defined or `null` the strict equality check function (`===`) will be used.
    *
    * @see {@link Compare}
-   * @see {@link InnerStore.setState}
-   * @see {@link InnerStore.subscribe}
+   * @see {@link Sweety.setState}
+   * @see {@link Sweety.subscribe}
    */
   public static of<TValue>(
     value: TValue,
     compare?: null | Compare<TValue>,
-  ): InnerStore<TValue> {
+  ): Sweety<TValue> {
     WatchContext.warning(WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING)
 
-    return new InnerStore(value, compare ?? isEqual)
+    return new Sweety(value, compare ?? isEqual)
   }
 
   private readonly subscribers = new Map<string, VoidFunction>()
 
   /**
-   * A unique key per `InnerStore` instance.
-   * This key is used internally for `useInnerWatch`
+   * A unique key per `Sweety` instance.
+   * This key is used internally for `useWatchSweety`
    * but can be used as the React key property.
    *
-   * @see {@link useInnerWatch}
+   * @see {@link useWatchSweety}
    */
   public readonly key = nanoid()
 
@@ -128,36 +128,36 @@ export class InnerStore<T> implements Subscriber {
   }
 
   /**
-   * Clones a `InnerStore` instance.
+   * Clones a `Sweety` instance.
    *
    * @param transform a function that will be applied to the current value before cloning.
    * @param compare an optional compare function.
-   * If not defined it uses `InnerStore#compare`.
+   * If not defined it uses `Sweety#compare`.
    * If `null` is passed the strict equality check function (`===`) will be used.
    *
-   * @returns new `InnerStore` instance with the same value.
+   * @returns new `Sweety` instance with the same value.
    *
-   * @see {@link InnerStore.compare}
+   * @see {@link Sweety.compare}
    * @see {@link Compare}
    */
   public clone(
     transform?: (value: T) => T,
     compare?: null | Compare<T>,
-  ): InnerStore<T> {
+  ): Sweety<T> {
     WatchContext.warning(WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING)
 
-    return new InnerStore(
+    return new Sweety(
       typeof transform === "function" ? transform(this.value) : this.value,
       overrideCompare(this.compare, compare),
     )
   }
 
   /**
-   * An `InnerStore` instance's method that returns the current value.
+   * A `Sweety` instance's method that returns the current value.
    */
   public getState(): T
   /**
-   * An `InnerStore` instance's method that returns the current value.
+   * A `Sweety` instance's method that returns the current value.
    *
    * @param transform a function that will be applied to the current value before returning.
    */
@@ -169,19 +169,19 @@ export class InnerStore<T> implements Subscriber {
   }
 
   /**
-   * Sets the store's value.
-   * Each time when the value is changed all of the store's listeners passed via `InnerStore#subscribe` are called.
+   * Sets the Sweety's value.
+   * Each time when the value is changed all of the store's listeners passed via `Sweety#subscribe` are called.
    * If the new value is comparably equal to the current value neither the value is set nor the listeners are called.
    *
    * @param valueOrTransform either the new value or a function that will be applied to the current value before setting.
    * @param compare an optional compare function with medium priority.
-   * If not defined it uses `InnerStore#compare`.
+   * If not defined it uses `Sweety#compare`.
    * If `null` is passed the strict equality check function (`===`) will be used.
    *
-   * @returns `void` to emphasize that `InnerStore` instances are mutable.
+   * @returns `void` to emphasize that `Sweety` instances are mutable.
    *
-   * @see {@link InnerStore.subscribe}
-   * @see {@link InnerStore.compare}
+   * @see {@link Sweety.subscribe}
+   * @see {@link Sweety.compare}
    * @see {@link Compare}
    */
   public setState(
@@ -209,13 +209,13 @@ export class InnerStore<T> implements Subscriber {
   }
 
   /**
-   * subscribes to the store's value changes caused by `InnerStore#setState` calls.
+   * Subscribes to the Sweety's value changes caused by `Sweety#setState` calls.
    *
    * @param listener a function that will be called on store updates.
    *
    * @returns a cleanup function that can be used to unsubscribe the listener.
    *
-   * @see {@link InnerStore.setState}
+   * @see {@link Sweety.setState}
    */
   public subscribe(listener: VoidFunction): VoidFunction {
     if (WatchContext.warning(WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING)) {

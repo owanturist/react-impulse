@@ -1,14 +1,14 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { InnerStore, useInnerWatch } from "../../src"
+import { Sweety, useWatchSweety } from "../../src"
 import { Counter, WithSpy, WithStore } from "../common"
 
 describe.each([
   [
     "without comparator",
     ({ store, spy }: WithStore & WithSpy) => {
-      return useInnerWatch(() => {
+      return useWatchSweety(() => {
         spy()
 
         return store.getState()
@@ -18,7 +18,7 @@ describe.each([
   [
     "with inline comparator",
     ({ store, spy }: WithStore & WithSpy) => {
-      return useInnerWatch(
+      return useWatchSweety(
         () => {
           spy()
 
@@ -31,7 +31,7 @@ describe.each([
   [
     "with memoized comparator",
     ({ store, spy }: WithStore & WithSpy) => {
-      return useInnerWatch(() => {
+      return useWatchSweety(() => {
         spy()
 
         return store.getState()
@@ -41,7 +41,7 @@ describe.each([
 ])("inline watcher %s", (_, useHook) => {
   const setup = () => {
     const spy = jest.fn()
-    const store = InnerStore.of({ count: 1 })
+    const store = Sweety.of({ count: 1 })
 
     const { rerender } = renderHook(useHook, {
       initialProps: { store, spy },
@@ -91,7 +91,7 @@ describe.each([
   [
     "without comparator",
     ({ store, spy }: WithStore & WithSpy) => {
-      return useInnerWatch(
+      return useWatchSweety(
         useCallback(() => {
           spy()
 
@@ -103,7 +103,7 @@ describe.each([
   [
     "with inline comparator",
     ({ store, spy }: WithStore & WithSpy) => {
-      return useInnerWatch(
+      return useWatchSweety(
         useCallback(() => {
           spy()
 
@@ -116,7 +116,7 @@ describe.each([
   [
     "with memoized comparator",
     ({ store, spy }: WithStore & WithSpy) => {
-      return useInnerWatch(
+      return useWatchSweety(
         useCallback(() => {
           spy()
 
@@ -129,7 +129,7 @@ describe.each([
 ])("memoized watcher %s", (__, useHook) => {
   const setup = () => {
     const spy = jest.fn()
-    const store = InnerStore.of({ count: 1 })
+    const store = Sweety.of({ count: 1 })
 
     const { rerender } = renderHook(useHook, {
       initialProps: { store, spy },

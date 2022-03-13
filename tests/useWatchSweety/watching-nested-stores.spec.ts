@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { batch, Compare, InnerStore, useInnerWatch } from "../../src"
+import { batch, Compare, Sweety, useWatchSweety } from "../../src"
 import {
   Counter,
   WithFirst,
@@ -18,7 +18,7 @@ describe.each([
       { store }: WithStore<WithFirst & WithSecond>,
       compare?: Compare<Counter>,
     ) => {
-      return useInnerWatch(() => {
+      return useWatchSweety(() => {
         const { first, second } = store.getState()
 
         return Counter.merge(first.getState(), second.getState())
@@ -31,7 +31,7 @@ describe.each([
       { store }: WithStore<WithFirst & WithSecond>,
       compare?: Compare<Counter>,
     ) => {
-      return useInnerWatch(
+      return useWatchSweety(
         useCallback(() => {
           const { first, second } = store.getState()
 
@@ -60,9 +60,9 @@ describe.each([
     ],
   ])("%s", (__, useHook) => {
     const setup = () => {
-      const first = InnerStore.of({ count: 2 })
-      const second = InnerStore.of({ count: 3 })
-      const store = InnerStore.of({ first, second })
+      const first = Sweety.of({ count: 2 })
+      const second = Sweety.of({ count: 3 })
+      const store = Sweety.of({ first, second })
       const { result } = renderHook(useHook, {
         initialProps: { store },
       })
@@ -105,7 +105,7 @@ describe.each([
     })
 
     it.concurrent("replaces nested stores", () => {
-      const newFirst = InnerStore.of({ count: 5 })
+      const newFirst = Sweety.of({ count: 5 })
       const { store, result } = setup()
 
       act(() => {
@@ -137,7 +137,7 @@ describe.each([
   [
     "inline watcher",
     ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-      return useInnerWatch(() => {
+      return useWatchSweety(() => {
         spy()
 
         return store.getState()
@@ -147,7 +147,7 @@ describe.each([
       { spy, store }: WithStore<WithFirst & WithSecond & WithThird> & WithSpy,
       compare?: Compare<Counter>,
     ) => {
-      return useInnerWatch(() => {
+      return useWatchSweety(() => {
         spy()
 
         const { first, second, third } = store.getState()
@@ -164,7 +164,7 @@ describe.each([
   [
     "memoized watcher",
     ({ spy, store }: WithStore & WithSpy) => {
-      return useInnerWatch(
+      return useWatchSweety(
         useCallback(() => {
           spy()
 
@@ -176,7 +176,7 @@ describe.each([
       spy,
       store,
     }: WithStore<WithFirst & WithSecond & WithThird> & WithSpy) => {
-      return useInnerWatch(
+      return useWatchSweety(
         useCallback(() => {
           spy()
 
@@ -224,10 +224,10 @@ describe.each([
       ],
     ])("%s", (__, useSingleHook, useNestedHook) => {
       const setup = () => {
-        const first = InnerStore.of({ count: 1 })
-        const second = InnerStore.of({ count: 2 })
-        const third = InnerStore.of({ count: 3 })
-        const store = InnerStore.of({ first, second, third })
+        const first = Sweety.of({ count: 1 })
+        const second = Sweety.of({ count: 2 })
+        const third = Sweety.of({ count: 3 })
+        const store = Sweety.of({ first, second, third })
         const spySingle = jest.fn()
         const spyNested = jest.fn()
 
@@ -364,7 +364,7 @@ describe.each([
         },
       )
 
-      it.concurrent("InnerStore#setState wraps the callback into batch", () => {
+      it.concurrent("Sweety#setState wraps the callback into batch", () => {
         const { second, third, store, spyNested, resultNested } = setup()
 
         spyNested.mockReset()

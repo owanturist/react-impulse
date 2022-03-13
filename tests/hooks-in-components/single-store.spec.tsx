@@ -1,17 +1,17 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { InnerStore, useGetInnerState, useSetInnerState } from "../../src"
+import { Sweety, useGetSweetyState, useSetSweetyState } from "../../src"
 import { Counter } from "../common"
 
 import { withinNth } from "./common"
 
 describe("single store", () => {
   const GetterComponent: React.VFC<{
-    store: InnerStore<Counter>
+    store: Sweety<Counter>
     onRender: VoidFunction
   }> = ({ store, onRender }) => {
-    const state = useGetInnerState(store)
+    const state = useGetSweetyState(store)
 
     onRender()
 
@@ -19,10 +19,10 @@ describe("single store", () => {
   }
 
   const SetterComponent: React.VFC<{
-    store: InnerStore<Counter>
+    store: Sweety<Counter>
     onRender: VoidFunction
   }> = ({ store, onRender }) => {
-    const setState = useSetInnerState(store, Counter.compare)
+    const setState = useSetSweetyState(store, Counter.compare)
 
     onRender()
 
@@ -44,7 +44,7 @@ describe("single store", () => {
   }
 
   const SingleSetterSingleGetter: React.VFC<{
-    store: InnerStore<Counter>
+    store: Sweety<Counter>
     onRootRender: VoidFunction
     onGetterRender: VoidFunction
     onSetterRender: VoidFunction
@@ -60,7 +60,7 @@ describe("single store", () => {
   }
 
   it("Single Setter / Getter", () => {
-    const store = InnerStore.of({ count: 0 })
+    const store = Sweety.of({ count: 0 })
     const onRootRender = jest.fn()
     const onGetterRender = jest.fn()
     const onSetterRender = jest.fn()
@@ -128,7 +128,7 @@ describe("single store", () => {
   })
 
   const MultipleSetterMultipleGetter: React.VFC<{
-    store: InnerStore<Counter>
+    store: Sweety<Counter>
     onRootRender: VoidFunction
     onFirstGetterRender: VoidFunction
     onSecondGetterRender: VoidFunction
@@ -155,7 +155,7 @@ describe("single store", () => {
   }
 
   it("Multiple Setters / Getters", () => {
-    const store = InnerStore.of({ count: 0 })
+    const store = Sweety.of({ count: 0 })
     const onRootRender = jest.fn()
     const onFirstGetterRender = jest.fn()
     const onSecondGetterRender = jest.fn()

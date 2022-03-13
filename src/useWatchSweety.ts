@@ -4,18 +4,18 @@ import { Compare, modInc, isEqual } from "./utils"
 import { WatchContext } from "./WatchContext"
 
 /**
- * A hook that subscribes to all `InnerStore#getState` execution involved in the `watcher` call.
- * Due to the mutable nature of `InnerStore` instances a parent component won't be re-rendered when a child's `InnerStore` value is changed.
- * The hook gives a way to watch after deep changes in the store's values and trigger a re-render when the returning value is changed.
+ * A hook that subscribes to all `Sweety#getState` execution involved in the `watcher` call.
+ * Due to the mutable nature of `Sweety` instances a parent component won't be re-rendered when a child's `Sweety` value is changed.
+ * The hook gives a way to watch after deep changes in the store's values and trigger a re-render when the returning value changes.
  *
- * @param watcher a function to read only the watching value meaning that it never should call `InnerStore.of`, `InnerStore#clone`, `InnerStore#setState` or `InnerStore#subscribe` methods inside.
+ * @param watcher a function to read only the watching value meaning that it never should call `Sweety.of`, `Sweety#clone`, `Sweety#setState` or `Sweety#subscribe` methods inside.
  * @param compare an optional compare function.
  * The strict equality check function (`===`) will be used if `null` or not defined.
  *
- * @see {@link InnerStore.getState}
+ * @see {@link Sweety.getState}
  * @see {@link Compare}
  */
-export function useInnerWatch<T>(
+export function useWatchSweety<T>(
   watcher: () => T,
   compare?: null | Compare<T>,
 ): T {

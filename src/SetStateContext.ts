@@ -3,7 +3,7 @@ import { Dispatch } from "react"
 import { noop } from "./utils"
 
 /**
- * A context that allows to collect setState subscribers and execute them all at once.
+ * A context that allows to collect Sweety#setState subscribers and execute them all at once.
  * This is useful when multiple stores are updated at the same time.
  *
  * @private
@@ -35,7 +35,7 @@ export abstract class SetStateContext {
 
         subscribers.forEach((subs) => {
           subs.forEach((listener) => {
-            // don't emit the same listener twice, for instance when using `useInnerWatch`
+            // don't emit the same listener twice, for instance when using `useWatchSweety`
             if (!calledListeners.has(listener)) {
               listener()
               calledListeners.add(listener)

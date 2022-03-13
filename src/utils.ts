@@ -2,7 +2,7 @@ import { SetStateAction } from "react"
 
 /**
  * A function that compares two values and returns `true` if they are equal.
- * Depending on the type of the values it might be more efficient to use
+ * Depending on the type of the values it might be reasonable to use
  * a custom compare function such as shallow-equal or deep-equal.
  */
 export type Compare<T> = (prev: T, next: T) => boolean
@@ -13,19 +13,19 @@ export type Compare<T> = (prev: T, next: T) => boolean
  * @param valueOrTransform either the new value or a function that will be applied to the current value before setting.
  *
  * @param compare an optional compare function with the highest priority to use for this call only.
- * If not defined it uses `compare` from `useSetInnerState` or `useInnerState`.
+ * If not defined it uses `compare` from `useSetSweetyState` or `useSweetyState`.
  * The strict equality check function (`===`) will be used if `null`.
  *
  * @example
- * import { useSetInnerState, useInnerState } from "use-inner-state"
+ * import { useSetSweetyState, useSweetyState } from "react-sweety"
  *
- * const setState = useSetInnerState(store)
+ * const setState = useSetSweetyState(store)
  * // or
- * const [state, setState] = useInnerState(store)
+ * const [state, setState] = useSweetyState(store)
  *
  * @see {@link Compare}
  */
-export type SetInnerState<T> = (
+export type SetSweetyState<T> = (
   valueOrTransform: SetStateAction<T>,
   compare?: null | Compare<T>,
 ) => void

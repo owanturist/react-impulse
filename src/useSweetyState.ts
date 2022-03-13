@@ -1,99 +1,99 @@
-import { Compare, SetInnerState } from "./utils"
-import { InnerStore } from "./InnerStore"
-import { useGetInnerState } from "./useGetInnerState"
-import { useSetInnerState } from "./useSetInnerState"
+import { Compare, SetSweetyState } from "./utils"
+import { Sweety } from "./Sweety"
+import { useGetSweetyState } from "./useGetSweetyState"
+import { useSetSweetyState } from "./useSetSweetyState"
 
 /**
- * A hook that is similar to `React.useState` but for `InnerStore` instances.
+ * A hook that is similar to `React.useState` but for `Sweety` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
- * @param store an `InnerStore` instance.
+ * @param store a `Sweety` instance.
  * @param compare an optional compare function with medium priority.
- * If not defined it uses `InnerStore#compare`.
+ * If not defined it uses `Sweety#compare`.
  * The strict equality check function (`===`) will be used if `null`.
  *
- * @see {@link InnerStore.getState}
- * @see {@link InnerStore.setState}
- * @see {@link InnerStore.subscribe}
- * @see {@link useGetInnerState}
- * @see {@link useSetInnerState}
+ * @see {@link Sweety.getState}
+ * @see {@link Sweety.setState}
+ * @see {@link Sweety.subscribe}
+ * @see {@link useGetSweetyState}
+ * @see {@link useSetSweetyState}
  * @see {@link Compare}
  */
-export function useInnerState<T>(
-  store: InnerStore<T>,
+export function useSweetyState<T>(
+  store: Sweety<T>,
   compare?: null | Compare<T>,
-): [T, SetInnerState<T>]
+): [T, SetSweetyState<T>]
 
 /**
- * The hook that is similar to `React.useState` but for `InnerStore` instances.
+ * The hook that is similar to `React.useState` but for `Sweety` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
- * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+ * @param store a `Sweety` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
  * @param compare an optional compare function with medium priority.
- * If not defined it uses `InnerStore#compare`.
+ * If not defined it uses `Sweety#compare`.
  * The strict equality check function (`===`) will be used if `null`.
  *
- * @see {@link InnerStore.getState}
- * @see {@link InnerStore.setState}
- * @see {@link InnerStore.subscribe}
- * @see {@link useGetInnerState}
- * @see {@link useSetInnerState}
+ * @see {@link Sweety.getState}
+ * @see {@link Sweety.setState}
+ * @see {@link Sweety.subscribe}
+ * @see {@link useGetSweetyState}
+ * @see {@link useSetSweetyState}
  * @see {@link Compare}
  */
-export function useInnerState<T>(
-  store: null | InnerStore<T>,
+export function useSweetyState<T>(
+  store: null | Sweety<T>,
   compare?: null | Compare<T>,
-): [null | T, SetInnerState<T>]
+): [null | T, SetSweetyState<T>]
 
 /**
- * A hook that is similar to `React.useState` but for `InnerStore` instances.
+ * A hook that is similar to `React.useState` but for `Sweety` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
- * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+ * @param store a `Sweety` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
  * @param compare an optional compare function with medium priority.
- * If not defined it uses `InnerStore#compare`.
+ * If not defined it uses `Sweety#compare`.
  * The strict equality check function (`===`) will be used if `null`.
  *
- * @see {@link InnerStore.getState}
- * @see {@link InnerStore.setState}
- * @see {@link InnerStore.subscribe}
- * @see {@link useGetInnerState}
- * @see {@link useSetInnerState}
+ * @see {@link Sweety.getState}
+ * @see {@link Sweety.setState}
+ * @see {@link Sweety.subscribe}
+ * @see {@link useGetSweetyState}
+ * @see {@link useSetSweetyState}
  * @see {@link Compare}
  */
-export function useInnerState<T>(
-  store: undefined | InnerStore<T>,
+export function useSweetyState<T>(
+  store: undefined | Sweety<T>,
   compare?: null | Compare<T>,
-): [undefined | T, SetInnerState<T>]
+): [undefined | T, SetSweetyState<T>]
 
 /**
- * A hook that is similar to `React.useState` but for `InnerStore` instances.
+ * A hook that is similar to `React.useState` but for `Sweety` instances.
  * It subscribes to the store changes and returns the current value and a function to set the value.
  * The store won't update if the new value is comparably equal to the current value.
  *
- * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+ * @param store a `Sweety` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
  * @param compare an optional compare function with medium priority.
- * If not defined it uses `InnerStore#compare`.
+ * If not defined it uses `Sweety#compare`.
  * The strict equality check function (`===`) will be used if `null`.
  *
- * @see {@link InnerStore.getState}
- * @see {@link InnerStore.setState}
- * @see {@link InnerStore.subscribe}
- * @see {@link useGetInnerState}
- * @see {@link useSetInnerState}
+ * @see {@link Sweety.getState}
+ * @see {@link Sweety.setState}
+ * @see {@link Sweety.subscribe}
+ * @see {@link useGetSweetyState}
+ * @see {@link useSetSweetyState}
  * @see {@link Compare}
  */
-export function useInnerState<T>(
-  store: null | undefined | InnerStore<T>,
+export function useSweetyState<T>(
+  store: null | undefined | Sweety<T>,
   compare?: null | Compare<T>,
-): [null | undefined | T, SetInnerState<T>]
+): [null | undefined | T, SetSweetyState<T>]
 
-export function useInnerState<T>(
-  store: null | undefined | InnerStore<T>,
+export function useSweetyState<T>(
+  store: null | undefined | Sweety<T>,
   compare?: null | Compare<T>,
-): [null | undefined | T, SetInnerState<T>] {
-  return [useGetInnerState(store), useSetInnerState(store, compare)]
+): [null | undefined | T, SetSweetyState<T>] {
+  return [useGetSweetyState(store), useSetSweetyState(store, compare)]
 }

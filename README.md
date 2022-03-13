@@ -1,8 +1,6 @@
-THE LIBRARY HAS CHANGED NPM NAME FROM `react-inner-store` TO [`react-sweety`](https://www.npmjs.com/package/react-sweety).
+# 🍬 `react-sweety`
 
-# react-inner-store
-
-The clean and natural React state management
+The clean and natural React state management.
 
 ## Get started
 
@@ -10,27 +8,27 @@ First, install the package:
 
 ```bash
 # with yarn
-yarn add react-inner-store
+yarn add react-sweety
 
 # with npm
-npm install react-inner-store
+npm install react-sweety
 ```
 
 And use it in your project:
 
 ```tsx
 import React from "react"
-import { InnerStore, useInnerState } from "react-inner-store"
+import { Sweety, useSweetyState } from "react-sweety"
 
 type State = {
-  username: InnerStore<string>
-  count: InnerStore<number>
+  username: Sweety<string>
+  count: Sweety<number>
 }
 
 const Username: React.VFC<{
-  store: InnerStore<string>
+  store: Sweety<string>
 }> = React.memo(({ store }) => {
-  const [username, setUsername] = useInnerState(store)
+  const [username, setUsername] = useSweetyState(store)
 
   return (
     <input
@@ -42,9 +40,9 @@ const Username: React.VFC<{
 })
 
 const Counter: React.VFC<{
-  store: InnerStore<number>
+  store: Sweety<number>
 }> = React.memo(({ store }) => {
-  const [count, setCount] = useInnerState(store)
+  const [count, setCount] = useSweetyState(store)
 
   return (
     <div>
@@ -78,8 +76,8 @@ const App: React.VFC<{
 ReactDOM.render(
   <App
     state={{
-      username: InnerStore.of(""),
-      count: InnerStore.of(0),
+      username: Sweety.of(""),
+      count: Sweety.of(0),
     }}
   />,
   document.getElementById("root"),
@@ -433,13 +431,13 @@ From now and on, any Counter increment will cause the entire App to reconcile. I
 
 But the problems above are relatively small compared to the amount of boilerplate and effort required to develop an app in that way. It would not be a case if we'd deal with only local state components, but the App needs access to read and write deeply nested values, so we have no choice but to define the state on App's level.
 
-That is where `react-inner-store` comes to the rescue. It allows working with a propagated state in the same way as with a local state. Let's transform Counter to use `react-inner-store`:
+That is where `react-sweety` comes to the rescue. It allows working with a propagated state in the same way as with a local state. Let's transform Counter to use `react-sweety`:
 
 <table>
 <thead>
 <tr>
 <th>
-<code>react-inner-store</code>
+<code>react-sweety</code>
 </th>
 
 <th>
@@ -453,9 +451,9 @@ classic React
 
 ```tsx
 const Counter: React.VFC<{
-  store: InnerStore<number>
+  store: Sweety<number>
 }> = ({ store }) => {
-  const [count, setCount] = useInnerState(store)
+  const [count, setCount] = useSweetyState(store)
 
   return (
     <div>
@@ -538,7 +536,7 @@ It looks like the [first Counter implementation](#simple-counter) with `React.us
 <thead>
 <tr>
 <th>
-<code>react-inner-store</code>
+<code>react-sweety</code>
 </th>
 
 <th>
@@ -552,13 +550,13 @@ classic React
 
 ```tsx
 interface GameScoreState {
-  firstCounter: InnerStore<number>
-  secondCounter: InnerStore<number>
+  firstCounter: Sweety<number>
+  secondCounter: Sweety<number>
 }
 
 const initGameScore = (): GameScoreState => ({
-  firstCounter: InnerStore.of(0),
-  secondCounter: InnerStore.of(0),
+  firstCounter: Sweety.of(0),
+  secondCounter: Sweety.of(0),
 })
 
 const resetGameScore = (state: GameScoreState): void => {
@@ -567,11 +565,11 @@ const resetGameScore = (state: GameScoreState): void => {
 }
 
 const GameScore: React.VFC<{
-  store: InnerStore<GameScoreState>
+  store: Sweety<GameScoreState>
 }> = ({ store }) => {
-  const state = useGetInnerState(store)
-  const firstCount = useGetInnerState(state.firstCounter)
-  const secondCount = useGetInnerState(state.secondCounter)
+  const state = useGetSweetyState(store)
+  const firstCount = useGetSweetyState(state.firstCounter)
+  const secondCount = useGetSweetyState(state.secondCounter)
 
   return (
     <div>
@@ -652,7 +650,7 @@ const GameScore: React.VFC<{
 
 ```tsx
 interface AppState {
-  games: ReadonlyArray<InnerStore<GameScoreState>>
+  games: ReadonlyArray<Sweety<GameScoreState>>
 }
 
 const prepareAppRequestPayload = (state: AppState) => ({
@@ -664,15 +662,15 @@ const prepareAppRequestPayload = (state: AppState) => ({
   ),
 })
 
-const appStore = InnerStore.of({ games: [] })
+const appStore = Sweety.of({ games: [] })
 
 const App = () => {
-  const [state, setState] = useInnerState(appStore)
+  const [state, setState] = useSweetyState(appStore)
 
   const addGame = () => {
     setState({
       ...state,
-      games: [...state.games, InnerStore.of(initGameScore())],
+      games: [...state.games, Sweety.of(initGameScore())],
     })
   }
 
@@ -770,50 +768,50 @@ const App = () => {
 
 </details>
 
-With `react-inner-store` we can now implement the same functionality without any boilerplate code but keep control over the app state. Moreover, any Counter's "action" will cause reconciliations only for its GameScore parent since no other components read the affected Counter's state.
+With `react-sweety` we can now implement the same functionality without any boilerplate code but keep control over the app state. Moreover, any Counter's "action" will cause reconciliations only for its GameScore parent since no other components read the affected Counter's state.
 
 ## API
 
-A core concept of the library is the `InnerStore` class. It is a mutable wrapper around an immutable value that allows to prevent unnecessary re-renders. The class provides an API to get and set the value, and to observe changes. There are hooks built on top of the API for convenient usage in React components.
+A core concept of the library is the `Sweety` class. It is a mutable wrapper around an immutable value that allows to prevent unnecessary re-renders. The class provides an API to get and set the value, and to observe changes. There are hooks built on top of the API for convenient usage in React components.
 
-### `InnerStore.of`
+### `Sweety.of`
 
 ```ts
-InnerStore.of<T>(value: T, compare?: null | Compare<T>): InnerStore<T>
+Sweety.of<T>(value: T, compare?: null | Compare<T>): Sweety<T>
 ```
 
-A static method that creates a new `InnerStore` instance. The instance is mutable so once created it should be used for all future operations.
+A static method that creates a new `Sweety` instance. The instance is mutable so once created it should be used for all future operations.
 
 - `value` is the initial immutable value of the store.
-- `[compare]` is an optional [`Compare`][compare] function to set as [`InnerStore#compare`][inner_store__compare]. If the `compare` function is not defined or `null` the strict equality check function (`===`) will be used.
+- `[compare]` is an optional [`Compare`][compare] function to set as [`Sweety#compare`][sweety__compare]. If the `compare` function is not defined or `null` the strict equality check function (`===`) will be used.
 
 ```ts
 type SignInFormState = {
   isSubmitting: boolean
-  username: InnerStore<string>
-  password: InnerStore<string>
-  rememberMe: InnerStore<boolean>
+  username: Sweety<string>
+  password: Sweety<string>
+  rememberMe: Sweety<boolean>
 }
 
-const signInFormStore = InnerStore.of<SignInFormState>({
+const signInFormStore = Sweety.of<SignInFormState>({
   isSubmitting: false,
-  username: InnerStore.of(""),
-  password: InnerStore.of(""),
-  rememberMe: InnerStore.of(false),
+  username: Sweety.of(""),
+  password: Sweety.of(""),
+  rememberMe: Sweety.of(false),
 })
 ```
 
-### `InnerStore#key`
+### `Sweety#key`
 
 ```ts
-InnerStore<T>#key: string
+Sweety<T>#key: string
 ```
 
-Each `InnerStore` instance has a unique key. This key is used internally for [`useInnerWatch`][use_inner_watch] but can be used as the React key property.
+Each `Sweety` instance has a unique key. This key is used internally for [`useWatchSweety`][use_watch_sweety] but can be used as the React key property.
 
 ```tsx
 const Toggles: React.VFC<{
-  options: Array<InnerStore<boolean>>
+  options: Array<Sweety<boolean>>
 }> = ({ options }) => (
   <>
     {options.map((option) => (
@@ -823,29 +821,29 @@ const Toggles: React.VFC<{
 )
 ```
 
-### `InnerStore#compare`
+### `Sweety#compare`
 
 ```ts
-InnerStore<T>#compare: Compare<T>
+Sweety<T>#compare: Compare<T>
 ```
 
-The [`compare`][compare] function compares the value of the store with the new value given via [`InnerStore#setState`][inner_store__set_state]. If the function returns `true` the store will not be updated so no listeners subscribed via [`InnerStore#subscribe`][inner_store__subscribe] will be notified.
+The [`compare`][compare] function compares the value of the store with the new value given via [`Sweety#setState`][sweety__set_state]. If the function returns `true` the store will not be updated so no listeners subscribed via [`Sweety#subscribe`][sweety__subscribe] will be notified.
 
-> 💬 The `InnerStore#compare` function has the lowest priority when [`InnerStore#setState`][inner_store__set_state], [`useInnerState`][use_inner_state], [`useSetInnerState`][use_set_inner_state] or [`useInnerReducer`][use_inner_reducer] are called.
+> 💬 The `Sweety#compare` function has the lowest priority when [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], [`useSetSweetyState`][use_set_sweety_state] or [`useSweetyReducer`][use_sweety_reducer] are called.
 
-### `InnerStore#clone`
+### `Sweety#clone`
 
 ```ts
-InnerStore<T>#clone(
+Sweety<T>#clone(
   transform?: (value: T) => T,
   compare?: null | Compare<T>
-): InnerStore<T>
+): Sweety<T>
 ```
 
-An `InnerStore` instance's method that creates a new `InnerStore` instance with the same value.
+A `Sweety` instance's method that creates a new `Sweety` instance with the same value.
 
-- `[transform]` is an optional function that will be applied to the current value before cloning. It might be handy when cloning a `InnerStore` instance that contains mutable values (e.g. `InnerStore`).
-- `[compare]` an optional [`Compare`][compare] function to replace [`InnerStore#compare`][inner_store__compare] of the cloned instance. If not defined the `InnerStore#compare` function of the source instance will be used. If `null` is passed the strict equality check function (`===`) will be used.
+- `[transform]` is an optional function that will be applied to the current value before cloning. It might be handy when cloning a `Sweety` instance that contains mutable values (e.g. `Sweety`).
+- `[compare]` an optional [`Compare`][compare] function to replace [`Sweety#compare`][sweety__compare] of the cloned instance. If not defined the `Sweety#compare` function of the source instance will be used. If `null` is passed the strict equality check function (`===`) will be used.
 
 ```ts
 const signInFormStoreClone = signInFormStore.clone(
@@ -858,14 +856,14 @@ const signInFormStoreClone = signInFormStore.clone(
 )
 ```
 
-### `InnerStore#getState`
+### `Sweety#getState`
 
 ```ts
-InnerStore<T>#getState(): T
-InnerStore<T>#getState<R>(transform: (value: T) => R): R
+Sweety<T>#getState(): T
+Sweety<T>#getState<R>(transform: (value: T) => R): R
 ```
 
-An `InnerStore` instance's method that returns the current value.
+A `Sweety` instance's method that returns the current value.
 
 - `[transform]` is an optional function that will be applied to the current value before returning.
 
@@ -880,20 +878,20 @@ const plainSignInState = signInFormStore.getState(
 )
 ```
 
-### `InnerStore#setState`
+### `Sweety#setState`
 
 ```ts
-InnerStore<T>#setState(
+Sweety<T>#setState(
   valueOrTransform: React.SetStateAction<T>,
   compare?: null | Compare<T>
 ): void
 ```
 
-An `InnerStore` instance's method that sets the value. Each time when the value changes all of the store's listeners passed via [`InnerStore#subscribe`][inner_store__subscribe] are called.
+A `Sweety` instance's method that sets the value. Each time when the value changes all of the store's listeners passed via [`Sweety#subscribe`][sweety__subscribe] are called.
 
 - `valueOrTransform` is the new value or a function that transforms the current value into the new value.
 - `[compare]` is an optional [`Compare`][compare] function to use for this call only.
-  If not defined the [`InnerStore#compare`][inner_store__compare] function of the instance will be used.
+  If not defined the [`Sweety#compare`][sweety__compare] function of the instance will be used.
   If `null` is passed the strict equality check function (`===`) will be used.
 
 ```ts
@@ -912,23 +910,23 @@ const onSubmit = () => {
 
 > 💡 If `valueOrTransform` argument is a function it acts as [`batch`][batch].
 
-> 💬 The method returns `void` to emphasize that `InnerStore` instances are mutable.
+> 💬 The method returns `void` to emphasize that `Sweety` instances are mutable.
 
-> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`InnerStore#compare`][inner_store__compare].
+> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
 
-### `InnerStore#subscribe`
+### `Sweety#subscribe`
 
 ```ts
-InnerStore<T>#subscribe(listener: VoidFunction): VoidFunction
+Sweety<T>#subscribe(listener: VoidFunction): VoidFunction
 ```
 
-An `InnerStore` instance's method that subscribes to the store's value changes caused by [`InnerStore#setState`][inner_store__set_state] calls. Returns a cleanup function that unsubscribes the listener.
+A `Sweety` instance's method that subscribes to the store's value changes caused by [`Sweety#setState`][sweety__set_state] calls. Returns a cleanup function that unsubscribes the listener.
 
 - `listener` is a function that a store will call when the value changes.
 
 ```tsx
 const UsernameInput: React.VFC<{
-  store: InnerStore<string>
+  store: Sweety<string>
 }> = React.memo(({ store }) => {
   const [username, setUsername] = React.useState(store.getState())
 
@@ -950,20 +948,20 @@ const UsernameInput: React.VFC<{
 
 > 💬 The example above is for demonstration purposes only. In real world app it's usually better use provided hooks in most cases.
 
-### `useInnerWatch`
+### `useWatchSweety`
 
 ```ts
-function useInnerWatch<T>(watcher: () => T, compare?: null | Compare<T>): T
+function useWatchSweety<T>(watcher: () => T, compare?: null | Compare<T>): T
 ```
 
-A hook that subscribes to all [`InnerStore#getState`][inner_store__get_state] execution involved in the `watcher` call. Due to the mutable nature of `InnerStore` instances a parent component won't be re-rendered when a child's `InnerStore` value is changed. The hook gives a way to watch after deep changes in the store's values and trigger a re-render when the returning value is changed.
+A hook that subscribes to all [`Sweety#getState`][sweety__get_state] execution involved in the `watcher` call. Due to the mutable nature of `Sweety` instances a parent component won't be re-rendered when a child's `Sweety` value is changed. The hook gives a way to watch after deep changes in the store's values and trigger a re-render when the returning value is changed.
 
-- `watcher` is a function to read only the watching value meaning that it should never call [`InnerStore.of`][inner_store__of], [`InnerStore#clone`][inner_store__clone], [`InnerStore#setState`][inner_store__set_state] or [`InnerStore#subscribe`][inner_store__subscribe] methods inside.
+- `watcher` is a function to read only the watching value meaning that it should never call [`Sweety.of`][sweety__of], [`Sweety#clone`][sweety__clone], [`Sweety#setState`][sweety__set_state] or [`Sweety#subscribe`][sweety__subscribe] methods inside.
 - `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default or when `null`. The hook won't trigger a re-render when the watching value is comparably equal to the current value.
 
 ```tsx
 type State = {
-  count: InnerStore<number>
+  count: Sweety<number>
 }
 
 const App: React.VFC<{
@@ -971,7 +969,7 @@ const App: React.VFC<{
 }> = React.memo(({ state }) => {
   // the component will re-render once the `count` is greater than 5
   // and once the `count` is less or equal to 5
-  const isMoreThanFive = useInnerWatch(() => state.count.getState() > 5)
+  const isMoreThanFive = useWatchSweety(() => state.count.getState() > 5)
 
   return (
     <div>
@@ -987,30 +985,30 @@ const App: React.VFC<{
 
 > 💡 Keep in mind that the `watcher` function acts as a "reader" so you'd like to avoid heavy calculations inside it. Sometimes it might be a good idea to pass a watcher result to a separated memoization hook. The same is true for the `compare` function - you should choose wisely between avoiding extra re-renders and heavy comparisons.
 
-### `useInnerState`
+### `useSweetyState`
 
 ```ts
-function useInnerState<T>(
-  store: InnerStore<T>,
+function useSweetyState<T>(
+  store: Sweety<T>,
   compare?: null | Compare<T>,
-): [T, SetInnerState<T>]
+): [T, SetSweetyState<T>]
 
-function useInnerState<T>(
-  store: null | undefined | InnerStore<T>,
+function useSweetyState<T>(
+  store: null | undefined | Sweety<T>,
   compare?: null | Compare<T>,
-): [null | undefined | T, SetInnerState<T>]
+): [null | undefined | T, SetSweetyState<T>]
 ```
 
-A hook that is similar to `React.useState` but for `InnerStore` instances. It subscribes to the store changes and returns the current value and a function to set the value.
+A hook that is similar to `React.useState` but for `Sweety` instances. It subscribes to the store changes and returns the current value and a function to set the value.
 
-- `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
-- `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `InnerStore#compare`. The strict equality check function (`===`) will be used if `null`.
+- `store` is A `Sweety` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+- `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `Sweety#compare`. The strict equality check function (`===`) will be used if `null`.
 
 ```tsx
 const UsernameInput: React.VFC<{
-  store: InnerStore<string>
+  store: Sweety<string>
 }> = React.memo(({ store }) => {
-  const [username, setUsername] = useInnerState(store)
+  const [username, setUsername] = useSweetyState(store)
 
   return (
     <input
@@ -1022,31 +1020,31 @@ const UsernameInput: React.VFC<{
 })
 ```
 
-> 💡 The hook is a combination of [`useGetInnerState`][use_get_inner_state] and [`useSetInnerState`][use_set_inner_state], so use them if you need to either get+subscribe or set the store's value.
+> 💡 The hook is a combination of [`useGetSweetyState`][use_get_sweety_state] and [`useSetSweetyState`][use_set_sweety_state], so use them if you need to either get+subscribe or set the store's value.
 
-> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`InnerStore#compare`][inner_store__compare].
+> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
 
-### `useGetInnerState`
+### `useGetSweetyState`
 
 ```ts
-function useGetInnerState<T>(store: InnerStore<T>): T
+function useGetSweetyState<T>(store: Sweety<T>): T
 
-function useGetInnerState<T>(
-  store: null | undefined | InnerStore<T>,
+function useGetSweetyState<T>(
+  store: null | undefined | Sweety<T>,
 ): null | undefined | T
 ```
 
 A hooks that subscribes to the store's changes and returns the current value.
 
-- `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+- `store` is A `Sweety` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
 
 ```tsx
 const App: React.VFC<{
-  left: InnerStore<number>
-  right: InnerStore<number>
+  left: Sweety<number>
+  right: Sweety<number>
 }> = React.memo(({ left, right }) => {
-  const countLeft = useGetInnerState(left)
-  const countRight = useGetInnerState(right)
+  const countLeft = useGetSweetyState(left)
+  const countRight = useGetSweetyState(right)
 
   return (
     <div>
@@ -1059,30 +1057,30 @@ const App: React.VFC<{
 })
 ```
 
-### `useSetInnerState`
+### `useSetSweetyState`
 
 ```ts
-function useSetInnerState<T>(
-  store: null | undefined | InnerStore<T>,
+function useSetSweetyState<T>(
+  store: null | undefined | Sweety<T>,
   compare?: null | Compare<T>,
-): SetInnerState<T>
+): SetSweetyState<T>
 ```
 
 A hooks that returns a function to update the store's value. Might be useful when you need a way to update the store's value without subscribing to its changes.
 
-- `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
-- `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `InnerStore#compare`. The strict equality check function (`===`) will be used if `null`.
+- `store` is A `Sweety` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
+- `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `Sweety#compare`. The strict equality check function (`===`) will be used if `null`.
 
 ```tsx
 type State = {
-  count: InnerStore<number>
+  count: Sweety<number>
 }
 
 const App: React.VFC<{
   state: State
 }> = React.memo(({ state }) => {
   // the component won't re-render on the count value change
-  const setCount = useSetInnerState(state.count)
+  const setCount = useSetSweetyState(state.count)
 
   return (
     <div>
@@ -1094,29 +1092,29 @@ const App: React.VFC<{
 })
 ```
 
-> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`InnerStore#compare`][inner_store__compare].
+> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
 
-### `useInnerReducer`
+### `useSweetyReducer`
 
 ```ts
-function useInnerReducer<A, T>(
-  store: InnerStore<T>,
+function useSweetyReducer<A, T>(
+  store: Sweety<T>,
   reducer: (state: T, action: A) => T,
   compare?: null | Compare<T>,
 ): [T, React.Dispatch<A>]
 
-function useInnerReducer<A, T>(
-  store: null | undefined | InnerStore<T>,
+function useSweetyReducer<A, T>(
+  store: null | undefined | Sweety<T>,
   reducer: (state: T, action: A) => T,
   compare?: null | Compare<T>,
 ): [null | undefined | T, React.Dispatch<A>]
 ```
 
-A hook that is similar to `React.useReducer` but for `InnerStore` instances. It subscribes to the store changes and returns the current value and a function to dispatch an action.
+A hook that is similar to `React.useReducer` but for `Sweety` instances. It subscribes to the store changes and returns the current value and a function to dispatch an action.
 
-- `store` is an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+- `store` is A `Sweety` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
 - `reducer` is a function that transforms the current value and the dispatched action into the new value.
-- `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `InnerStore#compare`. The strict equality check function (`===`) will be used if `null`.
+- `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `Sweety#compare`. The strict equality check function (`===`) will be used if `null`.
 
 ```tsx
 type CounterAction = { type: "INCREMENT" } | { type: "DECREMENT" }
@@ -1132,9 +1130,9 @@ const counterReducer = (state: number, action: CounterAction) => {
 }
 
 const Counter: React.VFC<{
-  store: InnerStore<number>
+  store: Sweety<number>
 }> = React.memo(({ store }) => {
-  const [count, dispatch] = useInnerReducer(store, counterReducer)
+  const [count, dispatch] = useSweetyReducer(store, counterReducer)
 
   return (
     <div>
@@ -1146,7 +1144,7 @@ const Counter: React.VFC<{
 })
 ```
 
-> 💬 The third argument `compare` function has medium priority, so it will be used instead of [`InnerStore#compare`][inner_store__compare].
+> 💬 The third argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
 
 ### `batch`
 
@@ -1158,11 +1156,11 @@ The `batch` function is a helper to optimise multiple stores' updates.
 
 ```tsx
 const LoginForm: React.VFC<{
-  email: InnerStore<string>
-  password: InnerStore<string>
+  email: Sweety<string>
+  password: Sweety<string>
 }> = ({ email: emailStore, password: passwordStore }) => {
-  const [email, setEmail] = useInnerState(emailStore)
-  const [password, setPassword] = useInnerState(passwordStore)
+  const [email, setEmail] = useSweetyState(emailStore)
+  const [password, setPassword] = useSweetyState(passwordStore)
 
   return (
     <form>
@@ -1203,10 +1201,10 @@ type Compare<T> = (prev: T, next: T) => boolean
 
 A function that compares two values and returns `true` if they are equal. Depending on the type of the values it might be reasonable to use a custom compare function such as shallow-equal or deep-equal.
 
-### `SetInnerState`
+### `SetSweetyState`
 
 ```ts
-type SetInnerState<T> = (
+type SetSweetyState<T> = (
   valueOrTransform: React.SetStateAction<T>,
   compare?: null | Compare<T>,
 ) => void
@@ -1221,54 +1219,54 @@ A function that similar to the `React.useState` callback but with extra [`compar
 
 > 💡 If `valueOrTransform` argument is a function it acts as [`batch`][batch].
 
-> 💬 The second argument `compare` function has the highest priority so it will be used instead of [`InnerStore#compare`][inner_store__compare] and any other `compare` passed via [`InnerStore#setState`][inner_store__set_state], [`useInnerState`][use_inner_state], [`useSetInnerState`][use_set_inner_state] or [`useInnerReducer`][use_inner_reducer].
+> 💬 The second argument `compare` function has the highest priority so it will be used instead of [`Sweety#compare`][sweety__compare] and any other `compare` passed via [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], [`useSetSweetyState`][use_set_sweety_state] or [`useSweetyReducer`][use_sweety_reducer].
 
-### `ExtractInnerState`
+### `ExtractSweetyState`
 
-A helper type that shallowly extracts value type from `InnerStore`:
+A helper type that shallowly extracts value type from `Sweety`:
 
 ```ts
-type SimpleStore = InnerStore<number>
-// ExtractInnerState<SimpleStore> === number
+type SimpleStore = Sweety<number>
+// ExtractSweetyState<SimpleStore> === number
 
-type ArrayStore = InnerStore<Array<string>>
-// ExtractInnerState<ArrayStore> === Array<string>
+type ArrayStore = Sweety<Array<string>>
+// ExtractSweetyState<ArrayStore> === Array<string>
 
-type ShapeStore = InnerStore<{
+type ShapeStore = Sweety<{
   name: string
   age: number
 }>
-// ExtractInnerState<ShapeStore> === {
+// ExtractSweetyState<ShapeStore> === {
 //   name: string
 //   age: number
 // }
 
-type ShapeOfStores = InnerStore<{
-  name: InnerStore<string>
-  age: InnerStore<number>
+type ShapeOfStores = Sweety<{
+  name: Sweety<string>
+  age: Sweety<number>
 }>
-// ExtractInnerState<ShapeStore> === {
-//   name: InnerStore<string>
-//   age: InnerStore<number>
+// ExtractSweetyState<ShapeStore> === {
+//   name: Sweety<string>
+//   age: Sweety<number>
 // }
 ```
 
-### `DeepExtractInnerState`
+### `DeepExtractSweetyState`
 
-A helper that deeply extracts value type from `InnerStore`:
+A helper that deeply extracts value type from `Sweety`:
 
 ```ts
-type ShapeOfStores = InnerStore<{
-  name: InnerStore<string>
-  age: InnerStore<number>
+type ShapeOfStores = Sweety<{
+  name: Sweety<string>
+  age: Sweety<number>
 }>
-// DeepExtractInnerState<ShapeStore> === {
+// DeepExtractSweetyState<ShapeStore> === {
 //   name: string
 //   age: number
 // }
 
-type ArrayOfStores = InnerStore<Array<InnerStore<boolean>>>
-// DeepExtractInnerState<ArrayOfStores> === Array<boolean>
+type ArrayOfStores = Sweety<Array<Sweety<boolean>>>
+// DeepExtractSweetyState<ArrayOfStores> === Array<boolean>
 ```
 
 ### `Dispatch`
@@ -1287,16 +1285,16 @@ Here are scripts you want to run for publishing a new version to NPM:
 
 <!-- L I N K S -->
 
-[inner_store__of]: #innerstoreof
-[inner_store__compare]: #innerstorecompare
-[inner_store__clone]: #innerstoreclone
-[inner_store__get_state]: #innerstoregetstate
-[inner_store__set_state]: #innerstoresetstate
-[inner_store__subscribe]: #innerstoresubscribe
-[use_inner_watch]: #useinnerwatch
-[use_inner_state]: #useinnerstate
-[use_inner_reducer]: #useinnerreducer
-[use_get_inner_state]: #usegetinnerstate
-[use_set_inner_state]: #usesetinnerstate
+[sweety__of]: #sweetyof
+[sweety__compare]: #sweetycompare
+[sweety__clone]: #sweetyclone
+[sweety__get_state]: #sweetygetstate
+[sweety__set_state]: #sweetysetstate
+[sweety__subscribe]: #sweetysubscribe
+[use_watch_sweety]: #usewatchsweety
+[use_sweety_state]: #usesweetystate
+[use_sweety_reducer]: #usesweetyreducer
+[use_get_sweety_state]: #usegetsweetystate
+[use_set_sweety_state]: #usesetsweetystate
 [batch]: #batch
 [compare]: #compare

@@ -1,14 +1,14 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { InnerStore, useInnerWatch } from "../../src"
+import { Sweety, useWatchSweety } from "../../src"
 
 import { CounterComponent, withinNth } from "./common"
 
 describe("watching multiple stores", () => {
   interface AppProps {
-    firstCount: InnerStore<number>
-    secondCount: InnerStore<number>
+    firstCount: Sweety<number>
+    secondCount: Sweety<number>
     onRender: VoidFunction
     onFirstCounterRender: VoidFunction
     onSecondCounterRender: VoidFunction
@@ -54,7 +54,7 @@ describe("watching multiple stores", () => {
   }
 
   const SingleWatcherApp: React.VFC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useInnerWatch(
+    const [moreThanOne, lessThanFour] = useWatchSweety(
       () => {
         const sum = props.firstCount.getState() + props.secondCount.getState()
 
@@ -75,7 +75,7 @@ describe("watching multiple stores", () => {
   }
 
   const SingleMemoizedWatcherApp: React.VFC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useInnerWatch(
+    const [moreThanOne, lessThanFour] = useWatchSweety(
       React.useCallback(() => {
         const sum = props.firstCount.getState() + props.secondCount.getState()
 
@@ -96,12 +96,12 @@ describe("watching multiple stores", () => {
   }
 
   const MultipleWatchersApp: React.VFC<AppProps> = (props) => {
-    const moreThanOne = useInnerWatch(() => {
+    const moreThanOne = useWatchSweety(() => {
       const sum = props.firstCount.getState() + props.secondCount.getState()
 
       return sum > 2
     })
-    const lessThanFour = useInnerWatch(() => {
+    const lessThanFour = useWatchSweety(() => {
       const sum = props.firstCount.getState() + props.secondCount.getState()
 
       return sum < 7
@@ -117,14 +117,14 @@ describe("watching multiple stores", () => {
   }
 
   const MultipleMemoizedWatchersApp: React.VFC<AppProps> = (props) => {
-    const moreThanOne = useInnerWatch(
+    const moreThanOne = useWatchSweety(
       React.useCallback(() => {
         const sum = props.firstCount.getState() + props.secondCount.getState()
 
         return sum > 2
       }, [props.firstCount, props.secondCount]),
     )
-    const lessThanFour = useInnerWatch(
+    const lessThanFour = useWatchSweety(
       React.useCallback(() => {
         const sum = props.firstCount.getState() + props.secondCount.getState()
 
@@ -147,8 +147,8 @@ describe("watching multiple stores", () => {
     ["multiple watchers", MultipleWatchersApp],
     ["multiple memoized watchers", MultipleMemoizedWatchersApp],
   ])("watches multiple stores with %s", (_, App) => {
-    const firstCount = InnerStore.of(0)
-    const secondCount = InnerStore.of(0)
+    const firstCount = Sweety.of(0)
+    const secondCount = Sweety.of(0)
     const onFirstCountRender = jest.fn()
     const onSecondCountRender = jest.fn()
     const onRender = jest.fn()

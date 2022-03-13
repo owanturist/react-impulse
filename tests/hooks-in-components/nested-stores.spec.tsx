@@ -1,29 +1,29 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { InnerStore, useInnerReducer } from "../../src"
+import { Sweety, useSweetyReducer } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
 describe("nested stores", () => {
   interface AppState {
-    counts: ReadonlyArray<InnerStore<number>>
+    counts: ReadonlyArray<Sweety<number>>
   }
   type AppAction = { type: "AddCounter" } | { type: "ResetCounters" }
 
   const App: React.VFC<{
-    store: InnerStore<AppState>
+    store: Sweety<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }> = ({ store, onRender, onCounterRender }) => {
-    const [state, dispatch] = useInnerReducer<AppState, AppAction>(
+    const [state, dispatch] = useSweetyReducer<AppState, AppAction>(
       store,
       (currentState, action) => {
         switch (action.type) {
           case "AddCounter": {
             return {
               ...currentState,
-              counts: [...currentState.counts, InnerStore.of(0)],
+              counts: [...currentState.counts, Sweety.of(0)],
             }
           }
 
@@ -62,7 +62,7 @@ describe("nested stores", () => {
   }
 
   it("Performs nested store management", () => {
-    const store = InnerStore.of<AppState>({ counts: [] })
+    const store = Sweety.of<AppState>({ counts: [] })
     const onRender = jest.fn()
     const onCounterRender = jest.fn()
 
@@ -117,7 +117,7 @@ describe("nested stores", () => {
     act(() => {
       store.setState((state) => ({
         ...state,
-        counts: [...state.counts, InnerStore.of(3)],
+        counts: [...state.counts, Sweety.of(3)],
       }))
     })
     expect(onRender).toHaveBeenCalledTimes(1)

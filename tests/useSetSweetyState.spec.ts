@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Compare, InnerStore, SetInnerState, useSetInnerState } from "../src"
+import { Compare, Sweety, SetSweetyState, useSetSweetyState } from "../src"
 
 import { Counter, WithCompare, WithStore } from "./common"
 
@@ -11,7 +11,7 @@ describe("bypassed store", () => {
     // eslint-disable-next-line no-undefined
     undefined,
   ])("noop for %s", (value) => {
-    const { result } = renderHook(() => useSetInnerState<number>(value))
+    const { result } = renderHook(() => useSetSweetyState<number>(value))
 
     expect(() => {
       result.current(1)
@@ -21,8 +21,8 @@ describe("bypassed store", () => {
 
 describe("defined store", () => {
   it.concurrent("keeps setState value over time", () => {
-    const store = InnerStore.of(0)
-    const { result, rerender } = renderHook(() => useSetInnerState(store))
+    const store = Sweety.of(0)
+    const { result, rerender } = renderHook(() => useSetSweetyState(store))
 
     const setState = result.current
 
@@ -47,10 +47,10 @@ describe("defined store", () => {
 
   describe("calls setState(value)", () => {
     let prev = { count: 0 }
-    const store = InnerStore.of(prev)
+    const store = Sweety.of(prev)
     const spy = jest.fn()
     const unsubscribe = store.subscribe(spy)
-    const { result } = renderHook(() => useSetInnerState(store))
+    const { result } = renderHook(() => useSetSweetyState(store))
     const setState = result.current
 
     beforeEach(() => {
@@ -102,10 +102,10 @@ describe("defined store", () => {
 
   describe("calls setState(transform)", () => {
     let prev = { count: 0 }
-    const store = InnerStore.of(prev)
+    const store = Sweety.of(prev)
     const spy = jest.fn()
     const unsubscribe = store.subscribe(spy)
-    const { result } = renderHook(() => useSetInnerState(store))
+    const { result } = renderHook(() => useSetSweetyState(store))
     const setState = result.current
 
     beforeEach(() => {
@@ -164,16 +164,16 @@ describe("defined store with compare", () => {
   })
 
   describe("keeps setState value over time", () => {
-    const store_1 = InnerStore.of({ count: 0 })
-    const useHook_1 = (): SetInnerState<Counter> => {
-      return useSetInnerState(store_1, (left, right) => {
+    const store_1 = Sweety.of({ count: 0 })
+    const useHook_1 = (): SetSweetyState<Counter> => {
+      return useSetSweetyState(store_1, (left, right) => {
         return spyCompare(left, right)
       })
     }
 
-    const store_2 = InnerStore.of({ count: 0 })
-    const useHook_2 = (): SetInnerState<Counter> => {
-      return useSetInnerState(
+    const store_2 = Sweety.of({ count: 0 })
+    const useHook_2 = (): SetSweetyState<Counter> => {
+      return useSetSweetyState(
         store_2,
         useCallback((left: Counter, right: Counter) => {
           return spyCompare(left, right)
@@ -216,16 +216,16 @@ describe("defined store with compare", () => {
   })
 
   describe("changes state", () => {
-    const store_1 = InnerStore.of({ count: 0 })
-    const useHook_1 = (): SetInnerState<Counter> => {
-      return useSetInnerState(store_1, (left, right) => {
+    const store_1 = Sweety.of({ count: 0 })
+    const useHook_1 = (): SetSweetyState<Counter> => {
+      return useSetSweetyState(store_1, (left, right) => {
         return spyCompare(left, right)
       })
     }
 
-    const store_2 = InnerStore.of({ count: 0 })
-    const useHook_2 = (): SetInnerState<Counter> => {
-      return useSetInnerState(
+    const store_2 = Sweety.of({ count: 0 })
+    const useHook_2 = (): SetSweetyState<Counter> => {
+      return useSetSweetyState(
         store_2,
         useCallback((left: Counter, right: Counter) => {
           return spyCompare(left, right)
@@ -333,7 +333,7 @@ describe("defined store with compare", () => {
     [
       "inline",
       ({ store, compare }: WithStore & WithCompare) => {
-        return useSetInnerState(
+        return useSetSweetyState(
           store,
           compare && ((prev, next) => compare(prev, next)),
         )
@@ -342,7 +342,7 @@ describe("defined store with compare", () => {
     [
       "memoized",
       ({ store, compare }: WithStore & WithCompare) => {
-        return useSetInnerState(
+        return useSetSweetyState(
           store,
           useMemo(
             () => compare && ((prev, next) => compare(prev, next)),
@@ -354,7 +354,7 @@ describe("defined store with compare", () => {
   ])("passes %s compare function", (_, useHook) => {
     it.concurrent("no compare", () => {
       const initial = { count: 0 }
-      const store = InnerStore.of(initial)
+      const store = Sweety.of(initial)
       const { result } = renderHook(useHook, {
         initialProps: { store },
       })
@@ -372,7 +372,7 @@ describe("defined store with compare", () => {
         hookLevelCompare,
       }: { hookLevelCompare?: null | Compare<Counter> } = {}) => {
         const initial = { count: 0 }
-        const store = InnerStore.of(initial, Counter.compare)
+        const store = Sweety.of(initial, Counter.compare)
         const { result } = renderHook(useHook, {
           initialProps: { store, compare: hookLevelCompare },
         })
@@ -438,7 +438,7 @@ describe("defined store with compare", () => {
         storeLevelCompare,
       }: { storeLevelCompare?: null | Compare<Counter> } = {}) => {
         const initial = { count: 0 }
-        const store = InnerStore.of(initial, storeLevelCompare)
+        const store = Sweety.of(initial, storeLevelCompare)
         const { result } = renderHook(useHook, {
           initialProps: { store, compare: Counter.compare },
         })
@@ -513,7 +513,7 @@ describe("defined store with compare", () => {
         hookLevelCompare?: null | Compare<Counter>
       } = {}) => {
         const initial = { count: 0 }
-        const store = InnerStore.of(initial, storeLevelCompare)
+        const store = Sweety.of(initial, storeLevelCompare)
         const { result } = renderHook(useHook, {
           initialProps: { store, compare: hookLevelCompare },
         })
@@ -590,7 +590,7 @@ describe("defined store with compare", () => {
       ["() => false", () => false],
     ])("replaces compare with %s on rerender", (__, compare) => {
       let prev = { count: 0 }
-      const store = InnerStore.of(prev)
+      const store = Sweety.of(prev)
       const { result, rerender } = renderHook(useHook, {
         initialProps: { store, compare: Counter.compare },
       })
@@ -613,7 +613,7 @@ describe("defined store with compare", () => {
     it.concurrent(
       "keeps the same setState function over compare changes",
       () => {
-        const store = InnerStore.of({ count: 0 })
+        const store = Sweety.of({ count: 0 })
         const { result, rerender } = renderHook(useHook, {
           initialProps: { store, compare: Counter.compare },
         })

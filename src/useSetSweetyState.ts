@@ -1,26 +1,26 @@
 import { useRef, useEffect, useCallback } from "react"
 
-import { Compare, overrideCompare, SetInnerState } from "./utils"
-import { InnerStore } from "./InnerStore"
+import { Compare, overrideCompare, SetSweetyState } from "./utils"
+import { Sweety } from "./Sweety"
 
 /**
  * A hooks that returns a function to update the store's value.
  * Might be useful when you need a way to update the store's value without subscribing to its changes.
  * The store won't update if the new value is comparably equal to the current value.
  *
- * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
+ * @param store a `Sweety` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
  * @param compare an optional compare function with medium priority.
- * If not defined it uses `InnerStore#compare`.
+ * If not defined it uses `Sweety#compare`.
  * The strict equality check function (`===`) will be used if `null`.
  *
- * @see {@link InnerStore.setState}
+ * @see {@link Sweety.setState}
  * @see {@link Compare}
- * @see {@link SetInnerState}
+ * @see {@link SetSweetyState}
  */
-export function useSetInnerState<T>(
-  store: null | undefined | InnerStore<T>,
+export function useSetSweetyState<T>(
+  store: null | undefined | Sweety<T>,
   compare?: null | Compare<T>,
-): SetInnerState<T> {
+): SetSweetyState<T> {
   const storeRef = useRef(store)
   const hookLevelCompareRef = useRef(compare)
 

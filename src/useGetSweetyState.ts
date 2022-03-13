@@ -1,54 +1,54 @@
 import { useEffect, useReducer } from "react"
 
 import { modInc } from "./utils"
-import { InnerStore } from "./InnerStore"
+import { Sweety } from "./Sweety"
 
 /**
  * A hooks that subscribes to the store's changes and returns the current value.
  *
- * @param store an `InnerStore` instance.
+ * @param store a `Sweety` instance.
  *
- * @see {@link InnerStore.getState}
- * @see {@link InnerStore.subscribe}
+ * @see {@link Sweety.getState}
+ * @see {@link Sweety.subscribe}
  */
-export function useGetInnerState<T>(store: InnerStore<T>): T
+export function useGetSweetyState<T>(store: Sweety<T>): T
 
 /**
  * A hooks that subscribes to the store's changes and returns the current value.
  *
- * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+ * @param store a `Sweety` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
  *
- * @see {@link InnerStore.getState}
- * @see {@link InnerStore.subscribe}
+ * @see {@link Sweety.getState}
+ * @see {@link Sweety.subscribe}
  */
-export function useGetInnerState<T>(store: null | InnerStore<T>): null | T
+export function useGetSweetyState<T>(store: null | Sweety<T>): null | T
 
 /**
  * A hooks that subscribes to the store's changes and returns the current value.
  *
- * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+ * @param store a `Sweety` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
  *
- * @see {@link InnerStore.getState}
- * @see {@link InnerStore.subscribe}
+ * @see {@link Sweety.getState}
+ * @see {@link Sweety.subscribe}
  */
-export function useGetInnerState<T>(
-  store: undefined | InnerStore<T>,
+export function useGetSweetyState<T>(
+  store: undefined | Sweety<T>,
 ): undefined | T
 
 /**
  * A hooks that subscribes to the store's changes and returns the current value.
  *
- * @param store an `InnerStore` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+ * @param store a `Sweety` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
  *
- * @see {@link InnerStore.getState}
- * @see {@link InnerStore.subscribe}
+ * @see {@link Sweety.getState}
+ * @see {@link Sweety.subscribe}
  */
-export function useGetInnerState<T>(
-  store: null | undefined | InnerStore<T>,
+export function useGetSweetyState<T>(
+  store: null | undefined | Sweety<T>,
 ): null | undefined | T
 
-export function useGetInnerState<T>(
-  store: null | undefined | InnerStore<T>,
+export function useGetSweetyState<T>(
+  store: null | undefined | Sweety<T>,
 ): null | undefined | T {
   const [, render] = useReducer(modInc, 0)
 
