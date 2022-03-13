@@ -66,10 +66,15 @@ const App: React.VFC<{
 
     <button
       onClick={() => {
+        // read values
         const username = state.username.getState()
         const count = state.count.getState()
 
         console.log(`User "${username}" gets ${count} score.`)
+        
+        // change values
+        state.username.setState("")
+        state.count.setState(0)
       }}
     >
       Submit
