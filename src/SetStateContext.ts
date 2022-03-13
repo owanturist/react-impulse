@@ -36,7 +36,7 @@ export abstract class SetStateContext {
       () => {
         const calledListeners = new WeakSet<VoidFunction>()
 
-        for (const subs of subscribers) {
+        subscribers.forEach((subs) => {
           subs.forEach((listener) => {
             // don't emit the same listener twice, for instance when using `useInnerWatch`
             if (!calledListeners.has(listener)) {
@@ -44,7 +44,7 @@ export abstract class SetStateContext {
               calledListeners.add(listener)
             }
           })
-        }
+        })
 
         SetStateContext.subscribers = null
       },

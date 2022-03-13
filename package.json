@@ -1,7 +1,7 @@
 {
   "name": "react-inner-store",
   "version": "1.0.0-beta.9",
-  "description": "A lightweight and performant React state management",
+  "description": "The clean and natural React state management",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/types/index.d.ts",
@@ -16,7 +16,7 @@
   },
   "scripts": {
     "clean": "rm -rf ./dist",
-    "prebuild": "npm run clean && npm run test && npm run lint",
+    "prebuild": "npm run clean && npm run typecheck && npm run lint && npm run test",
     "build": "rollup --config",
     "test": "jest",
     "lint": "eslint . --config=.eslintrc.prod.json --ext=js,jsx,ts,tsx,md",
@@ -60,7 +60,7 @@
     "eslint": "^8.2.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.3",
-    "eslint-plugin-jest": "^25.7.0",
+    "eslint-plugin-jest": "^26.1.1",
     "eslint-plugin-jest-dom": "^4.0.1",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.27.1",

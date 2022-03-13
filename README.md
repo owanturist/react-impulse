@@ -1,6 +1,8 @@
+THE LIBRARY HAS CHANGED NPM NAME FROM `react-inner-store` TO [`react-sweety`](https://www.npmjs.com/package/react-sweety).
+
 # react-inner-store
 
-A lightweight and performant React state management.
+The clean and natural React state management
 
 ## Get started
 
