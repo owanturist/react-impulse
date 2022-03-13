@@ -2,6 +2,10 @@
 
 The clean and natural React state management.
 
+## Demos
+
+- [Todo MVC](https://codesandbox.io/s/react-sweety-todo-mvc-inr46?file=/src/TodoApp.tsx) - an implementation of [todomvc.com](https://todomvc.com) template.
+
 ## Get started
 
 First, install the package:
