@@ -141,25 +141,25 @@ describe("defined store", () => {
     expect(result.current[0]).not.toBe(store_1.getState())
     expect(result.current[0]).toBe(store_2.getState())
     expect(result.current[0]).toStrictEqual({ count: 10 })
-    expect(result.current[1]).not.toBe(firstResult[1])
+    expect(result.current[1]).toBe(firstResult[1])
 
     act(() => {
       store_1.setState(Counter.inc)
       firstResult[1]("Increment")
     })
 
-    expect(store_1.getState()).toStrictEqual({ count: 2 })
+    expect(store_1.getState()).toStrictEqual({ count: 1 })
     expect(result.current[0]).toBe(store_2.getState())
-    expect(result.current[0]).toStrictEqual({ count: 10 })
+    expect(result.current[0]).toStrictEqual({ count: 11 })
 
     act(() => {
       store_2.setState(Counter.inc)
       result.current[1]("Increment")
     })
 
-    expect(store_1.getState()).toStrictEqual({ count: 2 })
+    expect(store_1.getState()).toStrictEqual({ count: 1 })
     expect(result.current[0]).toBe(store_2.getState())
-    expect(result.current[0]).toStrictEqual({ count: 12 })
+    expect(result.current[0]).toStrictEqual({ count: 13 })
   })
 
   describe("clones state", () => {

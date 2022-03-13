@@ -21,22 +21,24 @@ export function useSetInnerState<T>(
   store: null | undefined | InnerStore<T>,
   compare?: null | Compare<T>,
 ): SetInnerState<T> {
+  const storeRef = useRef(store)
   const hookLevelCompareRef = useRef(compare)
 
   useEffect(() => {
+    storeRef.current = store
     hookLevelCompareRef.current = compare
-  }, [compare])
+  }, [store, compare])
 
-  return useCallback(
-    (update, setStateLevelCompare) => {
-      store?.setState(
-        update,
-        overrideCompare(
-          overrideCompare(store.compare, hookLevelCompareRef.current),
-          setStateLevelCompare,
-        ),
+  return useCallback((update, setStateLevelCompare) => {
+    const currentStore = storeRef.current
+
+    if (currentStore != null) {
+      const finalCompare = overrideCompare(
+        overrideCompare(currentStore.compare, hookLevelCompareRef.current),
+        setStateLevelCompare,
       )
-    },
-    [store],
-  )
+
+      currentStore.setState(update, finalCompare)
+    }
+  }, [])
 }
