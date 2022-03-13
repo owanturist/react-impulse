@@ -1,6 +1,6 @@
 {
-  "name": "react-inner-store",
-  "version": "1.0.0-beta.10",
+  "name": "react-sweety",
+  "version": "1.0.0",
   "description": "The clean and natural React state management",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -25,7 +25,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/owanturist/react-inner-store.git"
+    "url": "git+https://github.com/owanturist/react-sweety.git"
   },
   "keywords": [
     "react",
@@ -35,9 +35,9 @@
   "author": "Anton Ovechkin <owanturist@gmail.com>",
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/owanturist/react-inner-store/issues"
+    "url": "https://github.com/owanturist/react-sweety/issues"
   },
-  "homepage": "https://github.com/owanturist/react-inner-store#readme",
+  "homepage": "https://github.com/owanturist/react-sweety#readme",
   "peerDependencies": {
     "react": ">=16.8.0"
   },
