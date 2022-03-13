@@ -1,4 +1,4 @@
-# 🍬 `react-sweety`
+# `react-sweety` 🍬
 
 The clean and natural React state management.
 
