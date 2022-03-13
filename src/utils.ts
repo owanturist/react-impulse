@@ -4,8 +4,6 @@ import { SetStateAction } from "react"
  * A function that compares two values and returns `true` if they are equal.
  * Depending on the type of the values it might be more efficient to use
  * a custom compare function such as shallow-equal or deep-equal.
- *
- * @public
  */
 export type Compare<T> = (prev: T, next: T) => boolean
 
@@ -26,7 +24,6 @@ export type Compare<T> = (prev: T, next: T) => boolean
  * const [state, setState] = useInnerState(store)
  *
  * @see {@link Compare}
- * @public
  */
 export type SetInnerState<T> = (
   valueOrTransform: SetStateAction<T>,
@@ -38,6 +35,9 @@ export type SetInnerState<T> = (
  */
 export const isEqual = <T>(one: T, another: T): boolean => one === another
 
+/**
+ * @private
+ */
 export const overrideCompare = <T>(
   original: Compare<T>,
   override: undefined | null | Compare<T>,
@@ -62,7 +62,8 @@ export const noop: VoidFunction = () => {
 export const warning = (message: string): void => {
   /* istanbul ignore next */
   if (
-    process.env.NODE_ENV !== "production" &&
+    (process.env.NODE_ENV === "development" ||
+      process.env.NODE_ENV === "test") &&
     typeof console !== "undefined" &&
     // eslint-disable-next-line no-console
     typeof console.error === "function"
