@@ -86,7 +86,7 @@ ReactDOM.render(
 
 ## Motivation
 
-Another one React state management library... Why do you need it? That's a fair question and it needs a decent explanation. Let me walk you through it.
+Yet another React state management library... Why do you need it? That's a fair question and it needs a decent explanation. Let me walk you through it.
 
 <a name="simple-counter"></a>Imagine you are building a stateful Counter component:
 
@@ -458,7 +458,7 @@ const Counter: React.VFC<{
   return (
     <div>
       <button onClick={() => setCount(count - 1)}>-</button>
-      <span>{state.count}</span>
+      <span>{count}</span>
       <button onClick={() => setCount(count + 1)}>+</button>
     </div>
   )
