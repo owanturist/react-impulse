@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react-hooks"
 import { useCallback } from "react"
 
-import { InnerStore, useInnerReducer } from "../src"
+import { Sweety, useSweetyReducer } from "../src"
 
 import { Counter, WithStore } from "./common"
 
@@ -12,7 +12,7 @@ describe("bypassed store", () => {
     undefined,
   ])("returns %s for %s", (store) => {
     const { result } = renderHook(() =>
-      useInnerReducer<number, never>(store, (state) => state),
+      useSweetyReducer<number, never>(store, (state) => state),
     )
 
     expect(result.current[0]).toBe(store)
@@ -34,9 +34,9 @@ describe("defined store", () => {
 
   it.concurrent("returns initial state", () => {
     const initial = { count: 0 }
-    const store = InnerStore.of(initial)
+    const store = Sweety.of(initial)
 
-    const { result } = renderHook(() => useInnerReducer(store, reducer))
+    const { result } = renderHook(() => useSweetyReducer(store, reducer))
 
     expect(result.current[0]).toBe(initial)
     expect(result.current[0]).toBe(store.getState())
@@ -45,10 +45,10 @@ describe("defined store", () => {
 
   it.concurrent("returns the same values when the hook re-renders", () => {
     const initial = { count: 0 }
-    const store = InnerStore.of(initial)
+    const store = Sweety.of(initial)
 
     const { result, rerender } = renderHook(() =>
-      useInnerReducer(store, reducer),
+      useSweetyReducer(store, reducer),
     )
     const firstResult = result.current
 
@@ -66,9 +66,9 @@ describe("defined store", () => {
 
   it.concurrent("watches after store's updates", () => {
     const initial = { count: 0 }
-    const store = InnerStore.of(initial)
+    const store = Sweety.of(initial)
 
-    const { result } = renderHook(() => useInnerReducer(store, reducer))
+    const { result } = renderHook(() => useSweetyReducer(store, reducer))
 
     act(() => {
       store.setState(Counter.inc)
@@ -85,7 +85,7 @@ describe("defined store", () => {
       [
         "inline",
         ({ store, diff }: WithStore & { diff: number }) => {
-          return useInnerReducer<Counter, Action>(store, (counter, action) =>
+          return useSweetyReducer<Counter, Action>(store, (counter, action) =>
             reducer(counter, action, diff),
           )
         },
@@ -93,7 +93,7 @@ describe("defined store", () => {
       [
         "memoized",
         ({ store, diff }: WithStore & { diff: number }) => {
-          return useInnerReducer<Counter, Action>(
+          return useSweetyReducer<Counter, Action>(
             store,
             useCallback(
               (counter, action) => reducer(counter, action, diff),
@@ -103,7 +103,7 @@ describe("defined store", () => {
         },
       ],
     ])("when the reducer is %s", (_, useHook) => {
-      const store = InnerStore.of({ count: 0 })
+      const store = Sweety.of({ count: 0 })
       const { result, rerender } = renderHook(useHook, {
         initialProps: { store, diff: 1 },
       })
@@ -125,11 +125,11 @@ describe("defined store", () => {
   })
 
   it.concurrent("re-subscribes on new store", () => {
-    const store_1 = InnerStore.of({ count: 0 })
-    const store_2 = InnerStore.of({ count: 10 })
+    const store_1 = Sweety.of({ count: 0 })
+    const store_2 = Sweety.of({ count: 10 })
 
     const { result, rerender } = renderHook(
-      (store) => useInnerReducer(store, reducer),
+      (store) => useSweetyReducer(store, reducer),
       {
         initialProps: store_1,
       },
@@ -165,9 +165,9 @@ describe("defined store", () => {
   describe("clones state", () => {
     it.concurrent("without compare", () => {
       const initial = { count: 0 }
-      const store = InnerStore.of(initial)
+      const store = Sweety.of(initial)
 
-      const { result } = renderHook(() => useInnerReducer(store, reducer))
+      const { result } = renderHook(() => useSweetyReducer(store, reducer))
 
       act(() => {
         result.current[1]("Clone")
@@ -180,10 +180,10 @@ describe("defined store", () => {
 
     it.concurrent("with compare", () => {
       const initial = { count: 0 }
-      const store = InnerStore.of(initial)
+      const store = Sweety.of(initial)
 
       const { result } = renderHook(() =>
-        useInnerReducer(store, reducer, Counter.compare),
+        useSweetyReducer(store, reducer, Counter.compare),
       )
 
       act(() => {

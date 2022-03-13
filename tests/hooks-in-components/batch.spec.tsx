@@ -3,11 +3,11 @@ import { act, render, screen, fireEvent } from "@testing-library/react"
 
 import {
   batch,
-  InnerStore,
-  useGetInnerState,
-  useSetInnerState,
-  useInnerState,
-  useInnerWatch,
+  Sweety,
+  useGetSweetyState,
+  useSetSweetyState,
+  useSweetyState,
+  useWatchSweety,
 } from "../../src"
 import { Counter } from "../common"
 
@@ -15,14 +15,14 @@ describe.each([
   ["not batched", (cb: VoidFunction) => cb()],
   ["batched", batch],
 ])("multiple stores %s calls with direct store access", (_, execute) => {
-  it("re-renders once for InnerStore#setState calls", () => {
+  it("re-renders once for Sweety#setState calls", () => {
     const onRender = jest.fn()
-    const store_1 = InnerStore.of({ count: 1 })
-    const store_2 = InnerStore.of({ count: 2 })
+    const store_1 = Sweety.of({ count: 1 })
+    const store_2 = Sweety.of({ count: 2 })
 
     const Component: React.VFC = () => {
-      const counter_1 = useGetInnerState(store_1)
-      const counter_2 = useGetInnerState(store_2)
+      const counter_1 = useGetSweetyState(store_1)
+      const counter_2 = useGetSweetyState(store_2)
 
       onRender()
 
@@ -46,14 +46,14 @@ describe.each([
     expect(onRender).toHaveBeenCalledTimes(2)
   })
 
-  it("re-renders once for useInnerState calls", () => {
+  it("re-renders once for useSweetyState calls", () => {
     const onRender = jest.fn()
-    const store_1 = InnerStore.of({ count: 1 })
-    const store_2 = InnerStore.of({ count: 2 })
+    const store_1 = Sweety.of({ count: 1 })
+    const store_2 = Sweety.of({ count: 2 })
 
     const Component: React.VFC = () => {
-      const [counter_1, setCounter_1] = useInnerState(store_1)
-      const [counter_2, setCounter_2] = useInnerState(store_2)
+      const [counter_1, setCounter_1] = useSweetyState(store_1)
+      const [counter_2, setCounter_2] = useSweetyState(store_2)
 
       onRender()
 
@@ -89,17 +89,17 @@ describe.each([
   ["not batched", (cb: VoidFunction) => cb()],
   ["batched", batch],
 ])("nested stores %s calls with direct store access", (_, execute) => {
-  it("re-renders once for InnerStore#setState calls", () => {
+  it("re-renders once for Sweety#setState calls", () => {
     const onRender = jest.fn()
-    const store = InnerStore.of({
-      first: InnerStore.of({ count: 1 }),
-      second: InnerStore.of({ count: 2 }),
+    const store = Sweety.of({
+      first: Sweety.of({ count: 1 }),
+      second: Sweety.of({ count: 2 }),
     })
 
     const Component: React.VFC = () => {
-      const { first: store_1, second: store_2 } = useGetInnerState(store)
-      const counter_1 = useGetInnerState(store_1)
-      const counter_2 = useGetInnerState(store_2)
+      const { first: store_1, second: store_2 } = useGetSweetyState(store)
+      const counter_1 = useGetSweetyState(store_1)
+      const counter_2 = useGetSweetyState(store_2)
 
       onRender()
 
@@ -140,18 +140,18 @@ describe.each([
     expect(onRender).toHaveBeenCalledTimes(3)
   })
 
-  it("re-renders once for useInnerState calls", () => {
+  it("re-renders once for useSweetyState calls", () => {
     const onRender = jest.fn()
-    const store = InnerStore.of({
-      first: InnerStore.of({ count: 1 }),
-      second: InnerStore.of({ count: 2 }),
+    const store = Sweety.of({
+      first: Sweety.of({ count: 1 }),
+      second: Sweety.of({ count: 2 }),
     })
 
     const Component: React.VFC = () => {
       const [{ first: store_1, second: store_2 }, setState] =
-        useInnerState(store)
-      const counter_1 = useGetInnerState(store_1)
-      const counter_2 = useGetInnerState(store_2)
+        useSweetyState(store)
+      const counter_1 = useGetSweetyState(store_1)
+      const counter_2 = useGetSweetyState(store_2)
 
       onRender()
 
@@ -212,7 +212,7 @@ describe.each([
     expectedWatcherCallsForNested: 3,
     execute: (cb: VoidFunction) => cb(),
     useCount: (watcher: () => number) => {
-      return useInnerWatch(() => watcher())
+      return useWatchSweety(() => watcher())
     },
   },
   {
@@ -221,7 +221,7 @@ describe.each([
     expectedWatcherCallsForNested: 3,
     execute: batch,
     useCount: (watcher: () => number) => {
-      return useInnerWatch(() => watcher())
+      return useWatchSweety(() => watcher())
     },
   },
   {
@@ -230,7 +230,7 @@ describe.each([
     expectedWatcherCallsForNested: 1,
     execute: (cb: VoidFunction) => cb(),
     useCount: (watcher: () => number) => {
-      return useInnerWatch(React.useCallback(() => watcher(), [watcher]))
+      return useWatchSweety(React.useCallback(() => watcher(), [watcher]))
     },
   },
   {
@@ -239,7 +239,7 @@ describe.each([
     expectedWatcherCallsForNested: 1,
     execute: batch,
     useCount: (watcher: () => number) => {
-      return useInnerWatch(React.useCallback(() => watcher(), [watcher]))
+      return useWatchSweety(React.useCallback(() => watcher(), [watcher]))
     },
   },
 ])(
@@ -254,8 +254,8 @@ describe.each([
       const setup = () => {
         const spy = jest.fn()
         const onRender = jest.fn()
-        const first = InnerStore.of({ count: 1 })
-        const second = InnerStore.of({ count: 2 })
+        const first = Sweety.of({ count: 1 })
+        const second = Sweety.of({ count: 2 })
         const watcher = () => {
           spy()
 
@@ -267,7 +267,7 @@ describe.each([
         return { spy, onRender, first, second, watcher }
       }
 
-      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by InnerStore#setState calls`, () => {
+      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by Sweety#setState calls`, () => {
         const { spy, onRender, first, second, watcher } = setup()
 
         const Component: React.VFC = () => {
@@ -296,13 +296,13 @@ describe.each([
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForMultiple)
       })
 
-      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by useSetInnerState calls`, () => {
+      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by useSetSweetyState calls`, () => {
         const { spy, onRender, first, second, watcher } = setup()
 
         const Component: React.VFC = () => {
           const count = useCount(watcher)
-          const setFirst = useSetInnerState(first)
-          const setSecond = useSetInnerState(second)
+          const setFirst = useSetSweetyState(first)
+          const setSecond = useSetSweetyState(second)
 
           onRender()
 
@@ -341,9 +341,9 @@ describe.each([
       const setup = () => {
         const spy = jest.fn()
         const onRender = jest.fn()
-        const store = InnerStore.of({
-          first: InnerStore.of({ count: 1 }),
-          second: InnerStore.of({ count: 2 }),
+        const store = Sweety.of({
+          first: Sweety.of({ count: 1 }),
+          second: Sweety.of({ count: 2 }),
         })
         const watcher = () => {
           spy()
@@ -358,7 +358,7 @@ describe.each([
         return { spy, onRender, store, watcher }
       }
 
-      it(`calls the watcher ${expectedWatcherCallsForNested} times by InnerStore#setState calls`, () => {
+      it(`calls the watcher ${expectedWatcherCallsForNested} times by Sweety#setState calls`, () => {
         const { spy, onRender, store, watcher } = setup()
 
         const Component: React.VFC = () => {
@@ -406,12 +406,12 @@ describe.each([
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
       })
 
-      it(`calls the watcher ${expectedWatcherCallsForNested} times by useSetInnerState calls`, () => {
+      it(`calls the watcher ${expectedWatcherCallsForNested} times by useSetSweetyState calls`, () => {
         const { spy, onRender, store, watcher } = setup()
 
         const Component: React.VFC = () => {
           const count = useCount(watcher)
-          const setState = useSetInnerState(store)
+          const setState = useSetSweetyState(store)
 
           onRender()
 

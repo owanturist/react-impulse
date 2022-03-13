@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Compare, InnerStore, useInnerWatch } from "../../src"
+import { Compare, Sweety, useWatchSweety } from "../../src"
 import { Counter, WithIsActive, WithStore, WithSpy } from "../common"
 
 describe.each([
@@ -11,7 +11,7 @@ describe.each([
       { store, isActive, spy }: WithStore & WithIsActive & Partial<WithSpy>,
       compare?: Compare<Counter>,
     ) => {
-      return useInnerWatch(() => {
+      return useWatchSweety(() => {
         spy?.()
 
         return isActive ? store.getState() : { count: -1 }
@@ -24,7 +24,7 @@ describe.each([
       { store, isActive, spy }: WithStore & WithIsActive & Partial<WithSpy>,
       compare?: Compare<Counter>,
     ) => {
-      return useInnerWatch(
+      return useWatchSweety(
         useCallback(() => {
           spy?.()
 
@@ -54,7 +54,7 @@ describe.each([
   ])("%s", (__, useHook) => {
     describe("when active", () => {
       it.concurrent("should return store's value on init", () => {
-        const store = InnerStore.of({ count: 1 })
+        const store = Sweety.of({ count: 1 })
         const { result } = renderHook(useHook, {
           initialProps: { store, isActive: true },
         })
@@ -63,7 +63,7 @@ describe.each([
       })
 
       it.concurrent("should return updated store's value", () => {
-        const store = InnerStore.of({ count: 1 })
+        const store = Sweety.of({ count: 1 })
 
         const { result } = renderHook(useHook, {
           initialProps: { store, isActive: true },
@@ -76,8 +76,8 @@ describe.each([
       })
 
       it.concurrent("should return replaced store's value", () => {
-        const store_1 = InnerStore.of({ count: 1 })
-        const store_2 = InnerStore.of({ count: 10 })
+        const store_1 = Sweety.of({ count: 1 })
+        const store_2 = Sweety.of({ count: 10 })
 
         const { result, rerender } = renderHook(useHook, {
           initialProps: { store: store_1, isActive: true },
@@ -100,7 +100,7 @@ describe.each([
       })
 
       it.concurrent("should return fallback value when turns inactive", () => {
-        const store = InnerStore.of({ count: 1 })
+        const store = Sweety.of({ count: 1 })
         const { result, rerender } = renderHook(useHook, {
           initialProps: { store, isActive: true },
         })
@@ -112,7 +112,7 @@ describe.each([
 
     describe("when inactive", () => {
       it.concurrent("should return fallback value when inactive", () => {
-        const store = InnerStore.of({ count: 1 })
+        const store = Sweety.of({ count: 1 })
         const { result } = renderHook(useHook, {
           initialProps: { store, isActive: false },
         })
@@ -123,7 +123,7 @@ describe.each([
       it.concurrent(
         "should return fallback value when inactive when store updates",
         () => {
-          const store = InnerStore.of({ count: 1 })
+          const store = Sweety.of({ count: 1 })
           const { result } = renderHook(useHook, {
             initialProps: { store, isActive: false },
           })
@@ -136,7 +136,7 @@ describe.each([
       )
 
       it.concurrent("should return fallback value when turns active", () => {
-        const store = InnerStore.of({ count: 1 })
+        const store = Sweety.of({ count: 1 })
         const { result, rerender } = renderHook(useHook, {
           initialProps: { store, isActive: false },
         })
@@ -154,7 +154,7 @@ describe.each([
         "should not trigger the watcher when the store updates",
         () => {
           const spy = jest.fn()
-          const store = InnerStore.of({ count: 1 })
+          const store = Sweety.of({ count: 1 })
           renderHook(useHook, {
             initialProps: { store, isActive: false, spy },
           })

@@ -5,6 +5,13 @@ export interface Subscriber {
   subscribe(listener: VoidFunction): VoidFunction
 }
 
+/**
+ * A context to track Sweety#getState() usage inside the watcher function.
+ * The tracked calls will subscribe related stores to updates,
+ * so the watcher will execute on each update.
+ *
+ * @private
+ */
 export class WatchContext {
   private static current: null | WatchContext = null
   private static isReadonlyDuringWatcherCall = false

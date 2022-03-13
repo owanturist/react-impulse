@@ -1,20 +1,20 @@
-import { InnerStore } from "../src"
+import { Sweety } from "../src"
 import { isEqual } from "../src/utils"
 
 import { Counter } from "./common"
 
-describe("InnerStore#key", () => {
+describe("Sweety#key", () => {
   it.concurrent("creates uniq store keys", () => {
     const state = { count: 0 }
-    const store_1 = InnerStore.of(state)
-    const store_2 = InnerStore.of(state)
+    const store_1 = Sweety.of(state)
+    const store_2 = Sweety.of(state)
 
     expect(store_1.key).not.toBe(store_2.key)
     expect(store_1.getState()).toBe(store_2.getState())
   })
 
   it.concurrent("keeps key on methods call", () => {
-    const store = InnerStore.of({ count: 0 })
+    const store = Sweety.of({ count: 0 })
     const key = store.key
 
     store.getState()
@@ -31,50 +31,50 @@ describe("InnerStore#key", () => {
   })
 })
 
-describe("InnerStore#compare", () => {
-  describe("when creating a store with InnerStore.of", () => {
+describe("Sweety#compare", () => {
+  describe("when creating a store with Sweety.of", () => {
     it.concurrent("assigns isEqual by default", () => {
-      const store = InnerStore.of({ count: 0 })
+      const store = Sweety.of({ count: 0 })
 
       expect(store.compare).toBe(isEqual)
     })
 
     it.concurrent("assigns isEqual by `null`", () => {
-      const store = InnerStore.of({ count: 0 }, null)
+      const store = Sweety.of({ count: 0 }, null)
 
       expect(store.compare).toBe(isEqual)
     })
 
     it.concurrent("assigns custom function", () => {
-      const store = InnerStore.of({ count: 0 }, Counter.compare)
+      const store = Sweety.of({ count: 0 }, Counter.compare)
 
       expect(store.compare).toBe(Counter.compare)
     })
   })
 
-  describe("when creating a store with InnerStore.clone", () => {
+  describe("when creating a store with Sweety.clone", () => {
     it.concurrent("inherits default the source store compare", () => {
-      const store = InnerStore.of({ count: 0 })
+      const store = Sweety.of({ count: 0 })
 
       expect(store.clone().compare).toBe(store.compare)
       expect(store.clone().compare).toBe(isEqual)
     })
 
     it.concurrent("inherits custom the source store compare", () => {
-      const store = InnerStore.of({ count: 0 }, Counter.compare)
+      const store = Sweety.of({ count: 0 }, Counter.compare)
 
       expect(store.clone().compare).toBe(store.compare)
       expect(store.clone().compare).toBe(Counter.compare)
     })
 
     it.concurrent("assigns isEqual by `null`", () => {
-      const store = InnerStore.of({ count: 0 }, Counter.compare)
+      const store = Sweety.of({ count: 0 }, Counter.compare)
 
       expect(store.clone(Counter.clone, null).compare).toBe(isEqual)
     })
 
     it.concurrent("assigns custom function", () => {
-      const store = InnerStore.of({ count: 0 })
+      const store = Sweety.of({ count: 0 })
 
       expect(store.clone(Counter.clone, Counter.compare).compare).toBe(
         Counter.compare,
@@ -82,10 +82,10 @@ describe("InnerStore#compare", () => {
     })
   })
 
-  describe("when using InnerStore#setState", () => {
-    it.concurrent("uses InnerStore#compare by default", () => {
+  describe("when using Sweety#setState", () => {
+    it.concurrent("uses Sweety#compare by default", () => {
       const initial = { count: 0 }
-      const store = InnerStore.of(initial, Counter.compare)
+      const store = Sweety.of(initial, Counter.compare)
 
       store.setState(Counter.clone)
       expect(store.getState()).toBe(initial)
@@ -93,7 +93,7 @@ describe("InnerStore#compare", () => {
 
     it.concurrent("replaces with isEqual when `null`", () => {
       const initial = { count: 0 }
-      const store = InnerStore.of(initial, Counter.compare)
+      const store = Sweety.of(initial, Counter.compare)
 
       store.setState(Counter.clone, null)
       expect(store.getState()).not.toBe(initial)
@@ -102,7 +102,7 @@ describe("InnerStore#compare", () => {
 
     it.concurrent("replaces with custom function", () => {
       const initial = { count: 0 }
-      const store = InnerStore.of(initial, Counter.compare)
+      const store = Sweety.of(initial, Counter.compare)
 
       store.setState(Counter.inc, () => true)
       expect(store.getState()).toBe(initial)
@@ -110,8 +110,8 @@ describe("InnerStore#compare", () => {
   })
 })
 
-describe("InnerStore#setState(value)", () => {
-  const store = InnerStore.of({ count: 0 })
+describe("Sweety#setState(value)", () => {
+  const store = Sweety.of({ count: 0 })
 
   it("updates state", () => {
     const next = { count: 1 }
@@ -132,8 +132,8 @@ describe("InnerStore#setState(value)", () => {
   })
 })
 
-describe("InnerStore#setState(transform)", () => {
-  const store = InnerStore.of({ count: 0 })
+describe("Sweety#setState(transform)", () => {
+  const store = Sweety.of({ count: 0 })
 
   it("updates state", () => {
     store.setState(Counter.inc)
@@ -160,9 +160,9 @@ describe("InnerStore#setState(transform)", () => {
   })
 })
 
-describe("InnerStore#setState(value, compare)", () => {
+describe("Sweety#setState(value, compare)", () => {
   let prev: Counter = { count: 0 }
-  const store = InnerStore.of(prev)
+  const store = Sweety.of(prev)
 
   beforeEach(() => {
     prev = store.getState()
@@ -193,9 +193,9 @@ describe("InnerStore#setState(value, compare)", () => {
   })
 })
 
-describe("InnerStore#setState(transform, compare)", () => {
+describe("Sweety#setState(transform, compare)", () => {
   let prev: Counter = { count: 0 }
-  const store = InnerStore.of(prev)
+  const store = Sweety.of(prev)
 
   beforeEach(() => {
     prev = store.getState()
@@ -219,9 +219,9 @@ describe("InnerStore#setState(transform, compare)", () => {
   })
 })
 
-describe("InnerStore#getState(transform)", () => {
+describe("Sweety#getState(transform)", () => {
   const initial = { count: 0 }
-  const store = InnerStore.of(initial)
+  const store = Sweety.of(initial)
 
   it("gets initial state", () => {
     expect(store.getState()).toBe(initial)
@@ -235,9 +235,9 @@ describe("InnerStore#getState(transform)", () => {
   })
 })
 
-describe("InnerStore#clone", () => {
+describe("Sweety#clone", () => {
   it.concurrent("creates new store instance with clone()", () => {
-    const store_1 = InnerStore.of({ count: 0 })
+    const store_1 = Sweety.of({ count: 0 })
     const store_2 = store_1.clone()
 
     expect(store_1).not.toBe(store_2)
@@ -246,7 +246,7 @@ describe("InnerStore#clone", () => {
   })
 
   it.concurrent("creates new store instance with clone(transform)", () => {
-    const store_1 = InnerStore.of({ count: 0 })
+    const store_1 = Sweety.of({ count: 0 })
     const store_2 = store_1.clone(Counter.clone)
 
     expect(store_1).not.toBe(store_2)
@@ -258,9 +258,9 @@ describe("InnerStore#clone", () => {
   it.concurrent(
     "creates new nested store instance with clone(transform)",
     () => {
-      const store_1 = InnerStore.of({
-        count: InnerStore.of(0),
-        name: InnerStore.of("John"),
+      const store_1 = Sweety.of({
+        count: Sweety.of(0),
+        name: Sweety.of("John"),
       })
       const store_2 = store_1.clone(({ count, name }) => ({
         count: count.clone(),
@@ -296,9 +296,9 @@ describe("InnerStore#clone", () => {
   )
 
   it.concurrent("creates shallow nested store instance with clone()", () => {
-    const store_1 = InnerStore.of({
-      count: InnerStore.of(0),
-      name: InnerStore.of("John"),
+    const store_1 = Sweety.of({
+      count: Sweety.of(0),
+      name: Sweety.of("John"),
     })
     const store_2 = store_1.clone()
 
@@ -330,9 +330,9 @@ describe("InnerStore#clone", () => {
   })
 })
 
-describe("InnerStore#subscribe", () => {
+describe("Sweety#subscribe", () => {
   it.concurrent("subscribes and unsubscribes to state changes", () => {
-    const store = InnerStore.of({ count: 0 })
+    const store = Sweety.of({ count: 0 })
     const spy = jest.fn()
 
     store.setState(Counter.inc)
@@ -353,7 +353,7 @@ describe("InnerStore#subscribe", () => {
 
   it.concurrent("emits the same listener once", () => {
     const spy = jest.fn()
-    const store = InnerStore.of({ count: 0 })
+    const store = Sweety.of({ count: 0 })
     const unsubscribe_1 = store.subscribe(spy)
     const unsubscribe_2 = store.subscribe(spy)
 
@@ -373,7 +373,7 @@ describe("InnerStore#subscribe", () => {
 
   it.concurrent("ignores second unsubscribe call", () => {
     const spy = jest.fn()
-    const store = InnerStore.of({ count: 0 })
+    const store = Sweety.of({ count: 0 })
     const unsubscribe = store.subscribe(spy)
 
     store.setState(Counter.inc)
@@ -390,7 +390,7 @@ describe("InnerStore#subscribe", () => {
   it.concurrent("subscribes multiple listeners", () => {
     const spy_1 = jest.fn()
     const spy_2 = jest.fn()
-    const store = InnerStore.of({ count: 0 })
+    const store = Sweety.of({ count: 0 })
     const unsubscribe_1 = store.subscribe(spy_1)
     const unsubscribe_2 = store.subscribe(spy_2)
 
@@ -414,7 +414,7 @@ describe("InnerStore#subscribe", () => {
   it.concurrent("does not emit when a new state is comparably equal", () => {
     const spy = jest.fn()
     const spyCompare = jest.fn(Counter.compare)
-    const store = InnerStore.of({ count: 0 })
+    const store = Sweety.of({ count: 0 })
     const unsubscribe = store.subscribe(spy)
 
     store.setState(Counter.clone, spyCompare)

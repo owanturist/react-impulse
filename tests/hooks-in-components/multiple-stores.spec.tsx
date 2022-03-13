@@ -1,16 +1,16 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { InnerStore, useInnerState } from "../../src"
+import { Sweety, useSweetyState } from "../../src"
 
 describe("multiple stores", () => {
   const LoginForm: React.VFC<{
-    email: InnerStore<string>
-    password: InnerStore<string>
+    email: Sweety<string>
+    password: Sweety<string>
     onRender: VoidFunction
   }> = ({ email: emailStore, password: passwordStore, onRender }) => {
-    const [email, setEmail] = useInnerState(emailStore)
-    const [password, setPassword] = useInnerState(passwordStore)
+    const [email, setEmail] = useSweetyState(emailStore)
+    const [password, setPassword] = useSweetyState(passwordStore)
 
     onRender()
 
@@ -41,8 +41,8 @@ describe("multiple stores", () => {
   }
 
   it("Performs multi store management", () => {
-    const email = InnerStore.of("")
-    const password = InnerStore.of("")
+    const email = Sweety.of("")
+    const password = Sweety.of("")
     const onRender = jest.fn()
 
     const { container } = render(

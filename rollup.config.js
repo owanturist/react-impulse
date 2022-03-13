@@ -22,7 +22,7 @@ const UMD_GLOBALS = {
   crypto: "crypto",
 }
 
-const UMD_NAME = "ReactInnerStore"
+const UMD_NAME = "ReactSweety"
 
 const extensions = [".ts"]
 

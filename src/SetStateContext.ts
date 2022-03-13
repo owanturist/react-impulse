@@ -3,7 +3,7 @@ import { Dispatch } from "react"
 import { noop } from "./utils"
 
 /**
- * A context that allows to collect setState subscribers and execute them all at once.
+ * A context that allows to collect Sweety#setState subscribers and execute them all at once.
  * This is useful when multiple stores are updated at the same time.
  *
  * @private
@@ -11,16 +11,16 @@ import { noop } from "./utils"
 export abstract class SetStateContext {
   private static subscribers: null | Array<Map<string, VoidFunction>> = null
 
-  public static init(): [Dispatch<Map<string, VoidFunction>>, VoidFunction] {
+  public static init(): [VoidFunction, Dispatch<Map<string, VoidFunction>>] {
     if (SetStateContext.subscribers != null) {
       const { subscribers } = SetStateContext
 
       // the context already exists - it should not emit anything at this point
       return [
+        noop,
         (subs) => {
           subscribers.push(subs)
         },
-        noop,
       ]
     }
 
@@ -30,15 +30,12 @@ export abstract class SetStateContext {
     const { subscribers } = SetStateContext
 
     return [
-      (subs) => {
-        subscribers.push(subs)
-      },
       () => {
         const calledListeners = new WeakSet<VoidFunction>()
 
         subscribers.forEach((subs) => {
           subs.forEach((listener) => {
-            // don't emit the same listener twice, for instance when using `useInnerWatch`
+            // don't emit the same listener twice, for instance when using `useWatchSweety`
             if (!calledListeners.has(listener)) {
               listener()
               calledListeners.add(listener)
@@ -48,6 +45,17 @@ export abstract class SetStateContext {
 
         SetStateContext.subscribers = null
       },
+      (subs) => {
+        subscribers.push(subs)
+      },
     ]
   }
+}
+
+export const batch = (execute: VoidFunction): void => {
+  const [emit] = SetStateContext.init()
+
+  execute()
+
+  emit()
 }

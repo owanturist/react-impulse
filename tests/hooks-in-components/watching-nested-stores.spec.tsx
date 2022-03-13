@@ -1,13 +1,13 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { InnerStore, useInnerState, useInnerWatch } from "../../src"
+import { Sweety, useSweetyState, useWatchSweety } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
 describe("watching nested stores", () => {
   abstract class AppState {
-    public abstract counts: ReadonlyArray<InnerStore<number>>
+    public abstract counts: ReadonlyArray<Sweety<number>>
 
     public static sum({ counts }: AppState): number {
       return counts.reduce((acc, count) => acc + count.getState(), 0)
@@ -15,7 +15,7 @@ describe("watching nested stores", () => {
   }
 
   interface AppProps {
-    store: InnerStore<AppState>
+    store: Sweety<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }
@@ -26,7 +26,7 @@ describe("watching nested stores", () => {
       lessThanTwenty: boolean
     } & AppProps
   > = ({ moreThanTen, lessThanTwenty, store, onRender, onCounterRender }) => {
-    const [state, setState] = useInnerState(store)
+    const [state, setState] = useSweetyState(store)
 
     onRender()
 
@@ -41,7 +41,7 @@ describe("watching nested stores", () => {
           onClick={() => {
             setState({
               ...state,
-              counts: [...state.counts, InnerStore.of(0)],
+              counts: [...state.counts, Sweety.of(0)],
             })
           }}
         />
@@ -83,7 +83,7 @@ describe("watching nested stores", () => {
   }
 
   const SingleWatcherApp: React.VFC<AppProps> = (props) => {
-    const [moreThanTen, lessThanTwenty] = useInnerWatch(
+    const [moreThanTen, lessThanTwenty] = useWatchSweety(
       () => {
         const count = AppState.sum(props.store.getState())
 
@@ -104,7 +104,7 @@ describe("watching nested stores", () => {
   }
 
   const SingleMemoizedWatcherApp: React.VFC<AppProps> = (props) => {
-    const [moreThanTen, lessThanTwenty] = useInnerWatch(
+    const [moreThanTen, lessThanTwenty] = useWatchSweety(
       React.useCallback(() => {
         const count = AppState.sum(props.store.getState())
 
@@ -125,12 +125,12 @@ describe("watching nested stores", () => {
   }
 
   const MultipleWatchersApp: React.VFC<AppProps> = (props) => {
-    const moreThanTen = useInnerWatch(() => {
+    const moreThanTen = useWatchSweety(() => {
       const count = props.store.getState(AppState.sum)
 
       return count > 10
     })
-    const lessThanTwenty = useInnerWatch(() => {
+    const lessThanTwenty = useWatchSweety(() => {
       const count = AppState.sum(props.store.getState())
 
       return count < 20
@@ -146,14 +146,14 @@ describe("watching nested stores", () => {
   }
 
   const MultipleMemoizedWatchersApp: React.VFC<AppProps> = (props) => {
-    const moreThanTen = useInnerWatch(
+    const moreThanTen = useWatchSweety(
       React.useCallback(() => {
         const count = props.store.getState(AppState.sum)
 
         return count > 10
       }, [props.store]),
     )
-    const lessThanTwenty = useInnerWatch(
+    const lessThanTwenty = useWatchSweety(
       React.useCallback(() => {
         const count = AppState.sum(props.store.getState())
 
@@ -176,7 +176,7 @@ describe("watching nested stores", () => {
     ["multiple watchers", MultipleWatchersApp],
     ["multiple memoized watchers", MultipleMemoizedWatchersApp],
   ])("watches nested stores with %s", (_, App) => {
-    const store = InnerStore.of<AppState>({
+    const store = Sweety.of<AppState>({
       counts: [],
     })
     const onRender = jest.fn()
@@ -264,7 +264,7 @@ describe("watching nested stores", () => {
     act(() => {
       store.setState((state) => ({
         ...state,
-        counts: [...state.counts, InnerStore.of(9)],
+        counts: [...state.counts, Sweety.of(9)],
       }))
     })
     expect(onRender).toHaveBeenCalledTimes(1)

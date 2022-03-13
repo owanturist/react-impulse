@@ -1,17 +1,17 @@
 import { useCallback } from "react"
 import { renderHook } from "@testing-library/react-hooks"
 
-import { InnerStore, useInnerWatch } from "../../src"
+import { Sweety, useWatchSweety } from "../../src"
 import {
   WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
-} from "../../src/InnerStore"
+} from "../../src/Sweety"
 import { noop } from "../../src/utils"
 import { WithStore, WithListener } from "../common"
 
-describe("illegal usage of useInnerWatch", () => {
+describe("illegal usage of useWatchSweety", () => {
   const console$error = jest
     .spyOn(console, "error")
     .mockImplementation(jest.fn())
@@ -24,16 +24,16 @@ describe("illegal usage of useInnerWatch", () => {
     [
       "inline",
       () => {
-        return useInnerWatch(() => InnerStore.of(1).getState())
+        return useWatchSweety(() => Sweety.of(1).getState())
       },
     ],
     [
       "memoized",
       () => {
-        return useInnerWatch(useCallback(() => InnerStore.of(1).getState(), []))
+        return useWatchSweety(useCallback(() => Sweety.of(1).getState(), []))
       },
     ],
-  ])("when calling InnerStore.of() inside of the %s watcher", (_, useHook) => {
+  ])("when calling Sweety.of() inside of the %s watcher", (_, useHook) => {
     it.concurrent("calls console.error", () => {
       renderHook(useHook)
 
@@ -53,22 +53,22 @@ describe("illegal usage of useInnerWatch", () => {
     [
       "inline",
       ({ store }: WithStore<number>) => {
-        return useInnerWatch(() => store.clone().getState())
+        return useWatchSweety(() => store.clone().getState())
       },
     ],
     [
       "memoized",
       ({ store }: WithStore<number>) => {
-        return useInnerWatch(
+        return useWatchSweety(
           useCallback(() => store.clone().getState(), [store]),
         )
       },
     ],
   ])(
-    "warn on calling InnerStore#clone() inside of the %s watcher",
+    "warn on calling Sweety#clone() inside of the %s watcher",
     (_, useHook) => {
       it.concurrent("calls console.error", () => {
-        const store = InnerStore.of(2)
+        const store = Sweety.of(2)
         renderHook(useHook, {
           initialProps: { store },
         })
@@ -79,7 +79,7 @@ describe("illegal usage of useInnerWatch", () => {
       })
 
       it.concurrent("returns the cloned store's value", () => {
-        const store = InnerStore.of(2)
+        const store = Sweety.of(2)
         const { result } = renderHook(useHook, {
           initialProps: { store },
         })
@@ -93,7 +93,7 @@ describe("illegal usage of useInnerWatch", () => {
     [
       "inline",
       ({ store }: WithStore<number>) => {
-        return useInnerWatch(() => {
+        return useWatchSweety(() => {
           store.setState(3)
 
           return store.getState()
@@ -103,7 +103,7 @@ describe("illegal usage of useInnerWatch", () => {
     [
       "memoized",
       ({ store }: WithStore<number>) => {
-        return useInnerWatch(
+        return useWatchSweety(
           useCallback(() => {
             store.setState(3)
 
@@ -113,10 +113,10 @@ describe("illegal usage of useInnerWatch", () => {
       },
     ],
   ])(
-    "warn on calling InnerStore#setState() inside of the %s watcher",
+    "warn on calling Sweety#setState() inside of the %s watcher",
     (_, useHook) => {
       it.concurrent("calls console.error", () => {
-        const store = InnerStore.of(4)
+        const store = Sweety.of(4)
         renderHook(useHook, {
           initialProps: { store },
         })
@@ -127,7 +127,7 @@ describe("illegal usage of useInnerWatch", () => {
       })
 
       it.concurrent("does not change the store's value", () => {
-        const store = InnerStore.of(4)
+        const store = Sweety.of(4)
         const { result } = renderHook(useHook, {
           initialProps: { store },
         })
@@ -144,7 +144,7 @@ describe("illegal usage of useInnerWatch", () => {
         store,
         listener = jest.fn(),
       }: WithStore<number> & Partial<WithListener>) => {
-        return useInnerWatch(() => {
+        return useWatchSweety(() => {
           store.subscribe(listener)
 
           return store.getState()
@@ -157,7 +157,7 @@ describe("illegal usage of useInnerWatch", () => {
         store,
         listener = jest.fn(),
       }: WithStore<number> & Partial<WithListener>) => {
-        return useInnerWatch(
+        return useWatchSweety(
           useCallback(() => {
             store.subscribe(listener)
 
@@ -167,10 +167,10 @@ describe("illegal usage of useInnerWatch", () => {
       },
     ],
   ])(
-    "warn on calling InnerStore#subscribe() inside of the %s watcher",
+    "warn on calling Sweety#subscribe() inside of the %s watcher",
     (_, useHook) => {
       it.concurrent("calls console.error", () => {
-        const store = InnerStore.of(4)
+        const store = Sweety.of(4)
 
         renderHook(useHook, {
           initialProps: { store },
@@ -182,7 +182,7 @@ describe("illegal usage of useInnerWatch", () => {
       })
 
       it.concurrent("returns the store's value", () => {
-        const store = InnerStore.of(4)
+        const store = Sweety.of(4)
         const { result } = renderHook(useHook, {
           initialProps: { store },
         })
@@ -191,7 +191,7 @@ describe("illegal usage of useInnerWatch", () => {
       })
 
       it.concurrent("returns noop function as unsubscribe", () => {
-        const store = InnerStore.of(4)
+        const store = Sweety.of(4)
         const store$subscribe = jest.spyOn(store, "subscribe")
 
         renderHook(useHook, {
@@ -202,7 +202,7 @@ describe("illegal usage of useInnerWatch", () => {
       })
 
       it.concurrent("does not call the listener on store's change", () => {
-        const store = InnerStore.of(4)
+        const store = Sweety.of(4)
         const listener = jest.fn()
         const correctListener = jest.fn()
 
