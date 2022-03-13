@@ -193,7 +193,7 @@ export class InnerStore<T> implements Subscriber {
     }
 
     const finalCompare = overrideCompare(this.compare, compare)
-    const [register, emit] = SetStateContext.init()
+    const [emit, register] = SetStateContext.init()
 
     const nextValue =
       typeof valueOrTransform === "function"

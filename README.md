@@ -1150,6 +1150,10 @@ const Counter: React.VFC<{
 
 ### `batch`
 
+```ts
+function batch(execute: VoidFunction): void
+```
+
 The `batch` function is a helper to optimise multiple stores' updates.
 
 ```tsx
