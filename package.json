@@ -29,7 +29,9 @@
   },
   "keywords": [
     "react",
+    "react-hooks",
     "state",
+    "state-management",
     "store"
   ],
   "author": "Anton Ovechkin <owanturist@gmail.com>",
