@@ -1,6 +1,6 @@
 {
   "name": "react-inner-store",
-  "version": "1.0.0-beta.10",
+  "version": "1.0.0-beta.11",
   "description": "The clean and natural React state management",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
