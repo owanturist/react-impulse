@@ -1,6 +1,5 @@
-import { useEffect, useReducer } from "react"
+import { useCallback, useSyncExternalStore } from "react"
 
-import { modInc } from "./utils"
 import { Sweety } from "./Sweety"
 
 /**
@@ -50,15 +49,8 @@ export function useGetSweetyState<T>(
 export function useGetSweetyState<T>(
   store: null | undefined | Sweety<T>,
 ): null | undefined | T {
-  const [, render] = useReducer(modInc, 0)
-
-  useEffect(() => {
-    return store?.subscribe(render)
-  }, [store])
-
-  if (store == null) {
-    return store
-  }
-
-  return store.getState()
+  return useSyncExternalStore(
+    useCallback((cb) => store?.subscribe(cb), [store]),
+    useCallback(() => store && store.getState(), [store]),
+  )
 }
