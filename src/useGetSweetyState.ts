@@ -1,6 +1,8 @@
-import { useCallback, useSyncExternalStore } from "react"
+import { useCallback } from "react"
+import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector"
 
 import { Sweety } from "./Sweety"
+import { Compare, isEqual, noop, overrideCompare } from "./utils"
 
 /**
  * A hooks that subscribes to the store's changes and returns the current value.
@@ -10,7 +12,11 @@ import { Sweety } from "./Sweety"
  * @see {@link Sweety.getState}
  * @see {@link Sweety.subscribe}
  */
-export function useGetSweetyState<T>(store: Sweety<T>): T
+export function useGetSweetyState<T, R = T>(
+  store: Sweety<T>,
+  selector?: (value: T) => R,
+  compare?: null | Compare<R>,
+): R
 
 /**
  * A hooks that subscribes to the store's changes and returns the current value.
@@ -20,7 +26,11 @@ export function useGetSweetyState<T>(store: Sweety<T>): T
  * @see {@link Sweety.getState}
  * @see {@link Sweety.subscribe}
  */
-export function useGetSweetyState<T>(store: null | Sweety<T>): null | T
+export function useGetSweetyState<T, R = T>(
+  store: null | Sweety<T>,
+  selector?: (value: T) => R,
+  compare?: null | Compare<R>,
+): null | R
 
 /**
  * A hooks that subscribes to the store's changes and returns the current value.
@@ -30,9 +40,11 @@ export function useGetSweetyState<T>(store: null | Sweety<T>): null | T
  * @see {@link Sweety.getState}
  * @see {@link Sweety.subscribe}
  */
-export function useGetSweetyState<T>(
+export function useGetSweetyState<T, R = T>(
   store: undefined | Sweety<T>,
-): undefined | T
+  selector?: (value: T) => R,
+  compare?: null | Compare<R>,
+): undefined | R
 
 /**
  * A hooks that subscribes to the store's changes and returns the current value.
@@ -42,15 +54,58 @@ export function useGetSweetyState<T>(
  * @see {@link Sweety.getState}
  * @see {@link Sweety.subscribe}
  */
-export function useGetSweetyState<T>(
+export function useGetSweetyState<T, R = T>(
   store: null | undefined | Sweety<T>,
-): null | undefined | T
+  selector?: (value: T) => R,
+  compare?: null | Compare<R>,
+): null | undefined | R
 
-export function useGetSweetyState<T>(
+export function useGetSweetyState<T, R = T>(
   store: null | undefined | Sweety<T>,
-): null | undefined | T {
-  return useSyncExternalStore(
-    useCallback((cb) => store?.subscribe(cb), [store]),
-    useCallback(() => store && store.getState(), [store]),
+  selector?: (value: T) => R,
+  compare?: null | Compare<R>,
+): null | undefined | R {
+  const finalCompare = overrideCompare(isEqual, compare)
+  const getState = useCallback(() => {
+    if (store == null) {
+      return store
+    }
+
+    return store.getState()
+  }, [store])
+
+  return useSyncExternalStoreWithSelector(
+    useCallback(
+      (cb) => {
+        if (store == null) {
+          return noop
+        }
+
+        return store.subscribe(cb)
+      },
+      [store],
+    ),
+    getState,
+    getState,
+    useCallback(
+      (state) => {
+        if (state == null || selector == null) {
+          return state as unknown as R
+        }
+
+        return selector(state)
+      },
+      [selector],
+    ),
+    useCallback(
+      (prev: R, next: R) => {
+        if (prev != null && next != null) {
+          return finalCompare(prev, next)
+        }
+
+        return prev !== next
+      },
+      [finalCompare],
+    ),
   )
 }
