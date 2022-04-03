@@ -59,6 +59,11 @@ export const noop: VoidFunction = () => {
 /**
  * @private
  */
+export const identity = <T>(value: T): T => value
+
+/**
+ * @private
+ */
 export const warning = (message: string): void => {
   /* istanbul ignore next */
   if (
