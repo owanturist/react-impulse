@@ -1,8 +1,31 @@
-import { warning } from "./utils"
+import { noop } from "./utils"
 
 export interface Subscriber {
   key: string
   subscribe(listener: VoidFunction): VoidFunction
+}
+
+const warning = (message: string): void => {
+  /* istanbul ignore next */
+  if (
+    (process.env.NODE_ENV === "development" ||
+      process.env.NODE_ENV === "test") &&
+    typeof console !== "undefined" &&
+    // eslint-disable-next-line no-console
+    typeof console.error === "function"
+  ) {
+    // eslint-disable-next-line no-console
+    console.error(message)
+  }
+  /* eslint-enable no-console */
+  try {
+    // This error was thrown as a convenience so that if you enable
+    // "break on all exceptions" in your console,
+    // it would pause the execution at this line.
+    throw new Error(message)
+  } catch {
+    // do nothing
+  }
 }
 
 /**
@@ -36,13 +59,9 @@ export class WatchContext {
     WatchContext.current?.register(store)
   }
 
-  private readonly listener: VoidFunction
+  private listener: VoidFunction = noop
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
-
-  public constructor(listener: VoidFunction) {
-    this.listener = () => this.cycle(listener)
-  }
 
   private register(store: Subscriber): void {
     if (this.cleanups.has(store.key)) {
@@ -50,7 +69,10 @@ export class WatchContext {
       this.deadCleanups.delete(store.key)
     } else {
       WatchContext.isReadonlyDuringWatcherCall = false
-      this.cleanups.set(store.key, store.subscribe(this.listener))
+      this.cleanups.set(
+        store.key,
+        store.subscribe(() => this.cycle(this.listener)),
+      )
       WatchContext.isReadonlyDuringWatcherCall = true
     }
   }
@@ -83,13 +105,17 @@ export class WatchContext {
     WatchContext.current = null
   }
 
-  public activate<T>(watcher: () => T): void {
-    this.cycle(() => WatchContext.executeWatcher(watcher))
+  public subscribe(listener: VoidFunction): VoidFunction {
+    this.listener = listener
+
+    return () => {
+      this.cleanups.forEach((cleanup) => cleanup())
+      this.cleanups.clear()
+      this.deadCleanups.clear()
+    }
   }
 
-  public cleanup(): void {
-    this.cleanups.forEach((cleanup) => cleanup())
-    this.cleanups.clear()
-    this.deadCleanups.clear()
+  public activate<T>(watcher: () => T): void {
+    this.cycle(() => WatchContext.executeWatcher(watcher))
   }
 }

@@ -8,3 +8,5 @@ export { useSetSweetyState } from "./useSetSweetyState"
 export { useSweetyState } from "./useSweetyState"
 export { useSweetyReducer } from "./useSweetyReducer"
 export { useWatchSweety } from "./useWatchSweety"
+
+// TODO implement useSweety that will create Sweety instance

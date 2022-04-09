@@ -1,10 +1,7 @@
-import { useCallback } from "react"
-import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector"
+import { useCallback, useSyncExternalStore } from "react"
 
+import { noop } from "./utils"
 import { Sweety } from "./Sweety"
-import { identity, isEqual, noop } from "./utils"
-
-// TODO add selector to the hook
 
 /**
  * A hooks that subscribes to the store's changes and returns the current value.
@@ -53,28 +50,23 @@ export function useGetSweetyState<T>(
 export function useGetSweetyState<T>(
   store: null | undefined | Sweety<T>,
 ): null | undefined | T {
-  const getState = useCallback(() => {
-    if (store == null) {
-      return store
-    }
-
-    return store.getState()
-  }, [store])
-
-  return useSyncExternalStoreWithSelector(
+  return useSyncExternalStore(
     useCallback(
-      (cb) => {
+      (fire) => {
         if (store == null) {
           return noop
         }
 
-        return store.subscribe(cb)
+        return store.subscribe(fire)
       },
       [store],
     ),
-    getState,
-    getState,
-    identity,
-    isEqual,
+    useCallback(() => {
+      if (store == null) {
+        return store
+      }
+
+      return store.getState()
+    }, [store]),
   )
 }
