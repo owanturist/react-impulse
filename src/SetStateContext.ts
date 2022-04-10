@@ -11,10 +11,10 @@ import { WatchContext } from "./WatchContext"
  */
 export abstract class SetStateContext {
   private static subscribers: null | Array<Map<string, VoidFunction>> = null
-  private static readonly watchContexts: Array<WatchContext> = []
+  private static readonly watchContexts: Set<WatchContext> = new Set()
 
   public static register(watchCtx: WatchContext): void {
-    SetStateContext.watchContexts.push(watchCtx)
+    SetStateContext.watchContexts.add(watchCtx)
   }
 
   public static init(): [VoidFunction, Dispatch<Map<string, VoidFunction>>] {
@@ -52,9 +52,8 @@ export abstract class SetStateContext {
           })
         })
 
-        while (SetStateContext.watchContexts.length > 0) {
-          SetStateContext.watchContexts.pop()!.emit()
-        }
+        SetStateContext.watchContexts.forEach((watchCtx) => watchCtx.emit())
+        SetStateContext.watchContexts.clear()
 
         SetStateContext.subscribers = null
       },

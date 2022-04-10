@@ -61,7 +61,6 @@ export class WatchContext {
   }
 
   private listener: VoidFunction = noop
-  private shouldEmit = false
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
 
@@ -75,10 +74,7 @@ export class WatchContext {
         store.key,
         store.subscribe(() => {
           // the listener registers a watcher so the watcher will emit once per (batch) setState
-          if (!this.shouldEmit) {
-            SetStateContext.register(this)
-            this.shouldEmit = true
-          }
+          SetStateContext.register(this)
         }),
       )
       WatchContext.isReadonlyDuringWatcherCall = true
@@ -129,6 +125,5 @@ export class WatchContext {
 
   public emit(): void {
     this.cycle(this.listener)
-    this.shouldEmit = false
   }
 }
