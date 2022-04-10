@@ -195,7 +195,7 @@ export class Sweety<T> {
     }
 
     const finalCompare = overrideCompare(this.compare, compare)
-    const [emit, register] = SetStateContext.init()
+    const [emit, register] = SetStateContext.registerStoreSubscribers()
 
     const nextValue =
       typeof valueOrTransform === "function"
