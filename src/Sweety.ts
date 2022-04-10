@@ -105,6 +105,8 @@ export class Sweety<T> implements Subscriber {
     return new Sweety(value, compare ?? isEqual)
   }
 
+  // it should keep the listeners in a Map by a uniq key because
+  // the same listener can be added multiple times
   private readonly subscribers = new Map<string, VoidFunction>()
 
   /**

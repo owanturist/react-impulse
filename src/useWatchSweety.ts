@@ -4,7 +4,9 @@ import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-s
 import { Compare, isEqual } from "./utils"
 import { WatchContext } from "./WatchContext"
 
-const identity = <T>(value: T): T => value
+const modInc = (x: number): number => {
+  return (x + 1) % 123456789
+}
 
 /**
  * A hook that subscribes to all `Sweety#getState` execution involved in the `watcher` call.
@@ -22,68 +24,43 @@ export function useWatchSweety<T>(
   watcher: () => T,
   compare?: null | Compare<T>,
 ): T {
+  const forceSelectRef = useRef(0)
   const contextRef = useRef<WatchContext>()
-  // const watcherRef = useRef(watcher)
+  const compareRef = useRef(compare ?? isEqual)
 
   if (contextRef.current == null) {
     contextRef.current = new WatchContext()
   }
 
-  const getState = useCallback(() => {
-    return WatchContext.executeWatcher(watcher)
+  const subscribe = useCallback((onStoreChange: VoidFunction) => {
+    return contextRef.current!.subscribeOnWatchedStores(() => {
+      forceSelectRef.current = modInc(forceSelectRef.current)
+      onStoreChange()
+    })
+  }, [])
+  const getState = useCallback(() => forceSelectRef.current, [])
+  const select = useCallback(
+    () => WatchContext.executeWatcher(watcher),
+    [watcher],
+  )
+  const onCompare = useCallback(
+    (prev: T, next: T) => compareRef.current(prev, next),
+    [],
+  )
+
+  useEffect(() => {
+    contextRef.current!.watchStores(watcher)
   }, [watcher])
 
   useEffect(() => {
-    contextRef.current!.activate(watcher)
-  }, [watcher])
+    compareRef.current = compare ?? isEqual
+  }, [compare])
 
   return useSyncExternalStoreWithSelector(
-    useCallback((fire) => contextRef.current!.subscribe(fire), []),
+    subscribe,
     getState,
     getState,
-    identity,
-    compare ?? isEqual,
+    select,
+    onCompare,
   )
-
-  // const [, render] = useReducer(modInc, 0)
-
-  // const valueRef = useRef<T>()
-  // // const watcherRef = useRef<() => T>()
-  // // workaround to handle changes of the watcher returning value
-  // if (watcherRef.current !== watcher) {
-  //   valueRef.current = WatchContext.executeWatcher(watcher)
-  // }
-
-  // // permanent ref
-  // // const contextRef = useRef<WatchContext>()
-  // if (contextRef.current == null) {
-  //   contextRef.current = new WatchContext(() => {
-  //     const currentValue = valueRef.current!
-  //     const nextValue = WatchContext.executeWatcher(watcherRef.current)
-
-  //     if (!compareRef.current(currentValue, nextValue)) {
-  //       valueRef.current = nextValue
-  //       render()
-  //     }
-  //   })
-  // }
-
-  // const compareRef = useRef(compare ?? isEqual)
-  // useEffect(() => {
-  //   compareRef.current = compare ?? isEqual
-  // }, [compare])
-
-  // useEffect(() => {
-  //   watcherRef.current = watcher
-  //   contextRef.current.activate(watcher)
-  // }, [watcher])
-
-  // // cleanup everything when unmounts
-  // useEffect(() => {
-  //   return () => {
-  //     contextRef.current.cleanup()
-  //   }
-  // }, [])
-
-  // return valueRef.current!
 }

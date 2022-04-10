@@ -52,12 +52,8 @@ export function useGetSweetyState<T>(
 ): null | undefined | T {
   return useSyncExternalStore(
     useCallback(
-      (fire) => {
-        if (store == null) {
-          return noop
-        }
-
-        return store.subscribe(fire)
+      (onStoreChange) => {
+        return store == null ? noop : store.subscribe(onStoreChange)
       },
       [store],
     ),

@@ -1,3 +1,4 @@
+import { SetStateContext } from "./SetStateContext"
 import { noop } from "./utils"
 
 export interface Subscriber {
@@ -60,6 +61,7 @@ export class WatchContext {
   }
 
   private listener: VoidFunction = noop
+  private shouldEmit = false
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
 
@@ -71,7 +73,11 @@ export class WatchContext {
       WatchContext.isReadonlyDuringWatcherCall = false
       this.cleanups.set(
         store.key,
-        store.subscribe(() => this.cycle(this.listener)),
+        store.subscribe(() => {
+          // the listener registers a watcher so the watcher will emit once per (batch) setState
+          SetStateContext.register(this)
+          this.shouldEmit = true
+        }),
       )
       WatchContext.isReadonlyDuringWatcherCall = true
     }
@@ -105,7 +111,7 @@ export class WatchContext {
     WatchContext.current = null
   }
 
-  public subscribe(listener: VoidFunction): VoidFunction {
+  public subscribeOnWatchedStores(listener: VoidFunction): VoidFunction {
     this.listener = listener
 
     return () => {
@@ -115,7 +121,14 @@ export class WatchContext {
     }
   }
 
-  public activate<T>(watcher: () => T): void {
+  public watchStores<T>(watcher: () => T): void {
     this.cycle(() => WatchContext.executeWatcher(watcher))
+  }
+
+  public emit(): void {
+    if (this.shouldEmit) {
+      this.cycle(this.listener)
+      this.shouldEmit = false
+    }
   }
 }

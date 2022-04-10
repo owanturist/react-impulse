@@ -1,6 +1,7 @@
 import { Dispatch } from "react"
 
 import { noop } from "./utils"
+import { WatchContext } from "./WatchContext"
 
 /**
  * A context that allows to collect Sweety#setState subscribers and execute them all at once.
@@ -10,6 +11,11 @@ import { noop } from "./utils"
  */
 export abstract class SetStateContext {
   private static subscribers: null | Array<Map<string, VoidFunction>> = null
+  private static readonly watchContexts: Set<WatchContext> = new Set()
+
+  public static register(watchCtx: WatchContext): void {
+    SetStateContext.watchContexts.add(watchCtx)
+  }
 
   public static init(): [VoidFunction, Dispatch<Map<string, VoidFunction>>] {
     if (SetStateContext.subscribers != null) {
@@ -37,11 +43,17 @@ export abstract class SetStateContext {
           subs.forEach((listener) => {
             // don't emit the same listener twice, for instance when using `useWatchSweety`
             if (!calledListeners.has(listener)) {
+              // the listener might register watchers (for useWatchSweety)
+              // so each watcher will emit only once in the code bellow
+              // even if there were multiple watching stores updated
               listener()
               calledListeners.add(listener)
             }
           })
         })
+
+        SetStateContext.watchContexts.forEach((watchCtx) => watchCtx.emit())
+        SetStateContext.watchContexts.clear()
 
         SetStateContext.subscribers = null
       },
