@@ -32,6 +32,11 @@ export function useWatchSweety<T>(
     contextRef.current = new WatchContext()
   }
 
+  // the subscribe cannot directly return the watcher result
+  // because it might be different per each call
+  // but subscribe requires a snapshot of the mutable store
+  // so instead it increments the forceSelectRef on store updates only
+  // but keeps the value in between allowing to avoid the re-render hell
   const subscribe = useCallback((onStoreChange: VoidFunction) => {
     return contextRef.current!.subscribeOnWatchedStores(() => {
       forceSelectRef.current = modInc(forceSelectRef.current)
@@ -39,10 +44,12 @@ export function useWatchSweety<T>(
     })
   }, [])
   const getState = useCallback(() => forceSelectRef.current, [])
+  // the select calls each time when updates either the watcher or the forceSelectRef
   const select = useCallback(
     () => WatchContext.executeWatcher(watcher),
     [watcher],
   )
+  // it should memoize the onCompare otherwise it will call the watcher on each render
   const onCompare = useCallback(
     (prev: T, next: T) => compareRef.current(prev, next),
     [],
