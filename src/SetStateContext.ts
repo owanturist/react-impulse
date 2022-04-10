@@ -1,7 +1,7 @@
 import { Dispatch } from "react"
 
 import { noop } from "./utils"
-import { WatchContext } from "./WatchContext"
+import type { WatchContext } from "./WatchContext"
 
 /**
  * A context that allows to collect Sweety#setState subscribers and execute them all at once.

@@ -1,10 +1,6 @@
+import type { Sweety } from "./Sweety"
 import { SetStateContext } from "./SetStateContext"
 import { noop } from "./utils"
-
-export interface Subscriber {
-  key: string
-  subscribe(listener: VoidFunction): VoidFunction
-}
 
 const warning = (message: string): void => {
   /* istanbul ignore next */
@@ -56,7 +52,7 @@ export class WatchContext {
     return value
   }
 
-  public static register(store: Subscriber): void {
+  public static register<T>(store: Sweety<T>): void {
     WatchContext.current?.register(store)
   }
 
@@ -64,7 +60,7 @@ export class WatchContext {
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
 
-  private register(store: Subscriber): void {
+  private register<T>(store: Sweety<T>): void {
     if (this.cleanups.has(store.key)) {
       // still alive
       this.deadCleanups.delete(store.key)
