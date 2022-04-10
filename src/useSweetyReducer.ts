@@ -91,13 +91,13 @@ export function useSweetyReducer<T, A>(
   store: null | undefined | Sweety<T>,
   reducer: (state: T, action: A) => T,
   compare?: null | Compare<T>,
-): [null | undefined | T, Dispatch<A>]
+): [state: null | undefined | T, dispatch: Dispatch<A>]
 
 export function useSweetyReducer<T, A>(
   store: null | undefined | Sweety<T>,
   reducer: (state: T, action: A) => T,
   compare?: null | Compare<T>,
-): [null | undefined | T, Dispatch<A>] {
+): [state: null | undefined | T, dispatch: Dispatch<A>] {
   const setState = useSetSweetyState(store, compare)
   const reducerRef = useRef(reducer)
 
