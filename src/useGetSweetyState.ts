@@ -1,7 +1,8 @@
-import { useCallback, useDebugValue, useSyncExternalStore } from "react"
+import { useCallback, useDebugValue } from "react"
+import { useSyncExternalStore } from "use-sync-external-store/shim"
 
 import { noop } from "./utils"
-import { Sweety } from "./Sweety"
+import type { Sweety } from "./Sweety"
 
 /**
  * A hooks that subscribes to the store's changes and returns the current value.

@@ -1,7 +1,7 @@
 import { Dispatch, useRef, useEffect, useCallback, useDebugValue } from "react"
 
-import { Compare } from "./utils"
-import { Sweety } from "./Sweety"
+import type { Compare } from "./utils"
+import type { Sweety } from "./Sweety"
 import { useGetSweetyState } from "./useGetSweetyState"
 import { useSetSweetyState } from "./useSetSweetyState"
 

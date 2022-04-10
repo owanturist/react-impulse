@@ -1,7 +1,7 @@
 import { useRef, useEffect, useCallback } from "react"
 
 import { Compare, overrideCompare, SetSweetyState } from "./utils"
-import { Sweety } from "./Sweety"
+import type { Sweety } from "./Sweety"
 
 /**
  * A hooks that returns a function to update the store's value.

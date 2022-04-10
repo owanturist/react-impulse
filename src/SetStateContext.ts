@@ -1,4 +1,4 @@
-import { Dispatch } from "react"
+import type { Dispatch } from "react"
 
 import { noop } from "./utils"
 import type { WatchContext } from "./WatchContext"

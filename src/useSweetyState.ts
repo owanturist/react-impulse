@@ -1,8 +1,9 @@
+import { useDebugValue } from "react"
+
 import { Compare, SetSweetyState } from "./utils"
-import { Sweety } from "./Sweety"
+import type { Sweety } from "./Sweety"
 import { useGetSweetyState } from "./useGetSweetyState"
 import { useSetSweetyState } from "./useSetSweetyState"
-import { useDebugValue } from "react"
 
 /**
  * A hook that is similar to `React.useState` but for `Sweety` instances.
