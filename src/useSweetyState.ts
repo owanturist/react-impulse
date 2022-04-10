@@ -2,6 +2,7 @@ import { Compare, SetSweetyState } from "./utils"
 import { Sweety } from "./Sweety"
 import { useGetSweetyState } from "./useGetSweetyState"
 import { useSetSweetyState } from "./useSetSweetyState"
+import { useDebugValue } from "react"
 
 /**
  * A hook that is similar to `React.useState` but for `Sweety` instances.
@@ -95,5 +96,9 @@ export function useSweetyState<T>(
   store: null | undefined | Sweety<T>,
   compare?: null | Compare<T>,
 ): [state: null | undefined | T, setState: SetSweetyState<T>] {
-  return [useGetSweetyState(store), useSetSweetyState(store, compare)]
+  const value = useGetSweetyState(store)
+
+  useDebugValue(value)
+
+  return [value, useSetSweetyState(store, compare)]
 }

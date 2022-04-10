@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from "react"
+import { useRef, useEffect, useCallback, useDebugValue } from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector"
 
 import { Compare, isEqual } from "./utils"
@@ -63,11 +63,15 @@ export function useWatchSweety<T>(
     compareRef.current = compare ?? isEqual
   }, [compare])
 
-  return useSyncExternalStoreWithSelector(
+  const value = useSyncExternalStoreWithSelector(
     subscribe,
     getState,
     getState,
     select,
     onCompare,
   )
+
+  useDebugValue(value)
+
+  return value
 }

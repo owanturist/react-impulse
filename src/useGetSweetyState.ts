@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from "react"
+import { useCallback, useDebugValue, useSyncExternalStore } from "react"
 
 import { noop } from "./utils"
 import { Sweety } from "./Sweety"
@@ -50,7 +50,7 @@ export function useGetSweetyState<T>(
 export function useGetSweetyState<T>(
   store: null | undefined | Sweety<T>,
 ): null | undefined | T {
-  return useSyncExternalStore(
+  const value = useSyncExternalStore(
     useCallback(
       (onStoreChange) => {
         return store == null ? noop : store.subscribe(onStoreChange)
@@ -65,4 +65,8 @@ export function useGetSweetyState<T>(
       return store.getState()
     }, [store]),
   )
+
+  useDebugValue(value)
+
+  return value
 }
