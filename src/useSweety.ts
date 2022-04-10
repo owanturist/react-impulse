@@ -4,8 +4,9 @@ import { Sweety } from "./Sweety"
 
 // TODO add docs
 export function useSweety<T>(init: () => T): Sweety<T>
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function useSweety(init: (...args: Array<any>) => any): never
+export function useSweety<A extends Array<unknown>, R>(
+  init: (...args: A) => R,
+): never
 export function useSweety<T>(value: T): Sweety<T>
 export function useSweety<T>(initOrValue: T | (() => T)): Sweety<T> {
   const sweetyRef = useRef<Sweety<T>>()

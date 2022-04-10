@@ -75,8 +75,10 @@ export class WatchContext {
         store.key,
         store.subscribe(() => {
           // the listener registers a watcher so the watcher will emit once per (batch) setState
-          SetStateContext.register(this)
-          this.shouldEmit = true
+          if (!this.shouldEmit) {
+            SetStateContext.register(this)
+            this.shouldEmit = true
+          }
         }),
       )
       WatchContext.isReadonlyDuringWatcherCall = true
@@ -126,9 +128,7 @@ export class WatchContext {
   }
 
   public emit(): void {
-    if (this.shouldEmit) {
-      this.cycle(this.listener)
-      this.shouldEmit = false
-    }
+    this.cycle(this.listener)
+    this.shouldEmit = false
   }
 }
