@@ -1,8 +1,28 @@
-import { warning } from "./utils"
+import type { Sweety } from "./Sweety"
+import { SetStateContext } from "./SetStateContext"
+import { noop } from "./utils"
 
-export interface Subscriber {
-  key: string
-  subscribe(listener: VoidFunction): VoidFunction
+const warning = (message: string): void => {
+  /* istanbul ignore next */
+  if (
+    (process.env.NODE_ENV === "development" ||
+      process.env.NODE_ENV === "test") &&
+    typeof console !== "undefined" &&
+    // eslint-disable-next-line no-console
+    typeof console.error === "function"
+  ) {
+    // eslint-disable-next-line no-console
+    console.error(message)
+  }
+  /* eslint-enable no-console */
+  try {
+    // This error was thrown as a convenience so that if you enable
+    // "break on all exceptions" in your console,
+    // it would pause the execution at this line.
+    throw new Error(message)
+  } catch {
+    // do nothing
+  }
 }
 
 /**
@@ -32,25 +52,27 @@ export class WatchContext {
     return value
   }
 
-  public static register(store: Subscriber): void {
+  public static register<T>(store: Sweety<T>): void {
     WatchContext.current?.register(store)
   }
 
-  private readonly listener: VoidFunction
+  private listener: VoidFunction = noop
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
 
-  public constructor(listener: VoidFunction) {
-    this.listener = () => this.cycle(listener)
-  }
-
-  private register(store: Subscriber): void {
+  private register<T>(store: Sweety<T>): void {
     if (this.cleanups.has(store.key)) {
       // still alive
       this.deadCleanups.delete(store.key)
     } else {
       WatchContext.isReadonlyDuringWatcherCall = false
-      this.cleanups.set(store.key, store.subscribe(this.listener))
+      this.cleanups.set(
+        store.key,
+        store.subscribe(() => {
+          // the listener registers a watcher so the watcher will emit once per (batch) setState
+          SetStateContext.registerWatchContext(this)
+        }),
+      )
       WatchContext.isReadonlyDuringWatcherCall = true
     }
   }
@@ -83,13 +105,21 @@ export class WatchContext {
     WatchContext.current = null
   }
 
-  public activate<T>(watcher: () => T): void {
+  public subscribeOnWatchedStores(listener: VoidFunction): VoidFunction {
+    this.listener = listener
+
+    return () => {
+      this.cleanups.forEach((cleanup) => cleanup())
+      this.cleanups.clear()
+      this.deadCleanups.clear()
+    }
+  }
+
+  public watchStores<T>(watcher: () => T): void {
     this.cycle(() => WatchContext.executeWatcher(watcher))
   }
 
-  public cleanup(): void {
-    this.cleanups.forEach((cleanup) => cleanup())
-    this.cleanups.clear()
-    this.deadCleanups.clear()
+  public emit(): void {
+    this.cycle(this.listener)
   }
 }

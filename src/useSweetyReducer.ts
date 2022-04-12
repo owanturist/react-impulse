@@ -1,7 +1,7 @@
-import { Dispatch, useRef, useEffect, useCallback } from "react"
+import { Dispatch, useRef, useEffect, useCallback, useDebugValue } from "react"
 
-import { Compare } from "./utils"
-import { Sweety } from "./Sweety"
+import type { Compare } from "./utils"
+import type { Sweety } from "./Sweety"
 import { useGetSweetyState } from "./useGetSweetyState"
 import { useSetSweetyState } from "./useSetSweetyState"
 
@@ -91,13 +91,13 @@ export function useSweetyReducer<T, A>(
   store: null | undefined | Sweety<T>,
   reducer: (state: T, action: A) => T,
   compare?: null | Compare<T>,
-): [null | undefined | T, Dispatch<A>]
+): [state: null | undefined | T, dispatch: Dispatch<A>]
 
 export function useSweetyReducer<T, A>(
   store: null | undefined | Sweety<T>,
   reducer: (state: T, action: A) => T,
   compare?: null | Compare<T>,
-): [null | undefined | T, Dispatch<A>] {
+): [state: null | undefined | T, dispatch: Dispatch<A>] {
   const setState = useSetSweetyState(store, compare)
   const reducerRef = useRef(reducer)
 
@@ -105,8 +105,12 @@ export function useSweetyReducer<T, A>(
     reducerRef.current = reducer
   }, [reducer])
 
+  const value = useGetSweetyState(store)
+
+  useDebugValue(value)
+
   return [
-    useGetSweetyState(store),
+    value,
     useCallback(
       (action) => setState((state) => reducerRef.current(state, action)),
       [setState],

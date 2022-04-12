@@ -1,7 +1,8 @@
-import { useEffect, useReducer } from "react"
+import { useCallback, useDebugValue } from "react"
+import { useSyncExternalStore } from "use-sync-external-store/shim"
 
-import { modInc } from "./utils"
-import { Sweety } from "./Sweety"
+import { noop } from "./utils"
+import type { Sweety } from "./Sweety"
 
 /**
  * A hooks that subscribes to the store's changes and returns the current value.
@@ -50,15 +51,23 @@ export function useGetSweetyState<T>(
 export function useGetSweetyState<T>(
   store: null | undefined | Sweety<T>,
 ): null | undefined | T {
-  const [, render] = useReducer(modInc, 0)
+  const value = useSyncExternalStore(
+    useCallback(
+      (onStoreChange) => {
+        return store == null ? noop : store.subscribe(onStoreChange)
+      },
+      [store],
+    ),
+    useCallback(() => {
+      if (store == null) {
+        return store
+      }
 
-  useEffect(() => {
-    return store?.subscribe(render)
-  }, [store])
+      return store.getState()
+    }, [store]),
+  )
 
-  if (store == null) {
-    return store
-  }
+  useDebugValue(value)
 
-  return store.getState()
+  return value
 }

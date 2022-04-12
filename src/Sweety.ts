@@ -1,8 +1,8 @@
-import { SetStateAction } from "react"
+import type { SetStateAction } from "react"
 import { nanoid } from "nanoid"
 
 import { Compare, isEqual, noop, overrideCompare } from "./utils"
-import { Subscriber, WatchContext } from "./WatchContext"
+import { WatchContext } from "./WatchContext"
 import { SetStateContext } from "./SetStateContext"
 
 type ExtractDirect<T> = T extends Sweety<infer R> ? R : T
@@ -81,7 +81,7 @@ export const WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING =
     method: "Sweety#subscribe",
   })
 
-export class Sweety<T> implements Subscriber {
+export class Sweety<T> {
   /**
    * Creates a new `Sweety` store instance.
    * The instance is mutable so once created it should be used for all future operations.
@@ -105,6 +105,8 @@ export class Sweety<T> implements Subscriber {
     return new Sweety(value, compare ?? isEqual)
   }
 
+  // it should keep the listeners in a Map by a uniq key because
+  // the same listener can be added multiple times
   private readonly subscribers = new Map<string, VoidFunction>()
 
   /**
@@ -193,7 +195,7 @@ export class Sweety<T> implements Subscriber {
     }
 
     const finalCompare = overrideCompare(this.compare, compare)
-    const [emit, register] = SetStateContext.init()
+    const [emit, register] = SetStateContext.registerStoreSubscribers()
 
     const nextValue =
       typeof valueOrTransform === "function"

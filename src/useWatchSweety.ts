@@ -1,7 +1,12 @@
-import { useRef, useReducer, useEffect } from "react"
+import { useRef, useEffect, useCallback, useDebugValue } from "react"
+import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector"
 
-import { Compare, modInc, isEqual } from "./utils"
+import { Compare, isEqual } from "./utils"
 import { WatchContext } from "./WatchContext"
+
+const modInc = (x: number): number => {
+  return (x + 1) % 123456789
+}
 
 /**
  * A hook that subscribes to all `Sweety#getState` execution involved in the `watcher` call.
@@ -19,45 +24,54 @@ export function useWatchSweety<T>(
   watcher: () => T,
   compare?: null | Compare<T>,
 ): T {
-  const [, render] = useReducer(modInc, 0)
-
-  const valueRef = useRef<T>()
-  const watcherRef = useRef<() => T>()
-  // workaround to handle changes of the watcher returning value
-  if (watcherRef.current !== watcher) {
-    valueRef.current = WatchContext.executeWatcher(watcher)
-  }
-
-  // permanent ref
+  const forceSelectRef = useRef(0)
   const contextRef = useRef<WatchContext>()
-  if (contextRef.current == null) {
-    contextRef.current = new WatchContext(() => {
-      const currentValue = valueRef.current!
-      const nextValue = WatchContext.executeWatcher(watcherRef.current!)
+  const compareRef = useRef(compare ?? isEqual)
 
-      if (!compareRef.current(currentValue, nextValue)) {
-        valueRef.current = nextValue
-        render()
-      }
-    })
+  if (contextRef.current == null) {
+    contextRef.current = new WatchContext()
   }
 
-  const compareRef = useRef(compare ?? isEqual)
+  // the subscribe cannot directly return the watcher result
+  // because it might be different per each call
+  // but subscribe requires a snapshot of the mutable store
+  // so instead it increments the forceSelectRef on store updates only
+  // but keeps the value in between allowing to avoid the re-render hell
+  const subscribe = useCallback((onStoreChange: VoidFunction) => {
+    return contextRef.current!.subscribeOnWatchedStores(() => {
+      forceSelectRef.current = modInc(forceSelectRef.current)
+      onStoreChange()
+    })
+  }, [])
+  const getState = useCallback(() => forceSelectRef.current, [])
+  // the select calls each time when updates either the watcher or the forceSelectRef
+  const select = useCallback(
+    () => WatchContext.executeWatcher(watcher),
+    [watcher],
+  )
+  // it should memoize the onCompare otherwise it will call the watcher on each render
+  const onCompare = useCallback(
+    (prev: T, next: T) => compareRef.current(prev, next),
+    [],
+  )
+
+  useEffect(() => {
+    contextRef.current!.watchStores(watcher)
+  }, [watcher])
+
   useEffect(() => {
     compareRef.current = compare ?? isEqual
   }, [compare])
 
-  useEffect(() => {
-    watcherRef.current = watcher
-    contextRef.current!.activate(watcher)
-  }, [watcher])
+  const value = useSyncExternalStoreWithSelector(
+    subscribe,
+    getState,
+    getState,
+    select,
+    onCompare,
+  )
 
-  // cleanup everything when unmounts
-  useEffect(() => {
-    return () => {
-      contextRef.current!.cleanup()
-    }
-  }, [])
+  useDebugValue(value)
 
-  return valueRef.current!
+  return value
 }

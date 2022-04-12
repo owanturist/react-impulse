@@ -1,5 +1,7 @@
+import { useDebugValue } from "react"
+
 import { Compare, SetSweetyState } from "./utils"
-import { Sweety } from "./Sweety"
+import type { Sweety } from "./Sweety"
 import { useGetSweetyState } from "./useGetSweetyState"
 import { useSetSweetyState } from "./useSetSweetyState"
 
@@ -23,7 +25,7 @@ import { useSetSweetyState } from "./useSetSweetyState"
 export function useSweetyState<T>(
   store: Sweety<T>,
   compare?: null | Compare<T>,
-): [T, SetSweetyState<T>]
+): [state: T, setState: SetSweetyState<T>]
 
 /**
  * The hook that is similar to `React.useState` but for `Sweety` instances.
@@ -45,7 +47,7 @@ export function useSweetyState<T>(
 export function useSweetyState<T>(
   store: null | Sweety<T>,
   compare?: null | Compare<T>,
-): [null | T, SetSweetyState<T>]
+): [state: null | T, setState: SetSweetyState<T>]
 
 /**
  * A hook that is similar to `React.useState` but for `Sweety` instances.
@@ -67,7 +69,7 @@ export function useSweetyState<T>(
 export function useSweetyState<T>(
   store: undefined | Sweety<T>,
   compare?: null | Compare<T>,
-): [undefined | T, SetSweetyState<T>]
+): [state: undefined | T, setState: SetSweetyState<T>]
 
 /**
  * A hook that is similar to `React.useState` but for `Sweety` instances.
@@ -89,11 +91,15 @@ export function useSweetyState<T>(
 export function useSweetyState<T>(
   store: null | undefined | Sweety<T>,
   compare?: null | Compare<T>,
-): [null | undefined | T, SetSweetyState<T>]
+): [state: null | undefined | T, setState: SetSweetyState<T>]
 
 export function useSweetyState<T>(
   store: null | undefined | Sweety<T>,
   compare?: null | Compare<T>,
-): [null | undefined | T, SetSweetyState<T>] {
-  return [useGetSweetyState(store), useSetSweetyState(store, compare)]
+): [state: null | undefined | T, setState: SetSweetyState<T>] {
+  const value = useGetSweetyState(store)
+
+  useDebugValue(value)
+
+  return [value, useSetSweetyState(store, compare)]
 }

@@ -81,9 +81,15 @@ describe("watching multiple stores", () => {
 
         return [sum > 2, sum < 7]
       }, [props.firstCount, props.secondCount]),
-      React.useCallback(([left1, right1], [left2, right2]) => {
-        return left1 === left2 && right1 === right2
-      }, []),
+      React.useCallback(
+        (
+          [left1, right1]: [boolean, boolean],
+          [left2, right2]: [boolean, boolean],
+        ) => {
+          return left1 === left2 && right1 === right2
+        },
+        [],
+      ),
     )
 
     return (
