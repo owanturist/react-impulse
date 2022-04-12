@@ -15,15 +15,6 @@ const terserOptions = {
   },
 }
 
-const UMD_EXTERNALS = ["react"]
-
-const UMD_GLOBALS = {
-  react: "React",
-  crypto: "crypto",
-}
-
-const UMD_NAME = "ReactSweety"
-
 const extensions = [".ts"]
 
 const isExternal = (filePath) => {
@@ -98,51 +89,6 @@ export default [
         "process.env.NODE_ENV": JSON.stringify("production"),
       }),
       terser({ module: true, ...terserOptions }),
-    ],
-  },
-
-  // UMD Development
-  {
-    input,
-    external: UMD_EXTERNALS,
-    output: {
-      file: path.resolve(root, "dist/index-dev.umd.js"),
-      format: "umd",
-      indent: false,
-      name: UMD_NAME,
-      globals: UMD_GLOBALS,
-    },
-    plugins: [
-      nodeResolve({ extensions }),
-      commonjs(),
-      typescript({ tsconfig }),
-      replace({
-        preventAssignment: true,
-        "process.env.NODE_ENV": JSON.stringify("development"),
-      }),
-    ],
-  },
-
-  // UMD Production
-  {
-    input,
-    external: UMD_EXTERNALS,
-    output: {
-      file: path.resolve(root, "dist/index-prod.umd.js"),
-      format: "umd",
-      indent: false,
-      name: UMD_NAME,
-      globals: UMD_GLOBALS,
-    },
-    plugins: [
-      nodeResolve({ extensions }),
-      commonjs(),
-      typescript({ tsconfig }),
-      replace({
-        preventAssignment: true,
-        "process.env.NODE_ENV": JSON.stringify("production"),
-      }),
-      terser(terserOptions),
     ],
   },
 ]

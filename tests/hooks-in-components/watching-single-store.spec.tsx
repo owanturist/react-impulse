@@ -58,9 +58,15 @@ describe("watching single store", () => {
 
         return [count > 1, count < 4]
       }, [props.count]),
-      React.useCallback(([left1, right1], [left2, right2]) => {
-        return left1 === left2 && right1 === right2
-      }, []),
+      React.useCallback(
+        (
+          [left1, right1]: [boolean, boolean],
+          [left2, right2]: [boolean, boolean],
+        ) => {
+          return left1 === left2 && right1 === right2
+        },
+        [],
+      ),
     )
 
     return (
