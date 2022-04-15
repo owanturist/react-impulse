@@ -131,6 +131,7 @@
       }
     ],
     "import/no-relative-packages": "error",
+    "import/no-unresolved": ["error", { "ignore": ["vitest/config"] }],
     "import/no-extraneous-dependencies": [
       "error",
       {
@@ -215,9 +216,6 @@
     },
     {
       "files": ["tests/**/*.ts?(x)"],
-      "env": {
-        "jest": true
-      },
       "extends": [
         "plugin:jest/recommended",
         "plugin:jest/style",
@@ -225,6 +223,7 @@
         "plugin:prettier/recommended"
       ],
       "rules": {
+        "jest/no-deprecated-functions": "off",
         "jest/no-duplicate-hooks": "warn",
         "jest/no-if": "error",
         "jest/no-test-return-statement": "error",

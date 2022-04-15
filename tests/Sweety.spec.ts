@@ -23,7 +23,7 @@ describe("Sweety#key", () => {
     store.setState({ count: 1 })
     expect(store.key).toBe(key)
 
-    store.subscribe(jest.fn)
+    store.subscribe(vi.fn)
     expect(store.key).toBe(key)
 
     store.clone()
@@ -333,17 +333,17 @@ describe("Sweety#clone", () => {
 describe("Sweety#subscribe", () => {
   it.concurrent("subscribes and unsubscribes to state changes", () => {
     const store = Sweety.of({ count: 0 })
-    const spy = jest.fn()
+    const spy = vi.fn()
 
     store.setState(Counter.inc)
     expect(spy).not.toHaveBeenCalled()
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     const unsubscribe = store.subscribe(spy)
 
     store.setState(Counter.inc)
     expect(spy).toHaveBeenCalledTimes(1)
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     unsubscribe()
 
@@ -352,19 +352,19 @@ describe("Sweety#subscribe", () => {
   })
 
   it.concurrent("emits the same listener once", () => {
-    const spy = jest.fn()
+    const spy = vi.fn()
     const store = Sweety.of({ count: 0 })
     const unsubscribe_1 = store.subscribe(spy)
     const unsubscribe_2 = store.subscribe(spy)
 
     store.setState(Counter.inc)
     expect(spy).toHaveBeenCalledTimes(1)
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     unsubscribe_1()
     store.setState(Counter.inc)
     expect(spy).toHaveBeenCalledTimes(1)
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     unsubscribe_2()
     store.setState(Counter.inc)
@@ -372,13 +372,13 @@ describe("Sweety#subscribe", () => {
   })
 
   it.concurrent("ignores second unsubscribe call", () => {
-    const spy = jest.fn()
+    const spy = vi.fn()
     const store = Sweety.of({ count: 0 })
     const unsubscribe = store.subscribe(spy)
 
     store.setState(Counter.inc)
     expect(spy).toHaveBeenCalledTimes(1)
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     unsubscribe()
     unsubscribe()
@@ -388,8 +388,8 @@ describe("Sweety#subscribe", () => {
   })
 
   it.concurrent("subscribes multiple listeners", () => {
-    const spy_1 = jest.fn()
-    const spy_2 = jest.fn()
+    const spy_1 = vi.fn()
+    const spy_2 = vi.fn()
     const store = Sweety.of({ count: 0 })
     const unsubscribe_1 = store.subscribe(spy_1)
     const unsubscribe_2 = store.subscribe(spy_2)
@@ -397,13 +397,13 @@ describe("Sweety#subscribe", () => {
     store.setState(Counter.inc)
     expect(spy_1).toHaveBeenCalledTimes(1)
     expect(spy_2).toHaveBeenCalledTimes(1)
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     unsubscribe_1()
     store.setState(Counter.inc)
     expect(spy_1).not.toHaveBeenCalled()
     expect(spy_2).toHaveBeenCalledTimes(1)
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     unsubscribe_2()
     store.setState(Counter.inc)
@@ -412,8 +412,8 @@ describe("Sweety#subscribe", () => {
   })
 
   it.concurrent("does not emit when a new state is comparably equal", () => {
-    const spy = jest.fn()
-    const spyCompare = jest.fn(Counter.compare)
+    const spy = vi.fn()
+    const spyCompare = vi.fn(Counter.compare)
     const store = Sweety.of({ count: 0 })
     const unsubscribe = store.subscribe(spy)
 
@@ -421,19 +421,19 @@ describe("Sweety#subscribe", () => {
     expect(spy).not.toHaveBeenCalled()
     expect(spyCompare).toHaveBeenCalledTimes(1)
     expect(spyCompare).toHaveLastReturnedWith(true)
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     store.setState(Counter.clone)
     expect(spy).toHaveBeenCalledTimes(1)
     expect(spyCompare).not.toHaveBeenCalled()
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     expect(spy.mock.calls).toHaveLength(0)
     store.setState(Counter.clone, spyCompare)
     expect(spy).not.toHaveBeenCalled()
     expect(spyCompare).toHaveBeenCalledTimes(1)
     expect(spyCompare).toHaveLastReturnedWith(true)
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     unsubscribe()
     store.setState(Counter.clone)

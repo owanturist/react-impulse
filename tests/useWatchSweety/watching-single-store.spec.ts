@@ -224,7 +224,7 @@ describe("transform state's value inside watcher", () => {
       },
     )
 
-    it.concurrent.each([
+    it.each([
       [
         "inline comparator",
         (props: WithStore) => {
@@ -319,7 +319,7 @@ describe("transform state's value inside watcher", () => {
   ])(
     "when store's changes under %s are comparably equal with",
     (_, useHookWithoutCompare) => {
-      it.concurrent.each([
+      it.each([
         ["without comparator", useHookWithoutCompare],
         [
           "with inline comparator",
@@ -337,7 +337,7 @@ describe("transform state's value inside watcher", () => {
         ],
       ])("should not trigger the watcher %s", () => {
         const store = Sweety.of({ count: 1 })
-        const spy = jest.fn()
+        const spy = vi.fn()
 
         renderHook(useHookWithoutCompare, {
           initialProps: { spy, store },
@@ -432,8 +432,8 @@ describe("multiple Sweety#getState() calls", () => {
         ],
       ])("%s", (__, useSingleHook, useDoubleHook) => {
         const setup = () => {
-          const spySingle = jest.fn()
-          const spyDouble = jest.fn()
+          const spySingle = vi.fn()
+          const spyDouble = vi.fn()
           const store = Sweety.of({ count: 1 })
 
           const { result: resultSingle } = renderHook(useSingleHook, {
@@ -454,7 +454,7 @@ describe("multiple Sweety#getState() calls", () => {
           expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
         })
 
-        it.concurrent.each([
+        it.each([
           // eslint-disable-next-line no-undefined
           ["without Sweety#setState comparator", undefined],
           ["with Sweety#setState comparator", Counter.compare],
@@ -471,7 +471,7 @@ describe("multiple Sweety#getState() calls", () => {
           expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
         })
 
-        it.concurrent.each([
+        it.each([
           // eslint-disable-next-line no-undefined
           ["without Sweety#setState comparator", undefined],
           ["with Sweety#setState comparator", Counter.compare],

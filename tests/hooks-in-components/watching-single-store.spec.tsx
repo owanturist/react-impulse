@@ -115,8 +115,8 @@ describe("watching single store", () => {
     ["multiple memoized watchers", MultipleMemoizedWatchersApp],
   ])("watches single store with %s", (_, App) => {
     const count = Sweety.of(0)
-    const onCounterRender = jest.fn()
-    const onRender = jest.fn()
+    const onCounterRender = vi.fn()
+    const onRender = vi.fn()
 
     render(
       <App

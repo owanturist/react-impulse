@@ -6,7 +6,7 @@ import { Compare, Sweety, SetSweetyState, useSetSweetyState } from "../src"
 import { Counter, WithCompare, WithStore } from "./common"
 
 describe("bypassed store", () => {
-  it.concurrent.each([
+  it.each([
     null,
     // eslint-disable-next-line no-undefined
     undefined,
@@ -48,14 +48,14 @@ describe("defined store", () => {
   describe("calls setState(value)", () => {
     let prev = { count: 0 }
     const store = Sweety.of(prev)
-    const spy = jest.fn()
+    const spy = vi.fn()
     const unsubscribe = store.subscribe(spy)
     const { result } = renderHook(() => useSetSweetyState(store))
     const setState = result.current
 
     beforeEach(() => {
       prev = store.getState()
-      jest.clearAllMocks()
+      vi.clearAllMocks()
     })
 
     it("sets new state", () => {
@@ -103,14 +103,14 @@ describe("defined store", () => {
   describe("calls setState(transform)", () => {
     let prev = { count: 0 }
     const store = Sweety.of(prev)
-    const spy = jest.fn()
+    const spy = vi.fn()
     const unsubscribe = store.subscribe(spy)
     const { result } = renderHook(() => useSetSweetyState(store))
     const setState = result.current
 
     beforeEach(() => {
       prev = store.getState()
-      jest.clearAllMocks()
+      vi.clearAllMocks()
     })
 
     it("sets new state", () => {
@@ -157,7 +157,7 @@ describe("defined store", () => {
 })
 
 describe("defined store with compare", () => {
-  const spyCompare = jest.fn(Counter.compare)
+  const spyCompare = vi.fn(Counter.compare)
 
   beforeEach(() => {
     spyCompare.mockClear()
@@ -190,7 +190,7 @@ describe("defined store with compare", () => {
 
       expect(spyCompare).not.toHaveBeenCalled()
       expect(result.all).toHaveLength(1)
-      jest.clearAllMocks()
+      vi.clearAllMocks()
 
       rerender()
       expect(store.getState()).toStrictEqual({ count: 0 })
@@ -206,7 +206,7 @@ describe("defined store with compare", () => {
       expect(spyCompare).toHaveBeenCalledTimes(1)
       expect(result.all).toHaveLength(2)
       expect(result.current).toBe(setState)
-      jest.clearAllMocks()
+      vi.clearAllMocks()
 
       rerender()
       expect(spyCompare).not.toHaveBeenCalled()
@@ -237,16 +237,16 @@ describe("defined store with compare", () => {
       ["inline compare", useHook_1, store_1],
       ["memoized compare", useHook_2, store_2],
     ])("%s", (_, init, store) => {
-      const spy = jest.fn()
+      const spy = vi.fn()
       const { result } = renderHook(init)
       const setState = result.current
 
-      let unsubscribe: VoidFunction = jest.fn()
+      let unsubscribe: VoidFunction = vi.fn()
       let prev = store.getState()
 
       beforeEach(() => {
         prev = store.getState()
-        jest.clearAllMocks()
+        vi.clearAllMocks()
       })
 
       it("does not call listeners on init", () => {
@@ -583,7 +583,7 @@ describe("defined store with compare", () => {
       )
     })
 
-    it.concurrent.each([
+    it.each([
       // eslint-disable-next-line no-undefined
       ["undefined", undefined],
       ["null", null],

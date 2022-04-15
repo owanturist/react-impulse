@@ -205,8 +205,8 @@ describe.each([
         const first = Sweety.of({ count: 1 })
         const second = Sweety.of({ count: 2 })
         const third = Sweety.of({ count: 3 })
-        const spySingle = jest.fn()
-        const spyMultiple = jest.fn()
+        const spySingle = vi.fn()
+        const spyMultiple = vi.fn()
 
         const { result: resultSingle } = renderHook(useSingleHook, {
           initialProps: { store: first, spy: spySingle },

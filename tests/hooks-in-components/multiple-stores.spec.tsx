@@ -43,7 +43,7 @@ describe("multiple stores", () => {
   it("Performs multi store management", () => {
     const email = Sweety.of("")
     const password = Sweety.of("")
-    const onRender = jest.fn()
+    const onRender = vi.fn()
 
     const { container } = render(
       <LoginForm email={email} password={password} onRender={onRender} />,

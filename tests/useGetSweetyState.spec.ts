@@ -5,7 +5,7 @@ import { Sweety, useGetSweetyState } from "../src"
 import { Counter } from "./common"
 
 describe("bypassed store", () => {
-  it.concurrent.each([
+  it.each([
     null,
     // eslint-disable-next-line no-undefined
     undefined,

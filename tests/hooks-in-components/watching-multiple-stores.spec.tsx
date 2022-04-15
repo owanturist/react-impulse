@@ -155,9 +155,9 @@ describe("watching multiple stores", () => {
   ])("watches multiple stores with %s", (_, App) => {
     const firstCount = Sweety.of(0)
     const secondCount = Sweety.of(0)
-    const onFirstCountRender = jest.fn()
-    const onSecondCountRender = jest.fn()
-    const onRender = jest.fn()
+    const onFirstCountRender = vi.fn()
+    const onSecondCountRender = vi.fn()
+    const onRender = vi.fn()
 
     render(
       <App

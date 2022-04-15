@@ -40,7 +40,7 @@ describe.each([
   ],
 ])("inline watcher %s", (_, useHook) => {
   const setup = () => {
-    const spy = jest.fn()
+    const spy = vi.fn()
     const store = Sweety.of({ count: 1 })
 
     const { rerender } = renderHook(useHook, {
@@ -128,7 +128,7 @@ describe.each([
   ],
 ])("memoized watcher %s", (__, useHook) => {
   const setup = () => {
-    const spy = jest.fn()
+    const spy = vi.fn()
     const store = Sweety.of({ count: 1 })
 
     const { rerender } = renderHook(useHook, {

@@ -153,7 +153,7 @@ describe.each([
       it.concurrent(
         "should not trigger the watcher when the store updates",
         () => {
-          const spy = jest.fn()
+          const spy = vi.fn()
           const store = Sweety.of({ count: 1 })
           renderHook(useHook, {
             initialProps: { store, isActive: false, spy },
