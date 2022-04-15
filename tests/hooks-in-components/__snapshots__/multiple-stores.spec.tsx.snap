@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1
 
-exports[`multiple stores Performs multi store management 1`] = `
+exports[`multiple stores > Performs multi store management 1`] = `
 <div>
   <input
     data-testid="email"
@@ -19,7 +19,7 @@ exports[`multiple stores Performs multi store management 1`] = `
 </div>
 `;
 
-exports[`multiple stores Performs multi store management 2`] = `
+exports[`multiple stores > Performs multi store management 2`] = `
 <div>
   <input
     data-testid="email"
@@ -38,7 +38,7 @@ exports[`multiple stores Performs multi store management 2`] = `
 </div>
 `;
 
-exports[`multiple stores Performs multi store management 3`] = `
+exports[`multiple stores > Performs multi store management 3`] = `
 <div>
   <input
     data-testid="email"
@@ -57,7 +57,7 @@ exports[`multiple stores Performs multi store management 3`] = `
 </div>
 `;
 
-exports[`multiple stores Performs multi store management 4`] = `
+exports[`multiple stores > Performs multi store management 4`] = `
 <div>
   <input
     data-testid="email"
@@ -76,7 +76,7 @@ exports[`multiple stores Performs multi store management 4`] = `
 </div>
 `;
 
-exports[`multiple stores Performs multi store management 5`] = `
+exports[`multiple stores > Performs multi store management 5`] = `
 <div>
   <input
     data-testid="email"

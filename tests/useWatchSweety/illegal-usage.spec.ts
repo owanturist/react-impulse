@@ -12,12 +12,12 @@ import { noop } from "../../src/utils"
 import { WithStore, WithListener } from "../common"
 
 describe("illegal usage of useWatchSweety", () => {
-  const console$error = jest
+  const console$error = vi
     .spyOn(console, "error")
-    .mockImplementation(jest.fn())
+    .mockImplementation(vi.fn() as VoidFunction)
 
   afterEach(() => {
-    jest.resetAllMocks()
+    vi.resetAllMocks()
   })
 
   describe.each([
@@ -142,7 +142,7 @@ describe("illegal usage of useWatchSweety", () => {
       "inline",
       ({
         store,
-        listener = jest.fn(),
+        listener = vi.fn(),
       }: WithStore<number> & Partial<WithListener>) => {
         return useWatchSweety(() => {
           store.subscribe(listener)
@@ -155,7 +155,7 @@ describe("illegal usage of useWatchSweety", () => {
       "memoized",
       ({
         store,
-        listener = jest.fn(),
+        listener = vi.fn(),
       }: WithStore<number> & Partial<WithListener>) => {
         return useWatchSweety(
           useCallback(() => {
@@ -192,7 +192,7 @@ describe("illegal usage of useWatchSweety", () => {
 
       it.concurrent("returns noop function as unsubscribe", () => {
         const store = Sweety.of(4)
-        const store$subscribe = jest.spyOn(store, "subscribe")
+        const store$subscribe = vi.spyOn(store, "subscribe")
 
         renderHook(useHook, {
           initialProps: { store },
@@ -203,8 +203,8 @@ describe("illegal usage of useWatchSweety", () => {
 
       it.concurrent("does not call the listener on store's change", () => {
         const store = Sweety.of(4)
-        const listener = jest.fn()
-        const correctListener = jest.fn()
+        const listener = vi.fn()
+        const correctListener = vi.fn()
 
         renderHook(useHook, {
           initialProps: { store, listener },

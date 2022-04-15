@@ -63,8 +63,8 @@ describe("nested stores", () => {
 
   it("Performs nested store management", () => {
     const store = Sweety.of<AppState>({ counts: [] })
-    const onRender = jest.fn()
-    const onCounterRender = jest.fn()
+    const onRender = vi.fn()
+    const onCounterRender = vi.fn()
 
     render(
       <App
@@ -77,7 +77,7 @@ describe("nested stores", () => {
     expect(onRender).toHaveBeenCalledTimes(1)
     expect(onCounterRender).toHaveBeenCalledTimes(0)
     expectCounts([])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // add first counter
     fireEvent.click(screen.getByTestId("add-counter"))
@@ -85,7 +85,7 @@ describe("nested stores", () => {
     expect(onCounterRender).toHaveBeenCalledTimes(1)
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expectCounts([0])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // increment the first counter
     fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
@@ -93,7 +93,7 @@ describe("nested stores", () => {
     expect(onCounterRender).toHaveBeenCalledTimes(1)
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expectCounts([1])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // add second counter
     fireEvent.click(screen.getByTestId("add-counter"))
@@ -101,7 +101,7 @@ describe("nested stores", () => {
     expect(onCounterRender).toHaveBeenCalledTimes(1)
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 1)
     expectCounts([1, 0])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // double increment second counter
     fireEvent.click(withinNth("counter", 1).getByTestId("increment"))
@@ -111,7 +111,7 @@ describe("nested stores", () => {
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 1)
     expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)
     expectCounts([1, 2])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // add third counter from the outside
     act(() => {
@@ -124,7 +124,7 @@ describe("nested stores", () => {
     expect(onCounterRender).toHaveBeenCalledTimes(1)
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 2)
     expectCounts([1, 2, 3])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // double the third counter from the outside
     act(() => {
@@ -134,7 +134,7 @@ describe("nested stores", () => {
     expect(onCounterRender).toHaveBeenCalledTimes(1)
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 2)
     expectCounts([1, 2, 6])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // reset
     fireEvent.click(screen.getByTestId("reset-counters"))
@@ -144,7 +144,7 @@ describe("nested stores", () => {
     expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)
     expect(onCounterRender).toHaveBeenNthCalledWith(3, 2)
     expectCounts([0, 0, 0])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // increment all from the outside
     act(() => {

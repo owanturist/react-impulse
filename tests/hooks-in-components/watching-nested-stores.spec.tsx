@@ -185,8 +185,8 @@ describe("watching nested stores", () => {
     const store = Sweety.of<AppState>({
       counts: [],
     })
-    const onRender = jest.fn()
-    const onCounterRender = jest.fn()
+    const onRender = vi.fn()
+    const onCounterRender = vi.fn()
 
     render(
       <App
@@ -202,7 +202,7 @@ describe("watching nested stores", () => {
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // add first counter
     fireEvent.click(screen.getByTestId("add-counter"))
@@ -212,7 +212,7 @@ describe("watching nested stores", () => {
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([0])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // increment first counter
     fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
@@ -222,7 +222,7 @@ describe("watching nested stores", () => {
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([1])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // add second counter
     fireEvent.click(screen.getByTestId("add-counter"))
@@ -232,7 +232,7 @@ describe("watching nested stores", () => {
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([1, 0])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // increment all counters
     fireEvent.click(screen.getByTestId("increment-all"))
@@ -243,7 +243,7 @@ describe("watching nested stores", () => {
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([2, 1])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // add third counter
     fireEvent.click(screen.getByTestId("add-counter"))
@@ -253,7 +253,7 @@ describe("watching nested stores", () => {
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([2, 1, 0])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // reset counters
     fireEvent.click(screen.getByTestId("reset-counters"))
@@ -264,7 +264,7 @@ describe("watching nested stores", () => {
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([0, 0, 0])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // add fourth counter from the outside
     act(() => {
@@ -279,7 +279,7 @@ describe("watching nested stores", () => {
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([0, 0, 0, 9])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // increment all counters
     fireEvent.click(screen.getByTestId("increment-all"))
@@ -292,7 +292,7 @@ describe("watching nested stores", () => {
     expect(screen.queryByText("more than ten")).toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([1, 1, 1, 10])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // add fifth counter
     fireEvent.click(screen.getByTestId("add-counter"))
@@ -302,7 +302,7 @@ describe("watching nested stores", () => {
     expect(screen.queryByText("more than ten")).toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([1, 1, 1, 10, 0])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // increment all counters
     fireEvent.click(screen.getByTestId("increment-all"))
@@ -316,7 +316,7 @@ describe("watching nested stores", () => {
     expect(screen.queryByText("more than ten")).toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([2, 2, 2, 11, 1])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // increment fifth counter
     fireEvent.click(withinNth("counter", 4).getByTestId("increment"))
@@ -326,7 +326,7 @@ describe("watching nested stores", () => {
     expect(screen.queryByText("more than ten")).toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([2, 2, 2, 11, 2])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // increment fourth counter
     fireEvent.click(withinNth("counter", 3).getByTestId("increment"))
@@ -336,7 +336,7 @@ describe("watching nested stores", () => {
     expect(screen.queryByText("more than ten")).toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).not.toBeInTheDocument()
     expectCounts([2, 2, 2, 12, 2])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // reset all counters
     fireEvent.click(screen.getByTestId("reset-counters"))
@@ -350,7 +350,7 @@ describe("watching nested stores", () => {
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([0, 0, 0, 0, 0])
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // reset all counters again
     fireEvent.click(screen.getByTestId("reset-counters"))

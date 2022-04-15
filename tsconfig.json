@@ -17,6 +17,9 @@
     "noUnusedParameters": true,
     "noUncheckedIndexedAccess": true,
     "downlevelIteration": true,
-    "jsx": "react"
-  }
+    "jsx": "react",
+    "typeRoots": ["node_modules/@types"],
+    "types": ["vitest/globals"]
+  },
+  "exclude": ["node_modules", "dist"]
 }

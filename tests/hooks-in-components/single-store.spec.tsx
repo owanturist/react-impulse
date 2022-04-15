@@ -61,9 +61,9 @@ describe("single store", () => {
 
   it("Single Setter / Getter", () => {
     const store = Sweety.of({ count: 0 })
-    const onRootRender = jest.fn()
-    const onGetterRender = jest.fn()
-    const onSetterRender = jest.fn()
+    const onRootRender = vi.fn()
+    const onGetterRender = vi.fn()
+    const onSetterRender = vi.fn()
 
     render(
       <SingleSetterSingleGetter
@@ -156,11 +156,11 @@ describe("single store", () => {
 
   it("Multiple Setters / Getters", () => {
     const store = Sweety.of({ count: 0 })
-    const onRootRender = jest.fn()
-    const onFirstGetterRender = jest.fn()
-    const onSecondGetterRender = jest.fn()
-    const onFirstSetterRender = jest.fn()
-    const onSecondSetterRender = jest.fn()
+    const onRootRender = vi.fn()
+    const onFirstGetterRender = vi.fn()
+    const onSecondGetterRender = vi.fn()
+    const onFirstSetterRender = vi.fn()
+    const onSecondSetterRender = vi.fn()
 
     render(
       <MultipleSetterMultipleGetter

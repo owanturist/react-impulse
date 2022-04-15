@@ -16,7 +16,7 @@ describe.each([
   ["batched", batch],
 ])("multiple stores %s calls with direct store access", (_, execute) => {
   it("re-renders once for Sweety#setState calls", () => {
-    const onRender = jest.fn()
+    const onRender = vi.fn()
     const store_1 = Sweety.of({ count: 1 })
     const store_2 = Sweety.of({ count: 2 })
 
@@ -47,7 +47,7 @@ describe.each([
   })
 
   it("re-renders once for useSweetyState calls", () => {
-    const onRender = jest.fn()
+    const onRender = vi.fn()
     const store_1 = Sweety.of({ count: 1 })
     const store_2 = Sweety.of({ count: 2 })
 
@@ -90,7 +90,7 @@ describe.each([
   ["batched", batch],
 ])("nested stores %s calls with direct store access", (_, execute) => {
   it("re-renders once for Sweety#setState calls", () => {
-    const onRender = jest.fn()
+    const onRender = vi.fn()
     const store = Sweety.of({
       first: Sweety.of({ count: 1 }),
       second: Sweety.of({ count: 2 }),
@@ -141,7 +141,7 @@ describe.each([
   })
 
   it("re-renders once for useSweetyState calls", () => {
-    const onRender = jest.fn()
+    const onRender = vi.fn()
     const store = Sweety.of({
       first: Sweety.of({ count: 1 }),
       second: Sweety.of({ count: 2 }),
@@ -252,8 +252,8 @@ describe.each([
   }) => {
     describe("for multiple stores", () => {
       const setup = () => {
-        const spy = jest.fn()
-        const onRender = jest.fn()
+        const spy = vi.fn()
+        const onRender = vi.fn()
         const first = Sweety.of({ count: 1 })
         const second = Sweety.of({ count: 2 })
         const watcher = () => {
@@ -339,8 +339,8 @@ describe.each([
 
     describe("for nested stores", () => {
       const setup = () => {
-        const spy = jest.fn()
-        const onRender = jest.fn()
+        const spy = vi.fn()
+        const onRender = vi.fn()
         const store = Sweety.of({
           first: Sweety.of({ count: 1 }),
           second: Sweety.of({ count: 2 }),

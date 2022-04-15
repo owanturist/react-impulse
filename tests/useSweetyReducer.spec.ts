@@ -6,7 +6,7 @@ import { Sweety, useSweetyReducer } from "../src"
 import { Counter, WithStore } from "./common"
 
 describe("bypassed store", () => {
-  it.concurrent.each([
+  it.each([
     null,
     // eslint-disable-next-line no-undefined
     undefined,
@@ -81,7 +81,7 @@ describe("defined store", () => {
   })
 
   describe("applies variables from clojure to a passed reducer function", () => {
-    it.concurrent.each([
+    it.each([
       [
         "inline",
         ({ store, diff }: WithStore & { diff: number }) => {
