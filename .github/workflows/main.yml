@@ -166,7 +166,6 @@ jobs:
         run: >
           npm i --no-save --force
           react@${{ matrix.react-version }}
-          react-dom@${{ matrix.react-version }}
           @testing-library/react@12
           @testing-library/react-hooks@7
 
