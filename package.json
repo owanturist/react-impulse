@@ -14,7 +14,7 @@
   },
   "scripts": {
     "clean": "rm -rf ./dist",
-    "prebuild": "npm run clean && npm run typecheck && npm run lint && npm run test",
+    "prebuild": "npm run clean && npm run typecheck && npm run lint && npm run test -- --run",
     "build": "tsup src/index.ts --dts --sourcemap --minify --format=esm,cjs --env.NODE_ENV=production",
     "test": "vitest",
     "lint": "eslint . --ext=js,jsx,ts,tsx,md",
