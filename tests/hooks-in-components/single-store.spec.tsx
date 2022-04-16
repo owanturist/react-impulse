@@ -13,9 +13,11 @@ describe("single store", () => {
   }> = ({ store, onRender }) => {
     const state = useGetSweetyState(store)
 
-    onRender()
-
-    return <span data-testid="getter">{state.count}</span>
+    return (
+      <React.Profiler id="test" onRender={onRender}>
+        <span data-testid="getter">{state.count}</span>
+      </React.Profiler>
+    )
   }
 
   const SetterComponent: React.FC<{
@@ -24,22 +26,21 @@ describe("single store", () => {
   }> = ({ store, onRender }) => {
     const setState = useSetSweetyState(store, Counter.compare)
 
-    onRender()
-
     return (
-      <div data-testid="setter">
-        <button
-          type="button"
-          data-testid="increment"
-          onClick={() => setState(Counter.inc)}
-        />
-
-        <button
-          type="button"
-          data-testid="reset"
-          onClick={() => setState({ count: 0 })}
-        />
-      </div>
+      <React.Profiler id="test" onRender={onRender}>
+        <div data-testid="setter">
+          <button
+            type="button"
+            data-testid="increment"
+            onClick={() => setState(Counter.inc)}
+          />
+          <button
+            type="button"
+            data-testid="reset"
+            onClick={() => setState({ count: 0 })}
+          />
+        </div>
+      </React.Profiler>
     )
   }
 
@@ -48,16 +49,14 @@ describe("single store", () => {
     onRootRender: VoidFunction
     onGetterRender: VoidFunction
     onSetterRender: VoidFunction
-  }> = ({ store, onRootRender, onGetterRender, onSetterRender }) => {
-    onRootRender()
+  }> = ({ store, onRootRender, onGetterRender, onSetterRender }) => (
+    <>
+      <React.Profiler id="test" onRender={onRootRender} />
 
-    return (
-      <>
-        <GetterComponent store={store} onRender={onGetterRender} />
-        <SetterComponent store={store} onRender={onSetterRender} />
-      </>
-    )
-  }
+      <GetterComponent store={store} onRender={onGetterRender} />
+      <SetterComponent store={store} onRender={onSetterRender} />
+    </>
+  )
 
   it("Single Setter / Getter", () => {
     const store = Sweety.of({ count: 0 })
@@ -141,18 +140,15 @@ describe("single store", () => {
     onSecondGetterRender,
     onFirstSetterRender,
     onSecondSetterRender,
-  }) => {
-    onRootRender()
-
-    return (
-      <div>
-        <GetterComponent store={store} onRender={onFirstGetterRender} />
-        <GetterComponent store={store} onRender={onSecondGetterRender} />
-        <SetterComponent store={store} onRender={onFirstSetterRender} />
-        <SetterComponent store={store} onRender={onSecondSetterRender} />
-      </div>
-    )
-  }
+  }) => (
+    <>
+      <React.Profiler id="test" onRender={onRootRender} />
+      <GetterComponent store={store} onRender={onFirstGetterRender} />
+      <GetterComponent store={store} onRender={onSecondGetterRender} />
+      <SetterComponent store={store} onRender={onFirstSetterRender} />
+      <SetterComponent store={store} onRender={onSecondSetterRender} />
+    </>
+  )
 
   it("Multiple Setters / Getters", () => {
     const store = Sweety.of({ count: 0 })

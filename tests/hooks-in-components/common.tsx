@@ -26,19 +26,18 @@ export const CounterComponent: React.FC<{
   ({ count: countStore, onRender }) => {
     const [count, setCount] = useSweetyState(countStore)
 
-    onRender()
-
     return (
-      <div data-testid="counter">
-        <span data-testid="count">{count}</span>
-        <button
-          type="button"
-          data-testid="increment"
-          onClick={() => setCount(count + 1)}
-        />
-      </div>
+      <React.Profiler id="test" onRender={onRender}>
+        <div data-testid="counter">
+          <span data-testid="count">{count}</span>
+          <button
+            type="button"
+            data-testid="increment"
+            onClick={() => setCount(count + 1)}
+          />
+        </div>
+      </React.Profiler>
     )
   },
-  // onRender is ignored
   (prevProps, nextProps) => prevProps.count === nextProps.count,
 )

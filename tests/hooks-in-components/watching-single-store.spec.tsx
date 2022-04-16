@@ -17,18 +17,16 @@ describe("watching single store", () => {
       moreThanOne: boolean
       lessThanFour: boolean
     } & AppProps
-  > = ({ moreThanOne, lessThanFour, count, onRender, onCounterRender }) => {
-    onRender()
-
-    return (
-      <>
+  > = ({ moreThanOne, lessThanFour, count, onRender, onCounterRender }) => (
+    <>
+      <React.Profiler id="test" onRender={onRender}>
         {moreThanOne && <span>more than one</span>}
         {lessThanFour && <span>less than four</span>}
+      </React.Profiler>
 
-        <CounterComponent count={count} onRender={onCounterRender} />
-      </>
-    )
-  }
+      <CounterComponent count={count} onRender={onCounterRender} />
+    </>
+  )
 
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useWatchSweety(

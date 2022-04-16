@@ -27,11 +27,9 @@ describe("watching multiple stores", () => {
     onRender,
     onFirstCounterRender,
     onSecondCounterRender,
-  }) => {
-    onRender()
-
-    return (
-      <>
+  }) => (
+    <>
+      <React.Profiler id="test" onRender={onRender}>
         {moreThanOne && <span>more than two</span>}
         {lessThanFour && <span>less than seven</span>}
 
@@ -43,15 +41,12 @@ describe("watching multiple stores", () => {
             secondCount.setState((state) => state + 1)
           }}
         />
+      </React.Profiler>
 
-        <CounterComponent count={firstCount} onRender={onFirstCounterRender} />
-        <CounterComponent
-          count={secondCount}
-          onRender={onSecondCounterRender}
-        />
-      </>
-    )
-  }
+      <CounterComponent count={firstCount} onRender={onFirstCounterRender} />
+      <CounterComponent count={secondCount} onRender={onSecondCounterRender} />
+    </>
+  )
 
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useWatchSweety(

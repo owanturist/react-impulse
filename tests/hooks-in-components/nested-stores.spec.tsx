@@ -36,20 +36,21 @@ describe("nested stores", () => {
       },
     )
 
-    onRender()
-
     return (
       <>
-        <button
-          type="button"
-          data-testid="add-counter"
-          onClick={() => dispatch({ type: "AddCounter" })}
-        />
-        <button
-          type="button"
-          data-testid="reset-counters"
-          onClick={() => dispatch({ type: "ResetCounters" })}
-        />
+        <React.Profiler id="test" onRender={onRender}>
+          <button
+            type="button"
+            data-testid="add-counter"
+            onClick={() => dispatch({ type: "AddCounter" })}
+          />
+          <button
+            type="button"
+            data-testid="reset-counters"
+            onClick={() => dispatch({ type: "ResetCounters" })}
+          />
+        </React.Profiler>
+
         {state.counts.map((count, index) => (
           <CounterComponent
             key={count.key}

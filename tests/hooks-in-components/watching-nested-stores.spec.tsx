@@ -28,49 +28,52 @@ describe("watching nested stores", () => {
   > = ({ moreThanTen, lessThanTwenty, store, onRender, onCounterRender }) => {
     const [state, setState] = useSweetyState(store)
 
-    onRender()
-
     return (
       <>
-        {moreThanTen && <span>more than ten</span>}
-        {lessThanTwenty && <span>less than twenty</span>}
+        <React.Profiler id="test" onRender={onRender}>
+          {moreThanTen && <span>more than ten</span>}
+          {lessThanTwenty && <span>less than twenty</span>}
 
-        <button
-          type="button"
-          data-testid="add-counter"
-          onClick={() => {
-            setState({
-              ...state,
-              counts: [...state.counts, Sweety.of(0)],
-            })
-          }}
-        />
-        <button
-          type="button"
-          data-testid="reset-counters"
-          onClick={() => {
-            state.counts.forEach((count) => {
-              count.setState(0)
+          <button
+            type="button"
+            data-testid="add-counter"
+            onClick={() => {
+              setState({
+                ...state,
+                counts: [...state.counts, Sweety.of(0)],
+              })
+            }}
+          />
 
-              return count
-            })
-          }}
-        />
-        <button
-          type="button"
-          data-testid="increment-all"
-          onClick={() => {
-            store.setState((current) => {
-              current.counts.forEach((count) => {
-                count.setState((x) => x + 1)
+          <button
+            type="button"
+            data-testid="reset-counters"
+            onClick={() => {
+              state.counts.forEach((count) => {
+                count.setState(0)
 
                 return count
               })
+            }}
+          />
 
-              return current
-            })
-          }}
-        />
+          <button
+            type="button"
+            data-testid="increment-all"
+            onClick={() => {
+              store.setState((current) => {
+                current.counts.forEach((count) => {
+                  count.setState((x) => x + 1)
+
+                  return count
+                })
+
+                return current
+              })
+            }}
+          />
+        </React.Profiler>
+
         {state.counts.map((count, index) => (
           <CounterComponent
             key={count.key}

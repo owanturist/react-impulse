@@ -12,10 +12,8 @@ describe("multiple stores", () => {
     const [email, setEmail] = useSweetyState(emailStore)
     const [password, setPassword] = useSweetyState(passwordStore)
 
-    onRender()
-
     return (
-      <>
+      <React.Profiler id="test" onRender={onRender}>
         <input
           type="email"
           data-testid="email"
@@ -36,7 +34,7 @@ describe("multiple stores", () => {
             setPassword("")
           }}
         />
-      </>
+      </React.Profiler>
     )
   }
 
