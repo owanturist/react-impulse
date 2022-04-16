@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react-hooks"
+import { act, renderHook } from "@testing-library/react"
 
 import { Sweety, useSweetyState } from "../src"
 
@@ -35,11 +35,7 @@ describe("defined store", () => {
     const { result, rerender } = renderHook(() => useSweetyState(store))
     const firstResult = result.current
 
-    expect(result.all).toHaveLength(1)
-
     rerender()
-
-    expect(result.all).toHaveLength(2)
 
     expect(result.current[0]).toBe(firstResult[0])
     expect(result.current[0]).toBe(store.getState())

@@ -1,5 +1,5 @@
 import { useCallback } from "react"
-import { act, renderHook } from "@testing-library/react-hooks"
+import { act, renderHook } from "@testing-library/react"
 
 import { Sweety, useWatchSweety } from "../../src"
 import { Counter, WithSpy, WithStore } from "../common"
@@ -59,11 +59,11 @@ describe.each([
   })
 
   it.concurrent("should call watcher 2 times on subsequent renders", () => {
-    const { spy, rerender } = setup()
+    const { spy, store, rerender } = setup()
 
     spy.mockReset()
 
-    rerender()
+    rerender({ spy, store })
     expect(spy).toHaveBeenCalledTimes(2)
   })
 
@@ -147,11 +147,11 @@ describe.each([
   })
 
   it.concurrent("should not call watcher on subsequent renders", () => {
-    const { spy, rerender } = setup()
+    const { spy, store, rerender } = setup()
 
     spy.mockReset()
 
-    rerender()
+    rerender({ spy, store })
     expect(spy).not.toHaveBeenCalled()
   })
 

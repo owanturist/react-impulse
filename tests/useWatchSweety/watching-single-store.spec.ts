@@ -1,5 +1,5 @@
 import { useCallback } from "react"
-import { act, renderHook } from "@testing-library/react-hooks"
+import { act, renderHook } from "@testing-library/react"
 
 import { Compare, Sweety, useWatchSweety } from "../../src"
 import { Counter, WithSpy, WithStore } from "../common"
@@ -203,7 +203,7 @@ describe("transform state's value inside watcher", () => {
         expect(result.current).toStrictEqual([true, true])
 
         // rerender
-        rerender()
+        rerender({ store })
         expect(result.current).toStrictEqual([true, true])
 
         // increments 3 -> 4
@@ -270,7 +270,7 @@ describe("transform state's value inside watcher", () => {
         expect(result.current).toStrictEqual([true, true])
 
         // rerender
-        rerender()
+        rerender({ store })
         expect(result.current).toStrictEqual([true, true])
 
         // increments 3 -> 4

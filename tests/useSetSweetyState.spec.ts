@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { act, renderHook } from "@testing-library/react-hooks"
+import { act, renderHook } from "@testing-library/react"
 
 import { Compare, Sweety, SetSweetyState, useSetSweetyState } from "../src"
 
@@ -26,10 +26,7 @@ describe("defined store", () => {
 
     const setState = result.current
 
-    expect(result.all).toHaveLength(1)
-
     rerender()
-    expect(result.all).toHaveLength(2)
     expect(result.current).toBe(setState)
 
     expect(store.getState()).toBe(0)
@@ -37,11 +34,9 @@ describe("defined store", () => {
       setState(1)
     })
     expect(store.getState()).toBe(1)
-    expect(result.all).toHaveLength(2)
     expect(result.current).toBe(setState)
 
     rerender()
-    expect(result.all).toHaveLength(3)
     expect(result.current).toBe(setState)
   })
 
@@ -189,13 +184,11 @@ describe("defined store with compare", () => {
       const setState = result.current
 
       expect(spyCompare).not.toHaveBeenCalled()
-      expect(result.all).toHaveLength(1)
       vi.clearAllMocks()
 
       rerender()
       expect(store.getState()).toStrictEqual({ count: 0 })
       expect(spyCompare).not.toHaveBeenCalled()
-      expect(result.all).toHaveLength(2)
       expect(result.current).toBe(setState)
 
       act(() => {
@@ -204,13 +197,11 @@ describe("defined store with compare", () => {
 
       expect(store.getState()).toStrictEqual({ count: 1 })
       expect(spyCompare).toHaveBeenCalledTimes(1)
-      expect(result.all).toHaveLength(2)
       expect(result.current).toBe(setState)
       vi.clearAllMocks()
 
       rerender()
       expect(spyCompare).not.toHaveBeenCalled()
-      expect(result.all).toHaveLength(3)
       expect(result.current).toBe(setState)
     })
   })
@@ -618,9 +609,10 @@ describe("defined store with compare", () => {
           initialProps: { store, compare: Counter.compare },
         })
 
+        const firstResult = result.current
+
         rerender({ store, compare: () => true })
-        expect(result.all).toHaveLength(2)
-        expect(result.all[0]).toBe(result.all[1])
+        expect(result.current).toBe(firstResult)
       },
     )
   })
