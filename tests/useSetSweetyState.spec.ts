@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { act, renderHook } from "@testing-library/react"
+import { act, renderHook } from "@testing-library/react-hooks"
 
 import { Compare, Sweety, SetSweetyState, useSetSweetyState } from "../src"
 

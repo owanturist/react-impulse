@@ -1,5 +1,5 @@
 import { useCallback } from "react"
-import { renderHook } from "@testing-library/react"
+import { renderHook } from "@testing-library/react-hooks"
 
 import { Sweety, useWatchSweety } from "../../src"
 import {
