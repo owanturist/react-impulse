@@ -52,8 +52,8 @@
     "no-alert": "error",
     "no-caller": "error",
     "no-constructor-return": "error",
-    "no-console": "warn",
-    "no-debugger": "warn",
+    "no-console": "error",
+    "no-debugger": "error",
     "no-else-return": "warn",
     "no-empty-function": [
       "warn",
@@ -160,6 +160,7 @@
         "array-callback-return": "off",
         "consistent-return": "off",
         "no-shadow": "off",
+        "no-unused-vars": "off",
 
         // Typescript Eslint
         "@typescript-eslint/no-shadow": "error",
@@ -182,6 +183,7 @@
             "ignoreStatic": true
           }
         ],
+        "@typescript-eslint/no-unused-vars": "error",
         "@typescript-eslint/explicit-member-accessibility": "error",
         "@typescript-eslint/method-signature-style": ["error", "method"],
         "@typescript-eslint/no-non-null-assertion": "off",

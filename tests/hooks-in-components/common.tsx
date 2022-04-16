@@ -19,26 +19,25 @@ export const expectCounts = (expecting: ReadonlyArray<number>): void => {
   }
 }
 
-export const CounterComponent: React.VFC<{
+export const CounterComponent: React.FC<{
   count: Sweety<number>
   onRender: VoidFunction
 }> = React.memo(
   ({ count: countStore, onRender }) => {
     const [count, setCount] = useSweetyState(countStore)
 
-    onRender()
-
     return (
-      <div data-testid="counter">
-        <span data-testid="count">{count}</span>
-        <button
-          type="button"
-          data-testid="increment"
-          onClick={() => setCount(count + 1)}
-        />
-      </div>
+      <React.Profiler id="test" onRender={onRender}>
+        <div data-testid="counter">
+          <span data-testid="count">{count}</span>
+          <button
+            type="button"
+            data-testid="increment"
+            onClick={() => setCount(count + 1)}
+          />
+        </div>
+      </React.Profiler>
     )
   },
-  // onRender is ignored
   (prevProps, nextProps) => prevProps.count === nextProps.count,
 )

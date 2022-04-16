@@ -11,7 +11,7 @@ describe("nested stores", () => {
   }
   type AppAction = { type: "AddCounter" } | { type: "ResetCounters" }
 
-  const App: React.VFC<{
+  const App: React.FC<{
     store: Sweety<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
@@ -36,20 +36,21 @@ describe("nested stores", () => {
       },
     )
 
-    onRender()
-
     return (
       <>
-        <button
-          type="button"
-          data-testid="add-counter"
-          onClick={() => dispatch({ type: "AddCounter" })}
-        />
-        <button
-          type="button"
-          data-testid="reset-counters"
-          onClick={() => dispatch({ type: "ResetCounters" })}
-        />
+        <React.Profiler id="test" onRender={onRender}>
+          <button
+            type="button"
+            data-testid="add-counter"
+            onClick={() => dispatch({ type: "AddCounter" })}
+          />
+          <button
+            type="button"
+            data-testid="reset-counters"
+            onClick={() => dispatch({ type: "ResetCounters" })}
+          />
+        </React.Profiler>
+
         {state.counts.map((count, index) => (
           <CounterComponent
             key={count.key}

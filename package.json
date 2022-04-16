@@ -14,10 +14,10 @@
   },
   "scripts": {
     "clean": "rm -rf ./dist",
-    "prebuild": "npm run clean && npm run typecheck && npm run lint && npm run test",
+    "prebuild": "npm run clean && npm run typecheck && npm run lint && npm run test -- --run",
     "build": "tsup src/index.ts --dts --sourcemap --minify --format=esm,cjs --env.NODE_ENV=production",
     "test": "vitest",
-    "lint": "eslint . --config=.eslintrc.prod.json --ext=js,jsx,ts,tsx,md",
+    "lint": "eslint . --ext=js,jsx,ts,tsx,md",
     "prettify": "prettier . --write",
     "typecheck": "tsc -p ./tsconfig.json --noEmit"
   },
@@ -47,9 +47,8 @@
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.0.1",
-    "@testing-library/react-hooks": "^8.0.0",
-    "@types/react": "^18.0.3",
+    "@testing-library/react": "^13.1.1",
+    "@types/react": "^18.0.5",
     "@types/use-sync-external-store": "^0.0.3",
     "@typescript-eslint/eslint-plugin": "^5.19.0",
     "@typescript-eslint/parser": "^5.19.0",

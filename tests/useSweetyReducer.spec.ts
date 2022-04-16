@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react-hooks"
+import { act, renderHook } from "@testing-library/react"
 import { useCallback } from "react"
 
 import { Sweety, useSweetyReducer } from "../src"
@@ -52,11 +52,7 @@ describe("defined store", () => {
     )
     const firstResult = result.current
 
-    expect(result.all).toHaveLength(1)
-
     rerender()
-
-    expect(result.all).toHaveLength(2)
 
     expect(result.current[0]).toBe(firstResult[0])
     expect(result.current[0]).toBe(store.getState())

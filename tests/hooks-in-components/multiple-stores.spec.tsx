@@ -4,7 +4,7 @@ import { act, render, screen, fireEvent } from "@testing-library/react"
 import { Sweety, useSweetyState } from "../../src"
 
 describe("multiple stores", () => {
-  const LoginForm: React.VFC<{
+  const LoginForm: React.FC<{
     email: Sweety<string>
     password: Sweety<string>
     onRender: VoidFunction
@@ -12,10 +12,8 @@ describe("multiple stores", () => {
     const [email, setEmail] = useSweetyState(emailStore)
     const [password, setPassword] = useSweetyState(passwordStore)
 
-    onRender()
-
     return (
-      <>
+      <React.Profiler id="test" onRender={onRender}>
         <input
           type="email"
           data-testid="email"
@@ -36,7 +34,7 @@ describe("multiple stores", () => {
             setPassword("")
           }}
         />
-      </>
+      </React.Profiler>
     )
   }
 

@@ -12,25 +12,23 @@ describe("watching single store", () => {
     onCounterRender: VoidFunction
   }
 
-  const GenericApp: React.VFC<
+  const GenericApp: React.FC<
     {
       moreThanOne: boolean
       lessThanFour: boolean
     } & AppProps
-  > = ({ moreThanOne, lessThanFour, count, onRender, onCounterRender }) => {
-    onRender()
-
-    return (
-      <>
+  > = ({ moreThanOne, lessThanFour, count, onRender, onCounterRender }) => (
+    <>
+      <React.Profiler id="test" onRender={onRender}>
         {moreThanOne && <span>more than one</span>}
         {lessThanFour && <span>less than four</span>}
+      </React.Profiler>
 
-        <CounterComponent count={count} onRender={onCounterRender} />
-      </>
-    )
-  }
+      <CounterComponent count={count} onRender={onCounterRender} />
+    </>
+  )
 
-  const SingleWatcherApp: React.VFC<AppProps> = (props) => {
+  const SingleWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useWatchSweety(
       () => {
         const count = props.count.getState()
@@ -51,7 +49,7 @@ describe("watching single store", () => {
     )
   }
 
-  const SingleMemoizedWatcherApp: React.VFC<AppProps> = (props) => {
+  const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useWatchSweety(
       React.useCallback(() => {
         const count = props.count.getState()
@@ -78,7 +76,7 @@ describe("watching single store", () => {
     )
   }
 
-  const MultipleWatchersApp: React.VFC<AppProps> = (props) => {
+  const MultipleWatchersApp: React.FC<AppProps> = (props) => {
     const moreThanOne = useWatchSweety(() => props.count.getState() > 1)
     const lessThanFour = useWatchSweety(() => props.count.getState() < 4)
 
@@ -91,7 +89,7 @@ describe("watching single store", () => {
     )
   }
 
-  const MultipleMemoizedWatchersApp: React.VFC<AppProps> = (props) => {
+  const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
     const moreThanOne = useWatchSweety(
       React.useCallback(() => props.count.getState() > 1, [props.count]),
     )

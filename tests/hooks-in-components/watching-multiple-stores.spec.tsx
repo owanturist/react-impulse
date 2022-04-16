@@ -14,7 +14,7 @@ describe("watching multiple stores", () => {
     onSecondCounterRender: VoidFunction
   }
 
-  const GenericApp: React.VFC<
+  const GenericApp: React.FC<
     {
       moreThanOne: boolean
       lessThanFour: boolean
@@ -27,11 +27,9 @@ describe("watching multiple stores", () => {
     onRender,
     onFirstCounterRender,
     onSecondCounterRender,
-  }) => {
-    onRender()
-
-    return (
-      <>
+  }) => (
+    <>
+      <React.Profiler id="test" onRender={onRender}>
         {moreThanOne && <span>more than two</span>}
         {lessThanFour && <span>less than seven</span>}
 
@@ -43,17 +41,14 @@ describe("watching multiple stores", () => {
             secondCount.setState((state) => state + 1)
           }}
         />
+      </React.Profiler>
 
-        <CounterComponent count={firstCount} onRender={onFirstCounterRender} />
-        <CounterComponent
-          count={secondCount}
-          onRender={onSecondCounterRender}
-        />
-      </>
-    )
-  }
+      <CounterComponent count={firstCount} onRender={onFirstCounterRender} />
+      <CounterComponent count={secondCount} onRender={onSecondCounterRender} />
+    </>
+  )
 
-  const SingleWatcherApp: React.VFC<AppProps> = (props) => {
+  const SingleWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useWatchSweety(
       () => {
         const sum = props.firstCount.getState() + props.secondCount.getState()
@@ -74,7 +69,7 @@ describe("watching multiple stores", () => {
     )
   }
 
-  const SingleMemoizedWatcherApp: React.VFC<AppProps> = (props) => {
+  const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useWatchSweety(
       React.useCallback(() => {
         const sum = props.firstCount.getState() + props.secondCount.getState()
@@ -101,7 +96,7 @@ describe("watching multiple stores", () => {
     )
   }
 
-  const MultipleWatchersApp: React.VFC<AppProps> = (props) => {
+  const MultipleWatchersApp: React.FC<AppProps> = (props) => {
     const moreThanOne = useWatchSweety(() => {
       const sum = props.firstCount.getState() + props.secondCount.getState()
 
@@ -122,7 +117,7 @@ describe("watching multiple stores", () => {
     )
   }
 
-  const MultipleMemoizedWatchersApp: React.VFC<AppProps> = (props) => {
+  const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
     const moreThanOne = useWatchSweety(
       React.useCallback(() => {
         const sum = props.firstCount.getState() + props.secondCount.getState()
