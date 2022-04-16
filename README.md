@@ -31,7 +31,7 @@ type State = {
   count: Sweety<number>
 }
 
-const Username: React.VFC<{
+const Username: React.FC<{
   store: Sweety<string>
 }> = React.memo(({ store }) => {
   const [username, setUsername] = useSweetyState(store)
@@ -45,7 +45,7 @@ const Username: React.VFC<{
   )
 })
 
-const Counter: React.VFC<{
+const Counter: React.FC<{
   store: Sweety<number>
 }> = React.memo(({ store }) => {
   const [count, setCount] = useSweetyState(store)
@@ -59,7 +59,7 @@ const Counter: React.VFC<{
   )
 })
 
-const App: React.VFC<{
+const App: React.FC<{
   state: State
 }> = React.memo(({ state }) => (
   <div>
@@ -73,7 +73,7 @@ const App: React.VFC<{
         const count = state.count.getState()
 
         console.log(`User "${username}" gets ${count} score.`)
-        
+
         // change values
         state.username.setState("")
         state.count.setState(0)
@@ -104,7 +104,7 @@ Yet another React state management library... Why do you need it? That's a fair 
 ```tsx
 import React from "react"
 
-const Counter: React.VFC = () => {
+const Counter: React.FC = () => {
   const [count, setCount] = React.useState(0)
 
   return (
@@ -122,7 +122,7 @@ That's fairly simple but not quite useful since there is no way to read the Coun
 ```tsx
 import React from "react"
 
-const Counter: React.VFC<{
+const Counter: React.FC<{
   onChange?(count: number): void
 }> = React.memo(({ onChange }) => {
   const [count, setCount] = React.useState(0)
@@ -163,7 +163,7 @@ Two `React.useState` for storing a single value... seems a bit of overkill, huh?
 ```tsx
 import React from "react"
 
-const Counter: React.VFC<{
+const Counter: React.FC<{
   count?: number
   onChange?(count: string): void
 }> = ({ count: forcedCount = 0, onChange }) => {
@@ -206,7 +206,7 @@ A brute-force workaround to reduce the two-way binding hustle is to store the In
 ```tsx
 import React from "react"
 
-const Counter: React.VFC<{
+const Counter: React.FC<{
   count: number
   setCount: React.Dispatch<React.SetStateAction<number>>
 }> = ({ count, setCount }) => (
@@ -245,7 +245,7 @@ const GameScore = () => {
 So far, so good, is not it? The problem is that the approach does not scale well. What if it needs to read and write the GameStore's state from the outside:
 
 ```tsx
-const GameScore: React.VFC<{
+const GameScore: React.FC<{
   firstCount: number
   secondCount: number
   setFirstCount: React.Dispatch<React.SetStateAction<number>>
@@ -305,7 +305,7 @@ const counterReducer = (state: CounterState, action: CounterAction) => {
   }
 }
 
-const Counter: React.VFC<{
+const Counter: React.FC<{
   state: CounterState
   dispatch: React.Dispatch<CounterAction>
 }> = ({ state, dispatch }) => (
@@ -360,7 +360,7 @@ const gameScoreReducer = (state: GameScoreState, action: GameScoreAction) => {
   }
 }
 
-const GameScore: React.VFC<{
+const GameScore: React.FC<{
   state: GameScoreState
   dispatch: React.Dispatch<GameScoreAction>
 }> = ({ state, dispatch }) => (
@@ -461,7 +461,7 @@ classic React
 <td valign="top">
 
 ```tsx
-const Counter: React.VFC<{
+const Counter: React.FC<{
   store: Sweety<number>
 }> = ({ store }) => {
   const [count, setCount] = useSweetyState(store)
@@ -514,7 +514,7 @@ const counterReducer = (state: CounterState, action: CounterAction) => {
   }
 }
 
-const Counter: React.VFC<{
+const Counter: React.FC<{
   state: CounterState
   dispatch: React.Dispatch<CounterAction>
 }> = ({ state, dispatch }) => (
@@ -575,7 +575,7 @@ const resetGameScore = (state: GameScoreState): void => {
   state.secondCounter.setState(0)
 }
 
-const GameScore: React.VFC<{
+const GameScore: React.FC<{
   store: Sweety<GameScoreState>
 }> = ({ store }) => {
   const state = useGetSweetyState(store)
@@ -636,7 +636,7 @@ const gameScoreReducer = (state: GameScoreState, action: GameScoreAction) => {
   }
 }
 
-const GameScore: React.VFC<{
+const GameScore: React.FC<{
   state: GameScoreState
   dispatch: React.Dispatch<GameScoreAction>
 }> = ({ state, dispatch }) => (
@@ -821,7 +821,7 @@ Sweety<T>#key: string
 Each `Sweety` instance has a unique key. This key is used internally for [`useWatchSweety`][use_watch_sweety] but can be used as the React key property.
 
 ```tsx
-const Toggles: React.VFC<{
+const Toggles: React.FC<{
   options: Array<Sweety<boolean>>
 }> = ({ options }) => (
   <>
@@ -936,7 +936,7 @@ A `Sweety` instance's method that subscribes to the store's value changes caused
 - `listener` is a function that a store will call when the value changes.
 
 ```tsx
-const UsernameInput: React.VFC<{
+const UsernameInput: React.FC<{
   store: Sweety<string>
 }> = React.memo(({ store }) => {
   const [username, setUsername] = React.useState(store.getState())
@@ -975,7 +975,7 @@ type State = {
   count: Sweety<number>
 }
 
-const App: React.VFC<{
+const App: React.FC<{
   state: State
 }> = React.memo(({ state }) => {
   // the component will re-render once the `count` is greater than 5
@@ -1016,7 +1016,7 @@ A hook that is similar to `React.useState` but for `Sweety` instances. It subscr
 - `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `Sweety#compare`. The strict equality check function (`===`) will be used if `null`.
 
 ```tsx
-const UsernameInput: React.VFC<{
+const UsernameInput: React.FC<{
   store: Sweety<string>
 }> = React.memo(({ store }) => {
   const [username, setUsername] = useSweetyState(store)
@@ -1050,7 +1050,7 @@ A hooks that subscribes to the store's changes and returns the current value.
 - `store` is A `Sweety` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
 
 ```tsx
-const App: React.VFC<{
+const App: React.FC<{
   left: Sweety<number>
   right: Sweety<number>
 }> = React.memo(({ left, right }) => {
@@ -1087,7 +1087,7 @@ type State = {
   count: Sweety<number>
 }
 
-const App: React.VFC<{
+const App: React.FC<{
   state: State
 }> = React.memo(({ state }) => {
   // the component won't re-render on the count value change
@@ -1140,7 +1140,7 @@ const counterReducer = (state: number, action: CounterAction) => {
   }
 }
 
-const Counter: React.VFC<{
+const Counter: React.FC<{
   store: Sweety<number>
 }> = React.memo(({ store }) => {
   const [count, dispatch] = useSweetyReducer(store, counterReducer)
@@ -1166,7 +1166,7 @@ function batch(execute: VoidFunction): void
 The `batch` function is a helper to optimise multiple stores' updates.
 
 ```tsx
-const LoginForm: React.VFC<{
+const LoginForm: React.FC<{
   email: Sweety<string>
   password: Sweety<string>
 }> = ({ email: emailStore, password: passwordStore }) => {

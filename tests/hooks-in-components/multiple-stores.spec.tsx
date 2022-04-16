@@ -4,7 +4,7 @@ import { act, render, screen, fireEvent } from "@testing-library/react"
 import { Sweety, useSweetyState } from "../../src"
 
 describe("multiple stores", () => {
-  const LoginForm: React.VFC<{
+  const LoginForm: React.FC<{
     email: Sweety<string>
     password: Sweety<string>
     onRender: VoidFunction

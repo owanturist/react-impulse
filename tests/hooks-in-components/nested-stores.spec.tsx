@@ -11,7 +11,7 @@ describe("nested stores", () => {
   }
   type AppAction = { type: "AddCounter" } | { type: "ResetCounters" }
 
-  const App: React.VFC<{
+  const App: React.FC<{
     store: Sweety<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>

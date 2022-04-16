@@ -20,7 +20,7 @@ describe("watching nested stores", () => {
     onCounterRender: React.Dispatch<number>
   }
 
-  const GenericApp: React.VFC<
+  const GenericApp: React.FC<
     {
       moreThanTen: boolean
       lessThanTwenty: boolean
@@ -82,7 +82,7 @@ describe("watching nested stores", () => {
     )
   }
 
-  const SingleWatcherApp: React.VFC<AppProps> = (props) => {
+  const SingleWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useWatchSweety(
       () => {
         const count = AppState.sum(props.store.getState())
@@ -103,7 +103,7 @@ describe("watching nested stores", () => {
     )
   }
 
-  const SingleMemoizedWatcherApp: React.VFC<AppProps> = (props) => {
+  const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useWatchSweety(
       React.useCallback(() => {
         const count = AppState.sum(props.store.getState())
@@ -130,7 +130,7 @@ describe("watching nested stores", () => {
     )
   }
 
-  const MultipleWatchersApp: React.VFC<AppProps> = (props) => {
+  const MultipleWatchersApp: React.FC<AppProps> = (props) => {
     const moreThanTen = useWatchSweety(() => {
       const count = props.store.getState(AppState.sum)
 
@@ -151,7 +151,7 @@ describe("watching nested stores", () => {
     )
   }
 
-  const MultipleMemoizedWatchersApp: React.VFC<AppProps> = (props) => {
+  const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
     const moreThanTen = useWatchSweety(
       React.useCallback(() => {
         const count = props.store.getState(AppState.sum)

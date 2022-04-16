@@ -19,7 +19,7 @@ export const expectCounts = (expecting: ReadonlyArray<number>): void => {
   }
 }
 
-export const CounterComponent: React.VFC<{
+export const CounterComponent: React.FC<{
   count: Sweety<number>
   onRender: VoidFunction
 }> = React.memo(

@@ -7,7 +7,7 @@ import { Counter } from "../common"
 import { withinNth } from "./common"
 
 describe("single store", () => {
-  const GetterComponent: React.VFC<{
+  const GetterComponent: React.FC<{
     store: Sweety<Counter>
     onRender: VoidFunction
   }> = ({ store, onRender }) => {
@@ -18,7 +18,7 @@ describe("single store", () => {
     return <span data-testid="getter">{state.count}</span>
   }
 
-  const SetterComponent: React.VFC<{
+  const SetterComponent: React.FC<{
     store: Sweety<Counter>
     onRender: VoidFunction
   }> = ({ store, onRender }) => {
@@ -43,7 +43,7 @@ describe("single store", () => {
     )
   }
 
-  const SingleSetterSingleGetter: React.VFC<{
+  const SingleSetterSingleGetter: React.FC<{
     store: Sweety<Counter>
     onRootRender: VoidFunction
     onGetterRender: VoidFunction
@@ -127,7 +127,7 @@ describe("single store", () => {
     expect(screen.getByTestId("getter")).toHaveTextContent("4")
   })
 
-  const MultipleSetterMultipleGetter: React.VFC<{
+  const MultipleSetterMultipleGetter: React.FC<{
     store: Sweety<Counter>
     onRootRender: VoidFunction
     onFirstGetterRender: VoidFunction
