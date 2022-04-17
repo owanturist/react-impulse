@@ -3,7 +3,6 @@ import { SetStateContext } from "./SetStateContext"
 import { noop } from "./utils"
 
 const warning = (message: string): void => {
-  /* istanbul ignore next */
   if (
     (process.env.NODE_ENV === "development" ||
       process.env.NODE_ENV === "test") &&
@@ -81,7 +80,6 @@ export class WatchContext {
     this.deadCleanups.forEach((key) => {
       const clean = this.cleanups.get(key)
 
-      /* istanbul ignore next */
       if (clean != null) {
         clean()
         this.cleanups.delete(key)

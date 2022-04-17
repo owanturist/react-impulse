@@ -14,13 +14,13 @@
   },
   "scripts": {
     "clean": "rm -rf ./dist",
-    "prebuild": "npm run clean && npm run typecheck && npm run lint && npm run test -- --run",
+    "prebuild": "npm run clean",
     "build": "tsup src/index.ts --dts --sourcemap --minify --format=esm,cjs --env.NODE_ENV=production",
     "pretest": "node ./printReactVersion",
     "test": "vitest",
     "lint": "eslint . --ext=js,jsx,ts,tsx,md",
     "prettify": "prettier . --write",
-    "typecheck": "tsc -p ./tsconfig.json --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
@@ -54,6 +54,7 @@
     "@types/use-sync-external-store": "^0.0.3",
     "@typescript-eslint/eslint-plugin": "^5.19.0",
     "@typescript-eslint/parser": "^5.19.0",
+    "c8": "^7.11.0",
     "eslint": "^8.13.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",

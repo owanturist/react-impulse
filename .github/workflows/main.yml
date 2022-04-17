@@ -67,7 +67,10 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Test
-        run: npm test -- --run
+        run: npm test -- --run --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
 
   react:
     name: Test with React ${{ matrix.react-version }}
