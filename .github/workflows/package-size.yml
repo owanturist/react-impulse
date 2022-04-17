@@ -2,7 +2,6 @@ name: Package size report
 
 on:
   pull_request:
-    branches: [master]
 
 jobs:
   package-size:
@@ -30,3 +29,4 @@ jobs:
         with:
           build-command: false
           display-size: uncompressed, gzip
+          mode: head-only
