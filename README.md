@@ -1014,7 +1014,7 @@ function useSweetyState<T>(
 
 A hook that is similar to `React.useState` but for `Sweety` instances. It subscribes to the store changes and returns the current value and a function to set the value.
 
-- `store` is A `Sweety` instance.
+- `store` is a `Sweety` instance.
 - `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `Sweety#compare`. The strict equality check function (`===`) will be used if `null`.
 
 ```tsx
@@ -1045,7 +1045,7 @@ function useGetSweetyState<T>(store: Sweety<T>): T
 
 A hooks that subscribes to the store's changes and returns the current value.
 
-- `store` is A `Sweety` instance.
+- `store` is a `Sweety` instance.
 
 ```tsx
 const App: React.FC<{
@@ -1077,7 +1077,7 @@ function useSetSweetyState<T>(
 
 A hooks that returns a function to update the store's value. Might be useful when you need a way to update the store's value without subscribing to its changes.
 
-- `store` is A `Sweety` instance.
+- `store` is a `Sweety` instance.
 - `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `Sweety#compare`. The strict equality check function (`===`) will be used if `null`.
 
 ```tsx
@@ -1115,7 +1115,7 @@ function useSweetyReducer<A, T>(
 
 A hook that is similar to `React.useReducer` but for `Sweety` instances. It subscribes to the store changes and returns the current value and a function to dispatch an action.
 
-- `store` is A `Sweety` instance.
+- `store` is a `Sweety` instance.
 - `reducer` is a function that transforms the current value and the dispatched action into the new value.
 - `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `Sweety#compare`. The strict equality check function (`===`) will be used if `null`.
 
