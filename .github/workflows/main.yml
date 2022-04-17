@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Setup dependencies
-        uses: .github/actions/setup.yml
+        uses: ./.github/actions/setup.yml
 
       - name: Install dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: Setup dependencies
-        uses: .github/actions/setup.yml
+        uses: ./.github/actions/setup.yml
 
       - name: Lint
         run: npm run lint
@@ -38,7 +38,7 @@ jobs:
 
     steps:
       - name: Setup dependencies
-        uses: .github/actions/setup.yml
+        uses: ./.github/actions/setup.yml
 
       - name: Type check
         run: npm run typecheck
@@ -52,7 +52,7 @@ jobs:
 
     steps:
       - name: Setup dependencies
-        uses: .github/actions/setup.yml
+        uses: ./.github/actions/setup.yml
 
       - name: Test
         run: npm test -- --run
@@ -68,7 +68,7 @@ jobs:
 
     steps:
       - name: Setup dependencies
-        uses: .github/actions/setup.yml
+        uses: ./.github/actions/setup.yml
 
       - name: Install React ${{ matrix.react-version }}
         run: >
