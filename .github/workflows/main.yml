@@ -121,5 +121,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           build-command: false
-          mode: head-only
           display-size: uncompressed, gzip
