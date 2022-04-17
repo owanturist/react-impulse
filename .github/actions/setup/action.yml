@@ -1,0 +1,22 @@
+name: Setup and cache dependencies
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: .nvmrc
+
+    - name: Cache .npm
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: npm-${{ hashFiles('package-lock.json') }}
+        restore-keys: npm-
+
+    - name: Cache node_modules
+      uses: actions/cache@v3
+      with:
+        path: node_modules
+        key: modules-${{ hashFiles('package-lock.json') }}

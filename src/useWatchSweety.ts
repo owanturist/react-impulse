@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback, useDebugValue } from "react"
-import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector"
+import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector"
 
 import { Compare, isEqual } from "./utils"
 import { WatchContext } from "./WatchContext"

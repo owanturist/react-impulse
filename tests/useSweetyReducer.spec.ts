@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react"
+import { act, renderHook } from "@testing-library/react-hooks"
 import { useCallback } from "react"
 
 import { Sweety, useSweetyReducer } from "../src"
