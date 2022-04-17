@@ -6,7 +6,6 @@ on:
 jobs:
   package-size:
     name: Package size
-    needs: install
     runs-on: ubuntu-latest
 
     steps:
