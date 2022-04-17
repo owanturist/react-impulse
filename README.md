@@ -35,7 +35,7 @@ type State = {
 
 const Username: React.FC<{
   store: Sweety<string>
-}> = React.memo(({ store }) => {
+}> = ({ store }) => {
   const [username, setUsername] = useSweetyState(store)
 
   return (
@@ -45,11 +45,11 @@ const Username: React.FC<{
       onChange={(event) => setUsername(event.target.value)}
     />
   )
-})
+}
 
 const Counter: React.FC<{
   store: Sweety<number>
-}> = React.memo(({ store }) => {
+}> = ({ store }) => {
   const [count, setCount] = useSweetyState(store)
 
   return (
@@ -59,11 +59,11 @@ const Counter: React.FC<{
       <button onClick={() => setCount(count + 1)}>+</button>
     </div>
   )
-})
+}
 
 const App: React.FC<{
   state: State
-}> = React.memo(({ state }) => (
+}> = ({ state }) => (
   <div>
     <Username store={state.username} />
     <Counter store={state.count} />
@@ -84,7 +84,7 @@ const App: React.FC<{
       Submit
     </button>
   </div>
-))
+)
 
 ReactDOM.render(
   <App
@@ -126,7 +126,7 @@ import React from "react"
 
 const Counter: React.FC<{
   onChange?(count: number): void
-}> = React.memo(({ onChange }) => {
+}> = ({ onChange }) => {
   const [count, setCount] = React.useState(0)
   const handleCount = (nextCount) => {
     setCount(nextCount)
@@ -140,7 +140,7 @@ const Counter: React.FC<{
       <button onClick={() => handleCount(count + 1)}>+</button>
     </div>
   )
-})
+}
 ```
 
 Now you can get the value from the Counter's parent component, but you need a place to store it:
@@ -675,10 +675,9 @@ const prepareAppRequestPayload = (state: AppState) => ({
   ),
 })
 
-const appStore = Sweety.of({ games: [] })
-
 const App = () => {
-  const [state, setState] = useSweetyState(appStore)
+  const store = useSweety({ games: [] })
+  const [state, setState] = useSweetyState(store)
 
   const addGame = () => {
     setState({
@@ -797,6 +796,8 @@ A static method that creates a new `Sweety` instance. The instance is mutable so
 
 - `value` is the initial immutable value of the store.
 - `[compare]` is an optional [`Compare`][compare] function to set as [`Sweety#compare`][sweety__compare]. If the `compare` function is not defined or `null` the strict equality check function (`===`) will be used.
+
+> 💡 The [`useSweety`][use_sweety] hook might help to create and store a `Sweety` instance inside a React component.
 
 ```ts
 type SignInFormState = {
@@ -940,7 +941,7 @@ A `Sweety` instance's method that subscribes to the store's value changes caused
 ```tsx
 const UsernameInput: React.FC<{
   store: Sweety<string>
-}> = React.memo(({ store }) => {
+}> = ({ store }) => {
   const [username, setUsername] = React.useState(store.getState())
 
   React.useEffect(() => {
@@ -956,7 +957,7 @@ const UsernameInput: React.FC<{
       onChange={(event) => store.setState(event.target.value)}
     />
   )
-})
+}
 ```
 
 > 💬 The example above is for demonstration purposes only. In real world app it's usually better use provided hooks in most cases.
@@ -979,7 +980,7 @@ type State = {
 
 const App: React.FC<{
   state: State
-}> = React.memo(({ state }) => {
+}> = ({ state }) => {
   // the component will re-render once the `count` is greater than 5
   // and once the `count` is less or equal to 5
   const isMoreThanFive = useWatchSweety(() => state.count.getState() > 5)
@@ -991,7 +992,7 @@ const App: React.FC<{
       {isMoreThanFive && <p>You did it!</p>}
     </div>
   )
-})
+}
 ```
 
 > 💡 It is recommended to memoize the `watcher` function for better performance.
@@ -1020,7 +1021,7 @@ A hook that is similar to `React.useState` but for `Sweety` instances. It subscr
 ```tsx
 const UsernameInput: React.FC<{
   store: Sweety<string>
-}> = React.memo(({ store }) => {
+}> = ({ store }) => {
   const [username, setUsername] = useSweetyState(store)
 
   return (
@@ -1030,7 +1031,7 @@ const UsernameInput: React.FC<{
       onChange={(event) => setUsername(event.target.value)}
     />
   )
-})
+}
 ```
 
 > 💡 The hook is a combination of [`useGetSweetyState`][use_get_sweety_state] and [`useSetSweetyState`][use_set_sweety_state], so use them if you need to either get+subscribe or set the store's value.
@@ -1055,7 +1056,7 @@ A hooks that subscribes to the store's changes and returns the current value.
 const App: React.FC<{
   left: Sweety<number>
   right: Sweety<number>
-}> = React.memo(({ left, right }) => {
+}> = ({ left, right }) => {
   const countLeft = useGetSweetyState(left)
   const countRight = useGetSweetyState(right)
 
@@ -1067,7 +1068,7 @@ const App: React.FC<{
       <p>Sum: {countLeft + countRight}</p>
     </div>
   )
-})
+}
 ```
 
 ### `useSetSweetyState`
@@ -1091,7 +1092,7 @@ type State = {
 
 const App: React.FC<{
   state: State
-}> = React.memo(({ state }) => {
+}> = ({ state }) => {
   // the component won't re-render on the count value change
   const setCount = useSetSweetyState(state.count)
 
@@ -1102,7 +1103,7 @@ const App: React.FC<{
       <button onClick={() => setCount(0)}>Reset count</button>
     </div>
   )
-})
+}
 ```
 
 > 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
@@ -1144,7 +1145,7 @@ const counterReducer = (state: number, action: CounterAction) => {
 
 const Counter: React.FC<{
   store: Sweety<number>
-}> = React.memo(({ store }) => {
+}> = ({ store }) => {
   const [count, dispatch] = useSweetyReducer(store, counterReducer)
 
   return (
@@ -1154,10 +1155,39 @@ const Counter: React.FC<{
       <button onClick={() => dispatch({ type: "INCREMENT" })}>+</button>
     </div>
   )
-})
+}
 ```
 
 > 💬 The third argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
+
+### `useSweety`
+
+```ts
+function useSweety<T>(initialValue: T): Sweety<T>
+
+function useSweety<T>(lazyInitialValue: () => T): Sweety<T>
+```
+
+A hook that initiates a stable (never changing) Sweety store.
+
+The first argument is either [`initialValue`] is a value to initialize the store or [`lazyInitialValue`] is a function returning an initial value that calls only once when the hook is called. It might be handy when the initial value is expensive to compute.
+
+```tsx
+const UsernameInput: React.FC = () => {
+  const store = useSweety("")
+  const [username, setUsername] = useSweetyState(store)
+
+  return (
+    <input
+      type="text"
+      value={username}
+      onChange={(event) => setUsername(event.target.value)}
+    />
+  )
+}
+```
+
+> 💬 The initial value is disregarded during subsequent re-renders.
 
 ### `batch`
 
@@ -1309,5 +1339,6 @@ Here are scripts you want to run for publishing a new version to NPM:
 [use_sweety_reducer]: #usesweetyreducer
 [use_get_sweety_state]: #usegetsweetystate
 [use_set_sweety_state]: #usesetsweetystate
+[use_sweety]: #usesweety
 [batch]: #batch
 [compare]: #compare

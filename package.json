@@ -18,6 +18,7 @@
     "build": "tsup src/index.ts --dts --sourcemap --format=esm,cjs --env.NODE_ENV=production",
     "pretest": "node ./printReactVersion",
     "test": "vitest",
+    "test:coverage": "npm test -- --run --coverage",
     "lint": "eslint . --ext=js,jsx,ts,tsx,md",
     "prettify": "prettier . --write",
     "typecheck": "tsc --noEmit"
