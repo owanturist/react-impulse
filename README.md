@@ -797,7 +797,7 @@ A static method that creates a new `Sweety` instance. The instance is mutable so
 - `value` is the initial immutable value of the store.
 - `[compare]` is an optional [`Compare`][compare] function to set as [`Sweety#compare`][sweety__compare]. If the `compare` function is not defined or `null` the strict equality check function (`===`) will be used.
 
-> 💡 The [`useSweety`][usesweety] hook might help to create and store a `Sweety` instance inside a React component.
+> 💡 The [`useSweety`][use_sweety] hook might help to create and store a `Sweety` instance inside a React component.
 
 ```ts
 type SignInFormState = {
