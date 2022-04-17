@@ -235,7 +235,6 @@
         "jest/prefer-spy-on": "error",
         "jest/prefer-strict-equal": "error",
         "jest/prefer-todo": "warn",
-        "jest/require-top-level-describe": "warn",
         "@typescript-eslint/explicit-function-return-type": "off"
       }
     }

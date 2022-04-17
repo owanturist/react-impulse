@@ -8,7 +8,7 @@ import type { Sweety } from "./Sweety"
  * Might be useful when you need a way to update the store's value without subscribing to its changes.
  * The store won't update if the new value is comparably equal to the current value.
  *
- * @param store a `Sweety` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
+ * @param store a `Sweety` instance.
  * @param compare an optional compare function with medium priority.
  * If not defined it uses `Sweety#compare`.
  * The strict equality check function (`===`) will be used if `null`.
@@ -18,7 +18,7 @@ import type { Sweety } from "./Sweety"
  * @see {@link SetSweetyState}
  */
 export function useSetSweetyState<T>(
-  store: null | undefined | Sweety<T>,
+  store: Sweety<T>,
   compare?: null | Compare<T>,
 ): SetSweetyState<T> {
   const storeRef = useRef(store)
@@ -30,15 +30,11 @@ export function useSetSweetyState<T>(
   }, [store, compare])
 
   return useCallback((update, setStateLevelCompare) => {
-    const currentStore = storeRef.current
+    const finalCompare = overrideCompare(
+      overrideCompare(storeRef.current.compare, hookLevelCompareRef.current),
+      setStateLevelCompare,
+    )
 
-    if (currentStore != null) {
-      const finalCompare = overrideCompare(
-        overrideCompare(currentStore.compare, hookLevelCompareRef.current),
-        setStateLevelCompare,
-      )
-
-      currentStore.setState(update, finalCompare)
-    }
+    storeRef.current.setState(update, finalCompare)
   }, [])
 }

@@ -5,20 +5,6 @@ import { Compare, Sweety, SetSweetyState, useSetSweetyState } from "../src"
 
 import { Counter, WithCompare, WithStore } from "./common"
 
-describe("bypassed store", () => {
-  it.each([
-    null,
-    // eslint-disable-next-line no-undefined
-    undefined,
-  ])("noop for %s", (value) => {
-    const { result } = renderHook(() => useSetSweetyState<number>(value))
-
-    expect(() => {
-      result.current(1)
-    }).not.toThrow()
-  })
-})
-
 describe("defined store", () => {
   it.concurrent("keeps setState value over time", () => {
     const store = Sweety.of(0)
