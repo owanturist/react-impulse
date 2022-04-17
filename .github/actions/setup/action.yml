@@ -1,6 +1,7 @@
 name: Setup and cache dependencies
 
 runs:
+  using: composite
   steps:
     - name: Set up Node
       uses: actions/setup-node@v3
