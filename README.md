@@ -3,6 +3,10 @@
 The clean and natural React state management.
 
 [![codecov](https://codecov.io/gh/owanturist/react-sweety/branch/master/graph/badge.svg?token=QP3SXO8E9F)](https://codecov.io/gh/owanturist/react-sweety)
+![known vulnerabilities](https://snyk.io/test/github/owanturist/react-sweety/badge.svg)
+![minified + gzip](https://badgen.net/bundlephobia/minzip/react-sweety)
+![dependency count](https://badgen.net/bundlephobia/dependency-count/react-sweety)
+![types](https://badgen.net/npm/types/react-sweety)
 
 ## Demos
 
@@ -1006,16 +1010,11 @@ function useSweetyState<T>(
   store: Sweety<T>,
   compare?: null | Compare<T>,
 ): [T, SetSweetyState<T>]
-
-function useSweetyState<T>(
-  store: null | undefined | Sweety<T>,
-  compare?: null | Compare<T>,
-): [null | undefined | T, SetSweetyState<T>]
 ```
 
 A hook that is similar to `React.useState` but for `Sweety` instances. It subscribes to the store changes and returns the current value and a function to set the value.
 
-- `store` is A `Sweety` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+- `store` is a `Sweety` instance.
 - `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `Sweety#compare`. The strict equality check function (`===`) will be used if `null`.
 
 ```tsx
@@ -1042,15 +1041,11 @@ const UsernameInput: React.FC<{
 
 ```ts
 function useGetSweetyState<T>(store: Sweety<T>): T
-
-function useGetSweetyState<T>(
-  store: null | undefined | Sweety<T>,
-): null | undefined | T
 ```
 
 A hooks that subscribes to the store's changes and returns the current value.
 
-- `store` is A `Sweety` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+- `store` is a `Sweety` instance.
 
 ```tsx
 const App: React.FC<{
@@ -1075,14 +1070,14 @@ const App: React.FC<{
 
 ```ts
 function useSetSweetyState<T>(
-  store: null | undefined | Sweety<T>,
+  store: Sweety<T>,
   compare?: null | Compare<T>,
 ): SetSweetyState<T>
 ```
 
 A hooks that returns a function to update the store's value. Might be useful when you need a way to update the store's value without subscribing to its changes.
 
-- `store` is A `Sweety` instance but can be `null` or `undefined` as a bypass when a store might be not defined.
+- `store` is a `Sweety` instance.
 - `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `Sweety#compare`. The strict equality check function (`===`) will be used if `null`.
 
 ```tsx
@@ -1116,17 +1111,11 @@ function useSweetyReducer<A, T>(
   reducer: (state: T, action: A) => T,
   compare?: null | Compare<T>,
 ): [T, React.Dispatch<A>]
-
-function useSweetyReducer<A, T>(
-  store: null | undefined | Sweety<T>,
-  reducer: (state: T, action: A) => T,
-  compare?: null | Compare<T>,
-): [null | undefined | T, React.Dispatch<A>]
 ```
 
 A hook that is similar to `React.useReducer` but for `Sweety` instances. It subscribes to the store changes and returns the current value and a function to dispatch an action.
 
-- `store` is A `Sweety` instance but can be `null` or `undefined` as a bypass when there is no need to subscribe to the store's changes.
+- `store` is a `Sweety` instance.
 - `reducer` is a function that transforms the current value and the dispatched action into the new value.
 - `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `Sweety#compare`. The strict equality check function (`===`) will be used if `null`.
 
@@ -1170,7 +1159,7 @@ function useSweety<T>(lazyInitialValue: () => T): Sweety<T>
 
 A hook that initiates a stable (never changing) Sweety store.
 
-The first argument is either [`initialValue`] is a value to initialize the store or [`lazyInitialValue`] is a function returning an initial value that calls only once when the hook is called. It might be handy when the initial value is expensive to compute.
+The first argument is either an [`initialValue`] value to initialize the store or a [`lazyInitialValue`] function returning an initial value that calls only once when the hook is called. It might be handy when the initial value is expensive to compute.
 
 ```tsx
 const UsernameInput: React.FC = () => {
@@ -1195,7 +1184,7 @@ const UsernameInput: React.FC = () => {
 function batch(execute: VoidFunction): void
 ```
 
-The `batch` function is a helper to optimise multiple stores' updates.
+The `batch` function is a helper to optimize multiple stores' updates.
 
 ```tsx
 const LoginForm: React.FC<{
