@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Setup dependencies
         uses: ./.github/actions/setup
 
@@ -25,6 +28,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Setup dependencies
         uses: ./.github/actions/setup
 
@@ -37,6 +43,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Setup dependencies
         uses: ./.github/actions/setup
 
@@ -51,6 +60,9 @@ jobs:
       fail-fast: false
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Setup dependencies
         uses: ./.github/actions/setup
 
@@ -67,6 +79,9 @@ jobs:
         react-version: [17, 16]
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Setup dependencies
         uses: ./.github/actions/setup
 
