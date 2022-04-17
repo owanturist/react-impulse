@@ -112,9 +112,12 @@ jobs:
       - name: Setup dependencies
         uses: ./.github/actions/setup
 
+      - name: Build the package
+        run: npm run build -- --minify
+
       - name: Package size report
         uses: pkg-size/action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          build-command: npm run build -- --minify
+          build-command: false
