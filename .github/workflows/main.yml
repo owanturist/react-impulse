@@ -75,7 +75,6 @@ jobs:
           fail_ci_if_error: true
           directory: ./coverage
           files: ./coverage-final.json
-          path_to_write_report: ./coverage/codecov_report.txt
 
   react:
     name: Test with React ${{ matrix.react-version }}
