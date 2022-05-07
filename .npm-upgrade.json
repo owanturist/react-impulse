@@ -1,7 +1,7 @@
 {
   "ignore": {
     "react": {
-      "versions": "18.0.0",
+      "versions": ">=18.0.0",
       "reason": "Peer dependency, should support the lowest possible"
     }
   }
