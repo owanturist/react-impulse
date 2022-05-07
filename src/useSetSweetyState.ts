@@ -1,7 +1,6 @@
-import { useRef, useEffect, useCallback } from "react"
-
 import { Compare, overrideCompare, SetSweetyState } from "./utils"
 import type { Sweety } from "./Sweety"
+import { useEvent } from "./useEvent"
 
 /**
  * A hooks that returns a function to update the store's value.
@@ -21,20 +20,12 @@ export function useSetSweetyState<T>(
   store: Sweety<T>,
   compare?: null | Compare<T>,
 ): SetSweetyState<T> {
-  const storeRef = useRef(store)
-  const hookLevelCompareRef = useRef(compare)
-
-  useEffect(() => {
-    storeRef.current = store
-    hookLevelCompareRef.current = compare
-  }, [store, compare])
-
-  return useCallback((update, setStateLevelCompare) => {
+  return useEvent((update, setStateLevelCompare) => {
     const finalCompare = overrideCompare(
-      overrideCompare(storeRef.current.compare, hookLevelCompareRef.current),
+      overrideCompare(store.compare, compare),
       setStateLevelCompare,
     )
 
-    storeRef.current.setState(update, finalCompare)
-  }, [])
+    store.setState(update, finalCompare)
+  })
 }

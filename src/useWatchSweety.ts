@@ -1,6 +1,7 @@
 import { useRef, useEffect, useCallback, useDebugValue } from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector"
 
+import { useEvent } from "./useEvent"
 import { Compare, isEqual } from "./utils"
 import { WatchContext } from "./WatchContext"
 
@@ -26,7 +27,6 @@ export function useWatchSweety<T>(
 ): T {
   const forceSelectRef = useRef(0)
   const contextRef = useRef<WatchContext>()
-  const compareRef = useRef(compare ?? isEqual)
 
   if (contextRef.current == null) {
     contextRef.current = new WatchContext()
@@ -50,18 +50,11 @@ export function useWatchSweety<T>(
     [watcher],
   )
   // it should memoize the onCompare otherwise it will call the watcher on each render
-  const onCompare = useCallback(
-    (prev: T, next: T) => compareRef.current(prev, next),
-    [],
-  )
+  const onCompare = useEvent(compare ?? isEqual)
 
   useEffect(() => {
     contextRef.current!.watchStores(watcher)
   }, [watcher])
-
-  useEffect(() => {
-    compareRef.current = compare ?? isEqual
-  }, [compare])
 
   const value = useSyncExternalStoreWithSelector(
     subscribe,

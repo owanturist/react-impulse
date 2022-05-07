@@ -1,9 +1,10 @@
-import { Dispatch, useRef, useEffect, useCallback, useDebugValue } from "react"
+import { Dispatch, useDebugValue } from "react"
 
 import type { Compare } from "./utils"
 import type { Sweety } from "./Sweety"
 import { useGetSweetyState } from "./useGetSweetyState"
 import { useSetSweetyState } from "./useSetSweetyState"
+import { useEvent } from "./useEvent"
 
 /**
  * A hook that is similar to `React.useReducer` but for `Sweety` instances.
@@ -27,21 +28,12 @@ export function useSweetyReducer<T, A>(
   compare?: null | Compare<T>,
 ): [state: T, dispatch: Dispatch<A>] {
   const setState = useSetSweetyState(store, compare)
-  const reducerRef = useRef(reducer)
-
-  useEffect(() => {
-    reducerRef.current = reducer
-  }, [reducer])
-
   const value = useGetSweetyState(store)
 
   useDebugValue(value)
 
   return [
     value,
-    useCallback(
-      (action) => setState((state) => reducerRef.current(state, action)),
-      [setState],
-    ),
+    useEvent((action) => setState((state) => reducer(state, action))),
   ]
 }

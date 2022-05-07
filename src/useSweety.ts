@@ -21,8 +21,8 @@ export function useSweety<T>(lazyInitialValue: () => T): Sweety<T>
  *
  * @param invalidInitValue a function with arguments might not be used to initialize the store.
  */
-export function useSweety<A extends Array<unknown>, R>(
-  invalidLazyInitialValue: (...args: A) => R,
+export function useSweety<TInit extends (...args: Array<never>) => unknown>(
+  invalidLazyInitialValue: TInit,
 ): never
 
 /**
