@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback, useDebugValue } from "react"
-import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector"
+import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
 import { useEvent } from "./useEvent"
 import { Compare, isEqual } from "./utils"
