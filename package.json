@@ -1,16 +1,18 @@
 {
   "name": "react-sweety",
+  "type": "module",
   "version": "2.0.0-beta.3",
   "description": "The clean and natural React state management",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "exports": {
-    "import": "./dist/index.mjs",
-    "default": "./dist/index.js"
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs",
+    "default": "./dist/index.cjs"
   },
   "scripts": {
     "clean": "rm -rf ./dist",
