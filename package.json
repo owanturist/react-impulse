@@ -3,21 +3,20 @@
   "type": "module",
   "version": "2.0.0-beta.4",
   "description": "The clean and natural React state management",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
   "exports": {
+    "types": "./dist/index.d.ts",
     "import": "./dist/index.js",
     "require": "./dist/index.cjs",
     "default": "./dist/index.cjs"
   },
   "scripts": {
-    "clean": "rm -rf ./dist",
-    "prebuild": "npm run clean",
-    "build": "tsup src/index.ts --dts --sourcemap --format=esm,cjs --env.NODE_ENV=production",
+    "build": "tsup src/index.ts --dts --sourcemap --format=esm,cjs --clean --target=es2020 --env.NODE_ENV=production",
     "pretest": "node ./printReactVersion",
     "test": "vitest",
     "test:coverage": "npm test -- --run --coverage",
