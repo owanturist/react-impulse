@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react-hooks"
+import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
 import { Sweety, useSweetyState, useWatchSweety } from "../src"
