@@ -1,4 +1,4 @@
-import { SetStateAction } from "react"
+import { SetStateAction, useEffect, useLayoutEffect, useRef } from "react"
 
 /**
  * A function that compares two values and returns `true` if they are equal.
@@ -54,4 +54,19 @@ export const overrideCompare = <T>(
  */
 export const noop: VoidFunction = () => {
   // do nothing
+}
+
+const useIsomorphicLayoutEffect =
+  typeof document !== "undefined" ? useLayoutEffect : useEffect
+
+export const useEvent = <THandler extends (...args: Array<never>) => unknown>(
+  handler: THandler,
+): THandler => {
+  const handlerRef = useRef(handler)
+
+  useIsomorphicLayoutEffect(() => {
+    handlerRef.current = handler
+  })
+
+  return useRef(((...args) => handlerRef.current(...args)) as THandler).current
 }

@@ -162,6 +162,14 @@
         "no-shadow": "off",
         "no-unused-vars": "off",
 
+        // React Hooks
+        "react-hooks/exhaustive-deps": [
+          "warn",
+          {
+            "additionalHooks": "useIsomorphicLayoutEffect"
+          }
+        ],
+
         // Typescript Eslint
         "@typescript-eslint/no-shadow": "error",
         "@typescript-eslint/array-type": [

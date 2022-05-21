@@ -1,6 +1,5 @@
 import type { Sweety } from "./Sweety"
 import { SetStateContext } from "./SetStateContext"
-import { noop } from "./utils"
 
 const warning = (message: string): void => {
   if (
@@ -55,7 +54,7 @@ export class WatchContext {
     WatchContext.current?.register(store)
   }
 
-  private listener: VoidFunction = noop
+  private listener?: () => null | VoidFunction
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
 
@@ -103,7 +102,9 @@ export class WatchContext {
     WatchContext.current = null
   }
 
-  public subscribeOnWatchedStores(listener: VoidFunction): VoidFunction {
+  public subscribeOnWatchedStores(
+    listener: () => null | VoidFunction,
+  ): VoidFunction {
     this.listener = listener
 
     return () => {
@@ -118,6 +119,10 @@ export class WatchContext {
   }
 
   public emit(): void {
-    this.cycle(this.listener)
+    const callback = this.listener?.()
+
+    if (callback != null) {
+      this.cycle(callback)
+    }
   }
 }

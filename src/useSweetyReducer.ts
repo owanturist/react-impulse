@@ -1,10 +1,9 @@
 import { Dispatch, useDebugValue } from "react"
 
-import type { Compare } from "./utils"
+import { Compare, useEvent } from "./utils"
 import type { Sweety } from "./Sweety"
 import { useGetSweetyState } from "./useGetSweetyState"
 import { useSetSweetyState } from "./useSetSweetyState"
-import { useEvent } from "./useEvent"
 
 /**
  * A hook that is similar to `React.useReducer` but for `Sweety` instances.

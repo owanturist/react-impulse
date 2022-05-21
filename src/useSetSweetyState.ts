@@ -1,6 +1,5 @@
-import { Compare, overrideCompare, SetSweetyState } from "./utils"
+import { Compare, overrideCompare, SetSweetyState, useEvent } from "./utils"
 import type { Sweety } from "./Sweety"
-import { useEvent } from "./useEvent"
 
 /**
  * A hooks that returns a function to update the store's value.
