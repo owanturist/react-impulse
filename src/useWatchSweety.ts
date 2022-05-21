@@ -1,11 +1,11 @@
-import { useRef, useEffect, useCallback, useDebugValue } from "react"
+import { useRef, useCallback, useDebugValue } from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
 import { Compare, isEqual, useEvent } from "./utils"
 import { WatchContext } from "./WatchContext"
 
 const modInc = (x: number): number => {
-  return (x + 1) % 123456789
+  return (x + 1) % 10e10
 }
 
 /**
@@ -24,36 +24,57 @@ export function useWatchSweety<T>(
   watcher: () => T,
   compare?: null | Compare<T>,
 ): T {
-  const forceSelectRef = useRef(0)
+  const watcherUpdateVersionRef = useRef(0)
   const contextRef = useRef<WatchContext>()
+  const unsubscribeRef = useRef<VoidFunction>()
+  const onStoreChangeRef = useRef<null | VoidFunction>(null)
 
   if (contextRef.current == null) {
     contextRef.current = new WatchContext()
   }
 
+  const watcherRef = useRef<() => T>()
+
+  // run the watcher synchronously so it fills up the subscribers of the stores
+  if (watcherRef.current !== watcher) {
+    watcherRef.current = watcher
+    contextRef.current.watchStores(watcher)
+  }
+
+  // it should subscribe the WatchContext during render otherwise
+  // it might lead to race conditions with useEffect(() => Sweety#setState())
+  if (unsubscribeRef.current == null) {
+    unsubscribeRef.current = contextRef.current.subscribeOnWatchedStores(() => {
+      watcherUpdateVersionRef.current = modInc(watcherUpdateVersionRef.current)
+
+      // it should return the onStoreChange callback to call it during the WatchContext#cycle()
+      // when the callback is null the cycle does not call so watched stores do not unsubscribe
+      return onStoreChangeRef.current
+    })
+  }
+
   // the subscribe cannot directly return the watcher result
   // because it might be different per each call
-  // but subscribe requires a snapshot of the mutable store
-  // so instead it increments the forceSelectRef on store updates only
-  // but keeps the value in between allowing to avoid the re-render hell
+  // instead it increments the watcherUpdateVersionRef each time when any watched store changes
+  // so the getState will be consistent over multiple calls until the real change happens
+  // when the version changes the select function calls the watcher and extracts actual data
+  // without that workaround it will go to the re-render hell
   const subscribe = useCallback((onStoreChange: VoidFunction) => {
-    return contextRef.current!.subscribeOnWatchedStores(() => {
-      forceSelectRef.current = modInc(forceSelectRef.current)
-      onStoreChange()
-    })
+    onStoreChangeRef.current = onStoreChange
+
+    return unsubscribeRef.current!
   }, [])
-  const getState = useCallback(() => forceSelectRef.current, [])
-  // the select calls each time when updates either the watcher or the forceSelectRef
+
+  const getState = useCallback(() => watcherUpdateVersionRef.current, [])
+
+  // the select calls each time when updates either the watcher or the watcherUpdateVersionRef
   const select = useCallback(
     () => WatchContext.executeWatcher(watcher),
     [watcher],
   )
+
   // it should memoize the onCompare otherwise it will call the watcher on each render
   const onCompare = useEvent(compare ?? isEqual)
-
-  useEffect(() => {
-    contextRef.current!.watchStores(watcher)
-  }, [watcher])
 
   const value = useSyncExternalStoreWithSelector(
     subscribe,
