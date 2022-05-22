@@ -59,11 +59,11 @@ export function useWatchSweety<T>(
   // so the getState will be consistent over multiple calls until the real change happens
   // when the version changes the select function calls the watcher and extracts actual data
   // without that workaround it will go to the re-render hell
-  const subscribe = useCallback((onStoreChange: VoidFunction) => {
+  const subscribe = useEvent((onStoreChange: VoidFunction) => {
     onStoreChangeRef.current = onStoreChange
 
     return unsubscribeRef.current!
-  }, [])
+  })
 
   const getState = useCallback(() => watcherUpdateVersionRef.current, [])
 
