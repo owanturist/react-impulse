@@ -24,10 +24,9 @@ export function useWatchSweety<T>(
   watcher: () => T,
   compare?: null | Compare<T>,
 ): T {
-  const watcherUpdateVersionRef = useRef(0)
   const contextRef = useRef<WatchContext>()
-  const unsubscribeRef = useRef<VoidFunction>()
-  const onStoreChangeRef = useRef<null | VoidFunction>(null)
+  const subscribeRef = useRef<(onStoreChange: VoidFunction) => VoidFunction>()
+  const getStateRef = useRef<() => number>(null as never)
 
   if (contextRef.current == null) {
     contextRef.current = new WatchContext()
@@ -43,31 +42,34 @@ export function useWatchSweety<T>(
 
   // it should subscribe the WatchContext during render otherwise
   // it might lead to race conditions with useEffect(() => Sweety#setState())
-  if (unsubscribeRef.current == null) {
-    unsubscribeRef.current = contextRef.current.subscribeOnWatchedStores(() => {
-      watcherUpdateVersionRef.current = modInc(watcherUpdateVersionRef.current)
+  if (subscribeRef.current == null) {
+    let version = 0
+    let onWatchedStoresUpdate: null | VoidFunction = null
+
+    // the getState cannot directly return the watcher result
+    // because it might be different per each call
+    // instead it increments the version each time when any watched store changes
+    // so the getState will be consistent over multiple calls until the real change happens
+    // when the version changes the select function calls the watcher and extracts actual data
+    // without that workaround it will go to the re-render hell
+    getStateRef.current = () => version
+
+    const unsubscribe = contextRef.current.subscribeOnWatchedStores(() => {
+      version = modInc(version)
 
       // it should return the onStoreChange callback to call it during the WatchContext#cycle()
       // when the callback is null the cycle does not call so watched stores do not unsubscribe
-      return onStoreChangeRef.current
+      return onWatchedStoresUpdate
     })
+
+    subscribeRef.current = (onStoreChange) => {
+      onWatchedStoresUpdate = onStoreChange
+
+      return unsubscribe
+    }
   }
 
-  // the subscribe cannot directly return the watcher result
-  // because it might be different per each call
-  // instead it increments the watcherUpdateVersionRef each time when any watched store changes
-  // so the getState will be consistent over multiple calls until the real change happens
-  // when the version changes the select function calls the watcher and extracts actual data
-  // without that workaround it will go to the re-render hell
-  const subscribe = useCallback((onStoreChange: VoidFunction) => {
-    onStoreChangeRef.current = onStoreChange
-
-    return unsubscribeRef.current!
-  }, [])
-
-  const getState = useCallback(() => watcherUpdateVersionRef.current, [])
-
-  // the select calls each time when updates either the watcher or the watcherUpdateVersionRef
+  // the select calls each time when updates either the watcher or the version
   const select = useCallback(
     () => WatchContext.executeWatcher(watcher),
     [watcher],
@@ -77,9 +79,9 @@ export function useWatchSweety<T>(
   const onCompare = useEvent(compare ?? isEqual)
 
   const value = useSyncExternalStoreWithSelector(
-    subscribe,
-    getState,
-    getState,
+    subscribeRef.current,
+    getStateRef.current,
+    getStateRef.current,
     select,
     onCompare,
   )
