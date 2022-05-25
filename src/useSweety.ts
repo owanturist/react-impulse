@@ -34,7 +34,7 @@ export function useSweety<TInit extends (...args: Array<never>) => unknown>(
  *
  * @see {@link Sweety.of}
  */
-export function useSweety<T>(initialValue: T): Sweety<T>
+export function useSweety<T>(initialValue: T): Sweety<T> // eslint-disable-line @typescript-eslint/unified-signatures
 
 export function useSweety<T>(lazyOrValue: T | (() => T)): Sweety<T> {
   const sweetyRef = useRef<Sweety<T>>()
