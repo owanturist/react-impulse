@@ -91,9 +91,9 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Install React ${{ matrix.react-version }}
-        run:
-          - npm i --no-save --force --no-fund react@${{ matrix.react-version }} @testing-library/react-hooks@7
-          - npm i --no-save --force --no-fund @testing-library/react@12
+        run: |
+          npm i --no-save --force --no-fund react@${{ matrix.react-version }} @testing-library/react-hooks@7
+          npm i --no-save --force --no-fund @testing-library/react@12
 
       - name: Test
         run: npm test -- --run
