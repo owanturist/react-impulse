@@ -20,7 +20,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm ci --no-audit --no-fund
+        run: npm ci --no-audit --no-fund --prefer-offline
 
   lint:
     name: Lint
@@ -92,8 +92,8 @@ jobs:
 
       - name: Install React ${{ matrix.react-version }}
         run: |
-          npm i --no-save --force --no-fund react@${{ matrix.react-version }} @testing-library/react-hooks@7
-          npm i --no-save --force --no-fund @testing-library/react@12
+          npm i -D --force --no-fund --no-audit react@${{ matrix.react-version }} @testing-library/react-hooks@7
+          npm i -D --force --no-fund --no-audit @testing-library/react@12
 
       - name: Test
         run: npm test -- --run
