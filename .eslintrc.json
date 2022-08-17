@@ -241,6 +241,7 @@
         "jest/prefer-comparison-matcher": "warn",
         "jest/prefer-equality-matcher": "warn",
         "jest/prefer-hooks-on-top": "warn",
+        "jest/prefer-hooks-in-order": "warn",
         "jest/prefer-spy-on": "error",
         "jest/prefer-strict-equal": "error",
         "jest/prefer-todo": "warn",
