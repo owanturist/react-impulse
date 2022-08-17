@@ -222,7 +222,8 @@
         "@typescript-eslint/prefer-ts-expect-error": "error",
         "@typescript-eslint/require-array-sort-compare": "error",
         "@typescript-eslint/restrict-plus-operands": "error",
-        "@typescript-eslint/switch-exhaustiveness-check": "error"
+        "@typescript-eslint/switch-exhaustiveness-check": "error",
+        "@typescript-eslint/consistent-generic-constructors": "warn"
       }
     },
     {

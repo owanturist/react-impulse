@@ -49,7 +49,7 @@ export class SetStateContext {
   }
 
   private readonly storeSubscribers: Array<Map<string, VoidFunction>> = []
-  private readonly watchContexts: Set<WatchContext> = new Set()
+  private readonly watchContexts = new Set<WatchContext>()
 
   private constructor() {
     // make private
