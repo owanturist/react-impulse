@@ -914,7 +914,7 @@ A `Sweety` instance's method that sets the value. Each time when the value chang
 
 ```ts
 const onSubmit = () => {
-  signInFormStore.update((state) => {
+  signInFormStore.setState((state) => {
     // reset password field
     state.password.setState("")
 
