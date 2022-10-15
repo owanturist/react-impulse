@@ -50,7 +50,7 @@ describe("watching single store", () => {
   }
 
   const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useWatchSweety(
+    const [moreThanOne, lessThanFour] = useWatchSweety<[boolean, boolean]>(
       React.useCallback(() => {
         const count = props.count.getState()
 

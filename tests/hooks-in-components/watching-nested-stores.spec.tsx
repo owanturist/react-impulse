@@ -107,7 +107,7 @@ describe("watching nested stores", () => {
   }
 
   const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanTen, lessThanTwenty] = useWatchSweety(
+    const [moreThanTen, lessThanTwenty] = useWatchSweety<[boolean, boolean]>(
       React.useCallback(() => {
         const count = AppState.sum(props.store.getState())
 
