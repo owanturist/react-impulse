@@ -4,9 +4,9 @@ import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/w
 import { WatchContext } from "./WatchContext"
 import { modInc } from "./useWatchSweety"
 
-export const watch = <TProps>(type: React.FC<TProps>): React.FC<TProps> => {
-  const watcher = type
-
+export const watch = <TProps = Record<string, unknown>>(
+  type: React.FC<TProps>,
+): React.FC<TProps> => {
   const SweetyWatcher: React.FC<TProps> = (props, context) => {
     const contextRef = useRef<WatchContext>()
     const subscribeRef = useRef<(onStoreChange: VoidFunction) => VoidFunction>()
@@ -16,7 +16,7 @@ export const watch = <TProps>(type: React.FC<TProps>): React.FC<TProps> => {
       contextRef.current = new WatchContext()
     }
 
-    contextRef.current.watchStores(() => watcher(props, context))
+    contextRef.current.watchStores(() => type(props, context))
 
     // it should subscribe the WatchContext during render otherwise
     // it might lead to race conditions with useEffect(() => Sweety#setState())
@@ -51,7 +51,7 @@ export const watch = <TProps>(type: React.FC<TProps>): React.FC<TProps> => {
       subscribeRef.current,
       getStateRef.current,
       getStateRef.current,
-      () => WatchContext.executeWatcher(() => watcher(props, context)),
+      () => WatchContext.executeWatcher(() => type(props, context)),
     )
 
     return value
