@@ -1,8 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useSweetyState, useWatchSweety } from "../../src"
-import { watch } from "../../src/watch"
+import { Sweety, useSweetyState, useWatchSweety, watch } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
