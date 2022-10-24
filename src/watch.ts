@@ -4,7 +4,7 @@ import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/w
 import { WatchContext } from "./WatchContext"
 import { modInc } from "./useWatchSweety"
 
-export const watch = <TProps = Record<string, unknown>>(
+export const watch = <TProps extends object>(
   type: React.FC<TProps>,
 ): React.FC<TProps> => {
   const SweetyWatcher: React.FC<TProps> = (props, context) => {
