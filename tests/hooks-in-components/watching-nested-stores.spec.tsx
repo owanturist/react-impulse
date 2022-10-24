@@ -2,6 +2,7 @@ import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
 import { Sweety, useSweetyState, useWatchSweety } from "../../src"
+import { watch } from "../../src/watch"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -359,6 +360,141 @@ describe("watching nested stores", () => {
     fireEvent.click(screen.getByTestId("reset-counters"))
     expect(onRender).not.toHaveBeenCalled()
     expect(onCounterRender).not.toHaveBeenCalled()
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([0, 0, 0, 0, 0])
+  })
+
+  it("should work with sweet", () => {
+    const MultipleWatchersHOK: React.FC<AppProps> = watch((props) => {
+      const count = AppState.sum(props.store.getState())
+      const [moreThanTen, lessThanTwenty] = [count > 10, count < 20]
+
+      return (
+        <GenericApp
+          moreThanTen={moreThanTen}
+          lessThanTwenty={lessThanTwenty}
+          {...props}
+        />
+      )
+    })
+
+    const store = Sweety.of<AppState>({
+      counts: [],
+    })
+
+    render(
+      <MultipleWatchersHOK
+        store={store}
+        onRender={vi.fn()}
+        onCounterRender={vi.fn()}
+      />,
+    )
+
+    // initial render and watcher setup
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([])
+    vi.clearAllMocks()
+
+    // add first counter
+    fireEvent.click(screen.getByTestId("add-counter"))
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([0])
+    vi.clearAllMocks()
+
+    // increment first counter
+    fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([1])
+    vi.clearAllMocks()
+
+    // add second counter
+    fireEvent.click(screen.getByTestId("add-counter"))
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([1, 0])
+    vi.clearAllMocks()
+
+    // increment all counters
+    fireEvent.click(screen.getByTestId("increment-all"))
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([2, 1])
+    vi.clearAllMocks()
+
+    // add third counter
+    fireEvent.click(screen.getByTestId("add-counter"))
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([2, 1, 0])
+    vi.clearAllMocks()
+
+    // reset counters
+    fireEvent.click(screen.getByTestId("reset-counters"))
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([0, 0, 0])
+    vi.clearAllMocks()
+
+    // add fourth counter from the outside
+    act(() => {
+      store.setState((state) => ({
+        ...state,
+        counts: [...state.counts, Sweety.of(9)],
+      }))
+    })
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([0, 0, 0, 9])
+    vi.clearAllMocks()
+
+    // increment all counters
+    fireEvent.click(screen.getByTestId("increment-all"))
+    expect(screen.queryByText("more than ten")).toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([1, 1, 1, 10])
+    vi.clearAllMocks()
+
+    // add fifth counter
+    fireEvent.click(screen.getByTestId("add-counter"))
+    expect(screen.queryByText("more than ten")).toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([1, 1, 1, 10, 0])
+    vi.clearAllMocks()
+
+    // increment all counters
+    fireEvent.click(screen.getByTestId("increment-all"))
+    expect(screen.queryByText("more than ten")).toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([2, 2, 2, 11, 1])
+    vi.clearAllMocks()
+
+    // increment fifth counter
+    fireEvent.click(withinNth("counter", 4).getByTestId("increment"))
+    expect(screen.queryByText("more than ten")).toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([2, 2, 2, 11, 2])
+    vi.clearAllMocks()
+
+    // increment fourth counter
+    fireEvent.click(withinNth("counter", 3).getByTestId("increment"))
+    expect(screen.queryByText("more than ten")).toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).not.toBeInTheDocument()
+    expectCounts([2, 2, 2, 12, 2])
+    vi.clearAllMocks()
+
+    // reset all counters
+    fireEvent.click(screen.getByTestId("reset-counters"))
+    expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
+    expect(screen.queryByText("less than twenty")).toBeInTheDocument()
+    expectCounts([0, 0, 0, 0, 0])
+    vi.clearAllMocks()
+
+    // reset all counters again
+    fireEvent.click(screen.getByTestId("reset-counters"))
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([0, 0, 0, 0, 0])
