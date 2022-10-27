@@ -224,7 +224,7 @@ describe("transform state's value inside watcher", () => {
       },
     )
 
-    it.each([
+    it.concurrent.each([
       [
         "inline comparator",
         (props: WithStore) => {
@@ -452,7 +452,7 @@ describe("multiple Sweety#getState() calls", () => {
           expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
         })
 
-        it.each([
+        it.concurrent.each([
           // eslint-disable-next-line no-undefined
           ["without Sweety#setState comparator", undefined],
           ["with Sweety#setState comparator", Counter.compare],
@@ -469,7 +469,7 @@ describe("multiple Sweety#getState() calls", () => {
           expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
         })
 
-        it.each([
+        it.concurrent.each([
           // eslint-disable-next-line no-undefined
           ["without Sweety#setState comparator", undefined],
           ["with Sweety#setState comparator", Counter.compare],

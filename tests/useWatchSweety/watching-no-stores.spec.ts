@@ -4,7 +4,7 @@ import { renderHook } from "@testing-library/react-hooks"
 import { useWatchSweety } from "../../src"
 
 describe("watching no stores", () => {
-  it.each([
+  it.concurrent.each([
     [
       "inline",
       () => {
@@ -23,7 +23,7 @@ describe("watching no stores", () => {
     expect(result.current).toBe(1)
   })
 
-  it.each([
+  it.concurrent.each([
     [
       "inline",
       ({ value }: { value: number }) => {

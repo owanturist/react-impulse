@@ -62,7 +62,7 @@ it.concurrent("watches after store's updates", () => {
 })
 
 describe("applies variables from clojure to a passed reducer function", () => {
-  it.each([
+  it.concurrent.each([
     [
       "inline",
       ({ store, diff }: WithStore & { diff: number }) => {

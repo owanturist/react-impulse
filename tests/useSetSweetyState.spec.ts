@@ -162,7 +162,7 @@ describe("defined store with compare", () => {
       )
     }
 
-    it.each([
+    it.concurrent.each([
       ["inline compare", useHook_1, store_1],
       ["memoized compare", useHook_2, store_2],
     ])("%s", (_, init, store) => {
@@ -560,7 +560,7 @@ describe("defined store with compare", () => {
       )
     })
 
-    it.each([
+    it.concurrent.each([
       // eslint-disable-next-line no-undefined
       ["undefined", undefined],
       ["null", null],
