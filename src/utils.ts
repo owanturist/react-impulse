@@ -22,8 +22,6 @@ export type Compare<T> = (prev: T, next: T) => boolean
  * const setState = useSetSweetyState(store)
  * // or
  * const [state, setState] = useSweetyState(store)
- *
- * @see {@link Compare}
  */
 export type SetSweetyState<T> = (
   valueOrTransform: SetStateAction<T>,

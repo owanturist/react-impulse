@@ -16,9 +16,6 @@ const modInc = (x: number): number => {
  * @param watcher a function to read only the watching value meaning that it never should call `Sweety.of`, `Sweety#clone`, `Sweety#setState` or `Sweety#subscribe` methods inside.
  * @param compare an optional compare function.
  * The strict equality check function (`===`) will be used if `null` or not defined.
- *
- * @see {@link Sweety.getState}
- * @see {@link Compare}
  */
 export function useWatchSweety<T>(
   watcher: () => T,

@@ -10,10 +10,6 @@ import type { Sweety } from "./Sweety"
  * @param compare an optional compare function with medium priority.
  * If not defined it uses `Sweety#compare`.
  * The strict equality check function (`===`) will be used if `null`.
- *
- * @see {@link Sweety.setState}
- * @see {@link Compare}
- * @see {@link SetSweetyState}
  */
 export function useSetSweetyState<T>(
   store: Sweety<T>,

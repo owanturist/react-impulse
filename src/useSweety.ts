@@ -9,8 +9,6 @@ import { Sweety } from "./Sweety"
  *
  * @param lazyInitialValue a function returning an initial value that calls only once when the hook is called.
  * It might be handy when the initial value is expensive to compute.
- *
- * @see {@link Sweety.of}
  */
 export function useSweety<T>(lazyInitialValue: () => T): Sweety<T>
 
@@ -31,8 +29,6 @@ export function useSweety<TInit extends (...args: Array<never>) => unknown>(
  * *The initial value is disregarded during subsequent re-renders.*
  *
  * @param initialValue a value to initialize the store.
- *
- * @see {@link Sweety.of}
  */
 export function useSweety<T>(initialValue: T): Sweety<T> // eslint-disable-line @typescript-eslint/unified-signatures
 
