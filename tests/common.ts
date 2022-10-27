@@ -49,7 +49,7 @@ export interface WithThird<T = Counter> {
 }
 
 export interface WithSpy {
-  spy: VoidFunction
+  spy(...args: Array<unknown>): void
 }
 
 export interface WithListener {

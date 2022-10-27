@@ -91,10 +91,6 @@ export class Sweety<T> {
    * @param value the initial immutable value.
    * @param compare an optional compare function with the lowest priority.
    * If not defined or `null` the strict equality check function (`===`) will be used.
-   *
-   * @see {@link Compare}
-   * @see {@link Sweety.setState}
-   * @see {@link Sweety.subscribe}
    */
   public static of<TValue>(
     value: TValue,
@@ -114,14 +110,11 @@ export class Sweety<T> {
    * This key is used internally for `useWatchSweety`
    * but can be used as the React key property.
    *
-   * @see {@link useWatchSweety}
    */
   public readonly key = nanoid()
 
   /**
    * A comparator function that compares the current store's value with the new one.
-   *
-   * @see {@link Compare}
    */
   public readonly compare: Compare<T>
 
@@ -138,9 +131,6 @@ export class Sweety<T> {
    * If `null` is passed the strict equality check function (`===`) will be used.
    *
    * @returns new `Sweety` instance with the same value.
-   *
-   * @see {@link Sweety.compare}
-   * @see {@link Compare}
    */
   public clone(
     transform?: (value: T) => T,
@@ -181,10 +171,6 @@ export class Sweety<T> {
    * If `null` is passed the strict equality check function (`===`) will be used.
    *
    * @returns `void` to emphasize that `Sweety` instances are mutable.
-   *
-   * @see {@link Sweety.subscribe}
-   * @see {@link Sweety.compare}
-   * @see {@link Compare}
    */
   public setState(
     valueOrTransform: SetStateAction<T>,
@@ -216,8 +202,6 @@ export class Sweety<T> {
    * @param listener a function that will be called on store updates.
    *
    * @returns a cleanup function that can be used to unsubscribe the listener.
-   *
-   * @see {@link Sweety.setState}
    */
   public subscribe(listener: VoidFunction): VoidFunction {
     if (WatchContext.warning(WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING)) {

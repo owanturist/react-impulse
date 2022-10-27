@@ -204,8 +204,8 @@ describe.each([
 describe.each([
   {
     name: "no batching for inline watcher",
-    expectedWatcherCallsForMultiple: 4,
-    expectedWatcherCallsForNested: 3,
+    expectedWatcherCallsForMultiple: 3,
+    expectedWatcherCallsForNested: 2,
     execute: (cb: VoidFunction) => cb(),
     useCount: (watcher: () => number) => {
       return useWatchSweety(() => watcher())
@@ -213,8 +213,8 @@ describe.each([
   },
   {
     name: "with batching for inline watcher",
-    expectedWatcherCallsForMultiple: 3,
-    expectedWatcherCallsForNested: 3,
+    expectedWatcherCallsForMultiple: 2,
+    expectedWatcherCallsForNested: 2,
     execute: batch,
     useCount: (watcher: () => number) => {
       return useWatchSweety(() => watcher())
@@ -280,7 +280,7 @@ describe.each([
 
         expect(screen.getByTestId("count")).toHaveTextContent("3")
         expect(onRender).toHaveBeenCalledTimes(1)
-        expect(spy).toHaveBeenCalledTimes(2)
+        expect(spy).toHaveBeenCalledTimes(1)
         spy.mockReset()
 
         act(() => {
@@ -323,7 +323,7 @@ describe.each([
 
         expect(screen.getByTestId("count")).toHaveTextContent("3")
         expect(onRender).toHaveBeenCalledTimes(1)
-        expect(spy).toHaveBeenCalledTimes(2)
+        expect(spy).toHaveBeenCalledTimes(1)
         spy.mockReset()
 
         fireEvent.click(screen.getByTestId("inc"))
@@ -371,7 +371,7 @@ describe.each([
 
         expect(screen.getByTestId("count")).toHaveTextContent("3")
         expect(onRender).toHaveBeenCalledTimes(1)
-        expect(spy).toHaveBeenCalledTimes(2)
+        expect(spy).toHaveBeenCalledTimes(1)
         spy.mockReset()
 
         act(() => {
@@ -450,7 +450,7 @@ describe.each([
 
         expect(screen.getByTestId("count")).toHaveTextContent("3")
         expect(onRender).toHaveBeenCalledTimes(1)
-        expect(spy).toHaveBeenCalledTimes(2)
+        expect(spy).toHaveBeenCalledTimes(1)
         spy.mockReset()
 
         fireEvent.click(screen.getByTestId("inc-1"))

@@ -15,11 +15,6 @@ import { useSetSweetyState } from "./useSetSweetyState"
  * @param compare an optional compare function with medium priority.
  * If not defined it uses `Sweety#compare`.
  * The strict equality check function (`===`) will be used if `null`.
- *
- * @see {@link Sweety.getState}
- * @see {@link Sweety.setState}
- * @see {@link Sweety.subscribe}
- * @see {@link Compare}
  */
 export function useSweetyReducer<T, A>(
   store: Sweety<T>,

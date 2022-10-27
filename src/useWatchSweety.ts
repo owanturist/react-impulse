@@ -16,9 +16,6 @@ const modInc = (x: number): number => {
  * @param watcher a function to read only the watching value meaning that it never should call `Sweety.of`, `Sweety#clone`, `Sweety#setState` or `Sweety#subscribe` methods inside.
  * @param compare an optional compare function.
  * The strict equality check function (`===`) will be used if `null` or not defined.
- *
- * @see {@link Sweety.getState}
- * @see {@link Compare}
  */
 export function useWatchSweety<T>(
   watcher: () => T,
@@ -30,14 +27,6 @@ export function useWatchSweety<T>(
 
   if (contextRef.current == null) {
     contextRef.current = new WatchContext()
-  }
-
-  const watcherRef = useRef<() => T>()
-
-  // run the watcher synchronously so it fills up the subscribers of the stores
-  if (watcherRef.current !== watcher) {
-    watcherRef.current = watcher
-    contextRef.current.watchStores(watcher)
   }
 
   // it should subscribe the WatchContext during render otherwise
@@ -71,7 +60,7 @@ export function useWatchSweety<T>(
 
   // the select calls each time when updates either the watcher or the version
   const select = useCallback(
-    () => WatchContext.executeWatcher(watcher),
+    () => contextRef.current!.watchStores(watcher),
     [watcher],
   )
 

@@ -224,7 +224,7 @@ describe("transform state's value inside watcher", () => {
       },
     )
 
-    it.each([
+    it.concurrent.each([
       [
         "inline comparator",
         (props: WithStore) => {
@@ -319,7 +319,7 @@ describe("transform state's value inside watcher", () => {
   ])(
     "when store's changes under %s are comparably equal with",
     (_, useHookWithoutCompare) => {
-      it.each([
+      it.concurrent.each([
         ["without comparator", useHookWithoutCompare],
         [
           "with inline comparator",
@@ -343,15 +343,13 @@ describe("transform state's value inside watcher", () => {
           initialProps: { spy, store },
         })
 
-        // 1st extracts the watcher result
-        // 2nd subscribes to the included stores' changes
-        expect(spy).toHaveBeenCalledTimes(2)
+        expect(spy).toHaveBeenCalledTimes(1)
 
         act(() => {
           store.setState(Counter.clone, Counter.compare)
         })
 
-        expect(spy).toHaveBeenCalledTimes(2)
+        expect(spy).toHaveBeenCalledTimes(1)
       })
     },
   )
@@ -454,7 +452,7 @@ describe("multiple Sweety#getState() calls", () => {
           expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
         })
 
-        it.each([
+        it.concurrent.each([
           // eslint-disable-next-line no-undefined
           ["without Sweety#setState comparator", undefined],
           ["with Sweety#setState comparator", Counter.compare],
@@ -471,7 +469,7 @@ describe("multiple Sweety#getState() calls", () => {
           expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
         })
 
-        it.each([
+        it.concurrent.each([
           // eslint-disable-next-line no-undefined
           ["without Sweety#setState comparator", undefined],
           ["with Sweety#setState comparator", Counter.compare],
