@@ -1,13 +1,15 @@
-import React, { useRef } from "react"
+import { FC, useRef, useMemo } from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
 import { WatchContext } from "./WatchContext"
 import { modInc } from "./useWatchSweety"
 
-export function watch<TProps extends object>(
-  type: React.FC<TProps>,
-): React.FC<TProps> {
-  const SweetyWatcher: React.FC<TProps> = (props, context) => {
+const useSweetyMemo: typeof useMemo = (factory, deps) => {
+  throw new Error("I am fake")
+}
+
+export function watch<TProps extends object>(fc: FC<TProps>): FC<TProps> {
+  const SweetyWatcher: FC<TProps> = (props, context) => {
     const contextRef = useRef<WatchContext>()
     const subscribeRef = useRef<(onStoreChange: VoidFunction) => VoidFunction>()
     const getStateRef = useRef<() => number>(null as never)
@@ -15,8 +17,6 @@ export function watch<TProps extends object>(
     if (contextRef.current == null) {
       contextRef.current = new WatchContext()
     }
-
-    contextRef.current.watchStores(() => type(props, context))
 
     // it should subscribe the WatchContext during render otherwise
     // it might lead to race conditions with useEffect(() => Sweety#setState())
@@ -47,14 +47,12 @@ export function watch<TProps extends object>(
       }
     }
 
-    const value = useSyncExternalStoreWithSelector(
+    return useSyncExternalStoreWithSelector(
       subscribeRef.current,
       getStateRef.current,
       getStateRef.current,
-      () => WatchContext.executeWatcher(() => type(props, context)),
+      () => contextRef.current!.watchStores(() => fc(props, context)),
     )
-
-    return value
   }
 
   return SweetyWatcher
