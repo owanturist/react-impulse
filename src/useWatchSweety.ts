@@ -29,14 +29,6 @@ export function useWatchSweety<T>(
     contextRef.current = new WatchContext()
   }
 
-  const watcherRef = useRef<() => T>()
-
-  // run the watcher synchronously so it fills up the subscribers of the stores
-  if (watcherRef.current !== watcher) {
-    watcherRef.current = watcher
-    contextRef.current.watchStores(watcher)
-  }
-
   // it should subscribe the WatchContext during render otherwise
   // it might lead to race conditions with useEffect(() => Sweety#setState())
   if (subscribeRef.current == null) {
@@ -68,7 +60,7 @@ export function useWatchSweety<T>(
 
   // the select calls each time when updates either the watcher or the version
   const select = useCallback(
-    () => WatchContext.executeWatcher(watcher),
+    () => contextRef.current!.watchStores(watcher),
     [watcher],
   )
 

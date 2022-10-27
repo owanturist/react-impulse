@@ -9,9 +9,11 @@ describe.each([
     "without comparator",
     ({ store, spy }: WithStore & WithSpy) => {
       return useWatchSweety(() => {
-        spy()
+        const value = store.getState()
 
-        return store.getState()
+        spy(value)
+
+        return value
       })
     },
   ],
@@ -20,9 +22,11 @@ describe.each([
     ({ store, spy }: WithStore & WithSpy) => {
       return useWatchSweety(
         () => {
-          spy()
+          const value = store.getState()
 
-          return store.getState()
+          spy(value)
+
+          return value
         },
         (prev, next) => Counter.compare(prev, next),
       )
@@ -32,9 +36,11 @@ describe.each([
     "with memoized comparator",
     ({ store, spy }: WithStore & WithSpy) => {
       return useWatchSweety(() => {
-        spy()
+        const value = store.getState()
 
-        return store.getState()
+        spy(value)
+
+        return value
       }, Counter.compare)
     },
   ],
@@ -50,25 +56,25 @@ describe.each([
     return { spy, store, rerender }
   }
 
-  it.concurrent("should call watcher 2 times on init", () => {
+  it.concurrent("should call watcher 1 time on init", () => {
     const { spy } = setup()
 
-    // 1st extracts the watcher result
-    // 2nd subscribes to the included stores' changes
-    expect(spy).toHaveBeenCalledTimes(2)
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
-  it.concurrent("should call watcher 2 times on subsequent renders", () => {
+  it.concurrent("should call watcher 1 time on subsequent renders", () => {
     const { spy, store, rerender } = setup()
 
     spy.mockReset()
 
     rerender({ spy, store })
-    expect(spy).toHaveBeenCalledTimes(2)
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
   it.concurrent(
-    "should call watcher 3 times when a watching store changes",
+    "should call watcher 2 times when a watching store changes",
     () => {
       const { spy, store } = setup()
 
@@ -81,8 +87,9 @@ describe.each([
       // 1st executes watcher to extract new result
       // --it causes reconciliation--
       // 2nd extracts the watcher result
-      // 3rd subscribes to the included stores' changes
-      expect(spy).toHaveBeenCalledTimes(3)
+      expect(spy).toHaveBeenCalledTimes(2)
+      expect(spy).toHaveBeenNthCalledWith(1, { count: 2 })
+      expect(spy).toHaveBeenNthCalledWith(2, { count: 2 })
     },
   )
 })
@@ -93,9 +100,11 @@ describe.each([
     ({ store, spy }: WithStore & WithSpy) => {
       return useWatchSweety(
         useCallback(() => {
-          spy()
+          const value = store.getState()
 
-          return store.getState()
+          spy(value)
+
+          return value
         }, [store, spy]),
       )
     },
@@ -105,9 +114,11 @@ describe.each([
     ({ store, spy }: WithStore & WithSpy) => {
       return useWatchSweety(
         useCallback(() => {
-          spy()
+          const value = store.getState()
 
-          return store.getState()
+          spy(value)
+
+          return value
         }, [store, spy]),
         (prev, next) => Counter.compare(prev, next),
       )
@@ -118,9 +129,11 @@ describe.each([
     ({ store, spy }: WithStore & WithSpy) => {
       return useWatchSweety(
         useCallback(() => {
-          spy()
+          const value = store.getState()
 
-          return store.getState()
+          spy(value)
+
+          return value
         }, [store, spy]),
         Counter.compare,
       )
@@ -138,12 +151,11 @@ describe.each([
     return { spy, store, rerender }
   }
 
-  it.concurrent("should call watcher 2 times on init", () => {
+  it.concurrent("should call watcher 1 time on init", () => {
     const { spy } = setup()
 
-    // 1st extracts the watcher result
-    // 2nd subscribes to the included stores' changes
-    expect(spy).toHaveBeenCalledTimes(2)
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
   it.concurrent("should not call watcher on subsequent renders", () => {
@@ -166,8 +178,8 @@ describe.each([
         store.setState(Counter.inc)
       })
 
-      // 1st executes watcher to extract new result
       expect(spy).toHaveBeenCalledTimes(1)
+      expect(spy).toHaveBeenLastCalledWith({ count: 2 })
     },
   )
 })

@@ -42,16 +42,16 @@ export class WatchContext {
     return WatchContext.isReadonlyDuringWatcherCall
   }
 
-  public static executeWatcher<T>(watcher: () => T): T {
+  public static register<T>(store: Sweety<T>): void {
+    WatchContext.current?.register(store)
+  }
+
+  private static executeWatcher<T>(watcher: () => T): T {
     WatchContext.isReadonlyDuringWatcherCall = true
     const value = watcher()
     WatchContext.isReadonlyDuringWatcherCall = false
 
     return value
-  }
-
-  public static register<T>(store: Sweety<T>): void {
-    WatchContext.current?.register(store)
   }
 
   private listener?: () => null | VoidFunction
@@ -88,18 +88,20 @@ export class WatchContext {
     this.deadCleanups.clear()
   }
 
-  private cycle(callback: VoidFunction): void {
+  private cycle<T>(callback: () => T): T {
     WatchContext.current = this
 
     // fill up dead cleanups with all of the current cleanups
     // to keep only real dead once during .register() call
     this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
 
-    callback()
+    const value = callback()
 
     this.cleanupObsolete()
 
     WatchContext.current = null
+
+    return value
   }
 
   public subscribeOnWatchedStores(
@@ -114,8 +116,8 @@ export class WatchContext {
     }
   }
 
-  public watchStores<T>(watcher: () => T): void {
-    this.cycle(() => WatchContext.executeWatcher(watcher))
+  public watchStores<T>(watcher: () => T): T {
+    return this.cycle(() => WatchContext.executeWatcher(watcher))
   }
 
   public emit(): void {
