@@ -1,11 +1,60 @@
-import { FC, useRef, useMemo } from "react"
+import { FC, useRef, useMemo, useEffect } from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
 import { WatchContext } from "./WatchContext"
-import { modInc } from "./useWatchSweety"
 
-const useSweetyMemo: typeof useMemo = (factory, deps) => {
-  throw new Error("I am fake")
+export const useSweetyMemo: typeof useMemo = (factory, deps) => {
+  // const contextRef = useRef<WatchContext>()
+  // const subscribeRef = useRef<(onStoreChange: VoidFunction) => VoidFunction>(
+  //   null as never,
+  // )
+  // const getStateRef = useRef<() => number>(null as never)
+
+  // if (contextRef.current == null) {
+  //   contextRef.current = new WatchContext()
+
+  //   let version = 0
+  //   let onWatchedStoresUpdate: null | VoidFunction = null
+
+  //   getStateRef.current = () => version
+
+  //   const unsubscribe = contextRef.current.subscribeOnWatchedStores(() => {
+  //     version++
+
+  //     return onWatchedStoresUpdate
+  //   })
+
+  //   subscribeRef.current = (onStoreChange) => {
+  //     onWatchedStoresUpdate = onStoreChange
+
+  //     return unsubscribe
+  //   }
+  // }
+
+  // const buster = useSyncExternalStore(
+  //   subscribeRef.current,
+  //   getStateRef.current,
+  //   getStateRef.current,
+  // )
+
+  const versionRef = useRef(0)
+  const cleanup = useRef<VoidFunction>()
+
+  if (cleanup.current == null) {
+    cleanup.current = WatchContext.current?.subscribeOnWatchedStores(() => {
+      versionRef.current++
+
+      return null
+    })
+  }
+
+  useEffect(() => cleanup.current, [])
+
+  return useMemo(
+    factory,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    deps && [...deps, versionRef.current],
+  )
 }
 
 export function watch<TProps extends object>(fc: FC<TProps>): FC<TProps> {
@@ -32,13 +81,15 @@ export function watch<TProps extends object>(fc: FC<TProps>): FC<TProps> {
       // without that workaround it will go to the re-render hell
       getStateRef.current = () => version
 
-      const unsubscribe = contextRef.current.subscribeOnWatchedStores(() => {
-        version = modInc(version)
+      const unsubscribe = contextRef.current.subscribeOnWatchedStores(
+        (stores) => {
+          version++
 
-        // it should return the onStoreChange callback to call it during the WatchContext#cycle()
-        // when the callback is null the cycle does not call so watched stores do not unsubscribe
-        return onWatchedStoresUpdate
-      })
+          // it should return the onStoreChange callback to call it during the WatchContext#cycle()
+          // when the callback is null the cycle does not call so watched stores do not unsubscribe
+          return onWatchedStoresUpdate
+        },
+      )
 
       subscribeRef.current = (onStoreChange) => {
         onWatchedStoresUpdate = onStoreChange
