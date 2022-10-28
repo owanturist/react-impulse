@@ -1,3 +1,5 @@
+import type { Dispatch } from "react"
+
 import type { Sweety } from "./Sweety"
 import { SetStateContext } from "./SetStateContext"
 
@@ -31,7 +33,7 @@ const warning = (message: string): void => {
  * @private
  */
 export class WatchContext {
-  private static current: null | WatchContext = null
+  public static current: null | WatchContext = null
   private static isReadonlyDuringWatcherCall = false
 
   public static warning(message: string): boolean {
@@ -54,18 +56,20 @@ export class WatchContext {
     return value
   }
 
-  private listener?: () => null | VoidFunction
-  private readonly deadCleanups = new Set<string>()
-  private readonly cleanups = new Map<string, VoidFunction>()
+  private readonly listeners = new Set<
+    (stores: Array<Sweety<unknown>>) => null | Dispatch<Array<Sweety<unknown>>>
+  >()
+  private readonly deadCleanups = new Set<Sweety<any>>()
+  private readonly cleanups = new Map<Sweety<any>, VoidFunction>()
 
   private register<T>(store: Sweety<T>): void {
-    if (this.cleanups.has(store.key)) {
+    if (this.cleanups.has(store)) {
       // still alive
-      this.deadCleanups.delete(store.key)
+      this.deadCleanups.delete(store)
     } else {
       WatchContext.isReadonlyDuringWatcherCall = false
       this.cleanups.set(
-        store.key,
+        store,
         store.subscribe(() => {
           // the listener registers a watcher so the watcher will emit once per (batch) setState
           SetStateContext.registerWatchContext(this)
@@ -76,26 +80,26 @@ export class WatchContext {
   }
 
   private cleanupObsolete(): void {
-    this.deadCleanups.forEach((key) => {
-      const clean = this.cleanups.get(key)
+    this.deadCleanups.forEach((store) => {
+      const clean = this.cleanups.get(store)
 
       if (clean != null) {
         clean()
-        this.cleanups.delete(key)
+        this.cleanups.delete(store)
       }
     })
 
     this.deadCleanups.clear()
   }
 
-  private cycle<T>(callback: () => T): T {
+  private cycle<T>(callback: (stores: Array<Sweety<unknown>>) => T): T {
     WatchContext.current = this
 
     // fill up dead cleanups with all of the current cleanups
     // to keep only real dead once during .register() call
-    this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
+    this.cleanups.forEach((_, store) => this.deadCleanups.add(store))
 
-    const value = callback()
+    const value = callback(Array.from(this.cleanups.keys()))
 
     this.cleanupObsolete()
 
@@ -105,14 +109,20 @@ export class WatchContext {
   }
 
   public subscribeOnWatchedStores(
-    listener: () => null | VoidFunction,
+    listener: (
+      stores: Array<Sweety<unknown>>,
+    ) => null | Dispatch<Array<Sweety<unknown>>>,
   ): VoidFunction {
-    this.listener = listener
+    this.listeners.add(listener)
 
     return () => {
-      this.cleanups.forEach((cleanup) => cleanup())
-      this.cleanups.clear()
-      this.deadCleanups.clear()
+      this.listeners.delete(listener)
+
+      if (this.listeners.size === 0) {
+        this.cleanups.forEach((cleanup) => cleanup())
+        this.cleanups.clear()
+        this.deadCleanups.clear()
+      }
     }
   }
 
@@ -121,10 +131,12 @@ export class WatchContext {
   }
 
   public emit(): void {
-    const callback = this.listener?.()
+    this.listeners.forEach((listener) => {
+      const callback = listener(Array.from(this.cleanups.keys()))
 
-    if (callback != null) {
-      this.cycle(callback)
-    }
+      if (callback != null) {
+        this.cycle(callback)
+      }
+    })
   }
 }

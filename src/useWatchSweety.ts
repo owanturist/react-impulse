@@ -4,7 +4,7 @@ import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/w
 import { Compare, isEqual, useEvent } from "./utils"
 import { WatchContext } from "./WatchContext"
 
-export const modInc = (x: number): number => {
+const modInc = (x: number): number => {
   return (x + 1) % 10e10
 }
 
