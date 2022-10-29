@@ -1,5 +1,6 @@
 import { useRef } from "react"
 
+import { noop } from "./utils"
 import { WatchContext } from "./WatchContext"
 
 const modInc = (x: number): number => {
@@ -16,12 +17,10 @@ export const useWatchContext = (): UseWatchContextResult => {
   const setupRef = useRef<UseWatchContextResult>()
 
   if (setupRef.current == null) {
-    const context = WatchContext.current ?? new WatchContext()
-
     let version = 0
-    let onWatchedStoresUpdate: null | VoidFunction = null
+    let onWatchedStoresUpdate = noop
 
-    const cleanup = context.subscribeOnWatchedStores(() => {
+    const context = new WatchContext(() => {
       version = modInc(version)
 
       // it should return the onStoreChange callback to call it during the WatchContext#cycle()
@@ -43,7 +42,7 @@ export const useWatchContext = (): UseWatchContextResult => {
       subscribe: (onStoreChange) => {
         onWatchedStoresUpdate = onStoreChange
 
-        return cleanup
+        return () => context.cleanup()
       },
     }
   }
