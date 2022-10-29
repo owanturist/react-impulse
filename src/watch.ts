@@ -1,59 +1,54 @@
-import { FC, useRef, useMemo, useEffect } from "react"
+import { FC, useRef, useMemo } from "react"
+import { useSyncExternalStore } from "use-sync-external-store/shim"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
 import { WatchContext } from "./WatchContext"
 
 export const useSweetyMemo: typeof useMemo = (factory, deps) => {
-  // const contextRef = useRef<WatchContext>()
-  // const subscribeRef = useRef<(onStoreChange: VoidFunction) => VoidFunction>(
-  //   null as never,
-  // )
-  // const getStateRef = useRef<() => number>(null as never)
+  const setupRef = useRef<{
+    context: WatchContext
+    getState: () => number
+    subscribe: (onStoreChange: VoidFunction) => VoidFunction
+  }>()
 
-  // if (contextRef.current == null) {
-  //   contextRef.current = new WatchContext()
+  if (setupRef.current == null) {
+    const [isUsingCurrentContext, context] =
+      WatchContext.current == null
+        ? [false, new WatchContext()]
+        : [true, WatchContext.current]
 
-  //   let version = 0
-  //   let onWatchedStoresUpdate: null | VoidFunction = null
+    let version = 0
+    let onWatchedStoresUpdate: null | VoidFunction = null
 
-  //   getStateRef.current = () => version
+    const cleanup = context.subscribeOnWatchedStores(() => {
+      version++
 
-  //   const unsubscribe = contextRef.current.subscribeOnWatchedStores(() => {
-  //     version++
-
-  //     return onWatchedStoresUpdate
-  //   })
-
-  //   subscribeRef.current = (onStoreChange) => {
-  //     onWatchedStoresUpdate = onStoreChange
-
-  //     return unsubscribe
-  //   }
-  // }
-
-  // const buster = useSyncExternalStore(
-  //   subscribeRef.current,
-  //   getStateRef.current,
-  //   getStateRef.current,
-  // )
-
-  const versionRef = useRef(0)
-  const cleanup = useRef<VoidFunction>()
-
-  if (cleanup.current == null) {
-    cleanup.current = WatchContext.current?.subscribeOnWatchedStores(() => {
-      versionRef.current++
-
-      return null
+      return onWatchedStoresUpdate
     })
+
+    setupRef.current = {
+      context,
+      getState: () => version,
+      subscribe: (onStoreChange) => {
+        if (!isUsingCurrentContext) {
+          onWatchedStoresUpdate = onStoreChange
+        }
+
+        return cleanup
+      },
+    }
   }
 
-  useEffect(() => cleanup.current, [])
+  const buster = useSyncExternalStore(
+    setupRef.current.subscribe,
+    setupRef.current.getState,
+    setupRef.current.getState,
+  )
 
   return useMemo(
-    factory,
+    () => setupRef.current!.context.watchStores(factory),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    deps && [...deps, versionRef.current],
+    deps && [...deps, buster],
   )
 }
 
@@ -81,15 +76,13 @@ export function watch<TProps extends object>(fc: FC<TProps>): FC<TProps> {
       // without that workaround it will go to the re-render hell
       getStateRef.current = () => version
 
-      const unsubscribe = contextRef.current.subscribeOnWatchedStores(
-        (stores) => {
-          version++
+      const unsubscribe = contextRef.current.subscribeOnWatchedStores(() => {
+        version++
 
-          // it should return the onStoreChange callback to call it during the WatchContext#cycle()
-          // when the callback is null the cycle does not call so watched stores do not unsubscribe
-          return onWatchedStoresUpdate
-        },
-      )
+        // it should return the onStoreChange callback to call it during the WatchContext#cycle()
+        // when the callback is null the cycle does not call so watched stores do not unsubscribe
+        return onWatchedStoresUpdate
+      })
 
       subscribeRef.current = (onStoreChange) => {
         onWatchedStoresUpdate = onStoreChange
