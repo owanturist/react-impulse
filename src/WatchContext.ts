@@ -1,5 +1,3 @@
-import type { Dispatch } from "react"
-
 import type { Sweety } from "./Sweety"
 import { SetStateContext } from "./SetStateContext"
 
@@ -56,9 +54,7 @@ export class WatchContext {
     return value
   }
 
-  private readonly listeners = new Set<
-    (stores: Array<Sweety<unknown>>) => null | Dispatch<Array<Sweety<unknown>>>
-  >()
+  private readonly listeners = new Set<() => null | VoidFunction>()
   private readonly deadCleanups = new Set<Sweety<any>>()
   private readonly cleanups = new Map<Sweety<any>, VoidFunction>()
 
@@ -109,9 +105,7 @@ export class WatchContext {
   }
 
   public subscribeOnWatchedStores(
-    listener: (
-      stores: Array<Sweety<unknown>>,
-    ) => null | Dispatch<Array<Sweety<unknown>>>,
+    listener: () => null | VoidFunction,
   ): VoidFunction {
     this.listeners.add(listener)
 
@@ -132,7 +126,7 @@ export class WatchContext {
 
   public emit(): void {
     this.listeners.forEach((listener) => {
-      const callback = listener(Array.from(this.cleanups.keys()))
+      const callback = listener()
 
       if (callback != null) {
         this.cycle(callback)
