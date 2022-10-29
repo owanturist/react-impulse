@@ -11,18 +11,18 @@ describe.each([
 ])("using %s as hoc", (_, hoc) => {
   describe("single store", () => {
     const Component: React.FC<{
-      spy?: React.Dispatch<number>
+      onMemo?: React.Dispatch<number>
       value: Sweety<number>
       useMemo: typeof React.useMemo
-    }> = hoc(({ spy, value, useMemo }) => {
+    }> = hoc(({ onMemo, value, useMemo }) => {
       const [multiplier, setMultiplier] = useState(2)
       const result = useMemo(() => {
         const x = value.getState() * multiplier
 
-        spy?.(x)
+        onMemo?.(x)
 
         return x
-      }, [value, multiplier, spy])
+      }, [value, multiplier, onMemo])
 
       return (
         <>
@@ -54,62 +54,145 @@ describe.each([
 
     it("can watch inside useSweetyMemo", () => {
       const value = Sweety.of(1)
+      const onMemo = vi.fn()
+      const onRender = vi.fn()
 
-      render(<Component useMemo={useSweetyMemo} value={value} />)
+      render(
+        <React.Profiler id="test" onRender={onRender}>
+          <Component onMemo={onMemo} useMemo={useSweetyMemo} value={value} />
+        </React.Profiler>,
+      )
 
       const node = screen.getByTestId("value")
 
       expect(node).toHaveTextContent("2")
+      expect(onMemo).toHaveBeenCalledTimes(1)
+      expect(onRender).toHaveBeenCalledTimes(1)
+      expect(value).toHaveProperty("subscribers.size", 1)
 
       act(() => {
         value.setState(2)
       })
 
       expect(node).toHaveTextContent("4")
+      expect(onMemo).toHaveBeenCalledTimes(2)
+      expect(onRender).toHaveBeenCalledTimes(2)
+      expect(value).toHaveProperty("subscribers.size", 1)
     })
 
     it("does not call useMemo factory when deps not changed", () => {
       const value = Sweety.of(1)
-      const spy = vi.fn()
+      const onMemo = vi.fn()
+      const onRender = vi.fn()
 
       const { rerender } = render(
-        <Component useMemo={useSweetyMemo} spy={spy} value={value} />,
+        <React.Profiler id="test" onRender={onRender}>
+          <Component useMemo={useSweetyMemo} onMemo={onMemo} value={value} />
+        </React.Profiler>,
       )
 
-      expect(spy).toHaveBeenCalledTimes(1)
-      expect(spy).toHaveBeenLastCalledWith(2)
+      expect(onMemo).toHaveBeenCalledTimes(1)
+      expect(onMemo).toHaveBeenLastCalledWith(2)
+      expect(onRender).toHaveBeenCalledTimes(1)
 
-      rerender(<Component useMemo={useSweetyMemo} spy={spy} value={value} />)
+      rerender(
+        <React.Profiler id="test" onRender={onRender}>
+          <Component useMemo={useSweetyMemo} onMemo={onMemo} value={value} />
+        </React.Profiler>,
+      )
 
-      expect(spy).toHaveBeenCalledTimes(1)
+      expect(onMemo).toHaveBeenCalledTimes(1)
+      expect(onRender).toHaveBeenCalledTimes(2)
+
+      act(() => {
+        value.setState(3)
+      })
+
+      expect(onMemo).toHaveBeenCalledTimes(2)
+      expect(onMemo).toHaveBeenLastCalledWith(6)
+      expect(value).toHaveProperty("subscribers.size", 1)
+      expect(onRender).toHaveBeenCalledTimes(3)
     })
 
     it("should call useMemo factory when dep Sweety instance changes", () => {
-      const spy = vi.fn()
+      const onMemo = vi.fn()
+      const onRender = vi.fn()
 
       const { rerender } = render(
-        <Component useMemo={useSweetyMemo} spy={spy} value={Sweety.of(1)} />,
+        <React.Profiler id="test" onRender={onRender}>
+          <Component
+            useMemo={useSweetyMemo}
+            onMemo={onMemo}
+            value={Sweety.of(1)}
+          />
+        </React.Profiler>,
       )
 
       rerender(
-        <Component useMemo={useSweetyMemo} spy={spy} value={Sweety.of(3)} />,
+        <React.Profiler id="test" onRender={onRender}>
+          <Component
+            useMemo={useSweetyMemo}
+            onMemo={onMemo}
+            value={Sweety.of(3)}
+          />
+        </React.Profiler>,
       )
 
-      expect(spy).toHaveBeenCalledTimes(2)
-      expect(spy).toHaveBeenLastCalledWith(6)
+      expect(onMemo).toHaveBeenCalledTimes(2)
+      expect(onMemo).toHaveBeenLastCalledWith(6)
+      expect(onRender).toHaveBeenCalledTimes(2)
     })
 
-    it("should call useMemo factory when dep non Sweety changes", () => {
-      const spy = vi.fn()
+    it("should unsubscribe Sweety from useMemo when swapped", () => {
+      const value = Sweety.of(1)
+      const onMemo = vi.fn()
+      const onRender = vi.fn()
+
+      const { rerender } = render(
+        <React.Profiler id="test" onRender={onRender}>
+          <Component useMemo={useSweetyMemo} onMemo={onMemo} value={value} />
+        </React.Profiler>,
+      )
+
+      rerender(
+        <React.Profiler id="test" onRender={onRender}>
+          <Component
+            useMemo={useSweetyMemo}
+            onMemo={onMemo}
+            value={Sweety.of(3)}
+          />
+        </React.Profiler>,
+      )
+
+      act(() => {
+        value.setState(10)
+      })
+
+      expect(onMemo).toHaveBeenCalledTimes(2)
+      expect(onMemo).toHaveBeenLastCalledWith(6)
+      expect(onRender).toHaveBeenCalledTimes(2)
+      expect(value).toHaveProperty("subscribers.size", 0)
+    })
+
+    it("should call useMemo factory when non Sweety dep changes", () => {
+      const onMemo = vi.fn()
+      const onRender = vi.fn()
 
       render(
-        <Component useMemo={useSweetyMemo} spy={spy} value={Sweety.of(3)} />,
+        <React.Profiler id="test" onRender={onRender}>
+          <Component
+            useMemo={useSweetyMemo}
+            onMemo={onMemo}
+            value={Sweety.of(3)}
+          />
+        </React.Profiler>,
       )
 
       fireEvent.click(screen.getByTestId("increment"))
 
-      expect(spy).toHaveBeenCalledTimes(2)
-      expect(spy).toHaveBeenLastCalledWith(9)
+      expect(onMemo).toHaveBeenCalledTimes(2)
+      expect(onMemo).toHaveBeenLastCalledWith(9)
+      expect(onRender).toHaveBeenCalledTimes(2)
     })
   })
 
