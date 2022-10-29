@@ -55,17 +55,17 @@ export class WatchContext {
   }
 
   private readonly listeners = new Set<() => null | VoidFunction>()
-  private readonly deadCleanups = new Set<Sweety<any>>()
-  private readonly cleanups = new Map<Sweety<any>, VoidFunction>()
+  private readonly deadCleanups = new Set<string>()
+  private readonly cleanups = new Map<string, VoidFunction>()
 
   private register<T>(store: Sweety<T>): void {
-    if (this.cleanups.has(store)) {
+    if (this.cleanups.has(store.key)) {
       // still alive
-      this.deadCleanups.delete(store)
+      this.deadCleanups.delete(store.key)
     } else {
       WatchContext.isReadonlyDuringWatcherCall = false
       this.cleanups.set(
-        store,
+        store.key,
         store.subscribe(() => {
           // the listener registers a watcher so the watcher will emit once per (batch) setState
           SetStateContext.registerWatchContext(this)
@@ -88,18 +88,25 @@ export class WatchContext {
     this.deadCleanups.clear()
   }
 
-  private cycle<T>(callback: (stores: Array<Sweety<unknown>>) => T): T {
+  private cycle<T>(callback: () => T): T {
+    // TODO check it
+    // if (WatchContext.current != null) {
+    //   throw new Error("WatchContext is already exit")
+    // }
+
+    const previousContext = WatchContext.current
+
     WatchContext.current = this
 
     // fill up dead cleanups with all of the current cleanups
     // to keep only real dead once during .register() call
-    this.cleanups.forEach((_, store) => this.deadCleanups.add(store))
+    this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
 
-    const value = callback(Array.from(this.cleanups.keys()))
+    const value = callback()
 
     this.cleanupObsolete()
 
-    WatchContext.current = null
+    WatchContext.current = previousContext
 
     return value
   }
