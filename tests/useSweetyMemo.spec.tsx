@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 
-import { Sweety, watch, useSweetyMemo } from "../../src"
+import { Sweety, watch, useSweetyMemo } from "../src"
 
 const identity = <T,>(value: T): T => value
 
