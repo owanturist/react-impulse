@@ -54,7 +54,6 @@ export class WatchContext {
     return value
   }
 
-  private readonly listeners = new Set<() => null | VoidFunction>()
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
 
@@ -76,12 +75,12 @@ export class WatchContext {
   }
 
   private cleanupObsolete(): void {
-    this.deadCleanups.forEach((store) => {
-      const clean = this.cleanups.get(store)
+    this.deadCleanups.forEach((key) => {
+      const cleanup = this.cleanups.get(key)
 
-      if (clean != null) {
-        clean()
-        this.cleanups.delete(store)
+      if (cleanup != null) {
+        cleanup()
+        this.cleanups.delete(key)
       }
     })
 
@@ -89,11 +88,6 @@ export class WatchContext {
   }
 
   private cycle<T>(callback: () => T): T {
-    // TODO check it
-    // if (WatchContext.current != null) {
-    //   throw new Error("WatchContext is already exit")
-    // }
-
     const previousContext = WatchContext.current
 
     WatchContext.current = this
@@ -111,20 +105,12 @@ export class WatchContext {
     return value
   }
 
-  public subscribeOnWatchedStores(
-    listener: () => null | VoidFunction,
-  ): VoidFunction {
-    this.listeners.add(listener)
+  public constructor(private readonly listener: () => VoidFunction) {}
 
-    return () => {
-      this.listeners.delete(listener)
-
-      if (this.listeners.size === 0) {
-        this.cleanups.forEach((cleanup) => cleanup())
-        this.cleanups.clear()
-        this.deadCleanups.clear()
-      }
-    }
+  public cleanup(): void {
+    this.cleanups.forEach((cleanup) => cleanup())
+    this.cleanups.clear()
+    this.deadCleanups.clear()
   }
 
   public watchStores<T>(watcher: () => T): T {
@@ -132,12 +118,6 @@ export class WatchContext {
   }
 
   public emit(): void {
-    this.listeners.forEach((listener) => {
-      const callback = listener()
-
-      if (callback != null) {
-        this.cycle(callback)
-      }
-    })
+    this.cycle(this.listener())
   }
 }

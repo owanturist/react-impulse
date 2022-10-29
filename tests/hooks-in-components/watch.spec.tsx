@@ -115,26 +115,20 @@ describe.each([
     })
 
     it("should call useMemo factory when dep Sweety instance changes", () => {
+      const value_1 = Sweety.of(1)
+      const value_2 = Sweety.of(3)
       const onMemo = vi.fn()
       const onRender = vi.fn()
 
       const { rerender } = render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component
-            useMemo={useSweetyMemo}
-            onMemo={onMemo}
-            value={Sweety.of(1)}
-          />
+          <Component useMemo={useSweetyMemo} onMemo={onMemo} value={value_1} />
         </React.Profiler>,
       )
 
       rerender(
         <React.Profiler id="test" onRender={onRender}>
-          <Component
-            useMemo={useSweetyMemo}
-            onMemo={onMemo}
-            value={Sweety.of(3)}
-          />
+          <Component useMemo={useSweetyMemo} onMemo={onMemo} value={value_2} />
         </React.Profiler>,
       )
 
@@ -144,47 +138,48 @@ describe.each([
     })
 
     it("should unsubscribe Sweety from useMemo when swapped", () => {
-      const value = Sweety.of(1)
+      const value_1 = Sweety.of(1)
+      const value_2 = Sweety.of(3)
       const onMemo = vi.fn()
       const onRender = vi.fn()
 
       const { rerender } = render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useMemo={useSweetyMemo} onMemo={onMemo} value={value} />
+          <Component useMemo={useSweetyMemo} onMemo={onMemo} value={value_1} />
         </React.Profiler>,
       )
 
       rerender(
         <React.Profiler id="test" onRender={onRender}>
-          <Component
-            useMemo={useSweetyMemo}
-            onMemo={onMemo}
-            value={Sweety.of(3)}
-          />
+          <Component useMemo={useSweetyMemo} onMemo={onMemo} value={value_2} />
         </React.Profiler>,
       )
 
       act(() => {
-        value.setState(10)
+        value_1.setState(10)
       })
 
       expect(onMemo).toHaveBeenCalledTimes(2)
-      expect(onMemo).toHaveBeenLastCalledWith(6)
       expect(onRender).toHaveBeenCalledTimes(2)
-      expect(value).toHaveProperty("subscribers.size", 0)
+      expect(value_1).toHaveProperty("subscribers.size", 0)
+
+      act(() => {
+        value_2.setState(5)
+      })
+      expect(onMemo).toHaveBeenCalledTimes(3)
+      expect(onMemo).toHaveBeenLastCalledWith(10)
+      expect(onRender).toHaveBeenCalledTimes(3)
+      expect(value_2).toHaveProperty("subscribers.size", 1)
     })
 
     it("should call useMemo factory when non Sweety dep changes", () => {
+      const value = Sweety.of(3)
       const onMemo = vi.fn()
       const onRender = vi.fn()
 
       render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component
-            useMemo={useSweetyMemo}
-            onMemo={onMemo}
-            value={Sweety.of(3)}
-          />
+          <Component useMemo={useSweetyMemo} onMemo={onMemo} value={value} />
         </React.Profiler>,
       )
 
@@ -193,23 +188,27 @@ describe.each([
       expect(onMemo).toHaveBeenCalledTimes(2)
       expect(onMemo).toHaveBeenLastCalledWith(9)
       expect(onRender).toHaveBeenCalledTimes(2)
+      expect(value).toHaveProperty("subscribers.size", 1)
+
+      act(() => {
+        value.setState(4)
+      })
+      expect(onMemo).toHaveBeenCalledTimes(3)
+      expect(onMemo).toHaveBeenLastCalledWith(12)
+      expect(onRender).toHaveBeenCalledTimes(3)
+      expect(value).toHaveProperty("subscribers.size", 1)
     })
   })
 
   describe("multiple stores", () => {
     const Component: React.FC<{
-      spy?: React.Dispatch<number>
       first: Sweety<number>
       second: Sweety<number>
-    }> = hoc(({ spy, first, second }) => {
+    }> = hoc(({ first, second }) => {
       const [multiplier, setMultiplier] = useState(2)
       const result = useSweetyMemo(() => {
-        const x = (first.getState() + second.getState()) * multiplier
-
-        spy?.(x)
-
-        return x
-      }, [first, second, multiplier, spy])
+        return (first.getState() + second.getState()) * multiplier
+      }, [first, second, multiplier])
 
       return (
         <>
@@ -229,6 +228,9 @@ describe.each([
 
       render(<Component first={first} second={second} />)
 
+      expect(first).toHaveProperty("subscribers.size", 1)
+      expect(second).toHaveProperty("subscribers.size", 1)
+
       const node = screen.getByTestId("value")
 
       expect(node).toHaveTextContent("10")
@@ -242,14 +244,16 @@ describe.each([
         second.setState(5)
       })
       expect(node).toHaveTextContent("18")
+
+      expect(first).toHaveProperty("subscribers.size", 1)
+      expect(second).toHaveProperty("subscribers.size", 1)
     })
   })
 
   describe("nested stores", () => {
     const Component: React.FC<{
-      spy?: React.Dispatch<number>
       list: Sweety<Array<Sweety<number>>>
-    }> = hoc(({ spy, list }) => {
+    }> = hoc(({ list }) => {
       const [multiplier, setMultiplier] = useState(2)
       const result = useSweetyMemo(() => {
         const x =
@@ -258,10 +262,8 @@ describe.each([
             .map((item) => item.getState())
             .reduce((acc, val) => acc + val, 0) * multiplier
 
-        spy?.(x)
-
         return x
-      }, [list, multiplier, spy])
+      }, [list, multiplier])
 
       return (
         <>
@@ -275,13 +277,18 @@ describe.each([
       )
     })
 
-    it("can watch after both stores", () => {
+    it("can watch after all stores", () => {
       const _0 = Sweety.of(2)
       const _1 = Sweety.of(3)
       const _2 = Sweety.of(4)
       const list = Sweety.of([_0, _1])
 
       render(<Component list={list} />)
+
+      expect(list).toHaveProperty("subscribers.size", 1)
+      expect(_0).toHaveProperty("subscribers.size", 1)
+      expect(_1).toHaveProperty("subscribers.size", 1)
+      expect(_2).toHaveProperty("subscribers.size", 0)
 
       const node = screen.getByTestId("value")
 
@@ -301,6 +308,18 @@ describe.each([
         list.setState((items) => [...items, _2])
       })
       expect(node).toHaveTextContent("26")
+
+      expect(_2).toHaveProperty("subscribers.size", 1)
+
+      act(() => {
+        list.setState((items) => items.slice(1))
+      })
+      expect(node).toHaveTextContent("18")
+
+      expect(list).toHaveProperty("subscribers.size", 1)
+      expect(_0).toHaveProperty("subscribers.size", 0)
+      expect(_1).toHaveProperty("subscribers.size", 1)
+      expect(_2).toHaveProperty("subscribers.size", 1)
     })
   })
 })
