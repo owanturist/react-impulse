@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React from "react"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 
 import { Sweety, watch, useSweetyMemo } from "../src"
@@ -15,7 +15,7 @@ describe.each([
       value: Sweety<number>
       useMemo: typeof React.useMemo
     }> = hoc(({ onMemo, value, useMemo }) => {
-      const [multiplier, setMultiplier] = useState(2)
+      const [multiplier, setMultiplier] = React.useState(2)
       const result = useMemo(() => {
         const x = value.getState() * multiplier
 
@@ -205,7 +205,7 @@ describe.each([
       first: Sweety<number>
       second: Sweety<number>
     }> = hoc(({ first, second }) => {
-      const [multiplier, setMultiplier] = useState(2)
+      const [multiplier, setMultiplier] = React.useState(2)
       const result = useSweetyMemo(() => {
         return (first.getState() + second.getState()) * multiplier
       }, [first, second, multiplier])
@@ -254,7 +254,7 @@ describe.each([
     const Component: React.FC<{
       list: Sweety<Array<Sweety<number>>>
     }> = hoc(({ list }) => {
-      const [multiplier, setMultiplier] = useState(2)
+      const [multiplier, setMultiplier] = React.useState(2)
       const result = useSweetyMemo(() => {
         const x =
           list
