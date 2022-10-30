@@ -11,9 +11,8 @@ export function watch<TProps extends object>(fc: FC<TProps>): FC<TProps> {
       subscribe,
       getState,
       getState,
-      () => {
-        return context.watchStores(() => fc(props, ctx))
-      },
+      // no need to memoize since props are a new object on each call
+      () => context.watchStores(() => fc(props, ctx)),
     )
   }
 
