@@ -4,8 +4,6 @@ import { noop } from "./utils"
 
 const warning = (message: string): void => {
   if (
-    (process.env.NODE_ENV === "development" ||
-      process.env.NODE_ENV === "test") &&
     typeof console !== "undefined" &&
     // eslint-disable-next-line no-console
     typeof console.error === "function"
@@ -13,7 +11,7 @@ const warning = (message: string): void => {
     // eslint-disable-next-line no-console
     console.error(message)
   }
-  /* eslint-enable no-console */
+
   try {
     // This error was thrown as a convenience so that if you enable
     // "break on all exceptions" in your console,
@@ -33,26 +31,19 @@ const warning = (message: string): void => {
  */
 export class WatchContext {
   public static current: null | WatchContext = null
-  private static isReadonlyDuringWatcherCall = false
 
   public static warning(message: string): boolean {
-    if (WatchContext.isReadonlyDuringWatcherCall) {
+    if (WatchContext.current?.isReadonly) {
       warning(message)
+
+      return true
     }
 
-    return WatchContext.isReadonlyDuringWatcherCall
+    return false
   }
 
   public static register<T>(store: Sweety<T>): void {
     WatchContext.current?.register(store)
-  }
-
-  private static executeWatcher<T>(watcher: () => T): T {
-    WatchContext.isReadonlyDuringWatcherCall = true
-    const value = watcher()
-    WatchContext.isReadonlyDuringWatcherCall = false
-
-    return value
   }
 
   private readonly deadCleanups = new Set<string>()
@@ -60,14 +51,18 @@ export class WatchContext {
 
   private version = 0
 
-  public notify: VoidFunction = noop
+  private notify: VoidFunction = noop
+
+  public constructor(private isReadonly: boolean) {}
 
   private register<T>(store: Sweety<T>): void {
     if (this.cleanups.has(store.key)) {
       // still alive
       this.deadCleanups.delete(store.key)
     } else {
-      WatchContext.isReadonlyDuringWatcherCall = false
+      const isContextReadonly = this.isReadonly
+
+      this.isReadonly = false
       this.cleanups.set(
         store.key,
         store.subscribe(() => {
@@ -75,7 +70,7 @@ export class WatchContext {
           SetStateContext.registerWatchContext(this)
         }),
       )
-      WatchContext.isReadonlyDuringWatcherCall = true
+      this.isReadonly = isContextReadonly
     }
   }
 
@@ -130,7 +125,7 @@ export class WatchContext {
   }
 
   public watchStores<T>(watcher: () => T): T {
-    return this.cycle(() => WatchContext.executeWatcher(watcher))
+    return this.cycle(watcher)
   }
 
   public emit(): void {

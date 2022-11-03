@@ -4,7 +4,9 @@ import { useSyncExternalStore } from "use-sync-external-store/shim"
 import { useWatchContext } from "./useWatchContext"
 
 export const useSweetyMemo: typeof useMemo = (factory, deps) => {
-  const { executeWatcher, subscribe, getState } = useWatchContext()
+  const { executeWatcher, subscribe, getState } = useWatchContext({
+    isReadonly: false,
+  })
 
   const buster = useSyncExternalStore(subscribe, getState, getState)
 
