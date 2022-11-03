@@ -8,11 +8,15 @@ interface UseWatchContextResult {
   subscribe: (onStoreChange: VoidFunction) => VoidFunction
 }
 
-export const useWatchContext = (): UseWatchContextResult => {
+export const useWatchContext = ({
+  isReadonly,
+}: {
+  isReadonly: boolean
+}): UseWatchContextResult => {
   const setupRef = useRef<UseWatchContextResult>()
 
   if (setupRef.current == null) {
-    const context = new WatchContext()
+    const context = new WatchContext(isReadonly)
 
     setupRef.current = {
       executeWatcher: (watcher) => context.watchStores(watcher),

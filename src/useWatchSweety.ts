@@ -17,7 +17,9 @@ export function useWatchSweety<T>(
   watcher: () => T,
   compare?: null | Compare<T>,
 ): T {
-  const { executeWatcher, subscribe, getState } = useWatchContext()
+  const { executeWatcher, subscribe, getState } = useWatchContext({
+    isReadonly: true,
+  })
 
   // the select calls each time when updates either the watcher or the version
   const select = useCallback(
