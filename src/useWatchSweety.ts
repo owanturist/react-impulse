@@ -17,12 +17,12 @@ export function useWatchSweety<T>(
   watcher: () => T,
   compare?: null | Compare<T>,
 ): T {
-  const { context, subscribe, getState } = useWatchContext()
+  const { executeWatcher, subscribe, getState } = useWatchContext()
 
   // the select calls each time when updates either the watcher or the version
   const select = useCallback(
-    () => context.watchStores(watcher),
-    [context, watcher],
+    () => executeWatcher(watcher),
+    [executeWatcher, watcher],
   )
 
   // it should memoize the onCompare otherwise it will call the watcher on each render
