@@ -24,10 +24,6 @@ const warning = (message: string): void => {
   }
 }
 
-const modInc = (x: number): number => {
-  return (x + 1) % 10e9
-}
-
 /**
  * A context to track Sweety#getState() usage inside the watcher function.
  * The tracked calls will subscribe related stores to updates,
@@ -114,10 +110,15 @@ export class WatchContext {
     return value
   }
 
+  private increment(): void {
+    this.version = (this.version + 1) % 10e9
+  }
+
   public subscribe(notify: VoidFunction): VoidFunction {
     this.notify = notify
 
     return () => {
+      this.increment()
       this.cleanups.forEach((cleanup) => cleanup())
       this.cleanups.clear()
       this.deadCleanups.clear()
@@ -133,7 +134,7 @@ export class WatchContext {
   }
 
   public emit(): void {
-    this.version = modInc(this.version)
+    this.increment()
     this.cycle(this.notify)
   }
 }
