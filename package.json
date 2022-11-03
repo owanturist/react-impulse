@@ -1,7 +1,7 @@
 {
   "name": "react-sweety",
   "type": "module",
-  "version": "2.1.0-alpha.6",
+  "version": "2.1.0-alpha.7",
   "description": "The clean and natural React state management",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
