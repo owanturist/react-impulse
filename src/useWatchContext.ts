@@ -1,14 +1,9 @@
 import { useRef } from "react"
 
-import { noop } from "./utils"
 import { WatchContext } from "./WatchContext"
 
-const modInc = (x: number): number => {
-  return (x + 1) % 10e9
-}
-
 interface UseWatchContextResult {
-  context: WatchContext
+  executeWatcher: <T>(watcher: () => T) => T
   getState: () => number
   subscribe: (onStoreChange: VoidFunction) => VoidFunction
 }
@@ -17,19 +12,10 @@ export const useWatchContext = (): UseWatchContextResult => {
   const setupRef = useRef<UseWatchContextResult>()
 
   if (setupRef.current == null) {
-    let version = 0
-    let onWatchedStoresUpdate = noop
-
-    const context = new WatchContext(() => {
-      version = modInc(version)
-
-      // it should return the onStoreChange callback to call it during the WatchContext#cycle()
-      // when the callback is null the cycle does not call so watched stores do not unsubscribe
-      return onWatchedStoresUpdate
-    })
+    const context = new WatchContext()
 
     setupRef.current = {
-      context,
+      executeWatcher: (watcher) => context.watchStores(watcher),
 
       // the getState cannot directly return the watcher result
       // because it might be different per each call
@@ -37,13 +23,9 @@ export const useWatchContext = (): UseWatchContextResult => {
       // so the getState will be consistent over multiple calls until the real change happens
       // when the version changes the select function calls the watcher and extracts actual data
       // without that workaround it will go to the re-render hell
-      getState: () => version,
+      getState: () => context.getVersion(),
 
-      subscribe: (onStoreChange) => {
-        onWatchedStoresUpdate = onStoreChange
-
-        return () => context.cleanup()
-      },
+      subscribe: (onStoreChange) => context.subscribe(onStoreChange),
     }
   }
 

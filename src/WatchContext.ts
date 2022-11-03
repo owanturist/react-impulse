@@ -1,5 +1,6 @@
 import type { Sweety } from "./Sweety"
 import { SetStateContext } from "./SetStateContext"
+import { noop } from "./utils"
 
 const warning = (message: string): void => {
   if (
@@ -21,6 +22,10 @@ const warning = (message: string): void => {
   } catch {
     // do nothing
   }
+}
+
+const modInc = (x: number): number => {
+  return (x + 1) % 10e9
 }
 
 /**
@@ -56,6 +61,10 @@ export class WatchContext {
 
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
+
+  private version = 0
+
+  public notify: VoidFunction = noop
 
   private register<T>(store: Sweety<T>): void {
     if (this.cleanups.has(store.key)) {
@@ -105,12 +114,18 @@ export class WatchContext {
     return value
   }
 
-  public constructor(private readonly listener: () => VoidFunction) {}
+  public subscribe(notify: VoidFunction): VoidFunction {
+    this.notify = notify
 
-  public cleanup(): void {
-    this.cleanups.forEach((cleanup) => cleanup())
-    this.cleanups.clear()
-    this.deadCleanups.clear()
+    return () => {
+      this.cleanups.forEach((cleanup) => cleanup())
+      this.cleanups.clear()
+      this.deadCleanups.clear()
+    }
+  }
+
+  public getVersion(): number {
+    return this.version
   }
 
   public watchStores<T>(watcher: () => T): T {
@@ -118,6 +133,7 @@ export class WatchContext {
   }
 
   public emit(): void {
-    this.cycle(this.listener())
+    this.version = modInc(this.version)
+    this.cycle(this.notify)
   }
 }
