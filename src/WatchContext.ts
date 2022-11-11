@@ -35,9 +35,10 @@ export class WatchContext {
 
   public static warning(warningSet: WarningSet): boolean {
     const warningSource = WatchContext.current?.warningSource
+    const message = warningSource == null ? null : warningSet[warningSource]
 
-    if (warningSource != null) {
-      warning(warningSet[warningSource])
+    if (message != null) {
+      warning(message)
 
       return true
     }

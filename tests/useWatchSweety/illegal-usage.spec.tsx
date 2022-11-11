@@ -24,7 +24,7 @@ const console$error = vi
   .mockImplementation(vi.fn() as VoidFunction)
 
 afterEach(() => {
-  vi.resetAllMocks()
+  vi.clearAllMocks()
 })
 
 afterAll(() => {
@@ -265,6 +265,23 @@ describe("calling Sweety#setState()", () => {
     expect(console$error).not.toHaveBeenCalled()
     expect(result.current.getState()).toBe(2)
   })
+
+  it("warns when called inside watch()", () => {
+    const Component = watch<{
+      store: Sweety<number>
+    }>(({ store }) => {
+      store.setState(10)
+
+      return <div data-testid="count">{store.getState()}</div>
+    })
+
+    render(<Component store={Sweety.of(20)} />)
+
+    expect(console$error).toHaveBeenCalledWith(
+      WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.watch,
+    )
+    expect(screen.getByTestId("count")).toHaveTextContent("20")
+  })
 })
 
 describe("calling Sweety#subscribe()", () => {
@@ -433,6 +450,59 @@ describe("calling Sweety#subscribe()", () => {
 
       expect(result.current.getState()).toBe(20)
       expect(listener).not.toHaveBeenCalled()
+    })
+  })
+
+  describe("warns when called inside watch()", () => {
+    const listener = vi.fn()
+    const Component = watch<{
+      store: Sweety<number>
+    }>(({ store }) => {
+      store.subscribe(listener)
+
+      return <div data-testid="count">{store.getState()}</div>
+    })
+
+    afterEach(() => {
+      vi.clearAllMocks()
+    })
+
+    it("calls console.error", () => {
+      render(<Component store={Sweety.of(20)} />)
+
+      expect(console$error).toHaveBeenCalledWith(
+        WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.watch,
+      )
+    })
+
+    it("renders the store's value", () => {
+      render(<Component store={Sweety.of(20)} />)
+
+      expect(screen.getByTestId("count")).toHaveTextContent("20")
+    })
+
+    it("returns noop function as unsubscribe", () => {
+      const store = Sweety.of(4)
+      const store$subscribe = vi.spyOn(store, "subscribe")
+      render(<Component store={store} />)
+
+      expect(store$subscribe).toHaveReturnedWith(noop)
+    })
+
+    it("does not call the listener on store's change", () => {
+      const store = Sweety.of(4)
+      const correctListener = vi.fn()
+
+      render(<Component store={store} />)
+
+      store.subscribe(correctListener)
+
+      expect(listener).not.toHaveBeenCalled()
+      expect(correctListener).not.toHaveBeenCalled()
+
+      store.setState(1)
+      expect(listener).not.toHaveBeenCalled()
+      expect(correctListener).toHaveBeenCalledTimes(1)
     })
   })
 })
