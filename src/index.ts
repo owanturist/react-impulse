@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useInsertionEffect } from "react"
+import { useEffect, useLayoutEffect } from "react"
 
 import { createEffectHook } from "./createEffectHook"
 
@@ -18,4 +18,3 @@ export { useWatchSweety } from "./useWatchSweety"
 
 export const useSweetyEffect = createEffectHook(useEffect)
 export const useSweetyLayoutEffect = createEffectHook(useLayoutEffect)
-export const useSweetyInsertionEffect = createEffectHook(useInsertionEffect)

@@ -1,20 +1,13 @@
 import React from "react"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 
-import {
-  Sweety,
-  watch,
-  useSweetyEffect,
-  useSweetyLayoutEffect,
-  useSweetyInsertionEffect,
-} from "../src"
+import { Sweety, watch, useSweetyEffect, useSweetyLayoutEffect } from "../src"
 
 const identity = <T,>(value: T): T => value
 
 describe.each([
   ["useEffect", React.useEffect, useSweetyEffect],
   ["useLayoutEffect", React.useLayoutEffect, useSweetyLayoutEffect],
-  ["useInsertionEffect", React.useInsertionEffect, useSweetyInsertionEffect],
 ])("running %s hook", (hookName, useReactEffect, useCustomSweetyEffect) => {
   describe.each([
     ["nothing", identity],
