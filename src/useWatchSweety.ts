@@ -18,7 +18,7 @@ export function useWatchSweety<T>(
   compare?: null | Compare<T>,
 ): T {
   const { executeWatcher, subscribe, getState } = useWatchContext({
-    isReadonly: true,
+    warningSource: "useWatchSweety",
   })
 
   // the select calls each time when updates either the watcher or the version

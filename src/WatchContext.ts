@@ -1,6 +1,7 @@
 import type { Sweety } from "./Sweety"
 import { SetStateContext } from "./SetStateContext"
 import { noop } from "./utils"
+import { WarningSet, WarningSource } from "./validation"
 
 const warning = (message: string): void => {
   if (
@@ -32,9 +33,11 @@ const warning = (message: string): void => {
 export class WatchContext {
   public static current: null | WatchContext = null
 
-  public static warning(message: string): boolean {
-    if (WatchContext.current?.isReadonly) {
-      warning(message)
+  public static warning(warningSet: WarningSet): boolean {
+    const warningSource = WatchContext.current?.warningSource
+
+    if (warningSource != null) {
+      warning(warningSet[warningSource])
 
       return true
     }
@@ -53,16 +56,16 @@ export class WatchContext {
 
   private notify: VoidFunction = noop
 
-  public constructor(private isReadonly: boolean) {}
+  public constructor(private warningSource: null | WarningSource) {}
 
   private register<T>(store: Sweety<T>): void {
     if (this.cleanups.has(store.key)) {
       // still alive
       this.deadCleanups.delete(store.key)
     } else {
-      const isContextReadonly = this.isReadonly
+      const isContextReadonly = this.warningSource
 
-      this.isReadonly = false
+      this.warningSource = null
       this.cleanups.set(
         store.key,
         store.subscribe(() => {
@@ -70,7 +73,7 @@ export class WatchContext {
           SetStateContext.registerWatchContext(this)
         }),
       )
-      this.isReadonly = isContextReadonly
+      this.warningSource = isContextReadonly
     }
   }
 

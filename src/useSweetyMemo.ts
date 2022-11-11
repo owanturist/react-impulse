@@ -5,7 +5,7 @@ import { useWatchContext } from "./useWatchContext"
 
 export const useSweetyMemo: typeof useMemo = (factory, deps) => {
   const { executeWatcher, subscribe, getState } = useWatchContext({
-    isReadonly: true,
+    warningSource: "useSweetyMemo",
   })
 
   const buster = useSyncExternalStore(subscribe, getState, getState)

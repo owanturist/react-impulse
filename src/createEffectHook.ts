@@ -7,7 +7,7 @@ export const createEffectHook =
   (useReactEffect: typeof useEffect): typeof useEffect =>
   (effect, deps) => {
     const { executeWatcher, subscribe, getState } = useWatchContext({
-      isReadonly: false,
+      warningSource: null,
     })
 
     const buster = useSyncExternalStore(subscribe, getState, getState)

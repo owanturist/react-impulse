@@ -1,5 +1,6 @@
 import { useRef } from "react"
 
+import { WarningSource } from "./validation"
 import { WatchContext } from "./WatchContext"
 
 interface UseWatchContextResult {
@@ -9,14 +10,14 @@ interface UseWatchContextResult {
 }
 
 export const useWatchContext = ({
-  isReadonly,
+  warningSource,
 }: {
-  isReadonly: boolean
+  warningSource: null | WarningSource
 }): UseWatchContextResult => {
   const setupRef = useRef<UseWatchContextResult>()
 
   if (setupRef.current == null) {
-    const context = new WatchContext(isReadonly)
+    const context = new WatchContext(warningSource)
 
     setupRef.current = {
       executeWatcher: (watcher) => context.watchStores(watcher),

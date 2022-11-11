@@ -4,6 +4,12 @@ import { nanoid } from "nanoid"
 import { Compare, isEqual, noop, overrideCompare } from "./utils"
 import { WatchContext } from "./WatchContext"
 import { SetStateContext } from "./SetStateContext"
+import {
+  WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING,
+  WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING,
+  WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING,
+  WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
+} from "./validation"
 
 type ExtractDirect<T> = T extends Sweety<infer R> ? R : T
 
@@ -32,54 +38,6 @@ export type DeepExtractSweetyState<T> = T extends Sweety<infer R>
   : T extends ReadonlyArray<infer R>
   ? ReadonlyArray<ExtractDeepDirect<R>>
   : { [K in keyof T]: ExtractDeepDirect<T[K]> }
-
-const makeWarningMessage = ({
-  isCritical,
-  whatItDoes,
-  method,
-}: {
-  isCritical: boolean
-  whatItDoes: string
-  method: string
-}): string => {
-  return [
-    "You",
-    isCritical ? "may not" : "should not",
-    "call",
-    method,
-    "inside the useWatchSweety(watcher) callback.",
-    "The useWatchSweety(watcher) hook is for read-only operations but",
-    method,
-    whatItDoes,
-    ".",
-  ].join(" ")
-}
-
-export const WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING = makeWarningMessage({
-  isCritical: false,
-  whatItDoes: "creates a new store",
-  method: "Sweety#of",
-})
-
-export const WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING = makeWarningMessage({
-  isCritical: false,
-  whatItDoes: "creates a new store",
-  method: "Sweety#clone",
-})
-
-export const WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING =
-  makeWarningMessage({
-    isCritical: true,
-    whatItDoes: "changes an existing store",
-    method: "Sweety#setState",
-  })
-
-export const WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING =
-  makeWarningMessage({
-    isCritical: true,
-    whatItDoes: "subscribes to a store",
-    method: "Sweety#subscribe",
-  })
 
 export class Sweety<T> {
   /**
