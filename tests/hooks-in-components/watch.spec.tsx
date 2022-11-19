@@ -47,7 +47,12 @@ it("should handle multi store updates without batching", () => {
 describe("watch.memo()", () => {
   it.each([
     ["watch.memo()", watch.memo],
-    ["React.memo()", <TProps,>(fc: React.FC<TProps>) => React.memo(watch(fc))],
+    ["watch.memo.forwardRef()", watch.memo.forwardRef],
+    ["watch.forwardRef.memo()", watch.forwardRef.memo],
+    [
+      "React.memo(watch())",
+      <TProps,>(fc: React.FC<TProps>) => React.memo(watch(fc)),
+    ],
   ])("should memoize with %s", (_, memo) => {
     const Component: React.FC<{
       state: Sweety<number>
@@ -59,7 +64,7 @@ describe("watch.memo()", () => {
     )
 
     const Watched = watch(Component)
-    const WatchedMemoized = memo(Component)
+    const WatchedMemoized = (memo as typeof React.memo)(Component)
 
     const Host: React.FC<{
       state: Sweety<number>
