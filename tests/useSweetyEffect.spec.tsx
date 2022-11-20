@@ -10,7 +10,7 @@ describe.each([
   ["useLayoutEffect", React.useLayoutEffect, useSweetyLayoutEffect],
 ])("running %s hook", (hookName, useReactEffect, useCustomSweetyEffect) => {
   describe.each([
-    ["nothing", identity],
+    ["nothing", identity as typeof watch],
     ["watch", watch],
   ])("using %s as hoc", (_, hoc) => {
     describe("single store", () => {

@@ -6,7 +6,7 @@ import { Sweety, watch, useSweetyMemo } from "../src"
 const identity = <T,>(value: T): T => value
 
 describe.each([
-  ["nothing", identity],
+  ["nothing", identity as typeof watch],
   ["watch", watch],
 ])("using %s as hoc", (_, hoc) => {
   describe("single store", () => {
