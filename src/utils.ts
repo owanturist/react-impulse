@@ -31,7 +31,7 @@ export type SetSweetyState<T> = (
 /**
  * @private
  */
-export const isEqual = <T>(one: T, another: T): boolean => one === another
+export const isEqual: Compare<unknown> = Object.is
 
 /**
  * @private
