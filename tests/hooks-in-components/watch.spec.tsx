@@ -131,3 +131,56 @@ describe("watch.memo()", () => {
     expect(counts[1]).toHaveTextContent("1")
   })
 })
+
+describe("watch.forwardRef()", () => {
+  it.each([
+    ["watch.forwardRef()", watch.forwardRef],
+    ["watch.memo.forwardRef()", watch.memo.forwardRef],
+    ["watch.forwardRef.memo()", watch.forwardRef.memo],
+    [
+      "React.forwardRef(watch())",
+      <TNode, TProps>(
+        renderFn: React.ForwardRefRenderFunction<TNode, TProps>,
+      ): React.ForwardRefExoticComponent<
+        React.PropsWithoutRef<TProps> & React.RefAttributes<TNode>
+      > => {
+        const component = watch(renderFn) as React.ForwardRefRenderFunction<
+          TNode,
+          TProps
+        >
+
+        return React.forwardRef(component)
+      },
+    ],
+  ])("should pass the reference with %s", (_, forwardRef) => {
+    const Component = forwardRef<
+      HTMLDivElement,
+      {
+        state: Sweety<number>
+      }
+    >(({ state }, ref) => (
+      <div ref={ref} data-testid="count">
+        {state.getState()}
+      </div>
+    ))
+
+    const state = Sweety.of(0)
+    const divRef = vi.fn()
+
+    render(<Component state={state} ref={divRef} />)
+
+    const count = screen.getByTestId("count")
+
+    expect(count).toHaveTextContent("0")
+    expect(divRef).toHaveBeenCalledTimes(1)
+    expect(divRef).toHaveBeenLastCalledWith(expect.any(HTMLDivElement))
+    vi.clearAllMocks()
+
+    act(() => {
+      state.setState((x) => x + 1)
+    })
+
+    expect(count).toHaveTextContent("1")
+    expect(divRef).not.toHaveBeenCalled()
+  })
+})
