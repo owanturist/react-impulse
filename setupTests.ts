@@ -1,3 +1,5 @@
+/* c8 ignore start */
+
 // otherwise jest leaking into vitest type definitions
 // https://github.com/testing-library/jest-dom/issues/427#issuecomment-1110985202
 import "@testing-library/jest-dom/extend-expect"
@@ -12,3 +14,5 @@ const console$error = vi
 afterAll(() => {
   console$error.mockRestore()
 })
+
+/* c8 ignore stop */
