@@ -1,47 +1,103 @@
 import { render, screen, fireEvent, act } from "@testing-library/react"
 import React from "react"
+import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
 import { Sweety, watch } from "../../src"
 
-it("should handle multi store updates without batching", () => {
-  const Component: React.FC<{
-    first: Sweety<number>
-    second: Sweety<number>
-    third: Sweety<number>
-  }> = watch(({ first, second, third }) => (
-    <button
-      type="button"
-      data-testid="btn"
-      onClick={() => {
-        first.setState((x) => x + 1)
-        second.setState((x) => x + 1)
-        third.setState((x) => x + 1)
-      }}
-    >
-      {first.getState() * second.getState() + third.getState()}
-    </button>
-  ))
+vi.mock("use-sync-external-store/shim/with-selector.js", async () => {
+  const actual: {
+    useSyncExternalStoreWithSelector: typeof useSyncExternalStoreWithSelector
+  } = await vi.importActual("use-sync-external-store/shim/with-selector.js")
 
-  const first = Sweety.of(2)
-  const second = Sweety.of(3)
-  const third = Sweety.of(4)
-  const onRender = vi.fn()
+  return {
+    useSyncExternalStoreWithSelector: vi.fn(
+      actual.useSyncExternalStoreWithSelector,
+    ),
+  }
+})
 
-  render(
-    <React.Profiler id="test" onRender={onRender}>
-      <Component first={first} second={second} third={third} />
-    </React.Profiler>,
-  )
-
-  const btn = screen.getByTestId("btn")
-
-  expect(btn).toHaveTextContent("10")
-  expect(onRender).toHaveBeenCalledTimes(1)
+afterEach(() => {
   vi.clearAllMocks()
+})
 
-  fireEvent.click(btn)
-  expect(btn).toHaveTextContent("17")
-  expect(onRender).toHaveBeenCalledTimes(1)
+describe("watch()", () => {
+  it("should handle multi store updates without batching", () => {
+    const Component: React.FC<{
+      first: Sweety<number>
+      second: Sweety<number>
+      third: Sweety<number>
+    }> = watch(({ first, second, third }) => (
+      <button
+        type="button"
+        data-testid="btn"
+        onClick={() => {
+          first.setState((x) => x + 1)
+          second.setState((x) => x + 1)
+          third.setState((x) => x + 1)
+        }}
+      >
+        {first.getState() * second.getState() + third.getState()}
+      </button>
+    ))
+
+    const first = Sweety.of(2)
+    const second = Sweety.of(3)
+    const third = Sweety.of(4)
+    const onRender = vi.fn()
+
+    render(
+      <React.Profiler id="test" onRender={onRender}>
+        <Component first={first} second={second} third={third} />
+      </React.Profiler>,
+    )
+
+    const btn = screen.getByTestId("btn")
+
+    expect(btn).toHaveTextContent("10")
+    expect(onRender).toHaveBeenCalledTimes(1)
+    vi.clearAllMocks()
+
+    fireEvent.click(btn)
+    expect(btn).toHaveTextContent("17")
+    expect(onRender).toHaveBeenCalledTimes(1)
+  })
+
+  it("should work fine with watch(watch())", () => {
+    const Component = watch(
+      watch<{
+        count: Sweety<number>
+      }>(({ count }) => (
+        <button
+          type="button"
+          data-testid="btn"
+          onClick={() => count.setState((x) => x + 1)}
+        >
+          {count.getState()}
+        </button>
+      )),
+    )
+
+    const store = Sweety.of(1)
+    const onRender = vi.fn()
+
+    render(
+      <React.Profiler id="test" onRender={onRender}>
+        <Component count={store} />
+      </React.Profiler>,
+    )
+
+    const btn = screen.getByTestId("btn")
+
+    expect(btn).toHaveTextContent("1")
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(useSyncExternalStoreWithSelector).toHaveBeenCalledTimes(1)
+    vi.clearAllMocks()
+
+    fireEvent.click(btn)
+    expect(btn).toHaveTextContent("2")
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(useSyncExternalStoreWithSelector).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe("watch.memo()", () => {

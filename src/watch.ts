@@ -1,6 +1,7 @@
 import {
   FC,
   ForwardRefRenderFunction,
+  ExoticComponent,
   MemoExoticComponent,
   ForwardRefExoticComponent,
   memo as React_memo,
@@ -13,8 +14,20 @@ import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/w
 import { useWatchContext } from "./useWatchContext"
 import { Compare } from "./utils"
 
-export const watch = <TProps>(render: FC<TProps>): FC<TProps> => {
-  const SweetyWatcher: FC<TProps> = (props, ctx) => {
+const isSweetyWatch = <TProps>(
+  render: FC<TProps> & { isSweetyWatch?: boolean },
+): boolean => {
+  return render.isSweetyWatch === true
+}
+
+export function watch<TProps>(render: ExoticComponent<TProps>): never
+export function watch<TProps>(render: FC<TProps>): FC<TProps>
+export function watch<TProps>(render: FC<TProps>): FC<TProps> {
+  if (isSweetyWatch(render)) {
+    return render
+  }
+
+  const SweetyWatcher = (props: TProps, ctx: unknown): ReturnType<FC> => {
     const { executeWatcher, subscribe, getState } = useWatchContext({
       warningSource: "watch",
     })
@@ -29,6 +42,7 @@ export const watch = <TProps>(render: FC<TProps>): FC<TProps> => {
   }
 
   SweetyWatcher.displayName = render.displayName
+  SweetyWatcher.isSweetyWatch = true
 
   return SweetyWatcher
 }
