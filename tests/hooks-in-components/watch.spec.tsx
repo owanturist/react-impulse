@@ -21,6 +21,55 @@ afterEach(() => {
 })
 
 describe("watch()", () => {
+  it("should work fine together with useState", () => {
+    const Component = watch<{
+      count: Sweety<number>
+    }>(({ count }) => {
+      const [multiplier, setMultiplier] = React.useState(1)
+
+      return (
+        <button
+          type="button"
+          data-testid="btn"
+          onClick={() => setMultiplier((x) => x + 1)}
+        >
+          {count.getState() * multiplier}
+        </button>
+      )
+    })
+
+    const store = Sweety.of(1)
+    const onRender = vi.fn()
+
+    render(
+      <React.Profiler id="test" onRender={onRender}>
+        <Component count={store} />
+      </React.Profiler>,
+    )
+
+    const btn = screen.getByTestId("btn")
+
+    expect(btn).toHaveTextContent("1")
+    expect(onRender).toHaveBeenCalledTimes(1)
+    vi.clearAllMocks()
+
+    fireEvent.click(btn)
+    expect(btn).toHaveTextContent("2")
+    expect(onRender).toHaveBeenCalledTimes(1)
+    vi.clearAllMocks()
+
+    fireEvent.click(btn)
+    expect(btn).toHaveTextContent("3")
+    expect(onRender).toHaveBeenCalledTimes(1)
+    vi.clearAllMocks()
+
+    act(() => {
+      store.setState(3)
+    })
+    expect(btn).toHaveTextContent("9")
+    expect(onRender).toHaveBeenCalledTimes(1)
+  })
+
   it("should handle multi store updates without batching", () => {
     const Component: React.FC<{
       first: Sweety<number>
