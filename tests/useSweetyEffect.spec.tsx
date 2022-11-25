@@ -435,4 +435,67 @@ describe.each([
       })
     })
   })
+
+  it("should not trigger effect when unsubscribes", () => {
+    const Counter: React.FC<{
+      count: Sweety<number>
+    }> = watch(({ count }) => (
+      <button
+        type="button"
+        data-testid="count"
+        onClick={() => count.setState((x) => x + 1)}
+      >
+        {count.getState()}
+      </button>
+    ))
+
+    const Host: React.FC<{
+      count: Sweety<number>
+      onEffect: React.Dispatch<number>
+    }> = ({ count, onEffect }) => {
+      const [isVisible, setIsVisible] = React.useState(true)
+
+      useCustomSweetyEffect(() => {
+        onEffect(count.getState())
+      }, [onEffect, count])
+
+      return (
+        <>
+          <button
+            type="button"
+            data-testid="visibility"
+            onClick={() => setIsVisible((x) => !x)}
+          />
+          {isVisible && <Counter count={count} />}
+        </>
+      )
+    }
+
+    const value = Sweety.of(3)
+    const onEffect = vi.fn()
+
+    render(<Host count={value} onEffect={onEffect} />)
+
+    const count = screen.getByTestId("count")
+    const visibility = screen.getByTestId("visibility")
+
+    expect(count).toHaveTextContent("3")
+    expect(onEffect).toHaveBeenCalledTimes(1)
+    expect(onEffect).toHaveBeenLastCalledWith(3)
+    vi.clearAllMocks()
+
+    fireEvent.click(count)
+    expect(count).toHaveTextContent("4")
+    expect(onEffect).toHaveBeenCalledTimes(1)
+    expect(onEffect).toHaveBeenLastCalledWith(4)
+    vi.clearAllMocks()
+
+    fireEvent.click(visibility)
+    expect(count).not.toBeInTheDocument()
+    expect(onEffect).not.toHaveBeenCalled()
+
+    fireEvent.click(visibility)
+    expect(screen.getByTestId("count")).toHaveTextContent("4")
+    expect(onEffect).not.toHaveBeenCalled()
+  })
 })

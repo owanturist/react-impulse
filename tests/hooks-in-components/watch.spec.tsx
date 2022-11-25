@@ -147,6 +147,35 @@ describe("watch()", () => {
     expect(onRender).toHaveBeenCalledTimes(1)
     expect(useSyncExternalStoreWithSelector).toHaveBeenCalledTimes(1)
   })
+
+  it("should work fine in Strict mode", () => {
+    const Component = watch<{
+      count: Sweety<number>
+    }>(({ count }) => (
+      <button
+        type="button"
+        data-testid="btn"
+        onClick={() => count.setState((x) => x + 1)}
+      >
+        {count.getState()}
+      </button>
+    ))
+
+    const store = Sweety.of(1)
+
+    render(
+      <React.StrictMode>
+        <Component count={store} />
+      </React.StrictMode>,
+    )
+
+    const btn = screen.getByTestId("btn")
+
+    expect(btn).toHaveTextContent("1")
+
+    fireEvent.click(btn)
+    expect(btn).toHaveTextContent("2")
+  })
 })
 
 describe("watch.memo()", () => {
