@@ -3,26 +3,6 @@ import { SetStateContext } from "./SetStateContext"
 import { noop } from "./utils"
 import { WarningSet, WarningSource } from "./validation"
 
-const warning = (message: string): void => {
-  if (
-    typeof console !== "undefined" &&
-    // eslint-disable-next-line no-console
-    typeof console.error === "function"
-  ) {
-    // eslint-disable-next-line no-console
-    console.error(message)
-  }
-
-  try {
-    // This error was thrown as a convenience so that if you enable
-    // "break on all exceptions" in your console,
-    // it would pause the execution at this line.
-    throw new Error(message)
-  } catch {
-    // do nothing
-  }
-}
-
 /**
  * A context to track Sweety#getState() usage inside the watcher function.
  * The tracked calls will subscribe related stores to updates,
@@ -37,13 +17,29 @@ export class WatchContext {
     const warningSource = WatchContext.current?.warningSource
     const message = warningSource == null ? null : warningSet[warningSource]
 
-    if (message != null) {
-      warning(message)
-
-      return true
+    if (message == null) {
+      return false
     }
 
-    return false
+    if (
+      typeof console !== "undefined" &&
+      // eslint-disable-next-line no-console
+      typeof console.error === "function"
+    ) {
+      // eslint-disable-next-line no-console
+      console.error(message)
+    }
+
+    try {
+      // This error was thrown as a convenience so that if you enable
+      // "break on all exceptions" in your console,
+      // it would pause the execution at this line.
+      throw new Error(message)
+    } catch {
+      // do nothing
+    }
+
+    return true
   }
 
   public static register<T>(store: Sweety<T>): void {
