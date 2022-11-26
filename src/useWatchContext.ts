@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useState } from "react"
 
 import { WarningSource } from "./validation"
 import { WatchContext } from "./WatchContext"
@@ -14,12 +14,10 @@ export const useWatchContext = ({
 }: {
   warningSource: null | WarningSource
 }): UseWatchContextResult => {
-  const setupRef = useRef<UseWatchContextResult>()
-
-  if (setupRef.current == null) {
+  const [result] = useState<UseWatchContextResult>(() => {
     const context = new WatchContext(warningSource)
 
-    setupRef.current = {
+    return {
       executeWatcher: (watcher) => context.watchStores(watcher),
 
       // the getState cannot directly return the watcher result
@@ -32,7 +30,7 @@ export const useWatchContext = ({
 
       subscribe: (onStoreChange) => context.subscribe(onStoreChange),
     }
-  }
+  })
 
-  return setupRef.current
+  return result
 }

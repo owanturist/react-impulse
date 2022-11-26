@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useState } from "react"
 
 import { Sweety } from "./Sweety"
 
@@ -33,15 +33,13 @@ export function useSweety<TInit extends (...args: Array<never>) => unknown>(
 export function useSweety<T>(initialValue: T): Sweety<T> // eslint-disable-line @typescript-eslint/unified-signatures
 
 export function useSweety<T>(lazyOrValue: T | (() => T)): Sweety<T> {
-  const sweetyRef = useRef<Sweety<T>>()
-
-  if (sweetyRef.current == null) {
-    sweetyRef.current = Sweety.of(
+  const [instance] = useState<Sweety<T>>(() => {
+    return Sweety.of(
       typeof lazyOrValue === "function"
         ? (lazyOrValue as () => T)()
         : lazyOrValue,
     )
-  }
+  })
 
-  return sweetyRef.current
+  return instance
 }
