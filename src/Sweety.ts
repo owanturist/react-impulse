@@ -46,17 +46,17 @@ export class Sweety<T> {
    * The `compare` function compares the value of the store with the new value given via `Sweety#setState`.
    * If the function returns `true` the store will not be updated so no listeners subscribed via `Sweety#subscribe` will be notified.
    *
-   * @param value the initial immutable value.
+   * @param initialValue the initial immutable value.
    * @param compare an optional compare function with the lowest priority.
    * If not defined or `null` the strict equality check function (`===`) will be used.
    */
   public static of<TValue>(
-    value: TValue,
+    initialValue: TValue,
     compare?: null | Compare<TValue>,
   ): Sweety<TValue> {
     WatchContext.warning(WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING)
 
-    return new Sweety(value, compare ?? isEqual)
+    return new Sweety(initialValue, compare ?? isEqual)
   }
 
   // it should keep the listeners in a Map by a uniq key because

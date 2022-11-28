@@ -33,18 +33,21 @@ export type SetSweetyState<T> = (
  */
 export const isEqual: Compare<unknown> = Object.is
 
+const isDefined = <T>(value: undefined | null | T): value is T => value != null
+
 /**
  * @private
  */
 export const overrideCompare = <T>(
-  original: Compare<T>,
-  override: undefined | null | Compare<T>,
+  lowest: Compare<T>,
+  ...overrides: Array<undefined | null | Compare<T>>
 ): Compare<T> => {
-  if (override === null) {
-    return isEqual
-  }
+  const [override = lowest] = overrides
+    .map((compare) => (compare === null ? isEqual : compare))
+    .filter(isDefined)
+    .slice(-1)
 
-  return override ?? original
+  return override
 }
 
 /**

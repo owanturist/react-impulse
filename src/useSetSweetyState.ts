@@ -17,7 +17,8 @@ export function useSetSweetyState<T>(
 ): SetSweetyState<T> {
   return useEvent((update, setStateLevelCompare) => {
     const finalCompare = overrideCompare(
-      overrideCompare(store.compare, compare),
+      store.compare,
+      compare,
       setStateLevelCompare,
     )
 
