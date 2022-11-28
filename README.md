@@ -95,7 +95,7 @@ A core piece of the library is the `Sweety` class - a box that holds value. The 
 
 ### `Sweety.of`
 
-```ts
+```scala
 Sweety.of<T>(initialValue: T, compare?: null | Compare<T>): Sweety<T>
 ```
 
@@ -108,7 +108,7 @@ A static method that creates a new `Sweety` instance.
 
 ### `Sweety#getState`
 
-```ts
+```scala
 Sweety<T>#getState(): T
 Sweety<T>#getState<R>(select: (value: T) => R): R
 ```
@@ -158,7 +158,7 @@ isActive.getState() // false
 
 ### `Sweety#key`
 
-```ts
+```scala
 Sweety<T>#key: string
 ```
 
