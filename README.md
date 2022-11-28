@@ -95,7 +95,7 @@ A core piece of the library is the `Sweety` class - a box that holds value. The 
 
 ### `Sweety.of`
 
-```scala
+```dart
 Sweety.of<T>(initialValue: T, compare?: null | Compare<T>): Sweety<T>
 ```
 
@@ -108,7 +108,7 @@ A static method that creates a new `Sweety` instance.
 
 ### `Sweety#getState`
 
-```scala
+```dart
 Sweety<T>#getState(): T
 Sweety<T>#getState<R>(select: (value: T) => R): R
 ```
@@ -126,7 +126,7 @@ count.getState((x) => x > 0) // === true
 
 ### `Sweety#setState`
 
-```ts
+```dart
 Sweety<T>#setState(
   valueOrTransform: React.SetStateAction<T>,
   compare?: null | Compare<T>
@@ -158,7 +158,7 @@ isActive.getState() // false
 
 ### `Sweety#key`
 
-```scala
+```dart
 Sweety<T>#key: string
 ```
 
