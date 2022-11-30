@@ -18,7 +18,7 @@ npm install react-sweety
 
 ## Quick start
 
-`Sweety` is a box holding any value you want, even another `Sweety`! Whenever a `Sweety` instance's state updates, it enqueues a re-render for all [`watch`][watch]ed components executing the [`Sweety#getState`][sweety__get_state] method during their render phase:
+`Sweety` is a box holding any value you want, even another `Sweety`! All [`watch`][watch]ed components that execute the [`Sweety#getState`][sweety__get_state] during the rendering phase enqueue re-render whenever a `Sweety` instance's state updates.
 
 ```tsx
 import { Sweety, watch } from "react-sweety"
@@ -91,12 +91,15 @@ const SignUp: React.FC = watch(() => {
 
 ## API
 
-A core piece of the library is the `Sweety` class - a box that holds value. The value might be anything you like as long as it changes immutably. The class instances are mutable by design, but other Sweety instances can use them as values.
+A core piece of the library is the `Sweety` class - a box that holds value. The value might be anything you like as long as it changes immutably. The class instances are mutable by design, but other `Sweety` instances can use them as values.
 
 ### `Sweety.of`
 
 ```dart
-Sweety.of<T>(initialValue: T, compare?: null | Compare<T>): Sweety<T>
+Sweety.of<T>(
+  initialValue: T,
+  compare?: null | Compare<T>
+): Sweety<T>
 ```
 
 A static method that creates a new `Sweety` instance.
@@ -113,7 +116,7 @@ Sweety<T>#getState(): T
 Sweety<T>#getState<R>(select: (value: T) => R): R
 ```
 
-A `Sweety` instance's method returns the current value.
+A `Sweety` instance's method that returns the current value.
 
 - `[select]` is an optional function that applies to the current value before returning.
 
@@ -133,7 +136,7 @@ Sweety<T>#setState(
 ): void
 ```
 
-A `Sweety` instance's method for setting a value. Whenever the value changes, all of the store's listeners defined via [`Sweety#subscribe`][sweety__subscribe] are executing.
+A `Sweety` instance's method to update the value. All listeners registered via the [`Sweety#subscribe`][sweety__subscribe] method execute whenever the instance's state updates.
 
 - `valueOrTransform` is the new value or a function that transforms the current value into the new value.
 - `[compare]` is an optional [`Compare`][compare] function applied for this call only.
@@ -156,6 +159,46 @@ isActive.getState() // false
 
 > 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
 
+### `Sweety#clone`
+
+```dart
+Sweety<T>#clone(
+  transform?: (value: T) => T,
+  compare?: null | Compare<T>
+): Sweety<T>
+```
+
+A `Sweety` instance's method for creating a new `Sweety` instance with the same value.
+
+- `[transform]` is an optional function that applies to the current value before cloning. It might be handy when cloning a state that contains mutable values.
+- `[compare]` is an optional [`Compare`][compare] function replaces [`Sweety#compare`][sweety__compare] of the cloned instance.
+  When not defined, it uses the [`Sweety#compare`][sweety__compare] function from the origin.
+  When `null` the [`Object.is`][object_is] function applies to compare the values.
+
+```ts
+const immutable = Sweety.of({
+  count: 0,
+})
+const cloneOfImmutable = immutable.clone()
+
+const mutable = Sweety.of({
+  counters: [Sweety.of(0), Sweety.of(1)],
+})
+const cloneOfMutable = mutable.clone(({ counters }) => ({
+  counters: counters.map((counter) => counter.clone()),
+}))
+```
+
+### `Sweety#compare`
+
+```dart
+Sweety<T>#compare: Compare<T>
+```
+
+The [`compare`][compare] function compares the state of a `Sweety` instance with the new value given via [`Sweety#setState`][sweety__set_state]. Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via [`Sweety#subscribe`][sweety__subscribe].
+
+> 💬 The `Sweety#compare` function has the lowest priority when [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], [`useSetSweetyState`][use_set_sweety_state] or [`useSweetyReducer`][use_sweety_reducer] execute.
+
 ### `Sweety#key`
 
 ```dart
@@ -176,74 +219,29 @@ const CheckList: React.FC<{
 )
 ```
 
-### `Sweety#compare`
-
-```ts
-Sweety<T>#compare: Compare<T>
-```
-
-The [`compare`][compare] function compares the value of the store with the new value given via [`Sweety#setState`][sweety__set_state]. If the function returns `true` the store will not be updated so no listeners subscribed via [`Sweety#subscribe`][sweety__subscribe] will be notified.
-
-> 💬 The `Sweety#compare` function has the lowest priority when [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], [`useSetSweetyState`][use_set_sweety_state] or [`useSweetyReducer`][use_sweety_reducer] are called.
-
-### `Sweety#clone`
-
-```ts
-Sweety<T>#clone(
-  transform?: (value: T) => T,
-  compare?: null | Compare<T>
-): Sweety<T>
-```
-
-A `Sweety` instance's method that creates a new `Sweety` instance with the same value.
-
-- `[transform]` is an optional function that will be applied to the current value before cloning. It might be handy when cloning a `Sweety` instance that contains mutable values (e.g. `Sweety`).
-- `[compare]` an optional [`Compare`][compare] function to replace [`Sweety#compare`][sweety__compare] of the cloned instance. If not defined the `Sweety#compare` function of the source instance will be used. If `null` is passed the strict equality check function (`===`) will be used.
-
-```ts
-const signInFormStoreClone = signInFormStore.clone(
-  ({ isSubmitting, username, password, rememberMe }) => ({
-    isSubmitting,
-    username: username.clone(),
-    password: password.clone(),
-    rememberMe: rememberMe.clone(),
-  }),
-)
-```
-
 ### `Sweety#subscribe`
 
-```ts
+```dart
 Sweety<T>#subscribe(listener: VoidFunction): VoidFunction
 ```
 
-A `Sweety` instance's method that subscribes to the store's value changes caused by [`Sweety#setState`][sweety__set_state] calls. Returns a cleanup function that unsubscribes the listener.
+A `Sweety` instance's method that subscribes to the state's updates caused by calling [`Sweety#setState`][sweety__set_state]. Returns a cleanup function that unsubscribes the `listener`.
 
-- `listener` is a function that a store will call when the value changes.
+- `listener` is a function that subscribes to the updates.
 
-```tsx
-const UsernameInput: React.FC<{
-  store: Sweety<string>
-}> = ({ store }) => {
-  const [username, setUsername] = React.useState(store.getState())
+```ts
+const count = Sweety.of(0)
+const unsubscribe = count.subscribe(() => {
+  console.log("The count is %d", count.getState())
+})
 
-  React.useEffect(() => {
-    // the listener is called on every store.setState() call across the app
-    return store.subscribe(() => setUsername(store.getState()))
-  }, [store])
+count.setState(10) // console: "The count is 10"
 
-  return (
-    <input
-      type="text"
-      value={username}
-      // all store.subscribe across the app will call their listeners
-      onChange={(event) => store.setState(event.target.value)}
-    />
-  )
-}
+unsubscribe()
+count.setState(20) // ...
 ```
 
-> 💬 The example above is for demonstration purposes only. In real world app it's usually better use provided hooks in most cases.
+> 💬 You'd like to avoid using the method in your application because it's been designed for convenient use in the exposed hooks and the [`watch`][watch] HOC.
 
 ### `useWatchSweety`
 
