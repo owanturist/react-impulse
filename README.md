@@ -243,6 +243,87 @@ count.setState(20) // ...
 
 > 💬 You'd like to avoid using the method in your application because it's been designed for convenient use in the exposed hooks and the [`watch`][watch] HOC.
 
+### `watch`
+
+```ts
+function watch<TProps>(render: React.FC<TProps>): React.FC<TProps>
+```
+
+The `watch` function creates a React component that subscribes to all `Sweety` instances calling the [`Sweety#getState`][sweety__get_state] method during the rendering phase of the component.
+
+The `Counter` component enqueues a re-render whenever the `count`'s state changes, for instance, when the `Counter`'s button clicks:
+
+```tsx
+const Counter: React.FC<{
+  count: Sweety<number>
+}> = watch(({ count }) => (
+  <button onClick={() => count.setState((x) => x + 1)}>
+    {count.getState()}
+  </button>
+))
+```
+
+But if a component defines a `Sweety` instance, passes it thru, or calls the [`Sweety#getState`][sweety__get_state] method outside of the rendering phase (ex: as part of event listeners handlers), then it does not subscribe to the `Sweety` instances changes.
+
+Here the `SumOfTwo` component defines two `Sweety` instances, passes them further to the `Counter`s components, and calls [`Sweety#getState`][sweety__get_state] inside the `button.onClick` handler. It is optional to use the `watch` function in that case:
+
+```tsx
+const SumOfTwo: React.FC = () => {
+  const firstCounter = useSweety(0)
+  const secondCounter = useSweety(0)
+
+  return (
+    <div>
+      <Counter count={firstCounter} />
+      <Counter count={secondCounter} />
+
+      <button
+        onClick={() => {
+          const sum = firstCounter.getState() + secondCounter.getState()
+
+          console.log("Sum of two is %d", sum)
+
+          firstCounter.setState(0)
+          secondCounter.setState(0)
+        }}
+      >
+        Save and reset
+      </button>
+    </div>
+  )
+}
+```
+
+With or without wrapping the component around the `watch` [HOC][hoc], The `SumOfTwo` component will never re-render due to either `firstCounter` or `secondCounter` updates, but still, it can read and write their states.
+
+#### `watch.memo`
+
+Alias for
+
+```ts
+React.memo(watch(/* */))
+watch.memo(/* */)
+```
+
+#### `watch.forwardRef`
+
+Alias for
+
+```ts
+React.forwardRef(watch(/* */))
+watch.forwardRef(/* */)
+```
+
+#### `watch.memo.forwardRef` and `watch.forwardRef.memo`
+
+Aliases for
+
+```ts
+React.memo(React.forwardRef(watch(/* */)))
+watch.memo.forwardRef(/* */)
+watch.forwardRef.memo(/* */)
+```
+
 ### `useWatchSweety`
 
 ```ts
