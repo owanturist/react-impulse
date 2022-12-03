@@ -2,7 +2,7 @@ import { render, screen, fireEvent, act } from "@testing-library/react"
 import React from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
-import { Sweety, watch } from "../../src"
+import { Sweety, useWatchSweety, watch } from "../../src"
 
 vi.mock("use-sync-external-store/shim/with-selector.js", async () => {
   const actual: {
@@ -175,6 +175,46 @@ describe("watch()", () => {
 
     fireEvent.click(btn)
     expect(btn).toHaveTextContent("2")
+  })
+
+  it("should scope re-renders via useWatchSweety", () => {
+    const Component = watch<{
+      count: Sweety<number>
+    }>(({ count }) => {
+      const isMoreThanTwo = useWatchSweety(() => count.getState() > 2)
+
+      return <span data-testid="result">{isMoreThanTwo && "Done"}</span>
+    })
+
+    const store = Sweety.of(1)
+    const onRender = vi.fn()
+
+    render(
+      <React.Profiler id="test" onRender={onRender}>
+        <Component count={store} />
+      </React.Profiler>,
+    )
+
+    const result = screen.getByTestId("result")
+
+    expect(result).not.toHaveTextContent("Done")
+    expect(onRender).toHaveBeenCalledTimes(1)
+    vi.clearAllMocks()
+
+    act(() => {
+      store.setState(2)
+    })
+
+    expect(result).not.toHaveTextContent("Done")
+    expect(onRender).not.toHaveBeenCalled()
+    vi.clearAllMocks()
+
+    act(() => {
+      store.setState(3)
+    })
+
+    expect(result).toHaveTextContent("Done")
+    expect(onRender).toHaveBeenCalledTimes(1)
   })
 })
 
