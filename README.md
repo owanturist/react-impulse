@@ -155,7 +155,7 @@ isActive.getState() // false
 
 > 💡 If `valueOrTransform` argument is a function it acts as [`batch`][batch].
 
-> 💬 The method returns `void` to emphasize that `Sweety` instances are mutable.
+> 💬 The method returns `void` to emphasize that `Sweety` instances are **mutable**.
 
 > 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
 
@@ -207,18 +207,6 @@ Sweety<T>#key: string
 
 Each `Sweety` instance has a unique key. It might get handy as the React `key` property.
 
-```tsx
-const CheckList: React.FC<{
-  checks: Array<Sweety<boolean>>
-}> = ({ checks }) => (
-  <>
-    {checks.map((checked) => (
-      <Checkbox key={checked.key} checked={checked} />
-    ))}
-  </>
-)
-```
-
 ### `Sweety#subscribe`
 
 ```dart
@@ -245,7 +233,7 @@ count.setState(20) // ...
 
 ### `watch`
 
-```ts
+```dart
 function watch<TProps>(render: React.FC<TProps>): React.FC<TProps>
 ```
 
@@ -324,38 +312,70 @@ watch.memo.forwardRef(/* */)
 watch.forwardRef.memo(/* */)
 ```
 
+### `useSweety`
+
+```dart
+function useSweety<T>(initialValue: T): Sweety<T>
+function useSweety<T>(lazyInitialValue: () => T): Sweety<T>
+```
+
+A hook that initiates a stable (never changing) `Sweety` instance.
+
+The `initialValue` argument is the state used during the initial render. If the initial value is the result of an expensive computation, you may provide the `lazyInitialValue` function instead, which will be executed only on the initial render.
+
+> 💬 The initial value is disregarded during subsequent re-renders.
+
 ### `useWatchSweety`
 
-```ts
+```dart
 function useWatchSweety<T>(watcher: () => T, compare?: null | Compare<T>): T
 ```
 
-A hook that subscribes to all [`Sweety#getState`][sweety__get_state] execution involved in the `watcher` call. Due to the mutable nature of `Sweety` instances a parent component won't be re-rendered when a child's `Sweety` value is changed. The hook gives a way to watch after deep changes in the store's values and trigger a re-render when the returning value is changed.
+- `watcher` is a function that subscribes to all `Sweety` instances calling the [`Sweety#getState`][sweety__get_state] method inside the function.
+- `[compare]` is an optional [`Compare`][compare] function. When not defined or null [`Object.is`][object_is] applies as a fallback.
 
-- `watcher` is a function to read only the watching value meaning that it should never call [`Sweety.of`][sweety__of], [`Sweety#clone`][sweety__clone], [`Sweety#setState`][sweety__set_state] or [`Sweety#subscribe`][sweety__subscribe] methods inside.
-- `[compare]` is an optional [`Compare`][compare] function with strict check (`===`) by default or when `null`. The hook won't trigger a re-render when the watching value is comparably equal to the current value.
+The `useWatchSweety` hook is an alternative to the [`watch`][watch] function. It executes the `watcher` function whenever any of the involved `Sweety` instances' state update but enqueues a re-render only when the resulting value is different from the previous.
+
+Custom hooks can use `useWatchSweety` for reading and transforming the `Sweety` instances' states, so the host component doesn't need to wrap around the [`watch`][watch] HOC:
 
 ```tsx
-type State = {
-  count: Sweety<number>
-}
+const useSumAllAndMultiply = ({
+  multiplier,
+  counts,
+}: {
+  multiplier: Sweety<number>
+  counts: Sweety<Array<Sweety<number>>>
+}): number => {
+  return useWatchSweety(() => {
+    const sumAll = counts
+      .getState()
+      .map((count) => count.getState())
+      .reduce((acc, x) => acc + x, 0)
 
-const App: React.FC<{
-  state: State
-}> = ({ state }) => {
-  // the component will re-render once the `count` is greater than 5
-  // and once the `count` is less or equal to 5
-  const isMoreThanFive = useWatchSweety(() => state.count.getState() > 5)
+    return multiplier.getState() * sumAll
+  })
+}
+```
+
+Components can scope watched `Sweety` instances to reduce re-rendering:
+
+```tsx
+const Challenge: React.FC = () => {
+  const count = useSweety(0)
+  // the component re-renders only once when the `count` is greater than 5
+  const isMoreThanFive = useWatchSweety(() => count.getState() > 5)
 
   return (
     <div>
-      <Counter store={state.count} />
+      <Counter count={count} />
 
-      {isMoreThanFive && <p>You did it!</p>}
+      {isMoreThanFive && <p>You did it 🥳</p>}
     </div>
   )
 }
 ```
+
+> 💬 The `watcher` function is only for reading the `Sweety` instances' states. It should never call [`Sweety.of`][sweety__of], [`Sweety#clone`][sweety__clone], [`Sweety#setState`][sweety__set_state], or [`Sweety#subscribe`][sweety__subscribe] methods inside.
 
 > 💡 It is recommended to memoize the `watcher` function for better performance.
 
@@ -506,35 +526,6 @@ const Counter: React.FC<{
 ```
 
 > 💬 The third argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
-
-### `useSweety`
-
-```ts
-function useSweety<T>(initialValue: T): Sweety<T>
-
-function useSweety<T>(lazyInitialValue: () => T): Sweety<T>
-```
-
-A hook that initiates a stable (never changing) Sweety store.
-
-The first argument is either an [`initialValue`] value to initialize the store or a [`lazyInitialValue`] function returning an initial value that calls only once when the hook is called. It might be handy when the initial value is expensive to compute.
-
-```tsx
-const UsernameInput: React.FC = () => {
-  const store = useSweety("")
-  const [username, setUsername] = useSweetyState(store)
-
-  return (
-    <input
-      type="text"
-      value={username}
-      onChange={(event) => setUsername(event.target.value)}
-    />
-  )
-}
-```
-
-> 💬 The initial value is disregarded during subsequent re-renders.
 
 ### `batch`
 
