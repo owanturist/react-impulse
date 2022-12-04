@@ -1,5 +1,6 @@
 import React from "react"
 import { act, fireEvent, render, screen } from "@testing-library/react"
+import { renderHook } from "@testing-library/react-hooks"
 
 import { Sweety, watch, useSweetyEffect, useSweetyLayoutEffect } from "../src"
 
@@ -499,3 +500,94 @@ describe.each([
     expect(onEffect).not.toHaveBeenCalled()
   })
 })
+
+it.concurrent(
+  "triggers the effect when either regular or additional dependencies change",
+  () => {
+    const spy = vi.fn()
+    const store = Sweety.of(2)
+    const { rerender } = renderHook(
+      ({ left, right }) => {
+        useSweetyEffect(() => {
+          spy(left + right.getState())
+        }, [left, right])
+      },
+      {
+        initialProps: { left: 1, right: store },
+      },
+    )
+
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith(3)
+    vi.clearAllMocks()
+
+    rerender({ left: 2, right: store })
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith(4)
+    vi.clearAllMocks()
+
+    rerender({ left: 2, right: store })
+    expect(spy).not.toHaveBeenCalled()
+    vi.clearAllMocks()
+
+    act(() => {
+      store.setState(3)
+    })
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith(5)
+    vi.clearAllMocks()
+
+    act(() => {
+      store.setState(3)
+    })
+    expect(spy).not.toHaveBeenCalled()
+    vi.clearAllMocks()
+
+    rerender({ left: 2, right: Sweety.of(4) })
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith(6)
+    vi.clearAllMocks()
+  },
+)
+
+it.concurrent(
+  "triggers the effect when Sweety instances are not listened in dependencies",
+  () => {
+    const spy = vi.fn()
+    const left = Sweety.of(1)
+    const right = Sweety.of(2)
+    const { rerender } = renderHook(
+      ({ state }) => {
+        useSweetyEffect(() => {
+          spy(state.left.getState() + state.right.getState())
+        }, [state])
+      },
+      {
+        initialProps: { state: { left, right } },
+      },
+    )
+
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith(3)
+    vi.clearAllMocks()
+
+    rerender({ state: { left, right } })
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith(3)
+    vi.clearAllMocks()
+
+    act(() => {
+      left.setState(2)
+    })
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith(4)
+    vi.clearAllMocks()
+
+    act(() => {
+      right.setState(3)
+    })
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith(5)
+    vi.clearAllMocks()
+  },
+)

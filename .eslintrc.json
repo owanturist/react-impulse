@@ -165,9 +165,9 @@
 
         // React Hooks
         "react-hooks/exhaustive-deps": [
-          "warn",
+          "error",
           {
-            "additionalHooks": "useIsomorphicLayoutEffect"
+            "additionalHooks": "(useSweetyMemo|useSweetyEffect|useSweetyLayoutEffect|useIsomorphicLayoutEffect)"
           }
         ],
 
