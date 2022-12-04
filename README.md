@@ -464,27 +464,29 @@ const usePrintSum = (left: number, right: Sweety<number>): void => {
 
 ### `useSweetyState`
 
-```ts
+```dart
 function useSweetyState<T>(
-  store: Sweety<T>,
+  sweety: Sweety<T>,
   compare?: null | Compare<T>,
 ): [T, SetSweetyState<T>]
 ```
 
-A hook that is similar to `React.useState` but for `Sweety` instances. It subscribes to the store changes and returns the current value and a function to set the value.
+A hook similar to [`React.useState`][react__use_use_state] but for `Sweety` instances. It subscribes to the `sweety` changes and returns the current state with a function to set the state.
 
-- `store` is a `Sweety` instance.
-- `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `Sweety#compare`. The strict equality check function (`===`) will be used if `null`.
+- `sweety` is a `Sweety` instance.
+- `[compare]` is an optional [`Compare`][compare] function.
+  When not defined it uses [`Sweety#compare`][sweety__compare].
+  When `null` the [`Object.is`][object_is] function applies to compare the values.
 
 ```tsx
-const UsernameInput: React.FC<{
-  store: Sweety<string>
-}> = ({ store }) => {
-  const [username, setUsername] = useSweetyState(store)
+const Input: React.FC<{
+  value: Sweety<string>
+}> = ({ value }) => {
+  const [username, setUsername] = useSweetyState(value)
 
   return (
     <input
-      type="text"
+      type="email"
       value={username}
       onChange={(event) => setUsername(event.target.value)}
     />
@@ -498,64 +500,49 @@ const UsernameInput: React.FC<{
 
 ### `useGetSweetyState`
 
-```ts
-function useGetSweetyState<T>(store: Sweety<T>): T
+```dart
+function useGetSweetyState<T>(sweety: Sweety<T>): T
 ```
 
-A hooks that subscribes to the store's changes and returns the current value.
+A hooks that subscribes to the store's changes and returns the current state.
 
-- `store` is a `Sweety` instance.
+- `sweety` is a `Sweety` instance.
 
 ```tsx
-const App: React.FC<{
-  left: Sweety<number>
-  right: Sweety<number>
-}> = ({ left, right }) => {
-  const countLeft = useGetSweetyState(left)
-  const countRight = useGetSweetyState(right)
+const NotificationsCount: React.FC<{
+  count: Sweety<number>
+}> = ({ count }) => {
+  const x = useGetSweetyState(count)
 
-  return (
-    <div>
-      <Counter store={left} />
-      <Counter store={right} />
-
-      <p>Sum: {countLeft + countRight}</p>
-    </div>
-  )
+  return <Badge>{x}</Badge>
 }
 ```
 
 ### `useSetSweetyState`
 
-```ts
+```dart
 function useSetSweetyState<T>(
-  store: Sweety<T>,
+  sweety: Sweety<T>,
   compare?: null | Compare<T>,
 ): SetSweetyState<T>
 ```
 
-A hooks that returns a function to update the store's value. Might be useful when you need a way to update the store's value without subscribing to its changes.
+A hooks that returns a function to update the `Sweety` instance state. Might be useful when you need a way to update the state without subscribing to its changes.
 
-- `store` is a `Sweety` instance.
-- `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `Sweety#compare`. The strict equality check function (`===`) will be used if `null`.
+- `sweety` is a `Sweety` instance.
+- `[compare]` is an optional [`Compare`][compare] function.
+  When not defined it uses [`Sweety#compare`][sweety__compare].
+  When `null` the [`Object.is`][object_is] function applies to compare the values.
 
 ```tsx
-type State = {
-  count: Sweety<number>
-}
-
-const App: React.FC<{
-  state: State
-}> = ({ state }) => {
-  // the component won't re-render on the count value change
-  const setCount = useSetSweetyState(state.count)
+const ClearNotifications: React.FC<{
+  notifications: Sweety<Array<string>>
+}> = ({ notifications }) => {
+  // the component won't re-render on the notifications' state change
+  const setNotifications = useSetSweetyState(notifications)
 
   return (
-    <div>
-      <Counter store={state.count} />
-
-      <button onClick={() => setCount(0)}>Reset count</button>
-    </div>
+    <button onClick={() => setNotifications([])}>Clear Notifications</button>
   )
 }
 ```
@@ -564,19 +551,21 @@ const App: React.FC<{
 
 ### `useSweetyReducer`
 
-```ts
+```dart
 function useSweetyReducer<A, T>(
-  store: Sweety<T>,
+  sweety: Sweety<T>,
   reducer: (state: T, action: A) => T,
   compare?: null | Compare<T>,
 ): [T, React.Dispatch<A>]
 ```
 
-A hook that is similar to `React.useReducer` but for `Sweety` instances. It subscribes to the store changes and returns the current value and a function to dispatch an action.
+A hook similar to `React.useReducer` but for `Sweety` instances. It subscribes to the `sweety` changes and returns the current state and a function to dispatch an action.
 
-- `store` is a `Sweety` instance.
+- `sweety` is a `Sweety` instance.
 - `reducer` is a function that transforms the current value and the dispatched action into the new value.
-- `[compare]` is an optional [`Compare`][compare] function. The store won't update if the new value is comparably equal to the current value. If not defined it uses `Sweety#compare`. The strict equality check function (`===`) will be used if `null`.
+- `[compare]` is an optional [`Compare`][compare] function.
+  When not defined it uses [`Sweety#compare`][sweety__compare].
+  When `null` the [`Object.is`][object_is] function applies to compare the values.
 
 ```tsx
 type CounterAction = { type: "INCREMENT" } | { type: "DECREMENT" }
@@ -592,9 +581,9 @@ const counterReducer = (state: number, action: CounterAction) => {
 }
 
 const Counter: React.FC<{
-  store: Sweety<number>
-}> = ({ store }) => {
-  const [count, dispatch] = useSweetyReducer(store, counterReducer)
+  state: Sweety<number>
+}> = ({ state }) => {
+  const [count, dispatch] = useSweetyReducer(state, counterReducer)
 
   return (
     <div>
@@ -610,50 +599,33 @@ const Counter: React.FC<{
 
 ### `batch`
 
-```ts
+```dart
 function batch(execute: VoidFunction): void
 ```
 
-The `batch` function is a helper to optimize multiple stores' updates.
+The `batch` function is a helper to optimize multiple `Sweety` updates.
 
 ```tsx
-const LoginForm: React.FC<{
-  email: Sweety<string>
-  password: Sweety<string>
-}> = ({ email: emailStore, password: passwordStore }) => {
-  const [email, setEmail] = useSweetyState(emailStore)
-  const [password, setPassword] = useSweetyState(passwordStore)
+const SumOfTwo: React.FC<{
+  left: Sweety<number>
+  right: Sweety<number>
+}> = watch(({ left, right }) => (
+  <div>
+    <span>Sum is: {left.getState() + right.getState()}</span>
 
-  return (
-    <form>
-      <input
-        type="email"
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(event) => setPassword(event.target.value)}
-      />
-
-      <button
-        type="button"
-        onClick={() => {
-          api.login(email, password)
-
-          // TODO await
-          batch(() => {
-            setEmail("")
-            setPassword("")
-          })
-        }}
-      >
-        Submit
-      </button>
-    </form>
-  )
-}
+    <button
+      onClick={() => {
+        // enqueues 1 re-render instead of 2 🎉
+        batch(() => {
+          left.setState(0)
+          right.setState(0)
+        })
+      }}
+    >
+      Reset
+    </button>
+  </div>
+))
 ```
 
 ### `Compare`
@@ -673,16 +645,16 @@ type SetSweetyState<T> = (
 ) => void
 ```
 
-A function that similar to the `React.useState` callback but with extra [`compare`][compare] function.
+A function that similar to the [`React.useState`][react__use_use_state] callback but with extra [`compare`][compare] function.
 
 - `valueOrTransform` is the new value or a function that transforms the current value into the new value.
-- `[compare]` is an optional [`Compare`][compare] function to use for this call only.
-  If not defined the `compare` function of the source hook will be used.
-  If `null` is passed the strict equality check function (`===`) will be used.
+- `[compare]` is an optional [`Compare`][compare] function applied for this call only.
+  When not defined it uses the `compare` function of the source hook.
+  When `null` the [`Object.is`][object_is] function applies to compare the values.
 
 > 💡 If `valueOrTransform` argument is a function it acts as [`batch`][batch].
 
-> 💬 The second argument `compare` function has the highest priority so it will be used instead of [`Sweety#compare`][sweety__compare] and any other `compare` passed via [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], [`useSetSweetyState`][use_set_sweety_state] or [`useSweetyReducer`][use_sweety_reducer].
+> 💬 The second argument `compare` function has the highest priority so it will be used instead of [`Sweety#compare`][sweety__compare] and any other `compare` passed via [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], [`useSetSweetyState`][use_set_sweety_state], or [`useSweetyReducer`][use_sweety_reducer].
 
 ### `ExtractSweetyState`
 
@@ -766,6 +738,7 @@ Here are scripts you want to run for publishing a new version to NPM:
 [compare]: #compare
 [object_is]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is#description
 [hoc]: https://reactjs.org/docs/higher-order-components.html
+[react__use_use_state]: https://reactjs.org/docs/hooks-reference.html#usestate
 [react__use_callback]: https://reactjs.org/docs/hooks-reference.html#usecallback
 [react__use_effect]: https://reactjs.org/docs/hooks-reference.html#useeffect
 [react__use_layout_effect]: https://reactjs.org/docs/hooks-reference.html#uselayouteffect
