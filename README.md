@@ -171,7 +171,7 @@ Sweety<T>#clone(
 A `Sweety` instance's method for creating a new `Sweety` instance with the same state.
 
 - `[transform]` is an optional function that applies to the current state before cloning. It might be handy when cloning a state that contains mutable values.
-- `[compare]` is an optional [`Compare`][compare] function replaces [`Sweety#compare`][sweety__compare] of the cloned instance.
+- `[compare]` is an optional [`Compare`][compare] function applied as [`Sweety#compare`][sweety__compare].
   When not defined, it uses the [`Sweety#compare`][sweety__compare] function from the origin.
   When `null` the [`Object.is`][object_is] function applies to compare the states.
 
@@ -282,7 +282,7 @@ const SumOfTwo: React.FC = () => {
 }
 ```
 
-With or without wrapping the component around the `watch` [HOC][hoc], The `SumOfTwo` component will never re-render due to either `firstCounter` or `secondCounter` updates, but still, it can read and write their states.
+With or without wrapping the component around the `watch` [HOC][hoc], The `SumOfTwo` component will never re-render due to either `firstCounter` or `secondCounter` updates, but still, it can read and write their states inside the `onClick` listener.
 
 #### `watch.memo`
 
@@ -328,11 +328,14 @@ The `initialState` argument is the state used during the initial render. If the 
 ### `useWatchSweety`
 
 ```dart
-function useWatchSweety<T>(watcher: () => T, compare?: null | Compare<T>): T
+function useWatchSweety<T>(
+  watcher: () => T,
+  compare?: null | Compare<T>
+): T
 ```
 
 - `watcher` is a function that subscribes to all `Sweety` instances calling the [`Sweety#getState`][sweety__get_state] method inside the function.
-- `[compare]` is an optional [`Compare`][compare] function. When not defined or null [`Object.is`][object_is] applies as a fallback.
+- `[compare]` is an optional [`Compare`][compare] function. When not defined or `null` [`Object.is`][object_is] applies as a fallback.
 
 The `useWatchSweety` hook is an alternative to the [`watch`][watch] function. It executes the `watcher` function whenever any of the involved `Sweety` instances' state update but enqueues a re-render only when the resulting value is different from the previous.
 
@@ -385,7 +388,7 @@ const Challenge: React.FC = () => {
 
 ```dart
 function useSweetyEffect(
-  effect: () => VoidFunction,
+  effect: () => (void | VoidFunction),
   dependencies?: ReadonlyArray<unknown>,
 ): void
 ```
@@ -393,7 +396,7 @@ function useSweetyEffect(
 - `effect` is an imperative function that can return a cleanup function.
 - `[dependencies]` if present, effect will only activate if the values in the list change.
 
-The hook is a `Sweety` version of the [`React.useEffect`][react__use_effect] hook. During the `effect` execution, all the `Sweety` instances that call the [`Sweety#getState`][sweety__get_state] method become **phantom dependencies** of the hook. The effect runs again whenever any dependency or a state of any phantom dependency changes:
+The hook is a `Sweety` version of the [`React.useEffect`][react__use_effect] hook. During the `effect` execution, all the `Sweety` instances that call the [`Sweety#getState`][sweety__get_state] method become _phantom dependencies_ of the hook. The effect runs again whenever any dependency or a state of any phantom dependency changes:
 
 ```ts
 const usePrintSum = (left: number, right: Sweety<number>): void => {
@@ -446,11 +449,11 @@ const usePrintSum = (left: number, right: Sweety<number>): void => {
 
 ### `useSweetyLayoutEffect`
 
-The hook is a `Sweety` version of the [`React.useLayoutEffect`][react__use_layout_effect] hook. Ats the same way as [`useSweetyEffect`][use_sweety_effect].
+The hook is a `Sweety` version of the [`React.useLayoutEffect`][react__use_layout_effect] hook. Acts similar way as [`useSweetyEffect`][use_sweety_effect].
 
 ### ~~`useSweetyInsertionEffect`~~
 
-There is no `Sweety` version of the [`React.useInsertionEffect`][react__use_insertion_effect] hook due to backward compatibility with React from v16.8.0. You can workaround it by using the native `React.useInsertionEffect` hook with the states extracted beforehand:
+There is no `Sweety` version of the [`React.useInsertionEffect`][react__use_insertion_effect] hook due to backward compatibility with React from `v16.8.0`. The workaround is to use the native `React.useInsertionEffect` hook with the states extracted beforehand:
 
 ```ts
 const usePrintSum = (left: number, right: Sweety<number>): void => {
@@ -494,7 +497,7 @@ const Input: React.FC<{
 }
 ```
 
-> 💡 The hook is a combination of [`useGetSweetyState`][use_get_sweety_state] and [`useSetSweetyState`][use_set_sweety_state], so use them if you need to either get+subscribe or set the store's state.
+> 💡 The hook is a combination of [`useGetSweetyState`][use_get_sweety_state] and [`useSetSweetyState`][use_set_sweety_state], so use them if you need to either get+subscribe or set the `Sweety` state.
 
 > 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
 
@@ -504,7 +507,7 @@ const Input: React.FC<{
 function useGetSweetyState<T>(sweety: Sweety<T>): T
 ```
 
-A hooks that subscribes to the store's changes and returns the current state.
+A hooks that subscribes to the `sweety` changes and returns the current state.
 
 - `sweety` is a `Sweety` instance.
 
@@ -638,7 +641,7 @@ A function that compares two values and returns `true` if they are equal. Depend
 
 ### `SetSweetyState`
 
-```ts
+```dart
 type SetSweetyState<T> = (
   stateOrTransform: React.SetStateAction<T>,
   compare?: null | Compare<T>,
@@ -661,26 +664,26 @@ A function that similar to the [`React.useState`][react__use_use_state] callback
 A helper type that shallowly extracts state type from `Sweety`:
 
 ```ts
-type SimpleStore = Sweety<number>
-// ExtractSweetyState<SimpleStore> === number
+type SimpleValue = Sweety<number>
+// ExtractSweetyState<SimpleValue> === number
 
-type ArrayStore = Sweety<Array<string>>
-// ExtractSweetyState<ArrayStore> === Array<string>
+type ArrayValue = Sweety<Array<string>>
+// ExtractSweetyState<ArrayValue> === Array<string>
 
-type ShapeStore = Sweety<{
+type ShapeValue = Sweety<{
   name: string
   age: number
 }>
-// ExtractSweetyState<ShapeStore> === {
+// ExtractSweetyState<ShapeValue> === {
 //   name: string
 //   age: number
 // }
 
-type ShapeOfStores = Sweety<{
+type ShapeOfSweeties = Sweety<{
   name: Sweety<string>
   age: Sweety<number>
 }>
-// ExtractSweetyState<ShapeStore> === {
+// ExtractSweetyState<ShapeOfSweeties> === {
 //   name: Sweety<string>
 //   age: Sweety<number>
 // }
@@ -691,17 +694,17 @@ type ShapeOfStores = Sweety<{
 A helper that deeply extracts state type from `Sweety`:
 
 ```ts
-type ShapeOfStores = Sweety<{
+type ShapeOfSweeties = Sweety<{
   name: Sweety<string>
   age: Sweety<number>
 }>
-// DeepExtractSweetyState<ShapeStore> === {
+// DeepExtractSweetyState<ShapeOfSweeties> === {
 //   name: string
 //   age: number
 // }
 
-type ArrayOfStores = Sweety<Array<Sweety<boolean>>>
-// DeepExtractSweetyState<ArrayOfStores> === Array<boolean>
+type ArrayOfSweeties = Sweety<Array<Sweety<boolean>>>
+// DeepExtractSweetyState<ArrayOfSweeties> === Array<boolean>
 ```
 
 ### `Dispatch`
