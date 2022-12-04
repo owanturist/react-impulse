@@ -18,7 +18,7 @@ npm install react-sweety
 
 ## Quick start
 
-`Sweety` is a box holding any value you want, even another `Sweety`! All [`watch`][watch]ed components that execute the [`Sweety#getState`][sweety__get_state] during the rendering phase enqueue re-render whenever a `Sweety` instance's state updates.
+`Sweety` is a box holding any value you want, even another `Sweety`! All [`watch`][watch]ed components that execute the [`Sweety#getState`][sweety__get_state] during the rendering phase enqueue re-render whenever the `Sweety` instance's state updates.
 
 ```tsx
 import { Sweety, watch } from "react-sweety"
@@ -91,21 +91,21 @@ const SignUp: React.FC = watch(() => {
 
 ## API
 
-A core piece of the library is the `Sweety` class - a box that holds value. The value might be anything you like as long as it changes immutably. The class instances are mutable by design, but other `Sweety` instances can use them as values.
+A core piece of the library is the `Sweety` class - a box that holds value. The value might be anything you like as long as it does not mutate. The class instances are mutable by design, but other `Sweety` instances can use them as values.
 
 ### `Sweety.of`
 
 ```dart
 Sweety.of<T>(
-  initialValue: T,
+  initialState: T,
   compare?: null | Compare<T>
 ): Sweety<T>
 ```
 
 A static method that creates a new `Sweety` instance.
 
-- `initialValue` is the initial value.
-- `[compare]` is an optional [`Compare`][compare] function applied as [`Sweety#compare`][sweety__compare]. When not defined or null [`Object.is`][object_is] applies as a fallback.
+- `initialState` is the initial state.
+- `[compare]` is an optional [`Compare`][compare] function applied as [`Sweety#compare`][sweety__compare]. When not defined or `null` [`Object.is`][object_is] applies as a fallback.
 
 > 💡 The [`useSweety`][use_sweety] hook helps to create and store a `Sweety` instance inside a React component.
 
@@ -113,12 +113,12 @@ A static method that creates a new `Sweety` instance.
 
 ```dart
 Sweety<T>#getState(): T
-Sweety<T>#getState<R>(select: (value: T) => R): R
+Sweety<T>#getState<R>(select: (state: T) => R): R
 ```
 
-A `Sweety` instance's method that returns the current value.
+A `Sweety` instance's method that returns the current state.
 
-- `[select]` is an optional function that applies to the current value before returning.
+- `[select]` is an optional function that applies to the current state before returning.
 
 ```ts
 const count = Sweety.of(3)
@@ -131,17 +131,17 @@ count.getState((x) => x > 0) // === true
 
 ```dart
 Sweety<T>#setState(
-  valueOrTransform: React.SetStateAction<T>,
+  stateOrTransform: React.SetStateAction<T>,
   compare?: null | Compare<T>
 ): void
 ```
 
-A `Sweety` instance's method to update the value. All listeners registered via the [`Sweety#subscribe`][sweety__subscribe] method execute whenever the instance's state updates.
+A `Sweety` instance's method to update the state. All listeners registered via the [`Sweety#subscribe`][sweety__subscribe] method execute whenever the instance's state updates.
 
-- `valueOrTransform` is the new value or a function that transforms the current value into the new value.
+- `stateOrTransform` is the new state or a function that transforms the current state into the new state.
 - `[compare]` is an optional [`Compare`][compare] function applied for this call only.
   When not defined the [`Sweety#compare`][sweety__compare] function of the instance will be used.
-  When `null` the [`Object.is`][object_is] function applies to compare the values.
+  When `null` the [`Object.is`][object_is] function applies to compare the states.
 
 ```ts
 const isActive = Sweety.of(false)
@@ -153,7 +153,7 @@ isActive.setState(false)
 isActive.getState() // false
 ```
 
-> 💡 If `valueOrTransform` argument is a function it acts as [`batch`][batch].
+> 💡 If `stateOrTransform` argument is a function it acts as [`batch`][batch].
 
 > 💬 The method returns `void` to emphasize that `Sweety` instances are **mutable**.
 
@@ -163,17 +163,17 @@ isActive.getState() // false
 
 ```dart
 Sweety<T>#clone(
-  transform?: (value: T) => T,
+  transform?: (state: T) => T,
   compare?: null | Compare<T>
 ): Sweety<T>
 ```
 
-A `Sweety` instance's method for creating a new `Sweety` instance with the same value.
+A `Sweety` instance's method for creating a new `Sweety` instance with the same state.
 
-- `[transform]` is an optional function that applies to the current value before cloning. It might be handy when cloning a state that contains mutable values.
+- `[transform]` is an optional function that applies to the current state before cloning. It might be handy when cloning a state that contains mutable values.
 - `[compare]` is an optional [`Compare`][compare] function replaces [`Sweety#compare`][sweety__compare] of the cloned instance.
   When not defined, it uses the [`Sweety#compare`][sweety__compare] function from the origin.
-  When `null` the [`Object.is`][object_is] function applies to compare the values.
+  When `null` the [`Object.is`][object_is] function applies to compare the states.
 
 ```ts
 const immutable = Sweety.of({
@@ -195,7 +195,7 @@ const cloneOfMutable = mutable.clone(({ counters }) => ({
 Sweety<T>#compare: Compare<T>
 ```
 
-The [`compare`][compare] function compares the state of a `Sweety` instance with the new value given via [`Sweety#setState`][sweety__set_state]. Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via [`Sweety#subscribe`][sweety__subscribe].
+The [`compare`][compare] function compares the state of a `Sweety` instance with the new state given via [`Sweety#setState`][sweety__set_state]. Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via [`Sweety#subscribe`][sweety__subscribe].
 
 > 💬 The `Sweety#compare` function has the lowest priority when [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], [`useSetSweetyState`][use_set_sweety_state] or [`useSweetyReducer`][use_sweety_reducer] execute.
 
@@ -315,15 +315,15 @@ watch.forwardRef.memo(/* */)
 ### `useSweety`
 
 ```dart
-function useSweety<T>(initialValue: T): Sweety<T>
-function useSweety<T>(lazyInitialValue: () => T): Sweety<T>
+function useSweety<T>(initialState: T): Sweety<T>
+function useSweety<T>(lazyInitialState: () => T): Sweety<T>
 ```
 
 A hook that initiates a stable (never changing) `Sweety` instance.
 
-The `initialValue` argument is the state used during the initial render. If the initial value is the result of an expensive computation, you may provide the `lazyInitialValue` function instead, which will be executed only on the initial render.
+The `initialState` argument is the state used during the initial render. If the initial state is the result of an expensive computation, you may provide the `lazyInitialState` function instead, which will be executed only on the initial render.
 
-> 💬 The initial value is disregarded during subsequent re-renders.
+> 💬 The initial state is disregarded during subsequent re-renders.
 
 ### `useWatchSweety`
 
@@ -476,7 +476,7 @@ A hook similar to [`React.useState`][react__use_use_state] but for `Sweety` inst
 - `sweety` is a `Sweety` instance.
 - `[compare]` is an optional [`Compare`][compare] function.
   When not defined it uses [`Sweety#compare`][sweety__compare].
-  When `null` the [`Object.is`][object_is] function applies to compare the values.
+  When `null` the [`Object.is`][object_is] function applies to compare the states.
 
 ```tsx
 const Input: React.FC<{
@@ -494,7 +494,7 @@ const Input: React.FC<{
 }
 ```
 
-> 💡 The hook is a combination of [`useGetSweetyState`][use_get_sweety_state] and [`useSetSweetyState`][use_set_sweety_state], so use them if you need to either get+subscribe or set the store's value.
+> 💡 The hook is a combination of [`useGetSweetyState`][use_get_sweety_state] and [`useSetSweetyState`][use_set_sweety_state], so use them if you need to either get+subscribe or set the store's state.
 
 > 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
 
@@ -532,7 +532,7 @@ A hooks that returns a function to update the `Sweety` instance state. Might be 
 - `sweety` is a `Sweety` instance.
 - `[compare]` is an optional [`Compare`][compare] function.
   When not defined it uses [`Sweety#compare`][sweety__compare].
-  When `null` the [`Object.is`][object_is] function applies to compare the values.
+  When `null` the [`Object.is`][object_is] function applies to compare the states.
 
 ```tsx
 const ClearNotifications: React.FC<{
@@ -562,10 +562,10 @@ function useSweetyReducer<A, T>(
 A hook similar to `React.useReducer` but for `Sweety` instances. It subscribes to the `sweety` changes and returns the current state and a function to dispatch an action.
 
 - `sweety` is a `Sweety` instance.
-- `reducer` is a function that transforms the current value and the dispatched action into the new value.
+- `reducer` is a function that transforms the current state and the dispatched action into the new state.
 - `[compare]` is an optional [`Compare`][compare] function.
   When not defined it uses [`Sweety#compare`][sweety__compare].
-  When `null` the [`Object.is`][object_is] function applies to compare the values.
+  When `null` the [`Object.is`][object_is] function applies to compare the states.
 
 ```tsx
 type CounterAction = { type: "INCREMENT" } | { type: "DECREMENT" }
@@ -640,25 +640,25 @@ A function that compares two values and returns `true` if they are equal. Depend
 
 ```ts
 type SetSweetyState<T> = (
-  valueOrTransform: React.SetStateAction<T>,
+  stateOrTransform: React.SetStateAction<T>,
   compare?: null | Compare<T>,
 ) => void
 ```
 
 A function that similar to the [`React.useState`][react__use_use_state] callback but with extra [`compare`][compare] function.
 
-- `valueOrTransform` is the new value or a function that transforms the current value into the new value.
+- `stateOrTransform` is the new state or a function that transforms the current state into the new state.
 - `[compare]` is an optional [`Compare`][compare] function applied for this call only.
   When not defined it uses the `compare` function of the source hook.
-  When `null` the [`Object.is`][object_is] function applies to compare the values.
+  When `null` the [`Object.is`][object_is] function applies to compare the states.
 
-> 💡 If `valueOrTransform` argument is a function it acts as [`batch`][batch].
+> 💡 If `stateOrTransform` argument is a function it acts as [`batch`][batch].
 
 > 💬 The second argument `compare` function has the highest priority so it will be used instead of [`Sweety#compare`][sweety__compare] and any other `compare` passed via [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], [`useSetSweetyState`][use_set_sweety_state], or [`useSweetyReducer`][use_sweety_reducer].
 
 ### `ExtractSweetyState`
 
-A helper type that shallowly extracts value type from `Sweety`:
+A helper type that shallowly extracts state type from `Sweety`:
 
 ```ts
 type SimpleStore = Sweety<number>
@@ -688,7 +688,7 @@ type ShapeOfStores = Sweety<{
 
 ### `DeepExtractSweetyState`
 
-A helper that deeply extracts value type from `Sweety`:
+A helper that deeply extracts state type from `Sweety`:
 
 ```ts
 type ShapeOfStores = Sweety<{
