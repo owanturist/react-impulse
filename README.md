@@ -239,7 +239,7 @@ function watch<TProps>(render: React.FC<TProps>): React.FC<TProps>
 
 The `watch` function creates a React component that subscribes to all `Sweety` instances calling the [`Sweety#getState`][sweety__get_state] method during the rendering phase of the component.
 
-The `Counter` component enqueues a re-render whenever the `count`'s state changes, for instance, when the `Counter`'s button clicks:
+The `Counter` component below enqueues a re-render whenever the `count`'s state changes, for instance, when the `Counter`'s button clicks:
 
 ```tsx
 const Counter: React.FC<{
@@ -377,9 +377,90 @@ const Challenge: React.FC = () => {
 
 > 💬 The `watcher` function is only for reading the `Sweety` instances' states. It should never call [`Sweety.of`][sweety__of], [`Sweety#clone`][sweety__clone], [`Sweety#setState`][sweety__set_state], or [`Sweety#subscribe`][sweety__subscribe] methods inside.
 
-> 💡 It is recommended to memoize the `watcher` function for better performance.
+> 💡 It is recommended to memoize the `watcher` function with [`React.useCallback`][react__use_callback] for better performance.
 
 > 💡 Keep in mind that the `watcher` function acts as a "reader" so you'd like to avoid heavy calculations inside it. Sometimes it might be a good idea to pass a watcher result to a separated memoization hook. The same is true for the `compare` function - you should choose wisely between avoiding extra re-renders and heavy comparisons.
+
+### `useSweetyEffect`
+
+```dart
+function useSweetyEffect(
+  effect: () => VoidFunction,
+  dependencies?: ReadonlyArray<unknown>,
+): void
+```
+
+- `effect` is an imperative function that can return a cleanup function.
+- `[dependencies]` if present, effect will only activate if the values in the list change.
+
+The hook is a `Sweety` version of the [`React.useEffect`][react__use_effect] hook. During the `effect` execution, all the `Sweety` instances that call the [`Sweety#getState`][sweety__get_state] method become **phantom dependencies** of the hook. The effect runs again whenever any dependency or a state of any phantom dependency changes:
+
+```ts
+const usePrintSum = (left: number, right: Sweety<number>): void => {
+  // the effect runs whenever:
+  // 1. `left` changes
+  // 2. `right` changes (new `Sweety` instance)
+  // 3. `right.getState()` changes (`right` mutates)
+  useSweetyEffect(() => {
+    console.log("sum is %d", left + right.getState())
+  }, [left, right])
+}
+```
+
+The phantom dependencies might be different per `effect` call. If a `Sweety` instance does not call the [`Sweety#getState`][sweety__get_state] method, it does not become a phantom dependency:
+
+```ts
+const usePrintSum = (left: number, right: Sweety<number>): void => {
+  // the effect runs when either:
+  //
+  // `left` > 0:
+  //   1. `left` changes
+  //   2. `right` changes (new `Sweety` instance)
+  //   3. `right.getState()` changes (`right` mutates)
+  //
+  // OR
+  //
+  // `left` <= 0:
+  //   1. `left` changes
+  //   2. `right` changes (new `Sweety` instance)
+  useSweetyEffect(() => {
+    if (left > 0) {
+      console.log("sum is %d", left + right.getState())
+    }
+  }, [left, right])
+}
+```
+
+> 💡 Want to see ESLint suggestions for the dependencies? Simply add the hook name to the ESLint rule override:
+>
+> ```json
+> {
+>   "react-hooks/exhaustive-deps": [
+>     "error",
+>     {
+>       "additionalHooks": "(useSweetyEffect|useSweetyLayoutEffect)"
+>     }
+>   ]
+> }
+> ```
+
+### `useSweetyLayoutEffect`
+
+The hook is a `Sweety` version of the [`React.useLayoutEffect`][react__use_layout_effect] hook. Ats the same way as [`useSweetyEffect`][use_sweety_effect].
+
+### ~~`useSweetyInsertionEffect`~~
+
+There is no `Sweety` version of the [`React.useInsertionEffect`][react__use_insertion_effect] hook due to backward compatibility with React from v16.8.0. You can workaround it by using the native `React.useInsertionEffect` hook with the states extracted beforehand:
+
+```ts
+const usePrintSum = (left: number, right: Sweety<number>): void => {
+  const rightState = useGetSweetyState(right)
+
+  React.useInsertionEffect(() => {
+    console.log("sum is %d", left + rightState)
+  }, [left, rightState])
+}
+```
 
 ### `useSweetyState`
 
@@ -679,8 +760,13 @@ Here are scripts you want to run for publishing a new version to NPM:
 [use_get_sweety_state]: #usegetsweetystate
 [use_set_sweety_state]: #usesetsweetystate
 [use_sweety]: #usesweety
+[use_sweety_effect]: #usesweetyeffect
 [watch]: #watch
 [batch]: #batch
 [compare]: #compare
 [object_is]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is#description
 [hoc]: https://reactjs.org/docs/higher-order-components.html
+[react__use_callback]: https://reactjs.org/docs/hooks-reference.html#usecallback
+[react__use_effect]: https://reactjs.org/docs/hooks-reference.html#useeffect
+[react__use_layout_effect]: https://reactjs.org/docs/hooks-reference.html#uselayouteffect
+[react__use_insertion_effect]: https://reactjs.org/docs/hooks-reference.html#useinsertioneffect
