@@ -297,7 +297,7 @@ describe("calling Sweety#subscribe()", () => {
           store.subscribe(listener)
 
           return store.getState()
-        }, [store])
+        }, [listener, store])
       },
     ],
     [
