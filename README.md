@@ -1,12 +1,12 @@
 # `react-sweety`
 
-The clean and natural React state management.
-
 [![codecov](https://codecov.io/gh/owanturist/react-sweety/branch/master/graph/badge.svg?token=QP3SXO8E9F)](https://codecov.io/gh/owanturist/react-sweety)
 ![known vulnerabilities](https://snyk.io/test/github/owanturist/react-sweety/badge.svg)
 ![minified + gzip](https://badgen.net/bundlephobia/minzip/react-sweety)
 ![dependency count](https://badgen.net/bundlephobia/dependency-count/react-sweety)
 ![types](https://badgen.net/npm/types/react-sweety)
+
+The clean and natural React state management.
 
 ```bash
 # with yarn
@@ -105,7 +105,7 @@ Sweety.of<T>(
 A static method that creates a new `Sweety` instance.
 
 - `initialState` is the initial state.
-- `[compare]` is an optional [`Compare`][compare] function applied as [`Sweety#compare`][sweety__compare]. When not defined or `null` [`Object.is`][object_is] applies as a fallback.
+- `[compare]` is an optional [`Compare`][compare] function applied as [`Sweety#compare`][sweety__compare]. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
 > 💡 The [`useSweety`][use_sweety] hook helps to create and store a `Sweety` instance inside a React component.
 
@@ -168,7 +168,7 @@ Sweety<T>#clone(
 ): Sweety<T>
 ```
 
-A `Sweety` instance's method for creating a new `Sweety` instance with the same state.
+A `Sweety` instance's method for cloning a `Sweety` instance.
 
 - `[transform]` is an optional function that applies to the current state before cloning. It might be handy when cloning a state that contains mutable values.
 - `[compare]` is an optional [`Compare`][compare] function applied as [`Sweety#compare`][sweety__compare].
@@ -195,7 +195,7 @@ const cloneOfMutable = mutable.clone(({ counters }) => ({
 Sweety<T>#compare: Compare<T>
 ```
 
-The [`compare`][compare] function compares the state of a `Sweety` instance with the new state given via [`Sweety#setState`][sweety__set_state]. Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via [`Sweety#subscribe`][sweety__subscribe].
+The [`Compare`][compare] function compares the state of a `Sweety` instance with the new state given via [`Sweety#setState`][sweety__set_state]. Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via [`Sweety#subscribe`][sweety__subscribe].
 
 > 💬 The `Sweety#compare` function has the lowest priority when [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], [`useSetSweetyState`][use_set_sweety_state] or [`useSweetyReducer`][use_sweety_reducer] execute.
 
@@ -234,7 +234,7 @@ count.setState(20) // ...
 ### `watch`
 
 ```dart
-function watch<TProps>(render: React.FC<TProps>): React.FC<TProps>
+function watch<TProps>(component: React.FC<TProps>): React.FC<TProps>
 ```
 
 The `watch` function creates a React component that subscribes to all `Sweety` instances calling the [`Sweety#getState`][sweety__get_state] method during the rendering phase of the component.
@@ -335,7 +335,7 @@ function useWatchSweety<T>(
 ```
 
 - `watcher` is a function that subscribes to all `Sweety` instances calling the [`Sweety#getState`][sweety__get_state] method inside the function.
-- `[compare]` is an optional [`Compare`][compare] function. When not defined or `null` [`Object.is`][object_is] applies as a fallback.
+- `[compare]` is an optional [`Compare`][compare] function. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
 The `useWatchSweety` hook is an alternative to the [`watch`][watch] function. It executes the `watcher` function whenever any of the involved `Sweety` instances' state update but enqueues a re-render only when the resulting value is different from the previous.
 
@@ -393,10 +393,11 @@ function useSweetyEffect(
 ): void
 ```
 
-- `effect` is an imperative function that can return a cleanup function.
-- `[dependencies]` if present, effect will only activate if the values in the list change.
+- `effect` a function that runs whenever any of the `dependencies`' values change.
+  Can return a cleanup function to cancel running side effects.
+- `[dependencies]` an optional array of values used in the `effect` function.
 
-The hook is a `Sweety` version of the [`React.useEffect`][react__use_effect] hook. During the `effect` execution, all the `Sweety` instances that call the [`Sweety#getState`][sweety__get_state] method become _phantom dependencies_ of the hook. The effect runs again whenever any dependency or a state of any phantom dependency changes:
+The hook is a `Sweety` version of the [`React.useEffect`][react__use_effect] hook. During the `effect` execution, all the `Sweety` instances that call the [`Sweety#getState`][sweety__get_state] method become _phantom dependencies_ of the hook. The `effect` runs again whenever any dependency or a state of any phantom dependency changes:
 
 ```ts
 const usePrintSum = (left: number, right: Sweety<number>): void => {
@@ -441,7 +442,7 @@ const usePrintSum = (left: number, right: Sweety<number>): void => {
 >   "react-hooks/exhaustive-deps": [
 >     "error",
 >     {
->       "additionalHooks": "(useSweetyEffect|useSweetyLayoutEffect)"
+>       "additionalHooks": "(useSweetyEffect|useSweetyLayoutEffect|useSweetyMemo)"
 >     }
 >   ]
 > }
@@ -464,6 +465,71 @@ const usePrintSum = (left: number, right: Sweety<number>): void => {
   }, [left, rightState])
 }
 ```
+
+### `useSweetyMemo`
+
+```dart
+function useSweetyMemo<T>(
+  factory: () => T,
+  dependencies: ReadonlyArray<unknown> | undefined,
+): T
+```
+
+- `factory` a function calculates a value `T` whenever any of the `dependencies`' values change.
+- `dependencies` an array of values used in the `factory` function.
+
+The hook is a `Sweety` version of the [`React.useMemo`][react__use_memo] hook. During the `factory` execution, all the `Sweety` instances that call the [`Sweety#getState`][sweety__get_state] method become _phantom dependencies_ of the hook. The `factory` runs again whenever any dependency or a state of any phantom dependency changes:
+
+```ts
+const useCalcSum = (left: number, right: Sweety<number>): number => {
+  // the factory runs whenever:
+  // 1. `left` changes
+  // 2. `right` changes (new `Sweety` instance)
+  // 3. `right.getState()` changes (`right` mutates)
+  return useSweetyMemo(() => {
+    return left + right.getState()
+  }, [left, right])
+}
+```
+
+The phantom dependencies might be different per `factory` call. If a `Sweety` instance does not call the [`Sweety#getState`][sweety__get_state] method, it does not become a phantom dependency:
+
+```ts
+const useCalcSum = (left: number, right: Sweety<number>): number => {
+  // the factory runs when either:
+  //
+  // `left` > 0:
+  //   1. `left` changes
+  //   2. `right` changes (new `Sweety` instance)
+  //   3. `right.getState()` changes (`right` mutates)
+  //
+  // OR
+  //
+  // `left` <= 0:
+  //   1. `left` changes
+  //   2. `right` changes (new `Sweety` instance)
+  return useSweetyEffect(() => {
+    if (left > 0) {
+      return left + right.getState()
+    }
+
+    return left
+  }, [left, right])
+}
+```
+
+> 💡 Want to see ESLint suggestions for the dependencies? Simply add the hook name to the ESLint rule override:
+>
+> ```json
+> {
+>   "react-hooks/exhaustive-deps": [
+>     "error",
+>     {
+>       "additionalHooks": "(useSweetyEffect|useSweetyLayoutEffect|useSweetyMemo)"
+>     }
+>   ]
+> }
+> ```
 
 ### `useSweetyState`
 
@@ -648,7 +714,7 @@ type SetSweetyState<T> = (
 ) => void
 ```
 
-A function that similar to the [`React.useState`][react__use_use_state] callback but with extra [`compare`][compare] function.
+A function that similar to the [`React.useState`][react__use_use_state] callback but with extra [`Compare`][compare] function.
 
 - `stateOrTransform` is the new state or a function that transforms the current state into the new state.
 - `[compare]` is an optional [`Compare`][compare] function applied for this call only.
@@ -742,6 +808,7 @@ Here are scripts you want to run for publishing a new version to NPM:
 [object_is]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is#description
 [hoc]: https://reactjs.org/docs/higher-order-components.html
 [react__use_use_state]: https://reactjs.org/docs/hooks-reference.html#usestate
+[react__use_memo]: https://reactjs.org/docs/hooks-reference.html#usememo
 [react__use_callback]: https://reactjs.org/docs/hooks-reference.html#usecallback
 [react__use_effect]: https://reactjs.org/docs/hooks-reference.html#useeffect
 [react__use_layout_effect]: https://reactjs.org/docs/hooks-reference.html#uselayouteffect
