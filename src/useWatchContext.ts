@@ -9,6 +9,9 @@ interface UseWatchContextResult {
   subscribe: (onStoreChange: VoidFunction) => VoidFunction
 }
 
+/**
+ * @private
+ */
 export const useWatchContext = ({
   warningSource,
 }: {

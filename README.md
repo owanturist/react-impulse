@@ -384,88 +384,6 @@ const Challenge: React.FC = () => {
 
 > 💡 Keep in mind that the `watcher` function acts as a "reader" so you'd like to avoid heavy calculations inside it. Sometimes it might be a good idea to pass a watcher result to a separated memoization hook. The same is true for the `compare` function - you should choose wisely between avoiding extra re-renders and heavy comparisons.
 
-### `useSweetyEffect`
-
-```dart
-function useSweetyEffect(
-  effect: () => (void | VoidFunction),
-  dependencies?: ReadonlyArray<unknown>,
-): void
-```
-
-- `effect` a function that runs whenever any of the `dependencies`' values change.
-  Can return a cleanup function to cancel running side effects.
-- `[dependencies]` an optional array of values used in the `effect` function.
-
-The hook is a `Sweety` version of the [`React.useEffect`][react__use_effect] hook. During the `effect` execution, all the `Sweety` instances that call the [`Sweety#getState`][sweety__get_state] method become _phantom dependencies_ of the hook. The `effect` runs again whenever any dependency or a state of any phantom dependency changes:
-
-```ts
-const usePrintSum = (left: number, right: Sweety<number>): void => {
-  // the effect runs whenever:
-  // 1. `left` changes
-  // 2. `right` changes (new `Sweety` instance)
-  // 3. `right.getState()` changes (`right` mutates)
-  useSweetyEffect(() => {
-    console.log("sum is %d", left + right.getState())
-  }, [left, right])
-}
-```
-
-The phantom dependencies might be different per `effect` call. If a `Sweety` instance does not call the [`Sweety#getState`][sweety__get_state] method, it does not become a phantom dependency:
-
-```ts
-const usePrintSum = (left: number, right: Sweety<number>): void => {
-  // the effect runs when either:
-  //
-  // `left` > 0:
-  //   1. `left` changes
-  //   2. `right` changes (new `Sweety` instance)
-  //   3. `right.getState()` changes (`right` mutates)
-  //
-  // OR
-  //
-  // `left` <= 0:
-  //   1. `left` changes
-  //   2. `right` changes (new `Sweety` instance)
-  useSweetyEffect(() => {
-    if (left > 0) {
-      console.log("sum is %d", left + right.getState())
-    }
-  }, [left, right])
-}
-```
-
-> 💡 Want to see ESLint suggestions for the dependencies? Simply add the hook name to the ESLint rule override:
->
-> ```json
-> {
->   "react-hooks/exhaustive-deps": [
->     "error",
->     {
->       "additionalHooks": "(useSweetyEffect|useSweetyLayoutEffect|useSweetyMemo)"
->     }
->   ]
-> }
-> ```
-
-### `useSweetyLayoutEffect`
-
-The hook is a `Sweety` version of the [`React.useLayoutEffect`][react__use_layout_effect] hook. Acts similar way as [`useSweetyEffect`][use_sweety_effect].
-
-### ~~`useSweetyInsertionEffect`~~
-
-There is no `Sweety` version of the [`React.useInsertionEffect`][react__use_insertion_effect] hook due to backward compatibility with React from `v16.8.0`. The workaround is to use the native `React.useInsertionEffect` hook with the states extracted beforehand:
-
-```ts
-const usePrintSum = (left: number, right: Sweety<number>): void => {
-  const rightState = useGetSweetyState(right)
-
-  React.useInsertionEffect(() => {
-    console.log("sum is %d", left + rightState)
-  }, [left, rightState])
-}
-```
-
 ### `useSweetyMemo`
 
 ```dart
@@ -475,10 +393,15 @@ function useSweetyMemo<T>(
 ): T
 ```
 
-- `factory` a function calculates a value `T` whenever any of the `dependencies`' values change.
-- `dependencies` an array of values used in the `factory` function.
+- `factory` is a function calculates a value `T` whenever any of the `dependencies`' values change.
+- `dependencies` is an array of values used in the `factory` function.
 
-The hook is a `Sweety` version of the [`React.useMemo`][react__use_memo] hook. During the `factory` execution, all the `Sweety` instances that call the [`Sweety#getState`][sweety__get_state] method become _phantom dependencies_ of the hook. The `factory` runs again whenever any dependency or a state of any phantom dependency changes:
+The hook is a `Sweety` version of the [`React.useMemo`][react__use_memo] hook. During the `factory` execution, all the `Sweety` instances that call the [`Sweety#getState`][sweety__get_state] method become _phantom dependencies_ of the hook.
+
+<details><summary><i>Click here to learn more about the phantom dependencies.</i></summary>
+<blockquote>
+
+The `factory` runs again whenever any dependency or a state of any phantom dependency changes:
 
 ```ts
 const useCalcSum = (left: number, right: Sweety<number>): number => {
@@ -518,7 +441,10 @@ const useCalcSum = (left: number, right: Sweety<number>): number => {
 }
 ```
 
-> 💡 Want to see ESLint suggestions for the dependencies? Simply add the hook name to the ESLint rule override:
+</blockquote>
+</details>
+
+> 💡 Want to see ESLint suggestions for the dependencies? Add the hook name to the ESLint rule override:
 >
 > ```json
 > {
@@ -530,6 +456,96 @@ const useCalcSum = (left: number, right: Sweety<number>): number => {
 >   ]
 > }
 > ```
+
+### `useSweetyEffect`
+
+```dart
+function useSweetyEffect(
+  effect: () => (void | VoidFunction),
+  dependencies?: ReadonlyArray<unknown>,
+): void
+```
+
+- `effect` is a function that runs whenever any of the `dependencies`' values change.
+  Can return a cleanup function to cancel running side effects.
+- `[dependencies]` is an optional array of values used in the `effect` function.
+
+The hook is a `Sweety` version of the [`React.useEffect`][react__use_effect] hook. During the `effect` execution, all the `Sweety` instances that call the [`Sweety#getState`][sweety__get_state] method become _phantom dependencies_ of the hook.
+
+<details><summary><i>Click here to learn more about the phantom dependencies.</i></summary>
+<blockquote>
+
+The `effect` runs again whenever any dependency or a state of any phantom dependency changes:
+
+```ts
+const usePrintSum = (left: number, right: Sweety<number>): void => {
+  // the effect runs whenever:
+  // 1. `left` changes
+  // 2. `right` changes (new `Sweety` instance)
+  // 3. `right.getState()` changes (`right` mutates)
+  useSweetyEffect(() => {
+    console.log("sum is %d", left + right.getState())
+  }, [left, right])
+}
+```
+
+The phantom dependencies might be different per `effect` call. If a `Sweety` instance does not call the [`Sweety#getState`][sweety__get_state] method, it does not become a phantom dependency:
+
+```ts
+const usePrintSum = (left: number, right: Sweety<number>): void => {
+  // the effect runs when either:
+  //
+  // `left` > 0:
+  //   1. `left` changes
+  //   2. `right` changes (new `Sweety` instance)
+  //   3. `right.getState()` changes (`right` mutates)
+  //
+  // OR
+  //
+  // `left` <= 0:
+  //   1. `left` changes
+  //   2. `right` changes (new `Sweety` instance)
+  useSweetyEffect(() => {
+    if (left > 0) {
+      console.log("sum is %d", left + right.getState())
+    }
+  }, [left, right])
+}
+```
+
+</blockquote>
+</details>
+
+> 💡 Want to see ESLint suggestions for the dependencies? Add the hook name to the ESLint rule override:
+>
+> ```json
+> {
+>   "react-hooks/exhaustive-deps": [
+>     "error",
+>     {
+>       "additionalHooks": "(useSweetyEffect|useSweetyLayoutEffect|useSweetyMemo)"
+>     }
+>   ]
+> }
+> ```
+
+### `useSweetyLayoutEffect`
+
+The hook is a `Sweety` version of the [`React.useLayoutEffect`][react__use_layout_effect] hook. Acts similar way as [`useSweetyEffect`][use_sweety_effect].
+
+### ~~`useSweetyInsertionEffect`~~
+
+There is no `Sweety` version of the [`React.useInsertionEffect`][react__use_insertion_effect] hook due to backward compatibility with React from `v16.8.0`. The workaround is to use the native `React.useInsertionEffect` hook with the states extracted beforehand:
+
+```ts
+const usePrintSum = (left: number, right: Sweety<number>): void => {
+  const rightState = useGetSweetyState(right)
+
+  React.useInsertionEffect(() => {
+    console.log("sum is %d", left + rightState)
+  }, [left, rightState])
+}
+```
 
 ### `useSweetyState`
 
@@ -573,7 +589,7 @@ const Input: React.FC<{
 function useGetSweetyState<T>(sweety: Sweety<T>): T
 ```
 
-A hooks that subscribes to the `sweety` changes and returns the current state.
+A hook that subscribes to the `sweety` changes and returns the current state.
 
 - `sweety` is a `Sweety` instance.
 
@@ -596,7 +612,7 @@ function useSetSweetyState<T>(
 ): SetSweetyState<T>
 ```
 
-A hooks that returns a function to update the `Sweety` instance state. Might be useful when you need a way to update the state without subscribing to its changes.
+A hook that returns a function to update the `Sweety` instance state. Might be useful when you need a way to update the state without subscribing to its changes.
 
 - `sweety` is a `Sweety` instance.
 - `[compare]` is an optional [`Compare`][compare] function.
@@ -673,6 +689,8 @@ function batch(execute: VoidFunction): void
 ```
 
 The `batch` function is a helper to optimize multiple `Sweety` updates.
+
+- `execute` is a function that executes multiple [`Sweety#setState`][sweety__set_state] calls at ones.
 
 ```tsx
 const SumOfTwo: React.FC<{

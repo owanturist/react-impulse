@@ -21,11 +21,18 @@ const isSweetyWatch = <TProps>(
   return render.isSweetyWatch === true
 }
 
-export function watch<TProps>(render: ExoticComponent<TProps>): never
-export function watch<TProps>(render: FC<TProps>): FC<TProps>
-export function watch<TProps>(render: FC<TProps>): FC<TProps> {
-  if (isSweetyWatch(render)) {
-    return render
+/**
+ * Creates a React component that subscribes to all `Sweety` instances calling the `Sweety#getState` method during the rendering phase of the component.
+ *
+ * @param component a watched component
+ *
+ * @version 2.1.0
+ */
+export function watch<TProps>(component: ExoticComponent<TProps>): never
+export function watch<TProps>(component: FC<TProps>): FC<TProps>
+export function watch<TProps>(component: FC<TProps>): FC<TProps> {
+  if (isSweetyWatch(component)) {
+    return component
   }
 
   const SweetyWatcher = (props: TProps, ctx: unknown): ReturnType<FC> => {
@@ -38,23 +45,23 @@ export function watch<TProps>(render: FC<TProps>): FC<TProps> {
       getState,
       getState,
       // no need to memoize since props are a new object on each call
-      () => executeWatcher(() => render(props, ctx)),
+      () => executeWatcher(() => component(props, ctx)),
     )
   }
 
-  hoistStatics(SweetyWatcher, render)
+  hoistStatics(SweetyWatcher, component)
 
-  SweetyWatcher.displayName = `SweetyWatcher${render.displayName ?? ""}`
+  SweetyWatcher.displayName = `SweetyWatcher${component.displayName ?? ""}`
   SweetyWatcher.isSweetyWatch = true
 
   return SweetyWatcher
 }
 
 const memo = <TProps>(
-  render: FC<TProps>,
+  component: FC<TProps>,
   propsAreEqual?: Compare<Readonly<TProps>>,
 ): MemoExoticComponent<FC<TProps>> => {
-  return React_memo(watch(render), propsAreEqual)
+  return React_memo(watch(component), propsAreEqual)
 }
 
 const forwardRefMemo = <TNode, TProps>(
@@ -78,6 +85,26 @@ const forwardRef = <TNode, TProps>(
   )
 }
 
+/**
+ * An alias for
+ *
+ * @example
+ * React.memo(React.forwardRef(watch(...)))
+ */
 memo.forwardRef = forwardRef.memo = forwardRefMemo
+
+/**
+ * An alias for
+ *
+ * @example
+ * React.memo(watch(...))
+ */
 watch.memo = memo
+
+/**
+ * An alias for
+ *
+ * @example
+ * React.forwardRef(watch(...))
+ */
 watch.forwardRef = forwardRef

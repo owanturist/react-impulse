@@ -83,11 +83,3 @@ export class SetStateContext {
     this.watchContexts.clear()
   }
 }
-
-export const batch = (execute: VoidFunction): void => {
-  const [emit] = SetStateContext.registerStoreSubscribers()
-
-  execute()
-
-  emit()
-}

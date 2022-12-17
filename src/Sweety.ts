@@ -41,22 +41,18 @@ export type DeepExtractSweetyState<T> = T extends Sweety<infer R>
 
 export class Sweety<T> {
   /**
-   * Creates a new `Sweety` store instance.
-   * The instance is mutable so once created it should be used for all future operations.
-   * The `compare` function compares the value of the store with the new value given via `Sweety#setState`.
-   * If the function returns `true` the store will not be updated so no listeners subscribed via `Sweety#subscribe` will be notified.
+   * Creates a new `Sweety` instance.
    *
-   * @param initialValue the initial immutable value.
-   * @param compare an optional compare function with the lowest priority.
-   * If not defined or `null` the strict equality check function (`===`) will be used.
+   * @param initialState the initial state.
+   * @param compare an optional `Compare` function applied as `Sweety#compare`. When not defined or `null` then `Object.is` applies as a fallback.
    */
   public static of<TValue>(
-    initialValue: TValue,
+    initialState: TValue,
     compare?: null | Compare<TValue>,
   ): Sweety<TValue> {
     WatchContext.warning(WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING)
 
-    return new Sweety(initialValue, compare ?? isEqual)
+    return new Sweety(initialState, compare ?? isEqual)
   }
 
   // it should keep the listeners in a Map by a uniq key because
@@ -65,14 +61,12 @@ export class Sweety<T> {
 
   /**
    * A unique key per `Sweety` instance.
-   * This key is used internally for `useWatchSweety`
-   * but can be used as the React key property.
-   *
    */
   public readonly key = nanoid()
 
   /**
-   * A comparator function that compares the current store's value with the new one.
+   * The `Compare` function compares the state of a `Sweety` instance with the new state given via `Sweety#setState`.
+   * Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via `Sweety#subscribe`.
    */
   public readonly compare: Compare<T>
 
@@ -83,12 +77,8 @@ export class Sweety<T> {
   /**
    * Clones a `Sweety` instance.
    *
-   * @param transform a function that will be applied to the current value before cloning.
-   * @param compare an optional compare function.
-   * If not defined it uses `Sweety#compare`.
-   * If `null` is passed the strict equality check function (`===`) will be used.
-   *
-   * @returns new `Sweety` instance with the same value.
+   * @param transform an optional function that applies to the current state before cloning. It might be handy when cloning a state that contains mutable values.
+   * @param compare an optional `Compare` function applied as `Sweety#compare`. When not defined, it uses the `Sweety#compare` function from the origin. When `null` the `Object.is` function applies to compare the states.
    */
   public clone(
     transform?: (value: T) => T,
@@ -103,35 +93,32 @@ export class Sweety<T> {
   }
 
   /**
-   * A `Sweety` instance's method that returns the current value.
+   * Returns the current state.
    */
   public getState(): T
   /**
-   * A `Sweety` instance's method that returns the current value.
+   * Returns a value selected from the current state.
    *
-   * @param transform a function that will be applied to the current value before returning.
+   * @param select an optional function that applies to the current state before returning.
    */
-  public getState<R>(transform: (value: T) => R): R
-  public getState<R>(transform?: (value: T) => R): T | R {
+  public getState<R>(select: (value: T) => R): R
+  public getState<R>(select?: (value: T) => R): T | R {
     WatchContext.register(this)
 
-    return typeof transform === "function" ? transform(this.value) : this.value
+    return typeof select === "function" ? select(this.value) : this.value
   }
 
   /**
-   * Sets the Sweety's value.
-   * Each time when the value is changed all of the store's listeners passed via `Sweety#subscribe` are called.
-   * If the new value is comparably equal to the current value neither the value is set nor the listeners are called.
+   * Updates the state.
+   * All listeners registered via the `Sweety#subscribe` method execute whenever the instance's state updates.
    *
-   * @param valueOrTransform either the new value or a function that will be applied to the current value before setting.
-   * @param compare an optional compare function with medium priority.
-   * If not defined it uses `Sweety#compare`.
-   * If `null` is passed the strict equality check function (`===`) will be used.
+   * @param stateOrTransform either the new state or a function that transforms the current state into the new state.
+   * @param compare an optional `Compare` function applied for this call only. When not defined the `Sweety#compare` function of the instance will be used. When `null` the `Object.is` function applies to compare the states.
    *
    * @returns `void` to emphasize that `Sweety` instances are mutable.
    */
   public setState(
-    valueOrTransform: SetStateAction<T>,
+    stateOrTransform: SetStateAction<T>,
     compare?: null | Compare<T>,
   ): void {
     if (WatchContext.warning(WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING)) {
@@ -142,9 +129,9 @@ export class Sweety<T> {
     const [emit, register] = SetStateContext.registerStoreSubscribers()
 
     const nextValue =
-      typeof valueOrTransform === "function"
-        ? (valueOrTransform as (value: T) => T)(this.value)
-        : valueOrTransform
+      typeof stateOrTransform === "function"
+        ? (stateOrTransform as (value: T) => T)(this.value)
+        : stateOrTransform
 
     if (!finalCompare(this.value, nextValue)) {
       this.value = nextValue
@@ -155,11 +142,11 @@ export class Sweety<T> {
   }
 
   /**
-   * Subscribes to the Sweety's value changes caused by `Sweety#setState` calls.
+   * Subscribes to the state's updates caused by calling `Sweety#setState`.
    *
-   * @param listener a function that will be called on store updates.
+   * @param listener a function that subscribes to the updates.
    *
-   * @returns a cleanup function that can be used to unsubscribe the listener.
+   * @returns a cleanup function that unsubscribes the `listener`.
    */
   public subscribe(listener: VoidFunction): VoidFunction {
     if (WatchContext.warning(WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING)) {
