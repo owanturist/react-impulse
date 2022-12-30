@@ -1,6 +1,6 @@
 import type { Sweety } from "./Sweety"
 import { SetStateContext } from "./SetStateContext"
-import { noop } from "./utils"
+import { isFunction, noop } from "./utils"
 import { WarningSet, WarningSource } from "./validation"
 
 /**
@@ -24,7 +24,7 @@ export class WatchContext {
     if (
       typeof console !== "undefined" &&
       // eslint-disable-next-line no-console
-      typeof console.error === "function"
+      isFunction(console.error)
     ) {
       // eslint-disable-next-line no-console
       console.error(message)
@@ -60,7 +60,7 @@ export class WatchContext {
       // still alive
       this.deadCleanups.delete(store.key)
     } else {
-      const isContextReadonly = this.warningSource
+      const thisWarningSource = this.warningSource
 
       this.warningSource = null
       this.cleanups.set(
@@ -70,7 +70,7 @@ export class WatchContext {
           SetStateContext.registerWatchContext(this)
         }),
       )
-      this.warningSource = isContextReadonly
+      this.warningSource = thisWarningSource
     }
   }
 
@@ -88,7 +88,7 @@ export class WatchContext {
   }
 
   private cycle<T>(callback: () => T): T {
-    const previousContext = WatchContext.current
+    const outerContext = WatchContext.current
 
     WatchContext.current = this
 
@@ -100,7 +100,7 @@ export class WatchContext {
 
     this.cleanupObsolete()
 
-    WatchContext.current = previousContext
+    WatchContext.current = outerContext
 
     return value
   }

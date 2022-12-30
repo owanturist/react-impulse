@@ -1,6 +1,7 @@
 import { useState } from "react"
 
 import { Sweety } from "./Sweety"
+import { isFunction } from "./utils"
 
 /**
  * A hook that initiates a stable (never changing) Sweety instance.
@@ -25,12 +26,10 @@ export function useSweety<TInit extends (...args: Array<never>) => unknown>(
 export function useSweety<T>(initialState: T): Sweety<T> // eslint-disable-line @typescript-eslint/unified-signatures
 
 export function useSweety<T>(lazyOrState: T | (() => T)): Sweety<T> {
-  const [instance] = useState<Sweety<T>>(() => {
-    return Sweety.of(
-      typeof lazyOrState === "function"
-        ? (lazyOrState as () => T)()
-        : lazyOrState,
-    )
+  const [instance] = useState(() => {
+    const initialState = isFunction(lazyOrState) ? lazyOrState() : lazyOrState
+
+    return Sweety.of(initialState)
   })
 
   return instance

@@ -71,3 +71,11 @@ export const useEvent = <THandler extends (...args: Array<never>) => unknown>(
 
   return useRef(((...args) => handlerRef.current(...args)) as THandler).current
 }
+
+export const isFunction = <
+  TFunction extends (...args: Array<never>) => unknown,
+>(
+  anything: unknown,
+): anything is TFunction => {
+  return typeof anything === "function"
+}
