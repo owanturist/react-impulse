@@ -245,7 +245,11 @@
         "jest/prefer-spy-on": "error",
         "jest/prefer-strict-equal": "error",
         "jest/prefer-todo": "warn",
-        "@typescript-eslint/explicit-function-return-type": "off"
+        "jest/no-focused-tests": "error",
+        "jest/no-commented-out-tests": "error",
+        "jest/consistent-test-it": ["error", { "fn": "it" }],
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "no-undefined": "off"
       }
     }
   ]

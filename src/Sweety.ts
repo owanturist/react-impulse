@@ -75,6 +75,30 @@ export class Sweety<T> {
   }
 
   /**
+   * Return the state when serializing to JSON.
+   * It does not encode the Sweety instance for decoding it back due to runtime parts of the class,
+   * that cannot be serialized as JSON.
+   *
+   * The method is protected in order to make it impossible to make the implicit call.
+   *
+   * @version 2.1.0
+   */
+  protected toJSON(): unknown {
+    return this.value
+  }
+
+  /**
+   * Return the stringified state when a Sweety instance converts to a string.
+   *
+   * The method is protected in order to make it impossible to make the implicit call.
+   *
+   * @version 2.1.0
+   */
+  protected toString(): string {
+    return String(this.value)
+  }
+
+  /**
    * Clones a `Sweety` instance.
    *
    * @param transform an optional function that applies to the current state before cloning. It might be handy when cloning a state that contains mutable values.
