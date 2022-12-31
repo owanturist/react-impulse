@@ -1,27 +1,7 @@
 import type { Sweety } from "./Sweety"
 import { SetStateContext } from "./SetStateContext"
-
-const warning = (message: string): void => {
-  if (
-    (process.env.NODE_ENV === "development" ||
-      process.env.NODE_ENV === "test") &&
-    typeof console !== "undefined" &&
-    // eslint-disable-next-line no-console
-    typeof console.error === "function"
-  ) {
-    // eslint-disable-next-line no-console
-    console.error(message)
-  }
-  /* eslint-enable no-console */
-  try {
-    // This error was thrown as a convenience so that if you enable
-    // "break on all exceptions" in your console,
-    // it would pause the execution at this line.
-    throw new Error(message)
-  } catch {
-    // do nothing
-  }
-}
+import { isFunction, noop } from "./utils"
+import { WarningSet, WarningSource } from "./validation"
 
 /**
  * A context to track Sweety#getState() usage inside the watcher function.
@@ -31,39 +11,58 @@ const warning = (message: string): void => {
  * @private
  */
 export class WatchContext {
-  private static current: null | WatchContext = null
-  private static isReadonlyDuringWatcherCall = false
+  public static current: null | WatchContext = null
 
-  public static warning(message: string): boolean {
-    if (WatchContext.isReadonlyDuringWatcherCall) {
-      warning(message)
+  public static warning(warningSet: WarningSet): boolean {
+    const warningSource = WatchContext.current?.warningSource
+    const message = warningSource == null ? null : warningSet[warningSource]
+
+    if (message == null) {
+      return false
     }
 
-    return WatchContext.isReadonlyDuringWatcherCall
+    if (
+      typeof console !== "undefined" &&
+      // eslint-disable-next-line no-console
+      isFunction(console.error)
+    ) {
+      // eslint-disable-next-line no-console
+      console.error(message)
+    }
+
+    try {
+      // This error was thrown as a convenience so that if you enable
+      // "break on all exceptions" in your console,
+      // it would pause the execution at this line.
+      throw new Error(message)
+    } catch {
+      // do nothing
+    }
+
+    return true
   }
 
   public static register<T>(store: Sweety<T>): void {
     WatchContext.current?.register(store)
   }
 
-  private static executeWatcher<T>(watcher: () => T): T {
-    WatchContext.isReadonlyDuringWatcherCall = true
-    const value = watcher()
-    WatchContext.isReadonlyDuringWatcherCall = false
-
-    return value
-  }
-
-  private listener?: () => null | VoidFunction
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
+
+  private version = 0
+
+  private notify: VoidFunction = noop
+
+  public constructor(private warningSource: null | WarningSource) {}
 
   private register<T>(store: Sweety<T>): void {
     if (this.cleanups.has(store.key)) {
       // still alive
       this.deadCleanups.delete(store.key)
     } else {
-      WatchContext.isReadonlyDuringWatcherCall = false
+      const thisWarningSource = this.warningSource
+
+      this.warningSource = null
       this.cleanups.set(
         store.key,
         store.subscribe(() => {
@@ -71,16 +70,16 @@ export class WatchContext {
           SetStateContext.registerWatchContext(this)
         }),
       )
-      WatchContext.isReadonlyDuringWatcherCall = true
+      this.warningSource = thisWarningSource
     }
   }
 
   private cleanupObsolete(): void {
     this.deadCleanups.forEach((key) => {
-      const clean = this.cleanups.get(key)
+      const cleanup = this.cleanups.get(key)
 
-      if (clean != null) {
-        clean()
+      if (cleanup != null) {
+        cleanup()
         this.cleanups.delete(key)
       }
     })
@@ -89,6 +88,8 @@ export class WatchContext {
   }
 
   private cycle<T>(callback: () => T): T {
+    const outerContext = WatchContext.current
+
     WatchContext.current = this
 
     // fill up dead cleanups with all of the current cleanups
@@ -99,32 +100,36 @@ export class WatchContext {
 
     this.cleanupObsolete()
 
-    WatchContext.current = null
+    WatchContext.current = outerContext
 
     return value
   }
 
-  public subscribeOnWatchedStores(
-    listener: () => null | VoidFunction,
-  ): VoidFunction {
-    this.listener = listener
+  private increment(): void {
+    this.version = (this.version + 1) % 10e9
+  }
+
+  public subscribe(notify: VoidFunction): VoidFunction {
+    this.notify = notify
 
     return () => {
+      this.increment()
       this.cleanups.forEach((cleanup) => cleanup())
       this.cleanups.clear()
       this.deadCleanups.clear()
     }
   }
 
+  public getVersion(): number {
+    return this.version
+  }
+
   public watchStores<T>(watcher: () => T): T {
-    return this.cycle(() => WatchContext.executeWatcher(watcher))
+    return this.cycle(watcher)
   }
 
   public emit(): void {
-    const callback = this.listener?.()
-
-    if (callback != null) {
-      this.cycle(callback)
-    }
+    this.increment()
+    this.cycle(this.notify)
   }
 }

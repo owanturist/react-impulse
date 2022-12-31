@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useWatchSweety } from "../../src"
+import { Sweety, useWatchSweety, watch } from "../../src"
 
 import { CounterComponent, withinNth } from "./common"
 
@@ -142,12 +142,26 @@ describe("watching multiple stores", () => {
     )
   }
 
+  const WatchedApp: React.FC<AppProps> = watch((props) => {
+    const sum = props.firstCount.getState() + props.secondCount.getState()
+    const [moreThanOne, lessThanFour] = [sum > 2, sum < 7]
+
+    return (
+      <GenericApp
+        moreThanOne={moreThanOne}
+        lessThanFour={lessThanFour}
+        {...props}
+      />
+    )
+  })
+
   it.each([
-    ["single watcher", SingleWatcherApp],
-    ["single memoized watcher", SingleMemoizedWatcherApp],
-    ["multiple watchers", MultipleWatchersApp],
-    ["multiple memoized watchers", MultipleMemoizedWatchersApp],
-  ])("watches multiple stores with %s", (_, App) => {
+    ["single watcher", SingleWatcherApp, 0],
+    ["single memoized watcher", SingleMemoizedWatcherApp, 0],
+    ["multiple watchers", MultipleWatchersApp, 0],
+    ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
+    ["watch()", WatchedApp, 1],
+  ])("watches multiple stores with %s", (_, App, unnecessaryRerendersCount) => {
     const firstCount = Sweety.of(0)
     const secondCount = Sweety.of(0)
     const onFirstCountRender = vi.fn()
@@ -172,65 +186,71 @@ describe("watching multiple stores", () => {
     expect(screen.queryByText("less than seven")).toBeInTheDocument()
     expect(screen.getAllByTestId("count")[0]).toHaveTextContent("0")
     expect(screen.getAllByTestId("count")[1]).toHaveTextContent("0")
+    vi.clearAllMocks()
 
     // increment first count
     fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
-    expect(onRender).toHaveBeenCalledTimes(1) // does not re-render
-    expect(onFirstCountRender).toHaveBeenCalledTimes(2)
-    expect(onSecondCountRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
+    expect(onFirstCountRender).toHaveBeenCalledTimes(1)
+    expect(onSecondCountRender).not.toHaveBeenCalled()
     expect(screen.queryByText("more than two")).not.toBeInTheDocument()
     expect(screen.queryByText("less than seven")).toBeInTheDocument()
     expect(screen.getAllByTestId("count")[0]).toHaveTextContent("1")
     expect(screen.getAllByTestId("count")[1]).toHaveTextContent("0")
+    vi.clearAllMocks()
 
     // increment second count
     fireEvent.click(withinNth("counter", 1).getByTestId("increment"))
-    expect(onRender).toHaveBeenCalledTimes(1) // does not re-render
-    expect(onFirstCountRender).toHaveBeenCalledTimes(2)
-    expect(onSecondCountRender).toHaveBeenCalledTimes(2)
+    expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
+    expect(onFirstCountRender).not.toHaveBeenCalled()
+    expect(onSecondCountRender).toHaveBeenCalledTimes(1)
     expect(screen.queryByText("more than two")).not.toBeInTheDocument()
     expect(screen.queryByText("less than seven")).toBeInTheDocument()
     expect(screen.getAllByTestId("count")[0]).toHaveTextContent("1")
     expect(screen.getAllByTestId("count")[1]).toHaveTextContent("1")
+    vi.clearAllMocks()
 
     // increment both
     fireEvent.click(screen.getByTestId("increment-both"))
-    expect(onRender).toHaveBeenCalledTimes(2)
-    expect(onFirstCountRender).toHaveBeenCalledTimes(3)
-    expect(onSecondCountRender).toHaveBeenCalledTimes(3)
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onFirstCountRender).toHaveBeenCalledTimes(1)
+    expect(onSecondCountRender).toHaveBeenCalledTimes(1)
     expect(screen.queryByText("more than two")).toBeInTheDocument()
     expect(screen.queryByText("less than seven")).toBeInTheDocument()
     expect(screen.getAllByTestId("count")[0]).toHaveTextContent("2")
     expect(screen.getAllByTestId("count")[1]).toHaveTextContent("2")
+    vi.clearAllMocks()
 
     // increment both again
     fireEvent.click(screen.getByTestId("increment-both"))
-    expect(onRender).toHaveBeenCalledTimes(2) // does not re-render
-    expect(onFirstCountRender).toHaveBeenCalledTimes(4)
-    expect(onSecondCountRender).toHaveBeenCalledTimes(4)
+    expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
+    expect(onFirstCountRender).toHaveBeenCalledTimes(1)
+    expect(onSecondCountRender).toHaveBeenCalledTimes(1)
     expect(screen.queryByText("more than two")).toBeInTheDocument()
     expect(screen.queryByText("less than seven")).toBeInTheDocument()
     expect(screen.getAllByTestId("count")[0]).toHaveTextContent("3")
     expect(screen.getAllByTestId("count")[1]).toHaveTextContent("3")
+    vi.clearAllMocks()
 
     // increment first
     fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
-    expect(onRender).toHaveBeenCalledTimes(3)
-    expect(onFirstCountRender).toHaveBeenCalledTimes(5)
-    expect(onSecondCountRender).toHaveBeenCalledTimes(4)
+    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onFirstCountRender).toHaveBeenCalledTimes(1)
+    expect(onSecondCountRender).not.toHaveBeenCalled()
     expect(screen.queryByText("more than two")).toBeInTheDocument()
     expect(screen.queryByText("less than seven")).not.toBeInTheDocument()
     expect(screen.getAllByTestId("count")[0]).toHaveTextContent("4")
     expect(screen.getAllByTestId("count")[1]).toHaveTextContent("3")
+    vi.clearAllMocks()
 
     // increment both from the outside
     act(() => {
       firstCount.setState((state) => state + 1)
       secondCount.setState((state) => state + 1)
     })
-    expect(onRender).toHaveBeenCalledTimes(3) // does not re-render
-    expect(onFirstCountRender).toHaveBeenCalledTimes(6)
-    expect(onSecondCountRender).toHaveBeenCalledTimes(5)
+    expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
+    expect(onFirstCountRender).toHaveBeenCalledTimes(1)
+    expect(onSecondCountRender).toHaveBeenCalledTimes(1)
     expect(screen.queryByText("more than two")).toBeInTheDocument()
     expect(screen.queryByText("less than seven")).not.toBeInTheDocument()
     expect(screen.getAllByTestId("count")[0]).toHaveTextContent("5")

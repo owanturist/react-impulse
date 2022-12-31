@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useSweetyState, useWatchSweety } from "../../src"
+import { Sweety, useSweetyState, useWatchSweety, watch } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -88,9 +88,9 @@ describe("watching nested stores", () => {
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useWatchSweety(
       () => {
-        const count = AppState.sum(props.store.getState())
+        const total = AppState.sum(props.store.getState())
 
-        return [count > 10, count < 20]
+        return [total > 10, total < 20]
       },
       ([left1, right1], [left2, right2]) => {
         return left1 === left2 && right1 === right2
@@ -109,9 +109,9 @@ describe("watching nested stores", () => {
   const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useWatchSweety<[boolean, boolean]>(
       React.useCallback(() => {
-        const count = AppState.sum(props.store.getState())
+        const total = AppState.sum(props.store.getState())
 
-        return [count > 10, count < 20]
+        return [total > 10, total < 20]
       }, [props.store]),
       React.useCallback(
         (
@@ -135,14 +135,14 @@ describe("watching nested stores", () => {
 
   const MultipleWatchersApp: React.FC<AppProps> = (props) => {
     const moreThanTen = useWatchSweety(() => {
-      const count = props.store.getState(AppState.sum)
+      const total = props.store.getState(AppState.sum)
 
-      return count > 10
+      return total > 10
     })
     const lessThanTwenty = useWatchSweety(() => {
-      const count = AppState.sum(props.store.getState())
+      const total = AppState.sum(props.store.getState())
 
-      return count < 20
+      return total < 20
     })
 
     return (
@@ -157,16 +157,16 @@ describe("watching nested stores", () => {
   const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
     const moreThanTen = useWatchSweety(
       React.useCallback(() => {
-        const count = props.store.getState(AppState.sum)
+        const total = props.store.getState(AppState.sum)
 
-        return count > 10
+        return total > 10
       }, [props.store]),
     )
     const lessThanTwenty = useWatchSweety(
       React.useCallback(() => {
-        const count = AppState.sum(props.store.getState())
+        const total = AppState.sum(props.store.getState())
 
-        return count < 20
+        return total < 20
       }, [props.store]),
     )
 
@@ -179,12 +179,26 @@ describe("watching nested stores", () => {
     )
   }
 
+  const WatchedApp: React.FC<AppProps> = watch((props) => {
+    const total = AppState.sum(props.store.getState())
+    const [moreThanTen, lessThanTwenty] = [total > 10, total < 20]
+
+    return (
+      <GenericApp
+        moreThanTen={moreThanTen}
+        lessThanTwenty={lessThanTwenty}
+        {...props}
+      />
+    )
+  })
+
   it.each([
-    ["single watcher", SingleWatcherApp],
-    ["single memoized watcher", SingleMemoizedWatcherApp],
-    ["multiple watchers", MultipleWatchersApp],
-    ["multiple memoized watchers", MultipleMemoizedWatchersApp],
-  ])("watches nested stores with %s", (_, App) => {
+    ["single watcher", SingleWatcherApp, 0],
+    ["single memoized watcher", SingleMemoizedWatcherApp, 0],
+    ["multiple watchers", MultipleWatchersApp, 0],
+    ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
+    ["watch()", WatchedApp, 1],
+  ])("watches nested stores with %s", (_, App, unnecessaryRerendersCount) => {
     const store = Sweety.of<AppState>({
       counts: [],
     })
@@ -219,7 +233,7 @@ describe("watching nested stores", () => {
 
     // increment first counter
     fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
-    expect(onRender).not.toHaveBeenCalled()
+    expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
     expect(onCounterRender).toHaveBeenCalledTimes(1)
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
@@ -239,7 +253,7 @@ describe("watching nested stores", () => {
 
     // increment all counters
     fireEvent.click(screen.getByTestId("increment-all"))
-    expect(onRender).not.toHaveBeenCalled()
+    expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
     expect(onCounterRender).toHaveBeenCalledTimes(2)
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)
@@ -260,7 +274,7 @@ describe("watching nested stores", () => {
 
     // reset counters
     fireEvent.click(screen.getByTestId("reset-counters"))
-    expect(onRender).not.toHaveBeenCalled()
+    expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
     expect(onCounterRender).toHaveBeenCalledTimes(2)
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)
@@ -309,7 +323,7 @@ describe("watching nested stores", () => {
 
     // increment all counters
     fireEvent.click(screen.getByTestId("increment-all"))
-    expect(onRender).not.toHaveBeenCalled()
+    expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
     expect(onCounterRender).toHaveBeenCalledTimes(5)
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)
@@ -323,7 +337,7 @@ describe("watching nested stores", () => {
 
     // increment fifth counter
     fireEvent.click(withinNth("counter", 4).getByTestId("increment"))
-    expect(onRender).not.toHaveBeenCalled()
+    expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
     expect(onCounterRender).toHaveBeenCalledTimes(1)
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 4)
     expect(screen.queryByText("more than ten")).toBeInTheDocument()
