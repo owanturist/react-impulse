@@ -443,3 +443,76 @@ describe("Sweety#subscribe", () => {
     expect(spy).not.toHaveBeenCalled()
   })
 })
+
+describe("Sweety#toJSON()", () => {
+  it.concurrent("converts state to JSON", () => {
+    const store = Sweety.of({
+      number: 0,
+      string: "biba",
+      boolean: false,
+      undefined: undefined,
+      null: null,
+      array: [1, "boba", true, undefined, null],
+      object: {
+        number: 2,
+        string: "baba",
+        boolean: false,
+        undefined: undefined,
+        null: null,
+      },
+    })
+
+    expect(JSON.stringify(store)).toMatchInlineSnapshot(
+      '"{\\"number\\":0,\\"string\\":\\"biba\\",\\"boolean\\":false,\\"null\\":null,\\"array\\":[1,\\"boba\\",true,null,null],\\"object\\":{\\"number\\":2,\\"string\\":\\"baba\\",\\"boolean\\":false,\\"null\\":null}}"',
+    )
+  })
+
+  it.concurrent("applies replace fields", () => {
+    const store = Sweety.of({ first: 1, second: 2, third: 3 })
+
+    expect(JSON.stringify(store, ["first", "third"])).toMatchInlineSnapshot(
+      '"{\\"first\\":1,\\"third\\":3}"',
+    )
+  })
+
+  it.concurrent("applies replace function", () => {
+    const store = Sweety.of({ first: 1, second: 2, third: 3 })
+
+    expect(
+      JSON.stringify(store, (_key, value: unknown) => {
+        if (typeof value === "number") {
+          return value * 2
+        }
+
+        return value
+      }),
+    ).toMatchInlineSnapshot('"{\\"first\\":2,\\"second\\":4,\\"third\\":6}"')
+  })
+
+  it.concurrent("applies spaces", () => {
+    const store = Sweety.of({ first: 1, second: 2, third: 3 })
+
+    expect(JSON.stringify(store, null, 2)).toMatchInlineSnapshot(
+      `
+      "{
+        \\"first\\": 1,
+        \\"second\\": 2,
+        \\"third\\": 3
+      }"
+    `,
+    )
+  })
+})
+
+describe("Sweety#toString", () => {
+  it.concurrent.each([
+    ["number", 1, "1"],
+    ["boolean", false, "false"],
+    ["null", null, "null"],
+    ["undefined", undefined, "undefined"],
+    ["array", [1, 2, 3], "1,2,3"],
+    ["object", { first: 1 }, "[object Object]"],
+  ])("converts %s state to string", (_, state, expected) => {
+    expect(String(Sweety.of(state))).toBe(expected)
+  })
+})
