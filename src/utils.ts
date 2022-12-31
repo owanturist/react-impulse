@@ -5,7 +5,7 @@ import { SetStateAction, useEffect, useLayoutEffect, useRef } from "react"
  * Depending on the type of the values it might be reasonable to use
  * a custom compare function such as shallow-equal or deep-equal.
  */
-export type Compare<T> = (prev: T, next: T) => boolean
+export type Compare<T> = (left: T, right: T) => boolean
 
 /**
  * The setState function that can be used to set the state of the store.

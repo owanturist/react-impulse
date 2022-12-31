@@ -13,7 +13,7 @@ import { useWatchContext } from "./useWatchContext"
  *
  * @version 2.1.0
  */
-export const useSweetyMemo: typeof useMemo = (factory, deps) => {
+export const useSweetyMemo: typeof useMemo = (factory, dependencies) => {
   const { executeWatcher, subscribe, getState } = useWatchContext({
     warningSource: "useSweetyMemo",
   })
@@ -23,6 +23,6 @@ export const useSweetyMemo: typeof useMemo = (factory, deps) => {
   return useMemo(
     () => executeWatcher(factory),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    deps && [...deps, buster],
+    dependencies && [...dependencies, buster],
   )
 }

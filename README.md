@@ -290,6 +290,7 @@ Alias for
 
 ```ts
 React.memo(watch(/* */))
+// equals to
 watch.memo(/* */)
 ```
 
@@ -299,6 +300,7 @@ Alias for
 
 ```ts
 React.forwardRef(watch(/* */))
+// equals to
 watch.forwardRef(/* */)
 ```
 
@@ -308,6 +310,7 @@ Aliases for
 
 ```ts
 React.memo(React.forwardRef(watch(/* */)))
+// equals to
 watch.memo.forwardRef(/* */)
 watch.forwardRef.memo(/* */)
 ```
@@ -718,7 +721,7 @@ const SumOfTwo: React.FC<{
 ### `Compare`
 
 ```ts
-type Compare<T> = (prev: T, next: T) => boolean
+type Compare<T> = (left: T, right: T) => boolean
 ```
 
 A function that compares two values and returns `true` if they are equal. Depending on the type of the values it might be reasonable to use a custom compare function such as shallow-equal or deep-equal.

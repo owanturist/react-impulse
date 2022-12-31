@@ -69,14 +69,15 @@ describe.each([
       expect(onMemo).toHaveBeenCalledTimes(1)
       expect(onRender).toHaveBeenCalledTimes(1)
       expect(value).toHaveProperty("subscribers.size", 1)
+      vi.clearAllMocks()
 
       act(() => {
         value.setState(2)
       })
 
       expect(node).toHaveTextContent("4")
-      expect(onMemo).toHaveBeenCalledTimes(2)
-      expect(onRender).toHaveBeenCalledTimes(2)
+      expect(onMemo).toHaveBeenCalledTimes(1)
+      expect(onRender).toHaveBeenCalledTimes(1)
       expect(value).toHaveProperty("subscribers.size", 1)
     })
 
@@ -94,6 +95,7 @@ describe.each([
       expect(onMemo).toHaveBeenCalledTimes(1)
       expect(onMemo).toHaveBeenLastCalledWith(2)
       expect(onRender).toHaveBeenCalledTimes(1)
+      vi.clearAllMocks()
 
       rerender(
         <React.Profiler id="test" onRender={onRender}>
@@ -101,17 +103,18 @@ describe.each([
         </React.Profiler>,
       )
 
-      expect(onMemo).toHaveBeenCalledTimes(1)
-      expect(onRender).toHaveBeenCalledTimes(2)
+      expect(onMemo).not.toHaveBeenCalled()
+      expect(onRender).toHaveBeenCalledTimes(1)
+      vi.clearAllMocks()
 
       act(() => {
         value.setState(3)
       })
 
-      expect(onMemo).toHaveBeenCalledTimes(2)
+      expect(onMemo).toHaveBeenCalledTimes(1)
       expect(onMemo).toHaveBeenLastCalledWith(6)
       expect(value).toHaveProperty("subscribers.size", 1)
-      expect(onRender).toHaveBeenCalledTimes(3)
+      expect(onRender).toHaveBeenCalledTimes(1)
     })
 
     it("should call useMemo factory when dep Sweety instance changes", () => {
@@ -125,6 +128,7 @@ describe.each([
           <Component useMemo={useSweetyMemo} onMemo={onMemo} value={value_1} />
         </React.Profiler>,
       )
+      vi.clearAllMocks()
 
       rerender(
         <React.Profiler id="test" onRender={onRender}>
@@ -132,9 +136,9 @@ describe.each([
         </React.Profiler>,
       )
 
-      expect(onMemo).toHaveBeenCalledTimes(2)
+      expect(onMemo).toHaveBeenCalledTimes(1)
       expect(onMemo).toHaveBeenLastCalledWith(6)
-      expect(onRender).toHaveBeenCalledTimes(2)
+      expect(onRender).toHaveBeenCalledTimes(1)
     })
 
     it("should unsubscribe Sweety from useMemo when swapped", () => {
@@ -154,25 +158,27 @@ describe.each([
           <Component useMemo={useSweetyMemo} onMemo={onMemo} value={value_2} />
         </React.Profiler>,
       )
+      vi.clearAllMocks()
 
       act(() => {
         value_1.setState(10)
       })
 
-      expect(onMemo).toHaveBeenCalledTimes(2)
-      expect(onRender).toHaveBeenCalledTimes(2)
+      expect(onMemo).not.toHaveBeenCalled()
+      expect(onRender).not.toHaveBeenCalled()
       expect(value_1).toHaveProperty("subscribers.size", 0)
+      vi.clearAllMocks()
 
       act(() => {
         value_2.setState(5)
       })
-      expect(onMemo).toHaveBeenCalledTimes(3)
+      expect(onMemo).toHaveBeenCalledTimes(1)
       expect(onMemo).toHaveBeenLastCalledWith(10)
-      expect(onRender).toHaveBeenCalledTimes(3)
+      expect(onRender).toHaveBeenCalledTimes(1)
       expect(value_2).toHaveProperty("subscribers.size", 1)
     })
 
-    it("should call useMemo factory when non Sweety dep changes", () => {
+    it("should call useMemo factory when none-Sweety dep changes", () => {
       const value = Sweety.of(3)
       const onMemo = vi.fn()
       const onRender = vi.fn()
@@ -182,20 +188,22 @@ describe.each([
           <Component useMemo={useSweetyMemo} onMemo={onMemo} value={value} />
         </React.Profiler>,
       )
+      vi.clearAllMocks()
 
       fireEvent.click(screen.getByTestId("increment"))
 
-      expect(onMemo).toHaveBeenCalledTimes(2)
+      expect(onMemo).toHaveBeenCalledTimes(1)
       expect(onMemo).toHaveBeenLastCalledWith(9)
-      expect(onRender).toHaveBeenCalledTimes(2)
+      expect(onRender).toHaveBeenCalledTimes(1)
       expect(value).toHaveProperty("subscribers.size", 1)
+      vi.clearAllMocks()
 
       act(() => {
         value.setState(4)
       })
-      expect(onMemo).toHaveBeenCalledTimes(3)
+      expect(onMemo).toHaveBeenCalledTimes(1)
       expect(onMemo).toHaveBeenLastCalledWith(12)
-      expect(onRender).toHaveBeenCalledTimes(3)
+      expect(onRender).toHaveBeenCalledTimes(1)
       expect(value).toHaveProperty("subscribers.size", 1)
     })
   })
@@ -228,11 +236,10 @@ describe.each([
 
       render(<Component first={first} second={second} />)
 
-      expect(first).toHaveProperty("subscribers.size", 1)
-      expect(second).toHaveProperty("subscribers.size", 1)
-
       const node = screen.getByTestId("value")
 
+      expect(first).toHaveProperty("subscribers.size", 1)
+      expect(second).toHaveProperty("subscribers.size", 1)
       expect(node).toHaveTextContent("10")
 
       act(() => {

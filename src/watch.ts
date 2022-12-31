@@ -15,10 +15,10 @@ import hoistStatics from "hoist-non-react-statics"
 import { useWatchContext } from "./useWatchContext"
 import { Compare } from "./utils"
 
-const isSweetyWatch = <TProps>(
-  render: FC<TProps> & { isSweetyWatch?: boolean },
+const isSweetyWatcher = <TProps>(
+  render: FC<TProps> & { isSweetyWatcher?: boolean },
 ): boolean => {
-  return render.isSweetyWatch === true
+  return render.isSweetyWatcher === true
 }
 
 /**
@@ -31,7 +31,7 @@ const isSweetyWatch = <TProps>(
 export function watch<TProps>(component: ExoticComponent<TProps>): never
 export function watch<TProps>(component: FC<TProps>): FC<TProps>
 export function watch<TProps>(component: FC<TProps>): FC<TProps> {
-  if (isSweetyWatch(component)) {
+  if (isSweetyWatcher(component)) {
     return component
   }
 
@@ -52,7 +52,7 @@ export function watch<TProps>(component: FC<TProps>): FC<TProps> {
   hoistStatics(SweetyWatcher, component)
 
   SweetyWatcher.displayName = `SweetyWatcher${component.displayName ?? ""}`
-  SweetyWatcher.isSweetyWatch = true
+  SweetyWatcher.isSweetyWatcher = true
 
   return SweetyWatcher
 }
@@ -86,25 +86,16 @@ const forwardRef = <TNode, TProps>(
 }
 
 /**
- * An alias for
- *
- * @example
- * React.memo(React.forwardRef(watch(...)))
+ * An alias for `React.memo(React.forwardRef(watch(...)))`
  */
 memo.forwardRef = forwardRef.memo = forwardRefMemo
 
 /**
- * An alias for
- *
- * @example
- * React.memo(watch(...))
+ * An alias for `React.memo(watch(...))`
  */
 watch.memo = memo
 
 /**
- * An alias for
- *
- * @example
- * React.forwardRef(watch(...))
+ * An alias for `React.forwardRef(watch(...))`
  */
 watch.forwardRef = forwardRef

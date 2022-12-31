@@ -5,14 +5,17 @@ import { useWatchContext } from "./useWatchContext"
 
 const createEffectHook =
   (useReactEffect: typeof useEffect): typeof useEffect =>
-  (effect, deps) => {
+  (effect, dependencies) => {
     const { executeWatcher, subscribe, getState } = useWatchContext({
       warningSource: null,
     })
 
     const buster = useSyncExternalStore(subscribe, getState, getState)
 
-    useReactEffect(() => executeWatcher(effect), deps && [...deps, buster])
+    useReactEffect(
+      () => executeWatcher(effect),
+      dependencies && [...dependencies, buster],
+    )
   }
 
 /**

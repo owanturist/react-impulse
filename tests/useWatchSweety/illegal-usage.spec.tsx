@@ -370,7 +370,7 @@ describe("calling Sweety#subscribe()", () => {
         initialProps: { store, listener },
       })
 
-      store.subscribe(correctListener)
+      const unsubscribe = store.subscribe(correctListener)
 
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).not.toHaveBeenCalled()
@@ -378,6 +378,8 @@ describe("calling Sweety#subscribe()", () => {
       store.setState(1)
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).toHaveBeenCalledTimes(1)
+
+      unsubscribe()
     })
   })
 
@@ -495,7 +497,7 @@ describe("calling Sweety#subscribe()", () => {
 
       render(<Component store={store} />)
 
-      store.subscribe(correctListener)
+      const unsubscribe = store.subscribe(correctListener)
 
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).not.toHaveBeenCalled()
@@ -503,6 +505,7 @@ describe("calling Sweety#subscribe()", () => {
       store.setState(1)
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).toHaveBeenCalledTimes(1)
+      unsubscribe()
     })
   })
 })

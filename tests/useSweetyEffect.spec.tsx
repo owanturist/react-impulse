@@ -51,12 +51,13 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(6)
+        vi.clearAllMocks()
 
         act(() => {
           value.setState(2)
         })
 
-        expect(onEffect).toHaveBeenCalledTimes(1)
+        expect(onEffect).not.toHaveBeenCalled()
       })
 
       it(`can watch inside Sweety ${hookName}`, () => {
@@ -73,12 +74,13 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(6)
+        vi.clearAllMocks()
 
         act(() => {
           value.setState(2)
         })
 
-        expect(onEffect).toHaveBeenCalledTimes(2)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(4)
       })
 
@@ -100,6 +102,7 @@ describe.each([
         expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(2)
         expect(onRender).toHaveBeenCalledTimes(1)
+        vi.clearAllMocks()
 
         rerender(
           <React.Profiler id="test" onRender={onRender}>
@@ -111,17 +114,18 @@ describe.each([
           </React.Profiler>,
         )
 
-        expect(onEffect).toHaveBeenCalledTimes(1)
-        expect(onRender).toHaveBeenCalledTimes(2)
+        expect(onEffect).not.toHaveBeenCalled()
+        expect(onRender).toHaveBeenCalledTimes(1)
+        vi.clearAllMocks()
 
         act(() => {
           value.setState(3)
         })
 
-        expect(onEffect).toHaveBeenCalledTimes(2)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(6)
         expect(value).toHaveProperty("subscribers.size", 1)
-        expect(onRender).toHaveBeenCalledTimes(3)
+        expect(onRender).toHaveBeenCalledTimes(1)
       })
 
       it("should call useEffect factory when dep Sweety instance changes", () => {
@@ -139,6 +143,7 @@ describe.each([
             />
           </React.Profiler>,
         )
+        vi.clearAllMocks()
 
         rerender(
           <React.Profiler id="test" onRender={onRender}>
@@ -150,9 +155,9 @@ describe.each([
           </React.Profiler>,
         )
 
-        expect(onEffect).toHaveBeenCalledTimes(2)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(6)
-        expect(onRender).toHaveBeenCalledTimes(2)
+        expect(onRender).toHaveBeenCalledTimes(1)
       })
 
       it("should unsubscribe Sweety from useEffect when swapped", () => {
@@ -171,6 +176,8 @@ describe.each([
           </React.Profiler>,
         )
 
+        vi.clearAllMocks()
+
         rerender(
           <React.Profiler id="test" onRender={onRender}>
             <Component
@@ -185,16 +192,17 @@ describe.each([
           value_1.setState(10)
         })
 
-        expect(onEffect).toHaveBeenCalledTimes(2)
-        expect(onRender).toHaveBeenCalledTimes(2)
+        expect(onEffect).toHaveBeenCalledTimes(1)
+        expect(onRender).toHaveBeenCalledTimes(1)
         expect(value_1).toHaveProperty("subscribers.size", 0)
+        vi.clearAllMocks()
 
         act(() => {
           value_2.setState(5)
         })
-        expect(onEffect).toHaveBeenCalledTimes(3)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(10)
-        expect(onRender).toHaveBeenCalledTimes(3)
+        expect(onRender).toHaveBeenCalledTimes(1)
         expect(value_2).toHaveProperty("subscribers.size", 1)
       })
 
@@ -212,20 +220,22 @@ describe.each([
             />
           </React.Profiler>,
         )
+        vi.clearAllMocks()
 
         fireEvent.click(screen.getByTestId("increment"))
 
-        expect(onEffect).toHaveBeenCalledTimes(2)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(9)
-        expect(onRender).toHaveBeenCalledTimes(2)
+        expect(onRender).toHaveBeenCalledTimes(1)
         expect(value).toHaveProperty("subscribers.size", 1)
+        vi.clearAllMocks()
 
         act(() => {
           value.setState(4)
         })
-        expect(onEffect).toHaveBeenCalledTimes(3)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(12)
-        expect(onRender).toHaveBeenCalledTimes(3)
+        expect(onRender).toHaveBeenCalledTimes(1)
         expect(value).toHaveProperty("subscribers.size", 1)
       })
     })
@@ -263,19 +273,21 @@ describe.each([
         expect(onEffect).toHaveBeenLastCalledWith(10)
         expect(first).toHaveProperty("subscribers.size", 1)
         expect(second).toHaveProperty("subscribers.size", 1)
+        vi.clearAllMocks()
 
         act(() => {
           first.setState(4)
         })
 
-        expect(onEffect).toHaveBeenCalledTimes(2)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(14)
+        vi.clearAllMocks()
 
         act(() => {
           second.setState(5)
         })
 
-        expect(onEffect).toHaveBeenCalledTimes(3)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(18)
         expect(first).toHaveProperty("subscribers.size", 1)
         expect(second).toHaveProperty("subscribers.size", 1)
@@ -323,37 +335,39 @@ describe.each([
         expect(_0).toHaveProperty("subscribers.size", 1)
         expect(_1).toHaveProperty("subscribers.size", 1)
         expect(_2).toHaveProperty("subscribers.size", 0)
+        vi.clearAllMocks()
 
         act(() => {
           _0.setState(4)
         })
 
-        expect(onEffect).toHaveBeenCalledTimes(2)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(14)
+        vi.clearAllMocks()
 
         act(() => {
           _1.setState(5)
         })
 
-        expect(onEffect).toHaveBeenCalledTimes(3)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(18)
+        vi.clearAllMocks()
 
         act(() => {
           list.setState((items) => [...items, _2])
         })
 
-        expect(onEffect).toHaveBeenCalledTimes(4)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(26)
-
         expect(_2).toHaveProperty("subscribers.size", 1)
+        vi.clearAllMocks()
 
         act(() => {
           list.setState((items) => items.slice(1))
         })
 
-        expect(onEffect).toHaveBeenCalledTimes(5)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(18)
-
         expect(list).toHaveProperty("subscribers.size", 1)
         expect(_0).toHaveProperty("subscribers.size", 0)
         expect(_1).toHaveProperty("subscribers.size", 1)
@@ -393,10 +407,11 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(6)
+        vi.clearAllMocks()
 
         rerender(<Component value={value} onEffect={onEffect} />)
 
-        expect(onEffect).toHaveBeenCalledTimes(2)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(6)
         expect(value).toHaveProperty("subscribers.size", 1)
       })
@@ -409,10 +424,11 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(6)
+        vi.clearAllMocks()
 
         fireEvent.click(screen.getByTestId("increment"))
 
-        expect(onEffect).toHaveBeenCalledTimes(2)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(9)
         expect(value).toHaveProperty("subscribers.size", 1)
       })
@@ -425,12 +441,13 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(6)
+        vi.clearAllMocks()
 
         act(() => {
           value.setState(4)
         })
 
-        expect(onEffect).toHaveBeenCalledTimes(2)
+        expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(8)
         expect(value).toHaveProperty("subscribers.size", 1)
       })
@@ -494,6 +511,7 @@ describe.each([
     fireEvent.click(visibility)
     expect(count).not.toBeInTheDocument()
     expect(onEffect).not.toHaveBeenCalled()
+    vi.clearAllMocks()
 
     fireEvent.click(visibility)
     expect(screen.getByTestId("count")).toHaveTextContent("4")
