@@ -333,16 +333,19 @@ describe("Sweety#clone", () => {
 describe("Sweety#subscribe", () => {
   it.concurrent("subscribes and unsubscribes to state changes", () => {
     const store = Sweety.of({ count: 0 })
-    const spy = vi.fn()
+    const spy = vi.fn<[Counter]>()
 
     store.setState(Counter.inc)
     expect(spy).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
-    const unsubscribe = store.subscribe(spy)
+    const unsubscribe = store.subscribe(() => {
+      spy(store.getState())
+    })
 
     store.setState(Counter.inc)
     expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenLastCalledWith({ count: 2 })
     vi.clearAllMocks()
 
     unsubscribe()

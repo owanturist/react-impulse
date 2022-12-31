@@ -6,22 +6,19 @@ import { useGetSweetyState } from "./useGetSweetyState"
 import { useSetSweetyState } from "./useSetSweetyState"
 
 /**
- * A hook that is similar to `React.useState` but for `Sweety` instances.
- * It subscribes to the store changes and returns the current value and a function to set the value.
- * The store won't update if the new value is comparably equal to the current value.
+ * A hook similar to `React.useState` but for `Sweety` instances.
+ * It subscribes to the `sweety` changes and returns the current state with a function to set the state.
  *
- * @param store a `Sweety` instance.
- * @param compare an optional compare function with medium priority.
- * If not defined it uses `Sweety#compare`.
- * The strict equality check function (`===`) will be used if `null`.
+ * @param sweety a `Sweety` instance.
+ * @param compare an optional `Compare` function. When not defined it uses `Sweety#compare`. When `null` the `Object.is` function applies to compare the states.
  */
 export function useSweetyState<T>(
-  store: Sweety<T>,
+  sweety: Sweety<T>,
   compare?: null | Compare<T>,
 ): [state: T, setState: SetSweetyState<T>] {
-  const value = useGetSweetyState(store)
+  const value = useGetSweetyState(sweety)
 
   useDebugValue(value)
 
-  return [value, useSetSweetyState(store, compare)]
+  return [value, useSetSweetyState(sweety, compare)]
 }

@@ -1,76 +1,37 @@
-import { useRef, useCallback, useDebugValue } from "react"
+import { useCallback, useDebugValue } from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
+import { useWatchContext } from "./useWatchContext"
 import { Compare, isEqual, useEvent } from "./utils"
-import { WatchContext } from "./WatchContext"
-
-const modInc = (x: number): number => {
-  return (x + 1) % 10e10
-}
 
 /**
- * A hook that subscribes to all `Sweety#getState` execution involved in the `watcher` call.
- * Due to the mutable nature of `Sweety` instances a parent component won't be re-rendered when a child's `Sweety` value is changed.
- * The hook gives a way to watch after deep changes in the store's values and trigger a re-render when the returning value changes.
+ * A hook that executes the `watcher` function whenever any of the involved `Sweety` instances' state update
+ * but enqueues a re-render only when the resulting value is different from the previous.
  *
- * @param watcher a function to read only the watching value meaning that it never should call `Sweety.of`, `Sweety#clone`, `Sweety#setState` or `Sweety#subscribe` methods inside.
- * @param compare an optional compare function.
- * The strict equality check function (`===`) will be used if `null` or not defined.
+ * @param watcher a function that subscribes to all `Sweety` instances calling the `Sweety#getState` method inside the function.
+ * @param compare an optional `Compare` function. When not defined or `null` then `Object.is` applies as a fallback.
  */
 export function useWatchSweety<T>(
   watcher: () => T,
   compare?: null | Compare<T>,
 ): T {
-  const contextRef = useRef<WatchContext>()
-  const subscribeRef = useRef<(onStoreChange: VoidFunction) => VoidFunction>()
-  const getStateRef = useRef<() => number>(null as never)
-
-  if (contextRef.current == null) {
-    contextRef.current = new WatchContext()
-  }
-
-  // it should subscribe the WatchContext during render otherwise
-  // it might lead to race conditions with useEffect(() => Sweety#setState())
-  if (subscribeRef.current == null) {
-    let version = 0
-    let onWatchedStoresUpdate: null | VoidFunction = null
-
-    // the getState cannot directly return the watcher result
-    // because it might be different per each call
-    // instead it increments the version each time when any watched store changes
-    // so the getState will be consistent over multiple calls until the real change happens
-    // when the version changes the select function calls the watcher and extracts actual data
-    // without that workaround it will go to the re-render hell
-    getStateRef.current = () => version
-
-    const unsubscribe = contextRef.current.subscribeOnWatchedStores(() => {
-      version = modInc(version)
-
-      // it should return the onStoreChange callback to call it during the WatchContext#cycle()
-      // when the callback is null the cycle does not call so watched stores do not unsubscribe
-      return onWatchedStoresUpdate
-    })
-
-    subscribeRef.current = (onStoreChange) => {
-      onWatchedStoresUpdate = onStoreChange
-
-      return unsubscribe
-    }
-  }
+  const { executeWatcher, subscribe, getState } = useWatchContext({
+    warningSource: "useWatchSweety",
+  })
 
   // the select calls each time when updates either the watcher or the version
   const select = useCallback(
-    () => contextRef.current!.watchStores(watcher),
-    [watcher],
+    () => executeWatcher(watcher),
+    [executeWatcher, watcher],
   )
 
   // it should memoize the onCompare otherwise it will call the watcher on each render
   const onCompare = useEvent(compare ?? isEqual)
 
   const value = useSyncExternalStoreWithSelector(
-    subscribeRef.current,
-    getStateRef.current,
-    getStateRef.current,
+    subscribe,
+    getState,
+    getState,
     select,
     onCompare,
   )
