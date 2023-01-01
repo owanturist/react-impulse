@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { batch, Sweety, useGetSweetyState, useWatchSweety } from "../../src"
+import { batch, Sweety, useSweetyState, useWatchSweety } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
@@ -14,8 +14,8 @@ describe.each([
     const store_2 = Sweety.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useGetSweetyState(store_1)
-      const counter_2 = useGetSweetyState(store_2)
+      const counter_1 = useSweetyState(store_1)
+      const counter_2 = useSweetyState(store_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -39,14 +39,14 @@ describe.each([
     expect(onRender).toHaveBeenCalledTimes(2)
   })
 
-  it("re-renders once for useGetSweetyState calls", () => {
+  it("re-renders once for useSweetyState calls", () => {
     const onRender = vi.fn()
     const store_1 = Sweety.of({ count: 1 })
     const store_2 = Sweety.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useGetSweetyState(store_1)
-      const counter_2 = useGetSweetyState(store_2)
+      const counter_1 = useSweetyState(store_1)
+      const counter_2 = useSweetyState(store_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -88,9 +88,9 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const { first: store_1, second: store_2 } = useGetSweetyState(store)
-      const counter_1 = useGetSweetyState(store_1)
-      const counter_2 = useGetSweetyState(store_2)
+      const { first: store_1, second: store_2 } = useSweetyState(store)
+      const counter_1 = useSweetyState(store_1)
+      const counter_2 = useSweetyState(store_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -131,7 +131,7 @@ describe.each([
     expect(onRender).toHaveBeenCalledTimes(3)
   })
 
-  it("re-renders once for useGetSweetyState calls", () => {
+  it("re-renders once for useSweetyState calls", () => {
     const onRender = vi.fn()
     const store = Sweety.of({
       first: Sweety.of({ count: 1 }),
@@ -139,9 +139,9 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const { first: store_1, second: store_2 } = useGetSweetyState(store)
-      const counter_1 = useGetSweetyState(store_1)
-      const counter_2 = useGetSweetyState(store_2)
+      const { first: store_1, second: store_2 } = useSweetyState(store)
+      const counter_1 = useSweetyState(store_1)
+      const counter_2 = useSweetyState(store_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>

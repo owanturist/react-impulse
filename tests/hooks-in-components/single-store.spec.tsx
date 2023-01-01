@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useGetSweetyState } from "../../src"
+import { Sweety, useSweetyState } from "../../src"
 import { Counter } from "../common"
 
 import { withinNth } from "./common"
@@ -11,7 +11,7 @@ describe("single store", () => {
     store: Sweety<Counter>
     onRender: VoidFunction
   }> = ({ store, onRender }) => {
-    const state = useGetSweetyState(store)
+    const state = useSweetyState(store)
 
     return (
       <React.Profiler id="test" onRender={onRender}>

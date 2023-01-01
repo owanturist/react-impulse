@@ -157,8 +157,6 @@ isActive.getState() // false
 
 > 💬 The method returns `void` to emphasize that `Sweety` instances are **mutable**.
 
-> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
-
 ### `Sweety#clone`
 
 ```dart
@@ -196,8 +194,6 @@ Sweety<T>#compare: Compare<T>
 ```
 
 The [`Compare`][compare] function compares the state of a `Sweety` instance with the new state given via [`Sweety#setState`][sweety__set_state]. Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via [`Sweety#subscribe`][sweety__subscribe].
-
-> 💬 The `Sweety#compare` function has the lowest priority when [`Sweety#setState`][sweety__set_state] executes.
 
 ### `Sweety#key`
 
@@ -542,7 +538,7 @@ There is no `Sweety` version of the [`React.useInsertionEffect`][react__use_inse
 
 ```ts
 const usePrintSum = (left: number, right: Sweety<number>): void => {
-  const rightState = useGetSweetyState(right)
+  const rightState = useSweetyState(right)
 
   React.useInsertionEffect(() => {
     console.log("sum is %d", left + rightState)
@@ -550,10 +546,10 @@ const usePrintSum = (left: number, right: Sweety<number>): void => {
 }
 ```
 
-### `useGetSweetyState`
+### `useSweetyState`
 
 ```dart
-function useGetSweetyState<T>(sweety: Sweety<T>): T
+function useSweetyState<T>(sweety: Sweety<T>): T
 ```
 
 A hook that subscribes to the `sweety` changes and returns the current state.
@@ -564,7 +560,7 @@ A hook that subscribes to the `sweety` changes and returns the current state.
 const Input: React.FC<{
   value: Sweety<string>
 }> = ({ value }) => {
-  const text = useGetSweetyState(value)
+  const text = useSweetyState(value)
 
   return (
     <input
@@ -683,13 +679,14 @@ Here are scripts you want to run for publishing a new version to NPM:
 [sweety__get_state]: #sweetygetstate
 [sweety__set_state]: #sweetysetstate
 [sweety__subscribe]: #sweetysubscribe
-[use_watch_sweety]: #usewatchsweety
-[use_get_sweety_state]: #usegetsweetystate
 [use_sweety]: #usesweety
 [use_sweety_effect]: #usesweetyeffect
 [watch]: #watch
 [batch]: #batch
 [compare]: #compare
+
+<!-- E X T E R N A L  L I N K S -->
+
 [object_is]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is#description
 [hoc]: https://reactjs.org/docs/higher-order-components.html
 [react__use_use_state]: https://reactjs.org/docs/hooks-reference.html#usestate

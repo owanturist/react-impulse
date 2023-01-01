@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useGetSweetyState } from "../../src"
+import { Sweety, useSweetyState } from "../../src"
 
 describe("multiple stores", () => {
   const LoginForm: React.FC<{
@@ -9,8 +9,8 @@ describe("multiple stores", () => {
     password: Sweety<string>
     onRender: VoidFunction
   }> = ({ email: emailStore, password: passwordStore, onRender }) => {
-    const email = useGetSweetyState(emailStore)
-    const password = useGetSweetyState(passwordStore)
+    const email = useSweetyState(emailStore)
+    const password = useSweetyState(passwordStore)
 
     return (
       <React.Profiler id="test" onRender={onRender}>

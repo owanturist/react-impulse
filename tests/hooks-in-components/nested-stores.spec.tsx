@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useGetSweetyState } from "../../src"
+import { Sweety, useSweetyState } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -15,7 +15,7 @@ describe("nested stores", () => {
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }> = ({ store, onRender, onCounterRender }) => {
-    const { counts } = useGetSweetyState(store)
+    const { counts } = useSweetyState(store)
 
     return (
       <>

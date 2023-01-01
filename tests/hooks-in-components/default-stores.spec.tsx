@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useSweety, useGetSweetyState } from "../../src"
+import { Sweety, useSweety, useSweetyState } from "../../src"
 
 describe("default stores", () => {
   it("Uses local default Sweety when nullable", () => {
@@ -11,7 +11,7 @@ describe("default stores", () => {
       const defaultValueStore = useSweety("search for me")
 
       const store = valueStore ?? defaultValueStore
-      const value = useGetSweetyState(store)
+      const value = useSweetyState(store)
 
       return (
         <input

@@ -8,7 +8,7 @@ import type { Sweety } from "./Sweety"
  *
  * @param sweety a `Sweety` instance.
  */
-export function useGetSweetyState<T>(sweety: Sweety<T>): T {
+export function useSweetyState<T>(sweety: Sweety<T>): T {
   const value = useSyncExternalStore(
     useCallback((onStoreChange) => sweety.subscribe(onStoreChange), [sweety]),
     useCallback(() => sweety.getState(), [sweety]),
