@@ -10,24 +10,22 @@ it.concurrent("returns initial state", () => {
 
   const { result } = renderHook(() => useSweetyState(store))
 
-  expect(result.current[0]).toBe(initial)
-  expect(result.current[0]).toBe(store.getState())
-  expect(result.current[0]).toStrictEqual({ count: 0 })
+  expect(result.current).toBe(initial)
+  expect(result.current).toBe(store.getState())
+  expect(result.current).toStrictEqual({ count: 0 })
 })
 
-it.concurrent("returns the same values when the hook re-renders", () => {
-  const initial = { count: 0 }
-  const store = Sweety.of(initial)
+it.concurrent("returns the same value when the hook re-renders", () => {
+  const store = Sweety.of({ count: 0 })
 
   const { result, rerender } = renderHook(() => useSweetyState(store))
   const firstResult = result.current
 
   rerender()
 
-  expect(result.current[0]).toBe(firstResult[0])
-  expect(result.current[0]).toBe(store.getState())
-  expect(result.current[0]).toStrictEqual({ count: 0 })
-  expect(result.current[1]).toBe(firstResult[1])
+  expect(result.current).toBe(firstResult)
+  expect(result.current).toBe(store.getState())
+  expect(result.current).toStrictEqual({ count: 0 })
 })
 
 it.concurrent("watches after store's updates", () => {
@@ -38,12 +36,11 @@ it.concurrent("watches after store's updates", () => {
 
   act(() => {
     store.setState(Counter.inc)
-    result.current[1](Counter.inc)
   })
 
-  expect(result.current[0]).not.toBe(initial)
-  expect(result.current[0]).toBe(store.getState())
-  expect(result.current[0]).toStrictEqual({ count: 2 })
+  expect(result.current).not.toBe(initial)
+  expect(result.current).toBe(store.getState())
+  expect(result.current).toStrictEqual({ count: 1 })
 })
 
 it.concurrent("re-subscribes on new store", () => {
@@ -53,62 +50,26 @@ it.concurrent("re-subscribes on new store", () => {
   const { result, rerender } = renderHook((store) => useSweetyState(store), {
     initialProps: store_1,
   })
-  const firstResult = result.current
 
   rerender(store_2)
 
-  expect(result.current[0]).not.toBe(store_1.getState())
-  expect(result.current[0]).toBe(store_2.getState())
-  expect(result.current[0]).toStrictEqual({ count: 10 })
-  expect(result.current[1]).toBe(firstResult[1])
+  expect(result.current).not.toBe(store_1.getState())
+  expect(result.current).toBe(store_2.getState())
+  expect(result.current).toStrictEqual({ count: 10 })
 
   act(() => {
     store_1.setState(Counter.inc)
-    firstResult[1](Counter.inc)
   })
 
   expect(store_1.getState()).toStrictEqual({ count: 1 })
-  expect(result.current[0]).toBe(store_2.getState())
-  expect(result.current[0]).toStrictEqual({ count: 11 })
+  expect(result.current).toBe(store_2.getState())
+  expect(result.current).toStrictEqual({ count: 10 })
 
   act(() => {
     store_2.setState(Counter.inc)
-    result.current[1](Counter.inc)
   })
 
   expect(store_1.getState()).toStrictEqual({ count: 1 })
-  expect(result.current[0]).toBe(store_2.getState())
-  expect(result.current[0]).toStrictEqual({ count: 13 })
-})
-
-describe("clones state", () => {
-  it.concurrent("without compare", () => {
-    const initial = { count: 0 }
-    const store = Sweety.of(initial)
-
-    const { result } = renderHook(() => useSweetyState(store))
-
-    act(() => {
-      result.current[1](Counter.clone)
-    })
-
-    expect(result.current[0]).not.toBe(initial)
-    expect(result.current[0]).toBe(store.getState())
-    expect(result.current[0]).toStrictEqual({ count: 0 })
-  })
-
-  it.concurrent("with compare", () => {
-    const initial = { count: 0 }
-    const store = Sweety.of(initial)
-
-    const { result } = renderHook(() => useSweetyState(store, Counter.compare))
-
-    act(() => {
-      result.current[1](Counter.clone)
-    })
-
-    expect(result.current[0]).toBe(initial)
-    expect(result.current[0]).toBe(store.getState())
-    expect(result.current[0]).toStrictEqual({ count: 0 })
-  })
+  expect(result.current).toBe(store_2.getState())
+  expect(result.current).toStrictEqual({ count: 11 })
 })

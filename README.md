@@ -157,8 +157,6 @@ isActive.getState() // false
 
 > 💬 The method returns `void` to emphasize that `Sweety` instances are **mutable**.
 
-> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
-
 ### `Sweety#clone`
 
 ```dart
@@ -196,8 +194,6 @@ Sweety<T>#compare: Compare<T>
 ```
 
 The [`Compare`][compare] function compares the state of a `Sweety` instance with the new state given via [`Sweety#setState`][sweety__set_state]. Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via [`Sweety#subscribe`][sweety__subscribe].
-
-> 💬 The `Sweety#compare` function has the lowest priority when [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], [`useSetSweetyState`][use_set_sweety_state] or [`useSweetyReducer`][use_sweety_reducer] execute.
 
 ### `Sweety#key`
 
@@ -542,7 +538,7 @@ There is no `Sweety` version of the [`React.useInsertionEffect`][react__use_inse
 
 ```ts
 const usePrintSum = (left: number, right: Sweety<number>): void => {
-  const rightState = useGetSweetyState(right)
+  const rightState = useSweetyState(right)
 
   React.useInsertionEffect(() => {
     console.log("sum is %d", left + rightState)
@@ -553,43 +549,7 @@ const usePrintSum = (left: number, right: Sweety<number>): void => {
 ### `useSweetyState`
 
 ```dart
-function useSweetyState<T>(
-  sweety: Sweety<T>,
-  compare?: null | Compare<T>,
-): [T, SetSweetyState<T>]
-```
-
-A hook similar to [`React.useState`][react__use_use_state] but for `Sweety` instances. It subscribes to the `sweety` changes and returns the current state with a function to set the state.
-
-- `sweety` is a `Sweety` instance.
-- `[compare]` is an optional [`Compare`][compare] function.
-  When not defined it uses [`Sweety#compare`][sweety__compare].
-  When `null` the [`Object.is`][object_is] function applies to compare the states.
-
-```tsx
-const Input: React.FC<{
-  value: Sweety<string>
-}> = ({ value }) => {
-  const [username, setUsername] = useSweetyState(value)
-
-  return (
-    <input
-      type="email"
-      value={username}
-      onChange={(event) => setUsername(event.target.value)}
-    />
-  )
-}
-```
-
-> 💡 The hook is a combination of [`useGetSweetyState`][use_get_sweety_state] and [`useSetSweetyState`][use_set_sweety_state], so use them if you need to either get+subscribe or set the `Sweety` state.
-
-> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
-
-### `useGetSweetyState`
-
-```dart
-function useGetSweetyState<T>(sweety: Sweety<T>): T
+function useSweetyState<T>(sweety: Sweety<T>): T
 ```
 
 A hook that subscribes to the `sweety` changes and returns the current state.
@@ -597,93 +557,20 @@ A hook that subscribes to the `sweety` changes and returns the current state.
 - `sweety` is a `Sweety` instance.
 
 ```tsx
-const NotificationsCount: React.FC<{
-  count: Sweety<number>
-}> = ({ count }) => {
-  const x = useGetSweetyState(count)
-
-  return <Badge>{x}</Badge>
-}
-```
-
-### `useSetSweetyState`
-
-```dart
-function useSetSweetyState<T>(
-  sweety: Sweety<T>,
-  compare?: null | Compare<T>,
-): SetSweetyState<T>
-```
-
-A hook that returns a function to update the `Sweety` instance state. Might be useful when you need a way to update the state without subscribing to its changes.
-
-- `sweety` is a `Sweety` instance.
-- `[compare]` is an optional [`Compare`][compare] function.
-  When not defined it uses [`Sweety#compare`][sweety__compare].
-  When `null` the [`Object.is`][object_is] function applies to compare the states.
-
-```tsx
-const ClearNotifications: React.FC<{
-  notifications: Sweety<Array<string>>
-}> = ({ notifications }) => {
-  // the component won't re-render on the notifications' state change
-  const setNotifications = useSetSweetyState(notifications)
+const Input: React.FC<{
+  value: Sweety<string>
+}> = ({ value }) => {
+  const text = useSweetyState(value)
 
   return (
-    <button onClick={() => setNotifications([])}>Clear Notifications</button>
+    <input
+      type="text"
+      value={text}
+      onChange={(event) => value.setState(event.target.value)}
+    />
   )
 }
 ```
-
-> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
-
-### `useSweetyReducer`
-
-```dart
-function useSweetyReducer<A, T>(
-  sweety: Sweety<T>,
-  reducer: (state: T, action: A) => T,
-  compare?: null | Compare<T>,
-): [T, React.Dispatch<A>]
-```
-
-A hook similar to `React.useReducer` but for `Sweety` instances. It subscribes to the `sweety` changes and returns the current state and a function to dispatch an action.
-
-- `sweety` is a `Sweety` instance.
-- `reducer` is a function that transforms the current state and the dispatched action into the new state.
-- `[compare]` is an optional [`Compare`][compare] function.
-  When not defined it uses [`Sweety#compare`][sweety__compare].
-  When `null` the [`Object.is`][object_is] function applies to compare the states.
-
-```tsx
-type CounterAction = { type: "INCREMENT" } | { type: "DECREMENT" }
-
-const counterReducer = (state: number, action: CounterAction) => {
-  switch (action.type) {
-    case "INCREMENT":
-      return state + 1
-
-    case "DECREMENT":
-      return state - 1
-  }
-}
-
-const Counter: React.FC<{
-  state: Sweety<number>
-}> = ({ state }) => {
-  const [count, dispatch] = useSweetyReducer(state, counterReducer)
-
-  return (
-    <div>
-      <button onClick={() => dispatch({ type: "DECREMENT" })}>-</button>
-      <span>{count}</span>
-      <button onClick={() => dispatch({ type: "INCREMENT" })}>+</button>
-    </div>
-  )
-}
-```
-
-> 💬 The third argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
 
 ### `batch`
 
@@ -726,78 +613,6 @@ type Compare<T> = (left: T, right: T) => boolean
 
 A function that compares two values and returns `true` if they are equal. Depending on the type of the values it might be reasonable to use a custom compare function such as shallow-equal or deep-equal.
 
-### `SetSweetyState`
-
-```dart
-type SetSweetyState<T> = (
-  stateOrTransform: React.SetStateAction<T>,
-  compare?: null | Compare<T>,
-) => void
-```
-
-A function that similar to the [`React.useState`][react__use_use_state] callback but with extra [`Compare`][compare] function.
-
-- `stateOrTransform` is the new state or a function that transforms the current state into the new state.
-- `[compare]` is an optional [`Compare`][compare] function applied for this call only.
-  When not defined it uses the `compare` function of the source hook.
-  When `null` the [`Object.is`][object_is] function applies to compare the states.
-
-> 💡 If `stateOrTransform` argument is a function it acts as [`batch`][batch].
-
-> 💬 The second argument `compare` function has the highest priority so it will be used instead of [`Sweety#compare`][sweety__compare] and any other `compare` passed via [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], [`useSetSweetyState`][use_set_sweety_state], or [`useSweetyReducer`][use_sweety_reducer].
-
-### `ExtractSweetyState`
-
-A helper type that shallowly extracts state type from `Sweety`:
-
-```ts
-type SimpleValue = Sweety<number>
-// ExtractSweetyState<SimpleValue> === number
-
-type ArrayValue = Sweety<Array<string>>
-// ExtractSweetyState<ArrayValue> === Array<string>
-
-type ShapeValue = Sweety<{
-  name: string
-  age: number
-}>
-// ExtractSweetyState<ShapeValue> === {
-//   name: string
-//   age: number
-// }
-
-type ShapeOfSweeties = Sweety<{
-  name: Sweety<string>
-  age: Sweety<number>
-}>
-// ExtractSweetyState<ShapeOfSweeties> === {
-//   name: Sweety<string>
-//   age: Sweety<number>
-// }
-```
-
-### `DeepExtractSweetyState`
-
-A helper that deeply extracts state type from `Sweety`:
-
-```ts
-type ShapeOfSweeties = Sweety<{
-  name: Sweety<string>
-  age: Sweety<number>
-}>
-// DeepExtractSweetyState<ShapeOfSweeties> === {
-//   name: string
-//   age: number
-// }
-
-type ArrayOfSweeties = Sweety<Array<Sweety<boolean>>>
-// DeepExtractSweetyState<ArrayOfSweeties> === Array<boolean>
-```
-
-### `Dispatch`
-
-Re-export of `React.Dispatch`.
-
 ## Publish
 
 Here are scripts you want to run for publishing a new version to NPM:
@@ -816,16 +631,14 @@ Here are scripts you want to run for publishing a new version to NPM:
 [sweety__get_state]: #sweetygetstate
 [sweety__set_state]: #sweetysetstate
 [sweety__subscribe]: #sweetysubscribe
-[use_watch_sweety]: #usewatchsweety
-[use_sweety_state]: #usesweetystate
-[use_sweety_reducer]: #usesweetyreducer
-[use_get_sweety_state]: #usegetsweetystate
-[use_set_sweety_state]: #usesetsweetystate
 [use_sweety]: #usesweety
 [use_sweety_effect]: #usesweetyeffect
 [watch]: #watch
 [batch]: #batch
 [compare]: #compare
+
+<!-- E X T E R N A L  L I N K S -->
+
 [object_is]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is#description
 [hoc]: https://reactjs.org/docs/higher-order-components.html
 [react__use_use_state]: https://reactjs.org/docs/hooks-reference.html#usestate

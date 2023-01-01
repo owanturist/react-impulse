@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useSweetyReducer } from "../../src"
+import { Sweety, useSweetyState } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -9,32 +9,13 @@ describe("nested stores", () => {
   interface AppState {
     counts: ReadonlyArray<Sweety<number>>
   }
-  type AppAction = { type: "AddCounter" } | { type: "ResetCounters" }
 
   const App: React.FC<{
     store: Sweety<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }> = ({ store, onRender, onCounterRender }) => {
-    const [state, dispatch] = useSweetyReducer<AppState, AppAction>(
-      store,
-      (currentState, action) => {
-        switch (action.type) {
-          case "AddCounter": {
-            return {
-              ...currentState,
-              counts: [...currentState.counts, Sweety.of(0)],
-            }
-          }
-
-          case "ResetCounters": {
-            currentState.counts.forEach((count) => count.setState(0))
-
-            return currentState
-          }
-        }
-      },
-    )
+    const { counts } = useSweetyState(store)
 
     return (
       <>
@@ -42,16 +23,27 @@ describe("nested stores", () => {
           <button
             type="button"
             data-testid="add-counter"
-            onClick={() => dispatch({ type: "AddCounter" })}
+            onClick={() => {
+              store.setState((state) => ({
+                ...state,
+                counts: [...state.counts, Sweety.of(0)],
+              }))
+            }}
           />
           <button
             type="button"
             data-testid="reset-counters"
-            onClick={() => dispatch({ type: "ResetCounters" })}
+            onClick={() => {
+              store.setState((state) => {
+                state.counts.forEach((count) => count.setState(0))
+
+                return state
+              })
+            }}
           />
         </React.Profiler>
 
-        {state.counts.map((count, index) => (
+        {counts.map((count, index) => (
           <CounterComponent
             key={count.key}
             count={count}

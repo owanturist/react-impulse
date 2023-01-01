@@ -24,7 +24,7 @@ export const CounterComponent: React.FC<{
   onRender: VoidFunction
 }> = React.memo(
   ({ count: countStore, onRender }) => {
-    const [count, setCount] = useSweetyState(countStore)
+    const count = useSweetyState(countStore)
 
     return (
       <React.Profiler id="test" onRender={onRender}>
@@ -33,7 +33,7 @@ export const CounterComponent: React.FC<{
           <button
             type="button"
             data-testid="increment"
-            onClick={() => setCount(count + 1)}
+            onClick={() => countStore.setState(count + 1)}
           />
         </div>
       </React.Profiler>

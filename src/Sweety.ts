@@ -1,7 +1,7 @@
 import type { SetStateAction } from "react"
 import { nanoid } from "nanoid"
 
-import { Compare, isEqual, isFunction, noop, overrideCompare } from "./utils"
+import { Compare, isEqual, isFunction, noop } from "./utils"
 import { WatchContext } from "./WatchContext"
 import { SetStateContext } from "./SetStateContext"
 import {
@@ -10,34 +10,6 @@ import {
   WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
 } from "./validation"
-
-type ExtractDirect<T> = T extends Sweety<infer R> ? R : T
-
-/**
- * A helper type that shallowly extracts value type from `Sweety`.
- */
-export type ExtractSweetyState<T> = T extends Sweety<infer R>
-  ? R
-  : T extends Array<infer R>
-  ? Array<ExtractDirect<R>>
-  : T extends ReadonlyArray<infer R>
-  ? ReadonlyArray<ExtractDirect<R>>
-  : { [K in keyof T]: ExtractDirect<T[K]> }
-
-type ExtractDeepDirect<T> = T extends Sweety<infer R>
-  ? DeepExtractSweetyState<R>
-  : T
-
-/**
- * A helper that deeply extracts value type from `Sweety`.
- */
-export type DeepExtractSweetyState<T> = T extends Sweety<infer R>
-  ? DeepExtractSweetyState<R>
-  : T extends Array<infer R>
-  ? Array<ExtractDeepDirect<R>>
-  : T extends ReadonlyArray<infer R>
-  ? ReadonlyArray<ExtractDeepDirect<R>>
-  : { [K in keyof T]: ExtractDeepDirect<T[K]> }
 
 export class Sweety<T> {
   /**
@@ -106,13 +78,13 @@ export class Sweety<T> {
    */
   public clone(
     transform?: (value: T) => T,
-    compare?: null | Compare<T>,
+    compare: null | Compare<T> = this.compare,
   ): Sweety<T> {
     WatchContext.warning(WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING)
 
     return new Sweety(
       isFunction(transform) ? transform(this.value) : this.value,
-      overrideCompare(this.compare, compare),
+      compare ?? isEqual,
     )
   }
 
@@ -143,13 +115,13 @@ export class Sweety<T> {
    */
   public setState(
     stateOrTransform: SetStateAction<T>,
-    compare?: null | Compare<T>,
+    compare: null | Compare<T> = this.compare,
   ): void {
     if (WatchContext.warning(WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING)) {
       return
     }
 
-    const finalCompare = overrideCompare(this.compare, compare)
+    const finalCompare = compare ?? isEqual
     const [emit, register] = SetStateContext.registerStoreSubscribers()
 
     const nextValue = isFunction(stateOrTransform)
