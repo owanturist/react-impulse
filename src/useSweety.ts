@@ -1,47 +1,36 @@
-import { useRef } from "react"
+import { useState } from "react"
 
 import { Sweety } from "./Sweety"
+import { isFunction } from "./utils"
 
 /**
- * A hook that initiates a stable (never changing) Sweety store.
+ * A hook that initiates a stable (never changing) Sweety instance.
  *
- * *The initial value is disregarded during subsequent re-renders.*
+ * *The initial state is disregarded during subsequent re-renders.*
  *
- * @param lazyInitialValue a function returning an initial value that calls only once when the hook is called.
- * It might be handy when the initial value is expensive to compute.
+ * @param lazyInitialState a function returning an initial state that calls only once during the initial render.
  */
-export function useSweety<T>(lazyInitialValue: () => T): Sweety<T>
+export function useSweety<T>(lazyInitialState: () => T): Sweety<T>
 
-/**
- * A hook that initiates a stable (never changing) Sweety store.
- *
- * *The initial value is disregarded during subsequent re-renders.*
- *
- * @param invalidInitValue a function with arguments might not be used to initialize the store.
- */
 export function useSweety<TInit extends (...args: Array<never>) => unknown>(
-  invalidLazyInitialValue: TInit,
+  invalidLazyInitialState: TInit,
 ): never
 
 /**
- * A hook that initiates a stable (never changing) Sweety store.
+ * A hook that initiates a stable (never changing) Sweety instance.
  *
- * *The initial value is disregarded during subsequent re-renders.*
+ * *The initial state is disregarded during subsequent re-renders.*
  *
- * @param initialValue a value to initialize the store.
+ * @param initialState a state used during the initial render
  */
-export function useSweety<T>(initialValue: T): Sweety<T> // eslint-disable-line @typescript-eslint/unified-signatures
+export function useSweety<T>(initialState: T): Sweety<T> // eslint-disable-line @typescript-eslint/unified-signatures
 
-export function useSweety<T>(lazyOrValue: T | (() => T)): Sweety<T> {
-  const sweetyRef = useRef<Sweety<T>>()
+export function useSweety<T>(lazyOrState: T | (() => T)): Sweety<T> {
+  const [instance] = useState(() => {
+    const initialState = isFunction(lazyOrState) ? lazyOrState() : lazyOrState
 
-  if (sweetyRef.current == null) {
-    sweetyRef.current = Sweety.of(
-      typeof lazyOrValue === "function"
-        ? (lazyOrValue as () => T)()
-        : lazyOrValue,
-    )
-  }
+    return Sweety.of(initialState)
+  })
 
-  return sweetyRef.current
+  return instance
 }

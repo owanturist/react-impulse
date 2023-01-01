@@ -4,14 +4,14 @@ import { useSyncExternalStore } from "use-sync-external-store/shim/index.js"
 import type { Sweety } from "./Sweety"
 
 /**
- * A hooks that subscribes to the store's changes and returns the current value.
+ * A hook that subscribes to the `sweety` changes and returns the current state.
  *
- * @param store a `Sweety` instance.
+ * @param sweety a `Sweety` instance.
  */
-export function useGetSweetyState<T>(store: Sweety<T>): T {
+export function useGetSweetyState<T>(sweety: Sweety<T>): T {
   const value = useSyncExternalStore(
-    useCallback((onStoreChange) => store.subscribe(onStoreChange), [store]),
-    useCallback(() => store.getState(), [store]),
+    useCallback((onStoreChange) => sweety.subscribe(onStoreChange), [sweety]),
+    useCallback(() => sweety.getState(), [sweety]),
   )
 
   useDebugValue(value)

@@ -5,7 +5,7 @@ import { SetStateAction, useEffect, useLayoutEffect, useRef } from "react"
  * Depending on the type of the values it might be reasonable to use
  * a custom compare function such as shallow-equal or deep-equal.
  */
-export type Compare<T> = (prev: T, next: T) => boolean
+export type Compare<T> = (left: T, right: T) => boolean
 
 /**
  * The setState function that can be used to set the state of the store.
@@ -31,20 +31,23 @@ export type SetSweetyState<T> = (
 /**
  * @private
  */
-export const isEqual = <T>(one: T, another: T): boolean => one === another
+export const isEqual: Compare<unknown> = Object.is
+
+const isDefined = <T>(value: undefined | null | T): value is T => value != null
 
 /**
  * @private
  */
 export const overrideCompare = <T>(
-  original: Compare<T>,
-  override: undefined | null | Compare<T>,
+  lowest: Compare<T>,
+  ...overrides: Array<undefined | null | Compare<T>>
 ): Compare<T> => {
-  if (override === null) {
-    return isEqual
-  }
+  const [override = lowest] = overrides
+    .map((compare) => (compare === null ? isEqual : compare))
+    .filter(isDefined)
+    .slice(-1)
 
-  return override ?? original
+  return override
 }
 
 /**
@@ -67,4 +70,12 @@ export const useEvent = <THandler extends (...args: Array<never>) => unknown>(
   })
 
   return useRef(((...args) => handlerRef.current(...args)) as THandler).current
+}
+
+export const isFunction = <
+  TFunction extends (...args: Array<never>) => unknown,
+>(
+  anything: unknown,
+): anything is TFunction => {
+  return typeof anything === "function"
 }
