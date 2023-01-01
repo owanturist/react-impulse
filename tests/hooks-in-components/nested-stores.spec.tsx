@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, watch } from "../../src"
+import { Sweety, useGetSweetyState } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -14,41 +14,45 @@ describe("nested stores", () => {
     store: Sweety<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
-  }> = watch(({ store, onRender, onCounterRender }) => (
-    <>
-      <React.Profiler id="test" onRender={onRender}>
-        <button
-          type="button"
-          data-testid="add-counter"
-          onClick={() => {
-            store.setState((state) => ({
-              ...state,
-              counts: [...state.counts, Sweety.of(0)],
-            }))
-          }}
-        />
-        <button
-          type="button"
-          data-testid="reset-counters"
-          onClick={() => {
-            store.setState((state) => {
-              state.counts.forEach((count) => count.setState(0))
+  }> = ({ store, onRender, onCounterRender }) => {
+    const { counts } = useGetSweetyState(store)
 
-              return state
-            })
-          }}
-        />
-      </React.Profiler>
+    return (
+      <>
+        <React.Profiler id="test" onRender={onRender}>
+          <button
+            type="button"
+            data-testid="add-counter"
+            onClick={() => {
+              store.setState((state) => ({
+                ...state,
+                counts: [...state.counts, Sweety.of(0)],
+              }))
+            }}
+          />
+          <button
+            type="button"
+            data-testid="reset-counters"
+            onClick={() => {
+              store.setState((state) => {
+                state.counts.forEach((count) => count.setState(0))
 
-      {store.getState().counts.map((count, index) => (
-        <CounterComponent
-          key={count.key}
-          count={count}
-          onRender={() => onCounterRender(index)}
-        />
-      ))}
-    </>
-  ))
+                return state
+              })
+            }}
+          />
+        </React.Profiler>
+
+        {counts.map((count, index) => (
+          <CounterComponent
+            key={count.key}
+            count={count}
+            onRender={() => onCounterRender(index)}
+          />
+        ))}
+      </>
+    )
+  }
 
   it("Performs nested store management", () => {
     const store = Sweety.of<AppState>({ counts: [] })

@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useSweetyState, useWatchSweety, watch } from "../../src"
+import { Sweety, useGetSweetyState, useWatchSweety, watch } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -26,7 +26,7 @@ describe("watching nested stores", () => {
       lessThanTwenty: boolean
     } & AppProps
   > = ({ moreThanTen, lessThanTwenty, store, onRender, onCounterRender }) => {
-    const [state, setState] = useSweetyState(store)
+    const state = useGetSweetyState(store)
 
     return (
       <>
@@ -38,7 +38,7 @@ describe("watching nested stores", () => {
             type="button"
             data-testid="add-counter"
             onClick={() => {
-              setState({
+              store.setState({
                 ...state,
                 counts: [...state.counts, Sweety.of(0)],
               })

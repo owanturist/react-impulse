@@ -13,15 +13,8 @@ export type Compare<T> = (left: T, right: T) => boolean
  * @param valueOrTransform either the new value or a function that will be applied to the current value before setting.
  *
  * @param compare an optional compare function with the highest priority to use for this call only.
- * If not defined it uses `compare` from `useSetSweetyState` or `useSweetyState`.
+ * If not defined it uses `compare` from `useSetSweetyState`.
  * The strict equality check function (`===`) will be used if `null`.
- *
- * @example
- * import { useSetSweetyState, useSweetyState } from "react-sweety"
- *
- * const setState = useSetSweetyState(store)
- * // or
- * const [state, setState] = useSweetyState(store)
  */
 export type SetSweetyState<T> = (
   valueOrTransform: SetStateAction<T>,

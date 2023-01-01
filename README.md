@@ -197,7 +197,7 @@ Sweety<T>#compare: Compare<T>
 
 The [`Compare`][compare] function compares the state of a `Sweety` instance with the new state given via [`Sweety#setState`][sweety__set_state]. Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via [`Sweety#subscribe`][sweety__subscribe].
 
-> 💬 The `Sweety#compare` function has the lowest priority when [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], or [`useSetSweetyState`][use_set_sweety_state] execute.
+> 💬 The `Sweety#compare` function has the lowest priority when [`Sweety#setState`][sweety__set_state], or [`useSetSweetyState`][use_set_sweety_state] execute.
 
 ### `Sweety#key`
 
@@ -550,42 +550,6 @@ const usePrintSum = (left: number, right: Sweety<number>): void => {
 }
 ```
 
-### `useSweetyState`
-
-```dart
-function useSweetyState<T>(
-  sweety: Sweety<T>,
-  compare?: null | Compare<T>,
-): [T, SetSweetyState<T>]
-```
-
-A hook similar to [`React.useState`][react__use_use_state] but for `Sweety` instances. It subscribes to the `sweety` changes and returns the current state with a function to set the state.
-
-- `sweety` is a `Sweety` instance.
-- `[compare]` is an optional [`Compare`][compare] function.
-  When not defined it uses [`Sweety#compare`][sweety__compare].
-  When `null` the [`Object.is`][object_is] function applies to compare the states.
-
-```tsx
-const Input: React.FC<{
-  value: Sweety<string>
-}> = ({ value }) => {
-  const [username, setUsername] = useSweetyState(value)
-
-  return (
-    <input
-      type="email"
-      value={username}
-      onChange={(event) => setUsername(event.target.value)}
-    />
-  )
-}
-```
-
-> 💡 The hook is a combination of [`useGetSweetyState`][use_get_sweety_state] and [`useSetSweetyState`][use_set_sweety_state], so use them if you need to either get+subscribe or set the `Sweety` state.
-
-> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
-
 ### `useGetSweetyState`
 
 ```dart
@@ -597,12 +561,18 @@ A hook that subscribes to the `sweety` changes and returns the current state.
 - `sweety` is a `Sweety` instance.
 
 ```tsx
-const NotificationsCount: React.FC<{
-  count: Sweety<number>
-}> = ({ count }) => {
-  const x = useGetSweetyState(count)
+const Input: React.FC<{
+  value: Sweety<string>
+}> = ({ value }) => {
+  const text = useGetSweetyState(value)
 
-  return <Badge>{x}</Badge>
+  return (
+    <input
+      type="text"
+      value={text}
+      onChange={(event) => value.setState(event.target.value)}
+    />
+  )
 }
 ```
 
@@ -696,7 +666,7 @@ A function that similar to the [`React.useState`][react__use_use_state] callback
 
 > 💡 If `stateOrTransform` argument is a function it acts as [`batch`][batch].
 
-> 💬 The second argument `compare` function has the highest priority so it will be used instead of [`Sweety#compare`][sweety__compare] and any other `compare` passed via [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], or [`useSetSweetyState`][use_set_sweety_state].
+> 💬 The second argument `compare` function has the highest priority so it will be used instead of [`Sweety#compare`][sweety__compare] and any other `compare` passed via [`Sweety#setState`][sweety__set_state], or [`useSetSweetyState`][use_set_sweety_state].
 
 ### `ExtractSweetyState`
 
@@ -765,7 +735,6 @@ Here are scripts you want to run for publishing a new version to NPM:
 [sweety__set_state]: #sweetysetstate
 [sweety__subscribe]: #sweetysubscribe
 [use_watch_sweety]: #usewatchsweety
-[use_sweety_state]: #usesweetystate
 [use_get_sweety_state]: #usegetsweetystate
 [use_set_sweety_state]: #usesetsweetystate
 [use_sweety]: #usesweety
