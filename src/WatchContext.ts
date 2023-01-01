@@ -69,24 +69,22 @@ export class WatchContext {
 
   private notify: VoidFunction = noop
 
-  public constructor(private warningSource: null | WarningSource) {}
+  public constructor(private readonly warningSource: null | WarningSource) {}
 
   private register<T>(store: Sweety<T>): void {
     if (this.cleanups.has(store.key)) {
       // still alive
       this.deadCleanups.delete(store.key)
     } else {
-      const thisWarningSource = this.warningSource
-
-      this.warningSource = null
-      this.cleanups.set(
-        store.key,
-        store.subscribe(() => {
-          // the listener registers a watcher so the watcher will emit once per (batch) setState
-          SetStateContext.registerWatchContext(this)
-        }),
-      )
-      this.warningSource = thisWarningSource
+      WatchContext.ignore(() => {
+        this.cleanups.set(
+          store.key,
+          store.subscribe(() => {
+            // the listener registers a watcher so the watcher will emit once per (batch) setState
+            SetStateContext.registerWatchContext(this)
+          }),
+        )
+      })
     }
   }
 
