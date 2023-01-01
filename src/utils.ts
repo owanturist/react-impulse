@@ -1,5 +1,3 @@
-import { useEffect, useLayoutEffect, useRef } from "react"
-
 /**
  * A function that compares two values and returns `true` if they are equal.
  * Depending on the type of the values it might be reasonable to use
@@ -35,22 +33,6 @@ export const overrideCompare = <T>(
  */
 export const noop: VoidFunction = () => {
   // do nothing
-}
-
-const useIsomorphicLayoutEffect =
-  typeof document !== "undefined" ? useLayoutEffect : useEffect
-
-// TODO move to useWatchSweety
-export const useEvent = <THandler extends (...args: Array<never>) => unknown>(
-  handler: THandler,
-): THandler => {
-  const handlerRef = useRef(handler)
-
-  useIsomorphicLayoutEffect(() => {
-    handlerRef.current = handler
-  })
-
-  return useRef(((...args) => handlerRef.current(...args)) as THandler).current
 }
 
 export const isFunction = <

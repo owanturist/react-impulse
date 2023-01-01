@@ -1,8 +1,8 @@
-import { useCallback, useDebugValue } from "react"
+import { useCallback, useDebugValue, useEffect, useRef } from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
 import { useWatchContext } from "./useWatchContext"
-import { Compare, isEqual, useEvent } from "./utils"
+import { Compare, isEqual } from "./utils"
 
 /**
  * A hook that executes the `watcher` function whenever any of the involved `Sweety` instances' state update
@@ -25,8 +25,18 @@ export function useWatchSweety<T>(
     [executeWatcher, watcher],
   )
 
+  // changeling of the `compare` value should not trigger `useSyncExternalStoreWithSelector`
+  // to re-select the store's value
+  const compareRef = useRef(compare ?? isEqual)
+  useEffect(() => {
+    compareRef.current = compare ?? isEqual
+  }, [compare])
+
   // it should memoize the onCompare otherwise it will call the watcher on each render
-  const onCompare = useEvent(compare ?? isEqual)
+  const onCompare: Compare<T> = useCallback(
+    (left, right) => compareRef.current(left, right),
+    [],
+  )
 
   const value = useSyncExternalStoreWithSelector(
     subscribe,
