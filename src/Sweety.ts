@@ -100,7 +100,7 @@ export class Sweety<T> {
    */
   public getState<R>(select: (value: T) => R): R
   public getState<R>(select?: (value: T) => R): T | R {
-    WatchContext.register(this)
+    WatchContext.register(this as Sweety<unknown>)
 
     return isFunction(select) ? select(this.value) : this.value
   }
