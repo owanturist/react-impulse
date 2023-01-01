@@ -1,7 +1,7 @@
 import type { SetStateAction } from "react"
 import { nanoid } from "nanoid"
 
-import { Compare, isEqual, isFunction, noop, overrideCompare } from "./utils"
+import { Compare, isEqual, isFunction, noop } from "./utils"
 import { WatchContext } from "./WatchContext"
 import { SetStateContext } from "./SetStateContext"
 import {
@@ -78,13 +78,13 @@ export class Sweety<T> {
    */
   public clone(
     transform?: (value: T) => T,
-    compare?: null | Compare<T>,
+    compare: null | Compare<T> = this.compare,
   ): Sweety<T> {
     WatchContext.warning(WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING)
 
     return new Sweety(
       isFunction(transform) ? transform(this.value) : this.value,
-      overrideCompare(this.compare, compare),
+      compare ?? isEqual,
     )
   }
 
@@ -115,13 +115,13 @@ export class Sweety<T> {
    */
   public setState(
     stateOrTransform: SetStateAction<T>,
-    compare?: null | Compare<T>,
+    compare: null | Compare<T> = this.compare,
   ): void {
     if (WatchContext.warning(WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING)) {
       return
     }
 
-    const finalCompare = overrideCompare(this.compare, compare)
+    const finalCompare = compare ?? isEqual
     const [emit, register] = SetStateContext.registerStoreSubscribers()
 
     const nextValue = isFunction(stateOrTransform)

@@ -10,24 +10,6 @@ export type Compare<T> = (left: T, right: T) => boolean
  */
 export const isEqual: Compare<unknown> = Object.is
 
-const isDefined = <T>(value: undefined | null | T): value is T => value != null
-
-/**
- * @private
- */
-// TODO use ?? instead
-export const overrideCompare = <T>(
-  lowest: Compare<T>,
-  ...overrides: Array<undefined | null | Compare<T>>
-): Compare<T> => {
-  const [override = lowest] = overrides
-    .map((compare) => (compare === null ? isEqual : compare))
-    .filter(isDefined)
-    .slice(-1)
-
-  return override
-}
-
 /**
  * @private
  */
