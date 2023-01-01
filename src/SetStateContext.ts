@@ -18,7 +18,7 @@ export class SetStateContext {
 
   public static registerStoreSubscribers(): [
     emit: VoidFunction,
-    register: Dispatch<Map<string, VoidFunction>>,
+    register: Dispatch<Map<VoidFunction, number>>,
   ] {
     if (SetStateContext.current != null) {
       const { current } = SetStateContext
@@ -48,14 +48,14 @@ export class SetStateContext {
     ]
   }
 
-  private readonly storeSubscribers: Array<Map<string, VoidFunction>> = []
+  private readonly storeSubscribers: Array<Map<VoidFunction, number>> = []
   private readonly watchContexts = new Set<WatchContext>()
 
   private constructor() {
     // make private
   }
 
-  private batchStoreSubscribers(subs: Map<string, VoidFunction>): void {
+  private batchStoreSubscribers(subs: Map<VoidFunction, number>): void {
     this.storeSubscribers.push(subs)
   }
 
@@ -67,7 +67,7 @@ export class SetStateContext {
     const calledListeners = new WeakSet<VoidFunction>()
 
     this.storeSubscribers.forEach((subs) => {
-      subs.forEach((listener) => {
+      subs.forEach((_, listener) => {
         // don't emit the same listener twice, for instance when using `useWatchSweety`
         if (!calledListeners.has(listener)) {
           // the listener might register watchers (for useWatchSweety)

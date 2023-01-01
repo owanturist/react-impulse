@@ -362,17 +362,35 @@ describe("Sweety#subscribe", () => {
 
     store.setState(Counter.inc)
     expect(spy).toHaveBeenCalledTimes(1)
-    vi.clearAllMocks()
 
     unsubscribe_1()
-    store.setState(Counter.inc)
-    expect(spy).toHaveBeenCalledTimes(1)
-    vi.clearAllMocks()
-
     unsubscribe_2()
-    store.setState(Counter.inc)
-    expect(spy).not.toHaveBeenCalled()
   })
+
+  it.concurrent(
+    "emits the same listener until it is subscribed at least ones",
+    () => {
+      const spy = vi.fn()
+      const store = Sweety.of({ count: 0 })
+      const unsubscribe_1 = store.subscribe(spy)
+      const unsubscribe_2 = store.subscribe(spy)
+      const unsubscribe_3 = store.subscribe(spy)
+
+      unsubscribe_1()
+      store.setState(Counter.inc)
+      expect(spy).toHaveBeenCalledTimes(1)
+      vi.clearAllMocks()
+
+      unsubscribe_2()
+      store.setState(Counter.inc)
+      expect(spy).toHaveBeenCalledTimes(1)
+      vi.clearAllMocks()
+
+      unsubscribe_3()
+      store.setState(Counter.inc)
+      expect(spy).not.toHaveBeenCalled()
+    },
+  )
 
   it.concurrent("ignores second unsubscribe call", () => {
     const spy = vi.fn()
