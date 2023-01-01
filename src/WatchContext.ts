@@ -46,6 +46,22 @@ export class WatchContext {
     WatchContext.current?.register(store)
   }
 
+  /**
+   * The method allows to ignore the current WatchContext presence as if it is not there.
+   * Helpful when something needs to perform Sweety#getState without subscribing it to the current WatchContext
+   */
+  public static ignore<T>(execute: () => T): T {
+    const currentContext = WatchContext.current
+
+    WatchContext.current = null
+
+    const result = execute()
+
+    WatchContext.current = currentContext
+
+    return result
+  }
+
   private readonly deadCleanups = new Set<string>()
   private readonly cleanups = new Map<string, VoidFunction>()
 
