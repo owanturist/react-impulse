@@ -197,7 +197,7 @@ Sweety<T>#compare: Compare<T>
 
 The [`Compare`][compare] function compares the state of a `Sweety` instance with the new state given via [`Sweety#setState`][sweety__set_state]. Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via [`Sweety#subscribe`][sweety__subscribe].
 
-> 💬 The `Sweety#compare` function has the lowest priority when [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], [`useSetSweetyState`][use_set_sweety_state] or [`useSweetyReducer`][use_sweety_reducer] execute.
+> 💬 The `Sweety#compare` function has the lowest priority when [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], or [`useSetSweetyState`][use_set_sweety_state] execute.
 
 ### `Sweety#key`
 
@@ -637,54 +637,6 @@ const ClearNotifications: React.FC<{
 
 > 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
 
-### `useSweetyReducer`
-
-```dart
-function useSweetyReducer<A, T>(
-  sweety: Sweety<T>,
-  reducer: (state: T, action: A) => T,
-  compare?: null | Compare<T>,
-): [T, React.Dispatch<A>]
-```
-
-A hook similar to `React.useReducer` but for `Sweety` instances. It subscribes to the `sweety` changes and returns the current state and a function to dispatch an action.
-
-- `sweety` is a `Sweety` instance.
-- `reducer` is a function that transforms the current state and the dispatched action into the new state.
-- `[compare]` is an optional [`Compare`][compare] function.
-  When not defined it uses [`Sweety#compare`][sweety__compare].
-  When `null` the [`Object.is`][object_is] function applies to compare the states.
-
-```tsx
-type CounterAction = { type: "INCREMENT" } | { type: "DECREMENT" }
-
-const counterReducer = (state: number, action: CounterAction) => {
-  switch (action.type) {
-    case "INCREMENT":
-      return state + 1
-
-    case "DECREMENT":
-      return state - 1
-  }
-}
-
-const Counter: React.FC<{
-  state: Sweety<number>
-}> = ({ state }) => {
-  const [count, dispatch] = useSweetyReducer(state, counterReducer)
-
-  return (
-    <div>
-      <button onClick={() => dispatch({ type: "DECREMENT" })}>-</button>
-      <span>{count}</span>
-      <button onClick={() => dispatch({ type: "INCREMENT" })}>+</button>
-    </div>
-  )
-}
-```
-
-> 💬 The third argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
-
 ### `batch`
 
 ```dart
@@ -744,7 +696,7 @@ A function that similar to the [`React.useState`][react__use_use_state] callback
 
 > 💡 If `stateOrTransform` argument is a function it acts as [`batch`][batch].
 
-> 💬 The second argument `compare` function has the highest priority so it will be used instead of [`Sweety#compare`][sweety__compare] and any other `compare` passed via [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], [`useSetSweetyState`][use_set_sweety_state], or [`useSweetyReducer`][use_sweety_reducer].
+> 💬 The second argument `compare` function has the highest priority so it will be used instead of [`Sweety#compare`][sweety__compare] and any other `compare` passed via [`Sweety#setState`][sweety__set_state], [`useSweetyState`][use_sweety_state], or [`useSetSweetyState`][use_set_sweety_state].
 
 ### `ExtractSweetyState`
 
@@ -814,7 +766,6 @@ Here are scripts you want to run for publishing a new version to NPM:
 [sweety__subscribe]: #sweetysubscribe
 [use_watch_sweety]: #usewatchsweety
 [use_sweety_state]: #usesweetystate
-[use_sweety_reducer]: #usesweetyreducer
 [use_get_sweety_state]: #usegetsweetystate
 [use_set_sweety_state]: #usesetsweetystate
 [use_sweety]: #usesweety

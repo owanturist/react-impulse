@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useSweetyReducer } from "../../src"
+import { Sweety, watch } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -9,58 +9,46 @@ describe("nested stores", () => {
   interface AppState {
     counts: ReadonlyArray<Sweety<number>>
   }
-  type AppAction = { type: "AddCounter" } | { type: "ResetCounters" }
 
   const App: React.FC<{
     store: Sweety<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
-  }> = ({ store, onRender, onCounterRender }) => {
-    const [state, dispatch] = useSweetyReducer<AppState, AppAction>(
-      store,
-      (currentState, action) => {
-        switch (action.type) {
-          case "AddCounter": {
-            return {
-              ...currentState,
-              counts: [...currentState.counts, Sweety.of(0)],
-            }
-          }
+  }> = watch(({ store, onRender, onCounterRender }) => (
+    <>
+      <React.Profiler id="test" onRender={onRender}>
+        <button
+          type="button"
+          data-testid="add-counter"
+          onClick={() => {
+            store.setState((state) => ({
+              ...state,
+              counts: [...state.counts, Sweety.of(0)],
+            }))
+          }}
+        />
+        <button
+          type="button"
+          data-testid="reset-counters"
+          onClick={() => {
+            store.setState((state) => {
+              state.counts.forEach((count) => count.setState(0))
 
-          case "ResetCounters": {
-            currentState.counts.forEach((count) => count.setState(0))
+              return state
+            })
+          }}
+        />
+      </React.Profiler>
 
-            return currentState
-          }
-        }
-      },
-    )
-
-    return (
-      <>
-        <React.Profiler id="test" onRender={onRender}>
-          <button
-            type="button"
-            data-testid="add-counter"
-            onClick={() => dispatch({ type: "AddCounter" })}
-          />
-          <button
-            type="button"
-            data-testid="reset-counters"
-            onClick={() => dispatch({ type: "ResetCounters" })}
-          />
-        </React.Profiler>
-
-        {state.counts.map((count, index) => (
-          <CounterComponent
-            key={count.key}
-            count={count}
-            onRender={() => onCounterRender(index)}
-          />
-        ))}
-      </>
-    )
-  }
+      {store.getState().counts.map((count, index) => (
+        <CounterComponent
+          key={count.key}
+          count={count}
+          onRender={() => onCounterRender(index)}
+        />
+      ))}
+    </>
+  ))
 
   it("Performs nested store management", () => {
     const store = Sweety.of<AppState>({ counts: [] })
