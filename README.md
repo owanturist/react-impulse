@@ -613,54 +613,6 @@ type Compare<T> = (left: T, right: T) => boolean
 
 A function that compares two values and returns `true` if they are equal. Depending on the type of the values it might be reasonable to use a custom compare function such as shallow-equal or deep-equal.
 
-### `ExtractSweetyState`
-
-A helper type that shallowly extracts state type from `Sweety`:
-
-```ts
-type SimpleValue = Sweety<number>
-// ExtractSweetyState<SimpleValue> === number
-
-type ArrayValue = Sweety<Array<string>>
-// ExtractSweetyState<ArrayValue> === Array<string>
-
-type ShapeValue = Sweety<{
-  name: string
-  age: number
-}>
-// ExtractSweetyState<ShapeValue> === {
-//   name: string
-//   age: number
-// }
-
-type ShapeOfSweeties = Sweety<{
-  name: Sweety<string>
-  age: Sweety<number>
-}>
-// ExtractSweetyState<ShapeOfSweeties> === {
-//   name: Sweety<string>
-//   age: Sweety<number>
-// }
-```
-
-### `DeepExtractSweetyState`
-
-A helper that deeply extracts state type from `Sweety`:
-
-```ts
-type ShapeOfSweeties = Sweety<{
-  name: Sweety<string>
-  age: Sweety<number>
-}>
-// DeepExtractSweetyState<ShapeOfSweeties> === {
-//   name: string
-//   age: number
-// }
-
-type ArrayOfSweeties = Sweety<Array<Sweety<boolean>>>
-// DeepExtractSweetyState<ArrayOfSweeties> === Array<boolean>
-```
-
 ## Publish
 
 Here are scripts you want to run for publishing a new version to NPM:

@@ -1,5 +1,4 @@
 export type { Compare } from "./utils"
-export type { ExtractSweetyState, DeepExtractSweetyState } from "./Sweety"
 export { Sweety } from "./Sweety"
 export { batch } from "./batch"
 export { watch } from "./watch"

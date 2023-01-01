@@ -11,34 +11,6 @@ import {
   WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
 } from "./validation"
 
-type ExtractDirect<T> = T extends Sweety<infer R> ? R : T
-
-/**
- * A helper type that shallowly extracts value type from `Sweety`.
- */
-export type ExtractSweetyState<T> = T extends Sweety<infer R>
-  ? R
-  : T extends Array<infer R>
-  ? Array<ExtractDirect<R>>
-  : T extends ReadonlyArray<infer R>
-  ? ReadonlyArray<ExtractDirect<R>>
-  : { [K in keyof T]: ExtractDirect<T[K]> }
-
-type ExtractDeepDirect<T> = T extends Sweety<infer R>
-  ? DeepExtractSweetyState<R>
-  : T
-
-/**
- * A helper that deeply extracts value type from `Sweety`.
- */
-export type DeepExtractSweetyState<T> = T extends Sweety<infer R>
-  ? DeepExtractSweetyState<R>
-  : T extends Array<infer R>
-  ? Array<ExtractDeepDirect<R>>
-  : T extends ReadonlyArray<infer R>
-  ? ReadonlyArray<ExtractDeepDirect<R>>
-  : { [K in keyof T]: ExtractDeepDirect<T[K]> }
-
 export class Sweety<T> {
   /**
    * Creates a new `Sweety` instance.
