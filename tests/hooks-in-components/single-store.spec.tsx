@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useGetSweetyState, useSetSweetyState } from "../../src"
+import { Sweety, useGetSweetyState } from "../../src"
 import { Counter } from "../common"
 
 import { withinNth } from "./common"
@@ -23,26 +23,22 @@ describe("single store", () => {
   const SetterComponent: React.FC<{
     store: Sweety<Counter>
     onRender: VoidFunction
-  }> = ({ store, onRender }) => {
-    const setState = useSetSweetyState(store, Counter.compare)
-
-    return (
-      <React.Profiler id="test" onRender={onRender}>
-        <div data-testid="setter">
-          <button
-            type="button"
-            data-testid="increment"
-            onClick={() => setState(Counter.inc)}
-          />
-          <button
-            type="button"
-            data-testid="reset"
-            onClick={() => setState({ count: 0 })}
-          />
-        </div>
-      </React.Profiler>
-    )
-  }
+  }> = ({ store, onRender }) => (
+    <React.Profiler id="test" onRender={onRender}>
+      <div data-testid="setter">
+        <button
+          type="button"
+          data-testid="increment"
+          onClick={() => store.setState(Counter.inc)}
+        />
+        <button
+          type="button"
+          data-testid="reset"
+          onClick={() => store.setState({ count: 0 }, Counter.compare)}
+        />
+      </div>
+    </React.Profiler>
+  )
 
   const SingleSetterSingleGetter: React.FC<{
     store: Sweety<Counter>

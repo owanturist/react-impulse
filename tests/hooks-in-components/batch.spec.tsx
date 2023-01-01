@@ -1,13 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import {
-  batch,
-  Sweety,
-  useGetSweetyState,
-  useSetSweetyState,
-  useWatchSweety,
-} from "../../src"
+import { batch, Sweety, useGetSweetyState, useWatchSweety } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
@@ -292,13 +286,11 @@ describe.each([
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForMultiple)
       })
 
-      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by useSetSweetyState calls`, () => {
+      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by Sweety#setState calls`, () => {
         const { spy, onRender, first, second, watcher } = setup()
 
         const Component: React.FC = () => {
           const count = useCount(watcher)
-          const setFirst = useSetSweetyState(first)
-          const setSecond = useSetSweetyState(second)
 
           return (
             <React.Profiler id="test" onRender={onRender}>
@@ -307,8 +299,8 @@ describe.each([
                 data-testid="inc"
                 onClick={() => {
                   execute(() => {
-                    setFirst(Counter.inc)
-                    setSecond(Counter.inc)
+                    first.setState(Counter.inc)
+                    second.setState(Counter.inc)
                   })
                 }}
               />
@@ -402,12 +394,11 @@ describe.each([
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
       })
 
-      it(`calls the watcher ${expectedWatcherCallsForNested} times by useSetSweetyState calls`, () => {
+      it(`calls the watcher ${expectedWatcherCallsForNested} times by Sweety#setState calls`, () => {
         const { spy, onRender, store, watcher } = setup()
 
         const Component: React.FC = () => {
           const count = useCount(watcher)
-          const setState = useSetSweetyState(store)
 
           return (
             <React.Profiler id="test" onRender={onRender}>
@@ -416,7 +407,7 @@ describe.each([
                 data-testid="inc-1"
                 onClick={() => {
                   execute(() => {
-                    setState((state) => {
+                    store.setState((state) => {
                       state.first.setState(Counter.inc)
                       state.second.setState(Counter.inc)
 
@@ -429,7 +420,7 @@ describe.each([
                 type="button"
                 data-testid="inc-2"
                 onClick={() => {
-                  setState((state) => {
+                  store.setState((state) => {
                     execute(() => {
                       state.first.setState(Counter.inc)
                       state.second.setState(Counter.inc)

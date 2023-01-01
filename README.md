@@ -197,7 +197,7 @@ Sweety<T>#compare: Compare<T>
 
 The [`Compare`][compare] function compares the state of a `Sweety` instance with the new state given via [`Sweety#setState`][sweety__set_state]. Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via [`Sweety#subscribe`][sweety__subscribe].
 
-> 💬 The `Sweety#compare` function has the lowest priority when [`Sweety#setState`][sweety__set_state], or [`useSetSweetyState`][use_set_sweety_state] execute.
+> 💬 The `Sweety#compare` function has the lowest priority when [`Sweety#setState`][sweety__set_state] executes.
 
 ### `Sweety#key`
 
@@ -576,37 +576,6 @@ const Input: React.FC<{
 }
 ```
 
-### `useSetSweetyState`
-
-```dart
-function useSetSweetyState<T>(
-  sweety: Sweety<T>,
-  compare?: null | Compare<T>,
-): SetSweetyState<T>
-```
-
-A hook that returns a function to update the `Sweety` instance state. Might be useful when you need a way to update the state without subscribing to its changes.
-
-- `sweety` is a `Sweety` instance.
-- `[compare]` is an optional [`Compare`][compare] function.
-  When not defined it uses [`Sweety#compare`][sweety__compare].
-  When `null` the [`Object.is`][object_is] function applies to compare the states.
-
-```tsx
-const ClearNotifications: React.FC<{
-  notifications: Sweety<Array<string>>
-}> = ({ notifications }) => {
-  // the component won't re-render on the notifications' state change
-  const setNotifications = useSetSweetyState(notifications)
-
-  return (
-    <button onClick={() => setNotifications([])}>Clear Notifications</button>
-  )
-}
-```
-
-> 💬 The second argument `compare` function has medium priority, so it will be used instead of [`Sweety#compare`][sweety__compare].
-
 ### `batch`
 
 ```dart
@@ -647,26 +616,6 @@ type Compare<T> = (left: T, right: T) => boolean
 ```
 
 A function that compares two values and returns `true` if they are equal. Depending on the type of the values it might be reasonable to use a custom compare function such as shallow-equal or deep-equal.
-
-### `SetSweetyState`
-
-```dart
-type SetSweetyState<T> = (
-  stateOrTransform: React.SetStateAction<T>,
-  compare?: null | Compare<T>,
-) => void
-```
-
-A function that similar to the [`React.useState`][react__use_use_state] callback but with extra [`Compare`][compare] function.
-
-- `stateOrTransform` is the new state or a function that transforms the current state into the new state.
-- `[compare]` is an optional [`Compare`][compare] function applied for this call only.
-  When not defined it uses the `compare` function of the source hook.
-  When `null` the [`Object.is`][object_is] function applies to compare the states.
-
-> 💡 If `stateOrTransform` argument is a function it acts as [`batch`][batch].
-
-> 💬 The second argument `compare` function has the highest priority so it will be used instead of [`Sweety#compare`][sweety__compare] and any other `compare` passed via [`Sweety#setState`][sweety__set_state], or [`useSetSweetyState`][use_set_sweety_state].
 
 ### `ExtractSweetyState`
 
@@ -736,7 +685,6 @@ Here are scripts you want to run for publishing a new version to NPM:
 [sweety__subscribe]: #sweetysubscribe
 [use_watch_sweety]: #usewatchsweety
 [use_get_sweety_state]: #usegetsweetystate
-[use_set_sweety_state]: #usesetsweetystate
 [use_sweety]: #usesweety
 [use_sweety_effect]: #usesweetyeffect
 [watch]: #watch

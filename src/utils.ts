@@ -1,4 +1,4 @@
-import { SetStateAction, useEffect, useLayoutEffect, useRef } from "react"
+import { useEffect, useLayoutEffect, useRef } from "react"
 
 /**
  * A function that compares two values and returns `true` if they are equal.
@@ -6,20 +6,6 @@ import { SetStateAction, useEffect, useLayoutEffect, useRef } from "react"
  * a custom compare function such as shallow-equal or deep-equal.
  */
 export type Compare<T> = (left: T, right: T) => boolean
-
-/**
- * The setState function that can be used to set the state of the store.
- *
- * @param valueOrTransform either the new value or a function that will be applied to the current value before setting.
- *
- * @param compare an optional compare function with the highest priority to use for this call only.
- * If not defined it uses `compare` from `useSetSweetyState`.
- * The strict equality check function (`===`) will be used if `null`.
- */
-export type SetSweetyState<T> = (
-  valueOrTransform: SetStateAction<T>,
-  compare?: null | Compare<T>,
-) => void
 
 /**
  * @private
@@ -31,6 +17,7 @@ const isDefined = <T>(value: undefined | null | T): value is T => value != null
 /**
  * @private
  */
+// TODO use ?? instead
 export const overrideCompare = <T>(
   lowest: Compare<T>,
   ...overrides: Array<undefined | null | Compare<T>>
@@ -53,6 +40,7 @@ export const noop: VoidFunction = () => {
 const useIsomorphicLayoutEffect =
   typeof document !== "undefined" ? useLayoutEffect : useEffect
 
+// TODO move to useWatchSweety
 export const useEvent = <THandler extends (...args: Array<never>) => unknown>(
   handler: THandler,
 ): THandler => {
