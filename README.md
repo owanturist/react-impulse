@@ -794,10 +794,6 @@ type ArrayOfSweeties = Sweety<Array<Sweety<boolean>>>
 // DeepExtractSweetyState<ArrayOfSweeties> === Array<boolean>
 ```
 
-### `Dispatch`
-
-Re-export of `React.Dispatch`.
-
 ## Publish
 
 Here are scripts you want to run for publishing a new version to NPM:

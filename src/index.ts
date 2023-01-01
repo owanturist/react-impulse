@@ -1,4 +1,3 @@
-export type { Dispatch } from "react"
 export type { Compare, SetSweetyState } from "./utils"
 export type { ExtractSweetyState, DeepExtractSweetyState } from "./Sweety"
 export { Sweety } from "./Sweety"
