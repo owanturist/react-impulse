@@ -46,7 +46,6 @@
   },
   "dependencies": {
     "hoist-non-react-statics": "^3.3.2",
-    "nanoid": "^4.0.0",
     "use-sync-external-store": "^1.2.0"
   },
   "devDependencies": {

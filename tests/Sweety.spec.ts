@@ -3,34 +3,6 @@ import { isEqual } from "../src/utils"
 
 import { Counter } from "./common"
 
-describe("Sweety#key", () => {
-  it.concurrent("creates uniq store keys", () => {
-    const state = { count: 0 }
-    const store_1 = Sweety.of(state)
-    const store_2 = Sweety.of(state)
-
-    expect(store_1.key).not.toBe(store_2.key)
-    expect(store_1.getState()).toBe(store_2.getState())
-  })
-
-  it.concurrent("keeps key on methods call", () => {
-    const store = Sweety.of({ count: 0 })
-    const key = store.key
-
-    store.getState()
-    expect(store.key).toBe(key)
-
-    store.setState({ count: 1 })
-    expect(store.key).toBe(key)
-
-    store.subscribe(vi.fn)
-    expect(store.key).toBe(key)
-
-    store.clone()
-    expect(store.key).toBe(key)
-  })
-})
-
 describe("Sweety#compare", () => {
   describe("when creating a store with Sweety.of", () => {
     it.concurrent("assigns isEqual by default", () => {
@@ -241,7 +213,6 @@ describe("Sweety#clone", () => {
     const store_2 = store_1.clone()
 
     expect(store_1).not.toBe(store_2)
-    expect(store_1.key).not.toBe(store_2.key)
     expect(store_1.getState()).toBe(store_2.getState())
   })
 
@@ -250,7 +221,6 @@ describe("Sweety#clone", () => {
     const store_2 = store_1.clone(Counter.clone)
 
     expect(store_1).not.toBe(store_2)
-    expect(store_1.key).not.toBe(store_2.key)
     expect(store_1.getState()).not.toBe(store_2.getState())
     expect(store_1.getState()).toStrictEqual(store_2.getState())
   })
@@ -268,7 +238,6 @@ describe("Sweety#clone", () => {
       }))
 
       expect(store_1).not.toBe(store_2)
-      expect(store_1.key).not.toBe(store_2.key)
       expect(store_1.getState()).not.toBe(store_2.getState())
       expect(store_1.getState().count).not.toBe(store_2.getState().count)
       expect(store_1.getState().name).not.toBe(store_2.getState().name)
@@ -303,7 +272,6 @@ describe("Sweety#clone", () => {
     const store_2 = store_1.clone()
 
     expect(store_1).not.toBe(store_2)
-    expect(store_1.key).not.toBe(store_2.key)
     expect(store_1.getState()).toBe(store_2.getState())
     expect(store_1.getState().count).toBe(store_2.getState().count)
     expect(store_1.getState().name).toBe(store_2.getState().name)

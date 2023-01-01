@@ -1,5 +1,4 @@
 import type { SetStateAction } from "react"
-import { nanoid } from "nanoid"
 
 import { Compare, isEqual, isFunction, noop } from "./utils"
 import { WatchContext } from "./WatchContext"
@@ -34,8 +33,6 @@ export class Sweety<T> {
    * the listener from `subscribers`.
    */
   private readonly subscribers = new Map<VoidFunction, number>()
-  // TODO delete
-  public readonly key = nanoid()
 
   /**
    * The `Compare` function compares the state of a `Sweety` instance with the new state given via `Sweety#setState`.
