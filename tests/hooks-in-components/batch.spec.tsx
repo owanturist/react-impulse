@@ -1,14 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import {
-  batch,
-  Sweety,
-  useGetSweetyState,
-  useSetSweetyState,
-  useSweetyState,
-  useWatchSweety,
-} from "../../src"
+import { batch, Sweety, useSweetyState, useWatchSweety } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
@@ -21,8 +14,8 @@ describe.each([
     const store_2 = Sweety.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useGetSweetyState(store_1)
-      const counter_2 = useGetSweetyState(store_2)
+      const counter_1 = useSweetyState(store_1)
+      const counter_2 = useSweetyState(store_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -52,8 +45,8 @@ describe.each([
     const store_2 = Sweety.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const [counter_1, setCounter_1] = useSweetyState(store_1)
-      const [counter_2, setCounter_2] = useSweetyState(store_2)
+      const counter_1 = useSweetyState(store_1)
+      const counter_2 = useSweetyState(store_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -62,8 +55,8 @@ describe.each([
             data-testid="inc"
             onClick={() => {
               execute(() => {
-                setCounter_1(Counter.inc)
-                setCounter_2(Counter.inc)
+                store_1.setState(Counter.inc)
+                store_2.setState(Counter.inc)
               })
             }}
           />
@@ -95,9 +88,9 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const { first: store_1, second: store_2 } = useGetSweetyState(store)
-      const counter_1 = useGetSweetyState(store_1)
-      const counter_2 = useGetSweetyState(store_2)
+      const { first: store_1, second: store_2 } = useSweetyState(store)
+      const counter_1 = useSweetyState(store_1)
+      const counter_2 = useSweetyState(store_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -146,10 +139,9 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const [{ first: store_1, second: store_2 }, setState] =
-        useSweetyState(store)
-      const counter_1 = useGetSweetyState(store_1)
-      const counter_2 = useGetSweetyState(store_2)
+      const { first: store_1, second: store_2 } = useSweetyState(store)
+      const counter_1 = useSweetyState(store_1)
+      const counter_2 = useSweetyState(store_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -158,7 +150,7 @@ describe.each([
             data-testid="inc-1"
             onClick={() => {
               execute(() => {
-                setState((state) => {
+                store.setState((state) => {
                   state.first.setState(Counter.inc)
                   state.second.setState(Counter.inc)
 
@@ -171,7 +163,7 @@ describe.each([
             type="button"
             data-testid="inc-2"
             onClick={() => {
-              setState((state) => {
+              store.setState((state) => {
                 execute(() => {
                   state.first.setState(Counter.inc)
                   state.second.setState(Counter.inc)
@@ -294,13 +286,11 @@ describe.each([
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForMultiple)
       })
 
-      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by useSetSweetyState calls`, () => {
+      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by Sweety#setState calls`, () => {
         const { spy, onRender, first, second, watcher } = setup()
 
         const Component: React.FC = () => {
           const count = useCount(watcher)
-          const setFirst = useSetSweetyState(first)
-          const setSecond = useSetSweetyState(second)
 
           return (
             <React.Profiler id="test" onRender={onRender}>
@@ -309,8 +299,8 @@ describe.each([
                 data-testid="inc"
                 onClick={() => {
                   execute(() => {
-                    setFirst(Counter.inc)
-                    setSecond(Counter.inc)
+                    first.setState(Counter.inc)
+                    second.setState(Counter.inc)
                   })
                 }}
               />
@@ -404,12 +394,11 @@ describe.each([
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
       })
 
-      it(`calls the watcher ${expectedWatcherCallsForNested} times by useSetSweetyState calls`, () => {
+      it(`calls the watcher ${expectedWatcherCallsForNested} times by Sweety#setState calls`, () => {
         const { spy, onRender, store, watcher } = setup()
 
         const Component: React.FC = () => {
           const count = useCount(watcher)
-          const setState = useSetSweetyState(store)
 
           return (
             <React.Profiler id="test" onRender={onRender}>
@@ -418,7 +407,7 @@ describe.each([
                 data-testid="inc-1"
                 onClick={() => {
                   execute(() => {
-                    setState((state) => {
+                    store.setState((state) => {
                       state.first.setState(Counter.inc)
                       state.second.setState(Counter.inc)
 
@@ -431,7 +420,7 @@ describe.each([
                 type="button"
                 data-testid="inc-2"
                 onClick={() => {
-                  setState((state) => {
+                  store.setState((state) => {
                     execute(() => {
                       state.first.setState(Counter.inc)
                       state.second.setState(Counter.inc)

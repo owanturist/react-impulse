@@ -10,13 +10,14 @@ describe("default stores", () => {
     }> = ({ value: valueStore }) => {
       const defaultValueStore = useSweety("search for me")
 
-      const [value, setValue] = useSweetyState(valueStore ?? defaultValueStore)
+      const store = valueStore ?? defaultValueStore
+      const value = useSweetyState(store)
 
       return (
         <input
           role="search"
           value={value}
-          onChange={(event) => setValue(event.target.value)}
+          onChange={(event) => store.setState(event.target.value)}
         />
       )
     }
