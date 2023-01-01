@@ -195,14 +195,6 @@ Sweety<T>#compare: Compare<T>
 
 The [`Compare`][compare] function compares the state of a `Sweety` instance with the new state given via [`Sweety#setState`][sweety__set_state]. Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via [`Sweety#subscribe`][sweety__subscribe].
 
-### `Sweety#key`
-
-```dart
-Sweety<T>#key: string
-```
-
-Each `Sweety` instance has a unique key. It might get handy as the React `key` property.
-
 ### `Sweety#subscribe`
 
 ```dart

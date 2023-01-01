@@ -45,7 +45,7 @@ describe("nested stores", () => {
 
         {counts.map((count, index) => (
           <CounterComponent
-            key={count.key}
+            key={index}
             count={count}
             onRender={() => onCounterRender(index)}
           />

@@ -1,5 +1,4 @@
 import type { SetStateAction } from "react"
-import { nanoid } from "nanoid"
 
 import { Compare, isEqual, isFunction, noop } from "./utils"
 import { WatchContext } from "./WatchContext"
@@ -27,14 +26,13 @@ export class Sweety<T> {
     return new Sweety(initialState, compare ?? isEqual)
   }
 
-  // it should keep the listeners in a Map by a uniq key because
-  // the same listener can be added multiple times
-  private readonly subscribers = new Map<string, VoidFunction>()
-
   /**
-   * A unique key per `Sweety` instance.
+   * It does not use `Set<VoidFunction>` here because the same listener might be subscribed
+   * many times to a Sweety instance, so it should not unsubscribe them all when one unsubscribes.
+   * By keeping track of how many times the same listener is subscribed it knows when to drop
+   * the listener from `subscribers`.
    */
-  public readonly key = nanoid()
+  private readonly subscribers = new Map<VoidFunction, number>()
 
   /**
    * The `Compare` function compares the state of a `Sweety` instance with the new state given via `Sweety#setState`.
@@ -99,7 +97,7 @@ export class Sweety<T> {
    */
   public getState<R>(select: (value: T) => R): R
   public getState<R>(select?: (value: T) => R): T | R {
-    WatchContext.register(this)
+    WatchContext.register(this as Sweety<unknown>)
 
     return isFunction(select) ? select(this.value) : this.value
   }
@@ -148,12 +146,18 @@ export class Sweety<T> {
       return noop
     }
 
-    const subscriberId = nanoid()
+    const countWhenSubscribes = this.subscribers.get(listener) ?? 0
 
-    this.subscribers.set(subscriberId, listener)
+    this.subscribers.set(listener, countWhenSubscribes + 1)
 
     return () => {
-      this.subscribers.delete(subscriberId)
+      const countWhenUnsubscribes = this.subscribers.get(listener) ?? 0
+
+      if (countWhenUnsubscribes > 1) {
+        this.subscribers.set(listener, countWhenUnsubscribes - 1)
+      } else {
+        this.subscribers.delete(listener)
+      }
     }
   }
 }

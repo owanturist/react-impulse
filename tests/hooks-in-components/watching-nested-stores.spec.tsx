@@ -76,7 +76,7 @@ describe("watching nested stores", () => {
 
         {state.counts.map((count, index) => (
           <CounterComponent
-            key={count.key}
+            key={index}
             count={count}
             onRender={() => onCounterRender(index)}
           />
