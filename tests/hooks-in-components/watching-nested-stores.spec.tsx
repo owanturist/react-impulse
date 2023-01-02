@@ -26,7 +26,7 @@ describe("watching nested stores", () => {
       lessThanTwenty: boolean
     } & AppProps
   > = ({ moreThanTen, lessThanTwenty, store, onRender, onCounterRender }) => {
-    const [state, setState] = useSweetyState(store)
+    const state = useSweetyState(store)
 
     return (
       <>
@@ -38,7 +38,7 @@ describe("watching nested stores", () => {
             type="button"
             data-testid="add-counter"
             onClick={() => {
-              setState({
+              store.setState({
                 ...state,
                 counts: [...state.counts, Sweety.of(0)],
               })
@@ -76,7 +76,7 @@ describe("watching nested stores", () => {
 
         {state.counts.map((count, index) => (
           <CounterComponent
-            key={count.key}
+            key={index}
             count={count}
             onRender={() => onCounterRender(index)}
           />

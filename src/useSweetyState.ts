@@ -1,24 +1,21 @@
-import { useDebugValue } from "react"
+import { useCallback, useDebugValue } from "react"
+import { useSyncExternalStore } from "use-sync-external-store/shim/index.js"
 
-import { Compare, SetSweetyState } from "./utils"
 import type { Sweety } from "./Sweety"
-import { useGetSweetyState } from "./useGetSweetyState"
-import { useSetSweetyState } from "./useSetSweetyState"
+import { WatchContext } from "./WatchContext"
 
 /**
- * A hook similar to `React.useState` but for `Sweety` instances.
- * It subscribes to the `sweety` changes and returns the current state with a function to set the state.
+ * A hook that subscribes to the `sweety` changes and returns the current state.
  *
  * @param sweety a `Sweety` instance.
- * @param compare an optional `Compare` function. When not defined it uses `Sweety#compare`. When `null` the `Object.is` function applies to compare the states.
  */
-export function useSweetyState<T>(
-  sweety: Sweety<T>,
-  compare?: null | Compare<T>,
-): [state: T, setState: SetSweetyState<T>] {
-  const value = useGetSweetyState(sweety)
+export function useSweetyState<T>(sweety: Sweety<T>): T {
+  const value = useSyncExternalStore(
+    useCallback((onStoreChange) => sweety.subscribe(onStoreChange), [sweety]),
+    useCallback(() => WatchContext.ignore(() => sweety.getState()), [sweety]),
+  )
 
   useDebugValue(value)
 
-  return [value, useSetSweetyState(sweety, compare)]
+  return value
 }

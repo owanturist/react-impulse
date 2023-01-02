@@ -107,3 +107,24 @@ describe("with lazy initial value", () => {
     },
   )
 })
+
+describe("with compare function", () => {
+  it.concurrent("applies Object.is by default", () => {
+    const { result } = renderHook(() => useSweety({ count: 0 }))
+
+    expect(result.current.compare).toBe(Object.is)
+  })
+
+  it.concurrent("applies Object.is when passing null as compare", () => {
+    const { result } = renderHook(() => useSweety({ count: 0 }, null))
+
+    expect(result.current.compare).toBe(Object.is)
+  })
+
+  it.concurrent("passes custom compare function", () => {
+    const compare = vi.fn()
+    const { result } = renderHook(() => useSweety({ count: 0 }, compare))
+
+    expect(result.current.compare).toBe(compare)
+  })
+})

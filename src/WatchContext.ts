@@ -11,7 +11,7 @@ import { WarningSet, WarningSource } from "./validation"
  * @private
  */
 export class WatchContext {
-  public static current: null | WatchContext = null
+  private static current: null | WatchContext = null
 
   public static warning(warningSet: WarningSet): boolean {
     const warningSource = WatchContext.current?.warningSource
@@ -42,7 +42,7 @@ export class WatchContext {
     return true
   }
 
-  public static register<T>(store: Sweety<T>): void {
+  public static register(store: Sweety<unknown>): void {
     WatchContext.current?.register(store)
   }
 
@@ -62,8 +62,8 @@ export class WatchContext {
     return result
   }
 
-  private readonly deadCleanups = new Set<string>()
-  private readonly cleanups = new Map<string, VoidFunction>()
+  private readonly deadCleanups = new Set<Sweety<unknown>>()
+  private readonly cleanups = new Map<Sweety<unknown>, VoidFunction>()
 
   private version = 0
 
@@ -71,14 +71,14 @@ export class WatchContext {
 
   public constructor(private readonly warningSource: null | WarningSource) {}
 
-  private register<T>(store: Sweety<T>): void {
-    if (this.cleanups.has(store.key)) {
+  private register(store: Sweety<unknown>): void {
+    if (this.cleanups.has(store)) {
       // still alive
-      this.deadCleanups.delete(store.key)
+      this.deadCleanups.delete(store)
     } else {
       WatchContext.ignore(() => {
         this.cleanups.set(
-          store.key,
+          store,
           store.subscribe(() => {
             // the listener registers a watcher so the watcher will emit once per (batch) setState
             SetStateContext.registerWatchContext(this)
@@ -89,12 +89,12 @@ export class WatchContext {
   }
 
   private cleanupObsolete(): void {
-    this.deadCleanups.forEach((key) => {
-      const cleanup = this.cleanups.get(key)
+    this.deadCleanups.forEach((sweety) => {
+      const cleanup = this.cleanups.get(sweety)
 
       if (cleanup != null) {
         cleanup()
-        this.cleanups.delete(key)
+        this.cleanups.delete(sweety)
       }
     })
 
@@ -108,7 +108,7 @@ export class WatchContext {
 
     // fill up dead cleanups with all of the current cleanups
     // to keep only real dead once during .register() call
-    this.cleanups.forEach((_, key) => this.deadCleanups.add(key))
+    this.cleanups.forEach((_, sweety) => this.deadCleanups.add(sweety))
 
     const value = callback()
 
