@@ -2,6 +2,8 @@ import { renderHook } from "@testing-library/react-hooks"
 
 import { useSweety } from "../src"
 
+import { Counter } from "./common"
+
 describe("with direct initial value", () => {
   it.concurrent("creates a store with an initial value", () => {
     const initial = { count: 0 }
@@ -106,4 +108,26 @@ describe("with lazy initial value", () => {
       expect(init).not.toHaveBeenCalled()
     },
   )
+})
+
+describe("with compare function", () => {
+  it.concurrent("applies Object.is by default", () => {
+    const { result } = renderHook(() => useSweety({ count: 0 }))
+
+    expect(result.current.compare).toBe(Object.is)
+  })
+
+  it.concurrent("applies Object.is when passing null as compare", () => {
+    const { result } = renderHook(() => useSweety({ count: 0 }, null))
+
+    expect(result.current.compare).toBe(Object.is)
+  })
+
+  it.concurrent("passes custom compare function", () => {
+    const { result } = renderHook(() =>
+      useSweety({ count: 0 }, Counter.compare),
+    )
+
+    expect(result.current.compare).toBe(Counter.compare)
+  })
 })

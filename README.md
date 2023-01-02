@@ -306,13 +306,16 @@ watch.forwardRef.memo(/* */)
 ### `useSweety`
 
 ```dart
-function useSweety<T>(initialState: T): Sweety<T>
-function useSweety<T>(lazyInitialState: () => T): Sweety<T>
+function useSweety<T>(
+  initialState: T | (() => T),
+  compare?: null | Compare<T>
+): Sweety<T>
 ```
 
-A hook that initiates a stable (never changing) `Sweety` instance.
+- `initialState` argument is the state used during the initial render. If the initial state is the result of an expensive computation, you may provide a function instead, which will be executed only on the initial render.
+- `[compare]` is an optional [`Compare`][compare] function applied as [`Sweety#compare`][sweety__compare]. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
-The `initialState` argument is the state used during the initial render. If the initial state is the result of an expensive computation, you may provide the `lazyInitialState` function instead, which will be executed only on the initial render.
+A hook that initiates a stable (never changing) `Sweety` instance.
 
 > 💬 The initial state is disregarded during subsequent re-renders.
 

@@ -17,10 +17,7 @@ export class Sweety<T> {
    * @param initialState the initial state.
    * @param compare an optional `Compare` function applied as `Sweety#compare`. When not defined or `null` then `Object.is` applies as a fallback.
    */
-  public static of<TValue>(
-    initialState: TValue,
-    compare?: null | Compare<TValue>,
-  ): Sweety<TValue> {
+  public static of<T>(initialState: T, compare?: null | Compare<T>): Sweety<T> {
     WatchContext.warning(WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING)
 
     return new Sweety(initialState, compare ?? isEqual)
