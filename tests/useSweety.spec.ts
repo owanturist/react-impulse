@@ -2,8 +2,6 @@ import { renderHook } from "@testing-library/react-hooks"
 
 import { useSweety } from "../src"
 
-import { Counter } from "./common"
-
 describe("with direct initial value", () => {
   it.concurrent("creates a store with an initial value", () => {
     const initial = { count: 0 }
@@ -124,10 +122,9 @@ describe("with compare function", () => {
   })
 
   it.concurrent("passes custom compare function", () => {
-    const { result } = renderHook(() =>
-      useSweety({ count: 0 }, Counter.compare),
-    )
+    const compare = vi.fn()
+    const { result } = renderHook(() => useSweety({ count: 0 }, compare))
 
-    expect(result.current.compare).toBe(Counter.compare)
+    expect(result.current.compare).toBe(compare)
   })
 })
