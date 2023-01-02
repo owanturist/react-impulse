@@ -2,7 +2,7 @@ import { render, screen, fireEvent, act } from "@testing-library/react"
 import React from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
-import { Sweety, useWatchSweety, watch } from "../../src"
+import { Sweety, useGetSweetyState, useWatchSweety, watch } from "../../src"
 
 vi.mock("use-sync-external-store/shim/with-selector.js", async () => {
   const actual: {
@@ -215,6 +215,32 @@ describe("watch()", () => {
 
     expect(result).toHaveTextContent("Done")
     expect(onRender).toHaveBeenCalledTimes(1)
+  })
+
+  it("should not subscribe twice with useSweetyState", () => {
+    const Component = watch<{
+      count: Sweety<number>
+    }>(({ count }) => {
+      const x = useGetSweetyState(count)
+
+      return <span data-testid="result">{x}</span>
+    })
+
+    const store = Sweety.of(1)
+
+    render(<Component count={store} />)
+
+    const result = screen.getByTestId("result")
+
+    expect(result).toHaveTextContent("1")
+    expect(store).toHaveProperty("subscribers.size", 1)
+
+    act(() => {
+      store.setState(2)
+    })
+
+    expect(result).toHaveTextContent("2")
+    expect(store).toHaveProperty("subscribers.size", 1)
   })
 })
 
