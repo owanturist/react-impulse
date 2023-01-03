@@ -1,14 +1,14 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useSweety, useSweetyState } from "../../src"
+import { Impulse, useImpulse, useSweetyState } from "../../src"
 
 describe("default stores", () => {
   it("Uses local default Sweety when nullable", () => {
     const SearchBar: React.FC<{
       value?: Impulse<string>
     }> = ({ value: valueStore }) => {
-      const defaultValueStore = useSweety("search for me")
+      const defaultValueStore = useImpulse("search for me")
 
       const store = valueStore ?? defaultValueStore
       const value = useSweetyState(store)
