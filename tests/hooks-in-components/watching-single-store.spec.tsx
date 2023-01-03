@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useWatchSweety, watch } from "../../src"
+import { Impulse, useWatchImpulse, watch } from "../../src"
 
 import { CounterComponent } from "./common"
 
@@ -29,7 +29,7 @@ describe("watching single store", () => {
   )
 
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useWatchSweety(
+    const [moreThanOne, lessThanFour] = useWatchImpulse(
       () => {
         const count = props.count.getState()
 
@@ -50,7 +50,7 @@ describe("watching single store", () => {
   }
 
   const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useWatchSweety<[boolean, boolean]>(
+    const [moreThanOne, lessThanFour] = useWatchImpulse<[boolean, boolean]>(
       React.useCallback(() => {
         const count = props.count.getState()
 
@@ -77,8 +77,8 @@ describe("watching single store", () => {
   }
 
   const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchSweety(() => props.count.getState() > 1)
-    const lessThanFour = useWatchSweety(() => props.count.getState() < 4)
+    const moreThanOne = useWatchImpulse(() => props.count.getState() > 1)
+    const lessThanFour = useWatchImpulse(() => props.count.getState() < 4)
 
     return (
       <GenericApp
@@ -90,10 +90,10 @@ describe("watching single store", () => {
   }
 
   const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchSweety(
+    const moreThanOne = useWatchImpulse(
       React.useCallback(() => props.count.getState() > 1, [props.count]),
     )
-    const lessThanFour = useWatchSweety(
+    const lessThanFour = useWatchImpulse(
       React.useCallback(() => props.count.getState() < 4, [props.count]),
     )
 

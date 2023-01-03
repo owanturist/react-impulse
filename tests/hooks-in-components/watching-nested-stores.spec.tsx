@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useImpulseState, useWatchSweety, watch } from "../../src"
+import { Impulse, useImpulseState, useWatchImpulse, watch } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -86,7 +86,7 @@ describe("watching nested stores", () => {
   }
 
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanTen, lessThanTwenty] = useWatchSweety(
+    const [moreThanTen, lessThanTwenty] = useWatchImpulse(
       () => {
         const total = AppState.sum(props.store.getState())
 
@@ -107,7 +107,7 @@ describe("watching nested stores", () => {
   }
 
   const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanTen, lessThanTwenty] = useWatchSweety<[boolean, boolean]>(
+    const [moreThanTen, lessThanTwenty] = useWatchImpulse<[boolean, boolean]>(
       React.useCallback(() => {
         const total = AppState.sum(props.store.getState())
 
@@ -134,12 +134,12 @@ describe("watching nested stores", () => {
   }
 
   const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanTen = useWatchSweety(() => {
+    const moreThanTen = useWatchImpulse(() => {
       const total = props.store.getState(AppState.sum)
 
       return total > 10
     })
-    const lessThanTwenty = useWatchSweety(() => {
+    const lessThanTwenty = useWatchImpulse(() => {
       const total = AppState.sum(props.store.getState())
 
       return total < 20
@@ -155,14 +155,14 @@ describe("watching nested stores", () => {
   }
 
   const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanTen = useWatchSweety(
+    const moreThanTen = useWatchImpulse(
       React.useCallback(() => {
         const total = props.store.getState(AppState.sum)
 
         return total > 10
       }, [props.store]),
     )
-    const lessThanTwenty = useWatchSweety(
+    const lessThanTwenty = useWatchImpulse(
       React.useCallback(() => {
         const total = AppState.sum(props.store.getState())
 

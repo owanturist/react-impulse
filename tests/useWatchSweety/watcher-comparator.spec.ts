@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Impulse, useWatchSweety } from "../../src"
+import { Impulse, useWatchImpulse } from "../../src"
 import { Counter, WithCompare, WithStore } from "../common"
 import { Compare, isEqual } from "../../src/utils"
 
@@ -9,13 +9,13 @@ describe.each([
   [
     "inline watcher",
     ({ store }: WithStore, compare?: Compare<Counter>) => {
-      return useWatchSweety(() => store.getState(), compare)
+      return useWatchImpulse(() => store.getState(), compare)
     },
   ],
   [
     "memoized watcher",
     ({ store }: WithStore, compare?: Compare<Counter>) => {
-      return useWatchSweety(
+      return useWatchImpulse(
         useCallback(() => store.getState(), [store]),
         compare,
       )

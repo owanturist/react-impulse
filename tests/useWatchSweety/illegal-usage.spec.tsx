@@ -7,7 +7,7 @@ import {
   useImpulseEffect,
   useImpulseLayoutEffect,
   useImpulseMemo,
-  useWatchSweety,
+  useWatchImpulse,
   watch,
 } from "../../src"
 import {
@@ -42,16 +42,16 @@ describe("calling Sweety.of()", () => {
     ],
     [
       "inline useWatchSweety",
-      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchSweety,
+      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchImpulse,
       () => {
-        return useWatchSweety(() => Impulse.of(1).getState())
+        return useWatchImpulse(() => Impulse.of(1).getState())
       },
     ],
     [
       "memoized useWatchSweety",
-      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchSweety,
+      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchImpulse,
       () => {
-        return useWatchSweety(
+        return useWatchImpulse(
           React.useCallback(() => Impulse.of(1).getState(), []),
         )
       },
@@ -113,16 +113,16 @@ describe("calling Sweety#clone()", () => {
     ],
     [
       "inline useWatchSweety",
-      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useWatchSweety,
+      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useWatchImpulse,
       ({ store }: WithStore<number>) => {
-        return useWatchSweety(() => store.clone().getState())
+        return useWatchImpulse(() => store.clone().getState())
       },
     ],
     [
       "memoized useWatchSweety",
-      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useWatchSweety,
+      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useWatchImpulse,
       ({ store }: WithStore<number>) => {
-        return useWatchSweety(
+        return useWatchImpulse(
           React.useCallback(() => store.clone().getState(), [store]),
         )
       },
@@ -203,9 +203,9 @@ describe("calling Sweety#setState()", () => {
     ],
     [
       "inline useWatchSweety",
-      WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.useWatchSweety,
+      WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.useWatchImpulse,
       ({ store }: WithStore<number>) => {
-        return useWatchSweety(() => {
+        return useWatchImpulse(() => {
           store.setState(3)
 
           return store.getState()
@@ -214,9 +214,9 @@ describe("calling Sweety#setState()", () => {
     ],
     [
       "memoized useWatchSweety",
-      WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.useWatchSweety,
+      WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.useWatchImpulse,
       ({ store }: WithStore<number>) => {
-        return useWatchSweety(
+        return useWatchImpulse(
           React.useCallback(() => {
             store.setState(3)
 
@@ -302,12 +302,12 @@ describe("calling Sweety#subscribe()", () => {
     ],
     [
       "inline useWatchSweety",
-      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useWatchSweety,
+      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useWatchImpulse,
       ({
         store,
         listener = vi.fn(),
       }: WithStore<number> & Partial<WithListener>) => {
-        return useWatchSweety(() => {
+        return useWatchImpulse(() => {
           store.subscribe(listener)
 
           return store.getState()
@@ -316,12 +316,12 @@ describe("calling Sweety#subscribe()", () => {
     ],
     [
       "memoized useWatchSweety",
-      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useWatchSweety,
+      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useWatchImpulse,
       ({
         store,
         listener = vi.fn(),
       }: WithStore<number> & Partial<WithListener>) => {
-        return useWatchSweety(
+        return useWatchImpulse(
           React.useCallback(() => {
             store.subscribe(listener)
 

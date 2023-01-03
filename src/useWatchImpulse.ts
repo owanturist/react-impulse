@@ -5,18 +5,20 @@ import { useWatchContext } from "./useWatchContext"
 import { Compare, isEqual } from "./utils"
 
 /**
- * A hook that executes the `watcher` function whenever any of the involved `Sweety` instances' state update
+ * A hook that executes the `watcher` function whenever any of the involved Impulses' states update
  * but enqueues a re-render only when the resulting value is different from the previous.
  *
- * @param watcher a function that subscribes to all `Sweety` instances calling the `Sweety#getState` method inside the function.
+ * @param watcher a function that subscribes to all Impulses calling the `Impulse#getState` method inside the function.
  * @param compare an optional `Compare` function. When not defined or `null` then `Object.is` applies as a fallback.
+ *
+ * @version 1.0.0
  */
-export function useWatchSweety<T>(
+export function useWatchImpulse<T>(
   watcher: () => T,
   compare?: null | Compare<T>,
 ): T {
   const { executeWatcher, subscribe, getState } = useWatchContext({
-    warningSource: "useWatchSweety",
+    warningSource: "useWatchImpulse",
   })
 
   // the select calls each time when updates either the watcher or the version

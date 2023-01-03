@@ -1,14 +1,14 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Impulse, useWatchSweety } from "../../src"
+import { Impulse, useWatchImpulse } from "../../src"
 import { Counter, WithSpy, WithStore } from "../common"
 
 describe.each([
   [
     "without comparator",
     ({ store, spy }: WithStore & WithSpy) => {
-      return useWatchSweety(() => {
+      return useWatchImpulse(() => {
         const value = store.getState()
 
         spy(value)
@@ -20,7 +20,7 @@ describe.each([
   [
     "with inline comparator",
     ({ store, spy }: WithStore & WithSpy) => {
-      return useWatchSweety(
+      return useWatchImpulse(
         () => {
           const value = store.getState()
 
@@ -35,7 +35,7 @@ describe.each([
   [
     "with memoized comparator",
     ({ store, spy }: WithStore & WithSpy) => {
-      return useWatchSweety(() => {
+      return useWatchImpulse(() => {
         const value = store.getState()
 
         spy(value)
@@ -98,7 +98,7 @@ describe.each([
   [
     "without comparator",
     ({ store, spy }: WithStore & WithSpy) => {
-      return useWatchSweety(
+      return useWatchImpulse(
         useCallback(() => {
           const value = store.getState()
 
@@ -112,7 +112,7 @@ describe.each([
   [
     "with inline comparator",
     ({ store, spy }: WithStore & WithSpy) => {
-      return useWatchSweety(
+      return useWatchImpulse(
         useCallback(() => {
           const value = store.getState()
 
@@ -127,7 +127,7 @@ describe.each([
   [
     "with memoized comparator",
     ({ store, spy }: WithStore & WithSpy) => {
-      return useWatchSweety(
+      return useWatchImpulse(
         useCallback(() => {
           const value = store.getState()
 

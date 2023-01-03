@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Compare, Impulse, useWatchSweety } from "../../src"
+import { Compare, Impulse, useWatchImpulse } from "../../src"
 import { Counter, WithIsActive, WithStore, WithSpy } from "../common"
 
 describe.each([
@@ -11,7 +11,7 @@ describe.each([
       { store, isActive, spy }: WithStore & WithIsActive & Partial<WithSpy>,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchSweety(() => {
+      return useWatchImpulse(() => {
         spy?.()
 
         return isActive ? store.getState() : { count: -1 }
@@ -24,7 +24,7 @@ describe.each([
       { store, isActive, spy }: WithStore & WithIsActive & Partial<WithSpy>,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchSweety(
+      return useWatchImpulse(
         useCallback(() => {
           spy?.()
 

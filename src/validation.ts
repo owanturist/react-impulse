@@ -1,4 +1,4 @@
-export type WarningSource = "useWatchSweety" | "useImpulseMemo" | "watch"
+export type WarningSource = "useWatchImpulse" | "useImpulseMemo" | "watch"
 
 export type WarningSet = Record<WarningSource, null | string>
 
@@ -19,7 +19,7 @@ const makeHookWarningMessage = (
 }
 
 const makeWarningSet = (options: MakeHookWarningOptions): WarningSet => ({
-  useWatchSweety: makeHookWarningMessage("useWatchSweety(watcher)", options),
+  useWatchImpulse: makeHookWarningMessage("useWatchImpulse(watcher)", options),
   useImpulseMemo: makeHookWarningMessage("useImpulseMemo(factory)", options),
   watch: options.isWatchAffected
     ? `You may not call ${options.method} during rendering of watch(Component)`

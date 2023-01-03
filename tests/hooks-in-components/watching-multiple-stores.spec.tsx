@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useWatchSweety, watch } from "../../src"
+import { Impulse, useWatchImpulse, watch } from "../../src"
 
 import { CounterComponent, withinNth } from "./common"
 
@@ -49,7 +49,7 @@ describe("watching multiple stores", () => {
   )
 
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useWatchSweety(
+    const [moreThanOne, lessThanFour] = useWatchImpulse(
       () => {
         const sum = props.firstCount.getState() + props.secondCount.getState()
 
@@ -70,7 +70,7 @@ describe("watching multiple stores", () => {
   }
 
   const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useWatchSweety<[boolean, boolean]>(
+    const [moreThanOne, lessThanFour] = useWatchImpulse<[boolean, boolean]>(
       React.useCallback(() => {
         const sum = props.firstCount.getState() + props.secondCount.getState()
 
@@ -97,12 +97,12 @@ describe("watching multiple stores", () => {
   }
 
   const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchSweety(() => {
+    const moreThanOne = useWatchImpulse(() => {
       const sum = props.firstCount.getState() + props.secondCount.getState()
 
       return sum > 2
     })
-    const lessThanFour = useWatchSweety(() => {
+    const lessThanFour = useWatchImpulse(() => {
       const sum = props.firstCount.getState() + props.secondCount.getState()
 
       return sum < 7
@@ -118,14 +118,14 @@ describe("watching multiple stores", () => {
   }
 
   const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchSweety(
+    const moreThanOne = useWatchImpulse(
       React.useCallback(() => {
         const sum = props.firstCount.getState() + props.secondCount.getState()
 
         return sum > 2
       }, [props.firstCount, props.secondCount]),
     )
-    const lessThanFour = useWatchSweety(
+    const lessThanFour = useWatchImpulse(
       React.useCallback(() => {
         const sum = props.firstCount.getState() + props.secondCount.getState()
 

@@ -1,20 +1,20 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Compare, Impulse, useWatchSweety } from "../../src"
+import { Compare, Impulse, useWatchImpulse } from "../../src"
 import { Counter, WithSpy, WithStore } from "../common"
 
 describe.each([
   [
     "inline watcher",
     ({ store }: WithStore, compare?: Compare<Counter>) => {
-      return useWatchSweety(() => store.getState(), compare)
+      return useWatchImpulse(() => store.getState(), compare)
     },
   ],
   [
     "memoized watcher",
     ({ store }: WithStore, compare?: Compare<Counter>) => {
-      return useWatchSweety(
+      return useWatchImpulse(
         useCallback(() => store.getState(), [store]),
         compare,
       )
@@ -159,13 +159,13 @@ describe("transform state's value inside watcher", () => {
     [
       "inline watcher",
       ({ store }: WithStore, compare?: Compare<[boolean, boolean]>) => {
-        return useWatchSweety(() => store.getState(toTuple), compare)
+        return useWatchImpulse(() => store.getState(toTuple), compare)
       },
     ],
     [
       "memoized watcher",
       ({ store }: WithStore, compare?: Compare<[boolean, boolean]>) => {
-        return useWatchSweety(
+        return useWatchImpulse(
           useCallback(() => store.getState(toTuple), [store]),
           compare,
         )
@@ -296,7 +296,7 @@ describe("transform state's value inside watcher", () => {
     [
       "inline watcher",
       ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchSweety(() => {
+        return useWatchImpulse(() => {
           spy()
 
           return store.getState()
@@ -306,7 +306,7 @@ describe("transform state's value inside watcher", () => {
     [
       "memoized watcher",
       ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchSweety(
+        return useWatchImpulse(
           useCallback(() => {
             spy()
 
@@ -360,14 +360,14 @@ describe("multiple Sweety#getState() calls", () => {
     [
       "inline watcher",
       ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchSweety(() => {
+        return useWatchImpulse(() => {
           spy()
 
           return store.getState()
         }, compare)
       },
       ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchSweety(() => {
+        return useWatchImpulse(() => {
           spy()
 
           return Counter.merge(store.getState(), store.getState())
@@ -377,7 +377,7 @@ describe("multiple Sweety#getState() calls", () => {
     [
       "memoized watcher",
       ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchSweety(
+        return useWatchImpulse(
           useCallback(() => {
             spy()
 
@@ -387,7 +387,7 @@ describe("multiple Sweety#getState() calls", () => {
         )
       },
       ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchSweety(
+        return useWatchImpulse(
           useCallback(() => {
             spy()
 

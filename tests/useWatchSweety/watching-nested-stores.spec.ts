@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { batch, Compare, Impulse, useWatchSweety } from "../../src"
+import { batch, Compare, Impulse, useWatchImpulse } from "../../src"
 import {
   Counter,
   WithFirst,
@@ -18,7 +18,7 @@ describe.each([
       { store }: WithStore<WithFirst & WithSecond>,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchSweety(() => {
+      return useWatchImpulse(() => {
         const { first, second } = store.getState()
 
         return Counter.merge(first.getState(), second.getState())
@@ -31,7 +31,7 @@ describe.each([
       { store }: WithStore<WithFirst & WithSecond>,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchSweety(
+      return useWatchImpulse(
         useCallback(() => {
           const { first, second } = store.getState()
 
@@ -137,7 +137,7 @@ describe.each([
   [
     "inline watcher",
     ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-      return useWatchSweety(() => {
+      return useWatchImpulse(() => {
         spy()
 
         return store.getState()
@@ -147,7 +147,7 @@ describe.each([
       { spy, store }: WithStore<WithFirst & WithSecond & WithThird> & WithSpy,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchSweety(() => {
+      return useWatchImpulse(() => {
         spy()
 
         const { first, second, third } = store.getState()
@@ -164,7 +164,7 @@ describe.each([
   [
     "memoized watcher",
     ({ spy, store }: WithStore & WithSpy) => {
-      return useWatchSweety(
+      return useWatchImpulse(
         useCallback(() => {
           spy()
 
@@ -176,7 +176,7 @@ describe.each([
       spy,
       store,
     }: WithStore<WithFirst & WithSecond & WithThird> & WithSpy) => {
-      return useWatchSweety(
+      return useWatchImpulse(
         useCallback(() => {
           spy()
 

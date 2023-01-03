@@ -2,7 +2,7 @@ import { render, screen, fireEvent, act } from "@testing-library/react"
 import React from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
-import { Impulse, useImpulseState, useWatchSweety, watch } from "../../src"
+import { Impulse, useImpulseState, useWatchImpulse, watch } from "../../src"
 
 vi.mock("use-sync-external-store/shim/with-selector.js", async () => {
   const actual: {
@@ -181,7 +181,7 @@ describe("watch()", () => {
     const Component = watch<{
       count: Impulse<number>
     }>(({ count }) => {
-      const isMoreThanTwo = useWatchSweety(() => count.getState() > 2)
+      const isMoreThanTwo = useWatchImpulse(() => count.getState() > 2)
 
       return <span data-testid="result">{isMoreThanTwo && "Done"}</span>
     })

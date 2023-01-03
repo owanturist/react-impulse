@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { batch, Impulse, useImpulseState, useWatchSweety } from "../../src"
+import { batch, Impulse, useImpulseState, useWatchImpulse } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
@@ -200,7 +200,7 @@ describe.each([
     expectedWatcherCallsForNested: 2,
     execute: (cb: VoidFunction) => cb(),
     useCount: (watcher: () => number) => {
-      return useWatchSweety(() => watcher())
+      return useWatchImpulse(() => watcher())
     },
   },
   {
@@ -209,7 +209,7 @@ describe.each([
     expectedWatcherCallsForNested: 2,
     execute: batch,
     useCount: (watcher: () => number) => {
-      return useWatchSweety(() => watcher())
+      return useWatchImpulse(() => watcher())
     },
   },
   {
@@ -218,7 +218,7 @@ describe.each([
     expectedWatcherCallsForNested: 1,
     execute: (cb: VoidFunction) => cb(),
     useCount: (watcher: () => number) => {
-      return useWatchSweety(React.useCallback(() => watcher(), [watcher]))
+      return useWatchImpulse(React.useCallback(() => watcher(), [watcher]))
     },
   },
   {
@@ -227,7 +227,7 @@ describe.each([
     expectedWatcherCallsForNested: 1,
     execute: batch,
     useCount: (watcher: () => number) => {
-      return useWatchSweety(React.useCallback(() => watcher(), [watcher]))
+      return useWatchImpulse(React.useCallback(() => watcher(), [watcher]))
     },
   },
 ])(

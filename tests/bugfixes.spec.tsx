@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, watch, useImpulseState, useWatchSweety } from "../src"
+import { Impulse, watch, useImpulseState, useWatchImpulse } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -53,11 +53,11 @@ describe("watching misses when defined after useEffect #140", () => {
   }
 
   const useWatchInline = (store: Impulse<number>) => {
-    return useWatchSweety(() => store.getState())
+    return useWatchImpulse(() => store.getState())
   }
 
   const useWatchMemoized = (store: Impulse<number>) => {
-    return useWatchSweety(React.useCallback(() => store.getState(), [store]))
+    return useWatchImpulse(React.useCallback(() => store.getState(), [store]))
   }
 
   describe.each([
@@ -123,7 +123,7 @@ describe("Use Impulse#getState() in Impulse#toJSON() and Impulse#toString() #321
     const Component: React.FC<{
       count: Impulse<number>
     }> = ({ count }) => {
-      const x = useWatchSweety(() => convert(count))
+      const x = useWatchImpulse(() => convert(count))
 
       return <span data-testid="result">{x}</span>
     }
