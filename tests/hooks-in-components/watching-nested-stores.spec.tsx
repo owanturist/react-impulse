@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useSweetyState, useWatchSweety, watch } from "../../src"
+import { Impulse, useImpulseState, useWatchSweety, watch } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -26,7 +26,7 @@ describe("watching nested stores", () => {
       lessThanTwenty: boolean
     } & AppProps
   > = ({ moreThanTen, lessThanTwenty, store, onRender, onCounterRender }) => {
-    const state = useSweetyState(store)
+    const state = useImpulseState(store)
 
     return (
       <>

@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useSweetyState } from "../../src"
+import { Impulse, useImpulseState } from "../../src"
 import { Counter } from "../common"
 
 import { withinNth } from "./common"
@@ -11,7 +11,7 @@ describe("single store", () => {
     store: Impulse<Counter>
     onRender: VoidFunction
   }> = ({ store, onRender }) => {
-    const state = useSweetyState(store)
+    const state = useImpulseState(store)
 
     return (
       <React.Profiler id="test" onRender={onRender}>

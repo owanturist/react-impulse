@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { batch, Impulse, useSweetyState, useWatchSweety } from "../../src"
+import { batch, Impulse, useImpulseState, useWatchSweety } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
@@ -14,8 +14,8 @@ describe.each([
     const store_2 = Impulse.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useSweetyState(store_1)
-      const counter_2 = useSweetyState(store_2)
+      const counter_1 = useImpulseState(store_1)
+      const counter_2 = useImpulseState(store_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -45,8 +45,8 @@ describe.each([
     const store_2 = Impulse.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useSweetyState(store_1)
-      const counter_2 = useSweetyState(store_2)
+      const counter_1 = useImpulseState(store_1)
+      const counter_2 = useImpulseState(store_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -88,9 +88,9 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const { first: store_1, second: store_2 } = useSweetyState(store)
-      const counter_1 = useSweetyState(store_1)
-      const counter_2 = useSweetyState(store_2)
+      const { first: store_1, second: store_2 } = useImpulseState(store)
+      const counter_1 = useImpulseState(store_1)
+      const counter_2 = useImpulseState(store_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -139,9 +139,9 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const { first: store_1, second: store_2 } = useSweetyState(store)
-      const counter_1 = useSweetyState(store_1)
-      const counter_2 = useSweetyState(store_2)
+      const { first: store_1, second: store_2 } = useImpulseState(store)
+      const counter_1 = useImpulseState(store_1)
+      const counter_2 = useImpulseState(store_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>

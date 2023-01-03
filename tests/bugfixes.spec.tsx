@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, watch, useSweetyState, useWatchSweety } from "../src"
+import { Impulse, watch, useImpulseState, useWatchSweety } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -65,12 +65,12 @@ describe("watching misses when defined after useEffect #140", () => {
     ["after", ComponentWatchAfterEffect],
   ])("calls depending hook %s useEffect", (_, Component) => {
     describe.each([
-      ["useSweetyState", useSweetyState],
+      ["useSweetyState", useImpulseState],
       ["inline useWatchSweety", useWatchInline],
       ["memoized useWatchSweety", useWatchMemoized],
     ])("with %s as useGetFirst", (__, useGetFirst) => {
       it.each([
-        ["useSweetyState", useSweetyState],
+        ["useSweetyState", useImpulseState],
         ["inline useWatchSweety", useWatchInline],
         ["memoized useWatchSweety", useWatchMemoized],
       ])("with %s as useGetSecond", (___, useGetSecond) => {

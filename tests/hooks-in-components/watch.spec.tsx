@@ -2,7 +2,7 @@ import { render, screen, fireEvent, act } from "@testing-library/react"
 import React from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
-import { Impulse, useSweetyState, useWatchSweety, watch } from "../../src"
+import { Impulse, useImpulseState, useWatchSweety, watch } from "../../src"
 
 vi.mock("use-sync-external-store/shim/with-selector.js", async () => {
   const actual: {
@@ -221,7 +221,7 @@ describe("watch()", () => {
     const Component = watch<{
       count: Impulse<number>
     }>(({ count }) => {
-      const x = useSweetyState(count)
+      const x = useImpulseState(count)
 
       return <span data-testid="result">{x}</span>
     })

@@ -1,7 +1,7 @@
 import React from "react"
 import { screen, within } from "@testing-library/react"
 
-import { Impulse, useSweetyState } from "../../src"
+import { Impulse, useImpulseState } from "../../src"
 
 export const withinNth = (testId: string, position: number) => {
   return within(screen.getAllByTestId(testId)[position]!)
@@ -24,7 +24,7 @@ export const CounterComponent: React.FC<{
   onRender: VoidFunction
 }> = React.memo(
   ({ count: countStore, onRender }) => {
-    const count = useSweetyState(countStore)
+    const count = useImpulseState(countStore)
 
     return (
       <React.Profiler id="test" onRender={onRender}>

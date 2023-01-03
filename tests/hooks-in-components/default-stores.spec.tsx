@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useImpulse, useSweetyState } from "../../src"
+import { Impulse, useImpulse, useImpulseState } from "../../src"
 
 describe("default stores", () => {
   it("Uses local default Sweety when nullable", () => {
@@ -11,7 +11,7 @@ describe("default stores", () => {
       const defaultValueStore = useImpulse("search for me")
 
       const store = valueStore ?? defaultValueStore
-      const value = useSweetyState(store)
+      const value = useImpulseState(store)
 
       return (
         <input
