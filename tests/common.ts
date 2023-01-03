@@ -28,8 +28,8 @@ export abstract class Counter {
   }
 }
 
-export interface WithStore<T = Counter> {
-  store: Impulse<T>
+export interface WithImpulse<T = Counter> {
+  impulse: Impulse<T>
 }
 
 export interface WithCompare<T = Counter> {

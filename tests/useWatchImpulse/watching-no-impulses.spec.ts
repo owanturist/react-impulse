@@ -3,7 +3,7 @@ import { renderHook } from "@testing-library/react-hooks"
 
 import { useWatchImpulse } from "../../src"
 
-describe("watching no stores", () => {
+describe("watching no impulses", () => {
   it.concurrent.each([
     [
       "inline",

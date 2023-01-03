@@ -17,7 +17,7 @@ import {
   WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
 } from "../../src/validation"
 import { noop } from "../../src/utils"
-import { WithStore, WithListener } from "../common"
+import { WithImpulse, WithListener } from "../common"
 
 const console$error = vi
   .spyOn(console, "error")
@@ -31,24 +31,24 @@ afterAll(() => {
   console$error.mockRestore()
 })
 
-describe("calling Sweety.of()", () => {
+describe("calling Impulse.of()", () => {
   describe.each([
     [
-      "useSweetyMemo",
+      "useImpulseMemo",
       WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useImpulseMemo,
       () => {
         return useImpulseMemo(() => Impulse.of(1).getState(), [])
       },
     ],
     [
-      "inline useWatchSweety",
+      "inline useWatchImpulse",
       WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchImpulse,
       () => {
         return useWatchImpulse(() => Impulse.of(1).getState())
       },
     ],
     [
-      "memoized useWatchSweety",
+      "memoized useWatchImpulse",
       WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchImpulse,
       () => {
         return useWatchImpulse(
@@ -63,7 +63,7 @@ describe("calling Sweety.of()", () => {
       expect(console$error).toHaveBeenLastCalledWith(message)
     })
 
-    it.concurrent("returns the new store's value", () => {
+    it.concurrent("returns the new impulse's value", () => {
       const { result } = renderHook(useHook)
 
       expect(result.current).toBe(1)
@@ -71,13 +71,13 @@ describe("calling Sweety.of()", () => {
   })
 
   it.concurrent.each([
-    ["useSweetyEffect", useImpulseEffect],
-    ["useSweetyLayoutEffect", useImpulseLayoutEffect],
-  ])("fine when called inside %s", (_, useSweetyEffectHook) => {
+    ["useImpulseEffect", useImpulseEffect],
+    ["useImpulseLayoutEffect", useImpulseLayoutEffect],
+  ])("fine when called inside %s", (_, useImpulseEffectHook) => {
     const { result } = renderHook(() => {
       const [state, setState] = React.useState(Impulse.of(1))
 
-      useSweetyEffectHook(() => {
+      useImpulseEffectHook(() => {
         setState(Impulse.of(10))
       }, [])
 
@@ -102,45 +102,45 @@ describe("calling Sweety.of()", () => {
   })
 })
 
-describe("calling Sweety#clone()", () => {
+describe("calling Impulse#clone()", () => {
   describe.each([
     [
-      "useSweetyMemo",
+      "useImpulseMemo",
       WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useImpulseMemo,
-      ({ store }: WithStore<number>) => {
-        return useImpulseMemo(() => store.clone().getState(), [store])
+      ({ impulse }: WithImpulse<number>) => {
+        return useImpulseMemo(() => impulse.clone().getState(), [impulse])
       },
     ],
     [
-      "inline useWatchSweety",
+      "inline useWatchImpulse",
       WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useWatchImpulse,
-      ({ store }: WithStore<number>) => {
-        return useWatchImpulse(() => store.clone().getState())
+      ({ impulse }: WithImpulse<number>) => {
+        return useWatchImpulse(() => impulse.clone().getState())
       },
     ],
     [
-      "memoized useWatchSweety",
+      "memoized useWatchImpulse",
       WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useWatchImpulse,
-      ({ store }: WithStore<number>) => {
+      ({ impulse }: WithImpulse<number>) => {
         return useWatchImpulse(
-          React.useCallback(() => store.clone().getState(), [store]),
+          React.useCallback(() => impulse.clone().getState(), [impulse]),
         )
       },
     ],
   ])("warn when called inside %s", (_, message, useHook) => {
     it.concurrent("calls console.error", () => {
-      const store = Impulse.of(2)
+      const impulse = Impulse.of(2)
       renderHook(useHook, {
-        initialProps: { store },
+        initialProps: { impulse },
       })
 
       expect(console$error).toHaveBeenLastCalledWith(message)
     })
 
-    it.concurrent("returns the cloned store's value", () => {
-      const store = Impulse.of(2)
+    it.concurrent("returns the cloned impulse's value", () => {
+      const impulse = Impulse.of(2)
       const { result } = renderHook(useHook, {
-        initialProps: { store },
+        initialProps: { impulse },
       })
 
       expect(result.current).toBe(2)
@@ -148,15 +148,15 @@ describe("calling Sweety#clone()", () => {
   })
 
   it.concurrent.each([
-    ["useSweetyEffect", useImpulseEffect],
-    ["useSweetyLayoutEffect", useImpulseLayoutEffect],
-  ])("fine when called inside %s", (_, useSweetyEffectHook) => {
+    ["useImpulseEffect", useImpulseEffect],
+    ["useImpulseLayoutEffect", useImpulseLayoutEffect],
+  ])("fine when called inside %s", (_, useImpulseEffectHook) => {
     const initial = Impulse.of(1)
     const { result } = renderHook(
-      (store) => {
-        const [state, setState] = React.useState(store)
+      (impulse) => {
+        const [state, setState] = React.useState(impulse)
 
-        useSweetyEffectHook(() => {
+        useImpulseEffectHook(() => {
           setState((x) => x.clone())
         }, [])
 
@@ -174,71 +174,71 @@ describe("calling Sweety#clone()", () => {
 
   it("fine when called inside watch()", () => {
     const Component = watch<{
-      store: Impulse<number>
-    }>(({ store }) => {
-      const [state] = React.useState(store.clone())
+      impulse: Impulse<number>
+    }>(({ impulse }) => {
+      const [state] = React.useState(impulse.clone())
 
       return <div data-testid="count">{state.getState()}</div>
     })
 
-    render(<Component store={Impulse.of(20)} />)
+    render(<Component impulse={Impulse.of(20)} />)
 
     expect(console$error).not.toHaveBeenCalled()
     expect(screen.getByTestId("count")).toHaveTextContent("20")
   })
 })
 
-describe("calling Sweety#setState()", () => {
+describe("calling Impulse#setState()", () => {
   describe.each([
     [
-      "useSweetyMemo",
+      "useImpulseMemo",
       WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.useImpulseMemo,
-      ({ store }: WithStore<number>) => {
+      ({ impulse }: WithImpulse<number>) => {
         return useImpulseMemo(() => {
-          store.setState(3)
+          impulse.setState(3)
 
-          return store.getState()
-        }, [store])
+          return impulse.getState()
+        }, [impulse])
       },
     ],
     [
-      "inline useWatchSweety",
+      "inline useWatchImpulse",
       WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.useWatchImpulse,
-      ({ store }: WithStore<number>) => {
+      ({ impulse }: WithImpulse<number>) => {
         return useWatchImpulse(() => {
-          store.setState(3)
+          impulse.setState(3)
 
-          return store.getState()
+          return impulse.getState()
         })
       },
     ],
     [
-      "memoized useWatchSweety",
+      "memoized useWatchImpulse",
       WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.useWatchImpulse,
-      ({ store }: WithStore<number>) => {
+      ({ impulse }: WithImpulse<number>) => {
         return useWatchImpulse(
           React.useCallback(() => {
-            store.setState(3)
+            impulse.setState(3)
 
-            return store.getState()
-          }, [store]),
+            return impulse.getState()
+          }, [impulse]),
         )
       },
     ],
   ])("warns when calling inside %s", (_, message, useHook) => {
     it.concurrent("calls console.error", () => {
-      const store = Impulse.of(4)
+      const impulse = Impulse.of(4)
       renderHook(useHook, {
-        initialProps: { store },
+        initialProps: { impulse },
       })
 
       expect(console$error).toHaveBeenLastCalledWith(message)
     })
 
-    it.concurrent("does not change the store's value", () => {
-      const store = Impulse.of(4)
+    it.concurrent("does not change the impulse's value", () => {
+      const impulse = Impulse.of(4)
       const { result } = renderHook(useHook, {
-        initialProps: { store },
+        initialProps: { impulse },
       })
 
       expect(result.current).toBe(4)
@@ -246,16 +246,16 @@ describe("calling Sweety#setState()", () => {
   })
 
   it.concurrent.each([
-    ["useSweetyEffect", useImpulseEffect],
-    ["useSweetyLayoutEffect", useImpulseLayoutEffect],
-  ])("fine when called inside %s", (_, useSweetyEffectHook) => {
+    ["useImpulseEffect", useImpulseEffect],
+    ["useImpulseLayoutEffect", useImpulseLayoutEffect],
+  ])("fine when called inside %s", (_, useImpulseEffectHook) => {
     const { result } = renderHook(
-      (store) => {
-        useSweetyEffectHook(() => {
-          store.setState((x) => x + 1)
-        }, [store])
+      (impulse) => {
+        useImpulseEffectHook(() => {
+          impulse.setState((x) => x + 1)
+        }, [impulse])
 
-        return store
+        return impulse
       },
       {
         initialProps: Impulse.of(1),
@@ -268,14 +268,14 @@ describe("calling Sweety#setState()", () => {
 
   it("warns when called inside watch()", () => {
     const Component = watch<{
-      store: Impulse<number>
-    }>(({ store }) => {
-      store.setState(10)
+      impulse: Impulse<number>
+    }>(({ impulse }) => {
+      impulse.setState(10)
 
-      return <div data-testid="count">{store.getState()}</div>
+      return <div data-testid="count">{impulse.getState()}</div>
     })
 
-    render(<Component store={Impulse.of(20)} />)
+    render(<Component impulse={Impulse.of(20)} />)
 
     expect(console$error).toHaveBeenCalledWith(
       WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.watch,
@@ -284,98 +284,98 @@ describe("calling Sweety#setState()", () => {
   })
 })
 
-describe("calling Sweety#subscribe()", () => {
+describe("calling Impulse#subscribe()", () => {
   describe.each([
     [
-      "useSweetyMemo",
+      "useImpulseMemo",
       WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useImpulseMemo,
       ({
-        store,
+        impulse,
         listener = vi.fn(),
-      }: WithStore<number> & Partial<WithListener>) => {
+      }: WithImpulse<number> & Partial<WithListener>) => {
         return useImpulseMemo(() => {
-          store.subscribe(listener)
+          impulse.subscribe(listener)
 
-          return store.getState()
-        }, [listener, store])
+          return impulse.getState()
+        }, [listener, impulse])
       },
     ],
     [
-      "inline useWatchSweety",
+      "inline useWatchImpulse",
       WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useWatchImpulse,
       ({
-        store,
+        impulse,
         listener = vi.fn(),
-      }: WithStore<number> & Partial<WithListener>) => {
+      }: WithImpulse<number> & Partial<WithListener>) => {
         return useWatchImpulse(() => {
-          store.subscribe(listener)
+          impulse.subscribe(listener)
 
-          return store.getState()
+          return impulse.getState()
         })
       },
     ],
     [
-      "memoized useWatchSweety",
+      "memoized useWatchImpulse",
       WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useWatchImpulse,
       ({
-        store,
+        impulse,
         listener = vi.fn(),
-      }: WithStore<number> & Partial<WithListener>) => {
+      }: WithImpulse<number> & Partial<WithListener>) => {
         return useWatchImpulse(
           React.useCallback(() => {
-            store.subscribe(listener)
+            impulse.subscribe(listener)
 
-            return store.getState()
-          }, [store, listener]),
+            return impulse.getState()
+          }, [impulse, listener]),
         )
       },
     ],
   ])("warn when called inside %s", (_, message, useHook) => {
     it.concurrent("calls console.error", () => {
-      const store = Impulse.of(4)
+      const impulse = Impulse.of(4)
 
       renderHook(useHook, {
-        initialProps: { store },
+        initialProps: { impulse },
       })
 
       expect(console$error).toHaveBeenLastCalledWith(message)
     })
 
-    it.concurrent("returns the store's value", () => {
-      const store = Impulse.of(4)
+    it.concurrent("returns the impulse's value", () => {
+      const impulse = Impulse.of(4)
       const { result } = renderHook(useHook, {
-        initialProps: { store },
+        initialProps: { impulse },
       })
 
       expect(result.current).toBe(4)
     })
 
     it.concurrent("returns noop function as unsubscribe", () => {
-      const store = Impulse.of(4)
-      const store$subscribe = vi.spyOn(store, "subscribe")
+      const impulse = Impulse.of(4)
+      const impulse$subscribe = vi.spyOn(impulse, "subscribe")
 
       renderHook(useHook, {
-        initialProps: { store },
+        initialProps: { impulse },
       })
 
-      expect(store$subscribe).toHaveReturnedWith(noop)
+      expect(impulse$subscribe).toHaveReturnedWith(noop)
     })
 
-    it.concurrent("does not call the listener on store's change", () => {
-      const store = Impulse.of(4)
+    it.concurrent("does not call the listener on impulse's change", () => {
+      const impulse = Impulse.of(4)
       const listener = vi.fn()
       const correctListener = vi.fn()
 
       renderHook(useHook, {
-        initialProps: { store, listener },
+        initialProps: { impulse, listener },
       })
 
-      const unsubscribe = store.subscribe(correctListener)
+      const unsubscribe = impulse.subscribe(correctListener)
 
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).not.toHaveBeenCalled()
 
-      store.setState(1)
+      impulse.setState(1)
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).toHaveBeenCalledTimes(1)
 
@@ -384,19 +384,19 @@ describe("calling Sweety#subscribe()", () => {
   })
 
   describe.each([
-    ["useSweetyEffect", useImpulseEffect],
-    ["useSweetyLayoutEffect", useImpulseLayoutEffect],
-  ])("fine when called inside %s", (_, useSweetyEffectHook) => {
+    ["useImpulseEffect", useImpulseEffect],
+    ["useImpulseLayoutEffect", useImpulseLayoutEffect],
+  ])("fine when called inside %s", (_, useImpulseEffectHook) => {
     it.concurrent("calls subscribed listener", () => {
       const initial = Impulse.of(1)
       const listener = vi.fn()
       const { result } = renderHook(
-        (store) => {
-          useSweetyEffectHook(() => {
-            return store.subscribe(listener)
-          }, [store])
+        (impulse) => {
+          useImpulseEffectHook(() => {
+            return impulse.subscribe(listener)
+          }, [impulse])
 
-          return store
+          return impulse
         },
         {
           initialProps: initial,
@@ -416,30 +416,30 @@ describe("calling Sweety#subscribe()", () => {
     })
 
     it.concurrent("un-subscribers on cleanup", () => {
-      const store_1 = Impulse.of(1)
-      const store_2 = Impulse.of(10)
+      const impulse_1 = Impulse.of(1)
+      const impulse_2 = Impulse.of(10)
       const listener = vi.fn()
       const { result, rerender } = renderHook(
-        (store) => {
-          useSweetyEffectHook(() => {
-            return store.subscribe(listener)
-          }, [store])
+        (impulse) => {
+          useImpulseEffectHook(() => {
+            return impulse.subscribe(listener)
+          }, [impulse])
 
-          return store
+          return impulse
         },
         {
-          initialProps: store_1,
+          initialProps: impulse_1,
         },
       )
 
-      rerender(store_2)
+      rerender(impulse_2)
 
       expect(console$error).not.toHaveBeenCalled()
       expect(result.current.getState()).toBe(10)
       expect(listener).not.toHaveBeenCalled()
 
       act(() => {
-        store_2.setState(20)
+        impulse_2.setState(20)
       })
 
       expect(result.current.getState()).toBe(20)
@@ -447,7 +447,7 @@ describe("calling Sweety#subscribe()", () => {
       vi.clearAllMocks()
 
       act(() => {
-        store_1.setState(2)
+        impulse_1.setState(2)
       })
 
       expect(result.current.getState()).toBe(20)
@@ -458,11 +458,11 @@ describe("calling Sweety#subscribe()", () => {
   describe("warns when called inside watch()", () => {
     const listener = vi.fn()
     const Component = watch<{
-      store: Impulse<number>
-    }>(({ store }) => {
-      store.subscribe(listener)
+      impulse: Impulse<number>
+    }>(({ impulse }) => {
+      impulse.subscribe(listener)
 
-      return <div data-testid="count">{store.getState()}</div>
+      return <div data-testid="count">{impulse.getState()}</div>
     })
 
     afterEach(() => {
@@ -470,39 +470,39 @@ describe("calling Sweety#subscribe()", () => {
     })
 
     it("calls console.error", () => {
-      render(<Component store={Impulse.of(20)} />)
+      render(<Component impulse={Impulse.of(20)} />)
 
       expect(console$error).toHaveBeenCalledWith(
         WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.watch,
       )
     })
 
-    it("renders the store's value", () => {
-      render(<Component store={Impulse.of(20)} />)
+    it("renders the impulse's value", () => {
+      render(<Component impulse={Impulse.of(20)} />)
 
       expect(screen.getByTestId("count")).toHaveTextContent("20")
     })
 
     it("returns noop function as unsubscribe", () => {
-      const store = Impulse.of(4)
-      const store$subscribe = vi.spyOn(store, "subscribe")
-      render(<Component store={store} />)
+      const impulse = Impulse.of(4)
+      const impulse$subscribe = vi.spyOn(impulse, "subscribe")
+      render(<Component impulse={impulse} />)
 
-      expect(store$subscribe).toHaveReturnedWith(noop)
+      expect(impulse$subscribe).toHaveReturnedWith(noop)
     })
 
-    it("does not call the listener on store's change", () => {
-      const store = Impulse.of(4)
+    it("does not call the listener on impulse's change", () => {
+      const impulse = Impulse.of(4)
       const correctListener = vi.fn()
 
-      render(<Component store={store} />)
+      render(<Component impulse={impulse} />)
 
-      const unsubscribe = store.subscribe(correctListener)
+      const unsubscribe = impulse.subscribe(correctListener)
 
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).not.toHaveBeenCalled()
 
-      store.setState(1)
+      impulse.setState(1)
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).toHaveBeenCalledTimes(1)
       unsubscribe()

@@ -1,45 +1,42 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Compare, Impulse, useWatchImpulse, batch } from "../../src"
-import { Counter } from "../common"
-
-interface WithStore<T = Counter> {
-  store: Impulse<T>
-}
-
-interface WithFirst<T = Counter> {
-  first: Impulse<T>
-}
-
-interface WithSecond<T = Counter> {
-  second: Impulse<T>
-}
-
-interface WithThird<T = Counter> {
-  third: Impulse<T>
-}
-
-interface WithSpy {
-  spy: VoidFunction
-}
+import { batch, Compare, Impulse, useWatchImpulse } from "../../src"
+import {
+  Counter,
+  WithFirst,
+  WithSecond,
+  WithSpy,
+  WithImpulse,
+  WithThird,
+} from "../common"
 
 describe.each([
   [
     "inline watcher",
-    ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
+    (
+      { impulse }: WithImpulse<WithFirst & WithSecond>,
+      compare?: Compare<Counter>,
+    ) => {
       return useWatchImpulse(() => {
+        const { first, second } = impulse.getState()
+
         return Counter.merge(first.getState(), second.getState())
       }, compare)
     },
   ],
   [
     "memoized watcher",
-    ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
+    (
+      { impulse }: WithImpulse<WithFirst & WithSecond>,
+      compare?: Compare<Counter>,
+    ) => {
       return useWatchImpulse(
         useCallback(() => {
+          const { first, second } = impulse.getState()
+
           return Counter.merge(first.getState(), second.getState())
-        }, [first, second]),
+        }, [impulse]),
         compare,
       )
     },
@@ -49,7 +46,7 @@ describe.each([
     ["without comparator", useHookWithoutCompare],
     [
       "with inline comparator",
-      (props: WithFirst & WithSecond) => {
+      (props: WithImpulse<WithFirst & WithSecond>) => {
         return useHookWithoutCompare(props, (prev, next) =>
           Counter.compare(prev, next),
         )
@@ -57,7 +54,7 @@ describe.each([
     ],
     [
       "with memoized comparator",
-      (props: WithFirst & WithSecond) => {
+      (props: WithImpulse<WithFirst & WithSecond>) => {
         return useHookWithoutCompare(props, Counter.compare)
       },
     ],
@@ -65,11 +62,12 @@ describe.each([
     const setup = () => {
       const first = Impulse.of({ count: 2 })
       const second = Impulse.of({ count: 3 })
+      const impulse = Impulse.of({ first, second })
       const { result } = renderHook(useHook, {
-        initialProps: { first, second },
+        initialProps: { impulse },
       })
 
-      return { first, second, result }
+      return { impulse, first, second, result }
     }
 
     it.concurrent("initiates with expected result", () => {
@@ -105,30 +103,57 @@ describe.each([
       })
       expect(result.current).toStrictEqual({ count: 7 })
     })
+
+    it.concurrent("replaces nested impulses", () => {
+      const newFirst = Impulse.of({ count: 5 })
+      const { impulse, result } = setup()
+
+      act(() => {
+        impulse.setState((state) => ({
+          ...state,
+          first: newFirst,
+        }))
+      })
+      expect(result.current).toStrictEqual({ count: 8 })
+    })
+
+    it.concurrent("updates nested impulses", () => {
+      const { impulse, result } = setup()
+
+      act(() => {
+        impulse.setState((state) => {
+          state.first.setState(Counter.inc)
+          state.second.setState(Counter.inc)
+
+          return state
+        })
+      })
+      expect(result.current).toStrictEqual({ count: 7 })
+    })
   })
 })
 
 describe.each([
   [
     "inline watcher",
-    ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
+    ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
       return useWatchImpulse(() => {
         spy()
 
-        return store.getState()
+        return impulse.getState()
       }, compare)
     },
     (
       {
         spy,
-        first,
-        second,
-        third,
-      }: WithFirst & WithSecond & WithThird & WithSpy,
+        impulse,
+      }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy,
       compare?: Compare<Counter>,
     ) => {
       return useWatchImpulse(() => {
         spy()
+
+        const { first, second, third } = impulse.getState()
 
         return Counter.merge(
           first.getState(),
@@ -141,36 +166,36 @@ describe.each([
 
   [
     "memoized watcher",
-    ({ spy, store }: WithStore & WithSpy) => {
+    ({ spy, impulse }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
         useCallback(() => {
           spy()
 
-          return store.getState()
-        }, [spy, store]),
+          return impulse.getState()
+        }, [spy, impulse]),
       )
     },
     ({
       spy,
-      first,
-      second,
-      third,
-    }: WithFirst & WithSecond & WithThird & WithSpy) => {
+      impulse,
+    }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy) => {
       return useWatchImpulse(
         useCallback(() => {
           spy()
+
+          const { first, second, third } = impulse.getState()
 
           return Counter.merge(
             first.getState(),
             second.getState(),
             third.getState(),
           )
-        }, [spy, first, second, third]),
+        }, [spy, impulse]),
       )
     },
   ],
 ])(
-  "triggering %s for multiple stores vs single store",
+  "triggering %s for nested impulses vs single impulse",
   (_, useSingleHookWithoutCompare, useMultipleHookWithoutCompare) => {
     describe.each([
       [
@@ -180,12 +205,12 @@ describe.each([
       ],
       [
         "with inline comparator",
-        (props: WithStore & WithSpy) => {
+        (props: WithImpulse & WithSpy) => {
           return useSingleHookWithoutCompare(props, (prev, next) =>
             Counter.compare(prev, next),
           )
         },
-        (props: WithFirst & WithSecond & WithThird & WithSpy) => {
+        (props: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy) => {
           return useMultipleHookWithoutCompare(props, (prev, next) =>
             Counter.compare(prev, next),
           )
@@ -193,46 +218,48 @@ describe.each([
       ],
       [
         "with memoized comparator",
-        (props: WithStore & WithSpy) => {
+        (props: WithImpulse & WithSpy) => {
           return useSingleHookWithoutCompare(props, Counter.compare)
         },
-        (props: WithFirst & WithSecond & WithThird & WithSpy) => {
+        (props: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy) => {
           return useMultipleHookWithoutCompare(props, Counter.compare)
         },
       ],
-    ])("%s", (__, useSingleHook, useMultipleHook) => {
+    ])("%s", (__, useSingleHook, useNestedHook) => {
       const setup = () => {
         const first = Impulse.of({ count: 1 })
         const second = Impulse.of({ count: 2 })
         const third = Impulse.of({ count: 3 })
+        const impulse = Impulse.of({ first, second, third })
         const spySingle = vi.fn()
-        const spyMultiple = vi.fn()
+        const spyNested = vi.fn()
 
         const { result: resultSingle } = renderHook(useSingleHook, {
-          initialProps: { store: first, spy: spySingle },
+          initialProps: { impulse: first, spy: spySingle },
         })
 
-        const { result: resultMultiple } = renderHook(useMultipleHook, {
-          initialProps: { first, second, third, spy: spyMultiple },
+        const { result: resultNested } = renderHook(useNestedHook, {
+          initialProps: { impulse, spy: spyNested },
         })
 
         return {
           first,
           second,
           third,
+          impulse,
           spySingle,
-          spyMultiple,
+          spyNested,
           resultSingle,
-          resultMultiple,
+          resultNested,
         }
       }
 
       it.concurrent("calls watchers the same amount when initiates", () => {
-        const { spySingle, spyMultiple, resultSingle, resultMultiple } = setup()
+        const { spySingle, spyNested, resultSingle, resultNested } = setup()
 
         expect(resultSingle.current).toStrictEqual({ count: 1 })
-        expect(resultMultiple.current).toStrictEqual({ count: 6 })
-        expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+        expect(resultNested.current).toStrictEqual({ count: 6 })
+        expect(spyNested).toHaveBeenCalledTimes(spySingle.mock.calls.length)
       })
 
       it.concurrent(
@@ -242,9 +269,9 @@ describe.each([
             first,
             second,
             spySingle,
-            spyMultiple,
+            spyNested,
             resultSingle,
-            resultMultiple,
+            resultNested,
           } = setup()
 
           act(() => {
@@ -254,8 +281,8 @@ describe.each([
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 2 })
-          expect(resultMultiple.current).toStrictEqual({ count: 8 })
-          expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+          expect(resultNested.current).toStrictEqual({ count: 8 })
+          expect(spyNested).toHaveBeenCalledTimes(spySingle.mock.calls.length)
         },
       )
 
@@ -266,9 +293,9 @@ describe.each([
             first,
             third,
             spySingle,
-            spyMultiple,
+            spyNested,
             resultSingle,
-            resultMultiple,
+            resultNested,
           } = setup()
 
           act(() => {
@@ -278,8 +305,8 @@ describe.each([
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 2 })
-          expect(resultMultiple.current).toStrictEqual({ count: 8 })
-          expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+          expect(resultNested.current).toStrictEqual({ count: 8 })
+          expect(spyNested).toHaveBeenCalledTimes(spySingle.mock.calls.length)
         },
       )
 
@@ -291,9 +318,9 @@ describe.each([
             second,
             third,
             spySingle,
-            spyMultiple,
+            spyNested,
             resultSingle,
-            resultMultiple,
+            resultNested,
           } = setup()
 
           act(() => {
@@ -307,8 +334,8 @@ describe.each([
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 2 })
-          expect(resultMultiple.current).toStrictEqual({ count: 9 })
-          expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+          expect(resultNested.current).toStrictEqual({ count: 9 })
+          expect(spyNested).toHaveBeenCalledTimes(spySingle.mock.calls.length)
         },
       )
 
@@ -319,13 +346,13 @@ describe.each([
             second,
             third,
             spySingle,
-            spyMultiple,
+            spyNested,
             resultSingle,
-            resultMultiple,
+            resultNested,
           } = setup()
 
           spySingle.mockReset()
-          spyMultiple.mockReset()
+          spyNested.mockReset()
 
           act(() => {
             batch(() => {
@@ -334,11 +361,40 @@ describe.each([
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 1 })
-          expect(resultMultiple.current).toStrictEqual({ count: 8 })
+          expect(resultNested.current).toStrictEqual({ count: 8 })
           expect(spySingle).not.toHaveBeenCalled()
-          expect(spyMultiple).toHaveBeenCalled()
+          expect(spyNested).toHaveBeenCalled()
         },
       )
+
+      it.concurrent("Impulse#setState wraps the callback into batch", () => {
+        const { second, third, impulse, spyNested, resultNested } = setup()
+
+        spyNested.mockReset()
+
+        act(() => {
+          batch(() => {
+            second.setState(Counter.inc)
+            third.setState(Counter.inc)
+          })
+        })
+
+        const spyCallsForBatch = spyNested.mock.calls.length
+
+        spyNested.mockReset()
+
+        act(() => {
+          impulse.setState((state) => {
+            state.second.setState(Counter.inc)
+            state.third.setState(Counter.inc)
+
+            return state
+          })
+        })
+
+        expect(spyNested).toHaveBeenCalledTimes(spyCallsForBatch)
+        expect(resultNested.current).toStrictEqual({ count: 10 })
+      })
     })
   },
 )
