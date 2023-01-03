@@ -6,7 +6,7 @@ import {
   Impulse,
   useSweetyEffect,
   useSweetyLayoutEffect,
-  useSweetyMemo,
+  useImpulseMemo,
   useWatchSweety,
   watch,
 } from "../../src"
@@ -35,9 +35,9 @@ describe("calling Sweety.of()", () => {
   describe.each([
     [
       "useSweetyMemo",
-      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useSweetyMemo,
+      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useImpulseMemo,
       () => {
-        return useSweetyMemo(() => Impulse.of(1).getState(), [])
+        return useImpulseMemo(() => Impulse.of(1).getState(), [])
       },
     ],
     [
@@ -106,9 +106,9 @@ describe("calling Sweety#clone()", () => {
   describe.each([
     [
       "useSweetyMemo",
-      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useSweetyMemo,
+      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useImpulseMemo,
       ({ store }: WithStore<number>) => {
-        return useSweetyMemo(() => store.clone().getState(), [store])
+        return useImpulseMemo(() => store.clone().getState(), [store])
       },
     ],
     [
@@ -192,9 +192,9 @@ describe("calling Sweety#setState()", () => {
   describe.each([
     [
       "useSweetyMemo",
-      WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.useSweetyMemo,
+      WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.useImpulseMemo,
       ({ store }: WithStore<number>) => {
-        return useSweetyMemo(() => {
+        return useImpulseMemo(() => {
           store.setState(3)
 
           return store.getState()
@@ -288,12 +288,12 @@ describe("calling Sweety#subscribe()", () => {
   describe.each([
     [
       "useSweetyMemo",
-      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useSweetyMemo,
+      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useImpulseMemo,
       ({
         store,
         listener = vi.fn(),
       }: WithStore<number> & Partial<WithListener>) => {
-        return useSweetyMemo(() => {
+        return useImpulseMemo(() => {
           store.subscribe(listener)
 
           return store.getState()
