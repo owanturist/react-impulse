@@ -9,7 +9,7 @@ describe.each([
   ["nothing", identity as typeof watch],
   ["watch", watch],
 ])("using %s as hoc", (_, hoc) => {
-  describe("single store", () => {
+  describe("single impulse", () => {
     const Component: React.FC<{
       onMemo?: React.Dispatch<number>
       value: Impulse<number>
@@ -52,7 +52,7 @@ describe.each([
       expect(node).toHaveTextContent("2")
     })
 
-    it("can watch inside useSweetyMemo", () => {
+    it("can watch inside useImpulseMemo", () => {
       const value = Impulse.of(1)
       const onMemo = vi.fn()
       const onRender = vi.fn()
@@ -117,7 +117,7 @@ describe.each([
       expect(onRender).toHaveBeenCalledTimes(1)
     })
 
-    it("should call useMemo factory when dep Sweety instance changes", () => {
+    it("should call useMemo factory when dep Impulse changes", () => {
       const value_1 = Impulse.of(1)
       const value_2 = Impulse.of(3)
       const onMemo = vi.fn()
@@ -141,7 +141,7 @@ describe.each([
       expect(onRender).toHaveBeenCalledTimes(1)
     })
 
-    it("should unsubscribe Sweety from useMemo when swapped", () => {
+    it("should unsubscribe Impulse from useMemo when swapped", () => {
       const value_1 = Impulse.of(1)
       const value_2 = Impulse.of(3)
       const onMemo = vi.fn()
@@ -178,7 +178,7 @@ describe.each([
       expect(value_2).toHaveProperty("subscribers.size", 1)
     })
 
-    it("should call useMemo factory when none-Sweety dep changes", () => {
+    it("should call useMemo factory when none-Impulse dep changes", () => {
       const value = Impulse.of(3)
       const onMemo = vi.fn()
       const onRender = vi.fn()
@@ -208,7 +208,7 @@ describe.each([
     })
   })
 
-  describe("multiple stores", () => {
+  describe("multiple impulses", () => {
     const Component: React.FC<{
       first: Impulse<number>
       second: Impulse<number>
@@ -230,7 +230,7 @@ describe.each([
       )
     })
 
-    it("can watch after both stores", () => {
+    it("can watch after both impulses", () => {
       const first = Impulse.of(2)
       const second = Impulse.of(3)
 
@@ -257,7 +257,7 @@ describe.each([
     })
   })
 
-  describe("nested stores", () => {
+  describe("nested impulses", () => {
     const Component: React.FC<{
       list: Impulse<Array<Impulse<number>>>
     }> = hoc(({ list }) => {
@@ -284,7 +284,7 @@ describe.each([
       )
     })
 
-    it("can watch after all stores", () => {
+    it("can watch after all impulses", () => {
       const _0 = Impulse.of(2)
       const _1 = Impulse.of(3)
       const _2 = Impulse.of(4)

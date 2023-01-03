@@ -52,12 +52,14 @@ describe("watching misses when defined after useEffect #140", () => {
     )
   }
 
-  const useWatchInline = (store: Impulse<number>) => {
-    return useWatchImpulse(() => store.getState())
+  const useWatchInline = (impulse: Impulse<number>) => {
+    return useWatchImpulse(() => impulse.getState())
   }
 
-  const useWatchMemoized = (store: Impulse<number>) => {
-    return useWatchImpulse(React.useCallback(() => store.getState(), [store]))
+  const useWatchMemoized = (impulse: Impulse<number>) => {
+    return useWatchImpulse(
+      React.useCallback(() => impulse.getState(), [impulse]),
+    )
   }
 
   describe.each([
@@ -65,14 +67,14 @@ describe("watching misses when defined after useEffect #140", () => {
     ["after", ComponentWatchAfterEffect],
   ])("calls depending hook %s useEffect", (_, Component) => {
     describe.each([
-      ["useSweetyState", useImpulseState],
-      ["inline useWatchSweety", useWatchInline],
-      ["memoized useWatchSweety", useWatchMemoized],
+      ["useImpulseState", useImpulseState],
+      ["inline useWatchImpulse", useWatchInline],
+      ["memoized useWatchImpulse", useWatchMemoized],
     ])("with %s as useGetFirst", (__, useGetFirst) => {
       it.each([
-        ["useSweetyState", useImpulseState],
-        ["inline useWatchSweety", useWatchInline],
-        ["memoized useWatchSweety", useWatchMemoized],
+        ["useImpulseState", useImpulseState],
+        ["inline useWatchImpulse", useWatchInline],
+        ["memoized useWatchImpulse", useWatchMemoized],
       ])("with %s as useGetSecond", (___, useGetSecond) => {
         const first = Impulse.of(0)
         const second = Impulse.of(5)

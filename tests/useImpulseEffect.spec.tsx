@@ -14,12 +14,12 @@ const identity = <T,>(value: T): T => value
 describe.each([
   ["useEffect", React.useEffect, useImpulseEffect],
   ["useLayoutEffect", React.useLayoutEffect, useImpulseLayoutEffect],
-])("running %s hook", (hookName, useReactEffect, useCustomSweetyEffect) => {
+])("running %s hook", (hookName, useReactEffect, useCustomImpulseEffect) => {
   describe.each([
     ["nothing", identity as typeof watch],
     ["watch", watch],
   ])("using %s as hoc", (_, hoc) => {
-    describe("single store", () => {
+    describe("single impulse", () => {
       const Component: React.FC<{
         value: Impulse<number>
         useEffect: typeof React.useEffect
@@ -65,14 +65,14 @@ describe.each([
         expect(onEffect).not.toHaveBeenCalled()
       })
 
-      it(`can watch inside Sweety ${hookName}`, () => {
+      it(`can watch inside Impulse ${hookName}`, () => {
         const value = Impulse.of(3)
         const onEffect = vi.fn()
 
         render(
           <Component
             onEffect={onEffect}
-            useEffect={useCustomSweetyEffect}
+            useEffect={useCustomImpulseEffect}
             value={value}
           />,
         )
@@ -97,7 +97,7 @@ describe.each([
         const { rerender } = render(
           <React.Profiler id="test" onRender={onRender}>
             <Component
-              useEffect={useCustomSweetyEffect}
+              useEffect={useCustomImpulseEffect}
               onEffect={onEffect}
               value={value}
             />
@@ -112,7 +112,7 @@ describe.each([
         rerender(
           <React.Profiler id="test" onRender={onRender}>
             <Component
-              useEffect={useCustomSweetyEffect}
+              useEffect={useCustomImpulseEffect}
               onEffect={onEffect}
               value={value}
             />
@@ -133,7 +133,7 @@ describe.each([
         expect(onRender).toHaveBeenCalledTimes(1)
       })
 
-      it("should call useEffect factory when dep Sweety instance changes", () => {
+      it("should call useEffect factory when dep Impulse changes", () => {
         const value_1 = Impulse.of(1)
         const value_2 = Impulse.of(3)
         const onEffect = vi.fn()
@@ -142,7 +142,7 @@ describe.each([
         const { rerender } = render(
           <React.Profiler id="test" onRender={onRender}>
             <Component
-              useEffect={useCustomSweetyEffect}
+              useEffect={useCustomImpulseEffect}
               onEffect={onEffect}
               value={value_1}
             />
@@ -153,7 +153,7 @@ describe.each([
         rerender(
           <React.Profiler id="test" onRender={onRender}>
             <Component
-              useEffect={useCustomSweetyEffect}
+              useEffect={useCustomImpulseEffect}
               onEffect={onEffect}
               value={value_2}
             />
@@ -165,7 +165,7 @@ describe.each([
         expect(onRender).toHaveBeenCalledTimes(1)
       })
 
-      it("should unsubscribe Sweety from useEffect when swapped", () => {
+      it("should unsubscribe Impulse from useEffect when swapped", () => {
         const value_1 = Impulse.of(1)
         const value_2 = Impulse.of(3)
         const onEffect = vi.fn()
@@ -174,7 +174,7 @@ describe.each([
         const { rerender } = render(
           <React.Profiler id="test" onRender={onRender}>
             <Component
-              useEffect={useCustomSweetyEffect}
+              useEffect={useCustomImpulseEffect}
               onEffect={onEffect}
               value={value_1}
             />
@@ -186,7 +186,7 @@ describe.each([
         rerender(
           <React.Profiler id="test" onRender={onRender}>
             <Component
-              useEffect={useCustomSweetyEffect}
+              useEffect={useCustomImpulseEffect}
               onEffect={onEffect}
               value={value_2}
             />
@@ -211,7 +211,7 @@ describe.each([
         expect(value_2).toHaveProperty("subscribers.size", 1)
       })
 
-      it("should call useEffect factory when non Sweety dep changes", () => {
+      it("should call useEffect factory when non Impulse dep changes", () => {
         const value = Impulse.of(3)
         const onEffect = vi.fn()
         const onRender = vi.fn()
@@ -219,7 +219,7 @@ describe.each([
         render(
           <React.Profiler id="test" onRender={onRender}>
             <Component
-              useEffect={useCustomSweetyEffect}
+              useEffect={useCustomImpulseEffect}
               onEffect={onEffect}
               value={value}
             />
@@ -245,14 +245,14 @@ describe.each([
       })
     })
 
-    describe("multiple stores", () => {
+    describe("multiple impulses", () => {
       const Component: React.FC<{
         first: Impulse<number>
         second: Impulse<number>
         onEffect: React.Dispatch<number>
       }> = hoc(({ first, second, onEffect }) => {
         const [multiplier, setMultiplier] = React.useState(2)
-        useCustomSweetyEffect(() => {
+        useCustomImpulseEffect(() => {
           const x = (first.getState() + second.getState()) * multiplier
 
           onEffect(x)
@@ -267,7 +267,7 @@ describe.each([
         )
       })
 
-      it("can watch after both stores", () => {
+      it("can watch after both impulses", () => {
         const first = Impulse.of(2)
         const second = Impulse.of(3)
         const onEffect = vi.fn()
@@ -299,14 +299,14 @@ describe.each([
       })
     })
 
-    describe("nested stores", () => {
+    describe("nested impulses", () => {
       const Component: React.FC<{
         list: Impulse<Array<Impulse<number>>>
         onEffect: React.Dispatch<number>
       }> = hoc(({ list, onEffect }) => {
         const [multiplier, setMultiplier] = React.useState(2)
 
-        useCustomSweetyEffect(() => {
+        useCustomImpulseEffect(() => {
           const x =
             list
               .getState()
@@ -325,7 +325,7 @@ describe.each([
         )
       })
 
-      it("can watch after all stores", () => {
+      it("can watch after all impulses", () => {
         const _0 = Impulse.of(2)
         const _1 = Impulse.of(3)
         const _2 = Impulse.of(4)
@@ -387,7 +387,7 @@ describe.each([
       }> = hoc(({ value, onEffect }) => {
         const [multiplier, setMultiplier] = React.useState(2)
 
-        useCustomSweetyEffect(() => {
+        useCustomImpulseEffect(() => {
           const x = value.getState() * multiplier
 
           onEffect(x)
@@ -438,7 +438,7 @@ describe.each([
         expect(value).toHaveProperty("subscribers.size", 1)
       })
 
-      it("calls effect when Sweety inside an effect changes", () => {
+      it("calls effect when Impulse inside an effect changes", () => {
         const value = Impulse.of(3)
         const onEffect = vi.fn()
 
@@ -478,7 +478,7 @@ describe.each([
     }> = ({ count, onEffect }) => {
       const [isVisible, setIsVisible] = React.useState(true)
 
-      useCustomSweetyEffect(() => {
+      useCustomImpulseEffect(() => {
         onEffect(count.getState())
       }, [onEffect, count])
 
@@ -528,7 +528,7 @@ it.concurrent(
   "triggers the effect when either regular or additional dependencies change",
   () => {
     const spy = vi.fn()
-    const store = Impulse.of(2)
+    const impulse = Impulse.of(2)
     const { rerender } = renderHook(
       ({ left, right }) => {
         useImpulseEffect(() => {
@@ -536,7 +536,7 @@ it.concurrent(
         }, [left, right])
       },
       {
-        initialProps: { left: 1, right: store },
+        initialProps: { left: 1, right: impulse },
       },
     )
 
@@ -544,24 +544,24 @@ it.concurrent(
     expect(spy).toHaveBeenLastCalledWith(3)
     vi.clearAllMocks()
 
-    rerender({ left: 2, right: store })
+    rerender({ left: 2, right: impulse })
     expect(spy).toHaveBeenCalledTimes(1)
     expect(spy).toHaveBeenLastCalledWith(4)
     vi.clearAllMocks()
 
-    rerender({ left: 2, right: store })
+    rerender({ left: 2, right: impulse })
     expect(spy).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
     act(() => {
-      store.setState(3)
+      impulse.setState(3)
     })
     expect(spy).toHaveBeenCalledTimes(1)
     expect(spy).toHaveBeenLastCalledWith(5)
     vi.clearAllMocks()
 
     act(() => {
-      store.setState(3)
+      impulse.setState(3)
     })
     expect(spy).not.toHaveBeenCalled()
     vi.clearAllMocks()
@@ -574,7 +574,7 @@ it.concurrent(
 )
 
 it.concurrent(
-  "triggers the effect when Sweety instances are not listened in dependencies",
+  "triggers the effect when Impulses are not listened in dependencies",
   () => {
     const spy = vi.fn()
     const left = Impulse.of(1)

@@ -3,7 +3,7 @@ import { renderHook } from "@testing-library/react-hooks"
 import { useImpulse } from "../src"
 
 describe("with direct initial value", () => {
-  it.concurrent("creates a store with an initial value", () => {
+  it.concurrent("creates a impulse with an initial value", () => {
     const initial = { count: 0 }
 
     const { result } = renderHook(() => useImpulse(initial))
@@ -12,7 +12,7 @@ describe("with direct initial value", () => {
     expect(result.current.getState()).toStrictEqual({ count: 0 })
   })
 
-  it.concurrent("keeps the same store during re-renders", () => {
+  it.concurrent("keeps the same impulse during re-renders", () => {
     const initial = { count: 0 }
 
     const { result, rerender } = renderHook(() => useImpulse(initial))
@@ -26,7 +26,7 @@ describe("with direct initial value", () => {
   })
 
   it.concurrent(
-    "does not create new store when the initial value changes",
+    "does not create new impulse when the initial value changes",
     () => {
       const initial = { count: 0 }
 
@@ -43,7 +43,7 @@ describe("with direct initial value", () => {
 })
 
 describe("with lazy initial value", () => {
-  it.concurrent("creates a store with an initial value", () => {
+  it.concurrent("creates a impulse with an initial value", () => {
     const initial = { count: 0 }
     const init = vi.fn(() => initial)
 
@@ -54,7 +54,7 @@ describe("with lazy initial value", () => {
     expect(init).toHaveBeenCalledTimes(1)
   })
 
-  it.concurrent("keeps the same store during re-renders", () => {
+  it.concurrent("keeps the same impulse during re-renders", () => {
     const initial = { count: 0 }
     const init = vi.fn(() => initial)
 
@@ -70,7 +70,7 @@ describe("with lazy initial value", () => {
   })
 
   it.concurrent(
-    "does not create new store when the init return value changes",
+    "does not create new impulse when the init return value changes",
     () => {
       let initial = { count: 0 }
       const init = vi.fn(() => initial)
@@ -89,7 +89,7 @@ describe("with lazy initial value", () => {
   )
 
   it.concurrent(
-    "does not create new store when the init function changes",
+    "does not create new impulse when the init function changes",
     () => {
       const initial = { count: 0 }
       let init = vi.fn(() => initial)
