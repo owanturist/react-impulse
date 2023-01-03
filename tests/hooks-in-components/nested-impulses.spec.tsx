@@ -5,17 +5,17 @@ import { Impulse, useImpulseState } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
-describe("nested stores", () => {
+describe("nested impulses", () => {
   interface AppState {
     counts: ReadonlyArray<Impulse<number>>
   }
 
   const App: React.FC<{
-    store: Impulse<AppState>
+    state: Impulse<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
-  }> = ({ store, onRender, onCounterRender }) => {
-    const { counts } = useImpulseState(store)
+  }> = ({ state, onRender, onCounterRender }) => {
+    const { counts } = useImpulseState(state)
 
     return (
       <>
@@ -24,9 +24,9 @@ describe("nested stores", () => {
             type="button"
             data-testid="add-counter"
             onClick={() => {
-              store.setState((state) => ({
-                ...state,
-                counts: [...state.counts, Impulse.of(0)],
+              state.setState((current) => ({
+                ...current,
+                counts: [...current.counts, Impulse.of(0)],
               }))
             }}
           />
@@ -34,10 +34,10 @@ describe("nested stores", () => {
             type="button"
             data-testid="reset-counters"
             onClick={() => {
-              store.setState((state) => {
-                state.counts.forEach((count) => count.setState(0))
+              state.setState((current) => {
+                current.counts.forEach((count) => count.setState(0))
 
-                return state
+                return current
               })
             }}
           />
@@ -54,14 +54,14 @@ describe("nested stores", () => {
     )
   }
 
-  it("Performs nested store management", () => {
-    const store = Impulse.of<AppState>({ counts: [] })
+  it("Performs nested impulse management", () => {
+    const impulse = Impulse.of<AppState>({ counts: [] })
     const onRender = vi.fn()
     const onCounterRender = vi.fn()
 
     render(
       <App
-        store={store}
+        state={impulse}
         onRender={onRender}
         onCounterRender={onCounterRender}
       />,
@@ -108,7 +108,7 @@ describe("nested stores", () => {
 
     // add third counter from the outside
     act(() => {
-      store.setState((state) => ({
+      impulse.setState((state) => ({
         ...state,
         counts: [...state.counts, Impulse.of(3)],
       }))
@@ -121,7 +121,7 @@ describe("nested stores", () => {
 
     // double the third counter from the outside
     act(() => {
-      store.getState().counts[2]!.setState((x) => 2 * x)
+      impulse.getState().counts[2]!.setState((x) => 2 * x)
     })
     expect(onRender).not.toHaveBeenCalled()
     expect(onCounterRender).toHaveBeenCalledTimes(1)
@@ -141,7 +141,7 @@ describe("nested stores", () => {
 
     // increment all from the outside
     act(() => {
-      store.getState().counts.forEach((count) => count.setState((x) => x + 1))
+      impulse.getState().counts.forEach((count) => count.setState((x) => x + 1))
     })
     expect(onRender).not.toHaveBeenCalled()
     expect(onCounterRender).toHaveBeenCalledTimes(3)

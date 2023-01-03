@@ -3,21 +3,21 @@ import { act, render, screen, fireEvent } from "@testing-library/react"
 
 import { Impulse, useImpulse, useImpulseState } from "../../src"
 
-describe("default stores", () => {
-  it("Uses local default Sweety when nullable", () => {
+describe("default impulse", () => {
+  it("uses local default Impulse when nullable", () => {
     const SearchBar: React.FC<{
       value?: Impulse<string>
-    }> = ({ value: valueStore }) => {
-      const defaultValueStore = useImpulse("search for me")
+    }> = ({ value: valueImpulse }) => {
+      const defaultValueImpulse = useImpulse("search for me")
 
-      const store = valueStore ?? defaultValueStore
-      const value = useImpulseState(store)
+      const impulse = valueImpulse ?? defaultValueImpulse
+      const value = useImpulseState(impulse)
 
       return (
         <input
           role="search"
           value={value}
-          onChange={(event) => store.setState(event.target.value)}
+          onChange={(event) => impulse.setState(event.target.value)}
         />
       )
     }

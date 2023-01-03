@@ -5,7 +5,7 @@ import { Impulse, useImpulseState, useWatchImpulse, watch } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
-describe("watching nested stores", () => {
+describe("watching nested impulses", () => {
   abstract class AppState {
     public abstract counts: ReadonlyArray<Impulse<number>>
 
@@ -15,7 +15,7 @@ describe("watching nested stores", () => {
   }
 
   interface AppProps {
-    store: Impulse<AppState>
+    state: Impulse<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }
@@ -25,8 +25,14 @@ describe("watching nested stores", () => {
       moreThanTen: boolean
       lessThanTwenty: boolean
     } & AppProps
-  > = ({ moreThanTen, lessThanTwenty, store, onRender, onCounterRender }) => {
-    const state = useImpulseState(store)
+  > = ({
+    moreThanTen,
+    lessThanTwenty,
+    state: appState,
+    onRender,
+    onCounterRender,
+  }) => {
+    const state = useImpulseState(appState)
 
     return (
       <>
@@ -38,7 +44,7 @@ describe("watching nested stores", () => {
             type="button"
             data-testid="add-counter"
             onClick={() => {
-              store.setState({
+              appState.setState({
                 ...state,
                 counts: [...state.counts, Impulse.of(0)],
               })
@@ -61,7 +67,7 @@ describe("watching nested stores", () => {
             type="button"
             data-testid="increment-all"
             onClick={() => {
-              store.setState((current) => {
+              appState.setState((current) => {
                 current.counts.forEach((count) => {
                   count.setState((x) => x + 1)
 
@@ -88,7 +94,7 @@ describe("watching nested stores", () => {
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useWatchImpulse(
       () => {
-        const total = AppState.sum(props.store.getState())
+        const total = AppState.sum(props.state.getState())
 
         return [total > 10, total < 20]
       },
@@ -109,10 +115,10 @@ describe("watching nested stores", () => {
   const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useWatchImpulse<[boolean, boolean]>(
       React.useCallback(() => {
-        const total = AppState.sum(props.store.getState())
+        const total = AppState.sum(props.state.getState())
 
         return [total > 10, total < 20]
-      }, [props.store]),
+      }, [props.state]),
       React.useCallback(
         (
           [left1, right1]: [boolean, boolean],
@@ -135,12 +141,12 @@ describe("watching nested stores", () => {
 
   const MultipleWatchersApp: React.FC<AppProps> = (props) => {
     const moreThanTen = useWatchImpulse(() => {
-      const total = props.store.getState(AppState.sum)
+      const total = props.state.getState(AppState.sum)
 
       return total > 10
     })
     const lessThanTwenty = useWatchImpulse(() => {
-      const total = AppState.sum(props.store.getState())
+      const total = AppState.sum(props.state.getState())
 
       return total < 20
     })
@@ -157,17 +163,17 @@ describe("watching nested stores", () => {
   const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
     const moreThanTen = useWatchImpulse(
       React.useCallback(() => {
-        const total = props.store.getState(AppState.sum)
+        const total = props.state.getState(AppState.sum)
 
         return total > 10
-      }, [props.store]),
+      }, [props.state]),
     )
     const lessThanTwenty = useWatchImpulse(
       React.useCallback(() => {
-        const total = AppState.sum(props.store.getState())
+        const total = AppState.sum(props.state.getState())
 
         return total < 20
-      }, [props.store]),
+      }, [props.state]),
     )
 
     return (
@@ -180,7 +186,7 @@ describe("watching nested stores", () => {
   }
 
   const WatchedApp: React.FC<AppProps> = watch((props) => {
-    const total = AppState.sum(props.store.getState())
+    const total = AppState.sum(props.state.getState())
     const [moreThanTen, lessThanTwenty] = [total > 10, total < 20]
 
     return (
@@ -198,8 +204,8 @@ describe("watching nested stores", () => {
     ["multiple watchers", MultipleWatchersApp, 0],
     ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
     ["watch()", WatchedApp, 1],
-  ])("watches nested stores with %s", (_, App, unnecessaryRerendersCount) => {
-    const store = Impulse.of<AppState>({
+  ])("watches nested impulses with %s", (_, App, unnecessaryRerendersCount) => {
+    const state = Impulse.of<AppState>({
       counts: [],
     })
     const onRender = vi.fn()
@@ -207,7 +213,7 @@ describe("watching nested stores", () => {
 
     render(
       <App
-        store={store}
+        state={state}
         onRender={onRender}
         onCounterRender={onCounterRender}
       />,
@@ -285,9 +291,9 @@ describe("watching nested stores", () => {
 
     // add fourth counter from the outside
     act(() => {
-      store.setState((state) => ({
-        ...state,
-        counts: [...state.counts, Impulse.of(9)],
+      state.setState((current) => ({
+        ...current,
+        counts: [...current.counts, Impulse.of(9)],
       }))
     })
     expect(onRender).toHaveBeenCalledTimes(1)

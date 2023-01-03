@@ -6,63 +6,63 @@ import { Counter } from "../common"
 
 import { withinNth } from "./common"
 
-describe("single store", () => {
+describe("single impulse", () => {
   const GetterComponent: React.FC<{
-    store: Impulse<Counter>
+    counter: Impulse<Counter>
     onRender: VoidFunction
-  }> = ({ store, onRender }) => {
-    const state = useImpulseState(store)
+  }> = ({ counter, onRender }) => {
+    const { count } = useImpulseState(counter)
 
     return (
       <React.Profiler id="test" onRender={onRender}>
-        <span data-testid="getter">{state.count}</span>
+        <span data-testid="getter">{count}</span>
       </React.Profiler>
     )
   }
 
   const SetterComponent: React.FC<{
-    store: Impulse<Counter>
+    counter: Impulse<Counter>
     onRender: VoidFunction
-  }> = ({ store, onRender }) => (
+  }> = ({ counter, onRender }) => (
     <React.Profiler id="test" onRender={onRender}>
       <div data-testid="setter">
         <button
           type="button"
           data-testid="increment"
-          onClick={() => store.setState(Counter.inc)}
+          onClick={() => counter.setState(Counter.inc)}
         />
         <button
           type="button"
           data-testid="reset"
-          onClick={() => store.setState({ count: 0 }, Counter.compare)}
+          onClick={() => counter.setState({ count: 0 }, Counter.compare)}
         />
       </div>
     </React.Profiler>
   )
 
   const SingleSetterSingleGetter: React.FC<{
-    store: Impulse<Counter>
+    counter: Impulse<Counter>
     onRootRender: VoidFunction
     onGetterRender: VoidFunction
     onSetterRender: VoidFunction
-  }> = ({ store, onRootRender, onGetterRender, onSetterRender }) => (
+  }> = ({ counter, onRootRender, onGetterRender, onSetterRender }) => (
     <>
       <React.Profiler id="test" onRender={onRootRender} />
 
-      <GetterComponent store={store} onRender={onGetterRender} />
-      <SetterComponent store={store} onRender={onSetterRender} />
+      <GetterComponent counter={counter} onRender={onGetterRender} />
+      <SetterComponent counter={counter} onRender={onSetterRender} />
     </>
   )
 
   it("Single Setter / Getter", () => {
-    const store = Impulse.of({ count: 0 })
+    const counter = Impulse.of({ count: 0 })
     const onRootRender = vi.fn()
     const onGetterRender = vi.fn()
     const onSetterRender = vi.fn()
 
     render(
       <SingleSetterSingleGetter
-        store={store}
+        counter={counter}
         onRootRender={onRootRender}
         onGetterRender={onGetterRender}
         onSetterRender={onSetterRender}
@@ -83,7 +83,7 @@ describe("single store", () => {
     expect(screen.getByTestId("getter")).toHaveTextContent("1")
 
     // increment from the outside
-    act(() => store.setState(Counter.inc))
+    act(() => counter.setState(Counter.inc))
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
     expect(onGetterRender).toHaveBeenCalledTimes(3)
@@ -113,8 +113,8 @@ describe("single store", () => {
 
     // increment twice in a row from the outside
     act(() => {
-      store.setState(Counter.inc)
-      store.setState(Counter.inc)
+      counter.setState(Counter.inc)
+      counter.setState(Counter.inc)
     })
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
@@ -123,14 +123,14 @@ describe("single store", () => {
   })
 
   const MultipleSetterMultipleGetter: React.FC<{
-    store: Impulse<Counter>
+    counter: Impulse<Counter>
     onRootRender: VoidFunction
     onFirstGetterRender: VoidFunction
     onSecondGetterRender: VoidFunction
     onFirstSetterRender: VoidFunction
     onSecondSetterRender: VoidFunction
   }> = ({
-    store,
+    counter,
     onRootRender,
     onFirstGetterRender,
     onSecondGetterRender,
@@ -139,15 +139,15 @@ describe("single store", () => {
   }) => (
     <>
       <React.Profiler id="test" onRender={onRootRender} />
-      <GetterComponent store={store} onRender={onFirstGetterRender} />
-      <GetterComponent store={store} onRender={onSecondGetterRender} />
-      <SetterComponent store={store} onRender={onFirstSetterRender} />
-      <SetterComponent store={store} onRender={onSecondSetterRender} />
+      <GetterComponent counter={counter} onRender={onFirstGetterRender} />
+      <GetterComponent counter={counter} onRender={onSecondGetterRender} />
+      <SetterComponent counter={counter} onRender={onFirstSetterRender} />
+      <SetterComponent counter={counter} onRender={onSecondSetterRender} />
     </>
   )
 
   it("Multiple Setters / Getters", () => {
-    const store = Impulse.of({ count: 0 })
+    const counter = Impulse.of({ count: 0 })
     const onRootRender = vi.fn()
     const onFirstGetterRender = vi.fn()
     const onSecondGetterRender = vi.fn()
@@ -156,7 +156,7 @@ describe("single store", () => {
 
     render(
       <MultipleSetterMultipleGetter
-        store={store}
+        counter={counter}
         onRootRender={onRootRender}
         onFirstGetterRender={onFirstGetterRender}
         onSecondGetterRender={onSecondGetterRender}
@@ -192,7 +192,7 @@ describe("single store", () => {
     expect(screen.getAllByTestId("getter")).toMatchSnapshot()
 
     // increment from the outside
-    act(() => store.setState(Counter.inc))
+    act(() => counter.setState(Counter.inc))
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onFirstSetterRender).toHaveBeenCalledTimes(1)
     expect(onSecondSetterRender).toHaveBeenCalledTimes(1)

@@ -38,12 +38,12 @@ describe("watch()", () => {
       )
     })
 
-    const store = Impulse.of(1)
+    const count = Impulse.of(1)
     const onRender = vi.fn()
 
     render(
       <React.Profiler id="test" onRender={onRender}>
-        <Component count={store} />
+        <Component count={count} />
       </React.Profiler>,
     )
 
@@ -64,13 +64,13 @@ describe("watch()", () => {
     vi.clearAllMocks()
 
     act(() => {
-      store.setState(3)
+      count.setState(3)
     })
     expect(btn).toHaveTextContent("9")
     expect(onRender).toHaveBeenCalledTimes(1)
   })
 
-  it("should handle multi store updates without batching", () => {
+  it("should handle multi impulse updates without batching", () => {
     const Component: React.FC<{
       first: Impulse<number>
       second: Impulse<number>
@@ -126,12 +126,12 @@ describe("watch()", () => {
       )),
     )
 
-    const store = Impulse.of(1)
+    const count = Impulse.of(1)
     const onRender = vi.fn()
 
     render(
       <React.Profiler id="test" onRender={onRender}>
-        <Component count={store} />
+        <Component count={count} />
       </React.Profiler>,
     )
 
@@ -148,7 +148,7 @@ describe("watch()", () => {
     expect(useSyncExternalStoreWithSelector).toHaveBeenCalledTimes(1)
   })
 
-  it("should work fine in Strict mode", () => {
+  it("should work fine in strict mode", () => {
     const Component = watch<{
       count: Impulse<number>
     }>(({ count }) => (
@@ -161,11 +161,11 @@ describe("watch()", () => {
       </button>
     ))
 
-    const store = Impulse.of(1)
+    const count = Impulse.of(1)
 
     render(
       <React.StrictMode>
-        <Component count={store} />
+        <Component count={count} />
       </React.StrictMode>,
     )
 
@@ -177,7 +177,7 @@ describe("watch()", () => {
     expect(btn).toHaveTextContent("2")
   })
 
-  it("should scope re-renders via useWatchSweety", () => {
+  it("should scope re-renders via useWatchImpulse", () => {
     const Component = watch<{
       count: Impulse<number>
     }>(({ count }) => {
@@ -186,12 +186,12 @@ describe("watch()", () => {
       return <span data-testid="result">{isMoreThanTwo && "Done"}</span>
     })
 
-    const store = Impulse.of(1)
+    const count = Impulse.of(1)
     const onRender = vi.fn()
 
     render(
       <React.Profiler id="test" onRender={onRender}>
-        <Component count={store} />
+        <Component count={count} />
       </React.Profiler>,
     )
 
@@ -202,7 +202,7 @@ describe("watch()", () => {
     vi.clearAllMocks()
 
     act(() => {
-      store.setState(2)
+      count.setState(2)
     })
 
     expect(result).not.toHaveTextContent("Done")
@@ -210,14 +210,14 @@ describe("watch()", () => {
     vi.clearAllMocks()
 
     act(() => {
-      store.setState(3)
+      count.setState(3)
     })
 
     expect(result).toHaveTextContent("Done")
     expect(onRender).toHaveBeenCalledTimes(1)
   })
 
-  it("should not subscribe twice with useSweetyState", () => {
+  it("should not subscribe twice with useImpulseState", () => {
     const Component = watch<{
       count: Impulse<number>
     }>(({ count }) => {
@@ -226,21 +226,21 @@ describe("watch()", () => {
       return <span data-testid="result">{x}</span>
     })
 
-    const store = Impulse.of(1)
+    const count = Impulse.of(1)
 
-    render(<Component count={store} />)
+    render(<Component count={count} />)
 
     const result = screen.getByTestId("result")
 
     expect(result).toHaveTextContent("1")
-    expect(store).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("subscribers.size", 1)
 
     act(() => {
-      store.setState(2)
+      count.setState(2)
     })
 
     expect(result).toHaveTextContent("2")
-    expect(store).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("subscribers.size", 1)
   })
 })
 

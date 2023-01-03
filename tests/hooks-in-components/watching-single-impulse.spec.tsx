@@ -5,7 +5,7 @@ import { Impulse, useWatchImpulse, watch } from "../../src"
 
 import { CounterComponent } from "./common"
 
-describe("watching single store", () => {
+describe("watching single impulse", () => {
   interface AppProps {
     count: Impulse<number>
     onRender: VoidFunction
@@ -125,7 +125,7 @@ describe("watching single store", () => {
     ["multiple watchers", MultipleWatchersApp, 0],
     ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
     ["watch()", WatchedApp, 1],
-  ])("watches single store with %s", (_, App, unnecessaryRerendersCount) => {
+  ])("watches single impulse with %s", (_, App, unnecessaryRerendersCount) => {
     const count = Impulse.of(0)
     const onCounterRender = vi.fn()
     const onRender = vi.fn()

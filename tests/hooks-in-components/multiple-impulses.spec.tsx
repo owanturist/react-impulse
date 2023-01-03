@@ -3,14 +3,14 @@ import { act, render, screen, fireEvent } from "@testing-library/react"
 
 import { Impulse, useImpulseState } from "../../src"
 
-describe("multiple stores", () => {
+describe("multiple impulses", () => {
   const LoginForm: React.FC<{
     email: Impulse<string>
     password: Impulse<string>
     onRender: VoidFunction
-  }> = ({ email: emailStore, password: passwordStore, onRender }) => {
-    const email = useImpulseState(emailStore)
-    const password = useImpulseState(passwordStore)
+  }> = ({ email: emailImpulse, password: passwordImpulse, onRender }) => {
+    const email = useImpulseState(emailImpulse)
+    const password = useImpulseState(passwordImpulse)
 
     return (
       <React.Profiler id="test" onRender={onRender}>
@@ -18,27 +18,27 @@ describe("multiple stores", () => {
           type="email"
           data-testid="email"
           value={email}
-          onChange={(event) => emailStore.setState(event.target.value)}
+          onChange={(event) => emailImpulse.setState(event.target.value)}
         />
         <input
           type="password"
           data-testid="password"
           value={password}
-          onChange={(event) => passwordStore.setState(event.target.value)}
+          onChange={(event) => passwordImpulse.setState(event.target.value)}
         />
         <button
           type="button"
           data-testid="reset"
           onClick={() => {
-            emailStore.setState("")
-            passwordStore.setState("")
+            emailImpulse.setState("")
+            passwordImpulse.setState("")
           }}
         />
       </React.Profiler>
     )
   }
 
-  it("Performs multi store management", () => {
+  it("Performs multi impulse management", () => {
     const email = Impulse.of("")
     const password = Impulse.of("")
     const onRender = vi.fn()
