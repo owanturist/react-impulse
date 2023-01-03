@@ -4,7 +4,7 @@ import { isFunction, noop } from "./utils"
 import { WarningSet, WarningSource } from "./validation"
 
 /**
- * A context to track Sweety#getState() usage inside the watcher function.
+ * A context to track Impulse#getState() usage inside the watcher function.
  * The tracked calls will subscribe related stores to updates,
  * so the watcher will execute on each update.
  *
@@ -48,7 +48,7 @@ export class WatchContext {
 
   /**
    * The method allows to ignore the current WatchContext presence as if it is not there.
-   * Helpful when something needs to perform Sweety#getState without subscribing it to the current WatchContext
+   * Helpful when something needs to perform Impulse#getState without subscribing it to the current WatchContext
    */
   public static ignore<T>(execute: () => T): T {
     const currentContext = WatchContext.current
@@ -89,12 +89,12 @@ export class WatchContext {
   }
 
   private cleanupObsolete(): void {
-    this.deadCleanups.forEach((sweety) => {
-      const cleanup = this.cleanups.get(sweety)
+    this.deadCleanups.forEach((impulse) => {
+      const cleanup = this.cleanups.get(impulse)
 
       if (cleanup != null) {
         cleanup()
-        this.cleanups.delete(sweety)
+        this.cleanups.delete(impulse)
       }
     })
 
@@ -108,7 +108,7 @@ export class WatchContext {
 
     // fill up dead cleanups with all of the current cleanups
     // to keep only real dead once during .register() call
-    this.cleanups.forEach((_, sweety) => this.deadCleanups.add(sweety))
+    this.cleanups.forEach((_, impulse) => this.deadCleanups.add(impulse))
 
     const value = callback()
 

@@ -14,27 +14,27 @@ import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/w
 import { useWatchContext } from "./useWatchContext"
 import { Compare } from "./utils"
 
-const isSweetyWatcher = <TProps>(
-  render: FC<TProps> & { isSweetyWatcher?: boolean },
+const isImpulseWatcher = <TProps>(
+  render: FC<TProps> & { isImpulseWatcher?: boolean },
 ): boolean => {
-  return render.isSweetyWatcher === true
+  return render.isImpulseWatcher === true
 }
 
 /**
- * Creates a React component that subscribes to all `Sweety` instances calling the `Sweety#getState` method during the rendering phase of the component.
+ * Creates a React component that subscribes to all Impulses calling the `Impulse#getState` method during the rendering phase of the component.
  *
  * @param component a watched component
  *
- * @version 2.1.0
+ * @version 1.0.0
  */
 export function watch<TProps>(component: ExoticComponent<TProps>): never
 export function watch<TProps>(component: FC<TProps>): FC<TProps>
 export function watch<TProps>(component: FC<TProps>): FC<TProps> {
-  if (isSweetyWatcher(component)) {
+  if (isImpulseWatcher(component)) {
     return component
   }
 
-  const SweetyWatcher = (props: TProps, ctx: unknown): ReturnType<FC> => {
+  const ImpulseWatcher = (props: TProps, ctx: unknown): ReturnType<FC> => {
     const { executeWatcher, subscribe, getState } = useWatchContext({
       warningSource: "watch",
     })
@@ -48,10 +48,10 @@ export function watch<TProps>(component: FC<TProps>): FC<TProps> {
     )
   }
 
-  SweetyWatcher.displayName = `SweetyWatcher${component.displayName ?? ""}`
-  SweetyWatcher.isSweetyWatcher = true
+  ImpulseWatcher.displayName = `ImpulseWatcher${component.displayName ?? ""}`
+  ImpulseWatcher.isImpulseWatcher = true
 
-  return SweetyWatcher
+  return ImpulseWatcher
 }
 
 const memo = <TProps>(
@@ -84,15 +84,21 @@ const forwardRef = <TNode, TProps>(
 
 /**
  * An alias for `React.memo(React.forwardRef(watch(...)))`
+ *
+ * @version 1.0.0
  */
 memo.forwardRef = forwardRef.memo = forwardRefMemo
 
 /**
  * An alias for `React.memo(watch(...))`
+ *
+ * @version 1.0.0
  */
 watch.memo = memo
 
 /**
  * An alias for `React.forwardRef(watch(...))`
+ *
+ * @version 1.0.0
  */
 watch.forwardRef = forwardRef

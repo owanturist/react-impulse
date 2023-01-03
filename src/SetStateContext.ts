@@ -4,7 +4,7 @@ import { noop } from "./utils"
 import type { WatchContext } from "./WatchContext"
 
 /**
- * A context that allows to collect Sweety#setState subscribers and execute them all at once.
+ * A context that allows to collect Impulse#setState subscribers and execute them all at once.
  * This is useful when multiple stores are updated at the same time.
  *
  * @private
@@ -68,9 +68,9 @@ export class SetStateContext {
 
     this.storeSubscribers.forEach((subs) => {
       subs.forEach((_, listener) => {
-        // don't emit the same listener twice, for instance when using `useWatchSweety`
+        // don't emit the same listener twice, for instance when using `useWatchImpulse`
         if (!calledListeners.has(listener)) {
-          // the listener might register watchers (for useWatchSweety)
+          // the listener might register watchers (for useWatchImpulse)
           // so each watcher will emit only once in the code bellow
           // even if there were multiple watching stores updated
           listener()
