@@ -1,23 +1,23 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Compare, Sweety, useWatchSweety, batch } from "../../src"
+import { Compare, Impulse, useWatchSweety, batch } from "../../src"
 import { Counter } from "../common"
 
 interface WithStore<T = Counter> {
-  store: Sweety<T>
+  store: Impulse<T>
 }
 
 interface WithFirst<T = Counter> {
-  first: Sweety<T>
+  first: Impulse<T>
 }
 
 interface WithSecond<T = Counter> {
-  second: Sweety<T>
+  second: Impulse<T>
 }
 
 interface WithThird<T = Counter> {
-  third: Sweety<T>
+  third: Impulse<T>
 }
 
 interface WithSpy {
@@ -63,8 +63,8 @@ describe.each([
     ],
   ])("%s", (__, useHook) => {
     const setup = () => {
-      const first = Sweety.of({ count: 2 })
-      const second = Sweety.of({ count: 3 })
+      const first = Impulse.of({ count: 2 })
+      const second = Impulse.of({ count: 3 })
       const { result } = renderHook(useHook, {
         initialProps: { first, second },
       })
@@ -202,9 +202,9 @@ describe.each([
       ],
     ])("%s", (__, useSingleHook, useMultipleHook) => {
       const setup = () => {
-        const first = Sweety.of({ count: 1 })
-        const second = Sweety.of({ count: 2 })
-        const third = Sweety.of({ count: 3 })
+        const first = Impulse.of({ count: 1 })
+        const second = Impulse.of({ count: 2 })
+        const third = Impulse.of({ count: 3 })
         const spySingle = vi.fn()
         const spyMultiple = vi.fn()
 

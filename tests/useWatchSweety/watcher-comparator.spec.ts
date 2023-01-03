@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Sweety, useWatchSweety } from "../../src"
+import { Impulse, useWatchSweety } from "../../src"
 import { Counter, WithCompare, WithStore } from "../common"
 import { Compare, isEqual } from "../../src/utils"
 
@@ -40,7 +40,7 @@ describe.each([
   ])("%s", (__, useHook) => {
     it.concurrent("swapping compare", () => {
       const initial = { count: 0 }
-      const store = Sweety.of(initial)
+      const store = Impulse.of(initial)
 
       const { result, rerender } = renderHook(useHook, {
         initialProps: { store },

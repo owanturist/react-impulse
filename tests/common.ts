@@ -1,4 +1,4 @@
-import { Compare, Sweety } from "../src"
+import { Compare, Impulse } from "../src"
 
 export abstract class Counter {
   public abstract readonly count: number
@@ -29,7 +29,7 @@ export abstract class Counter {
 }
 
 export interface WithStore<T = Counter> {
-  store: Sweety<T>
+  store: Impulse<T>
 }
 
 export interface WithCompare<T = Counter> {
@@ -37,15 +37,15 @@ export interface WithCompare<T = Counter> {
 }
 
 export interface WithFirst<T = Counter> {
-  first: Sweety<T>
+  first: Impulse<T>
 }
 
 export interface WithSecond<T = Counter> {
-  second: Sweety<T>
+  second: Impulse<T>
 }
 
 export interface WithThird<T = Counter> {
-  third: Sweety<T>
+  third: Impulse<T>
 }
 
 export interface WithSpy {

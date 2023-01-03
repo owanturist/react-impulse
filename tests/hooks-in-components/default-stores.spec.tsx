@@ -1,12 +1,12 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useSweety, useSweetyState } from "../../src"
+import { Impulse, useSweety, useSweetyState } from "../../src"
 
 describe("default stores", () => {
   it("Uses local default Sweety when nullable", () => {
     const SearchBar: React.FC<{
-      value?: Sweety<string>
+      value?: Impulse<string>
     }> = ({ value: valueStore }) => {
       const defaultValueStore = useSweety("search for me")
 
@@ -31,7 +31,7 @@ describe("default stores", () => {
     fireEvent.change(input, { target: { value: "now" } })
     expect(input).toHaveValue("now")
 
-    const val = Sweety.of("new")
+    const val = Impulse.of("new")
 
     rerender(<SearchBar value={val} />)
     expect(input).toHaveValue("new")

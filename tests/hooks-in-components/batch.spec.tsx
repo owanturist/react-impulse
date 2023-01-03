@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { batch, Sweety, useSweetyState, useWatchSweety } from "../../src"
+import { batch, Impulse, useSweetyState, useWatchSweety } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
@@ -10,8 +10,8 @@ describe.each([
 ])("multiple stores %s calls with direct store access", (_, execute) => {
   it("re-renders once for Sweety#setState calls", () => {
     const onRender = vi.fn()
-    const store_1 = Sweety.of({ count: 1 })
-    const store_2 = Sweety.of({ count: 2 })
+    const store_1 = Impulse.of({ count: 1 })
+    const store_2 = Impulse.of({ count: 2 })
 
     const Component: React.FC = () => {
       const counter_1 = useSweetyState(store_1)
@@ -41,8 +41,8 @@ describe.each([
 
   it("re-renders once for useSweetyState calls", () => {
     const onRender = vi.fn()
-    const store_1 = Sweety.of({ count: 1 })
-    const store_2 = Sweety.of({ count: 2 })
+    const store_1 = Impulse.of({ count: 1 })
+    const store_2 = Impulse.of({ count: 2 })
 
     const Component: React.FC = () => {
       const counter_1 = useSweetyState(store_1)
@@ -82,9 +82,9 @@ describe.each([
 ])("nested stores %s calls with direct store access", (_, execute) => {
   it("re-renders once for Sweety#setState calls", () => {
     const onRender = vi.fn()
-    const store = Sweety.of({
-      first: Sweety.of({ count: 1 }),
-      second: Sweety.of({ count: 2 }),
+    const store = Impulse.of({
+      first: Impulse.of({ count: 1 }),
+      second: Impulse.of({ count: 2 }),
     })
 
     const Component: React.FC = () => {
@@ -133,9 +133,9 @@ describe.each([
 
   it("re-renders once for useSweetyState calls", () => {
     const onRender = vi.fn()
-    const store = Sweety.of({
-      first: Sweety.of({ count: 1 }),
-      second: Sweety.of({ count: 2 }),
+    const store = Impulse.of({
+      first: Impulse.of({ count: 1 }),
+      second: Impulse.of({ count: 2 }),
     })
 
     const Component: React.FC = () => {
@@ -242,8 +242,8 @@ describe.each([
       const setup = () => {
         const spy = vi.fn()
         const onRender = vi.fn()
-        const first = Sweety.of({ count: 1 })
-        const second = Sweety.of({ count: 2 })
+        const first = Impulse.of({ count: 1 })
+        const second = Impulse.of({ count: 2 })
         const watcher = () => {
           spy()
 
@@ -327,9 +327,9 @@ describe.each([
       const setup = () => {
         const spy = vi.fn()
         const onRender = vi.fn()
-        const store = Sweety.of({
-          first: Sweety.of({ count: 1 }),
-          second: Sweety.of({ count: 2 }),
+        const store = Impulse.of({
+          first: Impulse.of({ count: 1 }),
+          second: Impulse.of({ count: 2 }),
         })
         const watcher = () => {
           spy()

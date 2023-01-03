@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Compare, Sweety, useWatchSweety } from "../../src"
+import { Compare, Impulse, useWatchSweety } from "../../src"
 import { Counter, WithSpy, WithStore } from "../common"
 
 describe.each([
@@ -39,7 +39,7 @@ describe.each([
     ],
   ])("%s", (__, useHook) => {
     it.concurrent("watches the store's changes", () => {
-      const store = Sweety.of({ count: 1 })
+      const store = Impulse.of({ count: 1 })
 
       const { result } = renderHook(useHook, {
         initialProps: { store },
@@ -60,8 +60,8 @@ describe.each([
 
     describe("watches the replaced store changes", () => {
       const setup = () => {
-        const store_1 = Sweety.of({ count: 1 })
-        const store_2 = Sweety.of({ count: 10 })
+        const store_1 = Impulse.of({ count: 1 })
+        const store_2 = Impulse.of({ count: 10 })
 
         const { result, rerender } = renderHook(useHook, {
           initialProps: { store: store_1 },
@@ -175,7 +175,7 @@ describe("transform state's value inside watcher", () => {
     it.concurrent(
       "produces new value on each store's update without comparator",
       () => {
-        const store = Sweety.of({ count: 1 })
+        const store = Impulse.of({ count: 1 })
 
         const { result, rerender } = renderHook(useHookWithoutCompare, {
           initialProps: { store },
@@ -242,7 +242,7 @@ describe("transform state's value inside watcher", () => {
     ])(
       "keeps the old value when it is comparably equal when %s",
       (_, useHookWithCompare) => {
-        const store = Sweety.of({ count: 1 })
+        const store = Impulse.of({ count: 1 })
 
         const { result, rerender } = renderHook(useHookWithCompare, {
           initialProps: { store },
@@ -336,7 +336,7 @@ describe("transform state's value inside watcher", () => {
           },
         ],
       ])("should not trigger the watcher %s", () => {
-        const store = Sweety.of({ count: 1 })
+        const store = Impulse.of({ count: 1 })
         const spy = vi.fn()
 
         renderHook(useHookWithoutCompare, {
@@ -432,7 +432,7 @@ describe("multiple Sweety#getState() calls", () => {
         const setup = () => {
           const spySingle = vi.fn()
           const spyDouble = vi.fn()
-          const store = Sweety.of({ count: 1 })
+          const store = Impulse.of({ count: 1 })
 
           const { result: resultSingle } = renderHook(useSingleHook, {
             initialProps: { spy: spySingle, store },

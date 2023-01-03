@@ -1,17 +1,17 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useSweetyState } from "../../src"
+import { Impulse, useSweetyState } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
 describe("nested stores", () => {
   interface AppState {
-    counts: ReadonlyArray<Sweety<number>>
+    counts: ReadonlyArray<Impulse<number>>
   }
 
   const App: React.FC<{
-    store: Sweety<AppState>
+    store: Impulse<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }> = ({ store, onRender, onCounterRender }) => {
@@ -26,7 +26,7 @@ describe("nested stores", () => {
             onClick={() => {
               store.setState((state) => ({
                 ...state,
-                counts: [...state.counts, Sweety.of(0)],
+                counts: [...state.counts, Impulse.of(0)],
               }))
             }}
           />
@@ -55,7 +55,7 @@ describe("nested stores", () => {
   }
 
   it("Performs nested store management", () => {
-    const store = Sweety.of<AppState>({ counts: [] })
+    const store = Impulse.of<AppState>({ counts: [] })
     const onRender = vi.fn()
     const onCounterRender = vi.fn()
 
@@ -110,7 +110,7 @@ describe("nested stores", () => {
     act(() => {
       store.setState((state) => ({
         ...state,
-        counts: [...state.counts, Sweety.of(3)],
+        counts: [...state.counts, Impulse.of(3)],
       }))
     })
     expect(onRender).toHaveBeenCalledTimes(1)

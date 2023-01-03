@@ -1,14 +1,14 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useWatchSweety, watch } from "../../src"
+import { Impulse, useWatchSweety, watch } from "../../src"
 
 import { CounterComponent, withinNth } from "./common"
 
 describe("watching multiple stores", () => {
   interface AppProps {
-    firstCount: Sweety<number>
-    secondCount: Sweety<number>
+    firstCount: Impulse<number>
+    secondCount: Impulse<number>
     onRender: VoidFunction
     onFirstCounterRender: VoidFunction
     onSecondCounterRender: VoidFunction
@@ -162,8 +162,8 @@ describe("watching multiple stores", () => {
     ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
     ["watch()", WatchedApp, 1],
   ])("watches multiple stores with %s", (_, App, unnecessaryRerendersCount) => {
-    const firstCount = Sweety.of(0)
-    const secondCount = Sweety.of(0)
+    const firstCount = Impulse.of(0)
+    const secondCount = Impulse.of(0)
     const onFirstCountRender = vi.fn()
     const onSecondCountRender = vi.fn()
     const onRender = vi.fn()

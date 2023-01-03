@@ -1,4 +1,4 @@
-import type { Sweety } from "./Sweety"
+import type { Impulse } from "./Impulse"
 import { SetStateContext } from "./SetStateContext"
 import { isFunction, noop } from "./utils"
 import { WarningSet, WarningSource } from "./validation"
@@ -42,7 +42,7 @@ export class WatchContext {
     return true
   }
 
-  public static register(store: Sweety<unknown>): void {
+  public static register(store: Impulse<unknown>): void {
     WatchContext.current?.register(store)
   }
 
@@ -62,8 +62,8 @@ export class WatchContext {
     return result
   }
 
-  private readonly deadCleanups = new Set<Sweety<unknown>>()
-  private readonly cleanups = new Map<Sweety<unknown>, VoidFunction>()
+  private readonly deadCleanups = new Set<Impulse<unknown>>()
+  private readonly cleanups = new Map<Impulse<unknown>, VoidFunction>()
 
   private version = 0
 
@@ -71,7 +71,7 @@ export class WatchContext {
 
   public constructor(private readonly warningSource: null | WarningSource) {}
 
-  private register(store: Sweety<unknown>): void {
+  private register(store: Impulse<unknown>): void {
     if (this.cleanups.has(store)) {
       // still alive
       this.deadCleanups.delete(store)

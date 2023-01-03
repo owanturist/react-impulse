@@ -2,7 +2,7 @@ import { render, screen, fireEvent, act } from "@testing-library/react"
 import React from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
-import { Sweety, useSweetyState, useWatchSweety, watch } from "../../src"
+import { Impulse, useSweetyState, useWatchSweety, watch } from "../../src"
 
 vi.mock("use-sync-external-store/shim/with-selector.js", async () => {
   const actual: {
@@ -23,7 +23,7 @@ afterEach(() => {
 describe("watch()", () => {
   it("should work fine together with useState", () => {
     const Component = watch<{
-      count: Sweety<number>
+      count: Impulse<number>
     }>(({ count }) => {
       const [multiplier, setMultiplier] = React.useState(1)
 
@@ -38,7 +38,7 @@ describe("watch()", () => {
       )
     })
 
-    const store = Sweety.of(1)
+    const store = Impulse.of(1)
     const onRender = vi.fn()
 
     render(
@@ -72,9 +72,9 @@ describe("watch()", () => {
 
   it("should handle multi store updates without batching", () => {
     const Component: React.FC<{
-      first: Sweety<number>
-      second: Sweety<number>
-      third: Sweety<number>
+      first: Impulse<number>
+      second: Impulse<number>
+      third: Impulse<number>
     }> = watch(({ first, second, third }) => (
       <button
         type="button"
@@ -89,9 +89,9 @@ describe("watch()", () => {
       </button>
     ))
 
-    const first = Sweety.of(2)
-    const second = Sweety.of(3)
-    const third = Sweety.of(4)
+    const first = Impulse.of(2)
+    const second = Impulse.of(3)
+    const third = Impulse.of(4)
     const onRender = vi.fn()
 
     render(
@@ -114,7 +114,7 @@ describe("watch()", () => {
   it("should work fine with watch(watch())", () => {
     const Component = watch(
       watch<{
-        count: Sweety<number>
+        count: Impulse<number>
       }>(({ count }) => (
         <button
           type="button"
@@ -126,7 +126,7 @@ describe("watch()", () => {
       )),
     )
 
-    const store = Sweety.of(1)
+    const store = Impulse.of(1)
     const onRender = vi.fn()
 
     render(
@@ -150,7 +150,7 @@ describe("watch()", () => {
 
   it("should work fine in Strict mode", () => {
     const Component = watch<{
-      count: Sweety<number>
+      count: Impulse<number>
     }>(({ count }) => (
       <button
         type="button"
@@ -161,7 +161,7 @@ describe("watch()", () => {
       </button>
     ))
 
-    const store = Sweety.of(1)
+    const store = Impulse.of(1)
 
     render(
       <React.StrictMode>
@@ -179,14 +179,14 @@ describe("watch()", () => {
 
   it("should scope re-renders via useWatchSweety", () => {
     const Component = watch<{
-      count: Sweety<number>
+      count: Impulse<number>
     }>(({ count }) => {
       const isMoreThanTwo = useWatchSweety(() => count.getState() > 2)
 
       return <span data-testid="result">{isMoreThanTwo && "Done"}</span>
     })
 
-    const store = Sweety.of(1)
+    const store = Impulse.of(1)
     const onRender = vi.fn()
 
     render(
@@ -219,14 +219,14 @@ describe("watch()", () => {
 
   it("should not subscribe twice with useSweetyState", () => {
     const Component = watch<{
-      count: Sweety<number>
+      count: Impulse<number>
     }>(({ count }) => {
       const x = useSweetyState(count)
 
       return <span data-testid="result">{x}</span>
     })
 
-    const store = Sweety.of(1)
+    const store = Impulse.of(1)
 
     render(<Component count={store} />)
 
@@ -255,7 +255,7 @@ describe("watch.memo()", () => {
     ],
   ])("should memoize with %s", (_, memo) => {
     const Component: React.FC<{
-      state: Sweety<number>
+      state: Impulse<number>
       onRender: VoidFunction
     }> = ({ state, onRender }) => (
       <React.Profiler id="test" onRender={onRender}>
@@ -267,7 +267,7 @@ describe("watch.memo()", () => {
     const WatchedMemoized = (memo as typeof React.memo)(Component)
 
     const Host: React.FC<{
-      state: Sweety<number>
+      state: Impulse<number>
       onWatchedRender: VoidFunction
       onWatchedMemoizedRender: VoidFunction
     }> = ({ state, onWatchedRender, onWatchedMemoizedRender }) => {
@@ -285,7 +285,7 @@ describe("watch.memo()", () => {
       )
     }
 
-    const state = Sweety.of(0)
+    const state = Impulse.of(0)
     const onWatchedRender = vi.fn()
     const onWatchedMemoizedRender = vi.fn()
 
@@ -356,7 +356,7 @@ describe("watch.forwardRef()", () => {
     const Component = forwardRef<
       HTMLDivElement,
       {
-        state: Sweety<number>
+        state: Impulse<number>
       }
     >(({ state }, ref) => (
       <div ref={ref} data-testid="count">
@@ -364,7 +364,7 @@ describe("watch.forwardRef()", () => {
       </div>
     ))
 
-    const state = Sweety.of(0)
+    const state = Impulse.of(0)
     const divRef = vi.fn()
 
     render(<Component state={state} ref={divRef} />)

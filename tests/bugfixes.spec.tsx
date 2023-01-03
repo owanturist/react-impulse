@@ -1,14 +1,14 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Sweety, watch, useSweetyState, useWatchSweety } from "../src"
+import { Impulse, watch, useSweetyState, useWatchSweety } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
-    first: Sweety<number>
-    second: Sweety<number>
-    useGetFirst(first: Sweety<number>): number
-    useGetSecond(second: Sweety<number>): number
+    first: Impulse<number>
+    second: Impulse<number>
+    useGetFirst(first: Impulse<number>): number
+    useGetSecond(second: Impulse<number>): number
   }
 
   const ComponentWatchBeforeEffect: React.FC<ComponentProps> = ({
@@ -52,11 +52,11 @@ describe("watching misses when defined after useEffect #140", () => {
     )
   }
 
-  const useWatchInline = (store: Sweety<number>) => {
+  const useWatchInline = (store: Impulse<number>) => {
     return useWatchSweety(() => store.getState())
   }
 
-  const useWatchMemoized = (store: Sweety<number>) => {
+  const useWatchMemoized = (store: Impulse<number>) => {
     return useWatchSweety(React.useCallback(() => store.getState(), [store]))
   }
 
@@ -74,8 +74,8 @@ describe("watching misses when defined after useEffect #140", () => {
         ["inline useWatchSweety", useWatchInline],
         ["memoized useWatchSweety", useWatchMemoized],
       ])("with %s as useGetSecond", (___, useGetSecond) => {
-        const first = Sweety.of(0)
-        const second = Sweety.of(5)
+        const first = Impulse.of(0)
+        const second = Impulse.of(5)
 
         render(
           <Component
@@ -115,20 +115,20 @@ describe("watching misses when defined after useEffect #140", () => {
   })
 })
 
-describe("Use Sweety#getState() in Sweety#toJSON() and Sweety#toString() #321", () => {
+describe("Use Impulse#getState() in Impulse#toJSON() and Impulse#toString() #321", () => {
   it.each([
     ["toString", (value: unknown) => String(value)],
     ["toJSON", (value: unknown) => JSON.stringify(value)],
   ])("watches %s execution", (_, convert) => {
     const Component: React.FC<{
-      count: Sweety<number>
+      count: Impulse<number>
     }> = ({ count }) => {
       const x = useWatchSweety(() => convert(count))
 
       return <span data-testid="result">{x}</span>
     }
 
-    const count = Sweety.of(1)
+    const count = Impulse.of(1)
     render(<Component count={count} />)
 
     const result = screen.getByTestId("result")
@@ -150,7 +150,7 @@ describe("return the same component type from watch #322", () => {
   )
 
   const StatefulInput: React.FC<{
-    value: Sweety<string>
+    value: Impulse<string>
   }> = watch(({ value }) => (
     <StatelessInput
       value={value.getState()}
@@ -161,7 +161,7 @@ describe("return the same component type from watch #322", () => {
   const Input = Object.assign(StatefulInput, { Stateless: StatelessInput })
 
   it("watches the StatefulInput", () => {
-    const text = Sweety.of("hello")
+    const text = Impulse.of("hello")
     render(<Input value={text} />)
 
     const first = screen.getByRole("textbox")

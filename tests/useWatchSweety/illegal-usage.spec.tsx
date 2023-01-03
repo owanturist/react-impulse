@@ -3,7 +3,7 @@ import { renderHook } from "@testing-library/react-hooks"
 import { act, render, screen } from "@testing-library/react"
 
 import {
-  Sweety,
+  Impulse,
   useSweetyEffect,
   useSweetyLayoutEffect,
   useSweetyMemo,
@@ -37,14 +37,14 @@ describe("calling Sweety.of()", () => {
       "useSweetyMemo",
       WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useSweetyMemo,
       () => {
-        return useSweetyMemo(() => Sweety.of(1).getState(), [])
+        return useSweetyMemo(() => Impulse.of(1).getState(), [])
       },
     ],
     [
       "inline useWatchSweety",
       WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchSweety,
       () => {
-        return useWatchSweety(() => Sweety.of(1).getState())
+        return useWatchSweety(() => Impulse.of(1).getState())
       },
     ],
     [
@@ -52,7 +52,7 @@ describe("calling Sweety.of()", () => {
       WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchSweety,
       () => {
         return useWatchSweety(
-          React.useCallback(() => Sweety.of(1).getState(), []),
+          React.useCallback(() => Impulse.of(1).getState(), []),
         )
       },
     ],
@@ -75,10 +75,10 @@ describe("calling Sweety.of()", () => {
     ["useSweetyLayoutEffect", useSweetyLayoutEffect],
   ])("fine when called inside %s", (_, useSweetyEffectHook) => {
     const { result } = renderHook(() => {
-      const [state, setState] = React.useState(Sweety.of(1))
+      const [state, setState] = React.useState(Impulse.of(1))
 
       useSweetyEffectHook(() => {
-        setState(Sweety.of(10))
+        setState(Impulse.of(10))
       }, [])
 
       return state
@@ -90,7 +90,7 @@ describe("calling Sweety.of()", () => {
 
   it("fine when called inside watch()", () => {
     const Component = watch(() => {
-      const [state] = React.useState(Sweety.of(20))
+      const [state] = React.useState(Impulse.of(20))
 
       return <div data-testid="count">{state.getState()}</div>
     })
@@ -129,7 +129,7 @@ describe("calling Sweety#clone()", () => {
     ],
   ])("warn when called inside %s", (_, message, useHook) => {
     it.concurrent("calls console.error", () => {
-      const store = Sweety.of(2)
+      const store = Impulse.of(2)
       renderHook(useHook, {
         initialProps: { store },
       })
@@ -138,7 +138,7 @@ describe("calling Sweety#clone()", () => {
     })
 
     it.concurrent("returns the cloned store's value", () => {
-      const store = Sweety.of(2)
+      const store = Impulse.of(2)
       const { result } = renderHook(useHook, {
         initialProps: { store },
       })
@@ -151,7 +151,7 @@ describe("calling Sweety#clone()", () => {
     ["useSweetyEffect", useSweetyEffect],
     ["useSweetyLayoutEffect", useSweetyLayoutEffect],
   ])("fine when called inside %s", (_, useSweetyEffectHook) => {
-    const initial = Sweety.of(1)
+    const initial = Impulse.of(1)
     const { result } = renderHook(
       (store) => {
         const [state, setState] = React.useState(store)
@@ -174,14 +174,14 @@ describe("calling Sweety#clone()", () => {
 
   it("fine when called inside watch()", () => {
     const Component = watch<{
-      store: Sweety<number>
+      store: Impulse<number>
     }>(({ store }) => {
       const [state] = React.useState(store.clone())
 
       return <div data-testid="count">{state.getState()}</div>
     })
 
-    render(<Component store={Sweety.of(20)} />)
+    render(<Component store={Impulse.of(20)} />)
 
     expect(console$error).not.toHaveBeenCalled()
     expect(screen.getByTestId("count")).toHaveTextContent("20")
@@ -227,7 +227,7 @@ describe("calling Sweety#setState()", () => {
     ],
   ])("warns when calling inside %s", (_, message, useHook) => {
     it.concurrent("calls console.error", () => {
-      const store = Sweety.of(4)
+      const store = Impulse.of(4)
       renderHook(useHook, {
         initialProps: { store },
       })
@@ -236,7 +236,7 @@ describe("calling Sweety#setState()", () => {
     })
 
     it.concurrent("does not change the store's value", () => {
-      const store = Sweety.of(4)
+      const store = Impulse.of(4)
       const { result } = renderHook(useHook, {
         initialProps: { store },
       })
@@ -258,7 +258,7 @@ describe("calling Sweety#setState()", () => {
         return store
       },
       {
-        initialProps: Sweety.of(1),
+        initialProps: Impulse.of(1),
       },
     )
 
@@ -268,14 +268,14 @@ describe("calling Sweety#setState()", () => {
 
   it("warns when called inside watch()", () => {
     const Component = watch<{
-      store: Sweety<number>
+      store: Impulse<number>
     }>(({ store }) => {
       store.setState(10)
 
       return <div data-testid="count">{store.getState()}</div>
     })
 
-    render(<Component store={Sweety.of(20)} />)
+    render(<Component store={Impulse.of(20)} />)
 
     expect(console$error).toHaveBeenCalledWith(
       WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.watch,
@@ -332,7 +332,7 @@ describe("calling Sweety#subscribe()", () => {
     ],
   ])("warn when called inside %s", (_, message, useHook) => {
     it.concurrent("calls console.error", () => {
-      const store = Sweety.of(4)
+      const store = Impulse.of(4)
 
       renderHook(useHook, {
         initialProps: { store },
@@ -342,7 +342,7 @@ describe("calling Sweety#subscribe()", () => {
     })
 
     it.concurrent("returns the store's value", () => {
-      const store = Sweety.of(4)
+      const store = Impulse.of(4)
       const { result } = renderHook(useHook, {
         initialProps: { store },
       })
@@ -351,7 +351,7 @@ describe("calling Sweety#subscribe()", () => {
     })
 
     it.concurrent("returns noop function as unsubscribe", () => {
-      const store = Sweety.of(4)
+      const store = Impulse.of(4)
       const store$subscribe = vi.spyOn(store, "subscribe")
 
       renderHook(useHook, {
@@ -362,7 +362,7 @@ describe("calling Sweety#subscribe()", () => {
     })
 
     it.concurrent("does not call the listener on store's change", () => {
-      const store = Sweety.of(4)
+      const store = Impulse.of(4)
       const listener = vi.fn()
       const correctListener = vi.fn()
 
@@ -388,7 +388,7 @@ describe("calling Sweety#subscribe()", () => {
     ["useSweetyLayoutEffect", useSweetyLayoutEffect],
   ])("fine when called inside %s", (_, useSweetyEffectHook) => {
     it.concurrent("calls subscribed listener", () => {
-      const initial = Sweety.of(1)
+      const initial = Impulse.of(1)
       const listener = vi.fn()
       const { result } = renderHook(
         (store) => {
@@ -416,8 +416,8 @@ describe("calling Sweety#subscribe()", () => {
     })
 
     it.concurrent("un-subscribers on cleanup", () => {
-      const store_1 = Sweety.of(1)
-      const store_2 = Sweety.of(10)
+      const store_1 = Impulse.of(1)
+      const store_2 = Impulse.of(10)
       const listener = vi.fn()
       const { result, rerender } = renderHook(
         (store) => {
@@ -458,7 +458,7 @@ describe("calling Sweety#subscribe()", () => {
   describe("warns when called inside watch()", () => {
     const listener = vi.fn()
     const Component = watch<{
-      store: Sweety<number>
+      store: Impulse<number>
     }>(({ store }) => {
       store.subscribe(listener)
 
@@ -470,7 +470,7 @@ describe("calling Sweety#subscribe()", () => {
     })
 
     it("calls console.error", () => {
-      render(<Component store={Sweety.of(20)} />)
+      render(<Component store={Impulse.of(20)} />)
 
       expect(console$error).toHaveBeenCalledWith(
         WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.watch,
@@ -478,13 +478,13 @@ describe("calling Sweety#subscribe()", () => {
     })
 
     it("renders the store's value", () => {
-      render(<Component store={Sweety.of(20)} />)
+      render(<Component store={Impulse.of(20)} />)
 
       expect(screen.getByTestId("count")).toHaveTextContent("20")
     })
 
     it("returns noop function as unsubscribe", () => {
-      const store = Sweety.of(4)
+      const store = Impulse.of(4)
       const store$subscribe = vi.spyOn(store, "subscribe")
       render(<Component store={store} />)
 
@@ -492,7 +492,7 @@ describe("calling Sweety#subscribe()", () => {
     })
 
     it("does not call the listener on store's change", () => {
-      const store = Sweety.of(4)
+      const store = Impulse.of(4)
       const correctListener = vi.fn()
 
       render(<Component store={store} />)

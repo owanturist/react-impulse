@@ -1,7 +1,7 @@
 import { useCallback, useDebugValue } from "react"
 import { useSyncExternalStore } from "use-sync-external-store/shim/index.js"
 
-import type { Sweety } from "./Sweety"
+import type { Impulse } from "./Impulse"
 import { WatchContext } from "./WatchContext"
 
 /**
@@ -9,7 +9,7 @@ import { WatchContext } from "./WatchContext"
  *
  * @param sweety a `Sweety` instance.
  */
-export function useSweetyState<T>(sweety: Sweety<T>): T {
+export function useSweetyState<T>(sweety: Impulse<T>): T {
   const value = useSyncExternalStore(
     useCallback((onStoreChange) => sweety.subscribe(onStoreChange), [sweety]),
     useCallback(() => WatchContext.ignore(() => sweety.getState()), [sweety]),

@@ -1,13 +1,13 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useSweetyState, useWatchSweety, watch } from "../../src"
+import { Impulse, useSweetyState, useWatchSweety, watch } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
 describe("watching nested stores", () => {
   abstract class AppState {
-    public abstract counts: ReadonlyArray<Sweety<number>>
+    public abstract counts: ReadonlyArray<Impulse<number>>
 
     public static sum({ counts }: AppState): number {
       return counts.reduce((acc, count) => acc + count.getState(), 0)
@@ -15,7 +15,7 @@ describe("watching nested stores", () => {
   }
 
   interface AppProps {
-    store: Sweety<AppState>
+    store: Impulse<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }
@@ -40,7 +40,7 @@ describe("watching nested stores", () => {
             onClick={() => {
               store.setState({
                 ...state,
-                counts: [...state.counts, Sweety.of(0)],
+                counts: [...state.counts, Impulse.of(0)],
               })
             }}
           />
@@ -199,7 +199,7 @@ describe("watching nested stores", () => {
     ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
     ["watch()", WatchedApp, 1],
   ])("watches nested stores with %s", (_, App, unnecessaryRerendersCount) => {
-    const store = Sweety.of<AppState>({
+    const store = Impulse.of<AppState>({
       counts: [],
     })
     const onRender = vi.fn()
@@ -287,7 +287,7 @@ describe("watching nested stores", () => {
     act(() => {
       store.setState((state) => ({
         ...state,
-        counts: [...state.counts, Sweety.of(9)],
+        counts: [...state.counts, Impulse.of(9)],
       }))
     })
     expect(onRender).toHaveBeenCalledTimes(1)

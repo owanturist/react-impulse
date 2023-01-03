@@ -1,5 +1,5 @@
 export type { Compare } from "./utils"
-export { Sweety } from "./Sweety"
+export { Impulse } from "./Impulse"
 export { batch } from "./batch"
 export { watch } from "./watch"
 export { useSweety } from "./useSweety"

@@ -1,12 +1,12 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useSweetyState } from "../../src"
+import { Impulse, useSweetyState } from "../../src"
 
 describe("multiple stores", () => {
   const LoginForm: React.FC<{
-    email: Sweety<string>
-    password: Sweety<string>
+    email: Impulse<string>
+    password: Impulse<string>
     onRender: VoidFunction
   }> = ({ email: emailStore, password: passwordStore, onRender }) => {
     const email = useSweetyState(emailStore)
@@ -39,8 +39,8 @@ describe("multiple stores", () => {
   }
 
   it("Performs multi store management", () => {
-    const email = Sweety.of("")
-    const password = Sweety.of("")
+    const email = Impulse.of("")
+    const password = Impulse.of("")
     const onRender = vi.fn()
 
     const { container } = render(

@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { batch, Compare, Sweety, useWatchSweety } from "../../src"
+import { batch, Compare, Impulse, useWatchSweety } from "../../src"
 import {
   Counter,
   WithFirst,
@@ -60,9 +60,9 @@ describe.each([
     ],
   ])("%s", (__, useHook) => {
     const setup = () => {
-      const first = Sweety.of({ count: 2 })
-      const second = Sweety.of({ count: 3 })
-      const store = Sweety.of({ first, second })
+      const first = Impulse.of({ count: 2 })
+      const second = Impulse.of({ count: 3 })
+      const store = Impulse.of({ first, second })
       const { result } = renderHook(useHook, {
         initialProps: { store },
       })
@@ -105,7 +105,7 @@ describe.each([
     })
 
     it.concurrent("replaces nested stores", () => {
-      const newFirst = Sweety.of({ count: 5 })
+      const newFirst = Impulse.of({ count: 5 })
       const { store, result } = setup()
 
       act(() => {
@@ -224,10 +224,10 @@ describe.each([
       ],
     ])("%s", (__, useSingleHook, useNestedHook) => {
       const setup = () => {
-        const first = Sweety.of({ count: 1 })
-        const second = Sweety.of({ count: 2 })
-        const third = Sweety.of({ count: 3 })
-        const store = Sweety.of({ first, second, third })
+        const first = Impulse.of({ count: 1 })
+        const second = Impulse.of({ count: 2 })
+        const third = Impulse.of({ count: 3 })
+        const store = Impulse.of({ first, second, third })
         const spySingle = vi.fn()
         const spyNested = vi.fn()
 

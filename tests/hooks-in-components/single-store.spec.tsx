@@ -1,14 +1,14 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useSweetyState } from "../../src"
+import { Impulse, useSweetyState } from "../../src"
 import { Counter } from "../common"
 
 import { withinNth } from "./common"
 
 describe("single store", () => {
   const GetterComponent: React.FC<{
-    store: Sweety<Counter>
+    store: Impulse<Counter>
     onRender: VoidFunction
   }> = ({ store, onRender }) => {
     const state = useSweetyState(store)
@@ -21,7 +21,7 @@ describe("single store", () => {
   }
 
   const SetterComponent: React.FC<{
-    store: Sweety<Counter>
+    store: Impulse<Counter>
     onRender: VoidFunction
   }> = ({ store, onRender }) => (
     <React.Profiler id="test" onRender={onRender}>
@@ -41,7 +41,7 @@ describe("single store", () => {
   )
 
   const SingleSetterSingleGetter: React.FC<{
-    store: Sweety<Counter>
+    store: Impulse<Counter>
     onRootRender: VoidFunction
     onGetterRender: VoidFunction
     onSetterRender: VoidFunction
@@ -55,7 +55,7 @@ describe("single store", () => {
   )
 
   it("Single Setter / Getter", () => {
-    const store = Sweety.of({ count: 0 })
+    const store = Impulse.of({ count: 0 })
     const onRootRender = vi.fn()
     const onGetterRender = vi.fn()
     const onSetterRender = vi.fn()
@@ -123,7 +123,7 @@ describe("single store", () => {
   })
 
   const MultipleSetterMultipleGetter: React.FC<{
-    store: Sweety<Counter>
+    store: Impulse<Counter>
     onRootRender: VoidFunction
     onFirstGetterRender: VoidFunction
     onSecondGetterRender: VoidFunction
@@ -147,7 +147,7 @@ describe("single store", () => {
   )
 
   it("Multiple Setters / Getters", () => {
-    const store = Sweety.of({ count: 0 })
+    const store = Impulse.of({ count: 0 })
     const onRootRender = vi.fn()
     const onFirstGetterRender = vi.fn()
     const onSecondGetterRender = vi.fn()

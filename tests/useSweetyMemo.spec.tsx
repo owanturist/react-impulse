@@ -1,7 +1,7 @@
 import React from "react"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 
-import { Sweety, watch, useSweetyMemo } from "../src"
+import { Impulse, watch, useSweetyMemo } from "../src"
 
 const identity = <T,>(value: T): T => value
 
@@ -12,7 +12,7 @@ describe.each([
   describe("single store", () => {
     const Component: React.FC<{
       onMemo?: React.Dispatch<number>
-      value: Sweety<number>
+      value: Impulse<number>
       useMemo: typeof React.useMemo
     }> = hoc(({ onMemo, value, useMemo }) => {
       const [multiplier, setMultiplier] = React.useState(2)
@@ -37,7 +37,7 @@ describe.each([
     })
 
     it("cannot watch inside React.useMemo", () => {
-      const value = Sweety.of(1)
+      const value = Impulse.of(1)
 
       render(<Component useMemo={React.useMemo} value={value} />)
 
@@ -53,7 +53,7 @@ describe.each([
     })
 
     it("can watch inside useSweetyMemo", () => {
-      const value = Sweety.of(1)
+      const value = Impulse.of(1)
       const onMemo = vi.fn()
       const onRender = vi.fn()
 
@@ -82,7 +82,7 @@ describe.each([
     })
 
     it("does not call useMemo factory when deps not changed", () => {
-      const value = Sweety.of(1)
+      const value = Impulse.of(1)
       const onMemo = vi.fn()
       const onRender = vi.fn()
 
@@ -118,8 +118,8 @@ describe.each([
     })
 
     it("should call useMemo factory when dep Sweety instance changes", () => {
-      const value_1 = Sweety.of(1)
-      const value_2 = Sweety.of(3)
+      const value_1 = Impulse.of(1)
+      const value_2 = Impulse.of(3)
       const onMemo = vi.fn()
       const onRender = vi.fn()
 
@@ -142,8 +142,8 @@ describe.each([
     })
 
     it("should unsubscribe Sweety from useMemo when swapped", () => {
-      const value_1 = Sweety.of(1)
-      const value_2 = Sweety.of(3)
+      const value_1 = Impulse.of(1)
+      const value_2 = Impulse.of(3)
       const onMemo = vi.fn()
       const onRender = vi.fn()
 
@@ -179,7 +179,7 @@ describe.each([
     })
 
     it("should call useMemo factory when none-Sweety dep changes", () => {
-      const value = Sweety.of(3)
+      const value = Impulse.of(3)
       const onMemo = vi.fn()
       const onRender = vi.fn()
 
@@ -210,8 +210,8 @@ describe.each([
 
   describe("multiple stores", () => {
     const Component: React.FC<{
-      first: Sweety<number>
-      second: Sweety<number>
+      first: Impulse<number>
+      second: Impulse<number>
     }> = hoc(({ first, second }) => {
       const [multiplier, setMultiplier] = React.useState(2)
       const result = useSweetyMemo(() => {
@@ -231,8 +231,8 @@ describe.each([
     })
 
     it("can watch after both stores", () => {
-      const first = Sweety.of(2)
-      const second = Sweety.of(3)
+      const first = Impulse.of(2)
+      const second = Impulse.of(3)
 
       render(<Component first={first} second={second} />)
 
@@ -259,7 +259,7 @@ describe.each([
 
   describe("nested stores", () => {
     const Component: React.FC<{
-      list: Sweety<Array<Sweety<number>>>
+      list: Impulse<Array<Impulse<number>>>
     }> = hoc(({ list }) => {
       const [multiplier, setMultiplier] = React.useState(2)
       const result = useSweetyMemo(() => {
@@ -285,10 +285,10 @@ describe.each([
     })
 
     it("can watch after all stores", () => {
-      const _0 = Sweety.of(2)
-      const _1 = Sweety.of(3)
-      const _2 = Sweety.of(4)
-      const list = Sweety.of([_0, _1])
+      const _0 = Impulse.of(2)
+      const _1 = Impulse.of(3)
+      const _2 = Impulse.of(4)
+      const list = Impulse.of([_0, _1])
 
       render(<Component list={list} />)
 

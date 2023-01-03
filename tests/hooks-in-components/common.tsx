@@ -1,7 +1,7 @@
 import React from "react"
 import { screen, within } from "@testing-library/react"
 
-import { Sweety, useSweetyState } from "../../src"
+import { Impulse, useSweetyState } from "../../src"
 
 export const withinNth = (testId: string, position: number) => {
   return within(screen.getAllByTestId(testId)[position]!)
@@ -20,7 +20,7 @@ export const expectCounts = (expecting: ReadonlyArray<number>): void => {
 }
 
 export const CounterComponent: React.FC<{
-  count: Sweety<number>
+  count: Impulse<number>
   onRender: VoidFunction
 }> = React.memo(
   ({ count: countStore, onRender }) => {

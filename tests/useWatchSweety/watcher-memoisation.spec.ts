@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Sweety, useWatchSweety } from "../../src"
+import { Impulse, useWatchSweety } from "../../src"
 import { Counter, WithSpy, WithStore } from "../common"
 
 describe.each([
@@ -47,7 +47,7 @@ describe.each([
 ])("inline watcher %s", (_, useHook) => {
   const setup = () => {
     const spy = vi.fn()
-    const store = Sweety.of({ count: 1 })
+    const store = Impulse.of({ count: 1 })
 
     const { rerender } = renderHook(useHook, {
       initialProps: { store, spy },
@@ -142,7 +142,7 @@ describe.each([
 ])("memoized watcher %s", (__, useHook) => {
   const setup = () => {
     const spy = vi.fn()
-    const store = Sweety.of({ count: 1 })
+    const store = Impulse.of({ count: 1 })
 
     const { rerender } = renderHook(useHook, {
       initialProps: { store, spy },

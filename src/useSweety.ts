@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-import { Sweety } from "./Sweety"
+import { Impulse } from "./Impulse"
 import { Compare, isFunction } from "./utils"
 
 /**
@@ -14,7 +14,7 @@ import { Compare, isFunction } from "./utils"
 export function useSweety<T>(
   lazyInitialState: () => T,
   compare?: null | Compare<T>,
-): Sweety<T>
+): Impulse<T>
 
 export function useSweety<T>(
   invalidLazyInitialState: (...args: Array<never>) => unknown,
@@ -32,16 +32,16 @@ export function useSweety<T>(
 export function useSweety<T>(
   initialState: T, // eslint-disable-line @typescript-eslint/unified-signatures
   compare?: null | Compare<T>,
-): Sweety<T>
+): Impulse<T>
 
 export function useSweety<T>(
   lazyOrState: T | (() => T),
   compare?: null | Compare<T>,
-): Sweety<T> {
+): Impulse<T> {
   const [instance] = useState(() => {
     const initialState = isFunction(lazyOrState) ? lazyOrState() : lazyOrState
 
-    return Sweety.of(initialState, compare)
+    return Impulse.of(initialState, compare)
   })
 
   return instance

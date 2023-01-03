@@ -1,12 +1,12 @@
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Sweety, useSweetyState } from "../src"
+import { Impulse, useSweetyState } from "../src"
 
 import { Counter } from "./common"
 
 it.concurrent("returns initial state", () => {
   const initial = { count: 0 }
-  const store = Sweety.of(initial)
+  const store = Impulse.of(initial)
 
   const { result } = renderHook(() => useSweetyState(store))
 
@@ -16,7 +16,7 @@ it.concurrent("returns initial state", () => {
 })
 
 it.concurrent("returns the same value when the hook re-renders", () => {
-  const store = Sweety.of({ count: 0 })
+  const store = Impulse.of({ count: 0 })
 
   const { result, rerender } = renderHook(() => useSweetyState(store))
   const firstResult = result.current
@@ -30,7 +30,7 @@ it.concurrent("returns the same value when the hook re-renders", () => {
 
 it.concurrent("watches after store's updates", () => {
   const initial = { count: 0 }
-  const store = Sweety.of(initial)
+  const store = Impulse.of(initial)
 
   const { result } = renderHook(() => useSweetyState(store))
 
@@ -44,8 +44,8 @@ it.concurrent("watches after store's updates", () => {
 })
 
 it.concurrent("re-subscribes on new store", () => {
-  const store_1 = Sweety.of({ count: 0 })
-  const store_2 = Sweety.of({ count: 10 })
+  const store_1 = Impulse.of({ count: 0 })
+  const store_2 = Impulse.of({ count: 10 })
 
   const { result, rerender } = renderHook((store) => useSweetyState(store), {
     initialProps: store_1,
