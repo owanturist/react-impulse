@@ -4,8 +4,8 @@ import { act, render, screen } from "@testing-library/react"
 
 import {
   Impulse,
-  useSweetyEffect,
-  useSweetyLayoutEffect,
+  useImpulseEffect,
+  useImpulseLayoutEffect,
   useImpulseMemo,
   useWatchSweety,
   watch,
@@ -71,8 +71,8 @@ describe("calling Sweety.of()", () => {
   })
 
   it.concurrent.each([
-    ["useSweetyEffect", useSweetyEffect],
-    ["useSweetyLayoutEffect", useSweetyLayoutEffect],
+    ["useSweetyEffect", useImpulseEffect],
+    ["useSweetyLayoutEffect", useImpulseLayoutEffect],
   ])("fine when called inside %s", (_, useSweetyEffectHook) => {
     const { result } = renderHook(() => {
       const [state, setState] = React.useState(Impulse.of(1))
@@ -148,8 +148,8 @@ describe("calling Sweety#clone()", () => {
   })
 
   it.concurrent.each([
-    ["useSweetyEffect", useSweetyEffect],
-    ["useSweetyLayoutEffect", useSweetyLayoutEffect],
+    ["useSweetyEffect", useImpulseEffect],
+    ["useSweetyLayoutEffect", useImpulseLayoutEffect],
   ])("fine when called inside %s", (_, useSweetyEffectHook) => {
     const initial = Impulse.of(1)
     const { result } = renderHook(
@@ -246,8 +246,8 @@ describe("calling Sweety#setState()", () => {
   })
 
   it.concurrent.each([
-    ["useSweetyEffect", useSweetyEffect],
-    ["useSweetyLayoutEffect", useSweetyLayoutEffect],
+    ["useSweetyEffect", useImpulseEffect],
+    ["useSweetyLayoutEffect", useImpulseLayoutEffect],
   ])("fine when called inside %s", (_, useSweetyEffectHook) => {
     const { result } = renderHook(
       (store) => {
@@ -384,8 +384,8 @@ describe("calling Sweety#subscribe()", () => {
   })
 
   describe.each([
-    ["useSweetyEffect", useSweetyEffect],
-    ["useSweetyLayoutEffect", useSweetyLayoutEffect],
+    ["useSweetyEffect", useImpulseEffect],
+    ["useSweetyLayoutEffect", useImpulseLayoutEffect],
   ])("fine when called inside %s", (_, useSweetyEffectHook) => {
     it.concurrent("calls subscribed listener", () => {
       const initial = Impulse.of(1)

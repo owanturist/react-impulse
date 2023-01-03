@@ -2,13 +2,18 @@ import React from "react"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { renderHook } from "@testing-library/react-hooks"
 
-import { Impulse, watch, useSweetyEffect, useSweetyLayoutEffect } from "../src"
+import {
+  Impulse,
+  watch,
+  useImpulseEffect,
+  useImpulseLayoutEffect,
+} from "../src"
 
 const identity = <T,>(value: T): T => value
 
 describe.each([
-  ["useEffect", React.useEffect, useSweetyEffect],
-  ["useLayoutEffect", React.useLayoutEffect, useSweetyLayoutEffect],
+  ["useEffect", React.useEffect, useImpulseEffect],
+  ["useLayoutEffect", React.useLayoutEffect, useImpulseLayoutEffect],
 ])("running %s hook", (hookName, useReactEffect, useCustomSweetyEffect) => {
   describe.each([
     ["nothing", identity as typeof watch],
@@ -526,7 +531,7 @@ it.concurrent(
     const store = Impulse.of(2)
     const { rerender } = renderHook(
       ({ left, right }) => {
-        useSweetyEffect(() => {
+        useImpulseEffect(() => {
           spy(left + right.getState())
         }, [left, right])
       },
@@ -576,7 +581,7 @@ it.concurrent(
     const right = Impulse.of(2)
     const { rerender } = renderHook(
       ({ state }) => {
-        useSweetyEffect(() => {
+        useImpulseEffect(() => {
           spy(state.left.getState() + state.right.getState())
         }, [state])
       },
