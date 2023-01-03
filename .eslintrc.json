@@ -167,7 +167,7 @@
         "react-hooks/exhaustive-deps": [
           "error",
           {
-            "additionalHooks": "(useSweetyMemo|useSweetyEffect|useSweetyLayoutEffect|useIsomorphicLayoutEffect)"
+            "additionalHooks": "(useImpulseMemo|useImpulseEffect|useImpulseLayoutEffect)"
           }
         ],
 

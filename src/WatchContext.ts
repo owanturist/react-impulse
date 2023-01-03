@@ -42,8 +42,8 @@ export class WatchContext {
     return true
   }
 
-  public static register(store: Impulse<unknown>): void {
-    WatchContext.current?.register(store)
+  public static register(impulse: Impulse<unknown>): void {
+    WatchContext.current?.register(impulse)
   }
 
   /**
@@ -71,15 +71,15 @@ export class WatchContext {
 
   public constructor(private readonly warningSource: null | WarningSource) {}
 
-  private register(store: Impulse<unknown>): void {
-    if (this.cleanups.has(store)) {
+  private register(impulse: Impulse<unknown>): void {
+    if (this.cleanups.has(impulse)) {
       // still alive
-      this.deadCleanups.delete(store)
+      this.deadCleanups.delete(impulse)
     } else {
       WatchContext.ignore(() => {
         this.cleanups.set(
-          store,
-          store.subscribe(() => {
+          impulse,
+          impulse.subscribe(() => {
             // the listener registers a watcher so the watcher will emit once per (batch) setState
             SetStateContext.registerWatchContext(this)
           }),

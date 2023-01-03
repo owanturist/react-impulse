@@ -28,7 +28,7 @@ export function useWatchImpulse<T>(
   )
 
   // changeling of the `compare` value should not trigger `useSyncExternalStoreWithSelector`
-  // to re-select the store's value
+  // to re-select the impulse's state
   const compareRef = useRef(compare ?? isEqual)
   useEffect(() => {
     compareRef.current = compare ?? isEqual

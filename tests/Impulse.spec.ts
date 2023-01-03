@@ -208,7 +208,7 @@ describe("Impulse#getState(transform)", () => {
 })
 
 describe("Impulse#clone", () => {
-  it.concurrent("creates new Impulse instance with clone()", () => {
+  it.concurrent("creates new Impulse with clone()", () => {
     const impulse_1 = Impulse.of({ count: 0 })
     const impulse_2 = impulse_1.clone()
 
@@ -216,7 +216,7 @@ describe("Impulse#clone", () => {
     expect(impulse_1.getState()).toBe(impulse_2.getState())
   })
 
-  it.concurrent("creates new Impulse instance with clone(transform)", () => {
+  it.concurrent("creates new Impulse with clone(transform)", () => {
     const impulse_1 = Impulse.of({ count: 0 })
     const impulse_2 = impulse_1.clone(Counter.clone)
 
@@ -225,46 +225,43 @@ describe("Impulse#clone", () => {
     expect(impulse_1.getState()).toStrictEqual(impulse_2.getState())
   })
 
-  it.concurrent(
-    "creates new nested Impulse instance with clone(transform)",
-    () => {
-      const impulse_1 = Impulse.of({
-        count: Impulse.of(0),
-        name: Impulse.of("John"),
-      })
-      const impulse_2 = impulse_1.clone(({ count, name }) => ({
-        count: count.clone(),
-        name: name.clone(),
-      }))
+  it.concurrent("creates new nested Impulse with clone(transform)", () => {
+    const impulse_1 = Impulse.of({
+      count: Impulse.of(0),
+      name: Impulse.of("John"),
+    })
+    const impulse_2 = impulse_1.clone(({ count, name }) => ({
+      count: count.clone(),
+      name: name.clone(),
+    }))
 
-      expect(impulse_1).not.toBe(impulse_2)
-      expect(impulse_1.getState()).not.toBe(impulse_2.getState())
-      expect(impulse_1.getState().count).not.toBe(impulse_2.getState().count)
-      expect(impulse_1.getState().name).not.toBe(impulse_2.getState().name)
-      expect(
-        impulse_1.getState(({ count, name }) => ({
-          count: count.getState(),
-          name: name.getState(),
-        })),
-      ).toStrictEqual(
-        impulse_2.getState(({ count, name }) => ({
-          count: count.getState(),
-          name: name.getState(),
-        })),
-      )
+    expect(impulse_1).not.toBe(impulse_2)
+    expect(impulse_1.getState()).not.toBe(impulse_2.getState())
+    expect(impulse_1.getState().count).not.toBe(impulse_2.getState().count)
+    expect(impulse_1.getState().name).not.toBe(impulse_2.getState().name)
+    expect(
+      impulse_1.getState(({ count, name }) => ({
+        count: count.getState(),
+        name: name.getState(),
+      })),
+    ).toStrictEqual(
+      impulse_2.getState(({ count, name }) => ({
+        count: count.getState(),
+        name: name.getState(),
+      })),
+    )
 
-      // the nested impulses are independent
-      impulse_1.getState().count.setState(1)
-      expect(impulse_1.getState().count.getState()).toBe(1)
-      expect(impulse_2.getState().count.getState()).toBe(0)
+    // the nested impulses are independent
+    impulse_1.getState().count.setState(1)
+    expect(impulse_1.getState().count.getState()).toBe(1)
+    expect(impulse_2.getState().count.getState()).toBe(0)
 
-      impulse_1.getState().name.setState("Doe")
-      expect(impulse_1.getState().name.getState()).toBe("Doe")
-      expect(impulse_2.getState().name.getState()).toBe("John")
-    },
-  )
+    impulse_1.getState().name.setState("Doe")
+    expect(impulse_1.getState().name.getState()).toBe("Doe")
+    expect(impulse_2.getState().name.getState()).toBe("John")
+  })
 
-  it.concurrent("creates shallow nested Impulse instance with clone()", () => {
+  it.concurrent("creates shallow nested Impulse with clone()", () => {
     const impulse_1 = Impulse.of({
       count: Impulse.of(0),
       name: Impulse.of("John"),

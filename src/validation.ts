@@ -28,28 +28,28 @@ const makeWarningSet = (options: MakeHookWarningOptions): WarningSet => ({
 
 export const WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING = makeWarningSet({
   method: "Impulse#of",
-  whatItDoes: "creates a new store",
+  whatItDoes: "creates a new Impulse",
   isCritical: false,
   isWatchAffected: false,
 })
 
 export const WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING = makeWarningSet({
   method: "Impulse#clone",
-  whatItDoes: "creates a new store",
+  whatItDoes: "clones an existing Impulse",
   isCritical: false,
   isWatchAffected: false,
 })
 
 export const WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING = makeWarningSet({
   method: "Impulse#setState",
-  whatItDoes: "changes an existing store",
+  whatItDoes: "changes an existing Impulse",
   isCritical: true,
   isWatchAffected: true,
 })
 
 export const WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING = makeWarningSet({
   method: "Impulse#subscribe",
-  whatItDoes: "subscribes to a store",
+  whatItDoes: "subscribes to an Impulse",
   isCritical: true,
   isWatchAffected: true,
 })
