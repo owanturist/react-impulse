@@ -1,31 +1,31 @@
-# `react-sweety`
+# `react-impulse`
 
-[![codecov](https://codecov.io/gh/owanturist/react-sweety/branch/master/graph/badge.svg?token=QP3SXO8E9F)](https://codecov.io/gh/owanturist/react-sweety)
-![known vulnerabilities](https://snyk.io/test/github/owanturist/react-sweety/badge.svg)
-![minified + gzip](https://badgen.net/bundlephobia/minzip/react-sweety)
-![dependency count](https://badgen.net/bundlephobia/dependency-count/react-sweety)
-![types](https://badgen.net/npm/types/react-sweety)
+[![codecov](https://codecov.io/gh/owanturist/react-impulse/branch/master/graph/badge.svg?token=QP3SXO8E9F)](https://codecov.io/gh/owanturist/react-impulse)
+![known vulnerabilities](https://snyk.io/test/github/owanturist/react-impulse/badge.svg)
+![minified + gzip](https://badgen.net/bundlephobia/minzip/react-impulse)
+![dependency count](https://badgen.net/bundlephobia/dependency-count/react-impulse)
+![types](https://badgen.net/npm/types/react-impulse)
 
 The clean and natural React state management.
 
 ```bash
 # with yarn
-yarn add react-sweety
+yarn add react-impulse
 
 # with npm
-npm install react-sweety
+npm install react-impulse
 ```
 
 ## Quick start
 
-`Sweety` is a box holding any value you want, even another `Sweety`! All [`watch`][watch]ed components that execute the [`Sweety#getState`][sweety__get_state] during the rendering phase enqueue re-render whenever the `Sweety` instance's state updates.
+`Impulse` is a box holding any value you want, even another `Impulse`! All [`watch`][watch]ed components that execute the [`Impulse#getState`][impulse__get_state] during the rendering phase enqueue re-render whenever the Impulse state updates.
 
 ```tsx
-import { Sweety, watch } from "react-sweety"
+import { Impulse, watch } from "react-impulse"
 
 const Input: React.FC<{
   type: "email" | "password"
-  value: Sweety<string>
+  value: Impulse<string>
 }> = watch(({ type, value }) => (
   <input
     type={type}
@@ -35,7 +35,7 @@ const Input: React.FC<{
 ))
 
 const Checkbox: React.FC<{
-  checked: Sweety<boolean>
+  checked: Impulse<boolean>
   children: React.ReactNode
 }> = watch(({ checked, children }) => (
   <label>
@@ -50,15 +50,15 @@ const Checkbox: React.FC<{
 ))
 ```
 
-Once created, `Sweety` instances can travel thru your components, where you can set and get their states:
+Once created, Impulses can travel thru your components, where you can set and get their states:
 
 ```tsx
-import { useSweety, watch } from "react-sweety"
+import { useImpulseOf, watch } from "react-impulse"
 
 const SignUp: React.FC = watch(() => {
-  const username = useSweety("")
-  const password = useSweety("")
-  const isAgreeWithTerms = useSweety(false)
+  const username = useImpulseOf("")
+  const password = useImpulseOf("")
+  const isAgreeWithTerms = useImpulseOf(false)
 
   return (
     <form>
@@ -85,66 +85,66 @@ const SignUp: React.FC = watch(() => {
 
 ## Demos
 
-- [Todo MVC](https://codesandbox.io/s/react-sweety-todo-mvc-inr46?file=/src/TodoApp.tsx) - an implementation of [todomvc.com](https://todomvc.com) template.
+- [Todo MVC](https://codesandbox.io/s/react-impulse-todo-mvc-inr46?file=/src/TodoApp.tsx) - an implementation of [todomvc.com](https://todomvc.com) template.
 - [Obstacle maze](https://obstacle-maze.surge.sh) - an application to build and solve mazes with [source code](https://github.com/owanturist/obstacle-maze) at GitHub.
 - [Catanstat](https://catanstat.surge.sh) - an application to track [Catan](https://www.catan.com) game statistics with [source code](https://github.com/owanturist/catanstat) at GitHub.
 
 ## API
 
-A core piece of the library is the `Sweety` class - a box that holds value. The value might be anything you like as long as it does not mutate. The class instances are mutable by design, but other `Sweety` instances can use them as values.
+A core piece of the library is the `Impulse` class - a box that holds value. The value might be anything you like as long as it does not mutate. The class instances are mutable by design, but other Impulses can use them as values.
 
-### `Sweety.of`
+### `Impulse.of`
 
 ```dart
-Sweety.of<T>(
+Impulse.of<T>(
   initialState: T,
   compare?: null | Compare<T>
-): Sweety<T>
+): Impulse<T>
 ```
 
-A static method that creates a new `Sweety` instance.
+A static method that creates new Impulse.
 
 - `initialState` is the initial state.
-- `[compare]` is an optional [`Compare`][compare] function applied as [`Sweety#compare`][sweety__compare]. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
+- `[compare]` is an optional [`Compare`][compare] function applied as [`Impulse#compare`][impulse__compare]. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
-> 💡 The [`useSweety`][use_sweety] hook helps to create and store a `Sweety` instance inside a React component.
+> 💡 The [`useImpulseOf`][use_impulse_of] hook helps to create and store an `Impulse` inside a React component.
 
-### `Sweety#getState`
+### `Impulse#getState`
 
 ```dart
-Sweety<T>#getState(): T
-Sweety<T>#getState<R>(select: (state: T) => R): R
+Impulse<T>#getState(): T
+Impulse<T>#getState<R>(select: (state: T) => R): R
 ```
 
-A `Sweety` instance's method that returns the current state.
+An `Impulse` instance's method that returns the current state.
 
 - `[select]` is an optional function that applies to the current state before returning.
 
 ```ts
-const count = Sweety.of(3)
+const count = Impulse.of(3)
 
 count.getState() // === 3
 count.getState((x) => x > 0) // === true
 ```
 
-### `Sweety#setState`
+### `Impulse#setState`
 
 ```dart
-Sweety<T>#setState(
+Impulse<T>#setState(
   stateOrTransform: React.SetStateAction<T>,
   compare?: null | Compare<T>
 ): void
 ```
 
-A `Sweety` instance's method to update the state. All listeners registered via the [`Sweety#subscribe`][sweety__subscribe] method execute whenever the instance's state updates.
+An `Impulse` instance's method to update the state. All listeners registered via the [`Impulse#subscribe`][impulse__subscribe] method execute whenever the state updates.
 
 - `stateOrTransform` is the new state or a function that transforms the current state into the new state.
 - `[compare]` is an optional [`Compare`][compare] function applied for this call only.
-  When not defined the [`Sweety#compare`][sweety__compare] function of the instance will be used.
+  When not defined the [`Impulse#compare`][impulse__compare] function of the instance will be used.
   When `null` the [`Object.is`][object_is] function applies to compare the states.
 
 ```ts
-const isActive = Sweety.of(false)
+const isActive = Impulse.of(false)
 
 isActive.setState((x) => !x)
 isActive.getState() // true
@@ -155,58 +155,60 @@ isActive.getState() // false
 
 > 💡 If `stateOrTransform` argument is a function it acts as [`batch`][batch].
 
-> 💬 The method returns `void` to emphasize that `Sweety` instances are **mutable**.
+> 💬 The method returns `void` to emphasize that `Impulse` instances are **mutable**.
 
-### `Sweety#clone`
+### `Impulse#clone`
 
 ```dart
-Sweety<T>#clone(
+Impulse<T>#clone(
   transform?: (state: T) => T,
   compare?: null | Compare<T>
-): Sweety<T>
+): Impulse<T>
 ```
 
-A `Sweety` instance's method for cloning a `Sweety` instance.
+An `Impulse` instance's method for cloning an Impulse.
 
 - `[transform]` is an optional function that applies to the current state before cloning. It might be handy when cloning a state that contains mutable values.
-- `[compare]` is an optional [`Compare`][compare] function applied as [`Sweety#compare`][sweety__compare].
-  When not defined, it uses the [`Sweety#compare`][sweety__compare] function from the origin.
+- `[compare]` is an optional [`Compare`][compare] function applied as [`Impulse#compare`][impulse__compare].
+  When not defined, it uses the [`Impulse#compare`][impulse__compare] function from the origin.
   When `null` the [`Object.is`][object_is] function applies to compare the states.
 
 ```ts
-const immutable = Sweety.of({
+const immutable = Impulse.of({
   count: 0,
 })
 const cloneOfImmutable = immutable.clone()
 
-const mutable = Sweety.of({
-  counters: [Sweety.of(0), Sweety.of(1)],
+const mutable = Impulse.of({
+  username: Impulse.of(""),
+  blacklist: new Set(),
 })
-const cloneOfMutable = mutable.clone(({ counters }) => ({
-  counters: counters.map((counter) => counter.clone()),
+const cloneOfMutable = mutable.clone((state) => ({
+  username: state.username.clone(),
+  blacklist: new Set(state.blacklist),
 }))
 ```
 
-### `Sweety#compare`
+### `Impulse#compare`
 
 ```dart
-Sweety<T>#compare: Compare<T>
+Impulse<T>#compare: Compare<T>
 ```
 
-The [`Compare`][compare] function compares the state of a `Sweety` instance with the new state given via [`Sweety#setState`][sweety__set_state]. Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via [`Sweety#subscribe`][sweety__subscribe].
+The [`Compare`][compare] function compares the Impulse's state with the new state given via [`Impulse#setState`][impulse__set_state]. Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via [`Impulse#subscribe`][impulse__subscribe].
 
-### `Sweety#subscribe`
+### `Impulse#subscribe`
 
 ```dart
-Sweety<T>#subscribe(listener: VoidFunction): VoidFunction
+Impulse<T>#subscribe(listener: VoidFunction): VoidFunction
 ```
 
-A `Sweety` instance's method that subscribes to the state's updates caused by calling [`Sweety#setState`][sweety__set_state]. Returns a cleanup function that unsubscribes the `listener`.
+An `Impulse` instance's method that subscribes to the state's updates caused by calling [`Impulse#setState`][impulse__set_state]. Returns a cleanup function that unsubscribes the `listener`.
 
 - `listener` is a function that subscribes to the updates.
 
 ```ts
-const count = Sweety.of(0)
+const count = Impulse.of(0)
 const unsubscribe = count.subscribe(() => {
   console.log("The count is %d", count.getState())
 })
@@ -225,13 +227,13 @@ count.setState(20) // ...
 function watch<TProps>(component: React.FC<TProps>): React.FC<TProps>
 ```
 
-The `watch` function creates a React component that subscribes to all `Sweety` instances calling the [`Sweety#getState`][sweety__get_state] method during the rendering phase of the component.
+The `watch` function creates a React component that subscribes to all Impulses calling the [`Impulse#getState`][impulse__get_state] method during the rendering phase of the component.
 
 The `Counter` component below enqueues a re-render whenever the `count`'s state changes, for instance, when the `Counter`'s button clicks:
 
 ```tsx
 const Counter: React.FC<{
-  count: Sweety<number>
+  count: Impulse<number>
 }> = watch(({ count }) => (
   <button onClick={() => count.setState((x) => x + 1)}>
     {count.getState()}
@@ -239,14 +241,14 @@ const Counter: React.FC<{
 ))
 ```
 
-But if a component defines a `Sweety` instance, passes it thru, or calls the [`Sweety#getState`][sweety__get_state] method outside of the rendering phase (ex: as part of event listeners handlers), then it does not subscribe to the `Sweety` instances changes.
+But if a component defines an Impulse, passes it thru, or calls the [`Impulse#getState`][impulse__get_state] method outside of the rendering phase (ex: inside an `onClick` handler), then it does not subscribe to the Impulse changes.
 
-Here the `SumOfTwo` component defines two `Sweety` instances, passes them further to the `Counter`s components, and calls [`Sweety#getState`][sweety__get_state] inside the `button.onClick` handler. It is optional to use the `watch` function in that case:
+Here the `SumOfTwo` component defines two Impulses, passes them further to the `Counter`s components, and calls [`Impulse#getState`][impulse__get_state] inside the `button.onClick` handler. It is optional to use the `watch` function in that case:
 
 ```tsx
 const SumOfTwo: React.FC = () => {
-  const firstCounter = useSweety(0)
-  const secondCounter = useSweety(0)
+  const firstCounter = useImpulseOf(0)
+  const secondCounter = useImpulseOf(0)
 
   return (
     <div>
@@ -303,47 +305,47 @@ watch.memo.forwardRef(/* */)
 watch.forwardRef.memo(/* */)
 ```
 
-### `useSweety`
+### `useImpulseOf`
 
 ```dart
-function useSweety<T>(
+function useImpulseOf<T>(
   initialState: T | (() => T),
   compare?: null | Compare<T>
-): Sweety<T>
+): Impulse<T>
 ```
 
 - `initialState` argument is the state used during the initial render. If the initial state is the result of an expensive computation, you may provide a function instead, which will be executed only on the initial render.
-- `[compare]` is an optional [`Compare`][compare] function applied as [`Sweety#compare`][sweety__compare]. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
+- `[compare]` is an optional [`Compare`][compare] function applied as [`Impulse#compare`][impulse__compare]. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
-A hook that initiates a stable (never changing) `Sweety` instance.
+A hook that initiates a stable (never changing) Impulse.
 
 > 💬 The initial state is disregarded during subsequent re-renders.
 
-### `useWatchSweety`
+### `useWatchImpulse`
 
 ```dart
-function useWatchSweety<T>(
+function useWatchImpulse<T>(
   watcher: () => T,
   compare?: null | Compare<T>
 ): T
 ```
 
-- `watcher` is a function that subscribes to all `Sweety` instances calling the [`Sweety#getState`][sweety__get_state] method inside the function.
+- `watcher` is a function that subscribes to all Impulses calling the [`Impulse#getState`][impulse__get_state] method inside the function.
 - `[compare]` is an optional [`Compare`][compare] function. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
-The `useWatchSweety` hook is an alternative to the [`watch`][watch] function. It executes the `watcher` function whenever any of the involved `Sweety` instances' state update but enqueues a re-render only when the resulting value is different from the previous.
+The `useWatchImpulse` hook is an alternative to the [`watch`][watch] function. It executes the `watcher` function whenever any of the involved Impulses' state update but enqueues a re-render only when the resulting value is different from the previous.
 
-Custom hooks can use `useWatchSweety` for reading and transforming the `Sweety` instances' states, so the host component doesn't need to wrap around the [`watch`][watch] HOC:
+Custom hooks can use `useWatchImpulse` for reading and transforming the Impulses' states, so the host component doesn't need to wrap around the [`watch`][watch] HOC:
 
 ```tsx
 const useSumAllAndMultiply = ({
   multiplier,
   counts,
 }: {
-  multiplier: Sweety<number>
-  counts: Sweety<Array<Sweety<number>>>
+  multiplier: Impulse<number>
+  counts: Impulse<Array<Impulse<number>>>
 }): number => {
-  return useWatchSweety(() => {
+  return useWatchImpulse(() => {
     const sumAll = counts
       .getState()
       .map((count) => count.getState())
@@ -354,13 +356,13 @@ const useSumAllAndMultiply = ({
 }
 ```
 
-Components can scope watched `Sweety` instances to reduce re-rendering:
+Components can scope watched Impulses to reduce re-rendering:
 
 ```tsx
 const Challenge: React.FC = () => {
-  const count = useSweety(0)
+  const count = useImpulseOf(0)
   // the component re-renders only once when the `count` is greater than 5
-  const isMoreThanFive = useWatchSweety(() => count.getState() > 5)
+  const isMoreThanFive = useWatchImpulse(() => count.getState() > 5)
 
   return (
     <div>
@@ -372,16 +374,16 @@ const Challenge: React.FC = () => {
 }
 ```
 
-> 💬 The `watcher` function is only for reading the `Sweety` instances' states. It should never call [`Sweety.of`][sweety__of], [`Sweety#clone`][sweety__clone], [`Sweety#setState`][sweety__set_state], or [`Sweety#subscribe`][sweety__subscribe] methods inside.
+> 💬 The `watcher` function is only for reading the Impulses' states. It should never call [`Impulse.of`][impulse__of], [`Impulse#clone`][impulse__clone], [`Impulse#setState`][impulse__set_state], or [`Impulse#subscribe`][impulse__subscribe] methods inside.
 
 > 💡 It is recommended to memoize the `watcher` function with [`React.useCallback`][react__use_callback] for better performance.
 
-> 💡 Keep in mind that the `watcher` function acts as a "reader" so you'd like to avoid heavy calculations inside it. Sometimes it might be a good idea to pass a watcher result to a separated memoization hook. The same is true for the `compare` function - you should choose wisely between avoiding extra re-renders and heavy comparisons.
+> 💡 Keep in mind that the `watcher` function acts as a "reader" so you'd like to avoid heavy computations inside it. Sometimes it might be a good idea to pass a watcher result to a separated memoization hook. The same is true for the `compare` function - you should choose wisely between avoiding extra re-renders and heavy comparisons.
 
-### `useSweetyMemo`
+### `useImpulseMemo`
 
 ```dart
-function useSweetyMemo<T>(
+function useImpulseMemo<T>(
   factory: () => T,
   dependencies: ReadonlyArray<unknown> | undefined,
 ): T
@@ -390,7 +392,7 @@ function useSweetyMemo<T>(
 - `factory` is a function calculates a value `T` whenever any of the `dependencies`' values change.
 - `dependencies` is an array of values used in the `factory` function.
 
-The hook is a `Sweety` version of the [`React.useMemo`][react__use_memo] hook. During the `factory` execution, all the `Sweety` instances that call the [`Sweety#getState`][sweety__get_state] method become _phantom dependencies_ of the hook.
+The hook is an Impulse version of the [`React.useMemo`][react__use_memo] hook. During the `factory` execution, all Impulses that call the [`Impulse#getState`][impulse__get_state] method become _phantom dependencies_ of the hook.
 
 <details><summary><i>Click here to learn more about the phantom dependencies.</i></summary>
 <blockquote>
@@ -398,34 +400,34 @@ The hook is a `Sweety` version of the [`React.useMemo`][react__use_memo] hook. D
 The `factory` runs again whenever any dependency or a state of any phantom dependency changes:
 
 ```ts
-const useCalcSum = (left: number, right: Sweety<number>): number => {
+const useCalcSum = (left: number, right: Impulse<number>): number => {
   // the factory runs whenever:
   // 1. `left` changes
-  // 2. `right` changes (new `Sweety` instance)
+  // 2. `right` changes (new `Impulse`)
   // 3. `right.getState()` changes (`right` mutates)
-  return useSweetyMemo(() => {
+  return useImpulseMemo(() => {
     return left + right.getState()
   }, [left, right])
 }
 ```
 
-The phantom dependencies might be different per `factory` call. If a `Sweety` instance does not call the [`Sweety#getState`][sweety__get_state] method, it does not become a phantom dependency:
+The phantom dependencies might be different per `factory` call. If an Impulse does not call the [`Impulse#getState`][impulse__get_state] method, it does not become a phantom dependency:
 
 ```ts
-const useCalcSum = (left: number, right: Sweety<number>): number => {
+const useCalcSum = (left: number, right: Impulse<number>): number => {
   // the factory runs when either:
   //
   // `left` > 0:
   //   1. `left` changes
-  //   2. `right` changes (new `Sweety` instance)
+  //   2. `right` changes (new `Impulse`)
   //   3. `right.getState()` changes (`right` mutates)
   //
   // OR
   //
   // `left` <= 0:
   //   1. `left` changes
-  //   2. `right` changes (new `Sweety` instance)
-  return useSweetyEffect(() => {
+  //   2. `right` changes (new `Impulse`)
+  return useImpulseMemo(() => {
     if (left > 0) {
       return left + right.getState()
     }
@@ -445,16 +447,16 @@ const useCalcSum = (left: number, right: Sweety<number>): number => {
 >   "react-hooks/exhaustive-deps": [
 >     "error",
 >     {
->       "additionalHooks": "(useSweetyEffect|useSweetyLayoutEffect|useSweetyMemo)"
+>       "additionalHooks": "(useImpulseEffect|useImpulseLayoutEffect|useImpulseMemo)"
 >     }
 >   ]
 > }
 > ```
 
-### `useSweetyEffect`
+### `useImpulseEffect`
 
 ```dart
-function useSweetyEffect(
+function useImpulseEffect(
   effect: () => (void | VoidFunction),
   dependencies?: ReadonlyArray<unknown>,
 ): void
@@ -464,7 +466,7 @@ function useSweetyEffect(
   Can return a cleanup function to cancel running side effects.
 - `[dependencies]` is an optional array of values used in the `effect` function.
 
-The hook is a `Sweety` version of the [`React.useEffect`][react__use_effect] hook. During the `effect` execution, all the `Sweety` instances that call the [`Sweety#getState`][sweety__get_state] method become _phantom dependencies_ of the hook.
+The hook is an Impulse version of the [`React.useEffect`][react__use_effect] hook. During the `effect` execution, all Impulses that call the [`Impulse#getState`][impulse__get_state] method become _phantom dependencies_ of the hook.
 
 <details><summary><i>Click here to learn more about the phantom dependencies.</i></summary>
 <blockquote>
@@ -472,34 +474,34 @@ The hook is a `Sweety` version of the [`React.useEffect`][react__use_effect] hoo
 The `effect` runs again whenever any dependency or a state of any phantom dependency changes:
 
 ```ts
-const usePrintSum = (left: number, right: Sweety<number>): void => {
+const usePrintSum = (left: number, right: Impulse<number>): void => {
   // the effect runs whenever:
   // 1. `left` changes
-  // 2. `right` changes (new `Sweety` instance)
+  // 2. `right` changes (new `Impulse`)
   // 3. `right.getState()` changes (`right` mutates)
-  useSweetyEffect(() => {
+  useImpulseEffect(() => {
     console.log("sum is %d", left + right.getState())
   }, [left, right])
 }
 ```
 
-The phantom dependencies might be different per `effect` call. If a `Sweety` instance does not call the [`Sweety#getState`][sweety__get_state] method, it does not become a phantom dependency:
+The phantom dependencies might be different per `effect` call. If an Impulse does not call the [`Impulse#getState`][impulse__get_state] method, it does not become a phantom dependency:
 
 ```ts
-const usePrintSum = (left: number, right: Sweety<number>): void => {
+const usePrintSum = (left: number, right: Impulse<number>): void => {
   // the effect runs when either:
   //
   // `left` > 0:
   //   1. `left` changes
-  //   2. `right` changes (new `Sweety` instance)
+  //   2. `right` changes (new `Impulse`)
   //   3. `right.getState()` changes (`right` mutates)
   //
   // OR
   //
   // `left` <= 0:
   //   1. `left` changes
-  //   2. `right` changes (new `Sweety` instance)
-  useSweetyEffect(() => {
+  //   2. `right` changes (new `Impulse`)
+  useImpulseEffect(() => {
     if (left > 0) {
       console.log("sum is %d", left + right.getState())
     }
@@ -517,23 +519,23 @@ const usePrintSum = (left: number, right: Sweety<number>): void => {
 >   "react-hooks/exhaustive-deps": [
 >     "error",
 >     {
->       "additionalHooks": "(useSweetyEffect|useSweetyLayoutEffect|useSweetyMemo)"
+>       "additionalHooks": "(useImpulseEffect|useImpulseLayoutEffect|useImpulseMemo)"
 >     }
 >   ]
 > }
 > ```
 
-### `useSweetyLayoutEffect`
+### `useImpulseLayoutEffect`
 
-The hook is a `Sweety` version of the [`React.useLayoutEffect`][react__use_layout_effect] hook. Acts similar way as [`useSweetyEffect`][use_sweety_effect].
+The hook is an Impulse version of the [`React.useLayoutEffect`][react__use_layout_effect] hook. Acts similar way as [`useImpulseEffect`][use_impulse_effect].
 
-### ~~`useSweetyInsertionEffect`~~
+### ~~`useImpulseInsertionEffect`~~
 
-There is no `Sweety` version of the [`React.useInsertionEffect`][react__use_insertion_effect] hook due to backward compatibility with React from `v16.8.0`. The workaround is to use the native `React.useInsertionEffect` hook with the states extracted beforehand:
+There is no Impulse version of the [`React.useInsertionEffect`][react__use_insertion_effect] hook due to backward compatibility with React from `v16.8.0`. The workaround is to use the native `React.useInsertionEffect` hook with the states extracted beforehand:
 
 ```ts
-const usePrintSum = (left: number, right: Sweety<number>): void => {
-  const rightState = useSweetyState(right)
+const usePrintSum = (left: number, right: Impulse<number>): void => {
+  const rightState = useImpulseState(right)
 
   React.useInsertionEffect(() => {
     console.log("sum is %d", left + rightState)
@@ -541,21 +543,21 @@ const usePrintSum = (left: number, right: Sweety<number>): void => {
 }
 ```
 
-### `useSweetyState`
+### `useImpulseState`
 
 ```dart
-function useSweetyState<T>(sweety: Sweety<T>): T
+function useImpulseState<T>(impulse: Impulse<T>): T
 ```
 
-A hook that subscribes to the `sweety` changes and returns the current state.
+A hook that subscribes to the `impulse` changes and returns the current state.
 
-- `sweety` is a `Sweety` instance.
+- `impulse` is an `Impulse` instance.
 
 ```tsx
 const Input: React.FC<{
-  value: Sweety<string>
+  value: Impulse<string>
 }> = ({ value }) => {
-  const text = useSweetyState(value)
+  const text = useImpulseState(value)
 
   return (
     <input
@@ -573,14 +575,14 @@ const Input: React.FC<{
 function batch(execute: VoidFunction): void
 ```
 
-The `batch` function is a helper to optimize multiple `Sweety` updates.
+The `batch` function is a helper to optimize multiple Impulses updates.
 
-- `execute` is a function that executes multiple [`Sweety#setState`][sweety__set_state] calls at ones.
+- `execute` is a function that executes multiple [`Impulse#setState`][impulse__set_state] calls at ones.
 
 ```tsx
 const SumOfTwo: React.FC<{
-  left: Sweety<number>
-  right: Sweety<number>
+  left: Impulse<number>
+  right: Impulse<number>
 }> = watch(({ left, right }) => (
   <div>
     <span>Sum is: {left.getState() + right.getState()}</span>
@@ -620,14 +622,14 @@ Here are scripts you want to run for publishing a new version to NPM:
 
 <!-- L I N K S -->
 
-[sweety__of]: #sweetyof
-[sweety__compare]: #sweetycompare
-[sweety__clone]: #sweetyclone
-[sweety__get_state]: #sweetygetstate
-[sweety__set_state]: #sweetysetstate
-[sweety__subscribe]: #sweetysubscribe
-[use_sweety]: #usesweety
-[use_sweety_effect]: #usesweetyeffect
+[impulse__of]: #impulseof
+[impulse__compare]: #impulsecompare
+[impulse__clone]: #impulseclone
+[impulse__get_state]: #impulsegetstate
+[impulse__set_state]: #impulsesetstate
+[impulse__subscribe]: #impulsesubscribe
+[use_impulse_of]: #useimpulseof
+[use_impulse_effect]: #useimpulseeffect
 [watch]: #watch
 [batch]: #batch
 [compare]: #compare
