@@ -29,7 +29,10 @@ const isSweetyWatcher = <TProps>(
  * @version 2.1.0
  */
 export function watch<TProps>(component: ExoticComponent<TProps>): never
-export function watch<TProps>(component: FC<TProps>): FC<TProps>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function watch<TComponent extends FC<any>>(
+  component: TComponent,
+): TComponent
 export function watch<TProps>(component: FC<TProps>): FC<TProps> {
   if (isSweetyWatcher(component)) {
     return component
@@ -80,9 +83,7 @@ const forwardRef = <TNode, TProps>(
 ): ForwardRefExoticComponent<
   PropsWithoutRef<TProps> & RefAttributes<TNode>
 > => {
-  return React_forwardRef(
-    watch(render) as ForwardRefRenderFunction<TNode, TProps>,
-  )
+  return React_forwardRef(watch(render))
 }
 
 /**

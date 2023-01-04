@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Sweety, useSweetyState, useWatchSweety } from "../src"
+import { Sweety, watch, useSweetyState, useWatchSweety } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -138,5 +138,44 @@ describe("Use Sweety#getState() in Sweety#toJSON() and Sweety#toString() #321", 
       count.setState(2)
     })
     expect(result).toHaveTextContent("2")
+  })
+})
+
+describe("return the same component type from watch #322", () => {
+  const First: React.FC<{
+    first: Sweety<string>
+  }> = ({ first }) => <span data-testid="first">{first.getState()}</span>
+
+  const Second: React.FC<{
+    second: Sweety<string>
+  }> = ({ second }) => <span data-testid="second">{second.getState()}</span>
+
+  const Combo = Object.assign(First, { Second: watch(Second) })
+  const WatchedCombo = watch(Combo)
+
+  it("watches host fine", () => {
+    const text = Sweety.of("hello")
+    render(<WatchedCombo first={text} />)
+
+    const first = screen.getByTestId("first")
+    expect(first).toHaveTextContent("hello")
+
+    act(() => {
+      text.setState("world")
+    })
+    expect(first).toHaveTextContent("world")
+  })
+
+  it("watches static fine", () => {
+    const text = Sweety.of("hello")
+    render(<WatchedCombo.Second second={text} />)
+
+    const first = screen.getByTestId("second")
+    expect(first).toHaveTextContent("hello")
+
+    act(() => {
+      text.setState("world")
+    })
+    expect(first).toHaveTextContent("world")
   })
 })
