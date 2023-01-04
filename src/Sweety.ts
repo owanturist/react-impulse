@@ -51,7 +51,7 @@ export class Sweety<T> {
    * @version 2.1.0
    */
   protected toJSON(): unknown {
-    return this.value
+    return this.getState()
   }
 
   /**
@@ -62,7 +62,7 @@ export class Sweety<T> {
    * @version 2.1.0
    */
   protected toString(): string {
-    return String(this.value)
+    return String(this.getState())
   }
 
   /**
