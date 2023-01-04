@@ -23,8 +23,8 @@ export const CounterComponent: React.FC<{
   count: Impulse<number>
   onRender: VoidFunction
 }> = React.memo(
-  ({ count: countStore, onRender }) => {
-    const count = useImpulseState(countStore)
+  ({ count: countImpulse, onRender }) => {
+    const count = useImpulseState(countImpulse)
 
     return (
       <React.Profiler id="test" onRender={onRender}>
@@ -33,7 +33,7 @@ export const CounterComponent: React.FC<{
           <button
             type="button"
             data-testid="increment"
-            onClick={() => countStore.setState(count + 1)}
+            onClick={() => countImpulse.setState(count + 1)}
           />
         </div>
       </React.Profiler>
