@@ -114,3 +114,29 @@ describe("watching misses when defined after useEffect #140", () => {
     })
   })
 })
+
+describe("Use Sweety#getState() in Sweety#toJSON() and Sweety#toString() #321", () => {
+  it.each([
+    ["toString", (value: unknown) => String(value)],
+    ["toJSON", (value: unknown) => JSON.stringify(value)],
+  ])("watches %s execution", (_, convert) => {
+    const Component: React.FC<{
+      count: Sweety<number>
+    }> = ({ count }) => {
+      const x = useWatchSweety(() => convert(count))
+
+      return <span data-testid="result">{x}</span>
+    }
+
+    const count = Sweety.of(1)
+    render(<Component count={count} />)
+
+    const result = screen.getByTestId("result")
+    expect(result).toHaveTextContent("1")
+
+    act(() => {
+      count.setState(2)
+    })
+    expect(result).toHaveTextContent("2")
+  })
+})
