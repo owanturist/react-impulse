@@ -488,6 +488,23 @@ describe("Sweety#toJSON()", () => {
     `,
     )
   })
+
+  it.concurrent("stringifies nested Sweety", () => {
+    const store = Sweety.of({
+      first: Sweety.of(1),
+      second: Sweety.of([Sweety.of("1"), Sweety.of(false)]),
+    })
+
+    expect(JSON.stringify(store, null, 2)).toMatchInlineSnapshot(`
+      "{
+        \\"first\\": 1,
+        \\"second\\": [
+          \\"1\\",
+          false
+        ]
+      }"
+    `)
+  })
 })
 
 describe("Sweety#toString", () => {
@@ -496,7 +513,7 @@ describe("Sweety#toString", () => {
     ["boolean", false, "false"],
     ["null", null, "null"],
     ["undefined", undefined, "undefined"],
-    ["array", [1, 2, 3], "1,2,3"],
+    ["array", [1, 2, Sweety.of(3)], "1,2,3"],
     ["object", { first: 1 }, "[object Object]"],
   ])("converts %s state to string", (_, state, expected) => {
     expect(String(Sweety.of(state))).toBe(expected)
