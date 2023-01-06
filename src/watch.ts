@@ -10,7 +10,6 @@ import {
   RefAttributes,
 } from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
-import hoistStatics from "hoist-non-react-statics"
 
 import { useWatchContext } from "./useWatchContext"
 import { Compare } from "./utils"
@@ -30,9 +29,7 @@ const isSweetyWatcher = <TProps>(
  */
 export function watch<TProps>(component: ExoticComponent<TProps>): never
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function watch<TComponent extends FC<any>>(
-  component: TComponent,
-): TComponent
+export function watch<TProps>(component: FC<TProps>): FC<TProps>
 export function watch<TProps>(component: FC<TProps>): FC<TProps> {
   if (isSweetyWatcher(component)) {
     return component
@@ -51,8 +48,6 @@ export function watch<TProps>(component: FC<TProps>): FC<TProps> {
       () => executeWatcher(() => component(props, ctx)),
     )
   }
-
-  hoistStatics(SweetyWatcher, component)
 
   SweetyWatcher.displayName = `SweetyWatcher${component.displayName ?? ""}`
   SweetyWatcher.isSweetyWatcher = true
@@ -83,7 +78,9 @@ const forwardRef = <TNode, TProps>(
 ): ForwardRefExoticComponent<
   PropsWithoutRef<TProps> & RefAttributes<TNode>
 > => {
-  return React_forwardRef(watch(render))
+  return React_forwardRef(
+    watch(render) as ForwardRefRenderFunction<TNode, TProps>,
+  )
 }
 
 /**

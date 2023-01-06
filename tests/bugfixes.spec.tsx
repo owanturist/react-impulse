@@ -142,40 +142,34 @@ describe("Use Sweety#getState() in Sweety#toJSON() and Sweety#toString() #321", 
 })
 
 describe("return the same component type from watch #322", () => {
-  const First: React.FC<{
-    first: Sweety<string>
-  }> = ({ first }) => <span data-testid="first">{first.getState()}</span>
+  const StatelessInput: React.FC<{
+    value: string
+    onChange: React.Dispatch<string>
+  }> = ({ value, onChange }) => (
+    <input value={value} onChange={(event) => onChange(event.target.value)} />
+  )
 
-  const Second: React.FC<{
-    second: Sweety<string>
-  }> = ({ second }) => <span data-testid="second">{second.getState()}</span>
+  const StatefulInput: React.FC<{
+    value: Sweety<string>
+  }> = watch(({ value }) => (
+    <StatelessInput
+      value={value.getState()}
+      onChange={(nextValue) => value.setState(nextValue)}
+    />
+  ))
 
-  const Combo = Object.assign(First, { Second: watch(Second) })
-  const WatchedCombo = watch(Combo)
+  const Input = Object.assign(StatefulInput, { Stateless: StatelessInput })
 
-  it("watches host fine", () => {
+  it("watches the StatefulInput", () => {
     const text = Sweety.of("hello")
-    render(<WatchedCombo first={text} />)
+    render(<Input value={text} />)
 
-    const first = screen.getByTestId("first")
-    expect(first).toHaveTextContent("hello")
+    const first = screen.getByRole("textbox")
+    expect(first).toHaveValue("hello")
 
     act(() => {
       text.setState("world")
     })
-    expect(first).toHaveTextContent("world")
-  })
-
-  it("watches static fine", () => {
-    const text = Sweety.of("hello")
-    render(<WatchedCombo.Second second={text} />)
-
-    const first = screen.getByTestId("second")
-    expect(first).toHaveTextContent("hello")
-
-    act(() => {
-      text.setState("world")
-    })
-    expect(first).toHaveTextContent("world")
+    expect(first).toHaveValue("world")
   })
 })
