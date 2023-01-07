@@ -15,12 +15,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup dependencies
-        uses: ./.github/actions/setup-deps
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
 
       - name: Install dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --no-audit --no-fund --prefer-offline
+
+      - name: Upload dependencies artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependencies
+          path: node_modules
+          retention-days: 7
 
   lint:
     name: Lint
@@ -31,8 +40,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup dependencies
-        uses: ./.github/actions/setup-deps
+      - name: Download dependencies
+        uses: actions/download-artifact@v3
+        with:
+          name: dependencies
 
       - name: Lint
         run: npm run lint
@@ -46,8 +57,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup dependencies
-        uses: ./.github/actions/setup-deps
+      - name: Download dependencies
+        uses: actions/download-artifact@v3
+        with:
+          name: dependencies
 
       - name: Type check
         run: npm run typecheck
@@ -63,8 +76,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup dependencies
-        uses: ./.github/actions/setup-deps
+      - name: Download dependencies
+        uses: actions/download-artifact@v3
+        with:
+          name: dependencies
 
       - name: Test
         run: npm run test:coverage
@@ -87,8 +102,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup dependencies
-        uses: ./.github/actions/setup-deps
+      - name: Download dependencies
+        uses: actions/download-artifact@v3
+        with:
+          name: dependencies
 
       - name: Install React ${{ matrix.react-version }}
         run: |
