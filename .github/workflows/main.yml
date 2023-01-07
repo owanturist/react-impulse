@@ -25,13 +25,13 @@ jobs:
         run: npm ci --no-audit --no-fund --prefer-offline
 
       - name: Zip dependencies for uploading
-        run: zip dependencies.zip ./node_modules/* -r
+        run: zip deps.zip ./node_modules/* -r
 
       - name: Upload dependencies artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dependencies
-          path: node_modules.zip
+          path: deps.zip
           retention-days: 7
 
   lint:
