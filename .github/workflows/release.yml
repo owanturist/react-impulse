@@ -9,7 +9,6 @@ on:
 jobs:
   release:
     name: Release new version
-    needs: checks
     runs-on: ubuntu-latest
 
     steps:
