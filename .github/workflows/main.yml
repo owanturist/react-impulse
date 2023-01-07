@@ -25,7 +25,10 @@ jobs:
         run: npm ci --no-audit --no-fund --prefer-offline
 
       - name: Zip dependencies for uploading
-        run: zip deps.zip ./node_modules -r
+        # [q] quite
+        # [r] recursive
+        # [y] store symlinks as symlinks
+        run: zip -qry deps.zip ./node_modules
 
       - name: Upload dependencies artifacts
         uses: actions/upload-artifact@v3

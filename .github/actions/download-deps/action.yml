@@ -10,4 +10,4 @@ runs:
 
     - name: Unzip dependencies
       shell: bash
-      run: unzip deps.zip
+      run: unzip -q deps.zip
