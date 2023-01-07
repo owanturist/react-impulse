@@ -33,6 +33,7 @@ jobs:
           name: dependencies
           path: deps.zip
           retention-days: 7
+          if-no-files-found: error
 
   lint:
     name: Lint
