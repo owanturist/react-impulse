@@ -24,11 +24,14 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund --prefer-offline
 
+      - name: Zip dependencies for uploading
+        run: zip dependencies.zip ./node_modules/* -r
+
       - name: Upload dependencies artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dependencies
-          path: node_modules
+          path: dependencies.zip
           retention-days: 7
 
   lint:
@@ -44,6 +47,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: dependencies
+
+      - name: Unzip dependencies
+        run: unzip dependencies.zip
 
       - name: Lint
         run: npm run lint
@@ -61,6 +67,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: dependencies
+
+      - name: Unzip dependencies
+        run: unzip dependencies.zip
 
       - name: Type check
         run: npm run typecheck
@@ -80,6 +89,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: dependencies
+
+      - name: Unzip dependencies
+        run: unzip dependencies.zip
 
       - name: Test
         run: npm run test:coverage
@@ -106,6 +118,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: dependencies
+
+      - name: Unzip dependencies
+        run: unzip dependencies.zip
 
       - name: Install React ${{ matrix.react-version }}
         run: |
