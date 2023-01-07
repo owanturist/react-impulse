@@ -1,0 +1,51 @@
+name: release
+
+on:
+  # push:
+  #   branches:
+  #     - release/**
+  pull_request:
+
+jobs:
+  release:
+    name: Release new version
+    needs: checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set environment variables
+        run: |
+          set +o history
+          PUBLISHED_VERSIONS=$(npm view --json ${{ github.repository }} versions)
+          CURRENT_VERSION=$(jq -r '.version' package.json)
+        env:
+          PUBLISHED_VERSIONS: $PUBLISHED_VERSIONS
+          CURRENT_VERSION: $CURRENT_VERSION
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+
+      - name: Check if package version has been published
+        run: |
+          set +o history
+          if [[ $PUBLISHED_VERSIONS == *$CURRENT_VERSION* ]]; then
+            echo "Version $CURRENT_VERSION has already been published."
+            exit 78
+          fi
+
+      - name: Download dependencies
+        uses: ./.github/actions/download-deps
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish
+        run: |
+          set +o history
+          NEWEST_PUBLISHED_VERSION=$(echo $PUBLISHED_VERSIONS | jq -r 'max')
+          if [[ "$CURRENT_VERSION" > "$NEWEST_PUBLISHED_VERSION" ]]; then
+            npm publish --tag latest
+          else
+            npm publish
+          fi
