@@ -1,0 +1,12 @@
+name: Download and unzip dependencies
+
+runs:
+  using: composite
+  steps:
+    - name: Download dependencies
+      uses: actions/download-artifact@v3
+      with:
+        name: dependencies
+
+    - name: Unzip dependencies
+      run: unzip dependencies.zip node_modules
