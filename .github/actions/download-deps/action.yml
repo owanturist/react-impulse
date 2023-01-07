@@ -9,4 +9,5 @@ runs:
         name: dependencies
 
     - name: Unzip dependencies
+      shell: bash
       run: unzip dependencies.zip node_modules
