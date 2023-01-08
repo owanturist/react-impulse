@@ -10,7 +10,6 @@ import {
   RefAttributes,
 } from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
-import hoistStatics from "hoist-non-react-statics"
 
 import { useWatchContext } from "./useWatchContext"
 import { Compare } from "./utils"
@@ -48,8 +47,6 @@ export function watch<TProps>(component: FC<TProps>): FC<TProps> {
       () => executeWatcher(() => component(props, ctx)),
     )
   }
-
-  hoistStatics(SweetyWatcher, component)
 
   SweetyWatcher.displayName = `SweetyWatcher${component.displayName ?? ""}`
   SweetyWatcher.isSweetyWatcher = true
