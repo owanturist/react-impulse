@@ -28,7 +28,6 @@ const isSweetyWatcher = <TProps>(
  * @version 2.1.0
  */
 export function watch<TProps>(component: ExoticComponent<TProps>): never
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function watch<TProps>(component: FC<TProps>): FC<TProps>
 export function watch<TProps>(component: FC<TProps>): FC<TProps> {
   if (isSweetyWatcher(component)) {
