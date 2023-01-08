@@ -53,12 +53,12 @@ const Checkbox: React.FC<{
 Once created, Impulses can travel thru your components, where you can set and get their states:
 
 ```tsx
-import { useImpulseOf, watch } from "react-impulse"
+import { useImpulse, watch } from "react-impulse"
 
 const SignUp: React.FC = watch(() => {
-  const username = useImpulseOf("")
-  const password = useImpulseOf("")
-  const isAgreeWithTerms = useImpulseOf(false)
+  const username = useImpulse("")
+  const password = useImpulse("")
+  const isAgreeWithTerms = useImpulse(false)
 
   return (
     <form>
@@ -107,7 +107,7 @@ A static method that creates new Impulse.
 - `initialState` is the initial state.
 - `[compare]` is an optional [`Compare`][compare] function applied as [`Impulse#compare`][impulse__compare]. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
-> 💡 The [`useImpulseOf`][use_impulse_of] hook helps to create and store an `Impulse` inside a React component.
+> 💡 The [`useImpulse`][use_impulse] hook helps to create and store an `Impulse` inside a React component.
 
 ### `Impulse#getState`
 
@@ -247,8 +247,8 @@ Here the `SumOfTwo` component defines two Impulses, passes them further to the `
 
 ```tsx
 const SumOfTwo: React.FC = () => {
-  const firstCounter = useImpulseOf(0)
-  const secondCounter = useImpulseOf(0)
+  const firstCounter = useImpulse(0)
+  const secondCounter = useImpulse(0)
 
   return (
     <div>
@@ -305,10 +305,10 @@ watch.memo.forwardRef(/* */)
 watch.forwardRef.memo(/* */)
 ```
 
-### `useImpulseOf`
+### `useImpulse`
 
 ```dart
-function useImpulseOf<T>(
+function useImpulse<T>(
   initialState: T | (() => T),
   compare?: null | Compare<T>
 ): Impulse<T>
@@ -360,7 +360,7 @@ Components can scope watched Impulses to reduce re-rendering:
 
 ```tsx
 const Challenge: React.FC = () => {
-  const count = useImpulseOf(0)
+  const count = useImpulse(0)
   // the component re-renders only once when the `count` is greater than 5
   const isMoreThanFive = useWatchImpulse(() => count.getState() > 5)
 
@@ -628,7 +628,7 @@ Here are scripts you want to run for publishing a new version to NPM:
 [impulse__get_state]: #impulsegetstate
 [impulse__set_state]: #impulsesetstate
 [impulse__subscribe]: #impulsesubscribe
-[use_impulse_of]: #useimpulseof
+[use_impulse]: #useimpulse
 [use_impulse_effect]: #useimpulseeffect
 [watch]: #watch
 [batch]: #batch

@@ -1,12 +1,12 @@
 import { renderHook } from "@testing-library/react-hooks"
 
-import { useImpulseOf } from "../src"
+import { useImpulse } from "../src"
 
 describe("with direct initial value", () => {
   it.concurrent("creates a impulse with an initial value", () => {
     const initial = { count: 0 }
 
-    const { result } = renderHook(() => useImpulseOf(initial))
+    const { result } = renderHook(() => useImpulse(initial))
 
     expect(result.current.getState()).toBe(initial)
     expect(result.current.getState()).toStrictEqual({ count: 0 })
@@ -15,7 +15,7 @@ describe("with direct initial value", () => {
   it.concurrent("keeps the same impulse during re-renders", () => {
     const initial = { count: 0 }
 
-    const { result, rerender } = renderHook(() => useImpulseOf(initial))
+    const { result, rerender } = renderHook(() => useImpulse(initial))
 
     const firstResult = result.current
 
@@ -30,7 +30,7 @@ describe("with direct initial value", () => {
     () => {
       const initial = { count: 0 }
 
-      const { result, rerender } = renderHook(() => useImpulseOf(initial))
+      const { result, rerender } = renderHook(() => useImpulse(initial))
 
       const firstResult = result.current
 
@@ -47,7 +47,7 @@ describe("with lazy initial value", () => {
     const initial = { count: 0 }
     const init = vi.fn(() => initial)
 
-    const { result } = renderHook(() => useImpulseOf(init))
+    const { result } = renderHook(() => useImpulse(init))
 
     expect(result.current.getState()).toBe(initial)
     expect(result.current.getState()).toStrictEqual({ count: 0 })
@@ -58,7 +58,7 @@ describe("with lazy initial value", () => {
     const initial = { count: 0 }
     const init = vi.fn(() => initial)
 
-    const { result, rerender } = renderHook(() => useImpulseOf(init))
+    const { result, rerender } = renderHook(() => useImpulse(init))
 
     const firstResult = result.current
 
@@ -75,7 +75,7 @@ describe("with lazy initial value", () => {
       let initial = { count: 0 }
       const init = vi.fn(() => initial)
 
-      const { result, rerender } = renderHook(() => useImpulseOf(init))
+      const { result, rerender } = renderHook(() => useImpulse(init))
 
       const firstResult = result.current
 
@@ -94,7 +94,7 @@ describe("with lazy initial value", () => {
       const initial = { count: 0 }
       let init = vi.fn(() => initial)
 
-      const { result, rerender } = renderHook(() => useImpulseOf(init))
+      const { result, rerender } = renderHook(() => useImpulse(init))
 
       const firstResult = result.current
 
@@ -110,20 +110,20 @@ describe("with lazy initial value", () => {
 
 describe("with compare function", () => {
   it.concurrent("applies Object.is by default", () => {
-    const { result } = renderHook(() => useImpulseOf({ count: 0 }))
+    const { result } = renderHook(() => useImpulse({ count: 0 }))
 
     expect(result.current.compare).toBe(Object.is)
   })
 
   it.concurrent("applies Object.is when passing null as compare", () => {
-    const { result } = renderHook(() => useImpulseOf({ count: 0 }, null))
+    const { result } = renderHook(() => useImpulse({ count: 0 }, null))
 
     expect(result.current.compare).toBe(Object.is)
   })
 
   it.concurrent("passes custom compare function", () => {
     const compare = vi.fn()
-    const { result } = renderHook(() => useImpulseOf({ count: 0 }, compare))
+    const { result } = renderHook(() => useImpulse({ count: 0 }, compare))
 
     expect(result.current.compare).toBe(compare)
   })

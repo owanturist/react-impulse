@@ -13,12 +13,12 @@ import { Compare, isFunction } from "./utils"
  *
  * @version 1.0.0
  */
-export function useImpulseOf<T>(
+export function useImpulse<T>(
   lazyInitialState: () => T,
   compare?: null | Compare<T>,
 ): Impulse<T>
 
-export function useImpulseOf<T>(
+export function useImpulse<T>(
   invalidLazyInitialState: (...args: Array<never>) => unknown,
   compare?: null | Compare<T>,
 ): never
@@ -33,12 +33,12 @@ export function useImpulseOf<T>(
  *
  * @version 1.0.0
  */
-export function useImpulseOf<T>(
+export function useImpulse<T>(
   initialState: T, // eslint-disable-line @typescript-eslint/unified-signatures
   compare?: null | Compare<T>,
 ): Impulse<T>
 
-export function useImpulseOf<T>(
+export function useImpulse<T>(
   lazyOrState: T | (() => T),
   compare?: null | Compare<T>,
 ): Impulse<T> {
