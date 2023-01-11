@@ -67,15 +67,15 @@ describe("nested impulses", () => {
       />,
     )
 
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(0)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).not.toHaveBeenCalled()
     expectCounts([])
     vi.clearAllMocks()
 
     // add first counter
     fireEvent.click(screen.getByTestId("add-counter"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expectCounts([0])
     vi.clearAllMocks()
@@ -83,15 +83,15 @@ describe("nested impulses", () => {
     // increment the first counter
     fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
     expect(onRender).not.toHaveBeenCalled()
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expectCounts([1])
     vi.clearAllMocks()
 
     // add second counter
     fireEvent.click(screen.getByTestId("add-counter"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 1)
     expectCounts([1, 0])
     vi.clearAllMocks()
@@ -113,8 +113,8 @@ describe("nested impulses", () => {
         counts: [...current.counts, Impulse.of(3)],
       }))
     })
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 2)
     expectCounts([1, 2, 3])
     vi.clearAllMocks()
@@ -124,7 +124,7 @@ describe("nested impulses", () => {
       impulse.getValue().counts[2]!.setValue((x) => 2 * x)
     })
     expect(onRender).not.toHaveBeenCalled()
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 2)
     expectCounts([1, 2, 6])
     vi.clearAllMocks()

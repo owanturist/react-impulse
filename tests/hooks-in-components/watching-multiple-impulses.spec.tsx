@@ -181,9 +181,9 @@ describe("watching multiple impulses", () => {
       )
 
       // initial render and watcher setup
-      expect(onRender).toHaveBeenCalledTimes(1)
-      expect(onFirstCountRender).toHaveBeenCalledTimes(1)
-      expect(onSecondCountRender).toHaveBeenCalledTimes(1)
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(onFirstCountRender).toHaveBeenCalledOnce()
+      expect(onSecondCountRender).toHaveBeenCalledOnce()
       expect(screen.queryByText("more than two")).not.toBeInTheDocument()
       expect(screen.queryByText("less than seven")).toBeInTheDocument()
       expect(screen.getAllByTestId("count")[0]).toHaveTextContent("0")
@@ -193,7 +193,7 @@ describe("watching multiple impulses", () => {
       // increment first count
       fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
       expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
-      expect(onFirstCountRender).toHaveBeenCalledTimes(1)
+      expect(onFirstCountRender).toHaveBeenCalledOnce()
       expect(onSecondCountRender).not.toHaveBeenCalled()
       expect(screen.queryByText("more than two")).not.toBeInTheDocument()
       expect(screen.queryByText("less than seven")).toBeInTheDocument()
@@ -205,7 +205,7 @@ describe("watching multiple impulses", () => {
       fireEvent.click(withinNth("counter", 1).getByTestId("increment"))
       expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
       expect(onFirstCountRender).not.toHaveBeenCalled()
-      expect(onSecondCountRender).toHaveBeenCalledTimes(1)
+      expect(onSecondCountRender).toHaveBeenCalledOnce()
       expect(screen.queryByText("more than two")).not.toBeInTheDocument()
       expect(screen.queryByText("less than seven")).toBeInTheDocument()
       expect(screen.getAllByTestId("count")[0]).toHaveTextContent("1")
@@ -214,9 +214,9 @@ describe("watching multiple impulses", () => {
 
       // increment both
       fireEvent.click(screen.getByTestId("increment-both"))
-      expect(onRender).toHaveBeenCalledTimes(1)
-      expect(onFirstCountRender).toHaveBeenCalledTimes(1)
-      expect(onSecondCountRender).toHaveBeenCalledTimes(1)
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(onFirstCountRender).toHaveBeenCalledOnce()
+      expect(onSecondCountRender).toHaveBeenCalledOnce()
       expect(screen.queryByText("more than two")).toBeInTheDocument()
       expect(screen.queryByText("less than seven")).toBeInTheDocument()
       expect(screen.getAllByTestId("count")[0]).toHaveTextContent("2")
@@ -226,8 +226,8 @@ describe("watching multiple impulses", () => {
       // increment both again
       fireEvent.click(screen.getByTestId("increment-both"))
       expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
-      expect(onFirstCountRender).toHaveBeenCalledTimes(1)
-      expect(onSecondCountRender).toHaveBeenCalledTimes(1)
+      expect(onFirstCountRender).toHaveBeenCalledOnce()
+      expect(onSecondCountRender).toHaveBeenCalledOnce()
       expect(screen.queryByText("more than two")).toBeInTheDocument()
       expect(screen.queryByText("less than seven")).toBeInTheDocument()
       expect(screen.getAllByTestId("count")[0]).toHaveTextContent("3")
@@ -236,8 +236,8 @@ describe("watching multiple impulses", () => {
 
       // increment first
       fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
-      expect(onRender).toHaveBeenCalledTimes(1)
-      expect(onFirstCountRender).toHaveBeenCalledTimes(1)
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(onFirstCountRender).toHaveBeenCalledOnce()
       expect(onSecondCountRender).not.toHaveBeenCalled()
       expect(screen.queryByText("more than two")).toBeInTheDocument()
       expect(screen.queryByText("less than seven")).not.toBeInTheDocument()
@@ -251,8 +251,8 @@ describe("watching multiple impulses", () => {
         secondCount.setValue((x) => x + 1)
       })
       expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
-      expect(onFirstCountRender).toHaveBeenCalledTimes(1)
-      expect(onSecondCountRender).toHaveBeenCalledTimes(1)
+      expect(onFirstCountRender).toHaveBeenCalledOnce()
+      expect(onSecondCountRender).toHaveBeenCalledOnce()
       expect(screen.queryByText("more than two")).toBeInTheDocument()
       expect(screen.queryByText("less than seven")).not.toBeInTheDocument()
       expect(screen.getAllByTestId("count")[0]).toHaveTextContent("5")

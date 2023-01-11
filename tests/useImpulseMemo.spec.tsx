@@ -66,8 +66,8 @@ describe.each([
       const node = screen.getByTestId("value")
 
       expect(node).toHaveTextContent("2")
-      expect(onMemo).toHaveBeenCalledTimes(1)
-      expect(onRender).toHaveBeenCalledTimes(1)
+      expect(onMemo).toHaveBeenCalledOnce()
+      expect(onRender).toHaveBeenCalledOnce()
       expect(value).toHaveProperty("subscribers.size", 1)
       vi.clearAllMocks()
 
@@ -76,8 +76,8 @@ describe.each([
       })
 
       expect(node).toHaveTextContent("4")
-      expect(onMemo).toHaveBeenCalledTimes(1)
-      expect(onRender).toHaveBeenCalledTimes(1)
+      expect(onMemo).toHaveBeenCalledOnce()
+      expect(onRender).toHaveBeenCalledOnce()
       expect(value).toHaveProperty("subscribers.size", 1)
     })
 
@@ -92,9 +92,9 @@ describe.each([
         </React.Profiler>,
       )
 
-      expect(onMemo).toHaveBeenCalledTimes(1)
+      expect(onMemo).toHaveBeenCalledOnce()
       expect(onMemo).toHaveBeenLastCalledWith(2)
-      expect(onRender).toHaveBeenCalledTimes(1)
+      expect(onRender).toHaveBeenCalledOnce()
       vi.clearAllMocks()
 
       rerender(
@@ -104,17 +104,17 @@ describe.each([
       )
 
       expect(onMemo).not.toHaveBeenCalled()
-      expect(onRender).toHaveBeenCalledTimes(1)
+      expect(onRender).toHaveBeenCalledOnce()
       vi.clearAllMocks()
 
       act(() => {
         value.setValue(3)
       })
 
-      expect(onMemo).toHaveBeenCalledTimes(1)
+      expect(onMemo).toHaveBeenCalledOnce()
       expect(onMemo).toHaveBeenLastCalledWith(6)
       expect(value).toHaveProperty("subscribers.size", 1)
-      expect(onRender).toHaveBeenCalledTimes(1)
+      expect(onRender).toHaveBeenCalledOnce()
     })
 
     it("should call useMemo factory when dep Impulse changes", () => {
@@ -136,9 +136,9 @@ describe.each([
         </React.Profiler>,
       )
 
-      expect(onMemo).toHaveBeenCalledTimes(1)
+      expect(onMemo).toHaveBeenCalledOnce()
       expect(onMemo).toHaveBeenLastCalledWith(6)
-      expect(onRender).toHaveBeenCalledTimes(1)
+      expect(onRender).toHaveBeenCalledOnce()
     })
 
     it("should unsubscribe Impulse from useMemo when swapped", () => {
@@ -172,9 +172,9 @@ describe.each([
       act(() => {
         value_2.setValue(5)
       })
-      expect(onMemo).toHaveBeenCalledTimes(1)
+      expect(onMemo).toHaveBeenCalledOnce()
       expect(onMemo).toHaveBeenLastCalledWith(10)
-      expect(onRender).toHaveBeenCalledTimes(1)
+      expect(onRender).toHaveBeenCalledOnce()
       expect(value_2).toHaveProperty("subscribers.size", 1)
     })
 
@@ -192,18 +192,18 @@ describe.each([
 
       fireEvent.click(screen.getByTestId("increment"))
 
-      expect(onMemo).toHaveBeenCalledTimes(1)
+      expect(onMemo).toHaveBeenCalledOnce()
       expect(onMemo).toHaveBeenLastCalledWith(9)
-      expect(onRender).toHaveBeenCalledTimes(1)
+      expect(onRender).toHaveBeenCalledOnce()
       expect(value).toHaveProperty("subscribers.size", 1)
       vi.clearAllMocks()
 
       act(() => {
         value.setValue(4)
       })
-      expect(onMemo).toHaveBeenCalledTimes(1)
+      expect(onMemo).toHaveBeenCalledOnce()
       expect(onMemo).toHaveBeenLastCalledWith(12)
-      expect(onRender).toHaveBeenCalledTimes(1)
+      expect(onRender).toHaveBeenCalledOnce()
       expect(value).toHaveProperty("subscribers.size", 1)
     })
   })

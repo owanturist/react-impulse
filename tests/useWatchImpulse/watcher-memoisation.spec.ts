@@ -59,7 +59,7 @@ describe.each([
   it.concurrent("should call watcher 1 time on init", () => {
     const { spy } = setup()
 
-    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
@@ -69,7 +69,7 @@ describe.each([
     spy.mockReset()
 
     rerender({ spy, impulse })
-    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
@@ -154,7 +154,7 @@ describe.each([
   it.concurrent("should call watcher 1 time on init", () => {
     const { spy } = setup()
 
-    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
@@ -178,7 +178,7 @@ describe.each([
         impulse.setValue(Counter.inc)
       })
 
-      expect(spy).toHaveBeenCalledTimes(1)
+      expect(spy).toHaveBeenCalledOnce()
       expect(spy).toHaveBeenLastCalledWith({ count: 2 })
     },
   )

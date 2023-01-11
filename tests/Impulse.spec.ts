@@ -309,7 +309,7 @@ describe("Impulse#subscribe", () => {
     })
 
     impulse.setValue(Counter.inc)
-    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 2 })
     vi.clearAllMocks()
 
@@ -326,7 +326,7 @@ describe("Impulse#subscribe", () => {
     const unsubscribe_2 = impulse.subscribe(spy)
 
     impulse.setValue(Counter.inc)
-    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenCalledOnce()
 
     unsubscribe_1()
     unsubscribe_2()
@@ -343,12 +343,12 @@ describe("Impulse#subscribe", () => {
 
       unsubscribe_1()
       impulse.setValue(Counter.inc)
-      expect(spy).toHaveBeenCalledTimes(1)
+      expect(spy).toHaveBeenCalledOnce()
       vi.clearAllMocks()
 
       unsubscribe_2()
       impulse.setValue(Counter.inc)
-      expect(spy).toHaveBeenCalledTimes(1)
+      expect(spy).toHaveBeenCalledOnce()
       vi.clearAllMocks()
 
       unsubscribe_3()
@@ -363,7 +363,7 @@ describe("Impulse#subscribe", () => {
     const unsubscribe = impulse.subscribe(spy)
 
     impulse.setValue(Counter.inc)
-    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     unsubscribe()
@@ -381,14 +381,14 @@ describe("Impulse#subscribe", () => {
     const unsubscribe_2 = impulse.subscribe(spy_2)
 
     impulse.setValue(Counter.inc)
-    expect(spy_1).toHaveBeenCalledTimes(1)
-    expect(spy_2).toHaveBeenCalledTimes(1)
+    expect(spy_1).toHaveBeenCalledOnce()
+    expect(spy_2).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     unsubscribe_1()
     impulse.setValue(Counter.inc)
     expect(spy_1).not.toHaveBeenCalled()
-    expect(spy_2).toHaveBeenCalledTimes(1)
+    expect(spy_2).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     unsubscribe_2()
@@ -405,19 +405,19 @@ describe("Impulse#subscribe", () => {
 
     impulse.setValue(Counter.clone, spyCompare)
     expect(spy).not.toHaveBeenCalled()
-    expect(spyCompare).toHaveBeenCalledTimes(1)
+    expect(spyCompare).toHaveBeenCalledOnce()
     expect(spyCompare).toHaveLastReturnedWith(true)
     vi.clearAllMocks()
 
     impulse.setValue(Counter.clone)
-    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenCalledOnce()
     expect(spyCompare).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
     expect(spy.mock.calls).toHaveLength(0)
     impulse.setValue(Counter.clone, spyCompare)
     expect(spy).not.toHaveBeenCalled()
-    expect(spyCompare).toHaveBeenCalledTimes(1)
+    expect(spyCompare).toHaveBeenCalledOnce()
     expect(spyCompare).toHaveLastReturnedWith(true)
     vi.clearAllMocks()
 

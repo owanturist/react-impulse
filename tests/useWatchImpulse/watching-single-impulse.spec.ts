@@ -343,13 +343,13 @@ describe("transform Impulse's value inside watcher", () => {
           initialProps: { spy, impulse },
         })
 
-        expect(spy).toHaveBeenCalledTimes(1)
+        expect(spy).toHaveBeenCalledOnce()
 
         act(() => {
           impulse.setValue(Counter.clone, Counter.compare)
         })
 
-        expect(spy).toHaveBeenCalledTimes(1)
+        expect(spy).toHaveBeenCalledOnce()
       })
     },
   )

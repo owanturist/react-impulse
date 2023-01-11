@@ -220,8 +220,8 @@ describe("watching nested impulses", () => {
     )
 
     // initial render and watcher setup
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(0)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).not.toHaveBeenCalled()
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
     expectCounts([])
@@ -229,8 +229,8 @@ describe("watching nested impulses", () => {
 
     // add first counter
     fireEvent.click(screen.getByTestId("add-counter"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
@@ -240,7 +240,7 @@ describe("watching nested impulses", () => {
     // increment first counter
     fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
     expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
@@ -249,8 +249,8 @@ describe("watching nested impulses", () => {
 
     // add second counter
     fireEvent.click(screen.getByTestId("add-counter"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 1)
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
@@ -270,8 +270,8 @@ describe("watching nested impulses", () => {
 
     // add third counter
     fireEvent.click(screen.getByTestId("add-counter"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 2)
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
@@ -296,8 +296,8 @@ describe("watching nested impulses", () => {
         counts: [...current.counts, Impulse.of(9)],
       }))
     })
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 3)
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
@@ -306,7 +306,7 @@ describe("watching nested impulses", () => {
 
     // increment all counters
     fireEvent.click(screen.getByTestId("increment-all"))
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenCalledTimes(4)
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)
@@ -319,8 +319,8 @@ describe("watching nested impulses", () => {
 
     // add fifth counter
     fireEvent.click(screen.getByTestId("add-counter"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 4)
     expect(screen.queryByText("more than ten")).toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
@@ -344,7 +344,7 @@ describe("watching nested impulses", () => {
     // increment fifth counter
     fireEvent.click(withinNth("counter", 4).getByTestId("increment"))
     expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 4)
     expect(screen.queryByText("more than ten")).toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).toBeInTheDocument()
@@ -353,8 +353,8 @@ describe("watching nested impulses", () => {
 
     // increment fourth counter
     fireEvent.click(withinNth("counter", 3).getByTestId("increment"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 3)
     expect(screen.queryByText("more than ten")).toBeInTheDocument()
     expect(screen.queryByText("less than twenty")).not.toBeInTheDocument()
@@ -363,7 +363,7 @@ describe("watching nested impulses", () => {
 
     // reset all counters
     fireEvent.click(screen.getByTestId("reset-counters"))
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenCalledTimes(5)
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expect(onCounterRender).toHaveBeenNthCalledWith(2, 1)

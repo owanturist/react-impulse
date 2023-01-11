@@ -50,24 +50,24 @@ describe("watch()", () => {
     const btn = screen.getByTestId("btn")
 
     expect(btn).toHaveTextContent("1")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     fireEvent.click(btn)
     expect(btn).toHaveTextContent("2")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     fireEvent.click(btn)
     expect(btn).toHaveTextContent("3")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     act(() => {
       count.setValue(3)
     })
     expect(btn).toHaveTextContent("9")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
   })
 
   it("should handle multi impulse updates without batching", () => {
@@ -103,12 +103,12 @@ describe("watch()", () => {
     const btn = screen.getByTestId("btn")
 
     expect(btn).toHaveTextContent("10")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     fireEvent.click(btn)
     expect(btn).toHaveTextContent("17")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
   })
 
   it("should work fine with watch(watch())", () => {
@@ -138,14 +138,14 @@ describe("watch()", () => {
     const btn = screen.getByTestId("btn")
 
     expect(btn).toHaveTextContent("1")
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(useSyncExternalStoreWithSelector).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(useSyncExternalStoreWithSelector).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     fireEvent.click(btn)
     expect(btn).toHaveTextContent("2")
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(useSyncExternalStoreWithSelector).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(useSyncExternalStoreWithSelector).toHaveBeenCalledOnce()
   })
 
   it("should work fine in strict mode", () => {
@@ -198,7 +198,7 @@ describe("watch()", () => {
     const result = screen.getByTestId("result")
 
     expect(result).not.toHaveTextContent("Done")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     act(() => {
@@ -214,7 +214,7 @@ describe("watch()", () => {
     })
 
     expect(result).toHaveTextContent("Done")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
   })
 
   it("should not subscribe twice with useImpulseValue", () => {
@@ -302,13 +302,13 @@ describe("watch.memo()", () => {
     expect(counts[0]).toHaveTextContent("0")
     expect(counts[1]).toHaveTextContent("0")
 
-    expect(onWatchedRender).toHaveBeenCalledTimes(1)
-    expect(onWatchedMemoizedRender).toHaveBeenCalledTimes(1)
+    expect(onWatchedRender).toHaveBeenCalledOnce()
+    expect(onWatchedMemoizedRender).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     fireEvent.click(screen.getByTestId("force"))
-    expect(onWatchedRender).toHaveBeenCalledTimes(1)
-    expect(onWatchedMemoizedRender).toHaveBeenCalledTimes(0)
+    expect(onWatchedRender).toHaveBeenCalledOnce()
+    expect(onWatchedMemoizedRender).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
     rerender(
@@ -318,15 +318,15 @@ describe("watch.memo()", () => {
         onWatchedMemoizedRender={onWatchedMemoizedRender}
       />,
     )
-    expect(onWatchedRender).toHaveBeenCalledTimes(1)
-    expect(onWatchedMemoizedRender).toHaveBeenCalledTimes(0)
+    expect(onWatchedRender).toHaveBeenCalledOnce()
+    expect(onWatchedMemoizedRender).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
     act(() => {
       state.setValue((x) => x + 1)
     })
-    expect(onWatchedRender).toHaveBeenCalledTimes(1)
-    expect(onWatchedMemoizedRender).toHaveBeenCalledTimes(1)
+    expect(onWatchedRender).toHaveBeenCalledOnce()
+    expect(onWatchedMemoizedRender).toHaveBeenCalledOnce()
     expect(counts[0]).toHaveTextContent("1")
     expect(counts[1]).toHaveTextContent("1")
   })
@@ -372,7 +372,7 @@ describe("watch.forwardRef()", () => {
     const count = screen.getByTestId("count")
 
     expect(count).toHaveTextContent("0")
-    expect(divRef).toHaveBeenCalledTimes(1)
+    expect(divRef).toHaveBeenCalledOnce()
     expect(divRef).toHaveBeenLastCalledWith(expect.any(HTMLDivElement))
     vi.clearAllMocks()
 

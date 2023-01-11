@@ -51,7 +51,7 @@ describe("with lazy initial value", () => {
 
     expect(result.current.getValue()).toBe(initial)
     expect(result.current.getValue()).toStrictEqual({ count: 0 })
-    expect(init).toHaveBeenCalledTimes(1)
+    expect(init).toHaveBeenCalledOnce()
   })
 
   it.concurrent("keeps the same impulse during re-renders", () => {
@@ -66,7 +66,7 @@ describe("with lazy initial value", () => {
 
     expect(result.current).toBe(firstResult)
     expect(result.current.getValue()).toStrictEqual({ count: 0 })
-    expect(init).toHaveBeenCalledTimes(1)
+    expect(init).toHaveBeenCalledOnce()
   })
 
   it.concurrent(
@@ -84,7 +84,7 @@ describe("with lazy initial value", () => {
 
       expect(result.current).toBe(firstResult)
       expect(result.current.getValue()).toStrictEqual({ count: 0 })
-      expect(init).toHaveBeenCalledTimes(1)
+      expect(init).toHaveBeenCalledOnce()
     },
   )
 

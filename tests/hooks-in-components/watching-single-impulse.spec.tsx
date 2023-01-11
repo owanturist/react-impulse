@@ -139,8 +139,8 @@ describe("watching single impulse", () => {
     )
 
     // initial render and watcher setup
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(screen.queryByText("more than one")).not.toBeInTheDocument()
     expect(screen.queryByText("less than four")).toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("0")
@@ -149,7 +149,7 @@ describe("watching single impulse", () => {
     // increment
     fireEvent.click(screen.getByTestId("increment"))
     expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(screen.queryByText("more than one")).not.toBeInTheDocument()
     expect(screen.queryByText("less than four")).toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("1")
@@ -157,8 +157,8 @@ describe("watching single impulse", () => {
 
     // increment again
     fireEvent.click(screen.getByTestId("increment"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(screen.queryByText("more than one")).toBeInTheDocument()
     expect(screen.queryByText("less than four")).toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("2")
@@ -169,7 +169,7 @@ describe("watching single impulse", () => {
       count.setValue((x) => x + 1)
     })
     expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount) // does not re-render
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(screen.queryByText("more than one")).toBeInTheDocument()
     expect(screen.queryByText("less than four")).toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("3")
@@ -177,8 +177,8 @@ describe("watching single impulse", () => {
 
     // increment again
     fireEvent.click(screen.getByTestId("increment"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(screen.queryByText("more than one")).toBeInTheDocument()
     expect(screen.queryByText("less than four")).not.toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("4")

@@ -47,34 +47,38 @@ describe("multiple impulses", () => {
       <LoginForm email={email} password={password} onRender={onRender} />,
     )
 
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
     expect(container).toMatchSnapshot()
+    vi.clearAllMocks()
 
     // change email
     fireEvent.change(screen.getByTestId("email"), {
       target: { value: "john-doe@gmail.com" },
     })
-    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onRender).toHaveBeenCalledOnce()
     expect(container).toMatchSnapshot()
+    vi.clearAllMocks()
 
     // change password
     fireEvent.change(screen.getByTestId("password"), {
       target: { value: "qwerty" },
     })
-    expect(onRender).toHaveBeenCalledTimes(3)
+    expect(onRender).toHaveBeenCalledOnce()
     expect(container).toMatchSnapshot()
+    vi.clearAllMocks()
 
     // changes from the outside
     act(() => {
       email.setValue("admin@gmail.com")
       password.setValue("admin")
     })
-    expect(onRender).toHaveBeenCalledTimes(4)
+    expect(onRender).toHaveBeenCalledOnce()
     expect(container).toMatchSnapshot()
+    vi.clearAllMocks()
 
     // reset
     fireEvent.click(screen.getByTestId("reset"))
-    expect(onRender).toHaveBeenCalledTimes(5)
+    expect(onRender).toHaveBeenCalledOnce()
     expect(container).toMatchSnapshot()
   })
 })

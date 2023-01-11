@@ -377,7 +377,7 @@ describe("calling Impulse#subscribe()", () => {
 
       impulse.setValue(1)
       expect(listener).not.toHaveBeenCalled()
-      expect(correctListener).toHaveBeenCalledTimes(1)
+      expect(correctListener).toHaveBeenCalledOnce()
 
       unsubscribe()
     })
@@ -412,7 +412,7 @@ describe("calling Impulse#subscribe()", () => {
       })
 
       expect(result.current.getValue()).toBe(2)
-      expect(listener).toHaveBeenCalledTimes(1)
+      expect(listener).toHaveBeenCalledOnce()
     })
 
     it.concurrent("un-subscribers on cleanup", () => {
@@ -443,7 +443,7 @@ describe("calling Impulse#subscribe()", () => {
       })
 
       expect(result.current.getValue()).toBe(20)
-      expect(listener).toHaveBeenCalledTimes(1)
+      expect(listener).toHaveBeenCalledOnce()
       vi.clearAllMocks()
 
       act(() => {
@@ -504,7 +504,7 @@ describe("calling Impulse#subscribe()", () => {
 
       impulse.setValue(1)
       expect(listener).not.toHaveBeenCalled()
-      expect(correctListener).toHaveBeenCalledTimes(1)
+      expect(correctListener).toHaveBeenCalledOnce()
       unsubscribe()
     })
   })

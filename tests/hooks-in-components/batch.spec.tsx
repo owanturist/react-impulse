@@ -27,7 +27,8 @@ describe.each([
     render(<Component />)
 
     expect(screen.getByTestId("count")).toHaveTextContent("3")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
     act(() => {
       execute(() => {
@@ -36,7 +37,7 @@ describe.each([
       })
     })
     expect(screen.getByTestId("count")).toHaveTextContent("5")
-    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onRender).toHaveBeenCalledOnce()
   })
 
   it("re-renders once for useImpulseValue calls", () => {
@@ -68,11 +69,12 @@ describe.each([
     render(<Component />)
 
     expect(screen.getByTestId("count")).toHaveTextContent("3")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
     fireEvent.click(screen.getByTestId("inc"))
     expect(screen.getByTestId("count")).toHaveTextContent("5")
-    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onRender).toHaveBeenCalledOnce()
   })
 })
 
@@ -102,7 +104,8 @@ describe.each([
     render(<Component />)
 
     expect(screen.getByTestId("count")).toHaveTextContent("3")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
     act(() => {
       execute(() => {
@@ -115,7 +118,8 @@ describe.each([
       })
     })
     expect(screen.getByTestId("count")).toHaveTextContent("5")
-    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
     act(() => {
       impulse.setValue((current) => {
@@ -128,7 +132,7 @@ describe.each([
       })
     })
     expect(screen.getByTestId("count")).toHaveTextContent("7")
-    expect(onRender).toHaveBeenCalledTimes(3)
+    expect(onRender).toHaveBeenCalledOnce()
   })
 
   it("re-renders once for useImpulseValue calls", () => {
@@ -181,15 +185,17 @@ describe.each([
     render(<Component />)
 
     expect(screen.getByTestId("count")).toHaveTextContent("3")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
     fireEvent.click(screen.getByTestId("inc-1"))
     expect(screen.getByTestId("count")).toHaveTextContent("5")
-    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
     fireEvent.click(screen.getByTestId("inc-2"))
     expect(screen.getByTestId("count")).toHaveTextContent("7")
-    expect(onRender).toHaveBeenCalledTimes(3)
+    expect(onRender).toHaveBeenCalledOnce()
   })
 })
 
@@ -271,9 +277,10 @@ describe.each([
         render(<Component />)
 
         expect(screen.getByTestId("count")).toHaveTextContent("3")
-        expect(onRender).toHaveBeenCalledTimes(1)
-        expect(spy).toHaveBeenCalledTimes(1)
-        spy.mockReset()
+        expect(onRender).toHaveBeenCalledOnce()
+        expect(spy).toHaveBeenCalledOnce()
+
+        vi.clearAllMocks()
 
         act(() => {
           execute(() => {
@@ -282,7 +289,7 @@ describe.each([
           })
         })
         expect(screen.getByTestId("count")).toHaveTextContent("5")
-        expect(onRender).toHaveBeenCalledTimes(2)
+        expect(onRender).toHaveBeenCalledOnce()
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForMultiple)
       })
 
@@ -312,13 +319,13 @@ describe.each([
         render(<Component />)
 
         expect(screen.getByTestId("count")).toHaveTextContent("3")
-        expect(onRender).toHaveBeenCalledTimes(1)
-        expect(spy).toHaveBeenCalledTimes(1)
-        spy.mockReset()
+        expect(onRender).toHaveBeenCalledOnce()
+        expect(spy).toHaveBeenCalledOnce()
+        vi.clearAllMocks()
 
         fireEvent.click(screen.getByTestId("inc"))
         expect(screen.getByTestId("count")).toHaveTextContent("5")
-        expect(onRender).toHaveBeenCalledTimes(2)
+        expect(onRender).toHaveBeenCalledOnce()
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForMultiple)
       })
     })
@@ -360,9 +367,9 @@ describe.each([
         render(<Component />)
 
         expect(screen.getByTestId("count")).toHaveTextContent("3")
-        expect(onRender).toHaveBeenCalledTimes(1)
-        expect(spy).toHaveBeenCalledTimes(1)
-        spy.mockReset()
+        expect(onRender).toHaveBeenCalledOnce()
+        expect(spy).toHaveBeenCalledOnce()
+        vi.clearAllMocks()
 
         act(() => {
           execute(() => {
@@ -375,9 +382,9 @@ describe.each([
           })
         })
         expect(screen.getByTestId("count")).toHaveTextContent("5")
-        expect(onRender).toHaveBeenCalledTimes(2)
+        expect(onRender).toHaveBeenCalledOnce()
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
-        spy.mockReset()
+        vi.clearAllMocks()
 
         act(() => {
           impulse.setValue((value) => {
@@ -390,7 +397,7 @@ describe.each([
           })
         })
         expect(screen.getByTestId("count")).toHaveTextContent("7")
-        expect(onRender).toHaveBeenCalledTimes(3)
+        expect(onRender).toHaveBeenCalledOnce()
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
       })
 
@@ -438,19 +445,19 @@ describe.each([
         render(<Component />)
 
         expect(screen.getByTestId("count")).toHaveTextContent("3")
-        expect(onRender).toHaveBeenCalledTimes(1)
-        expect(spy).toHaveBeenCalledTimes(1)
-        spy.mockReset()
+        expect(onRender).toHaveBeenCalledOnce()
+        expect(spy).toHaveBeenCalledOnce()
+        vi.clearAllMocks()
 
         fireEvent.click(screen.getByTestId("inc-1"))
         expect(screen.getByTestId("count")).toHaveTextContent("5")
-        expect(onRender).toHaveBeenCalledTimes(2)
+        expect(onRender).toHaveBeenCalledOnce()
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
-        spy.mockReset()
+        vi.clearAllMocks()
 
         fireEvent.click(screen.getByTestId("inc-2"))
         expect(screen.getByTestId("count")).toHaveTextContent("7")
-        expect(onRender).toHaveBeenCalledTimes(3)
+        expect(onRender).toHaveBeenCalledOnce()
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
       })
     })
