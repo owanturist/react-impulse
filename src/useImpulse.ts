@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-import { Impulse } from "./Sweety"
+import { Impulse } from "./Impulse"
 import { Compare, isFunction } from "./utils"
 
 /**
