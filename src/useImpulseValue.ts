@@ -1,7 +1,7 @@
 import { useCallback, useDebugValue } from "react"
 import { useSyncExternalStore } from "use-sync-external-store/shim/index.js"
 
-import type { Impulse } from "./Sweety"
+import type { Impulse } from "./Impulse"
 import { WatchContext } from "./WatchContext"
 
 /**

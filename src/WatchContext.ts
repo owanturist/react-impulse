@@ -1,4 +1,4 @@
-import type { Impulse } from "./Sweety"
+import type { Impulse } from "./Impulse"
 import { SetValueContext } from "./SetValueContext"
 import { isFunction, noop } from "./utils"
 import { WarningSet, WarningSource } from "./validation"
