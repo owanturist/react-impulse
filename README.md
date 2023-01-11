@@ -18,7 +18,7 @@ npm install react-impulse
 
 ## Quick start
 
-`Impulse` is a box holding any value you want, even another `Impulse`! All [`watch`][watch]ed components that execute the [`Impulse#getState`][impulse__get_state] during the rendering phase enqueue re-render whenever the Impulse state updates.
+`Impulse` is a box holding any value you want, even another `Impulse`! All [`watch`][watch]ed components that execute the [`Impulse#getValue`][impulse__get_value] during the rendering phase enqueue re-render whenever the Impulse value updates.
 
 ```tsx
 import { Impulse, watch } from "react-impulse"
@@ -29,8 +29,8 @@ const Input: React.FC<{
 }> = watch(({ type, value }) => (
   <input
     type={type}
-    value={value.getState()}
-    onChange={(event) => value.setState(event.target.value)}
+    value={value.getValue()}
+    onChange={(event) => value.setValue(event.target.value)}
   />
 ))
 
@@ -41,8 +41,8 @@ const Checkbox: React.FC<{
   <label>
     <input
       type="checkbox"
-      checked={checked.getState()}
-      onChange={(event) => checked.setState(event.target.checked)}
+      checked={checked.getValue()}
+      onChange={(event) => checked.setValue(event.target.checked)}
     />
 
     {children}
@@ -50,7 +50,7 @@ const Checkbox: React.FC<{
 ))
 ```
 
-Once created, Impulses can travel thru your components, where you can set and get their states:
+Once created, Impulses can travel thru your components, where you can set and get their values:
 
 ```tsx
 import { useImpulse, watch } from "react-impulse"
@@ -68,11 +68,11 @@ const SignUp: React.FC = watch(() => {
 
       <button
         type="button"
-        disabled={!isAgreeWithTerms.getState()}
+        disabled={!isAgreeWithTerms.getValue()}
         onClick={() => {
           api.submitSignUpRequest({
-            username: username.getState(),
-            password: password.getState(),
+            username: username.getValue(),
+            password: password.getValue(),
           })
         }}
       >
@@ -97,63 +97,63 @@ A core piece of the library is the `Impulse` class - a box that holds value. The
 
 ```dart
 Impulse.of<T>(
-  initialState: T,
+  initialValue: T,
   compare?: null | Compare<T>
 ): Impulse<T>
 ```
 
 A static method that creates new Impulse.
 
-- `initialState` is the initial state.
+- `initialValue` is the initial value.
 - `[compare]` is an optional [`Compare`][compare] function applied as [`Impulse#compare`][impulse__compare]. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
 > 💡 The [`useImpulse`][use_impulse] hook helps to create and store an `Impulse` inside a React component.
 
-### `Impulse#getState`
+### `Impulse#getValue`
 
 ```dart
-Impulse<T>#getState(): T
-Impulse<T>#getState<R>(select: (state: T) => R): R
+Impulse<T>#getValue(): T
+Impulse<T>#getValue<R>(select: (value: T) => R): R
 ```
 
-An `Impulse` instance's method that returns the current state.
+An `Impulse` instance's method that returns the current value.
 
-- `[select]` is an optional function that applies to the current state before returning.
+- `[select]` is an optional function that applies to the current value before returning.
 
 ```ts
 const count = Impulse.of(3)
 
-count.getState() // === 3
-count.getState((x) => x > 0) // === true
+count.getValue() // === 3
+count.getValue((x) => x > 0) // === true
 ```
 
-### `Impulse#setState`
+### `Impulse#setValue`
 
 ```dart
-Impulse<T>#setState(
-  stateOrTransform: React.SetStateAction<T>,
+Impulse<T>#setValue(
+  valueOrTransform: T | ((currentValue: T) => T),
   compare?: null | Compare<T>
 ): void
 ```
 
-An `Impulse` instance's method to update the state. All listeners registered via the [`Impulse#subscribe`][impulse__subscribe] method execute whenever the state updates.
+An `Impulse` instance's method to update the value. All listeners registered via the [`Impulse#subscribe`][impulse__subscribe] method execute whenever the value updates.
 
-- `stateOrTransform` is the new state or a function that transforms the current state into the new state.
+- `valueOrTransform` is the new value or a function that transforms the current value.
 - `[compare]` is an optional [`Compare`][compare] function applied for this call only.
   When not defined the [`Impulse#compare`][impulse__compare] function of the instance will be used.
-  When `null` the [`Object.is`][object_is] function applies to compare the states.
+  When `null` the [`Object.is`][object_is] function applies to compare the values.
 
 ```ts
 const isActive = Impulse.of(false)
 
-isActive.setState((x) => !x)
-isActive.getState() // true
+isActive.setValue((x) => !x)
+isActive.getValue() // true
 
-isActive.setState(false)
-isActive.getState() // false
+isActive.setValue(false)
+isActive.getValue() // false
 ```
 
-> 💡 If `stateOrTransform` argument is a function it acts as [`batch`][batch].
+> 💡 If `valueOrTransform` argument is a function it acts as [`batch`][batch].
 
 > 💬 The method returns `void` to emphasize that `Impulse` instances are **mutable**.
 
@@ -161,17 +161,17 @@ isActive.getState() // false
 
 ```dart
 Impulse<T>#clone(
-  transform?: (state: T) => T,
+  transform?: (value: T) => T,
   compare?: null | Compare<T>
 ): Impulse<T>
 ```
 
 An `Impulse` instance's method for cloning an Impulse.
 
-- `[transform]` is an optional function that applies to the current state before cloning. It might be handy when cloning a state that contains mutable values.
+- `[transform]` is an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
 - `[compare]` is an optional [`Compare`][compare] function applied as [`Impulse#compare`][impulse__compare].
   When not defined, it uses the [`Impulse#compare`][impulse__compare] function from the origin.
-  When `null` the [`Object.is`][object_is] function applies to compare the states.
+  When `null` the [`Object.is`][object_is] function applies to compare the values.
 
 ```ts
 const immutable = Impulse.of({
@@ -183,9 +183,9 @@ const mutable = Impulse.of({
   username: Impulse.of(""),
   blacklist: new Set(),
 })
-const cloneOfMutable = mutable.clone((state) => ({
-  username: state.username.clone(),
-  blacklist: new Set(state.blacklist),
+const cloneOfMutable = mutable.clone((current) => ({
+  username: current.username.clone(),
+  blacklist: new Set(current.blacklist),
 }))
 ```
 
@@ -195,7 +195,7 @@ const cloneOfMutable = mutable.clone((state) => ({
 Impulse<T>#compare: Compare<T>
 ```
 
-The [`Compare`][compare] function compares the Impulse's state with the new state given via [`Impulse#setState`][impulse__set_state]. Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via [`Impulse#subscribe`][impulse__subscribe].
+The [`Compare`][compare] function compares the Impulse's value with the new value given via [`Impulse#setValue`][impulse__set_value]. Whenever the function returns `true`, neither the value change nor it notifies the listeners subscribed via [`Impulse#subscribe`][impulse__subscribe].
 
 ### `Impulse#subscribe`
 
@@ -203,20 +203,20 @@ The [`Compare`][compare] function compares the Impulse's state with the new stat
 Impulse<T>#subscribe(listener: VoidFunction): VoidFunction
 ```
 
-An `Impulse` instance's method that subscribes to the state's updates caused by calling [`Impulse#setState`][impulse__set_state]. Returns a cleanup function that unsubscribes the `listener`.
+An `Impulse` instance's method that subscribes to the value's updates caused by calling [`Impulse#setValue`][impulse__set_value]. Returns a cleanup function that unsubscribes the `listener`.
 
 - `listener` is a function that subscribes to the updates.
 
 ```ts
 const count = Impulse.of(0)
 const unsubscribe = count.subscribe(() => {
-  console.log("The count is %d", count.getState())
+  console.log("The count is %d", count.getValue())
 })
 
-count.setState(10) // console: "The count is 10"
+count.setValue(10) // console: "The count is 10"
 
 unsubscribe()
-count.setState(20) // ...
+count.setValue(20) // ...
 ```
 
 > 💬 You'd like to avoid using the method in your application because it's been designed for convenient use in the exposed hooks and the [`watch`][watch] HOC.
@@ -227,23 +227,23 @@ count.setState(20) // ...
 function watch<TProps>(component: React.FC<TProps>): React.FC<TProps>
 ```
 
-The `watch` function creates a React component that subscribes to all Impulses calling the [`Impulse#getState`][impulse__get_state] method during the rendering phase of the component.
+The `watch` function creates a React component that subscribes to all Impulses calling the [`Impulse#getValue`][impulse__get_value] method during the rendering phase of the component.
 
-The `Counter` component below enqueues a re-render whenever the `count`'s state changes, for instance, when the `Counter`'s button clicks:
+The `Counter` component below enqueues a re-render whenever the `count`'s value changes, for instance, when the `Counter`'s button clicks:
 
 ```tsx
 const Counter: React.FC<{
   count: Impulse<number>
 }> = watch(({ count }) => (
-  <button onClick={() => count.setState((x) => x + 1)}>
-    {count.getState()}
+  <button onClick={() => count.setValue((x) => x + 1)}>
+    {count.getValue()}
   </button>
 ))
 ```
 
-But if a component defines an Impulse, passes it thru, or calls the [`Impulse#getState`][impulse__get_state] method outside of the rendering phase (ex: inside an `onClick` handler), then it does not subscribe to the Impulse changes.
+But if a component defines an Impulse, passes it thru, or calls the [`Impulse#getValue`][impulse__get_value] method outside of the rendering phase (ex: inside an `onClick` handler), then it does not subscribe to the Impulse changes.
 
-Here the `SumOfTwo` component defines two Impulses, passes them further to the `Counter`s components, and calls [`Impulse#getState`][impulse__get_state] inside the `button.onClick` handler. It is optional to use the `watch` function in that case:
+Here the `SumOfTwo` component defines two Impulses, passes them further to the `Counter`s components, and calls [`Impulse#getValue`][impulse__get_value] inside the `button.onClick` handler. It is optional to use the `watch` function in that case:
 
 ```tsx
 const SumOfTwo: React.FC = () => {
@@ -257,12 +257,12 @@ const SumOfTwo: React.FC = () => {
 
       <button
         onClick={() => {
-          const sum = firstCounter.getState() + secondCounter.getState()
+          const sum = firstCounter.getValue() + secondCounter.getValue()
 
           console.log("Sum of two is %d", sum)
 
-          firstCounter.setState(0)
-          secondCounter.setState(0)
+          firstCounter.setValue(0)
+          secondCounter.setValue(0)
         }}
       >
         Save and reset
@@ -272,7 +272,7 @@ const SumOfTwo: React.FC = () => {
 }
 ```
 
-With or without wrapping the component around the `watch` [HOC][hoc], The `SumOfTwo` component will never re-render due to either `firstCounter` or `secondCounter` updates, but still, it can read and write their states inside the `onClick` listener.
+With or without wrapping the component around the `watch` [HOC][hoc], The `SumOfTwo` component will never re-render due to either `firstCounter` or `secondCounter` updates, but still, it can read and write their values inside the `onClick` listener.
 
 #### `watch.memo`
 
@@ -309,17 +309,17 @@ watch.forwardRef.memo(/* */)
 
 ```dart
 function useImpulse<T>(
-  initialState: T | (() => T),
+  valueOrLazyValue: T | (() => T),
   compare?: null | Compare<T>
 ): Impulse<T>
 ```
 
-- `initialState` argument is the state used during the initial render. If the initial state is the result of an expensive computation, you may provide a function instead, which will be executed only on the initial render.
+- `valueOrLazyValue` is the value used during the initial render. If the initial value is the result of an expensive computation, you may provide a function instead, which will be executed only on the initial render.
 - `[compare]` is an optional [`Compare`][compare] function applied as [`Impulse#compare`][impulse__compare]. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
 A hook that initiates a stable (never changing) Impulse.
 
-> 💬 The initial state is disregarded during subsequent re-renders.
+> 💬 The initial value is disregarded during subsequent re-renders.
 
 ### `useWatchImpulse`
 
@@ -330,12 +330,12 @@ function useWatchImpulse<T>(
 ): T
 ```
 
-- `watcher` is a function that subscribes to all Impulses calling the [`Impulse#getState`][impulse__get_state] method inside the function.
+- `watcher` is a function that subscribes to all Impulses calling the [`Impulse#getValue`][impulse__get_value] method inside the function.
 - `[compare]` is an optional [`Compare`][compare] function. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
-The `useWatchImpulse` hook is an alternative to the [`watch`][watch] function. It executes the `watcher` function whenever any of the involved Impulses' state update but enqueues a re-render only when the resulting value is different from the previous.
+The `useWatchImpulse` hook is an alternative to the [`watch`][watch] function. It executes the `watcher` function whenever any of the involved Impulses' value update but enqueues a re-render only when the resulting value is different from the previous.
 
-Custom hooks can use `useWatchImpulse` for reading and transforming the Impulses' states, so the host component doesn't need to wrap around the [`watch`][watch] HOC:
+Custom hooks can use `useWatchImpulse` for reading and transforming the Impulses' values, so the host component doesn't need to wrap around the [`watch`][watch] HOC:
 
 ```tsx
 const useSumAllAndMultiply = ({
@@ -347,11 +347,11 @@ const useSumAllAndMultiply = ({
 }): number => {
   return useWatchImpulse(() => {
     const sumAll = counts
-      .getState()
-      .map((count) => count.getState())
+      .getValue()
+      .map((count) => count.getValue())
       .reduce((acc, x) => acc + x, 0)
 
-    return multiplier.getState() * sumAll
+    return multiplier.getValue() * sumAll
   })
 }
 ```
@@ -362,7 +362,7 @@ Components can scope watched Impulses to reduce re-rendering:
 const Challenge: React.FC = () => {
   const count = useImpulse(0)
   // the component re-renders only once when the `count` is greater than 5
-  const isMoreThanFive = useWatchImpulse(() => count.getState() > 5)
+  const isMoreThanFive = useWatchImpulse(() => count.getValue() > 5)
 
   return (
     <div>
@@ -374,7 +374,7 @@ const Challenge: React.FC = () => {
 }
 ```
 
-> 💬 The `watcher` function is only for reading the Impulses' states. It should never call [`Impulse.of`][impulse__of], [`Impulse#clone`][impulse__clone], [`Impulse#setState`][impulse__set_state], or [`Impulse#subscribe`][impulse__subscribe] methods inside.
+> 💬 The `watcher` function is only for reading the Impulses' values. It should never call [`Impulse.of`][impulse__of], [`Impulse#clone`][impulse__clone], [`Impulse#setValue`][impulse__set_value], or [`Impulse#subscribe`][impulse__subscribe] methods inside.
 
 > 💡 It is recommended to memoize the `watcher` function with [`React.useCallback`][react__use_callback] for better performance.
 
@@ -392,26 +392,26 @@ function useImpulseMemo<T>(
 - `factory` is a function calculates a value `T` whenever any of the `dependencies`' values change.
 - `dependencies` is an array of values used in the `factory` function.
 
-The hook is an Impulse version of the [`React.useMemo`][react__use_memo] hook. During the `factory` execution, all Impulses that call the [`Impulse#getState`][impulse__get_state] method become _phantom dependencies_ of the hook.
+The hook is an Impulse version of the [`React.useMemo`][react__use_memo] hook. During the `factory` execution, all Impulses that call the [`Impulse#getValue`][impulse__get_value] method become _phantom dependencies_ of the hook.
 
 <details><summary><i>Click here to learn more about the phantom dependencies.</i></summary>
 <blockquote>
 
-The `factory` runs again whenever any dependency or a state of any phantom dependency changes:
+The `factory` runs again whenever any dependency or a value of any phantom dependency changes:
 
 ```ts
 const useCalcSum = (left: number, right: Impulse<number>): number => {
   // the factory runs whenever:
   // 1. `left` changes
   // 2. `right` changes (new `Impulse`)
-  // 3. `right.getState()` changes (`right` mutates)
+  // 3. `right.getValue()` changes (`right` mutates)
   return useImpulseMemo(() => {
-    return left + right.getState()
+    return left + right.getValue()
   }, [left, right])
 }
 ```
 
-The phantom dependencies might be different per `factory` call. If an Impulse does not call the [`Impulse#getState`][impulse__get_state] method, it does not become a phantom dependency:
+The phantom dependencies might be different per `factory` call. If an Impulse does not call the [`Impulse#getValue`][impulse__get_value] method, it does not become a phantom dependency:
 
 ```ts
 const useCalcSum = (left: number, right: Impulse<number>): number => {
@@ -420,7 +420,7 @@ const useCalcSum = (left: number, right: Impulse<number>): number => {
   // `left` > 0:
   //   1. `left` changes
   //   2. `right` changes (new `Impulse`)
-  //   3. `right.getState()` changes (`right` mutates)
+  //   3. `right.getValue()` changes (`right` mutates)
   //
   // OR
   //
@@ -429,7 +429,7 @@ const useCalcSum = (left: number, right: Impulse<number>): number => {
   //   2. `right` changes (new `Impulse`)
   return useImpulseMemo(() => {
     if (left > 0) {
-      return left + right.getState()
+      return left + right.getValue()
     }
 
     return left
@@ -466,26 +466,26 @@ function useImpulseEffect(
   Can return a cleanup function to cancel running side effects.
 - `[dependencies]` is an optional array of values used in the `effect` function.
 
-The hook is an Impulse version of the [`React.useEffect`][react__use_effect] hook. During the `effect` execution, all Impulses that call the [`Impulse#getState`][impulse__get_state] method become _phantom dependencies_ of the hook.
+The hook is an Impulse version of the [`React.useEffect`][react__use_effect] hook. During the `effect` execution, all Impulses that call the [`Impulse#getValue`][impulse__get_value] method become _phantom dependencies_ of the hook.
 
 <details><summary><i>Click here to learn more about the phantom dependencies.</i></summary>
 <blockquote>
 
-The `effect` runs again whenever any dependency or a state of any phantom dependency changes:
+The `effect` runs again whenever any dependency or a value of any phantom dependency changes:
 
 ```ts
 const usePrintSum = (left: number, right: Impulse<number>): void => {
   // the effect runs whenever:
   // 1. `left` changes
   // 2. `right` changes (new `Impulse`)
-  // 3. `right.getState()` changes (`right` mutates)
+  // 3. `right.getValue()` changes (`right` mutates)
   useImpulseEffect(() => {
-    console.log("sum is %d", left + right.getState())
+    console.log("sum is %d", left + right.getValue())
   }, [left, right])
 }
 ```
 
-The phantom dependencies might be different per `effect` call. If an Impulse does not call the [`Impulse#getState`][impulse__get_state] method, it does not become a phantom dependency:
+The phantom dependencies might be different per `effect` call. If an Impulse does not call the [`Impulse#getValue`][impulse__get_value] method, it does not become a phantom dependency:
 
 ```ts
 const usePrintSum = (left: number, right: Impulse<number>): void => {
@@ -494,7 +494,7 @@ const usePrintSum = (left: number, right: Impulse<number>): void => {
   // `left` > 0:
   //   1. `left` changes
   //   2. `right` changes (new `Impulse`)
-  //   3. `right.getState()` changes (`right` mutates)
+  //   3. `right.getValue()` changes (`right` mutates)
   //
   // OR
   //
@@ -503,7 +503,7 @@ const usePrintSum = (left: number, right: Impulse<number>): void => {
   //   2. `right` changes (new `Impulse`)
   useImpulseEffect(() => {
     if (left > 0) {
-      console.log("sum is %d", left + right.getState())
+      console.log("sum is %d", left + right.getValue())
     }
   }, [left, right])
 }
@@ -531,25 +531,25 @@ The hook is an Impulse version of the [`React.useLayoutEffect`][react__use_layou
 
 ### ~~`useImpulseInsertionEffect`~~
 
-There is no Impulse version of the [`React.useInsertionEffect`][react__use_insertion_effect] hook due to backward compatibility with React from `v16.8.0`. The workaround is to use the native `React.useInsertionEffect` hook with the states extracted beforehand:
+There is no Impulse version of the [`React.useInsertionEffect`][react__use_insertion_effect] hook due to backward compatibility with React from `v16.8.0`. The workaround is to use the native `React.useInsertionEffect` hook with the values extracted beforehand:
 
 ```ts
 const usePrintSum = (left: number, right: Impulse<number>): void => {
-  const rightState = useImpulseState(right)
+  const rightValue = useImpulseValue(right)
 
   React.useInsertionEffect(() => {
-    console.log("sum is %d", left + rightState)
-  }, [left, rightState])
+    console.log("sum is %d", left + rightValue)
+  }, [left, rightValue])
 }
 ```
 
-### `useImpulseState`
+### `useImpulseValue`
 
 ```dart
-function useImpulseState<T>(impulse: Impulse<T>): T
+function useImpulseValue<T>(impulse: Impulse<T>): T
 ```
 
-A hook that subscribes to the `impulse` changes and returns the current state.
+A hook that subscribes to the `impulse` changes and returns the current value.
 
 - `impulse` is an `Impulse` instance.
 
@@ -557,13 +557,13 @@ A hook that subscribes to the `impulse` changes and returns the current state.
 const Input: React.FC<{
   value: Impulse<string>
 }> = ({ value }) => {
-  const text = useImpulseState(value)
+  const text = useImpulseValue(value)
 
   return (
     <input
       type="text"
       value={text}
-      onChange={(event) => value.setState(event.target.value)}
+      onChange={(event) => value.setValue(event.target.value)}
     />
   )
 }
@@ -577,7 +577,7 @@ function batch(execute: VoidFunction): void
 
 The `batch` function is a helper to optimize multiple Impulses updates.
 
-- `execute` is a function that executes multiple [`Impulse#setState`][impulse__set_state] calls at ones.
+- `execute` is a function that executes multiple [`Impulse#setValue`][impulse__set_value] calls at ones.
 
 ```tsx
 const SumOfTwo: React.FC<{
@@ -585,14 +585,14 @@ const SumOfTwo: React.FC<{
   right: Impulse<number>
 }> = watch(({ left, right }) => (
   <div>
-    <span>Sum is: {left.getState() + right.getState()}</span>
+    <span>Sum is: {left.getValue() + right.getValue()}</span>
 
     <button
       onClick={() => {
         // enqueues 1 re-render instead of 2 🎉
         batch(() => {
-          left.setState(0)
-          right.setState(0)
+          left.setValue(0)
+          right.setValue(0)
         })
       }}
     >
@@ -625,8 +625,8 @@ Here are scripts you want to run for publishing a new version to NPM:
 [impulse__of]: #impulseof
 [impulse__compare]: #impulsecompare
 [impulse__clone]: #impulseclone
-[impulse__get_state]: #impulsegetstate
-[impulse__set_state]: #impulsesetstate
+[impulse__get_value]: #impulsegetvalue
+[impulse__set_value]: #impulsesetvalue
 [impulse__subscribe]: #impulsesubscribe
 [use_impulse]: #useimpulse
 [use_impulse_effect]: #useimpulseeffect

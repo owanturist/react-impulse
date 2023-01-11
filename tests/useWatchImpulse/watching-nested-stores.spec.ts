@@ -19,9 +19,9 @@ describe.each([
       compare?: Compare<Counter>,
     ) => {
       return useWatchImpulse(() => {
-        const { first, second } = impulse.getState()
+        const { first, second } = impulse.getValue()
 
-        return Counter.merge(first.getState(), second.getState())
+        return Counter.merge(first.getValue(), second.getValue())
       }, compare)
     },
   ],
@@ -33,9 +33,9 @@ describe.each([
     ) => {
       return useWatchImpulse(
         useCallback(() => {
-          const { first, second } = impulse.getState()
+          const { first, second } = impulse.getValue()
 
-          return Counter.merge(first.getState(), second.getState())
+          return Counter.merge(first.getValue(), second.getValue())
         }, [impulse]),
         compare,
       )
@@ -80,7 +80,7 @@ describe.each([
       const { first, result } = setup()
 
       act(() => {
-        first.setState(Counter.inc)
+        first.setValue(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -89,7 +89,7 @@ describe.each([
       const { second, result } = setup()
 
       act(() => {
-        second.setState(Counter.inc)
+        second.setValue(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -98,8 +98,8 @@ describe.each([
       const { first, second, result } = setup()
 
       act(() => {
-        first.setState(Counter.inc)
-        second.setState(Counter.inc)
+        first.setValue(Counter.inc)
+        second.setValue(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 7 })
     })
@@ -109,8 +109,8 @@ describe.each([
       const { impulse, result } = setup()
 
       act(() => {
-        impulse.setState((state) => ({
-          ...state,
+        impulse.setValue((current) => ({
+          ...current,
           first: newFirst,
         }))
       })
@@ -121,11 +121,11 @@ describe.each([
       const { impulse, result } = setup()
 
       act(() => {
-        impulse.setState((state) => {
-          state.first.setState(Counter.inc)
-          state.second.setState(Counter.inc)
+        impulse.setValue((current) => {
+          current.first.setValue(Counter.inc)
+          current.second.setValue(Counter.inc)
 
-          return state
+          return current
         })
       })
       expect(result.current).toStrictEqual({ count: 7 })
@@ -140,7 +140,7 @@ describe.each([
       return useWatchImpulse(() => {
         spy()
 
-        return impulse.getState()
+        return impulse.getValue()
       }, compare)
     },
     (
@@ -153,12 +153,12 @@ describe.each([
       return useWatchImpulse(() => {
         spy()
 
-        const { first, second, third } = impulse.getState()
+        const { first, second, third } = impulse.getValue()
 
         return Counter.merge(
-          first.getState(),
-          second.getState(),
-          third.getState(),
+          first.getValue(),
+          second.getValue(),
+          third.getValue(),
         )
       }, compare)
     },
@@ -171,7 +171,7 @@ describe.each([
         useCallback(() => {
           spy()
 
-          return impulse.getState()
+          return impulse.getValue()
         }, [spy, impulse]),
       )
     },
@@ -183,12 +183,12 @@ describe.each([
         useCallback(() => {
           spy()
 
-          const { first, second, third } = impulse.getState()
+          const { first, second, third } = impulse.getValue()
 
           return Counter.merge(
-            first.getState(),
-            second.getState(),
-            third.getState(),
+            first.getValue(),
+            second.getValue(),
+            third.getValue(),
           )
         }, [spy, impulse]),
       )
@@ -276,8 +276,8 @@ describe.each([
 
           act(() => {
             batch(() => {
-              first.setState(Counter.inc)
-              second.setState(Counter.inc)
+              first.setValue(Counter.inc)
+              second.setValue(Counter.inc)
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -300,8 +300,8 @@ describe.each([
 
           act(() => {
             batch(() => {
-              first.setState(Counter.inc)
-              third.setState(Counter.inc)
+              first.setValue(Counter.inc)
+              third.setValue(Counter.inc)
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -326,11 +326,11 @@ describe.each([
           act(() => {
             batch(() => {
               batch(() => {
-                first.setState(Counter.inc)
-                second.setState(Counter.inc)
+                first.setValue(Counter.inc)
+                second.setValue(Counter.inc)
               })
 
-              third.setState(Counter.inc)
+              third.setValue(Counter.inc)
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -356,8 +356,8 @@ describe.each([
 
           act(() => {
             batch(() => {
-              second.setState(Counter.inc)
-              third.setState(Counter.inc)
+              second.setValue(Counter.inc)
+              third.setValue(Counter.inc)
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 1 })
@@ -367,15 +367,15 @@ describe.each([
         },
       )
 
-      it.concurrent("Impulse#setState wraps the callback into batch", () => {
+      it.concurrent("Impulse#setValue wraps the callback into batch", () => {
         const { second, third, impulse, spyNested, resultNested } = setup()
 
         spyNested.mockReset()
 
         act(() => {
           batch(() => {
-            second.setState(Counter.inc)
-            third.setState(Counter.inc)
+            second.setValue(Counter.inc)
+            third.setValue(Counter.inc)
           })
         })
 
@@ -384,11 +384,11 @@ describe.each([
         spyNested.mockReset()
 
         act(() => {
-          impulse.setState((state) => {
-            state.second.setState(Counter.inc)
-            state.third.setState(Counter.inc)
+          impulse.setValue((current) => {
+            current.second.setValue(Counter.inc)
+            current.third.setValue(Counter.inc)
 
-            return state
+            return current
           })
         })
 

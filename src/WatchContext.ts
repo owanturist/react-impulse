@@ -1,10 +1,10 @@
 import type { Impulse } from "./Impulse"
-import { SetStateContext } from "./SetStateContext"
+import { SetValueContext } from "./SetValueContext"
 import { isFunction, noop } from "./utils"
 import { WarningSet, WarningSource } from "./validation"
 
 /**
- * A context to track Impulse#getState() usage inside the watcher function.
+ * A context to track Impulse#getValue usage inside the watcher function.
  * The tracked calls will subscribe related stores to updates,
  * so the watcher will execute on each update.
  *
@@ -48,7 +48,7 @@ export class WatchContext {
 
   /**
    * The method allows to ignore the current WatchContext presence as if it is not there.
-   * Helpful when something needs to perform Impulse#getState without subscribing it to the current WatchContext
+   * Helpful when something needs to perform Impulse#getValue without subscribing it to the current WatchContext
    */
   public static ignore<T>(execute: () => T): T {
     const currentContext = WatchContext.current
@@ -80,8 +80,8 @@ export class WatchContext {
         this.cleanups.set(
           impulse,
           impulse.subscribe(() => {
-            // the listener registers a watcher so the watcher will emit once per (batch) setState
-            SetStateContext.registerWatchContext(this)
+            // the listener registers a watcher so the watcher will emit once per (batch) setValue
+            SetValueContext.registerWatchContext(this)
           }),
         )
       })

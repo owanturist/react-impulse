@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useImpulseState } from "../../src"
+import { Impulse, useImpulseValue } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -15,7 +15,7 @@ describe("nested impulses", () => {
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }> = ({ state, onRender, onCounterRender }) => {
-    const { counts } = useImpulseState(state)
+    const { counts } = useImpulseValue(state)
 
     return (
       <>
@@ -24,7 +24,7 @@ describe("nested impulses", () => {
             type="button"
             data-testid="add-counter"
             onClick={() => {
-              state.setState((current) => ({
+              state.setValue((current) => ({
                 ...current,
                 counts: [...current.counts, Impulse.of(0)],
               }))
@@ -34,8 +34,8 @@ describe("nested impulses", () => {
             type="button"
             data-testid="reset-counters"
             onClick={() => {
-              state.setState((current) => {
-                current.counts.forEach((count) => count.setState(0))
+              state.setValue((current) => {
+                current.counts.forEach((count) => count.setValue(0))
 
                 return current
               })
@@ -108,9 +108,9 @@ describe("nested impulses", () => {
 
     // add third counter from the outside
     act(() => {
-      impulse.setState((state) => ({
-        ...state,
-        counts: [...state.counts, Impulse.of(3)],
+      impulse.setValue((current) => ({
+        ...current,
+        counts: [...current.counts, Impulse.of(3)],
       }))
     })
     expect(onRender).toHaveBeenCalledTimes(1)
@@ -121,7 +121,7 @@ describe("nested impulses", () => {
 
     // double the third counter from the outside
     act(() => {
-      impulse.getState().counts[2]!.setState((x) => 2 * x)
+      impulse.getValue().counts[2]!.setValue((x) => 2 * x)
     })
     expect(onRender).not.toHaveBeenCalled()
     expect(onCounterRender).toHaveBeenCalledTimes(1)
@@ -141,7 +141,7 @@ describe("nested impulses", () => {
 
     // increment all from the outside
     act(() => {
-      impulse.getState().counts.forEach((count) => count.setState((x) => x + 1))
+      impulse.getValue().counts.forEach((count) => count.setValue((x) => x + 1))
     })
     expect(onRender).not.toHaveBeenCalled()
     expect(onCounterRender).toHaveBeenCalledTimes(3)

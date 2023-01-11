@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, watch, useImpulseState, useWatchImpulse } from "../src"
+import { Impulse, watch, useImpulseValue, useWatchImpulse } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -21,11 +21,11 @@ describe("watching misses when defined after useEffect #140", () => {
     const y = useGetSecond(second)
 
     React.useEffect(() => {
-      second.setState(x)
+      second.setValue(x)
     }, [second, x])
 
     return (
-      <button type="button" onClick={() => first.setState(x + 1)}>
+      <button type="button" onClick={() => first.setValue(x + 1)}>
         {y}
       </button>
     )
@@ -40,25 +40,25 @@ describe("watching misses when defined after useEffect #140", () => {
     const x = useGetFirst(first)
 
     React.useEffect(() => {
-      second.setState(x)
+      second.setValue(x)
     }, [second, x])
 
     const y = useGetSecond(second)
 
     return (
-      <button type="button" onClick={() => first.setState(x + 1)}>
+      <button type="button" onClick={() => first.setValue(x + 1)}>
         {y}
       </button>
     )
   }
 
   const useWatchInline = (impulse: Impulse<number>) => {
-    return useWatchImpulse(() => impulse.getState())
+    return useWatchImpulse(() => impulse.getValue())
   }
 
   const useWatchMemoized = (impulse: Impulse<number>) => {
     return useWatchImpulse(
-      React.useCallback(() => impulse.getState(), [impulse]),
+      React.useCallback(() => impulse.getValue(), [impulse]),
     )
   }
 
@@ -67,12 +67,12 @@ describe("watching misses when defined after useEffect #140", () => {
     ["after", ComponentWatchAfterEffect],
   ])("calls depending hook %s useEffect", (_, Component) => {
     describe.each([
-      ["useImpulseState", useImpulseState],
+      ["useImpulseValue", useImpulseValue],
       ["inline useWatchImpulse", useWatchInline],
       ["memoized useWatchImpulse", useWatchMemoized],
     ])("with %s as useGetFirst", (__, useGetFirst) => {
       it.each([
-        ["useImpulseState", useImpulseState],
+        ["useImpulseValue", useImpulseValue],
         ["inline useWatchImpulse", useWatchInline],
         ["memoized useWatchImpulse", useWatchMemoized],
       ])("with %s as useGetSecond", (___, useGetSecond) => {
@@ -98,7 +98,7 @@ describe("watching misses when defined after useEffect #140", () => {
         expect(button).toHaveTextContent("2")
 
         act(() => {
-          first.setState(10)
+          first.setValue(10)
         })
         expect(button).toHaveTextContent("10")
 
@@ -106,7 +106,7 @@ describe("watching misses when defined after useEffect #140", () => {
         expect(button).toHaveTextContent("11")
 
         act(() => {
-          second.setState(20)
+          second.setValue(20)
         })
         expect(button).toHaveTextContent("20")
 
@@ -117,7 +117,7 @@ describe("watching misses when defined after useEffect #140", () => {
   })
 })
 
-describe("Use Impulse#getState() in Impulse#toJSON() and Impulse#toString() #321", () => {
+describe("Use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321", () => {
   it.each([
     ["toString", (value: unknown) => String(value)],
     ["toJSON", (value: unknown) => JSON.stringify(value)],
@@ -137,7 +137,7 @@ describe("Use Impulse#getState() in Impulse#toJSON() and Impulse#toString() #321
     expect(result).toHaveTextContent("1")
 
     act(() => {
-      count.setState(2)
+      count.setValue(2)
     })
     expect(result).toHaveTextContent("2")
   })
@@ -155,8 +155,8 @@ describe("return the same component type from watch #322", () => {
     value: Impulse<string>
   }> = watch(({ value }) => (
     <StatelessInput
-      value={value.getState()}
-      onChange={(nextValue) => value.setState(nextValue)}
+      value={value.getValue()}
+      onChange={(nextValue) => value.setValue(nextValue)}
     />
   ))
 
@@ -170,7 +170,7 @@ describe("return the same component type from watch #322", () => {
     expect(first).toHaveValue("hello")
 
     act(() => {
-      text.setState("world")
+      text.setValue("world")
     })
     expect(first).toHaveValue("world")
   })

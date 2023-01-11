@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useImpulseState } from "../../src"
+import { Impulse, useImpulseValue } from "../../src"
 import { Counter } from "../common"
 
 import { withinNth } from "./common"
@@ -11,7 +11,7 @@ describe("single impulse", () => {
     counter: Impulse<Counter>
     onRender: VoidFunction
   }> = ({ counter, onRender }) => {
-    const { count } = useImpulseState(counter)
+    const { count } = useImpulseValue(counter)
 
     return (
       <React.Profiler id="test" onRender={onRender}>
@@ -29,12 +29,12 @@ describe("single impulse", () => {
         <button
           type="button"
           data-testid="increment"
-          onClick={() => counter.setState(Counter.inc)}
+          onClick={() => counter.setValue(Counter.inc)}
         />
         <button
           type="button"
           data-testid="reset"
-          onClick={() => counter.setState({ count: 0 }, Counter.compare)}
+          onClick={() => counter.setValue({ count: 0 }, Counter.compare)}
         />
       </div>
     </React.Profiler>
@@ -69,7 +69,7 @@ describe("single impulse", () => {
       />,
     )
 
-    // check initial state
+    // check initial value
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
     expect(onGetterRender).toHaveBeenCalledTimes(1)
@@ -83,7 +83,7 @@ describe("single impulse", () => {
     expect(screen.getByTestId("getter")).toHaveTextContent("1")
 
     // increment from the outside
-    act(() => counter.setState(Counter.inc))
+    act(() => counter.setValue(Counter.inc))
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
     expect(onGetterRender).toHaveBeenCalledTimes(3)
@@ -113,8 +113,8 @@ describe("single impulse", () => {
 
     // increment twice in a row from the outside
     act(() => {
-      counter.setState(Counter.inc)
-      counter.setState(Counter.inc)
+      counter.setValue(Counter.inc)
+      counter.setValue(Counter.inc)
     })
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onSetterRender).toHaveBeenCalledTimes(1)
@@ -165,7 +165,7 @@ describe("single impulse", () => {
       />,
     )
 
-    // check initial state
+    // check initial value
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onFirstSetterRender).toHaveBeenCalledTimes(1)
     expect(onSecondSetterRender).toHaveBeenCalledTimes(1)
@@ -192,7 +192,7 @@ describe("single impulse", () => {
     expect(screen.getAllByTestId("getter")).toMatchSnapshot()
 
     // increment from the outside
-    act(() => counter.setState(Counter.inc))
+    act(() => counter.setValue(Counter.inc))
     expect(onRootRender).toHaveBeenCalledTimes(1)
     expect(onFirstSetterRender).toHaveBeenCalledTimes(1)
     expect(onSecondSetterRender).toHaveBeenCalledTimes(1)

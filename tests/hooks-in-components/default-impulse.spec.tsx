@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useImpulse, useImpulseState } from "../../src"
+import { Impulse, useImpulse, useImpulseValue } from "../../src"
 
 describe("default impulse", () => {
   it("uses local default Impulse when nullable", () => {
@@ -11,13 +11,13 @@ describe("default impulse", () => {
       const defaultValueImpulse = useImpulse("search for me")
 
       const impulse = valueImpulse ?? defaultValueImpulse
-      const value = useImpulseState(impulse)
+      const value = useImpulseValue(impulse)
 
       return (
         <input
           role="search"
           value={value}
-          onChange={(event) => impulse.setState(event.target.value)}
+          onChange={(event) => impulse.setValue(event.target.value)}
         />
       )
     }
@@ -40,7 +40,7 @@ describe("default impulse", () => {
     expect(input).toHaveValue("what a hell")
 
     act(() => {
-      val.setState("no way")
+      val.setValue("no way")
     })
     expect(input).toHaveValue("no way")
 
@@ -48,7 +48,7 @@ describe("default impulse", () => {
     expect(input).toHaveValue("now")
 
     act(() => {
-      val.setState("but now")
+      val.setValue("but now")
     })
     expect(input).toHaveValue("now")
 

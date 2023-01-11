@@ -9,14 +9,14 @@ describe.each([
   [
     "inline watcher",
     ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
-      return useWatchImpulse(() => impulse.getState(), compare)
+      return useWatchImpulse(() => impulse.getValue(), compare)
     },
   ],
   [
     "memoized watcher",
     ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
       return useWatchImpulse(
-        useCallback(() => impulse.getState(), [impulse]),
+        useCallback(() => impulse.getValue(), [impulse]),
         compare,
       )
     },
@@ -48,7 +48,7 @@ describe.each([
       expect(result.current).toBe(initial)
 
       act(() => {
-        impulse.setState({ count: 0 })
+        impulse.setValue({ count: 0 })
       })
       expect(result.current).toBe(initial)
 
@@ -59,7 +59,7 @@ describe.each([
       expect(result.current).toBe(initial)
 
       act(() => {
-        impulse.setState({ count: 0 })
+        impulse.setValue({ count: 0 })
       })
       expect(result.current).not.toBe(initial)
       expect(result.current).toStrictEqual(initial)

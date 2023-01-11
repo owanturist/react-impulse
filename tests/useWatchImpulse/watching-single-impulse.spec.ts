@@ -8,14 +8,14 @@ describe.each([
   [
     "inline watcher",
     ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
-      return useWatchImpulse(() => impulse.getState(), compare)
+      return useWatchImpulse(() => impulse.getValue(), compare)
     },
   ],
   [
     "memoized watcher",
     ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
       return useWatchImpulse(
-        useCallback(() => impulse.getState(), [impulse]),
+        useCallback(() => impulse.getValue(), [impulse]),
         compare,
       )
     },
@@ -48,12 +48,12 @@ describe.each([
       expect(result.current).toStrictEqual({ count: 1 })
 
       act(() => {
-        impulse.setState(Counter.inc)
+        impulse.setValue(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 2 })
 
       act(() => {
-        impulse.setState(({ count }) => ({ count: count * 2 }))
+        impulse.setValue(({ count }) => ({ count: count * 2 }))
       })
       expect(result.current).toStrictEqual({ count: 4 })
     })
@@ -91,10 +91,10 @@ describe.each([
           rerender({ impulse: impulse_2 })
 
           act(() => {
-            impulse_1.setState(Counter.inc)
+            impulse_1.setValue(Counter.inc)
           })
 
-          expect(impulse_1.getState()).toStrictEqual({ count: 2 })
+          expect(impulse_1.getValue()).toStrictEqual({ count: 2 })
           expect(result.current).toStrictEqual({ count: 10 })
         },
       )
@@ -107,10 +107,10 @@ describe.each([
           rerender({ impulse: impulse_2 })
 
           act(() => {
-            impulse_2.setState(Counter.inc)
+            impulse_2.setValue(Counter.inc)
           })
 
-          expect(impulse_1.getState()).toStrictEqual({ count: 1 })
+          expect(impulse_1.getValue()).toStrictEqual({ count: 1 })
           expect(result.current).toStrictEqual({ count: 11 })
         },
       )
@@ -133,7 +133,7 @@ describe.each([
           rerender({ impulse: impulse_1 })
 
           act(() => {
-            impulse_2.setState(Counter.inc)
+            impulse_2.setValue(Counter.inc)
           })
 
           expect(result.current).toStrictEqual({ count: 1 })
@@ -143,7 +143,7 @@ describe.each([
   })
 })
 
-describe("transform state's value inside watcher", () => {
+describe("transform Impulse's value inside watcher", () => {
   const toTuple = ({ count }: Counter): [boolean, boolean] => {
     return [count > 2, count < 5]
   }
@@ -159,14 +159,14 @@ describe("transform state's value inside watcher", () => {
     [
       "inline watcher",
       ({ impulse }: WithImpulse, compare?: Compare<[boolean, boolean]>) => {
-        return useWatchImpulse(() => impulse.getState(toTuple), compare)
+        return useWatchImpulse(() => impulse.getValue(toTuple), compare)
       },
     ],
     [
       "memoized watcher",
       ({ impulse }: WithImpulse, compare?: Compare<[boolean, boolean]>) => {
         return useWatchImpulse(
-          useCallback(() => impulse.getState(toTuple), [impulse]),
+          useCallback(() => impulse.getValue(toTuple), [impulse]),
           compare,
         )
       },
@@ -189,7 +189,7 @@ describe("transform state's value inside watcher", () => {
         // increments 1 -> 2
         prev = result.current
         act(() => {
-          impulse.setState(Counter.inc)
+          impulse.setValue(Counter.inc)
         })
         expect(result.current).not.toBe(prev)
         expect(result.current).toStrictEqual([false, true])
@@ -197,7 +197,7 @@ describe("transform state's value inside watcher", () => {
         // increments 2 -> 3
         prev = result.current
         act(() => {
-          impulse.setState({ count: 3 })
+          impulse.setValue({ count: 3 })
         })
         expect(result.current).not.toBe(prev)
         expect(result.current).toStrictEqual([true, true])
@@ -209,7 +209,7 @@ describe("transform state's value inside watcher", () => {
         // increments 3 -> 4
         prev = result.current
         act(() => {
-          impulse.setState({ count: 4 })
+          impulse.setValue({ count: 4 })
         })
         expect(result.current).not.toBe(prev)
         expect(result.current).toStrictEqual([true, true])
@@ -217,7 +217,7 @@ describe("transform state's value inside watcher", () => {
         // increments 4 -> 5
         prev = result.current
         act(() => {
-          impulse.setState(Counter.inc)
+          impulse.setValue(Counter.inc)
         })
         expect(result.current).not.toBe(prev)
         expect(result.current).toStrictEqual([true, false])
@@ -256,7 +256,7 @@ describe("transform state's value inside watcher", () => {
         // increments 1 -> 2
         prev = result.current
         act(() => {
-          impulse.setState(Counter.inc)
+          impulse.setValue(Counter.inc)
         })
         expect(result.current).toBe(prev)
         expect(result.current).toStrictEqual([false, true])
@@ -264,7 +264,7 @@ describe("transform state's value inside watcher", () => {
         // increments 2 -> 3
         prev = result.current
         act(() => {
-          impulse.setState({ count: 3 })
+          impulse.setValue({ count: 3 })
         })
         expect(result.current).not.toBe(prev)
         expect(result.current).toStrictEqual([true, true])
@@ -276,7 +276,7 @@ describe("transform state's value inside watcher", () => {
         // increments 3 -> 4
         prev = result.current
         act(() => {
-          impulse.setState({ count: 4 })
+          impulse.setValue({ count: 4 })
         })
         expect(result.current).toBe(prev)
         expect(result.current).toStrictEqual([true, true])
@@ -284,7 +284,7 @@ describe("transform state's value inside watcher", () => {
         // increments 4 -> 5
         prev = result.current
         act(() => {
-          impulse.setState(Counter.inc)
+          impulse.setValue(Counter.inc)
         })
         expect(result.current).not.toBe(prev)
         expect(result.current).toStrictEqual([true, false])
@@ -299,7 +299,7 @@ describe("transform state's value inside watcher", () => {
         return useWatchImpulse(() => {
           spy()
 
-          return impulse.getState()
+          return impulse.getValue()
         }, compare)
       },
     ],
@@ -310,7 +310,7 @@ describe("transform state's value inside watcher", () => {
           useCallback(() => {
             spy()
 
-            return impulse.getState()
+            return impulse.getValue()
           }, [spy, impulse]),
           compare,
         )
@@ -346,7 +346,7 @@ describe("transform state's value inside watcher", () => {
         expect(spy).toHaveBeenCalledTimes(1)
 
         act(() => {
-          impulse.setState(Counter.clone, Counter.compare)
+          impulse.setValue(Counter.clone, Counter.compare)
         })
 
         expect(spy).toHaveBeenCalledTimes(1)
@@ -355,7 +355,7 @@ describe("transform state's value inside watcher", () => {
   )
 })
 
-describe("multiple Impulse#getState() calls", () => {
+describe("multiple Impulse#getValue() calls", () => {
   describe.each([
     [
       "inline watcher",
@@ -363,14 +363,14 @@ describe("multiple Impulse#getState() calls", () => {
         return useWatchImpulse(() => {
           spy()
 
-          return impulse.getState()
+          return impulse.getValue()
         }, compare)
       },
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
         return useWatchImpulse(() => {
           spy()
 
-          return Counter.merge(impulse.getState(), impulse.getState())
+          return Counter.merge(impulse.getValue(), impulse.getValue())
         }, compare)
       },
     ],
@@ -381,7 +381,7 @@ describe("multiple Impulse#getState() calls", () => {
           useCallback(() => {
             spy()
 
-            return impulse.getState()
+            return impulse.getValue()
           }, [spy, impulse]),
           compare,
         )
@@ -391,14 +391,14 @@ describe("multiple Impulse#getState() calls", () => {
           useCallback(() => {
             spy()
 
-            return Counter.merge(impulse.getState(), impulse.getState())
+            return Counter.merge(impulse.getValue(), impulse.getValue())
           }, [spy, impulse]),
           compare,
         )
       },
     ],
   ])(
-    "triggering %s for multiple Impulse#getState() calls the same as for a single",
+    "triggering %s for multiple Impulse#getValue() calls the same as for a single",
     (_, useSingleHookWithoutCompare, useDoubleHookWithoutCompare) => {
       describe.each([
         [
@@ -453,14 +453,14 @@ describe("multiple Impulse#getState() calls", () => {
         })
 
         it.concurrent.each([
-          ["without Impulse#setState comparator", undefined],
-          ["with Impulse#setState comparator", Counter.compare],
+          ["without Impulse#setValue comparator", undefined],
+          ["with Impulse#setValue comparator", Counter.compare],
         ])("increments %s", (___, compare) => {
           const { impulse, spySingle, spyDouble, resultSingle, resultDouble } =
             setup()
 
           act(() => {
-            impulse.setState(Counter.inc, compare)
+            impulse.setValue(Counter.inc, compare)
           })
 
           expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -469,14 +469,14 @@ describe("multiple Impulse#getState() calls", () => {
         })
 
         it.concurrent.each([
-          ["without Impulse#setState comparator", undefined],
-          ["with Impulse#setState comparator", Counter.compare],
+          ["without Impulse#setValue comparator", undefined],
+          ["with Impulse#setValue comparator", Counter.compare],
         ])("clones %s", (___, compare) => {
           const { impulse, spySingle, spyDouble, resultSingle, resultDouble } =
             setup()
 
           act(() => {
-            impulse.setState(Counter.clone, compare)
+            impulse.setValue(Counter.clone, compare)
           })
 
           expect(resultSingle.current).toStrictEqual({ count: 1 })

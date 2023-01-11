@@ -21,7 +21,7 @@ const isImpulseWatcher = <TProps>(
 }
 
 /**
- * Creates a React component that subscribes to all Impulses calling the `Impulse#getState` method during the rendering phase of the component.
+ * Creates a React component that subscribes to all Impulses calling the `Impulse#getValue` method during the rendering phase of the component.
  *
  * @param component a watched component
  *
@@ -35,14 +35,14 @@ export function watch<TProps>(component: FC<TProps>): FC<TProps> {
   }
 
   const ImpulseWatcher = (props: TProps, ctx: unknown): ReturnType<FC> => {
-    const { executeWatcher, subscribe, getState } = useWatchContext({
+    const { executeWatcher, subscribe, getVersion } = useWatchContext({
       warningSource: "watch",
     })
 
     return useSyncExternalStoreWithSelector(
       subscribe,
-      getState,
-      getState,
+      getVersion,
+      getVersion,
       // no need to memoize since props are a new object on each call
       () => executeWatcher(() => component(props, ctx)),
     )

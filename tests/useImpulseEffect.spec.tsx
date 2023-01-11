@@ -28,7 +28,7 @@ describe.each([
         const [multiplier, setMultiplier] = React.useState(2)
 
         useEffect(() => {
-          const x = value.getState() * multiplier
+          const x = value.getValue() * multiplier
 
           onEffect(x)
         }, [value, multiplier, onEffect])
@@ -59,7 +59,7 @@ describe.each([
         vi.clearAllMocks()
 
         act(() => {
-          value.setState(2)
+          value.setValue(2)
         })
 
         expect(onEffect).not.toHaveBeenCalled()
@@ -82,7 +82,7 @@ describe.each([
         vi.clearAllMocks()
 
         act(() => {
-          value.setState(2)
+          value.setValue(2)
         })
 
         expect(onEffect).toHaveBeenCalledTimes(1)
@@ -124,7 +124,7 @@ describe.each([
         vi.clearAllMocks()
 
         act(() => {
-          value.setState(3)
+          value.setValue(3)
         })
 
         expect(onEffect).toHaveBeenCalledTimes(1)
@@ -194,7 +194,7 @@ describe.each([
         )
 
         act(() => {
-          value_1.setState(10)
+          value_1.setValue(10)
         })
 
         expect(onEffect).toHaveBeenCalledTimes(1)
@@ -203,7 +203,7 @@ describe.each([
         vi.clearAllMocks()
 
         act(() => {
-          value_2.setState(5)
+          value_2.setValue(5)
         })
         expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(10)
@@ -236,7 +236,7 @@ describe.each([
         vi.clearAllMocks()
 
         act(() => {
-          value.setState(4)
+          value.setValue(4)
         })
         expect(onEffect).toHaveBeenCalledTimes(1)
         expect(onEffect).toHaveBeenLastCalledWith(12)
@@ -253,7 +253,7 @@ describe.each([
       }> = hoc(({ first, second, onEffect }) => {
         const [multiplier, setMultiplier] = React.useState(2)
         useCustomImpulseEffect(() => {
-          const x = (first.getState() + second.getState()) * multiplier
+          const x = (first.getValue() + second.getValue()) * multiplier
 
           onEffect(x)
         }, [first, second, multiplier])
@@ -281,7 +281,7 @@ describe.each([
         vi.clearAllMocks()
 
         act(() => {
-          first.setState(4)
+          first.setValue(4)
         })
 
         expect(onEffect).toHaveBeenCalledTimes(1)
@@ -289,7 +289,7 @@ describe.each([
         vi.clearAllMocks()
 
         act(() => {
-          second.setState(5)
+          second.setValue(5)
         })
 
         expect(onEffect).toHaveBeenCalledTimes(1)
@@ -309,8 +309,8 @@ describe.each([
         useCustomImpulseEffect(() => {
           const x =
             list
-              .getState()
-              .map((item) => item.getState())
+              .getValue()
+              .map((item) => item.getValue())
               .reduce((acc, val) => acc + val, 0) * multiplier
 
           onEffect(x)
@@ -343,7 +343,7 @@ describe.each([
         vi.clearAllMocks()
 
         act(() => {
-          _0.setState(4)
+          _0.setValue(4)
         })
 
         expect(onEffect).toHaveBeenCalledTimes(1)
@@ -351,7 +351,7 @@ describe.each([
         vi.clearAllMocks()
 
         act(() => {
-          _1.setState(5)
+          _1.setValue(5)
         })
 
         expect(onEffect).toHaveBeenCalledTimes(1)
@@ -359,7 +359,7 @@ describe.each([
         vi.clearAllMocks()
 
         act(() => {
-          list.setState((items) => [...items, _2])
+          list.setValue((items) => [...items, _2])
         })
 
         expect(onEffect).toHaveBeenCalledTimes(1)
@@ -368,7 +368,7 @@ describe.each([
         vi.clearAllMocks()
 
         act(() => {
-          list.setState((items) => items.slice(1))
+          list.setValue((items) => items.slice(1))
         })
 
         expect(onEffect).toHaveBeenCalledTimes(1)
@@ -388,7 +388,7 @@ describe.each([
         const [multiplier, setMultiplier] = React.useState(2)
 
         useCustomImpulseEffect(() => {
-          const x = value.getState() * multiplier
+          const x = value.getValue() * multiplier
 
           onEffect(x)
         })
@@ -449,7 +449,7 @@ describe.each([
         vi.clearAllMocks()
 
         act(() => {
-          value.setState(4)
+          value.setValue(4)
         })
 
         expect(onEffect).toHaveBeenCalledTimes(1)
@@ -466,9 +466,9 @@ describe.each([
       <button
         type="button"
         data-testid="count"
-        onClick={() => count.setState((x) => x + 1)}
+        onClick={() => count.setValue((x) => x + 1)}
       >
-        {count.getState()}
+        {count.getValue()}
       </button>
     ))
 
@@ -479,7 +479,7 @@ describe.each([
       const [isVisible, setIsVisible] = React.useState(true)
 
       useCustomImpulseEffect(() => {
-        onEffect(count.getState())
+        onEffect(count.getValue())
       }, [onEffect, count])
 
       return (
@@ -532,7 +532,7 @@ it.concurrent(
     const { rerender } = renderHook(
       ({ left, right }) => {
         useImpulseEffect(() => {
-          spy(left + right.getState())
+          spy(left + right.getValue())
         }, [left, right])
       },
       {
@@ -554,14 +554,14 @@ it.concurrent(
     vi.clearAllMocks()
 
     act(() => {
-      impulse.setState(3)
+      impulse.setValue(3)
     })
     expect(spy).toHaveBeenCalledTimes(1)
     expect(spy).toHaveBeenLastCalledWith(5)
     vi.clearAllMocks()
 
     act(() => {
-      impulse.setState(3)
+      impulse.setValue(3)
     })
     expect(spy).not.toHaveBeenCalled()
     vi.clearAllMocks()
@@ -582,7 +582,7 @@ it.concurrent(
     const { rerender } = renderHook(
       ({ state }) => {
         useImpulseEffect(() => {
-          spy(state.left.getState() + state.right.getState())
+          spy(state.left.getValue() + state.right.getValue())
         }, [state])
       },
       {
@@ -600,14 +600,14 @@ it.concurrent(
     vi.clearAllMocks()
 
     act(() => {
-      left.setState(2)
+      left.setValue(2)
     })
     expect(spy).toHaveBeenCalledTimes(1)
     expect(spy).toHaveBeenLastCalledWith(4)
     vi.clearAllMocks()
 
     act(() => {
-      right.setState(3)
+      right.setValue(3)
     })
     expect(spy).toHaveBeenCalledTimes(1)
     expect(spy).toHaveBeenLastCalledWith(5)

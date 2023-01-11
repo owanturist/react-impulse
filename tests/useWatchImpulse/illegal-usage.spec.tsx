@@ -13,7 +13,7 @@ import {
 import {
   WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING,
-  WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING,
+  WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
 } from "../../src/validation"
 import { noop } from "../../src/utils"
@@ -37,14 +37,14 @@ describe("calling Impulse.of()", () => {
       "useImpulseMemo",
       WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useImpulseMemo,
       () => {
-        return useImpulseMemo(() => Impulse.of(1).getState(), [])
+        return useImpulseMemo(() => Impulse.of(1).getValue(), [])
       },
     ],
     [
       "inline useWatchImpulse",
       WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchImpulse,
       () => {
-        return useWatchImpulse(() => Impulse.of(1).getState())
+        return useWatchImpulse(() => Impulse.of(1).getValue())
       },
     ],
     [
@@ -52,7 +52,7 @@ describe("calling Impulse.of()", () => {
       WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchImpulse,
       () => {
         return useWatchImpulse(
-          React.useCallback(() => Impulse.of(1).getState(), []),
+          React.useCallback(() => Impulse.of(1).getValue(), []),
         )
       },
     ],
@@ -85,14 +85,14 @@ describe("calling Impulse.of()", () => {
     })
 
     expect(console$error).not.toHaveBeenCalled()
-    expect(result.current.getState()).toBe(10)
+    expect(result.current.getValue()).toBe(10)
   })
 
   it("fine when called inside watch()", () => {
     const Component = watch(() => {
       const [state] = React.useState(Impulse.of(20))
 
-      return <div data-testid="count">{state.getState()}</div>
+      return <div data-testid="count">{state.getValue()}</div>
     })
 
     render(<Component />)
@@ -108,14 +108,14 @@ describe("calling Impulse#clone()", () => {
       "useImpulseMemo",
       WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useImpulseMemo,
       ({ impulse }: WithImpulse<number>) => {
-        return useImpulseMemo(() => impulse.clone().getState(), [impulse])
+        return useImpulseMemo(() => impulse.clone().getValue(), [impulse])
       },
     ],
     [
       "inline useWatchImpulse",
       WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useWatchImpulse,
       ({ impulse }: WithImpulse<number>) => {
-        return useWatchImpulse(() => impulse.clone().getState())
+        return useWatchImpulse(() => impulse.clone().getValue())
       },
     ],
     [
@@ -123,7 +123,7 @@ describe("calling Impulse#clone()", () => {
       WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useWatchImpulse,
       ({ impulse }: WithImpulse<number>) => {
         return useWatchImpulse(
-          React.useCallback(() => impulse.clone().getState(), [impulse]),
+          React.useCallback(() => impulse.clone().getValue(), [impulse]),
         )
       },
     ],
@@ -169,7 +169,7 @@ describe("calling Impulse#clone()", () => {
 
     expect(console$error).not.toHaveBeenCalled()
     expect(result.current).not.toBe(initial)
-    expect(result.current.getState()).toBe(1)
+    expect(result.current.getValue()).toBe(1)
   })
 
   it("fine when called inside watch()", () => {
@@ -178,7 +178,7 @@ describe("calling Impulse#clone()", () => {
     }>(({ impulse }) => {
       const [state] = React.useState(impulse.clone())
 
-      return <div data-testid="count">{state.getState()}</div>
+      return <div data-testid="count">{state.getValue()}</div>
     })
 
     render(<Component impulse={Impulse.of(20)} />)
@@ -188,39 +188,39 @@ describe("calling Impulse#clone()", () => {
   })
 })
 
-describe("calling Impulse#setState()", () => {
+describe("calling Impulse#setValue()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.useImpulseMemo,
+      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useImpulseMemo,
       ({ impulse }: WithImpulse<number>) => {
         return useImpulseMemo(() => {
-          impulse.setState(3)
+          impulse.setValue(3)
 
-          return impulse.getState()
+          return impulse.getValue()
         }, [impulse])
       },
     ],
     [
       "inline useWatchImpulse",
-      WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.useWatchImpulse,
+      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useWatchImpulse,
       ({ impulse }: WithImpulse<number>) => {
         return useWatchImpulse(() => {
-          impulse.setState(3)
+          impulse.setValue(3)
 
-          return impulse.getState()
+          return impulse.getValue()
         })
       },
     ],
     [
       "memoized useWatchImpulse",
-      WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.useWatchImpulse,
+      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useWatchImpulse,
       ({ impulse }: WithImpulse<number>) => {
         return useWatchImpulse(
           React.useCallback(() => {
-            impulse.setState(3)
+            impulse.setValue(3)
 
-            return impulse.getState()
+            return impulse.getValue()
           }, [impulse]),
         )
       },
@@ -252,7 +252,7 @@ describe("calling Impulse#setState()", () => {
     const { result } = renderHook(
       (impulse) => {
         useImpulseEffectHook(() => {
-          impulse.setState((x) => x + 1)
+          impulse.setValue((x) => x + 1)
         }, [impulse])
 
         return impulse
@@ -263,22 +263,22 @@ describe("calling Impulse#setState()", () => {
     )
 
     expect(console$error).not.toHaveBeenCalled()
-    expect(result.current.getState()).toBe(2)
+    expect(result.current.getValue()).toBe(2)
   })
 
   it("warns when called inside watch()", () => {
     const Component = watch<{
       impulse: Impulse<number>
     }>(({ impulse }) => {
-      impulse.setState(10)
+      impulse.setValue(10)
 
-      return <div data-testid="count">{impulse.getState()}</div>
+      return <div data-testid="count">{impulse.getValue()}</div>
     })
 
     render(<Component impulse={Impulse.of(20)} />)
 
     expect(console$error).toHaveBeenCalledWith(
-      WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING.watch,
+      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.watch,
     )
     expect(screen.getByTestId("count")).toHaveTextContent("20")
   })
@@ -296,7 +296,7 @@ describe("calling Impulse#subscribe()", () => {
         return useImpulseMemo(() => {
           impulse.subscribe(listener)
 
-          return impulse.getState()
+          return impulse.getValue()
         }, [listener, impulse])
       },
     ],
@@ -310,7 +310,7 @@ describe("calling Impulse#subscribe()", () => {
         return useWatchImpulse(() => {
           impulse.subscribe(listener)
 
-          return impulse.getState()
+          return impulse.getValue()
         })
       },
     ],
@@ -325,7 +325,7 @@ describe("calling Impulse#subscribe()", () => {
           React.useCallback(() => {
             impulse.subscribe(listener)
 
-            return impulse.getState()
+            return impulse.getValue()
           }, [impulse, listener]),
         )
       },
@@ -375,7 +375,7 @@ describe("calling Impulse#subscribe()", () => {
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).not.toHaveBeenCalled()
 
-      impulse.setState(1)
+      impulse.setValue(1)
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).toHaveBeenCalledTimes(1)
 
@@ -404,14 +404,14 @@ describe("calling Impulse#subscribe()", () => {
       )
 
       expect(console$error).not.toHaveBeenCalled()
-      expect(result.current.getState()).toBe(1)
+      expect(result.current.getValue()).toBe(1)
       expect(listener).not.toHaveBeenCalled()
 
       act(() => {
-        initial.setState(2)
+        initial.setValue(2)
       })
 
-      expect(result.current.getState()).toBe(2)
+      expect(result.current.getValue()).toBe(2)
       expect(listener).toHaveBeenCalledTimes(1)
     })
 
@@ -435,22 +435,22 @@ describe("calling Impulse#subscribe()", () => {
       rerender(impulse_2)
 
       expect(console$error).not.toHaveBeenCalled()
-      expect(result.current.getState()).toBe(10)
+      expect(result.current.getValue()).toBe(10)
       expect(listener).not.toHaveBeenCalled()
 
       act(() => {
-        impulse_2.setState(20)
+        impulse_2.setValue(20)
       })
 
-      expect(result.current.getState()).toBe(20)
+      expect(result.current.getValue()).toBe(20)
       expect(listener).toHaveBeenCalledTimes(1)
       vi.clearAllMocks()
 
       act(() => {
-        impulse_1.setState(2)
+        impulse_1.setValue(2)
       })
 
-      expect(result.current.getState()).toBe(20)
+      expect(result.current.getValue()).toBe(20)
       expect(listener).not.toHaveBeenCalled()
     })
   })
@@ -462,7 +462,7 @@ describe("calling Impulse#subscribe()", () => {
     }>(({ impulse }) => {
       impulse.subscribe(listener)
 
-      return <div data-testid="count">{impulse.getState()}</div>
+      return <div data-testid="count">{impulse.getValue()}</div>
     })
 
     afterEach(() => {
@@ -502,7 +502,7 @@ describe("calling Impulse#subscribe()", () => {
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).not.toHaveBeenCalled()
 
-      impulse.setState(1)
+      impulse.setValue(1)
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).toHaveBeenCalledTimes(1)
       unsubscribe()

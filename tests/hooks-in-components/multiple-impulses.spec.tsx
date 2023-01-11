@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useImpulseState } from "../../src"
+import { Impulse, useImpulseValue } from "../../src"
 
 describe("multiple impulses", () => {
   const LoginForm: React.FC<{
@@ -9,8 +9,8 @@ describe("multiple impulses", () => {
     password: Impulse<string>
     onRender: VoidFunction
   }> = ({ email: emailImpulse, password: passwordImpulse, onRender }) => {
-    const email = useImpulseState(emailImpulse)
-    const password = useImpulseState(passwordImpulse)
+    const email = useImpulseValue(emailImpulse)
+    const password = useImpulseValue(passwordImpulse)
 
     return (
       <React.Profiler id="test" onRender={onRender}>
@@ -18,20 +18,20 @@ describe("multiple impulses", () => {
           type="email"
           data-testid="email"
           value={email}
-          onChange={(event) => emailImpulse.setState(event.target.value)}
+          onChange={(event) => emailImpulse.setValue(event.target.value)}
         />
         <input
           type="password"
           data-testid="password"
           value={password}
-          onChange={(event) => passwordImpulse.setState(event.target.value)}
+          onChange={(event) => passwordImpulse.setValue(event.target.value)}
         />
         <button
           type="button"
           data-testid="reset"
           onClick={() => {
-            emailImpulse.setState("")
-            passwordImpulse.setState("")
+            emailImpulse.setValue("")
+            passwordImpulse.setValue("")
           }}
         />
       </React.Profiler>
@@ -66,8 +66,8 @@ describe("multiple impulses", () => {
 
     // changes from the outside
     act(() => {
-      email.setState("admin@gmail.com")
-      password.setState("admin")
+      email.setValue("admin@gmail.com")
+      password.setValue("admin")
     })
     expect(onRender).toHaveBeenCalledTimes(4)
     expect(container).toMatchSnapshot()

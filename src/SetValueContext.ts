@@ -4,24 +4,24 @@ import { noop } from "./utils"
 import type { WatchContext } from "./WatchContext"
 
 /**
- * A context that allows to collect Impulse#setState subscribers and execute them all at once.
+ * A context that allows to collect Impulse#setValue subscribers and execute them all at once.
  * This is useful when multiple stores are updated at the same time.
  *
  * @private
  */
-export class SetStateContext {
-  private static current: null | SetStateContext = null
+export class SetValueContext {
+  private static current: null | SetValueContext = null
 
   public static registerWatchContext(ctx: WatchContext): void {
-    SetStateContext.current?.registerWatchContext(ctx)
+    SetValueContext.current?.registerWatchContext(ctx)
   }
 
   public static registerStoreSubscribers(): [
     emit: VoidFunction,
     register: Dispatch<Map<VoidFunction, number>>,
   ] {
-    if (SetStateContext.current != null) {
-      const { current } = SetStateContext
+    if (SetValueContext.current != null) {
+      const { current } = SetValueContext
 
       // the context already exists - it should not emit anything at this point
       return [
@@ -32,15 +32,15 @@ export class SetStateContext {
       ]
     }
 
-    // the first setState call should create the context and emit the listeners
-    const current = new SetStateContext()
+    // the first setValue call should create the context and emit the listeners
+    const current = new SetValueContext()
 
-    SetStateContext.current = current
+    SetValueContext.current = current
 
     return [
       () => {
         current.emit()
-        SetStateContext.current = null
+        SetValueContext.current = null
       },
       (subs) => {
         current.batchStoreSubscribers(subs)

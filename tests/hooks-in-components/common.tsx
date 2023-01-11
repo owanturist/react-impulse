@@ -1,7 +1,7 @@
 import React from "react"
 import { screen, within } from "@testing-library/react"
 
-import { Impulse, useImpulseState } from "../../src"
+import { Impulse, useImpulseValue } from "../../src"
 
 export const withinNth = (testId: string, position: number) => {
   return within(screen.getAllByTestId(testId)[position]!)
@@ -24,7 +24,7 @@ export const CounterComponent: React.FC<{
   onRender: VoidFunction
 }> = React.memo(
   ({ count: countImpulse, onRender }) => {
-    const count = useImpulseState(countImpulse)
+    const count = useImpulseValue(countImpulse)
 
     return (
       <React.Profiler id="test" onRender={onRender}>
@@ -33,7 +33,7 @@ export const CounterComponent: React.FC<{
           <button
             type="button"
             data-testid="increment"
-            onClick={() => countImpulse.setState(count + 1)}
+            onClick={() => countImpulse.setValue(count + 1)}
           />
         </div>
       </React.Profiler>

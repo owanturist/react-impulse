@@ -31,7 +31,7 @@ describe("watching single impulse", () => {
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useWatchImpulse(
       () => {
-        const count = props.count.getState()
+        const count = props.count.getValue()
 
         return [count > 1, count < 4]
       },
@@ -52,7 +52,7 @@ describe("watching single impulse", () => {
   const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useWatchImpulse<[boolean, boolean]>(
       React.useCallback(() => {
-        const count = props.count.getState()
+        const count = props.count.getValue()
 
         return [count > 1, count < 4]
       }, [props.count]),
@@ -77,8 +77,8 @@ describe("watching single impulse", () => {
   }
 
   const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchImpulse(() => props.count.getState() > 1)
-    const lessThanFour = useWatchImpulse(() => props.count.getState() < 4)
+    const moreThanOne = useWatchImpulse(() => props.count.getValue() > 1)
+    const lessThanFour = useWatchImpulse(() => props.count.getValue() < 4)
 
     return (
       <GenericApp
@@ -91,10 +91,10 @@ describe("watching single impulse", () => {
 
   const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
     const moreThanOne = useWatchImpulse(
-      React.useCallback(() => props.count.getState() > 1, [props.count]),
+      React.useCallback(() => props.count.getValue() > 1, [props.count]),
     )
     const lessThanFour = useWatchImpulse(
-      React.useCallback(() => props.count.getState() < 4, [props.count]),
+      React.useCallback(() => props.count.getValue() < 4, [props.count]),
     )
 
     return (
@@ -107,7 +107,7 @@ describe("watching single impulse", () => {
   }
 
   const WatchedApp: React.FC<AppProps> = watch((props) => {
-    const count = props.count.getState()
+    const count = props.count.getValue()
     const [moreThanOne, lessThanFour] = [count > 1, count < 4]
 
     return (
@@ -166,7 +166,7 @@ describe("watching single impulse", () => {
 
     // increment from the outside
     act(() => {
-      count.setState((state) => state + 1)
+      count.setValue((x) => x + 1)
     })
     expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount) // does not re-render
     expect(onCounterRender).toHaveBeenCalledTimes(1)

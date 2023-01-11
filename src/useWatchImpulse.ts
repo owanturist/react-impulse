@@ -5,10 +5,10 @@ import { useWatchContext } from "./useWatchContext"
 import { Compare, isEqual } from "./utils"
 
 /**
- * A hook that executes the `watcher` function whenever any of the involved Impulses' states update
+ * A hook that executes the `watcher` function whenever any of the involved Impulses' values update
  * but enqueues a re-render only when the resulting value is different from the previous.
  *
- * @param watcher a function that subscribes to all Impulses calling the `Impulse#getState` method inside the function.
+ * @param watcher a function that subscribes to all Impulses calling the `Impulse#getValue` method inside the function.
  * @param compare an optional `Compare` function. When not defined or `null` then `Object.is` applies as a fallback.
  *
  * @version 1.0.0
@@ -17,7 +17,7 @@ export function useWatchImpulse<T>(
   watcher: () => T,
   compare?: null | Compare<T>,
 ): T {
-  const { executeWatcher, subscribe, getState } = useWatchContext({
+  const { executeWatcher, subscribe, getVersion } = useWatchContext({
     warningSource: "useWatchImpulse",
   })
 
@@ -28,7 +28,7 @@ export function useWatchImpulse<T>(
   )
 
   // changeling of the `compare` value should not trigger `useSyncExternalStoreWithSelector`
-  // to re-select the impulse's state
+  // to re-select the impulse's value
   const compareRef = useRef(compare ?? isEqual)
   useEffect(() => {
     compareRef.current = compare ?? isEqual
@@ -42,8 +42,8 @@ export function useWatchImpulse<T>(
 
   const value = useSyncExternalStoreWithSelector(
     subscribe,
-    getState,
-    getState,
+    getVersion,
+    getVersion,
     select,
     onCompare,
   )

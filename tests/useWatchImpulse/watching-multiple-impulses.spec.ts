@@ -16,7 +16,7 @@ describe.each([
     "inline watcher",
     ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
       return useWatchImpulse(() => {
-        return Counter.merge(first.getState(), second.getState())
+        return Counter.merge(first.getValue(), second.getValue())
       }, compare)
     },
   ],
@@ -25,7 +25,7 @@ describe.each([
     ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
       return useWatchImpulse(
         useCallback(() => {
-          return Counter.merge(first.getState(), second.getState())
+          return Counter.merge(first.getValue(), second.getValue())
         }, [first, second]),
         compare,
       )
@@ -69,7 +69,7 @@ describe.each([
       const { first, result } = setup()
 
       act(() => {
-        first.setState(Counter.inc)
+        first.setValue(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -78,7 +78,7 @@ describe.each([
       const { second, result } = setup()
 
       act(() => {
-        second.setState(Counter.inc)
+        second.setValue(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -87,8 +87,8 @@ describe.each([
       const { first, second, result } = setup()
 
       act(() => {
-        first.setState(Counter.inc)
-        second.setState(Counter.inc)
+        first.setValue(Counter.inc)
+        second.setValue(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 7 })
     })
@@ -102,7 +102,7 @@ describe.each([
       return useWatchImpulse(() => {
         spy()
 
-        return impulse.getState()
+        return impulse.getValue()
       }, compare)
     },
     (
@@ -118,9 +118,9 @@ describe.each([
         spy()
 
         return Counter.merge(
-          first.getState(),
-          second.getState(),
-          third.getState(),
+          first.getValue(),
+          second.getValue(),
+          third.getValue(),
         )
       }, compare)
     },
@@ -133,7 +133,7 @@ describe.each([
         useCallback(() => {
           spy()
 
-          return impulse.getState()
+          return impulse.getValue()
         }, [spy, impulse]),
       )
     },
@@ -148,9 +148,9 @@ describe.each([
           spy()
 
           return Counter.merge(
-            first.getState(),
-            second.getState(),
-            third.getState(),
+            first.getValue(),
+            second.getValue(),
+            third.getValue(),
           )
         }, [spy, first, second, third]),
       )
@@ -236,8 +236,8 @@ describe.each([
 
           act(() => {
             batch(() => {
-              first.setState(Counter.inc)
-              second.setState(Counter.inc)
+              first.setValue(Counter.inc)
+              second.setValue(Counter.inc)
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -260,8 +260,8 @@ describe.each([
 
           act(() => {
             batch(() => {
-              first.setState(Counter.inc)
-              third.setState(Counter.inc)
+              first.setValue(Counter.inc)
+              third.setValue(Counter.inc)
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -286,11 +286,11 @@ describe.each([
           act(() => {
             batch(() => {
               batch(() => {
-                first.setState(Counter.inc)
-                second.setState(Counter.inc)
+                first.setValue(Counter.inc)
+                second.setValue(Counter.inc)
               })
 
-              third.setState(Counter.inc)
+              third.setValue(Counter.inc)
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -316,8 +316,8 @@ describe.each([
 
           act(() => {
             batch(() => {
-              second.setState(Counter.inc)
-              third.setState(Counter.inc)
+              second.setValue(Counter.inc)
+              third.setValue(Counter.inc)
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 1 })

@@ -2,7 +2,7 @@ import { render, screen, fireEvent, act } from "@testing-library/react"
 import React from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
-import { Impulse, useImpulseState, useWatchImpulse, watch } from "../../src"
+import { Impulse, useImpulseValue, useWatchImpulse, watch } from "../../src"
 
 vi.mock("use-sync-external-store/shim/with-selector.js", async () => {
   const actual: {
@@ -33,7 +33,7 @@ describe("watch()", () => {
           data-testid="btn"
           onClick={() => setMultiplier((x) => x + 1)}
         >
-          {count.getState() * multiplier}
+          {count.getValue() * multiplier}
         </button>
       )
     })
@@ -64,7 +64,7 @@ describe("watch()", () => {
     vi.clearAllMocks()
 
     act(() => {
-      count.setState(3)
+      count.setValue(3)
     })
     expect(btn).toHaveTextContent("9")
     expect(onRender).toHaveBeenCalledTimes(1)
@@ -80,12 +80,12 @@ describe("watch()", () => {
         type="button"
         data-testid="btn"
         onClick={() => {
-          first.setState((x) => x + 1)
-          second.setState((x) => x + 1)
-          third.setState((x) => x + 1)
+          first.setValue((x) => x + 1)
+          second.setValue((x) => x + 1)
+          third.setValue((x) => x + 1)
         }}
       >
-        {first.getState() * second.getState() + third.getState()}
+        {first.getValue() * second.getValue() + third.getValue()}
       </button>
     ))
 
@@ -119,9 +119,9 @@ describe("watch()", () => {
         <button
           type="button"
           data-testid="btn"
-          onClick={() => count.setState((x) => x + 1)}
+          onClick={() => count.setValue((x) => x + 1)}
         >
-          {count.getState()}
+          {count.getValue()}
         </button>
       )),
     )
@@ -155,9 +155,9 @@ describe("watch()", () => {
       <button
         type="button"
         data-testid="btn"
-        onClick={() => count.setState((x) => x + 1)}
+        onClick={() => count.setValue((x) => x + 1)}
       >
-        {count.getState()}
+        {count.getValue()}
       </button>
     ))
 
@@ -181,7 +181,7 @@ describe("watch()", () => {
     const Component = watch<{
       count: Impulse<number>
     }>(({ count }) => {
-      const isMoreThanTwo = useWatchImpulse(() => count.getState() > 2)
+      const isMoreThanTwo = useWatchImpulse(() => count.getValue() > 2)
 
       return <span data-testid="result">{isMoreThanTwo && "Done"}</span>
     })
@@ -202,7 +202,7 @@ describe("watch()", () => {
     vi.clearAllMocks()
 
     act(() => {
-      count.setState(2)
+      count.setValue(2)
     })
 
     expect(result).not.toHaveTextContent("Done")
@@ -210,18 +210,18 @@ describe("watch()", () => {
     vi.clearAllMocks()
 
     act(() => {
-      count.setState(3)
+      count.setValue(3)
     })
 
     expect(result).toHaveTextContent("Done")
     expect(onRender).toHaveBeenCalledTimes(1)
   })
 
-  it("should not subscribe twice with useImpulseState", () => {
+  it("should not subscribe twice with useImpulseValue", () => {
     const Component = watch<{
       count: Impulse<number>
     }>(({ count }) => {
-      const x = useImpulseState(count)
+      const x = useImpulseValue(count)
 
       return <span data-testid="result">{x}</span>
     })
@@ -236,7 +236,7 @@ describe("watch()", () => {
     expect(count).toHaveProperty("subscribers.size", 1)
 
     act(() => {
-      count.setState(2)
+      count.setValue(2)
     })
 
     expect(result).toHaveTextContent("2")
@@ -259,7 +259,7 @@ describe("watch.memo()", () => {
       onRender: VoidFunction
     }> = ({ state, onRender }) => (
       <React.Profiler id="test" onRender={onRender}>
-        <div data-testid="count">{state.getState()}</div>
+        <div data-testid="count">{state.getValue()}</div>
       </React.Profiler>
     )
 
@@ -323,7 +323,7 @@ describe("watch.memo()", () => {
     vi.clearAllMocks()
 
     act(() => {
-      state.setState((x) => x + 1)
+      state.setValue((x) => x + 1)
     })
     expect(onWatchedRender).toHaveBeenCalledTimes(1)
     expect(onWatchedMemoizedRender).toHaveBeenCalledTimes(1)
@@ -360,7 +360,7 @@ describe("watch.forwardRef()", () => {
       }
     >(({ state }, ref) => (
       <div ref={ref} data-testid="count">
-        {state.getState()}
+        {state.getValue()}
       </div>
     ))
 
@@ -377,7 +377,7 @@ describe("watch.forwardRef()", () => {
     vi.clearAllMocks()
 
     act(() => {
-      state.setState((x) => x + 1)
+      state.setValue((x) => x + 1)
     })
 
     expect(count).toHaveTextContent("1")

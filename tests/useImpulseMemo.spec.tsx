@@ -17,7 +17,7 @@ describe.each([
     }> = hoc(({ onMemo, value, useMemo }) => {
       const [multiplier, setMultiplier] = React.useState(2)
       const result = useMemo(() => {
-        const x = value.getState() * multiplier
+        const x = value.getValue() * multiplier
 
         onMemo?.(x)
 
@@ -46,7 +46,7 @@ describe.each([
       expect(node).toHaveTextContent("2")
 
       act(() => {
-        value.setState(2)
+        value.setValue(2)
       })
 
       expect(node).toHaveTextContent("2")
@@ -72,7 +72,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value.setState(2)
+        value.setValue(2)
       })
 
       expect(node).toHaveTextContent("4")
@@ -108,7 +108,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value.setState(3)
+        value.setValue(3)
       })
 
       expect(onMemo).toHaveBeenCalledTimes(1)
@@ -161,7 +161,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value_1.setState(10)
+        value_1.setValue(10)
       })
 
       expect(onMemo).not.toHaveBeenCalled()
@@ -170,7 +170,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value_2.setState(5)
+        value_2.setValue(5)
       })
       expect(onMemo).toHaveBeenCalledTimes(1)
       expect(onMemo).toHaveBeenLastCalledWith(10)
@@ -199,7 +199,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value.setState(4)
+        value.setValue(4)
       })
       expect(onMemo).toHaveBeenCalledTimes(1)
       expect(onMemo).toHaveBeenLastCalledWith(12)
@@ -215,7 +215,7 @@ describe.each([
     }> = hoc(({ first, second }) => {
       const [multiplier, setMultiplier] = React.useState(2)
       const result = useImpulseMemo(() => {
-        return (first.getState() + second.getState()) * multiplier
+        return (first.getValue() + second.getValue()) * multiplier
       }, [first, second, multiplier])
 
       return (
@@ -243,12 +243,12 @@ describe.each([
       expect(node).toHaveTextContent("10")
 
       act(() => {
-        first.setState(4)
+        first.setValue(4)
       })
       expect(node).toHaveTextContent("14")
 
       act(() => {
-        second.setState(5)
+        second.setValue(5)
       })
       expect(node).toHaveTextContent("18")
 
@@ -265,8 +265,8 @@ describe.each([
       const result = useImpulseMemo(() => {
         const x =
           list
-            .getState()
-            .map((item) => item.getState())
+            .getValue()
+            .map((item) => item.getValue())
             .reduce((acc, val) => acc + val, 0) * multiplier
 
         return x
@@ -302,24 +302,24 @@ describe.each([
       expect(node).toHaveTextContent("10")
 
       act(() => {
-        _0.setState(4)
+        _0.setValue(4)
       })
       expect(node).toHaveTextContent("14")
 
       act(() => {
-        _1.setState(5)
+        _1.setValue(5)
       })
       expect(node).toHaveTextContent("18")
 
       act(() => {
-        list.setState((items) => [...items, _2])
+        list.setValue((items) => [...items, _2])
       })
       expect(node).toHaveTextContent("26")
 
       expect(_2).toHaveProperty("subscribers.size", 1)
 
       act(() => {
-        list.setState((items) => items.slice(1))
+        list.setValue((items) => items.slice(1))
       })
       expect(node).toHaveTextContent("18")
 

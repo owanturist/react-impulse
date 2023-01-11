@@ -1,21 +1,21 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { batch, Impulse, useImpulseState, useWatchImpulse } from "../../src"
+import { batch, Impulse, useImpulseValue, useWatchImpulse } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
   ["not batched", (cb: VoidFunction) => cb()],
   ["batched", batch],
 ])("multiple impulses %s calls with direct impulse access", (_, execute) => {
-  it("re-renders once for Impulse#setState calls", () => {
+  it("re-renders once for Impulse#setValue calls", () => {
     const onRender = vi.fn()
     const impulse_1 = Impulse.of({ count: 1 })
     const impulse_2 = Impulse.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useImpulseState(impulse_1)
-      const counter_2 = useImpulseState(impulse_2)
+      const counter_1 = useImpulseValue(impulse_1)
+      const counter_2 = useImpulseValue(impulse_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -31,22 +31,22 @@ describe.each([
 
     act(() => {
       execute(() => {
-        impulse_1.setState(Counter.inc)
-        impulse_2.setState(Counter.inc)
+        impulse_1.setValue(Counter.inc)
+        impulse_2.setValue(Counter.inc)
       })
     })
     expect(screen.getByTestId("count")).toHaveTextContent("5")
     expect(onRender).toHaveBeenCalledTimes(2)
   })
 
-  it("re-renders once for useImpulseState calls", () => {
+  it("re-renders once for useImpulseValue calls", () => {
     const onRender = vi.fn()
     const impulse_1 = Impulse.of({ count: 1 })
     const impulse_2 = Impulse.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useImpulseState(impulse_1)
-      const counter_2 = useImpulseState(impulse_2)
+      const counter_1 = useImpulseValue(impulse_1)
+      const counter_2 = useImpulseValue(impulse_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -55,8 +55,8 @@ describe.each([
             data-testid="inc"
             onClick={() => {
               execute(() => {
-                impulse_1.setState(Counter.inc)
-                impulse_2.setState(Counter.inc)
+                impulse_1.setValue(Counter.inc)
+                impulse_2.setValue(Counter.inc)
               })
             }}
           />
@@ -80,7 +80,7 @@ describe.each([
   ["not batched", (cb: VoidFunction) => cb()],
   ["batched", batch],
 ])("nested impulses %s calls with direct impulse access", (_, execute) => {
-  it("re-renders once for Impulse#setState calls", () => {
+  it("re-renders once for Impulse#setValue calls", () => {
     const onRender = vi.fn()
     const impulse = Impulse.of({
       first: Impulse.of({ count: 1 }),
@@ -88,9 +88,9 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const { first: impulse_1, second: impulse_2 } = useImpulseState(impulse)
-      const counter_1 = useImpulseState(impulse_1)
-      const counter_2 = useImpulseState(impulse_2)
+      const { first: impulse_1, second: impulse_2 } = useImpulseValue(impulse)
+      const counter_1 = useImpulseValue(impulse_1)
+      const counter_2 = useImpulseValue(impulse_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -106,11 +106,11 @@ describe.each([
 
     act(() => {
       execute(() => {
-        impulse.setState((state) => {
-          state.first.setState(Counter.inc)
-          state.second.setState(Counter.inc)
+        impulse.setValue((current) => {
+          current.first.setValue(Counter.inc)
+          current.second.setValue(Counter.inc)
 
-          return state
+          return current
         })
       })
     })
@@ -118,20 +118,20 @@ describe.each([
     expect(onRender).toHaveBeenCalledTimes(2)
 
     act(() => {
-      impulse.setState((state) => {
+      impulse.setValue((current) => {
         execute(() => {
-          state.first.setState(Counter.inc)
-          state.second.setState(Counter.inc)
+          current.first.setValue(Counter.inc)
+          current.second.setValue(Counter.inc)
         })
 
-        return state
+        return current
       })
     })
     expect(screen.getByTestId("count")).toHaveTextContent("7")
     expect(onRender).toHaveBeenCalledTimes(3)
   })
 
-  it("re-renders once for useImpulseState calls", () => {
+  it("re-renders once for useImpulseValue calls", () => {
     const onRender = vi.fn()
     const impulse = Impulse.of({
       first: Impulse.of({ count: 1 }),
@@ -139,9 +139,9 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const { first: impulse_1, second: impulse_2 } = useImpulseState(impulse)
-      const counter_1 = useImpulseState(impulse_1)
-      const counter_2 = useImpulseState(impulse_2)
+      const { first: impulse_1, second: impulse_2 } = useImpulseValue(impulse)
+      const counter_1 = useImpulseValue(impulse_1)
+      const counter_2 = useImpulseValue(impulse_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -150,11 +150,11 @@ describe.each([
             data-testid="inc-1"
             onClick={() => {
               execute(() => {
-                impulse.setState((state) => {
-                  state.first.setState(Counter.inc)
-                  state.second.setState(Counter.inc)
+                impulse.setValue((value) => {
+                  value.first.setValue(Counter.inc)
+                  value.second.setValue(Counter.inc)
 
-                  return state
+                  return value
                 })
               })
             }}
@@ -163,13 +163,13 @@ describe.each([
             type="button"
             data-testid="inc-2"
             onClick={() => {
-              impulse.setState((state) => {
+              impulse.setValue((value) => {
                 execute(() => {
-                  state.first.setState(Counter.inc)
-                  state.second.setState(Counter.inc)
+                  value.first.setValue(Counter.inc)
+                  value.second.setValue(Counter.inc)
                 })
 
-                return state
+                return value
               })
             }}
           />
@@ -248,14 +248,14 @@ describe.each([
           spy()
 
           return (
-            first.getState(Counter.getCount) + second.getState(Counter.getCount)
+            first.getValue(Counter.getCount) + second.getValue(Counter.getCount)
           )
         }
 
         return { spy, onRender, first, second, watcher }
       }
 
-      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by Impulse#setState calls`, () => {
+      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by Impulse#setValue calls`, () => {
         const { spy, onRender, first, second, watcher } = setup()
 
         const Component: React.FC = () => {
@@ -277,8 +277,8 @@ describe.each([
 
         act(() => {
           execute(() => {
-            first.setState(Counter.inc)
-            second.setState(Counter.inc)
+            first.setValue(Counter.inc)
+            second.setValue(Counter.inc)
           })
         })
         expect(screen.getByTestId("count")).toHaveTextContent("5")
@@ -286,7 +286,7 @@ describe.each([
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForMultiple)
       })
 
-      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by Impulse#setState calls`, () => {
+      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by Impulse#setValue calls`, () => {
         const { spy, onRender, first, second, watcher } = setup()
 
         const Component: React.FC = () => {
@@ -299,8 +299,8 @@ describe.each([
                 data-testid="inc"
                 onClick={() => {
                   execute(() => {
-                    first.setState(Counter.inc)
-                    second.setState(Counter.inc)
+                    first.setValue(Counter.inc)
+                    second.setValue(Counter.inc)
                   })
                 }}
               />
@@ -334,17 +334,17 @@ describe.each([
         const watcher = () => {
           spy()
 
-          return impulse.getState(
+          return impulse.getValue(
             ({ first, second }) =>
-              first.getState(Counter.getCount) +
-              second.getState(Counter.getCount),
+              first.getValue(Counter.getCount) +
+              second.getValue(Counter.getCount),
           )
         }
 
         return { spy, onRender, impulse, watcher }
       }
 
-      it(`calls the watcher ${expectedWatcherCallsForNested} times by Impulse#setState calls`, () => {
+      it(`calls the watcher ${expectedWatcherCallsForNested} times by Impulse#setValue calls`, () => {
         const { spy, onRender, impulse, watcher } = setup()
 
         const Component: React.FC = () => {
@@ -366,11 +366,11 @@ describe.each([
 
         act(() => {
           execute(() => {
-            impulse.setState((state) => {
-              state.first.setState(Counter.inc)
-              state.second.setState(Counter.inc)
+            impulse.setValue((value) => {
+              value.first.setValue(Counter.inc)
+              value.second.setValue(Counter.inc)
 
-              return state
+              return value
             })
           })
         })
@@ -380,13 +380,13 @@ describe.each([
         spy.mockReset()
 
         act(() => {
-          impulse.setState((state) => {
+          impulse.setValue((value) => {
             execute(() => {
-              state.first.setState(Counter.inc)
-              state.second.setState(Counter.inc)
+              value.first.setValue(Counter.inc)
+              value.second.setValue(Counter.inc)
             })
 
-            return state
+            return value
           })
         })
         expect(screen.getByTestId("count")).toHaveTextContent("7")
@@ -394,7 +394,7 @@ describe.each([
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
       })
 
-      it(`calls the watcher ${expectedWatcherCallsForNested} times by Impulse#setState calls`, () => {
+      it(`calls the watcher ${expectedWatcherCallsForNested} times by Impulse#setValue calls`, () => {
         const { spy, onRender, impulse, watcher } = setup()
 
         const Component: React.FC = () => {
@@ -407,11 +407,11 @@ describe.each([
                 data-testid="inc-1"
                 onClick={() => {
                   execute(() => {
-                    impulse.setState((state) => {
-                      state.first.setState(Counter.inc)
-                      state.second.setState(Counter.inc)
+                    impulse.setValue((value) => {
+                      value.first.setValue(Counter.inc)
+                      value.second.setValue(Counter.inc)
 
-                      return state
+                      return value
                     })
                   })
                 }}
@@ -420,13 +420,13 @@ describe.each([
                 type="button"
                 data-testid="inc-2"
                 onClick={() => {
-                  impulse.setState((state) => {
+                  impulse.setValue((value) => {
                     execute(() => {
-                      state.first.setState(Counter.inc)
-                      state.second.setState(Counter.inc)
+                      value.first.setValue(Counter.inc)
+                      value.second.setValue(Counter.inc)
                     })
 
-                    return state
+                    return value
                   })
                 }}
               />

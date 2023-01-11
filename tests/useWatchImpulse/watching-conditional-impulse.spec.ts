@@ -18,7 +18,7 @@ describe.each([
       return useWatchImpulse(() => {
         spy?.()
 
-        return isActive ? impulse.getState() : { count: -1 }
+        return isActive ? impulse.getValue() : { count: -1 }
       }, compare)
     },
   ],
@@ -36,7 +36,7 @@ describe.each([
         useCallback(() => {
           spy?.()
 
-          return isActive ? impulse.getState() : { count: -1 }
+          return isActive ? impulse.getValue() : { count: -1 }
         }, [impulse, isActive, spy]),
         compare,
       )
@@ -78,7 +78,7 @@ describe.each([
         })
 
         act(() => {
-          impulse.setState({ count: 2 })
+          impulse.setValue({ count: 2 })
         })
         expect(result.current).toStrictEqual({ count: 2 })
       })
@@ -97,12 +97,12 @@ describe.each([
         expect(result.current).toStrictEqual({ count: 10 })
 
         act(() => {
-          impulse_2.setState({ count: 20 })
+          impulse_2.setValue({ count: 20 })
         })
         expect(result.current).toStrictEqual({ count: 20 })
 
         act(() => {
-          impulse_1.setState({ count: 2 })
+          impulse_1.setValue({ count: 2 })
         })
         expect(result.current).toStrictEqual({ count: 20 })
       })
@@ -137,7 +137,7 @@ describe.each([
           })
 
           act(() => {
-            impulse.setState({ count: 2 })
+            impulse.setValue({ count: 2 })
           })
           expect(result.current).toStrictEqual({ count: -1 })
         },
@@ -153,7 +153,7 @@ describe.each([
         expect(result.current).toStrictEqual({ count: 1 })
 
         act(() => {
-          impulse.setState({ count: 2 })
+          impulse.setValue({ count: 2 })
         })
         expect(result.current).toStrictEqual({ count: 2 })
       })
@@ -170,7 +170,7 @@ describe.each([
           spy.mockReset()
 
           act(() => {
-            impulse.setState(Counter.inc)
+            impulse.setValue(Counter.inc)
           })
           expect(spy).not.toHaveBeenCalled()
         },

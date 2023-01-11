@@ -5,19 +5,19 @@ import type { Impulse } from "./Impulse"
 import { WatchContext } from "./WatchContext"
 
 /**
- * A hook that subscribes to the `impulse` changes and returns the current state.
+ * A hook that subscribes to the `impulse` changes and returns the current value.
  *
  * @param impulse an Impulse instance.
  *
  * @version 1.0.0
  */
-export function useImpulseState<T>(impulse: Impulse<T>): T {
-  const state = useSyncExternalStore(
+export function useImpulseValue<T>(impulse: Impulse<T>): T {
+  const value = useSyncExternalStore(
     useCallback((onChange) => impulse.subscribe(onChange), [impulse]),
-    useCallback(() => WatchContext.ignore(() => impulse.getState()), [impulse]),
+    useCallback(() => WatchContext.ignore(() => impulse.getValue()), [impulse]),
   )
 
-  useDebugValue(state)
+  useDebugValue(value)
 
-  return state
+  return value
 }

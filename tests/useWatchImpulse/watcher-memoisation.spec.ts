@@ -9,7 +9,7 @@ describe.each([
     "without comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
       return useWatchImpulse(() => {
-        const value = impulse.getState()
+        const value = impulse.getValue()
 
         spy(value)
 
@@ -22,7 +22,7 @@ describe.each([
     ({ impulse, spy }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
         () => {
-          const value = impulse.getState()
+          const value = impulse.getValue()
 
           spy(value)
 
@@ -36,7 +36,7 @@ describe.each([
     "with memoized comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
       return useWatchImpulse(() => {
-        const value = impulse.getState()
+        const value = impulse.getValue()
 
         spy(value)
 
@@ -81,7 +81,7 @@ describe.each([
       spy.mockReset()
 
       act(() => {
-        impulse.setState(Counter.inc)
+        impulse.setValue(Counter.inc)
       })
 
       // 1st executes watcher to extract new result
@@ -100,7 +100,7 @@ describe.each([
     ({ impulse, spy }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
         useCallback(() => {
-          const value = impulse.getState()
+          const value = impulse.getValue()
 
           spy(value)
 
@@ -114,7 +114,7 @@ describe.each([
     ({ impulse, spy }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
         useCallback(() => {
-          const value = impulse.getState()
+          const value = impulse.getValue()
 
           spy(value)
 
@@ -129,7 +129,7 @@ describe.each([
     ({ impulse, spy }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
         useCallback(() => {
-          const value = impulse.getState()
+          const value = impulse.getValue()
 
           spy(value)
 
@@ -175,7 +175,7 @@ describe.each([
       spy.mockReset()
 
       act(() => {
-        impulse.setState(Counter.inc)
+        impulse.setValue(Counter.inc)
       })
 
       expect(spy).toHaveBeenCalledTimes(1)

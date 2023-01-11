@@ -40,8 +40,8 @@ export const WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING = makeWarningSet({
   isWatchAffected: false,
 })
 
-export const WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING = makeWarningSet({
-  method: "Impulse#setState",
+export const WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING = makeWarningSet({
+  method: "Impulse#setValue",
   whatItDoes: "changes an existing Impulse",
   isCritical: true,
   isWatchAffected: true,

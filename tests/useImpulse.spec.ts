@@ -8,8 +8,8 @@ describe("with direct initial value", () => {
 
     const { result } = renderHook(() => useImpulse(initial))
 
-    expect(result.current.getState()).toBe(initial)
-    expect(result.current.getState()).toStrictEqual({ count: 0 })
+    expect(result.current.getValue()).toBe(initial)
+    expect(result.current.getValue()).toStrictEqual({ count: 0 })
   })
 
   it.concurrent("keeps the same impulse during re-renders", () => {
@@ -22,7 +22,7 @@ describe("with direct initial value", () => {
     rerender(initial)
 
     expect(result.current).toBe(firstResult)
-    expect(result.current.getState()).toStrictEqual({ count: 0 })
+    expect(result.current.getValue()).toStrictEqual({ count: 0 })
   })
 
   it.concurrent(
@@ -37,7 +37,7 @@ describe("with direct initial value", () => {
       rerender({ count: 1 })
 
       expect(result.current).toBe(firstResult)
-      expect(result.current.getState()).toStrictEqual({ count: 0 })
+      expect(result.current.getValue()).toStrictEqual({ count: 0 })
     },
   )
 })
@@ -49,8 +49,8 @@ describe("with lazy initial value", () => {
 
     const { result } = renderHook(() => useImpulse(init))
 
-    expect(result.current.getState()).toBe(initial)
-    expect(result.current.getState()).toStrictEqual({ count: 0 })
+    expect(result.current.getValue()).toBe(initial)
+    expect(result.current.getValue()).toStrictEqual({ count: 0 })
     expect(init).toHaveBeenCalledTimes(1)
   })
 
@@ -65,7 +65,7 @@ describe("with lazy initial value", () => {
     rerender(init)
 
     expect(result.current).toBe(firstResult)
-    expect(result.current.getState()).toStrictEqual({ count: 0 })
+    expect(result.current.getValue()).toStrictEqual({ count: 0 })
     expect(init).toHaveBeenCalledTimes(1)
   })
 
@@ -83,7 +83,7 @@ describe("with lazy initial value", () => {
       rerender(init)
 
       expect(result.current).toBe(firstResult)
-      expect(result.current.getState()).toStrictEqual({ count: 0 })
+      expect(result.current.getValue()).toStrictEqual({ count: 0 })
       expect(init).toHaveBeenCalledTimes(1)
     },
   )
@@ -102,7 +102,7 @@ describe("with lazy initial value", () => {
       rerender(init)
 
       expect(result.current).toBe(firstResult)
-      expect(result.current.getState()).toStrictEqual({ count: 0 })
+      expect(result.current.getValue()).toStrictEqual({ count: 0 })
       expect(init).not.toHaveBeenCalled()
     },
   )

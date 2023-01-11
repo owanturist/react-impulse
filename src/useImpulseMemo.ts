@@ -6,7 +6,7 @@ import { useWatchContext } from "./useWatchContext"
 /**
  * The hook is an `Impulse` version of the `React.useMemo` hook.
  * During the `factory` execution, all the Impulses
- * calling the `Impulse#getState` method become _phantom dependencies_ of the hook.
+ * calling the `Impulse#getValue` method become _phantom dependencies_ of the hook.
  *
  * @param factory a function calculates a value `T` whenever any of the `dependencies`' values change.
  * @param dependencies an array of values used in the `factory` function.
@@ -14,11 +14,11 @@ import { useWatchContext } from "./useWatchContext"
  * @version 1.0.0
  */
 export const useImpulseMemo: typeof useMemo = (factory, dependencies) => {
-  const { executeWatcher, subscribe, getState } = useWatchContext({
+  const { executeWatcher, subscribe, getVersion } = useWatchContext({
     warningSource: "useImpulseMemo",
   })
 
-  const buster = useSyncExternalStore(subscribe, getState, getState)
+  const buster = useSyncExternalStore(subscribe, getVersion, getVersion)
 
   return useMemo(
     () => executeWatcher(factory),
