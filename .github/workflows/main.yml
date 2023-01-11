@@ -15,12 +15,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup dependencies
-        uses: ./.github/actions/setup
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
 
       - name: Install dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --no-audit --no-fund --prefer-offline
+
+      - name: Zip dependencies for uploading
+        # [q] quite
+        # [r] recursive
+        # [y] store symlinks as symlinks
+        run: zip -qry deps.zip ./node_modules
+
+      - name: Upload dependencies artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependencies
+          path: deps.zip
+          retention-days: 7
+          if-no-files-found: error
 
   lint:
     name: Lint
@@ -31,8 +47,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup dependencies
-        uses: ./.github/actions/setup
+      - name: Download dependencies
+        uses: ./.github/actions/download-deps
 
       - name: Lint
         run: npm run lint
@@ -46,8 +62,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup dependencies
-        uses: ./.github/actions/setup
+      - name: Download dependencies
+        uses: ./.github/actions/download-deps
 
       - name: Type check
         run: npm run typecheck
@@ -63,8 +79,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup dependencies
-        uses: ./.github/actions/setup
+      - name: Download dependencies
+        uses: ./.github/actions/download-deps
 
       - name: Test
         run: npm run test:coverage
@@ -87,8 +103,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup dependencies
-        uses: ./.github/actions/setup
+      - name: Download dependencies
+        uses: ./.github/actions/download-deps
 
       - name: Install React ${{ matrix.react-version }}
         run: |
