@@ -1,3 +1,5 @@
+THE LIBRARY HAS CHANGED NPM NAME FROM `react-sweety` TO [`react-impulse`](https://www.npmjs.com/package/react-impulse).
+
 # `react-sweety`
 
 [![codecov](https://codecov.io/gh/owanturist/react-sweety/branch/master/graph/badge.svg?token=QP3SXO8E9F)](https://codecov.io/gh/owanturist/react-sweety)
