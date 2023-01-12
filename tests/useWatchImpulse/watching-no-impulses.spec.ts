@@ -1,20 +1,20 @@
 import { useCallback } from "react"
 import { renderHook } from "@testing-library/react-hooks"
 
-import { useWatchSweety } from "../../src"
+import { useWatchImpulse } from "../../src"
 
-describe("watching no stores", () => {
+describe("watching no impulses", () => {
   it.concurrent.each([
     [
       "inline",
       () => {
-        return useWatchSweety(() => 1)
+        return useWatchImpulse(() => 1)
       },
     ],
     [
       "memoized",
       () => {
-        return useWatchSweety(useCallback(() => 1, []))
+        return useWatchImpulse(useCallback(() => 1, []))
       },
     ],
   ])("returns %s watcher result", (_, useHook) => {
@@ -27,13 +27,13 @@ describe("watching no stores", () => {
     [
       "inline",
       ({ value }: { value: number }) => {
-        return useWatchSweety(() => 2 * value)
+        return useWatchImpulse(() => 2 * value)
       },
     ],
     [
       "memoized",
       ({ value }: { value: number }) => {
-        return useWatchSweety(useCallback(() => 2 * value, [value]))
+        return useWatchImpulse(useCallback(() => 2 * value, [value]))
       },
     ],
   ])("returns %s watcher result from clojure", (_, useHook) => {

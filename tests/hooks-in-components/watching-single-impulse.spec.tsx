@@ -1,13 +1,13 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useWatchSweety, watch } from "../../src"
+import { Impulse, useWatchImpulse, watch } from "../../src"
 
 import { CounterComponent } from "./common"
 
-describe("watching single store", () => {
+describe("watching single impulse", () => {
   interface AppProps {
-    count: Sweety<number>
+    count: Impulse<number>
     onRender: VoidFunction
     onCounterRender: VoidFunction
   }
@@ -29,9 +29,9 @@ describe("watching single store", () => {
   )
 
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useWatchSweety(
+    const [moreThanOne, lessThanFour] = useWatchImpulse(
       () => {
-        const count = props.count.getState()
+        const count = props.count.getValue()
 
         return [count > 1, count < 4]
       },
@@ -50,9 +50,9 @@ describe("watching single store", () => {
   }
 
   const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useWatchSweety<[boolean, boolean]>(
+    const [moreThanOne, lessThanFour] = useWatchImpulse<[boolean, boolean]>(
       React.useCallback(() => {
-        const count = props.count.getState()
+        const count = props.count.getValue()
 
         return [count > 1, count < 4]
       }, [props.count]),
@@ -77,8 +77,8 @@ describe("watching single store", () => {
   }
 
   const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchSweety(() => props.count.getState() > 1)
-    const lessThanFour = useWatchSweety(() => props.count.getState() < 4)
+    const moreThanOne = useWatchImpulse(() => props.count.getValue() > 1)
+    const lessThanFour = useWatchImpulse(() => props.count.getValue() < 4)
 
     return (
       <GenericApp
@@ -90,11 +90,11 @@ describe("watching single store", () => {
   }
 
   const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchSweety(
-      React.useCallback(() => props.count.getState() > 1, [props.count]),
+    const moreThanOne = useWatchImpulse(
+      React.useCallback(() => props.count.getValue() > 1, [props.count]),
     )
-    const lessThanFour = useWatchSweety(
-      React.useCallback(() => props.count.getState() < 4, [props.count]),
+    const lessThanFour = useWatchImpulse(
+      React.useCallback(() => props.count.getValue() < 4, [props.count]),
     )
 
     return (
@@ -107,7 +107,7 @@ describe("watching single store", () => {
   }
 
   const WatchedApp: React.FC<AppProps> = watch((props) => {
-    const count = props.count.getState()
+    const count = props.count.getValue()
     const [moreThanOne, lessThanFour] = [count > 1, count < 4]
 
     return (
@@ -125,8 +125,8 @@ describe("watching single store", () => {
     ["multiple watchers", MultipleWatchersApp, 0],
     ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
     ["watch()", WatchedApp, 1],
-  ])("watches single store with %s", (_, App, unnecessaryRerendersCount) => {
-    const count = Sweety.of(0)
+  ])("watches single impulse with %s", (_, App, unnecessaryRerendersCount) => {
+    const count = Impulse.of(0)
     const onCounterRender = vi.fn()
     const onRender = vi.fn()
 
@@ -139,8 +139,8 @@ describe("watching single store", () => {
     )
 
     // initial render and watcher setup
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(screen.queryByText("more than one")).not.toBeInTheDocument()
     expect(screen.queryByText("less than four")).toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("0")
@@ -149,7 +149,7 @@ describe("watching single store", () => {
     // increment
     fireEvent.click(screen.getByTestId("increment"))
     expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(screen.queryByText("more than one")).not.toBeInTheDocument()
     expect(screen.queryByText("less than four")).toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("1")
@@ -157,8 +157,8 @@ describe("watching single store", () => {
 
     // increment again
     fireEvent.click(screen.getByTestId("increment"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(screen.queryByText("more than one")).toBeInTheDocument()
     expect(screen.queryByText("less than four")).toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("2")
@@ -166,10 +166,10 @@ describe("watching single store", () => {
 
     // increment from the outside
     act(() => {
-      count.setState((state) => state + 1)
+      count.setValue((x) => x + 1)
     })
     expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount) // does not re-render
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(screen.queryByText("more than one")).toBeInTheDocument()
     expect(screen.queryByText("less than four")).toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("3")
@@ -177,8 +177,8 @@ describe("watching single store", () => {
 
     // increment again
     fireEvent.click(screen.getByTestId("increment"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(screen.queryByText("more than one")).toBeInTheDocument()
     expect(screen.queryByText("less than four")).not.toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("4")

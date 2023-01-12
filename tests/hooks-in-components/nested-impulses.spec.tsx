@@ -1,21 +1,21 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useSweetyState } from "../../src"
+import { Impulse, useImpulseValue } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
-describe("nested stores", () => {
+describe("nested impulses", () => {
   interface AppState {
-    counts: ReadonlyArray<Sweety<number>>
+    counts: ReadonlyArray<Impulse<number>>
   }
 
   const App: React.FC<{
-    store: Sweety<AppState>
+    state: Impulse<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
-  }> = ({ store, onRender, onCounterRender }) => {
-    const { counts } = useSweetyState(store)
+  }> = ({ state, onRender, onCounterRender }) => {
+    const { counts } = useImpulseValue(state)
 
     return (
       <>
@@ -24,9 +24,9 @@ describe("nested stores", () => {
             type="button"
             data-testid="add-counter"
             onClick={() => {
-              store.setState((state) => ({
-                ...state,
-                counts: [...state.counts, Sweety.of(0)],
+              state.setValue((current) => ({
+                ...current,
+                counts: [...current.counts, Impulse.of(0)],
               }))
             }}
           />
@@ -34,10 +34,10 @@ describe("nested stores", () => {
             type="button"
             data-testid="reset-counters"
             onClick={() => {
-              store.setState((state) => {
-                state.counts.forEach((count) => count.setState(0))
+              state.setValue((current) => {
+                current.counts.forEach((count) => count.setValue(0))
 
-                return state
+                return current
               })
             }}
           />
@@ -54,28 +54,28 @@ describe("nested stores", () => {
     )
   }
 
-  it("Performs nested store management", () => {
-    const store = Sweety.of<AppState>({ counts: [] })
+  it("Performs nested impulse management", () => {
+    const impulse = Impulse.of<AppState>({ counts: [] })
     const onRender = vi.fn()
     const onCounterRender = vi.fn()
 
     render(
       <App
-        store={store}
+        state={impulse}
         onRender={onRender}
         onCounterRender={onCounterRender}
       />,
     )
 
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(0)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).not.toHaveBeenCalled()
     expectCounts([])
     vi.clearAllMocks()
 
     // add first counter
     fireEvent.click(screen.getByTestId("add-counter"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expectCounts([0])
     vi.clearAllMocks()
@@ -83,15 +83,15 @@ describe("nested stores", () => {
     // increment the first counter
     fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
     expect(onRender).not.toHaveBeenCalled()
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 0)
     expectCounts([1])
     vi.clearAllMocks()
 
     // add second counter
     fireEvent.click(screen.getByTestId("add-counter"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 1)
     expectCounts([1, 0])
     vi.clearAllMocks()
@@ -108,23 +108,23 @@ describe("nested stores", () => {
 
     // add third counter from the outside
     act(() => {
-      store.setState((state) => ({
-        ...state,
-        counts: [...state.counts, Sweety.of(3)],
+      impulse.setValue((current) => ({
+        ...current,
+        counts: [...current.counts, Impulse.of(3)],
       }))
     })
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 2)
     expectCounts([1, 2, 3])
     vi.clearAllMocks()
 
     // double the third counter from the outside
     act(() => {
-      store.getState().counts[2]!.setState((x) => 2 * x)
+      impulse.getValue().counts[2]!.setValue((x) => 2 * x)
     })
     expect(onRender).not.toHaveBeenCalled()
-    expect(onCounterRender).toHaveBeenCalledTimes(1)
+    expect(onCounterRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenNthCalledWith(1, 2)
     expectCounts([1, 2, 6])
     vi.clearAllMocks()
@@ -141,7 +141,7 @@ describe("nested stores", () => {
 
     // increment all from the outside
     act(() => {
-      store.getState().counts.forEach((count) => count.setState((x) => x + 1))
+      impulse.getValue().counts.forEach((count) => count.setValue((x) => x + 1))
     })
     expect(onRender).not.toHaveBeenCalled()
     expect(onCounterRender).toHaveBeenCalledTimes(3)

@@ -1,15 +1,15 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Sweety, useWatchSweety } from "../../src"
-import { Counter, WithSpy, WithStore } from "../common"
+import { Impulse, useWatchImpulse } from "../../src"
+import { Counter, WithSpy, WithImpulse } from "../common"
 
 describe.each([
   [
     "without comparator",
-    ({ store, spy }: WithStore & WithSpy) => {
-      return useWatchSweety(() => {
-        const value = store.getState()
+    ({ impulse, spy }: WithImpulse & WithSpy) => {
+      return useWatchImpulse(() => {
+        const value = impulse.getValue()
 
         spy(value)
 
@@ -19,10 +19,10 @@ describe.each([
   ],
   [
     "with inline comparator",
-    ({ store, spy }: WithStore & WithSpy) => {
-      return useWatchSweety(
+    ({ impulse, spy }: WithImpulse & WithSpy) => {
+      return useWatchImpulse(
         () => {
-          const value = store.getState()
+          const value = impulse.getValue()
 
           spy(value)
 
@@ -34,9 +34,9 @@ describe.each([
   ],
   [
     "with memoized comparator",
-    ({ store, spy }: WithStore & WithSpy) => {
-      return useWatchSweety(() => {
-        const value = store.getState()
+    ({ impulse, spy }: WithImpulse & WithSpy) => {
+      return useWatchImpulse(() => {
+        const value = impulse.getValue()
 
         spy(value)
 
@@ -47,41 +47,41 @@ describe.each([
 ])("inline watcher %s", (_, useHook) => {
   const setup = () => {
     const spy = vi.fn()
-    const store = Sweety.of({ count: 1 })
+    const impulse = Impulse.of({ count: 1 })
 
     const { rerender } = renderHook(useHook, {
-      initialProps: { store, spy },
+      initialProps: { impulse, spy },
     })
 
-    return { spy, store, rerender }
+    return { spy, impulse, rerender }
   }
 
   it.concurrent("should call watcher 1 time on init", () => {
     const { spy } = setup()
 
-    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
   it.concurrent("should call watcher 1 time on subsequent renders", () => {
-    const { spy, store, rerender } = setup()
+    const { spy, impulse, rerender } = setup()
 
     spy.mockReset()
 
-    rerender({ spy, store })
-    expect(spy).toHaveBeenCalledTimes(1)
+    rerender({ spy, impulse })
+    expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
   it.concurrent(
-    "should call watcher 2 times when a watching store changes",
+    "should call watcher 2 times when a watching impulse changes",
     () => {
-      const { spy, store } = setup()
+      const { spy, impulse } = setup()
 
       spy.mockReset()
 
       act(() => {
-        store.setState(Counter.inc)
+        impulse.setValue(Counter.inc)
       })
 
       // 1st executes watcher to extract new result
@@ -97,44 +97,44 @@ describe.each([
 describe.each([
   [
     "without comparator",
-    ({ store, spy }: WithStore & WithSpy) => {
-      return useWatchSweety(
+    ({ impulse, spy }: WithImpulse & WithSpy) => {
+      return useWatchImpulse(
         useCallback(() => {
-          const value = store.getState()
+          const value = impulse.getValue()
 
           spy(value)
 
           return value
-        }, [store, spy]),
+        }, [impulse, spy]),
       )
     },
   ],
   [
     "with inline comparator",
-    ({ store, spy }: WithStore & WithSpy) => {
-      return useWatchSweety(
+    ({ impulse, spy }: WithImpulse & WithSpy) => {
+      return useWatchImpulse(
         useCallback(() => {
-          const value = store.getState()
+          const value = impulse.getValue()
 
           spy(value)
 
           return value
-        }, [store, spy]),
+        }, [impulse, spy]),
         (prev, next) => Counter.compare(prev, next),
       )
     },
   ],
   [
     "with memoized comparator",
-    ({ store, spy }: WithStore & WithSpy) => {
-      return useWatchSweety(
+    ({ impulse, spy }: WithImpulse & WithSpy) => {
+      return useWatchImpulse(
         useCallback(() => {
-          const value = store.getState()
+          const value = impulse.getValue()
 
           spy(value)
 
           return value
-        }, [store, spy]),
+        }, [impulse, spy]),
         Counter.compare,
       )
     },
@@ -142,43 +142,43 @@ describe.each([
 ])("memoized watcher %s", (__, useHook) => {
   const setup = () => {
     const spy = vi.fn()
-    const store = Sweety.of({ count: 1 })
+    const impulse = Impulse.of({ count: 1 })
 
     const { rerender } = renderHook(useHook, {
-      initialProps: { store, spy },
+      initialProps: { impulse, spy },
     })
 
-    return { spy, store, rerender }
+    return { spy, impulse, rerender }
   }
 
   it.concurrent("should call watcher 1 time on init", () => {
     const { spy } = setup()
 
-    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
   it.concurrent("should not call watcher on subsequent renders", () => {
-    const { spy, store, rerender } = setup()
+    const { spy, impulse, rerender } = setup()
 
     spy.mockReset()
 
-    rerender({ spy, store })
+    rerender({ spy, impulse })
     expect(spy).not.toHaveBeenCalled()
   })
 
   it.concurrent(
-    "should call watcher 1 time when a watching store changes",
+    "should call watcher 1 time when a watching impulse changes",
     () => {
-      const { spy, store } = setup()
+      const { spy, impulse } = setup()
 
       spy.mockReset()
 
       act(() => {
-        store.setState(Counter.inc)
+        impulse.setValue(Counter.inc)
       })
 
-      expect(spy).toHaveBeenCalledTimes(1)
+      expect(spy).toHaveBeenCalledOnce()
       expect(spy).toHaveBeenLastCalledWith({ count: 2 })
     },
   )

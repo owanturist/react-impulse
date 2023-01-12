@@ -5,18 +5,20 @@ import { useWatchContext } from "./useWatchContext"
 import { Compare, isEqual } from "./utils"
 
 /**
- * A hook that executes the `watcher` function whenever any of the involved `Sweety` instances' state update
+ * A hook that executes the `watcher` function whenever any of the involved Impulses' values update
  * but enqueues a re-render only when the resulting value is different from the previous.
  *
- * @param watcher a function that subscribes to all `Sweety` instances calling the `Sweety#getState` method inside the function.
+ * @param watcher a function that subscribes to all Impulses calling the `Impulse#getValue` method inside the function.
  * @param compare an optional `Compare` function. When not defined or `null` then `Object.is` applies as a fallback.
+ *
+ * @version 1.0.0
  */
-export function useWatchSweety<T>(
+export function useWatchImpulse<T>(
   watcher: () => T,
   compare?: null | Compare<T>,
 ): T {
-  const { executeWatcher, subscribe, getState } = useWatchContext({
-    warningSource: "useWatchSweety",
+  const { executeWatcher, subscribe, getVersion } = useWatchContext({
+    warningSource: "useWatchImpulse",
   })
 
   // the select calls each time when updates either the watcher or the version
@@ -26,7 +28,7 @@ export function useWatchSweety<T>(
   )
 
   // changeling of the `compare` value should not trigger `useSyncExternalStoreWithSelector`
-  // to re-select the store's value
+  // to re-select the impulse's value
   const compareRef = useRef(compare ?? isEqual)
   useEffect(() => {
     compareRef.current = compare ?? isEqual
@@ -40,8 +42,8 @@ export function useWatchSweety<T>(
 
   const value = useSyncExternalStoreWithSelector(
     subscribe,
-    getState,
-    getState,
+    getVersion,
+    getVersion,
     select,
     onCompare,
   )

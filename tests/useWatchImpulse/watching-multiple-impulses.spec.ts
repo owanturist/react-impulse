@@ -1,44 +1,31 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Compare, Sweety, useWatchSweety, batch } from "../../src"
-import { Counter } from "../common"
-
-interface WithStore<T = Counter> {
-  store: Sweety<T>
-}
-
-interface WithFirst<T = Counter> {
-  first: Sweety<T>
-}
-
-interface WithSecond<T = Counter> {
-  second: Sweety<T>
-}
-
-interface WithThird<T = Counter> {
-  third: Sweety<T>
-}
-
-interface WithSpy {
-  spy: VoidFunction
-}
+import { Compare, Impulse, useWatchImpulse, batch } from "../../src"
+import {
+  Counter,
+  WithImpulse,
+  WithFirst,
+  WithSecond,
+  WithThird,
+  WithSpy,
+} from "../common"
 
 describe.each([
   [
     "inline watcher",
     ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
-      return useWatchSweety(() => {
-        return Counter.merge(first.getState(), second.getState())
+      return useWatchImpulse(() => {
+        return Counter.merge(first.getValue(), second.getValue())
       }, compare)
     },
   ],
   [
     "memoized watcher",
     ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
-      return useWatchSweety(
+      return useWatchImpulse(
         useCallback(() => {
-          return Counter.merge(first.getState(), second.getState())
+          return Counter.merge(first.getValue(), second.getValue())
         }, [first, second]),
         compare,
       )
@@ -63,8 +50,8 @@ describe.each([
     ],
   ])("%s", (__, useHook) => {
     const setup = () => {
-      const first = Sweety.of({ count: 2 })
-      const second = Sweety.of({ count: 3 })
+      const first = Impulse.of({ count: 2 })
+      const second = Impulse.of({ count: 3 })
       const { result } = renderHook(useHook, {
         initialProps: { first, second },
       })
@@ -82,7 +69,7 @@ describe.each([
       const { first, result } = setup()
 
       act(() => {
-        first.setState(Counter.inc)
+        first.setValue(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -91,7 +78,7 @@ describe.each([
       const { second, result } = setup()
 
       act(() => {
-        second.setState(Counter.inc)
+        second.setValue(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -100,8 +87,8 @@ describe.each([
       const { first, second, result } = setup()
 
       act(() => {
-        first.setState(Counter.inc)
-        second.setState(Counter.inc)
+        first.setValue(Counter.inc)
+        second.setValue(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 7 })
     })
@@ -111,11 +98,11 @@ describe.each([
 describe.each([
   [
     "inline watcher",
-    ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-      return useWatchSweety(() => {
+    ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
+      return useWatchImpulse(() => {
         spy()
 
-        return store.getState()
+        return impulse.getValue()
       }, compare)
     },
     (
@@ -127,13 +114,13 @@ describe.each([
       }: WithFirst & WithSecond & WithThird & WithSpy,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchSweety(() => {
+      return useWatchImpulse(() => {
         spy()
 
         return Counter.merge(
-          first.getState(),
-          second.getState(),
-          third.getState(),
+          first.getValue(),
+          second.getValue(),
+          third.getValue(),
         )
       }, compare)
     },
@@ -141,13 +128,13 @@ describe.each([
 
   [
     "memoized watcher",
-    ({ spy, store }: WithStore & WithSpy) => {
-      return useWatchSweety(
+    ({ spy, impulse }: WithImpulse & WithSpy) => {
+      return useWatchImpulse(
         useCallback(() => {
           spy()
 
-          return store.getState()
-        }, [spy, store]),
+          return impulse.getValue()
+        }, [spy, impulse]),
       )
     },
     ({
@@ -156,21 +143,21 @@ describe.each([
       second,
       third,
     }: WithFirst & WithSecond & WithThird & WithSpy) => {
-      return useWatchSweety(
+      return useWatchImpulse(
         useCallback(() => {
           spy()
 
           return Counter.merge(
-            first.getState(),
-            second.getState(),
-            third.getState(),
+            first.getValue(),
+            second.getValue(),
+            third.getValue(),
           )
         }, [spy, first, second, third]),
       )
     },
   ],
 ])(
-  "triggering %s for multiple stores vs single store",
+  "triggering %s for multiple impulses vs single impulse",
   (_, useSingleHookWithoutCompare, useMultipleHookWithoutCompare) => {
     describe.each([
       [
@@ -180,7 +167,7 @@ describe.each([
       ],
       [
         "with inline comparator",
-        (props: WithStore & WithSpy) => {
+        (props: WithImpulse & WithSpy) => {
           return useSingleHookWithoutCompare(props, (prev, next) =>
             Counter.compare(prev, next),
           )
@@ -193,7 +180,7 @@ describe.each([
       ],
       [
         "with memoized comparator",
-        (props: WithStore & WithSpy) => {
+        (props: WithImpulse & WithSpy) => {
           return useSingleHookWithoutCompare(props, Counter.compare)
         },
         (props: WithFirst & WithSecond & WithThird & WithSpy) => {
@@ -202,14 +189,14 @@ describe.each([
       ],
     ])("%s", (__, useSingleHook, useMultipleHook) => {
       const setup = () => {
-        const first = Sweety.of({ count: 1 })
-        const second = Sweety.of({ count: 2 })
-        const third = Sweety.of({ count: 3 })
+        const first = Impulse.of({ count: 1 })
+        const second = Impulse.of({ count: 2 })
+        const third = Impulse.of({ count: 3 })
         const spySingle = vi.fn()
         const spyMultiple = vi.fn()
 
         const { result: resultSingle } = renderHook(useSingleHook, {
-          initialProps: { store: first, spy: spySingle },
+          initialProps: { impulse: first, spy: spySingle },
         })
 
         const { result: resultMultiple } = renderHook(useMultipleHook, {
@@ -249,8 +236,8 @@ describe.each([
 
           act(() => {
             batch(() => {
-              first.setState(Counter.inc)
-              second.setState(Counter.inc)
+              first.setValue(Counter.inc)
+              second.setValue(Counter.inc)
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -273,8 +260,8 @@ describe.each([
 
           act(() => {
             batch(() => {
-              first.setState(Counter.inc)
-              third.setState(Counter.inc)
+              first.setValue(Counter.inc)
+              third.setValue(Counter.inc)
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -299,11 +286,11 @@ describe.each([
           act(() => {
             batch(() => {
               batch(() => {
-                first.setState(Counter.inc)
-                second.setState(Counter.inc)
+                first.setValue(Counter.inc)
+                second.setValue(Counter.inc)
               })
 
-              third.setState(Counter.inc)
+              third.setValue(Counter.inc)
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -329,8 +316,8 @@ describe.each([
 
           act(() => {
             batch(() => {
-              second.setState(Counter.inc)
-              third.setState(Counter.inc)
+              second.setValue(Counter.inc)
+              third.setValue(Counter.inc)
             })
           })
           expect(resultSingle.current).toStrictEqual({ count: 1 })

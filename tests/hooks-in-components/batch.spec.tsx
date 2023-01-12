@@ -1,21 +1,21 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { batch, Sweety, useSweetyState, useWatchSweety } from "../../src"
+import { batch, Impulse, useImpulseValue, useWatchImpulse } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
   ["not batched", (cb: VoidFunction) => cb()],
   ["batched", batch],
-])("multiple stores %s calls with direct store access", (_, execute) => {
-  it("re-renders once for Sweety#setState calls", () => {
+])("multiple impulses %s calls with direct impulse access", (_, execute) => {
+  it("re-renders once for Impulse#setValue calls", () => {
     const onRender = vi.fn()
-    const store_1 = Sweety.of({ count: 1 })
-    const store_2 = Sweety.of({ count: 2 })
+    const impulse_1 = Impulse.of({ count: 1 })
+    const impulse_2 = Impulse.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useSweetyState(store_1)
-      const counter_2 = useSweetyState(store_2)
+      const counter_1 = useImpulseValue(impulse_1)
+      const counter_2 = useImpulseValue(impulse_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -27,26 +27,27 @@ describe.each([
     render(<Component />)
 
     expect(screen.getByTestId("count")).toHaveTextContent("3")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
     act(() => {
       execute(() => {
-        store_1.setState(Counter.inc)
-        store_2.setState(Counter.inc)
+        impulse_1.setValue(Counter.inc)
+        impulse_2.setValue(Counter.inc)
       })
     })
     expect(screen.getByTestId("count")).toHaveTextContent("5")
-    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onRender).toHaveBeenCalledOnce()
   })
 
-  it("re-renders once for useSweetyState calls", () => {
+  it("re-renders once for useImpulseValue calls", () => {
     const onRender = vi.fn()
-    const store_1 = Sweety.of({ count: 1 })
-    const store_2 = Sweety.of({ count: 2 })
+    const impulse_1 = Impulse.of({ count: 1 })
+    const impulse_2 = Impulse.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useSweetyState(store_1)
-      const counter_2 = useSweetyState(store_2)
+      const counter_1 = useImpulseValue(impulse_1)
+      const counter_2 = useImpulseValue(impulse_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -55,8 +56,8 @@ describe.each([
             data-testid="inc"
             onClick={() => {
               execute(() => {
-                store_1.setState(Counter.inc)
-                store_2.setState(Counter.inc)
+                impulse_1.setValue(Counter.inc)
+                impulse_2.setValue(Counter.inc)
               })
             }}
           />
@@ -68,29 +69,30 @@ describe.each([
     render(<Component />)
 
     expect(screen.getByTestId("count")).toHaveTextContent("3")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
     fireEvent.click(screen.getByTestId("inc"))
     expect(screen.getByTestId("count")).toHaveTextContent("5")
-    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onRender).toHaveBeenCalledOnce()
   })
 })
 
 describe.each([
   ["not batched", (cb: VoidFunction) => cb()],
   ["batched", batch],
-])("nested stores %s calls with direct store access", (_, execute) => {
-  it("re-renders once for Sweety#setState calls", () => {
+])("nested impulses %s calls with direct impulse access", (_, execute) => {
+  it("re-renders once for Impulse#setValue calls", () => {
     const onRender = vi.fn()
-    const store = Sweety.of({
-      first: Sweety.of({ count: 1 }),
-      second: Sweety.of({ count: 2 }),
+    const impulse = Impulse.of({
+      first: Impulse.of({ count: 1 }),
+      second: Impulse.of({ count: 2 }),
     })
 
     const Component: React.FC = () => {
-      const { first: store_1, second: store_2 } = useSweetyState(store)
-      const counter_1 = useSweetyState(store_1)
-      const counter_2 = useSweetyState(store_2)
+      const { first: impulse_1, second: impulse_2 } = useImpulseValue(impulse)
+      const counter_1 = useImpulseValue(impulse_1)
+      const counter_2 = useImpulseValue(impulse_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -102,46 +104,48 @@ describe.each([
     render(<Component />)
 
     expect(screen.getByTestId("count")).toHaveTextContent("3")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
     act(() => {
       execute(() => {
-        store.setState((state) => {
-          state.first.setState(Counter.inc)
-          state.second.setState(Counter.inc)
+        impulse.setValue((current) => {
+          current.first.setValue(Counter.inc)
+          current.second.setValue(Counter.inc)
 
-          return state
+          return current
         })
       })
     })
     expect(screen.getByTestId("count")).toHaveTextContent("5")
-    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
     act(() => {
-      store.setState((state) => {
+      impulse.setValue((current) => {
         execute(() => {
-          state.first.setState(Counter.inc)
-          state.second.setState(Counter.inc)
+          current.first.setValue(Counter.inc)
+          current.second.setValue(Counter.inc)
         })
 
-        return state
+        return current
       })
     })
     expect(screen.getByTestId("count")).toHaveTextContent("7")
-    expect(onRender).toHaveBeenCalledTimes(3)
+    expect(onRender).toHaveBeenCalledOnce()
   })
 
-  it("re-renders once for useSweetyState calls", () => {
+  it("re-renders once for useImpulseValue calls", () => {
     const onRender = vi.fn()
-    const store = Sweety.of({
-      first: Sweety.of({ count: 1 }),
-      second: Sweety.of({ count: 2 }),
+    const impulse = Impulse.of({
+      first: Impulse.of({ count: 1 }),
+      second: Impulse.of({ count: 2 }),
     })
 
     const Component: React.FC = () => {
-      const { first: store_1, second: store_2 } = useSweetyState(store)
-      const counter_1 = useSweetyState(store_1)
-      const counter_2 = useSweetyState(store_2)
+      const { first: impulse_1, second: impulse_2 } = useImpulseValue(impulse)
+      const counter_1 = useImpulseValue(impulse_1)
+      const counter_2 = useImpulseValue(impulse_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -150,11 +154,11 @@ describe.each([
             data-testid="inc-1"
             onClick={() => {
               execute(() => {
-                store.setState((state) => {
-                  state.first.setState(Counter.inc)
-                  state.second.setState(Counter.inc)
+                impulse.setValue((value) => {
+                  value.first.setValue(Counter.inc)
+                  value.second.setValue(Counter.inc)
 
-                  return state
+                  return value
                 })
               })
             }}
@@ -163,13 +167,13 @@ describe.each([
             type="button"
             data-testid="inc-2"
             onClick={() => {
-              store.setState((state) => {
+              impulse.setValue((value) => {
                 execute(() => {
-                  state.first.setState(Counter.inc)
-                  state.second.setState(Counter.inc)
+                  value.first.setValue(Counter.inc)
+                  value.second.setValue(Counter.inc)
                 })
 
-                return state
+                return value
               })
             }}
           />
@@ -181,15 +185,17 @@ describe.each([
     render(<Component />)
 
     expect(screen.getByTestId("count")).toHaveTextContent("3")
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
     fireEvent.click(screen.getByTestId("inc-1"))
     expect(screen.getByTestId("count")).toHaveTextContent("5")
-    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
     fireEvent.click(screen.getByTestId("inc-2"))
     expect(screen.getByTestId("count")).toHaveTextContent("7")
-    expect(onRender).toHaveBeenCalledTimes(3)
+    expect(onRender).toHaveBeenCalledOnce()
   })
 })
 
@@ -200,7 +206,7 @@ describe.each([
     expectedWatcherCallsForNested: 2,
     execute: (cb: VoidFunction) => cb(),
     useCount: (watcher: () => number) => {
-      return useWatchSweety(() => watcher())
+      return useWatchImpulse(() => watcher())
     },
   },
   {
@@ -209,7 +215,7 @@ describe.each([
     expectedWatcherCallsForNested: 2,
     execute: batch,
     useCount: (watcher: () => number) => {
-      return useWatchSweety(() => watcher())
+      return useWatchImpulse(() => watcher())
     },
   },
   {
@@ -218,7 +224,7 @@ describe.each([
     expectedWatcherCallsForNested: 1,
     execute: (cb: VoidFunction) => cb(),
     useCount: (watcher: () => number) => {
-      return useWatchSweety(React.useCallback(() => watcher(), [watcher]))
+      return useWatchImpulse(React.useCallback(() => watcher(), [watcher]))
     },
   },
   {
@@ -227,7 +233,7 @@ describe.each([
     expectedWatcherCallsForNested: 1,
     execute: batch,
     useCount: (watcher: () => number) => {
-      return useWatchSweety(React.useCallback(() => watcher(), [watcher]))
+      return useWatchImpulse(React.useCallback(() => watcher(), [watcher]))
     },
   },
 ])(
@@ -238,24 +244,24 @@ describe.each([
     execute,
     useCount,
   }) => {
-    describe("for multiple stores", () => {
+    describe("for multiple impulses", () => {
       const setup = () => {
         const spy = vi.fn()
         const onRender = vi.fn()
-        const first = Sweety.of({ count: 1 })
-        const second = Sweety.of({ count: 2 })
+        const first = Impulse.of({ count: 1 })
+        const second = Impulse.of({ count: 2 })
         const watcher = () => {
           spy()
 
           return (
-            first.getState(Counter.getCount) + second.getState(Counter.getCount)
+            first.getValue(Counter.getCount) + second.getValue(Counter.getCount)
           )
         }
 
         return { spy, onRender, first, second, watcher }
       }
 
-      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by Sweety#setState calls`, () => {
+      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by Impulse#setValue calls`, () => {
         const { spy, onRender, first, second, watcher } = setup()
 
         const Component: React.FC = () => {
@@ -271,22 +277,23 @@ describe.each([
         render(<Component />)
 
         expect(screen.getByTestId("count")).toHaveTextContent("3")
-        expect(onRender).toHaveBeenCalledTimes(1)
-        expect(spy).toHaveBeenCalledTimes(1)
-        spy.mockReset()
+        expect(onRender).toHaveBeenCalledOnce()
+        expect(spy).toHaveBeenCalledOnce()
+
+        vi.clearAllMocks()
 
         act(() => {
           execute(() => {
-            first.setState(Counter.inc)
-            second.setState(Counter.inc)
+            first.setValue(Counter.inc)
+            second.setValue(Counter.inc)
           })
         })
         expect(screen.getByTestId("count")).toHaveTextContent("5")
-        expect(onRender).toHaveBeenCalledTimes(2)
+        expect(onRender).toHaveBeenCalledOnce()
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForMultiple)
       })
 
-      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by Sweety#setState calls`, () => {
+      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by Impulse#setValue calls`, () => {
         const { spy, onRender, first, second, watcher } = setup()
 
         const Component: React.FC = () => {
@@ -299,8 +306,8 @@ describe.each([
                 data-testid="inc"
                 onClick={() => {
                   execute(() => {
-                    first.setState(Counter.inc)
-                    second.setState(Counter.inc)
+                    first.setValue(Counter.inc)
+                    second.setValue(Counter.inc)
                   })
                 }}
               />
@@ -312,40 +319,40 @@ describe.each([
         render(<Component />)
 
         expect(screen.getByTestId("count")).toHaveTextContent("3")
-        expect(onRender).toHaveBeenCalledTimes(1)
-        expect(spy).toHaveBeenCalledTimes(1)
-        spy.mockReset()
+        expect(onRender).toHaveBeenCalledOnce()
+        expect(spy).toHaveBeenCalledOnce()
+        vi.clearAllMocks()
 
         fireEvent.click(screen.getByTestId("inc"))
         expect(screen.getByTestId("count")).toHaveTextContent("5")
-        expect(onRender).toHaveBeenCalledTimes(2)
+        expect(onRender).toHaveBeenCalledOnce()
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForMultiple)
       })
     })
 
-    describe("for nested stores", () => {
+    describe("for nested impulses", () => {
       const setup = () => {
         const spy = vi.fn()
         const onRender = vi.fn()
-        const store = Sweety.of({
-          first: Sweety.of({ count: 1 }),
-          second: Sweety.of({ count: 2 }),
+        const impulse = Impulse.of({
+          first: Impulse.of({ count: 1 }),
+          second: Impulse.of({ count: 2 }),
         })
         const watcher = () => {
           spy()
 
-          return store.getState(
+          return impulse.getValue(
             ({ first, second }) =>
-              first.getState(Counter.getCount) +
-              second.getState(Counter.getCount),
+              first.getValue(Counter.getCount) +
+              second.getValue(Counter.getCount),
           )
         }
 
-        return { spy, onRender, store, watcher }
+        return { spy, onRender, impulse, watcher }
       }
 
-      it(`calls the watcher ${expectedWatcherCallsForNested} times by Sweety#setState calls`, () => {
-        const { spy, onRender, store, watcher } = setup()
+      it(`calls the watcher ${expectedWatcherCallsForNested} times by Impulse#setValue calls`, () => {
+        const { spy, onRender, impulse, watcher } = setup()
 
         const Component: React.FC = () => {
           const count = useCount(watcher)
@@ -360,42 +367,42 @@ describe.each([
         render(<Component />)
 
         expect(screen.getByTestId("count")).toHaveTextContent("3")
-        expect(onRender).toHaveBeenCalledTimes(1)
-        expect(spy).toHaveBeenCalledTimes(1)
-        spy.mockReset()
+        expect(onRender).toHaveBeenCalledOnce()
+        expect(spy).toHaveBeenCalledOnce()
+        vi.clearAllMocks()
 
         act(() => {
           execute(() => {
-            store.setState((state) => {
-              state.first.setState(Counter.inc)
-              state.second.setState(Counter.inc)
+            impulse.setValue((value) => {
+              value.first.setValue(Counter.inc)
+              value.second.setValue(Counter.inc)
 
-              return state
+              return value
             })
           })
         })
         expect(screen.getByTestId("count")).toHaveTextContent("5")
-        expect(onRender).toHaveBeenCalledTimes(2)
+        expect(onRender).toHaveBeenCalledOnce()
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
-        spy.mockReset()
+        vi.clearAllMocks()
 
         act(() => {
-          store.setState((state) => {
+          impulse.setValue((value) => {
             execute(() => {
-              state.first.setState(Counter.inc)
-              state.second.setState(Counter.inc)
+              value.first.setValue(Counter.inc)
+              value.second.setValue(Counter.inc)
             })
 
-            return state
+            return value
           })
         })
         expect(screen.getByTestId("count")).toHaveTextContent("7")
-        expect(onRender).toHaveBeenCalledTimes(3)
+        expect(onRender).toHaveBeenCalledOnce()
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
       })
 
-      it(`calls the watcher ${expectedWatcherCallsForNested} times by Sweety#setState calls`, () => {
-        const { spy, onRender, store, watcher } = setup()
+      it(`calls the watcher ${expectedWatcherCallsForNested} times by Impulse#setValue calls`, () => {
+        const { spy, onRender, impulse, watcher } = setup()
 
         const Component: React.FC = () => {
           const count = useCount(watcher)
@@ -407,11 +414,11 @@ describe.each([
                 data-testid="inc-1"
                 onClick={() => {
                   execute(() => {
-                    store.setState((state) => {
-                      state.first.setState(Counter.inc)
-                      state.second.setState(Counter.inc)
+                    impulse.setValue((value) => {
+                      value.first.setValue(Counter.inc)
+                      value.second.setValue(Counter.inc)
 
-                      return state
+                      return value
                     })
                   })
                 }}
@@ -420,13 +427,13 @@ describe.each([
                 type="button"
                 data-testid="inc-2"
                 onClick={() => {
-                  store.setState((state) => {
+                  impulse.setValue((value) => {
                     execute(() => {
-                      state.first.setState(Counter.inc)
-                      state.second.setState(Counter.inc)
+                      value.first.setValue(Counter.inc)
+                      value.second.setValue(Counter.inc)
                     })
 
-                    return state
+                    return value
                   })
                 }}
               />
@@ -438,19 +445,19 @@ describe.each([
         render(<Component />)
 
         expect(screen.getByTestId("count")).toHaveTextContent("3")
-        expect(onRender).toHaveBeenCalledTimes(1)
-        expect(spy).toHaveBeenCalledTimes(1)
-        spy.mockReset()
+        expect(onRender).toHaveBeenCalledOnce()
+        expect(spy).toHaveBeenCalledOnce()
+        vi.clearAllMocks()
 
         fireEvent.click(screen.getByTestId("inc-1"))
         expect(screen.getByTestId("count")).toHaveTextContent("5")
-        expect(onRender).toHaveBeenCalledTimes(2)
+        expect(onRender).toHaveBeenCalledOnce()
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
-        spy.mockReset()
+        vi.clearAllMocks()
 
         fireEvent.click(screen.getByTestId("inc-2"))
         expect(screen.getByTestId("count")).toHaveTextContent("7")
-        expect(onRender).toHaveBeenCalledTimes(3)
+        expect(onRender).toHaveBeenCalledOnce()
         expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
       })
     })

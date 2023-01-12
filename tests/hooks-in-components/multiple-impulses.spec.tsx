@@ -1,16 +1,16 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useSweetyState } from "../../src"
+import { Impulse, useImpulseValue } from "../../src"
 
-describe("multiple stores", () => {
+describe("multiple impulses", () => {
   const LoginForm: React.FC<{
-    email: Sweety<string>
-    password: Sweety<string>
+    email: Impulse<string>
+    password: Impulse<string>
     onRender: VoidFunction
-  }> = ({ email: emailStore, password: passwordStore, onRender }) => {
-    const email = useSweetyState(emailStore)
-    const password = useSweetyState(passwordStore)
+  }> = ({ email: emailImpulse, password: passwordImpulse, onRender }) => {
+    const email = useImpulseValue(emailImpulse)
+    const password = useImpulseValue(passwordImpulse)
 
     return (
       <React.Profiler id="test" onRender={onRender}>
@@ -18,63 +18,67 @@ describe("multiple stores", () => {
           type="email"
           data-testid="email"
           value={email}
-          onChange={(event) => emailStore.setState(event.target.value)}
+          onChange={(event) => emailImpulse.setValue(event.target.value)}
         />
         <input
           type="password"
           data-testid="password"
           value={password}
-          onChange={(event) => passwordStore.setState(event.target.value)}
+          onChange={(event) => passwordImpulse.setValue(event.target.value)}
         />
         <button
           type="button"
           data-testid="reset"
           onClick={() => {
-            emailStore.setState("")
-            passwordStore.setState("")
+            emailImpulse.setValue("")
+            passwordImpulse.setValue("")
           }}
         />
       </React.Profiler>
     )
   }
 
-  it("Performs multi store management", () => {
-    const email = Sweety.of("")
-    const password = Sweety.of("")
+  it("Performs multi impulse management", () => {
+    const email = Impulse.of("")
+    const password = Impulse.of("")
     const onRender = vi.fn()
 
     const { container } = render(
       <LoginForm email={email} password={password} onRender={onRender} />,
     )
 
-    expect(onRender).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledOnce()
     expect(container).toMatchSnapshot()
+    vi.clearAllMocks()
 
     // change email
     fireEvent.change(screen.getByTestId("email"), {
       target: { value: "john-doe@gmail.com" },
     })
-    expect(onRender).toHaveBeenCalledTimes(2)
+    expect(onRender).toHaveBeenCalledOnce()
     expect(container).toMatchSnapshot()
+    vi.clearAllMocks()
 
     // change password
     fireEvent.change(screen.getByTestId("password"), {
       target: { value: "qwerty" },
     })
-    expect(onRender).toHaveBeenCalledTimes(3)
+    expect(onRender).toHaveBeenCalledOnce()
     expect(container).toMatchSnapshot()
+    vi.clearAllMocks()
 
     // changes from the outside
     act(() => {
-      email.setState("admin@gmail.com")
-      password.setState("admin")
+      email.setValue("admin@gmail.com")
+      password.setValue("admin")
     })
-    expect(onRender).toHaveBeenCalledTimes(4)
+    expect(onRender).toHaveBeenCalledOnce()
     expect(container).toMatchSnapshot()
+    vi.clearAllMocks()
 
     // reset
     fireEvent.click(screen.getByTestId("reset"))
-    expect(onRender).toHaveBeenCalledTimes(5)
+    expect(onRender).toHaveBeenCalledOnce()
     expect(container).toMatchSnapshot()
   })
 })

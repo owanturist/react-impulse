@@ -1,335 +1,332 @@
-import { Sweety } from "../src"
+import { Impulse } from "../src"
 import { isEqual } from "../src/utils"
 
 import { Counter } from "./common"
 
-describe("Sweety#compare", () => {
-  describe("when creating a store with Sweety.of", () => {
+describe("Impulse#compare", () => {
+  describe("when creating a impulse with Impulse.of", () => {
     it.concurrent("assigns isEqual by default", () => {
-      const store = Sweety.of({ count: 0 })
+      const impulse = Impulse.of({ count: 0 })
 
-      expect(store.compare).toBe(isEqual)
+      expect(impulse.compare).toBe(isEqual)
     })
 
     it.concurrent("assigns isEqual by `null`", () => {
-      const store = Sweety.of({ count: 0 }, null)
+      const impulse = Impulse.of({ count: 0 }, null)
 
-      expect(store.compare).toBe(isEqual)
+      expect(impulse.compare).toBe(isEqual)
     })
 
     it.concurrent("assigns custom function", () => {
-      const store = Sweety.of({ count: 0 }, Counter.compare)
+      const impulse = Impulse.of({ count: 0 }, Counter.compare)
 
-      expect(store.compare).toBe(Counter.compare)
+      expect(impulse.compare).toBe(Counter.compare)
     })
   })
 
-  describe("when creating a store with Sweety.clone", () => {
-    it.concurrent("inherits default the source store compare", () => {
-      const store = Sweety.of({ count: 0 })
+  describe("when creating a impulse with Impulse.clone", () => {
+    it.concurrent("inherits default the source impulse compare", () => {
+      const impulse = Impulse.of({ count: 0 })
 
-      expect(store.clone().compare).toBe(store.compare)
-      expect(store.clone().compare).toBe(isEqual)
+      expect(impulse.clone().compare).toBe(impulse.compare)
+      expect(impulse.clone().compare).toBe(isEqual)
     })
 
-    it.concurrent("inherits custom the source store compare", () => {
-      const store = Sweety.of({ count: 0 }, Counter.compare)
+    it.concurrent("inherits custom the source impulse compare", () => {
+      const impulse = Impulse.of({ count: 0 }, Counter.compare)
 
-      expect(store.clone().compare).toBe(store.compare)
-      expect(store.clone().compare).toBe(Counter.compare)
+      expect(impulse.clone().compare).toBe(impulse.compare)
+      expect(impulse.clone().compare).toBe(Counter.compare)
     })
 
     it.concurrent("assigns isEqual by `null`", () => {
-      const store = Sweety.of({ count: 0 }, Counter.compare)
+      const impulse = Impulse.of({ count: 0 }, Counter.compare)
 
-      expect(store.clone(Counter.clone, null).compare).toBe(isEqual)
+      expect(impulse.clone(Counter.clone, null).compare).toBe(isEqual)
     })
 
     it.concurrent("assigns custom function", () => {
-      const store = Sweety.of({ count: 0 })
+      const impulse = Impulse.of({ count: 0 })
 
-      expect(store.clone(Counter.clone, Counter.compare).compare).toBe(
+      expect(impulse.clone(Counter.clone, Counter.compare).compare).toBe(
         Counter.compare,
       )
     })
   })
 
-  describe("when using Sweety#setState", () => {
-    it.concurrent("uses Sweety#compare by default", () => {
+  describe("when using Impulse#setValue", () => {
+    it.concurrent("uses Impulse#compare by default", () => {
       const initial = { count: 0 }
-      const store = Sweety.of(initial, Counter.compare)
+      const impulse = Impulse.of(initial, Counter.compare)
 
-      store.setState(Counter.clone)
-      expect(store.getState()).toBe(initial)
+      impulse.setValue(Counter.clone)
+      expect(impulse.getValue()).toBe(initial)
     })
 
     it.concurrent("replaces with isEqual when `null`", () => {
       const initial = { count: 0 }
-      const store = Sweety.of(initial, Counter.compare)
+      const impulse = Impulse.of(initial, Counter.compare)
 
-      store.setState(Counter.clone, null)
-      expect(store.getState()).not.toBe(initial)
-      expect(store.getState()).toStrictEqual(initial)
+      impulse.setValue(Counter.clone, null)
+      expect(impulse.getValue()).not.toBe(initial)
+      expect(impulse.getValue()).toStrictEqual(initial)
     })
 
     it.concurrent("replaces with custom function", () => {
       const initial = { count: 0 }
-      const store = Sweety.of(initial, Counter.compare)
+      const impulse = Impulse.of(initial, Counter.compare)
 
-      store.setState(Counter.inc, () => true)
-      expect(store.getState()).toBe(initial)
+      impulse.setValue(Counter.inc, () => true)
+      expect(impulse.getValue()).toBe(initial)
     })
   })
 })
 
-describe("Sweety#setState(value)", () => {
-  const store = Sweety.of({ count: 0 })
+describe("Impulse#setValue(value)", () => {
+  const impulse = Impulse.of({ count: 0 })
 
-  it("updates state", () => {
+  it("updates value", () => {
     const next = { count: 1 }
-    store.setState(next)
-    expect(store.getState()).toBe(next)
+    impulse.setValue(next)
+    expect(impulse.getValue()).toBe(next)
   })
 
-  it("updates with the same state", () => {
+  it("updates with the same value", () => {
     const next = { count: 1 }
-    store.setState(next)
-    expect(store.getState()).toBe(next)
+    impulse.setValue(next)
+    expect(impulse.getValue()).toBe(next)
   })
 
-  it("updates with equal state", () => {
-    const prev = store.getState()
-    store.setState(prev)
-    expect(store.getState()).toBe(prev)
+  it("updates with equal value", () => {
+    const prev = impulse.getValue()
+    impulse.setValue(prev)
+    expect(impulse.getValue()).toBe(prev)
   })
 })
 
-describe("Sweety#setState(transform)", () => {
-  const store = Sweety.of({ count: 0 })
+describe("Impulse#setValue(transform)", () => {
+  const impulse = Impulse.of({ count: 0 })
 
-  it("updates state", () => {
-    store.setState(Counter.inc)
-    expect(store.getState()).toStrictEqual({ count: 1 })
+  it("updates value", () => {
+    impulse.setValue(Counter.inc)
+    expect(impulse.getValue()).toStrictEqual({ count: 1 })
   })
 
-  it("keeps the state", () => {
-    const prev = store.getState()
-    store.setState((counter) => counter)
-    expect(store.getState()).toBe(prev)
+  it("keeps the value", () => {
+    const prev = impulse.getValue()
+    impulse.setValue((counter) => counter)
+    expect(impulse.getValue()).toBe(prev)
   })
 
-  it("updates with the same state", () => {
-    const prev = store.getState()
-    store.setState(Counter.clone)
-    expect(store.getState()).not.toBe(prev)
-    expect(store.getState()).toStrictEqual(prev)
+  it("updates with the same value", () => {
+    const prev = impulse.getValue()
+    impulse.setValue(Counter.clone)
+    expect(impulse.getValue()).not.toBe(prev)
+    expect(impulse.getValue()).toStrictEqual(prev)
   })
 
-  it("updates with the equal state", () => {
-    const prev = store.getState()
-    store.setState(() => prev)
-    expect(store.getState()).toBe(prev)
+  it("updates with the equal value", () => {
+    const prev = impulse.getValue()
+    impulse.setValue(() => prev)
+    expect(impulse.getValue()).toBe(prev)
   })
 })
 
-describe("Sweety#setState(value, compare)", () => {
+describe("Impulse#setValue(value, compare)", () => {
   let prev: Counter = { count: 0 }
-  const store = Sweety.of(prev)
+  const impulse = Impulse.of(prev)
 
   beforeEach(() => {
-    prev = store.getState()
+    prev = impulse.getValue()
   })
 
-  it("keeps equal state", () => {
+  it("keeps equal value", () => {
     const clone = Counter.clone(prev)
-    store.setState(clone, Counter.compare)
+    impulse.setValue(clone, Counter.compare)
 
-    expect(store.getState()).toBe(prev)
-    expect(store.getState()).not.toBe(clone)
+    expect(impulse.getValue()).toBe(prev)
+    expect(impulse.getValue()).not.toBe(clone)
   })
 
-  it("replaces with not equal state", () => {
+  it("replaces with not equal value", () => {
     const replacement = { count: 1 }
-    store.setState(replacement, Counter.compare)
+    impulse.setValue(replacement, Counter.compare)
 
-    expect(store.getState()).toBe(replacement)
-    expect(store.getState()).not.toBe(prev)
+    expect(impulse.getValue()).toBe(replacement)
+    expect(impulse.getValue()).not.toBe(prev)
   })
 
   it("replaces with same but not equal", () => {
     const clone = Counter.clone(prev)
-    store.setState(clone)
+    impulse.setValue(clone)
 
-    expect(store.getState()).toBe(clone)
-    expect(store.getState()).not.toBe(prev)
+    expect(impulse.getValue()).toBe(clone)
+    expect(impulse.getValue()).not.toBe(prev)
   })
 })
 
-describe("Sweety#setState(transform, compare)", () => {
+describe("Impulse#setValue(transform, compare)", () => {
   let prev: Counter = { count: 0 }
-  const store = Sweety.of(prev)
+  const impulse = Impulse.of(prev)
 
   beforeEach(() => {
-    prev = store.getState()
+    prev = impulse.getValue()
   })
 
-  it("keeps equal state", () => {
-    store.setState(Counter.clone, Counter.compare)
-    expect(store.getState()).toBe(prev)
+  it("keeps equal value", () => {
+    impulse.setValue(Counter.clone, Counter.compare)
+    expect(impulse.getValue()).toBe(prev)
   })
 
-  it("replaces with not equal state", () => {
-    store.setState(Counter.inc, Counter.compare)
-    expect(store.getState()).not.toBe(prev)
-    expect(store.getState()).toStrictEqual({ count: 1 })
+  it("replaces with not equal value", () => {
+    impulse.setValue(Counter.inc, Counter.compare)
+    expect(impulse.getValue()).not.toBe(prev)
+    expect(impulse.getValue()).toStrictEqual({ count: 1 })
   })
 
   it("replaces with same but not equal", () => {
-    store.setState(Counter.clone)
-    expect(store.getState()).not.toBe(prev)
-    expect(store.getState()).toStrictEqual({ count: 1 })
+    impulse.setValue(Counter.clone)
+    expect(impulse.getValue()).not.toBe(prev)
+    expect(impulse.getValue()).toStrictEqual({ count: 1 })
   })
 })
 
-describe("Sweety#getState(transform)", () => {
+describe("Impulse#getValue(transform)", () => {
   const initial = { count: 0 }
-  const store = Sweety.of(initial)
+  const impulse = Impulse.of(initial)
 
-  it("gets initial state", () => {
-    expect(store.getState()).toBe(initial)
-    expect(store.getState(Counter.getCount)).toBe(0)
+  it("gets initial value", () => {
+    expect(impulse.getValue()).toBe(initial)
+    expect(impulse.getValue(Counter.getCount)).toBe(0)
   })
 
-  it("gets updates state", () => {
-    store.setState(Counter.inc)
-    expect(store.getState()).toStrictEqual({ count: 1 })
-    expect(store.getState(Counter.getCount)).toBe(1)
+  it("gets updates value", () => {
+    impulse.setValue(Counter.inc)
+    expect(impulse.getValue()).toStrictEqual({ count: 1 })
+    expect(impulse.getValue(Counter.getCount)).toBe(1)
   })
 })
 
-describe("Sweety#clone", () => {
-  it.concurrent("creates new store instance with clone()", () => {
-    const store_1 = Sweety.of({ count: 0 })
-    const store_2 = store_1.clone()
+describe("Impulse#clone", () => {
+  it.concurrent("creates new Impulse with clone()", () => {
+    const impulse_1 = Impulse.of({ count: 0 })
+    const impulse_2 = impulse_1.clone()
 
-    expect(store_1).not.toBe(store_2)
-    expect(store_1.getState()).toBe(store_2.getState())
+    expect(impulse_1).not.toBe(impulse_2)
+    expect(impulse_1.getValue()).toBe(impulse_2.getValue())
   })
 
-  it.concurrent("creates new store instance with clone(transform)", () => {
-    const store_1 = Sweety.of({ count: 0 })
-    const store_2 = store_1.clone(Counter.clone)
+  it.concurrent("creates new Impulse with clone(transform)", () => {
+    const impulse_1 = Impulse.of({ count: 0 })
+    const impulse_2 = impulse_1.clone(Counter.clone)
 
-    expect(store_1).not.toBe(store_2)
-    expect(store_1.getState()).not.toBe(store_2.getState())
-    expect(store_1.getState()).toStrictEqual(store_2.getState())
+    expect(impulse_1).not.toBe(impulse_2)
+    expect(impulse_1.getValue()).not.toBe(impulse_2.getValue())
+    expect(impulse_1.getValue()).toStrictEqual(impulse_2.getValue())
   })
 
-  it.concurrent(
-    "creates new nested store instance with clone(transform)",
-    () => {
-      const store_1 = Sweety.of({
-        count: Sweety.of(0),
-        name: Sweety.of("John"),
-      })
-      const store_2 = store_1.clone(({ count, name }) => ({
-        count: count.clone(),
-        name: name.clone(),
-      }))
-
-      expect(store_1).not.toBe(store_2)
-      expect(store_1.getState()).not.toBe(store_2.getState())
-      expect(store_1.getState().count).not.toBe(store_2.getState().count)
-      expect(store_1.getState().name).not.toBe(store_2.getState().name)
-      expect(
-        store_1.getState(({ count, name }) => ({
-          count: count.getState(),
-          name: name.getState(),
-        })),
-      ).toStrictEqual(
-        store_2.getState(({ count, name }) => ({
-          count: count.getState(),
-          name: name.getState(),
-        })),
-      )
-
-      // the nested stores are independent
-      store_1.getState().count.setState(1)
-      expect(store_1.getState().count.getState()).toBe(1)
-      expect(store_2.getState().count.getState()).toBe(0)
-
-      store_1.getState().name.setState("Doe")
-      expect(store_1.getState().name.getState()).toBe("Doe")
-      expect(store_2.getState().name.getState()).toBe("John")
-    },
-  )
-
-  it.concurrent("creates shallow nested store instance with clone()", () => {
-    const store_1 = Sweety.of({
-      count: Sweety.of(0),
-      name: Sweety.of("John"),
+  it.concurrent("creates new nested Impulse with clone(transform)", () => {
+    const impulse_1 = Impulse.of({
+      count: Impulse.of(0),
+      name: Impulse.of("John"),
     })
-    const store_2 = store_1.clone()
+    const impulse_2 = impulse_1.clone(({ count, name }) => ({
+      count: count.clone(),
+      name: name.clone(),
+    }))
 
-    expect(store_1).not.toBe(store_2)
-    expect(store_1.getState()).toBe(store_2.getState())
-    expect(store_1.getState().count).toBe(store_2.getState().count)
-    expect(store_1.getState().name).toBe(store_2.getState().name)
+    expect(impulse_1).not.toBe(impulse_2)
+    expect(impulse_1.getValue()).not.toBe(impulse_2.getValue())
+    expect(impulse_1.getValue().count).not.toBe(impulse_2.getValue().count)
+    expect(impulse_1.getValue().name).not.toBe(impulse_2.getValue().name)
     expect(
-      store_1.getState(({ count, name }) => ({
-        count: count.getState(),
-        name: name.getState(),
+      impulse_1.getValue(({ count, name }) => ({
+        count: count.getValue(),
+        name: name.getValue(),
       })),
     ).toStrictEqual(
-      store_2.getState(({ count, name }) => ({
-        count: count.getState(),
-        name: name.getState(),
+      impulse_2.getValue(({ count, name }) => ({
+        count: count.getValue(),
+        name: name.getValue(),
       })),
     )
 
-    // the nested stores are dependent
-    store_1.getState().count.setState(1)
-    expect(store_1.getState().count.getState()).toBe(1)
-    expect(store_2.getState().count.getState()).toBe(1)
+    // the nested impulses are independent
+    impulse_1.getValue().count.setValue(1)
+    expect(impulse_1.getValue().count.getValue()).toBe(1)
+    expect(impulse_2.getValue().count.getValue()).toBe(0)
 
-    store_1.getState().name.setState("Doe")
-    expect(store_1.getState().name.getState()).toBe("Doe")
-    expect(store_2.getState().name.getState()).toBe("Doe")
+    impulse_1.getValue().name.setValue("Doe")
+    expect(impulse_1.getValue().name.getValue()).toBe("Doe")
+    expect(impulse_2.getValue().name.getValue()).toBe("John")
+  })
+
+  it.concurrent("creates shallow nested Impulse with clone()", () => {
+    const impulse_1 = Impulse.of({
+      count: Impulse.of(0),
+      name: Impulse.of("John"),
+    })
+    const impulse_2 = impulse_1.clone()
+
+    expect(impulse_1).not.toBe(impulse_2)
+    expect(impulse_1.getValue()).toBe(impulse_2.getValue())
+    expect(impulse_1.getValue().count).toBe(impulse_2.getValue().count)
+    expect(impulse_1.getValue().name).toBe(impulse_2.getValue().name)
+    expect(
+      impulse_1.getValue(({ count, name }) => ({
+        count: count.getValue(),
+        name: name.getValue(),
+      })),
+    ).toStrictEqual(
+      impulse_2.getValue(({ count, name }) => ({
+        count: count.getValue(),
+        name: name.getValue(),
+      })),
+    )
+
+    // the nested impulses are dependent
+    impulse_1.getValue().count.setValue(1)
+    expect(impulse_1.getValue().count.getValue()).toBe(1)
+    expect(impulse_2.getValue().count.getValue()).toBe(1)
+
+    impulse_1.getValue().name.setValue("Doe")
+    expect(impulse_1.getValue().name.getValue()).toBe("Doe")
+    expect(impulse_2.getValue().name.getValue()).toBe("Doe")
   })
 })
 
-describe("Sweety#subscribe", () => {
-  it.concurrent("subscribes and unsubscribes to state changes", () => {
-    const store = Sweety.of({ count: 0 })
+describe("Impulse#subscribe", () => {
+  it.concurrent("subscribes and unsubscribes to value changes", () => {
+    const impulse = Impulse.of({ count: 0 })
     const spy = vi.fn<[Counter]>()
 
-    store.setState(Counter.inc)
+    impulse.setValue(Counter.inc)
     expect(spy).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
-    const unsubscribe = store.subscribe(() => {
-      spy(store.getState())
+    const unsubscribe = impulse.subscribe(() => {
+      spy(impulse.getValue())
     })
 
-    store.setState(Counter.inc)
-    expect(spy).toHaveBeenCalledTimes(1)
+    impulse.setValue(Counter.inc)
+    expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 2 })
     vi.clearAllMocks()
 
     unsubscribe()
 
-    store.setState(Counter.inc)
+    impulse.setValue(Counter.inc)
     expect(spy).not.toHaveBeenCalled()
   })
 
   it.concurrent("emits the same listener once", () => {
     const spy = vi.fn()
-    const store = Sweety.of({ count: 0 })
-    const unsubscribe_1 = store.subscribe(spy)
-    const unsubscribe_2 = store.subscribe(spy)
+    const impulse = Impulse.of({ count: 0 })
+    const unsubscribe_1 = impulse.subscribe(spy)
+    const unsubscribe_2 = impulse.subscribe(spy)
 
-    store.setState(Counter.inc)
-    expect(spy).toHaveBeenCalledTimes(1)
+    impulse.setValue(Counter.inc)
+    expect(spy).toHaveBeenCalledOnce()
 
     unsubscribe_1()
     unsubscribe_2()
@@ -339,100 +336,100 @@ describe("Sweety#subscribe", () => {
     "emits the same listener until it is subscribed at least ones",
     () => {
       const spy = vi.fn()
-      const store = Sweety.of({ count: 0 })
-      const unsubscribe_1 = store.subscribe(spy)
-      const unsubscribe_2 = store.subscribe(spy)
-      const unsubscribe_3 = store.subscribe(spy)
+      const impulse = Impulse.of({ count: 0 })
+      const unsubscribe_1 = impulse.subscribe(spy)
+      const unsubscribe_2 = impulse.subscribe(spy)
+      const unsubscribe_3 = impulse.subscribe(spy)
 
       unsubscribe_1()
-      store.setState(Counter.inc)
-      expect(spy).toHaveBeenCalledTimes(1)
+      impulse.setValue(Counter.inc)
+      expect(spy).toHaveBeenCalledOnce()
       vi.clearAllMocks()
 
       unsubscribe_2()
-      store.setState(Counter.inc)
-      expect(spy).toHaveBeenCalledTimes(1)
+      impulse.setValue(Counter.inc)
+      expect(spy).toHaveBeenCalledOnce()
       vi.clearAllMocks()
 
       unsubscribe_3()
-      store.setState(Counter.inc)
+      impulse.setValue(Counter.inc)
       expect(spy).not.toHaveBeenCalled()
     },
   )
 
   it.concurrent("ignores second unsubscribe call", () => {
     const spy = vi.fn()
-    const store = Sweety.of({ count: 0 })
-    const unsubscribe = store.subscribe(spy)
+    const impulse = Impulse.of({ count: 0 })
+    const unsubscribe = impulse.subscribe(spy)
 
-    store.setState(Counter.inc)
-    expect(spy).toHaveBeenCalledTimes(1)
+    impulse.setValue(Counter.inc)
+    expect(spy).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     unsubscribe()
     unsubscribe()
 
-    store.setState(Counter.inc)
+    impulse.setValue(Counter.inc)
     expect(spy).not.toHaveBeenCalled()
   })
 
   it.concurrent("subscribes multiple listeners", () => {
     const spy_1 = vi.fn()
     const spy_2 = vi.fn()
-    const store = Sweety.of({ count: 0 })
-    const unsubscribe_1 = store.subscribe(spy_1)
-    const unsubscribe_2 = store.subscribe(spy_2)
+    const impulse = Impulse.of({ count: 0 })
+    const unsubscribe_1 = impulse.subscribe(spy_1)
+    const unsubscribe_2 = impulse.subscribe(spy_2)
 
-    store.setState(Counter.inc)
-    expect(spy_1).toHaveBeenCalledTimes(1)
-    expect(spy_2).toHaveBeenCalledTimes(1)
+    impulse.setValue(Counter.inc)
+    expect(spy_1).toHaveBeenCalledOnce()
+    expect(spy_2).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     unsubscribe_1()
-    store.setState(Counter.inc)
+    impulse.setValue(Counter.inc)
     expect(spy_1).not.toHaveBeenCalled()
-    expect(spy_2).toHaveBeenCalledTimes(1)
+    expect(spy_2).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     unsubscribe_2()
-    store.setState(Counter.inc)
+    impulse.setValue(Counter.inc)
     expect(spy_1).not.toHaveBeenCalled()
     expect(spy_2).not.toHaveBeenCalled()
   })
 
-  it.concurrent("does not emit when a new state is comparably equal", () => {
+  it.concurrent("does not emit when a new value is comparably equal", () => {
     const spy = vi.fn()
     const spyCompare = vi.fn(Counter.compare)
-    const store = Sweety.of({ count: 0 })
-    const unsubscribe = store.subscribe(spy)
+    const impulse = Impulse.of({ count: 0 })
+    const unsubscribe = impulse.subscribe(spy)
 
-    store.setState(Counter.clone, spyCompare)
+    impulse.setValue(Counter.clone, spyCompare)
     expect(spy).not.toHaveBeenCalled()
-    expect(spyCompare).toHaveBeenCalledTimes(1)
+    expect(spyCompare).toHaveBeenCalledOnce()
     expect(spyCompare).toHaveLastReturnedWith(true)
     vi.clearAllMocks()
 
-    store.setState(Counter.clone)
-    expect(spy).toHaveBeenCalledTimes(1)
+    impulse.setValue(Counter.clone)
+    expect(spy).toHaveBeenCalledOnce()
     expect(spyCompare).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
     expect(spy.mock.calls).toHaveLength(0)
-    store.setState(Counter.clone, spyCompare)
+    impulse.setValue(Counter.clone, spyCompare)
     expect(spy).not.toHaveBeenCalled()
-    expect(spyCompare).toHaveBeenCalledTimes(1)
+    expect(spyCompare).toHaveBeenCalledOnce()
     expect(spyCompare).toHaveLastReturnedWith(true)
     vi.clearAllMocks()
 
     unsubscribe()
-    store.setState(Counter.clone)
+    impulse.setValue(Counter.clone)
     expect(spy).not.toHaveBeenCalled()
   })
 })
 
-describe("Sweety#toJSON()", () => {
-  it.concurrent("converts state to JSON", () => {
-    const store = Sweety.of({
+describe("Impulse#toJSON()", () => {
+  it.concurrent("converts value to JSON", () => {
+    const impulse = Impulse.of({
       number: 0,
       string: "biba",
       boolean: false,
@@ -448,24 +445,24 @@ describe("Sweety#toJSON()", () => {
       },
     })
 
-    expect(JSON.stringify(store)).toMatchInlineSnapshot(
+    expect(JSON.stringify(impulse)).toMatchInlineSnapshot(
       '"{\\"number\\":0,\\"string\\":\\"biba\\",\\"boolean\\":false,\\"null\\":null,\\"array\\":[1,\\"boba\\",true,null,null],\\"object\\":{\\"number\\":2,\\"string\\":\\"baba\\",\\"boolean\\":false,\\"null\\":null}}"',
     )
   })
 
   it.concurrent("applies replace fields", () => {
-    const store = Sweety.of({ first: 1, second: 2, third: 3 })
+    const impulse = Impulse.of({ first: 1, second: 2, third: 3 })
 
-    expect(JSON.stringify(store, ["first", "third"])).toMatchInlineSnapshot(
+    expect(JSON.stringify(impulse, ["first", "third"])).toMatchInlineSnapshot(
       '"{\\"first\\":1,\\"third\\":3}"',
     )
   })
 
   it.concurrent("applies replace function", () => {
-    const store = Sweety.of({ first: 1, second: 2, third: 3 })
+    const impulse = Impulse.of({ first: 1, second: 2, third: 3 })
 
     expect(
-      JSON.stringify(store, (_key, value: unknown) => {
+      JSON.stringify(impulse, (_key, value: unknown) => {
         if (typeof value === "number") {
           return value * 2
         }
@@ -476,9 +473,9 @@ describe("Sweety#toJSON()", () => {
   })
 
   it.concurrent("applies spaces", () => {
-    const store = Sweety.of({ first: 1, second: 2, third: 3 })
+    const impulse = Impulse.of({ first: 1, second: 2, third: 3 })
 
-    expect(JSON.stringify(store, null, 2)).toMatchInlineSnapshot(
+    expect(JSON.stringify(impulse, null, 2)).toMatchInlineSnapshot(
       `
       "{
         \\"first\\": 1,
@@ -489,10 +486,10 @@ describe("Sweety#toJSON()", () => {
     )
   })
 
-  it.concurrent("stringifies nested Sweety", () => {
-    const store = Sweety.of({
-      first: Sweety.of(1),
-      second: Sweety.of([Sweety.of("1"), Sweety.of(false)]),
+  it.concurrent("stringifies nested Impulse", () => {
+    const store = Impulse.of({
+      first: Impulse.of(1),
+      second: Impulse.of([Impulse.of("1"), Impulse.of(false)]),
     })
 
     expect(JSON.stringify(store, null, 2)).toMatchInlineSnapshot(`
@@ -507,15 +504,15 @@ describe("Sweety#toJSON()", () => {
   })
 })
 
-describe("Sweety#toString", () => {
+describe("Impulse#toString", () => {
   it.concurrent.each([
     ["number", 1, "1"],
     ["boolean", false, "false"],
     ["null", null, "null"],
     ["undefined", undefined, "undefined"],
-    ["array", [1, 2, Sweety.of(3)], "1,2,3"],
+    ["array", [1, 2, Impulse.of(3)], "1,2,3"],
     ["object", { first: 1 }, "[object Object]"],
-  ])("converts %s state to string", (_, state, expected) => {
-    expect(String(Sweety.of(state))).toBe(expected)
+  ])("converts %s value to string", (_, value, expected) => {
+    expect(String(Impulse.of(value))).toBe(expected)
   })
 })

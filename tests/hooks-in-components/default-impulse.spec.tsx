@@ -1,23 +1,23 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useSweety, useSweetyState } from "../../src"
+import { Impulse, useImpulse, useImpulseValue } from "../../src"
 
-describe("default stores", () => {
-  it("Uses local default Sweety when nullable", () => {
+describe("default impulse", () => {
+  it("uses local default Impulse when nullable", () => {
     const SearchBar: React.FC<{
-      value?: Sweety<string>
-    }> = ({ value: valueStore }) => {
-      const defaultValueStore = useSweety("search for me")
+      value?: Impulse<string>
+    }> = ({ value: valueImpulse }) => {
+      const defaultValueImpulse = useImpulse("search for me")
 
-      const store = valueStore ?? defaultValueStore
-      const value = useSweetyState(store)
+      const impulse = valueImpulse ?? defaultValueImpulse
+      const value = useImpulseValue(impulse)
 
       return (
         <input
           role="search"
           value={value}
-          onChange={(event) => store.setState(event.target.value)}
+          onChange={(event) => impulse.setValue(event.target.value)}
         />
       )
     }
@@ -31,7 +31,7 @@ describe("default stores", () => {
     fireEvent.change(input, { target: { value: "now" } })
     expect(input).toHaveValue("now")
 
-    const val = Sweety.of("new")
+    const val = Impulse.of("new")
 
     rerender(<SearchBar value={val} />)
     expect(input).toHaveValue("new")
@@ -40,7 +40,7 @@ describe("default stores", () => {
     expect(input).toHaveValue("what a hell")
 
     act(() => {
-      val.setState("no way")
+      val.setValue("no way")
     })
     expect(input).toHaveValue("no way")
 
@@ -48,7 +48,7 @@ describe("default stores", () => {
     expect(input).toHaveValue("now")
 
     act(() => {
-      val.setState("but now")
+      val.setValue("but now")
     })
     expect(input).toHaveValue("now")
 

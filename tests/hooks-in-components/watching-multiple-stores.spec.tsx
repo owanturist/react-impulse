@@ -1,14 +1,14 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Sweety, useWatchSweety, watch } from "../../src"
+import { Impulse, useWatchImpulse, watch } from "../../src"
 
 import { CounterComponent, withinNth } from "./common"
 
-describe("watching multiple stores", () => {
+describe("watching multiple impulses", () => {
   interface AppProps {
-    firstCount: Sweety<number>
-    secondCount: Sweety<number>
+    firstCount: Impulse<number>
+    secondCount: Impulse<number>
     onRender: VoidFunction
     onFirstCounterRender: VoidFunction
     onSecondCounterRender: VoidFunction
@@ -37,8 +37,8 @@ describe("watching multiple stores", () => {
           type="button"
           data-testid="increment-both"
           onClick={() => {
-            firstCount.setState((state) => state + 1)
-            secondCount.setState((state) => state + 1)
+            firstCount.setValue((x) => x + 1)
+            secondCount.setValue((x) => x + 1)
           }}
         />
       </React.Profiler>
@@ -49,9 +49,9 @@ describe("watching multiple stores", () => {
   )
 
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useWatchSweety(
+    const [moreThanOne, lessThanFour] = useWatchImpulse(
       () => {
-        const sum = props.firstCount.getState() + props.secondCount.getState()
+        const sum = props.firstCount.getValue() + props.secondCount.getValue()
 
         return [sum > 2, sum < 7]
       },
@@ -70,9 +70,9 @@ describe("watching multiple stores", () => {
   }
 
   const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useWatchSweety<[boolean, boolean]>(
+    const [moreThanOne, lessThanFour] = useWatchImpulse<[boolean, boolean]>(
       React.useCallback(() => {
-        const sum = props.firstCount.getState() + props.secondCount.getState()
+        const sum = props.firstCount.getValue() + props.secondCount.getValue()
 
         return [sum > 2, sum < 7]
       }, [props.firstCount, props.secondCount]),
@@ -97,13 +97,13 @@ describe("watching multiple stores", () => {
   }
 
   const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchSweety(() => {
-      const sum = props.firstCount.getState() + props.secondCount.getState()
+    const moreThanOne = useWatchImpulse(() => {
+      const sum = props.firstCount.getValue() + props.secondCount.getValue()
 
       return sum > 2
     })
-    const lessThanFour = useWatchSweety(() => {
-      const sum = props.firstCount.getState() + props.secondCount.getState()
+    const lessThanFour = useWatchImpulse(() => {
+      const sum = props.firstCount.getValue() + props.secondCount.getValue()
 
       return sum < 7
     })
@@ -118,16 +118,16 @@ describe("watching multiple stores", () => {
   }
 
   const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchSweety(
+    const moreThanOne = useWatchImpulse(
       React.useCallback(() => {
-        const sum = props.firstCount.getState() + props.secondCount.getState()
+        const sum = props.firstCount.getValue() + props.secondCount.getValue()
 
         return sum > 2
       }, [props.firstCount, props.secondCount]),
     )
-    const lessThanFour = useWatchSweety(
+    const lessThanFour = useWatchImpulse(
       React.useCallback(() => {
-        const sum = props.firstCount.getState() + props.secondCount.getState()
+        const sum = props.firstCount.getValue() + props.secondCount.getValue()
 
         return sum < 7
       }, [props.firstCount, props.secondCount]),
@@ -143,7 +143,7 @@ describe("watching multiple stores", () => {
   }
 
   const WatchedApp: React.FC<AppProps> = watch((props) => {
-    const sum = props.firstCount.getState() + props.secondCount.getState()
+    const sum = props.firstCount.getValue() + props.secondCount.getValue()
     const [moreThanOne, lessThanFour] = [sum > 2, sum < 7]
 
     return (
@@ -161,99 +161,102 @@ describe("watching multiple stores", () => {
     ["multiple watchers", MultipleWatchersApp, 0],
     ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
     ["watch()", WatchedApp, 1],
-  ])("watches multiple stores with %s", (_, App, unnecessaryRerendersCount) => {
-    const firstCount = Sweety.of(0)
-    const secondCount = Sweety.of(0)
-    const onFirstCountRender = vi.fn()
-    const onSecondCountRender = vi.fn()
-    const onRender = vi.fn()
+  ])(
+    "watches multiple impulses with %s",
+    (_, App, unnecessaryRerendersCount) => {
+      const firstCount = Impulse.of(0)
+      const secondCount = Impulse.of(0)
+      const onFirstCountRender = vi.fn()
+      const onSecondCountRender = vi.fn()
+      const onRender = vi.fn()
 
-    render(
-      <App
-        firstCount={firstCount}
-        secondCount={secondCount}
-        onFirstCounterRender={onFirstCountRender}
-        onSecondCounterRender={onSecondCountRender}
-        onRender={onRender}
-      />,
-    )
+      render(
+        <App
+          firstCount={firstCount}
+          secondCount={secondCount}
+          onFirstCounterRender={onFirstCountRender}
+          onSecondCounterRender={onSecondCountRender}
+          onRender={onRender}
+        />,
+      )
 
-    // initial render and watcher setup
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onFirstCountRender).toHaveBeenCalledTimes(1)
-    expect(onSecondCountRender).toHaveBeenCalledTimes(1)
-    expect(screen.queryByText("more than two")).not.toBeInTheDocument()
-    expect(screen.queryByText("less than seven")).toBeInTheDocument()
-    expect(screen.getAllByTestId("count")[0]).toHaveTextContent("0")
-    expect(screen.getAllByTestId("count")[1]).toHaveTextContent("0")
-    vi.clearAllMocks()
+      // initial render and watcher setup
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(onFirstCountRender).toHaveBeenCalledOnce()
+      expect(onSecondCountRender).toHaveBeenCalledOnce()
+      expect(screen.queryByText("more than two")).not.toBeInTheDocument()
+      expect(screen.queryByText("less than seven")).toBeInTheDocument()
+      expect(screen.getAllByTestId("count")[0]).toHaveTextContent("0")
+      expect(screen.getAllByTestId("count")[1]).toHaveTextContent("0")
+      vi.clearAllMocks()
 
-    // increment first count
-    fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
-    expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
-    expect(onFirstCountRender).toHaveBeenCalledTimes(1)
-    expect(onSecondCountRender).not.toHaveBeenCalled()
-    expect(screen.queryByText("more than two")).not.toBeInTheDocument()
-    expect(screen.queryByText("less than seven")).toBeInTheDocument()
-    expect(screen.getAllByTestId("count")[0]).toHaveTextContent("1")
-    expect(screen.getAllByTestId("count")[1]).toHaveTextContent("0")
-    vi.clearAllMocks()
+      // increment first count
+      fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
+      expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
+      expect(onFirstCountRender).toHaveBeenCalledOnce()
+      expect(onSecondCountRender).not.toHaveBeenCalled()
+      expect(screen.queryByText("more than two")).not.toBeInTheDocument()
+      expect(screen.queryByText("less than seven")).toBeInTheDocument()
+      expect(screen.getAllByTestId("count")[0]).toHaveTextContent("1")
+      expect(screen.getAllByTestId("count")[1]).toHaveTextContent("0")
+      vi.clearAllMocks()
 
-    // increment second count
-    fireEvent.click(withinNth("counter", 1).getByTestId("increment"))
-    expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
-    expect(onFirstCountRender).not.toHaveBeenCalled()
-    expect(onSecondCountRender).toHaveBeenCalledTimes(1)
-    expect(screen.queryByText("more than two")).not.toBeInTheDocument()
-    expect(screen.queryByText("less than seven")).toBeInTheDocument()
-    expect(screen.getAllByTestId("count")[0]).toHaveTextContent("1")
-    expect(screen.getAllByTestId("count")[1]).toHaveTextContent("1")
-    vi.clearAllMocks()
+      // increment second count
+      fireEvent.click(withinNth("counter", 1).getByTestId("increment"))
+      expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
+      expect(onFirstCountRender).not.toHaveBeenCalled()
+      expect(onSecondCountRender).toHaveBeenCalledOnce()
+      expect(screen.queryByText("more than two")).not.toBeInTheDocument()
+      expect(screen.queryByText("less than seven")).toBeInTheDocument()
+      expect(screen.getAllByTestId("count")[0]).toHaveTextContent("1")
+      expect(screen.getAllByTestId("count")[1]).toHaveTextContent("1")
+      vi.clearAllMocks()
 
-    // increment both
-    fireEvent.click(screen.getByTestId("increment-both"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onFirstCountRender).toHaveBeenCalledTimes(1)
-    expect(onSecondCountRender).toHaveBeenCalledTimes(1)
-    expect(screen.queryByText("more than two")).toBeInTheDocument()
-    expect(screen.queryByText("less than seven")).toBeInTheDocument()
-    expect(screen.getAllByTestId("count")[0]).toHaveTextContent("2")
-    expect(screen.getAllByTestId("count")[1]).toHaveTextContent("2")
-    vi.clearAllMocks()
+      // increment both
+      fireEvent.click(screen.getByTestId("increment-both"))
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(onFirstCountRender).toHaveBeenCalledOnce()
+      expect(onSecondCountRender).toHaveBeenCalledOnce()
+      expect(screen.queryByText("more than two")).toBeInTheDocument()
+      expect(screen.queryByText("less than seven")).toBeInTheDocument()
+      expect(screen.getAllByTestId("count")[0]).toHaveTextContent("2")
+      expect(screen.getAllByTestId("count")[1]).toHaveTextContent("2")
+      vi.clearAllMocks()
 
-    // increment both again
-    fireEvent.click(screen.getByTestId("increment-both"))
-    expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
-    expect(onFirstCountRender).toHaveBeenCalledTimes(1)
-    expect(onSecondCountRender).toHaveBeenCalledTimes(1)
-    expect(screen.queryByText("more than two")).toBeInTheDocument()
-    expect(screen.queryByText("less than seven")).toBeInTheDocument()
-    expect(screen.getAllByTestId("count")[0]).toHaveTextContent("3")
-    expect(screen.getAllByTestId("count")[1]).toHaveTextContent("3")
-    vi.clearAllMocks()
+      // increment both again
+      fireEvent.click(screen.getByTestId("increment-both"))
+      expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
+      expect(onFirstCountRender).toHaveBeenCalledOnce()
+      expect(onSecondCountRender).toHaveBeenCalledOnce()
+      expect(screen.queryByText("more than two")).toBeInTheDocument()
+      expect(screen.queryByText("less than seven")).toBeInTheDocument()
+      expect(screen.getAllByTestId("count")[0]).toHaveTextContent("3")
+      expect(screen.getAllByTestId("count")[1]).toHaveTextContent("3")
+      vi.clearAllMocks()
 
-    // increment first
-    fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
-    expect(onRender).toHaveBeenCalledTimes(1)
-    expect(onFirstCountRender).toHaveBeenCalledTimes(1)
-    expect(onSecondCountRender).not.toHaveBeenCalled()
-    expect(screen.queryByText("more than two")).toBeInTheDocument()
-    expect(screen.queryByText("less than seven")).not.toBeInTheDocument()
-    expect(screen.getAllByTestId("count")[0]).toHaveTextContent("4")
-    expect(screen.getAllByTestId("count")[1]).toHaveTextContent("3")
-    vi.clearAllMocks()
+      // increment first
+      fireEvent.click(withinNth("counter", 0).getByTestId("increment"))
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(onFirstCountRender).toHaveBeenCalledOnce()
+      expect(onSecondCountRender).not.toHaveBeenCalled()
+      expect(screen.queryByText("more than two")).toBeInTheDocument()
+      expect(screen.queryByText("less than seven")).not.toBeInTheDocument()
+      expect(screen.getAllByTestId("count")[0]).toHaveTextContent("4")
+      expect(screen.getAllByTestId("count")[1]).toHaveTextContent("3")
+      vi.clearAllMocks()
 
-    // increment both from the outside
-    act(() => {
-      firstCount.setState((state) => state + 1)
-      secondCount.setState((state) => state + 1)
-    })
-    expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
-    expect(onFirstCountRender).toHaveBeenCalledTimes(1)
-    expect(onSecondCountRender).toHaveBeenCalledTimes(1)
-    expect(screen.queryByText("more than two")).toBeInTheDocument()
-    expect(screen.queryByText("less than seven")).not.toBeInTheDocument()
-    expect(screen.getAllByTestId("count")[0]).toHaveTextContent("5")
-    expect(screen.getAllByTestId("count")[1]).toHaveTextContent("4")
-  })
+      // increment both from the outside
+      act(() => {
+        firstCount.setValue((x) => x + 1)
+        secondCount.setValue((x) => x + 1)
+      })
+      expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
+      expect(onFirstCountRender).toHaveBeenCalledOnce()
+      expect(onSecondCountRender).toHaveBeenCalledOnce()
+      expect(screen.queryByText("more than two")).toBeInTheDocument()
+      expect(screen.queryByText("less than seven")).not.toBeInTheDocument()
+      expect(screen.getAllByTestId("count")[0]).toHaveTextContent("5")
+      expect(screen.getAllByTestId("count")[1]).toHaveTextContent("4")
+    },
+  )
 })

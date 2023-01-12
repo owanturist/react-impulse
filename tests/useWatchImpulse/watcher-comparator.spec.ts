@@ -1,22 +1,22 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Sweety, useWatchSweety } from "../../src"
-import { Counter, WithCompare, WithStore } from "../common"
+import { Impulse, useWatchImpulse } from "../../src"
+import { Counter, WithCompare, WithImpulse } from "../common"
 import { Compare, isEqual } from "../../src/utils"
 
 describe.each([
   [
     "inline watcher",
-    ({ store }: WithStore, compare?: Compare<Counter>) => {
-      return useWatchSweety(() => store.getState(), compare)
+    ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
+      return useWatchImpulse(() => impulse.getValue(), compare)
     },
   ],
   [
     "memoized watcher",
-    ({ store }: WithStore, compare?: Compare<Counter>) => {
-      return useWatchSweety(
-        useCallback(() => store.getState(), [store]),
+    ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
+      return useWatchImpulse(
+        useCallback(() => impulse.getValue(), [impulse]),
         compare,
       )
     },
@@ -25,7 +25,7 @@ describe.each([
   describe.each([
     [
       "with inline comparator",
-      ({ compare, ...props }: WithStore & WithCompare) => {
+      ({ compare, ...props }: WithImpulse & WithCompare) => {
         const cmp = compare ?? Counter.compare
 
         return useHookWithoutCompare(props, (prev, next) => cmp(prev, next))
@@ -33,33 +33,33 @@ describe.each([
     ],
     [
       "with memoized comparator",
-      ({ compare, ...props }: WithStore & WithCompare) => {
+      ({ compare, ...props }: WithImpulse & WithCompare) => {
         return useHookWithoutCompare(props, compare ?? Counter.compare)
       },
     ],
   ])("%s", (__, useHook) => {
     it.concurrent("swapping compare", () => {
       const initial = { count: 0 }
-      const store = Sweety.of(initial)
+      const impulse = Impulse.of(initial)
 
       const { result, rerender } = renderHook(useHook, {
-        initialProps: { store },
+        initialProps: { impulse },
       })
       expect(result.current).toBe(initial)
 
       act(() => {
-        store.setState({ count: 0 })
+        impulse.setValue({ count: 0 })
       })
       expect(result.current).toBe(initial)
 
       rerender({
-        store,
+        impulse,
         compare: isEqual,
       })
       expect(result.current).toBe(initial)
 
       act(() => {
-        store.setState({ count: 0 })
+        impulse.setValue({ count: 0 })
       })
       expect(result.current).not.toBe(initial)
       expect(result.current).toStrictEqual(initial)

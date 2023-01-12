@@ -1,21 +1,21 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Compare, Sweety, useWatchSweety } from "../../src"
-import { Counter, WithSpy, WithStore } from "../common"
+import { Compare, Impulse, useWatchImpulse } from "../../src"
+import { Counter, WithSpy, WithImpulse } from "../common"
 
 describe.each([
   [
     "inline watcher",
-    ({ store }: WithStore, compare?: Compare<Counter>) => {
-      return useWatchSweety(() => store.getState(), compare)
+    ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
+      return useWatchImpulse(() => impulse.getValue(), compare)
     },
   ],
   [
     "memoized watcher",
-    ({ store }: WithStore, compare?: Compare<Counter>) => {
-      return useWatchSweety(
-        useCallback(() => store.getState(), [store]),
+    ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
+      return useWatchImpulse(
+        useCallback(() => impulse.getValue(), [impulse]),
         compare,
       )
     },
@@ -25,7 +25,7 @@ describe.each([
     ["without comparator", useHookWithoutCompare],
     [
       "with inline comparator",
-      (props: WithStore) => {
+      (props: WithImpulse) => {
         return useHookWithoutCompare(props, (prev, next) =>
           Counter.compare(prev, next),
         )
@@ -33,41 +33,41 @@ describe.each([
     ],
     [
       "with memoized comparator",
-      (props: WithStore) => {
+      (props: WithImpulse) => {
         return useHookWithoutCompare(props, Counter.compare)
       },
     ],
   ])("%s", (__, useHook) => {
-    it.concurrent("watches the store's changes", () => {
-      const store = Sweety.of({ count: 1 })
+    it.concurrent("watches the impulse's changes", () => {
+      const impulse = Impulse.of({ count: 1 })
 
       const { result } = renderHook(useHook, {
-        initialProps: { store },
+        initialProps: { impulse },
       })
 
       expect(result.current).toStrictEqual({ count: 1 })
 
       act(() => {
-        store.setState(Counter.inc)
+        impulse.setValue(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 2 })
 
       act(() => {
-        store.setState(({ count }) => ({ count: count * 2 }))
+        impulse.setValue(({ count }) => ({ count: count * 2 }))
       })
       expect(result.current).toStrictEqual({ count: 4 })
     })
 
-    describe("watches the replaced store changes", () => {
+    describe("watches the replaced impulse changes", () => {
       const setup = () => {
-        const store_1 = Sweety.of({ count: 1 })
-        const store_2 = Sweety.of({ count: 10 })
+        const impulse_1 = Impulse.of({ count: 1 })
+        const impulse_2 = Impulse.of({ count: 10 })
 
         const { result, rerender } = renderHook(useHook, {
-          initialProps: { store: store_1 },
+          initialProps: { impulse: impulse_1 },
         })
 
-        return { store_1, store_2, result, rerender }
+        return { impulse_1, impulse_2, result, rerender }
       }
 
       it.concurrent("initiates with correct result", () => {
@@ -76,64 +76,64 @@ describe.each([
         expect(result.current).toStrictEqual({ count: 1 })
       })
 
-      it.concurrent("replaces initial store_1 with store_2", () => {
-        const { store_2, result, rerender } = setup()
+      it.concurrent("replaces initial impulse_1 with impulse_2", () => {
+        const { impulse_2, result, rerender } = setup()
 
-        rerender({ store: store_2 })
+        rerender({ impulse: impulse_2 })
         expect(result.current).toStrictEqual({ count: 10 })
       })
 
       it.concurrent(
-        "stops watching store_1 changes after replacement with store_2",
+        "stops watching impulse_1 changes after replacement with impulse_2",
         () => {
-          const { store_1, store_2, result, rerender } = setup()
+          const { impulse_1, impulse_2, result, rerender } = setup()
 
-          rerender({ store: store_2 })
+          rerender({ impulse: impulse_2 })
 
           act(() => {
-            store_1.setState(Counter.inc)
+            impulse_1.setValue(Counter.inc)
           })
 
-          expect(store_1.getState()).toStrictEqual({ count: 2 })
+          expect(impulse_1.getValue()).toStrictEqual({ count: 2 })
           expect(result.current).toStrictEqual({ count: 10 })
         },
       )
 
       it.concurrent(
-        "starts watching store_2 changes after replacement of store_1",
+        "starts watching impulse_2 changes after replacement of impulse_1",
         () => {
-          const { store_1, store_2, result, rerender } = setup()
+          const { impulse_1, impulse_2, result, rerender } = setup()
 
-          rerender({ store: store_2 })
+          rerender({ impulse: impulse_2 })
 
           act(() => {
-            store_2.setState(Counter.inc)
+            impulse_2.setValue(Counter.inc)
           })
 
-          expect(store_1.getState()).toStrictEqual({ count: 1 })
+          expect(impulse_1.getValue()).toStrictEqual({ count: 1 })
           expect(result.current).toStrictEqual({ count: 11 })
         },
       )
 
-      it.concurrent("replaces store_1 back", () => {
-        const { store_1, store_2, result, rerender } = setup()
+      it.concurrent("replaces impulse_1 back", () => {
+        const { impulse_1, impulse_2, result, rerender } = setup()
 
-        rerender({ store: store_2 })
-        rerender({ store: store_1 })
+        rerender({ impulse: impulse_2 })
+        rerender({ impulse: impulse_1 })
 
         expect(result.current).toStrictEqual({ count: 1 })
       })
 
       it.concurrent(
-        "stops watching store_2 after replacement back store_1",
+        "stops watching impulse_2 after replacement back impulse_1",
         () => {
-          const { store_1, store_2, result, rerender } = setup()
+          const { impulse_1, impulse_2, result, rerender } = setup()
 
-          rerender({ store: store_2 })
-          rerender({ store: store_1 })
+          rerender({ impulse: impulse_2 })
+          rerender({ impulse: impulse_1 })
 
           act(() => {
-            store_2.setState(Counter.inc)
+            impulse_2.setValue(Counter.inc)
           })
 
           expect(result.current).toStrictEqual({ count: 1 })
@@ -143,7 +143,7 @@ describe.each([
   })
 })
 
-describe("transform state's value inside watcher", () => {
+describe("transform Impulse's value inside watcher", () => {
   const toTuple = ({ count }: Counter): [boolean, boolean] => {
     return [count > 2, count < 5]
   }
@@ -158,27 +158,27 @@ describe("transform state's value inside watcher", () => {
   describe.each([
     [
       "inline watcher",
-      ({ store }: WithStore, compare?: Compare<[boolean, boolean]>) => {
-        return useWatchSweety(() => store.getState(toTuple), compare)
+      ({ impulse }: WithImpulse, compare?: Compare<[boolean, boolean]>) => {
+        return useWatchImpulse(() => impulse.getValue(toTuple), compare)
       },
     ],
     [
       "memoized watcher",
-      ({ store }: WithStore, compare?: Compare<[boolean, boolean]>) => {
-        return useWatchSweety(
-          useCallback(() => store.getState(toTuple), [store]),
+      ({ impulse }: WithImpulse, compare?: Compare<[boolean, boolean]>) => {
+        return useWatchImpulse(
+          useCallback(() => impulse.getValue(toTuple), [impulse]),
           compare,
         )
       },
     ],
   ])("%s", (__, useHookWithoutCompare) => {
     it.concurrent(
-      "produces new value on each store's update without comparator",
+      "produces new value on each impulse's update without comparator",
       () => {
-        const store = Sweety.of({ count: 1 })
+        const impulse = Impulse.of({ count: 1 })
 
         const { result, rerender } = renderHook(useHookWithoutCompare, {
-          initialProps: { store },
+          initialProps: { impulse },
         })
 
         let prev = result.current
@@ -189,7 +189,7 @@ describe("transform state's value inside watcher", () => {
         // increments 1 -> 2
         prev = result.current
         act(() => {
-          store.setState(Counter.inc)
+          impulse.setValue(Counter.inc)
         })
         expect(result.current).not.toBe(prev)
         expect(result.current).toStrictEqual([false, true])
@@ -197,19 +197,19 @@ describe("transform state's value inside watcher", () => {
         // increments 2 -> 3
         prev = result.current
         act(() => {
-          store.setState({ count: 3 })
+          impulse.setValue({ count: 3 })
         })
         expect(result.current).not.toBe(prev)
         expect(result.current).toStrictEqual([true, true])
 
         // rerender
-        rerender({ store })
+        rerender({ impulse })
         expect(result.current).toStrictEqual([true, true])
 
         // increments 3 -> 4
         prev = result.current
         act(() => {
-          store.setState({ count: 4 })
+          impulse.setValue({ count: 4 })
         })
         expect(result.current).not.toBe(prev)
         expect(result.current).toStrictEqual([true, true])
@@ -217,7 +217,7 @@ describe("transform state's value inside watcher", () => {
         // increments 4 -> 5
         prev = result.current
         act(() => {
-          store.setState(Counter.inc)
+          impulse.setValue(Counter.inc)
         })
         expect(result.current).not.toBe(prev)
         expect(result.current).toStrictEqual([true, false])
@@ -227,7 +227,7 @@ describe("transform state's value inside watcher", () => {
     it.concurrent.each([
       [
         "inline comparator",
-        (props: WithStore) => {
+        (props: WithImpulse) => {
           return useHookWithoutCompare(props, (prev, next) =>
             compareTuple(prev, next),
           )
@@ -235,17 +235,17 @@ describe("transform state's value inside watcher", () => {
       ],
       [
         "memoized comparator",
-        (props: WithStore) => {
+        (props: WithImpulse) => {
           return useHookWithoutCompare(props, compareTuple)
         },
       ],
     ])(
       "keeps the old value when it is comparably equal when %s",
       (_, useHookWithCompare) => {
-        const store = Sweety.of({ count: 1 })
+        const impulse = Impulse.of({ count: 1 })
 
         const { result, rerender } = renderHook(useHookWithCompare, {
-          initialProps: { store },
+          initialProps: { impulse },
         })
 
         let prev = result.current
@@ -256,7 +256,7 @@ describe("transform state's value inside watcher", () => {
         // increments 1 -> 2
         prev = result.current
         act(() => {
-          store.setState(Counter.inc)
+          impulse.setValue(Counter.inc)
         })
         expect(result.current).toBe(prev)
         expect(result.current).toStrictEqual([false, true])
@@ -264,19 +264,19 @@ describe("transform state's value inside watcher", () => {
         // increments 2 -> 3
         prev = result.current
         act(() => {
-          store.setState({ count: 3 })
+          impulse.setValue({ count: 3 })
         })
         expect(result.current).not.toBe(prev)
         expect(result.current).toStrictEqual([true, true])
 
         // rerender
-        rerender({ store })
+        rerender({ impulse })
         expect(result.current).toStrictEqual([true, true])
 
         // increments 3 -> 4
         prev = result.current
         act(() => {
-          store.setState({ count: 4 })
+          impulse.setValue({ count: 4 })
         })
         expect(result.current).toBe(prev)
         expect(result.current).toStrictEqual([true, true])
@@ -284,7 +284,7 @@ describe("transform state's value inside watcher", () => {
         // increments 4 -> 5
         prev = result.current
         act(() => {
-          store.setState(Counter.inc)
+          impulse.setValue(Counter.inc)
         })
         expect(result.current).not.toBe(prev)
         expect(result.current).toStrictEqual([true, false])
@@ -295,35 +295,35 @@ describe("transform state's value inside watcher", () => {
   describe.each([
     [
       "inline watcher",
-      ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchSweety(() => {
+      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
+        return useWatchImpulse(() => {
           spy()
 
-          return store.getState()
+          return impulse.getValue()
         }, compare)
       },
     ],
     [
       "memoized watcher",
-      ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchSweety(
+      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
+        return useWatchImpulse(
           useCallback(() => {
             spy()
 
-            return store.getState()
-          }, [spy, store]),
+            return impulse.getValue()
+          }, [spy, impulse]),
           compare,
         )
       },
     ],
   ])(
-    "when store's changes under %s are comparably equal with",
+    "when impulse's changes under %s are comparably equal with",
     (_, useHookWithoutCompare) => {
       it.concurrent.each([
         ["without comparator", useHookWithoutCompare],
         [
           "with inline comparator",
-          (props: WithStore & WithSpy) => {
+          (props: WithImpulse & WithSpy) => {
             return useHookWithoutCompare(props, (prev, next) =>
               Counter.compare(prev, next),
             )
@@ -331,74 +331,74 @@ describe("transform state's value inside watcher", () => {
         ],
         [
           "with memoized comparator",
-          (props: WithStore & WithSpy) => {
+          (props: WithImpulse & WithSpy) => {
             return useHookWithoutCompare(props, Counter.compare)
           },
         ],
       ])("should not trigger the watcher %s", () => {
-        const store = Sweety.of({ count: 1 })
+        const impulse = Impulse.of({ count: 1 })
         const spy = vi.fn()
 
         renderHook(useHookWithoutCompare, {
-          initialProps: { spy, store },
+          initialProps: { spy, impulse },
         })
 
-        expect(spy).toHaveBeenCalledTimes(1)
+        expect(spy).toHaveBeenCalledOnce()
 
         act(() => {
-          store.setState(Counter.clone, Counter.compare)
+          impulse.setValue(Counter.clone, Counter.compare)
         })
 
-        expect(spy).toHaveBeenCalledTimes(1)
+        expect(spy).toHaveBeenCalledOnce()
       })
     },
   )
 })
 
-describe("multiple Sweety#getState() calls", () => {
+describe("multiple Impulse#getValue() calls", () => {
   describe.each([
     [
       "inline watcher",
-      ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchSweety(() => {
+      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
+        return useWatchImpulse(() => {
           spy()
 
-          return store.getState()
+          return impulse.getValue()
         }, compare)
       },
-      ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchSweety(() => {
+      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
+        return useWatchImpulse(() => {
           spy()
 
-          return Counter.merge(store.getState(), store.getState())
+          return Counter.merge(impulse.getValue(), impulse.getValue())
         }, compare)
       },
     ],
     [
       "memoized watcher",
-      ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchSweety(
+      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
+        return useWatchImpulse(
           useCallback(() => {
             spy()
 
-            return store.getState()
-          }, [spy, store]),
+            return impulse.getValue()
+          }, [spy, impulse]),
           compare,
         )
       },
-      ({ spy, store }: WithStore & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchSweety(
+      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
+        return useWatchImpulse(
           useCallback(() => {
             spy()
 
-            return Counter.merge(store.getState(), store.getState())
-          }, [spy, store]),
+            return Counter.merge(impulse.getValue(), impulse.getValue())
+          }, [spy, impulse]),
           compare,
         )
       },
     ],
   ])(
-    "triggering %s for multiple Sweety#getState() calls the same as for a single",
+    "triggering %s for multiple Impulse#getValue() calls the same as for a single",
     (_, useSingleHookWithoutCompare, useDoubleHookWithoutCompare) => {
       describe.each([
         [
@@ -408,12 +408,12 @@ describe("multiple Sweety#getState() calls", () => {
         ],
         [
           "with inline comparator",
-          (props: WithStore & WithSpy) => {
+          (props: WithImpulse & WithSpy) => {
             return useSingleHookWithoutCompare(props, (prev, next) =>
               Counter.compare(prev, next),
             )
           },
-          (props: WithStore & WithSpy) => {
+          (props: WithImpulse & WithSpy) => {
             return useDoubleHookWithoutCompare(props, (prev, next) =>
               Counter.compare(prev, next),
             )
@@ -421,10 +421,10 @@ describe("multiple Sweety#getState() calls", () => {
         ],
         [
           "with memoized comparator",
-          (props: WithStore & WithSpy) => {
+          (props: WithImpulse & WithSpy) => {
             return useSingleHookWithoutCompare(props, Counter.compare)
           },
-          (props: WithStore & WithSpy) => {
+          (props: WithImpulse & WithSpy) => {
             return useDoubleHookWithoutCompare(props, Counter.compare)
           },
         ],
@@ -432,16 +432,16 @@ describe("multiple Sweety#getState() calls", () => {
         const setup = () => {
           const spySingle = vi.fn()
           const spyDouble = vi.fn()
-          const store = Sweety.of({ count: 1 })
+          const impulse = Impulse.of({ count: 1 })
 
           const { result: resultSingle } = renderHook(useSingleHook, {
-            initialProps: { spy: spySingle, store },
+            initialProps: { spy: spySingle, impulse },
           })
           const { result: resultDouble } = renderHook(useDoubleHook, {
-            initialProps: { spy: spyDouble, store },
+            initialProps: { spy: spyDouble, impulse },
           })
 
-          return { store, spySingle, spyDouble, resultSingle, resultDouble }
+          return { impulse, spySingle, spyDouble, resultSingle, resultDouble }
         }
 
         it.concurrent("initiates with expected results", () => {
@@ -453,15 +453,14 @@ describe("multiple Sweety#getState() calls", () => {
         })
 
         it.concurrent.each([
-          // eslint-disable-next-line no-undefined
-          ["without Sweety#setState comparator", undefined],
-          ["with Sweety#setState comparator", Counter.compare],
+          ["without Impulse#setValue comparator", undefined],
+          ["with Impulse#setValue comparator", Counter.compare],
         ])("increments %s", (___, compare) => {
-          const { store, spySingle, spyDouble, resultSingle, resultDouble } =
+          const { impulse, spySingle, spyDouble, resultSingle, resultDouble } =
             setup()
 
           act(() => {
-            store.setState(Counter.inc, compare)
+            impulse.setValue(Counter.inc, compare)
           })
 
           expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -470,15 +469,14 @@ describe("multiple Sweety#getState() calls", () => {
         })
 
         it.concurrent.each([
-          // eslint-disable-next-line no-undefined
-          ["without Sweety#setState comparator", undefined],
-          ["with Sweety#setState comparator", Counter.compare],
+          ["without Impulse#setValue comparator", undefined],
+          ["with Impulse#setValue comparator", Counter.compare],
         ])("clones %s", (___, compare) => {
-          const { store, spySingle, spyDouble, resultSingle, resultDouble } =
+          const { impulse, spySingle, spyDouble, resultSingle, resultDouble } =
             setup()
 
           act(() => {
-            store.setState(Counter.clone, compare)
+            impulse.setValue(Counter.clone, compare)
           })
 
           expect(resultSingle.current).toStrictEqual({ count: 1 })

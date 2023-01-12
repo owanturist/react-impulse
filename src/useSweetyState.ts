@@ -1,18 +1,20 @@
 import { useCallback, useDebugValue } from "react"
 import { useSyncExternalStore } from "use-sync-external-store/shim/index.js"
 
-import type { Sweety } from "./Sweety"
+import type { Impulse } from "./Sweety"
 import { WatchContext } from "./WatchContext"
 
 /**
- * A hook that subscribes to the `sweety` changes and returns the current state.
+ * A hook that subscribes to the `impulse` changes and returns the current value.
  *
- * @param sweety a `Sweety` instance.
+ * @param impulse an Impulse instance.
+ *
+ * @version 1.0.0
  */
-export function useSweetyState<T>(sweety: Sweety<T>): T {
+export function useImpulseValue<T>(impulse: Impulse<T>): T {
   const value = useSyncExternalStore(
-    useCallback((onStoreChange) => sweety.subscribe(onStoreChange), [sweety]),
-    useCallback(() => WatchContext.ignore(() => sweety.getState()), [sweety]),
+    useCallback((onChange) => impulse.subscribe(onChange), [impulse]),
+    useCallback(() => WatchContext.ignore(() => impulse.getValue()), [impulse]),
   )
 
   useDebugValue(value)

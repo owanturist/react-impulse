@@ -1,39 +1,44 @@
-import type { SetStateAction } from "react"
-
 import { Compare, isEqual, isFunction, noop } from "./utils"
 import { WatchContext } from "./WatchContext"
-import { SetStateContext } from "./SetStateContext"
+import { SetValueContext } from "./SetValueContext"
 import {
   WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING,
-  WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING,
+  WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
 } from "./validation"
 
-export class Sweety<T> {
+export class Impulse<T> {
   /**
-   * Creates a new `Sweety` instance.
+   * Creates new Impulse.
    *
-   * @param initialState the initial state.
-   * @param compare an optional `Compare` function applied as `Sweety#compare`. When not defined or `null` then `Object.is` applies as a fallback.
+   * @param initialValue the initial value.
+   * @param compare an optional `Compare` function applied as `Impulse#compare`. When not defined or `null` then `Object.is` applies as a fallback.
+   *
+   * @version 1.0.0
    */
-  public static of<T>(initialState: T, compare?: null | Compare<T>): Sweety<T> {
+  public static of<T>(
+    initialValue: T,
+    compare?: null | Compare<T>,
+  ): Impulse<T> {
     WatchContext.warning(WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING)
 
-    return new Sweety(initialState, compare ?? isEqual)
+    return new Impulse(initialValue, compare ?? isEqual)
   }
 
   /**
    * It does not use `Set<VoidFunction>` here because the same listener might be subscribed
-   * many times to a Sweety instance, so it should not unsubscribe them all when one unsubscribes.
+   * many times to an Impulse, so it should not unsubscribe them all when one unsubscribes.
    * By keeping track of how many times the same listener is subscribed it knows when to drop
    * the listener from `subscribers`.
    */
   private readonly subscribers = new Map<VoidFunction, number>()
 
   /**
-   * The `Compare` function compares the state of a `Sweety` instance with the new state given via `Sweety#setState`.
-   * Whenever the function returns `true`, neither the state change nor it notifies the listeners subscribed via `Sweety#subscribe`.
+   * The `Compare` function compares Impulse's value with the new value given via `Impulse#setValue`.
+   * Whenever the function returns `true`, neither the value change nor it notifies the listeners subscribed via `Impulse#subscribe`.
+   *
+   * @version 1.0.0
    */
   public readonly compare: Compare<T>
 
@@ -42,86 +47,93 @@ export class Sweety<T> {
   }
 
   /**
-   * Return the state when serializing to JSON.
-   * It does not encode the Sweety instance for decoding it back due to runtime parts of the class,
+   * Return the value when serializing to JSON.
+   * It does not encode an Impulse for decoding it back due to runtime parts of the class,
    * that cannot be serialized as JSON.
    *
    * The method is protected in order to make it impossible to make the implicit call.
    *
-   * @version 2.1.0
+   * @version 1.0.0
    */
   protected toJSON(): unknown {
-    return this.getState()
+    return this.getValue()
   }
 
   /**
-   * Return the stringified state when a Sweety instance converts to a string.
+   * Return the stringified value when an Impulse converts to a string.
    *
    * The method is protected in order to make it impossible to make the implicit call.
-   *
-   * @version 2.1.0
+   * @version 1.0.0
    */
   protected toString(): string {
-    return String(this.getState())
+    return String(this.getValue())
   }
 
   /**
-   * Clones a `Sweety` instance.
+   * Clones an Impulse.
    *
-   * @param transform an optional function that applies to the current state before cloning. It might be handy when cloning a state that contains mutable values.
-   * @param compare an optional `Compare` function applied as `Sweety#compare`. When not defined, it uses the `Sweety#compare` function from the origin. When `null` the `Object.is` function applies to compare the states.
+   * @param transform an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
+   * @param compare an optional `Compare` function applied as `Impulse#compare`. When not defined, it uses the `Impulse#compare` function from the origin. When `null` the `Object.is` function applies to compare the values.
+   *
+   * @version 1.0.0
    */
   public clone(
     transform?: (value: T) => T,
     compare: null | Compare<T> = this.compare,
-  ): Sweety<T> {
+  ): Impulse<T> {
     WatchContext.warning(WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING)
 
-    return new Sweety(
+    return new Impulse(
       isFunction(transform) ? transform(this.value) : this.value,
       compare ?? isEqual,
     )
   }
 
   /**
-   * Returns the current state.
-   */
-  public getState(): T
-  /**
-   * Returns a value selected from the current state.
+   * Returns the current value.
    *
-   * @param select an optional function that applies to the current state before returning.
+   * @version 1.0.0
    */
-  public getState<R>(select: (value: T) => R): R
-  public getState<R>(select?: (value: T) => R): T | R {
-    WatchContext.register(this as Sweety<unknown>)
+  public getValue(): T
+  /**
+   * Returns a value selected from the current value.
+   *
+   * @param select an optional function that applies to the current value before returning.
+   *
+   * @version 1.0.0
+   */
+  public getValue<R>(select: (value: T) => R): R
+  public getValue<R>(select?: (value: T) => R): T | R {
+    WatchContext.register(this as Impulse<unknown>)
 
     return isFunction(select) ? select(this.value) : this.value
   }
 
   /**
-   * Updates the state.
-   * All listeners registered via the `Sweety#subscribe` method execute whenever the instance's state updates.
+   * Updates the value.
+   * All listeners registered via the `Impulse#subscribe` method execute whenever the Impulse's value updates.
    *
-   * @param stateOrTransform either the new state or a function that transforms the current state into the new state.
-   * @param compare an optional `Compare` function applied for this call only. When not defined the `Sweety#compare` function of the instance will be used. When `null` the `Object.is` function applies to compare the states.
+   * @param valueOrTransform either the new value or a function that transforms the current value.
+   * @param compare an optional `Compare` function applied for this call only. When not defined the `Impulse#compare` function will be used. When `null` the `Object.is` function applies to compare the values.
    *
-   * @returns `void` to emphasize that `Sweety` instances are mutable.
+   * @returns `void` to emphasize that Impulses are mutable.
+   *
+   * @version 1.0.0
    */
-  public setState(
-    stateOrTransform: SetStateAction<T>,
+  public setValue(
+    valueOrTransform: T | ((currentValue: T) => T),
     compare: null | Compare<T> = this.compare,
   ): void {
-    if (WatchContext.warning(WARNING_MESSAGE_CALLING_SET_STATE_WHEN_WATCHING)) {
+    if (WatchContext.warning(WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING)) {
       return
     }
 
     const finalCompare = compare ?? isEqual
-    const [emit, register] = SetStateContext.registerStoreSubscribers()
+    const [emit, register] = SetValueContext.registerStoreSubscribers()
 
-    const nextValue = isFunction(stateOrTransform)
-      ? stateOrTransform(this.value)
-      : stateOrTransform
+    const nextValue = isFunction(valueOrTransform)
+      ? valueOrTransform(this.value)
+      : valueOrTransform
 
     if (!finalCompare(this.value, nextValue)) {
       this.value = nextValue
@@ -132,11 +144,13 @@ export class Sweety<T> {
   }
 
   /**
-   * Subscribes to the state's updates caused by calling `Sweety#setState`.
+   * Subscribes to the value's updates caused by calling `Impulse#setValue`.
    *
    * @param listener a function that subscribes to the updates.
    *
    * @returns a cleanup function that unsubscribes the `listener`.
+   *
+   * @version 1.0.0
    */
   public subscribe(listener: VoidFunction): VoidFunction {
     if (WatchContext.warning(WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING)) {
