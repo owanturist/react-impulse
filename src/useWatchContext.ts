@@ -23,10 +23,10 @@ export const useWatchContext = ({
     return {
       executeWatcher: (watcher) => context.watchStores(watcher),
 
-      // the getValue cannot directly return the watcher result
+      // the getVersion cannot directly return the watcher result
       // because it might be different per each call
       // instead it increments the version each time when any watched impulse changes
-      // so the getValue will be consistent over multiple calls until the real change happens
+      // so the getVersion will be consistent over multiple calls until the real change happens
       // when the version changes the select function calls the watcher and extracts actual data
       // without that workaround it will go to the re-render hell
       getVersion: () => context.getVersion(),
