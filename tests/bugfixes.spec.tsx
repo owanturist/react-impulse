@@ -117,7 +117,7 @@ describe("watching misses when defined after useEffect #140", () => {
   })
 })
 
-describe("Use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321", () => {
+describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321", () => {
   it.each([
     ["toString", (value: unknown) => String(value)],
     ["toJSON", (value: unknown) => JSON.stringify(value)],
@@ -174,4 +174,40 @@ describe("return the same component type from watch #322", () => {
     })
     expect(first).toHaveValue("world")
   })
+})
+
+it("in StrictMode, fails due to unexpected .setValue during watch call #336", () => {
+  const Button: React.FC<{
+    count: Impulse<number>
+  }> = watch(({ count }) => {
+    React.useState(0)
+
+    return (
+      <button type="button" onClick={() => count.setValue((x) => x + 1)}>
+        {count.getValue()}
+      </button>
+    )
+  })
+
+  const impulse = Impulse.of(0)
+
+  render(
+    <React.StrictMode>
+      <Button count={impulse} />
+    </React.StrictMode>,
+  )
+
+  const btn = screen.getByRole("button")
+  expect(btn).toHaveTextContent("0")
+
+  fireEvent.click(btn)
+  expect(btn).toHaveTextContent("1")
+
+  fireEvent.click(btn)
+  expect(btn).toHaveTextContent("2")
+
+  act(() => {
+    impulse.setValue((x) => x + 1)
+  })
+  expect(btn).toHaveTextContent("3")
 })
