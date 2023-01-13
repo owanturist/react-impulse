@@ -114,7 +114,8 @@ export class WatchContext {
 
     this.cleanupObsolete()
 
-    WatchContext.current = outerContext
+    // happens when rendering in StrictMode so a WatchContext can execute itself
+    WatchContext.current = outerContext === this ? null : outerContext
 
     return value
   }
