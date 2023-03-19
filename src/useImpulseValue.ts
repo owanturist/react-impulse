@@ -1,4 +1,4 @@
-import { useCallback, useDebugValue } from "react"
+import { useDebugValue, useMemo } from "react"
 import { useSyncExternalStore } from "use-sync-external-store/shim/index.js"
 
 import type { Impulse } from "./Impulse"
@@ -12,10 +12,14 @@ import { WatchContext } from "./WatchContext"
  * @version 1.0.0
  */
 export function useImpulseValue<T>(impulse: Impulse<T>): T {
-  const value = useSyncExternalStore(
-    useCallback((onChange) => impulse.subscribe(onChange), [impulse]),
-    useCallback(() => WatchContext.ignore(() => impulse.getValue()), [impulse]),
+  const [subscribe, getSnapshot] = useMemo(
+    () => [
+      (onChange: VoidFunction) => impulse.subscribe(onChange),
+      () => WatchContext.ignore(() => impulse.getValue()),
+    ],
+    [impulse],
   )
+  const value = useSyncExternalStore(subscribe, getSnapshot)
 
   useDebugValue(value)
 
