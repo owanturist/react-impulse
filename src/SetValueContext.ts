@@ -1,7 +1,6 @@
 import type { Dispatch } from "react"
 
 import { noop } from "./utils"
-import type { WatchContext } from "./WatchContext"
 
 /**
  * A context that allows to collect Impulse#setValue subscribers and execute them all at once.
@@ -12,8 +11,8 @@ import type { WatchContext } from "./WatchContext"
 export class SetValueContext {
   private static current: null | SetValueContext = null
 
-  public static registerWatchContext(ctx: WatchContext): void {
-    SetValueContext.current?.registerWatchContext(ctx)
+  public static registerEmitter(emitter: VoidFunction): void {
+    SetValueContext.current?.emitters.add(emitter)
   }
 
   public static registerStoreSubscribers(): [
@@ -49,7 +48,7 @@ export class SetValueContext {
   }
 
   private readonly storeSubscribers: Array<Map<VoidFunction, number>> = []
-  private readonly watchContexts = new Set<WatchContext>()
+  private readonly emitters = new Set<VoidFunction>()
 
   private constructor() {
     // make private
@@ -57,10 +56,6 @@ export class SetValueContext {
 
   private batchStoreSubscribers(subs: Map<VoidFunction, number>): void {
     this.storeSubscribers.push(subs)
-  }
-
-  private registerWatchContext(ctx: WatchContext): void {
-    this.watchContexts.add(ctx)
   }
 
   private emit(): void {
@@ -79,7 +74,7 @@ export class SetValueContext {
       })
     })
 
-    this.watchContexts.forEach((ctx) => ctx.emit())
-    this.watchContexts.clear()
+    this.emitters.forEach((emit) => emit())
+    this.emitters.clear()
   }
 }
