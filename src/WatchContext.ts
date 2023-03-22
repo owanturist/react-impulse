@@ -1,6 +1,6 @@
 import type { Impulse } from "./Impulse"
 import { SetValueContext } from "./SetValueContext"
-import { isFunction, noop } from "./utils"
+import { isFunction } from "./utils"
 import { WarningSet, WarningSource } from "./validation"
 
 /**
@@ -67,13 +67,15 @@ export class WatchContext {
 
   private version = 0
 
-  private notify: VoidFunction = noop
+  private notify: null | VoidFunction = null
 
   public constructor(private readonly warningSource: null | WarningSource) {}
 
   private readonly emit = (): void => {
     this.increment()
-    this.cycle(this.notify)
+    if (this.notify != null) {
+      this.cycle(this.notify)
+    }
   }
 
   private register(impulse: Impulse<unknown>): void {
@@ -130,14 +132,24 @@ export class WatchContext {
   }
 
   public subscribe(notify: VoidFunction): VoidFunction {
-    this.notify = notify
+    const unsubscribe = (): void => {
+      // does not need to unsubscribe if it is already unsubscribed
+      if (this.notify == null) {
+        return
+      }
 
-    return () => {
+      this.notify = null
       this.increment()
       this.cleanups.forEach((cleanup) => cleanup())
       this.cleanups.clear()
       this.deadCleanups.clear()
     }
+
+    // in case if subscribe is called twice
+    unsubscribe()
+    this.notify = notify
+
+    return unsubscribe
   }
 
   public getVersion(): number {
