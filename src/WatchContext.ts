@@ -71,6 +71,11 @@ export class WatchContext {
 
   public constructor(private readonly warningSource: null | WarningSource) {}
 
+  private readonly emit = (): void => {
+    this.increment()
+    this.cycle(this.notify)
+  }
+
   private register(impulse: Impulse<unknown>): void {
     if (this.cleanups.has(impulse)) {
       // still alive
@@ -81,7 +86,7 @@ export class WatchContext {
           impulse,
           impulse.subscribe(() => {
             // the listener registers a watcher so the watcher will emit once per (batch) setValue
-            SetValueContext.registerWatchContext(this)
+            SetValueContext.registerEmitter(this.emit)
           }),
         )
       })
@@ -141,10 +146,5 @@ export class WatchContext {
 
   public watchStores<T>(watcher: () => T): T {
     return this.cycle(watcher)
-  }
-
-  public emit(): void {
-    this.increment()
-    this.cycle(this.notify)
   }
 }
