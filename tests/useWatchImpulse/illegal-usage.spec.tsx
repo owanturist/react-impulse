@@ -20,14 +20,12 @@ import {
 import { noop } from "../../src/utils"
 import { WithImpulse, WithListener } from "../common"
 
-const cleanup = new Array<VoidFunction>()
 const console$error = vi
   .spyOn(console, "error")
   .mockImplementation(vi.fn() as VoidFunction)
 
 afterEach(() => {
   vi.clearAllMocks()
-  cleanup.forEach((fn) => fn())
 })
 
 afterAll(() => {
@@ -74,7 +72,7 @@ describe("calling Impulse.of()", () => {
   })
 
   it("warns when called inside subscribe()", () => {
-    cleanup[0] = subscribe(() => {
+    subscribe(() => {
       Impulse.of(1)
     })
 
@@ -163,7 +161,7 @@ describe("calling Impulse#clone()", () => {
   it("warns when called inside subscribe()", () => {
     const impulse = Impulse.of(1)
 
-    cleanup[0] = subscribe(() => {
+    subscribe(() => {
       impulse.clone()
     })
 
@@ -295,7 +293,7 @@ describe("calling Impulse#setValue()", () => {
     const spy = vi.fn()
     const impulse = Impulse.of(1)
 
-    cleanup[0] = subscribe(() => {
+    subscribe(() => {
       impulse.setValue(2)
       spy()
     })
@@ -409,7 +407,7 @@ describe("calling Impulse#subscribe()", () => {
         initialProps: { impulse, listener },
       })
 
-      cleanup[0] = impulse.subscribe(correctListener)
+      impulse.subscribe(correctListener)
 
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).not.toHaveBeenCalled()
@@ -534,7 +532,7 @@ describe("calling Impulse#subscribe()", () => {
 
       render(<Component impulse={impulse} />)
 
-      cleanup[0] = impulse.subscribe(correctListener)
+      impulse.subscribe(correctListener)
 
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).not.toHaveBeenCalled()
@@ -555,7 +553,7 @@ describe("calling Impulse#subscribe()", () => {
     it("calls console.error", () => {
       const impulse = Impulse.of(4)
 
-      cleanup[0] = subscribe(() => {
+      subscribe(() => {
         impulse.subscribe(listener)
       })
 
@@ -568,7 +566,7 @@ describe("calling Impulse#subscribe()", () => {
       const impulse = Impulse.of(4)
       const impulse$subscribe = vi.spyOn(impulse, "subscribe")
 
-      cleanup[0] = subscribe(() => {
+      subscribe(() => {
         impulse.subscribe(listener)
       })
 
@@ -579,11 +577,11 @@ describe("calling Impulse#subscribe()", () => {
       const impulse = Impulse.of(4)
       const correctListener = vi.fn()
 
-      cleanup[0] = subscribe(() => {
+      subscribe(() => {
         impulse.subscribe(listener)
       })
 
-      cleanup[1] = impulse.subscribe(correctListener)
+      impulse.subscribe(correctListener)
 
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).not.toHaveBeenCalled()
