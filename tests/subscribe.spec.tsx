@@ -45,6 +45,22 @@ describe("single Impulse", () => {
     expect(spy).not.toHaveBeenCalled()
   })
 
+  it.concurrent("ignores second unsubscribe", () => {
+    const spy = vi.fn()
+    const impulse = Impulse.of(1)
+
+    const unsubscribe = subscribe(() => {
+      spy(impulse.getValue())
+    })
+
+    unsubscribe()
+    unsubscribe()
+
+    spy.mockReset()
+    impulse.setValue(2)
+    expect(spy).not.toHaveBeenCalled()
+  })
+
   it.concurrent("executes listener on every Impulse update", () => {
     const spy = vi.fn()
     const impulse = Impulse.of(1)
