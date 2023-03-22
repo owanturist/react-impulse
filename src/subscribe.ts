@@ -1,8 +1,7 @@
 import { WatchContext } from "./WatchContext"
 
 export const subscribe = (listener: VoidFunction): VoidFunction => {
-  // TODO use correct warning source
-  const context = new WatchContext("useImpulseMemo")
+  const context = new WatchContext("subscribe")
 
   context.watchStores(listener)
 

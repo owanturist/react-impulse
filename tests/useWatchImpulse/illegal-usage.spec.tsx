@@ -3,6 +3,7 @@ import { act, render, screen, renderHook } from "@testing-library/react"
 
 import {
   Impulse,
+  subscribe,
   useImpulseEffect,
   useImpulseLayoutEffect,
   useImpulseMemo,
@@ -18,12 +19,14 @@ import {
 import { noop } from "../../src/utils"
 import { WithImpulse, WithListener } from "../common"
 
+const cleanup = new Array<VoidFunction>()
 const console$error = vi
   .spyOn(console, "error")
   .mockImplementation(vi.fn() as VoidFunction)
 
 afterEach(() => {
   vi.clearAllMocks()
+  cleanup.forEach((fn) => fn())
 })
 
 afterAll(() => {
@@ -69,6 +72,16 @@ describe("calling Impulse.of()", () => {
     })
   })
 
+  it("warns when called inside subscribe()", () => {
+    cleanup[0] = subscribe(() => {
+      Impulse.of(1)
+    })
+
+    expect(console$error).toHaveBeenLastCalledWith(
+      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.subscribe,
+    )
+  })
+
   it.concurrent.each([
     ["useImpulseEffect", useImpulseEffect],
     ["useImpulseLayoutEffect", useImpulseLayoutEffect],
@@ -87,7 +100,7 @@ describe("calling Impulse.of()", () => {
     expect(result.current.getValue()).toBe(10)
   })
 
-  it("fine when called inside watch()", () => {
+  it.concurrent("fine when called inside watch()", () => {
     const Component = watch(() => {
       const [state] = React.useState(Impulse.of(20))
 
@@ -144,6 +157,18 @@ describe("calling Impulse#clone()", () => {
 
       expect(result.current).toBe(2)
     })
+  })
+
+  it("warns when called inside subscribe()", () => {
+    const impulse = Impulse.of(1)
+
+    cleanup[0] = subscribe(() => {
+      impulse.clone()
+    })
+
+    expect(console$error).toHaveBeenLastCalledWith(
+      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.subscribe,
+    )
   })
 
   it.concurrent.each([
@@ -265,6 +290,20 @@ describe("calling Impulse#setValue()", () => {
     expect(result.current.getValue()).toBe(2)
   })
 
+  it("fine when called inside subscribe()", () => {
+    const spy = vi.fn()
+    const impulse = Impulse.of(1)
+
+    cleanup[0] = subscribe(() => {
+      impulse.setValue(2)
+      spy()
+    })
+
+    expect(spy).toHaveBeenCalledOnce()
+    expect(console$error).not.toHaveBeenCalled()
+    expect(impulse.getValue()).toBe(2)
+  })
+
   it("warns when called inside watch()", () => {
     const Component = watch<{
       impulse: Impulse<number>
@@ -369,7 +408,7 @@ describe("calling Impulse#subscribe()", () => {
         initialProps: { impulse, listener },
       })
 
-      const unsubscribe = impulse.subscribe(correctListener)
+      cleanup[0] = impulse.subscribe(correctListener)
 
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).not.toHaveBeenCalled()
@@ -377,8 +416,6 @@ describe("calling Impulse#subscribe()", () => {
       impulse.setValue(1)
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).toHaveBeenCalledOnce()
-
-      unsubscribe()
     })
   })
 
@@ -496,7 +533,7 @@ describe("calling Impulse#subscribe()", () => {
 
       render(<Component impulse={impulse} />)
 
-      const unsubscribe = impulse.subscribe(correctListener)
+      cleanup[0] = impulse.subscribe(correctListener)
 
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).not.toHaveBeenCalled()
@@ -504,7 +541,55 @@ describe("calling Impulse#subscribe()", () => {
       impulse.setValue(1)
       expect(listener).not.toHaveBeenCalled()
       expect(correctListener).toHaveBeenCalledOnce()
-      unsubscribe()
+    })
+  })
+
+  describe("warns when called inside subscribe()", () => {
+    const listener = vi.fn()
+
+    afterEach(() => {
+      vi.clearAllMocks()
+    })
+
+    it("calls console.error", () => {
+      const impulse = Impulse.of(4)
+
+      cleanup[0] = subscribe(() => {
+        impulse.subscribe(listener)
+      })
+
+      expect(console$error).toHaveBeenCalledWith(
+        WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.subscribe,
+      )
+    })
+
+    it("returns noop function as unsubscribe", () => {
+      const impulse = Impulse.of(4)
+      const impulse$subscribe = vi.spyOn(impulse, "subscribe")
+
+      cleanup[0] = subscribe(() => {
+        impulse.subscribe(listener)
+      })
+
+      expect(impulse$subscribe).toHaveReturnedWith(noop)
+    })
+
+    it("does not call the listener on impulse's change", () => {
+      const impulse = Impulse.of(4)
+      const correctListener = vi.fn()
+
+      cleanup[0] = subscribe(() => {
+        impulse.subscribe(listener)
+      })
+
+      cleanup[1] = impulse.subscribe(correctListener)
+
+      expect(listener).not.toHaveBeenCalled()
+      expect(correctListener).not.toHaveBeenCalled()
+
+      impulse.setValue(1)
+      expect(listener).not.toHaveBeenCalled()
+      expect(correctListener).toHaveBeenCalledOnce()
     })
   })
 })
