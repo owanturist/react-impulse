@@ -1,12 +1,6 @@
-import { Compare, eq, isFunction, noop } from "./utils"
-import { WatchContext } from "./WatchContext"
+import { Compare, eq, isFunction } from "./utils"
 import { SetValueContext } from "./SetValueContext"
-import {
-  WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING,
-  WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING,
-  WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING,
-  WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
-} from "./validation"
+import { DUMMY_SCOPE, SCOPE_KEY, Scope } from "./Scope"
 
 export class Impulse<T> {
   /**
@@ -31,8 +25,6 @@ export class Impulse<T> {
     initialValue?: T,
     compare?: null | Compare<undefined | T>,
   ): Impulse<undefined | T> {
-    WatchContext.warning(WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING)
-
     return new Impulse(initialValue, compare ?? eq)
   }
 
@@ -66,7 +58,7 @@ export class Impulse<T> {
    * @version 1.0.0
    */
   protected toJSON(): unknown {
-    return this.getValue()
+    return this.getValue(DUMMY_SCOPE)
   }
 
   /**
@@ -76,7 +68,7 @@ export class Impulse<T> {
    * @version 1.0.0
    */
   protected toString(): string {
-    return String(this.getValue())
+    return String(this.getValue(DUMMY_SCOPE))
   }
 
   /**
@@ -91,8 +83,6 @@ export class Impulse<T> {
     transform?: (value: T) => T,
     compare: null | Compare<T> = this.compare,
   ): Impulse<T> {
-    WatchContext.warning(WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING)
-
     return new Impulse(
       isFunction(transform) ? transform(this.value) : this.value,
       compare ?? eq,
@@ -104,7 +94,7 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
-  public getValue(): T
+  public getValue(scope: Scope): T
   /**
    * Returns a value selected from the current value.
    *
@@ -112,11 +102,14 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
-  public getValue<R>(select: (value: T) => R): R
-  public getValue<R>(select?: (value: T) => R): T | R {
-    WatchContext.register(this as Impulse<unknown>)
+  public getValue<R>(scope: Scope, select: (value: T, scope: Scope) => R): R
+  public getValue<R>(
+    scope: Scope,
+    select?: (value: T, scope: Scope) => R,
+  ): T | R {
+    scope[SCOPE_KEY]?.register(this as Impulse<unknown>)
 
-    return isFunction(select) ? select(this.value) : this.value
+    return isFunction(select) ? select(this.value, scope) : this.value
   }
 
   /**
@@ -134,10 +127,6 @@ export class Impulse<T> {
     valueOrTransform: T | ((currentValue: T) => T),
     compare: null | Compare<T> = this.compare,
   ): void {
-    if (WatchContext.warning(WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING)) {
-      return
-    }
-
     const finalCompare = compare ?? eq
     const [emit, register] = SetValueContext.registerStoreSubscribers()
 
@@ -163,10 +152,6 @@ export class Impulse<T> {
    * @version 1.0.0
    */
   public subscribe(listener: VoidFunction): VoidFunction {
-    if (WatchContext.warning(WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING)) {
-      return noop
-    }
-
     const countWhenSubscribes = this.subscribers.get(listener) ?? 0
 
     this.subscribers.set(listener, countWhenSubscribes + 1)

@@ -1,24 +1,24 @@
 import {
   FC,
   ForwardRefRenderFunction,
-  ExoticComponent,
   MemoExoticComponent,
   ForwardRefExoticComponent,
   memo as React_memo,
   forwardRef as React_forwardRef,
   PropsWithoutRef,
   RefAttributes,
+  createElement,
 } from "react"
-import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
-import { useWatchContext } from "./useWatchContext"
 import { Compare } from "./utils"
+import { Scope } from "./Scope"
+import { useScope } from "./useScope"
 
-const isImpulseWatcher = <TProps>(
-  render: FC<TProps> & { isImpulseWatcher?: boolean },
-): boolean => {
-  return render.isImpulseWatcher === true
-}
+// TODO export types?
+export type PropsWithScope<TProps> = TProps & { scope: Scope }
+
+// TODO delete or apply in memo and forwardRef
+export type PropsWithoutScope<TProps> = Omit<TProps, "scope">
 
 /**
  * Creates a React component that subscribes to all Impulses calling the `Impulse#getValue` method during the rendering phase of the component.
@@ -27,42 +27,34 @@ const isImpulseWatcher = <TProps>(
  *
  * @version 1.0.0
  */
-export function watch<TProps>(component: ExoticComponent<TProps>): never
-export function watch<TProps>(component: FC<TProps>): FC<TProps>
-export function watch<TProps>(component: FC<TProps>): FC<TProps> {
-  if (isImpulseWatcher(component)) {
-    return component
-  }
+// export function watch<TProps>(Component: FC<PropsWithScope<TProps>>): FC<TProps>
+// export function watch<TProps extends { scope: Scope }>(
+//   Component: FC<TProps>,
+// ): FC<PropsWithoutScope<TProps>>
+export function watch<TProps>(
+  Component: FC<PropsWithScope<TProps>>,
+): FC<PropsWithoutScope<TProps>> {
+  const ImpulseWatcher: React.FC<TProps> = React_forwardRef((props, ref) => {
+    const scope = useScope()
 
-  const ImpulseWatcher = (props: TProps, ctx: unknown): ReturnType<FC> => {
-    const { executeWatcher, subscribe, getVersion } = useWatchContext({
-      warningSource: "watch",
-    })
+    return createElement(Component, { ...props, ref, scope })
+  })
 
-    return useSyncExternalStoreWithSelector(
-      subscribe,
-      getVersion,
-      getVersion,
-      // no need to memoize since props are a new object on each call
-      () => executeWatcher(() => component(props, ctx)),
-    )
-  }
-
-  ImpulseWatcher.displayName = `ImpulseWatcher${component.displayName ?? ""}`
-  ImpulseWatcher.isImpulseWatcher = true
+  ImpulseWatcher.displayName = `ImpulseWatcher${Component.displayName ?? ""}`
 
   return ImpulseWatcher
 }
 
 const memo = <TProps>(
-  component: FC<TProps>,
-  propsAreEqual?: Compare<Readonly<TProps>>,
+  component: FC<PropsWithScope<TProps>>,
+  // TODO exclude scope from props
+  propsAreEqual?: Compare<Readonly<PropsWithScope<TProps>>>,
 ): MemoExoticComponent<FC<TProps>> => {
   return React_memo(watch(component), propsAreEqual)
 }
 
 const forwardRefMemo = <TNode, TProps>(
-  render: ForwardRefRenderFunction<TNode, TProps>,
+  render: ForwardRefRenderFunction<TNode, PropsWithScope<TProps>>,
   propsAreEqual?: Compare<
     Readonly<PropsWithoutRef<TProps> & RefAttributes<TNode>>
   >,
@@ -73,13 +65,11 @@ const forwardRefMemo = <TNode, TProps>(
 }
 
 const forwardRef = <TNode, TProps>(
-  render: ForwardRefRenderFunction<TNode, TProps>,
+  render: ForwardRefRenderFunction<TNode, PropsWithScope<TProps>>,
 ): ForwardRefExoticComponent<
   PropsWithoutRef<TProps> & RefAttributes<TNode>
 > => {
-  return React_forwardRef(
-    watch(render) as ForwardRefRenderFunction<TNode, TProps>,
-  )
+  return watch(React_forwardRef(render))
 }
 
 /**

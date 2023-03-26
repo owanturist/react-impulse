@@ -1,8 +1,9 @@
-import { useCallback, useDebugValue } from "react"
+import { useCallback, useDebugValue, useMemo, useState } from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
-import { useWatchContext } from "./useWatchContext"
 import { Compare, eq, useEvent } from "./utils"
+import { SCOPE_KEY, Scope } from "./Scope"
+import { WatchContext } from "./WatchContext"
 
 /**
  * A hook that executes the `watcher` function whenever any of the involved Impulses' values update
@@ -14,17 +15,23 @@ import { Compare, eq, useEvent } from "./utils"
  * @version 1.0.0
  */
 export function useWatchImpulse<T>(
-  watcher: () => T,
+  watcher: (scope: Scope) => T,
   compare?: null | Compare<T>,
 ): T {
-  const { executeWatcher, subscribe, getVersion } = useWatchContext({
-    warningSource: "useWatchImpulse",
-  })
+  const [context] = useState(() => new WatchContext())
+
+  const [subscribe, getVersion] = useMemo(
+    () => [
+      (onChange: VoidFunction) => context.subscribe(onChange),
+      () => context.getVersion(),
+    ],
+    [context],
+  )
 
   // the select calls each time when updates either the watcher or the version
   const select = useCallback(
-    () => executeWatcher(watcher),
-    [executeWatcher, watcher],
+    (version: number) => watcher({ [SCOPE_KEY]: context, version }),
+    [watcher, context],
   )
 
   const value = useSyncExternalStoreWithSelector(
