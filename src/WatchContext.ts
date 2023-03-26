@@ -9,7 +9,6 @@ import { SetValueContext } from "./SetValueContext"
  * @private
  */
 export class WatchContext {
-  private readonly deadCleanups = new Set<Impulse<unknown>>()
   private readonly cleanups = new Map<Impulse<unknown>, VoidFunction>()
 
   private version = 0
@@ -17,46 +16,18 @@ export class WatchContext {
   private notify: null | VoidFunction = null
 
   private readonly emit = (): void => {
-    this.increment()
-    if (this.notify != null) {
-      this.cycle(this.notify)
-    }
+    this.cleanup()
+    this.notify?.()
   }
 
-  private cleanupObsolete(): void {
-    this.deadCleanups.forEach((impulse) => {
-      const cleanup = this.cleanups.get(impulse)
-
-      if (cleanup != null) {
-        cleanup()
-        this.cleanups.delete(impulse)
-      }
-    })
-
-    this.deadCleanups.clear()
-  }
-
-  private cycle<T>(callback: () => T): T {
-    // fill up dead cleanups with all of the current cleanups
-    // to keep only real dead once during .register() call
-    this.cleanups.forEach((_, impulse) => this.deadCleanups.add(impulse))
-
-    const value = callback()
-
-    this.cleanupObsolete()
-
-    return value
-  }
-
-  private increment(): void {
+  private cleanup(): void {
     this.version = (this.version + 1) % 10e9
+    this.cleanups.forEach((cleanup) => cleanup())
+    this.cleanups.clear()
   }
 
   public register(impulse: Impulse<unknown>): void {
-    if (this.cleanups.has(impulse)) {
-      // still alive
-      this.deadCleanups.delete(impulse)
-    } else {
+    if (!this.cleanups.has(impulse)) {
       this.cleanups.set(
         impulse,
         impulse.subscribe(() => {
@@ -68,31 +39,19 @@ export class WatchContext {
   }
 
   public subscribe(notify: VoidFunction): VoidFunction {
-    const unsubscribe = (): void => {
-      // does not need to unsubscribe if it is already unsubscribed
-      if (this.notify == null) {
-        return
-      }
-
-      this.notify = null
-      this.increment()
-      this.cleanups.forEach((cleanup) => cleanup())
-      this.cleanups.clear()
-      this.deadCleanups.clear()
+    // in case if subscribe is called twice
+    if (this.notify != null) {
+      this.cleanup()
     }
 
-    // in case if subscribe is called twice
-    unsubscribe()
     this.notify = notify
 
-    return unsubscribe
+    return () => {
+      this.cleanup()
+    }
   }
 
   public getVersion(): number {
     return this.version
-  }
-
-  public watchStores<T>(watcher: () => T): T {
-    return this.cycle(watcher)
   }
 }
