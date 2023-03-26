@@ -1,7 +1,7 @@
 import { useMemo } from "react"
-import { useSyncExternalStore } from "use-sync-external-store/shim"
 
-import { useWatchContext } from "./useWatchContext"
+import { useScope } from "./useScope"
+import { Scope } from "./Scope"
 
 /**
  * The hook is an `Impulse` version of the `React.useMemo` hook.
@@ -13,16 +13,15 @@ import { useWatchContext } from "./useWatchContext"
  *
  * @version 1.0.0
  */
-export const useImpulseMemo: typeof useMemo = (factory, dependencies) => {
-  const { executeWatcher, subscribe, getVersion } = useWatchContext({
-    warningSource: "useImpulseMemo",
-  })
-
-  const buster = useSyncExternalStore(subscribe, getVersion, getVersion)
+export const useImpulseMemo = <T>(
+  factory: (scope: Scope) => T,
+  dependencies: undefined | ReadonlyArray<unknown>,
+): T => {
+  const scope = useScope()
 
   return useMemo(
-    () => executeWatcher(factory),
+    () => factory(scope),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    dependencies && [...dependencies, buster],
+    dependencies && [...dependencies, scope],
   )
 }
