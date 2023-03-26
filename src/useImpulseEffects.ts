@@ -1,20 +1,19 @@
 import { useEffect, useLayoutEffect } from "react"
-import { useSyncExternalStore } from "use-sync-external-store/shim"
 
-import { useWatchContext } from "./useWatchContext"
+import { useScope } from "./useScope"
+import { Scope } from "./Scope"
 
 const createEffectHook =
-  (useReactEffect: typeof useEffect): typeof useEffect =>
-  (effect, dependencies) => {
-    const { executeWatcher, subscribe, getVersion } = useWatchContext({
-      warningSource: null,
-    })
-
-    const buster = useSyncExternalStore(subscribe, getVersion, getVersion)
+  (useReactEffect: typeof useEffect) =>
+  (
+    effect: ((scope: Scope) => void) | ((scope: Scope) => VoidFunction),
+    dependencies?: ReadonlyArray<unknown>,
+  ) => {
+    const scope = useScope()
 
     useReactEffect(
-      () => executeWatcher(effect),
-      dependencies && [...dependencies, buster],
+      () => effect(scope),
+      dependencies && [...dependencies, scope],
     )
   }
 

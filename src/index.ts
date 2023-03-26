@@ -1,5 +1,7 @@
 export type { Compare } from "./utils"
+export type { Scope } from "./Scope"
 export { Impulse } from "./Impulse"
+export { tap } from "./tap"
 export { batch } from "./batch"
 export { subscribe } from "./subscribe"
 export { watch } from "./watch"
