@@ -1,7 +1,13 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useImpulseValue, useWatchImpulse, watch } from "../../src"
+import {
+  Impulse,
+  Scope,
+  useImpulseValue,
+  useWatchImpulse,
+  watch,
+} from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -9,8 +15,8 @@ describe("watching nested impulses", () => {
   abstract class AppState {
     public abstract counts: ReadonlyArray<Impulse<number>>
 
-    public static sum({ counts }: AppState): number {
-      return counts.reduce((acc, count) => acc + count.getValue(), 0)
+    public static sum({ counts }: AppState, scope: Scope): number {
+      return counts.reduce((acc, count) => acc + count.getValue(scope), 0)
     }
   }
 
@@ -93,8 +99,8 @@ describe("watching nested impulses", () => {
 
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useWatchImpulse(
-      () => {
-        const total = AppState.sum(props.state.getValue())
+      (scope) => {
+        const total = props.state.getValue(scope, AppState.sum)
 
         return [total > 10, total < 20]
       },
@@ -114,11 +120,14 @@ describe("watching nested impulses", () => {
 
   const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useWatchImpulse<[boolean, boolean]>(
-      React.useCallback(() => {
-        const total = AppState.sum(props.state.getValue())
+      React.useCallback(
+        (scope) => {
+          const total = props.state.getValue(scope, AppState.sum)
 
-        return [total > 10, total < 20]
-      }, [props.state]),
+          return [total > 10, total < 20]
+        },
+        [props.state],
+      ),
       React.useCallback(
         (
           [left1, right1]: [boolean, boolean],
@@ -140,13 +149,13 @@ describe("watching nested impulses", () => {
   }
 
   const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanTen = useWatchImpulse(() => {
-      const total = props.state.getValue(AppState.sum)
+    const moreThanTen = useWatchImpulse((scope) => {
+      const total = props.state.getValue(scope, AppState.sum)
 
       return total > 10
     })
-    const lessThanTwenty = useWatchImpulse(() => {
-      const total = AppState.sum(props.state.getValue())
+    const lessThanTwenty = useWatchImpulse((scope) => {
+      const total = props.state.getValue(scope, AppState.sum)
 
       return total < 20
     })
@@ -162,18 +171,24 @@ describe("watching nested impulses", () => {
 
   const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
     const moreThanTen = useWatchImpulse(
-      React.useCallback(() => {
-        const total = props.state.getValue(AppState.sum)
+      React.useCallback(
+        (scope) => {
+          const total = props.state.getValue(scope, AppState.sum)
 
-        return total > 10
-      }, [props.state]),
+          return total > 10
+        },
+        [props.state],
+      ),
     )
     const lessThanTwenty = useWatchImpulse(
-      React.useCallback(() => {
-        const total = AppState.sum(props.state.getValue())
+      React.useCallback(
+        (scope) => {
+          const total = props.state.getValue(scope, AppState.sum)
 
-        return total < 20
-      }, [props.state]),
+          return total < 20
+        },
+        [props.state],
+      ),
     )
 
     return (
@@ -185,8 +200,8 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const WatchedApp: React.FC<AppProps> = watch((props) => {
-    const total = AppState.sum(props.state.getValue())
+  const WatchedApp: React.FC<AppProps> = watch(({ scope, ...props }) => {
+    const total = props.state.getValue(scope, AppState.sum)
     const [moreThanTen, lessThanTwenty] = [total > 10, total < 20]
 
     return (

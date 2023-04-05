@@ -1,5 +1,6 @@
 export type { Compare } from "./utils"
 export type { Scope } from "./Scope"
+export type { PropsWithScope, PropsWithoutScope } from "./watch"
 export { Impulse } from "./Impulse"
 export { tap } from "./tap"
 export { batch } from "./batch"
