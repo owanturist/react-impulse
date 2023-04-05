@@ -1,20 +1,21 @@
-import { useEffect, useLayoutEffect } from "react"
+import { EffectCallback, useEffect, useLayoutEffect } from "react"
 
 import { useScope } from "./useScope"
-import { Scope } from "./Scope"
+import { SCOPE_KEY, Scope } from "./Scope"
 
 const createEffectHook =
   (useReactEffect: typeof useEffect) =>
   (
-    effect: ((scope: Scope) => void) | ((scope: Scope) => VoidFunction),
+    effect: (scope: Scope) => ReturnType<EffectCallback>,
     dependencies?: ReadonlyArray<unknown>,
   ) => {
     const scope = useScope()
 
-    useReactEffect(
-      () => effect(scope),
-      dependencies && [...dependencies, scope],
-    )
+    useReactEffect(() => {
+      scope[SCOPE_KEY]?.cleanup()
+
+      return effect(scope)
+    }, dependencies && [...dependencies, scope])
   }
 
 /**

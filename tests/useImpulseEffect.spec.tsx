@@ -17,9 +17,9 @@ import {
 const identity = <T,>(value: T): T => value
 
 describe.each([
-  ["useEffect", React.useEffect, useImpulseEffect],
-  ["useLayoutEffect", React.useLayoutEffect, useImpulseLayoutEffect],
-])("running %s hook", (hookName, useReactEffect, useCustomImpulseEffect) => {
+  ["useEffect", useImpulseEffect],
+  ["useLayoutEffect", useImpulseLayoutEffect],
+])("running %s hook", (hookName, useCustomImpulseEffect) => {
   describe.each([
     ["nothing", identity as typeof watch],
     ["watch", watch],
@@ -48,29 +48,6 @@ describe.each([
             onClick={() => setMultiplier((x) => x + 1)}
           />
         )
-      })
-
-      it.skip(`cannot watch inside React ${hookName}`, () => {
-        const value = Impulse.of(3)
-        const onEffect = vi.fn()
-
-        render(
-          <Component
-            onEffect={onEffect}
-            useEffect={useReactEffect}
-            value={value}
-          />,
-        )
-
-        expect(onEffect).toHaveBeenCalledOnce()
-        expect(onEffect).toHaveBeenLastCalledWith(6)
-        vi.clearAllMocks()
-
-        act(() => {
-          value.setValue(2)
-        })
-
-        expect(onEffect).not.toHaveBeenCalled()
       })
 
       it(`can watch inside Impulse ${hookName}`, () => {
@@ -174,7 +151,7 @@ describe.each([
       })
 
       // TODO add the same test for watch, useWatchImpulse, useImpulseEffect, subscribe
-      it.skip("should unsubscribe Impulse from useEffect when swapped", () => {
+      it("should unsubscribe Impulse from useEffect when swapped", () => {
         const value_1 = Impulse.of(1)
         const value_2 = Impulse.of(3)
         const onEffect = vi.fn()
