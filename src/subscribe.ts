@@ -1,4 +1,4 @@
-import { SCOPE_KEY, Scope } from "./Scope"
+import { SCOPE_KEY, Scope, injectScope } from "./Scope"
 import { WatchContext } from "./WatchContext"
 
 /**
@@ -10,13 +10,14 @@ import { WatchContext } from "./WatchContext"
 export const subscribe = (listener: (scope: Scope) => void): VoidFunction => {
   const context = new WatchContext()
 
-  listener({
+  // TODO update docs about JSON and toString
+  injectScope(listener, {
     [SCOPE_KEY]: context,
     version: context.getVersion(),
   })
 
   return context.subscribe(() => {
-    listener({
+    injectScope(listener, {
       [SCOPE_KEY]: context,
       version: context.getVersion(),
     })
