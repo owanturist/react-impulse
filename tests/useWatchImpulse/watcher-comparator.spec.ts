@@ -9,14 +9,14 @@ describe.each([
   [
     "inline watcher",
     ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
-      return useWatchImpulse(() => impulse.getValue(), compare)
+      return useWatchImpulse((scope) => impulse.getValue(scope), compare)
     },
   ],
   [
     "memoized watcher",
     ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
       return useWatchImpulse(
-        useCallback(() => impulse.getValue(), [impulse]),
+        useCallback((scope) => impulse.getValue(scope), [impulse]),
         compare,
       )
     },

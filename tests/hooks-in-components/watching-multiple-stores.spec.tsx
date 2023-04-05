@@ -50,8 +50,9 @@ describe("watching multiple impulses", () => {
 
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useWatchImpulse(
-      () => {
-        const sum = props.firstCount.getValue() + props.secondCount.getValue()
+      (scope) => {
+        const sum =
+          props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
 
         return [sum > 2, sum < 7]
       },
@@ -71,11 +72,15 @@ describe("watching multiple impulses", () => {
 
   const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useWatchImpulse<[boolean, boolean]>(
-      React.useCallback(() => {
-        const sum = props.firstCount.getValue() + props.secondCount.getValue()
+      React.useCallback(
+        (scope) => {
+          const sum =
+            props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
 
-        return [sum > 2, sum < 7]
-      }, [props.firstCount, props.secondCount]),
+          return [sum > 2, sum < 7]
+        },
+        [props.firstCount, props.secondCount],
+      ),
       React.useCallback(
         (
           [left1, right1]: [boolean, boolean],
@@ -97,13 +102,15 @@ describe("watching multiple impulses", () => {
   }
 
   const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchImpulse(() => {
-      const sum = props.firstCount.getValue() + props.secondCount.getValue()
+    const moreThanOne = useWatchImpulse((scope) => {
+      const sum =
+        props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
 
       return sum > 2
     })
-    const lessThanFour = useWatchImpulse(() => {
-      const sum = props.firstCount.getValue() + props.secondCount.getValue()
+    const lessThanFour = useWatchImpulse((scope) => {
+      const sum =
+        props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
 
       return sum < 7
     })
@@ -119,18 +126,26 @@ describe("watching multiple impulses", () => {
 
   const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
     const moreThanOne = useWatchImpulse(
-      React.useCallback(() => {
-        const sum = props.firstCount.getValue() + props.secondCount.getValue()
+      React.useCallback(
+        (scope) => {
+          const sum =
+            props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
 
-        return sum > 2
-      }, [props.firstCount, props.secondCount]),
+          return sum > 2
+        },
+        [props.firstCount, props.secondCount],
+      ),
     )
     const lessThanFour = useWatchImpulse(
-      React.useCallback(() => {
-        const sum = props.firstCount.getValue() + props.secondCount.getValue()
+      React.useCallback(
+        (scope) => {
+          const sum =
+            props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
 
-        return sum < 7
-      }, [props.firstCount, props.secondCount]),
+          return sum < 7
+        },
+        [props.firstCount, props.secondCount],
+      ),
     )
 
     return (
@@ -142,8 +157,9 @@ describe("watching multiple impulses", () => {
     )
   }
 
-  const WatchedApp: React.FC<AppProps> = watch((props) => {
-    const sum = props.firstCount.getValue() + props.secondCount.getValue()
+  const WatchedApp: React.FC<AppProps> = watch(({ scope, ...props }) => {
+    const sum =
+      props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
     const [moreThanOne, lessThanFour] = [sum > 2, sum < 7]
 
     return (

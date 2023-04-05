@@ -3,16 +3,16 @@ import { renderHook } from "@testing-library/react-hooks"
 import { useImpulse } from "../src"
 
 describe("with direct initial value", () => {
-  it.concurrent("creates a impulse with an initial value", () => {
+  it.concurrent("creates an impulse with an initial value", ({ scope }) => {
     const initial = { count: 0 }
 
     const { result } = renderHook(() => useImpulse(initial))
 
-    expect(result.current.getValue()).toBe(initial)
-    expect(result.current.getValue()).toStrictEqual({ count: 0 })
+    expect(result.current.getValue(scope)).toBe(initial)
+    expect(result.current.getValue(scope)).toStrictEqual({ count: 0 })
   })
 
-  it.concurrent("keeps the same impulse during re-renders", () => {
+  it.concurrent("keeps the same impulse during re-renders", ({ scope }) => {
     const initial = { count: 0 }
 
     const { result, rerender } = renderHook(() => useImpulse(initial))
@@ -22,12 +22,12 @@ describe("with direct initial value", () => {
     rerender(initial)
 
     expect(result.current).toBe(firstResult)
-    expect(result.current.getValue()).toStrictEqual({ count: 0 })
+    expect(result.current.getValue(scope)).toStrictEqual({ count: 0 })
   })
 
   it.concurrent(
     "does not create new impulse when the initial value changes",
-    () => {
+    ({ scope }) => {
       const initial = { count: 0 }
 
       const { result, rerender } = renderHook(() => useImpulse(initial))
@@ -37,24 +37,24 @@ describe("with direct initial value", () => {
       rerender({ count: 1 })
 
       expect(result.current).toBe(firstResult)
-      expect(result.current.getValue()).toStrictEqual({ count: 0 })
+      expect(result.current.getValue(scope)).toStrictEqual({ count: 0 })
     },
   )
 })
 
 describe("with lazy initial value", () => {
-  it.concurrent("creates a impulse with an initial value", () => {
+  it.concurrent("creates an impulse with an initial value", ({ scope }) => {
     const initial = { count: 0 }
     const init = vi.fn(() => initial)
 
     const { result } = renderHook(() => useImpulse(init))
 
-    expect(result.current.getValue()).toBe(initial)
-    expect(result.current.getValue()).toStrictEqual({ count: 0 })
+    expect(result.current.getValue(scope)).toBe(initial)
+    expect(result.current.getValue(scope)).toStrictEqual({ count: 0 })
     expect(init).toHaveBeenCalledOnce()
   })
 
-  it.concurrent("keeps the same impulse during re-renders", () => {
+  it.concurrent("keeps the same impulse during re-renders", ({ scope }) => {
     const initial = { count: 0 }
     const init = vi.fn(() => initial)
 
@@ -65,13 +65,13 @@ describe("with lazy initial value", () => {
     rerender(init)
 
     expect(result.current).toBe(firstResult)
-    expect(result.current.getValue()).toStrictEqual({ count: 0 })
+    expect(result.current.getValue(scope)).toStrictEqual({ count: 0 })
     expect(init).toHaveBeenCalledOnce()
   })
 
   it.concurrent(
     "does not create new impulse when the init return value changes",
-    () => {
+    ({ scope }) => {
       let initial = { count: 0 }
       const init = vi.fn(() => initial)
 
@@ -83,14 +83,14 @@ describe("with lazy initial value", () => {
       rerender(init)
 
       expect(result.current).toBe(firstResult)
-      expect(result.current.getValue()).toStrictEqual({ count: 0 })
+      expect(result.current.getValue(scope)).toStrictEqual({ count: 0 })
       expect(init).toHaveBeenCalledOnce()
     },
   )
 
   it.concurrent(
     "does not create new impulse when the init function changes",
-    () => {
+    ({ scope }) => {
       const initial = { count: 0 }
       let init = vi.fn(() => initial)
 
@@ -102,7 +102,7 @@ describe("with lazy initial value", () => {
       rerender(init)
 
       expect(result.current).toBe(firstResult)
-      expect(result.current.getValue()).toStrictEqual({ count: 0 })
+      expect(result.current.getValue(scope)).toStrictEqual({ count: 0 })
       expect(init).not.toHaveBeenCalled()
     },
   )

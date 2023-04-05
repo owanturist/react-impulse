@@ -8,14 +8,14 @@ describe.each([
   [
     "inline watcher",
     ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
-      return useWatchImpulse(() => impulse.getValue(), compare)
+      return useWatchImpulse((scope) => impulse.getValue(scope), compare)
     },
   ],
   [
     "memoized watcher",
     ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
       return useWatchImpulse(
-        useCallback(() => impulse.getValue(), [impulse]),
+        useCallback((scope) => impulse.getValue(scope), [impulse]),
         compare,
       )
     },
@@ -85,7 +85,7 @@ describe.each([
 
       it.concurrent(
         "stops watching impulse_1 changes after replacement with impulse_2",
-        () => {
+        ({ scope }) => {
           const { impulse_1, impulse_2, result, rerender } = setup()
 
           rerender({ impulse: impulse_2 })
@@ -94,14 +94,14 @@ describe.each([
             impulse_1.setValue(Counter.inc)
           })
 
-          expect(impulse_1.getValue()).toStrictEqual({ count: 2 })
+          expect(impulse_1.getValue(scope)).toStrictEqual({ count: 2 })
           expect(result.current).toStrictEqual({ count: 10 })
         },
       )
 
       it.concurrent(
         "starts watching impulse_2 changes after replacement of impulse_1",
-        () => {
+        ({ scope }) => {
           const { impulse_1, impulse_2, result, rerender } = setup()
 
           rerender({ impulse: impulse_2 })
@@ -110,7 +110,7 @@ describe.each([
             impulse_2.setValue(Counter.inc)
           })
 
-          expect(impulse_1.getValue()).toStrictEqual({ count: 1 })
+          expect(impulse_1.getValue(scope)).toStrictEqual({ count: 1 })
           expect(result.current).toStrictEqual({ count: 11 })
         },
       )
@@ -159,14 +159,17 @@ describe("transform Impulse's value inside watcher", () => {
     [
       "inline watcher",
       ({ impulse }: WithImpulse, compare?: Compare<[boolean, boolean]>) => {
-        return useWatchImpulse(() => impulse.getValue(toTuple), compare)
+        return useWatchImpulse(
+          (scope) => impulse.getValue(scope, toTuple),
+          compare,
+        )
       },
     ],
     [
       "memoized watcher",
       ({ impulse }: WithImpulse, compare?: Compare<[boolean, boolean]>) => {
         return useWatchImpulse(
-          useCallback(() => impulse.getValue(toTuple), [impulse]),
+          useCallback((scope) => impulse.getValue(scope, toTuple), [impulse]),
           compare,
         )
       },
@@ -296,10 +299,10 @@ describe("transform Impulse's value inside watcher", () => {
     [
       "inline watcher",
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(() => {
+        return useWatchImpulse((scope) => {
           spy()
 
-          return impulse.getValue()
+          return impulse.getValue(scope)
         }, compare)
       },
     ],
@@ -307,11 +310,14 @@ describe("transform Impulse's value inside watcher", () => {
       "memoized watcher",
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
         return useWatchImpulse(
-          useCallback(() => {
-            spy()
+          useCallback(
+            (scope) => {
+              spy()
 
-            return impulse.getValue()
-          }, [spy, impulse]),
+              return impulse.getValue(scope)
+            },
+            [spy, impulse],
+          ),
           compare,
         )
       },
@@ -360,17 +366,17 @@ describe("multiple Impulse#getValue() calls", () => {
     [
       "inline watcher",
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(() => {
+        return useWatchImpulse((scope) => {
           spy()
 
-          return impulse.getValue()
+          return impulse.getValue(scope)
         }, compare)
       },
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(() => {
+        return useWatchImpulse((scope) => {
           spy()
 
-          return Counter.merge(impulse.getValue(), impulse.getValue())
+          return Counter.merge(impulse.getValue(scope), impulse.getValue(scope))
         }, compare)
       },
     ],
@@ -378,21 +384,30 @@ describe("multiple Impulse#getValue() calls", () => {
       "memoized watcher",
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
         return useWatchImpulse(
-          useCallback(() => {
-            spy()
+          useCallback(
+            (scope) => {
+              spy()
 
-            return impulse.getValue()
-          }, [spy, impulse]),
+              return impulse.getValue(scope)
+            },
+            [spy, impulse],
+          ),
           compare,
         )
       },
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
         return useWatchImpulse(
-          useCallback(() => {
-            spy()
+          useCallback(
+            (scope) => {
+              spy()
 
-            return Counter.merge(impulse.getValue(), impulse.getValue())
-          }, [spy, impulse]),
+              return Counter.merge(
+                impulse.getValue(scope),
+                impulse.getValue(scope),
+              )
+            },
+            [spy, impulse],
+          ),
           compare,
         )
       },

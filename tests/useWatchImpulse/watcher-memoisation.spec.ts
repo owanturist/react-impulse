@@ -8,8 +8,8 @@ describe.each([
   [
     "without comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(() => {
-        const value = impulse.getValue()
+      return useWatchImpulse((scope) => {
+        const value = impulse.getValue(scope)
 
         spy(value)
 
@@ -21,8 +21,8 @@ describe.each([
     "with inline comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
-        () => {
-          const value = impulse.getValue()
+        (scope) => {
+          const value = impulse.getValue(scope)
 
           spy(value)
 
@@ -35,8 +35,8 @@ describe.each([
   [
     "with memoized comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(() => {
-        const value = impulse.getValue()
+      return useWatchImpulse((scope) => {
+        const value = impulse.getValue(scope)
 
         spy(value)
 
@@ -99,13 +99,16 @@ describe.each([
     "without comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
-        useCallback(() => {
-          const value = impulse.getValue()
+        useCallback(
+          (scope) => {
+            const value = impulse.getValue(scope)
 
-          spy(value)
+            spy(value)
 
-          return value
-        }, [impulse, spy]),
+            return value
+          },
+          [impulse, spy],
+        ),
       )
     },
   ],
@@ -113,13 +116,16 @@ describe.each([
     "with inline comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
-        useCallback(() => {
-          const value = impulse.getValue()
+        useCallback(
+          (scope) => {
+            const value = impulse.getValue(scope)
 
-          spy(value)
+            spy(value)
 
-          return value
-        }, [impulse, spy]),
+            return value
+          },
+          [impulse, spy],
+        ),
         (prev, next) => Counter.compare(prev, next),
       )
     },
@@ -128,13 +134,16 @@ describe.each([
     "with memoized comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
-        useCallback(() => {
-          const value = impulse.getValue()
+        useCallback(
+          (scope) => {
+            const value = impulse.getValue(scope)
 
-          spy(value)
+            spy(value)
 
-          return value
-        }, [impulse, spy]),
+            return value
+          },
+          [impulse, spy],
+        ),
         Counter.compare,
       )
     },

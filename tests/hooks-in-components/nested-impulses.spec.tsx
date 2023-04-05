@@ -54,7 +54,7 @@ describe("nested impulses", () => {
     )
   }
 
-  it("Performs nested impulse management", () => {
+  it("Performs nested impulse management", ({ scope }) => {
     const impulse = Impulse.of<AppState>({ counts: [] })
     const onRender = vi.fn()
     const onCounterRender = vi.fn()
@@ -121,7 +121,7 @@ describe("nested impulses", () => {
 
     // double the third counter from the outside
     act(() => {
-      impulse.getValue().counts[2]!.setValue((x) => 2 * x)
+      impulse.getValue(scope).counts[2]!.setValue((x) => 2 * x)
     })
     expect(onRender).not.toHaveBeenCalled()
     expect(onCounterRender).toHaveBeenCalledOnce()
@@ -141,7 +141,9 @@ describe("nested impulses", () => {
 
     // increment all from the outside
     act(() => {
-      impulse.getValue().counts.forEach((count) => count.setValue((x) => x + 1))
+      impulse
+        .getValue(scope)
+        .counts.forEach((count) => count.setValue((x) => x + 1))
     })
     expect(onRender).not.toHaveBeenCalled()
     expect(onCounterRender).toHaveBeenCalledTimes(3)

@@ -4,7 +4,7 @@ import { isEqual } from "../src/utils"
 import { Counter } from "./common"
 
 describe("Impulse#compare", () => {
-  describe("when creating a impulse with Impulse.of", () => {
+  describe("when creating an impulse with Impulse.of", () => {
     it.concurrent("assigns isEqual by default", () => {
       const impulse = Impulse.of({ count: 0 })
 
@@ -24,7 +24,7 @@ describe("Impulse#compare", () => {
     })
   })
 
-  describe("when creating a impulse with Impulse.clone", () => {
+  describe("when creating an impulse with Impulse.clone", () => {
     it.concurrent("inherits default the source impulse compare", () => {
       const impulse = Impulse.of({ count: 0 })
 
@@ -55,29 +55,29 @@ describe("Impulse#compare", () => {
   })
 
   describe("when using Impulse#setValue", () => {
-    it.concurrent("uses Impulse#compare by default", () => {
+    it.concurrent("uses Impulse#compare by default", ({ scope }) => {
       const initial = { count: 0 }
       const impulse = Impulse.of(initial, Counter.compare)
 
       impulse.setValue(Counter.clone)
-      expect(impulse.getValue()).toBe(initial)
+      expect(impulse.getValue(scope)).toBe(initial)
     })
 
-    it.concurrent("replaces with isEqual when `null`", () => {
+    it.concurrent("replaces with isEqual when `null`", ({ scope }) => {
       const initial = { count: 0 }
       const impulse = Impulse.of(initial, Counter.compare)
 
       impulse.setValue(Counter.clone, null)
-      expect(impulse.getValue()).not.toBe(initial)
-      expect(impulse.getValue()).toStrictEqual(initial)
+      expect(impulse.getValue(scope)).not.toBe(initial)
+      expect(impulse.getValue(scope)).toStrictEqual(initial)
     })
 
-    it.concurrent("replaces with custom function", () => {
+    it.concurrent("replaces with custom function", ({ scope }) => {
       const initial = { count: 0 }
       const impulse = Impulse.of(initial, Counter.compare)
 
       impulse.setValue(Counter.inc, () => true)
-      expect(impulse.getValue()).toBe(initial)
+      expect(impulse.getValue(scope)).toBe(initial)
     })
   })
 })
@@ -85,50 +85,50 @@ describe("Impulse#compare", () => {
 describe("Impulse#setValue(value)", () => {
   const impulse = Impulse.of({ count: 0 })
 
-  it("updates value", () => {
+  it("updates value", ({ scope }) => {
     const next = { count: 1 }
     impulse.setValue(next)
-    expect(impulse.getValue()).toBe(next)
+    expect(impulse.getValue(scope)).toBe(next)
   })
 
-  it("updates with the same value", () => {
+  it("updates with the same value", ({ scope }) => {
     const next = { count: 1 }
     impulse.setValue(next)
-    expect(impulse.getValue()).toBe(next)
+    expect(impulse.getValue(scope)).toBe(next)
   })
 
-  it("updates with equal value", () => {
-    const prev = impulse.getValue()
+  it("updates with equal value", ({ scope }) => {
+    const prev = impulse.getValue(scope)
     impulse.setValue(prev)
-    expect(impulse.getValue()).toBe(prev)
+    expect(impulse.getValue(scope)).toBe(prev)
   })
 })
 
 describe("Impulse#setValue(transform)", () => {
   const impulse = Impulse.of({ count: 0 })
 
-  it("updates value", () => {
+  it("updates value", ({ scope }) => {
     impulse.setValue(Counter.inc)
-    expect(impulse.getValue()).toStrictEqual({ count: 1 })
+    expect(impulse.getValue(scope)).toStrictEqual({ count: 1 })
   })
 
-  it("keeps the value", () => {
-    const prev = impulse.getValue()
+  it("keeps the value", ({ scope }) => {
+    const prev = impulse.getValue(scope)
     impulse.setValue((counter) => counter)
-    expect(impulse.getValue()).toBe(prev)
+    expect(impulse.getValue(scope)).toBe(prev)
   })
 
-  it("updates with the same value", () => {
-    const prev = impulse.getValue()
+  it("updates with the same value", ({ scope }) => {
+    const prev = impulse.getValue(scope)
     impulse.setValue(Counter.clone)
-    expect(impulse.getValue()).not.toBe(prev)
-    expect(impulse.getValue()).toStrictEqual(prev)
+    expect(impulse.getValue(scope)).not.toBe(prev)
+    expect(impulse.getValue(scope)).toStrictEqual(prev)
   })
 
-  it("updates with the equal value", () => {
-    const prev = impulse.getValue()
+  it("updates with the equal value", ({ scope }) => {
+    const prev = impulse.getValue(scope)
     impulse.setValue(() => prev)
-    expect(impulse.getValue()).toBe(prev)
+    expect(impulse.getValue(scope)).toBe(prev)
   })
 })
 
@@ -136,32 +136,32 @@ describe("Impulse#setValue(value, compare)", () => {
   let prev: Counter = { count: 0 }
   const impulse = Impulse.of(prev)
 
-  beforeEach(() => {
-    prev = impulse.getValue()
+  beforeEach(({ scope }) => {
+    prev = impulse.getValue(scope)
   })
 
-  it("keeps equal value", () => {
+  it("keeps equal value", ({ scope }) => {
     const clone = Counter.clone(prev)
     impulse.setValue(clone, Counter.compare)
 
-    expect(impulse.getValue()).toBe(prev)
-    expect(impulse.getValue()).not.toBe(clone)
+    expect(impulse.getValue(scope)).toBe(prev)
+    expect(impulse.getValue(scope)).not.toBe(clone)
   })
 
-  it("replaces with not equal value", () => {
+  it("replaces with not equal value", ({ scope }) => {
     const replacement = { count: 1 }
     impulse.setValue(replacement, Counter.compare)
 
-    expect(impulse.getValue()).toBe(replacement)
-    expect(impulse.getValue()).not.toBe(prev)
+    expect(impulse.getValue(scope)).toBe(replacement)
+    expect(impulse.getValue(scope)).not.toBe(prev)
   })
 
-  it("replaces with same but not equal", () => {
+  it("replaces with same but not equal", ({ scope }) => {
     const clone = Counter.clone(prev)
     impulse.setValue(clone)
 
-    expect(impulse.getValue()).toBe(clone)
-    expect(impulse.getValue()).not.toBe(prev)
+    expect(impulse.getValue(scope)).toBe(clone)
+    expect(impulse.getValue(scope)).not.toBe(prev)
   })
 })
 
@@ -169,25 +169,25 @@ describe("Impulse#setValue(transform, compare)", () => {
   let prev: Counter = { count: 0 }
   const impulse = Impulse.of(prev)
 
-  beforeEach(() => {
-    prev = impulse.getValue()
+  beforeEach(({ scope }) => {
+    prev = impulse.getValue(scope)
   })
 
-  it("keeps equal value", () => {
+  it("keeps equal value", ({ scope }) => {
     impulse.setValue(Counter.clone, Counter.compare)
-    expect(impulse.getValue()).toBe(prev)
+    expect(impulse.getValue(scope)).toBe(prev)
   })
 
-  it("replaces with not equal value", () => {
+  it("replaces with not equal value", ({ scope }) => {
     impulse.setValue(Counter.inc, Counter.compare)
-    expect(impulse.getValue()).not.toBe(prev)
-    expect(impulse.getValue()).toStrictEqual({ count: 1 })
+    expect(impulse.getValue(scope)).not.toBe(prev)
+    expect(impulse.getValue(scope)).toStrictEqual({ count: 1 })
   })
 
-  it("replaces with same but not equal", () => {
+  it("replaces with same but not equal", ({ scope }) => {
     impulse.setValue(Counter.clone)
-    expect(impulse.getValue()).not.toBe(prev)
-    expect(impulse.getValue()).toStrictEqual({ count: 1 })
+    expect(impulse.getValue(scope)).not.toBe(prev)
+    expect(impulse.getValue(scope)).toStrictEqual({ count: 1 })
   })
 })
 
@@ -195,73 +195,80 @@ describe("Impulse#getValue(transform)", () => {
   const initial = { count: 0 }
   const impulse = Impulse.of(initial)
 
-  it("gets initial value", () => {
-    expect(impulse.getValue()).toBe(initial)
-    expect(impulse.getValue(Counter.getCount)).toBe(0)
+  it("gets initial value", ({ scope }) => {
+    expect(impulse.getValue(scope)).toBe(initial)
+    expect(impulse.getValue(scope, Counter.getCount)).toBe(0)
   })
 
-  it("gets updates value", () => {
+  it("gets updates value", ({ scope }) => {
     impulse.setValue(Counter.inc)
-    expect(impulse.getValue()).toStrictEqual({ count: 1 })
-    expect(impulse.getValue(Counter.getCount)).toBe(1)
+    expect(impulse.getValue(scope)).toStrictEqual({ count: 1 })
+    expect(impulse.getValue(scope, Counter.getCount)).toBe(1)
   })
 })
 
 describe("Impulse#clone", () => {
-  it.concurrent("creates new Impulse with clone()", () => {
+  it.concurrent("creates new Impulse with clone()", ({ scope }) => {
     const impulse_1 = Impulse.of({ count: 0 })
     const impulse_2 = impulse_1.clone()
 
     expect(impulse_1).not.toBe(impulse_2)
-    expect(impulse_1.getValue()).toBe(impulse_2.getValue())
+    expect(impulse_1.getValue(scope)).toBe(impulse_2.getValue(scope))
   })
 
-  it.concurrent("creates new Impulse with clone(transform)", () => {
+  it.concurrent("creates new Impulse with clone(transform)", ({ scope }) => {
     const impulse_1 = Impulse.of({ count: 0 })
     const impulse_2 = impulse_1.clone(Counter.clone)
 
     expect(impulse_1).not.toBe(impulse_2)
-    expect(impulse_1.getValue()).not.toBe(impulse_2.getValue())
-    expect(impulse_1.getValue()).toStrictEqual(impulse_2.getValue())
+    expect(impulse_1.getValue(scope)).not.toBe(impulse_2.getValue(scope))
+    expect(impulse_1.getValue(scope)).toStrictEqual(impulse_2.getValue(scope))
   })
 
-  it.concurrent("creates new nested Impulse with clone(transform)", () => {
-    const impulse_1 = Impulse.of({
-      count: Impulse.of(0),
-      name: Impulse.of("John"),
-    })
-    const impulse_2 = impulse_1.clone(({ count, name }) => ({
-      count: count.clone(),
-      name: name.clone(),
-    }))
+  it.concurrent(
+    "creates new nested Impulse with clone(transform)",
+    ({ scope }) => {
+      const impulse_1 = Impulse.of({
+        count: Impulse.of(0),
+        name: Impulse.of("John"),
+      })
+      const impulse_2 = impulse_1.clone(({ count, name }) => ({
+        count: count.clone(),
+        name: name.clone(),
+      }))
 
-    expect(impulse_1).not.toBe(impulse_2)
-    expect(impulse_1.getValue()).not.toBe(impulse_2.getValue())
-    expect(impulse_1.getValue().count).not.toBe(impulse_2.getValue().count)
-    expect(impulse_1.getValue().name).not.toBe(impulse_2.getValue().name)
-    expect(
-      impulse_1.getValue(({ count, name }) => ({
-        count: count.getValue(),
-        name: name.getValue(),
-      })),
-    ).toStrictEqual(
-      impulse_2.getValue(({ count, name }) => ({
-        count: count.getValue(),
-        name: name.getValue(),
-      })),
-    )
+      expect(impulse_1).not.toBe(impulse_2)
+      expect(impulse_1.getValue(scope)).not.toBe(impulse_2.getValue(scope))
+      expect(impulse_1.getValue(scope).count).not.toBe(
+        impulse_2.getValue(scope).count,
+      )
+      expect(impulse_1.getValue(scope).name).not.toBe(
+        impulse_2.getValue(scope).name,
+      )
+      expect(
+        impulse_1.getValue(scope, ({ count, name }) => ({
+          count: count.getValue(scope),
+          name: name.getValue(scope),
+        })),
+      ).toStrictEqual(
+        impulse_2.getValue(scope, ({ count, name }) => ({
+          count: count.getValue(scope),
+          name: name.getValue(scope),
+        })),
+      )
 
-    // the nested impulses are independent
-    impulse_1.getValue().count.setValue(1)
-    expect(impulse_1.getValue().count.getValue()).toBe(1)
-    expect(impulse_2.getValue().count.getValue()).toBe(0)
+      // the nested impulses are independent
+      impulse_1.getValue(scope).count.setValue(1)
+      expect(impulse_1.getValue(scope).count.getValue(scope)).toBe(1)
+      expect(impulse_2.getValue(scope).count.getValue(scope)).toBe(0)
 
-    impulse_1.getValue().name.setValue("Doe")
-    expect(impulse_1.getValue().name.getValue()).toBe("Doe")
-    expect(impulse_2.getValue().name.getValue()).toBe("John")
-  })
+      impulse_1.getValue(scope).name.setValue("Doe")
+      expect(impulse_1.getValue(scope).name.getValue(scope)).toBe("Doe")
+      expect(impulse_2.getValue(scope).name.getValue(scope)).toBe("John")
+    },
+  )
 
-  it.concurrent("creates shallow nested Impulse with clone()", () => {
+  it.concurrent("creates shallow nested Impulse with clone()", ({ scope }) => {
     const impulse_1 = Impulse.of({
       count: Impulse.of(0),
       name: Impulse.of("John"),
@@ -269,34 +276,36 @@ describe("Impulse#clone", () => {
     const impulse_2 = impulse_1.clone()
 
     expect(impulse_1).not.toBe(impulse_2)
-    expect(impulse_1.getValue()).toBe(impulse_2.getValue())
-    expect(impulse_1.getValue().count).toBe(impulse_2.getValue().count)
-    expect(impulse_1.getValue().name).toBe(impulse_2.getValue().name)
+    expect(impulse_1.getValue(scope)).toBe(impulse_2.getValue(scope))
+    expect(impulse_1.getValue(scope).count).toBe(
+      impulse_2.getValue(scope).count,
+    )
+    expect(impulse_1.getValue(scope).name).toBe(impulse_2.getValue(scope).name)
     expect(
-      impulse_1.getValue(({ count, name }) => ({
-        count: count.getValue(),
-        name: name.getValue(),
+      impulse_1.getValue(scope, ({ count, name }) => ({
+        count: count.getValue(scope),
+        name: name.getValue(scope),
       })),
     ).toStrictEqual(
-      impulse_2.getValue(({ count, name }) => ({
-        count: count.getValue(),
-        name: name.getValue(),
+      impulse_2.getValue(scope, ({ count, name }) => ({
+        count: count.getValue(scope),
+        name: name.getValue(scope),
       })),
     )
 
     // the nested impulses are dependent
-    impulse_1.getValue().count.setValue(1)
-    expect(impulse_1.getValue().count.getValue()).toBe(1)
-    expect(impulse_2.getValue().count.getValue()).toBe(1)
+    impulse_1.getValue(scope).count.setValue(1)
+    expect(impulse_1.getValue(scope).count.getValue(scope)).toBe(1)
+    expect(impulse_2.getValue(scope).count.getValue(scope)).toBe(1)
 
-    impulse_1.getValue().name.setValue("Doe")
-    expect(impulse_1.getValue().name.getValue()).toBe("Doe")
-    expect(impulse_2.getValue().name.getValue()).toBe("Doe")
+    impulse_1.getValue(scope).name.setValue("Doe")
+    expect(impulse_1.getValue(scope).name.getValue(scope)).toBe("Doe")
+    expect(impulse_2.getValue(scope).name.getValue(scope)).toBe("Doe")
   })
 })
 
 describe("Impulse#subscribe", () => {
-  it.concurrent("subscribes and unsubscribes to value changes", () => {
+  it.concurrent("subscribes and unsubscribes to value changes", ({ scope }) => {
     const impulse = Impulse.of({ count: 0 })
     const spy = vi.fn<[Counter]>()
 
@@ -305,7 +314,7 @@ describe("Impulse#subscribe", () => {
     vi.clearAllMocks()
 
     const unsubscribe = impulse.subscribe(() => {
-      spy(impulse.getValue())
+      spy(impulse.getValue(scope))
     })
 
     impulse.setValue(Counter.inc)

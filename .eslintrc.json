@@ -192,7 +192,10 @@
             "ignoreStatic": true
           }
         ],
-        "@typescript-eslint/no-unused-vars": "error",
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          { "argsIgnorePattern": "^_" }
+        ],
         "@typescript-eslint/explicit-member-accessibility": "error",
         "@typescript-eslint/no-non-null-assertion": "off",
         "@typescript-eslint/no-confusing-non-null-assertion": "error",
@@ -234,6 +237,7 @@
         "plugin:prettier/recommended"
       ],
       "rules": {
+        "jest/no-done-callback": "off", // causes false positives with test context
         "jest/no-deprecated-functions": "off",
         "jest/no-duplicate-hooks": "warn",
         "jest/no-if": "error",

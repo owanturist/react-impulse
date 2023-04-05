@@ -1,7 +1,13 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { batch, Impulse, useImpulseValue, useWatchImpulse } from "../../src"
+import {
+  batch,
+  Impulse,
+  Scope,
+  useImpulseValue,
+  useWatchImpulse,
+} from "../../src"
 import { Counter } from "../common"
 
 describe.each([
@@ -205,8 +211,8 @@ describe.each([
     expectedWatcherCallsForMultiple: 3,
     expectedWatcherCallsForNested: 2,
     execute: (cb: VoidFunction) => cb(),
-    useCount: (watcher: () => number) => {
-      return useWatchImpulse(() => watcher())
+    useCount: (watcher: (scope: Scope) => number) => {
+      return useWatchImpulse((scope) => watcher(scope))
     },
   },
   {
@@ -214,8 +220,8 @@ describe.each([
     expectedWatcherCallsForMultiple: 2,
     expectedWatcherCallsForNested: 2,
     execute: batch,
-    useCount: (watcher: () => number) => {
-      return useWatchImpulse(() => watcher())
+    useCount: (watcher: (scope: Scope) => number) => {
+      return useWatchImpulse((scope) => watcher(scope))
     },
   },
   {
@@ -223,8 +229,10 @@ describe.each([
     expectedWatcherCallsForMultiple: 2,
     expectedWatcherCallsForNested: 1,
     execute: (cb: VoidFunction) => cb(),
-    useCount: (watcher: () => number) => {
-      return useWatchImpulse(React.useCallback(() => watcher(), [watcher]))
+    useCount: (watcher: (scope: Scope) => number) => {
+      return useWatchImpulse(
+        React.useCallback((scope) => watcher(scope), [watcher]),
+      )
     },
   },
   {
@@ -232,8 +240,10 @@ describe.each([
     expectedWatcherCallsForMultiple: 1,
     expectedWatcherCallsForNested: 1,
     execute: batch,
-    useCount: (watcher: () => number) => {
-      return useWatchImpulse(React.useCallback(() => watcher(), [watcher]))
+    useCount: (watcher: (scope: Scope) => number) => {
+      return useWatchImpulse(
+        React.useCallback((scope) => watcher(scope), [watcher]),
+      )
     },
   },
 ])(
@@ -250,11 +260,12 @@ describe.each([
         const onRender = vi.fn()
         const first = Impulse.of({ count: 1 })
         const second = Impulse.of({ count: 2 })
-        const watcher = () => {
+        const watcher = (scope: Scope) => {
           spy()
 
           return (
-            first.getValue(Counter.getCount) + second.getValue(Counter.getCount)
+            first.getValue(scope, Counter.getCount) +
+            second.getValue(scope, Counter.getCount)
           )
         }
 
@@ -338,13 +349,14 @@ describe.each([
           first: Impulse.of({ count: 1 }),
           second: Impulse.of({ count: 2 }),
         })
-        const watcher = () => {
+        const watcher = (scope: Scope) => {
           spy()
 
           return impulse.getValue(
+            scope,
             ({ first, second }) =>
-              first.getValue(Counter.getCount) +
-              second.getValue(Counter.getCount),
+              first.getValue(scope, Counter.getCount) +
+              second.getValue(scope, Counter.getCount),
           )
         }
 

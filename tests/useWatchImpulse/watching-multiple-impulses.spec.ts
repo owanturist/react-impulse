@@ -15,8 +15,8 @@ describe.each([
   [
     "inline watcher",
     ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
-      return useWatchImpulse(() => {
-        return Counter.merge(first.getValue(), second.getValue())
+      return useWatchImpulse((scope) => {
+        return Counter.merge(first.getValue(scope), second.getValue(scope))
       }, compare)
     },
   ],
@@ -24,9 +24,12 @@ describe.each([
     "memoized watcher",
     ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
       return useWatchImpulse(
-        useCallback(() => {
-          return Counter.merge(first.getValue(), second.getValue())
-        }, [first, second]),
+        useCallback(
+          (scope) => {
+            return Counter.merge(first.getValue(scope), second.getValue(scope))
+          },
+          [first, second],
+        ),
         compare,
       )
     },
@@ -99,10 +102,10 @@ describe.each([
   [
     "inline watcher",
     ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-      return useWatchImpulse(() => {
+      return useWatchImpulse((scope) => {
         spy()
 
-        return impulse.getValue()
+        return impulse.getValue(scope)
       }, compare)
     },
     (
@@ -114,13 +117,13 @@ describe.each([
       }: WithFirst & WithSecond & WithThird & WithSpy,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchImpulse(() => {
+      return useWatchImpulse((scope) => {
         spy()
 
         return Counter.merge(
-          first.getValue(),
-          second.getValue(),
-          third.getValue(),
+          first.getValue(scope),
+          second.getValue(scope),
+          third.getValue(scope),
         )
       }, compare)
     },
@@ -130,11 +133,14 @@ describe.each([
     "memoized watcher",
     ({ spy, impulse }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
-        useCallback(() => {
-          spy()
+        useCallback(
+          (scope) => {
+            spy()
 
-          return impulse.getValue()
-        }, [spy, impulse]),
+            return impulse.getValue(scope)
+          },
+          [spy, impulse],
+        ),
       )
     },
     ({
@@ -144,15 +150,18 @@ describe.each([
       third,
     }: WithFirst & WithSecond & WithThird & WithSpy) => {
       return useWatchImpulse(
-        useCallback(() => {
-          spy()
+        useCallback(
+          (scope) => {
+            spy()
 
-          return Counter.merge(
-            first.getValue(),
-            second.getValue(),
-            third.getValue(),
-          )
-        }, [spy, first, second, third]),
+            return Counter.merge(
+              first.getValue(scope),
+              second.getValue(scope),
+              third.getValue(scope),
+            )
+          },
+          [spy, first, second, third],
+        ),
       )
     },
   ],
