@@ -1,7 +1,13 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, watch, useImpulseValue, useWatchImpulse } from "../src"
+import {
+  Impulse,
+  watch,
+  useImpulseValue,
+  useWatchImpulse,
+  subscribe,
+} from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -117,8 +123,7 @@ describe("watching misses when defined after useEffect #140", () => {
   })
 })
 
-// TODO solve with subscribe
-describe.skip("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321", () => {
+describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321", () => {
   it.each([
     ["toString", (value: unknown) => String(value)],
     ["toJSON", (value: unknown) => JSON.stringify(value)],
@@ -126,9 +131,15 @@ describe.skip("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString()
     const Component: React.FC<{
       count: Impulse<number>
     }> = ({ count }) => {
-      const x = useWatchImpulse(() => convert(count))
+      const [value, setValue] = React.useState(() => convert(count))
 
-      return <span data-testid="result">{x}</span>
+      React.useEffect(() => {
+        return subscribe(() => {
+          setValue(convert(count))
+        })
+      }, [count])
+
+      return <span data-testid="result">{value}</span>
     }
 
     const count = Impulse.of(1)

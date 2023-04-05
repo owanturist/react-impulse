@@ -1,6 +1,6 @@
 import { Compare, isEqual, isFunction } from "./utils"
 import { SetValueContext } from "./SetValueContext"
-import { STATIC_SCOPE, SCOPE_KEY, Scope } from "./Scope"
+import { STATIC_SCOPE, SCOPE_KEY, Scope, extractScope } from "./Scope"
 
 export class Impulse<T> {
   /**
@@ -48,7 +48,7 @@ export class Impulse<T> {
    * @version 1.0.0
    */
   protected toJSON(): unknown {
-    return this.getValue(STATIC_SCOPE)
+    return this.getValue(extractScope() ?? STATIC_SCOPE)
   }
 
   /**
@@ -58,7 +58,7 @@ export class Impulse<T> {
    * @version 1.0.0
    */
   protected toString(): string {
-    return String(this.getValue(STATIC_SCOPE))
+    return String(this.getValue(extractScope() ?? STATIC_SCOPE))
   }
 
   /**
