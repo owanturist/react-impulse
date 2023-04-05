@@ -6,7 +6,7 @@ import "@testing-library/jest-dom/extend-expect"
 
 import { cleanup } from "@testing-library/react"
 
-import { DUMMY_SCOPE } from "./src/Scope"
+import { STATIC_SCOPE } from "./src/Scope"
 
 // forces tests to fail in case of illegal usage
 const console$error = vi
@@ -16,7 +16,7 @@ const console$error = vi
   })
 
 beforeEach((context) => {
-  context.scope = DUMMY_SCOPE
+  context.scope = STATIC_SCOPE
 })
 
 afterEach(() => {
