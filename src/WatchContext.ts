@@ -16,12 +16,16 @@ export class WatchContext {
   private notify: null | VoidFunction = null
 
   private readonly emit = (): void => {
-    this.cleanup()
+    this.cleanupAndBump()
     this.notify?.()
   }
 
-  private cleanup(): void {
+  private cleanupAndBump(): void {
     this.version = (this.version + 1) % 10e9
+    this.cleanup()
+  }
+
+  public cleanup(): void {
     this.cleanups.forEach((cleanup) => cleanup())
     this.cleanups.clear()
   }
@@ -30,10 +34,8 @@ export class WatchContext {
     if (!this.cleanups.has(impulse)) {
       this.cleanups.set(
         impulse,
-        impulse.subscribe(() => {
-          // the listener registers a watcher so the watcher will emit once per (batch) setValue
-          SetValueContext.registerEmitter(this.emit)
-        }),
+        // the listener registers a watcher so the watcher will emit once per (batch) setValue
+        impulse.subscribe(() => SetValueContext.registerEmitter(this.emit)),
       )
     }
   }
@@ -41,13 +43,14 @@ export class WatchContext {
   public subscribe(notify: VoidFunction): VoidFunction {
     // in case if subscribe is called twice
     if (this.notify != null) {
-      this.cleanup()
+      this.cleanupAndBump()
     }
 
     this.notify = notify
 
     return () => {
-      this.cleanup()
+      this.cleanupAndBump()
+      this.notify = null
     }
   }
 
