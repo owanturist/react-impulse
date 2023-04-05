@@ -8,7 +8,6 @@ export interface Scope {
   readonly version?: number
 }
 
-// TODO better name
-export const DUMMY_SCOPE: Scope = {
+export const STATIC_SCOPE: Scope = {
   [SCOPE_KEY]: null,
 }

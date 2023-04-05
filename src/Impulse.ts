@@ -1,6 +1,6 @@
 import { Compare, isEqual, isFunction } from "./utils"
 import { SetValueContext } from "./SetValueContext"
-import { DUMMY_SCOPE, SCOPE_KEY, Scope } from "./Scope"
+import { STATIC_SCOPE, SCOPE_KEY, Scope } from "./Scope"
 
 export class Impulse<T> {
   /**
@@ -48,7 +48,7 @@ export class Impulse<T> {
    * @version 1.0.0
    */
   protected toJSON(): unknown {
-    return this.getValue(DUMMY_SCOPE)
+    return this.getValue(STATIC_SCOPE)
   }
 
   /**
@@ -58,7 +58,7 @@ export class Impulse<T> {
    * @version 1.0.0
    */
   protected toString(): string {
-    return String(this.getValue(DUMMY_SCOPE))
+    return String(this.getValue(STATIC_SCOPE))
   }
 
   /**
@@ -88,6 +88,7 @@ export class Impulse<T> {
   /**
    * Returns a value selected from the current value.
    *
+   * TODO update select docs with scope and add tests
    * @param select an optional function that applies to the current value before returning.
    *
    * @version 1.0.0
