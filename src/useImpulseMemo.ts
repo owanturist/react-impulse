@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 
 import { useScope } from "./useScope"
-import { Scope } from "./Scope"
+import { SCOPE_KEY, Scope } from "./Scope"
 
 /**
  * The hook is an `Impulse` version of the `React.useMemo` hook.
@@ -20,7 +20,11 @@ export const useImpulseMemo = <T>(
   const scope = useScope()
 
   return useMemo(
-    () => factory(scope),
+    () => {
+      scope[SCOPE_KEY]?.cleanup()
+
+      return factory(scope)
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies && [...dependencies, scope],
   )

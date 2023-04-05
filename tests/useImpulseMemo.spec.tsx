@@ -39,22 +39,6 @@ describe.each([
       )
     })
 
-    it.skip("cannot watch inside React.useMemo", () => {
-      const value = Impulse.of(1)
-
-      render(<Component useMemo={React.useMemo} value={value} />)
-
-      const node = screen.getByTestId("value")
-
-      expect(node).toHaveTextContent("2")
-
-      act(() => {
-        value.setValue(2)
-      })
-
-      expect(node).toHaveTextContent("2")
-    })
-
     it("can watch inside useImpulseMemo", () => {
       const value = Impulse.of(1)
       const onMemo = vi.fn()
@@ -144,7 +128,7 @@ describe.each([
       expect(onRender).toHaveBeenCalledOnce()
     })
 
-    it.skip("should unsubscribe Impulse from useMemo when swapped", () => {
+    it("should unsubscribe Impulse from useMemo when swapped", () => {
       const value_1 = Impulse.of(1)
       const value_2 = Impulse.of(3)
       const onMemo = vi.fn()
