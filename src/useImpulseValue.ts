@@ -2,7 +2,7 @@ import { useDebugValue, useMemo } from "react"
 import { useSyncExternalStore } from "use-sync-external-store/shim/index.js"
 
 import type { Impulse } from "./Impulse"
-import { DUMMY_SCOPE } from "./Scope"
+import { STATIC_SCOPE } from "./Scope"
 
 /**
  * A hook that subscribes to the `impulse` changes and returns the current value.
@@ -16,7 +16,7 @@ export function useImpulseValue<T>(impulse: Impulse<T>): T {
     () => [
       (onChange: VoidFunction) => impulse.subscribe(onChange),
       // does not need a real Scope - it subscribes by itself
-      () => impulse.getValue(DUMMY_SCOPE),
+      () => impulse.getValue(STATIC_SCOPE),
     ],
     [impulse],
   )
