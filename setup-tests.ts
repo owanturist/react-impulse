@@ -6,6 +6,8 @@ import "@testing-library/jest-dom/extend-expect"
 
 import { cleanup } from "@testing-library/react"
 
+import { DUMMY_SCOPE } from "./src/Scope"
+
 // forces tests to fail in case of illegal usage
 const console$error = vi
   .spyOn(console, "error")
@@ -13,8 +15,8 @@ const console$error = vi
     expect.fail(message)
   })
 
-afterAll(() => {
-  console$error.mockRestore()
+beforeEach((context) => {
+  context.scope = DUMMY_SCOPE
 })
 
 afterEach(() => {
@@ -22,6 +24,9 @@ afterEach(() => {
   cleanup()
 })
 
+afterAll(() => {
+  console$error.mockRestore()
+})
 /* c8 ignore stop */
 
 vi.mock("@testing-library/react", async () => {

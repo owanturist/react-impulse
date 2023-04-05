@@ -1,13 +1,13 @@
 import {
-  FC,
+  FunctionComponent,
   ForwardRefRenderFunction,
-  MemoExoticComponent,
   ForwardRefExoticComponent,
   memo as React_memo,
   forwardRef as React_forwardRef,
   PropsWithoutRef,
   RefAttributes,
   createElement,
+  NamedExoticComponent,
 } from "react"
 
 import { Compare } from "./utils"
@@ -15,10 +15,17 @@ import { Scope } from "./Scope"
 import { useScope } from "./useScope"
 
 // TODO export types?
-export type PropsWithScope<TProps> = TProps & { scope: Scope }
+export type PropsWithScope<TProps = Record<string, unknown>> = TProps & {
+  scope: Scope
+}
 
 // TODO delete or apply in memo and forwardRef
-export type PropsWithoutScope<TProps> = Omit<TProps, "scope">
+export type PropsWithoutScope<TProps> = "scope" extends keyof TProps
+  ? // it shows the resulting type in VSCode better than Omit
+    {
+      [K in keyof TProps as K extends "scope" ? never : K]: TProps[K]
+    }
+  : TProps
 
 /**
  * Creates a React component that subscribes to all Impulses calling the `Impulse#getValue` method during the rendering phase of the component.
@@ -27,18 +34,14 @@ export type PropsWithoutScope<TProps> = Omit<TProps, "scope">
  *
  * @version 1.0.0
  */
-// export function watch<TProps>(Component: FC<PropsWithScope<TProps>>): FC<TProps>
-// export function watch<TProps extends { scope: Scope }>(
-//   Component: FC<TProps>,
-// ): FC<PropsWithoutScope<TProps>>
 export function watch<TProps>(
-  Component: FC<PropsWithScope<TProps>>,
-): FC<PropsWithoutScope<TProps>> {
-  const ImpulseWatcher: React.FC<TProps> = React_forwardRef((props, ref) => {
+  Component: FunctionComponent<PropsWithScope<TProps>>,
+): ForwardRefExoticComponent<PropsWithoutScope<TProps>> {
+  const ImpulseWatcher = React_forwardRef((props, ref) => {
     const scope = useScope()
 
     return createElement(Component, { ...props, ref, scope })
-  })
+  }) as ForwardRefExoticComponent<PropsWithoutScope<TProps>>
 
   ImpulseWatcher.displayName = `ImpulseWatcher${Component.displayName ?? ""}`
 
@@ -46,28 +49,25 @@ export function watch<TProps>(
 }
 
 const memo = <TProps>(
-  component: FC<PropsWithScope<TProps>>,
-  // TODO exclude scope from props
-  propsAreEqual?: Compare<Readonly<PropsWithScope<TProps>>>,
-): MemoExoticComponent<FC<TProps>> => {
+  component: FunctionComponent<PropsWithScope<TProps>>,
+  propsAreEqual?: Compare<Readonly<PropsWithoutScope<TProps>>>,
+): NamedExoticComponent<PropsWithoutScope<TProps>> => {
   return React_memo(watch(component), propsAreEqual)
 }
 
 const forwardRefMemo = <TNode, TProps>(
   render: ForwardRefRenderFunction<TNode, PropsWithScope<TProps>>,
-  propsAreEqual?: Compare<
-    Readonly<PropsWithoutRef<TProps> & RefAttributes<TNode>>
-  >,
-): MemoExoticComponent<
-  ForwardRefExoticComponent<PropsWithoutRef<TProps> & RefAttributes<TNode>>
-> => {
+  propsAreEqual?: Compare<Readonly<PropsWithoutScope<TProps>>>,
+): NamedExoticComponent<PropsWithoutScope<TProps>> => {
   return React_memo(forwardRef(render), propsAreEqual)
 }
 
 const forwardRef = <TNode, TProps>(
   render: ForwardRefRenderFunction<TNode, PropsWithScope<TProps>>,
 ): ForwardRefExoticComponent<
-  PropsWithoutRef<TProps> & RefAttributes<TNode>
+  PropsWithoutScope<
+    PropsWithoutRef<PropsWithScope<TProps>> & RefAttributes<TNode>
+  >
 > => {
   return watch(React_forwardRef(render))
 }

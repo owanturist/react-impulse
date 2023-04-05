@@ -15,10 +15,10 @@ describe.each([
       }: WithImpulse & WithIsActive & Partial<WithSpy>,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchImpulse(() => {
+      return useWatchImpulse((scope) => {
         spy?.()
 
-        return isActive ? impulse.getValue() : { count: -1 }
+        return isActive ? impulse.getValue(scope) : { count: -1 }
       }, compare)
     },
   ],
@@ -33,11 +33,14 @@ describe.each([
       compare?: Compare<Counter>,
     ) => {
       return useWatchImpulse(
-        useCallback(() => {
-          spy?.()
+        useCallback(
+          (scope) => {
+            spy?.()
 
-          return isActive ? impulse.getValue() : { count: -1 }
-        }, [impulse, isActive, spy]),
+            return isActive ? impulse.getValue(scope) : { count: -1 }
+          },
+          [impulse, isActive, spy],
+        ),
         compare,
       )
     },
