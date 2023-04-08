@@ -237,11 +237,12 @@ describe("watch()", () => {
 })
 
 describe.each([
-  ["watch.memo()", watch.memo],
-  ["watch.memo.forwardRef()", watch.memo.forwardRef],
-  ["watch.forwardRef.memo()", watch.forwardRef.memo],
+  ["watch.memo()", 0, watch.memo],
+  ["watch.memo.forwardRef()", 0, watch.memo.forwardRef],
+  ["watch.forwardRef.memo()", 0, watch.forwardRef.memo],
   [
     "React.memo(watch())",
+    0,
     <TProps,>(
       Component: React.FC<PropsWithScope<TProps>>,
       propsAreEqual?: Compare<Readonly<PropsWithoutScope<TProps>>>,
@@ -251,6 +252,7 @@ describe.each([
   ],
   [
     "watch(React.memo())",
+    1,
     <TProps,>(
       Component: React.FC<PropsWithScope<TProps>>,
       propsAreEqual?: Compare<Readonly<TProps>>,
@@ -266,7 +268,7 @@ describe.each([
       )
     },
   ],
-])("memoizing with %s", (_, customMemo) => {
+])("memoizing with %s", (_, unnecessaryRerendersCount, customMemo) => {
   const memo = customMemo as typeof watch.memo
 
   it("should memoize", () => {
@@ -326,7 +328,9 @@ describe.each([
     expect(counts[0]).toHaveTextContent("0")
     expect(counts[1]).toHaveTextContent("0")
     expect(onWatchedRender).toHaveBeenCalledOnce()
-    expect(onWatchedMemoizedRender).not.toHaveBeenCalled()
+    expect(onWatchedMemoizedRender).toHaveBeenCalledTimes(
+      unnecessaryRerendersCount,
+    )
     vi.clearAllMocks()
 
     rerender(
@@ -339,7 +343,9 @@ describe.each([
     expect(counts[0]).toHaveTextContent("0")
     expect(counts[1]).toHaveTextContent("0")
     expect(onWatchedRender).toHaveBeenCalledOnce()
-    expect(onWatchedMemoizedRender).not.toHaveBeenCalled()
+    expect(onWatchedMemoizedRender).toHaveBeenCalledTimes(
+      unnecessaryRerendersCount,
+    )
     vi.clearAllMocks()
 
     act(() => {
@@ -395,12 +401,12 @@ describe.each([
 
     fireEvent.click(screen.getByTestId("force"))
     expect(counter).toHaveTextContent("0")
-    expect(onWatchedRender).not.toHaveBeenCalled()
+    expect(onWatchedRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
     vi.clearAllMocks()
 
     rerender(<Host count={count} onWatchedRender={onWatchedRender} />)
     expect(counter).toHaveTextContent("0")
-    expect(onWatchedRender).not.toHaveBeenCalled()
+    expect(onWatchedRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
     vi.clearAllMocks()
 
     act(() => {

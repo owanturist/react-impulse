@@ -150,7 +150,7 @@ describe.each([
         expect(onRender).toHaveBeenCalledOnce()
       })
 
-      // TODO add the same test for watch, useWatchImpulse, useImpulseEffect, subscribe
+      // TODO add the same test for watch, subscribe
       it("should unsubscribe Impulse from useEffect when swapped", () => {
         const value_1 = Impulse.of(1)
         const value_2 = Impulse.of(3)
@@ -166,6 +166,8 @@ describe.each([
             />
           </React.Profiler>,
         )
+        expect(value_1).toHaveProperty("subscribers.size", 1)
+        expect(value_2).toHaveProperty("subscribers.size", 0)
 
         vi.clearAllMocks()
 
@@ -178,10 +180,11 @@ describe.each([
             />
           </React.Profiler>,
         )
+        expect(value_1).toHaveProperty("subscribers.size", 0)
+        expect(value_2).toHaveProperty("subscribers.size", 1)
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onRender).toHaveBeenCalledOnce()
-        expect(value_1).toHaveProperty("subscribers.size", 0)
         vi.clearAllMocks()
 
         act(() => {
@@ -190,7 +193,6 @@ describe.each([
 
         expect(onEffect).not.toHaveBeenCalled()
         expect(onRender).not.toHaveBeenCalled()
-        expect(value_1).toHaveProperty("subscribers.size", 0)
         vi.clearAllMocks()
 
         act(() => {
@@ -199,6 +201,7 @@ describe.each([
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(10)
         expect(onRender).toHaveBeenCalledOnce()
+        expect(value_1).toHaveProperty("subscribers.size", 0)
         expect(value_2).toHaveProperty("subscribers.size", 1)
       })
 

@@ -38,9 +38,9 @@ export function watch<TProps>(
   Component: FunctionComponent<PropsWithScope<TProps>>,
 ): ForwardRefExoticComponent<PropsWithoutScope<TProps>> {
   const ImpulseWatcher = React_forwardRef((props, ref) => {
-    const scope = useScope()
+    const getScope = useScope()
 
-    return createElement(Component, { ...props, ref, scope })
+    return createElement(Component, { ...props, ref, scope: getScope() })
   }) as ForwardRefExoticComponent<PropsWithoutScope<TProps>>
 
   ImpulseWatcher.displayName = `ImpulseWatcher${Component.displayName ?? ""}`
