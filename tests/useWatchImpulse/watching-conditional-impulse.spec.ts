@@ -71,6 +71,7 @@ describe.each([
         })
 
         expect(result.current).toStrictEqual({ count: 1 })
+        expect(impulse).toHaveProperty("subscribers.size", 1)
       })
 
       it.concurrent("should return updated impulse's value", () => {
@@ -84,6 +85,7 @@ describe.each([
           impulse.setValue({ count: 2 })
         })
         expect(result.current).toStrictEqual({ count: 2 })
+        expect(impulse).toHaveProperty("subscribers.size", 1)
       })
 
       it.concurrent("should return replaced impulse's value", () => {
@@ -93,11 +95,15 @@ describe.each([
         const { result, rerender } = renderHook(useHook, {
           initialProps: { impulse: impulse_1, isActive: true },
         })
+        expect(impulse_1).toHaveProperty("subscribers.size", 1)
+        expect(impulse_2).toHaveProperty("subscribers.size", 0)
 
         act(() => {
           rerender({ impulse: impulse_2, isActive: true })
         })
         expect(result.current).toStrictEqual({ count: 10 })
+        expect(impulse_1).toHaveProperty("subscribers.size", 0)
+        expect(impulse_2).toHaveProperty("subscribers.size", 1)
 
         act(() => {
           impulse_2.setValue({ count: 20 })
@@ -108,6 +114,8 @@ describe.each([
           impulse_1.setValue({ count: 2 })
         })
         expect(result.current).toStrictEqual({ count: 20 })
+        expect(impulse_1).toHaveProperty("subscribers.size", 0)
+        expect(impulse_2).toHaveProperty("subscribers.size", 1)
       })
 
       it.concurrent("should return fallback value when turns inactive", () => {
@@ -118,6 +126,7 @@ describe.each([
 
         rerender({ impulse: impulse, isActive: false })
         expect(result.current).toStrictEqual({ count: -1 })
+        expect(impulse).toHaveProperty("subscribers.size", 0)
       })
     })
 
@@ -129,6 +138,7 @@ describe.each([
         })
 
         expect(result.current).toStrictEqual({ count: -1 })
+        expect(impulse).toHaveProperty("subscribers.size", 0)
       })
 
       it.concurrent(
@@ -143,10 +153,11 @@ describe.each([
             impulse.setValue({ count: 2 })
           })
           expect(result.current).toStrictEqual({ count: -1 })
+          expect(impulse).toHaveProperty("subscribers.size", 0)
         },
       )
 
-      it.concurrent("should return fallback value when turns active", () => {
+      it.concurrent("should return impulse value when turns active", () => {
         const impulse = Impulse.of({ count: 1 })
         const { result, rerender } = renderHook(useHook, {
           initialProps: { impulse: impulse, isActive: false },
@@ -154,11 +165,13 @@ describe.each([
 
         rerender({ impulse: impulse, isActive: true })
         expect(result.current).toStrictEqual({ count: 1 })
+        expect(impulse).toHaveProperty("subscribers.size", 1)
 
         act(() => {
           impulse.setValue({ count: 2 })
         })
         expect(result.current).toStrictEqual({ count: 2 })
+        expect(impulse).toHaveProperty("subscribers.size", 1)
       })
 
       it.concurrent(

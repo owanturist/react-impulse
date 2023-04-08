@@ -16,11 +16,11 @@ export class WatchContext {
   private notify: null | VoidFunction = null
 
   private readonly emit = (): void => {
-    this.cleanupAndBump()
+    this.reset()
     this.notify?.()
   }
 
-  private cleanupAndBump(): void {
+  private reset(): void {
     this.version = (this.version + 1) % 10e9
     this.cleanup()
   }
@@ -43,13 +43,13 @@ export class WatchContext {
   public subscribe(notify: VoidFunction): VoidFunction {
     // in case if subscribe is called twice
     if (this.notify != null) {
-      this.cleanupAndBump()
+      this.reset()
     }
 
     this.notify = notify
 
     return () => {
-      this.cleanupAndBump()
+      this.reset()
       this.notify = null
     }
   }

@@ -139,6 +139,8 @@ describe.each([
           <Component useMemo={useImpulseMemo} onMemo={onMemo} value={value_1} />
         </React.Profiler>,
       )
+      expect(value_1).toHaveProperty("subscribers.size", 1)
+      expect(value_2).toHaveProperty("subscribers.size", 0)
 
       vi.clearAllMocks()
 
@@ -147,8 +149,9 @@ describe.each([
           <Component useMemo={useImpulseMemo} onMemo={onMemo} value={value_2} />
         </React.Profiler>,
       )
-
       expect(value_1).toHaveProperty("subscribers.size", 0)
+      expect(value_2).toHaveProperty("subscribers.size", 1)
+
       vi.clearAllMocks()
 
       act(() => {
@@ -157,7 +160,6 @@ describe.each([
 
       expect(onMemo).not.toHaveBeenCalled()
       expect(onRender).not.toHaveBeenCalled()
-      expect(value_1).toHaveProperty("subscribers.size", 0)
       vi.clearAllMocks()
 
       act(() => {
@@ -166,6 +168,8 @@ describe.each([
       expect(onMemo).toHaveBeenCalledOnce()
       expect(onMemo).toHaveBeenLastCalledWith(10)
       expect(onRender).toHaveBeenCalledOnce()
+
+      expect(value_1).toHaveProperty("subscribers.size", 0)
       expect(value_2).toHaveProperty("subscribers.size", 1)
     })
 
