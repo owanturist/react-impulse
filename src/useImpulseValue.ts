@@ -11,8 +11,8 @@ import { useScope } from "./useScope"
  * @version 1.0.0
  */
 export function useImpulseValue<T>(impulse: Impulse<T>): T {
-  const scope = useScope()
-  const value = impulse.getValue(scope)
+  const getScope = useScope()
+  const value = impulse.getValue(getScope())
 
   useDebugValue(value)
 
