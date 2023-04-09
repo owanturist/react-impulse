@@ -1,4 +1,3 @@
-import type { Impulse } from "./Impulse"
 import { SetValueContext } from "./SetValueContext"
 
 /**
@@ -9,15 +8,17 @@ import { SetValueContext } from "./SetValueContext"
  * @private
  */
 export class WatchContext {
-  private readonly cleanups = new Map<Impulse<unknown>, VoidFunction>()
+  private readonly cleanups = new Set<React.Dispatch<VoidFunction>>()
 
   private version = 0
 
   private notify: null | VoidFunction = null
 
   private readonly emit = (): void => {
-    this.reset()
-    this.notify?.()
+    SetValueContext.registerEmitter(() => {
+      this.reset()
+      this.notify?.()
+    })
   }
 
   private reset(): void {
@@ -26,17 +27,17 @@ export class WatchContext {
   }
 
   public cleanup(): void {
-    this.cleanups.forEach((cleanup) => cleanup())
+    this.cleanups.forEach((cleanup) => cleanup(this.emit))
     this.cleanups.clear()
   }
 
-  public register(impulse: Impulse<unknown>): void {
-    if (!this.cleanups.has(impulse)) {
-      this.cleanups.set(
-        impulse,
-        // the listener registers a watcher so the watcher will emit once per (batch) setValue
-        impulse.subscribe(() => SetValueContext.registerEmitter(this.emit)),
-      )
+  public register(
+    subscribe: React.Dispatch<VoidFunction>,
+    unsubscribe: React.Dispatch<VoidFunction>,
+  ): void {
+    if (!this.cleanups.has(unsubscribe)) {
+      subscribe(this.emit)
+      this.cleanups.add(unsubscribe)
     }
   }
 
