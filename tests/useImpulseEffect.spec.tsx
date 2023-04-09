@@ -145,7 +145,7 @@ describe.each([
         expect(onRender).toHaveBeenCalledOnce()
       })
 
-      // TODO add the same test for watch, subscribe
+      // TODO add the same test for watch
       it("should unsubscribe Impulse from useEffect when swapped", () => {
         const value_1 = Impulse.of(1)
         const value_2 = Impulse.of(3)
