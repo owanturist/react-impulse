@@ -14,12 +14,10 @@ import { Compare } from "./utils"
 import { Scope } from "./Scope"
 import { useScope } from "./useScope"
 
-// TODO export types?
 export type PropsWithScope<TProps = Record<string, unknown>> = TProps & {
   scope: Scope
 }
 
-// TODO delete or apply in memo and forwardRef
 export type PropsWithoutScope<TProps> = "scope" extends keyof TProps
   ? // it shows the resulting type in VSCode better than Omit
     {
