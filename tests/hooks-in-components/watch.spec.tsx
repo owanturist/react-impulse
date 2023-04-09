@@ -606,3 +606,178 @@ describe("watch.forwardRef()", () => {
     expect(divRef).not.toHaveBeenCalled()
   })
 })
+
+describe("wild cases", () => {
+  it("should work with `React.lazy()`", async () => {
+    const Component = watch.memo<{ count: Impulse<number> }>(
+      ({ scope, count }) => (
+        <div data-testid="count">{count.getValue(scope)}</div>
+      ),
+    )
+
+    const LazyComponent = React.lazy(() =>
+      Promise.resolve({ default: Component }),
+    )
+    const count = Impulse.of(0)
+
+    render(
+      <React.Suspense fallback={null}>
+        <LazyComponent count={count} />
+      </React.Suspense>,
+    )
+
+    expect(await screen.findByTestId("count")).toHaveTextContent("0")
+
+    act(() => {
+      count.setValue((x) => x + 1)
+    })
+    expect(screen.getByTestId("count")).toHaveTextContent("1")
+  })
+
+  it.each([
+    ["not memoized", ((x) => x) as typeof React.useCallback],
+    ["memoized", React.useCallback],
+  ])(
+    "should re-render %s rendering function passed as a prop when impulse value changes",
+    (_, useCallback) => {
+      const Host: React.FC<{
+        renderCount: (x: number) => React.ReactNode
+        onRender: VoidFunction
+      }> = ({ renderCount, onRender }) => {
+        const [count, setCount] = React.useState(2)
+
+        return (
+          <React.Profiler id="host" onRender={onRender}>
+            <button
+              type="button"
+              data-testid="increment"
+              onClick={() => setCount((x) => x + 1)}
+            />
+            {renderCount(count)}
+          </React.Profiler>
+        )
+      }
+
+      const Component: React.FC<{
+        count: Impulse<number>
+        onRender: VoidFunction
+        onHostRender: VoidFunction
+      }> = watch(({ scope, count, onRender, onHostRender }) => {
+        onRender()
+
+        return (
+          <Host
+            renderCount={useCallback(
+              (x) => (
+                <span data-testid="result">{x * count.getValue(scope)}</span>
+              ),
+              [count, scope],
+            )}
+            onRender={onHostRender}
+          />
+        )
+      })
+
+      const count = Impulse.of(1)
+      const onRender = vi.fn()
+      const onHostRender = vi.fn()
+      render(
+        <Component
+          count={count}
+          onRender={onRender}
+          onHostRender={onHostRender}
+        />,
+      )
+
+      const increment = screen.getByTestId("increment")
+      const result = screen.getByTestId("result")
+
+      expect(result).toHaveTextContent("2")
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(onHostRender).toHaveBeenCalledOnce()
+      vi.clearAllMocks()
+
+      fireEvent.click(increment)
+      expect(result).toHaveTextContent("3")
+      expect(onRender).not.toHaveBeenCalled()
+      expect(onHostRender).toHaveBeenCalledOnce()
+      vi.clearAllMocks()
+
+      act(() => {
+        count.setValue((x) => x + 1)
+      })
+
+      expect(result).toHaveTextContent("6")
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(onHostRender).toHaveBeenCalledOnce()
+    },
+  )
+
+  it.each([
+    ["React.useEffect", React.useEffect],
+    ["React.useLayoutEffect", React.useLayoutEffect],
+    ["React.useMemo", React.useMemo],
+  ])(
+    "should run `%s` on render when scope is a dependency",
+    (_, useReactHook) => {
+      const Component: React.FC<{
+        count: Impulse<number>
+        onEffect: React.Dispatch<number>
+        onRender: VoidFunction
+      }> = watch(({ scope, count, onEffect, onRender }) => {
+        const [, force] = React.useState(0)
+
+        useReactHook(() => {
+          onEffect(count.getValue(scope))
+        }, [count, onEffect, scope])
+
+        return (
+          <React.Profiler id="root" onRender={onRender}>
+            <button
+              type="button"
+              data-testid="force"
+              onClick={() => force((x) => x + 1)}
+            />
+          </React.Profiler>
+        )
+      })
+
+      const count = Impulse.of(0)
+      const onEffect = vi.fn()
+      const onRender = vi.fn()
+
+      const { rerender } = render(
+        <Component count={count} onEffect={onEffect} onRender={onRender} />,
+      )
+
+      expect(count).toHaveProperty("subscribers.size", 1)
+      expect(onEffect).toHaveBeenCalledOnce()
+      expect(onEffect).toHaveBeenLastCalledWith(0)
+      expect(onRender).toHaveBeenCalledOnce()
+      vi.clearAllMocks()
+
+      fireEvent.click(screen.getByTestId("force"))
+      expect(count).toHaveProperty("subscribers.size", 1)
+      expect(onEffect).not.toHaveBeenCalled()
+      expect(onRender).toHaveBeenCalledOnce()
+      vi.clearAllMocks()
+
+      act(() => {
+        count.setValue((x) => x + 1)
+      })
+      expect(count).toHaveProperty("subscribers.size", 1)
+      expect(onEffect).toHaveBeenCalledOnce()
+      expect(onEffect).toHaveBeenLastCalledWith(1)
+      expect(onRender).toHaveBeenCalledOnce()
+      vi.clearAllMocks()
+
+      rerender(
+        <Component count={count} onEffect={onEffect} onRender={onRender} />,
+      )
+      expect(count).toHaveProperty("subscribers.size", 1)
+      expect(onEffect).toHaveBeenCalledOnce()
+      expect(onEffect).toHaveBeenLastCalledWith(1)
+      expect(onRender).toHaveBeenCalledOnce()
+    },
+  )
+})
