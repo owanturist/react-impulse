@@ -24,7 +24,7 @@ export class Impulse<T> {
    * By keeping track of how many times the same listener is subscribed it knows when to drop
    * the listener from `subscribers`.
    */
-  private readonly subscribers = new Map<VoidFunction, number>()
+  private readonly subscribers = new Set<VoidFunction>()
 
   /**
    * The `Compare` function compares Impulse's value with the new value given via `Impulse#setValue`.
@@ -36,6 +36,24 @@ export class Impulse<T> {
 
   private constructor(private value: T, compare: Compare<T>) {
     this.compare = compare
+  }
+
+  /**
+   * Subscribes to the value's updates caused by calling `Impulse#setValue`.
+   *
+   * @param listener a function that subscribes to the updates.
+   */
+  private readonly subscribe = (listener: VoidFunction): void => {
+    this.subscribers.add(listener)
+  }
+
+  /**
+   * Unsubscribes from the subscribed listener.
+   *
+   * @param listener a function that subscribes to the updates via `Impulse#subscribe`.
+   */
+  private readonly unsubscribe = (listener: VoidFunction): void => {
+    this.subscribers.delete(listener)
   }
 
   /**
@@ -98,7 +116,7 @@ export class Impulse<T> {
     scope: Scope,
     select?: (value: T, scope: Scope) => R,
   ): T | R {
-    scope[SCOPE_KEY]?.register(this as Impulse<unknown>)
+    scope[SCOPE_KEY]?.register(this.subscribe, this.unsubscribe)
 
     return isFunction(select) ? select(this.value, scope) : this.value
   }
@@ -131,30 +149,5 @@ export class Impulse<T> {
     }
 
     emit()
-  }
-
-  /**
-   * Subscribes to the value's updates caused by calling `Impulse#setValue`.
-   *
-   * @param listener a function that subscribes to the updates.
-   *
-   * @returns a cleanup function that unsubscribes the `listener`.
-   *
-   * @version 1.0.0
-   */
-  public subscribe(listener: VoidFunction): VoidFunction {
-    const countWhenSubscribes = this.subscribers.get(listener) ?? 0
-
-    this.subscribers.set(listener, countWhenSubscribes + 1)
-
-    return () => {
-      const countWhenUnsubscribes = this.subscribers.get(listener) ?? 0
-
-      if (countWhenUnsubscribes > 1) {
-        this.subscribers.set(listener, countWhenUnsubscribes - 1)
-      } else {
-        this.subscribers.delete(listener)
-      }
-    }
   }
 }
