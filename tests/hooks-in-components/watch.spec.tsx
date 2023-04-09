@@ -234,6 +234,152 @@ describe("watch()", () => {
     expect(result).toHaveTextContent("2")
     expect(count).toHaveProperty("subscribers.size", 1)
   })
+
+  it("should subscribe only ones for the same impulse", () => {
+    const Component = watch<{
+      count: Impulse<number>
+    }>(({ scope, count }) => (
+      <span data-testid="result">
+        {count.getValue(scope) + count.getValue(scope)}
+      </span>
+    ))
+
+    const count = Impulse.of(1)
+
+    render(<Component count={count} />)
+
+    const result = screen.getByTestId("result")
+
+    expect(result).toHaveTextContent("2")
+    expect(count).toHaveProperty("subscribers.size", 1)
+
+    act(() => {
+      count.setValue(3)
+    })
+
+    expect(result).toHaveTextContent("6")
+    expect(count).toHaveProperty("subscribers.size", 1)
+  })
+
+  it("should unsubscribe when impulse changes", () => {
+    const Component = watch<{
+      count: Impulse<number>
+    }>(({ scope, count }) => (
+      <span data-testid="result">{count.getValue(scope)}</span>
+    ))
+
+    const count_1 = Impulse.of(1)
+    const count_2 = Impulse.of(3)
+
+    const { rerender } = render(<Component count={count_1} />)
+
+    const result = screen.getByTestId("result")
+
+    expect(result).toHaveTextContent("1")
+    expect(count_1).toHaveProperty("subscribers.size", 1)
+    expect(count_2).toHaveProperty("subscribers.size", 0)
+
+    rerender(<Component count={count_2} />)
+
+    expect(result).toHaveTextContent("3")
+    expect(count_1).toHaveProperty("subscribers.size", 0)
+    expect(count_2).toHaveProperty("subscribers.size", 1)
+  })
+
+  it("should unsubscribe for conditionally rendered impulses", () => {
+    const Component = watch<{
+      count: Impulse<number>
+      condition: Impulse<boolean>
+    }>(({ scope, count, condition }) => (
+      <span data-testid="result">
+        {condition.getValue(scope) ? count.getValue(scope) : "none"}
+      </span>
+    ))
+
+    const count = Impulse.of(1)
+    const condition = Impulse.of(false)
+
+    render(<Component count={count} condition={condition} />)
+
+    const result = screen.getByTestId("result")
+
+    expect(result).toHaveTextContent("none")
+    expect(count).toHaveProperty("subscribers.size", 0)
+    expect(condition).toHaveProperty("subscribers.size", 1)
+
+    act(() => {
+      condition.setValue(true)
+    })
+    expect(result).toHaveTextContent("1")
+    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(condition).toHaveProperty("subscribers.size", 1)
+
+    act(() => {
+      count.setValue(2)
+    })
+    expect(result).toHaveTextContent("2")
+
+    act(() => {
+      condition.setValue(false)
+    })
+    expect(result).toHaveTextContent("none")
+    expect(count).toHaveProperty("subscribers.size", 0)
+    expect(condition).toHaveProperty("subscribers.size", 1)
+  })
+
+  it("should unsubscribe for conditionally rendered impulse", () => {
+    const Component = watch<{
+      count: Impulse<number>
+      condition: boolean
+    }>(({ scope, count, condition }) => (
+      <span data-testid="result">
+        {condition ? count.getValue(scope) : "none"}
+      </span>
+    ))
+
+    const count = Impulse.of(1)
+
+    const { rerender } = render(<Component count={count} condition={false} />)
+
+    const result = screen.getByTestId("result")
+
+    expect(result).toHaveTextContent("none")
+    expect(count).toHaveProperty("subscribers.size", 0)
+
+    rerender(<Component count={count} condition={true} />)
+    expect(result).toHaveTextContent("1")
+    expect(count).toHaveProperty("subscribers.size", 1)
+
+    act(() => {
+      count.setValue(2)
+    })
+    expect(result).toHaveTextContent("2")
+
+    rerender(<Component count={count} condition={false} />)
+    expect(result).toHaveTextContent("none")
+    expect(count).toHaveProperty("subscribers.size", 0)
+  })
+
+  it("should unsubscribe on unmount", () => {
+    const Component = watch<{
+      count: Impulse<number>
+    }>(({ scope, count }) => (
+      <span data-testid="result">{count.getValue(scope)}</span>
+    ))
+
+    const count = Impulse.of(1)
+
+    const { unmount } = render(<Component count={count} />)
+
+    const result = screen.getByTestId("result")
+
+    expect(result).toHaveTextContent("1")
+    expect(count).toHaveProperty("subscribers.size", 1)
+
+    unmount()
+
+    expect(count).toHaveProperty("subscribers.size", 0)
+  })
 })
 
 describe.each([
