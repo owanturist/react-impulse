@@ -360,6 +360,47 @@ describe("watch()", () => {
     expect(count).toHaveProperty("subscribers.size", 0)
   })
 
+  it("should not unsubscribe conditionally rendered impulse if it is used in another place", () => {
+    const Component = watch<{
+      count: Impulse<number>
+      condition: boolean
+    }>(({ scope, count, condition }) => (
+      <>
+        <span data-testid="x">
+          {condition ? count.getValue(scope) : "none"}
+        </span>
+        <span data-testid="y">{count.getValue(scope)}</span>
+      </>
+    ))
+
+    const count = Impulse.of(1)
+
+    const { rerender } = render(<Component count={count} condition={false} />)
+
+    const x = screen.getByTestId("x")
+    const y = screen.getByTestId("y")
+
+    expect(x).toHaveTextContent("none")
+    expect(y).toHaveTextContent("1")
+    expect(count).toHaveProperty("subscribers.size", 1)
+
+    rerender(<Component count={count} condition={true} />)
+    expect(x).toHaveTextContent("1")
+    expect(y).toHaveTextContent("1")
+    expect(count).toHaveProperty("subscribers.size", 1)
+
+    act(() => {
+      count.setValue(2)
+    })
+    expect(x).toHaveTextContent("2")
+    expect(y).toHaveTextContent("2")
+
+    rerender(<Component count={count} condition={false} />)
+    expect(x).toHaveTextContent("none")
+    expect(y).toHaveTextContent("2")
+    expect(count).toHaveProperty("subscribers.size", 1)
+  })
+
   it("should unsubscribe on unmount", () => {
     const Component = watch<{
       count: Impulse<number>

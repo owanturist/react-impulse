@@ -17,7 +17,7 @@ export class SetValueContext {
 
   public static registerStoreSubscribers(): [
     emit: VoidFunction,
-    register: Dispatch<Map<VoidFunction, number>>,
+    register: Dispatch<Set<VoidFunction>>,
   ] {
     if (SetValueContext.current != null) {
       const { current } = SetValueContext
@@ -47,14 +47,14 @@ export class SetValueContext {
     ]
   }
 
-  private readonly storeSubscribers: Array<Map<VoidFunction, number>> = []
+  private readonly storeSubscribers: Array<Set<VoidFunction>> = []
   private readonly emitters = new Set<VoidFunction>()
 
   private constructor() {
     // make private
   }
 
-  private batchStoreSubscribers(subs: Map<VoidFunction, number>): void {
+  private batchStoreSubscribers(subs: Set<VoidFunction>): void {
     this.storeSubscribers.push(subs)
   }
 
