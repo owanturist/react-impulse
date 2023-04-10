@@ -1,4 +1,3 @@
-import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
 import { Compare, Impulse, useWatchImpulse } from "../../src"
@@ -7,19 +6,16 @@ import { Counter, WithIsActive, WithImpulse, WithSpy } from "../common"
 describe.each([
   [
     "inline watcher",
-    (
-      {
-        impulse: impulse,
-        isActive,
-        spy,
-      }: WithImpulse & WithIsActive & Partial<WithSpy>,
-      compare?: Compare<Counter>,
-    ) => {
+    ({
+      impulse: impulse,
+      isActive,
+      spy,
+    }: WithImpulse & WithIsActive & Partial<WithSpy>) => {
       return useWatchImpulse((scope) => {
         spy?.()
 
         return isActive ? impulse.getValue(scope) : { count: -1 }
-      }, compare)
+      })
     },
   ],
   [
@@ -33,14 +29,12 @@ describe.each([
       compare?: Compare<Counter>,
     ) => {
       return useWatchImpulse(
-        useCallback(
-          (scope) => {
-            spy?.()
+        (scope) => {
+          spy?.()
 
-            return isActive ? impulse.getValue(scope) : { count: -1 }
-          },
-          [impulse, isActive, spy],
-        ),
+          return isActive ? impulse.getValue(scope) : { count: -1 }
+        },
+        [impulse, isActive, spy],
         compare,
       )
     },

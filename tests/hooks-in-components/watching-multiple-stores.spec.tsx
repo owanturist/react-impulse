@@ -56,40 +56,10 @@ describe("watching multiple impulses", () => {
 
         return [sum > 2, sum < 7]
       },
+      [props.firstCount, props.secondCount],
       ([left1, right1], [left2, right2]) => {
         return left1 === left2 && right1 === right2
       },
-    )
-
-    return (
-      <GenericApp
-        moreThanOne={moreThanOne}
-        lessThanFour={lessThanFour}
-        {...props}
-      />
-    )
-  }
-
-  const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useWatchImpulse<[boolean, boolean]>(
-      React.useCallback(
-        (scope) => {
-          const sum =
-            props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
-
-          return [sum > 2, sum < 7]
-        },
-        [props.firstCount, props.secondCount],
-      ),
-      React.useCallback(
-        (
-          [left1, right1]: [boolean, boolean],
-          [left2, right2]: [boolean, boolean],
-        ) => {
-          return left1 === left2 && right1 === right2
-        },
-        [],
-      ),
     )
 
     return (
@@ -126,26 +96,22 @@ describe("watching multiple impulses", () => {
 
   const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
     const moreThanOne = useWatchImpulse(
-      React.useCallback(
-        (scope) => {
-          const sum =
-            props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
+      (scope) => {
+        const sum =
+          props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
 
-          return sum > 2
-        },
-        [props.firstCount, props.secondCount],
-      ),
+        return sum > 2
+      },
+      [props.firstCount, props.secondCount],
     )
     const lessThanFour = useWatchImpulse(
-      React.useCallback(
-        (scope) => {
-          const sum =
-            props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
+      (scope) => {
+        const sum =
+          props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
 
-          return sum < 7
-        },
-        [props.firstCount, props.secondCount],
-      ),
+        return sum < 7
+      },
+      [props.firstCount, props.secondCount],
     )
 
     return (
@@ -173,7 +139,6 @@ describe("watching multiple impulses", () => {
 
   it.each([
     ["single watcher", SingleWatcherApp, 0],
-    ["single memoized watcher", SingleMemoizedWatcherApp, 0],
     ["multiple watchers", MultipleWatchersApp, 0],
     ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
     ["watch()", WatchedApp, 1],

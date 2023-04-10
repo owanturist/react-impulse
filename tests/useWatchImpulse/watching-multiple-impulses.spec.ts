@@ -1,4 +1,3 @@
-import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
 import { Compare, Impulse, useWatchImpulse, batch } from "../../src"
@@ -14,22 +13,20 @@ import {
 describe.each([
   [
     "inline watcher",
-    ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
+    ({ first, second }: WithFirst & WithSecond) => {
       return useWatchImpulse((scope) => {
         return Counter.merge(first.getValue(scope), second.getValue(scope))
-      }, compare)
+      })
     },
   ],
   [
     "memoized watcher",
     ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
       return useWatchImpulse(
-        useCallback(
-          (scope) => {
-            return Counter.merge(first.getValue(scope), second.getValue(scope))
-          },
-          [first, second],
-        ),
+        (scope) => {
+          return Counter.merge(first.getValue(scope), second.getValue(scope))
+        },
+        [first, second],
         compare,
       )
     },
@@ -101,12 +98,42 @@ describe.each([
 describe.each([
   [
     "inline watcher",
-    ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
+    ({ spy, impulse }: WithImpulse & WithSpy) => {
       return useWatchImpulse((scope) => {
         spy()
 
         return impulse.getValue(scope)
-      }, compare)
+      })
+    },
+    ({
+      spy,
+      first,
+      second,
+      third,
+    }: WithFirst & WithSecond & WithThird & WithSpy) => {
+      return useWatchImpulse((scope) => {
+        spy()
+
+        return Counter.merge(
+          first.getValue(scope),
+          second.getValue(scope),
+          third.getValue(scope),
+        )
+      })
+    },
+  ],
+
+  [
+    "memoized watcher",
+    ({ spy, impulse }: WithImpulse & WithSpy) => {
+      return useWatchImpulse(
+        (scope) => {
+          spy()
+
+          return impulse.getValue(scope)
+        },
+        [spy, impulse],
+      )
     },
     (
       {
@@ -117,70 +144,28 @@ describe.each([
       }: WithFirst & WithSecond & WithThird & WithSpy,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchImpulse((scope) => {
-        spy()
-
-        return Counter.merge(
-          first.getValue(scope),
-          second.getValue(scope),
-          third.getValue(scope),
-        )
-      }, compare)
-    },
-  ],
-
-  [
-    "memoized watcher",
-    ({ spy, impulse }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
-        useCallback(
-          (scope) => {
-            spy()
+        (scope) => {
+          spy()
 
-            return impulse.getValue(scope)
-          },
-          [spy, impulse],
-        ),
-      )
-    },
-    ({
-      spy,
-      first,
-      second,
-      third,
-    }: WithFirst & WithSecond & WithThird & WithSpy) => {
-      return useWatchImpulse(
-        useCallback(
-          (scope) => {
-            spy()
-
-            return Counter.merge(
-              first.getValue(scope),
-              second.getValue(scope),
-              third.getValue(scope),
-            )
-          },
-          [spy, first, second, third],
-        ),
+          return Counter.merge(
+            first.getValue(scope),
+            second.getValue(scope),
+            third.getValue(scope),
+          )
+        },
+        [spy, first, second, third],
+        compare,
       )
     },
   ],
 ])(
   "triggering %s for multiple impulses vs single impulse",
-  (_, useSingleHookWithoutCompare, useMultipleHookWithoutCompare) => {
+  (_, useSingleHook, useMultipleHookWithoutCompare) => {
     describe.each([
-      [
-        "without comparator",
-        useSingleHookWithoutCompare,
-        useMultipleHookWithoutCompare,
-      ],
+      ["without comparator", useMultipleHookWithoutCompare],
       [
         "with inline comparator",
-        (props: WithImpulse & WithSpy) => {
-          return useSingleHookWithoutCompare(props, (prev, next) =>
-            Counter.compare(prev, next),
-          )
-        },
         (props: WithFirst & WithSecond & WithThird & WithSpy) => {
           return useMultipleHookWithoutCompare(props, (prev, next) =>
             Counter.compare(prev, next),
@@ -189,14 +174,11 @@ describe.each([
       ],
       [
         "with memoized comparator",
-        (props: WithImpulse & WithSpy) => {
-          return useSingleHookWithoutCompare(props, Counter.compare)
-        },
         (props: WithFirst & WithSecond & WithThird & WithSpy) => {
           return useMultipleHookWithoutCompare(props, Counter.compare)
         },
       ],
-    ])("%s", (__, useSingleHook, useMultipleHook) => {
+    ])("when second hook %s", (__, useMultipleHook) => {
       const setup = () => {
         const first = Impulse.of({ count: 1 })
         const second = Impulse.of({ count: 2 })
