@@ -197,3 +197,48 @@ describe("watching single impulse", () => {
     expect(screen.getByTestId("count")).toHaveTextContent("4")
   })
 })
+
+describe("when drilling an Impulse", () => {
+  it("should not re-render of the host component when an Impulse value changes", () => {
+    const Host: React.FC<{
+      count: Impulse<number>
+      onRender: VoidFunction
+      onCounterRender: VoidFunction
+    }> = ({ count, onRender, onCounterRender }) => (
+      <>
+        <React.Profiler id="host" onRender={onRender} />
+        <CounterComponent count={count} onRender={onCounterRender} />
+      </>
+    )
+
+    const count = Impulse.of(5)
+    const onRender = vi.fn()
+    const onCounterRender = vi.fn()
+
+    render(
+      <Host
+        count={count}
+        onRender={onRender}
+        onCounterRender={onCounterRender}
+      />,
+    )
+
+    expect(screen.getByTestId("count")).toHaveTextContent("5")
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    fireEvent.click(screen.getByTestId("increment"))
+    expect(screen.getByTestId("count")).toHaveTextContent("6")
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    act(() => {
+      count.setValue((x) => x * 2)
+    })
+    expect(screen.getByTestId("count")).toHaveTextContent("12")
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).toHaveBeenCalledOnce()
+  })
+})
