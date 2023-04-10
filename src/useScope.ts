@@ -1,5 +1,5 @@
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useState } from "react"
 
 import { WatchContext } from "./WatchContext"
 import { SCOPE_KEY, Scope } from "./Scope"
@@ -10,15 +10,6 @@ export function useScope<T = () => Scope>(
   compare?: Compare<T>,
 ): T {
   const [context] = useState(() => new WatchContext())
-
-  const [subscribe, getVersion] = useMemo(
-    () => [
-      (onChange: VoidFunction) => context.subscribe(onChange),
-      () => context.getVersion(),
-    ],
-    [context],
-  )
-
   const select = useCallback(
     (version: number) => {
       const getScope = (): Scope => {
@@ -36,9 +27,9 @@ export function useScope<T = () => Scope>(
   )
 
   return useSyncExternalStoreWithSelector(
-    subscribe,
-    getVersion,
-    getVersion,
+    context.subscribe,
+    context.getVersion,
+    context.getVersion,
     select,
     compare,
   )

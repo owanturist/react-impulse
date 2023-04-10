@@ -9,17 +9,15 @@ import { WatchContext } from "./WatchContext"
  */
 export const subscribe = (listener: (scope: Scope) => void): VoidFunction => {
   const context = new WatchContext()
-
-  // TODO update docs about JSON and toString
-  injectScope(listener, {
+  const getScope = (): Scope => ({
     [SCOPE_KEY]: context,
     version: context.getVersion(),
   })
 
+  // TODO update docs about JSON and toString
+  injectScope(listener, getScope())
+
   return context.subscribe(() => {
-    injectScope(listener, {
-      [SCOPE_KEY]: context,
-      version: context.getVersion(),
-    })
+    injectScope(listener, getScope())
   })
 }
