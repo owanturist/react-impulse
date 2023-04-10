@@ -41,7 +41,7 @@ export class WatchContext {
     }
   }
 
-  public subscribe(notify: VoidFunction): VoidFunction {
+  public subscribe = (notify: VoidFunction): VoidFunction => {
     // in case if subscribe is called twice
     if (this.notify != null) {
       this.reset()
@@ -55,7 +55,7 @@ export class WatchContext {
     }
   }
 
-  public getVersion(): number {
+  public getVersion = (): number => {
     return this.version
   }
 }
