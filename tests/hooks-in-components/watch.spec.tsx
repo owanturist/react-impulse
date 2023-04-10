@@ -286,7 +286,7 @@ describe("watch()", () => {
     expect(count_2).toHaveProperty("subscribers.size", 1)
   })
 
-  it("should unsubscribe for conditionally rendered impulses", () => {
+  it("should unsubscribe for conditionally rendered impulse when re-render is triggered by changing impulse value", () => {
     const Component = watch<{
       count: Impulse<number>
       condition: Impulse<boolean>
@@ -327,7 +327,7 @@ describe("watch()", () => {
     expect(condition).toHaveProperty("subscribers.size", 1)
   })
 
-  it("should unsubscribe for conditionally rendered impulse", () => {
+  it("should unsubscribe for conditionally rendered impulse when re-render is triggered by changing props", () => {
     const Component = watch<{
       count: Impulse<number>
       condition: boolean
@@ -356,6 +356,47 @@ describe("watch()", () => {
     expect(result).toHaveTextContent("2")
 
     rerender(<Component count={count} condition={false} />)
+    expect(result).toHaveTextContent("none")
+    expect(count).toHaveProperty("subscribers.size", 0)
+  })
+
+  it("should unsubscribe for conditionally rendered impulse when re-render is triggered by changing useState", () => {
+    const Component = watch<{
+      count: Impulse<number>
+    }>(({ scope, count }) => {
+      const [condition, setCondition] = React.useState(false)
+
+      return (
+        <button
+          type="button"
+          data-testid="result"
+          onClick={() => setCondition((x) => !x)}
+        >
+          {/* eslint-disable-next-line jest/no-if */}
+          {condition ? count.getValue(scope) : "none"}
+        </button>
+      )
+    })
+
+    const count = Impulse.of(1)
+
+    render(<Component count={count} />)
+
+    const result = screen.getByTestId("result")
+
+    expect(result).toHaveTextContent("none")
+    expect(count).toHaveProperty("subscribers.size", 0)
+
+    fireEvent.click(result)
+    expect(result).toHaveTextContent("1")
+    expect(count).toHaveProperty("subscribers.size", 1)
+
+    act(() => {
+      count.setValue(2)
+    })
+    expect(result).toHaveTextContent("2")
+
+    fireEvent.click(result)
     expect(result).toHaveTextContent("none")
     expect(count).toHaveProperty("subscribers.size", 0)
   })
@@ -743,8 +784,6 @@ describe("wild cases", () => {
     },
   )
 
-  it.todo("should rerender child component consuming the scope via props")
-
   it.each([
     ["React.useEffect", React.useEffect],
     ["React.useLayoutEffect", React.useLayoutEffect],
@@ -812,4 +851,158 @@ describe("wild cases", () => {
       expect(onRender).toHaveBeenCalledOnce()
     },
   )
+})
+
+describe.each([
+  ["not memoized", (<T,>(x: T): T => x) as typeof React.memo],
+  ["memoized", React.memo],
+])("when scope passes as a property to %s component", (_, memo) => {
+  const Host: React.FC<{
+    count: Impulse<number>
+    countChild: Impulse<number>
+    onRender: VoidFunction
+    onChildRender: VoidFunction
+  }> = watch(({ scope, count, countChild, onRender, onChildRender }) => {
+    const [, force] = React.useState(0)
+
+    return (
+      <React.Profiler id="host" onRender={onRender}>
+        <button
+          type="button"
+          data-testid="force"
+          onClick={() => force((x) => x + 1)}
+        />
+        <span data-testid="result">{count.getValue(scope)}</span>
+        <Child count={countChild} scope={scope} onRender={onChildRender} />
+      </React.Profiler>
+    )
+  })
+
+  const Child: React.FC<{
+    count: Impulse<number>
+    scope: Scope
+    onRender: VoidFunction
+  }> = memo(({ count, scope, onRender }) => (
+    <React.Profiler id="child" onRender={onRender}>
+      <span data-testid="child-result">{count.getValue(scope)}</span>
+      <button
+        type="button"
+        data-testid="increment"
+        onClick={() => count.setValue((x) => x + 1)}
+      />
+    </React.Profiler>
+  ))
+
+  const setup = () => {
+    const count = Impulse.of(5)
+    const countChild = Impulse.of(10)
+    const onRender = vi.fn()
+    const onChildRender = vi.fn()
+    const { rerender } = render(
+      <Host
+        count={count}
+        countChild={countChild}
+        onRender={onRender}
+        onChildRender={onChildRender}
+      />,
+    )
+
+    return {
+      count,
+      countChild,
+      onRender,
+      onChildRender,
+      rerender: () => {
+        rerender(
+          <Host
+            count={count}
+            countChild={countChild}
+            onRender={onRender}
+            onChildRender={onChildRender}
+          />,
+        )
+      },
+    }
+  }
+
+  it("should successfully render", () => {
+    const { onRender, onChildRender, count, countChild } = setup()
+
+    expect(screen.getByTestId("result")).toHaveTextContent("5")
+    expect(screen.getByTestId("child-result")).toHaveTextContent("10")
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onChildRender).toHaveBeenCalledOnce()
+    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(countChild).toHaveProperty("subscribers.size", 1)
+  })
+
+  it.each([
+    [
+      "inside",
+      () => {
+        fireEvent.click(screen.getByTestId("increment"))
+      },
+    ],
+    [
+      "outside",
+      (count: Impulse<number>) => {
+        act(() => {
+          count.setValue((x) => x + 1)
+        })
+      },
+    ],
+  ])(
+    "should re-render when countChild value changes from the %s",
+    (__, increment) => {
+      const { onRender, onChildRender, countChild } = setup()
+      vi.clearAllMocks()
+
+      increment(countChild)
+      expect(screen.getByTestId("result")).toHaveTextContent("5")
+      expect(screen.getByTestId("child-result")).toHaveTextContent("11")
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(onChildRender).toHaveBeenCalledOnce()
+      expect(countChild).toHaveProperty("subscribers.size", 1)
+    },
+  )
+
+  it("should re-render when count value changes", () => {
+    const { onRender, onChildRender, count } = setup()
+    vi.clearAllMocks()
+
+    act(() => {
+      count.setValue((x) => x + 1)
+    })
+    expect(screen.getByTestId("result")).toHaveTextContent("6")
+    expect(screen.getByTestId("child-result")).toHaveTextContent("10")
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onChildRender).toHaveBeenCalledOnce()
+    expect(count).toHaveProperty("subscribers.size", 1)
+  })
+
+  it("should re-render when the host re-renders", () => {
+    const { onRender, onChildRender, count, countChild } = setup()
+    vi.clearAllMocks()
+
+    fireEvent.click(screen.getByTestId("force"))
+    expect(screen.getByTestId("result")).toHaveTextContent("5")
+    expect(screen.getByTestId("child-result")).toHaveTextContent("10")
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onChildRender).toHaveBeenCalledOnce()
+    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(countChild).toHaveProperty("subscribers.size", 1)
+  })
+
+  it("should re-render on `rerender`", () => {
+    const { onRender, onChildRender, count, countChild, rerender } = setup()
+    vi.clearAllMocks()
+
+    rerender()
+    expect(screen.getByTestId("result")).toHaveTextContent("5")
+    expect(screen.getByTestId("child-result")).toHaveTextContent("10")
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onChildRender).toHaveBeenCalledOnce()
+    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(countChild).toHaveProperty("subscribers.size", 1)
+  })
 })
