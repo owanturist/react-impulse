@@ -4,56 +4,31 @@ import { act, renderHook } from "@testing-library/react"
 import { Impulse, useWatchImpulse } from "../../src"
 import { Counter, WithSpy, WithImpulse } from "../common"
 
-describe.each([
-  [
-    "without comparator",
-    ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse((scope) => {
-        const value = impulse.getValue(scope)
+describe("inline watcher", () => {
+  const setup = () => {
+    const spy = vi.fn()
+    const impulse = Impulse.of({ count: 1 })
 
-        spy(value)
-
-        return value
-      })
-    },
-  ],
-  [
-    "with inline comparator",
-    ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(
-        (scope) => {
+    const { rerender } = renderHook(
+      () => {
+        return useWatchImpulse((scope) => {
           const value = impulse.getValue(scope)
 
           spy(value)
 
           return value
-        },
-        (prev, next) => Counter.compare(prev, next),
-      )
-    },
-  ],
-  [
-    "with memoized comparator",
-    ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse((scope) => {
-        const value = impulse.getValue(scope)
+        })
+      },
+      {
+        initialProps: { impulse, spy },
+      },
+    )
 
-        spy(value)
-
-        return value
-      }, Counter.compare)
-    },
-  ],
-])("inline watcher %s", (_, useHook) => {
-  const setup = () => {
-    const spy = vi.fn()
-    const impulse = Impulse.of({ count: 1 })
-
-    const { rerender } = renderHook(useHook, {
-      initialProps: { impulse, spy },
-    })
-
-    return { spy, impulse, rerender }
+    return {
+      spy,
+      impulse,
+      rerender: () => rerender({ spy, impulse }),
+    }
   }
 
   it.concurrent("should call watcher 1 time on init", () => {
@@ -64,11 +39,11 @@ describe.each([
   })
 
   it.concurrent("should call watcher 1 time on subsequent renders", () => {
-    const { spy, impulse, rerender } = setup()
+    const { spy, rerender } = setup()
 
     spy.mockReset()
 
-    rerender({ spy, impulse })
+    rerender()
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
@@ -116,16 +91,14 @@ describe.each([
     "with inline comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
-        useCallback(
-          (scope) => {
-            const value = impulse.getValue(scope)
+        (scope) => {
+          const value = impulse.getValue(scope)
 
-            spy(value)
+          spy(value)
 
-            return value
-          },
-          [impulse, spy],
-        ),
+          return value
+        },
+        [impulse, spy],
         (prev, next) => Counter.compare(prev, next),
       )
     },
@@ -134,16 +107,14 @@ describe.each([
     "with memoized comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
-        useCallback(
-          (scope) => {
-            const value = impulse.getValue(scope)
+        (scope) => {
+          const value = impulse.getValue(scope)
 
-            spy(value)
+          spy(value)
 
-            return value
-          },
-          [impulse, spy],
-        ),
+          return value
+        },
+        [impulse, spy],
         Counter.compare,
       )
     },
@@ -157,7 +128,11 @@ describe.each([
       initialProps: { impulse, spy },
     })
 
-    return { spy, impulse, rerender }
+    return {
+      spy,
+      impulse,
+      rerender: () => rerender({ spy, impulse }),
+    }
   }
 
   it.concurrent("should call watcher 1 time on init", () => {
@@ -168,11 +143,11 @@ describe.each([
   })
 
   it.concurrent("should not call watcher on subsequent renders", () => {
-    const { spy, impulse, rerender } = setup()
+    const { spy, rerender } = setup()
 
     spy.mockReset()
 
-    rerender({ spy, impulse })
+    rerender()
     expect(spy).not.toHaveBeenCalled()
   })
 

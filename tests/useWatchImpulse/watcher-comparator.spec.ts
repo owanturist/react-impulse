@@ -1,68 +1,57 @@
-import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react"
 
 import { Impulse, useWatchImpulse } from "../../src"
 import { Counter, WithCompare, WithImpulse } from "../common"
-import { Compare, eq } from "../../src/utils"
+import { eq } from "../../src/utils"
 
 describe.each([
   [
-    "inline watcher",
-    ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
-      return useWatchImpulse((scope) => impulse.getValue(scope), compare)
-    },
-  ],
-  [
-    "memoized watcher",
-    ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
+    "with inline comparator",
+    ({ compare, impulse }: WithImpulse & WithCompare) => {
+      const cmp = compare ?? Counter.compare
+
       return useWatchImpulse(
-        useCallback((scope) => impulse.getValue(scope), [impulse]),
-        compare,
+        (scope) => impulse.getValue(scope),
+        [impulse],
+        (prev, next) => cmp(prev, next),
       )
     },
   ],
-])("with %s", (_, useHookWithoutCompare) => {
-  describe.each([
-    [
-      "with inline comparator",
-      ({ compare, ...props }: WithImpulse & WithCompare) => {
-        const cmp = compare ?? Counter.compare
+  [
+    "with memoized comparator",
+    ({ compare, impulse }: WithImpulse & WithCompare) => {
+      return useWatchImpulse(
+        (scope) => impulse.getValue(scope),
+        [impulse],
+        compare ?? Counter.compare,
+      )
+    },
+  ],
+])("%s", (__, useHook) => {
+  it.concurrent("swapping compare", () => {
+    const initial = { count: 0 }
+    const impulse = Impulse.of(initial)
 
-        return useHookWithoutCompare(props, (prev, next) => cmp(prev, next))
-      },
-    ],
-    [
-      "with memoized comparator",
-      ({ compare, ...props }: WithImpulse & WithCompare) => {
-        return useHookWithoutCompare(props, compare ?? Counter.compare)
-      },
-    ],
-  ])("%s", (__, useHook) => {
-    it.concurrent("swapping compare", () => {
-      const initial = { count: 0 }
-      const impulse = Impulse.of(initial)
-
-      const { result, rerender } = renderHook(useHook, {
-        initialProps: { impulse },
-      })
-      expect(result.current).toBe(initial)
-
-      act(() => {
-        impulse.setValue({ count: 0 })
-      })
-      expect(result.current).toBe(initial)
-
-      rerender({
-        impulse,
-        compare: eq,
-      })
-      expect(result.current).toBe(initial)
-
-      act(() => {
-        impulse.setValue({ count: 0 })
-      })
-      expect(result.current).not.toBe(initial)
-      expect(result.current).toStrictEqual(initial)
+    const { result, rerender } = renderHook(useHook, {
+      initialProps: { impulse },
     })
+    expect(result.current).toBe(initial)
+
+    act(() => {
+      impulse.setValue({ count: 0 })
+    })
+    expect(result.current).toBe(initial)
+
+    rerender({
+      impulse,
+      compare: eq,
+    })
+    expect(result.current).toBe(initial)
+
+    act(() => {
+      impulse.setValue({ count: 0 })
+    })
+    expect(result.current).not.toBe(initial)
+    expect(result.current).toStrictEqual(initial)
   })
 })

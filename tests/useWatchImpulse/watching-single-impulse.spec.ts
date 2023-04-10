@@ -1,4 +1,3 @@
-import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react"
 
 import { Compare, Impulse, useWatchImpulse } from "../../src"
@@ -7,15 +6,16 @@ import { Counter, WithSpy, WithImpulse } from "../common"
 describe.each([
   [
     "inline watcher",
-    ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
-      return useWatchImpulse((scope) => impulse.getValue(scope), compare)
+    ({ impulse }: WithImpulse) => {
+      return useWatchImpulse((scope) => impulse.getValue(scope))
     },
   ],
   [
     "memoized watcher",
     ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
       return useWatchImpulse(
-        useCallback((scope) => impulse.getValue(scope), [impulse]),
+        (scope) => impulse.getValue(scope),
+        [impulse],
         compare,
       )
     },
@@ -163,21 +163,92 @@ describe("transform Impulse's value inside watcher", () => {
     return prevLeft === nextLeft && prevRight === nextRight
   }
 
+  it.concurrent.each([
+    [
+      "inline comparator",
+      ({ impulse }: WithImpulse) => {
+        return useWatchImpulse(
+          (scope) => impulse.getValue(scope, toTuple),
+          [impulse],
+          (prev, next) => compareTuple(prev, next),
+        )
+      },
+    ],
+    [
+      "memoized comparator",
+      ({ impulse }: WithImpulse) => {
+        return useWatchImpulse(
+          (scope) => impulse.getValue(scope, toTuple),
+          [impulse],
+          compareTuple,
+        )
+      },
+    ],
+  ])(
+    "keeps the old value when it is comparably equal when %s",
+    (_, useHookWithCompare) => {
+      const impulse = Impulse.of({ count: 1 })
+
+      const { result, rerender } = renderHook(useHookWithCompare, {
+        initialProps: { impulse },
+      })
+
+      let prev = result.current
+
+      // produces initial result
+      expect(result.current).toStrictEqual([false, true])
+
+      // increments 1 -> 2
+      prev = result.current
+      act(() => {
+        impulse.setValue(Counter.inc)
+      })
+      expect(result.current).toBe(prev)
+      expect(result.current).toStrictEqual([false, true])
+
+      // increments 2 -> 3
+      prev = result.current
+      act(() => {
+        impulse.setValue({ count: 3 })
+      })
+      expect(result.current).not.toBe(prev)
+      expect(result.current).toStrictEqual([true, true])
+
+      // rerender
+      rerender({ impulse })
+      expect(result.current).toStrictEqual([true, true])
+
+      // increments 3 -> 4
+      prev = result.current
+      act(() => {
+        impulse.setValue({ count: 4 })
+      })
+      expect(result.current).toBe(prev)
+      expect(result.current).toStrictEqual([true, true])
+
+      // increments 4 -> 5
+      prev = result.current
+      act(() => {
+        impulse.setValue(Counter.inc)
+      })
+      expect(result.current).not.toBe(prev)
+      expect(result.current).toStrictEqual([true, false])
+    },
+  )
+
   describe.each([
     [
       "inline watcher",
-      ({ impulse }: WithImpulse, compare?: Compare<[boolean, boolean]>) => {
-        return useWatchImpulse(
-          (scope) => impulse.getValue(scope, toTuple),
-          compare,
-        )
+      ({ impulse }: WithImpulse) => {
+        return useWatchImpulse((scope) => impulse.getValue(scope, toTuple))
       },
     ],
     [
       "memoized watcher",
       ({ impulse }: WithImpulse, compare?: Compare<[boolean, boolean]>) => {
         return useWatchImpulse(
-          useCallback((scope) => impulse.getValue(scope, toTuple), [impulse]),
+          (scope) => impulse.getValue(scope, toTuple),
+          [impulse],
           compare,
         )
       },
@@ -234,98 +305,29 @@ describe("transform Impulse's value inside watcher", () => {
         expect(result.current).toStrictEqual([true, false])
       },
     )
-
-    it.concurrent.each([
-      [
-        "inline comparator",
-        (props: WithImpulse) => {
-          return useHookWithoutCompare(props, (prev, next) =>
-            compareTuple(prev, next),
-          )
-        },
-      ],
-      [
-        "memoized comparator",
-        (props: WithImpulse) => {
-          return useHookWithoutCompare(props, compareTuple)
-        },
-      ],
-    ])(
-      "keeps the old value when it is comparably equal when %s",
-      (_, useHookWithCompare) => {
-        const impulse = Impulse.of({ count: 1 })
-
-        const { result, rerender } = renderHook(useHookWithCompare, {
-          initialProps: { impulse },
-        })
-
-        let prev = result.current
-
-        // produces initial result
-        expect(result.current).toStrictEqual([false, true])
-
-        // increments 1 -> 2
-        prev = result.current
-        act(() => {
-          impulse.setValue(Counter.inc)
-        })
-        expect(result.current).toBe(prev)
-        expect(result.current).toStrictEqual([false, true])
-
-        // increments 2 -> 3
-        prev = result.current
-        act(() => {
-          impulse.setValue({ count: 3 })
-        })
-        expect(result.current).not.toBe(prev)
-        expect(result.current).toStrictEqual([true, true])
-
-        // rerender
-        rerender({ impulse })
-        expect(result.current).toStrictEqual([true, true])
-
-        // increments 3 -> 4
-        prev = result.current
-        act(() => {
-          impulse.setValue({ count: 4 })
-        })
-        expect(result.current).toBe(prev)
-        expect(result.current).toStrictEqual([true, true])
-
-        // increments 4 -> 5
-        prev = result.current
-        act(() => {
-          impulse.setValue(Counter.inc)
-        })
-        expect(result.current).not.toBe(prev)
-        expect(result.current).toStrictEqual([true, false])
-      },
-    )
   })
 
   describe.each([
     [
       "inline watcher",
-      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
+      ({ spy, impulse }: WithImpulse & WithSpy) => {
         return useWatchImpulse((scope) => {
           spy()
 
           return impulse.getValue(scope)
-        }, compare)
+        })
       },
     ],
     [
       "memoized watcher",
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
         return useWatchImpulse(
-          useCallback(
-            (scope) => {
-              spy()
+          (scope) => {
+            spy()
 
-              return impulse.getValue(scope)
-            },
-            [spy, impulse],
-          ),
+            return impulse.getValue(scope)
+          },
+          [spy, impulse],
           compare,
         )
       },
@@ -373,49 +375,45 @@ describe("multiple Impulse#getValue() calls", () => {
   describe.each([
     [
       "inline watcher",
-      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
+      ({ spy, impulse }: WithImpulse & WithSpy) => {
         return useWatchImpulse((scope) => {
           spy()
 
           return impulse.getValue(scope)
-        }, compare)
+        })
       },
-      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
+      ({ spy, impulse }: WithImpulse & WithSpy) => {
         return useWatchImpulse((scope) => {
           spy()
 
           return Counter.merge(impulse.getValue(scope), impulse.getValue(scope))
-        }, compare)
+        })
       },
     ],
     [
       "memoized watcher",
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
         return useWatchImpulse(
-          useCallback(
-            (scope) => {
-              spy()
+          (scope) => {
+            spy()
 
-              return impulse.getValue(scope)
-            },
-            [spy, impulse],
-          ),
+            return impulse.getValue(scope)
+          },
+          [spy, impulse],
           compare,
         )
       },
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
         return useWatchImpulse(
-          useCallback(
-            (scope) => {
-              spy()
+          (scope) => {
+            spy()
 
-              return Counter.merge(
-                impulse.getValue(scope),
-                impulse.getValue(scope),
-              )
-            },
-            [spy, impulse],
-          ),
+            return Counter.merge(
+              impulse.getValue(scope),
+              impulse.getValue(scope),
+            )
+          },
+          [spy, impulse],
           compare,
         )
       },

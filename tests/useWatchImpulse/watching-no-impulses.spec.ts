@@ -1,4 +1,3 @@
-import { useCallback } from "react"
 import { renderHook } from "@testing-library/react"
 
 import { useWatchImpulse } from "../../src"
@@ -14,7 +13,7 @@ describe("watching no impulses", () => {
     [
       "memoized",
       () => {
-        return useWatchImpulse(useCallback(() => 1, []))
+        return useWatchImpulse(() => 1, [])
       },
     ],
   ])("returns %s watcher result", (_, useHook) => {
@@ -33,7 +32,7 @@ describe("watching no impulses", () => {
     [
       "memoized",
       ({ value }: { value: number }) => {
-        return useWatchImpulse(useCallback(() => 2 * value, [value]))
+        return useWatchImpulse(() => 2 * value, [value])
       },
     ],
   ])("returns %s watcher result from clojure", (_, useHook) => {

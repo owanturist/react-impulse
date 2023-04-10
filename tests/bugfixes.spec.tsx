@@ -63,9 +63,7 @@ describe("watching misses when defined after useEffect #140", () => {
   }
 
   const useWatchMemoized = (impulse: Impulse<number>) => {
-    return useWatchImpulse(
-      React.useCallback((scope) => impulse.getValue(scope), [impulse]),
-    )
+    return useWatchImpulse((scope) => impulse.getValue(scope), [impulse])
   }
 
   describe.each([
