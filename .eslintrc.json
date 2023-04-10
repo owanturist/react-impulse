@@ -167,7 +167,7 @@
         "react-hooks/exhaustive-deps": [
           "error",
           {
-            "additionalHooks": "(useImpulseMemo|useImpulseEffect|useImpulseLayoutEffect)"
+            "additionalHooks": "(useWatchImpulse|useImpulseMemo|useImpulseEffect|useImpulseLayoutEffect)"
           }
         ],
 

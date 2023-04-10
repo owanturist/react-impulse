@@ -230,9 +230,7 @@ describe.each([
     expectedWatcherCallsForNested: 1,
     execute: (cb: VoidFunction) => cb(),
     useCount: (watcher: (scope: Scope) => number) => {
-      return useWatchImpulse(
-        React.useCallback((scope) => watcher(scope), [watcher]),
-      )
+      return useWatchImpulse((scope) => watcher(scope), [watcher])
     },
   },
   {
@@ -241,9 +239,7 @@ describe.each([
     expectedWatcherCallsForNested: 1,
     execute: batch,
     useCount: (watcher: (scope: Scope) => number) => {
-      return useWatchImpulse(
-        React.useCallback((scope) => watcher(scope), [watcher]),
-      )
+      return useWatchImpulse((scope) => watcher(scope), [watcher])
     },
   },
 ])(
