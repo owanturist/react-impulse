@@ -437,24 +437,6 @@ describe.each([
       return React.memo(watch(Component), propsAreEqual)
     },
   ],
-  [
-    "watch(React.memo())",
-    1,
-    <TProps,>(
-      Component: React.FC<PropsWithScope<TProps>>,
-      propsAreEqual?: Compare<Readonly<TProps>>,
-    ) => {
-      if (propsAreEqual == null) {
-        return watch(React.memo(Component))
-      }
-
-      return watch(
-        React.memo(Component, (prev, next) => {
-          return prev.scope === next.scope && propsAreEqual(prev, next)
-        }),
-      )
-    },
-  ],
 ])("memoizing with %s", (_, unnecessaryRerendersCount, customMemo) => {
   const memo = customMemo as typeof watch.memo
 
@@ -610,10 +592,17 @@ describe("watch.forwardRef()", () => {
     ["watch.memo.forwardRef()", watch.memo.forwardRef],
     ["watch.forwardRef.memo()", watch.forwardRef.memo],
     [
-      "watch(React.forwardRef())",
+      "React.forwardRef(watch())",
       <TNode, TProps>(
         renderFn: React.ForwardRefRenderFunction<TNode, PropsWithScope<TProps>>,
-      ) => watch(React.forwardRef(renderFn)),
+      ) => {
+        return React.forwardRef(
+          watch(renderFn) as React.ForwardRefRenderFunction<
+            TNode,
+            PropsWithoutScope<TProps>
+          >,
+        )
+      },
     ],
   ])("should pass the reference with %s", (_, forwardRef) => {
     const Component = forwardRef<
@@ -754,6 +743,8 @@ describe("wild cases", () => {
     },
   )
 
+  it.todo("should rerender child component consuming the scope via props")
+
   it.each([
     ["React.useEffect", React.useEffect],
     ["React.useLayoutEffect", React.useLayoutEffect],
@@ -799,7 +790,7 @@ describe("wild cases", () => {
 
       fireEvent.click(screen.getByTestId("force"))
       expect(count).toHaveProperty("subscribers.size", 1)
-      expect(onEffect).not.toHaveBeenCalled()
+      expect(onEffect).toHaveBeenCalledOnce()
       expect(onRender).toHaveBeenCalledOnce()
       vi.clearAllMocks()
 

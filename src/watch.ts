@@ -6,8 +6,8 @@ import {
   forwardRef as React_forwardRef,
   PropsWithoutRef,
   RefAttributes,
-  createElement,
   NamedExoticComponent,
+  ExoticComponent,
 } from "react"
 
 import { Compare } from "./utils"
@@ -32,16 +32,22 @@ export type PropsWithoutScope<TProps> = "scope" extends keyof TProps
  *
  * @version 1.0.0
  */
+export function watch<TProps>(component: ExoticComponent<TProps>): never
 export function watch<TProps>(
-  Component: FunctionComponent<PropsWithScope<TProps>>,
-): ForwardRefExoticComponent<PropsWithoutScope<TProps>> {
-  const ImpulseWatcher = React_forwardRef((props, ref) => {
+  component: FunctionComponent<PropsWithScope<TProps>>,
+): FunctionComponent<PropsWithoutScope<TProps>>
+export function watch<TProps>(
+  component: FunctionComponent<TProps>,
+): FunctionComponent<TProps> {
+  const ImpulseWatcher: FunctionComponent<TProps> = (props, ctx: unknown) => {
     const getScope = useScope()
 
-    return createElement(Component, { ...props, ref, scope: getScope() })
-  }) as ForwardRefExoticComponent<PropsWithoutScope<TProps>>
+    return component({ ...props, scope: getScope() }, ctx)
+  }
 
-  ImpulseWatcher.displayName = `ImpulseWatcher${Component.displayName ?? ""}`
+  ImpulseWatcher.displayName = `ImpulseWatcher${
+    component.displayName ?? component.name
+  }`
 
   return ImpulseWatcher
 }
@@ -63,11 +69,11 @@ const forwardRefMemo = <TNode, TProps>(
 const forwardRef = <TNode, TProps>(
   render: ForwardRefRenderFunction<TNode, PropsWithScope<TProps>>,
 ): ForwardRefExoticComponent<
-  PropsWithoutScope<
-    PropsWithoutRef<PropsWithScope<TProps>> & RefAttributes<TNode>
-  >
+  PropsWithoutRef<PropsWithoutScope<TProps>> & RefAttributes<TNode>
 > => {
-  return watch(React_forwardRef(render))
+  return React_forwardRef(
+    watch(render) as ForwardRefRenderFunction<TNode, PropsWithoutScope<TProps>>,
+  )
 }
 
 /**
