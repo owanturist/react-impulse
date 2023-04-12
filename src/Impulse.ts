@@ -1,5 +1,5 @@
 import { Compare, eq, isFunction } from "./utils"
-import { SetValueContext } from "./SetValueContext"
+import { scheduleEmit } from "./SetValueContext"
 import { STATIC_SCOPE, SCOPE_KEY, Scope, extractScope } from "./Scope"
 
 export class Impulse<T> {
@@ -28,12 +28,6 @@ export class Impulse<T> {
     return new Impulse(initialValue, compare ?? eq)
   }
 
-  /**
-   * It does not use `Set<VoidFunction>` here because the same listener might be subscribed
-   * many times to an Impulse, so it should not unsubscribe them all when one unsubscribes.
-   * By keeping track of how many times the same listener is subscribed it knows when to drop
-   * the listener from `subscribers`.
-   */
   private readonly subscribers = new Set<VoidFunction>()
 
   /**
@@ -147,17 +141,16 @@ export class Impulse<T> {
     compare: null | Compare<T> = this.compare,
   ): void {
     const finalCompare = compare ?? eq
-    const [emit, register] = SetValueContext.registerStoreSubscribers()
 
-    const nextValue = isFunction(valueOrTransform)
-      ? valueOrTransform(this.value)
-      : valueOrTransform
+    scheduleEmit((register) => {
+      const nextValue = isFunction(valueOrTransform)
+        ? valueOrTransform(this.value)
+        : valueOrTransform
 
-    if (!finalCompare(this.value, nextValue)) {
-      this.value = nextValue
-      register(this.subscribers)
-    }
-
-    emit()
+      if (!finalCompare(this.value, nextValue)) {
+        this.value = nextValue
+        register(this.subscribers)
+      }
+    })
   }
 }
