@@ -1,5 +1,3 @@
-import { registerEmitter } from "./SetValueContext"
-
 /**
  * A context to track Impulse#getValue usage inside the watcher function.
  * The tracked calls will subscribe related stores to updates,
@@ -15,10 +13,8 @@ export class WatchContext {
   private notify: null | VoidFunction = null
 
   private readonly emit = (): void => {
-    registerEmitter(() => {
-      this.reset()
-      this.notify?.()
-    })
+    this.reset()
+    this.notify?.()
   }
 
   private reset(): void {
