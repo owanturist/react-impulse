@@ -87,10 +87,10 @@ describe.each([
         "stops watching impulse_1 changes after replacement with impulse_2",
         ({ scope }) => {
           const { impulse_1, impulse_2, result, rerender } = setup()
-          expect(impulse_1).toHaveProperty("subscribers.size", 1)
+          expect(impulse_1).toHaveProperty("scopes.size", 1)
 
           rerender({ impulse: impulse_2 })
-          expect(impulse_1).toHaveProperty("subscribers.size", 0)
+          expect(impulse_1).toHaveProperty("scopes.size", 0)
 
           act(() => {
             impulse_1.setValue(Counter.inc)
@@ -98,7 +98,7 @@ describe.each([
 
           expect(impulse_1.getValue(scope)).toStrictEqual({ count: 2 })
           expect(result.current).toStrictEqual({ count: 10 })
-          expect(impulse_1).toHaveProperty("subscribers.size", 0)
+          expect(impulse_1).toHaveProperty("scopes.size", 0)
         },
       )
 
@@ -106,10 +106,10 @@ describe.each([
         "starts watching impulse_2 changes after replacement of impulse_1",
         ({ scope }) => {
           const { impulse_1, impulse_2, result, rerender } = setup()
-          expect(impulse_2).toHaveProperty("subscribers.size", 0)
+          expect(impulse_2).toHaveProperty("scopes.size", 0)
 
           rerender({ impulse: impulse_2 })
-          expect(impulse_2).toHaveProperty("subscribers.size", 1)
+          expect(impulse_2).toHaveProperty("scopes.size", 1)
 
           act(() => {
             impulse_2.setValue(Counter.inc)
@@ -117,7 +117,7 @@ describe.each([
 
           expect(impulse_1.getValue(scope)).toStrictEqual({ count: 1 })
           expect(result.current).toStrictEqual({ count: 11 })
-          expect(impulse_2).toHaveProperty("subscribers.size", 1)
+          expect(impulse_2).toHaveProperty("scopes.size", 1)
         },
       )
 
@@ -137,8 +137,8 @@ describe.each([
 
           rerender({ impulse: impulse_2 })
           rerender({ impulse: impulse_1 })
-          expect(impulse_1).toHaveProperty("subscribers.size", 1)
-          expect(impulse_2).toHaveProperty("subscribers.size", 0)
+          expect(impulse_1).toHaveProperty("scopes.size", 1)
+          expect(impulse_2).toHaveProperty("scopes.size", 0)
 
           act(() => {
             impulse_2.setValue(Counter.inc)

@@ -13,7 +13,7 @@ export function useScope<T = () => Scope>(
   const select = useCallback(
     (version: number) => {
       const getScope = (): Scope => {
-        context.cleanup()
+        context.clean()
 
         return {
           [SCOPE_KEY]: context,

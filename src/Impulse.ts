@@ -1,6 +1,7 @@
 import { Compare, eq, isFunction } from "./utils"
 import { scheduleEmit } from "./scheduler"
 import { STATIC_SCOPE, SCOPE_KEY, Scope, extractScope } from "./Scope"
+import type { WatchContext } from "./WatchContext"
 
 export class Impulse<T> {
   /**
@@ -28,7 +29,7 @@ export class Impulse<T> {
     return new Impulse(initialValue, compare ?? eq)
   }
 
-  private readonly subscribers = new Set<VoidFunction>()
+  private readonly scopes = new Set<WatchContext>()
 
   /**
    * The `Compare` function compares Impulse's value with the new value given via `Impulse#setValue`.
@@ -40,24 +41,6 @@ export class Impulse<T> {
 
   private constructor(private value: T, compare: Compare<T>) {
     this.compare = compare
-  }
-
-  /**
-   * Subscribes to the value's updates caused by calling `Impulse#setValue`.
-   *
-   * @param listener a function that subscribes to the updates.
-   */
-  private readonly subscribe = (listener: VoidFunction): void => {
-    this.subscribers.add(listener)
-  }
-
-  /**
-   * Unsubscribes from the subscribed listener.
-   *
-   * @param listener a function that subscribes to the updates via `Impulse#subscribe`.
-   */
-  private readonly unsubscribe = (listener: VoidFunction): void => {
-    this.subscribers.delete(listener)
   }
 
   /**
@@ -120,7 +103,16 @@ export class Impulse<T> {
     scope: Scope,
     select?: (value: T, scope: Scope) => R,
   ): T | R {
-    scope[SCOPE_KEY]?.register(this.subscribe, this.unsubscribe)
+    // TODO come up with a better name for tmp
+    const tmp = scope[SCOPE_KEY]
+
+    if (tmp != null && !this.scopes.has(tmp)) {
+      this.scopes.add(tmp)
+
+      tmp.register(() => {
+        this.scopes.delete(tmp)
+      })
+    }
 
     return isFunction(select) ? select(this.value, scope) : this.value
   }
@@ -149,7 +141,7 @@ export class Impulse<T> {
 
       if (!finalCompare(this.value, nextValue)) {
         this.value = nextValue
-        register(this.subscribers)
+        register(this.scopes)
       }
     })
   }
