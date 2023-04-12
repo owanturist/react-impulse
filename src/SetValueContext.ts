@@ -1,47 +1,26 @@
 import type { Dispatch } from "react"
 
-const registeredEmitters = new Set<VoidFunction>()
-let scheduledListeners: null | Array<Set<VoidFunction>> = null
+let scheduledListeners: null | Set<VoidFunction> = null
 
-const runListeners = (listeners: Array<Set<VoidFunction>>): void => {
-  const calledListeners = new WeakSet<VoidFunction>()
-
-  listeners.forEach((bag) => {
-    bag.forEach((listener) => {
-      // don't emit the same listener twice, for instance when using `useWatchImpulse`
-      if (!calledListeners.has(listener)) {
-        // the listener might register watchers (for useWatchImpulse)
-        // so each watcher will emit only once in the code bellow
-        // even if there were multiple watching stores updated
-        listener()
-        calledListeners.add(listener)
-      }
-    })
-  })
-}
-
-const runEmitters = (): void => {
-  registeredEmitters.forEach((emit) => emit())
-  registeredEmitters.clear()
+const insertListeners = (
+  acc: Set<VoidFunction>,
+  next: ReadonlySet<VoidFunction>,
+): void => {
+  next.forEach((listener) => acc.add(listener))
 }
 
 export const scheduleEmit = (
-  execute: (register: Dispatch<Set<VoidFunction>>) => void,
+  execute: (register: Dispatch<ReadonlySet<VoidFunction>>) => void,
 ): void => {
-  if (scheduledListeners != null) {
-    execute((listeners) => scheduledListeners!.push(listeners))
-  } else {
-    scheduledListeners = []
+  if (scheduledListeners == null) {
+    scheduledListeners = new Set()
 
-    execute((listeners) => scheduledListeners!.push(listeners))
+    execute((listeners) => insertListeners(scheduledListeners!, listeners))
 
-    runListeners(scheduledListeners)
-    runEmitters()
+    scheduledListeners.forEach((listener) => listener())
 
     scheduledListeners = null
+  } else {
+    execute((listeners) => insertListeners(scheduledListeners!, listeners))
   }
-}
-
-export const registerEmitter = (emitter: VoidFunction): void => {
-  registeredEmitters.add(emitter)
 }
