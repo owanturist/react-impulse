@@ -42,7 +42,8 @@ export function watch<TProps>(
   const ImpulseWatcher: FunctionComponent<TProps> = (props, ctx: unknown) => {
     const getScope = useScope()
 
-    return component({ ...props, scope: getScope() }, ctx)
+    // it uses Object.assign to reduce output file size by avoiding the spread operator
+    return component(Object.assign({}, props, { scope: getScope() }), ctx)
   }
 
   ImpulseWatcher.displayName = `ImpulseWatcher${

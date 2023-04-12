@@ -1,4 +1,4 @@
-import { SetValueContext } from "./SetValueContext"
+import { registerEmitter } from "./SetValueContext"
 
 /**
  * A context to track Impulse#getValue usage inside the watcher function.
@@ -15,7 +15,7 @@ export class WatchContext {
   private notify: null | VoidFunction = null
 
   private readonly emit = (): void => {
-    SetValueContext.registerEmitter(() => {
+    registerEmitter(() => {
       this.reset()
       this.notify?.()
     })
