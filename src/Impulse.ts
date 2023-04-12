@@ -1,5 +1,5 @@
 import { Compare, eq, isFunction } from "./utils"
-import { scheduleEmit } from "./SetValueContext"
+import { scheduleEmit } from "./scheduler"
 import { STATIC_SCOPE, SCOPE_KEY, Scope, extractScope } from "./Scope"
 
 export class Impulse<T> {
