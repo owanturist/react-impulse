@@ -1,26 +1,35 @@
 import type { Dispatch } from "react"
 
-let scheduledListeners: null | Set<VoidFunction> = null
-
-const insertListeners = (
-  acc: Set<VoidFunction>,
-  next: ReadonlySet<VoidFunction>,
-): void => {
-  next.forEach((listener) => acc.add(listener))
+export interface Emitter {
+  emit(): void
 }
 
-export const scheduleEmit = (
-  execute: (register: Dispatch<ReadonlySet<VoidFunction>>) => void,
-): void => {
-  if (scheduledListeners == null) {
-    scheduledListeners = new Set()
+let queue: null | Array<ReadonlySet<Emitter>> = null
 
-    execute((listeners) => insertListeners(scheduledListeners!, listeners))
+const enqueue = (emitters: ReadonlySet<Emitter>): void => {
+  queue!.push(emitters)
+}
 
-    scheduledListeners.forEach((listener) => listener())
+// TODO move to batch.ts
+export const scheduleEmit = (execute: Dispatch<typeof enqueue>): void => {
+  if (queue == null) {
+    queue = []
 
-    scheduledListeners = null
+    execute(enqueue)
+
+    const completed = new WeakSet<Emitter>()
+
+    queue.forEach((bag) => {
+      bag.forEach((emitter) => {
+        if (!completed.has(emitter)) {
+          completed.add(emitter)
+          emitter.emit()
+        }
+      })
+    })
+
+    queue = null
   } else {
-    execute((listeners) => insertListeners(scheduledListeners!, listeners))
+    execute(enqueue)
   }
 }
