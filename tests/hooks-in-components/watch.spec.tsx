@@ -225,14 +225,14 @@ describe("watch()", () => {
     const result = screen.getByTestId("result")
 
     expect(result).toHaveTextContent("1")
-    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
 
     act(() => {
       count.setValue(2)
     })
 
     expect(result).toHaveTextContent("2")
-    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
   })
 
   it("should subscribe only ones for the same impulse", () => {
@@ -251,14 +251,14 @@ describe("watch()", () => {
     const result = screen.getByTestId("result")
 
     expect(result).toHaveTextContent("2")
-    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
 
     act(() => {
       count.setValue(3)
     })
 
     expect(result).toHaveTextContent("6")
-    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
   })
 
   it("should unsubscribe when impulse changes", () => {
@@ -276,14 +276,14 @@ describe("watch()", () => {
     const result = screen.getByTestId("result")
 
     expect(result).toHaveTextContent("1")
-    expect(count_1).toHaveProperty("subscribers.size", 1)
-    expect(count_2).toHaveProperty("subscribers.size", 0)
+    expect(count_1).toHaveProperty("scopes.size", 1)
+    expect(count_2).toHaveProperty("scopes.size", 0)
 
     rerender(<Component count={count_2} />)
 
     expect(result).toHaveTextContent("3")
-    expect(count_1).toHaveProperty("subscribers.size", 0)
-    expect(count_2).toHaveProperty("subscribers.size", 1)
+    expect(count_1).toHaveProperty("scopes.size", 0)
+    expect(count_2).toHaveProperty("scopes.size", 1)
   })
 
   it("should unsubscribe for conditionally rendered impulse when re-render is triggered by changing impulse value", () => {
@@ -304,15 +304,15 @@ describe("watch()", () => {
     const result = screen.getByTestId("result")
 
     expect(result).toHaveTextContent("none")
-    expect(count).toHaveProperty("subscribers.size", 0)
-    expect(condition).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 0)
+    expect(condition).toHaveProperty("scopes.size", 1)
 
     act(() => {
       condition.setValue(true)
     })
     expect(result).toHaveTextContent("1")
-    expect(count).toHaveProperty("subscribers.size", 1)
-    expect(condition).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
+    expect(condition).toHaveProperty("scopes.size", 1)
 
     act(() => {
       count.setValue(2)
@@ -323,8 +323,8 @@ describe("watch()", () => {
       condition.setValue(false)
     })
     expect(result).toHaveTextContent("none")
-    expect(count).toHaveProperty("subscribers.size", 0)
-    expect(condition).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 0)
+    expect(condition).toHaveProperty("scopes.size", 1)
   })
 
   it("should unsubscribe for conditionally rendered impulse when re-render is triggered by changing props", () => {
@@ -344,11 +344,11 @@ describe("watch()", () => {
     const result = screen.getByTestId("result")
 
     expect(result).toHaveTextContent("none")
-    expect(count).toHaveProperty("subscribers.size", 0)
+    expect(count).toHaveProperty("scopes.size", 0)
 
     rerender(<Component count={count} condition={true} />)
     expect(result).toHaveTextContent("1")
-    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
 
     act(() => {
       count.setValue(2)
@@ -357,7 +357,7 @@ describe("watch()", () => {
 
     rerender(<Component count={count} condition={false} />)
     expect(result).toHaveTextContent("none")
-    expect(count).toHaveProperty("subscribers.size", 0)
+    expect(count).toHaveProperty("scopes.size", 0)
   })
 
   it("should unsubscribe for conditionally rendered impulse when re-render is triggered by changing useState", () => {
@@ -385,11 +385,11 @@ describe("watch()", () => {
     const result = screen.getByTestId("result")
 
     expect(result).toHaveTextContent("none")
-    expect(count).toHaveProperty("subscribers.size", 0)
+    expect(count).toHaveProperty("scopes.size", 0)
 
     fireEvent.click(result)
     expect(result).toHaveTextContent("1")
-    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
 
     act(() => {
       count.setValue(2)
@@ -398,7 +398,7 @@ describe("watch()", () => {
 
     fireEvent.click(result)
     expect(result).toHaveTextContent("none")
-    expect(count).toHaveProperty("subscribers.size", 0)
+    expect(count).toHaveProperty("scopes.size", 0)
   })
 
   it("should not unsubscribe conditionally rendered impulse if it is used in another place", () => {
@@ -423,12 +423,12 @@ describe("watch()", () => {
 
     expect(x).toHaveTextContent("none")
     expect(y).toHaveTextContent("1")
-    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
 
     rerender(<Component count={count} condition={true} />)
     expect(x).toHaveTextContent("1")
     expect(y).toHaveTextContent("1")
-    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
 
     act(() => {
       count.setValue(2)
@@ -439,7 +439,7 @@ describe("watch()", () => {
     rerender(<Component count={count} condition={false} />)
     expect(x).toHaveTextContent("none")
     expect(y).toHaveTextContent("2")
-    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
   })
 
   it("should unsubscribe on unmount", () => {
@@ -456,11 +456,11 @@ describe("watch()", () => {
     const result = screen.getByTestId("result")
 
     expect(result).toHaveTextContent("1")
-    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
 
     unmount()
 
-    expect(count).toHaveProperty("subscribers.size", 0)
+    expect(count).toHaveProperty("scopes.size", 0)
   })
 })
 
@@ -821,14 +821,14 @@ describe("wild cases", () => {
         <Component count={count} onEffect={onEffect} onRender={onRender} />,
       )
 
-      expect(count).toHaveProperty("subscribers.size", 1)
+      expect(count).toHaveProperty("scopes.size", 1)
       expect(onEffect).toHaveBeenCalledOnce()
       expect(onEffect).toHaveBeenLastCalledWith(0)
       expect(onRender).toHaveBeenCalledOnce()
       vi.clearAllMocks()
 
       fireEvent.click(screen.getByTestId("force"))
-      expect(count).toHaveProperty("subscribers.size", 1)
+      expect(count).toHaveProperty("scopes.size", 1)
       expect(onEffect).toHaveBeenCalledOnce()
       expect(onRender).toHaveBeenCalledOnce()
       vi.clearAllMocks()
@@ -836,7 +836,7 @@ describe("wild cases", () => {
       act(() => {
         count.setValue((x) => x + 1)
       })
-      expect(count).toHaveProperty("subscribers.size", 1)
+      expect(count).toHaveProperty("scopes.size", 1)
       expect(onEffect).toHaveBeenCalledOnce()
       expect(onEffect).toHaveBeenLastCalledWith(1)
       expect(onRender).toHaveBeenCalledOnce()
@@ -845,7 +845,7 @@ describe("wild cases", () => {
       rerender(
         <Component count={count} onEffect={onEffect} onRender={onRender} />,
       )
-      expect(count).toHaveProperty("subscribers.size", 1)
+      expect(count).toHaveProperty("scopes.size", 1)
       expect(onEffect).toHaveBeenCalledOnce()
       expect(onEffect).toHaveBeenLastCalledWith(1)
       expect(onRender).toHaveBeenCalledOnce()
@@ -932,8 +932,8 @@ describe.each([
     expect(screen.getByTestId("child-result")).toHaveTextContent("10")
     expect(onRender).toHaveBeenCalledOnce()
     expect(onChildRender).toHaveBeenCalledOnce()
-    expect(count).toHaveProperty("subscribers.size", 1)
-    expect(countChild).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
+    expect(countChild).toHaveProperty("scopes.size", 1)
   })
 
   it.each([
@@ -962,7 +962,7 @@ describe.each([
       expect(screen.getByTestId("child-result")).toHaveTextContent("11")
       expect(onRender).toHaveBeenCalledOnce()
       expect(onChildRender).toHaveBeenCalledOnce()
-      expect(countChild).toHaveProperty("subscribers.size", 1)
+      expect(countChild).toHaveProperty("scopes.size", 1)
     },
   )
 
@@ -977,7 +977,7 @@ describe.each([
     expect(screen.getByTestId("child-result")).toHaveTextContent("10")
     expect(onRender).toHaveBeenCalledOnce()
     expect(onChildRender).toHaveBeenCalledOnce()
-    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
   })
 
   it("should re-render when the host re-renders", () => {
@@ -989,8 +989,8 @@ describe.each([
     expect(screen.getByTestId("child-result")).toHaveTextContent("10")
     expect(onRender).toHaveBeenCalledOnce()
     expect(onChildRender).toHaveBeenCalledOnce()
-    expect(count).toHaveProperty("subscribers.size", 1)
-    expect(countChild).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
+    expect(countChild).toHaveProperty("scopes.size", 1)
   })
 
   it("should re-render on `rerender`", () => {
@@ -1002,7 +1002,7 @@ describe.each([
     expect(screen.getByTestId("child-result")).toHaveTextContent("10")
     expect(onRender).toHaveBeenCalledOnce()
     expect(onChildRender).toHaveBeenCalledOnce()
-    expect(count).toHaveProperty("subscribers.size", 1)
-    expect(countChild).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("scopes.size", 1)
+    expect(countChild).toHaveProperty("scopes.size", 1)
   })
 })
