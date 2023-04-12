@@ -1,4 +1,4 @@
-import { scheduleEmit } from "./SetValueContext"
+import { scheduleEmit } from "./scheduler"
 
 /**
  * A helper to optimize multiple Impulse updates.
