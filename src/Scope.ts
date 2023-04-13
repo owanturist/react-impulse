@@ -1,17 +1,17 @@
-import type { WatchContext } from "./WatchContext"
+import type { ImpulseEmitter } from "./ImpulseEmitter"
 
-export const SCOPE_KEY = Symbol("scope")
+export const EMITTER_KEY = Symbol("scope")
 
 export interface Scope {
-  readonly [SCOPE_KEY]: null | WatchContext
+  readonly [EMITTER_KEY]: null | ImpulseEmitter
   readonly version?: number
 }
 
 export const STATIC_SCOPE: Scope = {
-  [SCOPE_KEY]: null,
+  [EMITTER_KEY]: null,
 }
 
-let currentInjectedScope: null | Scope = null
+let currentInjectedScope = STATIC_SCOPE
 
 export const injectScope = (
   runtime: (scope: Scope) => void,
@@ -19,7 +19,7 @@ export const injectScope = (
 ): void => {
   currentInjectedScope = scope
   runtime(scope)
-  currentInjectedScope = null
+  currentInjectedScope = STATIC_SCOPE
 }
 
-export const extractScope = (): null | Scope => currentInjectedScope
+export const extractScope = (): Scope => currentInjectedScope

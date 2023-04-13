@@ -7,43 +7,42 @@ import type { Emitter } from "./scheduler"
  *
  * @private
  */
-// TODO rename to something more meaningful (ScopeEmitter?)
-export class WatchContext implements Emitter {
+export class ImpulseEmitter implements Emitter {
   private readonly cleanups: Array<VoidFunction> = []
 
   private version = 0
 
   private tick: null | VoidFunction = null
 
-  private reset(): void {
+  private increment(): void {
     this.version = (this.version + 1) % 10e9
-    this.clean()
+    this.detach()
   }
 
   public emit(): void {
-    this.reset()
+    this.increment()
     this.tick?.()
   }
 
-  public clean(): void {
+  public detach(): void {
     this.cleanups.forEach((cleanup) => cleanup())
     this.cleanups.length = 0
   }
 
-  public register(cleanup: VoidFunction): void {
+  public attach(cleanup: VoidFunction): void {
     this.cleanups.push(cleanup)
   }
 
-  public subscribe = (tick: VoidFunction): VoidFunction => {
+  public onEmit = (tick: VoidFunction): VoidFunction => {
     // in case if subscribe is called twice
     if (this.tick != null) {
-      this.reset()
+      this.increment()
     }
 
     this.tick = tick
 
     return () => {
-      this.reset()
+      this.increment()
       this.tick = null
     }
   }
