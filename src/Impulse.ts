@@ -1,7 +1,6 @@
 import { Compare, isEqual, isFunction } from "./utils"
-import { scheduleEmit } from "./scheduler"
 import { EMITTER_KEY, Scope, extractScope } from "./Scope"
-import type { ImpulseEmitter } from "./ImpulseEmitter"
+import { ImpulseEmitter } from "./ImpulseEmitter"
 
 export class Impulse<T> {
   /**
@@ -122,16 +121,18 @@ export class Impulse<T> {
   ): void {
     const finalCompare = compare ?? isEqual
 
-    scheduleEmit(() => {
+    ImpulseEmitter.schedule(() => {
       const nextValue = isFunction(valueOrTransform)
         ? valueOrTransform(this.value)
         : valueOrTransform
 
-      if (!finalCompare(this.value, nextValue)) {
-        this.value = nextValue
-
-        return this.emitters
+      if (finalCompare(this.value, nextValue)) {
+        return null
       }
+
+      this.value = nextValue
+
+      return this.emitters
     })
   }
 }
