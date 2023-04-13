@@ -1,21 +1,23 @@
-import type { Dispatch } from "react"
-
 export interface Emitter {
   emit(): void
 }
 
 let queue: null | Array<ReadonlySet<Emitter>> = null
 
-const enqueue = (emitters: ReadonlySet<Emitter>): void => {
-  queue!.push(emitters)
+const enqueue = <T>(arr: Array<T>, item: undefined | T): void => {
+  if (item != null) {
+    arr.push(item)
+  }
 }
 
 // TODO move to batch.ts
-export const scheduleEmit = (execute: Dispatch<typeof enqueue>): void => {
+export const scheduleEmit = (
+  execute: VoidFunction | (() => ReadonlySet<Emitter>),
+): void => {
   if (queue == null) {
     queue = []
 
-    execute(enqueue)
+    enqueue(queue, execute())
 
     const completed = new WeakSet<Emitter>()
 
@@ -30,6 +32,6 @@ export const scheduleEmit = (execute: Dispatch<typeof enqueue>): void => {
 
     queue = null
   } else {
-    execute(enqueue)
+    enqueue(queue, execute())
   }
 }
