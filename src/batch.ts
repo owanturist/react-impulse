@@ -1,4 +1,4 @@
-import { scheduleEmit } from "./scheduler"
+import { ImpulseEmitter } from "./ImpulseEmitter"
 
 /**
  * A helper to optimize multiple Impulse updates.
@@ -8,7 +8,9 @@ import { scheduleEmit } from "./scheduler"
  * @version 1.0.0
  */
 export const batch = (execute: VoidFunction): void => {
-  scheduleEmit(() => {
+  ImpulseEmitter.schedule(() => {
     execute()
+
+    return null
   })
 }
