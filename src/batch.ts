@@ -8,5 +8,7 @@ import { scheduleEmit } from "./scheduler"
  * @version 1.0.0
  */
 export const batch = (execute: VoidFunction): void => {
-  scheduleEmit(() => execute())
+  scheduleEmit(() => {
+    execute()
+  })
 }

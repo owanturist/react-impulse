@@ -132,14 +132,15 @@ export class Impulse<T> {
   ): void {
     const finalCompare = compare ?? eq
 
-    scheduleEmit((register) => {
+    scheduleEmit(() => {
       const nextValue = isFunction(valueOrTransform)
         ? valueOrTransform(this.value)
         : valueOrTransform
 
       if (!finalCompare(this.value, nextValue)) {
         this.value = nextValue
-        register(this.emitters)
+
+        return this.emitters
       }
     })
   }
