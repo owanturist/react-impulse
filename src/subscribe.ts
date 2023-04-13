@@ -1,5 +1,5 @@
-import { SCOPE_KEY, Scope, injectScope } from "./Scope"
-import { WatchContext } from "./WatchContext"
+import { EMITTER_KEY, Scope, injectScope } from "./Scope"
+import { ImpulseEmitter } from "./ImpulseEmitter"
 
 /**
  * A function that subscribes to changes of all `Impulse` instances that call the `Impulse#getValue` method inside the `listener`.
@@ -8,16 +8,16 @@ import { WatchContext } from "./WatchContext"
  * @returns cleanup function that unsubscribes the `listener`
  */
 export const subscribe = (listener: (scope: Scope) => void): VoidFunction => {
-  const context = new WatchContext()
+  const emitter = new ImpulseEmitter()
   const getScope = (): Scope => ({
-    [SCOPE_KEY]: context,
-    version: context.getVersion(),
+    [EMITTER_KEY]: emitter,
+    version: emitter.getVersion(),
   })
 
   // TODO update docs about JSON and toString
   injectScope(listener, getScope())
 
-  return context.subscribe(() => {
+  return emitter.onEmit(() => {
     injectScope(listener, getScope())
   })
 }
