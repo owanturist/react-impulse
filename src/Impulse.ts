@@ -1,7 +1,7 @@
 import { Compare, eq, isFunction } from "./utils"
 import { scheduleEmit } from "./scheduler"
-import { STATIC_SCOPE, SCOPE_KEY, Scope, extractScope } from "./Scope"
-import type { WatchContext } from "./WatchContext"
+import { EMITTER_KEY, Scope, extractScope } from "./Scope"
+import type { ImpulseEmitter } from "./ImpulseEmitter"
 
 export class Impulse<T> {
   /**
@@ -29,7 +29,7 @@ export class Impulse<T> {
     return new Impulse(initialValue, compare ?? eq)
   }
 
-  private readonly scopes = new Set<WatchContext>()
+  private readonly emitters = new Set<ImpulseEmitter>()
 
   /**
    * The `Compare` function compares Impulse's value with the new value given via `Impulse#setValue`.
@@ -53,7 +53,7 @@ export class Impulse<T> {
    * @version 1.0.0
    */
   protected toJSON(): unknown {
-    return this.getValue(extractScope() ?? STATIC_SCOPE)
+    return this.getValue(extractScope())
   }
 
   /**
@@ -63,7 +63,7 @@ export class Impulse<T> {
    * @version 1.0.0
    */
   protected toString(): string {
-    return String(this.getValue(extractScope() ?? STATIC_SCOPE))
+    return String(this.getValue(extractScope()))
   }
 
   /**
@@ -93,7 +93,6 @@ export class Impulse<T> {
   /**
    * Returns a value selected from the current value.
    *
-   * TODO update select docs with scope and add tests
    * @param select an optional function that applies to the current value before returning.
    *
    * @version 1.0.0
@@ -103,14 +102,13 @@ export class Impulse<T> {
     scope: Scope,
     select?: (value: T, scope: Scope) => R,
   ): T | R {
-    // TODO come up with a better name for tmp
-    const tmp = scope[SCOPE_KEY]
+    const emitter = scope[EMITTER_KEY]
 
-    if (tmp != null && !this.scopes.has(tmp)) {
-      this.scopes.add(tmp)
+    if (emitter != null && !this.emitters.has(emitter)) {
+      this.emitters.add(emitter)
 
-      tmp.register(() => {
-        this.scopes.delete(tmp)
+      emitter.attach(() => {
+        this.emitters.delete(emitter)
       })
     }
 
@@ -141,7 +139,7 @@ export class Impulse<T> {
 
       if (!finalCompare(this.value, nextValue)) {
         this.value = nextValue
-        register(this.scopes)
+        register(this.emitters)
       }
     })
   }
