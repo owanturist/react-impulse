@@ -114,7 +114,7 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(6)
-        expect(value).toHaveProperty("scopes.size", 1)
+        expect(value).toHaveProperty("emitters.size", 1)
         expect(onRender).toHaveBeenCalledOnce()
       })
 
@@ -165,8 +165,8 @@ describe.each([
             />
           </React.Profiler>,
         )
-        expect(value_1).toHaveProperty("scopes.size", 1)
-        expect(value_2).toHaveProperty("scopes.size", 0)
+        expect(value_1).toHaveProperty("emitters.size", 1)
+        expect(value_2).toHaveProperty("emitters.size", 0)
 
         vi.clearAllMocks()
 
@@ -179,8 +179,8 @@ describe.each([
             />
           </React.Profiler>,
         )
-        expect(value_1).toHaveProperty("scopes.size", 0)
-        expect(value_2).toHaveProperty("scopes.size", 1)
+        expect(value_1).toHaveProperty("emitters.size", 0)
+        expect(value_2).toHaveProperty("emitters.size", 1)
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onRender).toHaveBeenCalledOnce()
@@ -200,8 +200,8 @@ describe.each([
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(10)
         expect(onRender).toHaveBeenCalledOnce()
-        expect(value_1).toHaveProperty("scopes.size", 0)
-        expect(value_2).toHaveProperty("scopes.size", 1)
+        expect(value_1).toHaveProperty("emitters.size", 0)
+        expect(value_2).toHaveProperty("emitters.size", 1)
       })
 
       it("should call useEffect factory when non Impulse dep changes", () => {
@@ -225,7 +225,7 @@ describe.each([
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(9)
         expect(onRender).toHaveBeenCalledOnce()
-        expect(value).toHaveProperty("scopes.size", 1)
+        expect(value).toHaveProperty("emitters.size", 1)
         vi.clearAllMocks()
 
         act(() => {
@@ -234,7 +234,7 @@ describe.each([
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(12)
         expect(onRender).toHaveBeenCalledOnce()
-        expect(value).toHaveProperty("scopes.size", 1)
+        expect(value).toHaveProperty("emitters.size", 1)
       })
     })
 
@@ -273,8 +273,8 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(10)
-        expect(first).toHaveProperty("scopes.size", 1)
-        expect(second).toHaveProperty("scopes.size", 1)
+        expect(first).toHaveProperty("emitters.size", 1)
+        expect(second).toHaveProperty("emitters.size", 1)
         vi.clearAllMocks()
 
         act(() => {
@@ -291,8 +291,8 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(18)
-        expect(first).toHaveProperty("scopes.size", 1)
-        expect(second).toHaveProperty("scopes.size", 1)
+        expect(first).toHaveProperty("emitters.size", 1)
+        expect(second).toHaveProperty("emitters.size", 1)
       })
     })
 
@@ -336,10 +336,10 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(10)
-        expect(list).toHaveProperty("scopes.size", 1)
-        expect(_0).toHaveProperty("scopes.size", 1)
-        expect(_1).toHaveProperty("scopes.size", 1)
-        expect(_2).toHaveProperty("scopes.size", 0)
+        expect(list).toHaveProperty("emitters.size", 1)
+        expect(_0).toHaveProperty("emitters.size", 1)
+        expect(_1).toHaveProperty("emitters.size", 1)
+        expect(_2).toHaveProperty("emitters.size", 0)
         vi.clearAllMocks()
 
         act(() => {
@@ -364,7 +364,7 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(26)
-        expect(_2).toHaveProperty("scopes.size", 1)
+        expect(_2).toHaveProperty("emitters.size", 1)
         vi.clearAllMocks()
 
         act(() => {
@@ -373,10 +373,10 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(18)
-        expect(list).toHaveProperty("scopes.size", 1)
-        expect(_0).toHaveProperty("scopes.size", 0)
-        expect(_1).toHaveProperty("scopes.size", 1)
-        expect(_2).toHaveProperty("scopes.size", 1)
+        expect(list).toHaveProperty("emitters.size", 1)
+        expect(_0).toHaveProperty("emitters.size", 0)
+        expect(_1).toHaveProperty("emitters.size", 1)
+        expect(_2).toHaveProperty("emitters.size", 1)
       })
     })
 
@@ -418,7 +418,7 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(6)
-        expect(value).toHaveProperty("scopes.size", 1)
+        expect(value).toHaveProperty("emitters.size", 1)
       })
 
       it("calls effect when inner useState changes", () => {
@@ -435,7 +435,7 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(9)
-        expect(value).toHaveProperty("scopes.size", 1)
+        expect(value).toHaveProperty("emitters.size", 1)
       })
 
       it("calls effect when Impulse inside an effect changes", () => {
@@ -454,7 +454,7 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(8)
-        expect(value).toHaveProperty("scopes.size", 1)
+        expect(value).toHaveProperty("emitters.size", 1)
       })
     })
   })
