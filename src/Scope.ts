@@ -17,9 +17,11 @@ export const injectScope = (
   runtime: (scope: Scope) => void,
   scope: Scope,
 ): void => {
+  const prevScope = currentInjectedScope
+
   currentInjectedScope = scope
   runtime(scope)
-  currentInjectedScope = STATIC_SCOPE
+  currentInjectedScope = prevScope
 }
 
 export const extractScope = (): Scope => currentInjectedScope
