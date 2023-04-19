@@ -8,6 +8,10 @@ export { subscribe } from "./subscribe"
 export { watch } from "./watch"
 export { useImpulse } from "./useImpulse"
 export { useImpulseValue } from "./useImpulseValue"
-export { useImpulseMemo } from "./useImpulseMemo"
-export { useImpulseEffect, useImpulseLayoutEffect } from "./useImpulseEffects"
+export {
+  useImpulseMemo,
+  useScopedCallback,
+  useImpulseEffect,
+  useImpulseLayoutEffect,
+} from "./useImpulseEffects"
 export { useWatchImpulse } from "./useWatchImpulse"
