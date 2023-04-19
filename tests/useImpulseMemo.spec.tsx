@@ -1,13 +1,13 @@
 import React from "react"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 
-import { Impulse, watch, useImpulseMemo } from "../src"
+import { Impulse, scoped, useImpulseMemo } from "../src"
 
 const identity = <T,>(value: T): T => value
 
 describe.each([
-  ["nothing", identity as typeof watch],
-  ["watch", watch],
+  ["nothing", identity as typeof scoped],
+  ["scoped", scoped],
 ])("using %s as hoc", (_, hoc) => {
   describe("single impulse", () => {
     const Component: React.FC<{
@@ -39,7 +39,7 @@ describe.each([
       )
     })
 
-    it("can watch inside useImpulseMemo", () => {
+    it("runs a factory when Impulse-dependency updates", () => {
       const value = Impulse.of(1)
       const onMemo = vi.fn()
       const onRender = vi.fn()
@@ -228,7 +228,7 @@ describe.each([
       )
     })
 
-    it("can watch after both impulses", () => {
+    it("runs a factory when any of both Impulse-dependencies updates", () => {
       const first = Impulse.of(2)
       const second = Impulse.of(3)
 
@@ -285,7 +285,7 @@ describe.each([
       )
     })
 
-    it("can watch after all impulses", () => {
+    it("runs a factory when any Impulse-dependency updates", () => {
       const _0 = Impulse.of(2)
       const _1 = Impulse.of(3)
       const _2 = Impulse.of(4)

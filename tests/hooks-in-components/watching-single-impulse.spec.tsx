@@ -1,11 +1,11 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useScoped, watch } from "../../src"
+import { Impulse, useScoped, scoped } from "../../src"
 
 import { CounterComponent } from "./common"
 
-describe("watching single impulse", () => {
+describe("scoping single impulse", () => {
   interface AppProps {
     count: Impulse<number>
     onRender: VoidFunction
@@ -28,7 +28,7 @@ describe("watching single impulse", () => {
     </>
   )
 
-  const SingleWatcherApp: React.FC<AppProps> = (props) => {
+  const SingleScopeApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useScoped(
       (scope) => {
         const count = props.count.getValue(scope)
@@ -50,7 +50,7 @@ describe("watching single impulse", () => {
     )
   }
 
-  const MultipleWatchersApp: React.FC<AppProps> = (props) => {
+  const MultipleScopesApp: React.FC<AppProps> = (props) => {
     const moreThanOne = useScoped((scope) => props.count.getValue(scope) > 1)
     const lessThanFour = useScoped((scope) => props.count.getValue(scope) < 4)
 
@@ -63,7 +63,7 @@ describe("watching single impulse", () => {
     )
   }
 
-  const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
+  const MultipleMemoizedScopesApp: React.FC<AppProps> = (props) => {
     const moreThanOne = useScoped(
       (scope) => props.count.getValue(scope) > 1,
       [props.count],
@@ -82,7 +82,7 @@ describe("watching single impulse", () => {
     )
   }
 
-  const WatchedApp: React.FC<AppProps> = watch(({ scope, ...props }) => {
+  const ScopedApp: React.FC<AppProps> = scoped(({ scope, ...props }) => {
     const count = props.count.getValue(scope)
     const [moreThanOne, lessThanFour] = [count > 1, count < 4]
 
@@ -96,11 +96,11 @@ describe("watching single impulse", () => {
   })
 
   it.each([
-    ["single watcher", SingleWatcherApp, 0],
-    ["multiple watchers", MultipleWatchersApp, 0],
-    ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
-    ["watch()", WatchedApp, 1],
-  ])("watches single impulse with %s", (_, App, unnecessaryRerendersCount) => {
+    ["single scope", SingleScopeApp, 0],
+    ["multiple scopes", MultipleScopesApp, 0],
+    ["multiple memoized scopes", MultipleMemoizedScopesApp, 0],
+    ["scoped()", ScopedApp, 1],
+  ])("handles single impulse with %s", (_, App, unnecessaryRerendersCount) => {
     const count = Impulse.of(0)
     const onCounterRender = vi.fn()
     const onRender = vi.fn()
@@ -113,7 +113,7 @@ describe("watching single impulse", () => {
       />,
     )
 
-    // initial render and watcher setup
+    // initial render
     expect(onRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenCalledOnce()
     expect(screen.queryByText("more than one")).not.toBeInTheDocument()

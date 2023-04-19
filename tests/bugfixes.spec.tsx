@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, watch, useImpulseValue, useScoped, subscribe } from "../src"
+import { Impulse, scoped, useImpulseValue, useScoped, subscribe } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -11,7 +11,7 @@ describe("watching misses when defined after useEffect #140", () => {
     useGetSecond(second: Impulse<number>): number
   }
 
-  const ComponentWatchBeforeEffect: React.FC<ComponentProps> = ({
+  const ComponentScopedBeforeEffect: React.FC<ComponentProps> = ({
     first,
     second,
     useGetFirst,
@@ -31,7 +31,7 @@ describe("watching misses when defined after useEffect #140", () => {
     )
   }
 
-  const ComponentWatchAfterEffect: React.FC<ComponentProps> = ({
+  const ComponentScopedAfterEffect: React.FC<ComponentProps> = ({
     first,
     second,
     useGetFirst,
@@ -52,27 +52,27 @@ describe("watching misses when defined after useEffect #140", () => {
     )
   }
 
-  const useWatchInline = (impulse: Impulse<number>) => {
+  const useScopedInline = (impulse: Impulse<number>) => {
     return useScoped((scope) => impulse.getValue(scope))
   }
 
-  const useWatchMemoized = (impulse: Impulse<number>) => {
+  const useScopedMemoized = (impulse: Impulse<number>) => {
     return useScoped((scope) => impulse.getValue(scope), [impulse])
   }
 
   describe.each([
-    ["before", ComponentWatchBeforeEffect],
-    ["after", ComponentWatchAfterEffect],
+    ["before", ComponentScopedBeforeEffect],
+    ["after", ComponentScopedAfterEffect],
   ])("calls depending hook %s useEffect", (_, Component) => {
     describe.each([
       ["useImpulseValue", useImpulseValue],
-      ["inline useScoped", useWatchInline],
-      ["memoized useScoped", useWatchMemoized],
+      ["inline useScoped", useScopedInline],
+      ["memoized useScoped", useScopedMemoized],
     ])("with %s as useGetFirst", (__, useGetFirst) => {
       it.each([
         ["useImpulseValue", useImpulseValue],
-        ["inline useScoped", useWatchInline],
-        ["memoized useScoped", useWatchMemoized],
+        ["inline useScoped", useScopedInline],
+        ["memoized useScoped", useScopedMemoized],
       ])("with %s as useGetSecond", (___, useGetSecond) => {
         const first = Impulse.of(0)
         const second = Impulse.of(5)
@@ -117,9 +117,9 @@ describe("watching misses when defined after useEffect #140", () => {
 
 describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321", () => {
   it.each([
-    ["toString", (value: unknown) => String(value)],
-    ["toJSON", (value: unknown) => JSON.stringify(value)],
-  ])("watches %s execution", (_, convert) => {
+    ["toString()", (value: unknown) => String(value)],
+    ["toJSON()", (value: unknown) => JSON.stringify(value)],
+  ])("reacts on %s call via `subscribe`", (_, convert) => {
     const Component: React.FC<{
       count: Impulse<number>
     }> = ({ count }) => {
@@ -157,7 +157,7 @@ describe("return the same component type from watch #322", () => {
 
   const StatefulInput: React.FC<{
     value: Impulse<string>
-  }> = watch(({ scope, value }) => (
+  }> = scoped(({ scope, value }) => (
     <StatelessInput
       value={value.getValue(scope)}
       onChange={(nextValue) => value.setValue(nextValue)}
@@ -166,7 +166,7 @@ describe("return the same component type from watch #322", () => {
 
   const Input = Object.assign(StatefulInput, { Stateless: StatelessInput })
 
-  it("watches the StatefulInput", () => {
+  it("scopes the StatefulInput", () => {
     const text = Impulse.of("hello")
     render(<Input value={text} />)
 
@@ -180,10 +180,10 @@ describe("return the same component type from watch #322", () => {
   })
 })
 
-it("in StrictMode, fails due to unexpected .setValue during watch call #336", () => {
+describe("in StrictMode, fails due to unexpected .setValue during watch call #336", () => {
   const Button: React.FC<{
     count: Impulse<number>
-  }> = watch(({ scope, count }) => {
+  }> = scoped(({ scope, count }) => {
     React.useState(0)
 
     return (
@@ -193,25 +193,27 @@ it("in StrictMode, fails due to unexpected .setValue during watch call #336", ()
     )
   })
 
-  const impulse = Impulse.of(0)
+  it("does not fail in strict mode", () => {
+    const impulse = Impulse.of(0)
 
-  render(
-    <React.StrictMode>
-      <Button count={impulse} />
-    </React.StrictMode>,
-  )
+    render(
+      <React.StrictMode>
+        <Button count={impulse} />
+      </React.StrictMode>,
+    )
 
-  const btn = screen.getByRole("button")
-  expect(btn).toHaveTextContent("0")
+    const btn = screen.getByRole("button")
+    expect(btn).toHaveTextContent("0")
 
-  fireEvent.click(btn)
-  expect(btn).toHaveTextContent("1")
+    fireEvent.click(btn)
+    expect(btn).toHaveTextContent("1")
 
-  fireEvent.click(btn)
-  expect(btn).toHaveTextContent("2")
+    fireEvent.click(btn)
+    expect(btn).toHaveTextContent("2")
 
-  act(() => {
-    impulse.setValue((x) => x + 1)
+    act(() => {
+      impulse.setValue((x) => x + 1)
+    })
+    expect(btn).toHaveTextContent("3")
   })
-  expect(btn).toHaveTextContent("3")
 })

@@ -1,11 +1,11 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useScoped, watch } from "../../src"
+import { Impulse, useScoped, scoped } from "../../src"
 
 import { CounterComponent, withinNth } from "./common"
 
-describe("watching multiple impulses", () => {
+describe("scoping multiple impulses", () => {
   interface AppProps {
     firstCount: Impulse<number>
     secondCount: Impulse<number>
@@ -48,7 +48,7 @@ describe("watching multiple impulses", () => {
     </>
   )
 
-  const SingleWatcherApp: React.FC<AppProps> = (props) => {
+  const SingleScopeApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useScoped(
       (scope) => {
         const sum =
@@ -71,7 +71,7 @@ describe("watching multiple impulses", () => {
     )
   }
 
-  const MultipleWatchersApp: React.FC<AppProps> = (props) => {
+  const MultipleScopesApp: React.FC<AppProps> = (props) => {
     const moreThanOne = useScoped((scope) => {
       const sum =
         props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
@@ -94,7 +94,7 @@ describe("watching multiple impulses", () => {
     )
   }
 
-  const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
+  const MultipleMemoizedScopesApp: React.FC<AppProps> = (props) => {
     const moreThanOne = useScoped(
       (scope) => {
         const sum =
@@ -123,7 +123,7 @@ describe("watching multiple impulses", () => {
     )
   }
 
-  const WatchedApp: React.FC<AppProps> = watch(({ scope, ...props }) => {
+  const ScopedApp: React.FC<AppProps> = scoped(({ scope, ...props }) => {
     const sum =
       props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
     const [moreThanOne, lessThanFour] = [sum > 2, sum < 7]
@@ -138,12 +138,12 @@ describe("watching multiple impulses", () => {
   })
 
   it.each([
-    ["single watcher", SingleWatcherApp, 0],
-    ["multiple watchers", MultipleWatchersApp, 0],
-    ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
-    ["watch()", WatchedApp, 1],
+    ["single scope", SingleScopeApp, 0],
+    ["multiple scopes", MultipleScopesApp, 0],
+    ["multiple memoized scopes", MultipleMemoizedScopesApp, 0],
+    ["scoped()", ScopedApp, 1],
   ])(
-    "watches multiple impulses with %s",
+    "handles multiple Impulses with %s",
     (_, App, unnecessaryRerendersCount) => {
       const firstCount = Impulse.of(0)
       const secondCount = Impulse.of(0)
@@ -161,7 +161,7 @@ describe("watching multiple impulses", () => {
         />,
       )
 
-      // initial render and watcher setup
+      // initial render
       expect(onRender).toHaveBeenCalledOnce()
       expect(onFirstCountRender).toHaveBeenCalledOnce()
       expect(onSecondCountRender).toHaveBeenCalledOnce()
