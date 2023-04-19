@@ -1,4 +1,10 @@
-import { useCallback, useLayoutEffect, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
 
 /**
  * A function that compares two values and returns `true` if they are equal.
@@ -29,12 +35,15 @@ export const isFunction = <
   return typeof anything === "function"
 }
 
+const useIsomorphicEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect
+
 export const useEvent = <TArgs extends Array<unknown>, TResult>(
   handler: (...args: TArgs) => TResult,
 ): ((...args: TArgs) => TResult) => {
   const handlerRef = useRef<(...args: TArgs) => TResult>()
 
-  useLayoutEffect(() => {
+  useIsomorphicEffect(() => {
     handlerRef.current = handler
   })
 
