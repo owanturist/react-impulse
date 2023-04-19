@@ -13,7 +13,7 @@ export function useScope<T = () => Scope>(
   const select = useCallback(
     (version: number) => {
       const getScope = (): Scope => {
-        emitter.detach()
+        emitter.detachAll()
 
         return {
           [EMITTER_KEY]: emitter,

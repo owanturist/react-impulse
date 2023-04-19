@@ -42,16 +42,19 @@ export class ScopeEmitter {
 
   private increment(): void {
     this.version = (this.version + 1) % 10e9
-    this.detach()
+    this.detachAll()
   }
 
-  public detach(): void {
+  public detachAll(): void {
     this.cleanups.forEach((cleanup) => cleanup())
     this.cleanups.length = 0
   }
 
-  public attach(cleanup: VoidFunction): void {
-    this.cleanups.push(cleanup)
+  public attachTo(emitters: Set<ScopeEmitter>): void {
+    if (!emitters.has(this)) {
+      emitters.add(this)
+      this.cleanups.push(() => emitters.delete(this))
+    }
   }
 
   public onEmit = (emit: VoidFunction): VoidFunction => {

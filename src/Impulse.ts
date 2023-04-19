@@ -91,15 +91,7 @@ export class Impulse<T> {
     scope: Scope,
     select?: (value: T, scope: Scope) => R,
   ): T | R {
-    const emitter = scope[EMITTER_KEY]
-
-    if (emitter != null && !this.emitters.has(emitter)) {
-      this.emitters.add(emitter)
-
-      emitter.attach(() => {
-        this.emitters.delete(emitter)
-      })
-    }
+    scope[EMITTER_KEY]?.attachTo(this.emitters)
 
     return isFunction(select) ? select(this.value, scope) : this.value
   }
