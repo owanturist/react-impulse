@@ -1,5 +1,5 @@
 import { EMITTER_KEY, Scope, injectScope } from "./Scope"
-import { ImpulseEmitter } from "./ImpulseEmitter"
+import { ScopeEmitter } from "./ScopeEmitter"
 
 /**
  * A function that subscribes to changes of all `Impulse` instances that call the `Impulse#getValue` method inside the `listener`.
@@ -8,7 +8,7 @@ import { ImpulseEmitter } from "./ImpulseEmitter"
  * @returns cleanup function that unsubscribes the `listener`
  */
 export const subscribe = (listener: (scope: Scope) => void): VoidFunction => {
-  const emitter = new ImpulseEmitter()
+  const emitter = new ScopeEmitter()
   const getScope = (): Scope => ({
     [EMITTER_KEY]: emitter,
     version: emitter.getVersion(),
