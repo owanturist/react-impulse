@@ -28,72 +28,78 @@ export type PropsWithoutScope<TProps> = "scope" extends keyof TProps
 /**
  * Creates a React component that subscribes to all Impulses calling the `Impulse#getValue` method during the rendering phase of the component.
  *
- * @param component a watched component
+ * @param component a scoped component
  *
  * @version 1.0.0
  */
-export function watch<TProps>(component: ExoticComponent<TProps>): never
-export function watch<TProps>(
+export function scoped<TProps>(component: ExoticComponent<TProps>): never
+export function scoped<TProps>(
   component: FunctionComponent<PropsWithScope<TProps>>,
 ): FunctionComponent<PropsWithoutScope<TProps>>
-export function watch<TProps>(
+export function scoped<TProps>(
   component: FunctionComponent<TProps>,
 ): FunctionComponent<TProps> {
-  const ImpulseWatcher: FunctionComponent<TProps> = (props, ctx: unknown) => {
+  const ComponentWithScope: FunctionComponent<TProps> = (
+    props,
+    ctx: unknown,
+  ) => {
     const getScope = useScope()
 
     // it uses Object.assign to reduce output file size by avoiding the spread operator
     return component(Object.assign({}, props, { scope: getScope() }), ctx)
   }
 
-  ImpulseWatcher.displayName = `ImpulseWatcher${
+  ComponentWithScope.displayName = `ComponentWithScope${
     component.displayName ?? component.name
   }`
 
-  return ImpulseWatcher
+  return ComponentWithScope
 }
 
-const memo = <TProps>(
+function memo<TProps>(
   component: FunctionComponent<PropsWithScope<TProps>>,
   propsAreEqual?: Compare<Readonly<PropsWithoutScope<TProps>>>,
-): NamedExoticComponent<PropsWithoutScope<TProps>> => {
-  return React_memo(watch(component), propsAreEqual)
+): NamedExoticComponent<PropsWithoutScope<TProps>> {
+  return React_memo(scoped(component), propsAreEqual)
 }
 
-const forwardRefMemo = <TNode, TProps>(
+function forwardRefMemo<TNode, TProps>(
   render: ForwardRefRenderFunction<TNode, PropsWithScope<TProps>>,
   propsAreEqual?: Compare<Readonly<PropsWithoutScope<TProps>>>,
-): NamedExoticComponent<PropsWithoutScope<TProps>> => {
+): NamedExoticComponent<PropsWithoutScope<TProps>> {
   return React_memo(forwardRef(render), propsAreEqual)
 }
 
-const forwardRef = <TNode, TProps>(
+function forwardRef<TNode, TProps>(
   render: ForwardRefRenderFunction<TNode, PropsWithScope<TProps>>,
 ): ForwardRefExoticComponent<
   PropsWithoutRef<PropsWithoutScope<TProps>> & RefAttributes<TNode>
-> => {
+> {
   return React_forwardRef(
-    watch(render) as ForwardRefRenderFunction<TNode, PropsWithoutScope<TProps>>,
+    scoped(render) as ForwardRefRenderFunction<
+      TNode,
+      PropsWithoutScope<TProps>
+    >,
   )
 }
 
 /**
- * An alias for `React.memo(React.forwardRef(watch(...)))`
+ * An alias for `React.memo(React.forwardRef(scoped(...)))`
  *
  * @version 1.0.0
  */
 memo.forwardRef = forwardRef.memo = forwardRefMemo
 
 /**
- * An alias for `React.memo(watch(...))`
+ * An alias for `React.memo(scoped(...))`
  *
  * @version 1.0.0
  */
-watch.memo = memo
+scoped.memo = memo
 
 /**
- * An alias for `React.forwardRef(watch(...))`
+ * An alias for `React.forwardRef(scoped(...))`
  *
  * @version 1.0.0
  */
-watch.forwardRef = forwardRef
+scoped.forwardRef = forwardRef
