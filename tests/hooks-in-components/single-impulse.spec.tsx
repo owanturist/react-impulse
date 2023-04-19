@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useImpulseValue } from "../../src"
+import { Impulse, useScoped } from "../../src"
 import { Counter } from "../common"
 
 import { withinNth } from "./common"
@@ -11,7 +11,7 @@ describe("single impulse", () => {
     counter: Impulse<Counter>
     onRender: VoidFunction
   }> = ({ counter, onRender }) => {
-    const { count } = useImpulseValue(counter)
+    const { count } = useScoped((scope) => counter.getValue(scope))
 
     return (
       <React.Profiler id="test" onRender={onRender}>
@@ -54,7 +54,7 @@ describe("single impulse", () => {
     </>
   )
 
-  it("Single Setter / Getter", () => {
+  it("single Setter / Getter", () => {
     const counter = Impulse.of({ count: 0 })
     const onRootRender = vi.fn()
     const onGetterRender = vi.fn()
@@ -152,7 +152,7 @@ describe("single impulse", () => {
     </>
   )
 
-  it("Multiple Setters / Getters", () => {
+  it("multiple Setters / Getters", () => {
     const counter = Impulse.of({ count: 0 })
     const onRootRender = vi.fn()
     const onFirstGetterRender = vi.fn()

@@ -7,7 +7,6 @@ import {
   PropsWithScope,
   PropsWithoutScope,
   Scope,
-  useImpulseValue,
   useScoped,
   scoped,
 } from "../../src"
@@ -205,32 +204,6 @@ describe("scoped()", () => {
 
     expect(result).toHaveTextContent("Done")
     expect(onRender).toHaveBeenCalledOnce()
-  })
-
-  it("should not subscribe twice with useImpulseValue", () => {
-    const Component = scoped<{
-      count: Impulse<number>
-    }>(({ count }) => {
-      const x = useImpulseValue(count)
-
-      return <span data-testid="result">{x}</span>
-    })
-
-    const count = Impulse.of(1)
-
-    render(<Component count={count} />)
-
-    const result = screen.getByTestId("result")
-
-    expect(result).toHaveTextContent("1")
-    expect(count).toHaveProperty("emitters.size", 1)
-
-    act(() => {
-      count.setValue(2)
-    })
-
-    expect(result).toHaveTextContent("2")
-    expect(count).toHaveProperty("emitters.size", 1)
   })
 
   it("should subscribe only ones for the same impulse", () => {

@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { batch, Impulse, Scope, useImpulseValue, useScoped } from "../../src"
+import { batch, Impulse, Scope, useScoped } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
@@ -14,8 +14,8 @@ describe.each([
     const impulse_2 = Impulse.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useImpulseValue(impulse_1)
-      const counter_2 = useImpulseValue(impulse_2)
+      const counter_1 = useScoped((scope) => impulse_1.getValue(scope))
+      const counter_2 = useScoped((scope) => impulse_2.getValue(scope))
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -40,14 +40,14 @@ describe.each([
     expect(onRender).toHaveBeenCalledOnce()
   })
 
-  it("re-renders once for useImpulseValue calls", () => {
+  it("re-renders once for multiple useScoped", () => {
     const onRender = vi.fn()
     const impulse_1 = Impulse.of({ count: 1 })
     const impulse_2 = Impulse.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useImpulseValue(impulse_1)
-      const counter_2 = useImpulseValue(impulse_2)
+      const counter_1 = useScoped((scope) => impulse_1.getValue(scope))
+      const counter_2 = useScoped((scope) => impulse_2.getValue(scope))
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -90,9 +90,12 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const { first: impulse_1, second: impulse_2 } = useImpulseValue(impulse)
-      const counter_1 = useImpulseValue(impulse_1)
-      const counter_2 = useImpulseValue(impulse_2)
+      const counter_1 = useScoped((scope) =>
+        impulse.getValue(scope).first.getValue(scope),
+      )
+      const counter_2 = useScoped((scope) =>
+        impulse.getValue(scope).second.getValue(scope),
+      )
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -135,7 +138,7 @@ describe.each([
     expect(onRender).toHaveBeenCalledOnce()
   })
 
-  it("re-renders once for useImpulseValue calls", () => {
+  it("re-renders once for multiple useScoped", () => {
     const onRender = vi.fn()
     const impulse = Impulse.of({
       first: Impulse.of({ count: 1 }),
@@ -143,9 +146,12 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const { first: impulse_1, second: impulse_2 } = useImpulseValue(impulse)
-      const counter_1 = useImpulseValue(impulse_1)
-      const counter_2 = useImpulseValue(impulse_2)
+      const counter_1 = useScoped((scope) =>
+        impulse.getValue(scope).first.getValue(scope),
+      )
+      const counter_2 = useScoped((scope) =>
+        impulse.getValue(scope).second.getValue(scope),
+      )
 
       return (
         <React.Profiler id="test" onRender={onRender}>

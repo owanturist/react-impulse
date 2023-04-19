@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useImpulseValue } from "../../src"
+import { Impulse, useScoped } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -15,7 +15,7 @@ describe("nested impulses", () => {
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }> = ({ state, onRender, onCounterRender }) => {
-    const { counts } = useImpulseValue(state)
+    const { counts } = useScoped((scope) => state.getValue(scope))
 
     return (
       <>
@@ -54,7 +54,7 @@ describe("nested impulses", () => {
     )
   }
 
-  it("Performs nested impulse management", ({ scope }) => {
+  it("performs nested impulse management", ({ scope }) => {
     const impulse = Impulse.of<AppState>({ counts: [] })
     const onRender = vi.fn()
     const onCounterRender = vi.fn()
