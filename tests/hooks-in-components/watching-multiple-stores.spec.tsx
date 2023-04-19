@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useWatchImpulse, watch } from "../../src"
+import { Impulse, useScoped, watch } from "../../src"
 
 import { CounterComponent, withinNth } from "./common"
 
@@ -49,7 +49,7 @@ describe("watching multiple impulses", () => {
   )
 
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useWatchImpulse(
+    const [moreThanOne, lessThanFour] = useScoped(
       (scope) => {
         const sum =
           props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
@@ -72,13 +72,13 @@ describe("watching multiple impulses", () => {
   }
 
   const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchImpulse((scope) => {
+    const moreThanOne = useScoped((scope) => {
       const sum =
         props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
 
       return sum > 2
     })
-    const lessThanFour = useWatchImpulse((scope) => {
+    const lessThanFour = useScoped((scope) => {
       const sum =
         props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
 
@@ -95,7 +95,7 @@ describe("watching multiple impulses", () => {
   }
 
   const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchImpulse(
+    const moreThanOne = useScoped(
       (scope) => {
         const sum =
           props.firstCount.getValue(scope) + props.secondCount.getValue(scope)
@@ -104,7 +104,7 @@ describe("watching multiple impulses", () => {
       },
       [props.firstCount, props.secondCount],
     )
-    const lessThanFour = useWatchImpulse(
+    const lessThanFour = useScoped(
       (scope) => {
         const sum =
           props.firstCount.getValue(scope) + props.secondCount.getValue(scope)

@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Compare, Impulse, useWatchImpulse } from "../../src"
+import { Compare, Impulse, useScoped } from "../../src"
 import { Counter, WithIsActive, WithImpulse, WithSpy } from "../common"
 
 describe.each([
@@ -11,7 +11,7 @@ describe.each([
       isActive,
       spy,
     }: WithImpulse & WithIsActive & Partial<WithSpy>) => {
-      return useWatchImpulse((scope) => {
+      return useScoped((scope) => {
         spy?.()
 
         return isActive ? impulse.getValue(scope) : { count: -1 }
@@ -28,7 +28,7 @@ describe.each([
       }: WithImpulse & WithIsActive & Partial<WithSpy>,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchImpulse(
+      return useScoped(
         (scope) => {
           spy?.()
 

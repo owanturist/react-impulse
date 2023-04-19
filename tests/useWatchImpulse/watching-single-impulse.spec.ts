@@ -1,23 +1,19 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Compare, Impulse, useWatchImpulse } from "../../src"
+import { Compare, Impulse, useScoped } from "../../src"
 import { Counter, WithSpy, WithImpulse } from "../common"
 
 describe.each([
   [
     "inline watcher",
     ({ impulse }: WithImpulse) => {
-      return useWatchImpulse((scope) => impulse.getValue(scope))
+      return useScoped((scope) => impulse.getValue(scope))
     },
   ],
   [
     "memoized watcher",
     ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
-      return useWatchImpulse(
-        (scope) => impulse.getValue(scope),
-        [impulse],
-        compare,
-      )
+      return useScoped((scope) => impulse.getValue(scope), [impulse], compare)
     },
   ],
 ])("direct %s", (_, useHookWithoutCompare) => {
@@ -167,7 +163,7 @@ describe("transform Impulse's value inside watcher", () => {
     [
       "inline comparator",
       ({ impulse }: WithImpulse) => {
-        return useWatchImpulse(
+        return useScoped(
           (scope) => impulse.getValue(scope, toTuple),
           [impulse],
           (prev, next) => compareTuple(prev, next),
@@ -177,7 +173,7 @@ describe("transform Impulse's value inside watcher", () => {
     [
       "memoized comparator",
       ({ impulse }: WithImpulse) => {
-        return useWatchImpulse(
+        return useScoped(
           (scope) => impulse.getValue(scope, toTuple),
           [impulse],
           compareTuple,
@@ -240,13 +236,13 @@ describe("transform Impulse's value inside watcher", () => {
     [
       "inline watcher",
       ({ impulse }: WithImpulse) => {
-        return useWatchImpulse((scope) => impulse.getValue(scope, toTuple))
+        return useScoped((scope) => impulse.getValue(scope, toTuple))
       },
     ],
     [
       "memoized watcher",
       ({ impulse }: WithImpulse, compare?: Compare<[boolean, boolean]>) => {
-        return useWatchImpulse(
+        return useScoped(
           (scope) => impulse.getValue(scope, toTuple),
           [impulse],
           compare,
@@ -311,7 +307,7 @@ describe("transform Impulse's value inside watcher", () => {
     [
       "inline watcher",
       ({ spy, impulse }: WithImpulse & WithSpy) => {
-        return useWatchImpulse((scope) => {
+        return useScoped((scope) => {
           spy()
 
           return impulse.getValue(scope)
@@ -321,7 +317,7 @@ describe("transform Impulse's value inside watcher", () => {
     [
       "memoized watcher",
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(
+        return useScoped(
           (scope) => {
             spy()
 
@@ -376,14 +372,14 @@ describe("multiple Impulse#getValue() calls", () => {
     [
       "inline watcher",
       ({ spy, impulse }: WithImpulse & WithSpy) => {
-        return useWatchImpulse((scope) => {
+        return useScoped((scope) => {
           spy()
 
           return impulse.getValue(scope)
         })
       },
       ({ spy, impulse }: WithImpulse & WithSpy) => {
-        return useWatchImpulse((scope) => {
+        return useScoped((scope) => {
           spy()
 
           return Counter.merge(impulse.getValue(scope), impulse.getValue(scope))
@@ -393,7 +389,7 @@ describe("multiple Impulse#getValue() calls", () => {
     [
       "memoized watcher",
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(
+        return useScoped(
           (scope) => {
             spy()
 
@@ -404,7 +400,7 @@ describe("multiple Impulse#getValue() calls", () => {
         )
       },
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(
+        return useScoped(
           (scope) => {
             spy()
 

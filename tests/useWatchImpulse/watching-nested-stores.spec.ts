@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { batch, Compare, Impulse, useWatchImpulse } from "../../src"
+import { batch, Compare, Impulse, useScoped } from "../../src"
 import {
   Counter,
   WithFirst,
@@ -14,7 +14,7 @@ describe.each([
   [
     "inline watcher",
     ({ impulse }: WithImpulse<WithFirst & WithSecond>) => {
-      return useWatchImpulse((scope) => {
+      return useScoped((scope) => {
         const { first, second } = impulse.getValue(scope)
 
         return Counter.merge(first.getValue(scope), second.getValue(scope))
@@ -27,7 +27,7 @@ describe.each([
       { impulse }: WithImpulse<WithFirst & WithSecond>,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchImpulse(
+      return useScoped(
         (scope) => {
           return Counter.merge(
             impulse.getValue(scope).first.getValue(scope),
@@ -135,7 +135,7 @@ describe.each([
   [
     "inline watcher",
     ({ spy, impulse }: WithImpulse & WithSpy) => {
-      return useWatchImpulse((scope) => {
+      return useScoped((scope) => {
         spy()
 
         return impulse.getValue(scope)
@@ -145,7 +145,7 @@ describe.each([
       spy,
       impulse,
     }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy) => {
-      return useWatchImpulse((scope) => {
+      return useScoped((scope) => {
         spy()
 
         const { first, second, third } = impulse.getValue(scope)
@@ -162,7 +162,7 @@ describe.each([
   [
     "memoized watcher",
     ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-      return useWatchImpulse(
+      return useScoped(
         (scope) => {
           spy()
 
@@ -179,7 +179,7 @@ describe.each([
       }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchImpulse(
+      return useScoped(
         (scope) => {
           spy()
 
