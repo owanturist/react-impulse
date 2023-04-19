@@ -5,9 +5,9 @@ import { act, render, screen } from "@testing-library/react"
 import {
   Impulse,
   subscribe,
-  useImpulseEffect,
-  useImpulseLayoutEffect,
-  useImpulseMemo,
+  useScopedEffect,
+  useScopedLayoutEffect,
+  useScopedMemo,
   useScoped,
   scoped,
 } from "../../src"
@@ -39,7 +39,7 @@ describe.skip("calling Impulse.of()", () => {
       "useImpulseMemo",
       WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useImpulseMemo,
       () => {
-        return useImpulseMemo(() => Impulse.of(1).getValue(), [])
+        return useScopedMemo(() => Impulse.of(1).getValue(), [])
       },
     ],
     [
@@ -81,8 +81,8 @@ describe.skip("calling Impulse.of()", () => {
   })
 
   it.concurrent.each([
-    ["useImpulseEffect", useImpulseEffect],
-    ["useImpulseLayoutEffect", useImpulseLayoutEffect],
+    ["useImpulseEffect", useScopedEffect],
+    ["useImpulseLayoutEffect", useScopedLayoutEffect],
   ])("fine when called inside %s", (_, useImpulseEffectHook) => {
     const { result } = renderHook(() => {
       const [state, setState] = React.useState(Impulse.of(1))
@@ -118,7 +118,7 @@ describe.skip("calling Impulse#clone()", () => {
       "useImpulseMemo",
       WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useImpulseMemo,
       ({ impulse }: WithImpulse<number>) => {
-        return useImpulseMemo(() => impulse.clone().getValue(), [impulse])
+        return useScopedMemo(() => impulse.clone().getValue(), [impulse])
       },
     ],
     [
@@ -170,8 +170,8 @@ describe.skip("calling Impulse#clone()", () => {
   })
 
   it.concurrent.each([
-    ["useImpulseEffect", useImpulseEffect],
-    ["useImpulseLayoutEffect", useImpulseLayoutEffect],
+    ["useImpulseEffect", useScopedEffect],
+    ["useImpulseLayoutEffect", useScopedLayoutEffect],
   ])("fine when called inside %s", (_, useImpulseEffectHook) => {
     const initial = Impulse.of(1)
     const { result } = renderHook(
@@ -216,7 +216,7 @@ describe.skip("calling Impulse#setValue()", () => {
       "useImpulseMemo",
       WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useImpulseMemo,
       ({ impulse }: WithImpulse<number>) => {
-        return useImpulseMemo(() => {
+        return useScopedMemo(() => {
           impulse.setValue(3)
 
           return impulse.getValue()
@@ -268,8 +268,8 @@ describe.skip("calling Impulse#setValue()", () => {
   })
 
   it.concurrent.each([
-    ["useImpulseEffect", useImpulseEffect],
-    ["useImpulseLayoutEffect", useImpulseLayoutEffect],
+    ["useImpulseEffect", useScopedEffect],
+    ["useImpulseLayoutEffect", useScopedLayoutEffect],
   ])("fine when called inside %s", (_, useImpulseEffectHook) => {
     const { result } = renderHook(
       (impulse) => {
@@ -329,7 +329,7 @@ describe.skip("calling Impulse#subscribe()", () => {
         impulse,
         listener = vi.fn(),
       }: WithImpulse<number> & Partial<WithListener>) => {
-        return useImpulseMemo(() => {
+        return useScopedMemo(() => {
           impulse.subscribe(listener)
 
           return impulse.getValue()
@@ -418,8 +418,8 @@ describe.skip("calling Impulse#subscribe()", () => {
   })
 
   describe.each([
-    ["useImpulseEffect", useImpulseEffect],
-    ["useImpulseLayoutEffect", useImpulseLayoutEffect],
+    ["useImpulseEffect", useScopedEffect],
+    ["useImpulseLayoutEffect", useScopedLayoutEffect],
   ])("fine when called inside %s", (_, useImpulseEffectHook) => {
     it.concurrent("calls subscribed listener", () => {
       const initial = Impulse.of(1)

@@ -20,7 +20,7 @@ import { Scope } from "./Scope"
  *
  * @version 1.0.0
  */
-export function useImpulseEffect(
+export function useScopedEffect(
   effect: (scope: Scope) => ReturnType<EffectCallback>,
   dependencies?: DependencyList,
 ): void {
@@ -43,7 +43,7 @@ export function useImpulseEffect(
  *
  * @version 1.0.0
  */
-export function useImpulseLayoutEffect(
+export function useScopedLayoutEffect(
   effect: (scope: Scope) => ReturnType<EffectCallback>,
   dependencies?: DependencyList,
 ): void {
@@ -66,7 +66,7 @@ export function useImpulseLayoutEffect(
  *
  * @version 1.0.0
  */
-export function useImpulseMemo<TValue>(
+export function useScopedMemo<TValue>(
   factory: (scope: Scope) => TValue,
   dependencies: undefined | DependencyList,
 ): TValue {

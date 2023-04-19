@@ -8,10 +8,10 @@ export { subscribe } from "./subscribe"
 export { scoped } from "./scoped"
 export { useImpulse } from "./useImpulse"
 export { useImpulseValue } from "./useImpulseValue"
-export {
-  useImpulseMemo,
-  useScopedCallback,
-  useImpulseEffect,
-  useImpulseLayoutEffect,
-} from "./useImpulseEffects"
 export { useScoped } from "./useScoped"
+export {
+  useScopedMemo,
+  useScopedCallback,
+  useScopedEffect,
+  useScopedLayoutEffect,
+} from "./useScopedReactHooks"

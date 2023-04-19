@@ -2,18 +2,13 @@ import React from "react"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { renderHook } from "@testing-library/react-hooks"
 
-import {
-  Impulse,
-  scoped,
-  useImpulseEffect,
-  useImpulseLayoutEffect,
-} from "../src"
+import { Impulse, scoped, useScopedEffect, useScopedLayoutEffect } from "../src"
 
 const identity = <T,>(value: T): T => value
 
 describe.each([
-  ["useEffect", useImpulseEffect],
-  ["useLayoutEffect", useImpulseLayoutEffect],
+  ["useScopedEffect", useScopedEffect],
+  ["useScopedLayoutEffect", useScopedLayoutEffect],
 ])("running %s hook", (_, useCustomImpulseEffect) => {
   describe.each([
     ["nothing", identity as typeof scoped],
@@ -22,7 +17,7 @@ describe.each([
     describe("single impulse", () => {
       const Component: React.FC<{
         value: Impulse<number>
-        useEffect: typeof useImpulseEffect
+        useEffect: typeof useScopedEffect
         onEffect: React.Dispatch<number>
       }> = hoc(({ onEffect, value, useEffect }) => {
         const [multiplier, setMultiplier] = React.useState(2)
@@ -529,7 +524,7 @@ it.concurrent(
     const impulse = Impulse.of(2)
     const { rerender } = renderHook(
       ({ left, right }) => {
-        useImpulseEffect(
+        useScopedEffect(
           (scope) => {
             spy(left + right.getValue(scope))
           },
@@ -582,7 +577,7 @@ it.concurrent(
     const right = Impulse.of(2)
     const { rerender } = renderHook(
       ({ state }) => {
-        useImpulseEffect(
+        useScopedEffect(
           (scope) => {
             spy(state.left.getValue(scope) + state.right.getValue(scope))
           },
