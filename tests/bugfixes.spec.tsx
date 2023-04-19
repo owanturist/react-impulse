@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, scoped, useImpulseValue, useScoped, subscribe } from "../src"
+import { Impulse, scoped, useScoped, subscribe } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -65,12 +65,10 @@ describe("watching misses when defined after useEffect #140", () => {
     ["after", ComponentScopedAfterEffect],
   ])("calls depending hook %s useEffect", (_, Component) => {
     describe.each([
-      ["useImpulseValue", useImpulseValue],
       ["inline useScoped", useScopedInline],
       ["memoized useScoped", useScopedMemoized],
     ])("with %s as useGetFirst", (__, useGetFirst) => {
       it.each([
-        ["useImpulseValue", useImpulseValue],
         ["inline useScoped", useScopedInline],
         ["memoized useScoped", useScopedMemoized],
       ])("with %s as useGetSecond", (___, useGetSecond) => {

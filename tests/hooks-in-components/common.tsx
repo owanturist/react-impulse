@@ -1,7 +1,7 @@
 import React from "react"
 import { screen, within } from "@testing-library/react"
 
-import { Impulse, useImpulseValue } from "../../src"
+import { Impulse, useScoped } from "../../src"
 
 export const withinNth = (testId: string, position: number) => {
   return within(screen.getAllByTestId(testId)[position]!)
@@ -24,7 +24,7 @@ export const CounterComponent: React.FC<{
   onRender: VoidFunction
 }> = React.memo(
   ({ count: countImpulse, onRender }) => {
-    const count = useImpulseValue(countImpulse)
+    const count = useScoped((scope) => countImpulse.getValue(scope))
 
     return (
       <React.Profiler id="test" onRender={onRender}>
