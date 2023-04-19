@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useRef } from "react"
+import { useCallback, useLayoutEffect, useRef, useState } from "react"
 
 /**
  * A function that compares two values and returns `true` if they are equal.
@@ -39,4 +39,10 @@ export const useEvent = <TArgs extends Array<unknown>, TResult>(
   })
 
   return useCallback((...args: TArgs) => handlerRef.current!(...args), [])
+}
+
+export const usePermanent = <TValue>(init: () => TValue): TValue => {
+  const [value] = useState(init)
+
+  return value
 }
