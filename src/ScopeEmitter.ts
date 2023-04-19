@@ -5,20 +5,20 @@
  *
  * @private
  */
-export class ImpulseEmitter {
-  private static queue: null | Array<null | ReadonlySet<ImpulseEmitter>> = null
+export class ScopeEmitter {
+  private static queue: null | Array<null | ReadonlySet<ScopeEmitter>> = null
 
   public static schedule(
-    execute: () => null | ReadonlySet<ImpulseEmitter>,
+    execute: () => null | ReadonlySet<ScopeEmitter>,
   ): void {
-    if (this.queue == null) {
-      this.queue = []
+    if (ScopeEmitter.queue == null) {
+      ScopeEmitter.queue = []
 
-      this.queue.push(execute())
+      ScopeEmitter.queue.push(execute())
 
-      const uniq = new WeakSet<ImpulseEmitter>()
+      const uniq = new WeakSet<ScopeEmitter>()
 
-      this.queue.forEach((emitters) => {
+      ScopeEmitter.queue.forEach((emitters) => {
         emitters?.forEach((emitter) => {
           if (!uniq.has(emitter)) {
             uniq.add(emitter)
@@ -28,9 +28,9 @@ export class ImpulseEmitter {
         })
       })
 
-      this.queue = null
+      ScopeEmitter.queue = null
     } else {
-      this.queue.push(execute())
+      ScopeEmitter.queue.push(execute())
     }
   }
 

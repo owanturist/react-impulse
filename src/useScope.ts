@@ -1,7 +1,7 @@
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 import { useCallback, useState } from "react"
 
-import { ImpulseEmitter } from "./ImpulseEmitter"
+import { ScopeEmitter } from "./ScopeEmitter"
 import { EMITTER_KEY, Scope } from "./Scope"
 import { Compare } from "./utils"
 
@@ -9,7 +9,7 @@ export function useScope<T = () => Scope>(
   transform?: (scope: Scope) => T,
   compare?: Compare<T>,
 ): T {
-  const [emitter] = useState(() => new ImpulseEmitter())
+  const [emitter] = useState(() => new ScopeEmitter())
   const select = useCallback(
     (version: number) => {
       const getScope = (): Scope => {

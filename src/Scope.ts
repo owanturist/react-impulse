@@ -1,9 +1,9 @@
-import type { ImpulseEmitter } from "./ImpulseEmitter"
+import type { ScopeEmitter } from "./ScopeEmitter"
 
 export const EMITTER_KEY = Symbol("scope")
 
 export interface Scope {
-  readonly [EMITTER_KEY]: null | ImpulseEmitter
+  readonly [EMITTER_KEY]: null | ScopeEmitter
   readonly version?: number
 }
 

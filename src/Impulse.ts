@@ -1,6 +1,6 @@
 import { Compare, isEqual, isFunction } from "./utils"
 import { EMITTER_KEY, Scope, extractScope } from "./Scope"
-import { ImpulseEmitter } from "./ImpulseEmitter"
+import { ScopeEmitter } from "./ScopeEmitter"
 
 export class Impulse<T> {
   /**
@@ -18,7 +18,7 @@ export class Impulse<T> {
     return new Impulse(initialValue, compare ?? isEqual)
   }
 
-  private readonly emitters = new Set<ImpulseEmitter>()
+  private readonly emitters = new Set<ScopeEmitter>()
 
   /**
    * The `Compare` function compares Impulse's value with the new value given via `Impulse#setValue`.
@@ -121,7 +121,7 @@ export class Impulse<T> {
   ): void {
     const finalCompare = compare ?? isEqual
 
-    ImpulseEmitter.schedule(() => {
+    ScopeEmitter.schedule(() => {
       const nextValue = isFunction(valueOrTransform)
         ? valueOrTransform(this.value)
         : valueOrTransform
