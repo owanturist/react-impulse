@@ -1,21 +1,14 @@
-import { EffectCallback, useEffect, useLayoutEffect } from "react"
+import {
+  DependencyList,
+  EffectCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useCallback,
+} from "react"
 
 import { useScope } from "./useScope"
 import { Scope } from "./Scope"
-
-const createEffectHook =
-  (useReactEffect: typeof useEffect) =>
-  (
-    effect: (scope: Scope) => ReturnType<EffectCallback>,
-    dependencies?: ReadonlyArray<unknown>,
-  ) => {
-    const getScope = useScope()
-
-    useReactEffect(
-      () => effect(getScope()),
-      dependencies && [...dependencies, getScope],
-    )
-  }
 
 /**
  * The hook is an `Impulse` version of the `React.useEffect` hook.
@@ -27,7 +20,18 @@ const createEffectHook =
  *
  * @version 1.0.0
  */
-export const useImpulseEffect = createEffectHook(useEffect)
+export function useImpulseEffect(
+  effect: (scope: Scope) => ReturnType<EffectCallback>,
+  dependencies?: DependencyList,
+): void {
+  const getScope = useScope()
+
+  useEffect(
+    () => effect(getScope()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    dependencies && [...dependencies, getScope],
+  )
+}
 
 /**
  * The hook is an `Impulse` version of the `React.useLayoutEffect` hook.
@@ -39,4 +43,55 @@ export const useImpulseEffect = createEffectHook(useEffect)
  *
  * @version 1.0.0
  */
-export const useImpulseLayoutEffect = createEffectHook(useLayoutEffect)
+export function useImpulseLayoutEffect(
+  effect: (scope: Scope) => ReturnType<EffectCallback>,
+  dependencies?: DependencyList,
+): void {
+  const getScope = useScope()
+
+  useLayoutEffect(
+    () => effect(getScope()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    dependencies && [...dependencies, getScope],
+  )
+}
+
+/**
+ * The hook is an `Impulse` version of the `React.useMemo` hook.
+ * During the `factory` execution, all the Impulses
+ * calling the `Impulse#getValue` method become _phantom dependencies_ of the hook.
+ *
+ * @param factory a function calculates a value `T` whenever any of the `dependencies`' values change.
+ * @param dependencies an array of values used in the `factory` function.
+ *
+ * @version 1.0.0
+ */
+export function useImpulseMemo<TValue>(
+  factory: (scope: Scope) => TValue,
+  dependencies: undefined | DependencyList,
+): TValue {
+  const getScope = useScope()
+
+  return useMemo(
+    () => factory(getScope()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    dependencies && [...dependencies, getScope],
+  )
+}
+
+// TODO add tests, docs
+export function useScopedCallback<
+  TArgs extends ReadonlyArray<unknown>,
+  TResult,
+>(
+  callback: (scope: Scope, ...args: TArgs) => TResult,
+  dependencies: DependencyList,
+): (...args: TArgs) => TResult {
+  const getScope = useScope()
+
+  return useCallback(
+    (...args: TArgs) => callback(getScope(), ...args),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [...dependencies, getScope],
+  )
+}
