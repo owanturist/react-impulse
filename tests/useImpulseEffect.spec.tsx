@@ -4,7 +4,7 @@ import { renderHook } from "@testing-library/react-hooks"
 
 import {
   Impulse,
-  watch,
+  scoped,
   useImpulseEffect,
   useImpulseLayoutEffect,
 } from "../src"
@@ -14,11 +14,11 @@ const identity = <T,>(value: T): T => value
 describe.each([
   ["useEffect", useImpulseEffect],
   ["useLayoutEffect", useImpulseLayoutEffect],
-])("running %s hook", (hookName, useCustomImpulseEffect) => {
+])("running %s hook", (_, useCustomImpulseEffect) => {
   describe.each([
-    ["nothing", identity as typeof watch],
-    ["watch", watch],
-  ])("using %s as hoc", (_, hoc) => {
+    ["nothing", identity as typeof scoped],
+    ["scoped", scoped],
+  ])("using %s as hoc", (__, hoc) => {
     describe("single impulse", () => {
       const Component: React.FC<{
         value: Impulse<number>
@@ -45,7 +45,7 @@ describe.each([
         )
       })
 
-      it(`can watch inside Impulse ${hookName}`, () => {
+      it(`runs an effect when Impulse-dependency updates`, () => {
         const value = Impulse.of(3)
         const onEffect = vi.fn()
 
@@ -259,7 +259,7 @@ describe.each([
         )
       })
 
-      it("can watch after both impulses", () => {
+      it("runs an effect when any of both Impulse-dependencies updates", () => {
         const first = Impulse.of(2)
         const second = Impulse.of(3)
         const onEffect = vi.fn()
@@ -320,7 +320,7 @@ describe.each([
         )
       })
 
-      it("can watch after all impulses", () => {
+      it("runs an effect when any Impulse-dependency updates", () => {
         const _0 = Impulse.of(2)
         const _1 = Impulse.of(3)
         const _2 = Impulse.of(4)
@@ -457,7 +457,7 @@ describe.each([
   it("should not trigger effect when unsubscribes", () => {
     const Counter: React.FC<{
       count: Impulse<number>
-    }> = watch(({ scope, count }) => (
+    }> = scoped(({ scope, count }) => (
       <button
         type="button"
         data-testid="count"

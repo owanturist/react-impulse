@@ -1,11 +1,11 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, Scope, useImpulseValue, useScoped, watch } from "../../src"
+import { Impulse, Scope, useImpulseValue, useScoped, scoped } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
-describe("watching nested impulses", () => {
+describe("scoping nested impulses", () => {
   abstract class AppState {
     public abstract counts: ReadonlyArray<Impulse<number>>
 
@@ -91,7 +91,7 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const SingleWatcherApp: React.FC<AppProps> = (props) => {
+  const SingleScopeApp: React.FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useScoped(
       (scope) => {
         const total = props.state.getValue(scope, AppState.sum)
@@ -113,7 +113,7 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const MultipleWatchersApp: React.FC<AppProps> = (props) => {
+  const MultipleScopesApp: React.FC<AppProps> = (props) => {
     const moreThanTen = useScoped((scope) => {
       const total = props.state.getValue(scope, AppState.sum)
 
@@ -134,7 +134,7 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
+  const MultipleMemoizedScopesApp: React.FC<AppProps> = (props) => {
     const moreThanTen = useScoped(
       (scope) => {
         const total = props.state.getValue(scope, AppState.sum)
@@ -161,7 +161,7 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const WatchedApp: React.FC<AppProps> = watch(({ scope, ...props }) => {
+  const ScopedApp: React.FC<AppProps> = scoped(({ scope, ...props }) => {
     const total = props.state.getValue(scope, AppState.sum)
     const [moreThanTen, lessThanTwenty] = [total > 10, total < 20]
 
@@ -175,11 +175,11 @@ describe("watching nested impulses", () => {
   })
 
   it.each([
-    ["single watcher", SingleWatcherApp, 0],
-    ["multiple watchers", MultipleWatchersApp, 0],
-    ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
-    ["watch()", WatchedApp, 1],
-  ])("watches nested impulses with %s", (_, App, unnecessaryRerendersCount) => {
+    ["single scope", SingleScopeApp, 0],
+    ["multiple scopes", MultipleScopesApp, 0],
+    ["multiple memoized scopes", MultipleMemoizedScopesApp, 0],
+    ["scoped()", ScopedApp, 1],
+  ])("handles nested Impulses with %s", (_, App, unnecessaryRerendersCount) => {
     const state = Impulse.of<AppState>({
       counts: [],
     })
@@ -194,7 +194,7 @@ describe("watching nested impulses", () => {
       />,
     )
 
-    // initial render and watcher setup
+    // initial render
     expect(onRender).toHaveBeenCalledOnce()
     expect(onCounterRender).not.toHaveBeenCalled()
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()

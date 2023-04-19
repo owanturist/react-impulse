@@ -9,7 +9,7 @@ import {
   useImpulseLayoutEffect,
   useImpulseMemo,
   useScoped,
-  watch,
+  scoped,
 } from "../../src"
 import {
   WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING,
@@ -32,6 +32,7 @@ afterAll(() => {
   console$error.mockRestore()
 })
 
+// TODO move one folder up
 describe.skip("calling Impulse.of()", () => {
   describe.each([
     [
@@ -98,7 +99,7 @@ describe.skip("calling Impulse.of()", () => {
   })
 
   it.concurrent("fine when called inside watch()", () => {
-    const Component = watch(() => {
+    const Component = scoped(() => {
       const [state] = React.useState(Impulse.of(20))
 
       return <div data-testid="count">{state.getValue()}</div>
@@ -194,7 +195,7 @@ describe.skip("calling Impulse#clone()", () => {
   })
 
   it("fine when called inside watch()", () => {
-    const Component = watch<{
+    const Component = scoped<{
       impulse: Impulse<number>
     }>(({ impulse }) => {
       const [state] = React.useState(impulse.clone())
@@ -302,7 +303,7 @@ describe.skip("calling Impulse#setValue()", () => {
   })
 
   it("warns when called inside watch()", () => {
-    const Component = watch<{
+    const Component = scoped<{
       impulse: Impulse<number>
     }>(({ impulse }) => {
       impulse.setValue(10)
@@ -490,7 +491,7 @@ describe.skip("calling Impulse#subscribe()", () => {
 
   describe("warns when called inside watch()", () => {
     const listener = vi.fn()
-    const Component = watch<{
+    const Component = scoped<{
       impulse: Impulse<number>
     }>(({ impulse }) => {
       impulse.subscribe(listener)
