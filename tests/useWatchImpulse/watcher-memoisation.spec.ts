@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Impulse, useWatchImpulse } from "../../src"
+import { Impulse, useScoped } from "../../src"
 import { Counter, WithSpy, WithImpulse } from "../common"
 
 describe("inline watcher", () => {
@@ -11,7 +11,7 @@ describe("inline watcher", () => {
 
     const { rerender } = renderHook(
       () => {
-        return useWatchImpulse((scope) => {
+        return useScoped((scope) => {
           const value = impulse.getValue(scope)
 
           spy(value)
@@ -73,7 +73,7 @@ describe.each([
   [
     "without comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(
+      return useScoped(
         useCallback(
           (scope) => {
             const value = impulse.getValue(scope)
@@ -90,7 +90,7 @@ describe.each([
   [
     "with inline comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(
+      return useScoped(
         (scope) => {
           const value = impulse.getValue(scope)
 
@@ -106,7 +106,7 @@ describe.each([
   [
     "with memoized comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(
+      return useScoped(
         (scope) => {
           const value = impulse.getValue(scope)
 

@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useWatchImpulse, watch } from "../../src"
+import { Impulse, useScoped, watch } from "../../src"
 
 import { CounterComponent } from "./common"
 
@@ -29,7 +29,7 @@ describe("watching single impulse", () => {
   )
 
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useWatchImpulse(
+    const [moreThanOne, lessThanFour] = useScoped(
       (scope) => {
         const count = props.count.getValue(scope)
 
@@ -51,12 +51,8 @@ describe("watching single impulse", () => {
   }
 
   const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchImpulse(
-      (scope) => props.count.getValue(scope) > 1,
-    )
-    const lessThanFour = useWatchImpulse(
-      (scope) => props.count.getValue(scope) < 4,
-    )
+    const moreThanOne = useScoped((scope) => props.count.getValue(scope) > 1)
+    const lessThanFour = useScoped((scope) => props.count.getValue(scope) < 4)
 
     return (
       <GenericApp
@@ -68,11 +64,11 @@ describe("watching single impulse", () => {
   }
 
   const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchImpulse(
+    const moreThanOne = useScoped(
       (scope) => props.count.getValue(scope) > 1,
       [props.count],
     )
-    const lessThanFour = useWatchImpulse(
+    const lessThanFour = useScoped(
       (scope) => props.count.getValue(scope) < 4,
       [props.count],
     )

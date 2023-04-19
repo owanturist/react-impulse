@@ -1,13 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import {
-  batch,
-  Impulse,
-  Scope,
-  useImpulseValue,
-  useWatchImpulse,
-} from "../../src"
+import { batch, Impulse, Scope, useImpulseValue, useScoped } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
@@ -212,7 +206,7 @@ describe.each([
     expectedWatcherCallsForNested: 2,
     execute: (cb: VoidFunction) => cb(),
     useCount: (watcher: (scope: Scope) => number) => {
-      return useWatchImpulse((scope) => watcher(scope))
+      return useScoped((scope) => watcher(scope))
     },
   },
   {
@@ -221,7 +215,7 @@ describe.each([
     expectedWatcherCallsForNested: 2,
     execute: batch,
     useCount: (watcher: (scope: Scope) => number) => {
-      return useWatchImpulse((scope) => watcher(scope))
+      return useScoped((scope) => watcher(scope))
     },
   },
   {
@@ -230,7 +224,7 @@ describe.each([
     expectedWatcherCallsForNested: 1,
     execute: (cb: VoidFunction) => cb(),
     useCount: (watcher: (scope: Scope) => number) => {
-      return useWatchImpulse((scope) => watcher(scope), [watcher])
+      return useScoped((scope) => watcher(scope), [watcher])
     },
   },
   {
@@ -239,7 +233,7 @@ describe.each([
     expectedWatcherCallsForNested: 1,
     execute: batch,
     useCount: (watcher: (scope: Scope) => number) => {
-      return useWatchImpulse((scope) => watcher(scope), [watcher])
+      return useScoped((scope) => watcher(scope), [watcher])
     },
   },
 ])(

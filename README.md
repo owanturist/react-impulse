@@ -324,7 +324,7 @@ A hook that initiates a stable (never changing) Impulse.
 ### `useWatchImpulse`
 
 ```dart
-function useWatchImpulse<T>(
+function useScoped<T>(
   watcher: () => T,
   compare?: null | Compare<T>
 ): T
@@ -333,9 +333,9 @@ function useWatchImpulse<T>(
 - `watcher` is a function that subscribes to all Impulses calling the [`Impulse#getValue`][impulse__get_value] method inside the function.
 - `[compare]` is an optional [`Compare`][compare] function. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
-The `useWatchImpulse` hook is an alternative to the [`watch`][watch] function. It executes the `watcher` function whenever any of the involved Impulses' value update but enqueues a re-render only when the resulting value is different from the previous.
+The `useScoped` hook is an alternative to the [`watch`][watch] function. It executes the `watcher` function whenever any of the involved Impulses' value update but enqueues a re-render only when the resulting value is different from the previous.
 
-Custom hooks can use `useWatchImpulse` for reading and transforming the Impulses' values, so the host component doesn't need to wrap around the [`watch`][watch] HOC:
+Custom hooks can use `useScoped` for reading and transforming the Impulses' values, so the host component doesn't need to wrap around the [`watch`][watch] HOC:
 
 ```tsx
 const useSumAllAndMultiply = ({
@@ -345,7 +345,7 @@ const useSumAllAndMultiply = ({
   multiplier: Impulse<number>
   counts: Impulse<Array<Impulse<number>>>
 }): number => {
-  return useWatchImpulse(() => {
+  return useScoped(() => {
     const sumAll = counts
       .getValue()
       .map((count) => count.getValue())
@@ -362,7 +362,7 @@ Components can scope watched Impulses to reduce re-rendering:
 const Challenge: React.FC = () => {
   const count = useImpulse(0)
   // the component re-renders only once when the `count` is greater than 5
-  const isMoreThanFive = useWatchImpulse(() => count.getValue() > 5)
+  const isMoreThanFive = useScoped(() => count.getValue() > 5)
 
   return (
     <div>
@@ -447,7 +447,7 @@ const useCalcSum = (left: number, right: Impulse<number>): number => {
 >   "react-hooks/exhaustive-deps": [
 >     "error",
 >     {
->       "additionalHooks": "(useImpulseEffect|useImpulseLayoutEffect|useImpulseMemo)"
+>       "additionalHooks": "(useScoped|useImpulseEffect|useImpulseLayoutEffect|useImpulseMemo)"
 >     }
 >   ]
 > }
@@ -519,7 +519,7 @@ const usePrintSum = (left: number, right: Impulse<number>): void => {
 >   "react-hooks/exhaustive-deps": [
 >     "error",
 >     {
->       "additionalHooks": "(useImpulseEffect|useImpulseLayoutEffect|useImpulseMemo)"
+>       "additionalHooks": "(useScoped|useImpulseEffect|useImpulseLayoutEffect|useImpulseMemo)"
 >     }
 >   ]
 > }

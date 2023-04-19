@@ -8,7 +8,7 @@ import {
   PropsWithoutScope,
   Scope,
   useImpulseValue,
-  useWatchImpulse,
+  useScoped,
   watch,
 } from "../../src"
 
@@ -167,13 +167,11 @@ describe("watch()", () => {
     expect(btn).toHaveTextContent("2")
   })
 
-  it("should scope re-renders via useWatchImpulse", () => {
+  it("should scope re-renders via useScoped", () => {
     const Component = watch<{
       count: Impulse<number>
     }>(({ count }) => {
-      const isMoreThanTwo = useWatchImpulse(
-        (scope) => count.getValue(scope) > 2,
-      )
+      const isMoreThanTwo = useScoped((scope) => count.getValue(scope) > 2)
 
       return <span data-testid="result">{isMoreThanTwo && "Done"}</span>
     })

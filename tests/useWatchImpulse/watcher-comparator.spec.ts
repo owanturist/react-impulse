@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react-hooks"
 
-import { Impulse, useWatchImpulse } from "../../src"
+import { Impulse, useScoped } from "../../src"
 import { Counter, WithCompare, WithImpulse } from "../common"
 import { isEqual } from "../../src/utils"
 
@@ -10,7 +10,7 @@ describe.each([
     ({ compare, impulse }: WithImpulse & WithCompare) => {
       const cmp = compare ?? Counter.compare
 
-      return useWatchImpulse(
+      return useScoped(
         (scope) => impulse.getValue(scope),
         [impulse],
         (prev, next) => cmp(prev, next),
@@ -20,7 +20,7 @@ describe.each([
   [
     "with memoized comparator",
     ({ compare, impulse }: WithImpulse & WithCompare) => {
-      return useWatchImpulse(
+      return useScoped(
         (scope) => impulse.getValue(scope),
         [impulse],
         compare ?? Counter.compare,

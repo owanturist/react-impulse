@@ -14,4 +14,4 @@ export {
   useImpulseEffect,
   useImpulseLayoutEffect,
 } from "./useImpulseEffects"
-export { useWatchImpulse } from "./useWatchImpulse"
+export { useScoped } from "./useScoped"
