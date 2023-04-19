@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, Scope, useImpulseValue, useScoped, scoped } from "../../src"
+import { Impulse, Scope, useScoped, scoped } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -32,7 +32,7 @@ describe("scoping nested impulses", () => {
     onRender,
     onCounterRender,
   }) => {
-    const state = useImpulseValue(appState)
+    const state = useScoped((scope) => appState.getValue(scope))
 
     return (
       <>
