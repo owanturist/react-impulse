@@ -1,9 +1,8 @@
 import { useCallback, useDebugValue } from "react"
 
-import { Compare, isEqual } from "./utils"
+import { Compare, isEqual, useEvent } from "./utils"
 import { Scope } from "./Scope"
 import { useScope } from "./useScope"
-import { useEvent } from "./useEvent"
 
 /**
  * A hook that executes the `watcher` function whenever any of the involved Impulses' values update

@@ -1,3 +1,5 @@
+import { useCallback, useLayoutEffect, useRef } from "react"
+
 /**
  * A function that compares two values and returns `true` if they are equal.
  * Depending on the type of the values it might be reasonable to use
@@ -25,4 +27,16 @@ export const isFunction = <
   anything: unknown,
 ): anything is TFunction => {
   return typeof anything === "function"
+}
+
+export const useEvent = <TArgs extends Array<unknown>, TResult>(
+  handler: (...args: TArgs) => TResult,
+): ((...args: TArgs) => TResult) => {
+  const handlerRef = useRef<(...args: TArgs) => TResult>()
+
+  useLayoutEffect(() => {
+    handlerRef.current = handler
+  })
+
+  return useCallback((...args: TArgs) => handlerRef.current!(...args), [])
 }
