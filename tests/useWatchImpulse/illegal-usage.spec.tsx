@@ -8,7 +8,7 @@ import {
   useImpulseEffect,
   useImpulseLayoutEffect,
   useImpulseMemo,
-  useWatchImpulse,
+  useScoped,
   watch,
 } from "../../src"
 import {
@@ -45,16 +45,14 @@ describe.skip("calling Impulse.of()", () => {
       "inline useWatchImpulse",
       WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchImpulse,
       () => {
-        return useWatchImpulse(() => Impulse.of(1).getValue())
+        return useScoped(() => Impulse.of(1).getValue())
       },
     ],
     [
       "memoized useWatchImpulse",
       WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchImpulse,
       () => {
-        return useWatchImpulse(
-          React.useCallback(() => Impulse.of(1).getValue(), []),
-        )
+        return useScoped(React.useCallback(() => Impulse.of(1).getValue(), []))
       },
     ],
   ])("warns when called inside %s", (_, message, useHook) => {
@@ -126,14 +124,14 @@ describe.skip("calling Impulse#clone()", () => {
       "inline useWatchImpulse",
       WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useWatchImpulse,
       ({ impulse }: WithImpulse<number>) => {
-        return useWatchImpulse(() => impulse.clone().getValue())
+        return useScoped(() => impulse.clone().getValue())
       },
     ],
     [
       "memoized useWatchImpulse",
       WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useWatchImpulse,
       ({ impulse }: WithImpulse<number>) => {
-        return useWatchImpulse(
+        return useScoped(
           React.useCallback(() => impulse.clone().getValue(), [impulse]),
         )
       },
@@ -228,7 +226,7 @@ describe.skip("calling Impulse#setValue()", () => {
       "inline useWatchImpulse",
       WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useWatchImpulse,
       ({ impulse }: WithImpulse<number>) => {
-        return useWatchImpulse(() => {
+        return useScoped(() => {
           impulse.setValue(3)
 
           return impulse.getValue()
@@ -239,7 +237,7 @@ describe.skip("calling Impulse#setValue()", () => {
       "memoized useWatchImpulse",
       WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useWatchImpulse,
       ({ impulse }: WithImpulse<number>) => {
-        return useWatchImpulse(
+        return useScoped(
           React.useCallback(() => {
             impulse.setValue(3)
 
@@ -344,7 +342,7 @@ describe.skip("calling Impulse#subscribe()", () => {
         impulse,
         listener = vi.fn(),
       }: WithImpulse<number> & Partial<WithListener>) => {
-        return useWatchImpulse(() => {
+        return useScoped(() => {
           impulse.subscribe(listener)
 
           return impulse.getValue()
@@ -358,7 +356,7 @@ describe.skip("calling Impulse#subscribe()", () => {
         impulse,
         listener = vi.fn(),
       }: WithImpulse<number> & Partial<WithListener>) => {
-        return useWatchImpulse(
+        return useScoped(
           React.useCallback(() => {
             impulse.subscribe(listener)
 
