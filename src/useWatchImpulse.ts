@@ -21,7 +21,7 @@ export function useWatchImpulse<T>(
 ): T {
   const value = useScope(
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    useCallback((scope: Scope) => watcher(scope), dependencies ?? [watcher]),
+    useCallback(watcher, dependencies ?? [watcher]),
     useEvent(compare ?? eq),
   )
 
