@@ -4,7 +4,6 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
-  useCallback,
 } from "react"
 
 import { useScope } from "./useScope"
@@ -79,7 +78,7 @@ export function useScopedMemo<TValue>(
   )
 }
 
-// TODO add tests, docs
+// TODO add docs
 export function useScopedCallback<
   TArgs extends ReadonlyArray<unknown>,
   TResult,
@@ -87,11 +86,8 @@ export function useScopedCallback<
   callback: (scope: Scope, ...args: TArgs) => TResult,
   dependencies: DependencyList,
 ): (...args: TArgs) => TResult {
-  const getScope = useScope()
-
-  return useCallback(
-    (...args: TArgs) => callback(getScope(), ...args),
+  return useScopedMemo((scope) => {
+    return (...args: TArgs) => callback(scope, ...args)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [...dependencies, getScope],
-  )
+  }, dependencies)
 }
