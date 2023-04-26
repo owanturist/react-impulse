@@ -3,7 +3,7 @@ import { useCallback } from "react"
 
 import { ScopeEmitter } from "./ScopeEmitter"
 import { EMITTER_KEY, Scope } from "./Scope"
-import { Compare, usePermanent } from "./utils"
+import { Compare, isFunction, usePermanent } from "./utils"
 
 export function useScope<T = () => Scope>(
   transform?: (scope: Scope) => T,
@@ -21,7 +21,7 @@ export function useScope<T = () => Scope>(
         }
       }
 
-      return transform ? transform(getScope()) : (getScope as T)
+      return isFunction(transform) ? transform(getScope()) : (getScope as T)
     },
     [emitter, transform],
   )

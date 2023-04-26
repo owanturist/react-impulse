@@ -23,24 +23,22 @@ export const isEqual: Compare<unknown> = Object.is
 /**
  * @private
  */
-export const noop: VoidFunction = () => {
+export function noop(): void {
   // do nothing
 }
 
-export const isFunction = <
+export function isFunction<
   TFunction extends (...args: Array<never>) => unknown,
->(
-  anything: unknown,
-): anything is TFunction => {
+>(anything: unknown): anything is TFunction {
   return typeof anything === "function"
 }
 
 const useIsomorphicEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect
 
-export const useEvent = <TArgs extends Array<unknown>, TResult>(
+export function useEvent<TArgs extends Array<unknown>, TResult>(
   handler: (...args: TArgs) => TResult,
-): ((...args: TArgs) => TResult) => {
+): (...args: TArgs) => TResult {
   const handlerRef = useRef<(...args: TArgs) => TResult>()
 
   useIsomorphicEffect(() => {
@@ -50,7 +48,7 @@ export const useEvent = <TArgs extends Array<unknown>, TResult>(
   return useCallback((...args: TArgs) => handlerRef.current!(...args), [])
 }
 
-export const usePermanent = <TValue>(init: () => TValue): TValue => {
+export function usePermanent<TValue>(init: () => TValue): TValue {
   const [value] = useState(init)
 
   return value

@@ -13,10 +13,10 @@ export const STATIC_SCOPE: Scope = {
 
 let currentInjectedScope = STATIC_SCOPE
 
-export const injectScope = (
+export function injectScope(
   runtime: (scope: Scope) => void,
   scope: Scope,
-): void => {
+): void {
   const prevScope = currentInjectedScope
 
   currentInjectedScope = scope
@@ -24,4 +24,6 @@ export const injectScope = (
   currentInjectedScope = prevScope
 }
 
-export const extractScope = (): Scope => currentInjectedScope
+export function extractScope(): Scope {
+  return currentInjectedScope
+}
