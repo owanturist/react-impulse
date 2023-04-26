@@ -28,7 +28,7 @@ export function noop(): void {
 }
 
 export function isFunction<
-  TFunction extends (...args: Array<never>) => unknown,
+  TFunction extends (...args: ReadonlyArray<never>) => unknown,
 >(anything: unknown): anything is TFunction {
   return typeof anything === "function"
 }
