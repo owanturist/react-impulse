@@ -10,15 +10,16 @@ import {
   useScopedMemo,
   useScoped,
   scoped,
-} from "../../src"
+} from "../src"
 import {
   WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
-} from "../../src/validation"
-import { noop } from "../../src/utils"
-import { WithImpulse, WithListener } from "../common"
+} from "../src/validation"
+import { noop } from "../src/utils"
+
+import { WithImpulse, WithListener } from "./common"
 
 const console$error = vi
   .spyOn(console, "error")
@@ -32,28 +33,27 @@ afterAll(() => {
   console$error.mockRestore()
 })
 
-// TODO move one folder up
-describe.skip("calling Impulse.of()", () => {
+describe("calling Impulse.of()", () => {
   describe.each([
     [
-      "useImpulseMemo",
-      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useImpulseMemo,
+      "useScopedMemo",
+      "You should not call Impulse#of inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#of creates a new Impulse.",
       () => {
-        return useScopedMemo(() => Impulse.of(1).getValue(), [])
+        return useScopedMemo((scope) => Impulse.of(1).getValue(scope), [])
       },
     ],
     [
-      "inline useWatchImpulse",
-      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchImpulse,
+      "inline useScoped",
+      "You should not call Impulse#of inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#of creates a new Impulse.",
       () => {
-        return useScoped(() => Impulse.of(1).getValue())
+        return useScoped((scope) => Impulse.of(1).getValue(scope))
       },
     ],
     [
-      "memoized useWatchImpulse",
-      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchImpulse,
+      "memoized useScoped",
+      "You should not call Impulse#of inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#of creates a new Impulse.",
       () => {
-        return useScoped(React.useCallback(() => Impulse.of(1).getValue(), []))
+        return useScoped((scope) => Impulse.of(1).getValue(scope), [])
       },
     ],
   ])("warns when called inside %s", (_, message, useHook) => {
@@ -63,46 +63,48 @@ describe.skip("calling Impulse.of()", () => {
       expect(console$error).toHaveBeenLastCalledWith(message)
     })
 
-    it.concurrent("returns the new impulse's value", () => {
+    it.concurrent("returns the new Impulse's value", () => {
       const { result } = renderHook(useHook)
 
       expect(result.current).toBe(1)
     })
   })
 
-  it("warns when called inside subscribe()", () => {
+  it.concurrent("warns when called inside subscribe()", () => {
     subscribe(() => {
       Impulse.of(1)
     })
 
     expect(console$error).toHaveBeenLastCalledWith(
-      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.subscribe,
+      "You should not call Impulse#of inside of the subscribe listener. The listener is for read-only operations but Impulse#of creates a new Impulse.",
     )
   })
 
-  it.concurrent.each([
-    ["useImpulseEffect", useScopedEffect],
-    ["useImpulseLayoutEffect", useScopedLayoutEffect],
-  ])("fine when called inside %s", (_, useImpulseEffectHook) => {
-    const { result } = renderHook(() => {
-      const [state, setState] = React.useState(Impulse.of(1))
+  describe.each([
+    ["useScopedEffect", useScopedEffect],
+    ["useScopedLayoutEffect", useScopedLayoutEffect],
+  ])("fine when called inside %s", (_, useScopedEffectHook) => {
+    it.concurrent("works fine, does not call console.error", ({ scope }) => {
+      const { result } = renderHook(() => {
+        const [state, setState] = React.useState(Impulse.of(1))
 
-      useImpulseEffectHook(() => {
-        setState(Impulse.of(10))
-      }, [])
+        useScopedEffectHook(() => {
+          setState(Impulse.of(10))
+        }, [])
 
-      return state
+        return state
+      })
+
+      expect(console$error).not.toHaveBeenCalled()
+      expect(result.current.getValue(scope)).toBe(10)
     })
-
-    expect(console$error).not.toHaveBeenCalled()
-    expect(result.current.getValue()).toBe(10)
   })
 
-  it.concurrent("fine when called inside watch()", () => {
+  it.concurrent("fine when called inside scoped()", ({ scope }) => {
     const Component = scoped(() => {
       const [state] = React.useState(Impulse.of(20))
 
-      return <div data-testid="count">{state.getValue()}</div>
+      return <div data-testid="count">{state.getValue(scope)}</div>
     })
 
     render(<Component />)
@@ -115,22 +117,22 @@ describe.skip("calling Impulse.of()", () => {
 describe.skip("calling Impulse#clone()", () => {
   describe.each([
     [
-      "useImpulseMemo",
-      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useImpulseMemo,
+      "useScopedMemo",
+      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useScopedMemo,
       ({ impulse }: WithImpulse<number>) => {
         return useScopedMemo(() => impulse.clone().getValue(), [impulse])
       },
     ],
     [
-      "inline useWatchImpulse",
-      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useWatchImpulse,
+      "inline useScoped",
+      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useScoped,
       ({ impulse }: WithImpulse<number>) => {
         return useScoped(() => impulse.clone().getValue())
       },
     ],
     [
-      "memoized useWatchImpulse",
-      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useWatchImpulse,
+      "memoized useScoped",
+      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useScoped,
       ({ impulse }: WithImpulse<number>) => {
         return useScoped(
           React.useCallback(() => impulse.clone().getValue(), [impulse]),
@@ -170,15 +172,15 @@ describe.skip("calling Impulse#clone()", () => {
   })
 
   it.concurrent.each([
-    ["useImpulseEffect", useScopedEffect],
-    ["useImpulseLayoutEffect", useScopedLayoutEffect],
-  ])("fine when called inside %s", (_, useImpulseEffectHook) => {
+    ["useScopedEffect", useScopedEffect],
+    ["useScopedLayoutEffect", useScopedLayoutEffect],
+  ])("fine when called inside %s", (_, useScopedEffectHook) => {
     const initial = Impulse.of(1)
     const { result } = renderHook(
       (impulse) => {
         const [state, setState] = React.useState(impulse)
 
-        useImpulseEffectHook(() => {
+        useScopedEffectHook(() => {
           setState((x) => x.clone())
         }, [])
 
@@ -194,7 +196,7 @@ describe.skip("calling Impulse#clone()", () => {
     expect(result.current.getValue()).toBe(1)
   })
 
-  it("fine when called inside watch()", () => {
+  it("fine when called inside scoped()", () => {
     const Component = scoped<{
       impulse: Impulse<number>
     }>(({ impulse }) => {
@@ -213,8 +215,8 @@ describe.skip("calling Impulse#clone()", () => {
 describe.skip("calling Impulse#setValue()", () => {
   describe.each([
     [
-      "useImpulseMemo",
-      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useImpulseMemo,
+      "useScopedMemo",
+      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useScopedMemo,
       ({ impulse }: WithImpulse<number>) => {
         return useScopedMemo(() => {
           impulse.setValue(3)
@@ -224,8 +226,8 @@ describe.skip("calling Impulse#setValue()", () => {
       },
     ],
     [
-      "inline useWatchImpulse",
-      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useWatchImpulse,
+      "inline useScoped",
+      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useScoped,
       ({ impulse }: WithImpulse<number>) => {
         return useScoped(() => {
           impulse.setValue(3)
@@ -235,8 +237,8 @@ describe.skip("calling Impulse#setValue()", () => {
       },
     ],
     [
-      "memoized useWatchImpulse",
-      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useWatchImpulse,
+      "memoized useScoped",
+      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useScoped,
       ({ impulse }: WithImpulse<number>) => {
         return useScoped(
           React.useCallback(() => {
@@ -268,12 +270,12 @@ describe.skip("calling Impulse#setValue()", () => {
   })
 
   it.concurrent.each([
-    ["useImpulseEffect", useScopedEffect],
-    ["useImpulseLayoutEffect", useScopedLayoutEffect],
-  ])("fine when called inside %s", (_, useImpulseEffectHook) => {
+    ["useScopedEffect", useScopedEffect],
+    ["useScopedLayoutEffect", useScopedLayoutEffect],
+  ])("fine when called inside %s", (_, useScopedEffectHook) => {
     const { result } = renderHook(
       (impulse) => {
-        useImpulseEffectHook(() => {
+        useScopedEffectHook(() => {
           impulse.setValue((x) => x + 1)
         }, [impulse])
 
@@ -302,7 +304,7 @@ describe.skip("calling Impulse#setValue()", () => {
     expect(impulse.getValue()).toBe(2)
   })
 
-  it("warns when called inside watch()", () => {
+  it("warns when called inside scoped()", () => {
     const Component = scoped<{
       impulse: Impulse<number>
     }>(({ impulse }) => {
@@ -314,7 +316,7 @@ describe.skip("calling Impulse#setValue()", () => {
     render(<Component impulse={Impulse.of(20)} />)
 
     expect(console$error).toHaveBeenCalledWith(
-      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.watch,
+      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.scoped,
     )
     expect(screen.getByTestId("count")).toHaveTextContent("20")
   })
@@ -323,8 +325,8 @@ describe.skip("calling Impulse#setValue()", () => {
 describe.skip("calling Impulse#subscribe()", () => {
   describe.each([
     [
-      "useImpulseMemo",
-      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useImpulseMemo,
+      "useScopedMemo",
+      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useScopedMemo,
       ({
         impulse,
         listener = vi.fn(),
@@ -337,8 +339,8 @@ describe.skip("calling Impulse#subscribe()", () => {
       },
     ],
     [
-      "inline useWatchImpulse",
-      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useWatchImpulse,
+      "inline useScoped",
+      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useScoped,
       ({
         impulse,
         listener = vi.fn(),
@@ -351,8 +353,8 @@ describe.skip("calling Impulse#subscribe()", () => {
       },
     ],
     [
-      "memoized useWatchImpulse",
-      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useWatchImpulse,
+      "memoized useScoped",
+      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useScoped,
       ({
         impulse,
         listener = vi.fn(),
@@ -418,15 +420,15 @@ describe.skip("calling Impulse#subscribe()", () => {
   })
 
   describe.each([
-    ["useImpulseEffect", useScopedEffect],
-    ["useImpulseLayoutEffect", useScopedLayoutEffect],
-  ])("fine when called inside %s", (_, useImpulseEffectHook) => {
+    ["useScopedEffect", useScopedEffect],
+    ["useScopedLayoutEffect", useScopedLayoutEffect],
+  ])("fine when called inside %s", (_, useScopedEffectHook) => {
     it.concurrent("calls subscribed listener", () => {
       const initial = Impulse.of(1)
       const listener = vi.fn()
       const { result } = renderHook(
         (impulse) => {
-          useImpulseEffectHook(() => {
+          useScopedEffectHook(() => {
             return impulse.subscribe(listener)
           }, [impulse])
 
@@ -455,7 +457,7 @@ describe.skip("calling Impulse#subscribe()", () => {
       const listener = vi.fn()
       const { result, rerender } = renderHook(
         (impulse) => {
-          useImpulseEffectHook(() => {
+          useScopedEffectHook(() => {
             return impulse.subscribe(listener)
           }, [impulse])
 
@@ -489,7 +491,7 @@ describe.skip("calling Impulse#subscribe()", () => {
     })
   })
 
-  describe("warns when called inside watch()", () => {
+  describe("warns when called inside scoped()", () => {
     const listener = vi.fn()
     const Component = scoped<{
       impulse: Impulse<number>
@@ -507,7 +509,7 @@ describe.skip("calling Impulse#subscribe()", () => {
       render(<Component impulse={Impulse.of(20)} />)
 
       expect(console$error).toHaveBeenCalledWith(
-        WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.watch,
+        WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.scoped,
       )
     })
 
