@@ -7,7 +7,7 @@ import { ScopeEmitter } from "./ScopeEmitter"
  *
  * @version 1.0.0
  */
-export const batch = (execute: VoidFunction): void => {
+export function batch(execute: VoidFunction): void {
   ScopeEmitter.schedule(() => {
     execute()
 

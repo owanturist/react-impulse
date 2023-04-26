@@ -7,7 +7,7 @@ import { ScopeEmitter } from "./ScopeEmitter"
  * @param listener function that will be called on each `Impulse` change, involved in the `listener` execution. Calls first time synchronously when `subscribe` is called.
  * @returns cleanup function that unsubscribes the `listener`
  */
-export const subscribe = (listener: (scope: Scope) => void): VoidFunction => {
+export function subscribe(listener: (scope: Scope) => void): VoidFunction {
   const emitter = new ScopeEmitter()
   const getScope = (): Scope => ({
     [EMITTER_KEY]: emitter,
