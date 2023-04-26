@@ -252,3 +252,64 @@ describe("conditional Impulse", () => {
     expect(count).toHaveProperty("emitters.size", 0)
   })
 })
+
+describe("argument Impulse", () => {
+  const setup = () => {
+    return renderHook(() => {
+      return useScopedCallback(
+        (scope, count: Impulse<number>) => count.getValue(scope) * 2,
+        [],
+      )
+    })
+  }
+
+  it.concurrent("attaches an Impulse when the resulting function calls", () => {
+    const count = Impulse.of(1)
+    const { result } = setup()
+
+    expect(result.current(count)).toBe(2)
+
+    expect(count).toHaveProperty("emitters.size", 1)
+  })
+
+  it.concurrent("does not attach the same Impulse twice", () => {
+    const count = Impulse.of(1)
+    const { result } = setup()
+
+    expect(result.current(count)).toBe(2)
+    expect(result.current(count)).toBe(2)
+
+    expect(count).toHaveProperty("emitters.size", 1)
+  })
+
+  it.concurrent("attaches multiple Impulses", () => {
+    const count_1 = Impulse.of(1)
+    const count_2 = Impulse.of(2)
+    const { result } = setup()
+
+    expect(result.current(count_1)).toBe(2)
+    expect(result.current(count_2)).toBe(4)
+
+    expect(count_1).toHaveProperty("emitters.size", 1)
+    expect(count_2).toHaveProperty("emitters.size", 1)
+  })
+
+  it.concurrent(
+    "detaches all Impulses when any of the attached Impulse value changes",
+    () => {
+      const count_1 = Impulse.of(1)
+      const count_2 = Impulse.of(2)
+      const { result } = setup()
+
+      result.current(count_1)
+      result.current(count_2)
+
+      act(() => {
+        count_1.setValue(3)
+      })
+
+      expect(count_1).toHaveProperty("emitters.size", 0)
+      expect(count_2).toHaveProperty("emitters.size", 0)
+    },
+  )
+})
