@@ -1,5 +1,6 @@
 import { EMITTER_KEY, Scope, injectScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
+import { warnContext } from "./validation"
 
 /**
  * A function that subscribes to changes of all `Impulse` instances that call the `Impulse#getValue` method inside the `listener`.
@@ -9,15 +10,15 @@ import { ScopeEmitter } from "./ScopeEmitter"
  */
 export function subscribe(listener: (scope: Scope) => void): VoidFunction {
   const emitter = new ScopeEmitter()
-  const getScope = (): Scope => ({
-    [EMITTER_KEY]: emitter,
-    version: emitter.getVersion(),
-  })
+  const emit = (): void => {
+    warnContext("subscribe", injectScope, listener, {
+      [EMITTER_KEY]: emitter,
+      version: emitter.getVersion(),
+    })
+  }
 
   // TODO update docs about JSON and toString
-  injectScope(listener, getScope())
+  emit()
 
-  return emitter.onEmit(() => {
-    injectScope(listener, getScope())
-  })
+  return emitter.onEmit(emit)
 }

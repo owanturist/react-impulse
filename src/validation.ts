@@ -1,7 +1,9 @@
+import { isFunction } from "./utils"
+
 export type WarningSource =
-  | "useWatchImpulse"
-  | "useImpulseMemo"
-  | "watch"
+  | "useScoped"
+  | "useScopedMemo"
+  | "scoped"
   | "subscribe"
 
 export type WarningSet = Record<WarningSource, null | string>
@@ -53,9 +55,9 @@ const makeSubscribeWarningMessage = ({
 }
 
 const makeWarningSet = (options: MakeWarningOptions): WarningSet => ({
-  useWatchImpulse: makeHookWarningMessage("useWatchImpulse(watcher)", options),
-  useImpulseMemo: makeHookWarningMessage("useImpulseMemo(factory)", options),
-  watch: makeWatchWarningMessage(options),
+  useScoped: makeHookWarningMessage("useScoped", options),
+  useScopedMemo: makeHookWarningMessage("useScopedMemo", options),
+  scoped: makeWatchWarningMessage(options),
   subscribe: makeSubscribeWarningMessage(options),
 })
 
@@ -90,3 +92,56 @@ export const WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING = makeWarningSet({
   isWatchAffected: true,
   isSubscribeAffected: true,
 })
+
+// TODO come up with better type name
+export type NAMES = "subscribe" | "scoped" | "useScoped" | "useScopedMemo"
+
+let currentName: null | NAMES = null
+
+export function warnContext<TArgs extends ReadonlyArray<unknown>, TResult>(
+  name: NAMES,
+  func: (...args: TArgs) => TResult,
+  ...args: TArgs
+): TResult {
+  const prev = currentName
+
+  currentName = name
+
+  const result = func(...args)
+
+  currentName = prev
+
+  return result
+}
+
+export function warnOn(
+  name: NAMES,
+  message: string,
+  { isBreaking }: { isBreaking?: boolean } = {},
+) {
+  return (_target: unknown, _key: string, descriptor: PropertyDescriptor) => {
+    const original = descriptor.value as (
+      ...args: ReadonlyArray<unknown>
+    ) => unknown
+
+    descriptor.value = function (...args: Array<unknown>) {
+      if (name !== currentName) {
+        return original.apply(this, args)
+      }
+
+      if (
+        process.env.NODE_ENV !== "production" &&
+        typeof console !== "undefined" &&
+        // eslint-disable-next-line no-console
+        isFunction(console.error)
+      ) {
+        // eslint-disable-next-line no-console
+        console.error(message)
+      }
+
+      if (!isBreaking) {
+        return original.apply(this, args)
+      }
+    }
+  }
+}
