@@ -56,25 +56,25 @@ export function scoped<TProps>(
   return ComponentWithScope
 }
 
-function memo<TProps>(
+const memo = <TProps>(
   component: FunctionComponent<PropsWithScope<TProps>>,
   propsAreEqual?: Compare<Readonly<PropsWithoutScope<TProps>>>,
-): NamedExoticComponent<PropsWithoutScope<TProps>> {
+): NamedExoticComponent<PropsWithoutScope<TProps>> => {
   return React_memo(scoped(component), propsAreEqual)
 }
 
-function forwardRefMemo<TNode, TProps>(
+const forwardRefMemo = <TNode, TProps>(
   render: ForwardRefRenderFunction<TNode, PropsWithScope<TProps>>,
   propsAreEqual?: Compare<Readonly<PropsWithoutScope<TProps>>>,
-): NamedExoticComponent<PropsWithoutScope<TProps>> {
+): NamedExoticComponent<PropsWithoutScope<TProps>> => {
   return React_memo(forwardRef(render), propsAreEqual)
 }
 
-function forwardRef<TNode, TProps>(
+const forwardRef = <TNode, TProps>(
   render: ForwardRefRenderFunction<TNode, PropsWithScope<TProps>>,
 ): ForwardRefExoticComponent<
   PropsWithoutRef<PropsWithoutScope<TProps>> & RefAttributes<TNode>
-> {
+> => {
   return React_forwardRef(
     scoped(render) as ForwardRefRenderFunction<
       TNode,
