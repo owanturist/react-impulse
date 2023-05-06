@@ -24,7 +24,7 @@ export function warnContext<TArgs extends ReadonlyArray<unknown>, TResult>(
   return result
 }
 
-// TODO come up with better type name
+// TODO delete
 
 const BAR: Record<
   NAMES,
@@ -69,55 +69,55 @@ export function getMessageFor(
 }
 
 // TODO come up with better name
-export function warnwarn<TArgs extends ReadonlyArray<unknown>, TResult>(
-  _: unknown,
-  methodName: keyof typeof Impulse | keyof Impulse<unknown>,
-  descriptor: TypedPropertyDescriptor<(...args: TArgs) => TResult>,
-): void {
-  if (
-    process.env.NODE_ENV === "production" ||
-    typeof console === "undefined" ||
-    // eslint-disable-next-line no-console
-    !isFunction(console.error)
-  ) {
-    return
-  }
-
-  const original = descriptor.value
-
-  descriptor.value = function (...args) {
-    const message = getMessageFor(methodName, currentName)
-
-    if (message != null) {
+export function warnwarn(context: NAMES, message: string) {
+  return <TArgs extends ReadonlyArray<unknown>, TResult>(
+    _: unknown,
+    __: string,
+    descriptor: TypedPropertyDescriptor<(...args: TArgs) => TResult>,
+  ): void => {
+    if (
+      production ||
+      typeof console === "undefined" ||
       // eslint-disable-next-line no-console
-      console.error(message)
+      !isFunction(console.error)
+    ) {
+      return
     }
 
-    return original.apply(this, args)
+    const original = descriptor.value
+
+    descriptor.value = function (...args) {
+      if (context === currentName) {
+        // eslint-disable-next-line no-console
+        console.error(message)
+      }
+
+      return original.apply(this, args)
+    }
   }
 }
 
 // TODO come up with better name
-export function stopstop<TArgs extends ReadonlyArray<unknown>>(
-  _: unknown,
-  methodName: keyof Impulse<unknown>,
-  descriptor: TypedPropertyDescriptor<(...args: TArgs) => void>,
-): void {
-  const original = descriptor.value
+export function stopstop(context: NAMES, message: string) {
+  return <TArgs extends ReadonlyArray<unknown>>(
+    _: unknown,
+    __: string,
+    descriptor: TypedPropertyDescriptor<(...args: TArgs) => void>,
+  ): void => {
+    const original = descriptor.value
 
-  descriptor.value = function (...args) {
-    const message = getMessageFor(methodName, currentName)
-
-    if (message == null) {
-      original.apply(this, args)
-    } else if (
-      process.env.NODE_ENV !== "production" &&
-      typeof console !== "undefined" &&
-      // eslint-disable-next-line no-console
-      isFunction(console.error)
-    ) {
-      // eslint-disable-next-line no-console
-      console.error(message)
+    descriptor.value = function (...args) {
+      if (context !== currentName) {
+        original.apply(this, args)
+      } else if (
+        !production &&
+        typeof console !== "undefined" &&
+        // eslint-disable-next-line no-console
+        isFunction(console.error)
+      ) {
+        // eslint-disable-next-line no-console
+        console.error(message)
+      }
     }
   }
 }

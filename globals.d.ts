@@ -8,6 +8,8 @@ declare global {
       R
     >
   }
+
+  const production: boolean
 }
 
 declare module "@vitest/runner" {
