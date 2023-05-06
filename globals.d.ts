@@ -6,6 +6,8 @@ declare global {
     interface Matchers<R = void>
       extends TestingLibraryMatchers<typeof expect.stringContaining, R> {}
   }
+
+  const production: boolean
 }
 
 declare module "@vitest/runner" {
