@@ -52,10 +52,6 @@ export interface WithSpy {
   spy(...args: Array<unknown>): void
 }
 
-export interface WithListener {
-  listener: VoidFunction
-}
-
 export interface WithIsActive {
   isActive: boolean
 }

@@ -1,7 +1,7 @@
 import { Compare, eq, isFunction } from "./utils"
 import { EMITTER_KEY, Scope, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
-import { warnOn } from "./validation"
+import { stopstop, warnwarn } from "./validation"
 
 export class Impulse<T> {
   /**
@@ -22,18 +22,7 @@ export class Impulse<T> {
   public static of<T>(initialValue: T, compare?: null | Compare<T>): Impulse<T>
 
   // Implements 👆
-  @warnOn(
-    "subscribe",
-    "You should not call Impulse#of inside of the subscribe listener. The listener is for read-only operations but Impulse#of creates a new Impulse.",
-  )
-  @warnOn(
-    "useScopedMemo",
-    "You should not call Impulse#of inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#of creates a new Impulse.",
-  )
-  @warnOn(
-    "useScoped",
-    "You should not call Impulse#of inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#of creates a new Impulse.",
-  )
+  @warnwarn
   public static of<T>(
     initialValue?: T,
     compare?: null | Compare<undefined | T>,
@@ -86,6 +75,7 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
+  @warnwarn
   public clone(
     transform?: (value: T) => T,
     compare: null | Compare<T> = this.compare,
@@ -130,6 +120,7 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
+  @stopstop
   public setValue(
     valueOrTransform: T | ((currentValue: T) => T),
     compare: null | Compare<T> = this.compare,
