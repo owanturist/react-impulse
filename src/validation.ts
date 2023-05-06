@@ -1,103 +1,13 @@
+import { Impulse } from "./Impulse"
 import { isFunction } from "./utils"
-
-export type WarningSource =
-  | "useScoped"
-  | "useScopedMemo"
-  | "scoped"
-  | "subscribe"
-
-export type WarningSet = Record<WarningSource, null | string>
-
-interface MakeWarningOptions {
-  isWatchAffected: boolean
-  isSubscribeAffected: boolean
-  isCritical: boolean
-  whatItDoes: string
-  method: string
-}
-
-const makeHookWarningMessage = (
-  hook: string,
-  { isCritical, whatItDoes, method }: MakeWarningOptions,
-): string => {
-  const verb = isCritical ? "may" : "should"
-
-  return `You ${verb} not call ${method} inside of the ${hook} callback. The ${hook} hook is for read-only operations but ${method} ${whatItDoes}.`
-}
-
-const makeWatchWarningMessage = ({
-  isWatchAffected,
-  isCritical,
-  method,
-}: MakeWarningOptions): null | string => {
-  if (!isWatchAffected) {
-    return null
-  }
-
-  const verb = isCritical ? "may" : "should"
-
-  return `You ${verb} not call ${method} during rendering of watch(Component)`
-}
-
-const makeSubscribeWarningMessage = ({
-  isSubscribeAffected,
-  isCritical,
-  method,
-  whatItDoes,
-}: MakeWarningOptions): null | string => {
-  if (!isSubscribeAffected) {
-    return null
-  }
-
-  const verb = isCritical ? "may" : "should"
-
-  return `You ${verb} not call ${method} inside of the subscribe listener. The listener is for read-only operations but ${method} ${whatItDoes}.`
-}
-
-const makeWarningSet = (options: MakeWarningOptions): WarningSet => ({
-  useScoped: makeHookWarningMessage("useScoped", options),
-  useScopedMemo: makeHookWarningMessage("useScopedMemo", options),
-  scoped: makeWatchWarningMessage(options),
-  subscribe: makeSubscribeWarningMessage(options),
-})
-
-export const WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING = makeWarningSet({
-  method: "Impulse#of",
-  whatItDoes: "creates a new Impulse",
-  isCritical: false,
-  isWatchAffected: false,
-  isSubscribeAffected: true,
-})
-
-export const WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING = makeWarningSet({
-  method: "Impulse#clone",
-  whatItDoes: "clones an existing Impulse",
-  isCritical: false,
-  isWatchAffected: false,
-  isSubscribeAffected: true,
-})
-
-export const WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING = makeWarningSet({
-  method: "Impulse#setValue",
-  whatItDoes: "changes an existing Impulse",
-  isCritical: true,
-  isWatchAffected: true,
-  isSubscribeAffected: false,
-})
-
-export const WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING = makeWarningSet({
-  method: "Impulse#subscribe",
-  whatItDoes: "subscribes to an Impulse",
-  isCritical: true,
-  isWatchAffected: true,
-  isSubscribeAffected: true,
-})
 
 // TODO come up with better type name
 export type NAMES = "subscribe" | "scoped" | "useScoped" | "useScopedMemo"
 
+// TODO come up with better name
 let currentName: null | NAMES = null
 
+// TODO come up with better type name
 export function warnContext<TArgs extends ReadonlyArray<unknown>, TResult>(
   name: NAMES,
   func: (...args: TArgs) => TResult,
@@ -114,34 +24,100 @@ export function warnContext<TArgs extends ReadonlyArray<unknown>, TResult>(
   return result
 }
 
-export function warnOn(
-  name: NAMES,
-  message: string,
-  { isBreaking }: { isBreaking?: boolean } = {},
-) {
-  return (_target: unknown, _key: string, descriptor: PropertyDescriptor) => {
-    const original = descriptor.value as (
-      ...args: ReadonlyArray<unknown>
-    ) => unknown
+// TODO come up with better type name
 
-    descriptor.value = function (...args: Array<unknown>) {
-      if (name !== currentName) {
-        return original.apply(this, args)
-      }
+const BAR: Record<
+  NAMES,
+  Partial<Record<keyof Impulse<unknown> | keyof typeof Impulse, string>>
+> = {
+  subscribe: {
+    of: "You should not call Impulse.of inside of the subscribe listener. The listener is for read-only operations but Impulse.of creates a new Impulse.",
+    clone:
+      "You should not call Impulse#clone inside of the subscribe listener. The listener is for read-only operations but Impulse#clone clones an existing Impulse.",
+  },
+  scoped: {
+    setValue:
+      "You should not call Impulse#setValue during rendering of scoped(Component)",
+  },
+  useScoped: {
+    of: "You should not call Impulse.of inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse.of creates a new Impulse.",
+    clone:
+      "You should not call Impulse#clone inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+    setValue:
+      "You should not call Impulse#setValue inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+  },
+  useScopedMemo: {
+    of: "You should not call Impulse.of inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
+    clone:
+      "You should not call Impulse#clone inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+    setValue:
+      "You should not call Impulse#setValue inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+  },
+}
 
-      if (
-        process.env.NODE_ENV !== "production" &&
-        typeof console !== "undefined" &&
-        // eslint-disable-next-line no-console
-        isFunction(console.error)
-      ) {
-        // eslint-disable-next-line no-console
-        console.error(message)
-      }
+// TODO come up with better name
+export function getMessageFor(
+  name_2: keyof typeof Impulse | keyof Impulse<unknown>,
+  name: null | NAMES,
+): null | undefined | string {
+  if (name == null) {
+    return null
+  }
 
-      if (!isBreaking) {
-        return original.apply(this, args)
-      }
+  // TODO come up with better name
+  return BAR[name][name_2]
+}
+
+// TODO come up with better name
+export function warnwarn<TArgs extends ReadonlyArray<unknown>, TResult>(
+  _: unknown,
+  methodName: keyof typeof Impulse | keyof Impulse<unknown>,
+  descriptor: TypedPropertyDescriptor<(...args: TArgs) => TResult>,
+): void {
+  if (
+    process.env.NODE_ENV === "production" ||
+    typeof console === "undefined" ||
+    // eslint-disable-next-line no-console
+    !isFunction(console.error)
+  ) {
+    return
+  }
+
+  const original = descriptor.value
+
+  descriptor.value = function (...args) {
+    const message = getMessageFor(methodName, currentName)
+
+    if (message != null) {
+      // eslint-disable-next-line no-console
+      console.error(message)
+    }
+
+    return original.apply(this, args)
+  }
+}
+
+// TODO come up with better name
+export function stopstop<TArgs extends ReadonlyArray<unknown>>(
+  _: unknown,
+  methodName: keyof Impulse<unknown>,
+  descriptor: TypedPropertyDescriptor<(...args: TArgs) => void>,
+): void {
+  const original = descriptor.value
+
+  descriptor.value = function (...args) {
+    const message = getMessageFor(methodName, currentName)
+
+    if (message == null) {
+      original.apply(this, args)
+    } else if (
+      process.env.NODE_ENV !== "production" &&
+      typeof console !== "undefined" &&
+      // eslint-disable-next-line no-console
+      isFunction(console.error)
+    ) {
+      // eslint-disable-next-line no-console
+      console.error(message)
     }
   }
 }
