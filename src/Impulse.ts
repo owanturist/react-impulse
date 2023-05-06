@@ -12,7 +12,18 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
-  @warnwarn
+  // @warnwarn(
+  //   "subscribe",
+  //   "You should not call Impulse.of inside of the subscribe listener. The listener is for read-only operations but Impulse.of creates a new Impulse.",
+  // )
+  // @warnwarn(
+  //   "useScoped",
+  //   "You should not call Impulse.of inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse.of creates a new Impulse.",
+  // )
+  // @warnwarn(
+  //   "useScopedMemo",
+  //   "You should not call Impulse.of inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
+  // )
   public static of<T>(
     initialValue: T,
     compare?: null | Compare<T>,
@@ -65,7 +76,18 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
-  @warnwarn
+  @warnwarn(
+    "subscribe",
+    "You should not call Impulse#clone inside of the subscribe listener. The listener is for read-only operations but Impulse#clone clones an existing Impulse.",
+  )
+  @warnwarn(
+    "useScoped",
+    "You should not call Impulse#clone inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+  )
+  @warnwarn(
+    "useScopedMemo",
+    "You should not call Impulse#clone inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+  )
   public clone(
     transform?: (value: T) => T,
     compare: null | Compare<T> = this.compare,
@@ -110,7 +132,18 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
-  @stopstop
+  @stopstop(
+    "scoped",
+    "You should not call Impulse#setValue during rendering of scoped(Component)",
+  )
+  @stopstop(
+    "useScoped",
+    "You should not call Impulse#setValue inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+  )
+  @stopstop(
+    "useScopedMemo",
+    "You should not call Impulse#setValue inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+  )
   public setValue(
     valueOrTransform: T | ((currentValue: T) => T),
     compare: null | Compare<T> = this.compare,
