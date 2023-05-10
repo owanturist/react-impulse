@@ -9,12 +9,10 @@ export default defineConfig({
   clean: true,
   esbuildPlugins: [
     replace({
+      // TODO fix filter
       filter: /Impulse/,
       patterns: [
-        [
-          /(?<=\b(warnwarn|stopstop)\(\s*"\w+"\s*\s*),/gm,
-          `, production ? "" :`,
-        ],
+        [/(?<=\b(warnwarn|stopstop)\(\s*"\w+"\s*),/gm, `, production ? "" :`],
         [/\bproduction\b/g, `(process.env.NODE_ENV === "production")`],
       ],
     }),
