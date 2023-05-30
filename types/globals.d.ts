@@ -6,5 +6,5 @@ declare global {
       extends TestingLibraryMatchers<typeof expect.stringContaining, R> {}
   }
 
-  const production: boolean
+  const PRODUCTION: boolean
 }
