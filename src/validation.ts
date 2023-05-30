@@ -1,4 +1,4 @@
-import { Impulse } from "./Impulse"
+import type { Impulse } from "./Impulse"
 import { isFunction } from "./utils"
 
 // TODO come up with better type name
@@ -70,10 +70,10 @@ export function getMessageFor(
 
 // TODO come up with better name
 export function warnwarn(context: NAMES, message: string) {
-  return <TArgs extends ReadonlyArray<unknown>, TResult>(
+  return (
     _: unknown,
     __: string,
-    descriptor: TypedPropertyDescriptor<(...args: TArgs) => TResult>,
+    descriptor: TypedPropertyDescriptor<(...args: ReadonlyArray<any>) => any>,
   ): void => {
     if (
       PRODUCTION ||
@@ -98,11 +98,12 @@ export function warnwarn(context: NAMES, message: string) {
 }
 
 // TODO come up with better name
+// preventSideEffect maybe
 export function stopstop(context: NAMES, message: string) {
-  return <TArgs extends ReadonlyArray<unknown>>(
+  return (
     _: unknown,
     __: string,
-    descriptor: TypedPropertyDescriptor<(...args: TArgs) => void>,
+    descriptor: TypedPropertyDescriptor<(...args: ReadonlyArray<any>) => void>,
   ): void => {
     const original = descriptor.value
 
