@@ -1,5 +1,5 @@
 import { defineConfig } from "tsup"
-import { replace } from "esbuild-plugin-replace-regex"
+import replace from "esbuild-plugin-replace-regex"
 
 export default defineConfig({
   entry: ["src/index.ts"],
