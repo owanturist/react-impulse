@@ -12,8 +12,10 @@ export default defineConfig({
       filter: /\.ts$/,
       loader: "ts",
       patterns: [
-        [/(?<=\b(warnwarn|stopstop)\(\s*"\w+"\s*),/gm, `, PRODUCTION ? "" :`],
-        [/\bPRODUCTION\b/g, `(process.env.NODE_ENV === "production")`],
+        [
+          /(?<=\b(warnwarn|stopstop)\(\s*"\w+"\s*),/gm,
+          `, process.env.NODE_ENV === "production" ? "" :`,
+        ],
       ],
     }),
   ],
