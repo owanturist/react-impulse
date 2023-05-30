@@ -76,7 +76,7 @@ export function warnwarn(context: NAMES, message: string) {
     descriptor: TypedPropertyDescriptor<(...args: ReadonlyArray<any>) => any>,
   ): void => {
     if (
-      PRODUCTION ||
+      process.env.NODE_ENV === "production" ||
       typeof console === "undefined" ||
       // eslint-disable-next-line no-console
       !isFunction(console.error)
@@ -111,7 +111,7 @@ export function stopstop(context: NAMES, message: string) {
       if (context !== currentName) {
         original.apply(this, args)
       } else if (
-        !PRODUCTION &&
+        process.env.NODE_ENV !== "production" &&
         typeof console !== "undefined" &&
         // eslint-disable-next-line no-console
         isFunction(console.error)
