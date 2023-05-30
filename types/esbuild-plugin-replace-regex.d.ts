@@ -3,10 +3,12 @@ declare module "esbuild-plugin-replace-regex" {
 
   type Plugin = Required<Options>["esbuildPlugins"][0]
 
-  export function replace(options?: {
+  function replace(options?: {
     filter?: RegExp
     loader?: string
     patterns?: Array<[RegExp, string]>
     encoding?: string
   }): Plugin
+
+  export = replace
 }
