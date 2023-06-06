@@ -4,28 +4,31 @@ import { Compare, useImpulse } from "../src"
 import * as utils from "../src/utils"
 
 describe("without initial value", () => {
-  it.concurrent("should create an impulse with undefined initial value", () => {
-    const { result } = renderHook(() => useImpulse())
+  it.concurrent(
+    "should create an impulse with undefined initial value",
+    ({ scope }) => {
+      const { result } = renderHook(() => useImpulse())
 
-    // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
-    expect(result.current.getValue()).toBeUndefined()
-  })
+      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+      expect(result.current.getValue(scope)).toBeUndefined()
+    },
+  )
 
-  it.concurrent("updates the impulse with a new value", () => {
+  it.concurrent("updates the impulse with a new value", ({ scope }) => {
     const { result } = renderHook(() => useImpulse<number>())
 
     result.current.setValue(1)
 
-    expect(result.current.getValue()).toBe(1)
+    expect(result.current.getValue(scope)).toBe(1)
   })
 
-  it.concurrent("updates the impulse with a undefined", () => {
+  it.concurrent("updates the impulse with a undefined", ({ scope }) => {
     const { result } = renderHook(() => useImpulse<number>())
 
     result.current.setValue(1)
     result.current.setValue(undefined)
 
-    expect(result.current.getValue()).toBeUndefined()
+    expect(result.current.getValue(scope)).toBeUndefined()
   })
 })
 
