@@ -97,7 +97,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        react-version: [17, 16]
+        react-version: [17, "16.8"]
 
     steps:
       - name: Checkout repository
@@ -108,7 +108,7 @@ jobs:
 
       - name: Install React ${{ matrix.react-version }}
         run: |
-          npm i -D --force --no-fund --no-audit react@${{ matrix.react-version }} @testing-library/react-hooks@7
+          npm i -D --force --no-fund --no-audit react@${{ matrix.react-version }} react-dom@${{ matrix.react-version }} @testing-library/react-hooks@7
           npm i -D --force --no-fund --no-audit @testing-library/react@12
 
       - name: Test
