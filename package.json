@@ -50,7 +50,7 @@
   },
   "homepage": "https://github.com/owanturist/react-impulse#readme",
   "peerDependencies": {
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+    "react": "^16.10.0 || ^17.0.0 || ^18.0.0"
   },
   "dependencies": {
     "use-sync-external-store": "^1.2.0"
