@@ -2,6 +2,35 @@ import { renderHook } from "@testing-library/react-hooks"
 
 import { useImpulse } from "../src"
 
+describe("without initial value", () => {
+  it.concurrent(
+    "should create an impulse with undefined initial value",
+    ({ scope }) => {
+      const { result } = renderHook(() => useImpulse())
+
+      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+      expect(result.current.getValue(scope)).toBeUndefined()
+    },
+  )
+
+  it.concurrent("updates the impulse with a new value", ({ scope }) => {
+    const { result } = renderHook(() => useImpulse<number>())
+
+    result.current.setValue(1)
+
+    expect(result.current.getValue(scope)).toBe(1)
+  })
+
+  it.concurrent("updates the impulse with a undefined", ({ scope }) => {
+    const { result } = renderHook(() => useImpulse<number>())
+
+    result.current.setValue(1)
+    result.current.setValue(undefined)
+
+    expect(result.current.getValue(scope)).toBeUndefined()
+  })
+})
+
 describe("with direct initial value", () => {
   it.concurrent("creates an impulse with an initial value", ({ scope }) => {
     const initial = { count: 0 }

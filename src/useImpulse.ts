@@ -11,10 +11,15 @@ import { Compare, isFunction, usePermanent } from "./utils"
  *
  * @version 1.0.0
  */
+export function useImpulse<T = undefined>(): Impulse<undefined | T>
 export function useImpulse<T>(
   valueOrLazyValue: T | ((...args: []) => T),
   compare?: null | Compare<T>,
-): Impulse<T> {
+): Impulse<T>
+export function useImpulse<T>(
+  valueOrLazyValue?: T | ((...args: []) => T),
+  compare?: null | Compare<undefined | T>,
+): Impulse<undefined | T> {
   return usePermanent(() => {
     const initialValue = isFunction(valueOrLazyValue)
       ? valueOrLazyValue()
