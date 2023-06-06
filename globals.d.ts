@@ -1,5 +1,5 @@
 import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers"
-import type { Scope } from "./src"
+import type { Scope } from "../../src/Scope"
 
 declare global {
   namespace jest {
@@ -8,8 +8,6 @@ declare global {
       R
     >
   }
-
-  const production: boolean
 }
 
 declare module "@vitest/runner" {
@@ -18,12 +16,4 @@ declare module "@vitest/runner" {
   }
 }
 
-interface Process {
-  env: ProcessEnv
-}
 
-interface ProcessEnv {
-  NODE_ENV: "development" | "test" | "production"
-}
-
-declare const process: Process
