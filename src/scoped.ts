@@ -8,8 +8,7 @@ import {
   RefAttributes,
   NamedExoticComponent,
   ExoticComponent,
-} from "react"
-
+} from "./dependencies"
 import { Compare } from "./utils"
 import { Scope } from "./Scope"
 import { useScope } from "./useScope"

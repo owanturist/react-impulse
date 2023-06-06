@@ -4,7 +4,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-} from "react"
+} from "./dependencies"
 
 /**
  * A function that compares two values and returns `true` if they are equal.
