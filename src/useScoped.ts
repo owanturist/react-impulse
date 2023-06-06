@@ -2,7 +2,7 @@ import { DependencyList, useCallback, useDebugValue } from "./dependencies"
 import { Compare, isEqual, useEvent } from "./utils"
 import { Scope } from "./Scope"
 import { useScope } from "./useScope"
-import { warnContext } from "./validation"
+import { registerExecutionContext } from "./validation"
 
 /**
  * A hook that executes the `fabric` function whenever any of the involved Impulses' values update
@@ -21,7 +21,7 @@ export function useScoped<T>(
 ): T {
   const value = useScope(
     useCallback(
-      (scope: Scope) => warnContext("useScoped", fabric, scope),
+      (scope: Scope) => registerExecutionContext("useScoped", fabric, scope),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       dependencies ?? [fabric],
     ),

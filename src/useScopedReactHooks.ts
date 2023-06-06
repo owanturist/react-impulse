@@ -7,7 +7,7 @@ import {
 } from "./dependencies"
 import { useScope } from "./useScope"
 import { Scope } from "./Scope"
-import { warnContext } from "./validation"
+import { registerExecutionContext } from "./validation"
 
 /**
  * The hook is an `Impulse` version of the `React.useEffect` hook.
@@ -72,7 +72,7 @@ export function useScopedMemo<TValue>(
   const getScope = useScope()
 
   return useMemo(
-    () => warnContext("useScopedMemo", factory, getScope()),
+    () => registerExecutionContext("useScopedMemo", factory, getScope()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies && [...dependencies, getScope],
   )

@@ -1,7 +1,7 @@
 import { Compare, isEqual, isFunction } from "./utils"
 import { EMITTER_KEY, Scope, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
-import { stopstop, warnwarn } from "./validation"
+import { stopInsideContext, warnInsideContext } from "./validation"
 
 export class Impulse<T> {
   /**
@@ -12,19 +12,19 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
-  @warnwarn(
+  @warnInsideContext(
     "subscribe",
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse.of inside of the subscribe listener. The listener is for read-only operations but Impulse.of creates a new Impulse.",
   )
-  @warnwarn(
+  @warnInsideContext(
     "useScoped",
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse.of inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse.of creates a new Impulse.",
   )
-  @warnwarn(
+  @warnInsideContext(
     "useScopedMemo",
     process.env.NODE_ENV === "production"
       ? ""
@@ -82,19 +82,19 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
-  @warnwarn(
+  @warnInsideContext(
     "subscribe",
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse#clone inside of the subscribe listener. The listener is for read-only operations but Impulse#clone clones an existing Impulse.",
   )
-  @warnwarn(
+  @warnInsideContext(
     "useScoped",
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse#clone inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#clone clones an existing Impulse.",
   )
-  @warnwarn(
+  @warnInsideContext(
     "useScopedMemo",
     process.env.NODE_ENV === "production"
       ? ""
@@ -144,19 +144,19 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
-  @stopstop(
+  @stopInsideContext(
     "scoped",
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse#setValue during rendering of scoped(Component)",
   )
-  @stopstop(
+  @stopInsideContext(
     "useScoped",
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse#setValue inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
   )
-  @stopstop(
+  @stopInsideContext(
     "useScopedMemo",
     process.env.NODE_ENV === "production"
       ? ""
