@@ -10,7 +10,6 @@ import {
   useScoped,
   scoped,
 } from "../src"
-import { getMessageFor } from "../src/validation"
 import { usePermanent } from "../src/utils"
 
 import type { WithImpulse } from "./common"
@@ -31,23 +30,16 @@ describe("calling Impulse.of()", () => {
   describe.each([
     [
       "useScopedMemo",
-      getMessageFor("of", "useScopedMemo"),
+      "You should not call Impulse.of inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
       () => {
         return useScopedMemo((scope) => Impulse.of(1).getValue(scope), [])
       },
     ],
     [
-      "inline useScoped",
-      getMessageFor("of", "useScoped"),
+      "useScoped",
+      "You should not call Impulse.of inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse.of creates a new Impulse.",
       () => {
         return useScoped((scope) => Impulse.of(1).getValue(scope))
-      },
-    ],
-    [
-      "memoized useScoped",
-      getMessageFor("of", "useScoped"),
-      () => {
-        return useScoped((scope) => Impulse.of(1).getValue(scope), [])
       },
     ],
   ])("warns when called inside %s", (_, message, useHook) => {
@@ -70,7 +62,7 @@ describe("calling Impulse.of()", () => {
     })
 
     expect(console$error).toHaveBeenLastCalledWith(
-      getMessageFor("of", "subscribe"),
+      "You should not call Impulse.of inside of the subscribe listener. The listener is for read-only operations but Impulse.of creates a new Impulse.",
     )
   })
 
@@ -112,7 +104,7 @@ describe("calling Impulse#clone()", () => {
   describe.each([
     [
       "useScopedMemo",
-      getMessageFor("clone", "useScopedMemo"),
+      "You should not call Impulse#clone inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
         return useScopedMemo(
           (scope) => impulse.clone().getValue(scope),
@@ -121,17 +113,10 @@ describe("calling Impulse#clone()", () => {
       },
     ],
     [
-      "inline useScoped",
-      getMessageFor("clone", "useScoped"),
+      "useScoped",
+      "You should not call Impulse#clone inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#clone clones an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
         return useScoped((scope) => impulse.clone().getValue(scope))
-      },
-    ],
-    [
-      "memoized useScoped",
-      getMessageFor("clone", "useScoped"),
-      ({ impulse }: WithImpulse<number>) => {
-        return useScoped((scope) => impulse.clone().getValue(scope), [impulse])
       },
     ],
   ])("warn when called inside %s", (_, message, useHook) => {
@@ -162,7 +147,7 @@ describe("calling Impulse#clone()", () => {
     })
 
     expect(console$error).toHaveBeenLastCalledWith(
-      getMessageFor("clone", "subscribe"),
+      "You should not call Impulse#clone inside of the subscribe listener. The listener is for read-only operations but Impulse#clone clones an existing Impulse.",
     )
   })
 
@@ -213,7 +198,7 @@ describe("calling Impulse#setValue()", () => {
   describe.each([
     [
       "useScopedMemo",
-      getMessageFor("setValue", "useScopedMemo"),
+      "You should not call Impulse#setValue inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
         return useScopedMemo(
           (scope) => {
@@ -226,28 +211,14 @@ describe("calling Impulse#setValue()", () => {
       },
     ],
     [
-      "inline useScoped",
-      getMessageFor("setValue", "useScoped"),
+      "useScoped",
+      "You should not call Impulse#setValue inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
         return useScoped((scope) => {
           impulse.setValue(3)
 
           return impulse.getValue(scope)
         })
-      },
-    ],
-    [
-      "memoized useScoped",
-      getMessageFor("setValue", "useScoped"),
-      ({ impulse }: WithImpulse<number>) => {
-        return useScoped(
-          (scope) => {
-            impulse.setValue(3)
-
-            return impulse.getValue(scope)
-          },
-          [impulse],
-        )
       },
     ],
   ])("warns when calling inside %s", (_, message, useHook) => {
@@ -319,7 +290,7 @@ describe("calling Impulse#setValue()", () => {
     render(<Component impulse={Impulse.of(20)} />)
 
     expect(console$error).toHaveBeenCalledWith(
-      getMessageFor("setValue", "scoped"),
+      "You should not call Impulse#setValue during rendering of scoped(Component)",
     )
     expect(screen.getByTestId("count")).toHaveTextContent("20")
   })

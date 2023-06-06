@@ -1,5 +1,5 @@
 import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers"
-import type { Scope } from "../../src/Scope"
+import type { Scope } from "./src"
 
 declare global {
   namespace jest {

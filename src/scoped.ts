@@ -12,7 +12,7 @@ import {
 import { Compare } from "./utils"
 import { Scope } from "./Scope"
 import { useScope } from "./useScope"
-import { warnContext } from "./validation"
+import { registerExecutionContext } from "./validation"
 
 export type PropsWithScope<TProps = Record<string, unknown>> = TProps & {
   scope: Scope
@@ -46,7 +46,7 @@ export function scoped<TProps>(
     const getScope = useScope()
 
     // it uses Object.assign to reduce output file size by avoiding the spread operator
-    return warnContext(
+    return registerExecutionContext(
       "scoped",
       component,
       Object.assign({}, props, { scope: getScope() }),
