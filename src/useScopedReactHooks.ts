@@ -4,8 +4,7 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
-} from "react"
-
+} from "./dependencies"
 import { useScope } from "./useScope"
 import { Scope } from "./Scope"
 import { warnContext } from "./validation"

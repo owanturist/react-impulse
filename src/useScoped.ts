@@ -1,5 +1,4 @@
-import { DependencyList, useCallback, useDebugValue } from "react"
-
+import { DependencyList, useCallback, useDebugValue } from "./dependencies"
 import { Compare, eq, useEvent } from "./utils"
 import { Scope } from "./Scope"
 import { useScope } from "./useScope"
