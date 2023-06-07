@@ -36,6 +36,7 @@ export function warnInsideContext(context: EXECUTION_CONTEXT, message: string) {
       // eslint-disable-next-line no-console
       !isFunction(console.error)
     ) {
+      /* c8 ignore next */
       return
     }
 

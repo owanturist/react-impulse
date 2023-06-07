@@ -24,18 +24,21 @@ export class Impulse<T> {
   // Implements 👆
   @warnInsideContext(
     "subscribe",
+    /* c8 ignore next 2 */
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse.of inside of the subscribe listener. The listener is for read-only operations but Impulse.of creates a new Impulse.",
   )
   @warnInsideContext(
     "useScoped",
+    /* c8 ignore next 2 */
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse.of inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse.of creates a new Impulse.",
   )
   @warnInsideContext(
     "useScopedMemo",
+    /* c8 ignore next 2 */
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse.of inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
@@ -94,18 +97,21 @@ export class Impulse<T> {
    */
   @warnInsideContext(
     "subscribe",
+    /* c8 ignore next 2 */
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse#clone inside of the subscribe listener. The listener is for read-only operations but Impulse#clone clones an existing Impulse.",
   )
   @warnInsideContext(
     "useScoped",
+    /* c8 ignore next 2 */
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse#clone inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#clone clones an existing Impulse.",
   )
   @warnInsideContext(
     "useScopedMemo",
+    /* c8 ignore next 2 */
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse#clone inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
@@ -156,18 +162,21 @@ export class Impulse<T> {
    */
   @stopInsideContext(
     "scoped",
+    /* c8 ignore next 2 */
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse#setValue during rendering of scoped(Component)",
   )
   @stopInsideContext(
     "useScoped",
+    /* c8 ignore next 2 */
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse#setValue inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
   )
   @stopInsideContext(
     "useScopedMemo",
+    /* c8 ignore next 2 */
     process.env.NODE_ENV === "production"
       ? ""
       : "You should not call Impulse#setValue inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
