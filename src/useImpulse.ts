@@ -18,16 +18,13 @@ function useTransmitImpulse<T>(
   compare?: null | Compare<T>,
 ): Impulse<T> {
   const compareStable = useEvent(compare ?? isEqual)
-  const impulse = usePermanent(() => {
-    return Impulse.of(getter(STATIC_SCOPE), compareStable)
-  })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const getterValue = useScope(useCallback(getter, dependencies), compareStable)
+  const impulse = usePermanent(() => Impulse.of(getterValue, compareStable))
   const impulseValue = useScope(
     useCallback((scope: Scope) => impulse.getValue(scope), [impulse]),
     compareStable,
   )
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const getterValue = useScope(useCallback(getter, dependencies), compareStable)
-
   useIsomorphicEffect(() => {
     impulse.setValue(getterValue)
   }, [impulse, getterValue])
