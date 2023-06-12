@@ -33,7 +33,7 @@ export function isFunction<
   return typeof anything === "function"
 }
 
-const useIsomorphicEffect =
+export const useIsomorphicEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect
 
 export function useEvent<TArgs extends ReadonlyArray<unknown>, TResult>(
