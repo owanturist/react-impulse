@@ -12,6 +12,8 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
+  public static of<T = undefined>(): Impulse<undefined | T>
+  public static of<T>(initialValue: T, compare?: null | Compare<T>): Impulse<T>
   @warnInsideContext(
     "subscribe",
     /* c8 ignore next 2 */
@@ -34,9 +36,9 @@ export class Impulse<T> {
       : "You should not call Impulse.of inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
   )
   public static of<T>(
-    initialValue: T,
-    compare?: null | Compare<T>,
-  ): Impulse<T> {
+    initialValue?: T,
+    compare?: null | Compare<undefined | T>,
+  ): Impulse<undefined | T> {
     return new Impulse(initialValue, compare ?? isEqual)
   }
 
