@@ -1,3 +1,4 @@
+import { Scope, STATIC_SCOPE } from "./Scope"
 import { Impulse } from "./Impulse"
 import { Compare, isFunction, usePermanent } from "./utils"
 
@@ -13,16 +14,16 @@ import { Compare, isFunction, usePermanent } from "./utils"
  */
 export function useImpulse<T = undefined>(): Impulse<undefined | T>
 export function useImpulse<T>(
-  valueOrLazyValue: T | ((...args: []) => T),
+  valueOrLazyValue: T | ((scope: Scope) => T),
   compare?: null | Compare<T>,
 ): Impulse<T>
 export function useImpulse<T>(
-  valueOrLazyValue?: T | ((...args: []) => T),
+  valueOrLazyValue?: T | ((scope: Scope) => T),
   compare?: null | Compare<undefined | T>,
 ): Impulse<undefined | T> {
   return usePermanent(() => {
     const initialValue = isFunction(valueOrLazyValue)
-      ? valueOrLazyValue()
+      ? valueOrLazyValue(STATIC_SCOPE)
       : valueOrLazyValue
 
     return Impulse.of(initialValue, compare)
