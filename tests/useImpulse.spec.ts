@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react-hooks"
 import { act } from "@testing-library/react"
 
-import { Compare, useImpulse } from "../src"
+import { Compare, Impulse, useImpulse } from "../src"
 
 describe("without initial value", () => {
   it.concurrent(
@@ -136,6 +136,16 @@ describe("with lazy initial value", () => {
       expect(init).not.toHaveBeenCalled()
     },
   )
+
+  it.concurrent("passes scope as an argument", ({ scope }) => {
+    const impulse = Impulse.of<number>(1)
+
+    const { result } = renderHook(() =>
+      useImpulse((localScope) => impulse.getValue(localScope).toFixed(2)),
+    )
+
+    expect(result.current.getValue(scope)).toBe("1.00")
+  })
 })
 
 describe("with compare function", () => {
