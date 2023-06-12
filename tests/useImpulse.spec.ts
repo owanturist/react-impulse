@@ -2,6 +2,7 @@ import { renderHook } from "@testing-library/react-hooks"
 import { act } from "@testing-library/react"
 
 import { Compare, Impulse, useImpulse } from "../src"
+import * as utils from "../src/utils"
 
 describe("without initial value", () => {
   it.concurrent(
@@ -150,31 +151,31 @@ describe("with lazy initial value", () => {
 
 describe("with compare function", () => {
   it.concurrent("applies Object.is by default", () => {
-    const spy = vi.spyOn(Object, "is")
+    const spy_isEqual = vi.spyOn(utils, "isEqual")
     const { result } = renderHook(() => useImpulse<number>(0))
 
-    expect(spy).not.toHaveBeenCalled()
+    expect(spy_isEqual).not.toHaveBeenCalled()
 
     act(() => {
       result.current.setValue((x) => x + 1)
     })
 
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(0, 1)
+    expect(spy_isEqual).toHaveBeenCalledOnce()
+    expect(spy_isEqual).toHaveBeenLastCalledWith(0, 1)
   })
 
   it.concurrent("applies Object.is when passing null as compare", () => {
-    const spy = vi.spyOn(Object, "is")
+    const spy_isEqual = vi.spyOn(utils, "isEqual")
     const { result } = renderHook(() => useImpulse<number>(0, null))
 
-    expect(spy).not.toHaveBeenCalled()
+    expect(spy_isEqual).not.toHaveBeenCalled()
 
     act(() => {
       result.current.setValue((x) => x + 1)
     })
 
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(0, 1)
+    expect(spy_isEqual).toHaveBeenCalledOnce()
+    expect(spy_isEqual).toHaveBeenLastCalledWith(0, 1)
   })
 
   it.concurrent("does not call the function on init", () => {
@@ -199,9 +200,10 @@ describe("with compare function", () => {
   it.concurrent("updates compare function on re-render", () => {
     const compare_1 = vi.fn().mockImplementation(Object.is)
     const compare_2 = vi.fn().mockImplementation(Object.is)
+    const spy_isEqual = vi.spyOn(utils, "isEqual")
 
     const { result, rerender } = renderHook(
-      (compare: Compare<number>) => useImpulse<number>(0, compare),
+      (compare: null | Compare<number>) => useImpulse<number>(0, compare),
       {
         initialProps: compare_1,
       },
@@ -210,19 +212,25 @@ describe("with compare function", () => {
     act(() => {
       result.current.setValue((x) => x + 1)
     })
-
     expect(compare_1).toHaveBeenCalledOnce()
     expect(compare_1).toHaveBeenLastCalledWith(0, 1)
     vi.clearAllMocks()
 
     rerender(compare_2)
-
     act(() => {
       result.current.setValue((x) => x + 1)
     })
-
     expect(compare_1).not.toHaveBeenCalled()
     expect(compare_2).toHaveBeenCalledOnce()
     expect(compare_2).toHaveBeenLastCalledWith(1, 2)
+    vi.clearAllMocks()
+
+    rerender(null)
+    act(() => {
+      result.current.setValue((x) => x + 1)
+    })
+    expect(compare_2).not.toHaveBeenCalled()
+    expect(spy_isEqual).toHaveBeenCalledOnce()
+    expect(spy_isEqual).toHaveBeenLastCalledWith(2, 3)
   })
 })

@@ -1,6 +1,6 @@
 import { Scope, STATIC_SCOPE } from "./Scope"
 import { Impulse } from "./Impulse"
-import { Compare, isFunction, useEvent, usePermanent } from "./utils"
+import { Compare, isFunction, useEvent, usePermanent, isEqual } from "./utils"
 
 /**
  * A hook that initiates a stable (never changing) Impulse.
@@ -21,7 +21,7 @@ export function useImpulse<T>(
   valueOrLazyValue?: T | ((scope: Scope) => T),
   compare?: null | Compare<undefined | T>,
 ): Impulse<undefined | T> {
-  const compareStable = useEvent(compare ?? Object.is)
+  const compareStable = useEvent(compare ?? isEqual)
 
   return usePermanent(() => {
     const initialValue = isFunction(valueOrLazyValue)
