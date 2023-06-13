@@ -167,7 +167,7 @@
         "react-hooks/exhaustive-deps": [
           "error",
           {
-            "additionalHooks": "(useScoped(|Memo|Callback|Effect|LayoutEffect))"
+            "additionalHooks": "(useIsomorphicEffect|useImpulse|useScoped(|Memo|Callback|Effect|LayoutEffect))"
           }
         ],
 
