@@ -1,9 +1,9 @@
 import { Compare, eq, isFunction } from "./utils"
-import { EMITTER_KEY, Scope, extractScope } from "./Scope"
+import { EMITTER_KEY, STATIC_SCOPE, Scope, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { stopInsideContext, warnInsideContext } from "./validation"
 
-export class Impulse<T> {
+export abstract class Impulse<T> {
   /**
    * Creates new Impulse without an initial value.
    *
@@ -47,7 +47,7 @@ export class Impulse<T> {
     initialValue?: T,
     compare?: null | Compare<undefined | T>,
   ): Impulse<undefined | T> {
-    return new Impulse(initialValue, compare ?? eq)
+    return new DirectImpulse(initialValue, compare ?? eq)
   }
 
   private readonly emitters = new Set<ScopeEmitter>()
@@ -60,7 +60,7 @@ export class Impulse<T> {
    */
   public readonly compare: Compare<T>
 
-  private constructor(private value: T, compare: Compare<T>) {
+  protected constructor(compare: Compare<T>) {
     this.compare = compare
   }
 
@@ -86,6 +86,9 @@ export class Impulse<T> {
   protected toString(): string {
     return String(this.getValue(extractScope()))
   }
+
+  protected abstract getter(scope: Scope): T
+  protected abstract setter(value: T): void
 
   /**
    * Clones an Impulse.
@@ -117,11 +120,13 @@ export class Impulse<T> {
       : "You should not call Impulse#clone inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
   )
   public clone(
-    transform?: (value: T) => T,
+    transform?: (value: T, scope: Scope) => T,
     compare: null | Compare<T> = this.compare,
   ): Impulse<T> {
-    return new Impulse(
-      isFunction(transform) ? transform(this.value) : this.value,
+    const value = this.getter(STATIC_SCOPE)
+
+    return new DirectImpulse(
+      isFunction(transform) ? transform(value, STATIC_SCOPE) : value,
       compare ?? eq,
     )
   }
@@ -146,7 +151,9 @@ export class Impulse<T> {
   ): T | R {
     scope[EMITTER_KEY]?.attachTo(this.emitters)
 
-    return isFunction(select) ? select(this.value, scope) : this.value
+    const value = this.getter(scope)
+
+    return isFunction(select) ? select(value, scope) : value
   }
 
   /**
@@ -188,17 +195,38 @@ export class Impulse<T> {
     const finalCompare = compare ?? eq
 
     ScopeEmitter.schedule(() => {
+      const value = this.getter(STATIC_SCOPE)
+
       const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(this.value)
+        ? valueOrTransform(value)
         : valueOrTransform
 
-      if (finalCompare(this.value, nextValue)) {
+      if (finalCompare(value, nextValue)) {
         return null
       }
 
-      this.value = nextValue
+      this.setter(nextValue)
 
       return this.emitters
     })
+  }
+}
+
+class DirectImpulse<T> extends Impulse<T> {
+  public constructor(private value: T, compare: Compare<T>) {
+    super(compare)
+  }
+
+  /**
+   * Returns the current value.
+   *
+   * @version 1.0.0
+   */
+  protected getter(): T {
+    return this.value
+  }
+
+  protected setter(value: T): void {
+    this.value = value
   }
 }
