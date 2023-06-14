@@ -1,3 +1,4 @@
+import { STATIC_SCOPE, Scope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 
 /**
@@ -7,9 +8,9 @@ import { ScopeEmitter } from "./ScopeEmitter"
  *
  * @version 1.0.0
  */
-export function batch(execute: VoidFunction): void {
+export function batch(execute: (scope: Scope) => void): void {
   ScopeEmitter.schedule(() => {
-    execute()
+    execute(STATIC_SCOPE)
 
     return null
   })

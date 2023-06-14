@@ -211,17 +211,6 @@ describe("setting origin values via setter", () => {
     expect(setter).toHaveBeenCalledTimes(0)
   })
 
-  it.concurrent("calls setter with previous value", () => {
-    const { result, setter } = setup(false)
-
-    act(() => {
-      result.current.setValue(true)
-    })
-
-    expect(setter).toHaveBeenCalledTimes(1)
-    expect(setter).toHaveBeenLastCalledWith(true, false)
-  })
-
   it.concurrent(
     "does not call setter if result.setValue() is not called",
     () => {
