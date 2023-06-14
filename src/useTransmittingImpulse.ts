@@ -12,7 +12,7 @@ import {
 export function useTransmittingImpulse<T>(
   getter: (scope: Scope) => T,
   dependencies: DependencyList,
-  setter: (value: T, prevValue: T) => void,
+  setter: (value: T, scope: Scope) => void,
   compare?: null | Compare<T>,
 ): Impulse<T> {
   const compareStable = useEvent(compare ?? isEqual)

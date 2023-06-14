@@ -80,7 +80,7 @@ export abstract class Impulse<T> {
   }
 
   protected abstract getter(scope: Scope): T
-  protected abstract setter(value: T, prevValue: T): void
+  protected abstract setter(value: T, scope: Scope): void
 
   /**
    * Clones an Impulse.
@@ -181,7 +181,7 @@ export abstract class Impulse<T> {
       : "You should not call Impulse#setValue inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
   )
   public setValue(
-    valueOrTransform: T | ((currentValue: T) => T),
+    valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
     compare: null | Compare<T> = this.compare,
   ): void {
     const finalCompare = compare ?? isEqual
@@ -190,14 +190,14 @@ export abstract class Impulse<T> {
       const value = this.getter(STATIC_SCOPE)
 
       const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(value)
+        ? valueOrTransform(value, STATIC_SCOPE)
         : valueOrTransform
 
       if (finalCompare(value, nextValue)) {
         return null
       }
 
-      this.setter(nextValue, value)
+      this.setter(nextValue, STATIC_SCOPE)
 
       return this.emitters
     })
@@ -226,7 +226,7 @@ export class DirectImpulse<T> extends Impulse<T> {
 export class TransmittingImpulse<T> extends Impulse<T> {
   public constructor(
     protected getter: (scope: Scope) => T,
-    protected readonly setter: (value: T, prevValue: T) => void,
+    protected readonly setter: (value: T, scope: Scope) => void,
     compare: Compare<T>,
   ) {
     super(compare)
@@ -235,6 +235,7 @@ export class TransmittingImpulse<T> extends Impulse<T> {
   public replaceGetter(getter: (scope: Scope) => T): void {
     if (this.getter !== getter) {
       this.getter = getter
+      // run the emitters to update the value
       this.setValue((x) => x)
     }
   }
