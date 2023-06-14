@@ -9,8 +9,11 @@ import {
   useImpulse,
   useTransmittingImpulse,
   Compare,
+  useScopedEffect,
 } from "../src"
 import * as utils from "../src/utils"
+
+import { Counter } from "./common"
 
 function setupWithGlobal(compare?: null | Compare<number>) {
   let counter = { count: 0 }
@@ -146,7 +149,7 @@ describe.each([
     },
   )
 
-  it.concurrent("calls setter only once when the Impulse value changes", () => {
+  it.concurrent("calls setter when the Impulse value changes", () => {
     const { setter, result } = setup()
 
     act(() => {
@@ -214,42 +217,6 @@ describe("transmit many Impulses to one (select all checkboxes example)", () => 
       expect(selected[0]!.getValue(scope)).toBe(true)
       expect(selected[1]!.getValue(scope)).toBe(true)
       expect(selected[2]!.getValue(scope)).toBe(true)
-    },
-  )
-})
-
-describe("setting origin values via setter", () => {
-  const setup = (initial: boolean) => {
-    const impulse = Impulse.of(initial)
-    const setter = vi.fn((x: boolean) => impulse.setValue(x))
-
-    const tools = renderHook(() => {
-      return useTransmittingImpulse(
-        (scope) => impulse.getValue(scope),
-        [],
-        setter,
-      )
-    })
-
-    return { ...tools, setter, impulse }
-  }
-
-  it.concurrent("does not call the setter on init", () => {
-    const { setter } = setup(false)
-
-    expect(setter).toHaveBeenCalledTimes(0)
-  })
-
-  it.concurrent(
-    "does not call setter if result.setValue() is not called",
-    () => {
-      const { impulse, setter } = setup(false)
-
-      act(() => {
-        impulse.setValue(true)
-      })
-
-      expect(setter).toHaveBeenCalledTimes(0)
     },
   )
 })
@@ -330,4 +297,56 @@ describe("with compare function", () => {
     expect(spy_isEqual).toHaveBeenCalledOnce()
     expect(spy_isEqual).toHaveBeenLastCalledWith(2, 3)
   })
+})
+
+describe("replacing getter", () => {
+  const setup = () => {
+    const onEffect = vi.fn()
+
+    const tools = renderHook(
+      (counter: Counter) => {
+        const impulse = useTransmittingImpulse(
+          () => counter.count,
+          [counter],
+          () => {
+            // noop
+          },
+        )
+
+        useScopedEffect(
+          (scope) => {
+            onEffect(impulse.getValue(scope))
+          },
+          [impulse],
+        )
+
+        return impulse
+      },
+      {
+        initialProps: { count: 0 },
+      },
+    )
+
+    onEffect.mockClear()
+
+    return { ...tools, onEffect }
+  }
+
+  it.concurrent("should emit subscribers when getter changes", () => {
+    const { rerender, onEffect } = setup()
+
+    rerender({ count: 1 })
+    expect(onEffect).toHaveBeenCalledOnce()
+    expect(onEffect).toHaveBeenLastCalledWith(1)
+  })
+
+  it.concurrent(
+    "does not emit subscribers when getter returns the same value",
+    () => {
+      const { rerender, onEffect } = setup()
+
+      rerender({ count: 0 })
+      expect(onEffect).not.toHaveBeenCalled()
+    },
+  )
 })

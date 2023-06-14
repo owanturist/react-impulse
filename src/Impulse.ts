@@ -90,6 +90,10 @@ export abstract class Impulse<T> {
   protected abstract getter(scope: Scope): T
   protected abstract setter(value: T, scope: Scope): void
 
+  protected emit(execute: () => boolean): void {
+    ScopeEmitter.schedule(() => (execute() ? this.emitters : null))
+  }
+
   /**
    * Clones an Impulse.
    *
@@ -194,7 +198,7 @@ export abstract class Impulse<T> {
   ): void {
     const finalCompare = compare ?? eq
 
-    ScopeEmitter.schedule(() => {
+    this.emit(() => {
       const value = this.getter(STATIC_SCOPE)
 
       const nextValue = isFunction(valueOrTransform)
@@ -202,12 +206,12 @@ export abstract class Impulse<T> {
         : valueOrTransform
 
       if (finalCompare(value, nextValue)) {
-        return null
+        return false
       }
 
       this.setter(nextValue, STATIC_SCOPE)
 
-      return this.emitters
+      return true
     })
   }
 }
@@ -241,10 +245,17 @@ export class TransmittingImpulse<T> extends Impulse<T> {
   }
 
   public replaceGetter(getter: (scope: Scope) => T): void {
-    if (this.getter !== getter) {
-      this.getter = getter
-      // run the emitters to update the value
-      this.setValue((x) => x)
+    if (this.getter === getter) {
+      return
     }
+
+    this.emit(() => {
+      const value = this.getter(STATIC_SCOPE)
+      const nextValue = getter(STATIC_SCOPE)
+
+      this.getter = getter
+
+      return !this.compare(value, nextValue)
+    })
   }
 }
