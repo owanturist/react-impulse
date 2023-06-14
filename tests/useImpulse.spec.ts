@@ -152,7 +152,7 @@ describe("with lazy initial value", () => {
 describe("with compare function", () => {
   it.concurrent("applies Object.is by default", () => {
     const spy_isEqual = vi.spyOn(utils, "isEqual")
-    const { result } = renderHook(() => useImpulse<number>(0))
+    const { result } = renderHook(() => useImpulse(0))
 
     expect(spy_isEqual).not.toHaveBeenCalled()
 
@@ -166,7 +166,7 @@ describe("with compare function", () => {
 
   it.concurrent("applies Object.is when passing null as compare", () => {
     const spy_isEqual = vi.spyOn(utils, "isEqual")
-    const { result } = renderHook(() => useImpulse<number>(0, null))
+    const { result } = renderHook(() => useImpulse(0, null))
 
     expect(spy_isEqual).not.toHaveBeenCalled()
 
@@ -186,7 +186,7 @@ describe("with compare function", () => {
   })
 
   it.concurrent("passes custom compare function", () => {
-    const compare = vi.fn()
+    const compare = vi.fn<[number], boolean>()
     const { result } = renderHook(() => useImpulse<number>(0, compare))
 
     act(() => {
