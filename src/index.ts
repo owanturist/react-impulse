@@ -7,6 +7,7 @@ export { batch } from "./batch"
 export { subscribe } from "./subscribe"
 export { scoped } from "./scoped"
 export { useImpulse } from "./useImpulse"
+export { useTransmittingImpulse } from "./useTransmittingImpulse"
 export { useScoped } from "./useScoped"
 export {
   useScopedMemo,
