@@ -1,6 +1,6 @@
-import { DependencyList, useCallback } from "./dependencies"
+import { DependencyList } from "./dependencies"
 import { Scope } from "./Scope"
-import { Impulse } from "./Impulse"
+import { Impulse, TransmittingImpulse } from "./Impulse"
 import {
   Compare,
   isEqual,
@@ -8,7 +8,6 @@ import {
   usePermanent,
   useIsomorphicEffect,
 } from "./utils"
-import { useScope } from "./useScope"
 
 export function useTransmittingImpulse<T>(
   getter: (scope: Scope) => T,
@@ -17,24 +16,15 @@ export function useTransmittingImpulse<T>(
   compare?: null | Compare<T>,
 ): Impulse<T> {
   const compareStable = useEvent(compare ?? isEqual)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const getterValue = useScope(useCallback(getter, dependencies), compareStable)
-  const impulse = usePermanent(() => Impulse.of(getterValue, compareStable))
-  const impulseValue = useScope(
-    useCallback((scope: Scope) => impulse.getValue(scope), [impulse]),
-    compareStable,
+  const impulse = usePermanent(
+    () => new TransmittingImpulse(getter, setter, compareStable),
   )
-  useIsomorphicEffect(() => {
-    impulse.setValue(getterValue)
-  }, [impulse, getterValue])
 
-  useIsomorphicEffect(() => {
-    if (!compareStable(impulseValue, getterValue)) {
-      setter(impulseValue, getterValue)
-    }
-    // it does not care about neither `getterValue` nor `setter` dependencies because only impulseValue changes matter
+  useIsomorphicEffect(
+    () => impulse.replaceGetter(getter),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [impulseValue])
+    dependencies,
+  )
 
   return impulse
 }

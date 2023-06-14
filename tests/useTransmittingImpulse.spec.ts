@@ -13,55 +13,69 @@ import {
 } from "../src"
 import * as utils from "../src/utils"
 
-describe.each([
-  [
-    "React.useState",
-    function setup() {
-      const getter = vi.fn((x: number) => x)
-      const setter = vi.fn((x: number) => x)
+function setupWithReactState(compare?: null | Compare<number>) {
+  const getter = vi.fn((x: number) => x)
+  const setter = vi.fn((x: number) => x)
 
-      const tools = renderHook(() => {
-        const [{ count }, setCounter] = useState({ count: 0 })
-        const impulse = useTransmittingImpulse(
-          () => getter(count),
-          [count],
-          (x) => setCounter({ count: setter(x) }),
-        )
+  const tools = renderHook(
+    (cmp?: null | Compare<number>) => {
+      const [{ count }, setCounter] = useState({ count: 0 })
+      const impulse = useTransmittingImpulse(
+        () => getter(count),
+        [count],
+        (x) => setCounter({ count: setter(x) }),
+        cmp,
+      )
 
-        return {
-          impulse,
-          count,
-          setCount: (x: number) => setCounter({ count: x }),
-        }
-      })
-
-      return { ...tools, getter, setter }
+      return {
+        impulse,
+        count,
+        setCount: (x: number) => setCounter({ count: x }),
+      }
     },
-  ],
-  [
-    "an Impulse",
-    function setup() {
-      const getter = vi.fn((x: number) => x)
-      const setter = vi.fn((x: number) => x)
+    {
+      initialProps: compare,
+    },
+  )
 
-      const tools = renderHook(() => {
-        const counter = useImpulse({ count: 0 })
-        const impulse = useTransmittingImpulse(
-          (scope: Scope) => getter(counter.getValue(scope).count),
+  return { ...tools, getter, setter }
+}
+
+function setupWithImpulse(compare?: null | Compare<number>) {
+  const getter = vi.fn((x: number) => x)
+  const setter = vi.fn((x: number) => x)
+
+  const tools = renderHook(
+    (cmp?: null | Compare<number>) => {
+      const counter = useImpulse({ count: 0 }, (x, y) => x === y)
+      const impulse = useTransmittingImpulse(
+        (scope: Scope) => getter(counter.getValue(scope).count),
+        [counter],
+        (x) => counter.setValue({ count: setter(x) }),
+        cmp,
+      )
+
+      return {
+        impulse,
+        count: useScoped(
+          (scope) => counter.getValue(scope).count,
           [counter],
-          (x) => counter.setValue({ count: setter(x) }),
-        )
-
-        return {
-          impulse,
-          count: useScoped((scope) => counter.getValue(scope).count),
-          setCount: (x: number) => counter.setValue({ count: x }),
-        }
-      })
-
-      return { ...tools, getter, setter }
+          (x, y) => x === y,
+        ),
+        setCount: (x: number) => counter.setValue({ count: x }),
+      }
     },
-  ],
+    {
+      initialProps: compare,
+    },
+  )
+
+  return { ...tools, getter, setter }
+}
+
+describe.each([
+  ["React.useState", setupWithReactState],
+  ["an Impulse", setupWithImpulse],
 ])("transmitting %s to Impulse", (_, setup) => {
   it.concurrent(
     "initializes the Impulse with the origin value",
@@ -72,16 +86,11 @@ describe.each([
     },
   )
 
-  it.concurrent("calls getter only once on init", () => {
-    const { getter, setter, result } = setup()
-    const spy_impulse_setValue = vi.spyOn(result.current.impulse, "setValue")
-    const spy_impulse_getValue = vi.spyOn(result.current.impulse, "getValue")
+  it.concurrent("does not call getter nor setter on init", () => {
+    const { getter, setter } = setup()
 
-    expect(getter).toHaveBeenCalledOnce()
-    expect(getter).toHaveBeenLastCalledWith(0)
+    expect(getter).not.toHaveBeenCalled()
     expect(setter).not.toHaveBeenCalled()
-    expect(spy_impulse_setValue).not.toHaveBeenCalled()
-    expect(spy_impulse_getValue).not.toHaveBeenCalled()
   })
 
   it.concurrent(
@@ -96,25 +105,6 @@ describe.each([
     },
   )
 
-  it.concurrent("calls getter only once when origin value changes", () => {
-    const { getter, setter, result } = setup()
-    const spy_impulse_setValue = vi.spyOn(result.current.impulse, "setValue")
-    const spy_impulse_getValue = vi.spyOn(result.current.impulse, "getValue")
-
-    vi.clearAllMocks()
-
-    act(() => {
-      result.current.setCount(1)
-    })
-    expect(getter).toHaveBeenCalledOnce()
-    expect(getter).toHaveBeenLastCalledWith(1)
-    expect(setter).not.toHaveBeenCalled()
-    expect(spy_impulse_setValue).toHaveBeenCalledOnce()
-    expect(spy_impulse_setValue).toHaveBeenLastCalledWith(1)
-    expect(spy_impulse_getValue).toHaveBeenCalledOnce()
-    expect(spy_impulse_getValue).toHaveLastReturnedWith(1)
-  })
-
   it.concurrent(
     "update the origin value when the Impulse value changes",
     () => {
@@ -128,24 +118,13 @@ describe.each([
   )
 
   it.concurrent("calls setter only once when the Impulse value changes", () => {
-    const { getter, setter, result } = setup()
-    const spy_impulse_setValue = vi.spyOn(result.current.impulse, "setValue")
-    const spy_impulse_getValue = vi.spyOn(result.current.impulse, "getValue")
-
-    vi.clearAllMocks()
+    const { setter, result } = setup()
 
     act(() => {
       result.current.impulse.setValue(1)
     })
     expect(setter).toHaveBeenCalledOnce()
     expect(setter).toHaveBeenLastCalledWith(1)
-    expect(getter).toHaveBeenCalledOnce()
-    expect(getter).toHaveBeenLastCalledWith(1)
-    expect(spy_impulse_setValue).toHaveBeenCalledTimes(2)
-    expect(spy_impulse_setValue).toHaveBeenNthCalledWith(1, 1)
-    expect(spy_impulse_setValue).toHaveBeenNthCalledWith(2, 1)
-    expect(spy_impulse_getValue).toHaveBeenCalledOnce()
-    expect(spy_impulse_getValue).toHaveLastReturnedWith(1)
   })
 })
 
@@ -260,66 +239,60 @@ describe("setting origin values via setter", () => {
 describe("with compare function", () => {
   const spy_isEqual = vi.spyOn(utils, "isEqual")
 
-  function setup(compare?: null | Compare<number>) {
-    return renderHook(
-      (cmp?: null | Compare<number>) => {
-        const [{ count }, setCounter] = useState({ count: 0 })
-        const impulse = useTransmittingImpulse(
-          () => count,
-          [count],
-          (x) => setCounter({ count: x }),
-          cmp,
-        )
-
-        return {
-          impulse,
-          count,
-          setCount: (x: number) => setCounter({ count: x }),
-        }
-      },
-      {
-        initialProps: compare,
-      },
-    )
-  }
-
   beforeEach(() => {
     spy_isEqual.mockClear()
   })
 
   it("applies Object.is by default", () => {
-    expect(spy_isEqual).not.toHaveBeenCalled()
+    const { result } = setupWithImpulse()
 
-    setup()
-    expect(spy_isEqual).toHaveBeenCalled()
+    expect(spy_isEqual).not.toHaveBeenCalled()
+    act(() => {
+      result.current.impulse.setValue((x) => x + 1)
+    })
+
+    expect(spy_isEqual).toHaveBeenCalledOnce()
+    expect(spy_isEqual).toHaveBeenLastCalledWith(0, 1)
   })
 
   it("applies Object.is when passing null as compare", () => {
-    expect(spy_isEqual).not.toHaveBeenCalled()
+    const { result } = setupWithImpulse(null)
 
-    setup(null)
-    expect(spy_isEqual).toHaveBeenCalled()
+    expect(spy_isEqual).not.toHaveBeenCalled()
+    act(() => {
+      result.current.impulse.setValue((x) => x + 1)
+    })
+
+    expect(spy_isEqual).toHaveBeenCalledOnce()
+    expect(spy_isEqual).toHaveBeenLastCalledWith(0, 1)
   })
 
   it("passes custom compare function", () => {
     const compare = vi.fn()
-    setup(compare)
+    const { result } = setupWithImpulse(compare)
+
+    expect(compare).not.toHaveBeenCalled()
+    act(() => {
+      result.current.impulse.setValue((x) => x + 1)
+    })
 
     expect(spy_isEqual).not.toHaveBeenCalled()
-    expect(compare).toHaveBeenCalled()
+    expect(compare).toHaveBeenCalledOnce()
+    expect(compare).toHaveBeenLastCalledWith(0, 1)
   })
 
   it("updates compare function on re-render", () => {
     const compare_1 = vi.fn().mockImplementation(Object.is)
     const compare_2 = vi.fn().mockImplementation(Object.is)
 
-    const { result, rerender } = setup(compare_1)
+    const { result, rerender } = setupWithImpulse(compare_1)
     vi.clearAllMocks()
 
     act(() => {
       result.current.impulse.setValue((x) => x + 1)
     })
-    expect(compare_1).toHaveBeenCalled()
+    expect(compare_1).toHaveBeenCalledOnce()
+    expect(compare_1).toHaveBeenLastCalledWith(0, 1)
     vi.clearAllMocks()
 
     rerender(compare_2)
@@ -327,7 +300,8 @@ describe("with compare function", () => {
       result.current.impulse.setValue((x) => x + 1)
     })
     expect(compare_1).not.toHaveBeenCalled()
-    expect(compare_2).toHaveBeenCalled()
+    expect(compare_2).toHaveBeenCalledOnce()
+    expect(compare_2).toHaveBeenLastCalledWith(1, 2)
     vi.clearAllMocks()
 
     rerender(null)
@@ -335,6 +309,7 @@ describe("with compare function", () => {
       result.current.impulse.setValue((x) => x + 1)
     })
     expect(compare_2).not.toHaveBeenCalled()
-    expect(spy_isEqual).toHaveBeenCalled()
+    expect(spy_isEqual).toHaveBeenCalledOnce()
+    expect(spy_isEqual).toHaveBeenLastCalledWith(2, 3)
   })
 })

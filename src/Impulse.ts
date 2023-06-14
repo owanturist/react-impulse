@@ -80,7 +80,7 @@ export abstract class Impulse<T> {
   }
 
   protected abstract getter(scope: Scope): T
-  protected abstract setter(value: T): void
+  protected abstract setter(value: T, prevValue: T): void
 
   /**
    * Clones an Impulse.
@@ -197,14 +197,14 @@ export abstract class Impulse<T> {
         return null
       }
 
-      this.setter(nextValue)
+      this.setter(nextValue, value)
 
       return this.emitters
     })
   }
 }
 
-class DirectImpulse<T> extends Impulse<T> {
+export class DirectImpulse<T> extends Impulse<T> {
   public constructor(private value: T, compare: Compare<T>) {
     super(compare)
   }
@@ -220,5 +220,22 @@ class DirectImpulse<T> extends Impulse<T> {
 
   protected setter(value: T): void {
     this.value = value
+  }
+}
+
+export class TransmittingImpulse<T> extends Impulse<T> {
+  public constructor(
+    protected getter: (scope: Scope) => T,
+    protected readonly setter: (value: T, prevValue: T) => void,
+    compare: Compare<T>,
+  ) {
+    super(compare)
+  }
+
+  public replaceGetter(getter: (scope: Scope) => T): void {
+    if (this.getter !== getter) {
+      this.getter = getter
+      this.setValue((x) => x)
+    }
   }
 }

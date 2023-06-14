@@ -1,4 +1,7 @@
+import { act } from "@testing-library/react"
+
 import { Impulse } from "../src"
+import { TransmittingImpulse } from "../src/Impulse"
 import { isEqual } from "../src/utils"
 
 import { Counter } from "./common"
@@ -301,6 +304,45 @@ describe("Impulse#clone", () => {
     impulse_1.getValue(scope).name.setValue("Doe")
     expect(impulse_1.getValue(scope).name.getValue(scope)).toBe("Doe")
     expect(impulse_2.getValue(scope).name.getValue(scope)).toBe("Doe")
+  })
+
+  it.concurrent("clones TransmittingImpulse as DirectImpulse", ({ scope }) => {
+    const cmp = vi.fn(Object.is)
+    const origin = Impulse.of({ count: 0 })
+    const transmitter = new TransmittingImpulse(
+      (localScope) => origin.getValue(localScope).count > 0,
+      (value) => origin.setValue({ count: value ? 1 : 0 }),
+      cmp,
+    )
+    const clone = transmitter.clone()
+
+    expect(transmitter).toBeInstanceOf(TransmittingImpulse)
+    expect(clone).toBeInstanceOf(Impulse)
+
+    expect(origin.getValue(scope)).toStrictEqual({ count: 0 })
+    expect(transmitter.getValue(scope)).toBe(false)
+    expect(clone.getValue(scope)).toBe(false)
+
+    act(() => {
+      origin.setValue({ count: 1 })
+    })
+    expect(origin.getValue(scope)).toStrictEqual({ count: 1 })
+    expect(transmitter.getValue(scope)).toBe(true)
+    expect(clone.getValue(scope)).toBe(false)
+
+    act(() => {
+      transmitter.setValue(false)
+    })
+    expect(origin.getValue(scope)).toStrictEqual({ count: 0 })
+    expect(transmitter.getValue(scope)).toBe(false)
+    expect(clone.getValue(scope)).toBe(false)
+
+    act(() => {
+      clone.setValue(true)
+    })
+    expect(origin.getValue(scope)).toStrictEqual({ count: 0 })
+    expect(transmitter.getValue(scope)).toBe(false)
+    expect(clone.getValue(scope)).toBe(true)
   })
 })
 
