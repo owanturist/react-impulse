@@ -9,7 +9,9 @@ import {
   useImpulse,
   useTransmittingImpulse,
   useScoped,
+  Compare,
 } from "../src"
+import * as utils from "../src/utils"
 
 describe.each([
   [
@@ -253,4 +255,86 @@ describe("setting origin values via setter", () => {
       expect(setter).toHaveBeenCalledTimes(0)
     },
   )
+})
+
+describe("with compare function", () => {
+  const spy_isEqual = vi.spyOn(utils, "isEqual")
+
+  function setup(compare?: null | Compare<number>) {
+    return renderHook(
+      (cmp?: null | Compare<number>) => {
+        const [{ count }, setCounter] = useState({ count: 0 })
+        const impulse = useTransmittingImpulse(
+          () => count,
+          [count],
+          (x) => setCounter({ count: x }),
+          cmp,
+        )
+
+        return {
+          impulse,
+          count,
+          setCount: (x: number) => setCounter({ count: x }),
+        }
+      },
+      {
+        initialProps: compare,
+      },
+    )
+  }
+
+  beforeEach(() => {
+    spy_isEqual.mockClear()
+  })
+
+  it("applies Object.is by default", () => {
+    expect(spy_isEqual).not.toHaveBeenCalled()
+
+    setup()
+    expect(spy_isEqual).toHaveBeenCalled()
+  })
+
+  it("applies Object.is when passing null as compare", () => {
+    expect(spy_isEqual).not.toHaveBeenCalled()
+
+    setup(null)
+    expect(spy_isEqual).toHaveBeenCalled()
+  })
+
+  it("passes custom compare function", () => {
+    const compare = vi.fn()
+    setup(compare)
+
+    expect(spy_isEqual).not.toHaveBeenCalled()
+    expect(compare).toHaveBeenCalled()
+  })
+
+  it("updates compare function on re-render", () => {
+    const compare_1 = vi.fn().mockImplementation(Object.is)
+    const compare_2 = vi.fn().mockImplementation(Object.is)
+
+    const { result, rerender } = setup(compare_1)
+    vi.clearAllMocks()
+
+    act(() => {
+      result.current.impulse.setValue((x) => x + 1)
+    })
+    expect(compare_1).toHaveBeenCalled()
+    vi.clearAllMocks()
+
+    rerender(compare_2)
+    act(() => {
+      result.current.impulse.setValue((x) => x + 1)
+    })
+    expect(compare_1).not.toHaveBeenCalled()
+    expect(compare_2).toHaveBeenCalled()
+    vi.clearAllMocks()
+
+    rerender(null)
+    act(() => {
+      result.current.impulse.setValue((x) => x + 1)
+    })
+    expect(compare_2).not.toHaveBeenCalled()
+    expect(spy_isEqual).toHaveBeenCalled()
+  })
 })

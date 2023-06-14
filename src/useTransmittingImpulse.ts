@@ -29,12 +29,12 @@ export function useTransmittingImpulse<T>(
   }, [impulse, getterValue])
 
   useIsomorphicEffect(() => {
-    if (!impulse.compare(impulseValue, getterValue)) {
+    if (!compareStable(impulseValue, getterValue)) {
       setter(impulseValue, getterValue)
     }
     // it does not care about neither `getterValue` nor `setter` dependencies because only impulseValue changes matter
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [impulse, impulseValue])
+  }, [impulseValue])
 
   return impulse
 }
