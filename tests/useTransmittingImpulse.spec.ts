@@ -8,10 +8,42 @@ import {
   batch,
   useImpulse,
   useTransmittingImpulse,
-  useScoped,
   Compare,
 } from "../src"
 import * as utils from "../src/utils"
+
+function setupWithGlobal(compare?: null | Compare<number>) {
+  let counter = { count: 0 }
+
+  const getter = vi.fn((x: number) => x)
+  const setter = vi.fn((x: number) => x)
+
+  const tools = renderHook(
+    (cmp?: null | Compare<number>) => {
+      const impulse = useTransmittingImpulse(
+        () => getter(counter.count),
+        [],
+        (x) => {
+          counter = { count: setter(x) }
+        },
+        cmp,
+      )
+
+      return {
+        impulse,
+        getCount: () => counter.count,
+        setCount: (x: number) => {
+          counter = { count: x }
+        },
+      }
+    },
+    {
+      initialProps: compare,
+    },
+  )
+
+  return { ...tools, getter, setter }
+}
 
 function setupWithReactState(compare?: null | Compare<number>) {
   const getter = vi.fn((x: number) => x)
@@ -29,7 +61,7 @@ function setupWithReactState(compare?: null | Compare<number>) {
 
       return {
         impulse,
-        count,
+        getCount: () => count,
         setCount: (x: number) => setCounter({ count: x }),
       }
     },
@@ -57,11 +89,7 @@ function setupWithImpulse(compare?: null | Compare<number>) {
 
       return {
         impulse,
-        count: useScoped(
-          (scope) => counter.getValue(scope).count,
-          [counter],
-          (x, y) => x === y,
-        ),
+        getCount: (scope: Scope) => counter.getValue(scope).count,
         setCount: (x: number) => counter.setValue({ count: x }),
       }
     },
@@ -74,6 +102,7 @@ function setupWithImpulse(compare?: null | Compare<number>) {
 }
 
 describe.each([
+  ["a global variable", setupWithGlobal],
   ["React.useState", setupWithReactState],
   ["an Impulse", setupWithImpulse],
 ])("transmitting %s to Impulse", (_, setup) => {
@@ -107,13 +136,13 @@ describe.each([
 
   it.concurrent(
     "update the origin value when the Impulse value changes",
-    () => {
+    ({ scope }) => {
       const { result } = setup()
 
       act(() => {
         result.current.impulse.setValue(1)
       })
-      expect(result.current.count).toBe(1)
+      expect(result.current.getCount(scope)).toBe(1)
     },
   )
 
