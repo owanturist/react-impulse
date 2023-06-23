@@ -16,13 +16,18 @@
     "default": "./dist/index.cjs"
   },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "build": "tsup src/index.ts --dts --sourcemap --format=esm,cjs --clean --env.NODE_ENV=production",
-    "pretest": "node ./printReactVersion",
+    "pretest": "node ./print-react-version",
     "test": "vitest",
-    "test:coverage": "npm test -- --run --coverage",
+    "test:coverage": "pnpm test -- --run --coverage",
     "lint": "eslint . --ext=js,jsx,ts,tsx,md",
     "prettify": "prettier . --write",
     "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=18.7.0",
+    "pnpm": ">=8.6.3"
   },
   "repository": {
     "type": "git",
@@ -52,6 +57,7 @@
     "@testing-library/react": "^14.0.0",
     "@testing-library/react-hooks": "file:node_modules/@testing-library/react",
     "@types/react": "^18.0.28",
+    "@types/testing-library__jest-dom": "^5.14.6",
     "@types/use-sync-external-store": "^0.0.3",
     "@typescript-eslint/eslint-plugin": "^5.55.0",
     "@typescript-eslint/parser": "^5.55.0",
@@ -64,6 +70,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "jsdom": "^22.1.0",
     "prettier": "^2.8.4",
     "react": "^18.2.0",
     "tsup": "^6.7.0",
