@@ -322,14 +322,11 @@ describe("Impulse#subscribe", () => {
   it.concurrent("emits the same listener once", () => {
     const spy = vi.fn()
     const impulse = Impulse.of({ count: 0 })
-    const unsubscribe_1 = impulse.subscribe(spy)
-    const unsubscribe_2 = impulse.subscribe(spy)
+    impulse.subscribe(spy)
+    impulse.subscribe(spy)
 
     impulse.setValue(Counter.inc)
     expect(spy).toHaveBeenCalledOnce()
-
-    unsubscribe_1()
-    unsubscribe_2()
   })
 
   it.concurrent(

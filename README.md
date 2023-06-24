@@ -602,6 +602,31 @@ const SumOfTwo: React.FC<{
 ))
 ```
 
+### `subscribe`
+
+```dart
+function subscribe(listener: VoidFunction): VoidFunction
+```
+
+A function that subscribes to changes of all `Impulse` instances that call the [`Impulse#getValue`][impulse__get_value] method inside the `listener`. Returns a cleanup function that unsubscribes the `listener`. The `listener` calls first time synchronously when `subscribe` is called.
+
+It is useful for subscribing to changes of multiple Impulses at once:
+
+```ts
+const impulse_1 = new Impulse(1)
+const impulse_2 = new Impulse(2)
+const impulse_3 = new Impulse("calculating...")
+
+const unsubscribe = subscribe(() => {
+  if (impulse_1.getValue() > 1) {
+    const sum = impulse_2.getValue() + impulse_3.getValue()
+    impulse_3.setValue(`done: ${sum}`)
+  }
+})
+```
+
+In the example above the `listener` will not react on the `impulse_2` updates until the `impulse_1` value is greater than `1`. The `impulse_3` updates will never trigger the `listener`, because the `impulse_3.getValue()` is not called inside the `listener`.
+
 ### `Compare`
 
 ```ts
