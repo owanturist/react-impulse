@@ -4,7 +4,13 @@ runs:
   using: composite
   steps:
     - name: Download dependencies
-      uses: ./.github/actions/download-deps
+      uses: actions/download-artifact@v3
+      with:
+        name: dependencies
+
+    - name: Unzip dependencies
+      shell: bash
+      run: unzip -q deps.zip
 
     - name: Install pnpm
       uses: ./.github/actions/install-pnpm
