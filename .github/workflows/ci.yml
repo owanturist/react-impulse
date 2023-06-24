@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - master
+      - next
+      - beta
+      - alpha
+      # maintenance branches regex
+      - "*.x"
+      - "*.*.x"
   pull_request:
 
 env:
@@ -23,7 +29,7 @@ jobs:
         uses: ./.github/actions/install-pnpm
 
       - name: Install Node
-      - uses: actions/setup-node@v3
+        uses: actions/setup-node@v3
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
