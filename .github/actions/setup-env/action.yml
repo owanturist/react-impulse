@@ -1,0 +1,16 @@
+name: Setup environment
+
+runs:
+  using: composite
+  steps:
+    - name: Install pnpm
+      uses: ./.github/actions/install-pnpm
+
+    - name: Install Node
+    - uses: actions/setup-node@v3
+      with:
+        node-version-file: .nvmrc
+        cache: "pnpm"
+
+    - name: Install dependencies
+      run: pnpm i --frozen-lockfile --prefer-offline

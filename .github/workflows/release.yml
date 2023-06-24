@@ -1,0 +1,44 @@
+name: release
+
+on:
+  push:
+    branches:
+      - main
+      - next
+      - beta
+      - alpha
+      # maintenance branches regex
+      - "*.x"
+      - "*.*.x"
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+env:
+  CI: true
+  PNPM_CACHE_FOLDER: .pnpm-store
+
+jobs:
+  release:
+    name: Release on npm
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
+          fetch-depth: 0
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@master
+        with:
+          publish: pnpm publish
+          commit: Version release
+          title: Next release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

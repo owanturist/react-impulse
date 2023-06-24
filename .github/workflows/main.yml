@@ -6,6 +6,10 @@ on:
       - master
   pull_request:
 
+env:
+  CI: true
+  PNPM_CACHE_FOLDER: .pnpm-store
+
 jobs:
   install:
     name: Install node_modules
@@ -15,17 +19,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install pnpm
-        uses: ./.github/actions/install-pnpm
-
-      - name: Set up Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm i --frozen-lockfile --prefer-offline
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
 
       - name: Zip dependencies for uploading
         # [q] quite

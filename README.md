@@ -610,16 +610,6 @@ type Compare<T> = (left: T, right: T) => boolean
 
 A function that compares two values and returns `true` if they are equal. Depending on the type of the values it might be reasonable to use a custom compare function such as shallow-equal or deep-equal.
 
-## Publish
-
-Here are scripts you want to run for publishing a new version to NPM:
-
-1. `npm version {version}` ex: `npm version 1.0.0-beta.1`
-2. `npm run build`
-3. `npm publish --tag {tag}` ex: `npm publish --tag beta --tag latest`
-4. `git push`
-5. `git push --tags`
-
 <!-- L I N K S -->
 
 [impulse__of]: #impulseof
