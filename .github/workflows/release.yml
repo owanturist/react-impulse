@@ -63,7 +63,7 @@ jobs:
             fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/deps.zip`, Buffer.from(download.data));
 
       - name: Unzip dependencies
-        run: unzip -q deps.zip
+        run: unzip deps.zip
 
       - name: Install pnpm
         uses: ./.github/actions/install-pnpm
