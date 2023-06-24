@@ -1,0 +1,10 @@
+name: Restore environment
+
+runs:
+  using: composite
+  steps:
+    - name: Download dependencies
+      uses: ./.github/actions/download-deps
+
+    - name: Install pnpm
+      uses: ./.github/actions/install-pnpm

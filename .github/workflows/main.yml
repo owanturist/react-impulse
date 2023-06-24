@@ -45,11 +45,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download dependencies
-        uses: ./.github/actions/download-deps
-
-      - name: Install pnpm
-        uses: ./.github/actions/install-pnpm
+      - name: Restore environment
+        uses: ./.github/actions/restore-env
 
       - name: Lint
         run: pnpm lint
@@ -63,11 +60,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download dependencies
-        uses: ./.github/actions/download-deps
-
-      - name: Install pnpm
-        uses: ./.github/actions/install-pnpm
+      - name: Restore environment
+        uses: ./.github/actions/restore-env
 
       - name: Type check
         run: pnpm typecheck
@@ -83,11 +77,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download dependencies
-        uses: ./.github/actions/download-deps
-
-      - name: Install pnpm
-        uses: ./.github/actions/install-pnpm
+      - name: Restore environment
+        uses: ./.github/actions/restore-env
 
       - name: Test
         run: pnpm test:coverage
@@ -110,11 +101,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download dependencies
-        uses: ./.github/actions/download-deps
-
-      - name: Install pnpm
-        uses: ./.github/actions/install-pnpm
+      - name: Restore environment
+        uses: ./.github/actions/restore-env
 
       - name: Install React ${{ matrix.react-version }}
         run: |
