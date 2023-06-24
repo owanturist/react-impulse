@@ -8,12 +8,6 @@ on:
       - ci
     branches:
       - master
-      - next
-      - beta
-      - alpha
-      # maintenance branches regex
-      - "*.x"
-      - "*.*.x"
 
 env:
   CI: true
@@ -37,9 +31,6 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup-env
 
-      - name: Write NPM_TOKEN to .npmrc
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
-
       - name: Build the source code
         run: pnpm build
 
@@ -51,6 +42,7 @@ jobs:
           title: Next release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   fail:
     runs-on: ubuntu-latest
