@@ -16,3 +16,19 @@ afterAll(() => {
 })
 
 /* c8 ignore stop */
+
+vi.mock("@testing-library/react", async () => {
+  const actual = await vi.importActual<typeof import("@testing-library/react")>(
+    "@testing-library/react",
+  )
+
+  try {
+    const { renderHook } = await vi.importActual<{
+      renderHook: (typeof actual)["renderHook"]
+    }>("@testing-library/react-hooks")
+
+    return { ...actual, renderHook }
+  } catch {
+    return actual
+  }
+})
