@@ -1,6 +1,7 @@
 name: Installs pnpm
 
 runs:
+  using: composite
   steps:
     - name: Install pnpm
       uses: pnpm/action-setup@v2
