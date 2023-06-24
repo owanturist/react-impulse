@@ -34,8 +34,35 @@ jobs:
           # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
           fetch-depth: 0
 
-      - name: Restore environment
-        uses: ./.github/actions/restore-env
+      - name: "Download artifact"
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               run_id: context.payload.workflow_run.id,
+            });
+
+            let dependenciesArtefact = allArtifacts.data.artifacts.find((artifact) => {
+              return artifact.name == "dependencies"
+            });
+
+            let download = await github.rest.actions.downloadArtifact({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               artifact_id: dependenciesArtefact.id,
+               archive_format: 'zip',
+            });
+
+            let fs = require('fs');
+            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/deps.zip`, Buffer.from(download.data));
+
+      - name: Unzip dependencies
+        run: unzip -q deps.zip
+
+      - name: Install pnpm
+        uses: ./.github/actions/install-pnpm
 
       - name: Build the source code
         run: pnpm build
@@ -49,3 +76,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  fail:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - run: echo 'The ci workflow failed'
+      - run: exit 1
