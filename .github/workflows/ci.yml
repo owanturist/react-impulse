@@ -19,8 +19,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup environment
-        uses: ./.github/actions/setup-env
+      - name: Install pnpm
+        uses: ./.github/actions/install-pnpm
+
+      - name: Install Node
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm i --frozen-lockfile --prefer-offline
 
       - name: Zip dependencies for uploading
         # [q] quite
