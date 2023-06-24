@@ -1,10 +1,14 @@
-name: Installs pnpm
+name: Install pnpm
 
 runs:
   using: composite
   steps:
-    - name: Install pnpm
+    - name: Setup pnpm
       uses: pnpm/action-setup@v2
       with:
         version: 8
         run_install: false
+
+    - name: Setup pnpm config
+      shell: bash
+      run: pnpm config set store-dir $PNPM_CACHE_FOLDER

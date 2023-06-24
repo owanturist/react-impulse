@@ -1,0 +1,51 @@
+name: release
+
+on:
+  workflow_run:
+    types:
+      - completed
+    workflows:
+      - ci
+    branches:
+      - master
+      - next
+      - beta
+      - alpha
+      # maintenance branches regex
+      - "*.x"
+      - "*.*.x"
+
+env:
+  CI: true
+  PNPM_CACHE_FOLDER: .pnpm-store
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    name: Release on npm
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
+          fetch-depth: 0
+
+      - name: Restore environment
+        uses: ./.github/actions/restore-env
+
+      - name: Build the source code
+        run: pnpm build
+
+      - name: Create Release Pull Request or Publish to npm
+        uses: changesets/action@master
+        with:
+          publish: pnpm publish
+          commit: Version release
+          title: Next release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

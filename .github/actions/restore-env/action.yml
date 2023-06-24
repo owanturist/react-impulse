@@ -1,4 +1,4 @@
-name: Download and unzip dependencies
+name: Restore environment
 
 runs:
   using: composite
@@ -11,3 +11,6 @@ runs:
     - name: Unzip dependencies
       shell: bash
       run: unzip -q deps.zip
+
+    - name: Install pnpm
+      uses: ./.github/actions/install-pnpm

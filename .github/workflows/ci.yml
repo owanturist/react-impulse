@@ -1,10 +1,20 @@
-name: main
+name: ci
 
 on:
   push:
     branches:
       - master
+      - next
+      - beta
+      - alpha
+      # maintenance branches regex
+      - "*.x"
+      - "*.*.x"
   pull_request:
+
+env:
+  CI: true
+  PNPM_CACHE_FOLDER: .pnpm-store
 
 jobs:
   install:
@@ -18,7 +28,7 @@ jobs:
       - name: Install pnpm
         uses: ./.github/actions/install-pnpm
 
-      - name: Set up Node
+      - name: Install Node
         uses: actions/setup-node@v3
         with:
           node-version-file: .nvmrc
@@ -50,11 +60,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download dependencies
-        uses: ./.github/actions/download-deps
-
-      - name: Install pnpm
-        uses: ./.github/actions/install-pnpm
+      - name: Restore environment
+        uses: ./.github/actions/restore-env
 
       - name: Lint
         run: pnpm lint
@@ -68,11 +75,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download dependencies
-        uses: ./.github/actions/download-deps
-
-      - name: Install pnpm
-        uses: ./.github/actions/install-pnpm
+      - name: Restore environment
+        uses: ./.github/actions/restore-env
 
       - name: Type check
         run: pnpm typecheck
@@ -88,11 +92,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download dependencies
-        uses: ./.github/actions/download-deps
-
-      - name: Install pnpm
-        uses: ./.github/actions/install-pnpm
+      - name: Restore environment
+        uses: ./.github/actions/restore-env
 
       - name: Test
         run: pnpm test:coverage
@@ -115,11 +116,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download dependencies
-        uses: ./.github/actions/download-deps
-
-      - name: Install pnpm
-        uses: ./.github/actions/install-pnpm
+      - name: Restore environment
+        uses: ./.github/actions/restore-env
 
       - name: Install React ${{ matrix.react-version }}
         run: |
