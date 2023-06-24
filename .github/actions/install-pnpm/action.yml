@@ -10,4 +10,5 @@ runs:
         run_install: false
 
     - name: Setup pnpm config
+      shell: bash
       run: pnpm config set store-dir $PNPM_CACHE_FOLDER
