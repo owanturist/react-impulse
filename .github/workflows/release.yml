@@ -48,6 +48,10 @@ jobs:
               return artifact.name == "dependencies"
             });
 
+            if (dependenciesArtefact == null) {
+              throw new Error("Could not find dependencies artifact")
+            }
+
             let download = await github.rest.actions.downloadArtifact({
                owner: context.repo.owner,
                repo: context.repo.repo,
