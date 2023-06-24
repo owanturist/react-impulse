@@ -27,18 +27,19 @@ jobs:
           # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
           fetch-depth: 0
 
+      - name: package.json info
+        id: info
+        uses: jaywcjlove/github-action-package@main
+
       - name: Setup env
         uses: ./.github/actions/setup-env
-
-      - name: Build the source code
-        run: pnpm build
 
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
         with:
-          publish: pnpm publish --no-git-checks
-          commit: Version release
-          title: Next release
+          publish: pnpm build && pnpm publish --no-git-checks
+          commit: Release ${{ steps.info.outputs.version }}
+          title: Release ${{ steps.info.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
