@@ -34,39 +34,8 @@ jobs:
           # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
           fetch-depth: 0
 
-      - name: "Download artifact"
-        uses: actions/github-script@v6
-        with:
-          script: |
-            let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               run_id: context.payload.workflow_run.id,
-            });
-
-            let dependenciesArtefact = allArtifacts.data.artifacts.find((artifact) => {
-              return artifact.name == "dependencies"
-            });
-
-            if (dependenciesArtefact == null) {
-              throw new Error("Could not find dependencies artifact")
-            }
-
-            let download = await github.rest.actions.downloadArtifact({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               artifact_id: dependenciesArtefact.id,
-               archive_format: 'zip',
-            });
-
-            let fs = require('fs');
-            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/deps.zip`, Buffer.from(download.data));
-
-      - name: Unzip dependencies
-        run: unzip -qo deps.zip
-
-      - name: Install pnpm
-        uses: ./.github/actions/install-pnpm
+      - name: Setup env
+        uses: ./.github/actions/setup-env
 
       - name: Build the source code
         run: pnpm build
