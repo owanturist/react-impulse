@@ -1,6 +1,5 @@
 import React from "react"
-import { renderHook } from "@testing-library/react-hooks"
-import { act, render, screen } from "@testing-library/react"
+import { act, render, screen, renderHook } from "@testing-library/react"
 
 import {
   Impulse,
