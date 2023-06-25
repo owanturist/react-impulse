@@ -12,6 +12,7 @@ coverage
 
 # production
 dist
+changeset-status.json
 
 # misc
 .DS_Store

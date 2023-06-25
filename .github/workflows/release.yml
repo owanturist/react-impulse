@@ -30,12 +30,15 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup-env
 
-      - name: Run changesets
-        run: pnpm cs version
+      - name: Get changeset status
+        run: pnpm cs status --output ./changeset-status.json
 
-      - name: Read package.json info
-        id: info
-        uses: jaywcjlove/github-action-package@main
+      - name: Read the new version
+        id: status
+        uses: notiz-dev/github-action-json-property@release
+        with:
+          path: ./changeset-status.json
+          prop_path: "releases.0.newVersion"
 
       - name: Build source code
         run: pnpm build
@@ -44,15 +47,8 @@ jobs:
         uses: changesets/action@v1
         with:
           publish: pnpm publish
-          commit: Release ${{ steps.info.outputs.version }}
-          title: Release ${{ steps.info.outputs.version }}
+          commit: Release ${{ steps.status.outputs.propStr }}
+          title: Release ${{ steps.status.outputs.propStr }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  fail:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-    steps:
-      - run: echo 'The ci workflow failed'
-      - run: exit 1
