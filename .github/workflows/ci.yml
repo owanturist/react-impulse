@@ -51,3 +51,9 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           fail_ci_if_error: false
+
+      # for making sure that all checks are executed they should continue-on-error
+      # but the job should fail if any of them failed
+      - name: Checks if any steps failed
+        if: ${{ failure() }}
+        run: exit 1
