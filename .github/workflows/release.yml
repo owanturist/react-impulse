@@ -41,6 +41,10 @@ jobs:
           path: ./changeset-status.json
           prop_path: "releases.0.newVersion"
 
+      - name: Exit if there is no new version
+        if: ${{ failure() }}
+        run: echo "There is nothing new to release" && exit 0
+
       - name: Build source code
         run: pnpm build
 
