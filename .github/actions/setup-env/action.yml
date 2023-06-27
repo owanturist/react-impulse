@@ -4,7 +4,10 @@ runs:
   using: composite
   steps:
     - name: Install pnpm
-      uses: ./.github/actions/install-pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        run_install: false
 
     - name: Install Node
       uses: actions/setup-node@v3

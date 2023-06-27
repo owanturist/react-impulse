@@ -42,7 +42,7 @@ jobs:
           prop_path: "releases.0.newVersion"
 
       - name: Exit if there is no new version
-        if: ${{ failure() }}
+        if: ${{ failure() && steps.status.conclusion == 'failure' }}
         run: echo "There is nothing new to release" && exit 0
 
       - name: Build source code
