@@ -1,4 +1,4 @@
-name: release
+name: Release
 
 on:
   workflow_run:
@@ -35,25 +35,35 @@ jobs:
         run: pnpm cs status --output ./changeset-status.json
 
       - name: Read the new version
-        id: status
+        id: new-version
         uses: notiz-dev/github-action-json-property@release
+        continue-on-error: true
         with:
           path: ./changeset-status.json
           prop_path: "releases.0.newVersion"
 
-      - name: Exit if there is no new version
-        if: ${{ failure() && steps.status.conclusion == 'failure' }}
-        run: echo "There is nothing new to release" && exit 0
+      - name: Read the old version
+        id: new-version
+        uses: notiz-dev/github-action-json-property@release
+        with:
+          path: ./package.json
+          prop_path: "version"
 
       - name: Build source code
+        if: ${{ steps.new-version.conclusion == 'success' }}
         run: pnpm build
 
       - name: Create Release Pull Request or Publish to npm
+        if: ${{ steps.new-version.conclusion == 'success' }}
         uses: changesets/action@v1
         with:
           publish: pnpm publish
-          commit: Release ${{ steps.status.outputs.propStr }}
-          title: Release ${{ steps.status.outputs.propStr }}
+          commit: Release ${{ steps.old-version.outputs.propStr }} -> ${{ steps.new-version.outputs.propStr }}
+          title: Release ${{ steps.old-version.outputs.propStr }} -> ${{ steps.new-version.outputs.propStr }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Exit if there is no new version
+        if: ${{ steps.new-version.conclusion == 'failure' }}
+        run: echo "There is nothing new to release"
