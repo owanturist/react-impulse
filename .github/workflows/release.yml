@@ -43,7 +43,7 @@ jobs:
           prop_path: "releases.0.newVersion"
 
       - name: Read the old version
-        id: new-version
+        id: old-version
         uses: notiz-dev/github-action-json-property@release
         with:
           path: ./package.json
