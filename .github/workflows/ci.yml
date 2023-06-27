@@ -28,7 +28,7 @@ jobs:
         run: pnpm lint
 
       - name: Test against React 18
-        run: pnpm test:coverage
+        run: pnpm test:run -- --coverage
 
       - name: Install legacy testing library
         run: pnpm add -D @testing-library/react@12  @testing-library/react-hooks@7
@@ -37,13 +37,13 @@ jobs:
         run: pnpm add -D react@17
 
       - name: Test against React 17
-        run: pnpm test -- --run
+        run: pnpm test:run
 
       - name: Install React 16
         run: pnpm add -D react@16
 
       - name: Test against React 16
-        run: pnpm test -- --run
+        run: pnpm test:run
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

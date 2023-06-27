@@ -4,6 +4,8 @@
 // https://github.com/testing-library/jest-dom/issues/427#issuecomment-1110985202
 import "@testing-library/jest-dom/extend-expect"
 
+import { cleanup } from "@testing-library/react"
+
 // forces tests to fail in case of illegal usage
 const console$error = vi
   .spyOn(console, "error")
@@ -13,6 +15,11 @@ const console$error = vi
 
 afterAll(() => {
   console$error.mockRestore()
+})
+
+afterEach(() => {
+  // should manually cleanup the react testing env since tests are running in a single thread
+  cleanup()
 })
 
 /* c8 ignore stop */
