@@ -22,38 +22,32 @@ jobs:
         uses: ./.github/actions/setup-env
 
       - name: Type check
-        continue-on-error: true
+        if: ${{ always() }}
         run: pnpm typecheck
 
       - name: Lint
-        continue-on-error: true
+        if: ${{ always() }}
         run: pnpm lint
 
       - name: Test against React 18
-        continue-on-error: true
+        if: ${{ always() }}
         run: pnpm test:run -- --coverage
 
       - name: Install React 17 and legacy testing library
         run: pnpm add -D react@17 @testing-library/react@12  @testing-library/react-hooks@7
 
       - name: Test against React 17
-        continue-on-error: true
+        if: ${{ always() }}
         run: pnpm test:run
 
       - name: Install React 16
         run: pnpm add -D react@16
 
       - name: Test against React 16
-        continue-on-error: true
+        if: ${{ always() }}
         run: pnpm test:run
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
           fail_ci_if_error: false
-
-      # for making sure that all checks are executed they should continue-on-error
-      # but the job should fail if any of them failed
-      - name: Checks if any steps failed
-        if: ${{ failure() }}
-        run: exit 1
