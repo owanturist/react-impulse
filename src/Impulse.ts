@@ -43,7 +43,7 @@ export class Impulse<T> {
   public readonly compare: Compare<T>
 
   private constructor(private value: T, compare: Compare<T>) {
-    this.compare = compare
+    this.compare = compare;
   }
 
   /**
