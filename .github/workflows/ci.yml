@@ -10,7 +10,7 @@ env:
   CI: true
 
 jobs:
-  install:
+  checks:
     name: Install node_modules
     runs-on: ubuntu-latest
 
@@ -21,92 +21,26 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup-env
 
-      - name: Zip dependencies for uploading
-        # [q] quite
-        # [r] recursive
-        # [y] store symlinks as symlinks
-        run: zip -qry deps.zip ./node_modules
-
-      - name: Upload dependencies artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: dependencies
-          path: deps.zip
-          retention-days: 7
-          if-no-files-found: error
-
-  lint:
-    name: Lint
-    needs: install
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Restore environment
-        uses: ./.github/actions/restore-env
+      - name: Type check
+        run: pnpm typecheck
 
       - name: Lint
         run: pnpm lint
 
-  typecheck:
-    name: Type check
-    needs: install
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Restore environment
-        uses: ./.github/actions/restore-env
-
-      - name: Type check
-        run: pnpm typecheck
-
-  test:
-    name: Test with React 18
-    needs: install
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Restore environment
-        uses: ./.github/actions/restore-env
-
-      - name: Test
+      - name: Test against React 18
         run: pnpm test:coverage
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: false
+      - name: Install legacy testing library
+        run: pnpm add -D @testing-library/react@12  @testing-library/react-hooks@7
 
-  react:
-    name: Test with React ${{ matrix.react-version }}
-    needs: install
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        react-version: [17, 16]
+      - name: Install React 17
+        run: pnpm add -D react@17
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Test against React 17
+        run: pnpm test -- --run
 
-      - name: Restore environment
-        uses: ./.github/actions/restore-env
+      - name: Install React 16
+        run: pnpm add -D react@16
 
-      - name: Install React ${{ matrix.react-version }}
-        run: |
-          pnpm add -D react@${{ matrix.react-version }} @testing-library/react-hooks@7
-          pnpm add -D @testing-library/react@12
-
-      - name: Test
+      - name: Test against React 16
         run: pnpm test -- --run
