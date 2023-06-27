@@ -44,3 +44,8 @@ jobs:
 
       - name: Test against React 16
         run: pnpm test -- --run
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: false
