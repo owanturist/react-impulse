@@ -11,7 +11,7 @@ env:
 
 jobs:
   checks:
-    name: Install node_modules
+    name: Checks
     runs-on: ubuntu-latest
 
     steps:
