@@ -59,7 +59,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Exit if there is no new version
-        if: ${{ steps.new-version.outcome == 'failure' }}
-        run: echo "There is nothing new to release"
