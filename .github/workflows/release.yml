@@ -49,15 +49,11 @@ jobs:
           path: ./package.json
           prop_path: "version"
 
-      - name: Build source code
-        if: ${{ steps.new-version.conclusion == 'success' }}
-        run: pnpm build
-
       - name: Create Release Pull Request or Publish to npm
-        if: ${{ steps.new-version.conclusion == 'success' }}
+        if: ${{ steps.new-version.outcome == 'success' }}
         uses: changesets/action@v1
         with:
-          publish: pnpm publish
+          publish: pnpm build && pnpm publish
           commit: Release ${{ steps.old-version.outputs.propStr }} -> ${{ steps.new-version.outputs.propStr }}
           title: Release ${{ steps.old-version.outputs.propStr }} -> ${{ steps.new-version.outputs.propStr }}
         env:
@@ -65,5 +61,5 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Exit if there is no new version
-        if: ${{ steps.new-version.conclusion == 'failure' }}
+        if: ${{ steps.new-version.outcome == 'failure' }}
         run: echo "There is nothing new to release"
