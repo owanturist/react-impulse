@@ -333,6 +333,10 @@ A hook that initiates a stable (never changing) Impulse.
 ```ts
 const count = useImpulse(0) // Impulse<number>
 const timeout = useImpulse<number>() // Impulse<undefined | number>
+
+const bigData = useImpulse(() => {
+  return bigTable.map((wideRow) => wideRow.map((int) => int * 2))
+})
 ```
 
 ### `useWatchImpulse`
