@@ -334,9 +334,12 @@ A hook that initiates a stable (never changing) Impulse.
 const count = useImpulse(0) // Impulse<number>
 const timeout = useImpulse<number>() // Impulse<undefined | number>
 
-const bigData = useImpulse(() => {
-  return bigTable.map((wideRow) => wideRow.map((int) => int * 2))
-})
+const tableSum = useImpulse(() => {
+  // the function body runs only once on the initial render
+  return bigTable
+    .flatMap((wideRow) => wideRow.map((int) => int * 2))
+    .reduce((acc, x) => acc + x, 0)
+}) // Impulse<number>
 ```
 
 ### `useWatchImpulse`
