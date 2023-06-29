@@ -96,6 +96,8 @@ A core piece of the library is the `Impulse` class - a box that holds value. The
 ### `Impulse.of`
 
 ```dart
+Impulse.of<T>(): Impulse<undefined | T>
+
 Impulse.of<T>(
   initialValue: T,
   compare?: null | Compare<T>
@@ -104,10 +106,15 @@ Impulse.of<T>(
 
 A static method that creates new Impulse.
 
-- `initialValue` is the initial value.
+- `[initialValue]` is an optional initial value. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
 - `[compare]` is an optional [`Compare`][compare] function applied as [`Impulse#compare`][impulse__compare]. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
 > 💡 The [`useImpulse`][use_impulse] hook helps to create and store an `Impulse` inside a React component.
+
+```ts
+const count = Impulse.of(1) // Impulse<number>
+const timeout = Impulse.of<number>() // Impulse<undefined | number>
+```
 
 ### `Impulse#getValue`
 
@@ -308,18 +315,32 @@ watch.forwardRef.memo(/* */)
 ### `useImpulse`
 
 ```dart
+function useImpulse<T>(): Impulse<undefined | T>
+
 function useImpulse<T>(
-  valueOrLazyValue: T | (() => T),
+  valueOrInitValue: T | (() => T),
   compare?: null | Compare<T>
 ): Impulse<T>
 ```
 
-- `valueOrLazyValue` is the value used during the initial render. If the initial value is the result of an expensive computation, you may provide a function instead, which will be executed only on the initial render.
+- `[valueOrInitValue]` is an optional value used during the initial render. If the initial value is the result of an expensive computation, you may provide a function instead, which will be executed only on the initial render. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
 - `[compare]` is an optional [`Compare`][compare] function applied as [`Impulse#compare`][impulse__compare]. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
 A hook that initiates a stable (never changing) Impulse.
 
 > 💬 The initial value is disregarded during subsequent re-renders.
+
+```ts
+const count = useImpulse(0) // Impulse<number>
+const timeout = useImpulse<number>() // Impulse<undefined | number>
+
+const tableSum = useImpulse(() => {
+  // the function body runs only once on the initial render
+  return bigTable
+    .flatMap((wideRow) => wideRow.map((int) => int * 2))
+    .reduce((acc, x) => acc + x, 0)
+}) // Impulse<number>
+```
 
 ### `useWatchImpulse`
 

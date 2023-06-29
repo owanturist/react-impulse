@@ -3,6 +3,32 @@ import { act, renderHook } from "@testing-library/react"
 import { Compare, useImpulse } from "../src"
 import * as utils from "../src/utils"
 
+describe("without initial value", () => {
+  it.concurrent("should create an impulse with undefined initial value", () => {
+    const { result } = renderHook(() => useImpulse())
+
+    // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+    expect(result.current.getValue()).toBeUndefined()
+  })
+
+  it.concurrent("updates the impulse with a new value", () => {
+    const { result } = renderHook(() => useImpulse<number>())
+
+    result.current.setValue(1)
+
+    expect(result.current.getValue()).toBe(1)
+  })
+
+  it.concurrent("updates the impulse with a undefined", () => {
+    const { result } = renderHook(() => useImpulse<number>())
+
+    result.current.setValue(1)
+    result.current.setValue(undefined)
+
+    expect(result.current.getValue()).toBeUndefined()
+  })
+})
+
 describe("with direct initial value", () => {
   it.concurrent("creates an impulse with an initial value", () => {
     const initial = { count: 0 }

@@ -10,6 +10,13 @@ import {
 
 export class Impulse<T> {
   /**
+   * Creates new Impulse without an initial value.
+   *
+   * @version 1.2.0
+   */
+  public static of<T = undefined>(): Impulse<undefined | T>
+
+  /**
    * Creates new Impulse.
    *
    * @param initialValue the initial value.
@@ -17,10 +24,13 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
+  public static of<T>(initialValue: T, compare?: null | Compare<T>): Impulse<T>
+
+  // Implements 👆
   public static of<T>(
-    initialValue: T,
-    compare?: null | Compare<T>,
-  ): Impulse<T> {
+    initialValue?: T,
+    compare?: null | Compare<undefined | T>,
+  ): Impulse<undefined | T> {
     WatchContext.warning(WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING)
 
     return new Impulse(initialValue, compare ?? eq)

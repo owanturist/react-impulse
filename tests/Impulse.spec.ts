@@ -3,6 +3,31 @@ import { eq } from "../src/utils"
 
 import { Counter } from "./common"
 
+describe("Impulse.of()", () => {
+  it.concurrent("should create an impulse with undefined initial value", () => {
+    const impulse = Impulse.of<number>()
+
+    expect(impulse.getValue()).toBeUndefined()
+  })
+
+  it.concurrent("updates the impulse with a new value", () => {
+    const impulse = Impulse.of<number>()
+
+    impulse.setValue(1)
+
+    expect(impulse.getValue()).toBe(1)
+  })
+
+  it.concurrent("updates the impulse with a undefined", () => {
+    const impulse = Impulse.of<number>()
+
+    impulse.setValue(1)
+    impulse.setValue(undefined)
+
+    expect(impulse.getValue()).toBeUndefined()
+  })
+})
+
 describe("Impulse#compare", () => {
   describe("when creating a impulse with Impulse.of", () => {
     it.concurrent("assigns eq by default", () => {
