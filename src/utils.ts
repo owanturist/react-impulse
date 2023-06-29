@@ -1,3 +1,11 @@
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useCallback,
+  useState,
+} from "react"
+
 /**
  * A function that compares two values and returns `true` if they are equal.
  * Depending on the type of the values it might be reasonable to use
@@ -10,19 +18,38 @@ export type Compare<T> = (left: T, right: T) => boolean
 /**
  * @private
  */
-export const isEqual: Compare<unknown> = Object.is
+export const eq: Compare<unknown> = Object.is
 
 /**
  * @private
  */
-export const noop: VoidFunction = () => {
+export function noop(): void {
   // do nothing
 }
 
-export const isFunction = <
+export function isFunction<
   TFunction extends (...args: Array<never>) => unknown,
->(
-  anything: unknown,
-): anything is TFunction => {
+>(anything: unknown): anything is TFunction {
   return typeof anything === "function"
+}
+
+export const useIsomorphicEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect
+
+export function useEvent<TArgs extends ReadonlyArray<unknown>, TResult>(
+  handler: (...args: TArgs) => TResult,
+): (...args: TArgs) => TResult {
+  const handlerRef = useRef<(...args: TArgs) => TResult>()
+
+  useIsomorphicEffect(() => {
+    handlerRef.current = handler
+  })
+
+  return useCallback((...args: TArgs) => handlerRef.current!(...args), [])
+}
+
+export function usePermanent<TValue>(init: () => TValue): TValue {
+  const [value] = useState(init)
+
+  return value
 }

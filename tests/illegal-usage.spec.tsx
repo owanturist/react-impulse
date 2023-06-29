@@ -9,15 +9,16 @@ import {
   useImpulseMemo,
   useWatchImpulse,
   watch,
-} from "../../src"
+} from "../src"
 import {
   WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING,
   WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
-} from "../../src/validation"
-import { noop } from "../../src/utils"
-import { WithImpulse, WithListener } from "../common"
+} from "../src/validation"
+import { noop, usePermanent } from "../src/utils"
+
+import { WithImpulse, WithListener } from "./common"
 
 const console$error = vi
   .spyOn(console, "error")
@@ -100,7 +101,7 @@ describe("calling Impulse.of()", () => {
 
   it.concurrent("fine when called inside watch()", () => {
     const Component = watch(() => {
-      const [state] = React.useState(Impulse.of(20))
+      const state = usePermanent(() => Impulse.of(20))
 
       return <div data-testid="count">{state.getValue()}</div>
     })
@@ -198,7 +199,7 @@ describe("calling Impulse#clone()", () => {
     const Component = watch<{
       impulse: Impulse<number>
     }>(({ impulse }) => {
-      const [state] = React.useState(impulse.clone())
+      const state = usePermanent(() => impulse.clone())
 
       return <div data-testid="count">{state.getValue()}</div>
     })

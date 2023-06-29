@@ -1,8 +1,8 @@
-import { useCallback, useDebugValue, useEffect, useRef } from "react"
+import { useCallback, useDebugValue } from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
 import { useWatchContext } from "./useWatchContext"
-import { Compare, isEqual } from "./utils"
+import { Compare, eq, useEvent } from "./utils"
 
 /**
  * A hook that executes the `watcher` function whenever any of the involved Impulses' values update
@@ -27,25 +27,12 @@ export function useWatchImpulse<T>(
     [executeWatcher, watcher],
   )
 
-  // changeling of the `compare` value should not trigger `useSyncExternalStoreWithSelector`
-  // to re-select the impulse's value
-  const compareRef = useRef(compare ?? isEqual)
-  useEffect(() => {
-    compareRef.current = compare ?? isEqual
-  }, [compare])
-
-  // it should memoize the onCompare otherwise it will call the watcher on each render
-  const onCompare: Compare<T> = useCallback(
-    (left, right) => compareRef.current(left, right),
-    [],
-  )
-
   const value = useSyncExternalStoreWithSelector(
     subscribe,
     getVersion,
     getVersion,
     select,
-    onCompare,
+    useEvent(compare ?? eq),
   )
 
   useDebugValue(value)

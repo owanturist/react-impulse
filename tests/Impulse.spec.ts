@@ -1,20 +1,20 @@
 import { Impulse } from "../src"
-import { isEqual } from "../src/utils"
+import { eq } from "../src/utils"
 
 import { Counter } from "./common"
 
 describe("Impulse#compare", () => {
   describe("when creating a impulse with Impulse.of", () => {
-    it.concurrent("assigns isEqual by default", () => {
+    it.concurrent("assigns eq by default", () => {
       const impulse = Impulse.of({ count: 0 })
 
-      expect(impulse.compare).toBe(isEqual)
+      expect(impulse.compare).toBe(eq)
     })
 
-    it.concurrent("assigns isEqual by `null`", () => {
+    it.concurrent("assigns eq by `null`", () => {
       const impulse = Impulse.of({ count: 0 }, null)
 
-      expect(impulse.compare).toBe(isEqual)
+      expect(impulse.compare).toBe(eq)
     })
 
     it.concurrent("assigns custom function", () => {
@@ -29,7 +29,7 @@ describe("Impulse#compare", () => {
       const impulse = Impulse.of({ count: 0 })
 
       expect(impulse.clone().compare).toBe(impulse.compare)
-      expect(impulse.clone().compare).toBe(isEqual)
+      expect(impulse.clone().compare).toBe(eq)
     })
 
     it.concurrent("inherits custom the source impulse compare", () => {
@@ -39,10 +39,10 @@ describe("Impulse#compare", () => {
       expect(impulse.clone().compare).toBe(Counter.compare)
     })
 
-    it.concurrent("assigns isEqual by `null`", () => {
+    it.concurrent("assigns eq by `null`", () => {
       const impulse = Impulse.of({ count: 0 }, Counter.compare)
 
-      expect(impulse.clone(Counter.clone, null).compare).toBe(isEqual)
+      expect(impulse.clone(Counter.clone, null).compare).toBe(eq)
     })
 
     it.concurrent("assigns custom function", () => {
@@ -63,7 +63,7 @@ describe("Impulse#compare", () => {
       expect(impulse.getValue()).toBe(initial)
     })
 
-    it.concurrent("replaces with isEqual when `null`", () => {
+    it.concurrent("replaces with eq when `null`", () => {
       const initial = { count: 0 }
       const impulse = Impulse.of(initial, Counter.compare)
 
