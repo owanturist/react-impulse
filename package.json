@@ -24,7 +24,8 @@
     "lint": "eslint . --ext=js,jsx,ts,tsx,md",
     "prettify": "prettier . --write",
     "typecheck": "tsc --noEmit",
-    "cs": "changeset"
+    "cs": "changeset",
+    "publish": "pnpm build && pnpm cs publish"
   },
   "engines": {
     "node": ">=18.7.0",
