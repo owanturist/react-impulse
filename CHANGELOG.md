@@ -1,5 +1,11 @@
 # react-impulse
 
+## 1.1.1
+
+### Patch Changes
+
+- dcb8309: 🐛 bugfix: an `Impulse` created via `useImpulse` uses latest `compare` function provided to `useImpulse` but not only the initial one.
+
 ## 1.1.0
 
 ### Minor Changes
