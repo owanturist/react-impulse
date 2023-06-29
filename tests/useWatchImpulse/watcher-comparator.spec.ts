@@ -3,7 +3,7 @@ import { act, renderHook } from "@testing-library/react"
 
 import { Impulse, useWatchImpulse } from "../../src"
 import { Counter, WithCompare, WithImpulse } from "../common"
-import { Compare, isEqual } from "../../src/utils"
+import { Compare, eq } from "../../src/utils"
 
 describe.each([
   [
@@ -54,7 +54,7 @@ describe.each([
 
       rerender({
         impulse,
-        compare: isEqual,
+        compare: eq,
       })
       expect(result.current).toBe(initial)
 

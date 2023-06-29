@@ -1,7 +1,5 @@
-import { useState } from "react"
-
 import { Impulse } from "./Impulse"
-import { Compare, isFunction } from "./utils"
+import { Compare, isFunction, usePermanent, useEvent, eq } from "./utils"
 
 /**
  * A hook that initiates a stable (never changing) Impulse.
@@ -17,13 +15,13 @@ export function useImpulse<T>(
   valueOrLazyValue: T | ((...args: []) => T),
   compare?: null | Compare<T>,
 ): Impulse<T> {
-  const [impulse] = useState(() => {
+  const stableCompare = useEvent(compare ?? eq)
+
+  return usePermanent(() => {
     const initialValue = isFunction(valueOrLazyValue)
       ? valueOrLazyValue()
       : valueOrLazyValue
 
-    return Impulse.of(initialValue, compare)
+    return Impulse.of(initialValue, stableCompare)
   })
-
-  return impulse
 }

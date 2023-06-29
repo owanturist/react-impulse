@@ -1,4 +1,4 @@
-import { Compare, isEqual, isFunction, noop } from "./utils"
+import { Compare, eq, isFunction, noop } from "./utils"
 import { WatchContext } from "./WatchContext"
 import { SetValueContext } from "./SetValueContext"
 import {
@@ -23,7 +23,7 @@ export class Impulse<T> {
   ): Impulse<T> {
     WatchContext.warning(WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING)
 
-    return new Impulse(initialValue, compare ?? isEqual)
+    return new Impulse(initialValue, compare ?? eq)
   }
 
   /**
@@ -85,7 +85,7 @@ export class Impulse<T> {
 
     return new Impulse(
       isFunction(transform) ? transform(this.value) : this.value,
-      compare ?? isEqual,
+      compare ?? eq,
     )
   }
 
@@ -128,7 +128,7 @@ export class Impulse<T> {
       return
     }
 
-    const finalCompare = compare ?? isEqual
+    const finalCompare = compare ?? eq
     const [emit, register] = SetValueContext.registerStoreSubscribers()
 
     const nextValue = isFunction(valueOrTransform)
