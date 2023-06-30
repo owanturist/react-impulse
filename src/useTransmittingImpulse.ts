@@ -3,7 +3,7 @@ import { Scope } from "./Scope"
 import { Impulse, TransmittingImpulse } from "./Impulse"
 import {
   Compare,
-  isEqual,
+  eq,
   useEvent,
   usePermanent,
   useIsomorphicEffect,
@@ -15,9 +15,9 @@ export function useTransmittingImpulse<T>(
   setter: (value: T, scope: Scope) => void,
   compare?: null | Compare<T>,
 ): Impulse<T> {
-  const compareStable = useEvent(compare ?? isEqual)
+  const stableCompare = useEvent(compare ?? eq)
   const impulse = usePermanent(
-    () => new TransmittingImpulse(getter, setter, compareStable),
+    () => new TransmittingImpulse(getter, setter, stableCompare),
   )
 
   useIsomorphicEffect(

@@ -1,5 +1,4 @@
-import { renderHook } from "@testing-library/react-hooks"
-import { act } from "@testing-library/react"
+import { act, renderHook } from "@testing-library/react"
 import { useState } from "react"
 
 import {
@@ -222,34 +221,34 @@ describe("transmit many Impulses to one (select all checkboxes example)", () => 
 })
 
 describe("with compare function", () => {
-  const spy_isEqual = vi.spyOn(utils, "isEqual")
+  const spy_eq = vi.spyOn(utils, "eq")
 
   beforeEach(() => {
-    spy_isEqual.mockClear()
+    spy_eq.mockClear()
   })
 
   it("applies Object.is by default", () => {
     const { result } = setupWithImpulse()
 
-    expect(spy_isEqual).not.toHaveBeenCalled()
+    expect(spy_eq).not.toHaveBeenCalled()
     act(() => {
       result.current.impulse.setValue((x) => x + 1)
     })
 
-    expect(spy_isEqual).toHaveBeenCalledOnce()
-    expect(spy_isEqual).toHaveBeenLastCalledWith(0, 1)
+    expect(spy_eq).toHaveBeenCalledOnce()
+    expect(spy_eq).toHaveBeenLastCalledWith(0, 1)
   })
 
   it("applies Object.is when passing null as compare", () => {
     const { result } = setupWithImpulse(null)
 
-    expect(spy_isEqual).not.toHaveBeenCalled()
+    expect(spy_eq).not.toHaveBeenCalled()
     act(() => {
       result.current.impulse.setValue((x) => x + 1)
     })
 
-    expect(spy_isEqual).toHaveBeenCalledOnce()
-    expect(spy_isEqual).toHaveBeenLastCalledWith(0, 1)
+    expect(spy_eq).toHaveBeenCalledOnce()
+    expect(spy_eq).toHaveBeenLastCalledWith(0, 1)
   })
 
   it("passes custom compare function", () => {
@@ -261,7 +260,7 @@ describe("with compare function", () => {
       result.current.impulse.setValue((x) => x + 1)
     })
 
-    expect(spy_isEqual).not.toHaveBeenCalled()
+    expect(spy_eq).not.toHaveBeenCalled()
     expect(compare).toHaveBeenCalledOnce()
     expect(compare).toHaveBeenLastCalledWith(0, 1)
   })
@@ -294,8 +293,8 @@ describe("with compare function", () => {
       result.current.impulse.setValue((x) => x + 1)
     })
     expect(compare_2).not.toHaveBeenCalled()
-    expect(spy_isEqual).toHaveBeenCalledOnce()
-    expect(spy_isEqual).toHaveBeenLastCalledWith(2, 3)
+    expect(spy_eq).toHaveBeenCalledOnce()
+    expect(spy_eq).toHaveBeenLastCalledWith(2, 3)
   })
 })
 

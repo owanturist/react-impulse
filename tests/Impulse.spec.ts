@@ -16,7 +16,7 @@ describe("Impulse.of()", () => {
     },
   )
 
-  it.concurrent("updates the impulse with a new value", () => {
+  it.concurrent("updates the impulse with a new value", ({ scope }) => {
     const impulse = Impulse.of<number>()
 
     impulse.setValue(1)
@@ -24,7 +24,7 @@ describe("Impulse.of()", () => {
     expect(impulse.getValue(scope)).toBe(1)
   })
 
-  it.concurrent("updates the impulse with a undefined", () => {
+  it.concurrent("updates the impulse with a undefined", ({ scope }) => {
     const impulse = Impulse.of<number>()
 
     impulse.setValue(1)
