@@ -47,6 +47,6 @@ runs:
       shell: bash
       run: git checkout package.json pnpm-lock.yaml
 
-    - name: Re-install prod dependencies
+    - name: Re-install dependencies
       shell: bash
-      run: pnpm i --prod --prefer-offline
+      run: pnpm i --prefer-offline
