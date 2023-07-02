@@ -17,14 +17,15 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "build": "tsup src/index.ts --dts --sourcemap --format=esm,cjs --clean --env.NODE_ENV=production",
+    "build": "tsup src/index.ts --dts --sourcemap --format=esm,cjs --clean",
     "pretest": "node ./print-react-version",
     "test": "vitest --single-thread",
     "test:run": "pnpm test -- --run --reporter=dot",
     "lint": "eslint . --ext=js,jsx,ts,tsx,md",
     "prettify": "prettier . --write",
     "typecheck": "tsc --noEmit",
-    "cs": "changeset"
+    "cs": "changeset",
+    "publish": "pnpm build && pnpm cs publish"
   },
   "engines": {
     "node": ">=18.7.0",

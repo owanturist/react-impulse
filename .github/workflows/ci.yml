@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - master
+      - v*.x
+      - v*.*.x
 
 env:
   CI: true
