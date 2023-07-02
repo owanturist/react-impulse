@@ -1,0 +1,52 @@
+name: Run checks
+
+runs:
+  using: composite
+  steps:
+    - name: Type check
+      if: ${{ always() }}
+      shell: bash
+      run: pnpm typecheck
+
+    - name: Lint
+      if: ${{ always() }}
+      shell: bash
+      run: pnpm lint
+
+    - name: Test against React 18
+      if: ${{ always() }}
+      shell: bash
+      run: pnpm test:run -- --coverage
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        fail_ci_if_error: false
+
+    - name: Check for unstaged changes
+      shell: bash
+      run: git diff --exit-code
+
+    - name: Install React 17 and legacy testing libraries
+      shell: bash
+      run: pnpm add -D react@17 @testing-library/react@12  @testing-library/react-hooks@7
+
+    - name: Test against React 17
+      shell: bash
+      run: pnpm test:run
+
+    - name: Install React 16
+      shell: bash
+      run: pnpm add -D react@16
+
+    - name: Test against React 16
+      shell: bash
+      run: pnpm test:run
+
+    - name: Cleanup the legacy testing libraries
+      shell: bash
+      run: git checkout package.json pnpm-lock.yaml
+
+    - name: Re-install dependencies
+      shell: bash
+      run: pnpm i --prefer-offline
