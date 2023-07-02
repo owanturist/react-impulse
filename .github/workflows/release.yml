@@ -8,6 +8,8 @@ on:
       - ci
     branches:
       - master
+      - v*.x
+      - v*.*.x
 
 env:
   CI: true
