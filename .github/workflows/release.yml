@@ -7,7 +7,7 @@ on:
     workflows:
       - ci
     branches:
-      - master
+      - v1.1.x
 
 env:
   CI: true
