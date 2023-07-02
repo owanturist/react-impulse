@@ -8,6 +8,8 @@ on:
       - ci
     branches:
       - master
+      - v*.x
+      - v*.*.x
 
 env:
   CI: true
@@ -50,12 +52,11 @@ jobs:
           prop_path: "version"
 
       - name: Create Release Pull Request or Publish to npm
-        if: ${{ steps.new-version.outcome == 'success' }}
         uses: changesets/action@v1
         with:
-          publish: pnpm build && pnpm publish
-          commit: Release ${{ steps.old-version.outputs.propStr }} -> ${{ steps.new-version.outputs.propStr }}
-          title: Release ${{ steps.old-version.outputs.propStr }} -> ${{ steps.new-version.outputs.propStr }}
+          publish: pnpm run publish --tag=${{ github.ref_name == 'master' && 'latest' || '' }}
+          commit: Release `${{ steps.old-version.outputs.prop }}` -> `${{ steps.new-version.outputs.prop }}`
+          title: Release `${{ steps.old-version.outputs.prop }}` -> `${{ steps.new-version.outputs.prop }}`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
