@@ -2,11 +2,6 @@ name: CI
 
 on:
   pull_request:
-  push:
-    branches:
-      - master
-      - v*.x
-      - v*.*.x
 
 env:
   CI: true
@@ -20,34 +15,5 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup env
-        uses: ./.github/actions/setup-env
-
-      - name: Type check
-        if: ${{ always() }}
-        run: pnpm typecheck
-
-      - name: Lint
-        if: ${{ always() }}
-        run: pnpm lint
-
-      - name: Test against React 18
-        if: ${{ always() }}
-        run: pnpm test:run -- --coverage
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: false
-
-      - name: Install React 17 and legacy testing libraries
-        run: pnpm add -D react@17 @testing-library/react@12  @testing-library/react-hooks@7
-
-      - name: Test against React 17
-        run: pnpm test:run
-
-      - name: Install React 16
-        run: pnpm add -D react@16
-
-      - name: Test against React 16
-        run: pnpm test:run
+      - uses: ./.github/actions/setup-env
+      - uses: ./.github/actions/run-checks
