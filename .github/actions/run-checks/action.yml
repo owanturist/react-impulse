@@ -23,6 +23,10 @@ runs:
       with:
         fail_ci_if_error: false
 
+    - name: Check for unstaged changes
+      shell: bash
+      run: git diff --exit-code
+
     - name: Install React 17 and legacy testing libraries
       shell: bash
       run: pnpm add -D react@17 @testing-library/react@12  @testing-library/react-hooks@7
@@ -38,3 +42,11 @@ runs:
     - name: Test against React 16
       shell: bash
       run: pnpm test:run
+
+    - name: Cleanup the legacy testing libraries
+      shell: bash
+      run: git checkout package.json pnpm-lock.yaml
+
+    - name: Re-install prod dependencies
+      shell: bash
+      run: pnpm i --prod --prefer-offline
