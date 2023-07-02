@@ -26,8 +26,11 @@ jobs:
           # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
           fetch-depth: 0
 
-      - uses: ./.github/actions/setup-env
-      - uses: ./.github/actions/run-checks
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: Run checks
+        uses: ./.github/actions/run-checks
 
       - name: Get changeset status
         run: pnpm cs status --output ./changeset-status.json

@@ -17,5 +17,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - uses: ./.github/actions/setup-env
-      - uses: ./.github/actions/run-checks
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: Run checks
+        uses: ./.github/actions/run-checks
