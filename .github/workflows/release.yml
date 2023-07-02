@@ -52,7 +52,7 @@ jobs:
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
         with:
-          publish: pnpm publish
+          publish: pnpm run publish
           commit: Release ${{ steps.old-version.outputs.propStr }} -> ${{ steps.new-version.outputs.propStr }}
           title: Release ${{ steps.old-version.outputs.propStr }} -> ${{ steps.new-version.outputs.propStr }}
         env:
