@@ -27,7 +27,6 @@ afterEach(() => {
 afterAll(() => {
   console$error.mockRestore()
 })
-/* c8 ignore stop */
 
 vi.mock("@testing-library/react", async () => {
   const actual = await vi.importActual<typeof import("@testing-library/react")>(
@@ -44,3 +43,5 @@ vi.mock("@testing-library/react", async () => {
     return actual
   }
 })
+
+/* c8 ignore stop */
