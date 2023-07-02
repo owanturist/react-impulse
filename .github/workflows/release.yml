@@ -53,9 +53,9 @@ jobs:
         if: ${{ steps.new-version.outcome == 'success' }}
         uses: changesets/action@v1
         with:
-          publish: pnpm build && pnpm publish
-          commit: Release ${{ steps.old-version.outputs.propStr }} -> ${{ steps.new-version.outputs.propStr }}
-          title: Release ${{ steps.old-version.outputs.propStr }} -> ${{ steps.new-version.outputs.propStr }}
+          publish: pnpm run publish
+          commit: Release `${{ steps.old-version.outputs.prop }}` -> `${{ steps.new-version.outputs.prop }}`
+          title: Release `${{ steps.old-version.outputs.prop }}` -> `${{ steps.new-version.outputs.prop }}`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
