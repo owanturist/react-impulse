@@ -73,19 +73,6 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
-      - name: Set .changeset baseBranch to the current branch
-        uses: jossef/action-set-json-field@v2.1
-        with:
-          file: .changeset/config.json
-          field: baseBranch
-          value: "${{ github.ref_name }}"
-
-      - name: Commit the changeset config
-        uses: EndBug/add-and-commit@v9
-        with:
-          message: "Change .changeset `baseBranch` to ${{ github.ref_name }}"
-          add: ".changeset/config.json"
-
       - name: Get changeset status
         run: pnpm cs status --output ./changeset-status.json
 
