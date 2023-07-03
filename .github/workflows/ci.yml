@@ -5,6 +5,12 @@ on:
     paths-ignore:
       - "**.md"
 
+  push:
+    branches:
+      - master
+      - v[0-9]+.x
+      - v[0-9]+.[0-9]+.x
+
 env:
   CI: true
 
@@ -20,5 +26,90 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
-      - name: Run checks
-        uses: ./.github/actions/run-checks
+      - name: Type check
+        if: ${{ always() }}
+        run: pnpm typecheck
+
+      - name: Lint
+        if: ${{ always() }}
+        run: pnpm lint
+
+      - name: Test against React 18
+        if: ${{ always() }}
+        run: pnpm test:run -- --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: false
+
+      - name: Install React 17 and legacy testing libraries
+        run: pnpm add -D react@17 @testing-library/react@12  @testing-library/react-hooks@7
+
+      - name: Test against React 17
+        run: pnpm test:run
+
+      - name: Install React 16
+        run: pnpm add -D react@16
+
+      - name: Test against React 16
+        run: pnpm test:run
+
+  release:
+    name: Release on npm
+    runs-on: ubuntu-latest
+    needs: checks
+    # prevents this action from running on forks and only on pushes
+    if: ${{ github.repository_owner == 'owanturist' && github.event_name == 'push' }}
+    concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
+          fetch-depth: 0
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: Set .changeset baseBranch to the current branch
+        uses: jossef/action-set-json-field@v2.1
+        with:
+          file: .changeset/config.json
+          field: baseBranch
+          value: "${{ github.ref_name }}"
+
+      - name: Commit the changeset config
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: "Change .changeset `baseBranch` to ${{ github.ref_name }}"
+          add: ".changeset/config.json"
+
+      - name: Get changeset status
+        run: pnpm cs status --output ./changeset-status.json
+
+      - name: Read the new version
+        id: new-version
+        uses: notiz-dev/github-action-json-property@release
+        continue-on-error: true
+        with:
+          path: ./changeset-status.json
+          prop_path: "releases.0.newVersion"
+
+      - name: Read the old version
+        id: old-version
+        uses: notiz-dev/github-action-json-property@release
+        with:
+          path: ./package.json
+          prop_path: "version"
+
+      - name: Create Release Pull Request or Publish to npm
+        uses: changesets/action@v1
+        with:
+          publish: pnpm run publish --tag=${{ github.ref_name == 'master' && 'latest' || ' ' }}
+          commit: Release `${{ steps.old-version.outputs.prop }}` -> `${{ steps.new-version.outputs.prop }}`
+          title: Release `${{ steps.old-version.outputs.prop }}` -> `${{ steps.new-version.outputs.prop }}`
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
