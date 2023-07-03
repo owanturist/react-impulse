@@ -42,8 +42,14 @@ then
     exit 0 ; # Not checking out a new branch
 fi
 
+# exit if does not match v[0-9].x or v[0-9].[0-9].x
+if ! [[ $branch_name =~ ^v[0-9].x$ ]] && ! [[ $branch_name =~ ^v[0-9].[0-9].x$ ]]; then
+  exit 0
+fi
+
 # change .changeset/config.json baseBranch to the current branch
-sed -i -e "s/\"baseBranch\":.*/\"baseBranch\": \"$branch_name\",/g" .changeset/config.json
+sed -i "" "s/\"baseBranch\":.*/\"baseBranch\": \"$branch_name\",/g" .changeset/config.json
 
 # Create a commit and display a message
-git commit --allow-empty -m "Created branch $branch_name" --no-verify
+git add .changeset/config.json
+git commit -m "Set .changeset `baseBranch` to '$branch_name'" --no-verify
