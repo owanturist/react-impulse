@@ -83,9 +83,7 @@ jobs:
       - name: Commit the changeset config
         uses: EndBug/add-and-commit@v9
         with:
-          author_name: Anton Ovechkin
-          author_email: owanturist@gmail.com
-          message: "Change baseBranch to ${{ github.ref_name }}"
+          message: "Change .changeset `baseBranch` to ${{ github.ref_name }}"
           add: ".changeset/config.json"
 
       - name: Get changeset status
