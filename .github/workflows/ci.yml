@@ -83,7 +83,7 @@ jobs:
 
       - name: Change .changeset baseBranch to the current branch
         run: |
-          perl -i -pe"s/\"baseBranch\":.*/\"baseBranch\": \"v1.2.x\",/g" .changeset/config.json
+          perl -i -pe"s/\"baseBranch\":.*/\"baseBranch\": \"${{ github.ref_name }}\",/g" .changeset/config.json
 
       - name: Commit updated .changeset config
         uses: stefanzweifel/git-auto-commit-action@v4
