@@ -7,7 +7,15 @@ on:
 
   push:
     branches:
+      # latest release
       - master
+      # pre releases
+      - next
+      - alpha
+      - beta
+      # snapshot releases
+      - snapshot
+      # maintenance releases
       - v[0-9]+.x
       - v[0-9]+.[0-9]+.x
 
@@ -73,6 +81,16 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
+      - name: Change .changeset baseBranch to the current branch
+        run: |
+          sed -i "" "s/\"baseBranch\":.*/\"baseBranch\": \"${{ github.ref_name }}\",/g" .changeset/config.json
+
+      - name: Commit updated .changeset config
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Change .changeset `baseBranch` to ${{ github.ref_name }}"
+          file_pattern: ".changeset/config.json"
+
       - name: Get changeset status
         run: pnpm cs status --output ./changeset-status.json
 
@@ -94,7 +112,7 @@ jobs:
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
         with:
-          publish: pnpm run publish --tag=${{ github.ref_name == 'master' && 'latest' || ' ' }}
+          publish: pnpm run publish --tag=${{ github.ref_name == 'master' && 'latest' || github.ref_name == 'next' && 'next' || github.ref_name == 'alpha' && 'alpha' || github.ref_name == 'beta' && 'beta' || ' ' }}
           commit: Release `${{ steps.old-version.outputs.prop }}` -> `${{ steps.new-version.outputs.prop }}`
           title: Release `${{ steps.old-version.outputs.prop }}` -> `${{ steps.new-version.outputs.prop }}`
         env:
