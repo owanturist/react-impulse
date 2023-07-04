@@ -7,7 +7,15 @@ on:
 
   push:
     branches:
+      # latest release
       - master
+      # pre releases
+      - next
+      - alpha
+      - beta
+      # snapshot releases
+      - snapshot
+      # maintenance releases
       - v[0-9]+.x
       - v[0-9]+.[0-9]+.x
 
@@ -94,7 +102,7 @@ jobs:
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
         with:
-          publish: pnpm run publish --tag=${{ github.ref_name == 'master' && 'latest' || ' ' }}
+          publish: pnpm run publish --tag=${{ github.ref_name == 'master' && 'latest' || github.ref_name == 'next' && 'next' || github.ref_name == 'alpha' && 'alpha' || github.ref_name == 'beta' && 'beta' || ' ' }}
           commit: Release `${{ steps.old-version.outputs.prop }}` -> `${{ steps.new-version.outputs.prop }}`
           title: Release `${{ steps.old-version.outputs.prop }}` -> `${{ steps.new-version.outputs.prop }}`
         env:
