@@ -34,19 +34,13 @@ then
     exit 0 ; # Not checking out a new branch
 fi
 
-# exit if baseBranch is already set as `baseBranch` field in .changeset/config.json
-if grep -c "\"baseBranch\":\\s*\"$branch_name\"" .changeset/config.json; then
-  exit 0
-fi
-
-
 # exit if does not match v[0-9].x or v[0-9].[0-9].x
-if ! [[ $branch_name =~ ^v[0-9].x$ ]] && ! [[ $branch_name =~ ^v[0-9].[0-9].x$ ]]; then
+if ! [[ $branch_name =~ ^v([0-9]\.){1,2}x$ ]]; then
   exit 0
 fi
 
 # change .changeset/config.json baseBranch to the current branch
-sed -i "" "s/\"baseBranch\":s/\"baseBranch\": \"$branch_name\",/g" .changeset/config.json
+sed -i "" "s/\"baseBranch\":.*/\"baseBranch\": \"$branch_name\",/g" .changeset/config.json
 
 # Create a commit and display a message
 git add .changeset/config.json
