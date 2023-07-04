@@ -81,6 +81,16 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
+      - name: Change .changeset baseBranch to the current branch
+        run: |
+          sed -i "" "s/\"baseBranch\":.*/\"baseBranch\": \"${{ github.ref_name }}\",/g" .changeset/config.json
+
+      - name: Commit updated .changeset config
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Change .changeset `baseBranch` to ${{ github.ref_name }}"
+          file_pattern: ".changeset/config.json"
+
       - name: Get changeset status
         run: pnpm cs status --output ./changeset-status.json
 
