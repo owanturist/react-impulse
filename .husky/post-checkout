@@ -35,7 +35,7 @@ then
 fi
 
 # exit if baseBranch is already set as `baseBranch` field in .changeset/config.json
-if grep -q "\"baseBranch\":s/\"$branch_name\"" .changeset/config.json; then
+if grep -c "\"baseBranch\":\\s*\"$branch_name\"" .changeset/config.json; then
   exit 0
 fi
 
