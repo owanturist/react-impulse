@@ -31,6 +31,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Change .changeset baseBranch to the current branch
+        run: |
+          perl -i -pe"s/\"baseBranch\":.*/\"baseBranch\": \"${{ github.ref_name }}\",/g" .changeset/config.json
+
+      - name: Commit updated .changeset config
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Change .changeset `baseBranch` to ${{ github.ref_name }}"
+          file_pattern: ".changeset/config.json"
+
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
