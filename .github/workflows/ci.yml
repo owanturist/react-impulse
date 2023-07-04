@@ -16,7 +16,7 @@ env:
 
 jobs:
   checks:
-    name: Checks
+    name: Linting and Type Checking
     runs-on: ubuntu-latest
 
     steps:
@@ -33,6 +33,17 @@ jobs:
       - name: Lint
         if: ${{ always() }}
         run: pnpm lint
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
 
       - name: Test against React 18
         if: ${{ always() }}
@@ -58,7 +69,9 @@ jobs:
   release:
     name: Release on npm
     runs-on: ubuntu-latest
-    needs: checks
+    needs:
+      - tests
+      - checks
     # prevents this action from running on forks and only on pushes
     if: ${{ github.repository_owner == 'owanturist' && github.event_name == 'push' }}
     concurrency: ${{ github.workflow }}-${{ github.ref }}
