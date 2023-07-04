@@ -50,4 +50,4 @@ sed -i "" "s/\"baseBranch\":s/\"baseBranch\": \"$branch_name\",/g" .changeset/co
 
 # Create a commit and display a message
 git add .changeset/config.json
-git commit -m "Set .changeset `baseBranch` to '$branch_name'" --no-verify
+git commit -m "Set .changeset.baseBranch to '$branch_name'" --no-verify
