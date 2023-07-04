@@ -1,5 +1,11 @@
 # react-impulse
 
+## 1.2.2
+
+### Patch Changes
+
+- cdf0483: Bump version to attach the latest tag
+
 ## 1.2.1
 
 ### Patch Changes
