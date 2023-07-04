@@ -9,16 +9,11 @@ import {
   PropsWithoutRef,
   RefAttributes,
 } from "react"
-import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
-import { useWatchContext } from "./useWatchContext"
 import { Compare } from "./utils"
-
-const isImpulseWatcher = <TProps>(
-  render: FC<TProps> & { isImpulseWatcher?: boolean },
-): boolean => {
-  return render.isImpulseWatcher === true
-}
+import { useScope } from "./useScope"
+import { registerExecutionContext } from "./validation"
+import { injectScope } from "./Scope"
 
 /**
  * Creates a React component that subscribes to all Impulses calling the `Impulse#getValue` method during the rendering phase of the component.
@@ -30,53 +25,48 @@ const isImpulseWatcher = <TProps>(
 export function watch<TProps>(component: ExoticComponent<TProps>): never
 export function watch<TProps>(component: FC<TProps>): FC<TProps>
 export function watch<TProps>(component: FC<TProps>): FC<TProps> {
-  if (isImpulseWatcher(component)) {
-    return component
-  }
+  const ComponentWithScope: FC<TProps> = (props, ctx: unknown) => {
+    const getScope = useScope()
 
-  const ImpulseWatcher = (props: TProps, ctx: unknown): ReturnType<FC> => {
-    const { executeWatcher, subscribe, getVersion } = useWatchContext({
-      warningSource: "watch",
-    })
-
-    return useSyncExternalStoreWithSelector(
-      subscribe,
-      getVersion,
-      getVersion,
-      // no need to memoize since props are a new object on each call
-      () => executeWatcher(() => component(props, ctx)),
+    // it uses Object.assign to reduce output file size by avoiding the spread operator
+    return registerExecutionContext(
+      "watch",
+      injectScope,
+      getScope(),
+      component,
+      props,
+      ctx,
     )
   }
 
-  ImpulseWatcher.displayName = `ImpulseWatcher${component.displayName ?? ""}`
-  ImpulseWatcher.isImpulseWatcher = true
+  ComponentWithScope.displayName = `ComponentWithScope${
+    component.displayName ?? component.name
+  }`
 
-  return ImpulseWatcher
+  return ComponentWithScope
 }
 
-const memo = <TProps>(
+function memo<TProps>(
   component: FC<TProps>,
   propsAreEqual?: Compare<Readonly<TProps>>,
-): MemoExoticComponent<FC<TProps>> => {
+): MemoExoticComponent<FC<TProps>> {
   return React_memo(watch(component), propsAreEqual)
 }
 
-const forwardRefMemo = <TNode, TProps>(
+function forwardRefMemo<TNode, TProps>(
   render: ForwardRefRenderFunction<TNode, TProps>,
   propsAreEqual?: Compare<
     Readonly<PropsWithoutRef<TProps> & RefAttributes<TNode>>
   >,
 ): MemoExoticComponent<
   ForwardRefExoticComponent<PropsWithoutRef<TProps> & RefAttributes<TNode>>
-> => {
+> {
   return React_memo(forwardRef(render), propsAreEqual)
 }
 
-const forwardRef = <TNode, TProps>(
+function forwardRef<TNode, TProps>(
   render: ForwardRefRenderFunction<TNode, TProps>,
-): ForwardRefExoticComponent<
-  PropsWithoutRef<TProps> & RefAttributes<TNode>
-> => {
+): ForwardRefExoticComponent<PropsWithoutRef<TProps> & RefAttributes<TNode>> {
   return React_forwardRef(
     watch(render) as ForwardRefRenderFunction<TNode, TProps>,
   )

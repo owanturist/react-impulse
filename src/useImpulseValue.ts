@@ -1,8 +1,8 @@
-import { useDebugValue, useMemo } from "react"
-import { useSyncExternalStore } from "use-sync-external-store/shim/index.js"
+import { useCallback, useDebugValue } from "react"
 
 import type { Impulse } from "./Impulse"
-import { WatchContext } from "./WatchContext"
+import { useScope } from "./useScope"
+import { Scope, injectScope } from "./Scope"
 
 /**
  * A hook that subscribes to the `impulse` changes and returns the current value.
@@ -12,14 +12,11 @@ import { WatchContext } from "./WatchContext"
  * @version 1.0.0
  */
 export function useImpulseValue<T>(impulse: Impulse<T>): T {
-  const [subscribe, getSnapshot] = useMemo(
-    () => [
-      (onChange: VoidFunction) => impulse.subscribe(onChange),
-      () => WatchContext.ignore(() => impulse.getValue()),
-    ],
+  const transform = useCallback(
+    (scope: Scope) => injectScope(scope, () => impulse.getValue()),
     [impulse],
   )
-  const value = useSyncExternalStore(subscribe, getSnapshot)
+  const value = useScope(transform, impulse.compare)
 
   useDebugValue(value)
 

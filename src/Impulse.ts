@@ -1,12 +1,7 @@
-import { Compare, eq, isFunction, noop } from "./utils"
-import { WatchContext } from "./WatchContext"
-import { SetValueContext } from "./SetValueContext"
-import {
-  WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING,
-  WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING,
-  WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING,
-  WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
-} from "./validation"
+import { Compare, eq, isFunction } from "./utils"
+import { EMITTER_KEY, extractScope } from "./Scope"
+import { ScopeEmitter } from "./ScopeEmitter"
+import { stopInsideContext, warnInsideContext } from "./validation"
 
 export class Impulse<T> {
   /**
@@ -27,14 +22,35 @@ export class Impulse<T> {
   public static of<T>(initialValue: T, compare?: null | Compare<T>): Impulse<T>
 
   // Implements 👆
+  @warnInsideContext(
+    "subscribe",
+    /* c8 ignore next 2 */
+    process.env.NODE_ENV === "production"
+      ? ""
+      : "You should not call Impulse.of inside of the subscribe listener. The listener is for read-only operations but Impulse.of creates a new Impulse.",
+  )
+  @warnInsideContext(
+    "useWatchImpulse",
+    /* c8 ignore next 2 */
+    process.env.NODE_ENV === "production"
+      ? ""
+      : "You should not call Impulse.of inside of the useWatchImpulse factory. The useWatchImpulse hook is for read-only operations but Impulse.of creates a new Impulse.",
+  )
+  @warnInsideContext(
+    "useImpulseMemo",
+    /* c8 ignore next 2 */
+    process.env.NODE_ENV === "production"
+      ? ""
+      : "You should not call Impulse.of inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
+  )
   public static of<T>(
     initialValue?: T,
     compare?: null | Compare<undefined | T>,
   ): Impulse<undefined | T> {
-    WatchContext.warning(WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING)
-
     return new Impulse(initialValue, compare ?? eq)
   }
+
+  private readonly emitters = new Set<ScopeEmitter>()
 
   /**
    * It does not use `Set<VoidFunction>` here because the same listener might be subscribed
@@ -79,6 +95,11 @@ export class Impulse<T> {
     return String(this.getValue())
   }
 
+  // TODO remove this method
+  protected emit(execute: () => boolean): void {
+    ScopeEmitter.schedule(() => (execute() ? this.emitters : null))
+  }
+
   /**
    * Clones an Impulse.
    *
@@ -87,12 +108,31 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
+  @warnInsideContext(
+    "subscribe",
+    /* c8 ignore next 2 */
+    process.env.NODE_ENV === "production"
+      ? ""
+      : "You should not call Impulse#clone inside of the subscribe listener. The listener is for read-only operations but Impulse#clone clones an existing Impulse.",
+  )
+  @warnInsideContext(
+    "useWatchImpulse",
+    /* c8 ignore next 2 */
+    process.env.NODE_ENV === "production"
+      ? ""
+      : "You should not call Impulse#clone inside of the useWatchImpulse factory. The useWatchImpulse hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+  )
+  @warnInsideContext(
+    "useImpulseMemo",
+    /* c8 ignore next 2 */
+    process.env.NODE_ENV === "production"
+      ? ""
+      : "You should not call Impulse#clone inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+  )
   public clone(
     transform?: (value: T) => T,
     compare: null | Compare<T> = this.compare,
   ): Impulse<T> {
-    WatchContext.warning(WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING)
-
     return new Impulse(
       isFunction(transform) ? transform(this.value) : this.value,
       compare ?? eq,
@@ -114,7 +154,9 @@ export class Impulse<T> {
    */
   public getValue<R>(select: (value: T) => R): R
   public getValue<R>(select?: (value: T) => R): T | R {
-    WatchContext.register(this as Impulse<unknown>)
+    const scope = extractScope()
+
+    scope[EMITTER_KEY]?.attachTo(this.emitters)
 
     return isFunction(select) ? select(this.value) : this.value
   }
@@ -130,27 +172,46 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
+  @stopInsideContext(
+    "watch",
+    /* c8 ignore next 2 */
+    process.env.NODE_ENV === "production"
+      ? ""
+      : "You should not call Impulse#setValue during rendering of watch(Component)",
+  )
+  @stopInsideContext(
+    "useWatchImpulse",
+    /* c8 ignore next 2 */
+    process.env.NODE_ENV === "production"
+      ? ""
+      : "You should not call Impulse#setValue inside of the useWatchImpulse factory. The useWatchImpulse hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+  )
+  @stopInsideContext(
+    "useImpulseMemo",
+    /* c8 ignore next 2 */
+    process.env.NODE_ENV === "production"
+      ? ""
+      : "You should not call Impulse#setValue inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+  )
   public setValue(
     valueOrTransform: T | ((currentValue: T) => T),
     compare: null | Compare<T> = this.compare,
   ): void {
-    if (WatchContext.warning(WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING)) {
-      return
-    }
-
     const finalCompare = compare ?? eq
-    const [emit, register] = SetValueContext.registerStoreSubscribers()
 
-    const nextValue = isFunction(valueOrTransform)
-      ? valueOrTransform(this.value)
-      : valueOrTransform
+    this.emit(() => {
+      const nextValue = isFunction(valueOrTransform)
+        ? valueOrTransform(this.value)
+        : valueOrTransform
 
-    if (!finalCompare(this.value, nextValue)) {
+      if (finalCompare(this.value, nextValue)) {
+        return false
+      }
+
       this.value = nextValue
-      register(this.subscribers)
-    }
 
-    emit()
+      return true
+    })
   }
 
   /**
@@ -161,12 +222,10 @@ export class Impulse<T> {
    * @returns a cleanup function that unsubscribes the `listener`.
    *
    * @version 1.0.0
+   *
+   * @deprecated The method is deprecated in favor of the `subscribe` higher-order function. It will be removed in the next major release.
    */
   public subscribe(listener: VoidFunction): VoidFunction {
-    if (WatchContext.warning(WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING)) {
-      return noop
-    }
-
     const countWhenSubscribes = this.subscribers.get(listener) ?? 0
 
     this.subscribers.set(listener, countWhenSubscribes + 1)

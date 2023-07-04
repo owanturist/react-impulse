@@ -1,22 +1,12 @@
-import { useEffect, useLayoutEffect } from "react"
-import { useSyncExternalStore } from "use-sync-external-store/shim"
+import {
+  DependencyList,
+  EffectCallback,
+  useEffect,
+  useLayoutEffect,
+} from "react"
 
-import { useWatchContext } from "./useWatchContext"
-
-const createEffectHook =
-  (useReactEffect: typeof useEffect): typeof useEffect =>
-  (effect, dependencies) => {
-    const { executeWatcher, subscribe, getVersion } = useWatchContext({
-      warningSource: null,
-    })
-
-    const buster = useSyncExternalStore(subscribe, getVersion, getVersion)
-
-    useReactEffect(
-      () => executeWatcher(effect),
-      dependencies && [...dependencies, buster],
-    )
-  }
+import { useScope } from "./useScope"
+import { injectScope } from "./Scope"
 
 /**
  * The hook is an `Impulse` version of the `React.useEffect` hook.
@@ -28,7 +18,18 @@ const createEffectHook =
  *
  * @version 1.0.0
  */
-export const useImpulseEffect = createEffectHook(useEffect)
+export function useImpulseEffect(
+  effect: () => ReturnType<EffectCallback>,
+  dependencies?: DependencyList,
+): void {
+  const getScope = useScope()
+
+  useEffect(
+    () => injectScope(getScope(), effect),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    dependencies && [...dependencies, getScope],
+  )
+}
 
 /**
  * The hook is an `Impulse` version of the `React.useLayoutEffect` hook.
@@ -40,4 +41,15 @@ export const useImpulseEffect = createEffectHook(useEffect)
  *
  * @version 1.0.0
  */
-export const useImpulseLayoutEffect = createEffectHook(useLayoutEffect)
+export function useImpulseLayoutEffect(
+  effect: () => ReturnType<EffectCallback>,
+  dependencies?: DependencyList,
+): void {
+  const getScope = useScope()
+
+  useLayoutEffect(
+    () => injectScope(getScope(), effect),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    dependencies && [...dependencies, getScope],
+  )
+}

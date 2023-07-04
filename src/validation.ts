@@ -1,92 +1,83 @@
-export type WarningSource =
+import { isFunction } from "./utils"
+
+type EXECUTION_CONTEXT =
+  | "subscribe"
+  | "watch"
   | "useWatchImpulse"
   | "useImpulseMemo"
-  | "watch"
-  | "subscribe"
 
-export type WarningSet = Record<WarningSource, null | string>
+let currentExecutionContext: null | EXECUTION_CONTEXT = null
 
-interface MakeWarningOptions {
-  isWatchAffected: boolean
-  isSubscribeAffected: boolean
-  isCritical: boolean
-  whatItDoes: string
-  method: string
+export function registerExecutionContext<
+  TArgs extends ReadonlyArray<unknown>,
+  TResult,
+>(
+  name: EXECUTION_CONTEXT,
+  func: (...args: TArgs) => TResult,
+  ...args: TArgs
+): TResult {
+  const prev = currentExecutionContext
+
+  currentExecutionContext = name
+
+  const result = func(...args)
+
+  currentExecutionContext = prev
+
+  return result
 }
 
-const makeHookWarningMessage = (
-  hook: string,
-  { isCritical, whatItDoes, method }: MakeWarningOptions,
-): string => {
-  const verb = isCritical ? "may" : "should"
+export function warnInsideContext(context: EXECUTION_CONTEXT, message: string) {
+  return (
+    _: unknown,
+    __: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    descriptor: TypedPropertyDescriptor<(...args: Array<never>) => any>,
+  ): void => {
+    if (
+      process.env.NODE_ENV === "production" ||
+      typeof console === "undefined" ||
+      // eslint-disable-next-line no-console
+      !isFunction(console.error)
+    ) {
+      /* c8 ignore next */
+      return
+    }
 
-  return `You ${verb} not call ${method} inside of the ${hook} callback. The ${hook} hook is for read-only operations but ${method} ${whatItDoes}.`
-}
+    const original = descriptor.value!
 
-const makeWatchWarningMessage = ({
-  isWatchAffected,
-  isCritical,
-  method,
-}: MakeWarningOptions): null | string => {
-  if (!isWatchAffected) {
-    return null
+    descriptor.value = function (...args) {
+      if (context === currentExecutionContext) {
+        // eslint-disable-next-line no-console
+        console.error(message)
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return original.apply(this, args)
+    }
   }
-
-  const verb = isCritical ? "may" : "should"
-
-  return `You ${verb} not call ${method} during rendering of watch(Component)`
 }
 
-const makeSubscribeWarningMessage = ({
-  isSubscribeAffected,
-  isCritical,
-  method,
-  whatItDoes,
-}: MakeWarningOptions): null | string => {
-  if (!isSubscribeAffected) {
-    return null
+export function stopInsideContext(context: EXECUTION_CONTEXT, message: string) {
+  return (
+    _: unknown,
+    __: string,
+    descriptor: TypedPropertyDescriptor<(...args: Array<never>) => void>,
+  ): void => {
+    const original = descriptor.value!
+
+    descriptor.value = function (...args) {
+      if (context !== currentExecutionContext) {
+        original.apply(this, args)
+      } else if (
+        process.env.NODE_ENV !== "production" &&
+        typeof console !== "undefined" &&
+        // eslint-disable-next-line no-console
+        isFunction(console.error)
+      ) {
+        // eslint-disable-next-line no-console
+        console.error(message)
+      }
+    }
   }
-
-  const verb = isCritical ? "may" : "should"
-
-  return `You ${verb} not call ${method} inside of the subscribe listener. The listener is for read-only operations but ${method} ${whatItDoes}.`
 }
-
-const makeWarningSet = (options: MakeWarningOptions): WarningSet => ({
-  useWatchImpulse: makeHookWarningMessage("useWatchImpulse(watcher)", options),
-  useImpulseMemo: makeHookWarningMessage("useImpulseMemo(factory)", options),
-  watch: makeWatchWarningMessage(options),
-  subscribe: makeSubscribeWarningMessage(options),
-})
-
-export const WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING = makeWarningSet({
-  method: "Impulse#of",
-  whatItDoes: "creates a new Impulse",
-  isCritical: false,
-  isWatchAffected: false,
-  isSubscribeAffected: true,
-})
-
-export const WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING = makeWarningSet({
-  method: "Impulse#clone",
-  whatItDoes: "clones an existing Impulse",
-  isCritical: false,
-  isWatchAffected: false,
-  isSubscribeAffected: true,
-})
-
-export const WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING = makeWarningSet({
-  method: "Impulse#setValue",
-  whatItDoes: "changes an existing Impulse",
-  isCritical: true,
-  isWatchAffected: true,
-  isSubscribeAffected: false,
-})
-
-export const WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING = makeWarningSet({
-  method: "Impulse#subscribe",
-  whatItDoes: "subscribes to an Impulse",
-  isCritical: true,
-  isWatchAffected: true,
-  isSubscribeAffected: true,
-})

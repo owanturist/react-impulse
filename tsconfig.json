@@ -16,6 +16,7 @@
     "noUnusedParameters": true,
     "noUncheckedIndexedAccess": true,
     "downlevelIteration": true,
+    "experimentalDecorators": true,
     "jsx": "react",
     "typeRoots": ["node_modules/@types"],
     "types": ["vitest/globals"]
