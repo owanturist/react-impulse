@@ -10,12 +10,6 @@ import {
   useWatchImpulse,
   watch,
 } from "../src"
-import {
-  WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING,
-  WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING,
-  WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING,
-  WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
-} from "../src/validation"
 import { noop, usePermanent } from "../src/utils"
 
 import { WithImpulse, WithListener } from "./common"
@@ -36,25 +30,16 @@ describe("calling Impulse.of()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useImpulseMemo,
+      "You should not call Impulse.of inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
       () => {
         return useImpulseMemo(() => Impulse.of(1).getValue(), [])
       },
     ],
     [
-      "inline useWatchImpulse",
-      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchImpulse,
+      "useWatchImpulse",
+      "You should not call Impulse.of inside of the useWatchImpulse factory. The useWatchImpulse hook is for read-only operations but Impulse.of creates a new Impulse.",
       () => {
         return useWatchImpulse(() => Impulse.of(1).getValue())
-      },
-    ],
-    [
-      "memoized useWatchImpulse",
-      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.useWatchImpulse,
-      () => {
-        return useWatchImpulse(
-          React.useCallback(() => Impulse.of(1).getValue(), []),
-        )
       },
     ],
   ])("warns when called inside %s", (_, message, useHook) => {
@@ -64,7 +49,7 @@ describe("calling Impulse.of()", () => {
       expect(console$error).toHaveBeenLastCalledWith(message)
     })
 
-    it.concurrent("returns the new impulse's value", () => {
+    it.concurrent("returns the new Impulse's value", () => {
       const { result } = renderHook(useHook)
 
       expect(result.current).toBe(1)
@@ -77,7 +62,7 @@ describe("calling Impulse.of()", () => {
     })
 
     expect(console$error).toHaveBeenLastCalledWith(
-      WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING.subscribe,
+      "You should not call Impulse.of inside of the subscribe listener. The listener is for read-only operations but Impulse.of creates a new Impulse.",
     )
   })
 
@@ -117,25 +102,16 @@ describe("calling Impulse#clone()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useImpulseMemo,
+      "You should not call Impulse#clone inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
         return useImpulseMemo(() => impulse.clone().getValue(), [impulse])
       },
     ],
     [
-      "inline useWatchImpulse",
-      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useWatchImpulse,
+      "useWatchImpulse",
+      "You should not call Impulse#clone inside of the useWatchImpulse factory. The useWatchImpulse hook is for read-only operations but Impulse#clone clones an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
         return useWatchImpulse(() => impulse.clone().getValue())
-      },
-    ],
-    [
-      "memoized useWatchImpulse",
-      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.useWatchImpulse,
-      ({ impulse }: WithImpulse<number>) => {
-        return useWatchImpulse(
-          React.useCallback(() => impulse.clone().getValue(), [impulse]),
-        )
       },
     ],
   ])("warn when called inside %s", (_, message, useHook) => {
@@ -166,33 +142,35 @@ describe("calling Impulse#clone()", () => {
     })
 
     expect(console$error).toHaveBeenLastCalledWith(
-      WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING.subscribe,
+      "You should not call Impulse#clone inside of the subscribe listener. The listener is for read-only operations but Impulse#clone clones an existing Impulse.",
     )
   })
 
-  it.concurrent.each([
+  describe.each([
     ["useImpulseEffect", useImpulseEffect],
     ["useImpulseLayoutEffect", useImpulseLayoutEffect],
-  ])("fine when called inside %s", (_, useImpulseEffectHook) => {
-    const initial = Impulse.of(1)
-    const { result } = renderHook(
-      (impulse) => {
-        const [state, setState] = React.useState(impulse)
+  ])("when called inside %s", (_, useImpulseEffectHook) => {
+    it("works fine, does not print an error", () => {
+      const initial = Impulse.of(1)
+      const { result } = renderHook(
+        (impulse) => {
+          const [state, setState] = React.useState(impulse)
 
-        useImpulseEffectHook(() => {
-          setState((x) => x.clone())
-        }, [])
+          useImpulseEffectHook(() => {
+            setState((x) => x.clone())
+          }, [])
 
-        return state
-      },
-      {
-        initialProps: initial,
-      },
-    )
+          return state
+        },
+        {
+          initialProps: initial,
+        },
+      )
 
-    expect(console$error).not.toHaveBeenCalled()
-    expect(result.current).not.toBe(initial)
-    expect(result.current.getValue()).toBe(1)
+      expect(console$error).not.toHaveBeenCalled()
+      expect(result.current).not.toBe(initial)
+      expect(result.current.getValue()).toBe(1)
+    })
   })
 
   it("fine when called inside watch()", () => {
@@ -215,7 +193,7 @@ describe("calling Impulse#setValue()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useImpulseMemo,
+      "You should not call Impulse#setValue inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
         return useImpulseMemo(() => {
           impulse.setValue(3)
@@ -225,27 +203,14 @@ describe("calling Impulse#setValue()", () => {
       },
     ],
     [
-      "inline useWatchImpulse",
-      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useWatchImpulse,
+      "useWatchImpulse",
+      "You should not call Impulse#setValue inside of the useWatchImpulse factory. The useWatchImpulse hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
         return useWatchImpulse(() => {
           impulse.setValue(3)
 
           return impulse.getValue()
         })
-      },
-    ],
-    [
-      "memoized useWatchImpulse",
-      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.useWatchImpulse,
-      ({ impulse }: WithImpulse<number>) => {
-        return useWatchImpulse(
-          React.useCallback(() => {
-            impulse.setValue(3)
-
-            return impulse.getValue()
-          }, [impulse]),
-        )
       },
     ],
   ])("warns when calling inside %s", (_, message, useHook) => {
@@ -268,25 +233,27 @@ describe("calling Impulse#setValue()", () => {
     })
   })
 
-  it.concurrent.each([
+  describe.each([
     ["useImpulseEffect", useImpulseEffect],
     ["useImpulseLayoutEffect", useImpulseLayoutEffect],
   ])("fine when called inside %s", (_, useImpulseEffectHook) => {
-    const { result } = renderHook(
-      (impulse) => {
-        useImpulseEffectHook(() => {
-          impulse.setValue((x) => x + 1)
-        }, [impulse])
+    it("works fine, does not print an error", () => {
+      const { result } = renderHook(
+        (impulse) => {
+          useImpulseEffectHook(() => {
+            impulse.setValue((x) => x + 1)
+          }, [impulse])
 
-        return impulse
-      },
-      {
-        initialProps: Impulse.of(1),
-      },
-    )
+          return impulse
+        },
+        {
+          initialProps: Impulse.of(1),
+        },
+      )
 
-    expect(console$error).not.toHaveBeenCalled()
-    expect(result.current.getValue()).toBe(2)
+      expect(console$error).not.toHaveBeenCalled()
+      expect(result.current.getValue()).toBe(2)
+    })
   })
 
   it("fine when called inside subscribe()", () => {
@@ -315,7 +282,7 @@ describe("calling Impulse#setValue()", () => {
     render(<Component impulse={Impulse.of(20)} />)
 
     expect(console$error).toHaveBeenCalledWith(
-      WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING.watch,
+      "You should not call Impulse#setValue during rendering of watch(Component)",
     )
     expect(screen.getByTestId("count")).toHaveTextContent("20")
   })
@@ -325,7 +292,7 @@ describe("calling Impulse#subscribe()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useImpulseMemo,
+      "You may not call Impulse#subscribe inside of the useImpulseMemo(factory) callback. The useImpulseMemo(factory) hook is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
       ({
         impulse,
         listener = vi.fn(),
@@ -338,8 +305,8 @@ describe("calling Impulse#subscribe()", () => {
       },
     ],
     [
-      "inline useWatchImpulse",
-      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useWatchImpulse,
+      "useWatchImpulse",
+      "You may not call Impulse#subscribe inside of the useWatchImpulse(watcher) callback. The useWatchImpulse(watcher) hook is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
       ({
         impulse,
         listener = vi.fn(),
@@ -349,22 +316,6 @@ describe("calling Impulse#subscribe()", () => {
 
           return impulse.getValue()
         })
-      },
-    ],
-    [
-      "memoized useWatchImpulse",
-      WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.useWatchImpulse,
-      ({
-        impulse,
-        listener = vi.fn(),
-      }: WithImpulse<number> & Partial<WithListener>) => {
-        return useWatchImpulse(
-          React.useCallback(() => {
-            impulse.subscribe(listener)
-
-            return impulse.getValue()
-          }, [impulse, listener]),
-        )
       },
     ],
   ])("warn when called inside %s", (_, message, useHook) => {
@@ -508,7 +459,7 @@ describe("calling Impulse#subscribe()", () => {
       render(<Component impulse={Impulse.of(20)} />)
 
       expect(console$error).toHaveBeenCalledWith(
-        WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.watch,
+        "You may not call Impulse#subscribe during rendering of watch(Component)",
       )
     })
 
@@ -558,7 +509,7 @@ describe("calling Impulse#subscribe()", () => {
       })
 
       expect(console$error).toHaveBeenCalledWith(
-        WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING.subscribe,
+        "You may not call Impulse#subscribe inside of the subscribe listener. The listener is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
       )
     })
 

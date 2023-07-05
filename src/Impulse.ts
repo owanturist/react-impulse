@@ -1,4 +1,4 @@
-import { Compare, eq, isFunction } from "./utils"
+import { Compare, eq, isFunction, noop } from "./utils"
 import { EMITTER_KEY, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { stopInsideContext, warnInsideContext } from "./validation"
@@ -217,6 +217,34 @@ export class Impulse<T> {
    *
    * @deprecated The method is deprecated in favor of the `subscribe` higher-order function. It will be removed in the next major release.
    */
+  @stopInsideContext(
+    "watch",
+    process.env.NODE_ENV === "production"
+      ? ""
+      : "You may not call Impulse#subscribe during rendering of watch(Component)",
+    noop,
+  )
+  @stopInsideContext(
+    "subscribe",
+    process.env.NODE_ENV === "production"
+      ? ""
+      : "You may not call Impulse#subscribe inside of the subscribe listener. The listener is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
+    noop,
+  )
+  @stopInsideContext(
+    "useImpulseMemo",
+    process.env.NODE_ENV === "production"
+      ? ""
+      : "You may not call Impulse#subscribe inside of the useImpulseMemo(factory) callback. The useImpulseMemo(factory) hook is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
+    noop,
+  )
+  @stopInsideContext(
+    "useWatchImpulse",
+    process.env.NODE_ENV === "production"
+      ? ""
+      : "You may not call Impulse#subscribe inside of the useWatchImpulse(watcher) callback. The useWatchImpulse(watcher) hook is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
+    noop,
+  )
   public subscribe(listener: VoidFunction): VoidFunction {
     const emitter = new ScopeEmitter(false)
 

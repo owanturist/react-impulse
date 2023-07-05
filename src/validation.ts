@@ -27,13 +27,13 @@ export function registerExecutionContext<
   return result
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PropDescriptor<TReturn = any> = TypedPropertyDescriptor<
+  (...args: Array<never>) => TReturn
+>
+
 export function warnInsideContext(context: EXECUTION_CONTEXT, message: string) {
-  return (
-    _: unknown,
-    __: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    descriptor: TypedPropertyDescriptor<(...args: Array<never>) => any>,
-  ): void => {
+  return (_: unknown, __: string, descriptor: PropDescriptor): void => {
     if (
       process.env.NODE_ENV === "production" ||
       typeof console === "undefined" ||
@@ -58,18 +58,33 @@ export function warnInsideContext(context: EXECUTION_CONTEXT, message: string) {
   }
 }
 
-export function stopInsideContext(context: EXECUTION_CONTEXT, message: string) {
+export function stopInsideContext(
+  context: EXECUTION_CONTEXT,
+  message: string,
+): (_: unknown, __: string, descriptor: PropDescriptor) => void
+export function stopInsideContext<TReturn>(
+  context: EXECUTION_CONTEXT,
+  message: string,
+  returns: TReturn,
+): (_: unknown, __: string, descriptor: PropDescriptor<TReturn>) => void
+export function stopInsideContext<TReturn = void>(
+  context: EXECUTION_CONTEXT,
+  message: string,
+  returns?: TReturn,
+) {
   return (
     _: unknown,
     __: string,
-    descriptor: TypedPropertyDescriptor<(...args: Array<never>) => void>,
+    descriptor: PropDescriptor<undefined | TReturn>,
   ): void => {
     const original = descriptor.value!
 
     descriptor.value = function (...args) {
       if (context !== currentExecutionContext) {
-        original.apply(this, args)
-      } else if (
+        return original.apply(this, args)
+      }
+
+      if (
         process.env.NODE_ENV !== "production" &&
         typeof console !== "undefined" &&
         // eslint-disable-next-line no-console
@@ -77,6 +92,8 @@ export function stopInsideContext(context: EXECUTION_CONTEXT, message: string) {
       ) {
         // eslint-disable-next-line no-console
         console.error(message)
+
+        return returns
       }
     }
   }
