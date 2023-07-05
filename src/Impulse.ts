@@ -53,14 +53,6 @@ export class Impulse<T> {
   private readonly emitters = new Set<ScopeEmitter>()
 
   /**
-   * It does not use `Set<VoidFunction>` here because the same listener might be subscribed
-   * many times to an Impulse, so it should not unsubscribe them all when one unsubscribes.
-   * By keeping track of how many times the same listener is subscribed it knows when to drop
-   * the listener from `subscribers`.
-   */
-  private readonly subscribers = new Map<VoidFunction, number>()
-
-  /**
    * The `Compare` function compares Impulse's value with the new value given via `Impulse#setValue`.
    * Whenever the function returns `true`, neither the value change nor it notifies the listeners subscribed via `Impulse#subscribe`.
    *
@@ -226,18 +218,10 @@ export class Impulse<T> {
    * @deprecated The method is deprecated in favor of the `subscribe` higher-order function. It will be removed in the next major release.
    */
   public subscribe(listener: VoidFunction): VoidFunction {
-    const countWhenSubscribes = this.subscribers.get(listener) ?? 0
+    const emitter = new ScopeEmitter(false)
 
-    this.subscribers.set(listener, countWhenSubscribes + 1)
+    emitter.attachTo(this.emitters)
 
-    return () => {
-      const countWhenUnsubscribes = this.subscribers.get(listener) ?? 0
-
-      if (countWhenUnsubscribes > 1) {
-        this.subscribers.set(listener, countWhenUnsubscribes - 1)
-      } else {
-        this.subscribers.delete(listener)
-      }
-    }
+    return emitter.onEmit(listener)
   }
 }

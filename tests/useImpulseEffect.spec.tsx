@@ -134,7 +134,7 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(6)
-        expect(value).toHaveProperty("subscribers.size", 1)
+        expect(value).toHaveProperty("emitters.size", 1)
         expect(onRender).toHaveBeenCalledOnce()
       })
 
@@ -185,6 +185,8 @@ describe.each([
             />
           </React.Profiler>,
         )
+        expect(value_1).toHaveProperty("emitters.size", 1)
+        expect(value_2).toHaveProperty("emitters.size", 0)
 
         vi.clearAllMocks()
 
@@ -197,14 +199,19 @@ describe.each([
             />
           </React.Profiler>,
         )
+        expect(value_1).toHaveProperty("emitters.size", 0)
+        expect(value_2).toHaveProperty("emitters.size", 1)
+
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onRender).toHaveBeenCalledOnce()
+        vi.clearAllMocks()
 
         act(() => {
           value_1.setValue(10)
         })
 
-        expect(onEffect).toHaveBeenCalledOnce()
-        expect(onRender).toHaveBeenCalledOnce()
-        expect(value_1).toHaveProperty("subscribers.size", 0)
+        expect(onEffect).not.toHaveBeenCalled()
+        expect(onRender).not.toHaveBeenCalled()
         vi.clearAllMocks()
 
         act(() => {
@@ -213,7 +220,8 @@ describe.each([
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(10)
         expect(onRender).toHaveBeenCalledOnce()
-        expect(value_2).toHaveProperty("subscribers.size", 1)
+        expect(value_1).toHaveProperty("emitters.size", 0)
+        expect(value_2).toHaveProperty("emitters.size", 1)
       })
 
       it("should call useEffect factory when non Impulse dep changes", () => {
@@ -237,7 +245,7 @@ describe.each([
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(9)
         expect(onRender).toHaveBeenCalledOnce()
-        expect(value).toHaveProperty("subscribers.size", 1)
+        expect(value).toHaveProperty("emitters.size", 1)
         vi.clearAllMocks()
 
         act(() => {
@@ -246,7 +254,7 @@ describe.each([
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(12)
         expect(onRender).toHaveBeenCalledOnce()
-        expect(value).toHaveProperty("subscribers.size", 1)
+        expect(value).toHaveProperty("emitters.size", 1)
       })
     })
 
@@ -281,8 +289,8 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(10)
-        expect(first).toHaveProperty("subscribers.size", 1)
-        expect(second).toHaveProperty("subscribers.size", 1)
+        expect(first).toHaveProperty("emitters.size", 1)
+        expect(second).toHaveProperty("emitters.size", 1)
         vi.clearAllMocks()
 
         act(() => {
@@ -299,8 +307,8 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(18)
-        expect(first).toHaveProperty("subscribers.size", 1)
-        expect(second).toHaveProperty("subscribers.size", 1)
+        expect(first).toHaveProperty("emitters.size", 1)
+        expect(second).toHaveProperty("emitters.size", 1)
       })
     })
 
@@ -341,10 +349,10 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(10)
-        expect(list).toHaveProperty("subscribers.size", 1)
-        expect(_0).toHaveProperty("subscribers.size", 1)
-        expect(_1).toHaveProperty("subscribers.size", 1)
-        expect(_2).toHaveProperty("subscribers.size", 0)
+        expect(list).toHaveProperty("emitters.size", 1)
+        expect(_0).toHaveProperty("emitters.size", 1)
+        expect(_1).toHaveProperty("emitters.size", 1)
+        expect(_2).toHaveProperty("emitters.size", 0)
         vi.clearAllMocks()
 
         act(() => {
@@ -369,7 +377,7 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(26)
-        expect(_2).toHaveProperty("subscribers.size", 1)
+        expect(_2).toHaveProperty("emitters.size", 1)
         vi.clearAllMocks()
 
         act(() => {
@@ -378,10 +386,10 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(18)
-        expect(list).toHaveProperty("subscribers.size", 1)
-        expect(_0).toHaveProperty("subscribers.size", 0)
-        expect(_1).toHaveProperty("subscribers.size", 1)
-        expect(_2).toHaveProperty("subscribers.size", 1)
+        expect(list).toHaveProperty("emitters.size", 1)
+        expect(_0).toHaveProperty("emitters.size", 0)
+        expect(_1).toHaveProperty("emitters.size", 1)
+        expect(_2).toHaveProperty("emitters.size", 1)
       })
     })
 
@@ -423,7 +431,7 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(6)
-        expect(value).toHaveProperty("subscribers.size", 1)
+        expect(value).toHaveProperty("emitters.size", 1)
       })
 
       it("calls effect when inner useState changes", () => {
@@ -440,7 +448,7 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(9)
-        expect(value).toHaveProperty("subscribers.size", 1)
+        expect(value).toHaveProperty("emitters.size", 1)
       })
 
       it("calls effect when Impulse inside an effect changes", () => {
@@ -459,7 +467,7 @@ describe.each([
 
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(8)
-        expect(value).toHaveProperty("subscribers.size", 1)
+        expect(value).toHaveProperty("emitters.size", 1)
       })
     })
   })

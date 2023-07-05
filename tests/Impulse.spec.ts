@@ -29,7 +29,7 @@ describe("Impulse.of()", () => {
 })
 
 describe("Impulse#compare", () => {
-  describe("when creating a impulse with Impulse.of", () => {
+  describe("when creating an impulse with Impulse.of", () => {
     it.concurrent("assigns eq by default", () => {
       const impulse = Impulse.of({ count: 0 })
 
@@ -49,7 +49,7 @@ describe("Impulse#compare", () => {
     })
   })
 
-  describe("when creating a impulse with Impulse.clone", () => {
+  describe("when creating an impulse with Impulse.clone", () => {
     it.concurrent("inherits default the source impulse compare", () => {
       const impulse = Impulse.of({ count: 0 })
 
@@ -336,6 +336,11 @@ describe("Impulse#subscribe", () => {
     impulse.setValue(Counter.inc)
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 2 })
+    vi.clearAllMocks()
+
+    impulse.setValue(Counter.inc)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith({ count: 3 })
     vi.clearAllMocks()
 
     unsubscribe()

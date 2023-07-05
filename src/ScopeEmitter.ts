@@ -16,14 +16,19 @@ export class ScopeEmitter {
 
       ScopeEmitter.queue.push(execute())
 
-      const uniq = new WeakSet<ScopeEmitter>()
+      const uniq = new WeakSet<VoidFunction>()
 
       ScopeEmitter.queue.forEach((emitters) => {
         emitters?.forEach((emitter) => {
-          if (!uniq.has(emitter)) {
-            uniq.add(emitter)
+          if (emitter.emit != null && !uniq.has(emitter.emit)) {
+            uniq.add(emitter.emit)
             emitter.increment()
-            emitter.emit?.()
+
+            if (emitter.shouldDetachOnEmit) {
+              emitter.detachAll()
+            }
+
+            emitter.emit()
           }
         })
       })
@@ -34,6 +39,9 @@ export class ScopeEmitter {
     }
   }
 
+  // TODO remove shouldDetachOnEmit when Impulse#subscribe is gone
+  public constructor(private readonly shouldDetachOnEmit: boolean = true) {}
+
   private readonly cleanups: Array<VoidFunction> = []
 
   private version = 0
@@ -42,7 +50,6 @@ export class ScopeEmitter {
 
   private increment(): void {
     this.version = (this.version + 1) % 10e9
-    this.detachAll()
   }
 
   public detachAll(): void {
@@ -62,6 +69,7 @@ export class ScopeEmitter {
 
     return () => {
       this.increment()
+      this.detachAll()
       this.emit = null
     }
   }
