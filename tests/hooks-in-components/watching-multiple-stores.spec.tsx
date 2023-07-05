@@ -162,7 +162,7 @@ describe("watching multiple impulses", () => {
     ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
     ["watch()", WatchedApp, 1],
   ])(
-    "watches multiple impulses with %s",
+    "handles multiple Impulses with %s",
     (_, App, unnecessaryRerendersCount) => {
       const firstCount = Impulse.of(0)
       const secondCount = Impulse.of(0)
@@ -180,7 +180,7 @@ describe("watching multiple impulses", () => {
         />,
       )
 
-      // initial render and watcher setup
+      // initial render
       expect(onRender).toHaveBeenCalledOnce()
       expect(onFirstCountRender).toHaveBeenCalledOnce()
       expect(onSecondCountRender).toHaveBeenCalledOnce()

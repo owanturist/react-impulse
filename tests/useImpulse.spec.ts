@@ -127,7 +127,7 @@ describe("with lazy initial value", () => {
 })
 
 describe("with compare function", () => {
-  it("applies Object.is by default", () => {
+  it("applies eq by default", () => {
     const spy_eq = vi.spyOn(utils, "eq")
     const { result } = renderHook(() => useImpulse(0))
 
@@ -141,7 +141,7 @@ describe("with compare function", () => {
     expect(spy_eq).toHaveBeenLastCalledWith(0, 1)
   })
 
-  it("applies Object.is when passing null as compare", () => {
+  it("applies eq when passing null as compare", () => {
     const spy_eq = vi.spyOn(utils, "eq")
     const { result } = renderHook(() => useImpulse(0, null))
 

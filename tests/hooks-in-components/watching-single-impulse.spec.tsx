@@ -125,7 +125,7 @@ describe("watching single impulse", () => {
     ["multiple watchers", MultipleWatchersApp, 0],
     ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
     ["watch()", WatchedApp, 1],
-  ])("watches single impulse with %s", (_, App, unnecessaryRerendersCount) => {
+  ])("handles single Impulse with %s", (_, App, unnecessaryRerendersCount) => {
     const count = Impulse.of(0)
     const onCounterRender = vi.fn()
     const onRender = vi.fn()
@@ -138,7 +138,7 @@ describe("watching single impulse", () => {
       />,
     )
 
-    // initial render and watcher setup
+    // initial render
     expect(onRender).toHaveBeenCalledOnce()
     expect(onCounterRender).toHaveBeenCalledOnce()
     expect(screen.queryByText("more than one")).not.toBeInTheDocument()
@@ -182,5 +182,50 @@ describe("watching single impulse", () => {
     expect(screen.queryByText("more than one")).toBeInTheDocument()
     expect(screen.queryByText("less than four")).not.toBeInTheDocument()
     expect(screen.getByTestId("count")).toHaveTextContent("4")
+  })
+})
+
+describe("when drilling an Impulse", () => {
+  it("should not re-render of the host component when an Impulse value changes", () => {
+    const Host: React.FC<{
+      count: Impulse<number>
+      onRender: VoidFunction
+      onCounterRender: VoidFunction
+    }> = ({ count, onRender, onCounterRender }) => (
+      <>
+        <React.Profiler id="host" onRender={onRender} />
+        <CounterComponent count={count} onRender={onCounterRender} />
+      </>
+    )
+
+    const count = Impulse.of(5)
+    const onRender = vi.fn()
+    const onCounterRender = vi.fn()
+
+    render(
+      <Host
+        count={count}
+        onRender={onRender}
+        onCounterRender={onCounterRender}
+      />,
+    )
+
+    expect(screen.getByTestId("count")).toHaveTextContent("5")
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onCounterRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    fireEvent.click(screen.getByTestId("increment"))
+    expect(screen.getByTestId("count")).toHaveTextContent("6")
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    act(() => {
+      count.setValue((x) => x * 2)
+    })
+    expect(screen.getByTestId("count")).toHaveTextContent("12")
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onCounterRender).toHaveBeenCalledOnce()
   })
 })
