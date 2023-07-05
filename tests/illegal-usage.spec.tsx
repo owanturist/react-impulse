@@ -43,13 +43,13 @@ describe("calling Impulse.of()", () => {
       },
     ],
   ])("warns when called inside %s", (_, message, useHook) => {
-    it.concurrent("calls console.error", () => {
+    it("calls console.error", () => {
       renderHook(useHook)
 
       expect(console$error).toHaveBeenLastCalledWith(message)
     })
 
-    it.concurrent("returns the new Impulse's value", () => {
+    it("returns the new Impulse's value", () => {
       const { result } = renderHook(useHook)
 
       expect(result.current).toBe(1)
@@ -66,7 +66,7 @@ describe("calling Impulse.of()", () => {
     )
   })
 
-  it.concurrent.each([
+  it.each([
     ["useImpulseEffect", useImpulseEffect],
     ["useImpulseLayoutEffect", useImpulseLayoutEffect],
   ])("fine when called inside %s", (_, useImpulseEffectHook) => {
@@ -84,7 +84,7 @@ describe("calling Impulse.of()", () => {
     expect(result.current.getValue()).toBe(10)
   })
 
-  it.concurrent("fine when called inside watch()", () => {
+  it("fine when called inside watch()", () => {
     const Component = watch(() => {
       const state = usePermanent(() => Impulse.of(20))
 
@@ -115,7 +115,7 @@ describe("calling Impulse#clone()", () => {
       },
     ],
   ])("warn when called inside %s", (_, message, useHook) => {
-    it.concurrent("calls console.error", () => {
+    it("calls console.error", () => {
       const impulse = Impulse.of(2)
       renderHook(useHook, {
         initialProps: { impulse },
@@ -124,7 +124,7 @@ describe("calling Impulse#clone()", () => {
       expect(console$error).toHaveBeenLastCalledWith(message)
     })
 
-    it.concurrent("returns the cloned impulse's value", () => {
+    it("returns the cloned impulse's value", () => {
       const impulse = Impulse.of(2)
       const { result } = renderHook(useHook, {
         initialProps: { impulse },
@@ -214,7 +214,7 @@ describe("calling Impulse#setValue()", () => {
       },
     ],
   ])("warns when calling inside %s", (_, message, useHook) => {
-    it.concurrent("calls console.error", () => {
+    it("calls console.error", () => {
       const impulse = Impulse.of(4)
       renderHook(useHook, {
         initialProps: { impulse },
@@ -223,7 +223,7 @@ describe("calling Impulse#setValue()", () => {
       expect(console$error).toHaveBeenLastCalledWith(message)
     })
 
-    it.concurrent("does not change the impulse's value", () => {
+    it("does not change the impulse's value", () => {
       const impulse = Impulse.of(4)
       const { result } = renderHook(useHook, {
         initialProps: { impulse },
@@ -319,7 +319,7 @@ describe("calling Impulse#subscribe()", () => {
       },
     ],
   ])("warn when called inside %s", (_, message, useHook) => {
-    it.concurrent("calls console.error", () => {
+    it("calls console.error", () => {
       const impulse = Impulse.of(4)
 
       renderHook(useHook, {
@@ -329,7 +329,7 @@ describe("calling Impulse#subscribe()", () => {
       expect(console$error).toHaveBeenLastCalledWith(message)
     })
 
-    it.concurrent("returns the impulse's value", () => {
+    it("returns the impulse's value", () => {
       const impulse = Impulse.of(4)
       const { result } = renderHook(useHook, {
         initialProps: { impulse },
@@ -338,7 +338,7 @@ describe("calling Impulse#subscribe()", () => {
       expect(result.current).toBe(4)
     })
 
-    it.concurrent("returns noop function as unsubscribe", () => {
+    it("returns noop function as unsubscribe", () => {
       const impulse = Impulse.of(4)
       const impulse$subscribe = vi.spyOn(impulse, "subscribe")
 
@@ -349,7 +349,7 @@ describe("calling Impulse#subscribe()", () => {
       expect(impulse$subscribe).toHaveReturnedWith(noop)
     })
 
-    it.concurrent("does not call the listener on impulse's change", () => {
+    it("does not call the listener on impulse's change", () => {
       const impulse = Impulse.of(4)
       const listener = vi.fn()
       const correctListener = vi.fn()
@@ -373,7 +373,7 @@ describe("calling Impulse#subscribe()", () => {
     ["useImpulseEffect", useImpulseEffect],
     ["useImpulseLayoutEffect", useImpulseLayoutEffect],
   ])("fine when called inside %s", (_, useImpulseEffectHook) => {
-    it.concurrent("calls subscribed listener", () => {
+    it("calls subscribed listener", () => {
       const initial = Impulse.of(1)
       const listener = vi.fn()
       const { result } = renderHook(
@@ -401,7 +401,7 @@ describe("calling Impulse#subscribe()", () => {
       expect(listener).toHaveBeenCalledOnce()
     })
 
-    it.concurrent("un-subscribers on cleanup", () => {
+    it("un-subscribers on cleanup", () => {
       const impulse_1 = Impulse.of(1)
       const impulse_2 = Impulse.of(10)
       const listener = vi.fn()

@@ -61,7 +61,7 @@ describe.each([
     ],
   ])("%s", (__, useHook) => {
     describe("when active", () => {
-      it.concurrent("should return impulse's value on init", () => {
+      it("should return impulse's value on init", () => {
         const impulse = Impulse.of({ count: 1 })
         const { result } = renderHook(useHook, {
           initialProps: { impulse: impulse, isActive: true },
@@ -70,7 +70,7 @@ describe.each([
         expect(result.current).toStrictEqual({ count: 1 })
       })
 
-      it.concurrent("should return updated impulse's value", () => {
+      it("should return updated impulse's value", () => {
         const impulse = Impulse.of({ count: 1 })
 
         const { result } = renderHook(useHook, {
@@ -83,7 +83,7 @@ describe.each([
         expect(result.current).toStrictEqual({ count: 2 })
       })
 
-      it.concurrent("should return replaced impulse's value", () => {
+      it("should return replaced impulse's value", () => {
         const impulse_1 = Impulse.of({ count: 1 })
         const impulse_2 = Impulse.of({ count: 10 })
 
@@ -107,7 +107,7 @@ describe.each([
         expect(result.current).toStrictEqual({ count: 20 })
       })
 
-      it.concurrent("should return fallback value when turns inactive", () => {
+      it("should return fallback value when turns inactive", () => {
         const impulse = Impulse.of({ count: 1 })
         const { result, rerender } = renderHook(useHook, {
           initialProps: { impulse: impulse, isActive: true },
@@ -119,7 +119,7 @@ describe.each([
     })
 
     describe("when inactive", () => {
-      it.concurrent("should return fallback value when inactive", () => {
+      it("should return fallback value when inactive", () => {
         const impulse = Impulse.of({ count: 1 })
         const { result } = renderHook(useHook, {
           initialProps: { impulse: impulse, isActive: false },
@@ -128,22 +128,19 @@ describe.each([
         expect(result.current).toStrictEqual({ count: -1 })
       })
 
-      it.concurrent(
-        "should return fallback value when inactive when impulse updates",
-        () => {
-          const impulse = Impulse.of({ count: 1 })
-          const { result } = renderHook(useHook, {
-            initialProps: { impulse: impulse, isActive: false },
-          })
+      it("should return fallback value when inactive when impulse updates", () => {
+        const impulse = Impulse.of({ count: 1 })
+        const { result } = renderHook(useHook, {
+          initialProps: { impulse: impulse, isActive: false },
+        })
 
-          act(() => {
-            impulse.setValue({ count: 2 })
-          })
-          expect(result.current).toStrictEqual({ count: -1 })
-        },
-      )
+        act(() => {
+          impulse.setValue({ count: 2 })
+        })
+        expect(result.current).toStrictEqual({ count: -1 })
+      })
 
-      it.concurrent("should return fallback value when turns active", () => {
+      it("should return fallback value when turns active", () => {
         const impulse = Impulse.of({ count: 1 })
         const { result, rerender } = renderHook(useHook, {
           initialProps: { impulse: impulse, isActive: false },
@@ -158,23 +155,20 @@ describe.each([
         expect(result.current).toStrictEqual({ count: 2 })
       })
 
-      it.concurrent(
-        "should not trigger the watcher when the impulse updates",
-        () => {
-          const spy = vi.fn()
-          const impulse = Impulse.of({ count: 1 })
-          renderHook(useHook, {
-            initialProps: { impulse, isActive: false, spy },
-          })
+      it("should not trigger the watcher when the impulse updates", () => {
+        const spy = vi.fn()
+        const impulse = Impulse.of({ count: 1 })
+        renderHook(useHook, {
+          initialProps: { impulse, isActive: false, spy },
+        })
 
-          spy.mockReset()
+        spy.mockReset()
 
-          act(() => {
-            impulse.setValue(Counter.inc)
-          })
-          expect(spy).not.toHaveBeenCalled()
-        },
-      )
+        act(() => {
+          impulse.setValue(Counter.inc)
+        })
+        expect(spy).not.toHaveBeenCalled()
+      })
     })
   })
 })

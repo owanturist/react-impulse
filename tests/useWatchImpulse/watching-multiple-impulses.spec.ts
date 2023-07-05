@@ -59,13 +59,13 @@ describe.each([
       return { first, second, result }
     }
 
-    it.concurrent("initiates with expected result", () => {
+    it("initiates with expected result", () => {
       const { result } = setup()
 
       expect(result.current).toStrictEqual({ count: 5 })
     })
 
-    it.concurrent("increments only first", () => {
+    it("increments only first", () => {
       const { first, result } = setup()
 
       act(() => {
@@ -74,7 +74,7 @@ describe.each([
       expect(result.current).toStrictEqual({ count: 6 })
     })
 
-    it.concurrent("increments only second", () => {
+    it("increments only second", () => {
       const { second, result } = setup()
 
       act(() => {
@@ -83,7 +83,7 @@ describe.each([
       expect(result.current).toStrictEqual({ count: 6 })
     })
 
-    it.concurrent("increments both first and second", () => {
+    it("increments both first and second", () => {
       const { first, second, result } = setup()
 
       act(() => {
@@ -214,7 +214,7 @@ describe.each([
         }
       }
 
-      it.concurrent("calls watchers the same amount when initiates", () => {
+      it("calls watchers the same amount when initiates", () => {
         const { spySingle, spyMultiple, resultSingle, resultMultiple } = setup()
 
         expect(resultSingle.current).toStrictEqual({ count: 1 })
@@ -222,110 +222,98 @@ describe.each([
         expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
       })
 
-      it.concurrent(
-        "calls watchers the same amount when only first and second",
-        () => {
-          const {
-            first,
-            second,
-            spySingle,
-            spyMultiple,
-            resultSingle,
-            resultMultiple,
-          } = setup()
+      it("calls watchers the same amount when only first and second", () => {
+        const {
+          first,
+          second,
+          spySingle,
+          spyMultiple,
+          resultSingle,
+          resultMultiple,
+        } = setup()
 
-          act(() => {
+        act(() => {
+          batch(() => {
+            first.setValue(Counter.inc)
+            second.setValue(Counter.inc)
+          })
+        })
+        expect(resultSingle.current).toStrictEqual({ count: 2 })
+        expect(resultMultiple.current).toStrictEqual({ count: 8 })
+        expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+      })
+
+      it("calls watchers the same amount when only first and third", () => {
+        const {
+          first,
+          third,
+          spySingle,
+          spyMultiple,
+          resultSingle,
+          resultMultiple,
+        } = setup()
+
+        act(() => {
+          batch(() => {
+            first.setValue(Counter.inc)
+            third.setValue(Counter.inc)
+          })
+        })
+        expect(resultSingle.current).toStrictEqual({ count: 2 })
+        expect(resultMultiple.current).toStrictEqual({ count: 8 })
+        expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+      })
+
+      it("calls watchers the same amount when first, second and third", () => {
+        const {
+          first,
+          second,
+          third,
+          spySingle,
+          spyMultiple,
+          resultSingle,
+          resultMultiple,
+        } = setup()
+
+        act(() => {
+          batch(() => {
             batch(() => {
               first.setValue(Counter.inc)
               second.setValue(Counter.inc)
             })
+
+            third.setValue(Counter.inc)
           })
-          expect(resultSingle.current).toStrictEqual({ count: 2 })
-          expect(resultMultiple.current).toStrictEqual({ count: 8 })
-          expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
-        },
-      )
+        })
+        expect(resultSingle.current).toStrictEqual({ count: 2 })
+        expect(resultMultiple.current).toStrictEqual({ count: 9 })
+        expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+      })
 
-      it.concurrent(
-        "calls watchers the same amount when only first and third",
-        () => {
-          const {
-            first,
-            third,
-            spySingle,
-            spyMultiple,
-            resultSingle,
-            resultMultiple,
-          } = setup()
+      it("doesn't call single watcher when changes only second and third", () => {
+        const {
+          second,
+          third,
+          spySingle,
+          spyMultiple,
+          resultSingle,
+          resultMultiple,
+        } = setup()
 
-          act(() => {
-            batch(() => {
-              first.setValue(Counter.inc)
-              third.setValue(Counter.inc)
-            })
+        spySingle.mockReset()
+        spyMultiple.mockReset()
+
+        act(() => {
+          batch(() => {
+            second.setValue(Counter.inc)
+            third.setValue(Counter.inc)
           })
-          expect(resultSingle.current).toStrictEqual({ count: 2 })
-          expect(resultMultiple.current).toStrictEqual({ count: 8 })
-          expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
-        },
-      )
-
-      it.concurrent(
-        "calls watchers the same amount when first, second and third",
-        () => {
-          const {
-            first,
-            second,
-            third,
-            spySingle,
-            spyMultiple,
-            resultSingle,
-            resultMultiple,
-          } = setup()
-
-          act(() => {
-            batch(() => {
-              batch(() => {
-                first.setValue(Counter.inc)
-                second.setValue(Counter.inc)
-              })
-
-              third.setValue(Counter.inc)
-            })
-          })
-          expect(resultSingle.current).toStrictEqual({ count: 2 })
-          expect(resultMultiple.current).toStrictEqual({ count: 9 })
-          expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
-        },
-      )
-
-      it.concurrent(
-        "doesn't call single watcher when changes only second and third",
-        () => {
-          const {
-            second,
-            third,
-            spySingle,
-            spyMultiple,
-            resultSingle,
-            resultMultiple,
-          } = setup()
-
-          spySingle.mockReset()
-          spyMultiple.mockReset()
-
-          act(() => {
-            batch(() => {
-              second.setValue(Counter.inc)
-              third.setValue(Counter.inc)
-            })
-          })
-          expect(resultSingle.current).toStrictEqual({ count: 1 })
-          expect(resultMultiple.current).toStrictEqual({ count: 8 })
-          expect(spySingle).not.toHaveBeenCalled()
-          expect(spyMultiple).toHaveBeenCalled()
-        },
-      )
+        })
+        expect(resultSingle.current).toStrictEqual({ count: 1 })
+        expect(resultMultiple.current).toStrictEqual({ count: 8 })
+        expect(spySingle).not.toHaveBeenCalled()
+        expect(spyMultiple).toHaveBeenCalled()
+      })
     })
   },
 )

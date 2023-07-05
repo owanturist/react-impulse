@@ -38,7 +38,7 @@ describe.each([
       },
     ],
   ])("%s", (__, useHook) => {
-    it.concurrent("swapping compare", () => {
+    it("swapping compare", () => {
       const initial = { count: 0 }
       const impulse = Impulse.of(initial)
 

@@ -537,93 +537,87 @@ describe.each([
   })
 })
 
-it.concurrent(
-  "triggers the effect when either regular or additional dependencies change",
-  () => {
-    const spy = vi.fn()
-    const impulse = Impulse.of(2)
-    const { rerender } = renderHook(
-      ({ left, right }) => {
-        useImpulseEffect(() => {
-          spy(left + right.getValue())
-        }, [left, right])
-      },
-      {
-        initialProps: { left: 1, right: impulse },
-      },
-    )
+it("triggers the effect when either regular or additional dependencies change", () => {
+  const spy = vi.fn()
+  const impulse = Impulse.of(2)
+  const { rerender } = renderHook(
+    ({ left, right }) => {
+      useImpulseEffect(() => {
+        spy(left + right.getValue())
+      }, [left, right])
+    },
+    {
+      initialProps: { left: 1, right: impulse },
+    },
+  )
 
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(3)
-    vi.clearAllMocks()
+  expect(spy).toHaveBeenCalledOnce()
+  expect(spy).toHaveBeenLastCalledWith(3)
+  vi.clearAllMocks()
 
-    rerender({ left: 2, right: impulse })
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(4)
-    vi.clearAllMocks()
+  rerender({ left: 2, right: impulse })
+  expect(spy).toHaveBeenCalledOnce()
+  expect(spy).toHaveBeenLastCalledWith(4)
+  vi.clearAllMocks()
 
-    rerender({ left: 2, right: impulse })
-    expect(spy).not.toHaveBeenCalled()
-    vi.clearAllMocks()
+  rerender({ left: 2, right: impulse })
+  expect(spy).not.toHaveBeenCalled()
+  vi.clearAllMocks()
 
-    act(() => {
-      impulse.setValue(3)
-    })
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(5)
-    vi.clearAllMocks()
+  act(() => {
+    impulse.setValue(3)
+  })
+  expect(spy).toHaveBeenCalledOnce()
+  expect(spy).toHaveBeenLastCalledWith(5)
+  vi.clearAllMocks()
 
-    act(() => {
-      impulse.setValue(3)
-    })
-    expect(spy).not.toHaveBeenCalled()
-    vi.clearAllMocks()
+  act(() => {
+    impulse.setValue(3)
+  })
+  expect(spy).not.toHaveBeenCalled()
+  vi.clearAllMocks()
 
-    rerender({ left: 2, right: Impulse.of(4) })
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(6)
-    vi.clearAllMocks()
-  },
-)
+  rerender({ left: 2, right: Impulse.of(4) })
+  expect(spy).toHaveBeenCalledOnce()
+  expect(spy).toHaveBeenLastCalledWith(6)
+  vi.clearAllMocks()
+})
 
-it.concurrent(
-  "triggers the effect when Impulses are not listened in dependencies",
-  () => {
-    const spy = vi.fn()
-    const left = Impulse.of(1)
-    const right = Impulse.of(2)
-    const { rerender } = renderHook(
-      ({ state }) => {
-        useImpulseEffect(() => {
-          spy(state.left.getValue() + state.right.getValue())
-        }, [state])
-      },
-      {
-        initialProps: { state: { left, right } },
-      },
-    )
+it("triggers the effect when Impulses are not listened in dependencies", () => {
+  const spy = vi.fn()
+  const left = Impulse.of(1)
+  const right = Impulse.of(2)
+  const { rerender } = renderHook(
+    ({ state }) => {
+      useImpulseEffect(() => {
+        spy(state.left.getValue() + state.right.getValue())
+      }, [state])
+    },
+    {
+      initialProps: { state: { left, right } },
+    },
+  )
 
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(3)
-    vi.clearAllMocks()
+  expect(spy).toHaveBeenCalledOnce()
+  expect(spy).toHaveBeenLastCalledWith(3)
+  vi.clearAllMocks()
 
-    rerender({ state: { left, right } })
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(3)
-    vi.clearAllMocks()
+  rerender({ state: { left, right } })
+  expect(spy).toHaveBeenCalledOnce()
+  expect(spy).toHaveBeenLastCalledWith(3)
+  vi.clearAllMocks()
 
-    act(() => {
-      left.setValue(2)
-    })
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(4)
-    vi.clearAllMocks()
+  act(() => {
+    left.setValue(2)
+  })
+  expect(spy).toHaveBeenCalledOnce()
+  expect(spy).toHaveBeenLastCalledWith(4)
+  vi.clearAllMocks()
 
-    act(() => {
-      right.setValue(3)
-    })
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(5)
-    vi.clearAllMocks()
-  },
-)
+  act(() => {
+    right.setValue(3)
+  })
+  expect(spy).toHaveBeenCalledOnce()
+  expect(spy).toHaveBeenLastCalledWith(5)
+  vi.clearAllMocks()
+})

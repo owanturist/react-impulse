@@ -56,14 +56,14 @@ describe.each([
     return { spy, impulse, rerender }
   }
 
-  it.concurrent("should call watcher 1 time on init", () => {
+  it("should call watcher 1 time on init", () => {
     const { spy } = setup()
 
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
-  it.concurrent("should call watcher 1 time on subsequent renders", () => {
+  it("should call watcher 1 time on subsequent renders", () => {
     const { spy, impulse, rerender } = setup()
 
     spy.mockReset()
@@ -73,25 +73,22 @@ describe.each([
     expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
-  it.concurrent(
-    "should call watcher 2 times when a watching impulse changes",
-    () => {
-      const { spy, impulse } = setup()
+  it("should call watcher 2 times when a watching impulse changes", () => {
+    const { spy, impulse } = setup()
 
-      spy.mockReset()
+    spy.mockReset()
 
-      act(() => {
-        impulse.setValue(Counter.inc)
-      })
+    act(() => {
+      impulse.setValue(Counter.inc)
+    })
 
-      // 1st executes watcher to extract new result
-      // --it causes reconciliation--
-      // 2nd extracts the watcher result
-      expect(spy).toHaveBeenCalledTimes(2)
-      expect(spy).toHaveBeenNthCalledWith(1, { count: 2 })
-      expect(spy).toHaveBeenNthCalledWith(2, { count: 2 })
-    },
-  )
+    // 1st executes watcher to extract new result
+    // --it causes reconciliation--
+    // 2nd extracts the watcher result
+    expect(spy).toHaveBeenCalledTimes(2)
+    expect(spy).toHaveBeenNthCalledWith(1, { count: 2 })
+    expect(spy).toHaveBeenNthCalledWith(2, { count: 2 })
+  })
 })
 
 describe.each([
@@ -151,14 +148,14 @@ describe.each([
     return { spy, impulse, rerender }
   }
 
-  it.concurrent("should call watcher 1 time on init", () => {
+  it("should call watcher 1 time on init", () => {
     const { spy } = setup()
 
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
-  it.concurrent("should not call watcher on subsequent renders", () => {
+  it("should not call watcher on subsequent renders", () => {
     const { spy, impulse, rerender } = setup()
 
     spy.mockReset()
@@ -167,19 +164,16 @@ describe.each([
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it.concurrent(
-    "should call watcher 1 time when a watching impulse changes",
-    () => {
-      const { spy, impulse } = setup()
+  it("should call watcher 1 time when a watching impulse changes", () => {
+    const { spy, impulse } = setup()
 
-      spy.mockReset()
+    spy.mockReset()
 
-      act(() => {
-        impulse.setValue(Counter.inc)
-      })
+    act(() => {
+      impulse.setValue(Counter.inc)
+    })
 
-      expect(spy).toHaveBeenCalledOnce()
-      expect(spy).toHaveBeenLastCalledWith({ count: 2 })
-    },
-  )
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith({ count: 2 })
+  })
 })

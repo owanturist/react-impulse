@@ -119,8 +119,8 @@ describe("watching misses when defined after useEffect #140", () => {
 
 describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321", () => {
   it.each([
-    ["toString", (value: unknown) => String(value)],
-    ["toJSON", (value: unknown) => JSON.stringify(value)],
+    ["toString()", (value: unknown) => String(value)],
+    ["toJSON()", (value: unknown) => JSON.stringify(value)],
   ])("watches %s execution", (_, convert) => {
     const Component: React.FC<{
       count: Impulse<number>
@@ -176,7 +176,7 @@ describe("return the same component type from watch #322", () => {
   })
 })
 
-it("in StrictMode, fails due to unexpected .setValue during watch call #336", () => {
+describe("in StrictMode, fails due to unexpected .setValue during watch call #336", () => {
   const Button: React.FC<{
     count: Impulse<number>
   }> = watch(({ count }) => {
@@ -189,25 +189,27 @@ it("in StrictMode, fails due to unexpected .setValue during watch call #336", ()
     )
   })
 
-  const impulse = Impulse.of(0)
+  it("does not fail in strict mode", () => {
+    const impulse = Impulse.of(0)
 
-  render(
-    <React.StrictMode>
-      <Button count={impulse} />
-    </React.StrictMode>,
-  )
+    render(
+      <React.StrictMode>
+        <Button count={impulse} />
+      </React.StrictMode>,
+    )
 
-  const btn = screen.getByRole("button")
-  expect(btn).toHaveTextContent("0")
+    const btn = screen.getByRole("button")
+    expect(btn).toHaveTextContent("0")
 
-  fireEvent.click(btn)
-  expect(btn).toHaveTextContent("1")
+    fireEvent.click(btn)
+    expect(btn).toHaveTextContent("1")
 
-  fireEvent.click(btn)
-  expect(btn).toHaveTextContent("2")
+    fireEvent.click(btn)
+    expect(btn).toHaveTextContent("2")
 
-  act(() => {
-    impulse.setValue((x) => x + 1)
+    act(() => {
+      impulse.setValue((x) => x + 1)
+    })
+    expect(btn).toHaveTextContent("3")
   })
-  expect(btn).toHaveTextContent("3")
 })

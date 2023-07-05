@@ -4,13 +4,13 @@ import { eq } from "../src/utils"
 import { Counter } from "./common"
 
 describe("Impulse.of()", () => {
-  it.concurrent("should create an impulse with undefined initial value", () => {
+  it("should create an impulse with undefined initial value", () => {
     const impulse = Impulse.of<number>()
 
     expect(impulse.getValue()).toBeUndefined()
   })
 
-  it.concurrent("updates the impulse with a new value", () => {
+  it("updates the impulse with a new value", () => {
     const impulse = Impulse.of<number>()
 
     impulse.setValue(1)
@@ -18,7 +18,7 @@ describe("Impulse.of()", () => {
     expect(impulse.getValue()).toBe(1)
   })
 
-  it.concurrent("updates the impulse with a undefined", () => {
+  it("updates the impulse with a undefined", () => {
     const impulse = Impulse.of<number>()
 
     impulse.setValue(1)
@@ -30,19 +30,19 @@ describe("Impulse.of()", () => {
 
 describe("Impulse#compare", () => {
   describe("when creating an impulse with Impulse.of", () => {
-    it.concurrent("assigns eq by default", () => {
+    it("assigns eq by default", () => {
       const impulse = Impulse.of({ count: 0 })
 
       expect(impulse.compare).toBe(eq)
     })
 
-    it.concurrent("assigns eq by `null`", () => {
+    it("assigns eq by `null`", () => {
       const impulse = Impulse.of({ count: 0 }, null)
 
       expect(impulse.compare).toBe(eq)
     })
 
-    it.concurrent("assigns custom function", () => {
+    it("assigns custom function", () => {
       const impulse = Impulse.of({ count: 0 }, Counter.compare)
 
       expect(impulse.compare).toBe(Counter.compare)
@@ -50,27 +50,27 @@ describe("Impulse#compare", () => {
   })
 
   describe("when creating an impulse with Impulse.clone", () => {
-    it.concurrent("inherits default the source impulse compare", () => {
+    it("inherits default the source impulse compare", () => {
       const impulse = Impulse.of({ count: 0 })
 
       expect(impulse.clone().compare).toBe(impulse.compare)
       expect(impulse.clone().compare).toBe(eq)
     })
 
-    it.concurrent("inherits custom the source impulse compare", () => {
+    it("inherits custom the source impulse compare", () => {
       const impulse = Impulse.of({ count: 0 }, Counter.compare)
 
       expect(impulse.clone().compare).toBe(impulse.compare)
       expect(impulse.clone().compare).toBe(Counter.compare)
     })
 
-    it.concurrent("assigns eq by `null`", () => {
+    it("assigns eq by `null`", () => {
       const impulse = Impulse.of({ count: 0 }, Counter.compare)
 
       expect(impulse.clone(Counter.clone, null).compare).toBe(eq)
     })
 
-    it.concurrent("assigns custom function", () => {
+    it("assigns custom function", () => {
       const impulse = Impulse.of({ count: 0 })
 
       expect(impulse.clone(Counter.clone, Counter.compare).compare).toBe(
@@ -80,7 +80,7 @@ describe("Impulse#compare", () => {
   })
 
   describe("when using Impulse#setValue", () => {
-    it.concurrent("uses Impulse#compare by default", () => {
+    it("uses Impulse#compare by default", () => {
       const initial = { count: 0 }
       const impulse = Impulse.of(initial, Counter.compare)
 
@@ -88,7 +88,7 @@ describe("Impulse#compare", () => {
       expect(impulse.getValue()).toBe(initial)
     })
 
-    it.concurrent("replaces with eq when `null`", () => {
+    it("replaces with eq when `null`", () => {
       const initial = { count: 0 }
       const impulse = Impulse.of(initial, Counter.compare)
 
@@ -97,7 +97,7 @@ describe("Impulse#compare", () => {
       expect(impulse.getValue()).toStrictEqual(initial)
     })
 
-    it.concurrent("replaces with custom function", () => {
+    it("replaces with custom function", () => {
       const initial = { count: 0 }
       const impulse = Impulse.of(initial, Counter.compare)
 
@@ -233,7 +233,7 @@ describe("Impulse#getValue(transform)", () => {
 })
 
 describe("Impulse#clone", () => {
-  it.concurrent("creates new Impulse with clone()", () => {
+  it("creates new Impulse with clone()", () => {
     const impulse_1 = Impulse.of({ count: 0 })
     const impulse_2 = impulse_1.clone()
 
@@ -241,7 +241,7 @@ describe("Impulse#clone", () => {
     expect(impulse_1.getValue()).toBe(impulse_2.getValue())
   })
 
-  it.concurrent("creates new Impulse with clone(transform)", () => {
+  it("creates new Impulse with clone(transform)", () => {
     const impulse_1 = Impulse.of({ count: 0 })
     const impulse_2 = impulse_1.clone(Counter.clone)
 
@@ -250,7 +250,7 @@ describe("Impulse#clone", () => {
     expect(impulse_1.getValue()).toStrictEqual(impulse_2.getValue())
   })
 
-  it.concurrent("creates new nested Impulse with clone(transform)", () => {
+  it("creates new nested Impulse with clone(transform)", () => {
     const impulse_1 = Impulse.of({
       count: Impulse.of(0),
       name: Impulse.of("John"),
@@ -286,7 +286,7 @@ describe("Impulse#clone", () => {
     expect(impulse_2.getValue().name.getValue()).toBe("John")
   })
 
-  it.concurrent("creates shallow nested Impulse with clone()", () => {
+  it("creates shallow nested Impulse with clone()", () => {
     const impulse_1 = Impulse.of({
       count: Impulse.of(0),
       name: Impulse.of("John"),
@@ -321,7 +321,7 @@ describe("Impulse#clone", () => {
 })
 
 describe("Impulse#subscribe", () => {
-  it.concurrent("subscribes and unsubscribes to value changes", () => {
+  it("subscribes and unsubscribes to value changes", () => {
     const impulse = Impulse.of({ count: 0 })
     const spy = vi.fn<[Counter]>()
 
@@ -349,7 +349,7 @@ describe("Impulse#subscribe", () => {
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it.concurrent("emits the same listener once", () => {
+  it("emits the same listener once", () => {
     const spy = vi.fn()
     const impulse = Impulse.of({ count: 0 })
     impulse.subscribe(spy)
@@ -359,32 +359,29 @@ describe("Impulse#subscribe", () => {
     expect(spy).toHaveBeenCalledOnce()
   })
 
-  it.concurrent(
-    "emits the same listener until it is subscribed at least ones",
-    () => {
-      const spy = vi.fn()
-      const impulse = Impulse.of({ count: 0 })
-      const unsubscribe_1 = impulse.subscribe(spy)
-      const unsubscribe_2 = impulse.subscribe(spy)
-      const unsubscribe_3 = impulse.subscribe(spy)
+  it("emits the same listener until it is subscribed at least ones", () => {
+    const spy = vi.fn()
+    const impulse = Impulse.of({ count: 0 })
+    const unsubscribe_1 = impulse.subscribe(spy)
+    const unsubscribe_2 = impulse.subscribe(spy)
+    const unsubscribe_3 = impulse.subscribe(spy)
 
-      unsubscribe_1()
-      impulse.setValue(Counter.inc)
-      expect(spy).toHaveBeenCalledOnce()
-      vi.clearAllMocks()
+    unsubscribe_1()
+    impulse.setValue(Counter.inc)
+    expect(spy).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
-      unsubscribe_2()
-      impulse.setValue(Counter.inc)
-      expect(spy).toHaveBeenCalledOnce()
-      vi.clearAllMocks()
+    unsubscribe_2()
+    impulse.setValue(Counter.inc)
+    expect(spy).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
-      unsubscribe_3()
-      impulse.setValue(Counter.inc)
-      expect(spy).not.toHaveBeenCalled()
-    },
-  )
+    unsubscribe_3()
+    impulse.setValue(Counter.inc)
+    expect(spy).not.toHaveBeenCalled()
+  })
 
-  it.concurrent("ignores second unsubscribe call", () => {
+  it("ignores second unsubscribe call", () => {
     const spy = vi.fn()
     const impulse = Impulse.of({ count: 0 })
     const unsubscribe = impulse.subscribe(spy)
@@ -400,7 +397,7 @@ describe("Impulse#subscribe", () => {
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it.concurrent("subscribes multiple listeners", () => {
+  it("subscribes multiple listeners", () => {
     const spy_1 = vi.fn()
     const spy_2 = vi.fn()
     const impulse = Impulse.of({ count: 0 })
@@ -424,7 +421,7 @@ describe("Impulse#subscribe", () => {
     expect(spy_2).not.toHaveBeenCalled()
   })
 
-  it.concurrent("does not emit when a new value is comparably equal", () => {
+  it("does not emit when a new value is comparably equal", () => {
     const spy = vi.fn()
     const spyCompare = vi.fn(Counter.compare)
     const impulse = Impulse.of({ count: 0 })
@@ -455,7 +452,7 @@ describe("Impulse#subscribe", () => {
 })
 
 describe("Impulse#toJSON()", () => {
-  it.concurrent("converts value to JSON", () => {
+  it("converts value to JSON", () => {
     const impulse = Impulse.of({
       number: 0,
       string: "biba",
@@ -477,7 +474,7 @@ describe("Impulse#toJSON()", () => {
     )
   })
 
-  it.concurrent("applies replace fields", () => {
+  it("applies replace fields", () => {
     const impulse = Impulse.of({ first: 1, second: 2, third: 3 })
 
     expect(JSON.stringify(impulse, ["first", "third"])).toMatchInlineSnapshot(
@@ -485,7 +482,7 @@ describe("Impulse#toJSON()", () => {
     )
   })
 
-  it.concurrent("applies replace function", () => {
+  it("applies replace function", () => {
     const impulse = Impulse.of({ first: 1, second: 2, third: 3 })
 
     expect(
@@ -499,7 +496,7 @@ describe("Impulse#toJSON()", () => {
     ).toMatchInlineSnapshot('"{\\"first\\":2,\\"second\\":4,\\"third\\":6}"')
   })
 
-  it.concurrent("applies spaces", () => {
+  it("applies spaces", () => {
     const impulse = Impulse.of({ first: 1, second: 2, third: 3 })
 
     expect(JSON.stringify(impulse, null, 2)).toMatchInlineSnapshot(
@@ -513,7 +510,7 @@ describe("Impulse#toJSON()", () => {
     )
   })
 
-  it.concurrent("stringifies nested Impulse", () => {
+  it("stringifies nested Impulse", () => {
     const store = Impulse.of({
       first: Impulse.of(1),
       second: Impulse.of([Impulse.of("1"), Impulse.of(false)]),
@@ -532,7 +529,7 @@ describe("Impulse#toJSON()", () => {
 })
 
 describe("Impulse#toString", () => {
-  it.concurrent.each([
+  it.each([
     ["number", 1, "1"],
     ["boolean", false, "false"],
     ["null", null, "null"],
