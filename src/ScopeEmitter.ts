@@ -1,3 +1,5 @@
+import { noop } from "./utils"
+
 /**
  * A context to track Impulse#getValue usage inside the watcher function.
  * The tracked calls will subscribe related stores to updates,
@@ -20,7 +22,7 @@ export class ScopeEmitter {
 
       ScopeEmitter.queue.forEach((emitters) => {
         emitters?.forEach((emitter) => {
-          if (emitter.emit != null && !uniq.has(emitter.emit)) {
+          if (!uniq.has(emitter.emit)) {
             uniq.add(emitter.emit)
             emitter.increment()
 
@@ -46,7 +48,7 @@ export class ScopeEmitter {
 
   private version = 0
 
-  private emit: null | VoidFunction = null
+  private emit: VoidFunction = noop
 
   private increment(): void {
     this.version = (this.version + 1) % 10e9
@@ -70,7 +72,7 @@ export class ScopeEmitter {
     return () => {
       this.increment()
       this.detachAll()
-      this.emit = null
+      this.emit = noop
     }
   }
 
