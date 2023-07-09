@@ -1,18 +1,20 @@
 import { isFunction } from "./utils"
 
-type EXECUTION_CONTEXT =
+export type ExecutionContext =
   | "subscribe"
   | "watch"
   | "useWatchImpulse"
   | "useImpulseMemo"
 
-let currentExecutionContext: null | EXECUTION_CONTEXT = null
+export type ExecutionContextSpec = Partial<Record<ExecutionContext, string>>
+
+let currentExecutionContext: null | ExecutionContext = null
 
 export function registerExecutionContext<
   TArgs extends ReadonlyArray<unknown>,
   TResult,
 >(
-  name: EXECUTION_CONTEXT,
+  name: ExecutionContext,
   func: (...args: TArgs) => TResult,
   ...args: TArgs
 ): TResult {
@@ -32,7 +34,7 @@ type PropDescriptor<TReturn = any> = TypedPropertyDescriptor<
   (...args: Array<never>) => TReturn
 >
 
-export function warnInsideContext(context: EXECUTION_CONTEXT, message: string) {
+export function warnInsideContext(spec: ExecutionContextSpec) {
   return (_: unknown, __: string, descriptor: PropDescriptor): void => {
     if (
       process.env.NODE_ENV === "production" ||
@@ -47,7 +49,9 @@ export function warnInsideContext(context: EXECUTION_CONTEXT, message: string) {
     const original = descriptor.value!
 
     descriptor.value = function (...args) {
-      if (context === currentExecutionContext) {
+      const message = currentExecutionContext && spec[currentExecutionContext]
+
+      if (message) {
         // eslint-disable-next-line no-console
         console.error(message)
       }
@@ -59,17 +63,14 @@ export function warnInsideContext(context: EXECUTION_CONTEXT, message: string) {
 }
 
 export function stopInsideContext(
-  context: EXECUTION_CONTEXT,
-  message: string,
+  spec: ExecutionContextSpec,
 ): (_: unknown, __: string, descriptor: PropDescriptor) => void
 export function stopInsideContext<TReturn>(
-  context: EXECUTION_CONTEXT,
-  message: string,
+  spec: ExecutionContextSpec,
   returns: TReturn,
 ): (_: unknown, __: string, descriptor: PropDescriptor<TReturn>) => void
 export function stopInsideContext<TReturn = void>(
-  context: EXECUTION_CONTEXT,
-  message: string,
+  spec: ExecutionContextSpec,
   returns?: TReturn,
 ) {
   return (
@@ -80,7 +81,9 @@ export function stopInsideContext<TReturn = void>(
     const original = descriptor.value!
 
     descriptor.value = function (...args) {
-      if (context !== currentExecutionContext) {
+      const message = currentExecutionContext && spec[currentExecutionContext]
+
+      if (message == null) {
         return original.apply(this, args)
       }
 
@@ -88,13 +91,14 @@ export function stopInsideContext<TReturn = void>(
         process.env.NODE_ENV !== "production" &&
         typeof console !== "undefined" &&
         // eslint-disable-next-line no-console
-        isFunction(console.error)
+        isFunction(console.error) &&
+        message
       ) {
         // eslint-disable-next-line no-console
         console.error(message)
-
-        return returns
       }
+
+      return returns
     }
   }
 }
