@@ -46,27 +46,32 @@ export function watch<TProps>(component: FC<TProps>): FC<TProps> {
   return ComponentWithScope
 }
 
-function memo<TProps>(
+/**
+ * The function should be defined as `const` to prevent rollup failure.
+ */
+const memo = <TProps>(
   component: FC<TProps>,
   propsAreEqual?: Compare<Readonly<TProps>>,
-): MemoExoticComponent<FC<TProps>> {
+): MemoExoticComponent<FC<TProps>> => {
   return React_memo(watch(component), propsAreEqual)
 }
 
-function forwardRefMemo<TNode, TProps>(
+const forwardRefMemo = <TNode, TProps>(
   render: ForwardRefRenderFunction<TNode, TProps>,
   propsAreEqual?: Compare<
     Readonly<PropsWithoutRef<TProps> & RefAttributes<TNode>>
   >,
 ): MemoExoticComponent<
   ForwardRefExoticComponent<PropsWithoutRef<TProps> & RefAttributes<TNode>>
-> {
+> => {
   return React_memo(forwardRef(render), propsAreEqual)
 }
 
-function forwardRef<TNode, TProps>(
+const forwardRef = <TNode, TProps>(
   render: ForwardRefRenderFunction<TNode, TProps>,
-): ForwardRefExoticComponent<PropsWithoutRef<TProps> & RefAttributes<TNode>> {
+): ForwardRefExoticComponent<
+  PropsWithoutRef<TProps> & RefAttributes<TNode>
+> => {
   return React_forwardRef(
     watch(render) as ForwardRefRenderFunction<TNode, TProps>,
   )
