@@ -81,11 +81,6 @@ export class Impulse<T> {
     return String(this.getValue())
   }
 
-  // TODO remove this method
-  protected emit(execute: () => boolean): void {
-    ScopeEmitter.schedule(() => (execute() ? this.emitters : null))
-  }
-
   /**
    * Clones an Impulse.
    *
@@ -173,18 +168,18 @@ export class Impulse<T> {
   ): void {
     const finalCompare = compare ?? eq
 
-    this.emit(() => {
+    ScopeEmitter.schedule(() => {
       const nextValue = isFunction(valueOrTransform)
         ? valueOrTransform(this.value)
         : valueOrTransform
 
       if (finalCompare(this.value, nextValue)) {
-        return false
+        return null
       }
 
       this.value = nextValue
 
-      return true
+      return this.emitters
     })
   }
 
