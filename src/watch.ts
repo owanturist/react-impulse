@@ -28,7 +28,6 @@ export function watch<TProps>(component: FC<TProps>): FC<TProps> {
   const ComponentWithScope: FC<TProps> = (props, ctx: unknown) => {
     const getScope = useScope()
 
-    // it uses Object.assign to reduce output file size by avoiding the spread operator
     return registerExecutionContext(
       "watch",
       injectScope,
@@ -39,7 +38,7 @@ export function watch<TProps>(component: FC<TProps>): FC<TProps> {
     )
   }
 
-  ComponentWithScope.displayName = `ComponentWithScope${
+  ComponentWithScope.displayName = `ImpulseWatcher${
     component.displayName ?? component.name
   }`
 
@@ -47,7 +46,7 @@ export function watch<TProps>(component: FC<TProps>): FC<TProps> {
 }
 
 /**
- * The function should be defined as `const` to prevent rollup failure.
+ * The function should be defined via `const` to prevent rollup failure.
  */
 const memo = <TProps>(
   component: FC<TProps>,

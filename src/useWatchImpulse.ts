@@ -15,7 +15,7 @@ import { Scope, injectScope } from "./Scope"
  * @version 1.0.0
  */
 export function useWatchImpulse<T>(
-  fabric: () => T,
+  watcher: () => T,
   compare?: null | Compare<T>,
 ): T {
   const transform = useCallback(
@@ -24,10 +24,10 @@ export function useWatchImpulse<T>(
         "useWatchImpulse",
         injectScope,
         scope,
-        fabric,
+        watcher,
       )
     },
-    [fabric],
+    [watcher],
   )
   const value = useScope(transform, useEvent(compare ?? eq))
 
