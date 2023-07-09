@@ -1,5 +1,5 @@
 import { useCallback } from "react"
-import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector"
+import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector"
 
 import { ScopeEmitter } from "./ScopeEmitter"
 import { EMITTER_KEY, Scope } from "./Scope"

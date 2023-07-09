@@ -656,8 +656,8 @@ describe("watch.forwardRef()", () => {
   })
 })
 
-describe("wild cases", () => {
-  it("should work with `React.lazy()`", async () => {
+describe.skipIf("lazy" in React)("using inside React.lazy()", () => {
+  it("should work fine", async () => {
     const Component = watch.memo<{ count: Impulse<number> }>(({ count }) => (
       <div data-testid="count">{count.getValue()}</div>
     ))
