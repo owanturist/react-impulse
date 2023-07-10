@@ -29,6 +29,7 @@ describe("single Impulse", () => {
     impulse.setValue(2)
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(2)
+    expect(impulse).toHaveProperty("emitters.size", 1)
   })
 
   it("doesn't execute listener after unsubscribe", () => {
@@ -61,6 +62,7 @@ describe("single Impulse", () => {
     spy.mockReset()
     impulse.setValue(2)
     expect(spy).not.toHaveBeenCalled()
+    expect(impulse).toHaveProperty("emitters.size", 0)
   })
 
   it("executes listener on every Impulse update", () => {
@@ -165,6 +167,8 @@ describe("multiple Impulses", () => {
     impulse_2.setValue(4)
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(7)
+    expect(impulse_1).toHaveProperty("emitters.size", 1)
+    expect(impulse_2).toHaveProperty("emitters.size", 1)
   })
 
   it("doesn't execute listener after unsubscribe", () => {
@@ -224,40 +228,6 @@ describe("multiple Impulses", () => {
     expect(spy).not.toHaveBeenCalled()
     expect(impulse_1).toHaveProperty("emitters.size", 1)
     expect(impulse_2).toHaveProperty("emitters.size", 0)
-  })
-
-  it("executes listener on every Impulse update", () => {
-    const spy = vi.fn()
-    const impulse_1 = Impulse.of(1)
-    const impulse_2 = Impulse.of(2)
-
-    subscribe(() => {
-      spy(impulse_1.getValue() + impulse_2.getValue())
-    })
-
-    spy.mockReset()
-    impulse_1.setValue(2)
-    impulse_2.setValue(3)
-    expect(spy).toHaveBeenCalledTimes(2)
-    expect(spy).toHaveBeenLastCalledWith(5)
-  })
-
-  it("executes listener ones for batched Impulse updates", () => {
-    const spy = vi.fn()
-    const impulse_1 = Impulse.of(1)
-    const impulse_2 = Impulse.of(2)
-
-    subscribe(() => {
-      spy(impulse_1.getValue() + impulse_2.getValue())
-    })
-
-    spy.mockReset()
-    batch(() => {
-      impulse_1.setValue(2)
-      impulse_2.setValue(3)
-    })
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(5)
   })
 })
 
@@ -321,5 +291,41 @@ describe("nested Impulses", () => {
     })
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(7)
+  })
+})
+
+describe("batching", () => {
+  it("executes listener on every Impulse update", () => {
+    const spy = vi.fn()
+    const impulse_1 = Impulse.of(1)
+    const impulse_2 = Impulse.of(2)
+
+    subscribe(() => {
+      spy(impulse_1.getValue() + impulse_2.getValue())
+    })
+
+    spy.mockReset()
+    impulse_1.setValue(2)
+    impulse_2.setValue(3)
+    expect(spy).toHaveBeenCalledTimes(2)
+    expect(spy).toHaveBeenLastCalledWith(5)
+  })
+
+  it("executes listener ones for batched Impulse updates", () => {
+    const spy = vi.fn()
+    const impulse_1 = Impulse.of(1)
+    const impulse_2 = Impulse.of(2)
+
+    subscribe(() => {
+      spy(impulse_1.getValue() + impulse_2.getValue())
+    })
+
+    spy.mockReset()
+    batch(() => {
+      impulse_1.setValue(2)
+      impulse_2.setValue(3)
+    })
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(5)
   })
 })

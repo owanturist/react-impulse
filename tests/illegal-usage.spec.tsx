@@ -124,7 +124,7 @@ describe("calling Impulse#clone()", () => {
       expect(console$error).toHaveBeenLastCalledWith(message)
     })
 
-    it("returns the cloned impulse's value", () => {
+    it("returns the cloned Impulse's value", () => {
       const impulse = Impulse.of(2)
       const { result } = renderHook(useHook, {
         initialProps: { impulse },
@@ -223,7 +223,7 @@ describe("calling Impulse#setValue()", () => {
       expect(console$error).toHaveBeenLastCalledWith(message)
     })
 
-    it("does not change the impulse's value", () => {
+    it("does not change the Impulse's value", () => {
       const impulse = Impulse.of(4)
       const { result } = renderHook(useHook, {
         initialProps: { impulse },
@@ -329,7 +329,7 @@ describe("calling Impulse#subscribe()", () => {
       expect(console$error).toHaveBeenLastCalledWith(message)
     })
 
-    it("returns the impulse's value", () => {
+    it("returns the Impulse's value", () => {
       const impulse = Impulse.of(4)
       const { result } = renderHook(useHook, {
         initialProps: { impulse },
@@ -349,7 +349,7 @@ describe("calling Impulse#subscribe()", () => {
       expect(impulse$subscribe).toHaveReturnedWith(noop)
     })
 
-    it("does not call the listener on impulse's change", () => {
+    it("does not call the listener on Impulse's change", () => {
       const impulse = Impulse.of(4)
       const listener = vi.fn()
       const correctListener = vi.fn()
@@ -463,7 +463,7 @@ describe("calling Impulse#subscribe()", () => {
       )
     })
 
-    it("renders the impulse's value", () => {
+    it("renders the Impulse's value", () => {
       render(<Component impulse={Impulse.of(20)} />)
 
       expect(screen.getByTestId("count")).toHaveTextContent("20")
@@ -477,7 +477,7 @@ describe("calling Impulse#subscribe()", () => {
       expect(impulse$subscribe).toHaveReturnedWith(noop)
     })
 
-    it("does not call the listener on impulse's change", () => {
+    it("does not call the listener on Impulse's change", () => {
       const impulse = Impulse.of(4)
       const correctListener = vi.fn()
 
@@ -524,7 +524,7 @@ describe("calling Impulse#subscribe()", () => {
       expect(impulse$subscribe).toHaveReturnedWith(noop)
     })
 
-    it("does not call the listener on impulse's change", () => {
+    it("does not call the listener on Impulse's change", () => {
       const impulse = Impulse.of(4)
       const correctListener = vi.fn()
 

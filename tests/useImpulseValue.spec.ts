@@ -28,7 +28,7 @@ it("returns the same value when the hook re-renders", () => {
   expect(result.current).toStrictEqual({ count: 0 })
 })
 
-it("watches after impulse's updates", () => {
+it("watches after Impulse's updates", () => {
   const initial = { count: 0 }
   const impulse = Impulse.of(initial)
 

@@ -61,7 +61,7 @@ describe.each([
     ],
   ])("%s", (__, useHook) => {
     describe("when active", () => {
-      it("should return impulse's value on init", () => {
+      it("should return Impulse's value on init", () => {
         const impulse = Impulse.of({ count: 1 })
         const { result } = renderHook(useHook, {
           initialProps: { impulse: impulse, isActive: true },
@@ -71,7 +71,7 @@ describe.each([
         expect(impulse).toHaveProperty("emitters.size", 1)
       })
 
-      it("should return updated impulse's value", () => {
+      it("should return updated Impulse's value", () => {
         const impulse = Impulse.of({ count: 1 })
 
         const { result } = renderHook(useHook, {
@@ -85,7 +85,7 @@ describe.each([
         expect(impulse).toHaveProperty("emitters.size", 1)
       })
 
-      it("should return replaced impulse's value", () => {
+      it("should return replaced Impulse's value", () => {
         const impulse_1 = Impulse.of({ count: 1 })
         const impulse_2 = Impulse.of({ count: 10 })
 
@@ -151,7 +151,7 @@ describe.each([
         expect(impulse).toHaveProperty("emitters.size", 0)
       })
 
-      it("should return fallback value when turns active", () => {
+      it("should return Impulse's value when turns active", () => {
         const impulse = Impulse.of({ count: 1 })
         const { result, rerender } = renderHook(useHook, {
           initialProps: { impulse: impulse, isActive: false },

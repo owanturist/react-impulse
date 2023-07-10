@@ -38,7 +38,7 @@ describe.each([
       },
     ],
   ])("%s", (__, useHook) => {
-    it("watches the impulse's changes", () => {
+    it("watches the Impulse's changes", () => {
       const impulse = Impulse.of({ count: 1 })
 
       const { result } = renderHook(useHook, {
@@ -171,7 +171,7 @@ describe("transform Impulse's value inside watcher", () => {
       },
     ],
   ])("%s", (__, useHookWithoutCompare) => {
-    it("produces new value on each impulse's update without comparator", () => {
+    it("produces new value on each Impulse's update without comparator", () => {
       const impulse = Impulse.of({ count: 1 })
 
       const { result, rerender } = renderHook(useHookWithoutCompare, {
@@ -313,7 +313,7 @@ describe("transform Impulse's value inside watcher", () => {
       },
     ],
   ])(
-    "when impulse's changes under %s are comparably equal with",
+    "when Impulse's changes under %s are comparably equal with",
     (_, useHookWithoutCompare) => {
       it.each([
         ["without comparator", useHookWithoutCompare],
