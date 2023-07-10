@@ -1,4 +1,5 @@
 import type { ScopeEmitter } from "./ScopeEmitter"
+import type { Func } from "./utils"
 
 export const EMITTER_KEY = Symbol("scope")
 
@@ -15,13 +16,13 @@ let currentInjectedScope = STATIC_SCOPE
 
 export function injectScope<TArgs extends ReadonlyArray<unknown>, TResult>(
   scope: Scope,
-  runtime: (...args: TArgs) => TResult,
+  execute: Func<TArgs, TResult>,
   ...args: TArgs
 ): TResult {
   const prevScope = currentInjectedScope
 
   currentInjectedScope = scope
-  const result = runtime(...args)
+  const result = execute(...args)
   currentInjectedScope = prevScope
 
   return result

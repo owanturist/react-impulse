@@ -1,4 +1,4 @@
-import { isFunction } from "./utils"
+import { Func, isFunction } from "./utils"
 
 export type ExecutionContext =
   | "subscribe"
@@ -15,14 +15,14 @@ export function registerExecutionContext<
   TResult,
 >(
   name: ExecutionContext,
-  func: (...args: TArgs) => TResult,
+  execute: Func<TArgs, TResult>,
   ...args: TArgs
 ): TResult {
   const prev = currentExecutionContext
 
   currentExecutionContext = name
 
-  const result = func(...args)
+  const result = execute(...args)
 
   currentExecutionContext = prev
 
@@ -31,7 +31,7 @@ export function registerExecutionContext<
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PropDescriptor<TReturn = any> = TypedPropertyDescriptor<
-  (...args: Array<never>) => TReturn
+  Func<Array<never>, TReturn>
 >
 
 export function warnInsideContext(spec: ExecutionContextSpec) {

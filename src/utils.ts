@@ -15,6 +15,10 @@ import {
  */
 export type Compare<T> = (left: T, right: T) => boolean
 
+export type Func<TArgs extends ReadonlyArray<unknown>, TResult = void> = (
+  ...args: TArgs
+) => TResult
+
 /**
  * @private
  */
@@ -28,7 +32,7 @@ export function noop(): void {
 }
 
 export function isFunction<
-  TFunction extends (...args: ReadonlyArray<never>) => unknown,
+  TFunction extends Func<ReadonlyArray<never>, unknown>,
 >(anything: unknown): anything is TFunction {
   return typeof anything === "function"
 }
@@ -37,8 +41,8 @@ export const useIsomorphicEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect
 
 export function useEvent<TArgs extends ReadonlyArray<unknown>, TResult>(
-  handler: (...args: TArgs) => TResult,
-): (...args: TArgs) => TResult {
+  handler: Func<TArgs, TResult>,
+): Func<TArgs, TResult> {
   const handlerRef = useRef<(...args: TArgs) => TResult>()
 
   useIsomorphicEffect(() => {
