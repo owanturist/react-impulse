@@ -11,6 +11,21 @@ import {
   watch,
 } from "../src"
 import { noop, usePermanent } from "../src/utils"
+import {
+  SUBSCRIBE_CALLING_IMPULSE_CLONE_MESSAGE,
+  SUBSCRIBE_CALLING_IMPULSE_OF_MESSAGE,
+  SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
+  USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE_MESSAGE,
+  USE_IMPULSE_MEMO_CALLING_IMPULSE_OF_MESSAGE,
+  USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE_MESSAGE,
+  USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
+  USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE_MESSAGE,
+  USE_WATCH_IMPULSE_CALLING_IMPULSE_OF_MESSAGE,
+  USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE_MESSAGE,
+  USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
+  WATCH_CALLING_IMPULSE_SET_VALUE_MESSAGE,
+  WATCH_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
+} from "../src/Impulse"
 
 import { WithImpulse, WithListener } from "./common"
 
@@ -30,14 +45,14 @@ describe("calling Impulse.of()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      "You should not call Impulse.of inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
+      USE_IMPULSE_MEMO_CALLING_IMPULSE_OF_MESSAGE,
       () => {
         return useImpulseMemo(() => Impulse.of(1).getValue(), [])
       },
     ],
     [
       "useWatchImpulse",
-      "You should not call Impulse.of inside of the useWatchImpulse factory. The useWatchImpulse hook is for read-only operations but Impulse.of creates a new Impulse.",
+      USE_WATCH_IMPULSE_CALLING_IMPULSE_OF_MESSAGE,
       () => {
         return useWatchImpulse(() => Impulse.of(1).getValue())
       },
@@ -62,7 +77,7 @@ describe("calling Impulse.of()", () => {
     })
 
     expect(console$error).toHaveBeenLastCalledWith(
-      "You should not call Impulse.of inside of the subscribe listener. The listener is for read-only operations but Impulse.of creates a new Impulse.",
+      SUBSCRIBE_CALLING_IMPULSE_OF_MESSAGE,
     )
   })
 
@@ -102,14 +117,14 @@ describe("calling Impulse#clone()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      "You should not call Impulse#clone inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+      USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE_MESSAGE,
       ({ impulse }: WithImpulse<number>) => {
         return useImpulseMemo(() => impulse.clone().getValue(), [impulse])
       },
     ],
     [
       "useWatchImpulse",
-      "You should not call Impulse#clone inside of the useWatchImpulse factory. The useWatchImpulse hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+      USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE_MESSAGE,
       ({ impulse }: WithImpulse<number>) => {
         return useWatchImpulse(() => impulse.clone().getValue())
       },
@@ -142,7 +157,7 @@ describe("calling Impulse#clone()", () => {
     })
 
     expect(console$error).toHaveBeenLastCalledWith(
-      "You should not call Impulse#clone inside of the subscribe listener. The listener is for read-only operations but Impulse#clone clones an existing Impulse.",
+      SUBSCRIBE_CALLING_IMPULSE_CLONE_MESSAGE,
     )
   })
 
@@ -193,7 +208,7 @@ describe("calling Impulse#setValue()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      "You should not call Impulse#setValue inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+      USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE_MESSAGE,
       ({ impulse }: WithImpulse<number>) => {
         return useImpulseMemo(() => {
           impulse.setValue(3)
@@ -204,7 +219,7 @@ describe("calling Impulse#setValue()", () => {
     ],
     [
       "useWatchImpulse",
-      "You should not call Impulse#setValue inside of the useWatchImpulse factory. The useWatchImpulse hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+      USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE_MESSAGE,
       ({ impulse }: WithImpulse<number>) => {
         return useWatchImpulse(() => {
           impulse.setValue(3)
@@ -282,7 +297,7 @@ describe("calling Impulse#setValue()", () => {
     render(<Component impulse={Impulse.of(20)} />)
 
     expect(console$error).toHaveBeenCalledWith(
-      "You should not call Impulse#setValue during rendering of watch(Component)",
+      WATCH_CALLING_IMPULSE_SET_VALUE_MESSAGE,
     )
     expect(screen.getByTestId("count")).toHaveTextContent("20")
   })
@@ -292,7 +307,7 @@ describe("calling Impulse#subscribe()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      "You may not call Impulse#subscribe inside of the useImpulseMemo(factory) callback. The useImpulseMemo(factory) hook is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
+      USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
       ({
         impulse,
         listener = vi.fn(),
@@ -306,7 +321,7 @@ describe("calling Impulse#subscribe()", () => {
     ],
     [
       "useWatchImpulse",
-      "You may not call Impulse#subscribe inside of the useWatchImpulse(watcher) callback. The useWatchImpulse(watcher) hook is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
+      USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
       ({
         impulse,
         listener = vi.fn(),
@@ -459,7 +474,7 @@ describe("calling Impulse#subscribe()", () => {
       render(<Component impulse={Impulse.of(20)} />)
 
       expect(console$error).toHaveBeenCalledWith(
-        "You may not call Impulse#subscribe during rendering of watch(Component)",
+        WATCH_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
       )
     })
 
@@ -509,7 +524,7 @@ describe("calling Impulse#subscribe()", () => {
       })
 
       expect(console$error).toHaveBeenCalledWith(
-        "You may not call Impulse#subscribe inside of the subscribe listener. The listener is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
+        SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
       )
     })
 

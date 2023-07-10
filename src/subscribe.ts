@@ -1,6 +1,6 @@
 import { EMITTER_KEY, injectScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
-import { registerExecutionContext } from "./validation"
+import { defineExecutionContext } from "./validation"
 /**
  * A function that subscribes to changes of all `Impulse` instances that call the `Impulse#getValue` method inside the `listener`.
  *
@@ -10,7 +10,7 @@ import { registerExecutionContext } from "./validation"
 export function subscribe(listener: VoidFunction): VoidFunction {
   const emitter = new ScopeEmitter()
   const emit = (): void => {
-    registerExecutionContext(
+    defineExecutionContext(
       "subscribe",
       injectScope,
       {

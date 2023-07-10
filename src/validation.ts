@@ -10,7 +10,7 @@ export type ExecutionContextSpec = Partial<Record<ExecutionContext, string>>
 
 let currentExecutionContext: null | ExecutionContext = null
 
-export function registerExecutionContext<
+export function defineExecutionContext<
   TArgs extends ReadonlyArray<unknown>,
   TResult,
 >(
@@ -34,7 +34,7 @@ type PropDescriptor<TReturn = any> = TypedPropertyDescriptor<
   Func<Array<never>, TReturn>
 >
 
-export function warnInsideContext(spec: ExecutionContextSpec) {
+export function alertCallingFrom(spec: ExecutionContextSpec) {
   return (_: unknown, __: string, descriptor: PropDescriptor): void => {
     if (
       process.env.NODE_ENV === "production" ||
@@ -62,14 +62,14 @@ export function warnInsideContext(spec: ExecutionContextSpec) {
   }
 }
 
-export function stopInsideContext(
+export function preventCallingFrom(
   spec: ExecutionContextSpec,
 ): (_: unknown, __: string, descriptor: PropDescriptor) => void
-export function stopInsideContext<TReturn>(
+export function preventCallingFrom<TReturn>(
   spec: ExecutionContextSpec,
   returns: TReturn,
 ): (_: unknown, __: string, descriptor: PropDescriptor<TReturn>) => void
-export function stopInsideContext<TReturn = void>(
+export function preventCallingFrom<TReturn = void>(
   spec: ExecutionContextSpec,
   returns?: TReturn,
 ) {
@@ -92,6 +92,7 @@ export function stopInsideContext<TReturn = void>(
         typeof console !== "undefined" &&
         // eslint-disable-next-line no-console
         isFunction(console.error) &&
+        // don't print empty message
         message
       ) {
         // eslint-disable-next-line no-console

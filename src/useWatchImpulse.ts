@@ -2,7 +2,7 @@ import { useCallback, useDebugValue } from "react"
 
 import { Compare, eq, useEvent } from "./utils"
 import { useScope } from "./useScope"
-import { registerExecutionContext } from "./validation"
+import { defineExecutionContext } from "./validation"
 import { Scope, injectScope } from "./Scope"
 
 /**
@@ -20,7 +20,7 @@ export function useWatchImpulse<T>(
 ): T {
   const transform = useCallback(
     (scope: Scope) => {
-      return registerExecutionContext(
+      return defineExecutionContext(
         "useWatchImpulse",
         injectScope,
         scope,

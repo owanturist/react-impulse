@@ -12,22 +12,22 @@ export const STATIC_SCOPE: Scope = {
   [EMITTER_KEY]: null,
 }
 
-let currentInjectedScope = STATIC_SCOPE
+let currentScope = STATIC_SCOPE
 
 export function injectScope<TArgs extends ReadonlyArray<unknown>, TResult>(
   scope: Scope,
   execute: Func<TArgs, TResult>,
   ...args: TArgs
 ): TResult {
-  const prevScope = currentInjectedScope
+  const prevScope = currentScope
 
-  currentInjectedScope = scope
+  currentScope = scope
   const result = execute(...args)
-  currentInjectedScope = prevScope
+  currentScope = prevScope
 
   return result
 }
 
 export function extractScope(): Scope {
-  return currentInjectedScope
+  return currentScope
 }

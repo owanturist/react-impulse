@@ -1,7 +1,7 @@
 import { DependencyList, useMemo } from "react"
 
 import { useScope } from "./useScope"
-import { registerExecutionContext } from "./validation"
+import { defineExecutionContext } from "./validation"
 import { injectScope } from "./Scope"
 
 /**
@@ -22,7 +22,7 @@ export function useImpulseMemo<TValue>(
 
   return useMemo(
     () => {
-      return registerExecutionContext(
+      return defineExecutionContext(
         "useImpulseMemo",
         injectScope,
         getScope(),

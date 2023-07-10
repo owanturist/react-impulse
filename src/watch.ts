@@ -12,7 +12,7 @@ import {
 
 import { Compare } from "./utils"
 import { useScope } from "./useScope"
-import { registerExecutionContext } from "./validation"
+import { defineExecutionContext } from "./validation"
 import { injectScope } from "./Scope"
 
 /**
@@ -28,7 +28,7 @@ export function watch<TProps>(component: FC<TProps>): FC<TProps> {
   const ComponentWithScope: FC<TProps> = (props, ctx: unknown) => {
     const getScope = useScope()
 
-    return registerExecutionContext(
+    return defineExecutionContext(
       "watch",
       injectScope,
       getScope(),
