@@ -269,7 +269,7 @@ describe.each([
           const x = (first.getValue() + second.getValue()) * multiplier
 
           onEffect(x)
-        }, [first, second, multiplier])
+        }, [first, second, multiplier, onEffect])
 
         return (
           <button
@@ -327,7 +327,7 @@ describe.each([
               .reduce((acc, val) => acc + val, 0) * multiplier
 
           onEffect(x)
-        }, [list, multiplier])
+        }, [list, multiplier, onEffect])
 
         return (
           <button
