@@ -3,57 +3,94 @@ import { EMITTER_KEY, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { validate } from "./validation"
 
-export const WATCH_CALLING_IMPULSE_SET_VALUE_MESSAGE =
-  "You should not call Impulse#setValue during rendering of watch(Component)."
-export const WATCH_CALLING_IMPULSE_SUBSCRIBE_MESSAGE =
-  "You may not call Impulse#subscribe during rendering of watch(Component)."
+export const WATCH_CALLING_IMPULSE_SET_VALUE =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : "You should not call Impulse#setValue during rendering of watch(Component)."
+export const WATCH_CALLING_IMPULSE_SUBSCRIBE =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : "You may not call Impulse#subscribe during rendering of watch(Component)."
 
-export const SUBSCRIBE_CALLING_IMPULSE_OF_MESSAGE = [
-  "You should not call Impulse.of inside of the subscribe listener.",
-  "The listener is for read-only operations but Impulse.of creates a new Impulse.",
-].join(" ")
-export const SUBSCRIBE_CALLING_IMPULSE_CLONE_MESSAGE = [
-  "You should not call Impulse#clone inside of the subscribe listener.",
-  "The listener is for read-only operations but Impulse#clone clones an existing Impulse.",
-].join(" ")
-export const SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE = [
-  "You may not call Impulse#subscribe inside of the subscribe listener.",
-  "The listener is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
-].join(" ")
+export const SUBSCRIBE_CALLING_IMPULSE_OF =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : [
+        "You should not call Impulse.of inside of the subscribe listener.",
+        "The listener is for read-only operations but Impulse.of creates a new Impulse.",
+      ].join(" ")
+export const SUBSCRIBE_CALLING_IMPULSE_CLONE =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : [
+        "You should not call Impulse#clone inside of the subscribe listener.",
+        "The listener is for read-only operations but Impulse#clone clones an existing Impulse.",
+      ].join(" ")
+export const SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : [
+        "You may not call Impulse#subscribe inside of the subscribe listener.",
+        "The listener is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
+      ].join(" ")
 
-export const USE_WATCH_IMPULSE_CALLING_IMPULSE_OF_MESSAGE = [
-  "You should not call Impulse.of inside of the useWatchImpulse watcher.",
-  "The useWatchImpulse hook is for read-only operations but Impulse.of creates a new Impulse.",
-].join(" ")
-export const USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE_MESSAGE = [
-  "You should not call Impulse#clone inside of the useWatchImpulse watcher.",
-  "The useWatchImpulse hook is for read-only operations but Impulse#clone clones an existing Impulse.",
-].join(" ")
-export const USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE_MESSAGE = [
-  "You should not call Impulse#setValue inside of the useWatchImpulse watcher.",
-  "The useWatchImpulse hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
-].join(" ")
-export const USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE = [
-  "You may not call Impulse#subscribe inside of the useWatchImpulse watcher.",
-  "The useWatchImpulse hook is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
-].join(" ")
+export const USE_WATCH_IMPULSE_CALLING_IMPULSE_OF =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : [
+        "You should not call Impulse.of inside of the useWatchImpulse watcher.",
+        "The useWatchImpulse hook is for read-only operations but Impulse.of creates a new Impulse.",
+      ].join(" ")
+export const USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : [
+        "You should not call Impulse#clone inside of the useWatchImpulse watcher.",
+        "The useWatchImpulse hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+      ].join(" ")
+export const USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : [
+        "You should not call Impulse#setValue inside of the useWatchImpulse watcher.",
+        "The useWatchImpulse hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+      ].join(" ")
+export const USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : [
+        "You may not call Impulse#subscribe inside of the useWatchImpulse watcher.",
+        "The useWatchImpulse hook is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
+      ].join(" ")
 
-export const USE_IMPULSE_MEMO_CALLING_IMPULSE_OF_MESSAGE = [
-  "You should not call Impulse.of inside of the useImpulseMemo factory.",
-  "The useImpulseMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
-].join(" ")
-export const USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE_MESSAGE = [
-  "You should not call Impulse#clone inside of the useImpulseMemo factory.",
-  "The useImpulseMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
-].join(" ")
-export const USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE_MESSAGE = [
-  "You should not call Impulse#setValue inside of the useImpulseMemo factory.",
-  "The useImpulseMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
-].join(" ")
-export const USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE_MESSAGE = [
-  "You may not call Impulse#subscribe inside of the useImpulseMemo factory.",
-  "The useImpulseMemo hook is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
-].join(" ")
+export const USE_IMPULSE_MEMO_CALLING_IMPULSE_OF =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : [
+        "You should not call Impulse.of inside of the useImpulseMemo factory.",
+        "The useImpulseMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
+      ].join(" ")
+export const USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : [
+        "You should not call Impulse#clone inside of the useImpulseMemo factory.",
+        "The useImpulseMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+      ].join(" ")
+export const USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : [
+        "You should not call Impulse#setValue inside of the useImpulseMemo factory.",
+        "The useImpulseMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+      ].join(" ")
+export const USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : [
+        "You may not call Impulse#subscribe inside of the useImpulseMemo factory.",
+        "The useImpulseMemo hook is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
+      ].join(" ")
 
 export class Impulse<T> {
   /**
@@ -75,24 +112,9 @@ export class Impulse<T> {
 
   // Implements 👆
   @validate
-    .when(
-      "subscribe",
-      process.env.NODE_ENV === "production"
-        ? ""
-        : SUBSCRIBE_CALLING_IMPULSE_OF_MESSAGE,
-    )
-    .when(
-      "useWatchImpulse",
-      process.env.NODE_ENV === "production"
-        ? ""
-        : USE_WATCH_IMPULSE_CALLING_IMPULSE_OF_MESSAGE,
-    )
-    .when(
-      "useImpulseMemo",
-      process.env.NODE_ENV === "production"
-        ? ""
-        : USE_IMPULSE_MEMO_CALLING_IMPULSE_OF_MESSAGE,
-    )
+    .when("subscribe", SUBSCRIBE_CALLING_IMPULSE_OF)
+    .when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_OF)
+    .when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_OF)
     .alert()
   public static of<T>(
     initialValue?: T,
@@ -147,24 +169,9 @@ export class Impulse<T> {
    * @version 1.0.0
    */
   @validate
-    .when(
-      "subscribe",
-      process.env.NODE_ENV === "production"
-        ? ""
-        : SUBSCRIBE_CALLING_IMPULSE_CLONE_MESSAGE,
-    )
-    .when(
-      "useWatchImpulse",
-      process.env.NODE_ENV === "production"
-        ? ""
-        : USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE_MESSAGE,
-    )
-    .when(
-      "useImpulseMemo",
-      process.env.NODE_ENV === "production"
-        ? ""
-        : USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE_MESSAGE,
-    )
+    .when("subscribe", SUBSCRIBE_CALLING_IMPULSE_CLONE)
+    .when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE)
+    .when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE)
     .alert()
   public clone(
     transform?: (value: T) => T,
@@ -210,24 +217,9 @@ export class Impulse<T> {
    * @version 1.0.0
    */
   @validate
-    .when(
-      "watch",
-      process.env.NODE_ENV === "production"
-        ? ""
-        : WATCH_CALLING_IMPULSE_SET_VALUE_MESSAGE,
-    )
-    .when(
-      "useWatchImpulse",
-      process.env.NODE_ENV === "production"
-        ? ""
-        : USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE_MESSAGE,
-    )
-    .when(
-      "useImpulseMemo",
-      process.env.NODE_ENV === "production"
-        ? ""
-        : USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE_MESSAGE,
-    )
+    .when("watch", WATCH_CALLING_IMPULSE_SET_VALUE)
+    .when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE)
+    .when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE)
     .prevent()
   public setValue(
     valueOrTransform: T | ((currentValue: T) => T),
@@ -262,30 +254,10 @@ export class Impulse<T> {
    * @deprecated The method is deprecated in favor of the `subscribe` higher-order function. It will be removed in the next major release.
    */
   @validate
-    .when(
-      "watch",
-      process.env.NODE_ENV === "production"
-        ? ""
-        : WATCH_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
-    )
-    .when(
-      "subscribe",
-      process.env.NODE_ENV === "production"
-        ? ""
-        : SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
-    )
-    .when(
-      "useWatchImpulse",
-      process.env.NODE_ENV === "production"
-        ? ""
-        : USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
-    )
-    .when(
-      "useImpulseMemo",
-      process.env.NODE_ENV === "production"
-        ? ""
-        : USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
-    )
+    .when("watch", WATCH_CALLING_IMPULSE_SUBSCRIBE)
+    .when("subscribe", SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE)
+    .when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE)
+    .when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE)
     .prevent(noop)
   public subscribe(listener: VoidFunction): VoidFunction {
     const emitter = new ScopeEmitter(false)

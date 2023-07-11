@@ -12,19 +12,19 @@ import {
 } from "../src"
 import { noop, usePermanent } from "../src/utils"
 import {
-  SUBSCRIBE_CALLING_IMPULSE_CLONE_MESSAGE,
-  SUBSCRIBE_CALLING_IMPULSE_OF_MESSAGE,
-  SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
-  USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE_MESSAGE,
-  USE_IMPULSE_MEMO_CALLING_IMPULSE_OF_MESSAGE,
-  USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE_MESSAGE,
-  USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
-  USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE_MESSAGE,
-  USE_WATCH_IMPULSE_CALLING_IMPULSE_OF_MESSAGE,
-  USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE_MESSAGE,
-  USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
-  WATCH_CALLING_IMPULSE_SET_VALUE_MESSAGE,
-  WATCH_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
+  SUBSCRIBE_CALLING_IMPULSE_CLONE,
+  SUBSCRIBE_CALLING_IMPULSE_OF,
+  SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE,
+  USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE,
+  USE_IMPULSE_MEMO_CALLING_IMPULSE_OF,
+  USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE,
+  USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE,
+  USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE,
+  USE_WATCH_IMPULSE_CALLING_IMPULSE_OF,
+  USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE,
+  USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE,
+  WATCH_CALLING_IMPULSE_SET_VALUE,
+  WATCH_CALLING_IMPULSE_SUBSCRIBE,
 } from "../src/Impulse"
 
 import { WithImpulse, WithListener } from "./common"
@@ -45,14 +45,14 @@ describe("calling Impulse.of()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      USE_IMPULSE_MEMO_CALLING_IMPULSE_OF_MESSAGE,
+      USE_IMPULSE_MEMO_CALLING_IMPULSE_OF,
       () => {
         return useImpulseMemo(() => Impulse.of(1).getValue(), [])
       },
     ],
     [
       "useWatchImpulse",
-      USE_WATCH_IMPULSE_CALLING_IMPULSE_OF_MESSAGE,
+      USE_WATCH_IMPULSE_CALLING_IMPULSE_OF,
       () => {
         return useWatchImpulse(() => Impulse.of(1).getValue())
       },
@@ -76,9 +76,7 @@ describe("calling Impulse.of()", () => {
       Impulse.of(1)
     })
 
-    expect(console$error).toHaveBeenLastCalledWith(
-      SUBSCRIBE_CALLING_IMPULSE_OF_MESSAGE,
-    )
+    expect(console$error).toHaveBeenLastCalledWith(SUBSCRIBE_CALLING_IMPULSE_OF)
   })
 
   it.each([
@@ -117,14 +115,14 @@ describe("calling Impulse#clone()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE_MESSAGE,
+      USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE,
       ({ impulse }: WithImpulse<number>) => {
         return useImpulseMemo(() => impulse.clone().getValue(), [impulse])
       },
     ],
     [
       "useWatchImpulse",
-      USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE_MESSAGE,
+      USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE,
       ({ impulse }: WithImpulse<number>) => {
         return useWatchImpulse(() => impulse.clone().getValue())
       },
@@ -157,7 +155,7 @@ describe("calling Impulse#clone()", () => {
     })
 
     expect(console$error).toHaveBeenLastCalledWith(
-      SUBSCRIBE_CALLING_IMPULSE_CLONE_MESSAGE,
+      SUBSCRIBE_CALLING_IMPULSE_CLONE,
     )
   })
 
@@ -208,7 +206,7 @@ describe("calling Impulse#setValue()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE_MESSAGE,
+      USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE,
       ({ impulse }: WithImpulse<number>) => {
         return useImpulseMemo(() => {
           impulse.setValue(3)
@@ -219,7 +217,7 @@ describe("calling Impulse#setValue()", () => {
     ],
     [
       "useWatchImpulse",
-      USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE_MESSAGE,
+      USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE,
       ({ impulse }: WithImpulse<number>) => {
         return useWatchImpulse(() => {
           impulse.setValue(3)
@@ -296,9 +294,7 @@ describe("calling Impulse#setValue()", () => {
 
     render(<Component impulse={Impulse.of(20)} />)
 
-    expect(console$error).toHaveBeenCalledWith(
-      WATCH_CALLING_IMPULSE_SET_VALUE_MESSAGE,
-    )
+    expect(console$error).toHaveBeenCalledWith(WATCH_CALLING_IMPULSE_SET_VALUE)
     expect(screen.getByTestId("count")).toHaveTextContent("20")
   })
 })
@@ -307,7 +303,7 @@ describe("calling Impulse#subscribe()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
+      USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE,
       ({
         impulse,
         listener = vi.fn(),
@@ -321,7 +317,7 @@ describe("calling Impulse#subscribe()", () => {
     ],
     [
       "useWatchImpulse",
-      USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
+      USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE,
       ({
         impulse,
         listener = vi.fn(),
@@ -474,7 +470,7 @@ describe("calling Impulse#subscribe()", () => {
       render(<Component impulse={Impulse.of(20)} />)
 
       expect(console$error).toHaveBeenCalledWith(
-        WATCH_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
+        WATCH_CALLING_IMPULSE_SUBSCRIBE,
       )
     })
 
@@ -524,7 +520,7 @@ describe("calling Impulse#subscribe()", () => {
       })
 
       expect(console$error).toHaveBeenCalledWith(
-        SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
+        SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE,
       )
     })
 
