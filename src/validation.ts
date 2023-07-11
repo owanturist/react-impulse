@@ -6,8 +6,6 @@ export type ExecutionContext =
   | "useWatchImpulse"
   | "useImpulseMemo"
 
-export type ExecutionContextSpec = Partial<Record<ExecutionContext, string>>
-
 let currentExecutionContext: null | ExecutionContext = null
 
 export function defineExecutionContext<
@@ -34,72 +32,85 @@ type PropDescriptor<TReturn = any> = TypedPropertyDescriptor<
   Func<Array<never>, TReturn>
 >
 
-export function alertCallingFrom(spec: ExecutionContextSpec) {
-  return (_: unknown, __: string, descriptor: PropDescriptor): void => {
-    if (
-      process.env.NODE_ENV === "production" ||
-      typeof console === "undefined" ||
-      // eslint-disable-next-line no-console
-      !isFunction(console.error)
-    ) {
-      /* c8 ignore next */
-      return
-    }
+class Validate<TContext extends ExecutionContext> {
+  public constructor(
+    private readonly spec: ReadonlyMap<ExecutionContext, string>,
+  ) {}
 
-    const original = descriptor.value!
+  public on<TName extends TContext>(
+    name: TName,
+    message: string,
+  ): Validate<Exclude<ExecutionContext, TName>> {
+    return new Validate(new Map(this.spec).set(name, message))
+  }
 
-    descriptor.value = function (...args) {
-      const message = currentExecutionContext && spec[currentExecutionContext]
-
-      if (message) {
+  public alert() {
+    return (_: unknown, __: string, descriptor: PropDescriptor): void => {
+      if (
+        process.env.NODE_ENV === "production" ||
+        typeof console === "undefined" ||
         // eslint-disable-next-line no-console
-        console.error(message)
+        !isFunction(console.error)
+      ) {
+        /* c8 ignore next */
+        return
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return original.apply(this, args)
-    }
-  }
-}
+      const original = descriptor.value!
+      const spec = this.spec
 
-export function preventCallingFrom(
-  spec: ExecutionContextSpec,
-): (_: unknown, __: string, descriptor: PropDescriptor) => void
-export function preventCallingFrom<TReturn>(
-  spec: ExecutionContextSpec,
-  returns: TReturn,
-): (_: unknown, __: string, descriptor: PropDescriptor<TReturn>) => void
-export function preventCallingFrom<TReturn = void>(
-  spec: ExecutionContextSpec,
-  returns?: TReturn,
-) {
-  return (
-    _: unknown,
-    __: string,
-    descriptor: PropDescriptor<undefined | TReturn>,
-  ): void => {
-    const original = descriptor.value!
+      descriptor.value = function (...args) {
+        const message =
+          currentExecutionContext && spec.get(currentExecutionContext)
 
-    descriptor.value = function (...args) {
-      const message = currentExecutionContext && spec[currentExecutionContext]
+        if (message) {
+          // eslint-disable-next-line no-console
+          console.error(message)
+        }
 
-      if (message == null) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return original.apply(this, args)
       }
+    }
+  }
 
-      if (
-        process.env.NODE_ENV !== "production" &&
-        typeof console !== "undefined" &&
-        // eslint-disable-next-line no-console
-        isFunction(console.error) &&
-        // don't print empty message
-        message
-      ) {
-        // eslint-disable-next-line no-console
-        console.error(message)
+  public prevent(): (_: unknown, __: string, descriptor: PropDescriptor) => void
+  public prevent<TReturn>(
+    returns: TReturn,
+  ): (_: unknown, __: string, descriptor: PropDescriptor<TReturn>) => void
+  public prevent<TReturn = void>(returns?: TReturn) {
+    return (
+      _: unknown,
+      __: string,
+      descriptor: PropDescriptor<undefined | TReturn>,
+    ): void => {
+      const original = descriptor.value!
+      const spec = this.spec
+
+      descriptor.value = function (...args) {
+        const message =
+          currentExecutionContext && spec.get(currentExecutionContext)
+
+        if (message == null) {
+          return original.apply(this, args)
+        }
+
+        if (
+          process.env.NODE_ENV !== "production" &&
+          typeof console !== "undefined" &&
+          // eslint-disable-next-line no-console
+          isFunction(console.error) &&
+          // don't print empty message
+          message
+        ) {
+          // eslint-disable-next-line no-console
+          console.error(message)
+        }
+
+        return returns
       }
-
-      return returns
     }
   }
 }
+
+export const validate = new Validate(new Map())

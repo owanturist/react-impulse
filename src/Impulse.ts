@@ -1,7 +1,7 @@
 import { Compare, eq, isFunction, noop } from "./utils"
 import { EMITTER_KEY, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
-import { preventCallingFrom, alertCallingFrom } from "./validation"
+import { validate } from "./validation"
 
 export const WATCH_CALLING_IMPULSE_SET_VALUE_MESSAGE =
   "You should not call Impulse#setValue during rendering of watch(Component)."
@@ -74,21 +74,26 @@ export class Impulse<T> {
   public static of<T>(initialValue: T, compare?: null | Compare<T>): Impulse<T>
 
   // Implements 👆
-  @alertCallingFrom({
-    /* c8 ignore next 2 */
-    subscribe:
+  @validate
+    .on(
+      "subscribe",
       process.env.NODE_ENV === "production"
         ? ""
         : SUBSCRIBE_CALLING_IMPULSE_OF_MESSAGE,
-    useWatchImpulse:
+    )
+    .on(
+      "useWatchImpulse",
       process.env.NODE_ENV === "production"
         ? ""
         : USE_WATCH_IMPULSE_CALLING_IMPULSE_OF_MESSAGE,
-    useImpulseMemo:
+    )
+    .on(
+      "useImpulseMemo",
       process.env.NODE_ENV === "production"
         ? ""
         : USE_IMPULSE_MEMO_CALLING_IMPULSE_OF_MESSAGE,
-  })
+    )
+    .alert()
   public static of<T>(
     initialValue?: T,
     compare?: null | Compare<undefined | T>,
@@ -141,21 +146,26 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
-  @alertCallingFrom({
-    /* c8 ignore next 12 */
-    subscribe:
+  @validate
+    .on(
+      "subscribe",
       process.env.NODE_ENV === "production"
         ? ""
         : SUBSCRIBE_CALLING_IMPULSE_CLONE_MESSAGE,
-    useWatchImpulse:
+    )
+    .on(
+      "useWatchImpulse",
       process.env.NODE_ENV === "production"
         ? ""
         : USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE_MESSAGE,
-    useImpulseMemo:
+    )
+    .on(
+      "useImpulseMemo",
       process.env.NODE_ENV === "production"
         ? ""
         : USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE_MESSAGE,
-  })
+    )
+    .alert()
   public clone(
     transform?: (value: T) => T,
     compare: null | Compare<T> = this.compare,
@@ -199,21 +209,26 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
-  @preventCallingFrom({
-    /* c8 ignore next 12 */
-    watch:
+  @validate
+    .on(
+      "watch",
       process.env.NODE_ENV === "production"
         ? ""
         : WATCH_CALLING_IMPULSE_SET_VALUE_MESSAGE,
-    useWatchImpulse:
+    )
+    .on(
+      "useWatchImpulse",
       process.env.NODE_ENV === "production"
         ? ""
         : USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE_MESSAGE,
-    useImpulseMemo:
+    )
+    .on(
+      "useImpulseMemo",
       process.env.NODE_ENV === "production"
         ? ""
         : USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE_MESSAGE,
-  })
+    )
+    .prevent()
   public setValue(
     valueOrTransform: T | ((currentValue: T) => T),
     compare: null | Compare<T> = this.compare,
@@ -246,28 +261,32 @@ export class Impulse<T> {
    *
    * @deprecated The method is deprecated in favor of the `subscribe` higher-order function. It will be removed in the next major release.
    */
-  @preventCallingFrom(
-    {
-      /* c8 ignore next 16 */
-      watch:
-        process.env.NODE_ENV === "production"
-          ? ""
-          : WATCH_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
-      subscribe:
-        process.env.NODE_ENV === "production"
-          ? ""
-          : SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
-      useWatchImpulse:
-        process.env.NODE_ENV === "production"
-          ? ""
-          : USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
-      useImpulseMemo:
-        process.env.NODE_ENV === "production"
-          ? ""
-          : USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
-    },
-    noop,
-  )
+  @validate
+    .on(
+      "watch",
+      process.env.NODE_ENV === "production"
+        ? ""
+        : WATCH_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
+    )
+    .on(
+      "subscribe",
+      process.env.NODE_ENV === "production"
+        ? ""
+        : SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
+    )
+    .on(
+      "useWatchImpulse",
+      process.env.NODE_ENV === "production"
+        ? ""
+        : USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
+    )
+    .on(
+      "useImpulseMemo",
+      process.env.NODE_ENV === "production"
+        ? ""
+        : USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
+    )
+    .prevent(noop)
   public subscribe(listener: VoidFunction): VoidFunction {
     const emitter = new ScopeEmitter(false)
 
