@@ -39,6 +39,24 @@ class Validate<TContext extends ExecutionContext> {
     private readonly spec: ReadonlyMap<ExecutionContext, string>,
   ) {}
 
+  private getMessage(): null | undefined | string {
+    return currentExecutionContext && this.spec.get(currentExecutionContext)
+  }
+
+  private print(message: string): void {
+    if (
+      typeof console !== "undefined" &&
+      // eslint-disable-next-line no-console
+      isFunction(console.error) &&
+      // don't print empty messages
+      /* c8 ignore next */
+      message
+    ) {
+      // eslint-disable-next-line no-console
+      console.error(message)
+    }
+  }
+
   public when<TName extends TContext>(
     name: TName,
     message: string,
@@ -48,26 +66,19 @@ class Validate<TContext extends ExecutionContext> {
 
   public alert(): ValidateDecorator {
     return (_, __, descriptor) => {
-      if (
-        process.env.NODE_ENV === "production" ||
-        typeof console === "undefined" ||
-        // eslint-disable-next-line no-console
-        !isFunction(console.error)
-      ) {
+      if (process.env.NODE_ENV === "production") {
         /* c8 ignore next */
         return
       }
 
       const original = descriptor.value!
-      const spec = this.spec
+      const that = this
 
       descriptor.value = function (...args) {
-        const message =
-          currentExecutionContext && spec.get(currentExecutionContext)
+        const message = that.getMessage()
 
         if (message) {
-          // eslint-disable-next-line no-console
-          console.error(message)
+          that.print(message)
         }
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -83,27 +94,17 @@ class Validate<TContext extends ExecutionContext> {
   ): ValidateDecorator<undefined | TReturn> {
     return (_, __, descriptor) => {
       const original = descriptor.value!
-      const spec = this.spec
+      const that = this
 
       descriptor.value = function (...args) {
-        const message =
-          currentExecutionContext && spec.get(currentExecutionContext)
+        const message = that.getMessage()
 
         if (message == null) {
           return original.apply(this, args)
         }
 
-        if (
-          process.env.NODE_ENV !== "production" &&
-          typeof console !== "undefined" &&
-          // eslint-disable-next-line no-console
-          isFunction(console.error) &&
-          // don't print empty message
-          /* c8 ignore next */
-          message
-        ) {
-          // eslint-disable-next-line no-console
-          console.error(message)
+        if (process.env.NODE_ENV !== "production") {
+          that.print(message)
         }
 
         return returns
