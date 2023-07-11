@@ -28,24 +28,26 @@ export function defineExecutionContext<
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type PropDescriptor<TReturn = any> = TypedPropertyDescriptor<
-  Func<Array<never>, TReturn>
->
+type ValidateDecorator<TReturn = any> = (
+  target: unknown,
+  propertyKey: string,
+  descriptor: TypedPropertyDescriptor<Func<Array<never>, TReturn>>,
+) => void
 
 class Validate<TContext extends ExecutionContext> {
   public constructor(
     private readonly spec: ReadonlyMap<ExecutionContext, string>,
   ) {}
 
-  public on<TName extends TContext>(
+  public when<TName extends TContext>(
     name: TName,
     message: string,
   ): Validate<Exclude<ExecutionContext, TName>> {
     return new Validate(new Map(this.spec).set(name, message))
   }
 
-  public alert() {
-    return (_: unknown, __: string, descriptor: PropDescriptor): void => {
+  public alert(): ValidateDecorator {
+    return (_, __, descriptor) => {
       if (
         process.env.NODE_ENV === "production" ||
         typeof console === "undefined" ||
@@ -74,16 +76,12 @@ class Validate<TContext extends ExecutionContext> {
     }
   }
 
-  public prevent(): (_: unknown, __: string, descriptor: PropDescriptor) => void
-  public prevent<TReturn>(
-    returns: TReturn,
-  ): (_: unknown, __: string, descriptor: PropDescriptor<TReturn>) => void
-  public prevent<TReturn = void>(returns?: TReturn) {
-    return (
-      _: unknown,
-      __: string,
-      descriptor: PropDescriptor<undefined | TReturn>,
-    ): void => {
+  public prevent(): ValidateDecorator
+  public prevent<TReturn>(returns: TReturn): ValidateDecorator<TReturn>
+  public prevent<TReturn = void>(
+    returns?: TReturn,
+  ): ValidateDecorator<undefined | TReturn> {
+    return (_, __, descriptor) => {
       const original = descriptor.value!
       const spec = this.spec
 

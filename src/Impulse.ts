@@ -75,19 +75,19 @@ export class Impulse<T> {
 
   // Implements 👆
   @validate
-    .on(
+    .when(
       "subscribe",
       process.env.NODE_ENV === "production"
         ? ""
         : SUBSCRIBE_CALLING_IMPULSE_OF_MESSAGE,
     )
-    .on(
+    .when(
       "useWatchImpulse",
       process.env.NODE_ENV === "production"
         ? ""
         : USE_WATCH_IMPULSE_CALLING_IMPULSE_OF_MESSAGE,
     )
-    .on(
+    .when(
       "useImpulseMemo",
       process.env.NODE_ENV === "production"
         ? ""
@@ -147,19 +147,19 @@ export class Impulse<T> {
    * @version 1.0.0
    */
   @validate
-    .on(
+    .when(
       "subscribe",
       process.env.NODE_ENV === "production"
         ? ""
         : SUBSCRIBE_CALLING_IMPULSE_CLONE_MESSAGE,
     )
-    .on(
+    .when(
       "useWatchImpulse",
       process.env.NODE_ENV === "production"
         ? ""
         : USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE_MESSAGE,
     )
-    .on(
+    .when(
       "useImpulseMemo",
       process.env.NODE_ENV === "production"
         ? ""
@@ -210,19 +210,19 @@ export class Impulse<T> {
    * @version 1.0.0
    */
   @validate
-    .on(
+    .when(
       "watch",
       process.env.NODE_ENV === "production"
         ? ""
         : WATCH_CALLING_IMPULSE_SET_VALUE_MESSAGE,
     )
-    .on(
+    .when(
       "useWatchImpulse",
       process.env.NODE_ENV === "production"
         ? ""
         : USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE_MESSAGE,
     )
-    .on(
+    .when(
       "useImpulseMemo",
       process.env.NODE_ENV === "production"
         ? ""
@@ -262,25 +262,25 @@ export class Impulse<T> {
    * @deprecated The method is deprecated in favor of the `subscribe` higher-order function. It will be removed in the next major release.
    */
   @validate
-    .on(
+    .when(
       "watch",
       process.env.NODE_ENV === "production"
         ? ""
         : WATCH_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
     )
-    .on(
+    .when(
       "subscribe",
       process.env.NODE_ENV === "production"
         ? ""
         : SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
     )
-    .on(
+    .when(
       "useWatchImpulse",
       process.env.NODE_ENV === "production"
         ? ""
         : USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE_MESSAGE,
     )
-    .on(
+    .when(
       "useImpulseMemo",
       process.env.NODE_ENV === "production"
         ? ""
