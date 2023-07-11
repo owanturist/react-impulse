@@ -656,15 +656,17 @@ describe("watch.forwardRef()", () => {
   })
 })
 
-describe.runIf("lazy" in React)("using inside React.lazy()", () => {
-  it("should work fine", async () => {
-    const Component = watch.memo<{ count: Impulse<number> }>(({ count }) => (
-      <div data-testid="count">{count.getValue()}</div>
-    ))
+describe("wild cases", () => {
+  it("should work with `React.lazy()`", async () => {
+    const Component = watch.memo<{
+      count: Impulse<number>
+    }>(({ count }) => <div data-testid="count">{count.getValue()}</div>)
 
-    const LazyComponent = React.lazy(() =>
-      Promise.resolve({ default: Component }),
-    )
+    const LazyComponent = React.lazy<typeof Component>(() => {
+      return new Promise((done) => {
+        setTimeout(() => done({ default: Component }), 100)
+      })
+    })
     const count = Impulse.of(0)
 
     render(
@@ -672,6 +674,8 @@ describe.runIf("lazy" in React)("using inside React.lazy()", () => {
         <LazyComponent count={count} />
       </React.Suspense>,
     )
+
+    expect(screen.queryByTestId("count")).not.toBeInTheDocument()
 
     expect(await screen.findByTestId("count")).toHaveTextContent("0")
 
