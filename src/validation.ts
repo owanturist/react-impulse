@@ -99,6 +99,7 @@ class Validate<TContext extends ExecutionContext> {
           // eslint-disable-next-line no-console
           isFunction(console.error) &&
           // don't print empty message
+          /* c8 ignore next */
           message
         ) {
           // eslint-disable-next-line no-console
