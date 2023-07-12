@@ -80,7 +80,8 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           skip_step: install
-          build_script: pnpm add -D size-limit @size-limit/preset-small-lib && build --env.NODE_ENV production --minify
+          # should install size-limit in the build_script so it install deps when checking out a PR's target branch
+          build_script: add -D size-limit @size-limit/preset-small-lib && pnpm build --env.NODE_ENV production --minify
 
   release:
     name: Release on npm
