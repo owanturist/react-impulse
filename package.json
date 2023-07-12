@@ -17,6 +17,7 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "size": "size-limit",
     "build": "tsup src/index.ts --dts --sourcemap --format=esm,cjs --clean",
     "pretest": "node ./print-react-version",
     "test": "vitest --single-thread",
@@ -71,6 +72,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.1",
+    "@size-limit/preset-small-lib": "^8.2.6",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
     "@types/react": "^18.0.28",
@@ -91,6 +93,7 @@
     "jsdom": "^22.1.0",
     "prettier": "^2.8.4",
     "react": "^18.2.0",
+    "size-limit": "^8.2.6",
     "tsup": "^6.7.0",
     "typescript": "^5.0.2",
     "vitest": "^0.29.3"
