@@ -4,7 +4,7 @@ import { Impulse, useImpulseValue } from "../src"
 
 import { Counter } from "./common"
 
-it.concurrent("returns initial value", () => {
+it("returns initial value", () => {
   const initial = { count: 0 }
   const impulse = Impulse.of(initial)
 
@@ -15,7 +15,7 @@ it.concurrent("returns initial value", () => {
   expect(result.current).toStrictEqual({ count: 0 })
 })
 
-it.concurrent("returns the same value when the hook re-renders", () => {
+it("returns the same value when the hook re-renders", () => {
   const impulse = Impulse.of({ count: 0 })
 
   const { result, rerender } = renderHook(() => useImpulseValue(impulse))
@@ -28,7 +28,7 @@ it.concurrent("returns the same value when the hook re-renders", () => {
   expect(result.current).toStrictEqual({ count: 0 })
 })
 
-it.concurrent("watches after impulse's updates", () => {
+it("watches after Impulse's updates", () => {
   const initial = { count: 0 }
   const impulse = Impulse.of(initial)
 
@@ -43,7 +43,7 @@ it.concurrent("watches after impulse's updates", () => {
   expect(result.current).toStrictEqual({ count: 1 })
 })
 
-it.concurrent("re-subscribes on new impulse", () => {
+it("re-subscribes on new impulse", () => {
   const impulse_1 = Impulse.of({ count: 0 })
   const impulse_2 = Impulse.of({ count: 10 })
 

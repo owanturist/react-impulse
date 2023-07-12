@@ -204,7 +204,7 @@ describe("watching nested impulses", () => {
     ["multiple watchers", MultipleWatchersApp, 0],
     ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
     ["watch()", WatchedApp, 1],
-  ])("watches nested impulses with %s", (_, App, unnecessaryRerendersCount) => {
+  ])("handles nested Impulses with %s", (_, App, unnecessaryRerendersCount) => {
     const state = Impulse.of<AppState>({
       counts: [],
     })
@@ -219,7 +219,7 @@ describe("watching nested impulses", () => {
       />,
     )
 
-    // initial render and watcher setup
+    // initial render
     expect(onRender).toHaveBeenCalledOnce()
     expect(onCounterRender).not.toHaveBeenCalled()
     expect(screen.queryByText("more than ten")).not.toBeInTheDocument()

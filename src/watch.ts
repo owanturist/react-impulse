@@ -9,16 +9,11 @@ import {
   PropsWithoutRef,
   RefAttributes,
 } from "react"
-import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
-import { useWatchContext } from "./useWatchContext"
 import { Compare } from "./utils"
-
-const isImpulseWatcher = <TProps>(
-  render: FC<TProps> & { isImpulseWatcher?: boolean },
-): boolean => {
-  return render.isImpulseWatcher === true
-}
+import { useScope } from "./useScope"
+import { defineExecutionContext } from "./validation"
+import { injectScope } from "./Scope"
 
 /**
  * Creates a React component that subscribes to all Impulses calling the `Impulse#getValue` method during the rendering phase of the component.
@@ -30,30 +25,29 @@ const isImpulseWatcher = <TProps>(
 export function watch<TProps>(component: ExoticComponent<TProps>): never
 export function watch<TProps>(component: FC<TProps>): FC<TProps>
 export function watch<TProps>(component: FC<TProps>): FC<TProps> {
-  if (isImpulseWatcher(component)) {
-    return component
-  }
+  const ComponentWithScope: FC<TProps> = (props, ctx: unknown) => {
+    const getScope = useScope()
 
-  const ImpulseWatcher = (props: TProps, ctx: unknown): ReturnType<FC> => {
-    const { executeWatcher, subscribe, getVersion } = useWatchContext({
-      warningSource: "watch",
-    })
-
-    return useSyncExternalStoreWithSelector(
-      subscribe,
-      getVersion,
-      getVersion,
-      // no need to memoize since props are a new object on each call
-      () => executeWatcher(() => component(props, ctx)),
+    return defineExecutionContext(
+      "watch",
+      injectScope,
+      getScope(),
+      component,
+      props,
+      ctx,
     )
   }
 
-  ImpulseWatcher.displayName = `ImpulseWatcher${component.displayName ?? ""}`
-  ImpulseWatcher.isImpulseWatcher = true
+  ComponentWithScope.displayName = `ImpulseWatcher${
+    component.displayName ?? component.name
+  }`
 
-  return ImpulseWatcher
+  return ComponentWithScope
 }
 
+/**
+ * The function should be defined via `const` to prevent rollup failure.
+ */
 const memo = <TProps>(
   component: FC<TProps>,
   propsAreEqual?: Compare<Readonly<TProps>>,

@@ -1,12 +1,22 @@
 import { Compare, eq, isFunction, noop } from "./utils"
-import { WatchContext } from "./WatchContext"
-import { SetValueContext } from "./SetValueContext"
+import { EMITTER_KEY, extractScope } from "./Scope"
+import { ScopeEmitter } from "./ScopeEmitter"
+import { validate } from "./validation"
 import {
-  WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING,
-  WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING,
-  WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING,
-  WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING,
-} from "./validation"
+  WATCH_CALLING_IMPULSE_SET_VALUE,
+  WATCH_CALLING_IMPULSE_SUBSCRIBE,
+  SUBSCRIBE_CALLING_IMPULSE_OF,
+  SUBSCRIBE_CALLING_IMPULSE_CLONE,
+  SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE,
+  USE_WATCH_IMPULSE_CALLING_IMPULSE_OF,
+  USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE,
+  USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE,
+  USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE,
+  USE_IMPULSE_MEMO_CALLING_IMPULSE_OF,
+  USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE,
+  USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE,
+  USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE,
+} from "./messages"
 
 export class Impulse<T> {
   /**
@@ -27,22 +37,19 @@ export class Impulse<T> {
   public static of<T>(initialValue: T, compare?: null | Compare<T>): Impulse<T>
 
   // Implements 👆
+  @validate
+    .when("subscribe", SUBSCRIBE_CALLING_IMPULSE_OF)
+    .when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_OF)
+    .when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_OF)
+    .alert()
   public static of<T>(
     initialValue?: T,
     compare?: null | Compare<undefined | T>,
   ): Impulse<undefined | T> {
-    WatchContext.warning(WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING)
-
     return new Impulse(initialValue, compare ?? eq)
   }
 
-  /**
-   * It does not use `Set<VoidFunction>` here because the same listener might be subscribed
-   * many times to an Impulse, so it should not unsubscribe them all when one unsubscribes.
-   * By keeping track of how many times the same listener is subscribed it knows when to drop
-   * the listener from `subscribers`.
-   */
-  private readonly subscribers = new Map<VoidFunction, number>()
+  private readonly emitters = new Set<ScopeEmitter>()
 
   /**
    * The `Compare` function compares Impulse's value with the new value given via `Impulse#setValue`.
@@ -87,12 +94,15 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
+  @validate
+    .when("subscribe", SUBSCRIBE_CALLING_IMPULSE_CLONE)
+    .when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE)
+    .when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE)
+    .alert()
   public clone(
     transform?: (value: T) => T,
     compare: null | Compare<T> = this.compare,
   ): Impulse<T> {
-    WatchContext.warning(WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING)
-
     return new Impulse(
       isFunction(transform) ? transform(this.value) : this.value,
       compare ?? eq,
@@ -114,7 +124,9 @@ export class Impulse<T> {
    */
   public getValue<R>(select: (value: T) => R): R
   public getValue<R>(select?: (value: T) => R): T | R {
-    WatchContext.register(this as Impulse<unknown>)
+    const scope = extractScope()
+
+    scope[EMITTER_KEY]?.attachTo(this.emitters)
 
     return isFunction(select) ? select(this.value) : this.value
   }
@@ -130,27 +142,30 @@ export class Impulse<T> {
    *
    * @version 1.0.0
    */
+  @validate
+    .when("watch", WATCH_CALLING_IMPULSE_SET_VALUE)
+    .when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE)
+    .when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE)
+    .prevent()
   public setValue(
     valueOrTransform: T | ((currentValue: T) => T),
     compare: null | Compare<T> = this.compare,
   ): void {
-    if (WatchContext.warning(WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING)) {
-      return
-    }
-
     const finalCompare = compare ?? eq
-    const [emit, register] = SetValueContext.registerStoreSubscribers()
 
-    const nextValue = isFunction(valueOrTransform)
-      ? valueOrTransform(this.value)
-      : valueOrTransform
+    ScopeEmitter.schedule(() => {
+      const nextValue = isFunction(valueOrTransform)
+        ? valueOrTransform(this.value)
+        : valueOrTransform
 
-    if (!finalCompare(this.value, nextValue)) {
+      if (finalCompare(this.value, nextValue)) {
+        return null
+      }
+
       this.value = nextValue
-      register(this.subscribers)
-    }
 
-    emit()
+      return this.emitters
+    })
   }
 
   /**
@@ -161,24 +176,20 @@ export class Impulse<T> {
    * @returns a cleanup function that unsubscribes the `listener`.
    *
    * @version 1.0.0
+   *
+   * @deprecated The method is deprecated in favor of the `subscribe` higher-order function. It will be removed in the next major release.
    */
+  @validate
+    .when("watch", WATCH_CALLING_IMPULSE_SUBSCRIBE)
+    .when("subscribe", SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE)
+    .when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE)
+    .when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE)
+    .prevent(noop)
   public subscribe(listener: VoidFunction): VoidFunction {
-    if (WatchContext.warning(WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING)) {
-      return noop
-    }
+    const emitter = new ScopeEmitter(false)
 
-    const countWhenSubscribes = this.subscribers.get(listener) ?? 0
+    emitter.attachTo(this.emitters)
 
-    this.subscribers.set(listener, countWhenSubscribes + 1)
-
-    return () => {
-      const countWhenUnsubscribes = this.subscribers.get(listener) ?? 0
-
-      if (countWhenUnsubscribes > 1) {
-        this.subscribers.set(listener, countWhenUnsubscribes - 1)
-      } else {
-        this.subscribers.delete(listener)
-      }
-    }
+    return emitter.onEmit(listener)
   }
 }

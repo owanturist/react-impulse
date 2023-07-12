@@ -1,24 +1,13 @@
 import { render, screen, fireEvent, act } from "@testing-library/react"
 import React from "react"
-import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
 
-import { Impulse, useImpulseValue, useWatchImpulse, watch } from "../../src"
-
-vi.mock("use-sync-external-store/shim/with-selector.js", async () => {
-  const actual: {
-    useSyncExternalStoreWithSelector: typeof useSyncExternalStoreWithSelector
-  } = await vi.importActual("use-sync-external-store/shim/with-selector.js")
-
-  return {
-    useSyncExternalStoreWithSelector: vi.fn(
-      actual.useSyncExternalStoreWithSelector,
-    ),
-  }
-})
-
-afterEach(() => {
-  vi.clearAllMocks()
-})
+import {
+  Compare,
+  Impulse,
+  useImpulseValue,
+  useWatchImpulse,
+  watch,
+} from "../../src"
 
 describe("watch()", () => {
   it("should work fine together with useState", () => {
@@ -139,13 +128,11 @@ describe("watch()", () => {
 
     expect(btn).toHaveTextContent("1")
     expect(onRender).toHaveBeenCalledOnce()
-    expect(useSyncExternalStoreWithSelector).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     fireEvent.click(btn)
     expect(btn).toHaveTextContent("2")
     expect(onRender).toHaveBeenCalledOnce()
-    expect(useSyncExternalStoreWithSelector).toHaveBeenCalledOnce()
   })
 
   it("should work fine in strict mode", () => {
@@ -217,6 +204,224 @@ describe("watch()", () => {
     expect(onRender).toHaveBeenCalledOnce()
   })
 
+  it("should subscribe only ones for the same impulse", () => {
+    const Component = watch<{
+      count: Impulse<number>
+    }>(({ count }) => (
+      <span data-testid="result">{count.getValue() + count.getValue()}</span>
+    ))
+
+    const count = Impulse.of(1)
+
+    render(<Component count={count} />)
+
+    const result = screen.getByTestId("result")
+
+    expect(result).toHaveTextContent("2")
+    expect(count).toHaveProperty("emitters.size", 1)
+
+    act(() => {
+      count.setValue(3)
+    })
+
+    expect(result).toHaveTextContent("6")
+    expect(count).toHaveProperty("emitters.size", 1)
+  })
+
+  it("should unsubscribe when impulse changes", () => {
+    const Component = watch<{
+      count: Impulse<number>
+    }>(({ count }) => <span data-testid="result">{count.getValue()}</span>)
+
+    const count_1 = Impulse.of(1)
+    const count_2 = Impulse.of(3)
+
+    const { rerender } = render(<Component count={count_1} />)
+
+    const result = screen.getByTestId("result")
+
+    expect(result).toHaveTextContent("1")
+    expect(count_1).toHaveProperty("emitters.size", 1)
+    expect(count_2).toHaveProperty("emitters.size", 0)
+
+    rerender(<Component count={count_2} />)
+
+    expect(result).toHaveTextContent("3")
+    expect(count_1).toHaveProperty("emitters.size", 0)
+    expect(count_2).toHaveProperty("emitters.size", 1)
+  })
+
+  it("should unsubscribe for conditionally rendered impulse when re-render is triggered by changing impulse value", () => {
+    const Component = watch<{
+      count: Impulse<number>
+      condition: Impulse<boolean>
+    }>(({ count, condition }) => (
+      <span data-testid="result">
+        {condition.getValue() ? count.getValue() : "none"}
+      </span>
+    ))
+
+    const count = Impulse.of(1)
+    const condition = Impulse.of(false)
+
+    render(<Component count={count} condition={condition} />)
+
+    const result = screen.getByTestId("result")
+
+    expect(result).toHaveTextContent("none")
+    expect(count).toHaveProperty("emitters.size", 0)
+    expect(condition).toHaveProperty("emitters.size", 1)
+
+    act(() => {
+      condition.setValue(true)
+    })
+    expect(result).toHaveTextContent("1")
+    expect(count).toHaveProperty("emitters.size", 1)
+    expect(condition).toHaveProperty("emitters.size", 1)
+
+    act(() => {
+      count.setValue(2)
+    })
+    expect(result).toHaveTextContent("2")
+
+    act(() => {
+      condition.setValue(false)
+    })
+    expect(result).toHaveTextContent("none")
+    expect(count).toHaveProperty("emitters.size", 0)
+    expect(condition).toHaveProperty("emitters.size", 1)
+  })
+
+  it("should unsubscribe for conditionally rendered impulse when re-render is triggered by changing props", () => {
+    const Component = watch<{
+      count: Impulse<number>
+      condition: boolean
+    }>(({ count, condition }) => (
+      <span data-testid="result">{condition ? count.getValue() : "none"}</span>
+    ))
+
+    const count = Impulse.of(1)
+
+    const { rerender } = render(<Component count={count} condition={false} />)
+
+    const result = screen.getByTestId("result")
+
+    expect(result).toHaveTextContent("none")
+    expect(count).toHaveProperty("emitters.size", 0)
+
+    rerender(<Component count={count} condition={true} />)
+    expect(result).toHaveTextContent("1")
+    expect(count).toHaveProperty("emitters.size", 1)
+
+    act(() => {
+      count.setValue(2)
+    })
+    expect(result).toHaveTextContent("2")
+
+    rerender(<Component count={count} condition={false} />)
+    expect(result).toHaveTextContent("none")
+    expect(count).toHaveProperty("emitters.size", 0)
+  })
+
+  it("should unsubscribe for conditionally rendered impulse when re-render is triggered by changing useState", () => {
+    const Component = watch<{
+      count: Impulse<number>
+    }>(({ count }) => {
+      const [condition, setCondition] = React.useState(false)
+
+      return (
+        <button
+          type="button"
+          data-testid="result"
+          onClick={() => setCondition((x) => !x)}
+        >
+          {/* eslint-disable-next-line jest/no-if */}
+          {condition ? count.getValue() : "none"}
+        </button>
+      )
+    })
+
+    const count = Impulse.of(1)
+
+    render(<Component count={count} />)
+
+    const result = screen.getByTestId("result")
+
+    expect(result).toHaveTextContent("none")
+    expect(count).toHaveProperty("emitters.size", 0)
+
+    fireEvent.click(result)
+    expect(result).toHaveTextContent("1")
+    expect(count).toHaveProperty("emitters.size", 1)
+
+    act(() => {
+      count.setValue(2)
+    })
+    expect(result).toHaveTextContent("2")
+
+    fireEvent.click(result)
+    expect(result).toHaveTextContent("none")
+    expect(count).toHaveProperty("emitters.size", 0)
+  })
+
+  it("should not unsubscribe conditionally rendered impulse if it is used in another place", () => {
+    const Component = watch<{
+      count: Impulse<number>
+      condition: boolean
+    }>(({ count, condition }) => (
+      <>
+        <span data-testid="x">{condition ? count.getValue() : "none"}</span>
+        <span data-testid="y">{count.getValue()}</span>
+      </>
+    ))
+
+    const count = Impulse.of(1)
+
+    const { rerender } = render(<Component count={count} condition={false} />)
+
+    const x = screen.getByTestId("x")
+    const y = screen.getByTestId("y")
+
+    expect(x).toHaveTextContent("none")
+    expect(y).toHaveTextContent("1")
+    expect(count).toHaveProperty("emitters.size", 1)
+
+    rerender(<Component count={count} condition={true} />)
+    expect(x).toHaveTextContent("1")
+    expect(y).toHaveTextContent("1")
+    expect(count).toHaveProperty("emitters.size", 1)
+
+    act(() => {
+      count.setValue(2)
+    })
+    expect(x).toHaveTextContent("2")
+    expect(y).toHaveTextContent("2")
+
+    rerender(<Component count={count} condition={false} />)
+    expect(x).toHaveTextContent("none")
+    expect(y).toHaveTextContent("2")
+    expect(count).toHaveProperty("emitters.size", 1)
+  })
+
+  it("should unsubscribe on unmount", () => {
+    const Component = watch<{
+      count: Impulse<number>
+    }>(({ count }) => <span data-testid="result">{count.getValue()}</span>)
+
+    const count = Impulse.of(1)
+
+    const { unmount } = render(<Component count={count} />)
+
+    const result = screen.getByTestId("result")
+
+    expect(result).toHaveTextContent("1")
+    expect(count).toHaveProperty("emitters.size", 1)
+
+    unmount()
+
+    expect(count).toHaveProperty("emitters.size", 0)
+  })
+
   it("should not subscribe twice with useImpulseValue", () => {
     const Component = watch<{
       count: Impulse<number>
@@ -233,27 +438,34 @@ describe("watch()", () => {
     const result = screen.getByTestId("result")
 
     expect(result).toHaveTextContent("1")
-    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("emitters.size", 1)
 
     act(() => {
       count.setValue(2)
     })
 
     expect(result).toHaveTextContent("2")
-    expect(count).toHaveProperty("subscribers.size", 1)
+    expect(count).toHaveProperty("emitters.size", 1)
   })
 })
 
-describe("watch.memo()", () => {
-  it.each([
-    ["watch.memo()", watch.memo],
-    ["watch.memo.forwardRef()", watch.memo.forwardRef],
-    ["watch.forwardRef.memo()", watch.forwardRef.memo],
-    [
-      "React.memo(watch())",
-      <TProps,>(fc: React.FC<TProps>) => React.memo(watch(fc)),
-    ],
-  ])("should memoize with %s", (_, memo) => {
+describe.each([
+  ["watch.memo()", watch.memo],
+  ["watch.memo.forwardRef()", watch.memo.forwardRef],
+  ["watch.forwardRef.memo()", watch.forwardRef.memo],
+  [
+    "React.memo(watch())",
+    <TProps,>(
+      Component: React.FC<TProps>,
+      propsAreEqual?: Compare<Readonly<TProps>>,
+    ) => {
+      return React.memo(watch(Component), propsAreEqual)
+    },
+  ],
+])("memoizing with %s", (_, customMemo) => {
+  const memo = customMemo as typeof watch.memo
+
+  it("should memoize", () => {
     const Component: React.FC<{
       state: Impulse<number>
       onRender: VoidFunction
@@ -264,7 +476,7 @@ describe("watch.memo()", () => {
     )
 
     const Watched = watch(Component)
-    const WatchedMemoized = (memo as typeof React.memo)(Component)
+    const WatchedMemoized = memo(Component)
 
     const Host: React.FC<{
       state: Impulse<number>
@@ -330,6 +542,65 @@ describe("watch.memo()", () => {
     expect(counts[0]).toHaveTextContent("1")
     expect(counts[1]).toHaveTextContent("1")
   })
+
+  it("should pass `propsAreEqual`", () => {
+    const Component = memo<{
+      state: { count: Impulse<number> }
+      onRender: VoidFunction
+    }>(
+      ({ state, onRender }, _refSuppressReactWarning) => (
+        <React.Profiler id="test" onRender={onRender}>
+          <div data-testid="count">{state.count.getValue()}</div>
+        </React.Profiler>
+      ),
+      (prev, next) => prev.state.count === next.state.count,
+    )
+
+    const Host: React.FC<{
+      count: Impulse<number>
+      onWatchedRender: VoidFunction
+    }> = ({ count, onWatchedRender }) => {
+      const [, force] = React.useState(0)
+
+      return (
+        <button
+          type="button"
+          data-testid="force"
+          onClick={() => force((x) => x + 1)}
+        >
+          <Component state={{ count }} onRender={onWatchedRender} />
+        </button>
+      )
+    }
+
+    const count = Impulse.of(0)
+    const onWatchedRender = vi.fn()
+
+    const { rerender } = render(
+      <Host count={count} onWatchedRender={onWatchedRender} />,
+    )
+
+    const counter = screen.getByTestId("count")
+    expect(counter).toHaveTextContent("0")
+    expect(onWatchedRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    fireEvent.click(screen.getByTestId("force"))
+    expect(counter).toHaveTextContent("0")
+    expect(onWatchedRender).toHaveBeenCalledTimes(0)
+    vi.clearAllMocks()
+
+    rerender(<Host count={count} onWatchedRender={onWatchedRender} />)
+    expect(counter).toHaveTextContent("0")
+    expect(onWatchedRender).toHaveBeenCalledTimes(0)
+    vi.clearAllMocks()
+
+    act(() => {
+      count.setValue((x) => x + 1)
+    })
+    expect(counter).toHaveTextContent("1")
+    expect(onWatchedRender).toHaveBeenCalledOnce()
+  })
 })
 
 describe("watch.forwardRef()", () => {
@@ -382,5 +653,35 @@ describe("watch.forwardRef()", () => {
 
     expect(count).toHaveTextContent("1")
     expect(divRef).not.toHaveBeenCalled()
+  })
+})
+
+describe("wild cases", () => {
+  it("should work with `React.lazy()`", async () => {
+    const Component = watch.memo<{
+      count: Impulse<number>
+    }>(({ count }) => <div data-testid="count">{count.getValue()}</div>)
+
+    const LazyComponent = React.lazy<typeof Component>(() => {
+      return new Promise((done) => {
+        setTimeout(() => done({ default: Component }), 100)
+      })
+    })
+    const count = Impulse.of(0)
+
+    render(
+      <React.Suspense fallback={null}>
+        <LazyComponent count={count} />
+      </React.Suspense>,
+    )
+
+    expect(screen.queryByTestId("count")).not.toBeInTheDocument()
+
+    expect(await screen.findByTestId("count")).toHaveTextContent("0")
+
+    act(() => {
+      count.setValue((x) => x + 1)
+    })
+    expect(screen.getByTestId("count")).toHaveTextContent("1")
   })
 })

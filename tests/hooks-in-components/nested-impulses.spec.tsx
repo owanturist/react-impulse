@@ -54,7 +54,7 @@ describe("nested impulses", () => {
     )
   }
 
-  it("Performs nested impulse management", () => {
+  it("performs nested impulse management", () => {
     const impulse = Impulse.of<AppState>({ counts: [] })
     const onRender = vi.fn()
     const onCounterRender = vi.fn()

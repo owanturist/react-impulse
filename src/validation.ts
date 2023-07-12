@@ -1,92 +1,116 @@
-export type WarningSource =
+import { Func, isFunction } from "./utils"
+
+export type ExecutionContext =
+  | "subscribe"
+  | "watch"
   | "useWatchImpulse"
   | "useImpulseMemo"
-  | "watch"
-  | "subscribe"
 
-export type WarningSet = Record<WarningSource, null | string>
+let currentExecutionContext: null | ExecutionContext = null
 
-interface MakeWarningOptions {
-  isWatchAffected: boolean
-  isSubscribeAffected: boolean
-  isCritical: boolean
-  whatItDoes: string
-  method: string
+export function defineExecutionContext<
+  TArgs extends ReadonlyArray<unknown>,
+  TResult,
+>(
+  name: ExecutionContext,
+  execute: Func<TArgs, TResult>,
+  ...args: TArgs
+): TResult {
+  const prev = currentExecutionContext
+
+  currentExecutionContext = name
+
+  const result = execute(...args)
+
+  currentExecutionContext = prev
+
+  return result
 }
 
-const makeHookWarningMessage = (
-  hook: string,
-  { isCritical, whatItDoes, method }: MakeWarningOptions,
-): string => {
-  const verb = isCritical ? "may" : "should"
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ValidateDecorator<TReturn = any> = (
+  target: unknown,
+  propertyKey: string,
+  descriptor: TypedPropertyDescriptor<Func<Array<never>, TReturn>>,
+) => void
 
-  return `You ${verb} not call ${method} inside of the ${hook} callback. The ${hook} hook is for read-only operations but ${method} ${whatItDoes}.`
-}
+class Validate<TContext extends ExecutionContext> {
+  public constructor(
+    private readonly spec: ReadonlyMap<ExecutionContext, string>,
+  ) {}
 
-const makeWatchWarningMessage = ({
-  isWatchAffected,
-  isCritical,
-  method,
-}: MakeWarningOptions): null | string => {
-  if (!isWatchAffected) {
-    return null
+  private getMessage(): null | undefined | string {
+    return currentExecutionContext && this.spec.get(currentExecutionContext)
   }
 
-  const verb = isCritical ? "may" : "should"
-
-  return `You ${verb} not call ${method} during rendering of watch(Component)`
-}
-
-const makeSubscribeWarningMessage = ({
-  isSubscribeAffected,
-  isCritical,
-  method,
-  whatItDoes,
-}: MakeWarningOptions): null | string => {
-  if (!isSubscribeAffected) {
-    return null
+  private print(message: string): void {
+    if (
+      typeof console !== "undefined" &&
+      // eslint-disable-next-line no-console
+      isFunction(console.error) &&
+      // don't print empty messages
+      /* c8 ignore next */
+      message
+    ) {
+      // eslint-disable-next-line no-console
+      console.error(message)
+    }
   }
 
-  const verb = isCritical ? "may" : "should"
+  public when<TName extends TContext>(
+    name: TName,
+    message: string,
+  ): Validate<Exclude<ExecutionContext, TName>> {
+    return new Validate(new Map(this.spec).set(name, message))
+  }
 
-  return `You ${verb} not call ${method} inside of the subscribe listener. The listener is for read-only operations but ${method} ${whatItDoes}.`
+  public alert(): ValidateDecorator {
+    return (_, __, descriptor) => {
+      if (process.env.NODE_ENV === "production") {
+        /* c8 ignore next */
+        return
+      }
+
+      const original = descriptor.value!
+      const that = this
+
+      descriptor.value = function (...args) {
+        const message = that.getMessage()
+
+        if (message) {
+          that.print(message)
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return original.apply(this, args)
+      }
+    }
+  }
+
+  public prevent(): ValidateDecorator
+  public prevent<TReturn>(returns: TReturn): ValidateDecorator<TReturn>
+  public prevent<TReturn = void>(
+    returns?: TReturn,
+  ): ValidateDecorator<undefined | TReturn> {
+    return (_, __, descriptor) => {
+      const original = descriptor.value!
+      const that = this
+
+      descriptor.value = function (...args) {
+        const message = that.getMessage()
+
+        if (message == null) {
+          return original.apply(this, args)
+        }
+
+        if (process.env.NODE_ENV !== "production") {
+          that.print(message)
+        }
+
+        return returns
+      }
+    }
+  }
 }
 
-const makeWarningSet = (options: MakeWarningOptions): WarningSet => ({
-  useWatchImpulse: makeHookWarningMessage("useWatchImpulse(watcher)", options),
-  useImpulseMemo: makeHookWarningMessage("useImpulseMemo(factory)", options),
-  watch: makeWatchWarningMessage(options),
-  subscribe: makeSubscribeWarningMessage(options),
-})
-
-export const WARNING_MESSAGE_CALLING_OF_WHEN_WATCHING = makeWarningSet({
-  method: "Impulse#of",
-  whatItDoes: "creates a new Impulse",
-  isCritical: false,
-  isWatchAffected: false,
-  isSubscribeAffected: true,
-})
-
-export const WARNING_MESSAGE_CALLING_CLONE_WHEN_WATCHING = makeWarningSet({
-  method: "Impulse#clone",
-  whatItDoes: "clones an existing Impulse",
-  isCritical: false,
-  isWatchAffected: false,
-  isSubscribeAffected: true,
-})
-
-export const WARNING_MESSAGE_CALLING_SET_VALUE_WHEN_WATCHING = makeWarningSet({
-  method: "Impulse#setValue",
-  whatItDoes: "changes an existing Impulse",
-  isCritical: true,
-  isWatchAffected: true,
-  isSubscribeAffected: false,
-})
-
-export const WARNING_MESSAGE_CALLING_SUBSCRIBE_WHEN_WATCHING = makeWarningSet({
-  method: "Impulse#subscribe",
-  whatItDoes: "subscribes to an Impulse",
-  isCritical: true,
-  isWatchAffected: true,
-  isSubscribeAffected: true,
-})
+export const validate = new Validate(new Map())

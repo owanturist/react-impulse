@@ -4,7 +4,7 @@ import { renderHook } from "@testing-library/react"
 import { useWatchImpulse } from "../../src"
 
 describe("watching no impulses", () => {
-  it.concurrent.each([
+  it.each([
     [
       "inline",
       () => {
@@ -23,7 +23,7 @@ describe("watching no impulses", () => {
     expect(result.current).toBe(1)
   })
 
-  it.concurrent.each([
+  it.each([
     [
       "inline",
       ({ value }: { value: number }) => {

@@ -52,13 +52,13 @@ jobs:
           fail_ci_if_error: false
 
       - name: Install React 17 and legacy testing libraries
-        run: pnpm add -D react@17 @testing-library/react@12 @testing-library/react-hooks@7
+        run: pnpm add -D react@17.0.0 react-dom@17.0.0 @testing-library/react@12 @testing-library/react-hooks
 
       - name: Test against React 17
         run: pnpm test:run
 
       - name: Install React 16
-        run: pnpm add -D react@16
+        run: pnpm add -D react@16.12.0 react-dom@16.12.0
 
       - name: Test against React 16
         run: pnpm test:run

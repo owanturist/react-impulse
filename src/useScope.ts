@@ -1,0 +1,36 @@
+import { useCallback } from "react"
+import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector"
+
+import { ScopeEmitter } from "./ScopeEmitter"
+import { EMITTER_KEY, Scope } from "./Scope"
+import { Compare, isFunction, usePermanent } from "./utils"
+
+export function useScope<T = () => Scope>(
+  transform?: (scope: Scope) => T,
+  compare?: Compare<T>,
+): T {
+  const emitter = usePermanent(() => new ScopeEmitter())
+  const select = useCallback(
+    (version: number) => {
+      const getScope = (): Scope => {
+        emitter.detachAll()
+
+        return {
+          [EMITTER_KEY]: emitter,
+          version,
+        }
+      }
+
+      return isFunction(transform) ? transform(getScope()) : (getScope as T)
+    },
+    [emitter, transform],
+  )
+
+  return useSyncExternalStoreWithSelector(
+    emitter.onEmit,
+    emitter.getVersion,
+    emitter.getVersion,
+    select,
+    compare,
+  )
+}

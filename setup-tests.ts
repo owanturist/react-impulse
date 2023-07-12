@@ -12,17 +12,14 @@ const console$error = vi
   .mockImplementation((message: string) => {
     expect.fail(message)
   })
-
-afterAll(() => {
-  console$error.mockRestore()
-})
-
 afterEach(() => {
   // should manually cleanup the react testing env since tests are running in a single thread
   cleanup()
 })
 
-/* c8 ignore stop */
+afterAll(() => {
+  console$error.mockRestore()
+})
 
 vi.mock("@testing-library/react", async () => {
   const actual = await vi.importActual<typeof import("@testing-library/react")>(
@@ -39,3 +36,5 @@ vi.mock("@testing-library/react", async () => {
     return actual
   }
 })
+
+/* c8 ignore stop */

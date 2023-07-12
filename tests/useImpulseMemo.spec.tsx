@@ -68,7 +68,7 @@ describe.each([
       expect(node).toHaveTextContent("2")
       expect(onMemo).toHaveBeenCalledOnce()
       expect(onRender).toHaveBeenCalledOnce()
-      expect(value).toHaveProperty("subscribers.size", 1)
+      expect(value).toHaveProperty("emitters.size", 1)
       vi.clearAllMocks()
 
       act(() => {
@@ -78,7 +78,7 @@ describe.each([
       expect(node).toHaveTextContent("4")
       expect(onMemo).toHaveBeenCalledOnce()
       expect(onRender).toHaveBeenCalledOnce()
-      expect(value).toHaveProperty("subscribers.size", 1)
+      expect(value).toHaveProperty("emitters.size", 1)
     })
 
     it("does not call useMemo factory when deps not changed", () => {
@@ -113,7 +113,7 @@ describe.each([
 
       expect(onMemo).toHaveBeenCalledOnce()
       expect(onMemo).toHaveBeenLastCalledWith(6)
-      expect(value).toHaveProperty("subscribers.size", 1)
+      expect(value).toHaveProperty("emitters.size", 1)
       expect(onRender).toHaveBeenCalledOnce()
     })
 
@@ -153,11 +153,17 @@ describe.each([
         </React.Profiler>,
       )
 
+      expect(value_1).toHaveProperty("emitters.size", 1)
+      expect(value_2).toHaveProperty("emitters.size", 0)
+
       rerender(
         <React.Profiler id="test" onRender={onRender}>
           <Component useMemo={useImpulseMemo} onMemo={onMemo} value={value_2} />
         </React.Profiler>,
       )
+      expect(value_1).toHaveProperty("emitters.size", 0)
+      expect(value_2).toHaveProperty("emitters.size", 1)
+
       vi.clearAllMocks()
 
       act(() => {
@@ -166,7 +172,6 @@ describe.each([
 
       expect(onMemo).not.toHaveBeenCalled()
       expect(onRender).not.toHaveBeenCalled()
-      expect(value_1).toHaveProperty("subscribers.size", 0)
       vi.clearAllMocks()
 
       act(() => {
@@ -175,7 +180,9 @@ describe.each([
       expect(onMemo).toHaveBeenCalledOnce()
       expect(onMemo).toHaveBeenLastCalledWith(10)
       expect(onRender).toHaveBeenCalledOnce()
-      expect(value_2).toHaveProperty("subscribers.size", 1)
+
+      expect(value_1).toHaveProperty("emitters.size", 0)
+      expect(value_2).toHaveProperty("emitters.size", 1)
     })
 
     it("should call useMemo factory when none-Impulse dep changes", () => {
@@ -195,7 +202,7 @@ describe.each([
       expect(onMemo).toHaveBeenCalledOnce()
       expect(onMemo).toHaveBeenLastCalledWith(9)
       expect(onRender).toHaveBeenCalledOnce()
-      expect(value).toHaveProperty("subscribers.size", 1)
+      expect(value).toHaveProperty("emitters.size", 1)
       vi.clearAllMocks()
 
       act(() => {
@@ -204,7 +211,7 @@ describe.each([
       expect(onMemo).toHaveBeenCalledOnce()
       expect(onMemo).toHaveBeenLastCalledWith(12)
       expect(onRender).toHaveBeenCalledOnce()
-      expect(value).toHaveProperty("subscribers.size", 1)
+      expect(value).toHaveProperty("emitters.size", 1)
     })
   })
 
@@ -238,8 +245,8 @@ describe.each([
 
       const node = screen.getByTestId("value")
 
-      expect(first).toHaveProperty("subscribers.size", 1)
-      expect(second).toHaveProperty("subscribers.size", 1)
+      expect(first).toHaveProperty("emitters.size", 1)
+      expect(second).toHaveProperty("emitters.size", 1)
       expect(node).toHaveTextContent("10")
 
       act(() => {
@@ -252,8 +259,8 @@ describe.each([
       })
       expect(node).toHaveTextContent("18")
 
-      expect(first).toHaveProperty("subscribers.size", 1)
-      expect(second).toHaveProperty("subscribers.size", 1)
+      expect(first).toHaveProperty("emitters.size", 1)
+      expect(second).toHaveProperty("emitters.size", 1)
     })
   })
 
@@ -292,10 +299,10 @@ describe.each([
 
       render(<Component list={list} />)
 
-      expect(list).toHaveProperty("subscribers.size", 1)
-      expect(_0).toHaveProperty("subscribers.size", 1)
-      expect(_1).toHaveProperty("subscribers.size", 1)
-      expect(_2).toHaveProperty("subscribers.size", 0)
+      expect(list).toHaveProperty("emitters.size", 1)
+      expect(_0).toHaveProperty("emitters.size", 1)
+      expect(_1).toHaveProperty("emitters.size", 1)
+      expect(_2).toHaveProperty("emitters.size", 0)
 
       const node = screen.getByTestId("value")
 
@@ -316,17 +323,17 @@ describe.each([
       })
       expect(node).toHaveTextContent("26")
 
-      expect(_2).toHaveProperty("subscribers.size", 1)
+      expect(_2).toHaveProperty("emitters.size", 1)
 
       act(() => {
         list.setValue((items) => items.slice(1))
       })
       expect(node).toHaveTextContent("18")
 
-      expect(list).toHaveProperty("subscribers.size", 1)
-      expect(_0).toHaveProperty("subscribers.size", 0)
-      expect(_1).toHaveProperty("subscribers.size", 1)
-      expect(_2).toHaveProperty("subscribers.size", 1)
+      expect(list).toHaveProperty("emitters.size", 1)
+      expect(_0).toHaveProperty("emitters.size", 0)
+      expect(_1).toHaveProperty("emitters.size", 1)
+      expect(_2).toHaveProperty("emitters.size", 1)
     })
   })
 })

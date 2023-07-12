@@ -4,7 +4,7 @@ import { subscribe } from "../src/subscribe"
 import { Counter } from "./common"
 
 describe("single Impulse", () => {
-  it.concurrent("executes listener on init", () => {
+  it("executes listener on init", () => {
     const spy = vi.fn()
     const impulse = Impulse.of(1)
 
@@ -14,9 +14,10 @@ describe("single Impulse", () => {
 
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(1)
+    expect(impulse).toHaveProperty("emitters.size", 1)
   })
 
-  it.concurrent("executes listener on update", () => {
+  it("executes listener on update", () => {
     const spy = vi.fn()
     const impulse = Impulse.of(1)
 
@@ -28,9 +29,10 @@ describe("single Impulse", () => {
     impulse.setValue(2)
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(2)
+    expect(impulse).toHaveProperty("emitters.size", 1)
   })
 
-  it.concurrent("doesn't execute listener after unsubscribe", () => {
+  it("doesn't execute listener after unsubscribe", () => {
     const spy = vi.fn()
     const impulse = Impulse.of(1)
 
@@ -43,9 +45,10 @@ describe("single Impulse", () => {
     spy.mockReset()
     impulse.setValue(2)
     expect(spy).not.toHaveBeenCalled()
+    expect(impulse).toHaveProperty("emitters.size", 0)
   })
 
-  it.concurrent("ignores second unsubscribe", () => {
+  it("ignores second unsubscribe", () => {
     const spy = vi.fn()
     const impulse = Impulse.of(1)
 
@@ -59,9 +62,10 @@ describe("single Impulse", () => {
     spy.mockReset()
     impulse.setValue(2)
     expect(spy).not.toHaveBeenCalled()
+    expect(impulse).toHaveProperty("emitters.size", 0)
   })
 
-  it.concurrent("executes listener on every Impulse update", () => {
+  it("executes listener on every Impulse update", () => {
     const spy = vi.fn()
     const impulse = Impulse.of(1)
 
@@ -74,9 +78,10 @@ describe("single Impulse", () => {
     impulse.setValue(3)
     expect(spy).toHaveBeenCalledTimes(2)
     expect(spy).toHaveBeenLastCalledWith(3)
+    expect(impulse).toHaveProperty("emitters.size", 1)
   })
 
-  it.concurrent("executes listener ones for batched Impulse updates", () => {
+  it("executes listener ones for batched Impulse updates", () => {
     const spy = vi.fn()
     const impulse = Impulse.of(1)
 
@@ -91,48 +96,45 @@ describe("single Impulse", () => {
     })
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(3)
+    expect(impulse).toHaveProperty("emitters.size", 1)
   })
 
-  it.concurrent(
-    "doesn't execute listener when Impulse value does not change",
-    () => {
-      const spy = vi.fn()
-      const impulse = Impulse.of(1)
+  it("doesn't execute listener when Impulse value does not change", () => {
+    const spy = vi.fn()
+    const impulse = Impulse.of(1)
 
-      subscribe(() => {
-        spy(impulse.getValue())
-      })
+    subscribe(() => {
+      spy(impulse.getValue())
+    })
 
-      spy.mockReset()
-      impulse.setValue(1)
-      expect(spy).not.toHaveBeenCalled()
-    },
-  )
+    spy.mockReset()
+    impulse.setValue(1)
+    expect(spy).not.toHaveBeenCalled()
+    expect(impulse).toHaveProperty("emitters.size", 1)
+  })
 
-  it.concurrent(
-    "doesn't execute listener when Impulse value comparably the same",
-    () => {
-      const spy = vi.fn()
-      const impulse = Impulse.of({ count: 1 }, Counter.compare)
+  it("doesn't execute listener when Impulse value comparably the same", () => {
+    const spy = vi.fn()
+    const impulse = Impulse.of({ count: 1 }, Counter.compare)
 
-      subscribe(() => {
-        spy(impulse.getValue())
-      })
+    subscribe(() => {
+      spy(impulse.getValue())
+    })
 
-      spy.mockReset()
-      impulse.setValue({ count: 1 })
-      expect(spy).not.toHaveBeenCalled()
+    spy.mockReset()
+    impulse.setValue({ count: 1 })
+    expect(spy).not.toHaveBeenCalled()
 
-      spy.mockReset()
-      impulse.setValue({ count: 2 })
-      expect(spy).toHaveBeenCalledOnce()
-      expect(spy).toHaveBeenLastCalledWith({ count: 2 })
-    },
-  )
+    spy.mockReset()
+    impulse.setValue({ count: 2 })
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith({ count: 2 })
+    expect(impulse).toHaveProperty("emitters.size", 1)
+  })
 })
 
 describe("multiple Impulses", () => {
-  it.concurrent("executes listener on init", () => {
+  it("executes listener on init", () => {
     const spy = vi.fn()
     const impulse_1 = Impulse.of(1)
     const impulse_2 = Impulse.of(2)
@@ -143,9 +145,11 @@ describe("multiple Impulses", () => {
 
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(3)
+    expect(impulse_1).toHaveProperty("emitters.size", 1)
+    expect(impulse_2).toHaveProperty("emitters.size", 1)
   })
 
-  it.concurrent("executes listener on update", () => {
+  it("executes listener on update", () => {
     const spy = vi.fn()
     const impulse_1 = Impulse.of(1)
     const impulse_2 = Impulse.of(2)
@@ -163,9 +167,11 @@ describe("multiple Impulses", () => {
     impulse_2.setValue(4)
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(7)
+    expect(impulse_1).toHaveProperty("emitters.size", 1)
+    expect(impulse_2).toHaveProperty("emitters.size", 1)
   })
 
-  it.concurrent("doesn't execute listener after unsubscribe", () => {
+  it("doesn't execute listener after unsubscribe", () => {
     const spy = vi.fn()
     const impulse_1 = Impulse.of(1)
     const impulse_2 = Impulse.of(2)
@@ -175,6 +181,8 @@ describe("multiple Impulses", () => {
     })
 
     unsubscribe()
+    expect(impulse_1).toHaveProperty("emitters.size", 0)
+    expect(impulse_2).toHaveProperty("emitters.size", 0)
 
     spy.mockReset()
     impulse_1.setValue(4)
@@ -182,76 +190,49 @@ describe("multiple Impulses", () => {
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it.concurrent(
-    "doesn't execute conditional listener when conditional Impulse changes",
-    () => {
-      const spy = vi.fn()
-      const impulse_1 = Impulse.of(1)
-      const impulse_2 = Impulse.of(2)
-
-      subscribe(() => {
-        if (impulse_1.getValue() > 1) {
-          spy(impulse_1.getValue() + impulse_2.getValue())
-        }
-      })
-
-      spy.mockReset()
-      impulse_2.setValue(3)
-      expect(spy).not.toHaveBeenCalled()
-
-      spy.mockReset()
-      impulse_1.setValue(2)
-      expect(spy).toHaveBeenCalledOnce()
-      expect(spy).toHaveBeenLastCalledWith(5)
-
-      spy.mockReset()
-      impulse_2.setValue(4)
-      expect(spy).toHaveBeenCalledOnce()
-      expect(spy).toHaveBeenLastCalledWith(6)
-
-      spy.mockReset()
-      impulse_1.setValue(1)
-      expect(spy).not.toHaveBeenCalled()
-    },
-  )
-
-  it.concurrent("executes listener on every Impulse update", () => {
+  it("doesn't execute conditional listener when conditional Impulse changes", () => {
     const spy = vi.fn()
     const impulse_1 = Impulse.of(1)
     const impulse_2 = Impulse.of(2)
 
     subscribe(() => {
-      spy(impulse_1.getValue() + impulse_2.getValue())
+      if (impulse_1.getValue() > 1) {
+        spy(impulse_1.getValue() + impulse_2.getValue())
+      }
     })
+    expect(impulse_1).toHaveProperty("emitters.size", 1)
+    expect(impulse_2).toHaveProperty("emitters.size", 0)
+
+    spy.mockReset()
+    impulse_2.setValue(3)
+    expect(spy).not.toHaveBeenCalled()
+    expect(impulse_1).toHaveProperty("emitters.size", 1)
+    expect(impulse_2).toHaveProperty("emitters.size", 0)
 
     spy.mockReset()
     impulse_1.setValue(2)
-    impulse_2.setValue(3)
-    expect(spy).toHaveBeenCalledTimes(2)
-    expect(spy).toHaveBeenLastCalledWith(5)
-  })
-
-  it.concurrent("executes listener ones for batched Impulse updates", () => {
-    const spy = vi.fn()
-    const impulse_1 = Impulse.of(1)
-    const impulse_2 = Impulse.of(2)
-
-    subscribe(() => {
-      spy(impulse_1.getValue() + impulse_2.getValue())
-    })
-
-    spy.mockReset()
-    batch(() => {
-      impulse_1.setValue(2)
-      impulse_2.setValue(3)
-    })
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(5)
+    expect(impulse_1).toHaveProperty("emitters.size", 1)
+    expect(impulse_2).toHaveProperty("emitters.size", 1)
+
+    spy.mockReset()
+    impulse_2.setValue(4)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(6)
+    expect(impulse_1).toHaveProperty("emitters.size", 1)
+    expect(impulse_2).toHaveProperty("emitters.size", 1)
+
+    spy.mockReset()
+    impulse_1.setValue(1)
+    expect(spy).not.toHaveBeenCalled()
+    expect(impulse_1).toHaveProperty("emitters.size", 1)
+    expect(impulse_2).toHaveProperty("emitters.size", 0)
   })
 })
 
 describe("nested Impulses", () => {
-  it.concurrent("executes listener on init", () => {
+  it("executes listener on init", () => {
     const spy = vi.fn()
     const impulse_1 = Impulse.of(1)
     const impulse_2 = Impulse.of(2)
@@ -268,11 +249,15 @@ describe("nested Impulses", () => {
       )
     })
 
+    expect(impulse_1).toHaveProperty("emitters.size", 1)
+    expect(impulse_2).toHaveProperty("emitters.size", 1)
+    expect(impulse_3).toHaveProperty("emitters.size", 1)
+
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(3)
   })
 
-  it.concurrent("executes listener on update", () => {
+  it("executes listener on update", () => {
     const spy = vi.fn()
     const impulse_1 = Impulse.of(1)
     const impulse_2 = Impulse.of(2)
@@ -306,5 +291,41 @@ describe("nested Impulses", () => {
     })
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(7)
+  })
+})
+
+describe("batching", () => {
+  it("executes listener on every Impulse update", () => {
+    const spy = vi.fn()
+    const impulse_1 = Impulse.of(1)
+    const impulse_2 = Impulse.of(2)
+
+    subscribe(() => {
+      spy(impulse_1.getValue() + impulse_2.getValue())
+    })
+
+    spy.mockReset()
+    impulse_1.setValue(2)
+    impulse_2.setValue(3)
+    expect(spy).toHaveBeenCalledTimes(2)
+    expect(spy).toHaveBeenLastCalledWith(5)
+  })
+
+  it("executes listener ones for batched Impulse updates", () => {
+    const spy = vi.fn()
+    const impulse_1 = Impulse.of(1)
+    const impulse_2 = Impulse.of(2)
+
+    subscribe(() => {
+      spy(impulse_1.getValue() + impulse_2.getValue())
+    })
+
+    spy.mockReset()
+    batch(() => {
+      impulse_1.setValue(2)
+      impulse_2.setValue(3)
+    })
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(5)
   })
 })

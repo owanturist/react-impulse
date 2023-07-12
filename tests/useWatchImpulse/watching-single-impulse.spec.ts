@@ -38,7 +38,7 @@ describe.each([
       },
     ],
   ])("%s", (__, useHook) => {
-    it.concurrent("watches the impulse's changes", () => {
+    it("watches the Impulse's changes", () => {
       const impulse = Impulse.of({ count: 1 })
 
       const { result } = renderHook(useHook, {
@@ -70,52 +70,52 @@ describe.each([
         return { impulse_1, impulse_2, result, rerender }
       }
 
-      it.concurrent("initiates with correct result", () => {
+      it("initiates with correct result", () => {
         const { result } = setup()
 
         expect(result.current).toStrictEqual({ count: 1 })
       })
 
-      it.concurrent("replaces initial impulse_1 with impulse_2", () => {
+      it("replaces initial impulse_1 with impulse_2", () => {
         const { impulse_2, result, rerender } = setup()
 
         rerender({ impulse: impulse_2 })
         expect(result.current).toStrictEqual({ count: 10 })
       })
 
-      it.concurrent(
-        "stops watching impulse_1 changes after replacement with impulse_2",
-        () => {
-          const { impulse_1, impulse_2, result, rerender } = setup()
+      it("stops watching impulse_1 changes after replacement with impulse_2", () => {
+        const { impulse_1, impulse_2, result, rerender } = setup()
+        expect(impulse_1).toHaveProperty("emitters.size", 1)
 
-          rerender({ impulse: impulse_2 })
+        rerender({ impulse: impulse_2 })
+        expect(impulse_1).toHaveProperty("emitters.size", 0)
 
-          act(() => {
-            impulse_1.setValue(Counter.inc)
-          })
+        act(() => {
+          impulse_1.setValue(Counter.inc)
+        })
 
-          expect(impulse_1.getValue()).toStrictEqual({ count: 2 })
-          expect(result.current).toStrictEqual({ count: 10 })
-        },
-      )
+        expect(impulse_1.getValue()).toStrictEqual({ count: 2 })
+        expect(result.current).toStrictEqual({ count: 10 })
+        expect(impulse_1).toHaveProperty("emitters.size", 0)
+      })
 
-      it.concurrent(
-        "starts watching impulse_2 changes after replacement of impulse_1",
-        () => {
-          const { impulse_1, impulse_2, result, rerender } = setup()
+      it("starts watching impulse_2 changes after replacement of impulse_1", () => {
+        const { impulse_1, impulse_2, result, rerender } = setup()
+        expect(impulse_2).toHaveProperty("emitters.size", 0)
 
-          rerender({ impulse: impulse_2 })
+        rerender({ impulse: impulse_2 })
+        expect(impulse_2).toHaveProperty("emitters.size", 1)
 
-          act(() => {
-            impulse_2.setValue(Counter.inc)
-          })
+        act(() => {
+          impulse_2.setValue(Counter.inc)
+        })
 
-          expect(impulse_1.getValue()).toStrictEqual({ count: 1 })
-          expect(result.current).toStrictEqual({ count: 11 })
-        },
-      )
+        expect(impulse_1.getValue()).toStrictEqual({ count: 1 })
+        expect(result.current).toStrictEqual({ count: 11 })
+        expect(impulse_2).toHaveProperty("emitters.size", 1)
+      })
 
-      it.concurrent("replaces impulse_1 back", () => {
+      it("replaces impulse_1 back", () => {
         const { impulse_1, impulse_2, result, rerender } = setup()
 
         rerender({ impulse: impulse_2 })
@@ -124,21 +124,20 @@ describe.each([
         expect(result.current).toStrictEqual({ count: 1 })
       })
 
-      it.concurrent(
-        "stops watching impulse_2 after replacement back impulse_1",
-        () => {
-          const { impulse_1, impulse_2, result, rerender } = setup()
+      it("stops watching impulse_2 after replacement back impulse_1", () => {
+        const { impulse_1, impulse_2, result, rerender } = setup()
 
-          rerender({ impulse: impulse_2 })
-          rerender({ impulse: impulse_1 })
+        rerender({ impulse: impulse_2 })
+        rerender({ impulse: impulse_1 })
+        expect(impulse_1).toHaveProperty("emitters.size", 1)
+        expect(impulse_2).toHaveProperty("emitters.size", 0)
 
-          act(() => {
-            impulse_2.setValue(Counter.inc)
-          })
+        act(() => {
+          impulse_2.setValue(Counter.inc)
+        })
 
-          expect(result.current).toStrictEqual({ count: 1 })
-        },
-      )
+        expect(result.current).toStrictEqual({ count: 1 })
+      })
     })
   })
 })
@@ -172,59 +171,56 @@ describe("transform Impulse's value inside watcher", () => {
       },
     ],
   ])("%s", (__, useHookWithoutCompare) => {
-    it.concurrent(
-      "produces new value on each impulse's update without comparator",
-      () => {
-        const impulse = Impulse.of({ count: 1 })
+    it("produces new value on each Impulse's update without comparator", () => {
+      const impulse = Impulse.of({ count: 1 })
 
-        const { result, rerender } = renderHook(useHookWithoutCompare, {
-          initialProps: { impulse },
-        })
+      const { result, rerender } = renderHook(useHookWithoutCompare, {
+        initialProps: { impulse },
+      })
 
-        let prev = result.current
+      let prev = result.current
 
-        // produces initial result
-        expect(result.current).toStrictEqual([false, true])
+      // produces initial result
+      expect(result.current).toStrictEqual([false, true])
 
-        // increments 1 -> 2
-        prev = result.current
-        act(() => {
-          impulse.setValue(Counter.inc)
-        })
-        expect(result.current).not.toBe(prev)
-        expect(result.current).toStrictEqual([false, true])
+      // increments 1 -> 2
+      prev = result.current
+      act(() => {
+        impulse.setValue(Counter.inc)
+      })
+      expect(result.current).not.toBe(prev)
+      expect(result.current).toStrictEqual([false, true])
 
-        // increments 2 -> 3
-        prev = result.current
-        act(() => {
-          impulse.setValue({ count: 3 })
-        })
-        expect(result.current).not.toBe(prev)
-        expect(result.current).toStrictEqual([true, true])
+      // increments 2 -> 3
+      prev = result.current
+      act(() => {
+        impulse.setValue({ count: 3 })
+      })
+      expect(result.current).not.toBe(prev)
+      expect(result.current).toStrictEqual([true, true])
 
-        // rerender
-        rerender({ impulse })
-        expect(result.current).toStrictEqual([true, true])
+      // rerender
+      rerender({ impulse })
+      expect(result.current).toStrictEqual([true, true])
 
-        // increments 3 -> 4
-        prev = result.current
-        act(() => {
-          impulse.setValue({ count: 4 })
-        })
-        expect(result.current).not.toBe(prev)
-        expect(result.current).toStrictEqual([true, true])
+      // increments 3 -> 4
+      prev = result.current
+      act(() => {
+        impulse.setValue({ count: 4 })
+      })
+      expect(result.current).not.toBe(prev)
+      expect(result.current).toStrictEqual([true, true])
 
-        // increments 4 -> 5
-        prev = result.current
-        act(() => {
-          impulse.setValue(Counter.inc)
-        })
-        expect(result.current).not.toBe(prev)
-        expect(result.current).toStrictEqual([true, false])
-      },
-    )
+      // increments 4 -> 5
+      prev = result.current
+      act(() => {
+        impulse.setValue(Counter.inc)
+      })
+      expect(result.current).not.toBe(prev)
+      expect(result.current).toStrictEqual([true, false])
+    })
 
-    it.concurrent.each([
+    it.each([
       [
         "inline comparator",
         (props: WithImpulse) => {
@@ -317,9 +313,9 @@ describe("transform Impulse's value inside watcher", () => {
       },
     ],
   ])(
-    "when impulse's changes under %s are comparably equal with",
+    "when Impulse's changes under %s are comparably equal with",
     (_, useHookWithoutCompare) => {
-      it.concurrent.each([
+      it.each([
         ["without comparator", useHookWithoutCompare],
         [
           "with inline comparator",
@@ -444,7 +440,7 @@ describe("multiple Impulse#getValue() calls", () => {
           return { impulse, spySingle, spyDouble, resultSingle, resultDouble }
         }
 
-        it.concurrent("initiates with expected results", () => {
+        it("initiates with expected results", () => {
           const { spySingle, spyDouble, resultSingle, resultDouble } = setup()
 
           expect(resultSingle.current).toStrictEqual({ count: 1 })
@@ -452,7 +448,7 @@ describe("multiple Impulse#getValue() calls", () => {
           expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
         })
 
-        it.concurrent.each([
+        it.each([
           ["without Impulse#setValue comparator", undefined],
           ["with Impulse#setValue comparator", Counter.compare],
         ])("increments %s", (___, compare) => {
@@ -468,7 +464,7 @@ describe("multiple Impulse#getValue() calls", () => {
           expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
         })
 
-        it.concurrent.each([
+        it.each([
           ["without Impulse#setValue comparator", undefined],
           ["with Impulse#setValue comparator", Counter.compare],
         ])("clones %s", (___, compare) => {

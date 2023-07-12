@@ -1,4 +1,4 @@
-import { SetValueContext } from "./SetValueContext"
+import { ScopeEmitter } from "./ScopeEmitter"
 
 /**
  * A helper to optimize multiple Impulse updates.
@@ -7,10 +7,10 @@ import { SetValueContext } from "./SetValueContext"
  *
  * @version 1.0.0
  */
-export const batch = (execute: VoidFunction): void => {
-  const [emit] = SetValueContext.registerStoreSubscribers()
+export function batch(execute: VoidFunction): void {
+  ScopeEmitter.schedule(() => {
+    execute()
 
-  execute()
-
-  emit()
+    return null
+  })
 }
