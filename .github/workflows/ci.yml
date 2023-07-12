@@ -52,15 +52,16 @@ jobs:
           fail_ci_if_error: false
 
       - name: Check size
+        if: ${{ github.event_name == 'pull_request' }}
         uses: andresz1/size-limit-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          script: pnpm size-limit --json
+          skip_step: install
           build_script: build --env.NODE_ENV production --minify
           package_manager: pnpm
 
       - name: Install React 17 and legacy testing libraries
-        run: pnpm add -D react@17 @testing-library/react@12  @testing-library/react-hooks@7
+        run: pnpm add -D react@17 @testing-library/react@12 @testing-library/react-hooks@7
 
       - name: Test against React 17
         run: pnpm test:run
