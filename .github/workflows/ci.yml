@@ -58,7 +58,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           skip_step: install
           build_script: build --env.NODE_ENV production --minify
-          package_manager: pnpm
 
       - name: Install React 17 and legacy testing libraries
         run: pnpm add -D react@17 @testing-library/react@12 @testing-library/react-hooks@7
