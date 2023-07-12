@@ -51,14 +51,6 @@ jobs:
         with:
           fail_ci_if_error: false
 
-      - name: Check size
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: andresz1/size-limit-action@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          skip_step: install
-          build_script: build --env.NODE_ENV production --minify
-
       - name: Install React 17 and legacy testing libraries
         run: pnpm add -D react@17 @testing-library/react@12 @testing-library/react-hooks@7
 
@@ -70,6 +62,25 @@ jobs:
 
       - name: Test against React 16
         run: pnpm test:run
+
+  size-limit:
+    name: Size Limit
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: Check size
+        uses: andresz1/size-limit-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          skip_step: install
+          build_script: build --env.NODE_ENV production --minify
 
   release:
     name: Release on npm
