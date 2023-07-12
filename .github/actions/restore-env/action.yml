@@ -1,0 +1,16 @@
+name: Restore environment
+
+runs:
+  using: composite
+  steps:
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+
+    - name: Download dependencies
+      uses: actions/download-artifact@v3
+      with:
+        name: dependencies
+
+    - name: Unzip dependencies
+      shell: bash
+      run: unzip -q deps.zip
