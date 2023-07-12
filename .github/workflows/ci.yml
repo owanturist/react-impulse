@@ -52,7 +52,7 @@ jobs:
           fail_ci_if_error: false
 
       - name: Check size double check
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ always() }}
         uses: andresz1/size-limit-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
