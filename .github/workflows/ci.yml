@@ -75,12 +75,15 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
-      - name: Install size-limit and check size
+      - name: Install size-limit
+        run: pnpm add -D size-limit @size-limit/preset-small-lib
+
+      - name: Check size
         uses: andresz1/size-limit-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           skip_step: install
-          build_script: pnpm add -D size-limit @size-limit/preset-small-lib && build --env.NODE_ENV production --minify
+          build_script: build --env.NODE_ENV production --minify
 
   release:
     name: Release on npm
