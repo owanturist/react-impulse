@@ -21,7 +21,7 @@ then
   exit 0 ; # Not checking out a new branch
 fi
 
-if ! [[ "$branch_name" =~ ^(v([0-9]\.){1,2}x|master|next|alpha|beta|snapshot)$ ]];
+if ! [[ "$branch_name" =~ ^(v([0-9]+\.){1,2}x|master|next|alpha|beta|snapshot)$ ]];
 then
   exit 0 ; # Does not match release branch pattern
 fi
