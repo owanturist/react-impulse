@@ -7,9 +7,8 @@
 from_hash=$1
 to_hash=$2
 checkout_type=$3
-branch_name=$(git rev-parse --abbrev-ref HEAD)
-from_branch_name=$(git name-rev --name-only $from_hash)
-
+branch_name=$(git rev-parse --abbrev-ref HEAD | sed 's/\//\\\//g')
+from_branch_name=$(git name-rev --name-only $from_hash | sed 's/\//\\\//g')
 
 if [ $checkout_type -ne 1 ]
 then
@@ -26,9 +25,9 @@ then
     exit 0 ; # Not checking out a new branch
 fi
 
-# exit if does not match release branch pattern
+
 if ! [[ $branch_name =~ ^(v([0-9]\.){1,2}x|master|next|alpha|beta|snapshot)$ ]]; then
-  exit 0
+    exit 0 ; # Does not match release branch pattern
 fi
 
 # change .changeset/config.json baseBranch to the current branch
