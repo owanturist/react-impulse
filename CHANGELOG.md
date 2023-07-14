@@ -1,5 +1,12 @@
 # react-impulse
 
+## 1.2.3
+
+### Patch Changes
+
+- 5331541: Introduce an implicit `Scope` injection by replacing internal `WatchContext` and `SetValueContext` with `ScopeEmitter`. It drastically simplifies the internal API and makes it possible for further improvements (eg: [#378](https://github.com/owanturist/react-impulse/issues/378)).
+- 2adf86c: test
+
 ## 1.2.2
 
 ### Patch Changes
