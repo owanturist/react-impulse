@@ -6,19 +6,12 @@ set -x
 # Based on a hook from gist.github.com
 # Source: https://gist.github.com/zgohr/4557894
 
-from_hash=$1
-to_hash=$2
 checkout_type=$3
 branch_name=$(git rev-parse --abbrev-ref HEAD)
 
 if [ "$checkout_type" -ne 1 ]
 then
   exit 0 ; # Not a branch checkout
-fi
-
-if [ "$from_hash" != "$to_hash" ]
-then
-  exit 0 ; # Not checking out a new branch
 fi
 
 if ! [[ "$branch_name" =~ ^(v([0-9]+\.){1,2}x|master|next|alpha|beta|snapshot)$ ]];
@@ -28,6 +21,11 @@ fi
 
 # change .changeset/config.json baseBranch to the current branch
 perl -i -pe"s/\"baseBranch\":.*/\"baseBranch\": \"$branch_name\",/g" .changeset/config.json
+
+# exit if there are no changes in .changeset/config.json
+if [ -z "$(git status --porcelain .changeset/config.json)" ]; then
+  exit 0
+fi
 
 # Create a commit and display a message
 git add .changeset/config.json
