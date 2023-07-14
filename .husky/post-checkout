@@ -12,7 +12,7 @@ fi
 
 branch_name=$(git rev-parse --abbrev-ref HEAD)
 
-if ! [[ "$branch_name" =~ ^(v([0-9]+\.){1,2}x|master|next|alpha|beta|snapshot)$ ]]; then
+if ! [[ "$branch_name" =~ ^(master|next|alpha|beta|snapshot)$ ]]; then
   exit 0; # Does not match release branch pattern
 fi
 
