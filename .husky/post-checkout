@@ -11,7 +11,7 @@ if [ "$checkout_type" -ne 1 ]; then
 fi
 
 branch_name=$(git rev-parse --abbrev-ref HEAD)
-release_branch_pattern="^(v[0-9]+\.x|v[0-9]+\.[0-9]+\.x|master|next|alpha|beta|snapshot)$"
+release_branch_pattern="^(v([0-9]+\.){1,2}x|master|next|alpha|beta|snapshot)$"
 
 if ! [[ "$branch_name" =~ $release_branch_pattern ]]; then
   exit 0; # Does not match release branch pattern
