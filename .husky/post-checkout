@@ -7,21 +7,19 @@
 checkout_type=$3
 
 if [ "$checkout_type" -ne 1 ]; then
-  exit 0 # Not a branch checkout
+  exit 0; # Not a branch checkout
 fi
 
 branch_name=$(git rev-parse --abbrev-ref HEAD)
 
 if ! [[ "$branch_name" =~ ^(v([0-9]+\.){1,2}x|master|next|alpha|beta|snapshot)$ ]]; then
-  exit 0 # Does not match release branch pattern
+  exit 0; # Does not match release branch pattern
 fi
 
-# change .changeset/config.json baseBranch to the current branch
 perl -i -pe"s/\"baseBranch\":.*/\"baseBranch\": \"$branch_name\",/g" .changeset/config.json
 
-# exit if there are no changes in .changeset/config.json
 if [ -z "$(git status --porcelain .changeset/config.json)" ]; then
-  exit 0
+  exit 0; # Exit if there are no changes in .changeset/config.json
 fi
 
 # Create a commit and display a message
