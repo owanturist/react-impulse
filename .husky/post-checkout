@@ -7,15 +7,13 @@
 checkout_type=$3
 
 if [ "$checkout_type" -ne 1 ]; then
-  exit 0 ; # Not a branch checkout
+  exit 0 # Not a branch checkout
 fi
-
-set -x
 
 branch_name=$(git rev-parse --abbrev-ref HEAD)
 
 if ! [[ "$branch_name" =~ ^(v([0-9]+\.){1,2}x|master|next|alpha|beta|snapshot)$ ]]; then
-  exit 0 ; # Does not match release branch pattern
+  exit 0 # Does not match release branch pattern
 fi
 
 # change .changeset/config.json baseBranch to the current branch
