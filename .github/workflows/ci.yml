@@ -40,10 +40,9 @@ jobs:
 
       - name: Lint only changed files
         if: ${{ github.event_name == 'pull_request' }}
-        uses: bradennapier/eslint-plus-action@v3.4.2
+        uses: tj-actions/eslint-changed-files@v20
         with:
-          extensions: "js,jsx,ts,tsx"
-          issueSummary: false
+          file_extensions: "**/*.{ts,tsx,js,jsx}"
 
       - name: Type check
         if: ${{ always() }}
