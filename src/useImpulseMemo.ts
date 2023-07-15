@@ -18,18 +18,18 @@ export function useImpulseMemo<TValue>(
   factory: () => TValue,
   dependencies: undefined | DependencyList,
 ): TValue {
-  const sc = useScope()
+  const getScope = useScope()
 
   return useMemo(
     () => {
       return defineExecutionContext(
         "useImpulseMemo",
         injectScope,
-        sc(),
+        getScope(),
         factory,
       )
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    dependencies && [...dependencies, sc],
+    dependencies && [...dependencies, getScope],
   )
 }
