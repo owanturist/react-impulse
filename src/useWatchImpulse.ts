@@ -29,9 +29,9 @@ export function useWatchImpulse<T>(
     },
     [watcher],
   )
-  const value = useScope(transform, useEvent(compare ?? eq))
+  const va = useScope(transform, useEvent(compare ?? eq))
 
-  useDebugValue(value)
+  useDebugValue(va)
 
-  return value
+  return va
 }
