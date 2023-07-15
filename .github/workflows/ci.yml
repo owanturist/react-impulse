@@ -34,15 +34,18 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
-      - name: Lint the entire project
-        if: ${{ github.event_name == 'push' }}
-        run: pnpm lint
+      - name: Detect .eslintrc change
+        id: eslintrc-changed
+        uses: tj-actions/changed-files@v37
+        with:
+          files: .eslintrc
 
-      - name: Lint only changed files
+      - name: Lint
         if: ${{ github.event_name == 'pull_request' }}
         uses: tj-actions/eslint-changed-files@v20
         with:
           file_extensions: "**/*.{ts,tsx,js,jsx}"
+          all_files: ${{ github.event_name == 'push' || steps.eslintrc-changed.outputs.any_changed == 'true' }}
 
       - name: Type check
         if: ${{ always() }}
