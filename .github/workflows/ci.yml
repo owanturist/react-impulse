@@ -38,9 +38,16 @@ jobs:
         if: ${{ always() }}
         run: pnpm typecheck
 
-      - name: Lint
-        if: ${{ always() }}
+      - name: Lint the entire project
+        if: ${{ github.event_name == 'push' }}
         run: pnpm lint
+
+      - name: Lint only changed files
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: sibiraj-s/action-eslint@v2
+        with:
+          extensions: "js,jsx,ts,tsx,md"
+          annotations: true
 
       - name: Test against React 18
         if: ${{ always() }}
