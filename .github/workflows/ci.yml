@@ -40,16 +40,16 @@ jobs:
         with:
           files: .eslintrc.json
 
+      - name: Type check
+        if: ${{ always() }}
+        run: pnpm typecheck
+
       - name: Lint
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ always() }}
         uses: tj-actions/eslint-changed-files@v20
         with:
           file_extensions: "**/*.{ts,tsx,js,jsx}"
           all_files: ${{ github.event_name == 'push' || steps.eslintrc-changed.outputs.any_changed == 'true' }}
-
-      - name: Type check
-        if: ${{ always() }}
-        run: pnpm typecheck
 
       - name: Test against React 18
         if: ${{ always() }}
