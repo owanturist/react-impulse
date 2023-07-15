@@ -42,7 +42,7 @@ export function watch<TProps>(component: FC<TProps>): FC<TProps> {
     component.displayName ?? component.name
   }`
 
-  return ComponentWithScope
+  return ComponentWithScope;
 }
 
 /**

@@ -258,7 +258,7 @@ describe("nested Impulses", () => {
   })
 
   it("executes listener on update", () => {
-    const spy = vi.fn()
+    const spy = vi.fn();
     const impulse_1 = Impulse.of(1)
     const impulse_2 = Impulse.of(2)
     const impulse_3 = Impulse.of({
