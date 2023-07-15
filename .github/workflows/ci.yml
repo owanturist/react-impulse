@@ -34,10 +34,6 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
-      - name: Type check
-        if: ${{ always() }}
-        run: pnpm typecheck
-
       - name: Lint the entire project
         if: ${{ github.event_name == 'push' }}
         run: pnpm lint
@@ -48,6 +44,10 @@ jobs:
         with:
           extensions: "js,jsx,ts,tsx,md"
           annotations: true
+
+      - name: Type check
+        if: ${{ always() }}
+        run: pnpm typecheck
 
       - name: Test against React 18
         if: ${{ always() }}
