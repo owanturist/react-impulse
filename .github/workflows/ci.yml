@@ -38,7 +38,7 @@ jobs:
         id: eslintrc-changed
         uses: tj-actions/changed-files@v37
         with:
-          files: .eslintrc
+          files: .eslintrc.json
 
       - name: Lint
         if: ${{ github.event_name == 'pull_request' }}
