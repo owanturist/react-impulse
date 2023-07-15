@@ -45,6 +45,7 @@ jobs:
         with:
           file_extensions: "**/*.{ts,tsx,js,jsx}"
           all_files: ${{ github.event_name == 'push' || steps.eslintrc-changed.outputs.any_changed == 'true' }}
+          reporter: github-check
 
       - name: Type check
         if: ${{ always() }}
