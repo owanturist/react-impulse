@@ -18,7 +18,7 @@ export function useScope<T = () => Scope>(
         return {
           [EMITTER_KEY]: emitter,
           version,
-        }
+        };
       }
 
       return isFunction(transform) ? transform(getScope()) : (getScope as T)
