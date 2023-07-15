@@ -45,11 +45,11 @@ export function useImpulseLayoutEffect(
   effect: () => ReturnType<EffectCallback>,
   dependencies?: DependencyList,
 ): void {
-  const gs = useScope()
+  const getScope = useScope()
 
   useLayoutEffect(
-    () => injectScope(gs(), effect),
+    () => injectScope(getScope(), effect),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    dependencies && [...dependencies, gs],
+    dependencies && [...dependencies, getScope],
   )
 }
