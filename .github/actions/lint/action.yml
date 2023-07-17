@@ -17,6 +17,6 @@ runs:
       if: ${{ inputs.all_files == 'false' }}
       uses: sibiraj-s/action-eslint@v2
       with:
-        extensions: "js,jsx,ts,tsx"
+        extensions: js,jsx,ts,tsx
         annotations: true
-        root-dir: "./"
+        root-dir: ./
