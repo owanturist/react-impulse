@@ -38,9 +38,7 @@ jobs:
         id: eslintrc-changed
         uses: tj-actions/changed-files@v37
         with:
-          files:
-            - .eslintrc.json
-            - pnpm-lock.yaml
+          files: "{.eslintrc.json,.eslintignore,pnpm-lock.yaml}"
 
       - name: Detect changed files
         id: changed-files
