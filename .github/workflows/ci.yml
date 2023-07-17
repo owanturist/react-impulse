@@ -40,8 +40,20 @@ jobs:
         with:
           files: .eslintrc.json
 
-      - name: Lint
+      - name: Detect changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v37
+        with:
+          files: "**/*.{ts,tsx,js,jsx}"
+          files_ignore_from_source_file: .eslintignore
+
+      - name: Lint all files
+        if: ${{ github.event_name == 'push' || steps.eslintrc-changed.outputs.any_changed == 'true' }}
         run: pnpm lint
+
+      - name: Lint changed files
+        if: ${{ github.event_name != 'push' && steps.eslintrc-changed.outputs.any_changed == 'false' }}
+        run: pnpm lint ${{ steps.changed-files.outputs.all_changed_files }}
 
       - name: Type check
         if: ${{ always() }}
