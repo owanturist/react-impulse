@@ -34,21 +34,22 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
-      # - name: Detect .eslintrc change
-      #   id: eslintrc-changed
-      #   uses: tj-actions/changed-files@v37
-      #   with:
-      #     files: .eslintrc.json
+      - name: Detect .eslintrc change
+        id: eslintrc-changed
+        uses: tj-actions/changed-files@v37
+        with:
+          files: .eslintrc.json
 
-      # - name: Lint
-      #   uses: tj-actions/eslint-changed-files@v20
-      #   with:
-      #     file_extensions: "**/*.{ts,tsx,js,jsx}"
-      #     all_files: ${{ github.event_name == 'push' || steps.eslintrc-changed.outputs.any_changed == 'true' }}
-      #     reporter: github-check
-
-      - name: Lint
+      - name: Lint all files
+        if: ${{ github.event_name == 'push' || steps.eslintrc-changed.outputs.any_changed == 'true' }}
         run: pnpm lint
+
+      - name: Lint changed files
+        if: ${{ github.event_name != 'push' && steps.eslintrc-changed.outputs.any_changed == 'false' }}
+        uses: sibiraj-s/action-eslint@v2
+        with:
+          extensions: "js,jsx,ts,tsx"
+          annotations: true
 
       - name: Type check
         if: ${{ always() }}
