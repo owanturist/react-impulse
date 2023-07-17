@@ -35,7 +35,7 @@ export function watch<TProps>(component: FC<TProps>): FC<TProps> {
       component,
       props,
       ctx,
-    )
+    );
   }
 
   ComponentWithScope.displayName = `ImpulseWatcher${
