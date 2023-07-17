@@ -41,10 +41,7 @@ jobs:
           files: .eslintrc.json
 
       - name: Lint
-        uses: tj-actions/eslint-changed-files@v20
-        with:
-          file_extensions: "**/*.{ts,tsx,js,jsx}"
-          all_files: ${{ github.event_name == 'push' || steps.eslintrc-changed.outputs.any_changed == 'true' }}
+        run: pnpm lint
 
       - name: Type check
         if: ${{ always() }}
