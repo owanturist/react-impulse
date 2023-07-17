@@ -40,16 +40,10 @@ jobs:
         with:
           files: .eslintrc.json
 
-      - name: Lint all files
-        if: ${{ github.event_name == 'push' || steps.eslintrc-changed.outputs.any_changed == 'true' }}
-        run: pnpm lint
-
-      - name: Lint changed files
-        if: ${{ github.event_name != 'push' && steps.eslintrc-changed.outputs.any_changed == 'false' }}
-        uses: sibiraj-s/action-eslint@v2
+      - name: Lint
+        uses: ./.github/actions/lint
         with:
-          extensions: "js,jsx,ts,tsx"
-          annotations: true
+          all_files: ${{ github.event_name == 'push' || steps.eslintrc-changed.outputs.any_changed == 'true' }}
 
       - name: Type check
         if: ${{ always() }}
