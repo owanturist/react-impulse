@@ -19,3 +19,4 @@ runs:
       with:
         extensions: "js,jsx,ts,tsx"
         annotations: true
+        root_dir: "./"
