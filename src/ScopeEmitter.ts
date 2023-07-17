@@ -18,12 +18,12 @@ export class ScopeEmitter {
 
       ScopeEmitter.queue.push(execute())
 
-      const uniq = new WeakSet<VoidFunction>()
+      const uniqs = new WeakSet<VoidFunction>()
 
       ScopeEmitter.queue.forEach((emitters) => {
         emitters?.forEach((emitter) => {
-          if (!uniq.has(emitter.emit)) {
-            uniq.add(emitter.emit)
+          if (!uniqs.has(emitter.emit)) {
+            uniqs.add(emitter.emit)
             emitter.increment()
 
             if (emitter.shouldDetachOnEmit) {
