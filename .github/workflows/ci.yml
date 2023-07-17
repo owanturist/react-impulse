@@ -46,6 +46,7 @@ jobs:
           all-files: ${{ github.event_name == 'push' || steps.eslintrc-changed.outputs.any_changed == 'true' }}
           extensions: js,jsx,ts,tsx
           annotations: true
+          working-directory: "./"
 
       - name: Type check
         if: ${{ always() }}
