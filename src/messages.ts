@@ -36,7 +36,7 @@ export const USE_WATCH_IMPULSE_CALLING_IMPULSE_OF =
     : [
         "You should not call Impulse.of inside of the useWatchImpulse watcher.",
         "The useWatchImpulse hook is for read-only operations but Impulse.of creates a new Impulse.",
-      ].join(" ");
+      ].join(" ")
 export const USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE =
   process.env.NODE_ENV === "production"
     ? ""

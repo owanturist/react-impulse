@@ -33,7 +33,7 @@ export function useImpulse<T>(
   return usePermanent(() => {
     const initialValue = isFunction(valueOrInitValue)
       ? valueOrInitValue()
-      : valueOrInitValue;
+      : valueOrInitValue
 
     return Impulse.of(initialValue, stableCompare)
   })

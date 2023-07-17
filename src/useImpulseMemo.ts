@@ -30,6 +30,6 @@ export function useImpulseMemo<TValue>(
       )
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    dependencies && [...dependencies, getScope]
+    dependencies && [...dependencies, getScope],
   )
 }
