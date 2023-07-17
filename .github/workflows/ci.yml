@@ -53,7 +53,7 @@ jobs:
 
       - name: Lint changed files
         if: ${{ github.event_name != 'push' && steps.eslintrc-changed.outputs.any_changed == 'false' && steps.changed-files.outputs.any_changed == 'true' }}
-        run: pnpm eslint ${{ steps.changed-files.outputs.all_changed_files }}
+        run: pnpm eslint ${{ steps.changed-files.outputs.all_changed_files }} --no-error-on-unmatched-pattern
 
       - name: Type check
         if: ${{ always() }}
