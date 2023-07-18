@@ -18,7 +18,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "size": "size-limit",
-    "build": "tsup src/index.ts --dts --sourcemap --format=esm,cjs --clean",
+    "build": "tsup",
     "test": "node ./print-react-version && vitest --single-thread",
     "test:run": "pnpm test -- --run --reporter=dot",
     "lint": "eslint . --ext=js,jsx,ts,tsx",
