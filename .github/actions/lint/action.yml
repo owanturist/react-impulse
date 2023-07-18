@@ -1,0 +1,34 @@
+name: Lint source code
+
+inputs:
+  all_files:
+    description: "Run eslint on all files, not just changed ones"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Detect .eslintrc change
+      id: eslintrc-changed
+      uses: tj-actions/changed-files@v37
+      with:
+        files: "{.eslintrc.json,.eslintignore,pnpm-lock.yaml}"
+
+    - name: Lint all files
+      id: lint-all
+      if: ${{ inputs.all_files == 'true' || steps.eslintrc-changed.outputs.any_changed == 'true' }}
+      shell: bash
+      run: pnpm lint
+
+    - name: Detect changed files
+      if: ${{ steps.lint-all.outcome == 'skipped' }}
+      id: changed-files
+      uses: tj-actions/changed-files@v37
+      with:
+        files: "**/*.{ts,tsx,js,jsx}"
+        files_ignore_from_source_file: .eslintignore
+
+    - name: Lint changed files
+      if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
+      shell: bash
+      run: pnpm eslint ${{ steps.changed-files.outputs.all_changed_files }} --no-error-on-unmatched-pattern
