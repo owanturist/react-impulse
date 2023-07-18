@@ -28,13 +28,13 @@ export function useImpulse<T>(
   valueOrInitValue?: T | ((...args: []) => T),
   compare?: null | Compare<undefined | T>,
 ): Impulse<undefined | T> {
-  const stableCompare = useEvent(compare ?? eq)
+  const cmp = useEvent(compare ?? eq)
 
   return usePermanent(() => {
     const initialValue = isFunction(valueOrInitValue)
       ? valueOrInitValue()
       : valueOrInitValue
 
-    return Impulse.of(initialValue, stableCompare)
+    return Impulse.of(initialValue, cmp)
   })
 }
