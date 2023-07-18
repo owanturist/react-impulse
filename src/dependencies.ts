@@ -1,12 +1,10 @@
 /* eslint-disable no-restricted-imports */
 
 export {
-  type FunctionComponent,
   type ForwardRefRenderFunction,
   type ForwardRefExoticComponent,
   type PropsWithoutRef,
   type RefAttributes,
-  type NamedExoticComponent,
   type ExoticComponent,
   type DependencyList,
   type EffectCallback,
