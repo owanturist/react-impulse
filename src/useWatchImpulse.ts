@@ -1,5 +1,4 @@
-import { useCallback, useDebugValue } from "react"
-
+import { useCallback, useDebugValue } from "./dependencies"
 import { Compare, eq, useEvent } from "./utils"
 import { useScope } from "./useScope"
 import { defineExecutionContext } from "./validation"

@@ -1,5 +1,4 @@
-import { useCallback, useDebugValue } from "react"
-
+import { useCallback, useDebugValue } from "./dependencies"
 import type { Impulse } from "./Impulse"
 import { useWatchImpulse } from "./useWatchImpulse"
 
