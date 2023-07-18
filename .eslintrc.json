@@ -235,6 +235,22 @@
       }
     },
     {
+      "files": ["src/**/*.ts?(x)"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["react", "use-sync-external-store"],
+                "message": "Import dependencies from dependencies.ts. It makes the imported deps appear only ones in the bundle."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "files": ["tests/**/*.ts?(x)"],
       "extends": [
         "plugin:jest/recommended",

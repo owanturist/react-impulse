@@ -3,8 +3,7 @@ import {
   EffectCallback,
   useEffect,
   useLayoutEffect,
-} from "react"
-
+} from "./dependencies"
 import { useScope } from "./useScope"
 import { injectScope } from "./Scope"
 

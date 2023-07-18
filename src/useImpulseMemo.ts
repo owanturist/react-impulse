@@ -1,5 +1,4 @@
-import { DependencyList, useMemo } from "react"
-
+import { DependencyList, useMemo } from "./dependencies"
 import { useScope } from "./useScope"
 import { defineExecutionContext } from "./validation"
 import { injectScope } from "./Scope"

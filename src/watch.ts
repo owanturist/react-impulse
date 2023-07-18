@@ -8,8 +8,7 @@ import {
   forwardRef as React_forwardRef,
   PropsWithoutRef,
   RefAttributes,
-} from "react"
-
+} from "./dependencies"
 import { Compare } from "./utils"
 import { useScope } from "./useScope"
 import { defineExecutionContext } from "./validation"
