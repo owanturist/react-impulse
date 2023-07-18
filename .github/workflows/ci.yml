@@ -34,13 +34,30 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
+      - name: Detect file changes
+        id: changed-lint-files
+        uses: tj-actions/changed-files@v37
+        with:
+          files_yaml: |
+            eslint:
+              - .eslintrc.json
+              - .eslintignore
+              - pnpm-lock.yaml
+            target:
+              - "**/*.{ts,tsx,js,jsx}"
+
+      - name: Lint all files
+        id: lint-all
+        if: ${{ github.event_name == 'push' || steps.changed-lint-files.outputs.eslint_any_changed == 'true' }}
+        run: pnpm lint
+
+      - name: Lint changed files
+        if: ${{ steps.lint-all.outcome == 'skipped' && steps.changed-lint-files.outputs.target_any_changed == 'true' }}
+        run: pnpm eslint ${{ steps.changed-lint-files.outputs.target_all_changed_files }} --no-error-on-unmatched-pattern
+
       - name: Type check
         if: ${{ always() }}
         run: pnpm typecheck
-
-      - name: Lint
-        if: ${{ always() }}
-        run: pnpm lint
 
       - name: Test against React 18
         if: ${{ always() }}
