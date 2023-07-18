@@ -11,7 +11,7 @@ export function useScope<T = () => Scope>(
   const select = useCallback(
     (version: number) => {
       const getScope = (): Scope => {
-        emitter.detachAll()
+        emitter._detachAll()
 
         return {
           [EMITTER_KEY]: emitter,
@@ -25,9 +25,9 @@ export function useScope<T = () => Scope>(
   )
 
   return useSyncExternalStoreWithSelector(
-    emitter.onEmit,
-    emitter.getVersion,
-    emitter.getVersion,
+    emitter._onEmit,
+    emitter._getVersion,
+    emitter._getVersion,
     select,
     compare,
   )

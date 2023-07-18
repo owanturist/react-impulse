@@ -7,6 +7,6 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   esbuildOptions(options) {
-    options.mangleProps = /^__/
+    options.mangleProps = /^_/
   },
 })
