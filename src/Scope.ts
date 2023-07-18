@@ -19,11 +19,11 @@ export function injectScope<TArgs extends ReadonlyArray<unknown>, TResult>(
   execute: Func<TArgs, TResult>,
   ...args: TArgs
 ): TResult {
-  const prev = currentScope
+  const prevScope = currentScope
 
   currentScope = scope
   const result = execute(...args)
-  currentScope = prev
+  currentScope = prevScope
 
   return result
 }

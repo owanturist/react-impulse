@@ -14,7 +14,7 @@ export function useImpulseValue<T>(impulse: Impulse<T>): T {
   const watcher = useCallback(() => impulse.getValue(), [impulse])
   const value = useWatchImpulse(watcher, impulse.compare)
 
-  useDebugValue(value);
+  useDebugValue(value)
 
   return value
 }

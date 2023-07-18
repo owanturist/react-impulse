@@ -21,7 +21,7 @@ export function subscribe(listener: VoidFunction): VoidFunction {
     )
   }
 
-  emit();
+  emit()
 
   return emitter.onEmit(emit)
 }
