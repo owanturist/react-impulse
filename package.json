@@ -18,7 +18,8 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "size": "size-limit",
-    "build": "tsup src/index.ts --dts --sourcemap --format=esm,cjs --clean",
+    "build": "tsup",
+    "build:minified": "pnpm build --env.NODE_ENV production --minify=terser",
     "test": "node ./print-react-version && vitest --single-thread",
     "test:run": "pnpm test -- --run --reporter=dot",
     "lint": "eslint . --ext=js,jsx,ts,tsx",
@@ -93,6 +94,7 @@
     "prettier": "^2.8.4",
     "react": "^18.2.0",
     "size-limit": "^8.2.6",
+    "terser": "^5.19.2",
     "tsup": "^7.1.0",
     "typescript": "^5.0.2",
     "vitest": "^0.32.4"

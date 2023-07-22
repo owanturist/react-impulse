@@ -8,8 +8,10 @@ import { noop } from "./utils"
  * @private
  */
 export class ScopeEmitter {
+  /*@__MANGLE_PROP__*/
   private static queue: null | Array<null | ReadonlySet<ScopeEmitter>> = null
 
+  /*@__MANGLE_PROP__*/
   public static schedule(
     execute: () => null | ReadonlySet<ScopeEmitter>,
   ): void {
@@ -42,23 +44,34 @@ export class ScopeEmitter {
   }
 
   // TODO remove shouldDetachOnEmit when Impulse#subscribe is gone
-  public constructor(private readonly shouldDetachOnEmit: boolean = true) {}
+  /*@__MANGLE_PROP__*/
+  private readonly shouldDetachOnEmit: boolean = true
 
+  public constructor(shouldDetachOnEmit = true) {
+    this.shouldDetachOnEmit = shouldDetachOnEmit
+  }
+
+  /*@__MANGLE_PROP__*/
   private readonly cleanups: Array<VoidFunction> = []
 
+  /*@__MANGLE_PROP__*/
   private version = 0
 
+  /*@__MANGLE_PROP__*/
   private emit: VoidFunction = noop
 
+  /*@__MANGLE_PROP__*/
   private increment(): void {
     this.version = (this.version + 1) % 10e9
   }
 
+  /*@__MANGLE_PROP__*/
   public detachAll(): void {
     this.cleanups.forEach((cleanup) => cleanup())
     this.cleanups.length = 0
   }
 
+  /*@__MANGLE_PROP__*/
   public attachTo(emitters: Set<ScopeEmitter>): void {
     if (!emitters.has(this)) {
       emitters.add(this)
@@ -66,6 +79,7 @@ export class ScopeEmitter {
     }
   }
 
+  /*@__MANGLE_PROP__*/
   public onEmit = (emit: VoidFunction): VoidFunction => {
     this.emit = emit
 
@@ -76,6 +90,7 @@ export class ScopeEmitter {
     }
   }
 
+  /*@__MANGLE_PROP__*/
   public getVersion = (): number => {
     return this.version
   }

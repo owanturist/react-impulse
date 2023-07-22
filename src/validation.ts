@@ -35,14 +35,19 @@ type ValidateDecorator<TReturn = any> = (
 ) => void
 
 class Validate<TContext extends ExecutionContext> {
-  public constructor(
-    private readonly spec: ReadonlyMap<ExecutionContext, string>,
-  ) {}
+  /*@__MANGLE_PROP__*/
+  private readonly spec: ReadonlyMap<ExecutionContext, string> = new Map()
 
+  public constructor(spec: ReadonlyMap<ExecutionContext, string>) {
+    this.spec = spec
+  }
+
+  /*@__MANGLE_PROP__*/
   private getMessage(): null | undefined | string {
     return currentExecutionContext && this.spec.get(currentExecutionContext)
   }
 
+  /*@__MANGLE_PROP__*/
   private print(message: string): void {
     if (
       typeof console !== "undefined" &&
@@ -57,6 +62,7 @@ class Validate<TContext extends ExecutionContext> {
     }
   }
 
+  /*@__MANGLE_PROP__*/
   public when<TName extends TContext>(
     name: TName,
     message: string,
@@ -64,6 +70,7 @@ class Validate<TContext extends ExecutionContext> {
     return new Validate(new Map(this.spec).set(name, message))
   }
 
+  /*@__MANGLE_PROP__*/
   public alert(): ValidateDecorator {
     return (_, __, descriptor) => {
       if (process.env.NODE_ENV === "production") {
@@ -89,6 +96,7 @@ class Validate<TContext extends ExecutionContext> {
 
   public prevent(): ValidateDecorator
   public prevent<TReturn>(returns: TReturn): ValidateDecorator<TReturn>
+  /*@__MANGLE_PROP__*/
   public prevent<TReturn = void>(
     returns?: TReturn,
   ): ValidateDecorator<undefined | TReturn> {
