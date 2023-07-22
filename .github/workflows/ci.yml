@@ -97,7 +97,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           skip_step: install
-          build_script: build --env.NODE_ENV production --minify=terser
+          build_script: build:minified
 
   release:
     name: Release on npm
