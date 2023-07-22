@@ -2,6 +2,11 @@ import { minify } from "terser"
 import { type Options, defineConfig } from "tsup"
 
 // Inspired by https://github.com/egoist/tsup/blob/692c112ac83f463d0be200253466c163c7cee36c/src/plugins/terser.ts
+/**
+ * The plugin mangles only annotated properties without minification and mangling anything else.
+ * The annotation looks like
+ */
+/*@__MANGLE_PROP__*/
 const manglePlugin: Required<Options>["plugins"][0] = {
   name: "terser-mangle",
   renderChunk: async function (code, info) {

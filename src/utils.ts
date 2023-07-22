@@ -19,14 +19,8 @@ export type Func<TArgs extends ReadonlyArray<unknown>, TResult = void> = (
   ...args: TArgs
 ) => TResult
 
-/**
- * @private
- */
 export const eq: Compare<unknown> = Object.is
 
-/**
- * @private
- */
 export function noop(): void {
   // do nothing
 }

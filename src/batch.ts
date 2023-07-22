@@ -8,7 +8,7 @@ import { ScopeEmitter } from "./ScopeEmitter"
  * @version 1.0.0
  */
 export function batch(execute: VoidFunction): void {
-  ScopeEmitter._schedule(() => {
+  ScopeEmitter.schedule(() => {
     execute()
 
     return null

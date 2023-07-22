@@ -38,10 +38,10 @@ export class Impulse<T> {
 
   // Implements 👆
   @validate
-    ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_OF)
-    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_OF)
-    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_OF)
-    ._alert()
+    .when("subscribe", SUBSCRIBE_CALLING_IMPULSE_OF)
+    .when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_OF)
+    .when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_OF)
+    .alert()
 
   /**
    * Creates new Impulse.
@@ -58,7 +58,12 @@ export class Impulse<T> {
     return new Impulse(initialValue, compare ?? eq)
   }
 
-  private readonly _emitters = new Set<ScopeEmitter>()
+  /*@__MANGLE_PROP__*/
+  private readonly emitters = new Set<ScopeEmitter>()
+
+  // assigning the initial value is necessary for mangling
+  /*@__MANGLE_PROP__*/
+  private value: T = null as never
 
   /**
    * The `Compare` function compares Impulse's value with the new value given via `Impulse#setValue`.
@@ -68,7 +73,8 @@ export class Impulse<T> {
    */
   public readonly compare: Compare<T>
 
-  private constructor(private _value: T, compare: Compare<T>) {
+  private constructor(initialValue: T, compare: Compare<T>) {
+    this.value = initialValue
     this.compare = compare
   }
 
@@ -96,10 +102,10 @@ export class Impulse<T> {
   }
 
   @validate
-    ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_CLONE)
-    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE)
-    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE)
-    ._alert()
+    .when("subscribe", SUBSCRIBE_CALLING_IMPULSE_CLONE)
+    .when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE)
+    .when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE)
+    .alert()
   /**
    * Clones an Impulse.
    *
@@ -113,7 +119,7 @@ export class Impulse<T> {
     compare: null | Compare<T> = this.compare,
   ): Impulse<T> {
     return new Impulse(
-      isFunction(transform) ? transform(this._value) : this._value,
+      isFunction(transform) ? transform(this.value) : this.value,
       compare ?? eq,
     )
   }
@@ -143,16 +149,16 @@ export class Impulse<T> {
   public getValue<R>(select?: (value: T) => R): T | R {
     const scope = extractScope()
 
-    scope[EMITTER_KEY]?._attachTo(this._emitters)
+    scope[EMITTER_KEY]?.attachTo(this.emitters)
 
-    return isFunction(select) ? select(this._value) : this._value
+    return isFunction(select) ? select(this.value) : this.value
   }
 
   @validate
-    ._when("watch", WATCH_CALLING_IMPULSE_SET_VALUE)
-    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE)
-    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE)
-    ._prevent()
+    .when("watch", WATCH_CALLING_IMPULSE_SET_VALUE)
+    .when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE)
+    .when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE)
+    .prevent()
   /**
    * Updates the value.
    * All listeners registered via the `Impulse#subscribe` method execute whenever the Impulse's value updates.
@@ -170,27 +176,27 @@ export class Impulse<T> {
   ): void {
     const finalCompare = compare ?? eq
 
-    ScopeEmitter._schedule(() => {
+    ScopeEmitter.schedule(() => {
       const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(this._value)
+        ? valueOrTransform(this.value)
         : valueOrTransform
 
-      if (finalCompare(this._value, nextValue)) {
+      if (finalCompare(this.value, nextValue)) {
         return null
       }
 
-      this._value = nextValue
+      this.value = nextValue
 
-      return this._emitters
+      return this.emitters
     })
   }
 
   @validate
-    ._when("watch", WATCH_CALLING_IMPULSE_SUBSCRIBE)
-    ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE)
-    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE)
-    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE)
-    ._prevent(noop)
+    .when("watch", WATCH_CALLING_IMPULSE_SUBSCRIBE)
+    .when("subscribe", SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE)
+    .when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE)
+    .when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE)
+    .prevent(noop)
   /**
    * Subscribes to the value's updates caused by calling `Impulse#setValue`.
    *
@@ -205,8 +211,8 @@ export class Impulse<T> {
   public subscribe(listener: VoidFunction): VoidFunction {
     const emitter = new ScopeEmitter(false)
 
-    emitter._attachTo(this._emitters)
+    emitter.attachTo(this.emitters)
 
-    return emitter._onEmit(listener)
+    return emitter.onEmit(listener)
   }
 }

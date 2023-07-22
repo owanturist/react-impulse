@@ -15,7 +15,7 @@ export function subscribe(listener: VoidFunction): VoidFunction {
       injectScope,
       {
         [EMITTER_KEY]: emitter,
-        version: emitter._getVersion(),
+        version: emitter.getVersion(),
       },
       listener,
     )
@@ -23,5 +23,5 @@ export function subscribe(listener: VoidFunction): VoidFunction {
 
   emit()
 
-  return emitter._onEmit(emit)
+  return emitter.onEmit(emit)
 }
