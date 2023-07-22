@@ -19,6 +19,7 @@
     "preinstall": "npx only-allow pnpm",
     "size": "size-limit",
     "build": "tsup",
+    "build:minified": "pnpm build --env.NODE_ENV production --minify=terser",
     "test": "node ./print-react-version && vitest --single-thread",
     "test:run": "pnpm test -- --run --reporter=dot",
     "lint": "eslint . --ext=js,jsx,ts,tsx",

@@ -30,6 +30,12 @@ const manglePlugin: Required<Options>["plugins"][0] = {
           keep_fnames: true,
           properties: {
             regex: /mangle only annotated/,
+            // @ts-expect-error undocumented, but it makes emitters to be always mangled as "__"
+            cache: {
+              props: {
+                $emitters: "__",
+              },
+            },
           },
         },
       })

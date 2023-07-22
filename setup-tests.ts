@@ -12,6 +12,7 @@ const console$error = vi
   .mockImplementation((message: string) => {
     expect.fail(message)
   })
+
 afterEach(() => {
   // should manually cleanup the react testing env since tests are running in a single thread
   cleanup()
