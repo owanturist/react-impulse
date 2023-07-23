@@ -5,10 +5,8 @@
 import "@testing-library/jest-dom/extend-expect"
 import { cleanup } from "@testing-library/react"
 
-// import { Impulse } from "./src"
-
 // forces tests to fail in case of illegal usage
-const console$error = vi
+const spy_console$error = vi
   .spyOn(console, "error")
   .mockImplementation((message: string) => {
     expect.fail(message)
@@ -26,7 +24,7 @@ afterEach(() => {
 })
 
 afterAll(() => {
-  console$error.mockRestore()
+  spy_console$error.mockRestore()
 })
 
 vi.mock("@testing-library/react", async () => {
