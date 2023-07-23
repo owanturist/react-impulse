@@ -1,6 +1,7 @@
 import { EMITTER_KEY, injectScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { defineExecutionContext } from "./validation"
+
 /**
  * A function that subscribes to changes of all `Impulse` instances that call the `Impulse#getValue` method inside the `listener`.
  *
