@@ -56,8 +56,8 @@ const getImpulseEmitters = (input: unknown): null | Set<unknown> => {
     return null
   }
 
-  if ("emitters" in input && isSet(input.emitters)) {
-    return input.emitters
+  if ("_emitters" in input && isSet(input._emitters)) {
+    return input._emitters
   }
 
   if ("$" in input && isSet(input.$)) {
