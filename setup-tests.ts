@@ -51,8 +51,8 @@ expect.extend({
       }
     }
 
-    // @ts-expect-error emitters field is mangled to "__" during build, see ./tsup.config
-    const emitters = received["emitters"] ?? received["__"] // eslint-disable-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/dot-notation
+    // @ts-expect-error emitters field is mangled to "$" during build, see ./tsup.config
+    const emitters = received["emitters"] ?? received["$"] // eslint-disable-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/dot-notation
 
     return {
       pass: emitters.size === size,
