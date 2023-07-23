@@ -345,9 +345,12 @@ describe("calling Impulse#subscribe()", () => {
         initialProps: { impulse },
       })
 
-      expect(impulse$subscribe).toHaveReturnedWith(
-        expect.objectContaining({ name: "noop" }),
-      )
+      expect(impulse).toHaveEmittersSize(1)
+      expect(impulse$subscribe.mock.results).toHaveLength(1)
+      expect(impulse$subscribe.mock.results[0]?.type).toBe("return")
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      impulse$subscribe.mock.results[0]?.value()
+      expect(impulse).toHaveEmittersSize(1)
     })
 
     it("does not call the listener on Impulse's change", () => {
@@ -475,9 +478,12 @@ describe("calling Impulse#subscribe()", () => {
       const impulse$subscribe = vi.spyOn(impulse, "subscribe")
       render(<Component impulse={impulse} />)
 
-      expect(impulse$subscribe).toHaveReturnedWith(
-        expect.objectContaining({ name: "noop" }),
-      )
+      expect(impulse).toHaveEmittersSize(1)
+      expect(impulse$subscribe.mock.results).toHaveLength(1)
+      expect(impulse$subscribe.mock.results[0]?.type).toBe("return")
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      impulse$subscribe.mock.results[0]?.value()
+      expect(impulse).toHaveEmittersSize(1)
     })
 
     it("does not call the listener on Impulse's change", () => {
@@ -521,12 +527,16 @@ describe("calling Impulse#subscribe()", () => {
       const impulse$subscribe = vi.spyOn(impulse, "subscribe")
 
       subscribe(() => {
+        impulse.getValue()
         impulse.subscribe(listener)
       })
 
-      expect(impulse$subscribe).toHaveReturnedWith(
-        expect.objectContaining({ name: "noop" }),
-      )
+      expect(impulse).toHaveEmittersSize(1)
+      expect(impulse$subscribe.mock.results).toHaveLength(1)
+      expect(impulse$subscribe.mock.results[0]?.type).toBe("return")
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      impulse$subscribe.mock.results[0]?.value()
+      expect(impulse).toHaveEmittersSize(1)
     })
 
     it("does not call the listener on Impulse's change", () => {
