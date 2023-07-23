@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        filename: [dist/index.js, dist/index.cjs]
+        filename: [index.js, index.cjs]
 
     steps:
       - name: Checkout repository
@@ -92,7 +92,7 @@ jobs:
         # [s] - symbolic
         # [F] - force, remove existing destination files
         # [f] - unlink file if it already exists
-        run: cd src && ln -sFf ${{ matrix.filename }} src/index.js && cd ..
+        run: cd src && ln -sFf ../dist/${{ matrix.filename }} index.js && cd ..
 
       - name: Test
         run: pnpm test:run
