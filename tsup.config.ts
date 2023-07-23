@@ -58,13 +58,10 @@ const manglePlugin: Required<Options>["plugins"][0] = {
 }
 
 export default defineConfig({
-  entryPoints: ["src/index.ts"],
+  entry: ["src/index.ts"],
   format: ["cjs", "esm"],
   dts: true,
   sourcemap: true,
   clean: true,
   plugins: [manglePlugin],
-  terserOptions: {
-    compress: true,
-  },
 })

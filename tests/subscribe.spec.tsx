@@ -1,5 +1,4 @@
-import { Impulse, batch } from "../src"
-import { subscribe } from "../src/subscribe"
+import { Impulse, batch, subscribe } from "../src"
 
 import { Counter } from "./common"
 

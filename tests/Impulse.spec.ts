@@ -1,5 +1,4 @@
 import { Impulse } from "../src"
-import { eq } from "../src/utils"
 
 import { Counter } from "./common"
 
@@ -30,16 +29,16 @@ describe("Impulse.of()", () => {
 
 describe("Impulse#compare", () => {
   describe("when creating an impulse with Impulse.of", () => {
-    it("assigns eq by default", () => {
+    it("assigns Object.is by default", () => {
       const impulse = Impulse.of({ count: 0 })
 
-      expect(impulse.compare).toBe(eq)
+      expect(impulse.compare).toBe(Object.is)
     })
 
-    it("assigns eq by `null`", () => {
+    it("assigns Object.is by `null`", () => {
       const impulse = Impulse.of({ count: 0 }, null)
 
-      expect(impulse.compare).toBe(eq)
+      expect(impulse.compare).toBe(Object.is)
     })
 
     it("assigns custom function", () => {
@@ -54,7 +53,7 @@ describe("Impulse#compare", () => {
       const impulse = Impulse.of({ count: 0 })
 
       expect(impulse.clone().compare).toBe(impulse.compare)
-      expect(impulse.clone().compare).toBe(eq)
+      expect(impulse.clone().compare).toBe(Object.is)
     })
 
     it("inherits custom the source impulse compare", () => {
@@ -64,10 +63,10 @@ describe("Impulse#compare", () => {
       expect(impulse.clone().compare).toBe(Counter.compare)
     })
 
-    it("assigns eq by `null`", () => {
+    it("assigns Object.is by `null`", () => {
       const impulse = Impulse.of({ count: 0 }, Counter.compare)
 
-      expect(impulse.clone(Counter.clone, null).compare).toBe(eq)
+      expect(impulse.clone(Counter.clone, null).compare).toBe(Object.is)
     })
 
     it("assigns custom function", () => {
@@ -88,7 +87,7 @@ describe("Impulse#compare", () => {
       expect(impulse.getValue()).toBe(initial)
     })
 
-    it("replaces with eq when `null`", () => {
+    it("replaces with Object.is when `null`", () => {
       const initial = { count: 0 }
       const impulse = Impulse.of(initial, Counter.compare)
 

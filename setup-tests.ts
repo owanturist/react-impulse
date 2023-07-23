@@ -5,7 +5,7 @@
 import "@testing-library/jest-dom/extend-expect"
 import { cleanup } from "@testing-library/react"
 
-import { Impulse } from "./src"
+// import { Impulse } from "./src"
 
 // forces tests to fail in case of illegal usage
 const console$error = vi
@@ -13,6 +13,12 @@ const console$error = vi
   .mockImplementation((message: string) => {
     expect.fail(message)
   })
+
+const spy_Object$is = vi.spyOn(Object, "is")
+
+beforeEach(() => {
+  spy_Object$is.mockClear()
+})
 
 afterEach(() => {
   // should manually cleanup the react testing env since tests are running in a single thread
@@ -41,18 +47,37 @@ vi.mock("@testing-library/react", async () => {
 
 /* c8 ignore stop */
 
+const isSet = (anything: unknown): anything is Set<unknown> => {
+  return anything instanceof Set
+}
+
+const getImpulseEmitters = (input: unknown): null | Set<unknown> => {
+  if (input == null || typeof input !== "object") {
+    return null
+  }
+
+  if ("emitters" in input && isSet(input.emitters)) {
+    return input.emitters
+  }
+
+  if ("$" in input && isSet(input.$)) {
+    return input.$
+  }
+
+  return null
+}
+
 expect.extend({
   toHaveEmittersSize(received: unknown, size: number) {
-    if (!(received instanceof Impulse)) {
+    const emitters = getImpulseEmitters(received)
+
+    if (emitters == null) {
       return {
         pass: false,
         message: () =>
           `expected ${this.utils.printReceived(received)} to be an Impulse`,
       }
     }
-
-    // @ts-expect-error emitters field is mangled to "$" during build, see ./tsup.config
-    const emitters = received["emitters"] ?? received["$"] // eslint-disable-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/dot-notation
 
     return {
       pass: emitters.size === size,

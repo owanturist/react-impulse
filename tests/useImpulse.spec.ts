@@ -1,7 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
 import { Compare, useImpulse } from "../src"
-import * as utils from "../src/utils"
 
 describe("without initial value", () => {
   it("should create an impulse with undefined initial value", () => {
@@ -127,32 +126,30 @@ describe("with lazy initial value", () => {
 })
 
 describe("with compare function", () => {
-  it("applies eq by default", () => {
-    const spy_eq = vi.spyOn(utils, "eq")
+  it("applies Object.is by default", () => {
     const { result } = renderHook(() => useImpulse(0))
 
-    expect(spy_eq).not.toHaveBeenCalled()
+    expect(Object.is).not.toHaveBeenCalled()
 
     act(() => {
       result.current.setValue((x) => x + 1)
     })
 
-    expect(spy_eq).toHaveBeenCalledOnce()
-    expect(spy_eq).toHaveBeenLastCalledWith(0, 1)
+    expect(Object.is).toHaveBeenCalledOnce()
+    expect(Object.is).toHaveBeenLastCalledWith(0, 1)
   })
 
-  it("applies eq when passing null as compare", () => {
-    const spy_eq = vi.spyOn(utils, "eq")
+  it("applies Object.is when passing null as compare", () => {
     const { result } = renderHook(() => useImpulse(0, null))
 
-    expect(spy_eq).not.toHaveBeenCalled()
+    expect(Object.is).not.toHaveBeenCalled()
 
     act(() => {
       result.current.setValue((x) => x + 1)
     })
 
-    expect(spy_eq).toHaveBeenCalledOnce()
-    expect(spy_eq).toHaveBeenLastCalledWith(0, 1)
+    expect(Object.is).toHaveBeenCalledOnce()
+    expect(Object.is).toHaveBeenLastCalledWith(0, 1)
   })
 
   it("does not call the function on init", () => {
@@ -177,7 +174,6 @@ describe("with compare function", () => {
   it("updates compare function on re-render", () => {
     const compare_1 = vi.fn().mockImplementation(Object.is)
     const compare_2 = vi.fn().mockImplementation(Object.is)
-    const spy_eq = vi.spyOn(utils, "eq")
 
     const { result, rerender } = renderHook(
       (compare: null | Compare<number>) => useImpulse<number>(0, compare),
@@ -207,7 +203,7 @@ describe("with compare function", () => {
       result.current.setValue((x) => x + 1)
     })
     expect(compare_2).not.toHaveBeenCalled()
-    expect(spy_eq).toHaveBeenCalledOnce()
-    expect(spy_eq).toHaveBeenLastCalledWith(2, 3)
+    expect(Object.is).toHaveBeenCalledOnce()
+    expect(Object.is).toHaveBeenLastCalledWith(2, 3)
   })
 })
