@@ -9,7 +9,9 @@ import { type Options, defineConfig } from "tsup"
 const manglePlugin: Required<Options>["plugins"][0] = {
   name: "terser-mangle",
   renderChunk: async function (code, info) {
-    if (!/\.(c|m)?js$/.test(info.path)) return
+    if (!/\.(c|m)?js$/.test(info.path)) {
+      return
+    }
 
     try {
       const minifiedOutput = await minify(code, {
