@@ -132,6 +132,7 @@
     ],
     "import/no-relative-packages": "error",
     "import/no-unresolved": ["error", { "ignore": ["vitest/config"] }],
+    "import/no-cycle": "error",
     "import/no-extraneous-dependencies": [
       "error",
       {
