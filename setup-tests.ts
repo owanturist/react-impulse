@@ -3,8 +3,9 @@
 // otherwise jest leaking into vitest type definitions
 // https://github.com/testing-library/jest-dom/issues/427#issuecomment-1110985202
 import "@testing-library/jest-dom/extend-expect"
-
 import { cleanup } from "@testing-library/react"
+
+import { Impulse } from "./src"
 
 // forces tests to fail in case of illegal usage
 const console$error = vi
@@ -39,3 +40,32 @@ vi.mock("@testing-library/react", async () => {
 })
 
 /* c8 ignore stop */
+
+expect.extend({
+  toHaveEmittersSize(received: unknown, size: number) {
+    if (!(received instanceof Impulse)) {
+      return {
+        pass: false,
+        message: () =>
+          `expected ${this.utils.printReceived(received)} to be an Impulse`,
+      }
+    }
+
+    // @ts-expect-error emitters field is mangled to "__" during build, see ./tsup.config
+    const emitters = received["emitters"] ?? received["__"] // eslint-disable-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/dot-notation
+
+    return {
+      pass: emitters.size === size,
+      message: () => {
+        return [
+          "expected",
+          this.utils.printReceived(emitters.size),
+          "to be",
+          this.utils.printExpected(size),
+        ].join(" ")
+      },
+      actual: emitters.size,
+      expected: size,
+    }
+  },
+})

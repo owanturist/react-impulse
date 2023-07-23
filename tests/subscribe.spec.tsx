@@ -14,7 +14,7 @@ describe("single Impulse", () => {
 
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(1)
-    expect(impulse).toHaveProperty("emitters.size", 1)
+    expect(impulse).toHaveEmittersSize(1)
   })
 
   it("executes listener on update", () => {
@@ -29,7 +29,7 @@ describe("single Impulse", () => {
     impulse.setValue(2)
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(2)
-    expect(impulse).toHaveProperty("emitters.size", 1)
+    expect(impulse).toHaveEmittersSize(1)
   })
 
   it("doesn't execute listener after unsubscribe", () => {
@@ -45,7 +45,7 @@ describe("single Impulse", () => {
     spy.mockReset()
     impulse.setValue(2)
     expect(spy).not.toHaveBeenCalled()
-    expect(impulse).toHaveProperty("emitters.size", 0)
+    expect(impulse).toHaveEmittersSize(0)
   })
 
   it("ignores second unsubscribe", () => {
@@ -62,7 +62,7 @@ describe("single Impulse", () => {
     spy.mockReset()
     impulse.setValue(2)
     expect(spy).not.toHaveBeenCalled()
-    expect(impulse).toHaveProperty("emitters.size", 0)
+    expect(impulse).toHaveEmittersSize(0)
   })
 
   it("executes listener on every Impulse update", () => {
@@ -78,7 +78,7 @@ describe("single Impulse", () => {
     impulse.setValue(3)
     expect(spy).toHaveBeenCalledTimes(2)
     expect(spy).toHaveBeenLastCalledWith(3)
-    expect(impulse).toHaveProperty("emitters.size", 1)
+    expect(impulse).toHaveEmittersSize(1)
   })
 
   it("executes listener ones for batched Impulse updates", () => {
@@ -96,7 +96,7 @@ describe("single Impulse", () => {
     })
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(3)
-    expect(impulse).toHaveProperty("emitters.size", 1)
+    expect(impulse).toHaveEmittersSize(1)
   })
 
   it("doesn't execute listener when Impulse value does not change", () => {
@@ -110,7 +110,7 @@ describe("single Impulse", () => {
     spy.mockReset()
     impulse.setValue(1)
     expect(spy).not.toHaveBeenCalled()
-    expect(impulse).toHaveProperty("emitters.size", 1)
+    expect(impulse).toHaveEmittersSize(1)
   })
 
   it("doesn't execute listener when Impulse value comparably the same", () => {
@@ -129,7 +129,7 @@ describe("single Impulse", () => {
     impulse.setValue({ count: 2 })
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 2 })
-    expect(impulse).toHaveProperty("emitters.size", 1)
+    expect(impulse).toHaveEmittersSize(1)
   })
 })
 
@@ -145,8 +145,8 @@ describe("multiple Impulses", () => {
 
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(3)
-    expect(impulse_1).toHaveProperty("emitters.size", 1)
-    expect(impulse_2).toHaveProperty("emitters.size", 1)
+    expect(impulse_1).toHaveEmittersSize(1)
+    expect(impulse_2).toHaveEmittersSize(1)
   })
 
   it("executes listener on update", () => {
@@ -167,8 +167,8 @@ describe("multiple Impulses", () => {
     impulse_2.setValue(4)
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(7)
-    expect(impulse_1).toHaveProperty("emitters.size", 1)
-    expect(impulse_2).toHaveProperty("emitters.size", 1)
+    expect(impulse_1).toHaveEmittersSize(1)
+    expect(impulse_2).toHaveEmittersSize(1)
   })
 
   it("doesn't execute listener after unsubscribe", () => {
@@ -181,8 +181,8 @@ describe("multiple Impulses", () => {
     })
 
     unsubscribe()
-    expect(impulse_1).toHaveProperty("emitters.size", 0)
-    expect(impulse_2).toHaveProperty("emitters.size", 0)
+    expect(impulse_1).toHaveEmittersSize(0)
+    expect(impulse_2).toHaveEmittersSize(0)
 
     spy.mockReset()
     impulse_1.setValue(4)
@@ -200,34 +200,34 @@ describe("multiple Impulses", () => {
         spy(impulse_1.getValue() + impulse_2.getValue())
       }
     })
-    expect(impulse_1).toHaveProperty("emitters.size", 1)
-    expect(impulse_2).toHaveProperty("emitters.size", 0)
+    expect(impulse_1).toHaveEmittersSize(1)
+    expect(impulse_2).toHaveEmittersSize(0)
 
     spy.mockReset()
     impulse_2.setValue(3)
     expect(spy).not.toHaveBeenCalled()
-    expect(impulse_1).toHaveProperty("emitters.size", 1)
-    expect(impulse_2).toHaveProperty("emitters.size", 0)
+    expect(impulse_1).toHaveEmittersSize(1)
+    expect(impulse_2).toHaveEmittersSize(0)
 
     spy.mockReset()
     impulse_1.setValue(2)
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(5)
-    expect(impulse_1).toHaveProperty("emitters.size", 1)
-    expect(impulse_2).toHaveProperty("emitters.size", 1)
+    expect(impulse_1).toHaveEmittersSize(1)
+    expect(impulse_2).toHaveEmittersSize(1)
 
     spy.mockReset()
     impulse_2.setValue(4)
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(6)
-    expect(impulse_1).toHaveProperty("emitters.size", 1)
-    expect(impulse_2).toHaveProperty("emitters.size", 1)
+    expect(impulse_1).toHaveEmittersSize(1)
+    expect(impulse_2).toHaveEmittersSize(1)
 
     spy.mockReset()
     impulse_1.setValue(1)
     expect(spy).not.toHaveBeenCalled()
-    expect(impulse_1).toHaveProperty("emitters.size", 1)
-    expect(impulse_2).toHaveProperty("emitters.size", 0)
+    expect(impulse_1).toHaveEmittersSize(1)
+    expect(impulse_2).toHaveEmittersSize(0)
   })
 })
 
@@ -249,9 +249,9 @@ describe("nested Impulses", () => {
       )
     })
 
-    expect(impulse_1).toHaveProperty("emitters.size", 1)
-    expect(impulse_2).toHaveProperty("emitters.size", 1)
-    expect(impulse_3).toHaveProperty("emitters.size", 1)
+    expect(impulse_1).toHaveEmittersSize(1)
+    expect(impulse_2).toHaveEmittersSize(1)
+    expect(impulse_3).toHaveEmittersSize(1)
 
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(3)
