@@ -1,9 +1,8 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, useWatchImpulse } from "../../src"
+import { type Compare, Impulse, useWatchImpulse } from "../../src"
 import { Counter, WithCompare, WithImpulse } from "../common"
-import { Compare, eq } from "../../src/utils"
 
 describe.each([
   [
@@ -54,7 +53,7 @@ describe.each([
 
       rerender({
         impulse,
-        compare: eq,
+        compare: Object.is,
       })
       expect(result.current).toBe(initial)
 
