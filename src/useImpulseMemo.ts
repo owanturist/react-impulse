@@ -1,4 +1,4 @@
-import { DependencyList, useMemo } from "./dependencies"
+import { type DependencyList, useMemo } from "./dependencies"
 import { useScope } from "./useScope"
 import { defineExecutionContext } from "./validation"
 import { injectScope } from "./Scope"

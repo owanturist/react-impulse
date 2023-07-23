@@ -1,4 +1,4 @@
-import { Compare, Impulse } from "../src"
+import type { Compare, Impulse } from "../src"
 
 export abstract class Counter {
   public abstract readonly count: number

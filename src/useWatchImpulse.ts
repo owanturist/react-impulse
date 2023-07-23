@@ -1,8 +1,8 @@
 import { useCallback, useDebugValue } from "./dependencies"
-import { Compare, eq, useEvent } from "./utils"
+import { type Compare, eq, useEvent } from "./utils"
 import { useScope } from "./useScope"
 import { defineExecutionContext } from "./validation"
-import { Scope, injectScope } from "./Scope"
+import { type Scope, injectScope } from "./Scope"
 
 /**
  * A hook that executes the `watcher` function whenever any of the involved Impulses' values update

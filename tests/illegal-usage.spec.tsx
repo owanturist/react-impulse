@@ -11,7 +11,7 @@ import {
   watch,
 } from "../src"
 
-import { WithImpulse, WithListener } from "./common"
+import type { WithImpulse, WithListener } from "./common"
 
 const console$error = vi
   .spyOn(console, "error")

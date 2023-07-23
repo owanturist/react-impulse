@@ -154,8 +154,7 @@
         "plugin:@typescript-eslint/recommended",
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
         "plugin:@typescript-eslint/strict",
-        "plugin:import/typescript",
-        "plugin:prettier/recommended"
+        "plugin:import/typescript"
       ],
       "rules": {
         "array-callback-return": "off",
@@ -231,6 +230,15 @@
           {
             "allowedNames": ["that"]
           }
+        ],
+        "@typescript-eslint/no-import-type-side-effects": "error",
+        "@typescript-eslint/consistent-type-imports": [
+          "error",
+          {
+            "prefer": "type-imports",
+            "fixStyle": "inline-type-imports",
+            "disallowTypeAnnotations": false
+          }
         ]
       }
     },
@@ -255,8 +263,7 @@
       "extends": [
         "plugin:jest/recommended",
         "plugin:jest/style",
-        "plugin:jest-dom/recommended",
-        "plugin:prettier/recommended"
+        "plugin:jest-dom/recommended"
       ],
       "rules": {
         "jest/no-deprecated-functions": "off",

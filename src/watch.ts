@@ -1,15 +1,15 @@
 import {
-  FC,
-  ForwardRefRenderFunction,
-  ExoticComponent,
-  MemoExoticComponent,
-  ForwardRefExoticComponent,
+  type FC,
+  type ForwardRefRenderFunction,
+  type ExoticComponent,
+  type MemoExoticComponent,
+  type ForwardRefExoticComponent,
+  type PropsWithoutRef,
+  type RefAttributes,
   memo as React_memo,
   forwardRef as React_forwardRef,
-  PropsWithoutRef,
-  RefAttributes,
 } from "./dependencies"
-import { Compare } from "./utils"
+import type { Compare } from "./utils"
 import { useScope } from "./useScope"
 import { defineExecutionContext } from "./validation"
 import { injectScope } from "./Scope"

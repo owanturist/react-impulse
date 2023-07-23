@@ -1,4 +1,4 @@
-import { Compare, eq, isFunction, noop } from "./utils"
+import { type Compare, eq, isFunction, noop } from "./utils"
 import { EMITTER_KEY, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { validate } from "./validation"

@@ -1,4 +1,4 @@
-import { Func, isFunction } from "./utils"
+import { type Func, isFunction } from "./utils"
 
 export type ExecutionContext =
   | "subscribe"

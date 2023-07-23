@@ -1,6 +1,6 @@
 import {
-  DependencyList,
-  EffectCallback,
+  type DependencyList,
+  type EffectCallback,
   useEffect,
   useLayoutEffect,
 } from "./dependencies"

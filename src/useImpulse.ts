@@ -1,5 +1,5 @@
 import { Impulse } from "./Impulse"
-import { Compare, isFunction, usePermanent, useEvent, eq } from "./utils"
+import { type Compare, isFunction, usePermanent, useEvent, eq } from "./utils"
 
 /**
  * A hook that initiates a stable (never changing) Impulse without an initial value.

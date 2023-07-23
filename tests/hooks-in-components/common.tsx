@@ -1,7 +1,7 @@
 import React from "react"
 import { screen, within } from "@testing-library/react"
 
-import { Impulse, useImpulseValue } from "../../src"
+import { type Impulse, useImpulseValue } from "../../src"
 
 export const withinNth = (testId: string, position: number) => {
   return within(screen.getAllByTestId(testId)[position]!)

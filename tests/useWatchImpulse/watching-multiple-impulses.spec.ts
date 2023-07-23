@@ -1,14 +1,14 @@
 import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react"
 
-import { Compare, Impulse, useWatchImpulse, batch } from "../../src"
+import { type Compare, Impulse, useWatchImpulse, batch } from "../../src"
 import {
   Counter,
-  WithImpulse,
-  WithFirst,
-  WithSecond,
-  WithThird,
-  WithSpy,
+  type WithImpulse,
+  type WithFirst,
+  type WithSecond,
+  type WithThird,
+  type WithSpy,
 } from "../common"
 
 describe.each([
