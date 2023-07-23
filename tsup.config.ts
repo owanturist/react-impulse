@@ -3,10 +3,9 @@ import { type Options, defineConfig } from "tsup"
 
 // Inspired by https://github.com/egoist/tsup/blob/692c112ac83f463d0be200253466c163c7cee36c/src/plugins/terser.ts
 /**
- * The plugin mangles only annotated properties without minification and mangling anything else.
+ * The plugin mangles only properties starting from single '_' and not ending at '_' without minification and mangling anything else.
  * The annotation looks like
  */
-/*@__MANGLE_PROP__*/
 const manglePlugin: Required<Options>["plugins"][0] = {
   name: "terser-mangle",
   renderChunk: async function (code, info) {
@@ -29,11 +28,12 @@ const manglePlugin: Required<Options>["plugins"][0] = {
           keep_classnames: true,
           keep_fnames: true,
           properties: {
-            regex: /mangle only annotated/,
-            // @ts-expect-error undocumented, but it makes emitters to be always mangled as "__"
+            regex: /^_[^_]\w+[^_]$/,
+            // @ts-expect-error undocumented, but it specifies how to mangle Impulse's properties
             cache: {
               props: {
-                $emitters: "__",
+                $_value: "_",
+                $_emitters: "$",
               },
             },
           },
@@ -57,13 +57,10 @@ const manglePlugin: Required<Options>["plugins"][0] = {
 }
 
 export default defineConfig({
-  entryPoints: ["src/index.ts"],
+  entry: ["src/index.ts"],
   format: ["cjs", "esm"],
   dts: true,
   sourcemap: true,
   clean: true,
   plugins: [manglePlugin],
-  terserOptions: {
-    compress: true,
-  },
 })

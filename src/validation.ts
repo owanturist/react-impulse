@@ -35,20 +35,15 @@ type ValidateDecorator<TReturn = any> = (
 ) => void
 
 class Validate<TContext extends ExecutionContext> {
-  /*@__MANGLE_PROP__*/
-  private readonly spec: ReadonlyMap<ExecutionContext, string> = new Map()
+  public constructor(
+    private readonly _spec: ReadonlyMap<ExecutionContext, string>,
+  ) {}
 
-  public constructor(spec: ReadonlyMap<ExecutionContext, string>) {
-    this.spec = spec
+  private _getMessage(): null | undefined | string {
+    return currentExecutionContext && this._spec.get(currentExecutionContext)
   }
 
-  /*@__MANGLE_PROP__*/
-  private getMessage(): null | undefined | string {
-    return currentExecutionContext && this.spec.get(currentExecutionContext)
-  }
-
-  /*@__MANGLE_PROP__*/
-  private print(message: string): void {
+  private _print(message: string): void {
     if (
       typeof console !== "undefined" &&
       // eslint-disable-next-line no-console
@@ -62,16 +57,14 @@ class Validate<TContext extends ExecutionContext> {
     }
   }
 
-  /*@__MANGLE_PROP__*/
-  public when<TName extends TContext>(
+  public _when<TName extends TContext>(
     name: TName,
     message: string,
   ): Validate<Exclude<ExecutionContext, TName>> {
-    return new Validate(new Map(this.spec).set(name, message))
+    return new Validate(new Map(this._spec).set(name, message))
   }
 
-  /*@__MANGLE_PROP__*/
-  public alert(): ValidateDecorator {
+  public _alert(): ValidateDecorator {
     return (_, __, descriptor) => {
       if (process.env.NODE_ENV === "production") {
         /* c8 ignore next */
@@ -82,10 +75,10 @@ class Validate<TContext extends ExecutionContext> {
       const that = this
 
       descriptor.value = function (...args) {
-        const message = that.getMessage()
+        const message = that._getMessage()
 
         if (message) {
-          that.print(message)
+          that._print(message)
         }
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -94,10 +87,9 @@ class Validate<TContext extends ExecutionContext> {
     }
   }
 
-  public prevent(): ValidateDecorator
-  public prevent<TReturn>(returns: TReturn): ValidateDecorator<TReturn>
-  /*@__MANGLE_PROP__*/
-  public prevent<TReturn = void>(
+  public _prevent(): ValidateDecorator
+  public _prevent<TReturn>(returns: TReturn): ValidateDecorator<TReturn>
+  public _prevent<TReturn = void>(
     returns?: TReturn,
   ): ValidateDecorator<undefined | TReturn> {
     return (_, __, descriptor) => {
@@ -105,14 +97,14 @@ class Validate<TContext extends ExecutionContext> {
       const that = this
 
       descriptor.value = function (...args) {
-        const message = that.getMessage()
+        const message = that._getMessage()
 
         if (message == null) {
           return original.apply(this, args)
         }
 
         if (process.env.NODE_ENV !== "production") {
-          that.print(message)
+          that._print(message)
         }
 
         return returns

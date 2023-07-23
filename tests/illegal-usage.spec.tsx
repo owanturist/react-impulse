@@ -10,22 +10,6 @@ import {
   useWatchImpulse,
   watch,
 } from "../src"
-import { noop, usePermanent } from "../src/utils"
-import {
-  WATCH_CALLING_IMPULSE_SET_VALUE,
-  WATCH_CALLING_IMPULSE_SUBSCRIBE,
-  SUBSCRIBE_CALLING_IMPULSE_OF,
-  SUBSCRIBE_CALLING_IMPULSE_CLONE,
-  SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE,
-  USE_WATCH_IMPULSE_CALLING_IMPULSE_OF,
-  USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE,
-  USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE,
-  USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE,
-  USE_IMPULSE_MEMO_CALLING_IMPULSE_OF,
-  USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE,
-  USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE,
-  USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE,
-} from "../src/messages"
 
 import { WithImpulse, WithListener } from "./common"
 
@@ -45,14 +29,14 @@ describe("calling Impulse.of()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      USE_IMPULSE_MEMO_CALLING_IMPULSE_OF,
+      "You should not call Impulse.of inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
       () => {
         return useImpulseMemo(() => Impulse.of(1).getValue(), [])
       },
     ],
     [
       "useWatchImpulse",
-      USE_WATCH_IMPULSE_CALLING_IMPULSE_OF,
+      "You should not call Impulse.of inside of the useWatchImpulse watcher. The useWatchImpulse hook is for read-only operations but Impulse.of creates a new Impulse.",
       () => {
         return useWatchImpulse(() => Impulse.of(1).getValue())
       },
@@ -76,7 +60,9 @@ describe("calling Impulse.of()", () => {
       Impulse.of(1)
     })
 
-    expect(console$error).toHaveBeenLastCalledWith(SUBSCRIBE_CALLING_IMPULSE_OF)
+    expect(console$error).toHaveBeenLastCalledWith(
+      "You should not call Impulse.of inside of the subscribe listener. The listener is for read-only operations but Impulse.of creates a new Impulse.",
+    )
   })
 
   it.each([
@@ -99,7 +85,7 @@ describe("calling Impulse.of()", () => {
 
   it("fine when called inside watch()", () => {
     const Component = watch(() => {
-      const state = usePermanent(() => Impulse.of(20))
+      const [state] = React.useState(() => Impulse.of(20))
 
       return <div data-testid="count">{state.getValue()}</div>
     })
@@ -115,14 +101,14 @@ describe("calling Impulse#clone()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE,
+      "You should not call Impulse#clone inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
         return useImpulseMemo(() => impulse.clone().getValue(), [impulse])
       },
     ],
     [
       "useWatchImpulse",
-      USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE,
+      "You should not call Impulse#clone inside of the useWatchImpulse watcher. The useWatchImpulse hook is for read-only operations but Impulse#clone clones an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
         return useWatchImpulse(() => impulse.clone().getValue())
       },
@@ -155,7 +141,7 @@ describe("calling Impulse#clone()", () => {
     })
 
     expect(console$error).toHaveBeenLastCalledWith(
-      SUBSCRIBE_CALLING_IMPULSE_CLONE,
+      "You should not call Impulse#clone inside of the subscribe listener. The listener is for read-only operations but Impulse#clone clones an existing Impulse.",
     )
   })
 
@@ -190,7 +176,7 @@ describe("calling Impulse#clone()", () => {
     const Component = watch<{
       impulse: Impulse<number>
     }>(({ impulse }) => {
-      const state = usePermanent(() => impulse.clone())
+      const [state] = React.useState(() => impulse.clone())
 
       return <div data-testid="count">{state.getValue()}</div>
     })
@@ -206,7 +192,7 @@ describe("calling Impulse#setValue()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE,
+      "You should not call Impulse#setValue inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
         return useImpulseMemo(() => {
           impulse.setValue(3)
@@ -217,7 +203,7 @@ describe("calling Impulse#setValue()", () => {
     ],
     [
       "useWatchImpulse",
-      USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE,
+      "You should not call Impulse#setValue inside of the useWatchImpulse watcher. The useWatchImpulse hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
         return useWatchImpulse(() => {
           impulse.setValue(3)
@@ -294,7 +280,9 @@ describe("calling Impulse#setValue()", () => {
 
     render(<Component impulse={Impulse.of(20)} />)
 
-    expect(console$error).toHaveBeenCalledWith(WATCH_CALLING_IMPULSE_SET_VALUE)
+    expect(console$error).toHaveBeenCalledWith(
+      "You should not call Impulse#setValue during rendering of watch(Component).",
+    )
     expect(screen.getByTestId("count")).toHaveTextContent("20")
   })
 })
@@ -303,7 +291,7 @@ describe("calling Impulse#subscribe()", () => {
   describe.each([
     [
       "useImpulseMemo",
-      USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE,
+      "You may not call Impulse#subscribe inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
       ({
         impulse,
         listener = vi.fn(),
@@ -317,7 +305,7 @@ describe("calling Impulse#subscribe()", () => {
     ],
     [
       "useWatchImpulse",
-      USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE,
+      "You may not call Impulse#subscribe inside of the useWatchImpulse watcher. The useWatchImpulse hook is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
       ({
         impulse,
         listener = vi.fn(),
@@ -357,7 +345,12 @@ describe("calling Impulse#subscribe()", () => {
         initialProps: { impulse },
       })
 
-      expect(impulse$subscribe).toHaveReturnedWith(noop)
+      expect(impulse).toHaveEmittersSize(1)
+      expect(impulse$subscribe.mock.results).toHaveLength(1)
+      expect(impulse$subscribe.mock.results[0]?.type).toBe("return")
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      impulse$subscribe.mock.results[0]?.value()
+      expect(impulse).toHaveEmittersSize(1)
     })
 
     it("does not call the listener on Impulse's change", () => {
@@ -470,7 +463,7 @@ describe("calling Impulse#subscribe()", () => {
       render(<Component impulse={Impulse.of(20)} />)
 
       expect(console$error).toHaveBeenCalledWith(
-        WATCH_CALLING_IMPULSE_SUBSCRIBE,
+        "You may not call Impulse#subscribe during rendering of watch(Component).",
       )
     })
 
@@ -485,7 +478,12 @@ describe("calling Impulse#subscribe()", () => {
       const impulse$subscribe = vi.spyOn(impulse, "subscribe")
       render(<Component impulse={impulse} />)
 
-      expect(impulse$subscribe).toHaveReturnedWith(noop)
+      expect(impulse).toHaveEmittersSize(1)
+      expect(impulse$subscribe.mock.results).toHaveLength(1)
+      expect(impulse$subscribe.mock.results[0]?.type).toBe("return")
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      impulse$subscribe.mock.results[0]?.value()
+      expect(impulse).toHaveEmittersSize(1)
     })
 
     it("does not call the listener on Impulse's change", () => {
@@ -520,7 +518,7 @@ describe("calling Impulse#subscribe()", () => {
       })
 
       expect(console$error).toHaveBeenCalledWith(
-        SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE,
+        "You may not call Impulse#subscribe inside of the subscribe listener. The listener is for read-only operations but Impulse#subscribe subscribes to an Impulse.",
       )
     })
 
@@ -529,10 +527,16 @@ describe("calling Impulse#subscribe()", () => {
       const impulse$subscribe = vi.spyOn(impulse, "subscribe")
 
       subscribe(() => {
+        impulse.getValue()
         impulse.subscribe(listener)
       })
 
-      expect(impulse$subscribe).toHaveReturnedWith(noop)
+      expect(impulse).toHaveEmittersSize(1)
+      expect(impulse$subscribe.mock.results).toHaveLength(1)
+      expect(impulse$subscribe.mock.results[0]?.type).toBe("return")
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      impulse$subscribe.mock.results[0]?.value()
+      expect(impulse).toHaveEmittersSize(1)
     })
 
     it("does not call the listener on Impulse's change", () => {

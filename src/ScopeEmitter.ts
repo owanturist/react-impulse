@@ -8,90 +8,76 @@ import { noop } from "./utils"
  * @private
  */
 export class ScopeEmitter {
-  /*@__MANGLE_PROP__*/
-  private static queue: null | Array<null | ReadonlySet<ScopeEmitter>> = null
+  private static _queue: null | Array<null | ReadonlySet<ScopeEmitter>> = null
 
-  /*@__MANGLE_PROP__*/
-  public static schedule(
+  public static _schedule(
     execute: () => null | ReadonlySet<ScopeEmitter>,
   ): void {
-    if (ScopeEmitter.queue == null) {
-      ScopeEmitter.queue = []
+    if (ScopeEmitter._queue == null) {
+      ScopeEmitter._queue = []
 
-      ScopeEmitter.queue.push(execute())
+      ScopeEmitter._queue.push(execute())
 
       const uniq = new WeakSet<VoidFunction>()
 
-      ScopeEmitter.queue.forEach((emitters) => {
+      ScopeEmitter._queue.forEach((emitters) => {
         emitters?.forEach((emitter) => {
-          if (!uniq.has(emitter.emit)) {
-            uniq.add(emitter.emit)
-            emitter.increment()
+          if (!uniq.has(emitter._emit)) {
+            uniq.add(emitter._emit)
+            emitter._increment()
 
-            if (emitter.shouldDetachOnEmit) {
-              emitter.detachAll()
+            if (emitter._shouldDetachOnEmit) {
+              emitter._detachAll()
             }
 
-            emitter.emit()
+            emitter._emit()
           }
         })
       })
 
-      ScopeEmitter.queue = null
+      ScopeEmitter._queue = null
     } else {
-      ScopeEmitter.queue.push(execute())
+      ScopeEmitter._queue.push(execute())
     }
   }
 
   // TODO remove shouldDetachOnEmit when Impulse#subscribe is gone
-  /*@__MANGLE_PROP__*/
-  private readonly shouldDetachOnEmit: boolean = true
 
-  public constructor(shouldDetachOnEmit = true) {
-    this.shouldDetachOnEmit = shouldDetachOnEmit
+  public constructor(private readonly _shouldDetachOnEmit: boolean = true) {}
+
+  private readonly _cleanups: Array<VoidFunction> = []
+
+  private _version = 0
+
+  private _emit: VoidFunction = noop
+
+  private _increment(): void {
+    this._version = (this._version + 1) % 10e9
   }
 
-  /*@__MANGLE_PROP__*/
-  private readonly cleanups: Array<VoidFunction> = []
-
-  /*@__MANGLE_PROP__*/
-  private version = 0
-
-  /*@__MANGLE_PROP__*/
-  private emit: VoidFunction = noop
-
-  /*@__MANGLE_PROP__*/
-  private increment(): void {
-    this.version = (this.version + 1) % 10e9
+  public _detachAll(): void {
+    this._cleanups.forEach((cleanup) => cleanup())
+    this._cleanups.length = 0
   }
 
-  /*@__MANGLE_PROP__*/
-  public detachAll(): void {
-    this.cleanups.forEach((cleanup) => cleanup())
-    this.cleanups.length = 0
-  }
-
-  /*@__MANGLE_PROP__*/
-  public attachTo(emitters: Set<ScopeEmitter>): void {
+  public _attachTo(emitters: Set<ScopeEmitter>): void {
     if (!emitters.has(this)) {
       emitters.add(this)
-      this.cleanups.push(() => emitters.delete(this))
+      this._cleanups.push(() => emitters.delete(this))
     }
   }
 
-  /*@__MANGLE_PROP__*/
-  public onEmit = (emit: VoidFunction): VoidFunction => {
-    this.emit = emit
+  public _onEmit = (emit: VoidFunction): VoidFunction => {
+    this._emit = emit
 
     return () => {
-      this.increment()
-      this.detachAll()
-      this.emit = noop
+      this._increment()
+      this._detachAll()
+      this._emit = noop
     }
   }
 
-  /*@__MANGLE_PROP__*/
-  public getVersion = (): number => {
-    return this.version
+  public _getVersion = (): number => {
+    return this._version
   }
 }
