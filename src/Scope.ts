@@ -1,20 +1,22 @@
+export { type Scope, EMITTER_KEY, STATIC_SCOPE, injectScope, extractScope }
+
 import type { ScopeEmitter } from "./ScopeEmitter"
 import type { Func } from "./utils"
 
-export const EMITTER_KEY = Symbol("scope")
+const EMITTER_KEY = Symbol("scope")
 
-export interface Scope {
+interface Scope {
   readonly [EMITTER_KEY]: null | ScopeEmitter
   readonly version?: number
 }
 
-export const STATIC_SCOPE: Scope = {
+const STATIC_SCOPE: Scope = {
   [EMITTER_KEY]: null,
 }
 
 let currentScope = STATIC_SCOPE
 
-export function injectScope<TArgs extends ReadonlyArray<unknown>, TResult>(
+function injectScope<TArgs extends ReadonlyArray<unknown>, TResult>(
   scope: Scope,
   execute: Func<TArgs, TResult>,
   ...args: TArgs
@@ -28,6 +30,6 @@ export function injectScope<TArgs extends ReadonlyArray<unknown>, TResult>(
   return result
 }
 
-export function extractScope(): Scope {
+function extractScope(): Scope {
   return currentScope
 }

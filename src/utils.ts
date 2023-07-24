@@ -1,3 +1,14 @@
+export {
+  type Compare,
+  type Func,
+  eq,
+  noop,
+  isFunction,
+  useIsomorphicEffect,
+  useEvent,
+  usePermanent,
+}
+
 import {
   useEffect,
   useLayoutEffect,
@@ -13,28 +24,28 @@ import {
  *
  * @version 1.0.0
  */
-export type Compare<T> = (left: T, right: T) => boolean
+type Compare<T> = (left: T, right: T) => boolean
 
-export type Func<TArgs extends ReadonlyArray<unknown>, TResult = void> = (
+type Func<TArgs extends ReadonlyArray<unknown>, TResult = void> = (
   ...args: TArgs
 ) => TResult
 
-export const eq: Compare<unknown> = Object.is
+const eq: Compare<unknown> = Object.is
 
-export function noop(): void {
+function noop(): void {
   // do nothing
 }
 
-export function isFunction<
-  TFunction extends Func<ReadonlyArray<never>, unknown>,
->(anything: unknown): anything is TFunction {
+function isFunction<TFunction extends Func<ReadonlyArray<never>, unknown>>(
+  anything: unknown,
+): anything is TFunction {
   return typeof anything === "function"
 }
 
-export const useIsomorphicEffect =
+const useIsomorphicEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect
 
-export function useEvent<TArgs extends ReadonlyArray<unknown>, TResult>(
+function useEvent<TArgs extends ReadonlyArray<unknown>, TResult>(
   handler: Func<TArgs, TResult>,
 ): Func<TArgs, TResult> {
   const handlerRef = useRef<(...args: TArgs) => TResult>()
@@ -46,7 +57,7 @@ export function useEvent<TArgs extends ReadonlyArray<unknown>, TResult>(
   return useCallback((...args: TArgs) => handlerRef.current!(...args), [])
 }
 
-export function usePermanent<TValue>(init: () => TValue): TValue {
+function usePermanent<TValue>(init: () => TValue): TValue {
   const [value] = useState(init)
 
   return value

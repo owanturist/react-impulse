@@ -1,3 +1,5 @@
+export { useWatchImpulse }
+
 import { useCallback, useDebugValue } from "./dependencies"
 import { type Compare, eq, useEvent } from "./utils"
 import { useScope } from "./useScope"
@@ -13,10 +15,7 @@ import { type Scope, injectScope } from "./Scope"
  *
  * @version 1.0.0
  */
-export function useWatchImpulse<T>(
-  watcher: () => T,
-  compare?: null | Compare<T>,
-): T {
+function useWatchImpulse<T>(watcher: () => T, compare?: null | Compare<T>): T {
   const transform = useCallback(
     (scope: Scope) => {
       return defineExecutionContext(

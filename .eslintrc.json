@@ -133,12 +133,12 @@
     "import/no-relative-packages": "error",
     "import/no-unresolved": ["error", { "ignore": ["vitest/config"] }],
     "import/no-cycle": "error",
-    "import/first": "error",
+    "import/group-exports": "error",
+    "import/no-default-export": "error",
     "import/newline-after-import": ["error", { "considerComments": true }],
     "import/no-anonymous-default-export": "error",
     "import/no-empty-named-blocks": "error",
     "import/no-mutable-exports": "error",
-    "import/no-relative-parent-imports": "off", // research
     "import/no-self-import": "error",
     "import/no-useless-path-segments": "error",
     "import/no-extraneous-dependencies": [
@@ -249,6 +249,12 @@
             "disallowTypeAnnotations": false
           }
         ]
+      }
+    },
+    {
+      "files": ["./*.ts"],
+      "rules": {
+        "import/no-default-export": "off"
       }
     },
     {

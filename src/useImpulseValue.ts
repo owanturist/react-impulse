@@ -1,3 +1,5 @@
+export { useImpulseValue }
+
 import { useCallback, useDebugValue } from "./dependencies"
 import type { Impulse } from "./Impulse"
 import { useWatchImpulse } from "./useWatchImpulse"
@@ -9,7 +11,7 @@ import { useWatchImpulse } from "./useWatchImpulse"
  *
  * @version 1.0.0
  */
-export function useImpulseValue<T>(impulse: Impulse<T>): T {
+function useImpulseValue<T>(impulse: Impulse<T>): T {
   const watcher = useCallback(() => impulse.getValue(), [impulse])
   const value = useWatchImpulse(watcher, impulse.compare)
 

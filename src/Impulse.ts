@@ -1,3 +1,5 @@
+export { Impulse }
+
 import { type Compare, eq, isFunction, noop } from "./utils"
 import { EMITTER_KEY, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
@@ -18,7 +20,7 @@ import {
   USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE,
 } from "./messages"
 
-export class Impulse<T> {
+class Impulse<T> {
   /**
    * Creates new Impulse without an initial value.
    *
