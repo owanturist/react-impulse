@@ -1,9 +1,11 @@
+export { useScope }
+
 import { useCallback, useSyncExternalStoreWithSelector } from "./dependencies"
 import { ScopeEmitter } from "./ScopeEmitter"
-import { EMITTER_KEY, Scope } from "./Scope"
-import { Compare, isFunction, usePermanent } from "./utils"
+import { EMITTER_KEY, type Scope } from "./Scope"
+import { type Compare, isFunction, usePermanent } from "./utils"
 
-export function useScope<T = () => Scope>(
+function useScope<T = () => Scope>(
   transform?: (scope: Scope) => T,
   compare?: Compare<T>,
 ): T {

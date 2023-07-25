@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Compare, useImpulse } from "../src"
+import { type Compare, useImpulse } from "../src"
 
 describe("without initial value", () => {
   it("should create an impulse with undefined initial value", () => {

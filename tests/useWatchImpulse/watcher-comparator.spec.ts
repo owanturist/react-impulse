@@ -2,7 +2,7 @@ import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react"
 
 import { type Compare, Impulse, useWatchImpulse } from "../../src"
-import { Counter, WithCompare, WithImpulse } from "../common"
+import { Counter, type WithCompare, type WithImpulse } from "../common"
 
 describe.each([
   [

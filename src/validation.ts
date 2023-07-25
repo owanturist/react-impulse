@@ -1,4 +1,6 @@
-import { Func, isFunction } from "./utils"
+export { defineExecutionContext, validate }
+
+import { type Func, isFunction } from "./utils"
 
 export type ExecutionContext =
   | "subscribe"
@@ -8,10 +10,7 @@ export type ExecutionContext =
 
 let currentExecutionContext: null | ExecutionContext = null
 
-export function defineExecutionContext<
-  TArgs extends ReadonlyArray<unknown>,
-  TResult,
->(
+function defineExecutionContext<TArgs extends ReadonlyArray<unknown>, TResult>(
   name: ExecutionContext,
   execute: Func<TArgs, TResult>,
   ...args: TArgs
@@ -113,4 +112,4 @@ class Validate<TContext extends ExecutionContext> {
   }
 }
 
-export const validate = new Validate(new Map())
+const validate = new Validate(new Map())

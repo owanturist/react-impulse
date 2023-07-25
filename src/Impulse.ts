@@ -1,4 +1,6 @@
-import { Compare, eq, isFunction, noop } from "./utils"
+export { Impulse }
+
+import { type Compare, eq, isFunction, noop } from "./utils"
 import { EMITTER_KEY, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { validate } from "./validation"
@@ -18,7 +20,7 @@ import {
   USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE,
 } from "./messages"
 
-export class Impulse<T> {
+class Impulse<T> {
   /**
    * Creates new Impulse without an initial value.
    *
@@ -68,7 +70,10 @@ export class Impulse<T> {
    */
   public readonly compare: Compare<T>
 
-  private constructor(private _value: T, compare: Compare<T>) {
+  private constructor(
+    private _value: T,
+    compare: Compare<T>,
+  ) {
     this.compare = compare
   }
 

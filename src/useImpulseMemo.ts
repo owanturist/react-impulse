@@ -1,4 +1,6 @@
-import { DependencyList, useMemo } from "./dependencies"
+export { useImpulseMemo }
+
+import { type DependencyList, useMemo } from "./dependencies"
 import { useScope } from "./useScope"
 import { defineExecutionContext } from "./validation"
 import { injectScope } from "./Scope"
@@ -13,7 +15,7 @@ import { injectScope } from "./Scope"
  *
  * @version 1.0.0
  */
-export function useImpulseMemo<TValue>(
+function useImpulseMemo<TValue>(
   factory: () => TValue,
   dependencies: undefined | DependencyList,
 ): TValue {

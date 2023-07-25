@@ -1,12 +1,14 @@
+export { useImpulse }
+
 import { Impulse } from "./Impulse"
-import { Compare, isFunction, usePermanent, useEvent, eq } from "./utils"
+import { type Compare, isFunction, usePermanent, useEvent, eq } from "./utils"
 
 /**
  * A hook that initiates a stable (never changing) Impulse without an initial value.
  *
  * @version 1.2.0
  */
-export function useImpulse<T = undefined>(): Impulse<undefined | T>
+function useImpulse<T = undefined>(): Impulse<undefined | T>
 
 /**
  * A hook that initiates a stable (never changing) Impulse.
@@ -18,13 +20,13 @@ export function useImpulse<T = undefined>(): Impulse<undefined | T>
  *
  * @version 1.0.0
  */
-export function useImpulse<T>(
+function useImpulse<T>(
   valueOrInitValue: T | ((...args: []) => T),
   compare?: null | Compare<T>,
 ): Impulse<T>
 
 // Implements 👆
-export function useImpulse<T>(
+function useImpulse<T>(
   valueOrInitValue?: T | ((...args: []) => T),
   compare?: null | Compare<undefined | T>,
 ): Impulse<undefined | T> {

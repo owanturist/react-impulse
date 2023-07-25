@@ -1,15 +1,17 @@
+export { watch }
+
 import {
-  FC,
-  ForwardRefRenderFunction,
-  ExoticComponent,
-  MemoExoticComponent,
-  ForwardRefExoticComponent,
+  type FC,
+  type ForwardRefRenderFunction,
+  type ExoticComponent,
+  type MemoExoticComponent,
+  type ForwardRefExoticComponent,
+  type PropsWithoutRef,
+  type RefAttributes,
   memo as React_memo,
   forwardRef as React_forwardRef,
-  PropsWithoutRef,
-  RefAttributes,
 } from "./dependencies"
-import { Compare } from "./utils"
+import type { Compare } from "./utils"
 import { useScope } from "./useScope"
 import { defineExecutionContext } from "./validation"
 import { injectScope } from "./Scope"
@@ -21,9 +23,9 @@ import { injectScope } from "./Scope"
  *
  * @version 1.0.0
  */
-export function watch<TProps>(component: ExoticComponent<TProps>): never
-export function watch<TProps>(component: FC<TProps>): FC<TProps>
-export function watch<TProps>(component: FC<TProps>): FC<TProps> {
+function watch<TProps>(component: ExoticComponent<TProps>): never
+function watch<TProps>(component: FC<TProps>): FC<TProps>
+function watch<TProps>(component: FC<TProps>): FC<TProps> {
   const ComponentWithScope: FC<TProps> = (props, ctx: unknown) => {
     const getScope = useScope()
 

@@ -1,3 +1,5 @@
+export { ScopeEmitter }
+
 import { noop } from "./utils"
 
 /**
@@ -7,7 +9,7 @@ import { noop } from "./utils"
  *
  * @private
  */
-export class ScopeEmitter {
+class ScopeEmitter {
   private static _queue: null | Array<null | ReadonlySet<ScopeEmitter>> = null
 
   public static _schedule(

@@ -2,7 +2,7 @@ import { render, screen, fireEvent, act } from "@testing-library/react"
 import React from "react"
 
 import {
-  Compare,
+  type Compare,
   Impulse,
   useImpulseValue,
   useWatchImpulse,

@@ -1,8 +1,10 @@
+export { useWatchImpulse }
+
 import { useCallback, useDebugValue } from "./dependencies"
-import { Compare, eq, useEvent } from "./utils"
+import { type Compare, eq, useEvent } from "./utils"
 import { useScope } from "./useScope"
 import { defineExecutionContext } from "./validation"
-import { Scope, injectScope } from "./Scope"
+import { type Scope, injectScope } from "./Scope"
 
 /**
  * A hook that executes the `watcher` function whenever any of the involved Impulses' values update
@@ -13,10 +15,7 @@ import { Scope, injectScope } from "./Scope"
  *
  * @version 1.0.0
  */
-export function useWatchImpulse<T>(
-  watcher: () => T,
-  compare?: null | Compare<T>,
-): T {
+function useWatchImpulse<T>(watcher: () => T, compare?: null | Compare<T>): T {
   const transform = useCallback(
     (scope: Scope) => {
       return defineExecutionContext(

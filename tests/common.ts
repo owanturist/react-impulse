@@ -1,6 +1,18 @@
-import { Compare, Impulse } from "../src"
+export {
+  type WithImpulse,
+  type WithCompare,
+  type WithFirst,
+  type WithSecond,
+  type WithThird,
+  type WithSpy,
+  type WithListener,
+  type WithIsActive,
+  Counter,
+}
 
-export abstract class Counter {
+import type { Compare, Impulse } from "../src"
+
+abstract class Counter {
   public abstract readonly count: number
 
   public static compare: Compare<Counter> = (prev, next) => {
@@ -28,34 +40,34 @@ export abstract class Counter {
   }
 }
 
-export interface WithImpulse<T = Counter> {
+interface WithImpulse<T = Counter> {
   impulse: Impulse<T>
 }
 
-export interface WithCompare<T = Counter> {
+interface WithCompare<T = Counter> {
   compare?: null | Compare<T>
 }
 
-export interface WithFirst<T = Counter> {
+interface WithFirst<T = Counter> {
   first: Impulse<T>
 }
 
-export interface WithSecond<T = Counter> {
+interface WithSecond<T = Counter> {
   second: Impulse<T>
 }
 
-export interface WithThird<T = Counter> {
+interface WithThird<T = Counter> {
   third: Impulse<T>
 }
 
-export interface WithSpy {
+interface WithSpy {
   spy(...args: Array<unknown>): void
 }
 
-export interface WithListener {
+interface WithListener {
   listener: VoidFunction
 }
 
-export interface WithIsActive {
+interface WithIsActive {
   isActive: boolean
 }
