@@ -102,7 +102,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [16.12.0, 17.0.0]
+        version: [16.12.0, 17.0.0, 18.0.0]
+        include:
+          - version: 16.12.0
+            legacy_testing_library: true
+          - version: 17.0.0
+            legacy_testing_library: true
 
     steps:
       - name: Checkout repository
@@ -111,8 +116,12 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
-      - name: Install React 17 and legacy testing libraries
-        run: pnpm add -D react@${{ matrix.version }} react-dom@${{ matrix.version }} @testing-library/react@12 @testing-library/react-hooks
+      - name: Install React@${{ matrix.version }}
+        run: pnpm add -D react@${{ matrix.version }} react-dom@${{ matrix.version }}
+
+      - name: Install legacy testing-library
+        if: ${{ matrix.legacy_testing_library }}
+        run: pnpm add -D @testing-library/react@12 @testing-library/react-hooks
 
       - name: Test against React@${{ matrix.version }}
         run: pnpm test:run
