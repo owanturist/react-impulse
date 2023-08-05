@@ -65,8 +65,8 @@ class Validate<TContext extends ExecutionContext> {
 
   public _alert(): ValidateDecorator {
     return (_, __, descriptor) => {
+      /* c8 ignore next 3 */
       if (process.env.NODE_ENV === "production") {
-        /* c8 ignore next */
         return
       }
 
