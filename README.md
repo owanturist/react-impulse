@@ -701,9 +701,8 @@ A function that compares two values and returns `true` if they are equal. Depend
 
 [object_is]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is#description
 [hoc]: https://reactjs.org/docs/higher-order-components.html
-[react__use_use_state]: https://reactjs.org/docs/hooks-reference.html#usestate
-[react__use_memo]: https://reactjs.org/docs/hooks-reference.html#usememo
-[react__use_callback]: https://reactjs.org/docs/hooks-reference.html#usecallback
-[react__use_effect]: https://reactjs.org/docs/hooks-reference.html#useeffect
-[react__use_layout_effect]: https://reactjs.org/docs/hooks-reference.html#uselayouteffect
-[react__use_insertion_effect]: https://reactjs.org/docs/hooks-reference.html#useinsertioneffect
+[react__use_memo]: https://react.dev/reference/react/useMemo
+[react__use_callback]: https://react.dev/reference/react/useCallback
+[react__use_effect]: https://react.dev/reference/react/useEffect
+[react__use_layout_effect]: https://react.dev/reference/react/useLayoutEffect
+[react__use_insertion_effect]: https://react.dev/reference/react/useInsertionEffect
