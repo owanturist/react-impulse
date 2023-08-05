@@ -10,7 +10,7 @@ import { injectScope } from "./Scope"
  * Whenever the `callback` executes, all the Impulses
  * calling the `Impulse#getValue` method become _phantom dependencies_ of the hook.
  *
- * @param callback a memoized function that updates every time when any of the `dependencies` values change.
+ * @param callback a function to memoize, the memoized value updates whenever any of the `dependencies` values change.
  * @param dependencies an array of values used in the `callback` function.
  *
  * @version 1.0.0
