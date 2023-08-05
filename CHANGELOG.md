@@ -1,5 +1,14 @@
 # react-impulse
 
+## 1.2.3
+
+### Patch Changes
+
+- f3c82b4: Re-export all dependencies from a single file so the imported packages appear only ones in the bundle. By doing so we can reduce the bundle size by ~2%.
+- 5331541: Introduce an implicit `Scope` injection by replacing internal `WatchContext` and `SetValueContext` with `ScopeEmitter`. It drastically simplifies the internal API and makes it possible for further improvements (eg: [#378](https://github.com/owanturist/react-impulse/issues/378)).
+- ad9e7bf: Mangle all private and internal methods and properties. It reduces the bundle size by ~5%
+- e87970f: Update all dev dependencies
+
 ## 1.2.2
 
 ### Patch Changes
