@@ -59,9 +59,9 @@ jobs:
         if: ${{ always() }}
         run: pnpm typecheck
 
-      - name: Test against React 18
+      - name: Tests with coverage
         if: ${{ always() }}
-        run: pnpm test:run -- --coverage
+        run: pnpm test:run --coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
