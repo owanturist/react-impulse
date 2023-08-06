@@ -468,7 +468,34 @@ const useCalcSum = (left: number, right: Impulse<number>): number => {
 >   "react-hooks/exhaustive-deps": [
 >     "error",
 >     {
->       "additionalHooks": "(useImpulseEffect|useImpulseLayoutEffect|useImpulseMemo)"
+>       "additionalHooks": "(useImpulse(Effect|LayoutEffect|Memo|Callback))"
+>     }
+>   ]
+> }
+> ```
+
+### `useImpulseCallback`
+
+```dart
+function useImpulseCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
+  callback: (...args: TArgs) => TResult,
+  dependencies: DependencyList,
+): (...args: TArgs) => TResult
+```
+
+- `callback` is a function to memoize, the memoized function updates whenever any of the `dependencies` values change.
+- `dependencies` is an array of values used in the `callback` function.
+
+The hook is an Impulse version of the [`React.useCallback`][react__use_callback] hook. During the `callback` execution, all Impulses that call the [`Impulse#getValue`][impulse__get_value] method become _phantom dependencies_ of the hook.
+
+> 💡 Want to see ESLint suggestions for the dependencies? Add the hook name to the ESLint rule override:
+>
+> ```json
+> {
+>   "react-hooks/exhaustive-deps": [
+>     "error",
+>     {
+>       "additionalHooks": "(useImpulse(Effect|LayoutEffect|Memo|Callback))"
 >     }
 >   ]
 > }
@@ -540,7 +567,7 @@ const usePrintSum = (left: number, right: Impulse<number>): void => {
 >   "react-hooks/exhaustive-deps": [
 >     "error",
 >     {
->       "additionalHooks": "(useImpulseEffect|useImpulseLayoutEffect|useImpulseMemo)"
+>       "additionalHooks": "(useImpulse(Effect|LayoutEffect|Memo|Callback))"
 >     }
 >   ]
 > }
@@ -674,9 +701,8 @@ A function that compares two values and returns `true` if they are equal. Depend
 
 [object_is]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is#description
 [hoc]: https://reactjs.org/docs/higher-order-components.html
-[react__use_use_state]: https://reactjs.org/docs/hooks-reference.html#usestate
-[react__use_memo]: https://reactjs.org/docs/hooks-reference.html#usememo
-[react__use_callback]: https://reactjs.org/docs/hooks-reference.html#usecallback
-[react__use_effect]: https://reactjs.org/docs/hooks-reference.html#useeffect
-[react__use_layout_effect]: https://reactjs.org/docs/hooks-reference.html#uselayouteffect
-[react__use_insertion_effect]: https://reactjs.org/docs/hooks-reference.html#useinsertioneffect
+[react__use_memo]: https://react.dev/reference/react/useMemo
+[react__use_callback]: https://react.dev/reference/react/useCallback
+[react__use_effect]: https://react.dev/reference/react/useEffect
+[react__use_layout_effect]: https://react.dev/reference/react/useLayoutEffect
+[react__use_insertion_effect]: https://react.dev/reference/react/useInsertionEffect
