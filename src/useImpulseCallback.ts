@@ -12,7 +12,7 @@ import { injectScope } from "./Scope"
  * @param callback a function to memoize, the memoized function updates whenever any of the `dependencies` values change.
  * @param dependencies an array of values used in the `callback` function.
  *
- * @version 1.0.0
+ * @version 1.3.0
  */
 
 function useImpulseCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
