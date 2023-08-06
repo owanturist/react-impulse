@@ -4,7 +4,7 @@ export {
   eq,
   noop,
   isFunction,
-  useIsomorphicEffect,
+  useIsomorphicLayoutEffect,
   useEvent,
   usePermanent,
 }
@@ -42,8 +42,8 @@ function isFunction<TFunction extends Func<ReadonlyArray<never>, unknown>>(
   return typeof anything === "function"
 }
 
-const useIsomorphicEffect =
-  /* c8 ignore next */
+const useIsomorphicLayoutEffect =
+  // /* c8 ignore next */
   typeof window === "undefined" ? useEffect : useLayoutEffect
 
 function useEvent<TArgs extends ReadonlyArray<unknown>, TResult>(
@@ -51,7 +51,7 @@ function useEvent<TArgs extends ReadonlyArray<unknown>, TResult>(
 ): Func<TArgs, TResult> {
   const handlerRef = useRef<(...args: TArgs) => TResult>()
 
-  useIsomorphicEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     handlerRef.current = handler
   })
 

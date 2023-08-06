@@ -1,4 +1,4 @@
-export { type ImpulseOptions, Impulse }
+export { type ImpulseOptions, Impulse, TransmittingImpulse }
 
 import { type Compare, eq, isFunction } from "./utils"
 import { EMITTER_KEY, extractScope } from "./Scope"
@@ -93,8 +93,14 @@ abstract class Impulse<T> {
     return String(this.getValue())
   }
 
-  protected abstract getter(): T
-  protected abstract setter(value: T, compare?: null | Compare<T>): boolean
+  protected _emit(execute: () => boolean): void {
+    ScopeEmitter._schedule(() => {
+      return execute() ? this._emitters : null
+    })
+  }
+
+  protected abstract _getter(): T
+  protected abstract _setter(value: T, compare?: null | Compare<T>): boolean
 
   /**
    * Creates a new Impulse instance out of the current one with the same value.
@@ -162,7 +168,7 @@ abstract class Impulse<T> {
 
     scope[EMITTER_KEY]?._attachTo(this._emitters)
 
-    const value = this.getter()
+    const value = this._getter()
 
     return isFunction(select) ? select(value) : value
   }
@@ -181,14 +187,16 @@ abstract class Impulse<T> {
     ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE)
     ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE)
     ._prevent()
-  public setValue(valueOrTransform: T | ((currentValue: T) => T)): void {
-    ScopeEmitter._schedule(() => {
-      const value = this.getter()
+  public setValue(
+    valueOrTransform: T | ((currentValue: T) => T),
+  ): void {
+    this._emit(() => {
+      const value = this._getter()
       const nextValue = isFunction(valueOrTransform)
         ? valueOrTransform(value)
         : valueOrTransform
 
-      return this.setter(nextValue, compare) ? this._emitters : null
+      return this._setter(nextValue, compare)
     })
   }
 }
@@ -201,11 +209,11 @@ class DirectImpulse<T> extends Impulse<T> {
     super(compare)
   }
 
-  protected getter(): T {
+  protected _getter(): T {
     return this._value
   }
 
-  protected setter(
+  protected _setter(
     value: T,
     compare: null | Compare<T> = this.compare,
   ): boolean {
@@ -218,5 +226,47 @@ class DirectImpulse<T> extends Impulse<T> {
     this._value = value
 
     return true
+  }
+}
+
+class TransmittingImpulse<T> extends Impulse<T> {
+  public constructor(
+    private _getFromSource: () => T,
+    private readonly _setToSource: (value: T) => void,
+    compare: Compare<T>,
+  ) {
+    super(compare)
+  }
+
+  protected _getter(): T {
+    return this._getFromSource()
+  }
+
+  protected _setter(
+    value: T,
+    compare: null | Compare<T> = this.compare,
+  ): boolean {
+    const finalCompare = compare ?? eq
+
+    if (finalCompare(this._getter(), value)) {
+      return false
+    }
+
+    this._setToSource(value)
+
+    return true
+  }
+
+  public _replaceGetter(getter: () => T): void {
+    if (this._getFromSource !== getter) {
+      this._emit(() => {
+        const value = this._getter()
+        const nextValue = getter()
+
+        this._getFromSource = getter
+
+        return !this.compare(value, nextValue)
+      })
+    }
   }
 }
