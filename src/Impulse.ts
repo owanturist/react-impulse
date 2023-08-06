@@ -1,4 +1,4 @@
-export { type ImpulseOptions, Impulse, TransmittingImpulse }
+export { type ImpulseOptions, type ReadonlyImpulse, Impulse, TransmittingImpulse  }
 
 import { type Compare, eq, isFunction } from "./utils"
 import { EMITTER_KEY, extractScope } from "./Scope"
@@ -24,13 +24,7 @@ interface ImpulseOptions<T> {
   compare?: null | Compare<T>
 }
 
-interface ImpulseOptions<T> {
-  /**
-   * The compare function determines whether or not a new Impulse's value replaces the current one.
-   * In many cases specifying the function leads to better performance because it prevents unnecessary updates.
-   */
-  compare?: null | Compare<T>
-}
+type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
 
 abstract class Impulse<T> {
   /**

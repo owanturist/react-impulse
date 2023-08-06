@@ -8,6 +8,7 @@ import {
   useTransmittingImpulse,
   type Compare,
   useImpulseEffect,
+  type ReadonlyImpulse,
 } from "../src"
 
 import type { Counter } from "./common"
@@ -333,5 +334,32 @@ describe("replacing getter", () => {
 
     rerender({ count: 0 })
     expect(onEffect).not.toHaveBeenCalled()
+  })
+})
+
+describe("type check", () => {
+  it("returns Impulse when setter is defined", () => {
+    const { result } = renderHook(() => {
+      return useTransmittingImpulse(
+        () => 1,
+        [],
+        () => {
+          // noop
+        },
+      )
+    })
+
+    expectTypeOf(result.current).toMatchTypeOf<Impulse<number>>()
+    expectTypeOf(result.current).toMatchTypeOf<ReadonlyImpulse<number>>()
+  })
+
+  it("returns ReadonlyImpulse when setter is not defined", () => {
+    const { result } = renderHook(() => {
+      return useTransmittingImpulse(() => 1, [])
+    })
+
+    // @ts-expect-error should be ReadonlyImpulse only
+    expectTypeOf(result.current).toMatchTypeOf<Impulse<number>>()
+    expectTypeOf(result.current).toMatchTypeOf<ReadonlyImpulse<number>>()
   })
 })

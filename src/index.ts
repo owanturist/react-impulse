@@ -1,5 +1,6 @@
+export type { DependencyList } from "./dependencies"
 export type { Compare } from "./utils"
-export { type ImpulseOptions, Impulse } from "./Impulse"
+export { type ImpulseOptions, type ReadonlyImpulse, Impulse } from "./Impulse"
 export { batch } from "./batch"
 export { subscribe } from "./subscribe"
 export { watch } from "./watch"
