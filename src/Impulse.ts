@@ -24,7 +24,15 @@ interface ImpulseOptions<T> {
   compare?: null | Compare<T>
 }
 
-class Impulse<T> {
+interface ImpulseOptions<T> {
+  /**
+   * The compare function determines whether or not a new Impulse's value replaces the current one.
+   * In many cases specifying the function leads to better performance because it prevents unnecessary updates.
+   */
+  compare?: null | Compare<T>
+}
+
+abstract class Impulse<T> {
   /**
    * Creates new Impulse without an initial value.
    *
@@ -52,12 +60,12 @@ class Impulse<T> {
     initialValue?: T,
     { compare }: ImpulseOptions<undefined | T> = {},
   ): Impulse<undefined | T> {
-    return new Impulse(initialValue, compare ?? eq)
+    return new DirectImpulse(initialValue, compare ?? eq)
   }
 
   private readonly _emitters = new Set<ScopeEmitter>()
 
-  private constructor(
+  protected constructor(
     private _value: T,
     private readonly _compare: Compare<T>,
   ) {}
@@ -84,6 +92,9 @@ class Impulse<T> {
   protected toString(): string {
     return String(this.getValue())
   }
+
+  protected abstract getter(): T
+  protected abstract setter(value: T, compare?: null | Compare<T>): boolean
 
   /**
    * Creates a new Impulse instance out of the current one with the same value.
@@ -123,7 +134,7 @@ class Impulse<T> {
       ? [args[0](this._value), args[1]]
       : [this._value, args[0]]
 
-    return new Impulse(value, compare ?? eq)
+    return new DirectImpulse(value, compare ?? eq)
   }
 
   /**
@@ -146,7 +157,9 @@ class Impulse<T> {
 
     scope[EMITTER_KEY]?._attachTo(this._emitters)
 
-    return isFunction(select) ? select(this._value) : this._value
+    const value = this.getter()
+
+    return isFunction(select) ? select(value) : value
   }
 
   /**
@@ -165,17 +178,40 @@ class Impulse<T> {
     ._prevent()
   public setValue(valueOrTransform: T | ((currentValue: T) => T)): void {
     ScopeEmitter._schedule(() => {
+      const value = this.getter()
       const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(this._value)
+        ? valueOrTransform(value)
         : valueOrTransform
 
-      if (this._compare(this._value, nextValue)) {
-        return null
-      }
-
-      this._value = nextValue
-
-      return this._emitters
+      return this.setter(nextValue, compare) ? this._emitters : null
     })
+  }
+}
+
+class DirectImpulse<T> extends Impulse<T> {
+  public constructor(
+    private _value: T,
+    compare: Compare<T>,
+  ) {
+    super(compare)
+  }
+
+  protected getter(): T {
+    return this._value
+  }
+
+  protected setter(
+    value: T,
+    compare: null | Compare<T> = this.compare,
+  ): boolean {
+    const finalCompare = compare ?? eq
+
+    if (finalCompare(this._value, value)) {
+      return false
+    }
+
+    this._value = value
+
+    return true
   }
 }
