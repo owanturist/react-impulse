@@ -483,7 +483,7 @@ function useImpulseCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
 ): (...args: TArgs) => TResult
 ```
 
-- `callback` is a function to memoize, the memoized value updates whenever any of the `dependencies` values change.
+- `callback` is a function to memoize, the memoized function updates whenever any of the `dependencies` values change.
 - `dependencies` is an array of values used in the `callback` function.
 
 The hook is an Impulse version of the [`React.useCallback`][react__use_callback] hook. During the `callback` execution, all Impulses that call the [`Impulse#getValue`][impulse__get_value] method become _phantom dependencies_ of the hook.
