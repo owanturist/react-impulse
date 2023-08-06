@@ -198,9 +198,9 @@ abstract class Impulse<T> {
 class DirectImpulse<T> extends Impulse<T> {
   public constructor(
     private _value: T,
-    compare: Compare<T>,
+    public readonly compare: Compare<T>,
   ) {
-    super(compare)
+    super()
   }
 
   protected _getter(): T {
@@ -227,25 +227,16 @@ class TransmittingImpulse<T> extends Impulse<T> {
   public constructor(
     private _getFromSource: () => T,
     private readonly _setToSource: (value: T) => void,
-    compare: Compare<T>,
+    public readonly compare: Compare<T>,
   ) {
-    super(compare)
+    super()
   }
 
   protected _getter(): T {
     return this._getFromSource()
   }
 
-  protected _setter(
-    value: T,
-    compare: null | Compare<T> = this.compare,
-  ): boolean {
-    const finalCompare = compare ?? eq
-
-    if (finalCompare(this._getter(), value)) {
-      return false
-    }
-
+  protected _setter(value: T): boolean {
     this._setToSource(value)
 
     return true

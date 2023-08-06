@@ -120,6 +120,23 @@ describe.each([
     expect(setter).not.toHaveBeenCalled()
   })
 
+  it("calls getter when the Impulse value is requested", () => {
+    const { getter, result } = setup()
+
+    result.current.impulse.getValue()
+    expect(getter).toHaveBeenCalledOnce()
+    expect(getter).toHaveLastReturnedWith(0)
+  })
+
+  it("calls the getter multiple times even if the value is fresh", () => {
+    const { getter, result } = setup()
+
+    result.current.impulse.getValue()
+    result.current.impulse.getValue()
+    expect(getter).toHaveBeenCalledTimes(2)
+    expect(getter).toHaveLastReturnedWith(0)
+  })
+
   it("updates the Impulse value when origin value changes", () => {
     const { result } = setup()
 
@@ -206,7 +223,7 @@ describe("transmit many Impulses to one (select all checkboxes example)", () => 
     expect(selected[2]!.getValue()).toBe(true)
   })
 
-  it.skip("every becomes false when transmitted value becomes false", () => {
+  it("every becomes false when transmitted value becomes false", () => {
     const { result, selected } = setup([false, true, true])
 
     act(() => {
@@ -220,11 +237,11 @@ describe("transmit many Impulses to one (select all checkboxes example)", () => 
 
 describe("with compare function", () => {
   it("applies Object.is by default", () => {
-    const { result } = setupWithImpulse()
+    const { result } = setupWithReactState()
 
     expect(Object.is).not.toHaveBeenCalled()
     act(() => {
-      result.current.impulse.setValue((x) => x + 1)
+      result.current.setCount(1)
     })
 
     expect(Object.is).toHaveBeenCalledOnce()
@@ -232,11 +249,11 @@ describe("with compare function", () => {
   })
 
   it("applies Object.is when passing null as compare", () => {
-    const { result } = setupWithImpulse(null)
+    const { result } = setupWithReactState(null)
 
     expect(Object.is).not.toHaveBeenCalled()
     act(() => {
-      result.current.impulse.setValue((x) => x + 1)
+      result.current.setCount(1)
     })
 
     expect(Object.is).toHaveBeenCalledOnce()
@@ -245,11 +262,11 @@ describe("with compare function", () => {
 
   it("passes custom compare function", () => {
     const compare = vi.fn()
-    const { result } = setupWithImpulse(compare)
+    const { result } = setupWithReactState(compare)
 
     expect(compare).not.toHaveBeenCalled()
     act(() => {
-      result.current.impulse.setValue((x) => x + 1)
+      result.current.setCount(1)
     })
 
     expect(Object.is).not.toHaveBeenCalled()
@@ -261,11 +278,11 @@ describe("with compare function", () => {
     const compare_1 = vi.fn().mockImplementation(Object.is)
     const compare_2 = vi.fn().mockImplementation(Object.is)
 
-    const { result, rerender } = setupWithImpulse(compare_1)
+    const { result, rerender } = setupWithReactState(compare_1)
     vi.clearAllMocks()
 
     act(() => {
-      result.current.impulse.setValue((x) => x + 1)
+      result.current.setCount(1)
     })
     expect(compare_1).toHaveBeenCalledOnce()
     expect(compare_1).toHaveBeenLastCalledWith(0, 1)
@@ -273,7 +290,7 @@ describe("with compare function", () => {
 
     rerender(compare_2)
     act(() => {
-      result.current.impulse.setValue((x) => x + 1)
+      result.current.setCount(2)
     })
     expect(compare_1).not.toHaveBeenCalled()
     expect(compare_2).toHaveBeenCalledOnce()
@@ -282,7 +299,7 @@ describe("with compare function", () => {
 
     rerender(null)
     act(() => {
-      result.current.impulse.setValue((x) => x + 1)
+      result.current.setCount(3)
     })
     expect(compare_1).not.toHaveBeenCalled()
     expect(compare_2).not.toHaveBeenCalled()
