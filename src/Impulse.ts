@@ -115,6 +115,11 @@ abstract class Impulse<T> {
    *
    * @version 1.0.0
    */
+  @validate
+    ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_CLONE)
+    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE)
+    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE)
+    ._alert()
   public clone(
     transform: (value: T) => T,
     options?: ImpulseOptions<T>,
