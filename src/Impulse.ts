@@ -3,6 +3,8 @@ import { EMITTER_KEY, STATIC_SCOPE, Scope, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { stopInsideContext, warnInsideContext } from "./validation"
 
+export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
+
 export abstract class Impulse<T> {
   /**
    * Creates new Impulse.
