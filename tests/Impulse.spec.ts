@@ -307,12 +307,10 @@ describe("Impulse#clone", () => {
   })
 
   it.concurrent("clones TransmittingImpulse as DirectImpulse", ({ scope }) => {
-    const cmp = vi.fn(Object.is)
     const origin = Impulse.of({ count: 0 })
     const transmitter = new TransmittingImpulse(
       (localScope) => origin.getValue(localScope).count > 0,
       (value) => origin.setValue({ count: value ? 1 : 0 }),
-      cmp,
     )
     const clone = transmitter.clone()
 
