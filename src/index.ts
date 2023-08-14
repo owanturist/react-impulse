@@ -1,7 +1,7 @@
 export type { Compare } from "./utils"
 export type { Scope } from "./Scope"
 export type { PropsWithScope, PropsWithoutScope } from "./scoped"
-export { Impulse } from "./Impulse"
+export { type ReadonlyImpulse, Impulse } from "./Impulse"
 export { batch } from "./batch"
 export { batch as tap } from "./batch"
 export { subscribe } from "./subscribe"
