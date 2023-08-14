@@ -1,23 +1,24 @@
 import { DependencyList } from "./dependencies"
 import { Scope } from "./Scope"
-import { Impulse, TransmittingImpulse } from "./Impulse"
-import {
-  Compare,
-  isEqual,
-  useEvent,
-  usePermanent,
-  useIsomorphicEffect,
-} from "./utils"
+import { Impulse, ReadonlyImpulse, TransmittingImpulse } from "./Impulse"
+import { usePermanent, useIsomorphicEffect, noop } from "./utils"
 
 export function useTransmittingImpulse<T>(
   getter: (scope: Scope) => T,
   dependencies: DependencyList,
+): ReadonlyImpulse<T>
+export function useTransmittingImpulse<T>(
+  getter: (scope: Scope) => T,
+  dependencies: DependencyList,
   setter: (value: T, scope: Scope) => void,
-  compare?: null | Compare<T>,
+): Impulse<T>
+export function useTransmittingImpulse<T>(
+  getter: (scope: Scope) => T,
+  dependencies: DependencyList,
+  setter?: (value: T, scope: Scope) => void,
 ): Impulse<T> {
-  const compareStable = useEvent(compare ?? isEqual)
   const impulse = usePermanent(
-    () => new TransmittingImpulse(getter, setter, compareStable),
+    () => new TransmittingImpulse(getter, setter ?? noop),
   )
 
   useIsomorphicEffect(
