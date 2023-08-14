@@ -2,6 +2,7 @@ import { Compare, eq, isFunction, noop } from "./utils"
 import { EMITTER_KEY, STATIC_SCOPE, Scope, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { stopInsideContext, warnInsideContext } from "./validation"
+import { batch } from "./batch"
 
 export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
 
@@ -260,12 +261,14 @@ export class TransmittingImpulse<T> extends Impulse<T> {
   public setValue(
     valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
   ): void {
-    this._setter(
-      isFunction(valueOrTransform)
-        ? valueOrTransform(this._getter(STATIC_SCOPE), STATIC_SCOPE)
-        : valueOrTransform,
-      STATIC_SCOPE,
-    )
+    batch((scope) => {
+      this._setter(
+        isFunction(valueOrTransform)
+          ? valueOrTransform(this._getter(scope), scope)
+          : valueOrTransform,
+        STATIC_SCOPE,
+      )
+    })
   }
 
   public replaceGetter(getter: (scope: Scope) => T): void {
