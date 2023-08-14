@@ -18,7 +18,6 @@
     "noUncheckedIndexedAccess": true,
     "downlevelIteration": true,
     "jsx": "react",
-    "typeRoots": ["node_modules/@types"],
     "types": ["vitest/globals"]
   },
   "exclude": ["node_modules", "dist"]

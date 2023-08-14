@@ -1,4 +1,4 @@
-import { Compare, eq, isFunction } from "./utils"
+import { Compare, eq, isFunction, noop } from "./utils"
 import { EMITTER_KEY, STATIC_SCOPE, Scope, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { stopInsideContext, warnInsideContext } from "./validation"
@@ -52,6 +52,18 @@ export abstract class Impulse<T> {
     return new DirectImpulse(initialValue, compare ?? eq)
   }
 
+  public static transmit<T>(getter: (scope: Scope) => T): ReadonlyImpulse<T>
+  public static transmit<T>(
+    getter: (scope: Scope) => T,
+    setter: (value: T, scope: Scope) => void,
+  ): Impulse<T>
+  public static transmit<T>(
+    getter: (scope: Scope) => T,
+    setter: (value: T, scope: Scope) => void = noop,
+  ): Impulse<T> {
+    return new TransmittingImpulse(getter, setter)
+  }
+
   private readonly emitters = new Set<ScopeEmitter>()
 
   /**
@@ -62,7 +74,7 @@ export abstract class Impulse<T> {
    */
   public readonly compare: Compare<T>
 
-  protected constructor(compare: Compare<T>) {
+  protected constructor(compare: Compare<T> = eq) {
     this.compare = compare
   }
 
@@ -90,7 +102,6 @@ export abstract class Impulse<T> {
   }
 
   protected abstract getter(scope: Scope): T
-  protected abstract setter(value: T, scope: Scope): void
 
   protected emit(execute: () => boolean): void {
     ScopeEmitter.schedule(() => (execute() ? this.emitters : null))
@@ -129,7 +140,7 @@ export abstract class Impulse<T> {
     transform?: (value: T, scope: Scope) => T,
     compare: null | Compare<T> = this.compare,
   ): Impulse<T> {
-    const value = this.getter(STATIC_SCOPE)
+    const value = this.getValue(STATIC_SCOPE)
 
     return new DirectImpulse(
       isFunction(transform) ? transform(value, STATIC_SCOPE) : value,
@@ -173,6 +184,24 @@ export abstract class Impulse<T> {
    *
    * @version 1.0.0
    */
+  public abstract setValue(
+    valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
+    compare?: null | Compare<T>,
+  ): void
+}
+
+export class DirectImpulse<T> extends Impulse<T> {
+  public constructor(
+    private value: T,
+    compare: Compare<T>,
+  ) {
+    super(compare)
+  }
+
+  protected getter(): T {
+    return this.value
+  }
+
   @stopInsideContext(
     "scoped",
     /* c8 ignore next 2 */
@@ -201,63 +230,53 @@ export abstract class Impulse<T> {
     const finalCompare = compare ?? eq
 
     this.emit(() => {
-      const value = this.getter(STATIC_SCOPE)
-
       const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(value, STATIC_SCOPE)
+        ? valueOrTransform(this.value, STATIC_SCOPE)
         : valueOrTransform
 
-      if (finalCompare(value, nextValue)) {
+      if (finalCompare(this.value, nextValue)) {
         return false
       }
 
-      this.setter(nextValue, STATIC_SCOPE)
+      this.value = nextValue
 
       return true
     })
   }
 }
 
-export class DirectImpulse<T> extends Impulse<T> {
-  public constructor(private value: T, compare: Compare<T>) {
-    super(compare)
-  }
-
-  /**
-   * Returns the current value.
-   *
-   * @version 1.0.0
-   */
-  protected getter(): T {
-    return this.value
-  }
-
-  protected setter(value: T): void {
-    this.value = value
-  }
-}
-
 export class TransmittingImpulse<T> extends Impulse<T> {
   public constructor(
-    protected getter: (scope: Scope) => T,
-    protected readonly setter: (value: T, scope: Scope) => void,
-    compare: Compare<T>,
+    protected _getter: (scope: Scope) => T,
+    protected readonly _setter: (value: T, scope: Scope) => void,
   ) {
-    super(compare)
+    super()
+  }
+
+  protected getter(scope: Scope): T {
+    return this._getter(scope)
+  }
+
+  public setValue(
+    valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
+  ): void {
+    this._setter(
+      isFunction(valueOrTransform)
+        ? valueOrTransform(this._getter(STATIC_SCOPE), STATIC_SCOPE)
+        : valueOrTransform,
+      STATIC_SCOPE,
+    )
   }
 
   public replaceGetter(getter: (scope: Scope) => T): void {
-    if (this.getter === getter) {
+    if (this._getter === getter) {
       return
     }
 
     this.emit(() => {
-      const value = this.getter(STATIC_SCOPE)
-      const nextValue = getter(STATIC_SCOPE)
-
       this.getter = getter
 
-      return !this.compare(value, nextValue)
+      return true
     })
   }
 }

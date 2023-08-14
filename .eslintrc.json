@@ -252,6 +252,12 @@
         "jest/no-focused-tests": "error",
         "jest/no-commented-out-tests": "error",
         "jest/consistent-test-it": ["error", { "fn": "it" }],
+        "jest/expect-expect": [
+          1,
+          {
+            "assertFunctionNames": ["expect*"]
+          }
+        ],
         "@typescript-eslint/explicit-function-return-type": "off",
         "no-undefined": "off"
       }
