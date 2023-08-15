@@ -192,10 +192,7 @@ export abstract class Impulse<T> {
 }
 
 export class DirectImpulse<T> extends Impulse<T> {
-  public constructor(
-    private value: T,
-    compare: Compare<T>,
-  ) {
+  public constructor(private value: T, compare: Compare<T>) {
     super(compare)
   }
 
