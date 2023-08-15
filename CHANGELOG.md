@@ -1,5 +1,11 @@
 # react-impulse
 
+## 2.0.0-beta.5
+
+### Patch Changes
+
+- b4c808f: Bump version for release only
+
 ## 1.2.2
 
 ### Patch Changes
