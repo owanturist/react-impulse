@@ -1,4 +1,4 @@
-export { Impulse }
+export { type ImpulseOptions, Impulse }
 
 import { type Compare, eq, isFunction } from "./utils"
 import { EMITTER_KEY, extractScope } from "./Scope"
@@ -16,6 +16,18 @@ import {
   USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE,
 } from "./messages"
 
+interface ImpulseOptions<T> {
+  /**
+   * The compare function determines whether or not a new Impulse's value replaces the current one.
+   * In many cases specifying the function leads to better performance because it prevents unnecessary updates.
+   *
+   * Becomes accessible via `Impulse#compare`.
+   *
+   * @default Object.is
+   */
+  compare?: null | Compare<T>
+}
+
 class Impulse<T> {
   /**
    * Creates new Impulse without an initial value.
@@ -28,11 +40,11 @@ class Impulse<T> {
    * Creates new Impulse.
    *
    * @param initialValue the initial value.
-   * @param compare an optional `Compare` function that determines whether the value has changed. When not defined or `null` then `Object.is` applies as a fallback.
+   * @param options optional `ImpulseOptions`.
    *
    * @version 1.0.0
    */
-  public static of<T>(initialValue: T, compare?: null | Compare<T>): Impulse<T>
+  public static of<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
 
   @validate
     ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_OF)
@@ -41,7 +53,7 @@ class Impulse<T> {
     ._alert()
   public static of<T>(
     initialValue?: T,
-    compare?: null | Compare<undefined | T>,
+    { compare }: ImpulseOptions<undefined | T> = {},
   ): Impulse<undefined | T> {
     return new Impulse(initialValue, compare ?? eq)
   }
@@ -77,10 +89,10 @@ class Impulse<T> {
   }
 
   /**
-   * Clones an Impulse. You can specify the `compare` function of the new Impulse.
+   * Clones an Impulse.
    *
    * @param transform an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
-   * @param compare an optional `Compare` function that determines whether the value has changed. When not defined, it uses the `compare` function from the origin Impulse. When `null` the `Object.is` function applies to compare the values.
+   * @param options optional `ImpulseOptions`. When not defined uses corresponding options from the origin Impulse.
    *
    * @version 1.0.0
    */
@@ -91,7 +103,7 @@ class Impulse<T> {
     ._alert()
   public clone(
     transform?: (value: T) => T,
-    compare: null | Compare<T> = this._compare,
+    { compare = this._compare }: ImpulseOptions<T> = {},
   ): Impulse<T> {
     return new Impulse(
       isFunction(transform) ? transform(this._value) : this._value,

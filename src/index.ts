@@ -1,5 +1,5 @@
 export type { Compare } from "./utils"
-export { Impulse } from "./Impulse"
+export { type ImpulseOptions, Impulse } from "./Impulse"
 export { batch } from "./batch"
 export { subscribe } from "./subscribe"
 export { watch } from "./watch"
