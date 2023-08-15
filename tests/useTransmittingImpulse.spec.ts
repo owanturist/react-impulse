@@ -13,91 +13,73 @@ import {
 
 import type { Counter } from "./common"
 
-function setupWithGlobal(compare?: null | Compare<number>) {
+function setupWithGlobal() {
   let counter = { count: 0 }
 
   const getter = vi.fn((x: number) => x)
   const setter = vi.fn((x: Counter) => x)
 
-  const tools = renderHook(
-    (cmp?: null | Compare<number>) => {
-      const impulse = useTransmittingImpulse(
-        () => getter(counter.count),
-        [],
-        (x) => {
-          counter = setter({ count: x })
-        },
-        cmp,
-      )
+  const tools = renderHook(() => {
+    const impulse = useTransmittingImpulse(
+      () => getter(counter.count),
+      [],
+      (x) => {
+        counter = setter({ count: x })
+      },
+    )
 
-      return {
-        impulse,
-        getCount: () => counter.count,
-        setCount: (x: number) => {
-          counter = { count: x }
-        },
-      }
-    },
-    {
-      initialProps: compare,
-    },
-  )
+    return {
+      impulse,
+      getCount: () => counter.count,
+      setCount: (x: number) => {
+        counter = { count: x }
+      },
+    }
+  })
 
   return { ...tools, getter, setter }
 }
 
-function setupWithReactState(compare?: null | Compare<number>) {
+function setupWithReactState() {
   const getter = vi.fn((x: number) => x)
   const setter = vi.fn((x: Counter) => x)
 
-  const tools = renderHook(
-    (cmp?: null | Compare<number>) => {
-      const [{ count }, setCounter] = useState({ count: 0 })
-      const impulse = useTransmittingImpulse(
-        () => getter(count),
-        [count],
-        (x) => setCounter(setter({ count: x })),
-        cmp,
-      )
+  const tools = renderHook(() => {
+    const [{ count }, setCounter] = useState({ count: 0 })
+    const impulse = useTransmittingImpulse(
+      () => getter(count),
+      [count],
+      (x) => setCounter(setter({ count: x })),
+    )
 
-      return {
-        impulse,
-        getCount: () => count,
-        setCount: (x: number) => setCounter({ count: x }),
-      }
-    },
-    {
-      initialProps: compare,
-    },
-  )
+    return {
+      impulse,
+      getCount: () => count,
+      setCount: (x: number) => setCounter({ count: x }),
+    }
+  })
 
   return { ...tools, getter, setter }
 }
 
-function setupWithImpulse(compare?: null | Compare<number>) {
+function setupWithImpulse() {
   const getter = vi.fn((x: number) => x)
   const setter = vi.fn((x: Counter) => x)
 
-  const tools = renderHook(
-    (cmp?: null | Compare<number>) => {
-      const counter = useImpulse({ count: 0 }, (x, y) => x === y)
-      const impulse = useTransmittingImpulse(
-        () => getter(counter.getValue().count),
-        [counter],
-        (x) => counter.setValue(setter({ count: x })),
-        cmp,
-      )
+  const tools = renderHook(() => {
+    const counter = useImpulse({ count: 0 })
+    const impulse = useTransmittingImpulse(
+      () => getter(counter.getValue().count),
+      [counter],
+      (x) => counter.setValue(setter({ count: x })),
+    )
 
-      return {
-        impulse,
-        getCount: () => counter.getValue().count,
-        setCount: (x: number) => counter.setValue({ count: x }),
-      }
-    },
-    {
-      initialProps: compare,
-    },
-  )
+    return {
+      impulse,
+      getCount: () => counter.getValue().count,
+      setCount: (x: number) => counter.setValue({ count: x }),
+    }
+  })
 
   return { ...tools, getter, setter }
 }
@@ -236,75 +218,135 @@ describe("transmit many Impulses to one (select all checkboxes example)", () => 
 })
 
 describe("with compare function", () => {
-  it("applies Object.is by default", () => {
-    const { result } = setupWithReactState()
+  const setup = (cmp?: null | Compare<{ x: boolean }>) => {
+    const source = Impulse.of(0)
+
+    const tools = renderHook(
+      (compare) => {
+        return useTransmittingImpulse(
+          () => ({ x: source.getValue() > 3 }),
+          [source],
+          { compare },
+        )
+      },
+      {
+        initialProps: cmp,
+      },
+    )
+
+    return { ...tools, source }
+  }
+
+  it("does not call compare on first #getValue() call", () => {
+    const { result } = setup()
 
     expect(Object.is).not.toHaveBeenCalled()
     act(() => {
-      result.current.setCount(1)
+      result.current.getValue()
+    })
+
+    expect(Object.is).not.toHaveBeenCalled()
+  })
+
+  it("returns different values for subsequent #getValue() calls when comparably not equal", () => {
+    const { result } = setup()
+    const value_1 = result.current.getValue()
+    const value_2 = result.current.getValue()
+
+    expect(value_1).not.toBe(value_2)
+    expect(value_1).toStrictEqual(value_2)
+  })
+
+  it("returns the same value for subsequent #getValue() calls when comparably equal", () => {
+    const { result } = setup((left, right) => left.x === right.x)
+    const value_1 = result.current.getValue()
+    const value_2 = result.current.getValue()
+
+    expect(value_1).toBe(value_2)
+    expect(value_1).toStrictEqual(value_2)
+  })
+
+  it("returns different values when source changes", () => {
+    const { source, result } = setup((left, right) => left.x === right.x)
+
+    expect(result.current.getValue()).toStrictEqual({ x: false })
+    source.setValue(4)
+    expect(result.current.getValue()).toStrictEqual({ x: true })
+  })
+
+  it("applies Object.is by default", () => {
+    const { result } = setup()
+
+    expect(Object.is).not.toHaveBeenCalled()
+    act(() => {
+      result.current.getValue()
+      result.current.getValue()
     })
 
     expect(Object.is).toHaveBeenCalledOnce()
-    expect(Object.is).toHaveBeenLastCalledWith(0, 1)
+    expect(Object.is).toHaveBeenLastCalledWith({ x: false }, { x: false })
   })
 
   it("applies Object.is when passing null as compare", () => {
-    const { result } = setupWithReactState(null)
+    const { result } = setup(null)
 
     expect(Object.is).not.toHaveBeenCalled()
     act(() => {
-      result.current.setCount(1)
+      result.current.getValue()
+      result.current.getValue()
     })
 
     expect(Object.is).toHaveBeenCalledOnce()
-    expect(Object.is).toHaveBeenLastCalledWith(0, 1)
+    expect(Object.is).toHaveBeenLastCalledWith({ x: false }, { x: false })
   })
 
   it("passes custom compare function", () => {
-    const compare = vi.fn()
-    const { result } = setupWithReactState(compare)
+    const compare = vi.fn().mockReturnValue(false)
+    const { result } = setup(compare)
 
     expect(compare).not.toHaveBeenCalled()
     act(() => {
-      result.current.setCount(1)
+      result.current.getValue()
+      result.current.getValue()
     })
 
     expect(Object.is).not.toHaveBeenCalled()
     expect(compare).toHaveBeenCalledOnce()
-    expect(compare).toHaveBeenLastCalledWith(0, 1)
+    expect(compare).toHaveBeenLastCalledWith({ x: false }, { x: false })
   })
 
   it("updates compare function on re-render", () => {
     const compare_1 = vi.fn().mockImplementation(Object.is)
     const compare_2 = vi.fn().mockImplementation(Object.is)
 
-    const { result, rerender } = setupWithReactState(compare_1)
+    const { result, rerender } = setup(compare_1)
     vi.clearAllMocks()
 
     act(() => {
-      result.current.setCount(1)
+      result.current.getValue()
+      result.current.getValue()
     })
     expect(compare_1).toHaveBeenCalledOnce()
-    expect(compare_1).toHaveBeenLastCalledWith(0, 1)
+    expect(compare_1).toHaveBeenLastCalledWith({ x: false }, { x: false })
     vi.clearAllMocks()
 
     rerender(compare_2)
     act(() => {
-      result.current.setCount(2)
+      result.current.getValue()
     })
     expect(compare_1).not.toHaveBeenCalled()
     expect(compare_2).toHaveBeenCalledOnce()
-    expect(compare_2).toHaveBeenLastCalledWith(1, 2)
+    expect(compare_2).toHaveBeenLastCalledWith({ x: false }, { x: false })
     vi.clearAllMocks()
 
     rerender(null)
     act(() => {
-      result.current.setCount(3)
+      result.current.getValue()
     })
     expect(compare_1).not.toHaveBeenCalled()
     expect(compare_2).not.toHaveBeenCalled()
     expect(Object.is).toHaveBeenCalledOnce()
-    expect(Object.is).toHaveBeenLastCalledWith(2, 3)
+    expect(Object.is).toHaveBeenLastCalledWith({ x: false }, { x: false })
   })
 })
 
@@ -314,13 +356,7 @@ describe("replacing getter", () => {
 
     const tools = renderHook(
       (counter: Counter) => {
-        const impulse = useTransmittingImpulse(
-          () => counter.count,
-          [counter],
-          () => {
-            // noop
-          },
-        )
+        const impulse = useTransmittingImpulse(() => counter.count, [counter])
 
         useImpulseEffect(() => {
           onEffect(impulse.getValue())
@@ -351,6 +387,34 @@ describe("replacing getter", () => {
 
     rerender({ count: 0 })
     expect(onEffect).not.toHaveBeenCalled()
+  })
+
+  it("should subscribe to correct source even if getter returns the same value", () => {
+    const impulse_1 = Impulse.of(1)
+    const impulse_2 = Impulse.of(2)
+
+    const { result, rerender } = renderHook(
+      (count) => {
+        return useTransmittingImpulse(() => count.getValue(), [count])
+      },
+      {
+        initialProps: impulse_1,
+      },
+    )
+
+    expect(result.current.getValue()).toBe(1)
+
+    impulse_1.setValue(2)
+    expect(result.current.getValue()).toBe(2)
+
+    rerender(impulse_2)
+    expect(result.current.getValue()).toBe(2)
+
+    impulse_1.setValue(3)
+    expect(result.current.getValue()).toBe(2)
+
+    impulse_2.setValue(3)
+    expect(result.current.getValue()).toBe(3)
   })
 })
 

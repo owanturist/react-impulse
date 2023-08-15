@@ -96,7 +96,7 @@ abstract class Impulse<T> {
   protected abstract _getter(): T
   protected abstract _setter(
     valueOrTransform: T | Func<[T], T>,
-    compare: Compare<T>,
+    compare?: null | Compare<T>,
   ): boolean
 
   /**
@@ -187,7 +187,7 @@ abstract class Impulse<T> {
   public setValue(
     valueOrTransform: T | ((currentValue: T) => T),
   ): void {
-    this._emit(() => this._setter(valueOrTransform, compare ?? eq))
+    this._emit(() => this._setter(valueOrTransform, compare))
   }
 }
 
@@ -205,13 +205,15 @@ class DirectImpulse<T> extends Impulse<T> {
 
   protected _setter(
     valueOrTransform: T | Func<[T], T>,
-    compare: Compare<T>,
+    compare: null | Compare<T> = this.compare,
   ): boolean {
     const nextValue = isFunction(valueOrTransform)
       ? valueOrTransform(this._value)
       : valueOrTransform
 
-    if (compare(this._value, nextValue)) {
+    const finalCompare = compare ?? eq
+
+    if (finalCompare(this._value, nextValue)) {
       return false
     }
 
@@ -222,6 +224,8 @@ class DirectImpulse<T> extends Impulse<T> {
 }
 
 class TransmittingImpulse<T> extends Impulse<T> {
+  private _value?: { _lazy: T }
+
   public constructor(
     private _getFromSource: () => T,
     private readonly _setToSource: (value: T) => void,
@@ -231,31 +235,33 @@ class TransmittingImpulse<T> extends Impulse<T> {
   }
 
   protected _getter(): T {
-    return this._getFromSource()
+    const value = this._getFromSource()
+
+    if (this._value == null || !this.compare(this._value._lazy, value)) {
+      this._value = { _lazy: value }
+    }
+
+    return this._value._lazy
   }
 
-  protected _setter(
-    valueOrTransform: T | Func<[T], T>,
-    compare: Compare<T>,
-  ): boolean {
+  protected _setter(valueOrTransform: T | Func<[T], T>): boolean {
     const nextValue = isFunction(valueOrTransform)
-      ? valueOrTransform(this._getFromSource())
+      ? valueOrTransform(this._getter())
       : valueOrTransform
 
     this._setToSource(nextValue)
 
-    return true
+    return false
   }
 
   public _replaceGetter(getter: () => T): void {
     if (this._getFromSource !== getter) {
       this._emit(() => {
-        const value = this._getter()
-        const nextValue = getter()
+        const value = this._value
 
         this._getFromSource = getter
 
-        return !this.compare(value, nextValue)
+        return value == null || value._lazy !== this._getter()
       })
     }
   }

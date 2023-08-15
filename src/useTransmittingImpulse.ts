@@ -13,27 +13,39 @@ import {
   useEvent,
   usePermanent,
   useIsomorphicLayoutEffect,
+  isFunction,
 } from "./utils"
+
+export interface TransmittingImpulseOptions<T> {
+  readonly compare?: null | Compare<T>
+}
 
 function useTransmittingImpulse<T>(
   getter: () => T,
   dependencies: DependencyList,
+  options?: TransmittingImpulseOptions<T>,
 ): ReadonlyImpulse<T>
 function useTransmittingImpulse<T>(
   getter: () => T,
   dependencies: DependencyList,
   setter: (value: T) => void,
-  compare?: null | Compare<T>,
+  options?: TransmittingImpulseOptions<T>,
 ): Impulse<T>
 function useTransmittingImpulse<T>(
   getter: () => T,
   dependencies: DependencyList,
-  setter?: (value: T) => void,
-  compare?: null | Compare<T>,
+  ...rest:
+    | []
+    | [options?: TransmittingImpulseOptions<T>]
+    | [setter: (value: T) => void, options?: TransmittingImpulseOptions<T>]
 ): Impulse<T> {
-  const stableCompare = useEvent(compare ?? eq)
+  const [setter, options] = isFunction(rest[0])
+    ? [rest[0], rest[1]]
+    : [noop, rest[0]]
+
+  const stableCompare = useEvent(options?.compare ?? eq)
   const impulse = usePermanent(
-    () => new TransmittingImpulse(getter, setter ?? noop, stableCompare),
+    () => new TransmittingImpulse(getter, setter, stableCompare),
   )
 
   useIsomorphicLayoutEffect(
