@@ -82,6 +82,8 @@ jobs:
         uses: ./.github/actions/setup-env
 
       - name: Get changeset status
+        # the step might fail in case there are no changesets
+        continue-on-error: true
         run: pnpm cs status --output ./changeset-status.json
 
       - name: Read the new version
