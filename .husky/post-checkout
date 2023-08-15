@@ -1,38 +1,27 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Based on a hook from gist.github.com
-# Source: https://gist.github.com/zgohr/4557894
+# Based on a hook from github.com
+# Source: https://github.com/CompSciLauren/awesome-git-hooks/blob/ad2dd0944b853deae52b981403d45c2d7e59a5ef/post-checkout-hooks/new-branch-alert.hook
 
-from_hash=$1
-to_hash=$2
 checkout_type=$3
+
+if [ "$checkout_type" -ne 1 ]; then
+  exit 0; # Not a branch checkout
+fi
+
 branch_name=$(git rev-parse --abbrev-ref HEAD)
-from_branch_name=$(git name-rev --name-only $from_hash)
+release_branch_pattern="^(v([0-9]+\.){1,2}x|master)$"
 
-
-if [ $checkout_type -ne 1 ]
-then
-    exit 0 ; # Not a branch checkout
+if ! [[ "$branch_name" =~ $release_branch_pattern ]]; then
+  exit 0; # Does not match release branch pattern
 fi
 
-if [ $from_hash != $to_hash ]
-then
-    exit 0 ; # Not checking out a new branch
-fi
-
-if [ $branch_name == $from_branch_name ]
-then
-    exit 0 ; # Not checking out a new branch
-fi
-
-# exit if does not match release branch pattern
-if ! [[ $branch_name =~ ^(v([0-9]\.){1,2}x|master|next|alpha|beta|snapshot)$ ]]; then
-  exit 0
-fi
-
-# change .changeset/config.json baseBranch to the current branch
 perl -i -pe"s/\"baseBranch\":.*/\"baseBranch\": \"$branch_name\",/g" .changeset/config.json
+
+if [ -z "$(git status --porcelain .changeset/config.json)" ]; then
+  exit 0; # Exit if there are no changes in .changeset/config.json
+fi
 
 # Create a commit and display a message
 git add .changeset/config.json
