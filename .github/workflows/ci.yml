@@ -58,7 +58,7 @@ jobs:
         run: pnpm test:run
 
       - name: Install React 16
-        run: pnpm add -D react@16
+        run: pnpm add -D react@16.12
 
       - name: Test against React 16
         run: pnpm test:run
