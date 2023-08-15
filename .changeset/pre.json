@@ -4,5 +4,7 @@
   "initialVersions": {
     "react-impulse": "1.2.2"
   },
-  "changesets": []
+  "changesets": [
+    "weak-flowers-explain"
+  ]
 }
