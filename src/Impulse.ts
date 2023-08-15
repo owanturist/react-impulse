@@ -1,6 +1,6 @@
 export { type ImpulseOptions, type ReadonlyImpulse, Impulse, TransmittingImpulse  }
 
-import { type Compare, eq, isFunction } from "./utils"
+import { type Func, type Compare, eq, isFunction } from "./utils"
 import { EMITTER_KEY, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { validate } from "./validation"
@@ -94,7 +94,10 @@ abstract class Impulse<T> {
   }
 
   protected abstract _getter(): T
-  protected abstract _setter(value: T, compare?: null | Compare<T>): boolean
+  protected abstract _setter(
+    valueOrTransform: T | Func<[T], T>,
+    compare: Compare<T>,
+  ): boolean
 
   /**
    * Creates a new Impulse instance out of the current one with the same value.
@@ -157,7 +160,7 @@ abstract class Impulse<T> {
    */
   public getValue<R>(select: (value: T) => R): R
 
-  public getValue<R>(select?: (value: T) => R): T | R {
+  public getValue<R>(select?: Func<[T], R>): T | R {
     const scope = extractScope()
 
     scope[EMITTER_KEY]?._attachTo(this._emitters)
@@ -184,14 +187,7 @@ abstract class Impulse<T> {
   public setValue(
     valueOrTransform: T | ((currentValue: T) => T),
   ): void {
-    this._emit(() => {
-      const value = this._getter()
-      const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(value)
-        : valueOrTransform
-
-      return this._setter(nextValue, compare)
-    })
+    this._emit(() => this._setter(valueOrTransform, compare ?? eq))
   }
 }
 
@@ -208,16 +204,18 @@ class DirectImpulse<T> extends Impulse<T> {
   }
 
   protected _setter(
-    value: T,
-    compare: null | Compare<T> = this.compare,
+    valueOrTransform: T | Func<[T], T>,
+    compare: Compare<T>,
   ): boolean {
-    const finalCompare = compare ?? eq
+    const nextValue = isFunction(valueOrTransform)
+      ? valueOrTransform(this._value)
+      : valueOrTransform
 
-    if (finalCompare(this._value, value)) {
+    if (compare(this._value, nextValue)) {
       return false
     }
 
-    this._value = value
+    this._value = nextValue
 
     return true
   }
@@ -236,8 +234,15 @@ class TransmittingImpulse<T> extends Impulse<T> {
     return this._getFromSource()
   }
 
-  protected _setter(value: T): boolean {
-    this._setToSource(value)
+  protected _setter(
+    valueOrTransform: T | Func<[T], T>,
+    compare: Compare<T>,
+  ): boolean {
+    const nextValue = isFunction(valueOrTransform)
+      ? valueOrTransform(this._getFromSource())
+      : valueOrTransform
+
+    this._setToSource(nextValue)
 
     return true
   }

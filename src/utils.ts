@@ -43,19 +43,19 @@ function isFunction<TFunction extends Func<ReadonlyArray<never>, unknown>>(
 }
 
 const useIsomorphicLayoutEffect =
-  // /* c8 ignore next */
+  /* c8 ignore next */
   typeof window === "undefined" ? useEffect : useLayoutEffect
 
 function useEvent<TArgs extends ReadonlyArray<unknown>, TResult>(
   handler: Func<TArgs, TResult>,
 ): Func<TArgs, TResult> {
-  const handlerRef = useRef<(...args: TArgs) => TResult>()
+  const handlerRef = useRef<Func<TArgs, TResult>>(null as never)
 
   useIsomorphicLayoutEffect(() => {
     handlerRef.current = handler
   })
 
-  return useCallback((...args: TArgs) => handlerRef.current!(...args), [])
+  return useCallback((...args) => handlerRef.current(...args), [])
 }
 
 function usePermanent<TValue>(init: () => TValue): TValue {
