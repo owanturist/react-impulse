@@ -28,20 +28,23 @@ describe.each([
 
           return value
         },
-        (prev, next) => Counter.compare(prev, next),
+        { compare: (prev, next) => Counter.compare(prev, next) },
       )
     },
   ],
   [
     "with memoized comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(() => {
-        const value = impulse.getValue()
+      return useWatchImpulse(
+        () => {
+          const value = impulse.getValue()
 
-        spy(value)
+          spy(value)
 
-        return value
-      }, Counter.compare)
+          return value
+        },
+        { compare: Counter.compare },
+      )
     },
   ],
 ])("inline watcher %s", (_, useHook) => {
@@ -117,7 +120,7 @@ describe.each([
 
           return value
         }, [impulse, spy]),
-        (prev, next) => Counter.compare(prev, next),
+        { compare: (prev, next) => Counter.compare(prev, next) },
       )
     },
   ],
@@ -132,7 +135,7 @@ describe.each([
 
           return value
         }, [impulse, spy]),
-        Counter.compare,
+        { compare: Counter.compare },
       )
     },
   ],

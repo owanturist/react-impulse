@@ -18,11 +18,14 @@ describe.each([
       { impulse }: WithImpulse<WithFirst & WithSecond>,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchImpulse(() => {
-        const { first, second } = impulse.getValue()
+      return useWatchImpulse(
+        () => {
+          const { first, second } = impulse.getValue()
 
-        return Counter.merge(first.getValue(), second.getValue())
-      }, compare)
+          return Counter.merge(first.getValue(), second.getValue())
+        },
+        { compare },
+      )
     },
   ],
   [
@@ -37,7 +40,7 @@ describe.each([
 
           return Counter.merge(first.getValue(), second.getValue())
         }, [impulse]),
-        compare,
+        { compare },
       )
     },
   ],
@@ -137,11 +140,14 @@ describe.each([
   [
     "inline watcher",
     ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-      return useWatchImpulse(() => {
-        spy()
+      return useWatchImpulse(
+        () => {
+          spy()
 
-        return impulse.getValue()
-      }, compare)
+          return impulse.getValue()
+        },
+        { compare },
+      )
     },
     (
       {
@@ -150,17 +156,20 @@ describe.each([
       }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchImpulse(() => {
-        spy()
+      return useWatchImpulse(
+        () => {
+          spy()
 
-        const { first, second, third } = impulse.getValue()
+          const { first, second, third } = impulse.getValue()
 
-        return Counter.merge(
-          first.getValue(),
-          second.getValue(),
-          third.getValue(),
-        )
-      }, compare)
+          return Counter.merge(
+            first.getValue(),
+            second.getValue(),
+            third.getValue(),
+          )
+        },
+        { compare },
+      )
     },
   ],
 

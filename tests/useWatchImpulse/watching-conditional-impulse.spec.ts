@@ -20,11 +20,14 @@ describe.each([
       }: WithImpulse & WithIsActive & Partial<WithSpy>,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchImpulse(() => {
-        spy?.()
+      return useWatchImpulse(
+        () => {
+          spy?.()
 
-        return isActive ? impulse.getValue() : { count: -1 }
-      }, compare)
+          return isActive ? impulse.getValue() : { count: -1 }
+        },
+        { compare },
+      )
     },
   ],
   [
@@ -43,7 +46,7 @@ describe.each([
 
           return isActive ? impulse.getValue() : { count: -1 }
         }, [impulse, isActive, spy]),
-        compare,
+        { compare },
       )
     },
   ],
