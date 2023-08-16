@@ -107,7 +107,7 @@ Impulse.of<T>(
 A static method that creates new Impulse.
 
 - `[initialValue]` is an optional initial value. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
-- `[compare]` is an optional [`Compare`][compare] function applied as [`Impulse#compare`][impulse__compare]. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
+- `[compare]` is an optional [`Compare`][compare] function that determines whether the value has changed. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
 > 💡 The [`useImpulse`][use_impulse] hook helps to create and store an `Impulse` inside a React component.
 
@@ -172,8 +172,8 @@ Impulse<T>#clone(
 An `Impulse` instance's method for cloning an Impulse.
 
 - `[transform]` is an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
-- `[compare]` is an optional [`Compare`][compare] function applied as [`Impulse#compare`][impulse__compare].
-  When not defined, it uses the [`Impulse#compare`][impulse__compare] function from the origin.
+- `[compare]` is an optional [`Compare`][compare] function that determines whether the value has changed.
+  When not defined, it uses the `compare` function from the origin Impulse.
   When `null` the [`Object.is`][object_is] function applies to compare the values.
 
 ```ts
@@ -191,14 +191,6 @@ const cloneOfMutable = mutable.clone((current) => ({
   blacklist: new Set(current.blacklist),
 }))
 ```
-
-### `Impulse#compare`
-
-```dart
-Impulse<T>#compare: Compare<T>
-```
-
-The [`Compare`][compare] function compares the Impulse's value with the new value given via [`Impulse#setValue`][impulse__set_value]. Whenever the function returns `true`, neither the value change nor it notifies the listeners subscribed via [`Impulse#subscribe`][impulse__subscribe].
 
 ### `Impulse#subscribe`
 
@@ -320,11 +312,11 @@ function useImpulse<T>(
 ```
 
 - `[valueOrInitValue]` is an optional value used during the initial render. If the initial value is the result of an expensive computation, you may provide a function instead, which will be executed only on the initial render. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
-- `[compare]` is an optional [`Compare`][compare] function applied as [`Impulse#compare`][impulse__compare]. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
+- `[compare]` is an optional [`Compare`][compare] function that determines whether the value has changed. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
 A hook that initiates a stable (never changing) Impulse.
 
-> 💬 The initial value is disregarded during subsequent re-renders.
+> 💬 The initial value is disregarded during subsequent re-renders but compare function is not - it uses the latest function passed to the hook.
 
 ```ts
 const count = useImpulse(0) // Impulse<number>
@@ -682,7 +674,6 @@ A function that compares two values and returns `true` if they are equal. Depend
 <!-- L I N K S -->
 
 [impulse__of]: #impulseof
-[impulse__compare]: #impulsecompare
 [impulse__clone]: #impulseclone
 [impulse__get_value]: #impulsegetvalue
 [impulse__set_value]: #impulsesetvalue

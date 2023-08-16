@@ -32,27 +32,17 @@ class Impulse<T> {
    * Creates new Impulse.
    *
    * @param initialValue the initial value.
-   * @param compare an optional `Compare` function applied as `Impulse#compare`. When not defined or `null` then `Object.is` applies as a fallback.
+   * @param compare an optional `Compare` function that determines whether the value has changed. When not defined or `null` then `Object.is` applies as a fallback.
    *
    * @version 1.0.0
    */
   public static of<T>(initialValue: T, compare?: null | Compare<T>): Impulse<T>
 
-  // Implements 👆
   @validate
     ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_OF)
     ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_OF)
     ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_OF)
     ._alert()
-
-  /**
-   * Creates new Impulse.
-   *
-   * @param initialValue an optional initial value.
-   * @param compare an optional `Compare` function applied as `Impulse#compare`. When not defined or `null` then `Object.is` applies as a fallback.
-   *
-   * @version 1.0.0
-   */
   public static of<T>(
     initialValue?: T,
     compare?: null | Compare<undefined | T>,
@@ -90,19 +80,19 @@ class Impulse<T> {
     return String(this.getValue())
   }
 
+  /**
+   * Clones an Impulse. You can specify the `compare` function of the new Impulse.
+   *
+   * @param transform an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
+   * @param compare an optional `Compare` function that determines whether the value has changed. When not defined, it uses the `compare` function from the origin Impulse. When `null` the `Object.is` function applies to compare the values.
+   *
+   * @version 1.0.0
+   */
   @validate
     ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_CLONE)
     ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE)
     ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE)
     ._alert()
-  /**
-   * Clones an Impulse.
-   *
-   * @param transform an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
-   * @param compare an optional `Compare` function applied as `Impulse#compare`. When not defined, it uses the `Impulse#compare` function from the origin. When `null` the `Object.is` function applies to compare the values.
-   *
-   * @version 1.0.0
-   */
   public clone(
     transform?: (value: T) => T,
     compare: null | Compare<T> = this._compare,
@@ -128,13 +118,6 @@ class Impulse<T> {
    */
   public getValue<R>(select: (value: T) => R): R
 
-  /**
-   * Returns a value selected from the current value.
-   *
-   * @param select an optional function that applies to the current value before returning.
-   *
-   * @version 1.0.0
-   */
   public getValue<R>(select?: (value: T) => R): T | R {
     const scope = extractScope()
 
@@ -143,11 +126,6 @@ class Impulse<T> {
     return isFunction(select) ? select(this._value) : this._value
   }
 
-  @validate
-    ._when("watch", WATCH_CALLING_IMPULSE_SET_VALUE)
-    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE)
-    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE)
-    ._prevent()
   /**
    * Updates the value.
    * All listeners registered via the `Impulse#subscribe` method execute whenever the Impulse's value updates.
@@ -158,6 +136,11 @@ class Impulse<T> {
    *
    * @version 1.0.0
    */
+  @validate
+    ._when("watch", WATCH_CALLING_IMPULSE_SET_VALUE)
+    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE)
+    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE)
+    ._prevent()
   public setValue(valueOrTransform: T | ((currentValue: T) => T)): void {
     ScopeEmitter._schedule(() => {
       const nextValue = isFunction(valueOrTransform)
@@ -174,12 +157,6 @@ class Impulse<T> {
     })
   }
 
-  @validate
-    ._when("watch", WATCH_CALLING_IMPULSE_SUBSCRIBE)
-    ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE)
-    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE)
-    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE)
-    ._prevent(noop)
   /**
    * Subscribes to the value's updates caused by calling `Impulse#setValue`.
    *
@@ -191,6 +168,12 @@ class Impulse<T> {
    *
    * @deprecated The method is deprecated in favor of the `subscribe` higher-order function. It will be removed in the next major release.
    */
+  @validate
+    ._when("watch", WATCH_CALLING_IMPULSE_SUBSCRIBE)
+    ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE)
+    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE)
+    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE)
+    ._prevent(noop)
   public subscribe(listener: VoidFunction): VoidFunction {
     const emitter = new ScopeEmitter(false)
 
