@@ -46,21 +46,16 @@ const useIsomorphicEffect =
   /* c8 ignore next */
   typeof window === "undefined" ? useEffect : useLayoutEffect
 
-function useEvent<
-  THandler extends undefined | null | Func<ReadonlyArray<never>, unknown>,
->(handler: THandler): THandler {
-  const handlerRef = useRef<THandler>()
+function useEvent<TArgs extends ReadonlyArray<unknown>, TResult>(
+  handler: Func<TArgs, TResult>,
+): Func<TArgs, TResult> {
+  const handlerRef = useRef<(...args: TArgs) => TResult>()
 
   useIsomorphicEffect(() => {
     handlerRef.current = handler
   })
 
-  const stableHandler = useCallback(
-    (...args: ReadonlyArray<never>) => handlerRef.current!(...args),
-    [],
-  )
-
-  return handler == null ? handler : (stableHandler as THandler)
+  return useCallback((...args: TArgs) => handlerRef.current!(...args), [])
 }
 
 function usePermanent<TValue>(init: () => TValue): TValue {
