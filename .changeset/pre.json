@@ -5,6 +5,7 @@
     "react-impulse": "1.2.2"
   },
   "changesets": [
+    "gentle-squids-cry",
     "weak-flowers-explain"
   ]
 }
