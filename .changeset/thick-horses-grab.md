@@ -4,5 +4,5 @@
 
 Drop the `compare` argument from `Impulse#setValue`.
 
-Turns that that on practice that argument is hardly ever used, but it makes the Impulse API more complicated than it needs to be.
-Instead, the compare function might be defined in the `Impulse.of(initialValue, compare)` fabric or `useImpulse(initialValue, compare)` hook.
+Turns that that in practice that argument is hardly ever used, but it makes the Impulse API confusing: why specifically `compare` is passed to `setValue` and not to `Impulse#of` or `useImpulse`?
+So, when needed, defined `compare` in `Impulse.of(initialValue, compare)` fabric or `useImpulse(initialValue, compare)` hook.

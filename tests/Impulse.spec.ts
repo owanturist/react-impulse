@@ -29,58 +29,82 @@ describe("Impulse.of()", () => {
 
 describe("Impulse#compare", () => {
   it("does not call compare on init", () => {
-    const compare = vi.fn(Counter.compare)
-    Impulse.of({ count: 0 }, compare)
+    Impulse.of({ count: 0 }, Counter.compare)
 
-    expect(compare).not.toHaveBeenCalled()
+    expect(Counter.compare).not.toHaveBeenCalled()
   })
 
   describe("when creating an impulse with Impulse.of", () => {
     it("assigns Object.is by default", () => {
       const impulse = Impulse.of({ count: 0 })
 
-      expect(impulse.compare).toBe(Object.is)
+      impulse.setValue({ count: 1 })
+      expect(Object.is).toHaveBeenCalledOnce()
+      expect(Object.is).toHaveBeenLastCalledWith({ count: 0 }, { count: 1 })
     })
 
     it("assigns Object.is by `null`", () => {
       const impulse = Impulse.of({ count: 0 }, null)
 
-      expect(impulse.compare).toBe(Object.is)
+      impulse.setValue({ count: 1 })
+      expect(Object.is).toHaveBeenCalledOnce()
+      expect(Object.is).toHaveBeenLastCalledWith({ count: 0 }, { count: 1 })
     })
 
     it("assigns custom function", () => {
       const impulse = Impulse.of({ count: 0 }, Counter.compare)
 
-      expect(impulse.compare).toBe(Counter.compare)
+      impulse.setValue({ count: 1 })
+      expect(Counter.compare).toHaveBeenCalledOnce()
+      expect(Counter.compare).toHaveBeenLastCalledWith(
+        { count: 0 },
+        { count: 1 },
+      )
     })
   })
 
   describe("when creating an impulse with Impulse.clone", () => {
     it("inherits default the source impulse compare", () => {
-      const impulse = Impulse.of({ count: 0 })
+      const clone = Impulse.of({ count: 0 }).clone()
 
-      expect(impulse.clone().compare).toBe(impulse.compare)
-      expect(impulse.clone().compare).toBe(Object.is)
+      clone.setValue({ count: 1 })
+      expect(Object.is).toHaveBeenCalledOnce()
+      expect(Object.is).toHaveBeenLastCalledWith({ count: 0 }, { count: 1 })
     })
 
     it("inherits custom the source impulse compare", () => {
-      const impulse = Impulse.of({ count: 0 }, Counter.compare)
+      const clone = Impulse.of({ count: 0 }, Counter.compare).clone()
 
-      expect(impulse.clone().compare).toBe(impulse.compare)
-      expect(impulse.clone().compare).toBe(Counter.compare)
+      clone.setValue({ count: 1 })
+      expect(Counter.compare).toHaveBeenCalledOnce()
+      expect(Counter.compare).toHaveBeenLastCalledWith(
+        { count: 0 },
+        { count: 1 },
+      )
     })
 
     it("assigns Object.is by `null`", () => {
-      const impulse = Impulse.of({ count: 0 }, Counter.compare)
+      const clone = Impulse.of({ count: 0 }, Counter.compare).clone(
+        Counter.clone,
+        null,
+      )
 
-      expect(impulse.clone(Counter.clone, null).compare).toBe(Object.is)
+      clone.setValue({ count: 1 })
+      expect(Object.is).toHaveBeenCalledOnce()
+      expect(Object.is).toHaveBeenLastCalledWith({ count: 0 }, { count: 1 })
     })
 
     it("assigns custom function", () => {
-      const impulse = Impulse.of({ count: 0 })
-
-      expect(impulse.clone(Counter.clone, Counter.compare).compare).toBe(
+      const clone = Impulse.of({ count: 0 }).clone(
+        Counter.clone,
         Counter.compare,
+      )
+
+      clone.setValue({ count: 1 })
+      expect(Counter.compare).toHaveBeenCalledOnce()
+      expect(Counter.compare).toHaveBeenLastCalledWith(
+        { count: 0 },
+        { count: 1 },
       )
     })
   })
@@ -356,20 +380,19 @@ describe("Impulse#subscribe", () => {
 
   it("does not emit when a new value is comparably equal", () => {
     const spy = vi.fn()
-    const spyCompare = vi.fn(Counter.compare)
-    const impulse = Impulse.of({ count: 0 }, spyCompare)
+    const impulse = Impulse.of({ count: 0 }, Counter.compare)
     const unsubscribe = impulse.subscribe(spy)
 
     impulse.setValue(Counter.clone)
     expect(spy).not.toHaveBeenCalled()
-    expect(spyCompare).toHaveBeenCalledOnce()
-    expect(spyCompare).toHaveLastReturnedWith(true)
+    expect(Counter.compare).toHaveBeenCalledOnce()
+    expect(Counter.compare).toHaveLastReturnedWith(true)
     vi.clearAllMocks()
 
     impulse.setValue(Counter.clone)
     expect(spy).not.toHaveBeenCalled()
-    expect(spyCompare).toHaveBeenCalledOnce()
-    expect(spyCompare).toHaveLastReturnedWith(true)
+    expect(Counter.compare).toHaveBeenCalledOnce()
+    expect(Counter.compare).toHaveLastReturnedWith(true)
     vi.clearAllMocks()
 
     unsubscribe()
