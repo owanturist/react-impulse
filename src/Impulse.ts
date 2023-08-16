@@ -62,20 +62,10 @@ class Impulse<T> {
 
   private readonly _emitters = new Set<ScopeEmitter>()
 
-  /**
-   * The `Compare` function compares Impulse's value with the new value given via `Impulse#setValue`.
-   * Whenever the function returns `true`, neither the value change nor it notifies the listeners subscribed via `Impulse#subscribe`.
-   *
-   * @version 1.0.0
-   */
-  public readonly compare: Compare<T>
-
   private constructor(
     private _value: T,
-    compare: Compare<T>,
-  ) {
-    this.compare = compare
-  }
+    private readonly _compare: Compare<T>,
+  ) {}
 
   /**
    * Return the value when serializing to JSON.
@@ -115,7 +105,7 @@ class Impulse<T> {
    */
   public clone(
     transform?: (value: T) => T,
-    compare: null | Compare<T> = this.compare,
+    compare: null | Compare<T> = this._compare,
   ): Impulse<T> {
     return new Impulse(
       isFunction(transform) ? transform(this._value) : this._value,
@@ -174,7 +164,7 @@ class Impulse<T> {
         ? valueOrTransform(this._value)
         : valueOrTransform
 
-      if (this.compare(this._value, nextValue)) {
+      if (this._compare(this._value, nextValue)) {
         return null
       }
 

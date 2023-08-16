@@ -13,7 +13,7 @@ import { useWatchImpulse } from "./useWatchImpulse"
  */
 function useImpulseValue<T>(impulse: Impulse<T>): T {
   const watcher = useCallback(() => impulse.getValue(), [impulse])
-  const value = useWatchImpulse(watcher, impulse.compare)
+  const value = useWatchImpulse(watcher)
 
   useDebugValue(value)
 
