@@ -43,7 +43,7 @@ function isFunction<TFunction extends Func<ReadonlyArray<never>, unknown>>(
 }
 
 const useIsomorphicEffect =
-  // /* c8 ignore next */
+  /* c8 ignore next */
   typeof window === "undefined" ? useEffect : useLayoutEffect
 
 function useEvent<TArgs extends ReadonlyArray<unknown>, TResult>(

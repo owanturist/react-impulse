@@ -142,7 +142,7 @@ Impulse<T>#setValue(
 ): void
 ```
 
-An `Impulse` instance's method to update the value. All listeners registered via the [`Impulse#subscribe`][impulse__subscribe] method execute whenever the value updates.
+An `Impulse` instance's method to update the value.
 
 - `valueOrTransform` is the new value or a function that transforms the current value.
 
@@ -191,30 +191,6 @@ const cloneOfMutable = mutable.clone((current) => ({
   blacklist: new Set(current.blacklist),
 }))
 ```
-
-### `Impulse#subscribe`
-
-```dart
-Impulse<T>#subscribe(listener: VoidFunction): VoidFunction
-```
-
-An `Impulse` instance's method that subscribes to the value's updates caused by calling [`Impulse#setValue`][impulse__set_value]. Returns a cleanup function that unsubscribes the `listener`.
-
-- `listener` is a function that subscribes to the updates.
-
-```ts
-const count = Impulse.of(0)
-const unsubscribe = count.subscribe(() => {
-  console.log("The count is %d", count.getValue())
-})
-
-count.setValue(10) // console: "The count is 10"
-
-unsubscribe()
-count.setValue(20) // ...
-```
-
-> 💬 You'd like to avoid using the method in your application because it's been designed for convenient use in the exposed hooks and the [`watch`][watch] HOC.
 
 ### `watch`
 
@@ -383,7 +359,7 @@ const Challenge: React.FC = () => {
 }
 ```
 
-> 💬 The `watcher` function is only for reading the Impulses' values. It should never call [`Impulse.of`][impulse__of], [`Impulse#clone`][impulse__clone], [`Impulse#setValue`][impulse__set_value], or [`Impulse#subscribe`][impulse__subscribe] methods inside.
+> 💬 The `watcher` function is only for reading the Impulses' values. It should never call [`Impulse.of`][impulse__of], [`Impulse#clone`][impulse__clone], or [`Impulse#setValue`][impulse__set_value] methods inside.
 
 > 💡 It is recommended to memoize the `watcher` function with [`React.useCallback`][react__use_callback] for better performance.
 
@@ -677,7 +653,6 @@ A function that compares two values and returns `true` if they are equal. Depend
 [impulse__clone]: #impulseclone
 [impulse__get_value]: #impulsegetvalue
 [impulse__set_value]: #impulsesetvalue
-[impulse__subscribe]: #impulsesubscribe
 [use_impulse]: #useimpulse
 [use_impulse_effect]: #useimpulseeffect
 [watch]: #watch
