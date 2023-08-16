@@ -1,23 +1,19 @@
 export { Impulse }
 
-import { type Compare, eq, isFunction, noop } from "./utils"
+import { type Compare, eq, isFunction } from "./utils"
 import { EMITTER_KEY, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { validate } from "./validation"
 import {
   WATCH_CALLING_IMPULSE_SET_VALUE,
-  WATCH_CALLING_IMPULSE_SUBSCRIBE,
   SUBSCRIBE_CALLING_IMPULSE_OF,
   SUBSCRIBE_CALLING_IMPULSE_CLONE,
-  SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE,
   USE_WATCH_IMPULSE_CALLING_IMPULSE_OF,
   USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE,
   USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE,
-  USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE,
   USE_IMPULSE_MEMO_CALLING_IMPULSE_OF,
   USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE,
   USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE,
-  USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE,
 } from "./messages"
 
 class Impulse<T> {
@@ -128,7 +124,6 @@ class Impulse<T> {
 
   /**
    * Updates the value.
-   * All listeners registered via the `Impulse#subscribe` method execute whenever the Impulse's value updates.
    *
    * @param valueOrTransform either the new value or a function that transforms the current value.
    *
@@ -155,30 +150,5 @@ class Impulse<T> {
 
       return this._emitters
     })
-  }
-
-  /**
-   * Subscribes to the value's updates caused by calling `Impulse#setValue`.
-   *
-   * @param listener a function that subscribes to the updates.
-   *
-   * @returns a cleanup function that unsubscribes the `listener`.
-   *
-   * @version 1.0.0
-   *
-   * @deprecated The method is deprecated in favor of the `subscribe` higher-order function. It will be removed in the next major release.
-   */
-  @validate
-    ._when("watch", WATCH_CALLING_IMPULSE_SUBSCRIBE)
-    ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_SUBSCRIBE)
-    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SUBSCRIBE)
-    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SUBSCRIBE)
-    ._prevent(noop)
-  public subscribe(listener: VoidFunction): VoidFunction {
-    const emitter = new ScopeEmitter(false)
-
-    emitter._attachTo(this._emitters)
-
-    return emitter._onEmit(listener)
   }
 }
