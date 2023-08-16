@@ -28,6 +28,13 @@ describe("Impulse.of()", () => {
 })
 
 describe("Impulse#compare", () => {
+  it("does not call compare on init", () => {
+    const compare = vi.fn(Counter.compare)
+    Impulse.of({ count: 0 }, compare)
+
+    expect(compare).not.toHaveBeenCalled()
+  })
+
   describe("when creating an impulse with Impulse.of", () => {
     it("assigns Object.is by default", () => {
       const impulse = Impulse.of({ count: 0 })
@@ -79,29 +86,15 @@ describe("Impulse#compare", () => {
   })
 
   describe("when using Impulse#setValue", () => {
-    it("uses Impulse#compare by default", () => {
+    it("uses Impulse#compare", () => {
+      const compare = vi.fn(Counter.compare)
       const initial = { count: 0 }
-      const impulse = Impulse.of(initial, Counter.compare)
+      const impulse = Impulse.of(initial, compare)
 
       impulse.setValue(Counter.clone)
       expect(impulse.getValue()).toBe(initial)
-    })
-
-    it("replaces with Object.is when `null`", () => {
-      const initial = { count: 0 }
-      const impulse = Impulse.of(initial, Counter.compare)
-
-      impulse.setValue(Counter.clone, null)
-      expect(impulse.getValue()).not.toBe(initial)
-      expect(impulse.getValue()).toStrictEqual(initial)
-    })
-
-    it("replaces with custom function", () => {
-      const initial = { count: 0 }
-      const impulse = Impulse.of(initial, Counter.compare)
-
-      impulse.setValue(Counter.inc, () => true)
-      expect(impulse.getValue()).toBe(initial)
+      expect(compare).toHaveBeenCalledOnce()
+      expect(compare).toHaveBeenLastCalledWith({ count: 0 }, { count: 0 })
     })
   })
 })
@@ -153,65 +146,6 @@ describe("Impulse#setValue(transform)", () => {
     const prev = impulse.getValue()
     impulse.setValue(() => prev)
     expect(impulse.getValue()).toBe(prev)
-  })
-})
-
-describe("Impulse#setValue(value, compare)", () => {
-  let prev: Counter = { count: 0 }
-  const impulse = Impulse.of(prev)
-
-  beforeEach(() => {
-    prev = impulse.getValue()
-  })
-
-  it("keeps equal value", () => {
-    const clone = Counter.clone(prev)
-    impulse.setValue(clone, Counter.compare)
-
-    expect(impulse.getValue()).toBe(prev)
-    expect(impulse.getValue()).not.toBe(clone)
-  })
-
-  it("replaces with not equal value", () => {
-    const replacement = { count: 1 }
-    impulse.setValue(replacement, Counter.compare)
-
-    expect(impulse.getValue()).toBe(replacement)
-    expect(impulse.getValue()).not.toBe(prev)
-  })
-
-  it("replaces with same but not equal", () => {
-    const clone = Counter.clone(prev)
-    impulse.setValue(clone)
-
-    expect(impulse.getValue()).toBe(clone)
-    expect(impulse.getValue()).not.toBe(prev)
-  })
-})
-
-describe("Impulse#setValue(transform, compare)", () => {
-  let prev: Counter = { count: 0 }
-  const impulse = Impulse.of(prev)
-
-  beforeEach(() => {
-    prev = impulse.getValue()
-  })
-
-  it("keeps equal value", () => {
-    impulse.setValue(Counter.clone, Counter.compare)
-    expect(impulse.getValue()).toBe(prev)
-  })
-
-  it("replaces with not equal value", () => {
-    impulse.setValue(Counter.inc, Counter.compare)
-    expect(impulse.getValue()).not.toBe(prev)
-    expect(impulse.getValue()).toStrictEqual({ count: 1 })
-  })
-
-  it("replaces with same but not equal", () => {
-    impulse.setValue(Counter.clone)
-    expect(impulse.getValue()).not.toBe(prev)
-    expect(impulse.getValue()).toStrictEqual({ count: 1 })
   })
 })
 
@@ -423,25 +357,33 @@ describe("Impulse#subscribe", () => {
   it("does not emit when a new value is comparably equal", () => {
     const spy = vi.fn()
     const spyCompare = vi.fn(Counter.compare)
-    const impulse = Impulse.of({ count: 0 })
+    const impulse = Impulse.of({ count: 0 }, spyCompare)
     const unsubscribe = impulse.subscribe(spy)
 
-    impulse.setValue(Counter.clone, spyCompare)
+    impulse.setValue(Counter.clone)
     expect(spy).not.toHaveBeenCalled()
     expect(spyCompare).toHaveBeenCalledOnce()
     expect(spyCompare).toHaveLastReturnedWith(true)
     vi.clearAllMocks()
 
     impulse.setValue(Counter.clone)
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spyCompare).not.toHaveBeenCalled()
-    vi.clearAllMocks()
-
-    expect(spy.mock.calls).toHaveLength(0)
-    impulse.setValue(Counter.clone, spyCompare)
     expect(spy).not.toHaveBeenCalled()
     expect(spyCompare).toHaveBeenCalledOnce()
     expect(spyCompare).toHaveLastReturnedWith(true)
+    vi.clearAllMocks()
+
+    unsubscribe()
+    impulse.setValue(Counter.clone)
+    expect(spy).not.toHaveBeenCalled()
+  })
+
+  it("emits when a new value is not comparably equal", () => {
+    const spy = vi.fn()
+    const impulse = Impulse.of({ count: 0 })
+    const unsubscribe = impulse.subscribe(spy)
+
+    impulse.setValue(Counter.clone)
+    expect(spy).toHaveBeenCalled()
     vi.clearAllMocks()
 
     unsubscribe()

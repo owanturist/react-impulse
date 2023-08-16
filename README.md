@@ -139,16 +139,12 @@ count.getValue((x) => x > 0) // === true
 ```dart
 Impulse<T>#setValue(
   valueOrTransform: T | ((currentValue: T) => T),
-  compare?: null | Compare<T>
 ): void
 ```
 
 An `Impulse` instance's method to update the value. All listeners registered via the [`Impulse#subscribe`][impulse__subscribe] method execute whenever the value updates.
 
 - `valueOrTransform` is the new value or a function that transforms the current value.
-- `[compare]` is an optional [`Compare`][compare] function applied for this call only.
-  When not defined the [`Impulse#compare`][impulse__compare] function of the instance will be used.
-  When `null` the [`Object.is`][object_is] function applies to compare the values.
 
 ```ts
 const isActive = Impulse.of(false)

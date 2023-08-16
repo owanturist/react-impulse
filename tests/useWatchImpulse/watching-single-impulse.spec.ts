@@ -142,7 +142,7 @@ describe.each([
   })
 })
 
-describe("transform Impulse's value inside watcher", () => {
+describe("transform watched Impulse's", () => {
   const toTuple = ({ count }: Counter): [boolean, boolean] => {
     return [count > 2, count < 5]
   }
@@ -332,7 +332,7 @@ describe("transform Impulse's value inside watcher", () => {
           },
         ],
       ])("should not trigger the watcher %s", () => {
-        const impulse = Impulse.of({ count: 1 })
+        const impulse = Impulse.of({ count: 1 }, Counter.compare)
         const spy = vi.fn()
 
         renderHook(useHookWithoutCompare, {
@@ -340,12 +340,13 @@ describe("transform Impulse's value inside watcher", () => {
         })
 
         expect(spy).toHaveBeenCalledOnce()
+        vi.clearAllMocks()
 
         act(() => {
-          impulse.setValue(Counter.clone, Counter.compare)
+          impulse.setValue(Counter.clone)
         })
 
-        expect(spy).toHaveBeenCalledOnce()
+        expect(spy).not.toHaveBeenCalled()
       })
     },
   )
@@ -448,15 +449,12 @@ describe("multiple Impulse#getValue() calls", () => {
           expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
         })
 
-        it.each([
-          ["without Impulse#setValue comparator", undefined],
-          ["with Impulse#setValue comparator", Counter.compare],
-        ])("increments %s", (___, compare) => {
+        it("increments %s", () => {
           const { impulse, spySingle, spyDouble, resultSingle, resultDouble } =
             setup()
 
           act(() => {
-            impulse.setValue(Counter.inc, compare)
+            impulse.setValue(Counter.inc)
           })
 
           expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -464,15 +462,12 @@ describe("multiple Impulse#getValue() calls", () => {
           expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
         })
 
-        it.each([
-          ["without Impulse#setValue comparator", undefined],
-          ["with Impulse#setValue comparator", Counter.compare],
-        ])("clones %s", (___, compare) => {
+        it("clones %s", () => {
           const { impulse, spySingle, spyDouble, resultSingle, resultDouble } =
             setup()
 
           act(() => {
-            impulse.setValue(Counter.clone, compare)
+            impulse.setValue(Counter.clone)
           })
 
           expect(resultSingle.current).toStrictEqual({ count: 1 })
