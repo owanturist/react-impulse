@@ -29,10 +29,9 @@ describe("Impulse.of()", () => {
 
 describe("Impulse#compare", () => {
   it("does not call compare on init", () => {
-    const compare = vi.fn(Counter.compare)
-    Impulse.of({ count: 0 }, compare)
+    Impulse.of({ count: 0 }, Counter.compare)
 
-    expect(compare).not.toHaveBeenCalled()
+    expect(Counter.compare).not.toHaveBeenCalled()
   })
 
   describe("when creating an impulse with Impulse.of", () => {
@@ -381,20 +380,19 @@ describe("Impulse#subscribe", () => {
 
   it("does not emit when a new value is comparably equal", () => {
     const spy = vi.fn()
-    const spyCompare = vi.fn(Counter.compare)
-    const impulse = Impulse.of({ count: 0 }, spyCompare)
+    const impulse = Impulse.of({ count: 0 }, Counter.compare)
     const unsubscribe = impulse.subscribe(spy)
 
     impulse.setValue(Counter.clone)
     expect(spy).not.toHaveBeenCalled()
-    expect(spyCompare).toHaveBeenCalledOnce()
-    expect(spyCompare).toHaveLastReturnedWith(true)
+    expect(Counter.compare).toHaveBeenCalledOnce()
+    expect(Counter.compare).toHaveLastReturnedWith(true)
     vi.clearAllMocks()
 
     impulse.setValue(Counter.clone)
     expect(spy).not.toHaveBeenCalled()
-    expect(spyCompare).toHaveBeenCalledOnce()
-    expect(spyCompare).toHaveLastReturnedWith(true)
+    expect(Counter.compare).toHaveBeenCalledOnce()
+    expect(Counter.compare).toHaveLastReturnedWith(true)
     vi.clearAllMocks()
 
     unsubscribe()
