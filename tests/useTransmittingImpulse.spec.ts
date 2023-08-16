@@ -258,6 +258,70 @@ describe("replacing getter", () => {
   })
 })
 
+describe("changeling setter", () => {
+  const setup = (setter: React.Dispatch<number>) => {
+    return renderHook(
+      (set) => {
+        return useTransmittingImpulse(() => 1, [], set)
+      },
+      { initialProps: setter },
+    )
+  }
+
+  it("should not call setter on init", () => {
+    const setter = vi.fn()
+
+    setup(setter)
+    expect(setter).not.toHaveBeenCalled()
+  })
+
+  it("should use initial setter on first render", () => {
+    const setter = vi.fn()
+
+    const { result } = setup(setter)
+
+    result.current.setValue(2)
+
+    expect(setter).toHaveBeenCalledOnce()
+    expect(setter).toHaveBeenLastCalledWith(2, expect.anything())
+  })
+
+  it("should not call setter on a subsequent rerender", () => {
+    const setter_0 = vi.fn()
+    const setter_1 = vi.fn()
+
+    const { rerender } = setup(setter_0)
+
+    rerender(setter_1)
+
+    expect(setter_0).not.toHaveBeenCalled()
+    expect(setter_1).not.toHaveBeenCalled()
+  })
+
+  it("should use updated setter on subsequent renders", () => {
+    const setter_0 = vi.fn()
+    const setter_1 = vi.fn()
+    const setter_2 = vi.fn()
+
+    const { result, rerender } = setup(setter_0)
+
+    rerender(setter_1)
+    vi.clearAllMocks()
+
+    result.current.setValue(2)
+    expect(setter_0).not.toHaveBeenCalled()
+    expect(setter_1).toHaveBeenLastCalledWith(2, expect.anything())
+
+    rerender(setter_2)
+    vi.clearAllMocks()
+
+    result.current.setValue(3)
+    expect(setter_0).not.toHaveBeenCalled()
+    expect(setter_1).not.toHaveBeenCalled()
+    expect(setter_2).toHaveBeenLastCalledWith(3, expect.anything())
+  })
+})
+
 describe("type check", () => {
   it("returns Impulse when setter is defined", () => {
     const { result } = renderHook(() => {
