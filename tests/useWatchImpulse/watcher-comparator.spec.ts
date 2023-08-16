@@ -8,7 +8,7 @@ describe.each([
   [
     "inline watcher",
     ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
-      return useWatchImpulse(() => impulse.getValue(), compare)
+      return useWatchImpulse(() => impulse.getValue(), { compare })
     },
   ],
   [
@@ -16,7 +16,7 @@ describe.each([
     ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
       return useWatchImpulse(
         useCallback(() => impulse.getValue(), [impulse]),
-        compare,
+        { compare },
       )
     },
   ],

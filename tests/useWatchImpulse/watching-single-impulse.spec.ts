@@ -8,7 +8,7 @@ describe.each([
   [
     "inline watcher",
     ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
-      return useWatchImpulse(() => impulse.getValue(), compare)
+      return useWatchImpulse(() => impulse.getValue(), { compare })
     },
   ],
   [
@@ -16,7 +16,7 @@ describe.each([
     ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
       return useWatchImpulse(
         useCallback(() => impulse.getValue(), [impulse]),
-        compare,
+        { compare },
       )
     },
   ],
@@ -158,7 +158,7 @@ describe("transform watched Impulse's", () => {
     [
       "inline watcher",
       ({ impulse }: WithImpulse, compare?: Compare<[boolean, boolean]>) => {
-        return useWatchImpulse(() => impulse.getValue(toTuple), compare)
+        return useWatchImpulse(() => impulse.getValue(toTuple), { compare })
       },
     ],
     [
@@ -166,7 +166,7 @@ describe("transform watched Impulse's", () => {
       ({ impulse }: WithImpulse, compare?: Compare<[boolean, boolean]>) => {
         return useWatchImpulse(
           useCallback(() => impulse.getValue(toTuple), [impulse]),
-          compare,
+          { compare },
         )
       },
     ],
@@ -292,11 +292,14 @@ describe("transform watched Impulse's", () => {
     [
       "inline watcher",
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(() => {
-          spy()
+        return useWatchImpulse(
+          () => {
+            spy()
 
-          return impulse.getValue()
-        }, compare)
+            return impulse.getValue()
+          },
+          { compare },
+        )
       },
     ],
     [
@@ -308,7 +311,7 @@ describe("transform watched Impulse's", () => {
 
             return impulse.getValue()
           }, [spy, impulse]),
-          compare,
+          { compare },
         )
       },
     ],
@@ -332,7 +335,7 @@ describe("transform watched Impulse's", () => {
           },
         ],
       ])("should not trigger the watcher %s", () => {
-        const impulse = Impulse.of({ count: 1 }, Counter.compare)
+        const impulse = Impulse.of({ count: 1 }, { compare: Counter.compare })
         const spy = vi.fn()
 
         renderHook(useHookWithoutCompare, {
@@ -357,18 +360,24 @@ describe("multiple Impulse#getValue() calls", () => {
     [
       "inline watcher",
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(() => {
-          spy()
+        return useWatchImpulse(
+          () => {
+            spy()
 
-          return impulse.getValue()
-        }, compare)
+            return impulse.getValue()
+          },
+          { compare },
+        )
       },
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(() => {
-          spy()
+        return useWatchImpulse(
+          () => {
+            spy()
 
-          return Counter.merge(impulse.getValue(), impulse.getValue())
-        }, compare)
+            return Counter.merge(impulse.getValue(), impulse.getValue())
+          },
+          { compare },
+        )
       },
     ],
     [
@@ -380,7 +389,7 @@ describe("multiple Impulse#getValue() calls", () => {
 
             return impulse.getValue()
           }, [spy, impulse]),
-          compare,
+          { compare },
         )
       },
       ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
@@ -390,7 +399,7 @@ describe("multiple Impulse#getValue() calls", () => {
 
             return Counter.merge(impulse.getValue(), impulse.getValue())
           }, [spy, impulse]),
-          compare,
+          { compare },
         )
       },
     ],

@@ -2,7 +2,7 @@
 "react-impulse": minor
 ---
 
-🚀 Introduce `useImpulseCallback`. The hook is an Impulse version of the `React.useCallback` hook. During the `callback` execution, all Impulses that call the `Impulse#getValue` method become _phantom dependencies_ of the hook.
+Introduce [`useImpulseCallback`](./#useimpulsecallback). The hook is an Impulse version of the `React.useCallback` hook. During the `callback` execution, all Impulses that call the `Impulse#getValue` method become _phantom dependencies_ of the hook.
 
 ```dart
 function useImpulseCallback<TArgs extends ReadonlyArray<unknown>, TResult>(

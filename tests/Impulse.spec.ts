@@ -29,7 +29,7 @@ describe("Impulse.of()", () => {
 
 describe("Impulse#compare", () => {
   it("does not call compare on init", () => {
-    Impulse.of({ count: 0 }, Counter.compare)
+    Impulse.of({ count: 0 }, { compare: Counter.compare })
 
     expect(Counter.compare).not.toHaveBeenCalled()
   })
@@ -44,7 +44,7 @@ describe("Impulse#compare", () => {
     })
 
     it("assigns Object.is by `null`", () => {
-      const impulse = Impulse.of({ count: 0 }, null)
+      const impulse = Impulse.of({ count: 0 }, { compare: null })
 
       impulse.setValue({ count: 1 })
       expect(Object.is).toHaveBeenCalledOnce()
@@ -52,7 +52,7 @@ describe("Impulse#compare", () => {
     })
 
     it("assigns custom function", () => {
-      const impulse = Impulse.of({ count: 0 }, Counter.compare)
+      const impulse = Impulse.of({ count: 0 }, { compare: Counter.compare })
 
       impulse.setValue({ count: 1 })
       expect(Counter.compare).toHaveBeenCalledOnce()
@@ -73,7 +73,10 @@ describe("Impulse#compare", () => {
     })
 
     it("inherits custom the source impulse compare", () => {
-      const clone = Impulse.of({ count: 0 }, Counter.compare).clone()
+      const clone = Impulse.of(
+        { count: 0 },
+        { compare: Counter.compare },
+      ).clone()
 
       clone.setValue({ count: 1 })
       expect(Counter.compare).toHaveBeenCalledOnce()
@@ -84,10 +87,10 @@ describe("Impulse#compare", () => {
     })
 
     it("assigns Object.is by `null`", () => {
-      const clone = Impulse.of({ count: 0 }, Counter.compare).clone(
-        Counter.clone,
-        null,
-      )
+      const clone = Impulse.of(
+        { count: 0 },
+        { compare: Counter.compare },
+      ).clone(Counter.clone, { compare: null })
 
       clone.setValue({ count: 1 })
       expect(Object.is).toHaveBeenCalledOnce()
@@ -95,10 +98,9 @@ describe("Impulse#compare", () => {
     })
 
     it("assigns custom function", () => {
-      const clone = Impulse.of({ count: 0 }).clone(
-        Counter.clone,
-        Counter.compare,
-      )
+      const clone = Impulse.of({ count: 0 }).clone(Counter.clone, {
+        compare: Counter.compare,
+      })
 
       clone.setValue({ count: 1 })
       expect(Counter.compare).toHaveBeenCalledOnce()
@@ -111,14 +113,16 @@ describe("Impulse#compare", () => {
 
   describe("when using Impulse#setValue", () => {
     it("uses Impulse#compare", () => {
-      const compare = vi.fn(Counter.compare)
       const initial = { count: 0 }
-      const impulse = Impulse.of(initial, compare)
+      const impulse = Impulse.of(initial, { compare: Counter.compare })
 
       impulse.setValue(Counter.clone)
       expect(impulse.getValue()).toBe(initial)
-      expect(compare).toHaveBeenCalledOnce()
-      expect(compare).toHaveBeenLastCalledWith({ count: 0 }, { count: 0 })
+      expect(Counter.compare).toHaveBeenCalledOnce()
+      expect(Counter.compare).toHaveBeenLastCalledWith(
+        { count: 0 },
+        { count: 0 },
+      )
     })
   })
 })

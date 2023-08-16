@@ -55,8 +55,10 @@ describe("watching multiple impulses", () => {
 
         return [sum > 2, sum < 7]
       },
-      ([left1, right1], [left2, right2]) => {
-        return left1 === left2 && right1 === right2
+      {
+        compare: ([left1, right1], [left2, right2]) => {
+          return left1 === left2 && right1 === right2
+        },
       },
     )
 
@@ -76,15 +78,17 @@ describe("watching multiple impulses", () => {
 
         return [sum > 2, sum < 7]
       }, [props.firstCount, props.secondCount]),
-      React.useCallback(
-        (
-          [left1, right1]: [boolean, boolean],
-          [left2, right2]: [boolean, boolean],
-        ) => {
-          return left1 === left2 && right1 === right2
-        },
-        [],
-      ),
+      {
+        compare: React.useCallback(
+          (
+            [left1, right1]: [boolean, boolean],
+            [left2, right2]: [boolean, boolean],
+          ) => {
+            return left1 === left2 && right1 === right2
+          },
+          [],
+        ),
+      },
     )
 
     return (

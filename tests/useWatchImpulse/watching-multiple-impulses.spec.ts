@@ -15,9 +15,12 @@ describe.each([
   [
     "inline watcher",
     ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
-      return useWatchImpulse(() => {
-        return Counter.merge(first.getValue(), second.getValue())
-      }, compare)
+      return useWatchImpulse(
+        () => {
+          return Counter.merge(first.getValue(), second.getValue())
+        },
+        { compare },
+      )
     },
   ],
   [
@@ -27,7 +30,7 @@ describe.each([
         useCallback(() => {
           return Counter.merge(first.getValue(), second.getValue())
         }, [first, second]),
-        compare,
+        { compare },
       )
     },
   ],
@@ -99,11 +102,14 @@ describe.each([
   [
     "inline watcher",
     ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-      return useWatchImpulse(() => {
-        spy()
+      return useWatchImpulse(
+        () => {
+          spy()
 
-        return impulse.getValue()
-      }, compare)
+          return impulse.getValue()
+        },
+        { compare },
+      )
     },
     (
       {
@@ -114,15 +120,18 @@ describe.each([
       }: WithFirst & WithSecond & WithThird & WithSpy,
       compare?: Compare<Counter>,
     ) => {
-      return useWatchImpulse(() => {
-        spy()
+      return useWatchImpulse(
+        () => {
+          spy()
 
-        return Counter.merge(
-          first.getValue(),
-          second.getValue(),
-          third.getValue(),
-        )
-      }, compare)
+          return Counter.merge(
+            first.getValue(),
+            second.getValue(),
+            third.getValue(),
+          )
+        },
+        { compare },
+      )
     },
   ],
 

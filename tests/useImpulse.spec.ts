@@ -140,7 +140,7 @@ describe("with compare function", () => {
   })
 
   it("applies Object.is when passing null as compare", () => {
-    const { result } = renderHook(() => useImpulse(0, null))
+    const { result } = renderHook(() => useImpulse(0, { compare: null }))
 
     expect(Object.is).not.toHaveBeenCalled()
 
@@ -154,14 +154,14 @@ describe("with compare function", () => {
 
   it("does not call the function on init", () => {
     const compare = vi.fn()
-    renderHook(() => useImpulse({ count: 0 }, compare))
+    renderHook(() => useImpulse({ count: 0 }, { compare }))
 
     expect(compare).not.toHaveBeenCalled()
   })
 
   it("passes custom compare function", () => {
     const compare = vi.fn<[number], boolean>()
-    const { result } = renderHook(() => useImpulse<number>(0, compare))
+    const { result } = renderHook(() => useImpulse<number>(0, { compare }))
 
     act(() => {
       result.current.setValue(1)
@@ -176,7 +176,7 @@ describe("with compare function", () => {
     const compare_2 = vi.fn().mockImplementation(Object.is)
 
     const { result, rerender } = renderHook(
-      (compare: null | Compare<number>) => useImpulse<number>(0, compare),
+      (compare: null | Compare<number>) => useImpulse<number>(0, { compare }),
       {
         initialProps: compare_1,
       },

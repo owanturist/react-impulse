@@ -100,14 +100,15 @@ Impulse.of<T>(): Impulse<undefined | T>
 
 Impulse.of<T>(
   initialValue: T,
-  compare?: null | Compare<T>
+  options?: ImpulseOptions<T>
 ): Impulse<T>
 ```
 
 A static method that creates new Impulse.
 
 - `[initialValue]` is an optional initial value. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
-- `[compare]` is an optional [`Compare`][compare] function that determines whether the value has changed. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
+- `[options]` is optional [`ImpulseOptions`][impulse_options] object.
+  - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
 > 💡 The [`useImpulse`][use_impulse] hook helps to create and store an `Impulse` inside a React component.
 
@@ -165,16 +166,15 @@ isActive.getValue() // false
 ```dart
 Impulse<T>#clone(
   transform?: (value: T) => T,
-  compare?: null | Compare<T>
+  options?: ImpulseOptions<T>,
 ): Impulse<T>
 ```
 
 An `Impulse` instance's method for cloning an Impulse.
 
 - `[transform]` is an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
-- `[compare]` is an optional [`Compare`][compare] function that determines whether the value has changed.
-  When not defined, it uses the `compare` function from the origin Impulse.
-  When `null` the [`Object.is`][object_is] function applies to compare the values.
+- `[options]` is optional [`ImpulseOptions`][impulse_options] object.
+  - `[options.compare]` when not defined it uses the `compare` function from the origin Impulse, when `null` the [`Object.is`][object_is] function applies to compare the values.
 
 ```ts
 const immutable = Impulse.of({
@@ -250,9 +250,9 @@ With or without wrapping the component around the `watch` [HOC][hoc], The `SumOf
 Alias for
 
 ```ts
-React.memo(watch(/* */))
+React.memo(watch(Component))
 // equals to
-watch.memo(/* */)
+watch.memo(Component)
 ```
 
 #### `watch.forwardRef`
@@ -260,9 +260,9 @@ watch.memo(/* */)
 Alias for
 
 ```ts
-React.forwardRef(watch(/* */))
+React.forwardRef(watch(Component))
 // equals to
-watch.forwardRef(/* */)
+watch.forwardRef(Component)
 ```
 
 #### `watch.memo.forwardRef` and `watch.forwardRef.memo`
@@ -270,10 +270,10 @@ watch.forwardRef(/* */)
 Aliases for
 
 ```ts
-React.memo(React.forwardRef(watch(/* */)))
+React.memo(React.forwardRef(watch(Component)))
 // equals to
-watch.memo.forwardRef(/* */)
-watch.forwardRef.memo(/* */)
+watch.memo.forwardRef(Component)
+watch.forwardRef.memo(Component)
 ```
 
 ### `useImpulse`
@@ -283,14 +283,15 @@ function useImpulse<T>(): Impulse<undefined | T>
 
 function useImpulse<T>(
   valueOrInitValue: T | (() => T),
-  compare?: null | Compare<T>
+  options?: ImpulseOptions<T>
 ): Impulse<T>
 ```
 
 - `[valueOrInitValue]` is an optional value used during the initial render. If the initial value is the result of an expensive computation, you may provide a function instead, which will be executed only on the initial render. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
-- `[compare]` is an optional [`Compare`][compare] function that determines whether the value has changed. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
+- `[options]` is optional [`ImpulseOptions`][impulse_options] object.
+  - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
-A hook that initiates a stable (never changing) Impulse.
+A hook that initiates a stable (never changing) Impulse. It's value can be changed with the [`Impulse#setValue`][impulse__set_value] method though.
 
 > 💬 The initial value is disregarded during subsequent re-renders but compare function is not - it uses the latest function passed to the hook.
 
@@ -311,12 +312,12 @@ const tableSum = useImpulse(() => {
 ```dart
 function useWatchImpulse<T>(
   watcher: () => T,
-  compare?: null | Compare<T>
+  options?: UseWatchImpulseOptions<T>
 ): T
 ```
 
 - `watcher` is a function that subscribes to all Impulses calling the [`Impulse#getValue`][impulse__get_value] method inside the function.
-- `[compare]` is an optional [`Compare`][compare] function. When not defined or `null` then [`Object.is`][object_is] applies as a fallback.
+- `[options]` is an optional [`UseWatchImpulseOptions`][use_watch_impulse_options] object.
 
 The `useWatchImpulse` hook is an alternative to the [`watch`][watch] function. It executes the `watcher` function whenever any of the involved Impulses' value update but enqueues a re-render only when the resulting value is different from the previous.
 
@@ -639,6 +640,26 @@ const unsubscribe = subscribe(() => {
 
 In the example above the `listener` will not react on the `impulse_2` updates until the `impulse_1` value is greater than `1`. The `impulse_3` updates will never trigger the `listener`, because the `impulse_3.getValue()` is not called inside the `listener`.
 
+### `ImpulseOptions`
+
+```ts
+interface ImpulseOptions<T> {
+  compare?: null | Compare<T>
+}
+```
+
+- `[compare]` is an optional [`Compare`][compare] function that determines whether or not a new Impulse's value replaces the current one. In many cases specifying the function leads to better performance because it prevents unnecessary updates. But keep the balance between the performance and the complexity of the function - sometimes it might be better to replace the value without heavy comparisons.
+
+### `UseWatchImpulseOptions`
+
+```ts
+interface UseWatchImpulseOptions<T> {
+  compare?: null | Compare<T>
+}
+```
+
+- `[compare]` is an optional [`Compare`][compare] function that determines whether or not the watcher result is different. If the watcher result is different, a host component re-renders. In many cases specifying the function leads to better performance because it prevents unnecessary updates.
+
 ### `Compare`
 
 ```ts
@@ -657,6 +678,8 @@ A function that compares two values and returns `true` if they are equal. Depend
 [use_impulse_effect]: #useimpulseeffect
 [watch]: #watch
 [batch]: #batch
+[impulse_options]: #impulseoptions
+[use_watch_impulse_options]: #usewatchimpulseoptions
 [compare]: #compare
 
 <!-- E X T E R N A L  L I N K S -->
