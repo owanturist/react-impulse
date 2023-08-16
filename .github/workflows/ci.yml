@@ -61,7 +61,7 @@ jobs:
 
       - name: Tests with coverage
         if: ${{ always() }}
-        run: pnpm test:run --coverage
+        run: pnpm test:coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
