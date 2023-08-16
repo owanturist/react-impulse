@@ -1,4 +1,4 @@
-export { useWatchImpulse }
+export { type UseWatchImpulseOptions, useWatchImpulse }
 
 import { useCallback, useDebugValue } from "./dependencies"
 import { type Compare, eq, useEvent } from "./utils"

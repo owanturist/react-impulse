@@ -20,10 +20,6 @@ interface ImpulseOptions<T> {
   /**
    * The compare function determines whether or not a new Impulse's value replaces the current one.
    * In many cases specifying the function leads to better performance because it prevents unnecessary updates.
-   *
-   * Becomes accessible via `Impulse#compare`.
-   *
-   * @default Object.is
    */
   compare?: null | Compare<T>
 }
@@ -40,7 +36,7 @@ class Impulse<T> {
    * Creates new Impulse.
    *
    * @param initialValue the initial value.
-   * @param options optional `ImpulseOptions`.
+   * @param options optional `ImpulseOptions`. When `options.compare` is not defined or `null` then `Object.is` applies as a fallback.
    *
    * @version 1.0.0
    */
@@ -92,7 +88,7 @@ class Impulse<T> {
    * Clones an Impulse.
    *
    * @param transform an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
-   * @param options optional `ImpulseOptions`. When not defined uses corresponding options from the origin Impulse.
+   * @param options optional `ImpulseOptions`. When `options.compare` is not defined it uses the `compare` function from the origin Impulse. When `options.compare` is `null` the `Object.is` function applies to compare the values.
    *
    * @version 1.0.0
    */

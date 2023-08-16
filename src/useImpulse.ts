@@ -16,7 +16,7 @@ function useImpulse<T = undefined>(): Impulse<undefined | T>
  * *The initial value is disregarded during subsequent re-renders but compare function is not - it uses the latest function passed to the hook.*
  *
  * @param valueOrInitValue either an initial value or function returning an initial value during the initial render
- * @param options optional `ImpulseOptions`.
+ * @param options optional `ImpulseOptions`. When `options.compare` is not defined or `null` then `Object.is` applies as a fallback.
  *
  * @version 1.0.0
  */
