@@ -28,6 +28,13 @@ describe("Impulse.of()", () => {
 })
 
 describe("Impulse#compare", () => {
+  it("does not call compare on init", () => {
+    const compare = vi.fn(Counter.compare)
+    Impulse.of({ count: 0 }, compare)
+
+    expect(compare).not.toHaveBeenCalled()
+  })
+
   describe("when creating an impulse with Impulse.of", () => {
     it("assigns Object.is by default", () => {
       const impulse = Impulse.of({ count: 0 })
@@ -80,11 +87,14 @@ describe("Impulse#compare", () => {
 
   describe("when using Impulse#setValue", () => {
     it("uses Impulse#compare", () => {
+      const compare = vi.fn(Counter.compare)
       const initial = { count: 0 }
-      const impulse = Impulse.of(initial, Counter.compare)
+      const impulse = Impulse.of(initial, compare)
 
       impulse.setValue(Counter.clone)
       expect(impulse.getValue()).toBe(initial)
+      expect(compare).toHaveBeenCalledOnce()
+      expect(compare).toHaveBeenLastCalledWith({ count: 0 }, { count: 0 })
     })
   })
 })
