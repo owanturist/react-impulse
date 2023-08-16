@@ -20,4 +20,4 @@ const value = useWatchImpulse(() => impulse_2.getValue(), {
 })
 ```
 
-The overall functionality is the same, but now it opens up a possibility to add more options in the future and helps TypeScript to distinguish options from another arguments (it was a problem with `compare` and other function arguments).
+The overall functionality is the same, but now it opens up a possibility to add more options in the future and helps TypeScript to distinguish options from other arguments (it was a problem with `compare` and other function arguments).
