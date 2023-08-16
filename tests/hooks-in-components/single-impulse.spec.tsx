@@ -34,7 +34,7 @@ describe("single impulse", () => {
         <button
           type="button"
           data-testid="reset"
-          onClick={() => counter.setValue({ count: 0 }, Counter.compare)}
+          onClick={() => counter.setValue({ count: 0 })}
         />
       </div>
     </React.Profiler>
@@ -104,7 +104,7 @@ describe("single impulse", () => {
     fireEvent.click(screen.getByTestId("reset"))
     expect(onRootRender).not.toHaveBeenCalled()
     expect(onSetterRender).not.toHaveBeenCalled()
-    expect(onGetterRender).not.toHaveBeenCalled()
+    expect(onGetterRender).toHaveBeenCalledOnce()
     expect(screen.getByTestId("getter")).toHaveTextContent("0")
     vi.clearAllMocks()
 

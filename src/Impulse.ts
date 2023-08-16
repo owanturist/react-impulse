@@ -163,24 +163,18 @@ class Impulse<T> {
    * All listeners registered via the `Impulse#subscribe` method execute whenever the Impulse's value updates.
    *
    * @param valueOrTransform either the new value or a function that transforms the current value.
-   * @param compare an optional `Compare` function applied for this call only. When not defined the `Impulse#compare` function will be used. When `null` the `Object.is` function applies to compare the values.
    *
    * @returns `void` to emphasize that Impulses are mutable.
    *
    * @version 1.0.0
    */
-  public setValue(
-    valueOrTransform: T | ((currentValue: T) => T),
-    compare: null | Compare<T> = this.compare,
-  ): void {
-    const finalCompare = compare ?? eq
-
+  public setValue(valueOrTransform: T | ((currentValue: T) => T)): void {
     ScopeEmitter._schedule(() => {
       const nextValue = isFunction(valueOrTransform)
         ? valueOrTransform(this._value)
         : valueOrTransform
 
-      if (finalCompare(this._value, nextValue)) {
+      if (this.compare(this._value, nextValue)) {
         return null
       }
 
