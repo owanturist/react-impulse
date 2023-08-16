@@ -1,5 +1,11 @@
 # react-impulse
 
+## 2.0.0-beta.6
+
+### Patch Changes
+
+- 73df942: Stabilize useTransmittingImpulse setter
+
 ## 2.0.0-beta.5
 
 ### Patch Changes
