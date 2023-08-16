@@ -36,7 +36,8 @@ class Impulse<T> {
    * Creates new Impulse.
    *
    * @param initialValue the initial value.
-   * @param options optional `ImpulseOptions`. When `options.compare` is not defined or `null` then `Object.is` applies as a fallback.
+   * @param options optional `ImpulseOptions`.
+   * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
    *
    * @version 1.0.0
    */
@@ -88,7 +89,8 @@ class Impulse<T> {
    * Clones an Impulse.
    *
    * @param transform an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
-   * @param options optional `ImpulseOptions`. When `options.compare` is not defined it uses the `compare` function from the origin Impulse. When `options.compare` is `null` the `Object.is` function applies to compare the values.
+   * @param options optional `ImpulseOptions`.
+   * @param options.compare when not defined it uses the `compare` function from the origin Impulse, When `null` the `Object.is` function applies to compare the values.
    *
    * @version 1.0.0
    */
