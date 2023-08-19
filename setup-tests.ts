@@ -1,8 +1,6 @@
 /* c8 ignore start */
 
-// otherwise jest leaking into vitest type definitions
-// https://github.com/testing-library/jest-dom/issues/427#issuecomment-1110985202
-import "@testing-library/jest-dom/extend-expect"
+import "@testing-library/jest-dom/vitest"
 import { cleanup } from "@testing-library/react"
 
 // forces tests to fail in case of illegal usage
