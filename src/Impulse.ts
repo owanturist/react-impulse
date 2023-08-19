@@ -50,9 +50,9 @@ class Impulse<T> {
     ._alert()
   public static of<T>(
     initialValue?: T,
-    options?: ImpulseOptions<undefined | T>,
+    { compare }: ImpulseOptions<undefined | T> = {},
   ): Impulse<undefined | T> {
-    return new Impulse(initialValue, options?.compare ?? eq)
+    return new Impulse(initialValue, compare ?? eq)
   }
 
   private readonly _emitters = new Set<ScopeEmitter>()
