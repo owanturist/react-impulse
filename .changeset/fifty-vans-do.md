@@ -2,7 +2,7 @@
 "react-impulse": major
 ---
 
-Add the [`Impulse#of`](./#impulseof) method's overload to accept `options: ImpulseOptions` as a single argument, so the resulting signature looks like the following:
+Add the [`Impulse#clone`](./#impulseclone) method's overload to accept `options: ImpulseOptions` as a single argument, so the resulting signature looks like the following:
 
 ```dart
 Impulse<T>#clone(
