@@ -165,6 +165,10 @@ isActive.getValue() // false
 
 ```dart
 Impulse<T>#clone(
+  options?: ImpulseOptions<T>,
+): Impulse<T>
+
+Impulse<T>#clone(
   transform?: (value: T) => T,
   options?: ImpulseOptions<T>,
 ): Impulse<T>

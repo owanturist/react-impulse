@@ -86,7 +86,17 @@ class Impulse<T> {
   }
 
   /**
-   * Clones an Impulse.
+   * Creates a new Impulse instance out of the current one with the same value.
+   *
+   * @param options optional `ImpulseOptions`.
+   * @param options.compare when not defined it uses the `compare` function from the origin Impulse, When `null` the `Object.is` function applies to compare the values.
+   *
+   * @version 2.0.0
+   */
+  public clone(options?: ImpulseOptions<T>): Impulse<T>
+
+  /**
+   * Creates a new Impulse instance out of the current one with the transformed value. Transforming might be handy when cloning mutable values (such as an Impulse).
    *
    * @param transform an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
    * @param options optional `ImpulseOptions`.
@@ -94,19 +104,26 @@ class Impulse<T> {
    *
    * @version 1.0.0
    */
+  public clone(
+    transform: (value: T) => T,
+    options?: ImpulseOptions<T>,
+  ): Impulse<T>
+
   @validate
     ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_CLONE)
     ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE)
     ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE)
     ._alert()
   public clone(
-    transform?: (value: T) => T,
-    { compare = this._compare }: ImpulseOptions<T> = {},
+    ...args:
+      | [options?: ImpulseOptions<T>]
+      | [transform: (value: T) => T, options?: ImpulseOptions<T>]
   ): Impulse<T> {
-    return new Impulse(
-      isFunction(transform) ? transform(this._value) : this._value,
-      compare ?? eq,
-    )
+    const [value, { compare = this._compare } = {}] = isFunction(args[0])
+      ? [args[0](this._value), args[1]]
+      : [this._value, args[0]]
+
+    return new Impulse(value, compare ?? eq)
   }
 
   /**
