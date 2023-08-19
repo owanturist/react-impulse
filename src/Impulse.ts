@@ -50,17 +50,20 @@ class Impulse<T> {
     ._alert()
   public static of<T>(
     initialValue?: T,
-    { compare }: ImpulseOptions<undefined | T> = {},
+    options?: ImpulseOptions<undefined | T>,
   ): Impulse<undefined | T> {
-    return new Impulse(initialValue, compare ?? eq)
+    return new Impulse(initialValue, options)
   }
 
   private readonly _emitters = new Set<ScopeEmitter>()
+  private readonly _compare: Compare<T>
 
   private constructor(
     private _value: T,
-    private readonly _compare: Compare<T>,
-  ) {}
+    options: undefined | ImpulseOptions<T>,
+  ) {
+    this._compare = options?.compare ?? eq
+  }
 
   /**
    * Return the value when serializing to JSON.
@@ -123,7 +126,7 @@ class Impulse<T> {
       ? [args[0](this._value), args[1]]
       : [this._value, args[0]]
 
-    return new Impulse(value, compare ?? eq)
+    return new Impulse(value, { compare })
   }
 
   /**
