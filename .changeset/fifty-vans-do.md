@@ -1,5 +1,5 @@
 ---
-"react-impulse": major
+"react-impulse": minor
 ---
 
 Add the [`Impulse#clone`](./#impulseclone) method's overload to accept `options: ImpulseOptions` as a single argument, so the resulting signature looks like the following:
