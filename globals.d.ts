@@ -1,8 +1,10 @@
-import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers"
+import type { Assertion, AsymmetricMatchersContaining } from "vitest"
+
+interface CustomMatchers<R> {
+  toHaveEmittersSize(size: number): R
+}
 
 declare module "vitest" {
-  export interface JestAssertion<R = any>
-    extends TestingLibraryMatchers<typeof expect.stringContaining, R> {
-    toHaveEmittersSize(size: number): R
-  }
+  interface Assertion<T = any> extends CustomMatchers<T> {}
+  interface AsymmetricMatchersContaining extends CustomMatchers {}
 }
