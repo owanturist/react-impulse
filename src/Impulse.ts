@@ -72,9 +72,10 @@ abstract class Impulse<T> {
 
   /**
    * Creates a new transmitting ReadonlyImpulse.
+   * A transmitting impulse is an impulse that does not have its own value but reads it from the external source.
    *
-   * @param getter the function to read the transmitting value.
-   * @param options optional `ImpulseOptions`.
+   * @param getter the function to read the transmitting value from the source.
+   * @param options optional `TransmittingImpulseOptions`.
    * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
    *
    * @version 2.0.0
@@ -86,9 +87,10 @@ abstract class Impulse<T> {
 
   /**
    * Creates a new transmitting Impulse.
+   * A transmitting impulse is an impulse that does not have its own value but reads it from the external source and writes it back.
    *
-   * @param getter the function to read the transmitting value.
-   * @param setter the function to write the transmitting value.
+   * @param getter the function to read the transmitting value from the source.
+   * @param setter the function to write the transmitting value back to the source.
    * @param options optional `TransmittingImpulseOptions`.
    * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
    */
