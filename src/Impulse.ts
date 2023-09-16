@@ -1,4 +1,9 @@
-export { type ImpulseOptions, type ReadonlyImpulse, Impulse, TransmittingImpulse  }
+export {
+  type ImpulseOptions,
+  type ReadonlyImpulse,
+  Impulse,
+  TransmittingImpulse,
+}
 
 import { type Func, type Compare, eq, isFunction } from "./utils"
 import { EMITTER_KEY, extractScope } from "./Scope"
@@ -59,10 +64,7 @@ abstract class Impulse<T> {
 
   private readonly _emitters = new Set<ScopeEmitter>()
 
-  protected constructor(
-    private _value: T,
-    private readonly _compare: Compare<T>,
-  ) {}
+  protected constructor(protected readonly _compare: Compare<T>) {}
 
   /**
    * Return the value when serializing to JSON.
@@ -94,10 +96,7 @@ abstract class Impulse<T> {
   }
 
   protected abstract _getter(): T
-  protected abstract _setter(
-    valueOrTransform: T | Func<[T], T>,
-    compare?: null | Compare<T>,
-  ): boolean
+  protected abstract _setter(valueOrTransform: T | Func<[T], T>): boolean
 
   /**
    * Creates a new Impulse instance out of the current one with the same value.
@@ -118,11 +117,6 @@ abstract class Impulse<T> {
    *
    * @version 1.0.0
    */
-  @validate
-    ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_CLONE)
-    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE)
-    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE)
-    ._alert()
   public clone(
     transform: (value: T) => T,
     options?: ImpulseOptions<T>,
@@ -136,11 +130,11 @@ abstract class Impulse<T> {
   public clone(
     ...args:
       | [options?: ImpulseOptions<T>]
-      | [transform: (value: T) => T, options?: ImpulseOptions<T>]
+      | [transform: Func<[T], T>, options?: ImpulseOptions<T>]
   ): Impulse<T> {
     const [value, { compare = this._compare } = {}] = isFunction(args[0])
-      ? [args[0](this._value), args[1]]
-      : [this._value, args[0]]
+      ? [args[0](this._getter()), args[1]]
+      : [this._getter(), args[0]]
 
     return new DirectImpulse(value, compare ?? eq)
   }
@@ -184,36 +178,29 @@ abstract class Impulse<T> {
     ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE)
     ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE)
     ._prevent()
-  public setValue(
-    valueOrTransform: T | ((currentValue: T) => T),
-  ): void {
-    this._emit(() => this._setter(valueOrTransform, compare))
+  public setValue(valueOrTransform: T | ((currentValue: T) => T)): void {
+    this._emit(() => this._setter(valueOrTransform))
   }
 }
 
 class DirectImpulse<T> extends Impulse<T> {
   public constructor(
     private _value: T,
-    public readonly compare: Compare<T>,
+    compare: Compare<T>,
   ) {
-    super()
+    super(compare)
   }
 
   protected _getter(): T {
     return this._value
   }
 
-  protected _setter(
-    valueOrTransform: T | Func<[T], T>,
-    compare: null | Compare<T> = this.compare,
-  ): boolean {
+  protected _setter(valueOrTransform: T | Func<[T], T>): boolean {
     const nextValue = isFunction(valueOrTransform)
       ? valueOrTransform(this._value)
       : valueOrTransform
 
-    const finalCompare = compare ?? eq
-
-    if (finalCompare(this._value, nextValue)) {
+    if (this._compare(this._value, nextValue)) {
       return false
     }
 
@@ -227,17 +214,17 @@ class TransmittingImpulse<T> extends Impulse<T> {
   private _value?: { _lazy: T }
 
   public constructor(
-    private _getFromSource: () => T,
-    private readonly _setToSource: (value: T) => void,
-    public readonly compare: Compare<T>,
+    private _getValue: () => T,
+    private readonly _setValue: (value: T) => void,
+    compare: Compare<T>,
   ) {
-    super()
+    super(compare)
   }
 
   protected _getter(): T {
-    const value = this._getFromSource()
+    const value = this._getValue()
 
-    if (this._value == null || !this.compare(this._value._lazy, value)) {
+    if (this._value == null || !this._compare(this._value._lazy, value)) {
       this._value = { _lazy: value }
     }
 
@@ -249,19 +236,19 @@ class TransmittingImpulse<T> extends Impulse<T> {
       ? valueOrTransform(this._getter())
       : valueOrTransform
 
-    this._setToSource(nextValue)
+    this._setValue(nextValue)
 
     return false
   }
 
   public _replaceGetter(getter: () => T): void {
-    if (this._getFromSource !== getter) {
+    if (this._getValue !== getter) {
       this._emit(() => {
         const value = this._value
 
-        this._getFromSource = getter
+        this._getValue = getter
 
-        return value == null || value._lazy !== this._getter()
+        return value == null || !this._compare(value._lazy, this._getter())
       })
     }
   }
