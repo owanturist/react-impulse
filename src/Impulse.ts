@@ -1,11 +1,12 @@
 export {
   type ImpulseOptions,
+  type TransmittingImpulseOptions,
   type ReadonlyImpulse,
   Impulse,
   TransmittingImpulse,
 }
 
-import { type Func, type Compare, eq, isFunction } from "./utils"
+import { type Func, type Compare, eq, noop, isFunction } from "./utils"
 import { EMITTER_KEY, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { validate } from "./validation"
@@ -13,12 +14,15 @@ import {
   WATCH_CALLING_IMPULSE_SET_VALUE,
   SUBSCRIBE_CALLING_IMPULSE_OF,
   SUBSCRIBE_CALLING_IMPULSE_CLONE,
+  SUBSCRIBE_CALLING_IMPULSE_TRANSMIT,
   USE_WATCH_IMPULSE_CALLING_IMPULSE_OF,
   USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE,
   USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE,
+  USE_WATCH_IMPULSE_CALLING_IMPULSE_TRANSMIT,
   USE_IMPULSE_MEMO_CALLING_IMPULSE_OF,
   USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE,
   USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE,
+  USE_IMPULSE_MEMO_CALLING_IMPULSE_TRANSMIT,
 } from "./messages"
 
 interface ImpulseOptions<T> {
@@ -27,6 +31,10 @@ interface ImpulseOptions<T> {
    * In many cases specifying the function leads to better performance because it prevents unnecessary updates.
    */
   compare?: null | Compare<T>
+}
+
+interface TransmittingImpulseOptions<T> {
+  readonly compare?: null | Compare<T>
 }
 
 type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
@@ -57,9 +65,58 @@ abstract class Impulse<T> {
     ._alert()
   public static of<T>(
     initialValue?: T,
-    { compare }: ImpulseOptions<undefined | T> = {},
+    options?: ImpulseOptions<undefined | T>,
   ): Impulse<undefined | T> {
-    return new DirectImpulse(initialValue, compare ?? eq)
+    return new DirectImpulse(initialValue, options?.compare ?? eq)
+  }
+
+  /**
+   * Creates a new transmitting ReadonlyImpulse.
+   *
+   * @param getter the function to read the transmitting value.
+   * @param options optional `ImpulseOptions`.
+   * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
+   *
+   * @version 2.0.0
+   */
+  public static transmit<T>(
+    getter: () => T,
+    options?: TransmittingImpulseOptions<T>,
+  ): ReadonlyImpulse<T>
+
+  /**
+   * Creates a new transmitting Impulse.
+   *
+   * @param getter the function to read the transmitting value.
+   * @param setter the function to write the transmitting value.
+   * @param options optional `TransmittingImpulseOptions`.
+   * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
+   */
+  public static transmit<T>(
+    getter: () => T,
+    setter: (value: T) => void,
+    options?: TransmittingImpulseOptions<T>,
+  ): Impulse<T>
+
+  @validate
+    ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_TRANSMIT)
+    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_TRANSMIT)
+    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_TRANSMIT)
+    ._alert()
+  public static transmit<T>(
+    ...args:
+      | [getter: () => T, options?: TransmittingImpulseOptions<T>]
+      | [
+          getter: () => T,
+          setter: (value: T) => void,
+          options?: TransmittingImpulseOptions<T>,
+        ]
+  ): Impulse<T> {
+    const [getter, setter, options] = isFunction(args[1])
+      ? [args[0], args[1], args[2]]
+      : [args[0], noop, args[1]]
+
+    return new TransmittingImpulse(getter, setter, options?.compare ?? eq)
   }
 
   private readonly _emitters = new Set<ScopeEmitter>()

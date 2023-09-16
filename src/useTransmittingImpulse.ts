@@ -5,9 +5,9 @@ import {
   type Impulse,
   TransmittingImpulse,
   type ReadonlyImpulse,
+  type TransmittingImpulseOptions,
 } from "./Impulse"
 import {
-  type Compare,
   noop,
   eq,
   useEvent,
@@ -15,10 +15,6 @@ import {
   useIsomorphicLayoutEffect,
   isFunction,
 } from "./utils"
-
-export interface TransmittingImpulseOptions<T> {
-  readonly compare?: null | Compare<T>
-}
 
 function useTransmittingImpulse<T>(
   getter: () => T,
@@ -35,7 +31,6 @@ function useTransmittingImpulse<T>(
   getter: () => T,
   dependencies: DependencyList,
   ...rest:
-    | []
     | [options?: TransmittingImpulseOptions<T>]
     | [setter: (value: T) => void, options?: TransmittingImpulseOptions<T>]
 ): Impulse<T> {
