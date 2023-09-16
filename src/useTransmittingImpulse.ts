@@ -43,9 +43,10 @@ function useTransmittingImpulse<T>(
     ? [rest[0], rest[1]]
     : [noop, rest[0]]
 
+  const stableSetter = useEvent(setter)
   const stableCompare = useEvent(options?.compare ?? eq)
   const impulse = usePermanent(
-    () => new TransmittingImpulse(getter, setter, stableCompare),
+    () => new TransmittingImpulse(getter, stableSetter, stableCompare),
   )
 
   useIsomorphicLayoutEffect(
