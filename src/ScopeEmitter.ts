@@ -27,11 +27,7 @@ class ScopeEmitter {
           if (!uniq.has(emitter._emit)) {
             uniq.add(emitter._emit)
             emitter._increment()
-
-            if (emitter._shouldDetachOnEmit) {
-              emitter._detachAll()
-            }
-
+            emitter._detachAll()
             emitter._emit()
           }
         })
@@ -42,10 +38,6 @@ class ScopeEmitter {
       ScopeEmitter._queue.push(execute())
     }
   }
-
-  // TODO remove shouldDetachOnEmit when Impulse#subscribe is gone
-
-  public constructor(private readonly _shouldDetachOnEmit: boolean = true) {}
 
   private readonly _cleanups: Array<VoidFunction> = []
 
