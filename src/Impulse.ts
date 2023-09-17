@@ -155,7 +155,7 @@ abstract class Impulse<T> {
   }
 
   protected abstract _getter(): T
-  protected abstract _setter(valueOrTransform: T | Func<[T], T>): boolean
+  protected abstract _setter(value: T): boolean
 
   /**
    * Creates a new Impulse instance out of the current one with the same value.
@@ -238,7 +238,13 @@ abstract class Impulse<T> {
     ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE)
     ._prevent()
   public setValue(valueOrTransform: T | ((currentValue: T) => T)): void {
-    this._emit(() => this._setter(valueOrTransform))
+    this._emit(() => {
+      const nextValue = isFunction(valueOrTransform)
+        ? valueOrTransform(this._getter())
+        : valueOrTransform
+
+      return this._setter(nextValue)
+    })
   }
 }
 
@@ -254,16 +260,12 @@ class DirectImpulse<T> extends Impulse<T> {
     return this._value
   }
 
-  protected _setter(valueOrTransform: T | Func<[T], T>): boolean {
-    const nextValue = isFunction(valueOrTransform)
-      ? valueOrTransform(this._value)
-      : valueOrTransform
-
-    if (this._compare(this._value, nextValue)) {
+  protected _setter(value: T): boolean {
+    if (this._compare(this._value, value)) {
       return false
     }
 
-    this._value = nextValue
+    this._value = value
 
     return true
   }
@@ -290,13 +292,11 @@ class TransmittingImpulse<T> extends Impulse<T> {
     return this._value._lazy
   }
 
-  protected _setter(valueOrTransform: T | Func<[T], T>): boolean {
-    const nextValue = isFunction(valueOrTransform)
-      ? valueOrTransform(this._getter())
-      : valueOrTransform
+  protected _setter(value: T): boolean {
+    this._setValue(value)
 
-    this._setValue(nextValue)
-
+    // the TransmittingImpulse does not need to emit changes by itself
+    // the transmitted impulses do it instead
     return false
   }
 
