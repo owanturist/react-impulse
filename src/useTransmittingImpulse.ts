@@ -18,10 +18,10 @@ import {
 
 /**
  * A hook that initialize a stable (never changing) transmitting ReadonlyImpulse.
- * A transmitting impulse is an impulse that does not have its own value but reads it from the external source.
+ * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source.
  *
- * @param getter the function to read the transmitting value from the source.
- * @param dependencies a list of values triggering the re-read of the transmitting value.
+ * @param getter a function to read the transmitting value from a source.
+ * @param dependencies an array of values triggering the re-read of the transmitting value.
  * @param options optional `TransmittingImpulseOptions`.
  * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
  *
@@ -35,11 +35,11 @@ function useTransmittingImpulse<T>(
 
 /**
  * A hook that initialize a stable (never changing) transmitting Impulse.
- * A transmitting impulse is an impulse that does not have its own value but reads it from the external source and writes it back.
+ * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source and writes it back.
  *
- * @param getter the function to read the transmitting value from the source.
- * @param setter the function to write the transmitting value back to the source.
- * @param dependencies a list of values triggering the re-read of the transmitting value.
+ * @param getter a function to read the transmitting value from a source.
+ * @param dependencies an array of values triggering the re-read of the transmitting value.
+ * @param setter a function to write the transmitting value back to a source.
  * @param options optional `TransmittingImpulseOptions`.
  * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
  *

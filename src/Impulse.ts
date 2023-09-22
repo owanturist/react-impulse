@@ -30,10 +30,13 @@ interface ImpulseOptions<T> {
    * The compare function determines whether or not a new Impulse's value replaces the current one.
    * In many cases specifying the function leads to better performance because it prevents unnecessary updates.
    */
-  compare?: null | Compare<T>
+  readonly compare?: null | Compare<T>
 }
 
 interface TransmittingImpulseOptions<T> {
+  /**
+   * The compare function determines whether or not a transmitting value changes when reading it from an external source.
+   */
   readonly compare?: null | Compare<T>
 }
 
@@ -72,9 +75,9 @@ abstract class Impulse<T> {
 
   /**
    * Creates a new transmitting ReadonlyImpulse.
-   * A transmitting impulse is an impulse that does not have its own value but reads it from the external source.
+   * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source.
    *
-   * @param getter the function to read the transmitting value from the source.
+   * @param getter a function to read the transmitting value from a source.
    * @param options optional `TransmittingImpulseOptions`.
    * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
    *
@@ -87,12 +90,14 @@ abstract class Impulse<T> {
 
   /**
    * Creates a new transmitting Impulse.
-   * A transmitting impulse is an impulse that does not have its own value but reads it from the external source and writes it back.
+   * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source and writes it back.
    *
-   * @param getter the function to read the transmitting value from the source.
-   * @param setter the function to write the transmitting value back to the source.
+   * @param getter a function to read the transmitting value from the source.
+   * @param setter a function to write the transmitting value back to the source.
    * @param options optional `TransmittingImpulseOptions`.
    * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
+   *
+   * @version 2.0.0
    */
   public static transmit<T>(
     getter: () => T,
