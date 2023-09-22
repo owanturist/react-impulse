@@ -2,8 +2,8 @@ export {
   type ImpulseOptions,
   type TransmittingImpulseOptions,
   type ReadonlyImpulse,
+  type TransmittingImpulse,
   Impulse,
-  TransmittingImpulse,
 }
 
 import { type Func, type Compare, eq, noop, isFunction } from "./utils"

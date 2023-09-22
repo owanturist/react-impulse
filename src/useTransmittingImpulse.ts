@@ -2,8 +2,8 @@ export { useTransmittingImpulse }
 
 import type { DependencyList } from "./dependencies"
 import {
-  type Impulse,
-  TransmittingImpulse,
+  Impulse,
+  type TransmittingImpulse,
   type ReadonlyImpulse,
   type TransmittingImpulseOptions,
 } from "./Impulse"
@@ -65,9 +65,11 @@ function useTransmittingImpulse<T>(
 
   const stableSetter = useEvent(setter)
   const stableCompare = useEvent(options?.compare ?? eq)
-  const impulse = usePermanent(
-    () => new TransmittingImpulse(getter, stableSetter, stableCompare),
-  )
+  const impulse = usePermanent(() => {
+    return Impulse.transmit(getter, stableSetter, {
+      compare: stableCompare,
+    })
+  }) as TransmittingImpulse<T>
 
   useIsomorphicLayoutEffect(
     () => impulse._replaceGetter(getter),
