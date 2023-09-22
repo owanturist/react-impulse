@@ -175,7 +175,7 @@
         "react-hooks/exhaustive-deps": [
           "error",
           {
-            "additionalHooks": "use(\\w+)(Memo|Effect)"
+            "additionalHooks": "(use(\\w+)(Memo|Effect)|useTransmittingImpulse)"
           }
         ],
 

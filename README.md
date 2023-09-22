@@ -291,7 +291,7 @@ const Counter: React.FC = () => {
 ```tsx
 import { useSearchParams } from "react-router-dom"
 
-const Counter: React.FC = () => {
+const PageNavigation: React.FC = () => {
   const [{ page_index = 1 }, setSearchParams] = useSearchParams()
 
   const page = useTransmittingImpulse(
@@ -604,7 +604,7 @@ const Challenge: React.FC = () => {
 ```dart
 function useImpulseMemo<T>(
   factory: () => T,
-  dependencies: ReadonlyArray<unknown> | undefined,
+  dependencies: undefined | DependencyList,
 ): T
 ```
 
@@ -659,19 +659,6 @@ const useCalcSum = (left: number, right: Impulse<number>): number => {
 </blockquote>
 </details>
 
-> 💡 Want to see ESLint suggestions for the dependencies? Add the hook name to the ESLint rule override:
->
-> ```json
-> {
->   "react-hooks/exhaustive-deps": [
->     "error",
->     {
->       "additionalHooks": "(useImpulse(Effect|LayoutEffect|Memo|Callback))"
->     }
->   ]
-> }
-> ```
-
 ### `useImpulseCallback`
 
 ```dart
@@ -686,25 +673,12 @@ function useImpulseCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
 
 The hook is an Impulse version of the [`React.useCallback`][react__use_callback] hook. During the `callback` execution, all Impulses that call the [`Impulse#getValue`][impulse__get_value] method become _phantom dependencies_ of the hook.
 
-> 💡 Want to see ESLint suggestions for the dependencies? Add the hook name to the ESLint rule override:
->
-> ```json
-> {
->   "react-hooks/exhaustive-deps": [
->     "error",
->     {
->       "additionalHooks": "(useImpulse(Effect|LayoutEffect|Memo|Callback))"
->     }
->   ]
-> }
-> ```
-
 ### `useImpulseEffect`
 
 ```dart
 function useImpulseEffect(
   effect: () => (void | VoidFunction),
-  dependencies?: ReadonlyArray<unknown>,
+  dependencies?: DependencyList,
 ): void
 ```
 
@@ -757,19 +731,6 @@ const usePrintSum = (left: number, right: Impulse<number>): void => {
 
 </blockquote>
 </details>
-
-> 💡 Want to see ESLint suggestions for the dependencies? Add the hook name to the ESLint rule override:
->
-> ```json
-> {
->   "react-hooks/exhaustive-deps": [
->     "error",
->     {
->       "additionalHooks": "(useImpulse(Effect|LayoutEffect|Memo|Callback))"
->     }
->   ]
-> }
-> ```
 
 ### `useImpulseLayoutEffect`
 
@@ -938,6 +899,21 @@ type Compare<T> = (left: T, right: T) => boolean
 ```
 
 A function that compares two values and returns `true` if they are equal. Depending on the type of the values it might be reasonable to use a custom compare function such as shallow-equal or deep-equal.
+
+## ESLint
+
+Want to see ESLint suggestions for the dependencies? Add the hook name to the ESLint rule override:
+
+```json
+{
+  "react-hooks/exhaustive-deps": [
+    "error",
+    {
+      "additionalHooks": "(useTransmittingImpulse|useImpulse(Effect|LayoutEffect|Memo|Callback))"
+    }
+  ]
+}
+```
 
 <!-- L I N K S -->
 
