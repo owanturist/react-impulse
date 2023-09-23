@@ -870,7 +870,7 @@ interface TransmittingImpulseOptions<T> {
   )
 
   counter_1.getValue() // { count: 1 }
-  counter_1.getValue() !== counter_1.getValue() // true
+  counter_1.getValue() === counter_1.getValue() // false
 
   // let's transmit the value but with compare function defined
 
