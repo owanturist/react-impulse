@@ -225,7 +225,7 @@ describe("with compare function", () => {
       (compare) => {
         return useTransmittingImpulse(
           () => ({ x: source.getValue() > 3 }),
-          [source],
+          [],
           { compare },
         )
       },
