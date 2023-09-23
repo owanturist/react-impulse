@@ -929,10 +929,10 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
 [use_impulse_effect]: #useimpulseeffect
 [watch]: #watch
 [batch]: #batch
-[impulse_options]: #interface_impulseoptions
-[transmitting_impulse_options]: #interface_transmittingimpulseoptions
-[use_watch_impulse_options]: #interface_usewatchimpulseoptions
-[compare]: #type_compare
+[impulse_options]: #interface-impulseoptions
+[transmitting_impulse_options]: #interface-transmittingimpulseoptions
+[use_watch_impulse_options]: #interface-usewatchimpulseoptions
+[compare]: #type-compare
 
 <!-- E X T E R N A L  L I N K S -->
 
