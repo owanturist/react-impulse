@@ -1,13 +1,7 @@
 import { render, screen, fireEvent, act } from "@testing-library/react"
 import React from "react"
 
-import {
-  type Compare,
-  Impulse,
-  useImpulseValue,
-  useWatchImpulse,
-  watch,
-} from "../../src"
+import { type Compare, Impulse, useWatchImpulse, watch } from "../../src"
 
 describe("watch()", () => {
   it("should work fine together with useState", () => {
@@ -422,11 +416,11 @@ describe("watch()", () => {
     expect(count).toHaveEmittersSize(0)
   })
 
-  it("should not subscribe twice with useImpulseValue", () => {
+  it("should not subscribe twice with useWatchImpulse", () => {
     const Component = watch<{
       count: Impulse<number>
     }>(({ count }) => {
-      const x = useImpulseValue(count)
+      const x = useWatchImpulse(() => count.getValue())
 
       return <span data-testid="result">{x}</span>
     })

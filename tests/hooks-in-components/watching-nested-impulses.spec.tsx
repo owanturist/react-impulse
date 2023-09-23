@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useImpulseValue, useWatchImpulse, watch } from "../../src"
+import { Impulse, useWatchImpulse, watch } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -32,7 +32,7 @@ describe("watching nested impulses", () => {
     onRender,
     onCounterRender,
   }) => {
-    const state = useImpulseValue(appState)
+    const state = useWatchImpulse(() => appState.getValue())
 
     return (
       <>

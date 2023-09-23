@@ -741,37 +741,11 @@ There is no Impulse version of the [`React.useInsertionEffect`][react__use_inser
 
 ```ts
 const usePrintSum = (left: number, right: Impulse<number>): void => {
-  const rightValue = useImpulseValue(right)
+  const rightValue = useWatchImpulse(() => right.getValue())
 
   React.useInsertionEffect(() => {
     console.log("sum is %d", left + rightValue)
   }, [left, rightValue])
-}
-```
-
-### `useImpulseValue`
-
-```dart
-function useImpulseValue<T>(impulse: Impulse<T>): T
-```
-
-A hook that subscribes to the `impulse` changes and returns the current value.
-
-- `impulse` is an `Impulse` instance.
-
-```tsx
-const Input: React.FC<{
-  value: Impulse<string>
-}> = ({ value }) => {
-  const text = useImpulseValue(value)
-
-  return (
-    <input
-      type="text"
-      value={text}
-      onChange={(event) => value.setValue(event.target.value)}
-    />
-  )
 }
 ```
 

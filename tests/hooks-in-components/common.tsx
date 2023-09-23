@@ -3,7 +3,7 @@ export { withinNth, expectCounts, CounterComponent }
 import React from "react"
 import { screen, within } from "@testing-library/react"
 
-import { type Impulse, useImpulseValue } from "../../src"
+import { type Impulse, useWatchImpulse } from "../../src"
 
 const withinNth = (testId: string, position: number) => {
   return within(screen.getAllByTestId(testId)[position]!)
@@ -26,7 +26,7 @@ const CounterComponent: React.FC<{
   onRender: VoidFunction
 }> = React.memo(
   ({ count: countImpulse, onRender }) => {
-    const count = useImpulseValue(countImpulse)
+    const count = useWatchImpulse(() => countImpulse.getValue())
 
     return (
       <React.Profiler id="test" onRender={onRender}>
