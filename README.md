@@ -737,7 +737,7 @@ The hook is an Impulse version of the [`React.useLayoutEffect`][react__use_layou
 
 ### ~~`useImpulseInsertionEffect`~~
 
-There is no Impulse version of the [`React.useInsertionEffect`][react__use_insertion_effect] hook due to backward compatibility with React from `v16.8.0`. The workaround is to use the native `React.useInsertionEffect` hook with the values extracted beforehand:
+There is no Impulse version of the [`React.useInsertionEffect`][react__use_insertion_effect] hook due to backward compatibility with React from `v16.12.0`. The workaround is to use the native `React.useInsertionEffect` hook with the values extracted beforehand:
 
 ```ts
 const usePrintSum = (left: number, right: Impulse<number>): void => {
@@ -921,6 +921,7 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
 <!-- L I N K S -->
 
 [impulse__of]: #impulseof
+[impulse__transmit]: #impulsetransmit
 [impulse__clone]: #impulseclone
 [impulse__get_value]: #impulsegetvalue
 [impulse__set_value]: #impulsesetvalue
