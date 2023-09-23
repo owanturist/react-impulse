@@ -139,7 +139,7 @@ Impulse.transmit<T>(
 
 A static method that creates a new transmitting Impulse. A transmitting Impulse is an Impulse that does not have its own value but reads it from an external source and writes it back to the source when the value changes. An external source is usually another Impulse or other Impulses.
 
-<details><summary><i>Click here to see how to transmit an Impulse</i></summary>
+<details><summary><i>Showcase: transmitting an Impulse</i></summary>
 <blockquote>
 
 ```tsx
@@ -186,7 +186,7 @@ const ProductDetailsDrawer: React.FC<{
 </blockquote>
 </details>
 
-<details><summary><i>Click here to see how to transmit many Impulses</i></summary>
+<details><summary><i>Showcase: transmitting many Impulses</i></summary>
 <blockquote>
 
 ```tsx
@@ -235,7 +235,7 @@ const Agreements: React.FC<{
 
 It can also transmit another store's value, such as `React.useState`, `redux`, URL, etc.
 
-<details><summary><i>Click here to see how to transmit a React state</i></summary>
+<details><summary><i>Showcase: transmitting a React state</i></summary>
 <blockquote>
 
 ```tsx
@@ -258,7 +258,7 @@ const Counter: React.FC = () => {
 </blockquote>
 </details>
 
-<details><summary><i>Click here to see how to transmit a Redux store</i></summary>
+<details><summary><i>Showcase: transmitting a Redux store</i></summary>
 <blockquote>
 
 ```tsx
@@ -284,7 +284,7 @@ const Counter: React.FC = () => {
 </blockquote>
 </details>
 
-<details><summary><i>Click here to see how to transmit a search param from URL with `react-router`</i></summary>
+<details><summary><i>Showcase: transmitting a search param from URL with `react-router`</i></summary>
 <blockquote>
 
 ```tsx
@@ -612,7 +612,7 @@ function useImpulseMemo<T>(
 
 The hook is an Impulse version of the [`React.useMemo`][react__use_memo] hook. During the `factory` execution, all Impulses that call the [`Impulse#getValue`][impulse__get_value] method become _phantom dependencies_ of the hook.
 
-<details><summary><i>Click here to learn more about the phantom dependencies.</i></summary>
+<details><summary><i>Learn more about the phantom dependencies.</i></summary>
 <blockquote>
 
 The `factory` runs again whenever any dependency or a value of any phantom dependency changes:
@@ -687,7 +687,7 @@ function useImpulseEffect(
 
 The hook is an Impulse version of the [`React.useEffect`][react__use_effect] hook. During the `effect` execution, all Impulses that call the [`Impulse#getValue`][impulse__get_value] method become _phantom dependencies_ of the hook.
 
-<details><summary><i>Click here to learn more about the phantom dependencies.</i></summary>
+<details><summary><i>Learn more about the phantom dependencies.</i></summary>
 <blockquote>
 
 The `effect` runs again whenever any dependency or a value of any phantom dependency changes:
@@ -857,6 +857,9 @@ interface TransmittingImpulseOptions<T> {
 
 - `[compare]` is an optional [`Compare`][compare] function that determines whether or not a transmitting value changes when reading it from an external source.
 
+  <details><summary><i>Showcase: use compare function in transmitting Impulse</i></summary>
+  <blockquote>
+
   ```ts
   const source = Impulse.of(1)
 
@@ -884,6 +887,9 @@ interface TransmittingImpulseOptions<T> {
   counter_2.getValue() // { count: 1 }
   counter_2.getValue() === counter_2.getValue() // true
   ```
+
+  </blockquote>
+  </details>
 
 ### `interface UseWatchImpulseOptions`
 
