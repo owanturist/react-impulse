@@ -120,12 +120,12 @@ const timeout = Impulse.of<number>() // Impulse<undefined | number>
 ### `Impulse.transmit`
 
 ```dart
-transmit<T>(
+Impulse.transmit<T>(
   getter: () => T,
   options?: TransmittingImpulseOptions<T>,
 ): ReadonlyImpulse<T>
 
-transmit<T>(
+Impulse.transmit<T>(
   getter: () => T,
   setter: (value: T) => void,
   options?: TransmittingImpulseOptions<T>,
@@ -135,7 +135,6 @@ transmit<T>(
 - `getter` is a function to read the transmitting value from a source.
 - `[setter]` is an optional function to write the transmitting value back to the source. When not defined, the Impulse is readonly.
 - `[options]` is an optional [`TransmittingImpulseOptions`][transmitting_impulse_options] object.
-
   - `[options.compare]` when not defined it uses the `compare` function from the origin Impulse, when `null` the [`Object.is`][object_is] function applies to compare the values.
 
 A static method that creates a new transmitting Impulse. A transmitting Impulse is an Impulse that does not have its own value but reads it from an external source and writes it back to the source when the value changes. An external source is usually another Impulse or other Impulses.
@@ -834,7 +833,11 @@ const unsubscribe = subscribe(() => {
 
 In the example above the `listener` will not react on the `impulse_2` updates until the `impulse_1` value is greater than `1`. The `impulse_3` updates will never trigger the `listener`, because the `impulse_3.getValue()` is not called inside the `listener`.
 
-### `ImpulseOptions`
+### `type ReadonlyImpulse`
+
+A type alias for `Impulse` that does not have the [`Impulse#setValue`][impulse__set_value] method. It might be handy to store some value inside an Impulse, so the value change trigger a host component re-render only if the component reads the value from the Impulse.
+
+### `interface ImpulseOptions`
 
 ```ts
 interface ImpulseOptions<T> {
@@ -844,7 +847,7 @@ interface ImpulseOptions<T> {
 
 - `[compare]` is an optional [`Compare`][compare] function that determines whether or not a new Impulse's value replaces the current one. In many cases specifying the function leads to better performance because it prevents unnecessary updates. But keep the balance between the performance and the complexity of the function - sometimes it might be better to replace the value without heavy comparisons.
 
-### `TransmittingImpulseOptions`
+### `interface TransmittingImpulseOptions`
 
 ```ts
 interface TransmittingImpulseOptions<T> {
@@ -882,7 +885,7 @@ interface TransmittingImpulseOptions<T> {
   counter_2.getValue() === counter_2.getValue() // true
   ```
 
-### `UseWatchImpulseOptions`
+### `interface UseWatchImpulseOptions`
 
 ```ts
 interface UseWatchImpulseOptions<T> {
@@ -892,7 +895,7 @@ interface UseWatchImpulseOptions<T> {
 
 - `[compare]` is an optional [`Compare`][compare] function that determines whether or not the watcher result is different. If the watcher result is different, a host component re-renders. In many cases specifying the function leads to better performance because it prevents unnecessary updates.
 
-### `Compare`
+### `type Compare`
 
 ```ts
 type Compare<T> = (left: T, right: T) => boolean
@@ -926,10 +929,10 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
 [use_impulse_effect]: #useimpulseeffect
 [watch]: #watch
 [batch]: #batch
-[impulse_options]: #impulseoptions
-[transmitting_impulse_options]: #transmittingimpulseoptions
-[use_watch_impulse_options]: #usewatchimpulseoptions
-[compare]: #compare
+[impulse_options]: #interface_impulseoptions
+[transmitting_impulse_options]: #interface_transmittingimpulseoptions
+[use_watch_impulse_options]: #interface_usewatchimpulseoptions
+[compare]: #type_compare
 
 <!-- E X T E R N A L  L I N K S -->
 
