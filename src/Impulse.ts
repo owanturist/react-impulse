@@ -1,6 +1,12 @@
-export { type ImpulseOptions, Impulse }
+export {
+  type ImpulseOptions,
+  type TransmittingImpulseOptions,
+  type ReadonlyImpulse,
+  type TransmittingImpulse,
+  Impulse,
+}
 
-import { type Compare, eq, isFunction } from "./utils"
+import { type Func, type Compare, eq, noop, isFunction } from "./utils"
 import { EMITTER_KEY, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { validate } from "./validation"
@@ -8,12 +14,15 @@ import {
   WATCH_CALLING_IMPULSE_SET_VALUE,
   SUBSCRIBE_CALLING_IMPULSE_OF,
   SUBSCRIBE_CALLING_IMPULSE_CLONE,
+  SUBSCRIBE_CALLING_IMPULSE_TRANSMIT,
   USE_WATCH_IMPULSE_CALLING_IMPULSE_OF,
   USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE,
   USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE,
+  USE_WATCH_IMPULSE_CALLING_IMPULSE_TRANSMIT,
   USE_IMPULSE_MEMO_CALLING_IMPULSE_OF,
   USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE,
   USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE,
+  USE_IMPULSE_MEMO_CALLING_IMPULSE_TRANSMIT,
 } from "./messages"
 
 interface ImpulseOptions<T> {
@@ -21,10 +30,19 @@ interface ImpulseOptions<T> {
    * The compare function determines whether or not a new Impulse's value replaces the current one.
    * In many cases specifying the function leads to better performance because it prevents unnecessary updates.
    */
-  compare?: null | Compare<T>
+  readonly compare?: null | Compare<T>
 }
 
-class Impulse<T> {
+interface TransmittingImpulseOptions<T> {
+  /**
+   * The compare function determines whether or not a transmitting value changes when reading it from an external source.
+   */
+  readonly compare?: null | Compare<T>
+}
+
+type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
+
+abstract class Impulse<T> {
   /**
    * Creates new Impulse without an initial value.
    *
@@ -50,17 +68,67 @@ class Impulse<T> {
     ._alert()
   public static of<T>(
     initialValue?: T,
-    { compare }: ImpulseOptions<undefined | T> = {},
+    options?: ImpulseOptions<undefined | T>,
   ): Impulse<undefined | T> {
-    return new Impulse(initialValue, compare ?? eq)
+    return new DirectImpulse(initialValue, options?.compare ?? eq)
+  }
+
+  /**
+   * Creates a new transmitting ReadonlyImpulse.
+   * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source.
+   *
+   * @param getter a function to read the transmitting value from a source.
+   * @param options optional `TransmittingImpulseOptions`.
+   * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
+   *
+   * @version 2.0.0
+   */
+  public static transmit<T>(
+    getter: () => T,
+    options?: TransmittingImpulseOptions<T>,
+  ): ReadonlyImpulse<T>
+
+  /**
+   * Creates a new transmitting Impulse.
+   * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source and writes it back.
+   *
+   * @param getter a function to read the transmitting value from the source.
+   * @param setter a function to write the transmitting value back to the source.
+   * @param options optional `TransmittingImpulseOptions`.
+   * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
+   *
+   * @version 2.0.0
+   */
+  public static transmit<T>(
+    getter: () => T,
+    setter: (value: T) => void,
+    options?: TransmittingImpulseOptions<T>,
+  ): Impulse<T>
+
+  @validate
+    ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_TRANSMIT)
+    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_TRANSMIT)
+    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_TRANSMIT)
+    ._alert()
+  public static transmit<T>(
+    ...args:
+      | [getter: () => T, options?: TransmittingImpulseOptions<T>]
+      | [
+          getter: () => T,
+          setter: (value: T) => void,
+          options?: TransmittingImpulseOptions<T>,
+        ]
+  ): Impulse<T> {
+    const [getter, setter, options] = isFunction(args[1])
+      ? [args[0], args[1], args[2]]
+      : [args[0], noop, args[1]]
+
+    return new TransmittingImpulse(getter, setter, options?.compare ?? eq)
   }
 
   private readonly _emitters = new Set<ScopeEmitter>()
 
-  private constructor(
-    private _value: T,
-    private readonly _compare: Compare<T>,
-  ) {}
+  protected constructor(protected readonly _compare: Compare<T>) {}
 
   /**
    * Return the value when serializing to JSON.
@@ -84,6 +152,15 @@ class Impulse<T> {
   protected toString(): string {
     return String(this.getValue())
   }
+
+  protected _emit(execute: () => boolean): void {
+    ScopeEmitter._schedule(() => {
+      return execute() ? this._emitters : null
+    })
+  }
+
+  protected abstract _getter(): T
+  protected abstract _setter(value: T): boolean
 
   /**
    * Creates a new Impulse instance out of the current one with the same value.
@@ -117,13 +194,13 @@ class Impulse<T> {
   public clone(
     ...args:
       | [options?: ImpulseOptions<T>]
-      | [transform: (value: T) => T, options?: ImpulseOptions<T>]
+      | [transform: Func<[T], T>, options?: ImpulseOptions<T>]
   ): Impulse<T> {
     const [value, { compare = this._compare } = {}] = isFunction(args[0])
-      ? [args[0](this._value), args[1]]
-      : [this._value, args[0]]
+      ? [args[0](this._getter()), args[1]]
+      : [this._getter(), args[0]]
 
-    return new Impulse(value, compare ?? eq)
+    return new DirectImpulse(value, compare ?? eq)
   }
 
   /**
@@ -141,12 +218,14 @@ class Impulse<T> {
    */
   public getValue<R>(select: (value: T) => R): R
 
-  public getValue<R>(select?: (value: T) => R): T | R {
+  public getValue<R>(select?: Func<[T], R>): T | R {
     const scope = extractScope()
 
     scope[EMITTER_KEY]?._attachTo(this._emitters)
 
-    return isFunction(select) ? select(this._value) : this._value
+    const value = this._getter()
+
+    return isFunction(select) ? select(value) : value
   }
 
   /**
@@ -164,18 +243,77 @@ class Impulse<T> {
     ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE)
     ._prevent()
   public setValue(valueOrTransform: T | ((currentValue: T) => T)): void {
-    ScopeEmitter._schedule(() => {
+    this._emit(() => {
       const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(this._value)
+        ? valueOrTransform(this._getter())
         : valueOrTransform
 
-      if (this._compare(this._value, nextValue)) {
-        return null
-      }
-
-      this._value = nextValue
-
-      return this._emitters
+      return this._setter(nextValue)
     })
+  }
+}
+
+class DirectImpulse<T> extends Impulse<T> {
+  public constructor(
+    private _value: T,
+    compare: Compare<T>,
+  ) {
+    super(compare)
+  }
+
+  protected _getter(): T {
+    return this._value
+  }
+
+  protected _setter(value: T): boolean {
+    if (this._compare(this._value, value)) {
+      return false
+    }
+
+    this._value = value
+
+    return true
+  }
+}
+
+class TransmittingImpulse<T> extends Impulse<T> {
+  private _value?: { _lazy: T }
+
+  public constructor(
+    private _getValue: () => T,
+    private readonly _setValue: (value: T) => void,
+    compare: Compare<T>,
+  ) {
+    super(compare)
+  }
+
+  protected _getter(): T {
+    const value = this._getValue()
+
+    if (this._value == null || !this._compare(this._value._lazy, value)) {
+      this._value = { _lazy: value }
+    }
+
+    return this._value._lazy
+  }
+
+  protected _setter(value: T): boolean {
+    this._setValue(value)
+
+    // the TransmittingImpulse does not need to emit changes by itself
+    // the transmitted impulses do it instead
+    return false
+  }
+
+  public _replaceGetter(getter: () => T): void {
+    if (this._getValue !== getter) {
+      this._emit(() => {
+        const value = this._value
+
+        this._getValue = getter
+
+        return value == null || !this._compare(value._lazy, this._getter())
+      })
+    }
   }
 }

@@ -18,7 +18,6 @@ const manglePlugin: Required<Options>["plugins"][0] = {
         compress: false,
         output: {
           beautify: true,
-          comments: "all",
           preserve_annotations: true,
         },
         mangle: {

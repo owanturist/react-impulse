@@ -14,7 +14,7 @@ interface UseWatchImpulseOptions<T> {
    *
    * @default Object.is
    */
-  compare?: null | Compare<T>
+  readonly compare?: null | Compare<T>
 }
 
 /**

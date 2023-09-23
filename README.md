@@ -107,7 +107,7 @@ Impulse.of<T>(
 A static method that creates new Impulse.
 
 - `[initialValue]` is an optional initial value. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
-- `[options]` is optional [`ImpulseOptions`][impulse_options] object.
+- `[options]` is an optional [`ImpulseOptions`][impulse_options] object.
   - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
 > 💡 The [`useImpulse`][use_impulse] hook helps to create and store an `Impulse` inside a React component.
@@ -116,6 +116,203 @@ A static method that creates new Impulse.
 const count = Impulse.of(1) // Impulse<number>
 const timeout = Impulse.of<number>() // Impulse<undefined | number>
 ```
+
+### `Impulse.transmit`
+
+```dart
+Impulse.transmit<T>(
+  getter: () => T,
+  options?: TransmittingImpulseOptions<T>,
+): ReadonlyImpulse<T>
+
+Impulse.transmit<T>(
+  getter: () => T,
+  setter: (value: T) => void,
+  options?: TransmittingImpulseOptions<T>,
+): Impulse<T>
+```
+
+- `getter` is a function to read the transmitting value from a source.
+- `[setter]` is an optional function to write the transmitting value back to the source. When not defined, the Impulse is readonly.
+- `[options]` is an optional [`TransmittingImpulseOptions`][transmitting_impulse_options] object.
+  - `[options.compare]` when not defined it uses the `compare` function from the origin Impulse, when `null` the [`Object.is`][object_is] function applies to compare the values.
+
+A static method that creates a new transmitting Impulse. A transmitting Impulse is an Impulse that does not have its own value but reads it from an external source and writes it back to the source when the value changes. An external source is usually another Impulse or other Impulses.
+
+<details><summary><i>Showcase: transmitting an Impulse</i></summary>
+<blockquote>
+
+```tsx
+const Drawer: React.FC<{
+  isOpen: Impulse<boolean>
+  children: React.ReactNode
+}> = watch(({ isOpen, children }) => {
+  if (!isOpen.getValue()) {
+    return null
+  }
+
+  return (
+    <div className="drawer">
+      {children}
+
+      <button type="button" onClick={() => isOpen.setValue(false)}>
+        Close
+      </button>
+    </div>
+  )
+})
+
+const ProductDetailsDrawer: React.FC<{
+  product: Impulse<undefined | Product>
+}> = ({ product }) => {
+  const isOpen = useTransmittingImpulse(
+    () => product.getValue() != null,
+    [product],
+    (open) => {
+      if (!open) {
+        product.setValue(undefined)
+      }
+    },
+  )
+
+  return (
+    <Drawer isOpen={isOpen}>
+      <ProductDetails product={product} />
+    </Drawer>
+  )
+}
+```
+
+</blockquote>
+</details>
+
+<details><summary><i>Showcase: transmitting many Impulses</i></summary>
+<blockquote>
+
+```tsx
+const Checkbox: React.FC<{
+  checked: Impulse<boolean>
+}> = watch(({ checked, children }) => (
+  <input
+    type="checkbox"
+    checked={checked.getValue()}
+    onChange={(event) => checked.setValue(event.target.checked)}
+  />
+))
+
+const Agreements: React.FC<{
+  isAgreeWithTermsOfUse: Impulse<boolean>
+  isAgreeWithPrivacy: Impulse<boolean>
+}> = watch(({ isAgreeWithTermsOfUse, isAgreeWithPrivacy }) => {
+  const isAgreeWithAll = useTransmittingImpulse(
+    () => isAgreeWithTermsOfUse.getValue() && isAgreeWithPrivacy.getValue(),
+    [isAgreeWithTermsOfUse, isAgreeWithPrivacy],
+    (agree) => {
+      isAgreeWithTermsOfUse.setValue(agree)
+      isAgreeWithPrivacy.setValue(agree)
+    },
+  )
+
+  return (
+    <div>
+      <Checkbox checked={isAgreeWithTermsOfUse}>
+        I agree with terms of use
+      </Checkbox>
+      <Checkbox checked={isAgreeWithPrivacy}>
+        I agree with privacy policy
+      </Checkbox>
+
+      <hr />
+
+      <Checkbox checked={isAgreeWithAll}>I agree with all</Checkbox>
+    </div>
+  )
+})
+```
+
+</blockquote>
+</details>
+
+It can also transmit another store's value, such as `React.useState`, `redux`, URL, etc.
+
+<details><summary><i>Showcase: transmitting a React state</i></summary>
+<blockquote>
+
+```tsx
+const Counter: React.FC = () => {
+  const [count, setCount] = React.useState(0)
+  const countImpulse = useTransmittingImpulse(
+    () => count,
+    [count],
+    (value) => setCount(value),
+  )
+
+  return (
+    <button type="button" onClick={() => countImpulse.setValue((x) => x + 1)}>
+      {count}
+    </button>
+  )
+}
+```
+
+</blockquote>
+</details>
+
+<details><summary><i>Showcase: transmitting a Redux store</i></summary>
+<blockquote>
+
+```tsx
+import { useSelector, useDispatch } from "react-redux"
+
+const Counter: React.FC = () => {
+  const count = useSelector((state) => state.count)
+  const dispatch = useDispatch()
+  const countImpulse = useTransmittingImpulse(
+    () => count,
+    [count],
+    (value) => dispatch({ type: "SET_COUNT", payload: value }),
+  )
+
+  return (
+    <button type="button" onClick={() => countImpulse.setValue((x) => x + 1)}>
+      {count}
+    </button>
+  )
+}
+```
+
+</blockquote>
+</details>
+
+<details><summary><i>Showcase: transmitting a search param from URL with `react-router`</i></summary>
+<blockquote>
+
+```tsx
+import { useSearchParams } from "react-router-dom"
+
+const PageNavigation: React.FC = () => {
+  const [{ page_index = 1 }, setSearchParams] = useSearchParams()
+
+  const page = useTransmittingImpulse(
+    () => page_index,
+    [page_index],
+    (index) => {
+      setSearchParams({ page_index: index })
+    },
+  )
+
+  return (
+    <button type="button" onClick={() => page.setValue((x) => x + 1)}>
+      Go to the next page
+    </button>
+  )
+}
+```
+
+</blockquote>
+</details>
+
+> 💡 The [`useTransmittingImpulse`][use_transmitting_impulse] hook helps to create and store a transmitting `Impulse` inside a React component.
 
 ### `Impulse#getValue`
 
@@ -174,7 +371,7 @@ Impulse<T>#clone(
 ): Impulse<T>
 ```
 
-An `Impulse` instance's method for cloning an Impulse.
+An `Impulse` instance's method for cloning an Impulse. When cloning a transmitting Impulse, the new Impulse is not transmitting, meaning that it does not read nor write the value from/to the external source.
 
 - `[transform]` is an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
 - `[options]` is optional [`ImpulseOptions`][impulse_options] object.
@@ -299,6 +496,8 @@ A hook that initiates a stable (never changing) Impulse. It's value can be chang
 
 > 💬 The initial value is disregarded during subsequent re-renders but compare function is not - it uses the latest function passed to the hook.
 
+> 💡 There is no need to memoize `options.compare` function. The hook does it internally.
+
 ```ts
 const count = useImpulse(0) // Impulse<number>
 const timeout = useImpulse<number>() // Impulse<undefined | number>
@@ -310,6 +509,33 @@ const tableSum = useImpulse(() => {
     .reduce((acc, x) => acc + x, 0)
 }) // Impulse<number>
 ```
+
+### `useTransmittingImpulse`
+
+```dart
+function useTransmittingImpulse<T>(
+  getter: () => T,
+  dependencies: DependencyList,
+  options?: TransmittingImpulseOptions<T>,
+): ReadonlyImpulse<T>
+
+function useTransmittingImpulse<T>(
+  getter: () => T,
+  dependencies: DependencyList,
+  setter: (value: T) => void,
+  options?: TransmittingImpulseOptions<T>,
+): Impulse<T>
+```
+
+- `getter` is a function to read the transmitting value from a source.
+- `dependencies` an array of values triggering the re-read of the transmitting value.
+- `[setter]` is an optional function to write the transmitting value back to the source. When not defined, the Impulse is readonly.
+- `[options]` is an optional [`TransmittingImpulseOptions`][transmitting_impulse_options] object.
+  - `[options.compare]` when not defined it uses the `compare` function from the origin Impulse, when `null` the [`Object.is`][object_is] function applies to compare the values.
+
+A hook that initialize a stable (never changing) transmitting Impulse. Look at the [`Impulse.transmit`][impulse__transmit] method for more details and examples.
+
+> 💡 There is no need to memoize neither `getter`, `setter`, nor `options.compare` functions. The hook does it internally.
 
 ### `useWatchImpulse`
 
@@ -370,12 +596,14 @@ const Challenge: React.FC = () => {
 
 > 💡 Keep in mind that the `watcher` function acts as a "reader" so you'd like to avoid heavy computations inside it. Sometimes it might be a good idea to pass a watcher result to a separated memoization hook. The same is true for the `compare` function - you should choose wisely between avoiding extra re-renders and heavy comparisons.
 
+> 💡 There is no need to memoize `options.compare` function. The hook does it internally.
+
 ### `useImpulseMemo`
 
 ```dart
 function useImpulseMemo<T>(
   factory: () => T,
-  dependencies: ReadonlyArray<unknown> | undefined,
+  dependencies: undefined | DependencyList,
 ): T
 ```
 
@@ -384,7 +612,7 @@ function useImpulseMemo<T>(
 
 The hook is an Impulse version of the [`React.useMemo`][react__use_memo] hook. During the `factory` execution, all Impulses that call the [`Impulse#getValue`][impulse__get_value] method become _phantom dependencies_ of the hook.
 
-<details><summary><i>Click here to learn more about the phantom dependencies.</i></summary>
+<details><summary><i>Learn more about the phantom dependencies.</i></summary>
 <blockquote>
 
 The `factory` runs again whenever any dependency or a value of any phantom dependency changes:
@@ -430,19 +658,6 @@ const useCalcSum = (left: number, right: Impulse<number>): number => {
 </blockquote>
 </details>
 
-> 💡 Want to see ESLint suggestions for the dependencies? Add the hook name to the ESLint rule override:
->
-> ```json
-> {
->   "react-hooks/exhaustive-deps": [
->     "error",
->     {
->       "additionalHooks": "(useImpulse(Effect|LayoutEffect|Memo|Callback))"
->     }
->   ]
-> }
-> ```
-
 ### `useImpulseCallback`
 
 ```dart
@@ -457,25 +672,12 @@ function useImpulseCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
 
 The hook is an Impulse version of the [`React.useCallback`][react__use_callback] hook. During the `callback` execution, all Impulses that call the [`Impulse#getValue`][impulse__get_value] method become _phantom dependencies_ of the hook.
 
-> 💡 Want to see ESLint suggestions for the dependencies? Add the hook name to the ESLint rule override:
->
-> ```json
-> {
->   "react-hooks/exhaustive-deps": [
->     "error",
->     {
->       "additionalHooks": "(useImpulse(Effect|LayoutEffect|Memo|Callback))"
->     }
->   ]
-> }
-> ```
-
 ### `useImpulseEffect`
 
 ```dart
 function useImpulseEffect(
   effect: () => (void | VoidFunction),
-  dependencies?: ReadonlyArray<unknown>,
+  dependencies?: DependencyList,
 ): void
 ```
 
@@ -485,7 +687,7 @@ function useImpulseEffect(
 
 The hook is an Impulse version of the [`React.useEffect`][react__use_effect] hook. During the `effect` execution, all Impulses that call the [`Impulse#getValue`][impulse__get_value] method become _phantom dependencies_ of the hook.
 
-<details><summary><i>Click here to learn more about the phantom dependencies.</i></summary>
+<details><summary><i>Learn more about the phantom dependencies.</i></summary>
 <blockquote>
 
 The `effect` runs again whenever any dependency or a value of any phantom dependency changes:
@@ -529,26 +731,13 @@ const usePrintSum = (left: number, right: Impulse<number>): void => {
 </blockquote>
 </details>
 
-> 💡 Want to see ESLint suggestions for the dependencies? Add the hook name to the ESLint rule override:
->
-> ```json
-> {
->   "react-hooks/exhaustive-deps": [
->     "error",
->     {
->       "additionalHooks": "(useImpulse(Effect|LayoutEffect|Memo|Callback))"
->     }
->   ]
-> }
-> ```
-
 ### `useImpulseLayoutEffect`
 
 The hook is an Impulse version of the [`React.useLayoutEffect`][react__use_layout_effect] hook. Acts similar way as [`useImpulseEffect`][use_impulse_effect].
 
 ### ~~`useImpulseInsertionEffect`~~
 
-There is no Impulse version of the [`React.useInsertionEffect`][react__use_insertion_effect] hook due to backward compatibility with React from `v16.8.0`. The workaround is to use the native `React.useInsertionEffect` hook with the values extracted beforehand:
+There is no Impulse version of the [`React.useInsertionEffect`][react__use_insertion_effect] hook due to backward compatibility with React from `v16.12.0`. The workaround is to use the native `React.useInsertionEffect` hook with the values extracted beforehand:
 
 ```ts
 const usePrintSum = (left: number, right: Impulse<number>): void => {
@@ -644,7 +833,11 @@ const unsubscribe = subscribe(() => {
 
 In the example above the `listener` will not react on the `impulse_2` updates until the `impulse_1` value is greater than `1`. The `impulse_3` updates will never trigger the `listener`, because the `impulse_3.getValue()` is not called inside the `listener`.
 
-### `ImpulseOptions`
+### `type ReadonlyImpulse`
+
+A type alias for `Impulse` that does not have the [`Impulse#setValue`][impulse__set_value] method. It might be handy to store some value inside an Impulse, so the value change trigger a host component re-render only if the component reads the value from the Impulse.
+
+### `interface ImpulseOptions`
 
 ```ts
 interface ImpulseOptions<T> {
@@ -654,7 +847,51 @@ interface ImpulseOptions<T> {
 
 - `[compare]` is an optional [`Compare`][compare] function that determines whether or not a new Impulse's value replaces the current one. In many cases specifying the function leads to better performance because it prevents unnecessary updates. But keep the balance between the performance and the complexity of the function - sometimes it might be better to replace the value without heavy comparisons.
 
-### `UseWatchImpulseOptions`
+### `interface TransmittingImpulseOptions`
+
+```ts
+interface TransmittingImpulseOptions<T> {
+  compare?: null | Compare<T>
+}
+```
+
+- `[compare]` is an optional [`Compare`][compare] function that determines whether or not a transmitting value changes when reading it from an external source.
+
+  <details><summary><i>Showcase: use compare function in transmitting Impulse</i></summary>
+  <blockquote>
+
+  ```ts
+  const source = Impulse.of(1)
+
+  const counter_1 = Impulse.transmit(
+    // the getter function creates a new object on every read
+    () => ({ count: source.getValue() }),
+    ({ count }) => source.setValue(count),
+  )
+
+  counter_1.getValue() // { count: 1 }
+  counter_1.getValue() === counter_1.getValue() // false
+
+  // let's transmit the value but with compare function defined
+
+  const counter_1 = Impulse.transmit(
+    // the getter function creates a new object on every read
+    // but if they are compared equal, the transmitting value is not changed
+    () => ({ count: source.getValue() }),
+    ({ count }) => source.setValue(count),
+    {
+      compare: (left, right) => left.count === right.count,
+    },
+  )
+
+  counter_2.getValue() // { count: 1 }
+  counter_2.getValue() === counter_2.getValue() // true
+  ```
+
+  </blockquote>
+  </details>
+
+### `interface UseWatchImpulseOptions`
 
 ```ts
 interface UseWatchImpulseOptions<T> {
@@ -664,7 +901,7 @@ interface UseWatchImpulseOptions<T> {
 
 - `[compare]` is an optional [`Compare`][compare] function that determines whether or not the watcher result is different. If the watcher result is different, a host component re-renders. In many cases specifying the function leads to better performance because it prevents unnecessary updates.
 
-### `Compare`
+### `type Compare`
 
 ```ts
 type Compare<T> = (left: T, right: T) => boolean
@@ -672,19 +909,37 @@ type Compare<T> = (left: T, right: T) => boolean
 
 A function that compares two values and returns `true` if they are equal. Depending on the type of the values it might be reasonable to use a custom compare function such as shallow-equal or deep-equal.
 
+## ESLint
+
+Want to see ESLint suggestions for the dependencies? Add the hook name to the ESLint rule override:
+
+```json
+{
+  "react-hooks/exhaustive-deps": [
+    "error",
+    {
+      "additionalHooks": "(useTransmittingImpulse|useImpulse(Effect|LayoutEffect|Memo|Callback))"
+    }
+  ]
+}
+```
+
 <!-- L I N K S -->
 
 [impulse__of]: #impulseof
+[impulse__transmit]: #impulsetransmit
 [impulse__clone]: #impulseclone
 [impulse__get_value]: #impulsegetvalue
 [impulse__set_value]: #impulsesetvalue
 [use_impulse]: #useimpulse
+[use_transmitting_impulse]: #usetransmittingimpulse
 [use_impulse_effect]: #useimpulseeffect
 [watch]: #watch
 [batch]: #batch
-[impulse_options]: #impulseoptions
-[use_watch_impulse_options]: #usewatchimpulseoptions
-[compare]: #compare
+[impulse_options]: #interface-impulseoptions
+[transmitting_impulse_options]: #interface-transmittingimpulseoptions
+[use_watch_impulse_options]: #interface-usewatchimpulseoptions
+[compare]: #type-compare
 
 <!-- E X T E R N A L  L I N K S -->
 
