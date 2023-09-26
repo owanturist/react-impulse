@@ -12,6 +12,11 @@ import { defineExecutionContext } from "./validation"
  */
 function subscribe(listener: VoidFunction): VoidFunction {
   const emitter = new ScopeEmitter()
+
+
+
+
+  
   const emit = (): void => {
     defineExecutionContext(
       "subscribe",

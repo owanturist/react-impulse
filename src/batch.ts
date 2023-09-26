@@ -11,7 +11,7 @@ import { ScopeEmitter } from "./ScopeEmitter"
  */
 function batch(execute: VoidFunction): void {
   ScopeEmitter._schedule(() => {
-    execute()
+    execute();
 
     return null
   })

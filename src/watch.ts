@@ -35,7 +35,7 @@ function watch<TProps>(component: FC<TProps>): FC<TProps> {
       getScope(),
       component,
       props,
-      ctx,
+      ctx
     )
   }
 
