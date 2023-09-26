@@ -34,7 +34,7 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
-      - name: Detect lint file changes
+      - name: Detect file changes
         id: changed-files
         uses: tj-actions/changed-files@v37
         with:
@@ -56,7 +56,7 @@ jobs:
         run: pnpm format:check .
 
       - name: Check changed fiels formatting
-        if: ${{ steps.format-all.outcome == 'skipped' &&  steps.changed-files.outputs.prettier_target_any_changed == 'true' }}
+        if: ${{ steps.format-all.outcome == 'skipped' && steps.changed-files.outputs.prettier_target_any_changed == 'true' }}
         run: pnpm format:check --no-error-on-unmatched-pattern ${{ steps.changed-files.outputs.prettier_target_all_changed_files }}
 
       - name: Lint all files
