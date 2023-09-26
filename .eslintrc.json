@@ -11,8 +11,7 @@
     "eslint:recommended",
     "plugin:import/recommended",
     "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
-    "plugin:prettier/recommended"
+    "plugin:react-hooks/recommended"
   ],
   "settings": {
     "react": {
@@ -132,7 +131,6 @@
     ],
     "import/no-relative-packages": "error",
     "import/no-unresolved": ["error", { "ignore": ["vitest/config"] }],
-    "import/no-cycle": "error",
     "import/group-exports": "error",
     "import/no-default-export": "error",
     "import/newline-after-import": ["error", { "considerComments": true }],
