@@ -30,8 +30,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Setup environment
         uses: ./.github/actions/setup-env
@@ -39,8 +37,6 @@ jobs:
       - name: Detect format file changes
         id: changed-format-files
         uses: tj-actions/changed-files@v37
-        with:
-          since_last_remote_commit: true
 
       - name: Format all changed fiels
         run: pnpm format ${{ steps.changed-format-files.outputs.target_all_changed_files }} --no-error-on-unmatched-pattern --write
