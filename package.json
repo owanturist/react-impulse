@@ -25,6 +25,7 @@
     "test:coverage": "pnpm test:run --coverage",
     "lint": "eslint --ext=js,jsx,ts,tsx",
     "format": "prettier --write",
+    "format:check": "prettier --check",
     "typecheck": "tsc --noEmit",
     "cs": "changeset",
     "publish": "pnpm build && pnpm cs publish",

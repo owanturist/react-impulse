@@ -50,19 +50,14 @@ jobs:
             prettier_target:
               - "**/*.*"
 
-      - name: Format all fiels
+      - name: Check all fiels formatting
         id: format-all
         if: ${{ github.event_name == 'push' || steps.changed-files.outputs.prettierrc_any_changed == 'true' }}
-        run: pnpm format .
+        run: pnpm format:check .
 
-      - name: Format changed fiels
+      - name: Check changed fiels formatting
         if: ${{ steps.format-all.outcome == 'skipped' &&  steps.changed-files.outputs.prettier_target_any_changed == 'true' }}
-        run: pnpm format --no-error-on-unmatched-pattern ${{ steps.changed-files.outputs.prettier_target_all_changed_files }}
-
-      - name: Commit formated files
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "Format with Prettier"
+        run: pnpm format:check --no-error-on-unmatched-pattern ${{ steps.changed-files.outputs.prettier_target_all_changed_files }}
 
       - name: Lint all files
         id: lint-all
