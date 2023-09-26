@@ -42,13 +42,11 @@ jobs:
             eslintrc:
               - .eslintrc.json
               - .eslintignore
-              - pnpm-lock.yaml
             eslint_target:
               - "**/*.{ts,tsx,js,jsx}"
             prettierrc:
               - .prettierrc
               - .prettierignore
-              - pnpm-lock.yaml
             prettier_target:
               - "**/*.*"
 
@@ -65,7 +63,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Format with Prettier"
-          file_pattern: ${{ steps.changed-files.outputs.all_changed_files }}
 
       - name: Lint all files
         id: lint-all
