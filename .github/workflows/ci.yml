@@ -39,18 +39,27 @@ jobs:
         uses: tj-actions/changed-files@v37
         with:
           files_yaml: |
-            eslint:
+            eslintrc:
               - .eslintrc.json
               - .eslintignore
               - pnpm-lock.yaml
-            target:
+            eslint_target:
               - "**/*.{ts,tsx,js,jsx}"
-            all:
+            prettierrc:
+              - .prettierrc
+              - .prettierignore
+              - pnpm-lock.yaml
+            prettier_target:
               - "**/*.*"
 
-      - name: Format all changed fiels
-        if: ${{ steps.changed-files.outputs.all_any_changed == 'true' }}
-        run: pnpm format ${{ steps.changed-files.outputs.all_changed_files }} --no-error-on-unmatched-pattern --write
+      - name: Format all fiels
+        id: format-all
+        if: ${{ github.event_name == 'push' || steps.changed-files.outputs.prettierrc_any_changed == 'true' }}
+        run: pnpm format .
+
+      - name: Format changed fiels
+        if: ${{ steps.format-all.outcome == 'skipped' &&  steps.changed-files.outputs.prettier_target_any_changed == 'true' }}
+        run: pnpm format --no-error-on-unmatched-pattern ${{ steps.changed-files.outputs.prettier_target_all_changed_files }}
 
       - name: Commit formated files
         uses: stefanzweifel/git-auto-commit-action@v4
@@ -60,12 +69,12 @@ jobs:
 
       - name: Lint all files
         id: lint-all
-        if: ${{ github.event_name == 'push' || steps.changed-files.outputs.eslint_any_changed == 'true' }}
+        if: ${{ github.event_name == 'push' || steps.changed-files.outputs.eslintrc_any_changed == 'true' }}
         run: pnpm lint .
 
       - name: Lint changed files
-        if: ${{ steps.lint-all.outcome == 'skipped' && steps.changed-files.outputs.target_any_changed == 'true' }}
-        run: pnpm lint ${{ steps.changed-files.outputs.target_all_changed_files }} --no-error-on-unmatched-pattern
+        if: ${{ steps.lint-all.outcome == 'skipped' && steps.changed-files.outputs.eslint_target_any_changed == 'true' }}
+        run: pnpm lint ${{ steps.changed-files.outputs.eslint_target_all_changed_files }} --no-error-on-unmatched-pattern
 
       - name: Type check
         if: ${{ always() }}
