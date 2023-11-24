@@ -48,17 +48,39 @@ describe("watching multiple impulses", () => {
     </>
   )
 
+  const watcherLeft = (
+    firstCount: Impulse<number>,
+    secondCount: Impulse<number>,
+  ) => {
+    const sum = firstCount.getValue() + secondCount.getValue()
+
+    return sum > 2
+  }
+  const watcherRight = (
+    firstCount: Impulse<number>,
+    secondCount: Impulse<number>,
+  ) => {
+    const sum = firstCount.getValue() + secondCount.getValue()
+
+    return sum < 7
+  }
+
+  const compare = (
+    [left1, right1]: [boolean, boolean],
+    [left2, right2]: [boolean, boolean],
+  ) => {
+    return left1 === left2 && right1 === right2
+  }
+
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useWatchImpulse(
-      () => {
-        const sum = props.firstCount.getValue() + props.secondCount.getValue()
-
-        return [sum > 2, sum < 7]
-      },
+      () => [
+        watcherLeft(props.firstCount, props.secondCount),
+        watcherRight(props.firstCount, props.secondCount),
+      ],
+      [props.firstCount, props.secondCount],
       {
-        compare: ([left1, right1], [left2, right2]) => {
-          return left1 === left2 && right1 === right2
-        },
+        compare: (left, right) => compare(left, right),
       },
     )
 
@@ -73,22 +95,12 @@ describe("watching multiple impulses", () => {
 
   const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useWatchImpulse<[boolean, boolean]>(
-      React.useCallback(() => {
-        const sum = props.firstCount.getValue() + props.secondCount.getValue()
-
-        return [sum > 2, sum < 7]
-      }, [props.firstCount, props.secondCount]),
-      {
-        compare: React.useCallback(
-          (
-            [left1, right1]: [boolean, boolean],
-            [left2, right2]: [boolean, boolean],
-          ) => {
-            return left1 === left2 && right1 === right2
-          },
-          [],
-        ),
-      },
+      () => [
+        watcherLeft(props.firstCount, props.secondCount),
+        watcherRight(props.firstCount, props.secondCount),
+      ],
+      [props.firstCount, props.secondCount],
+      { compare },
     )
 
     return (
@@ -101,16 +113,12 @@ describe("watching multiple impulses", () => {
   }
 
   const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchImpulse(() => {
-      const sum = props.firstCount.getValue() + props.secondCount.getValue()
-
-      return sum > 2
-    })
-    const lessThanFour = useWatchImpulse(() => {
-      const sum = props.firstCount.getValue() + props.secondCount.getValue()
-
-      return sum < 7
-    })
+    const moreThanOne = useWatchImpulse(() =>
+      watcherLeft(props.firstCount, props.secondCount),
+    )
+    const lessThanFour = useWatchImpulse(() =>
+      watcherRight(props.firstCount, props.secondCount),
+    )
 
     return (
       <GenericApp
@@ -121,20 +129,14 @@ describe("watching multiple impulses", () => {
     )
   }
 
-  const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
+  const MultipleWatchersWithDepsApp: React.FC<AppProps> = (props) => {
     const moreThanOne = useWatchImpulse(
-      React.useCallback(() => {
-        const sum = props.firstCount.getValue() + props.secondCount.getValue()
-
-        return sum > 2
-      }, [props.firstCount, props.secondCount]),
+      () => watcherLeft(props.firstCount, props.secondCount),
+      [props.firstCount, props.secondCount],
     )
     const lessThanFour = useWatchImpulse(
-      React.useCallback(() => {
-        const sum = props.firstCount.getValue() + props.secondCount.getValue()
-
-        return sum < 7
-      }, [props.firstCount, props.secondCount]),
+      () => watcherRight(props.firstCount, props.secondCount),
+      [props.firstCount, props.secondCount],
     )
 
     return (
@@ -147,8 +149,8 @@ describe("watching multiple impulses", () => {
   }
 
   const WatchedApp: React.FC<AppProps> = watch((props) => {
-    const sum = props.firstCount.getValue() + props.secondCount.getValue()
-    const [moreThanOne, lessThanFour] = [sum > 2, sum < 7]
+    const moreThanOne = watcherLeft(props.firstCount, props.secondCount)
+    const lessThanFour = watcherRight(props.firstCount, props.secondCount)
 
     return (
       <GenericApp
@@ -163,7 +165,7 @@ describe("watching multiple impulses", () => {
     ["single watcher", SingleWatcherApp, 0],
     ["single memoized watcher", SingleMemoizedWatcherApp, 0],
     ["multiple watchers", MultipleWatchersApp, 0],
-    ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
+    ["multiple memoized watchers", MultipleWatchersWithDepsApp, 0],
     ["watch()", WatchedApp, 1],
   ])(
     "handles multiple Impulses with %s",

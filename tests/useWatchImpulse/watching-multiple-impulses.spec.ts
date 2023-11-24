@@ -1,7 +1,6 @@
-import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react"
 
-import { type Compare, Impulse, useWatchImpulse, batch } from "../../src"
+import { Impulse, useWatchImpulse, batch } from "../../src"
 import {
   Counter,
   type WithImpulse,
@@ -11,44 +10,47 @@ import {
   type WithSpy,
 } from "../common"
 
-describe.each([
-  [
-    "inline watcher",
-    ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
-      return useWatchImpulse(
-        () => {
-          return Counter.merge(first.getValue(), second.getValue())
-        },
-        { compare },
-      )
-    },
-  ],
-  [
-    "memoized watcher",
-    ({ first, second }: WithFirst & WithSecond, compare?: Compare<Counter>) => {
-      return useWatchImpulse(
-        useCallback(() => {
-          return Counter.merge(first.getValue(), second.getValue())
-        }, [first, second]),
-        { compare },
-      )
-    },
-  ],
-])("direct %s", (_, useHookWithoutCompare) => {
+describe("multiple watcher", () => {
+  const watcher = ({ first, second }: WithFirst & WithSecond) => {
+    return Counter.merge(first.getValue(), second.getValue())
+  }
+
   describe.each([
-    ["without comparator", useHookWithoutCompare],
+    [
+      "without deps",
+      ({ first, second }: WithFirst & WithSecond) => {
+        return useWatchImpulse(() => watcher({ first, second }))
+      },
+    ],
+    [
+      "without comparator",
+      ({ first, second }: WithFirst & WithSecond) => {
+        return useWatchImpulse(
+          () => watcher({ first, second }),
+          [first, second],
+        )
+      },
+    ],
     [
       "with inline comparator",
-      (props: WithFirst & WithSecond) => {
-        return useHookWithoutCompare(props, (prev, next) =>
-          Counter.compare(prev, next),
+      ({ first, second }: WithFirst & WithSecond) => {
+        return useWatchImpulse(
+          () => watcher({ first, second }),
+          [first, second],
+          {
+            compare: (prev, next) => Counter.compare(prev, next),
+          },
         )
       },
     ],
     [
       "with memoized comparator",
-      (props: WithFirst & WithSecond) => {
-        return useHookWithoutCompare(props, Counter.compare)
+      ({ first, second }: WithFirst & WithSecond) => {
+        return useWatchImpulse(
+          () => watcher({ first, second }),
+          [first, second],
+          { compare: Counter.compare },
+        )
       },
     ],
   ])("%s", (__, useHook) => {
@@ -98,231 +100,235 @@ describe.each([
   })
 })
 
-describe.each([
-  [
-    "inline watcher",
-    ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-      return useWatchImpulse(
-        () => {
-          spy()
+describe("triggering watcher for multiple impulses vs single impulse", () => {
+  const watcherSingle = ({ impulse, spy }: WithImpulse & WithSpy) => {
+    spy()
 
-          return impulse.getValue()
-        },
-        { compare },
-      )
-    },
-    (
-      {
-        spy,
+    return impulse.getValue()
+  }
+
+  const watcherMultiple = ({
+    spy,
+    first,
+    second,
+    third,
+  }: WithFirst & WithSecond & WithThird & WithSpy) => {
+    spy()
+
+    return Counter.merge(first.getValue(), second.getValue(), third.getValue())
+  }
+
+  describe.each([
+    [
+      "without deps",
+      ({ impulse, spy }: WithImpulse & WithSpy) => {
+        return useWatchImpulse(() => watcherSingle({ impulse, spy }))
+      },
+      ({
         first,
         second,
         third,
-      }: WithFirst & WithSecond & WithThird & WithSpy,
-      compare?: Compare<Counter>,
-    ) => {
-      return useWatchImpulse(
-        () => {
-          spy()
+        spy,
+      }: WithFirst & WithSecond & WithThird & WithSpy) => {
+        return useWatchImpulse(() =>
+          watcherMultiple({ first, second, third, spy }),
+        )
+      },
+    ],
+    [
+      "without comparator",
+      ({ impulse, spy }: WithImpulse & WithSpy) => {
+        return useWatchImpulse(
+          () => watcherSingle({ impulse, spy }),
+          [impulse, spy],
+        )
+      },
+      ({
+        first,
+        second,
+        third,
+        spy,
+      }: WithFirst & WithSecond & WithThird & WithSpy) => {
+        return useWatchImpulse(
+          () => watcherMultiple({ first, second, third, spy }),
+          [first, second, third, spy],
+        )
+      },
+    ],
+    [
+      "with inline comparator",
+      ({ impulse, spy }: WithImpulse & WithSpy) => {
+        return useWatchImpulse(
+          () => watcherSingle({ impulse, spy }),
+          [impulse, spy],
+          {
+            compare: (prev, next) => Counter.compare(prev, next),
+          },
+        )
+      },
+      ({
+        first,
+        second,
+        third,
+        spy,
+      }: WithFirst & WithSecond & WithThird & WithSpy) => {
+        return useWatchImpulse(
+          () => watcherMultiple({ first, second, third, spy }),
+          [first, second, third, spy],
+          {
+            compare: (prev, next) => Counter.compare(prev, next),
+          },
+        )
+      },
+    ],
+    [
+      "with memoized comparator",
+      ({ impulse, spy }: WithImpulse & WithSpy) => {
+        return useWatchImpulse(
+          () => watcherSingle({ impulse, spy }),
+          [impulse, spy],
+          { compare: Counter.compare },
+        )
+      },
+      ({
+        first,
+        second,
+        third,
+        spy,
+      }: WithFirst & WithSecond & WithThird & WithSpy) => {
+        return useWatchImpulse(
+          () => watcherMultiple({ first, second, third, spy }),
+          [first, second, third, spy],
+          { compare: Counter.compare },
+        )
+      },
+    ],
+  ])("%s", (__, useSingleHook, useMultipleHook) => {
+    const setup = () => {
+      const first = Impulse.of({ count: 1 })
+      const second = Impulse.of({ count: 2 })
+      const third = Impulse.of({ count: 3 })
+      const spySingle = vi.fn()
+      const spyMultiple = vi.fn()
 
-          return Counter.merge(
-            first.getValue(),
-            second.getValue(),
-            third.getValue(),
-          )
-        },
-        { compare },
-      )
-    },
-  ],
+      const { result: resultSingle } = renderHook(useSingleHook, {
+        initialProps: { impulse: first, spy: spySingle },
+      })
 
-  [
-    "memoized watcher",
-    ({ spy, impulse }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(
-        useCallback(() => {
-          spy()
+      const { result: resultMultiple } = renderHook(useMultipleHook, {
+        initialProps: { first, second, third, spy: spyMultiple },
+      })
 
-          return impulse.getValue()
-        }, [spy, impulse]),
-      )
-    },
-    ({
-      spy,
-      first,
-      second,
-      third,
-    }: WithFirst & WithSecond & WithThird & WithSpy) => {
-      return useWatchImpulse(
-        useCallback(() => {
-          spy()
-
-          return Counter.merge(
-            first.getValue(),
-            second.getValue(),
-            third.getValue(),
-          )
-        }, [spy, first, second, third]),
-      )
-    },
-  ],
-])(
-  "triggering %s for multiple impulses vs single impulse",
-  (_, useSingleHookWithoutCompare, useMultipleHookWithoutCompare) => {
-    describe.each([
-      [
-        "without comparator",
-        useSingleHookWithoutCompare,
-        useMultipleHookWithoutCompare,
-      ],
-      [
-        "with inline comparator",
-        (props: WithImpulse & WithSpy) => {
-          return useSingleHookWithoutCompare(props, (prev, next) =>
-            Counter.compare(prev, next),
-          )
-        },
-        (props: WithFirst & WithSecond & WithThird & WithSpy) => {
-          return useMultipleHookWithoutCompare(props, (prev, next) =>
-            Counter.compare(prev, next),
-          )
-        },
-      ],
-      [
-        "with memoized comparator",
-        (props: WithImpulse & WithSpy) => {
-          return useSingleHookWithoutCompare(props, Counter.compare)
-        },
-        (props: WithFirst & WithSecond & WithThird & WithSpy) => {
-          return useMultipleHookWithoutCompare(props, Counter.compare)
-        },
-      ],
-    ])("%s", (__, useSingleHook, useMultipleHook) => {
-      const setup = () => {
-        const first = Impulse.of({ count: 1 })
-        const second = Impulse.of({ count: 2 })
-        const third = Impulse.of({ count: 3 })
-        const spySingle = vi.fn()
-        const spyMultiple = vi.fn()
-
-        const { result: resultSingle } = renderHook(useSingleHook, {
-          initialProps: { impulse: first, spy: spySingle },
-        })
-
-        const { result: resultMultiple } = renderHook(useMultipleHook, {
-          initialProps: { first, second, third, spy: spyMultiple },
-        })
-
-        return {
-          first,
-          second,
-          third,
-          spySingle,
-          spyMultiple,
-          resultSingle,
-          resultMultiple,
-        }
+      return {
+        first,
+        second,
+        third,
+        spySingle,
+        spyMultiple,
+        resultSingle,
+        resultMultiple,
       }
+    }
 
-      it("calls watchers the same amount when initiates", () => {
-        const { spySingle, spyMultiple, resultSingle, resultMultiple } = setup()
+    it("calls watchers the same amount when initiates", () => {
+      const { spySingle, spyMultiple, resultSingle, resultMultiple } = setup()
 
-        expect(resultSingle.current).toStrictEqual({ count: 1 })
-        expect(resultMultiple.current).toStrictEqual({ count: 6 })
-        expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
-      })
-
-      it("calls watchers the same amount when only first and second", () => {
-        const {
-          first,
-          second,
-          spySingle,
-          spyMultiple,
-          resultSingle,
-          resultMultiple,
-        } = setup()
-
-        act(() => {
-          batch(() => {
-            first.setValue(Counter.inc)
-            second.setValue(Counter.inc)
-          })
-        })
-        expect(resultSingle.current).toStrictEqual({ count: 2 })
-        expect(resultMultiple.current).toStrictEqual({ count: 8 })
-        expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
-      })
-
-      it("calls watchers the same amount when only first and third", () => {
-        const {
-          first,
-          third,
-          spySingle,
-          spyMultiple,
-          resultSingle,
-          resultMultiple,
-        } = setup()
-
-        act(() => {
-          batch(() => {
-            first.setValue(Counter.inc)
-            third.setValue(Counter.inc)
-          })
-        })
-        expect(resultSingle.current).toStrictEqual({ count: 2 })
-        expect(resultMultiple.current).toStrictEqual({ count: 8 })
-        expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
-      })
-
-      it("calls watchers the same amount when first, second and third", () => {
-        const {
-          first,
-          second,
-          third,
-          spySingle,
-          spyMultiple,
-          resultSingle,
-          resultMultiple,
-        } = setup()
-
-        act(() => {
-          batch(() => {
-            batch(() => {
-              first.setValue(Counter.inc)
-              second.setValue(Counter.inc)
-            })
-
-            third.setValue(Counter.inc)
-          })
-        })
-        expect(resultSingle.current).toStrictEqual({ count: 2 })
-        expect(resultMultiple.current).toStrictEqual({ count: 9 })
-        expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
-      })
-
-      it("doesn't call single watcher when changes only second and third", () => {
-        const {
-          second,
-          third,
-          spySingle,
-          spyMultiple,
-          resultSingle,
-          resultMultiple,
-        } = setup()
-
-        spySingle.mockReset()
-        spyMultiple.mockReset()
-
-        act(() => {
-          batch(() => {
-            second.setValue(Counter.inc)
-            third.setValue(Counter.inc)
-          })
-        })
-        expect(resultSingle.current).toStrictEqual({ count: 1 })
-        expect(resultMultiple.current).toStrictEqual({ count: 8 })
-        expect(spySingle).not.toHaveBeenCalled()
-        expect(spyMultiple).toHaveBeenCalled()
-      })
+      expect(resultSingle.current).toStrictEqual({ count: 1 })
+      expect(resultMultiple.current).toStrictEqual({ count: 6 })
+      expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
     })
-  },
-)
+
+    it("calls watchers the same amount when only first and second", () => {
+      const {
+        first,
+        second,
+        spySingle,
+        spyMultiple,
+        resultSingle,
+        resultMultiple,
+      } = setup()
+
+      act(() => {
+        batch(() => {
+          first.setValue(Counter.inc)
+          second.setValue(Counter.inc)
+        })
+      })
+      expect(resultSingle.current).toStrictEqual({ count: 2 })
+      expect(resultMultiple.current).toStrictEqual({ count: 8 })
+      expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+    })
+
+    it("calls watchers the same amount when only first and third", () => {
+      const {
+        first,
+        third,
+        spySingle,
+        spyMultiple,
+        resultSingle,
+        resultMultiple,
+      } = setup()
+
+      act(() => {
+        batch(() => {
+          first.setValue(Counter.inc)
+          third.setValue(Counter.inc)
+        })
+      })
+      expect(resultSingle.current).toStrictEqual({ count: 2 })
+      expect(resultMultiple.current).toStrictEqual({ count: 8 })
+      expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+    })
+
+    it("calls watchers the same amount when first, second and third", () => {
+      const {
+        first,
+        second,
+        third,
+        spySingle,
+        spyMultiple,
+        resultSingle,
+        resultMultiple,
+      } = setup()
+
+      act(() => {
+        batch(() => {
+          batch(() => {
+            first.setValue(Counter.inc)
+            second.setValue(Counter.inc)
+          })
+
+          third.setValue(Counter.inc)
+        })
+      })
+      expect(resultSingle.current).toStrictEqual({ count: 2 })
+      expect(resultMultiple.current).toStrictEqual({ count: 9 })
+      expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
+    })
+
+    it("doesn't call single watcher when changes only second and third", () => {
+      const {
+        second,
+        third,
+        spySingle,
+        spyMultiple,
+        resultSingle,
+        resultMultiple,
+      } = setup()
+
+      spySingle.mockReset()
+      spyMultiple.mockReset()
+
+      act(() => {
+        batch(() => {
+          second.setValue(Counter.inc)
+          third.setValue(Counter.inc)
+        })
+      })
+      expect(resultSingle.current).toStrictEqual({ count: 1 })
+      expect(resultMultiple.current).toStrictEqual({ count: 8 })
+      expect(spySingle).not.toHaveBeenCalled()
+      expect(spyMultiple).toHaveBeenCalled()
+    })
+  })
+})

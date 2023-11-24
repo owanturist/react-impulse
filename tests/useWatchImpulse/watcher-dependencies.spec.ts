@@ -1,60 +1,29 @@
-import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react"
 
 import { Impulse, useWatchImpulse } from "../../src"
 import { Counter, type WithSpy, type WithImpulse } from "../common"
 
-describe.each([
-  [
-    "without comparator",
-    ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(() => {
-        const value = impulse.getValue()
+const watcher = ({ impulse, spy }: WithImpulse & WithSpy) => {
+  const value = impulse.getValue()
 
-        spy(value)
+  spy(value)
 
-        return value
-      })
-    },
-  ],
-  [
-    "with inline comparator",
-    ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(
-        () => {
-          const value = impulse.getValue()
+  return value
+}
 
-          spy(value)
-
-          return value
-        },
-        { compare: (prev, next) => Counter.compare(prev, next) },
-      )
-    },
-  ],
-  [
-    "with memoized comparator",
-    ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(
-        () => {
-          const value = impulse.getValue()
-
-          spy(value)
-
-          return value
-        },
-        { compare: Counter.compare },
-      )
-    },
-  ],
-])("inline watcher %s", (_, useHook) => {
+describe("watcher without deps", () => {
   const setup = () => {
     const spy = vi.fn()
     const impulse = Impulse.of({ count: 1 })
 
-    const { rerender } = renderHook(useHook, {
-      initialProps: { impulse, spy },
-    })
+    const { rerender } = renderHook(
+      (props) => {
+        return useWatchImpulse(() => watcher(props))
+      },
+      {
+        initialProps: { impulse, spy },
+      },
+    )
 
     return { spy, impulse, rerender }
   }
@@ -98,29 +67,30 @@ describe.each([
   [
     "without comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(
-        useCallback(() => {
-          const value = impulse.getValue()
+      return useWatchImpulse(() => {
+        const value = impulse.getValue()
 
-          spy(value)
+        spy(value)
 
-          return value
-        }, [impulse, spy]),
-      )
+        return value
+      }, [impulse, spy])
     },
   ],
   [
     "with inline comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
-        useCallback(() => {
+        () => {
           const value = impulse.getValue()
 
           spy(value)
 
           return value
-        }, [impulse, spy]),
-        { compare: (prev, next) => Counter.compare(prev, next) },
+        },
+        [impulse, spy],
+        {
+          compare: (prev, next) => Counter.compare(prev, next),
+        },
       )
     },
   ],
@@ -128,23 +98,24 @@ describe.each([
     "with memoized comparator",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
       return useWatchImpulse(
-        useCallback(() => {
+        () => {
           const value = impulse.getValue()
 
           spy(value)
 
           return value
-        }, [impulse, spy]),
+        },
+        [impulse, spy],
         { compare: Counter.compare },
       )
     },
   ],
-])("memoized watcher %s", (__, useHook) => {
+])("watcher with deps and %s", (_, useCounter) => {
   const setup = () => {
     const spy = vi.fn()
     const impulse = Impulse.of({ count: 1 })
 
-    const { rerender } = renderHook(useHook, {
+    const { rerender } = renderHook(useCounter, {
       initialProps: { impulse, spy },
     })
 

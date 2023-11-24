@@ -1,47 +1,45 @@
-import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react"
 
 import { type Compare, Impulse, useWatchImpulse } from "../../src"
 import { Counter, type WithSpy, type WithImpulse } from "../common"
 
-describe.each([
-  [
-    "inline watcher",
-    ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
-      return useWatchImpulse(() => impulse.getValue(), { compare })
-    },
-  ],
-  [
-    "memoized watcher",
-    ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
-      return useWatchImpulse(
-        useCallback(() => impulse.getValue(), [impulse]),
-        { compare },
-      )
-    },
-  ],
-])("direct %s", (_, useHookWithoutCompare) => {
+describe("single watcher", () => {
+  const watcher = ({ impulse }: WithImpulse) => impulse.getValue()
+
   describe.each([
-    ["without comparator", useHookWithoutCompare],
+    [
+      "without deps",
+      ({ impulse }: WithImpulse) => {
+        return useWatchImpulse(() => watcher({ impulse }))
+      },
+    ],
+    [
+      "without comparator",
+      ({ impulse }: WithImpulse) => {
+        return useWatchImpulse(() => watcher({ impulse }), [impulse])
+      },
+    ],
     [
       "with inline comparator",
-      (props: WithImpulse) => {
-        return useHookWithoutCompare(props, (prev, next) =>
-          Counter.compare(prev, next),
-        )
+      ({ impulse }: WithImpulse) => {
+        return useWatchImpulse(() => watcher({ impulse }), [impulse], {
+          compare: (prev, next) => Counter.compare(prev, next),
+        })
       },
     ],
     [
       "with memoized comparator",
-      (props: WithImpulse) => {
-        return useHookWithoutCompare(props, Counter.compare)
+      ({ impulse }: WithImpulse) => {
+        return useWatchImpulse(() => watcher({ impulse }), [impulse], {
+          compare: Counter.compare,
+        })
       },
     ],
-  ])("%s", (__, useHook) => {
+  ])("%s", (__, useCounter) => {
     it("watches the Impulse's changes", () => {
       const impulse = Impulse.of({ count: 1 })
 
-      const { result } = renderHook(useHook, {
+      const { result } = renderHook(useCounter, {
         initialProps: { impulse },
       })
 
@@ -63,7 +61,7 @@ describe.each([
         const impulse_1 = Impulse.of({ count: 1 })
         const impulse_2 = Impulse.of({ count: 10 })
 
-        const { result, rerender } = renderHook(useHook, {
+        const { result, rerender } = renderHook(useCounter, {
           initialProps: { impulse: impulse_1 },
         })
 
@@ -154,27 +152,93 @@ describe("transform watched Impulse's", () => {
     return prevLeft === nextLeft && prevRight === nextRight
   }
 
-  describe.each([
+  const watcherTuple = ({ impulse }: WithImpulse) => impulse.getValue(toTuple)
+
+  it.each([
     [
-      "inline watcher",
-      ({ impulse }: WithImpulse, compare?: Compare<[boolean, boolean]>) => {
-        return useWatchImpulse(() => impulse.getValue(toTuple), { compare })
+      "without deps",
+      ({ impulse }: WithImpulse) => {
+        return useWatchImpulse(() => watcherTuple({ impulse }))
       },
     ],
     [
-      "memoized watcher",
-      ({ impulse }: WithImpulse, compare?: Compare<[boolean, boolean]>) => {
-        return useWatchImpulse(
-          useCallback(() => impulse.getValue(toTuple), [impulse]),
-          { compare },
-        )
+      "without compare",
+      ({ impulse }: WithImpulse) => {
+        return useWatchImpulse(() => watcherTuple({ impulse }), [impulse])
       },
     ],
-  ])("%s", (__, useHookWithoutCompare) => {
-    it("produces new value on each Impulse's update without comparator", () => {
+  ])("produces new value on each Impulse's update %s", (_, useCounter) => {
+    const impulse = Impulse.of({ count: 1 })
+
+    const { result, rerender } = renderHook(useCounter, {
+      initialProps: { impulse },
+    })
+
+    let prev = result.current
+
+    // produces initial result
+    expect(result.current).toStrictEqual([false, true])
+
+    // increments 1 -> 2
+    prev = result.current
+    act(() => {
+      impulse.setValue(Counter.inc)
+    })
+    expect(result.current).not.toBe(prev)
+    expect(result.current).toStrictEqual([false, true])
+
+    // increments 2 -> 3
+    prev = result.current
+    act(() => {
+      impulse.setValue({ count: 3 })
+    })
+    expect(result.current).not.toBe(prev)
+    expect(result.current).toStrictEqual([true, true])
+
+    // rerender
+    rerender({ impulse })
+    expect(result.current).toStrictEqual([true, true])
+
+    // increments 3 -> 4
+    prev = result.current
+    act(() => {
+      impulse.setValue({ count: 4 })
+    })
+    expect(result.current).not.toBe(prev)
+    expect(result.current).toStrictEqual([true, true])
+
+    // increments 4 -> 5
+    prev = result.current
+    act(() => {
+      impulse.setValue(Counter.inc)
+    })
+    expect(result.current).not.toBe(prev)
+    expect(result.current).toStrictEqual([true, false])
+  })
+
+  it.each([
+    [
+      "inline comparator",
+      ({ impulse }: WithImpulse) => {
+        return useWatchImpulse(() => watcherTuple({ impulse }), [impulse], {
+          compare: (prev, next) => compareTuple(prev, next),
+        })
+      },
+    ],
+    [
+      "memoized comparator",
+      ({ impulse }: WithImpulse) => {
+        return useWatchImpulse(() => watcherTuple({ impulse }), [impulse], {
+          compare: compareTuple,
+        })
+      },
+    ],
+  ])(
+    "keeps the old value when it is comparably equal when %s",
+    (_, useCounter) => {
       const impulse = Impulse.of({ count: 1 })
 
-      const { result, rerender } = renderHook(useHookWithoutCompare, {
+      const { result, rerender } = renderHook(useCounter, {
         initialProps: { impulse },
       })
 
@@ -188,7 +252,7 @@ describe("transform watched Impulse's", () => {
       act(() => {
         impulse.setValue(Counter.inc)
       })
-      expect(result.current).not.toBe(prev)
+      expect(result.current).toBe(prev)
       expect(result.current).toStrictEqual([false, true])
 
       // increments 2 -> 3
@@ -208,7 +272,7 @@ describe("transform watched Impulse's", () => {
       act(() => {
         impulse.setValue({ count: 4 })
       })
-      expect(result.current).not.toBe(prev)
+      expect(result.current).toBe(prev)
       expect(result.current).toStrictEqual([true, true])
 
       // increments 4 -> 5
@@ -218,272 +282,210 @@ describe("transform watched Impulse's", () => {
       })
       expect(result.current).not.toBe(prev)
       expect(result.current).toStrictEqual([true, false])
-    })
+    },
+  )
+
+  describe("when Impulse's changes under watcher are comparably equal with", () => {
+    const watcher = ({ impulse }: WithImpulse) => impulse.getValue()
 
     it.each([
       [
-        "inline comparator",
-        (props: WithImpulse) => {
-          return useHookWithoutCompare(props, (prev, next) =>
-            compareTuple(prev, next),
+        "without deps",
+        ({ impulse, spy }: WithImpulse & WithSpy) => {
+          return useWatchImpulse(() => {
+            spy()
+
+            return watcher({ impulse })
+          })
+        },
+      ],
+      [
+        "without comparator",
+        ({ impulse, spy }: WithImpulse & WithSpy) => {
+          return useWatchImpulse(() => {
+            spy()
+
+            return watcher({ impulse })
+          }, [impulse, spy])
+        },
+      ],
+      [
+        "with inline comparator",
+        ({ impulse, spy }: WithImpulse & WithSpy) => {
+          return useWatchImpulse(
+            () => {
+              spy()
+
+              return watcher({ impulse })
+            },
+            [impulse, spy],
+            {
+              compare: (prev, next) => Counter.compare(prev, next),
+            },
           )
         },
       ],
       [
-        "memoized comparator",
-        (props: WithImpulse) => {
-          return useHookWithoutCompare(props, compareTuple)
+        "with memoized comparator",
+        ({ impulse, spy }: WithImpulse & WithSpy) => {
+          return useWatchImpulse(
+            () => {
+              spy()
+
+              return watcher({ impulse })
+            },
+            [impulse, spy],
+            {
+              compare: Counter.compare,
+            },
+          )
         },
       ],
-    ])(
-      "keeps the old value when it is comparably equal when %s",
-      (_, useHookWithCompare) => {
+    ])("should not trigger the watcher %s", (_, useCounter) => {
+      const impulse = Impulse.of({ count: 1 }, { compare: Counter.compare })
+      const spy = vi.fn()
+
+      renderHook(useCounter, {
+        initialProps: { impulse, spy },
+      })
+
+      expect(spy).toHaveBeenCalledOnce()
+      vi.clearAllMocks()
+
+      act(() => {
+        impulse.setValue(Counter.clone)
+      })
+
+      expect(spy).not.toHaveBeenCalled()
+    })
+  })
+})
+
+describe("multiple Impulse#getValue() calls", () => {
+  const watcherSingle = ({ impulse, spy }: WithImpulse & WithSpy) => {
+    spy()
+
+    return impulse.getValue()
+  }
+  const watcherDouble = ({ impulse, spy }: WithImpulse & WithSpy) => {
+    spy()
+
+    return Counter.merge(impulse.getValue(), impulse.getValue())
+  }
+
+  describe("triggering watcher for multiple Impulse#getValue() calls the same as for a single", () => {
+    describe.each([
+      [
+        "without deps",
+        ({ impulse, spy }: WithImpulse & WithSpy) => {
+          return useWatchImpulse(() => watcherSingle({ impulse, spy }))
+        },
+        ({ impulse, spy }: WithImpulse & WithSpy) => {
+          return useWatchImpulse(() => watcherDouble({ impulse, spy }))
+        },
+      ],
+      [
+        "without comparator",
+        ({ impulse, spy }: WithImpulse & WithSpy) => {
+          return useWatchImpulse(
+            () => watcherSingle({ impulse, spy }),
+            [impulse, spy],
+          )
+        },
+        ({ impulse, spy }: WithImpulse & WithSpy) => {
+          return useWatchImpulse(
+            () => watcherDouble({ impulse, spy }),
+            [impulse, spy],
+          )
+        },
+      ],
+      [
+        "with inline comparator",
+        ({ impulse, spy }: WithImpulse & WithSpy) => {
+          return useWatchImpulse(
+            () => watcherSingle({ impulse, spy }),
+            [impulse, spy],
+            {
+              compare: (prev, next) => Counter.compare(prev, next),
+            },
+          )
+        },
+        ({ impulse, spy }: WithImpulse & WithSpy) => {
+          return useWatchImpulse(
+            () => watcherDouble({ impulse, spy }),
+            [impulse, spy],
+            {
+              compare: (prev, next) => Counter.compare(prev, next),
+            },
+          )
+        },
+      ],
+      [
+        "with memoized comparator",
+        ({ impulse, spy }: WithImpulse & WithSpy) => {
+          return useWatchImpulse(
+            () => watcherSingle({ impulse, spy }),
+            [impulse, spy],
+            { compare: Counter.compare },
+          )
+        },
+        ({ impulse, spy }: WithImpulse & WithSpy) => {
+          return useWatchImpulse(
+            () => watcherDouble({ impulse, spy }),
+            [impulse, spy],
+            { compare: Counter.compare },
+          )
+        },
+      ],
+    ])("%s", (__, useSingleHook, useDoubleHook) => {
+      const setup = () => {
+        const spySingle = vi.fn()
+        const spyDouble = vi.fn()
         const impulse = Impulse.of({ count: 1 })
 
-        const { result, rerender } = renderHook(useHookWithCompare, {
-          initialProps: { impulse },
+        const { result: resultSingle } = renderHook(useSingleHook, {
+          initialProps: { spy: spySingle, impulse },
+        })
+        const { result: resultDouble } = renderHook(useDoubleHook, {
+          initialProps: { spy: spyDouble, impulse },
         })
 
-        let prev = result.current
+        return { impulse, spySingle, spyDouble, resultSingle, resultDouble }
+      }
 
-        // produces initial result
-        expect(result.current).toStrictEqual([false, true])
+      it("initiates with expected results", () => {
+        const { spySingle, spyDouble, resultSingle, resultDouble } = setup()
 
-        // increments 1 -> 2
-        prev = result.current
+        expect(resultSingle.current).toStrictEqual({ count: 1 })
+        expect(resultDouble.current).toStrictEqual({ count: 2 })
+        expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
+      })
+
+      it("increments %s", () => {
+        const { impulse, spySingle, spyDouble, resultSingle, resultDouble } =
+          setup()
+
         act(() => {
           impulse.setValue(Counter.inc)
         })
-        expect(result.current).toBe(prev)
-        expect(result.current).toStrictEqual([false, true])
 
-        // increments 2 -> 3
-        prev = result.current
-        act(() => {
-          impulse.setValue({ count: 3 })
-        })
-        expect(result.current).not.toBe(prev)
-        expect(result.current).toStrictEqual([true, true])
+        expect(resultSingle.current).toStrictEqual({ count: 2 })
+        expect(resultDouble.current).toStrictEqual({ count: 4 })
+        expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
+      })
 
-        // rerender
-        rerender({ impulse })
-        expect(result.current).toStrictEqual([true, true])
-
-        // increments 3 -> 4
-        prev = result.current
-        act(() => {
-          impulse.setValue({ count: 4 })
-        })
-        expect(result.current).toBe(prev)
-        expect(result.current).toStrictEqual([true, true])
-
-        // increments 4 -> 5
-        prev = result.current
-        act(() => {
-          impulse.setValue(Counter.inc)
-        })
-        expect(result.current).not.toBe(prev)
-        expect(result.current).toStrictEqual([true, false])
-      },
-    )
-  })
-
-  describe.each([
-    [
-      "inline watcher",
-      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(
-          () => {
-            spy()
-
-            return impulse.getValue()
-          },
-          { compare },
-        )
-      },
-    ],
-    [
-      "memoized watcher",
-      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(
-          useCallback(() => {
-            spy()
-
-            return impulse.getValue()
-          }, [spy, impulse]),
-          { compare },
-        )
-      },
-    ],
-  ])(
-    "when Impulse's changes under %s are comparably equal with",
-    (_, useHookWithoutCompare) => {
-      it.each([
-        ["without comparator", useHookWithoutCompare],
-        [
-          "with inline comparator",
-          (props: WithImpulse & WithSpy) => {
-            return useHookWithoutCompare(props, (prev, next) =>
-              Counter.compare(prev, next),
-            )
-          },
-        ],
-        [
-          "with memoized comparator",
-          (props: WithImpulse & WithSpy) => {
-            return useHookWithoutCompare(props, Counter.compare)
-          },
-        ],
-      ])("should not trigger the watcher %s", () => {
-        const impulse = Impulse.of({ count: 1 }, { compare: Counter.compare })
-        const spy = vi.fn()
-
-        renderHook(useHookWithoutCompare, {
-          initialProps: { spy, impulse },
-        })
-
-        expect(spy).toHaveBeenCalledOnce()
-        vi.clearAllMocks()
+      it("clones %s", () => {
+        const { impulse, spySingle, spyDouble, resultSingle, resultDouble } =
+          setup()
 
         act(() => {
           impulse.setValue(Counter.clone)
         })
 
-        expect(spy).not.toHaveBeenCalled()
+        expect(resultSingle.current).toStrictEqual({ count: 1 })
+        expect(resultDouble.current).toStrictEqual({ count: 2 })
+        expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
       })
-    },
-  )
-})
-
-describe("multiple Impulse#getValue() calls", () => {
-  describe.each([
-    [
-      "inline watcher",
-      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(
-          () => {
-            spy()
-
-            return impulse.getValue()
-          },
-          { compare },
-        )
-      },
-      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(
-          () => {
-            spy()
-
-            return Counter.merge(impulse.getValue(), impulse.getValue())
-          },
-          { compare },
-        )
-      },
-    ],
-    [
-      "memoized watcher",
-      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(
-          useCallback(() => {
-            spy()
-
-            return impulse.getValue()
-          }, [spy, impulse]),
-          { compare },
-        )
-      },
-      ({ spy, impulse }: WithImpulse & WithSpy, compare?: Compare<Counter>) => {
-        return useWatchImpulse(
-          useCallback(() => {
-            spy()
-
-            return Counter.merge(impulse.getValue(), impulse.getValue())
-          }, [spy, impulse]),
-          { compare },
-        )
-      },
-    ],
-  ])(
-    "triggering %s for multiple Impulse#getValue() calls the same as for a single",
-    (_, useSingleHookWithoutCompare, useDoubleHookWithoutCompare) => {
-      describe.each([
-        [
-          "without comparator",
-          useSingleHookWithoutCompare,
-          useDoubleHookWithoutCompare,
-        ],
-        [
-          "with inline comparator",
-          (props: WithImpulse & WithSpy) => {
-            return useSingleHookWithoutCompare(props, (prev, next) =>
-              Counter.compare(prev, next),
-            )
-          },
-          (props: WithImpulse & WithSpy) => {
-            return useDoubleHookWithoutCompare(props, (prev, next) =>
-              Counter.compare(prev, next),
-            )
-          },
-        ],
-        [
-          "with memoized comparator",
-          (props: WithImpulse & WithSpy) => {
-            return useSingleHookWithoutCompare(props, Counter.compare)
-          },
-          (props: WithImpulse & WithSpy) => {
-            return useDoubleHookWithoutCompare(props, Counter.compare)
-          },
-        ],
-      ])("%s", (__, useSingleHook, useDoubleHook) => {
-        const setup = () => {
-          const spySingle = vi.fn()
-          const spyDouble = vi.fn()
-          const impulse = Impulse.of({ count: 1 })
-
-          const { result: resultSingle } = renderHook(useSingleHook, {
-            initialProps: { spy: spySingle, impulse },
-          })
-          const { result: resultDouble } = renderHook(useDoubleHook, {
-            initialProps: { spy: spyDouble, impulse },
-          })
-
-          return { impulse, spySingle, spyDouble, resultSingle, resultDouble }
-        }
-
-        it("initiates with expected results", () => {
-          const { spySingle, spyDouble, resultSingle, resultDouble } = setup()
-
-          expect(resultSingle.current).toStrictEqual({ count: 1 })
-          expect(resultDouble.current).toStrictEqual({ count: 2 })
-          expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
-        })
-
-        it("increments %s", () => {
-          const { impulse, spySingle, spyDouble, resultSingle, resultDouble } =
-            setup()
-
-          act(() => {
-            impulse.setValue(Counter.inc)
-          })
-
-          expect(resultSingle.current).toStrictEqual({ count: 2 })
-          expect(resultDouble.current).toStrictEqual({ count: 4 })
-          expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
-        })
-
-        it("clones %s", () => {
-          const { impulse, spySingle, spyDouble, resultSingle, resultDouble } =
-            setup()
-
-          act(() => {
-            impulse.setValue(Counter.clone)
-          })
-
-          expect(resultSingle.current).toStrictEqual({ count: 1 })
-          expect(resultDouble.current).toStrictEqual({ count: 2 })
-          expect(spySingle).toHaveBeenCalledTimes(spyDouble.mock.calls.length)
-        })
-      })
-    },
-  )
+    })
+  })
 })

@@ -1,7 +1,6 @@
-import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react"
 
-import { type Compare, Impulse, useWatchImpulse } from "../../src"
+import { Impulse, useWatchImpulse } from "../../src"
 import {
   Counter,
   type WithIsActive,
@@ -9,62 +8,69 @@ import {
   type WithSpy,
 } from "../common"
 
-describe.each([
-  [
-    "inline watcher",
-    (
-      {
-        impulse: impulse,
-        isActive,
-        spy,
-      }: WithImpulse & WithIsActive & Partial<WithSpy>,
-      compare?: Compare<Counter>,
-    ) => {
-      return useWatchImpulse(
-        () => {
-          spy?.()
+describe("conditional watcher", () => {
+  const watcher = ({
+    impulse,
+    isActive,
+    spy,
+  }: WithImpulse & WithIsActive & Partial<WithSpy>) => {
+    spy?.()
 
-          return isActive ? impulse.getValue() : { count: -1 }
-        },
-        { compare },
-      )
-    },
-  ],
-  [
-    "memoized watcher",
-    (
-      {
-        impulse: impulse,
-        isActive,
-        spy,
-      }: WithImpulse & WithIsActive & Partial<WithSpy>,
-      compare?: Compare<Counter>,
-    ) => {
-      return useWatchImpulse(
-        useCallback(() => {
-          spy?.()
+    return isActive ? impulse.getValue() : { count: -1 }
+  }
 
-          return isActive ? impulse.getValue() : { count: -1 }
-        }, [impulse, isActive, spy]),
-        { compare },
-      )
-    },
-  ],
-])("direct %s", (_, useHookWithoutCompare) => {
   describe.each([
-    ["without comparator", useHookWithoutCompare],
+    [
+      "without deps",
+      ({
+        impulse,
+        isActive,
+        spy,
+      }: WithImpulse & WithIsActive & Partial<WithSpy>) => {
+        return useWatchImpulse(() => watcher({ impulse, isActive, spy }))
+      },
+    ],
+    [
+      "without comparator",
+      ({
+        impulse,
+        isActive,
+        spy,
+      }: WithImpulse & WithIsActive & Partial<WithSpy>) => {
+        return useWatchImpulse(
+          () => watcher({ impulse, isActive, spy }),
+          [impulse, isActive, spy],
+        )
+      },
+    ],
     [
       "with inline comparator",
-      (props: WithImpulse & WithIsActive & Partial<WithSpy>) => {
-        return useHookWithoutCompare(props, (prev, next) =>
-          Counter.compare(prev, next),
+      ({
+        impulse,
+        isActive,
+        spy,
+      }: WithImpulse & WithIsActive & Partial<WithSpy>) => {
+        return useWatchImpulse(
+          () => watcher({ impulse, isActive, spy }),
+          [impulse, isActive, spy],
+          {
+            compare: (prev, next) => Counter.compare(prev, next),
+          },
         )
       },
     ],
     [
       "with memoized comparator",
-      (props: WithImpulse & WithIsActive & Partial<WithSpy>) => {
-        return useHookWithoutCompare(props, Counter.compare)
+      ({
+        impulse,
+        isActive,
+        spy,
+      }: WithImpulse & WithIsActive & Partial<WithSpy>) => {
+        return useWatchImpulse(
+          () => watcher({ impulse, isActive, spy }),
+          [impulse, isActive, spy],
+          { compare: Counter.compare },
+        )
       },
     ],
   ])("%s", (__, useHook) => {
