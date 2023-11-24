@@ -7,17 +7,7 @@
     "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "extends": [
-    "eslint:recommended",
-    "plugin:import/recommended",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended"
-  ],
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
-  },
+  "extends": ["eslint:recommended", "plugin:import/recommended"],
   "rules": {
     "padding-line-between-statements": [
       "error",
@@ -101,12 +91,6 @@
     // ECMAScript 6
     "no-var": "error",
 
-    // React Eslint
-    "react/button-has-type": ["warn", { "reset": false }],
-    "react/prop-types": "off",
-    "react/jsx-curly-brace-presence": "error",
-    "react/display-name": "off",
-
     // Import
     "import/order": [
       "warn",
@@ -168,14 +152,6 @@
         "consistent-return": "off",
         "no-shadow": "off",
         "no-unused-vars": "off",
-
-        // React Hooks
-        "react-hooks/exhaustive-deps": [
-          "error",
-          {
-            "additionalHooks": "(use(\\w+)(Memo|Effect)|useWatchImpulse|useTransmittingImpulse)"
-          }
-        ],
 
         // Typescript Eslint
         "@typescript-eslint/no-shadow": "error",
@@ -257,6 +233,12 @@
     },
     {
       "files": ["src/**/*.ts?(x)"],
+      "extends": ["plugin:react/recommended", "plugin:react-hooks/recommended"],
+      "settings": {
+        "react": {
+          "version": "detect"
+        }
+      },
       "rules": {
         "no-restricted-imports": [
           "error",
@@ -267,6 +249,20 @@
                 "message": "Import dependencies from dependencies.ts. It makes the imported deps appear only ones in the bundle."
               }
             ]
+          }
+        ],
+
+        // React Eslint
+        "react/button-has-type": ["warn", { "reset": false }],
+        "react/prop-types": "off",
+        "react/jsx-curly-brace-presence": "error",
+        "react/display-name": "off",
+
+        // React Hooks
+        "react-hooks/exhaustive-deps": [
+          "error",
+          {
+            "additionalHooks": "(use(\\w+)(Memo|Effect)|useWatchImpulse|useTransmittingImpulse)"
           }
         ]
       }
