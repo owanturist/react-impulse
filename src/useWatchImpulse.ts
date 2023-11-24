@@ -1,6 +1,6 @@
 export { type UseWatchImpulseOptions, useWatchImpulse }
 
-import { useCallback, useDebugValue } from "./dependencies"
+import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
 import { type Compare, eq, useEvent } from "./utils"
 import { useScope } from "./useScope"
 import { defineExecutionContext } from "./validation"
@@ -22,12 +22,14 @@ interface UseWatchImpulseOptions<T> {
  * but enqueues a re-render only when the resulting value is different from the previous.
  *
  * @param watcher a function that subscribes to all Impulses calling the `Impulse#getValue` method inside the function.
+ * @param dependencies optional array of dependencies of the `watcher` function. If not defined, the `watcher` function is called on every re-render.
  * @param options optional `UseWatchImpulseOptions`.
  *
  * @version 1.0.0
  */
 function useWatchImpulse<T>(
   watcher: () => T,
+  dependencies?: DependencyList,
   { compare }: UseWatchImpulseOptions<T> = {},
 ): T {
   const transform = useCallback(
@@ -39,7 +41,8 @@ function useWatchImpulse<T>(
         watcher,
       )
     },
-    [watcher],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    dependencies ?? [watcher],
   )
   const value = useScope(transform, useEvent(compare ?? eq))
 
