@@ -542,11 +542,13 @@ A hook that initialize a stable (never changing) transmitting Impulse. Look at t
 ```dart
 function useWatchImpulse<T>(
   watcher: () => T,
+  dependencies?: DependencyList,
   options?: UseWatchImpulseOptions<T>
 ): T
 ```
 
 - `watcher` is a function that subscribes to all Impulses calling the [`Impulse#getValue`][impulse__get_value] method inside the function.
+- `dependencies` is an optional array of dependencies of the `watcher` function. If not defined, the `watcher` function is called on every render.
 - `[options]` is an optional [`UseWatchImpulseOptions`][use_watch_impulse_options] object.
 
 The `useWatchImpulse` hook is an alternative to the [`watch`][watch] function. It executes the `watcher` function whenever any of the involved Impulses' value update but enqueues a re-render only when the resulting value is different from the previous.
@@ -591,8 +593,6 @@ const Challenge: React.FC = () => {
 ```
 
 > 💬 The `watcher` function is only for reading the Impulses' values. It should never call [`Impulse.of`][impulse__of], [`Impulse#clone`][impulse__clone], or [`Impulse#setValue`][impulse__set_value] methods inside.
-
-> 💡 It is recommended to memoize the `watcher` function with [`React.useCallback`][react__use_callback] for better performance.
 
 > 💡 Keep in mind that the `watcher` function acts as a "reader" so you'd like to avoid heavy computations inside it. Sometimes it might be a good idea to pass a watcher result to a separated memoization hook. The same is true for the `compare` function - you should choose wisely between avoiding extra re-renders and heavy comparisons.
 
@@ -892,7 +892,7 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
   "react-hooks/exhaustive-deps": [
     "error",
     {
-      "additionalHooks": "(useTransmittingImpulse|useImpulse(Effect|LayoutEffect|Memo|Callback))"
+      "additionalHooks": "(useTransmittingImpulse|useWatchImpulse|useImpulse(Effect|LayoutEffect|Memo|Callback))"
     }
   ]
 }

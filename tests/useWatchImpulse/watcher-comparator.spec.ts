@@ -1,39 +1,28 @@
-import { useCallback } from "react"
 import { act, renderHook } from "@testing-library/react"
 
-import { type Compare, Impulse, useWatchImpulse } from "../../src"
+import { Impulse, useWatchImpulse } from "../../src"
 import { Counter, type WithCompare, type WithImpulse } from "../common"
 
-describe.each([
-  [
-    "inline watcher",
-    ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
-      return useWatchImpulse(() => impulse.getValue(), { compare })
-    },
-  ],
-  [
-    "memoized watcher",
-    ({ impulse }: WithImpulse, compare?: Compare<Counter>) => {
-      return useWatchImpulse(
-        useCallback(() => impulse.getValue(), [impulse]),
-        { compare },
-      )
-    },
-  ],
-])("with %s", (_, useHookWithoutCompare) => {
+describe("watcher", () => {
+  const watcher = ({ impulse }: WithImpulse) => impulse.getValue()
+
   describe.each([
     [
       "with inline comparator",
-      ({ compare, ...props }: WithImpulse & WithCompare) => {
+      ({ impulse, compare }: WithImpulse & WithCompare) => {
         const cmp = compare ?? Counter.compare
 
-        return useHookWithoutCompare(props, (prev, next) => cmp(prev, next))
+        return useWatchImpulse(() => watcher({ impulse }), [impulse], {
+          compare: (prev, next) => cmp(prev, next),
+        })
       },
     ],
     [
       "with memoized comparator",
-      ({ compare, ...props }: WithImpulse & WithCompare) => {
-        return useHookWithoutCompare(props, compare ?? Counter.compare)
+      ({ impulse, compare }: WithImpulse & WithCompare) => {
+        return useWatchImpulse(() => watcher({ impulse }), [impulse], {
+          compare: compare ?? Counter.compare,
+        })
       },
     ],
   ])("%s", (__, useHook) => {

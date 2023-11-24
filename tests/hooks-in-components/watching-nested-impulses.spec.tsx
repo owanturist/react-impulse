@@ -91,17 +91,30 @@ describe("watching nested impulses", () => {
     )
   }
 
+  const watcherLeft = (state: Impulse<AppState>) => {
+    const total = AppState.sum(state.getValue())
+
+    return total > 10
+  }
+  const watcherRight = (state: Impulse<AppState>) => {
+    const total = AppState.sum(state.getValue())
+
+    return total < 20
+  }
+
+  const compare = (
+    [left1, right1]: [boolean, boolean],
+    [left2, right2]: [boolean, boolean],
+  ) => {
+    return left1 === left2 && right1 === right2
+  }
+
   const SingleWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useWatchImpulse(
-      () => {
-        const total = AppState.sum(props.state.getValue())
-
-        return [total > 10, total < 20]
-      },
+      () => [watcherLeft(props.state), watcherRight(props.state)],
+      [props.state],
       {
-        compare: ([left1, right1], [left2, right2]) => {
-          return left1 === left2 && right1 === right2
-        },
+        compare: (left, right) => compare(left, right),
       },
     )
 
@@ -116,22 +129,9 @@ describe("watching nested impulses", () => {
 
   const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useWatchImpulse<[boolean, boolean]>(
-      React.useCallback(() => {
-        const total = AppState.sum(props.state.getValue())
-
-        return [total > 10, total < 20]
-      }, [props.state]),
-      {
-        compare: React.useCallback(
-          (
-            [left1, right1]: [boolean, boolean],
-            [left2, right2]: [boolean, boolean],
-          ) => {
-            return left1 === left2 && right1 === right2
-          },
-          [],
-        ),
-      },
+      () => [watcherLeft(props.state), watcherRight(props.state)],
+      [props.state],
+      { compare },
     )
 
     return (
@@ -144,16 +144,8 @@ describe("watching nested impulses", () => {
   }
 
   const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanTen = useWatchImpulse(() => {
-      const total = props.state.getValue(AppState.sum)
-
-      return total > 10
-    })
-    const lessThanTwenty = useWatchImpulse(() => {
-      const total = AppState.sum(props.state.getValue())
-
-      return total < 20
-    })
+    const moreThanTen = useWatchImpulse(() => watcherLeft(props.state))
+    const lessThanTwenty = useWatchImpulse(() => watcherRight(props.state))
 
     return (
       <GenericApp
@@ -164,20 +156,14 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const MultipleMemoizedWatchersApp: React.FC<AppProps> = (props) => {
+  const MultipleWatchersWithDepsApp: React.FC<AppProps> = (props) => {
     const moreThanTen = useWatchImpulse(
-      React.useCallback(() => {
-        const total = props.state.getValue(AppState.sum)
-
-        return total > 10
-      }, [props.state]),
+      () => watcherLeft(props.state),
+      [props.state],
     )
     const lessThanTwenty = useWatchImpulse(
-      React.useCallback(() => {
-        const total = AppState.sum(props.state.getValue())
-
-        return total < 20
-      }, [props.state]),
+      () => watcherRight(props.state),
+      [props.state],
     )
 
     return (
@@ -190,8 +176,8 @@ describe("watching nested impulses", () => {
   }
 
   const WatchedApp: React.FC<AppProps> = watch((props) => {
-    const total = AppState.sum(props.state.getValue())
-    const [moreThanTen, lessThanTwenty] = [total > 10, total < 20]
+    const moreThanTen = watcherLeft(props.state)
+    const lessThanTwenty = watcherRight(props.state)
 
     return (
       <GenericApp
@@ -206,7 +192,7 @@ describe("watching nested impulses", () => {
     ["single watcher", SingleWatcherApp, 0],
     ["single memoized watcher", SingleMemoizedWatcherApp, 0],
     ["multiple watchers", MultipleWatchersApp, 0],
-    ["multiple memoized watchers", MultipleMemoizedWatchersApp, 0],
+    ["multiple memoized watchers", MultipleWatchersWithDepsApp, 0],
     ["watch()", WatchedApp, 1],
   ])("handles nested Impulses with %s", (_, App, unnecessaryRerendersCount) => {
     const state = Impulse.of<AppState>({
