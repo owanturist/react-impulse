@@ -22,7 +22,7 @@ interface UseWatchImpulseOptions<T> {
  * but enqueues a re-render only when the resulting value is different from the previous.
  *
  * @param watcher a function that subscribes to all Impulses calling the `Impulse#getValue` method inside the function.
- * @param dependencies optional array of dependencies of the `watcher` function. If not defined, the `watcher` function is called on every re-render.
+ * @param dependencies optional array of dependencies of the `watcher` function. If not defined, the `watcher` function is called on every render.
  * @param options optional `UseWatchImpulseOptions`.
  *
  * @version 1.0.0
