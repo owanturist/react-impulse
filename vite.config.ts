@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     globals: true,
     singleThread: true,
-    environment: "jsdom",
+    environment: "happy-dom",
     setupFiles: "./setup-tests.ts",
     coverage: {
       reporter: ["text", "json"],
