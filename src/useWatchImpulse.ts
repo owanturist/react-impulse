@@ -1,12 +1,10 @@
-export { type UseWatchImpulseOptions, useWatchImpulse }
-
 import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
 import { type Compare, eq, useEvent } from "./utils"
 import { useScope } from "./useScope"
 import { defineExecutionContext } from "./validation"
 import { type Scope, injectScope } from "./Scope"
 
-interface UseWatchImpulseOptions<T> {
+export interface UseWatchImpulseOptions<T> {
   /**
    * The compare function determines whether or not the watcher result is different.
    * If the watcher result is different, a host component re-renders.
@@ -27,7 +25,7 @@ interface UseWatchImpulseOptions<T> {
  *
  * @version 1.0.0
  */
-function useWatchImpulse<T>(
+export function useWatchImpulse<T>(
   watcher: () => T,
   dependencies?: DependencyList,
   { compare }: UseWatchImpulseOptions<T> = {},

@@ -1,5 +1,3 @@
-export { batch }
-
 import { ScopeEmitter } from "./ScopeEmitter"
 
 /**
@@ -9,7 +7,7 @@ import { ScopeEmitter } from "./ScopeEmitter"
  *
  * @version 1.0.0
  */
-function batch(execute: VoidFunction): void {
+export function batch(execute: VoidFunction): void {
   ScopeEmitter._schedule(() => {
     execute()
 

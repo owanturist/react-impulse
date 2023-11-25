@@ -1,5 +1,3 @@
-export { useTransmittingImpulse }
-
 import type { DependencyList } from "./dependencies"
 import {
   Impulse,
@@ -27,7 +25,7 @@ import {
  *
  * @version 2.0.0
  */
-function useTransmittingImpulse<T>(
+export function useTransmittingImpulse<T>(
   getter: () => T,
   dependencies: DependencyList,
   options?: TransmittingImpulseOptions<T>,
@@ -45,14 +43,14 @@ function useTransmittingImpulse<T>(
  *
  * @version 2.0.0
  */
-function useTransmittingImpulse<T>(
+export function useTransmittingImpulse<T>(
   getter: () => T,
   dependencies: DependencyList,
   setter: (value: T) => void,
   options?: TransmittingImpulseOptions<T>,
 ): Impulse<T>
 
-function useTransmittingImpulse<T>(
+export function useTransmittingImpulse<T>(
   getter: () => T,
   dependencies: DependencyList,
   ...rest:

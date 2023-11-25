@@ -1,5 +1,3 @@
-export { watch }
-
 import {
   type FC,
   type ForwardRefRenderFunction,
@@ -23,9 +21,9 @@ import { injectScope } from "./Scope"
  *
  * @version 1.0.0
  */
-function watch<TProps>(component: ExoticComponent<TProps>): never
-function watch<TProps>(component: FC<TProps>): FC<TProps>
-function watch<TProps>(component: FC<TProps>): FC<TProps> {
+export function watch<TProps>(component: ExoticComponent<TProps>): never
+export function watch<TProps>(component: FC<TProps>): FC<TProps>
+export function watch<TProps>(component: FC<TProps>): FC<TProps> {
   const ComponentWithScope: FC<TProps> = (props, ctx: unknown) => {
     const getScope = useScope()
 

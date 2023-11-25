@@ -115,7 +115,6 @@
     ],
     "import/no-relative-packages": "error",
     "import/no-unresolved": ["error", { "ignore": ["vitest/config"] }],
-    "import/group-exports": "error",
     "import/no-default-export": "error",
     "import/newline-after-import": ["error", { "considerComments": true }],
     "import/no-anonymous-default-export": "error",
@@ -232,7 +231,7 @@
       }
     },
     {
-      "files": ["src/**/*.ts?(x)"],
+      "files": ["src/**/*.ts?(x)", "tests/**/*.ts?(x)"],
       "extends": ["plugin:react/recommended", "plugin:react-hooks/recommended"],
       "settings": {
         "react": {

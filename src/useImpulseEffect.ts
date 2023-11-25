@@ -1,5 +1,3 @@
-export { useImpulseEffect }
-
 import {
   type DependencyList,
   type EffectCallback,
@@ -18,7 +16,7 @@ import { injectScope } from "./Scope"
  *
  * @version 1.0.0
  */
-function useImpulseEffect(
+export function useImpulseEffect(
   effect: () => ReturnType<EffectCallback>,
   dependencies?: DependencyList,
 ): void {
