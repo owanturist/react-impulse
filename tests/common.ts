@@ -1,22 +1,10 @@
-export {
-  type WithImpulse,
-  type WithCompare,
-  type WithFirst,
-  type WithSecond,
-  type WithThird,
-  type WithSpy,
-  type WithListener,
-  type WithIsActive,
-  Counter,
-}
-
 import type { Compare, Impulse } from "../src"
 
 afterEach(() => {
   Counter.compare.mockClear()
 })
 
-abstract class Counter {
+export abstract class Counter {
   public abstract readonly count: number
 
   public static compare = vi.fn((prev, next) => {
@@ -44,34 +32,34 @@ abstract class Counter {
   }
 }
 
-interface WithImpulse<T = Counter> {
+export interface WithImpulse<T = Counter> {
   impulse: Impulse<T>
 }
 
-interface WithCompare<T = Counter> {
+export interface WithCompare<T = Counter> {
   compare?: null | Compare<T>
 }
 
-interface WithFirst<T = Counter> {
+export interface WithFirst<T = Counter> {
   first: Impulse<T>
 }
 
-interface WithSecond<T = Counter> {
+export interface WithSecond<T = Counter> {
   second: Impulse<T>
 }
 
-interface WithThird<T = Counter> {
+export interface WithThird<T = Counter> {
   third: Impulse<T>
 }
 
-interface WithSpy {
+export interface WithSpy {
   spy(...args: Array<unknown>): void
 }
 
-interface WithListener {
+export interface WithListener {
   listener: VoidFunction
 }
 
-interface WithIsActive {
+export interface WithIsActive {
   isActive: boolean
 }

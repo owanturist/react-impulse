@@ -1,11 +1,3 @@
-export {
-  type ImpulseOptions,
-  type TransmittingImpulseOptions,
-  type ReadonlyImpulse,
-  type TransmittingImpulse,
-  Impulse,
-}
-
 import { type Func, type Compare, eq, noop, isFunction } from "./utils"
 import { EMITTER_KEY, extractScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
@@ -25,7 +17,7 @@ import {
   USE_IMPULSE_MEMO_CALLING_IMPULSE_TRANSMIT,
 } from "./messages"
 
-interface ImpulseOptions<T> {
+export interface ImpulseOptions<T> {
   /**
    * The compare function determines whether or not a new Impulse's value replaces the current one.
    * In many cases specifying the function leads to better performance because it prevents unnecessary updates.
@@ -33,16 +25,16 @@ interface ImpulseOptions<T> {
   readonly compare?: null | Compare<T>
 }
 
-interface TransmittingImpulseOptions<T> {
+export interface TransmittingImpulseOptions<T> {
   /**
    * The compare function determines whether or not a transmitting value changes when reading it from an external source.
    */
   readonly compare?: null | Compare<T>
 }
 
-type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
+export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
 
-abstract class Impulse<T> {
+export abstract class Impulse<T> {
   /**
    * Creates new Impulse without an initial value.
    *
@@ -276,7 +268,7 @@ class DirectImpulse<T> extends Impulse<T> {
   }
 }
 
-class TransmittingImpulse<T> extends Impulse<T> {
+export class TransmittingImpulse<T> extends Impulse<T> {
   private _value?: { _lazy: T }
 
   public constructor(

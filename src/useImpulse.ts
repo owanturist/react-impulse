@@ -1,5 +1,3 @@
-export { useImpulse }
-
 import { Impulse, type ImpulseOptions } from "./Impulse"
 import { isFunction, usePermanent, useEvent, eq } from "./utils"
 
@@ -8,7 +6,7 @@ import { isFunction, usePermanent, useEvent, eq } from "./utils"
  *
  * @version 1.2.0
  */
-function useImpulse<T = undefined>(): Impulse<undefined | T>
+export function useImpulse<T = undefined>(): Impulse<undefined | T>
 
 /**
  * A hook that initiates a stable (never changing) Impulse.
@@ -21,12 +19,12 @@ function useImpulse<T = undefined>(): Impulse<undefined | T>
  *
  * @version 1.0.0
  */
-function useImpulse<T>(
+export function useImpulse<T>(
   valueOrInitValue: T | ((...args: []) => T),
   options?: ImpulseOptions<T>,
 ): Impulse<T>
 
-function useImpulse<T>(
+export function useImpulse<T>(
   valueOrInitValue?: T | ((...args: []) => T),
   { compare }: ImpulseOptions<undefined | T> = {},
 ): Impulse<undefined | T> {

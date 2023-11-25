@@ -1,15 +1,13 @@
-export { withinNth, expectCounts, CounterComponent }
-
 import React from "react"
 import { screen, within } from "@testing-library/react"
 
 import { type Impulse, useWatchImpulse } from "../../src"
 
-const withinNth = (testId: string, position: number) => {
+export const withinNth = (testId: string, position: number) => {
   return within(screen.getAllByTestId(testId)[position]!)
 }
 
-const expectCounts = (expecting: ReadonlyArray<number>): void => {
+export const expectCounts = (expecting: ReadonlyArray<number>): void => {
   const counters = screen.queryAllByTestId("counter")
 
   expect(counters).toHaveLength(expecting.length)
@@ -21,7 +19,7 @@ const expectCounts = (expecting: ReadonlyArray<number>): void => {
   }
 }
 
-const CounterComponent: React.FC<{
+export const CounterComponent: React.FC<{
   count: Impulse<number>
   onRender: VoidFunction
 }> = React.memo(

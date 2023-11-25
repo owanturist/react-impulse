@@ -1,5 +1,3 @@
-export { useImpulseCallback }
-
 import { type DependencyList, useMemo } from "./dependencies"
 import { useScope } from "./useScope"
 import { injectScope } from "./Scope"
@@ -15,7 +13,10 @@ import { injectScope } from "./Scope"
  * @version 1.3.0
  */
 
-function useImpulseCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
+export function useImpulseCallback<
+  TArgs extends ReadonlyArray<unknown>,
+  TResult,
+>(
   callback: (...args: TArgs) => TResult,
   dependencies: DependencyList,
 ): (...args: TArgs) => TResult {
