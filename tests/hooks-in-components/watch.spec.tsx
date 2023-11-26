@@ -648,6 +648,41 @@ describe("watch.forwardRef()", () => {
     expect(count).toHaveTextContent("1")
     expect(divRef).not.toHaveBeenCalled()
   })
+
+  it("forwards correct props", () => {
+    interface Props {
+      className: string
+      id: string
+    }
+
+    const Forwarded = watch.forwardRef<HTMLDivElement, Props>((props, ref) => (
+      <div ref={ref} {...props} />
+    ))
+    const ForwardedMemoized = watch.forwardRef.memo<HTMLDivElement, Props>(
+      (props, ref) => <div ref={ref} {...props} />,
+    )
+    const MemoizedForwarded = watch.memo.forwardRef<HTMLDivElement, Props>(
+      (props, ref) => <div ref={ref} {...props} />,
+    )
+
+    const ref_1: React.Ref<HTMLDivElement> = vi.fn()
+    const ref_2: React.Ref<HTMLDivElement> = vi.fn()
+    const ref_3: React.Ref<HTMLDivElement> = vi.fn()
+    const { rerender } = render(
+      <Forwarded ref={ref_1} className="test" id="test" />,
+    )
+
+    expect(ref_1).toHaveBeenCalledOnce()
+    expect(ref_1).toHaveBeenLastCalledWith(expect.any(HTMLDivElement))
+
+    rerender(<ForwardedMemoized ref={ref_2} className="test" id="test" />)
+    expect(ref_2).toHaveBeenCalledOnce()
+    expect(ref_2).toHaveBeenLastCalledWith(expect.any(HTMLDivElement))
+
+    rerender(<MemoizedForwarded ref={ref_3} className="test" id="test" />)
+    expect(ref_3).toHaveBeenCalledOnce()
+    expect(ref_3).toHaveBeenLastCalledWith(expect.any(HTMLDivElement))
+  })
 })
 
 describe("wild cases", () => {
