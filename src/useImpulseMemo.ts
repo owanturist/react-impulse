@@ -1,7 +1,7 @@
 import { type DependencyList, useMemo } from "./dependencies"
 import { useScope } from "./useScope"
 import { defineExecutionContext } from "./validation"
-import { injectScope } from "./Scope"
+import type { Scope } from "./Scope"
 
 /**
  * The hook is an `Impulse` version of the `React.useMemo` hook.
@@ -14,20 +14,13 @@ import { injectScope } from "./Scope"
  * @version 1.0.0
  */
 export function useImpulseMemo<TValue>(
-  factory: () => TValue,
+  factory: (scope: Scope) => TValue,
   dependencies: DependencyList,
 ): TValue {
   const getScope = useScope()
 
   return useMemo(
-    () => {
-      return defineExecutionContext(
-        "useImpulseMemo",
-        injectScope,
-        getScope(),
-        factory,
-      )
-    },
+    () => defineExecutionContext("useImpulseMemo", factory, getScope()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [...dependencies, getScope],
   )

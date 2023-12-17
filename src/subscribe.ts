@@ -1,4 +1,4 @@
-import { EMITTER_KEY, injectScope } from "./Scope"
+import { EMITTER_KEY, type Scope, injectScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { defineExecutionContext } from "./validation"
 
@@ -8,19 +8,14 @@ import { defineExecutionContext } from "./validation"
  * @param listener function that will be called on each `Impulse` change, involved in the `listener` execution. Calls first time synchronously when `subscribe` is called.
  * @returns cleanup function that unsubscribes the `listener`
  */
-export function subscribe(listener: VoidFunction): VoidFunction {
-  const emitter = new ScopeEmitter()
+export function subscribe(listener: (scope: Scope) => void): VoidFunction {
+  const emitter = ScopeEmitter._init()
 
   const emit = (): void => {
-    defineExecutionContext(
-      "subscribe",
-      injectScope,
-      {
-        [EMITTER_KEY]: emitter,
-        version: emitter._getVersion(),
-      },
-      listener,
-    )
+    defineExecutionContext("subscribe", injectScope, listener, {
+      [EMITTER_KEY]: emitter,
+      version: emitter._getVersion(),
+    })
   }
 
   emit()

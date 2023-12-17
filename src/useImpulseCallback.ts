@@ -1,6 +1,6 @@
-import { type DependencyList, useMemo } from "./dependencies"
-import { useScope } from "./useScope"
-import { injectScope } from "./Scope"
+import type { DependencyList } from "./dependencies"
+import type { Scope } from "./Scope"
+import { useImpulseMemo } from "./useImpulseMemo"
 
 /**
  * The hook is an `Impulse` version of the `React.useCallback` hook.
@@ -17,18 +17,14 @@ export function useImpulseCallback<
   TArgs extends ReadonlyArray<unknown>,
   TResult,
 >(
-  callback: (...args: TArgs) => TResult,
+  callback: (scope: Scope, ...args: TArgs) => TResult,
   dependencies: DependencyList,
 ): (...args: TArgs) => TResult {
-  const getScope = useScope()
-
-  return useMemo(
-    () => {
-      const scope = getScope()
-
-      return (...args) => injectScope(scope, callback, ...args)
+  return useImpulseMemo(
+    (scope) => {
+      return (...args) => callback(scope, ...args)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [...dependencies, getScope],
+    dependencies,
   )
 }

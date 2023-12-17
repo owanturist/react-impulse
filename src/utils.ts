@@ -1,4 +1,5 @@
 import {
+  type EffectCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -14,6 +15,8 @@ import {
  * @version 1.0.0
  */
 export type Compare<T> = (left: T, right: T) => boolean
+
+export type Destructor = ReturnType<EffectCallback>
 
 export type Func<TArgs extends ReadonlyArray<unknown>, TResult = void> = (
   ...args: TArgs

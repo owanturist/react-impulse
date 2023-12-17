@@ -1,5 +1,5 @@
 import { type Func, type Compare, eq, noop, isFunction } from "./utils"
-import { EMITTER_KEY, extractScope } from "./Scope"
+import { EMITTER_KEY, type Scope, extractScope, STATIC_SCOPE } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { validate } from "./validation"
 import {
@@ -76,7 +76,7 @@ export abstract class Impulse<T> {
    * @version 2.0.0
    */
   public static transmit<T>(
-    getter: () => T,
+    getter: (scope: Scope) => T,
     options?: TransmittingImpulseOptions<T>,
   ): ReadonlyImpulse<T>
 
@@ -92,8 +92,8 @@ export abstract class Impulse<T> {
    * @version 2.0.0
    */
   public static transmit<T>(
-    getter: () => T,
-    setter: (value: T) => void,
+    getter: (scope: Scope) => T,
+    setter: (value: T, scope: Scope) => void,
     options?: TransmittingImpulseOptions<T>,
   ): Impulse<T>
 
@@ -104,10 +104,10 @@ export abstract class Impulse<T> {
     ._alert()
   public static transmit<T>(
     ...args:
-      | [getter: () => T, options?: TransmittingImpulseOptions<T>]
+      | [getter: Func<[Scope], T>, options?: TransmittingImpulseOptions<T>]
       | [
-          getter: () => T,
-          setter: (value: T) => void,
+          getter: Func<[Scope], T>,
+          setter: Func<[T, Scope]>,
           options?: TransmittingImpulseOptions<T>,
         ]
   ): Impulse<T> {
@@ -132,7 +132,9 @@ export abstract class Impulse<T> {
    * @version 1.0.0
    */
   protected toJSON(): unknown {
-    return this.getValue()
+    const scope = extractScope()
+
+    return this.getValue(scope)
   }
 
   /**
@@ -142,7 +144,9 @@ export abstract class Impulse<T> {
    * @version 1.0.0
    */
   protected toString(): string {
-    return String(this.getValue())
+    const scope = extractScope()
+
+    return String(this.getValue(scope))
   }
 
   protected _emit(execute: () => boolean): void {
@@ -151,7 +155,7 @@ export abstract class Impulse<T> {
     })
   }
 
-  protected abstract _getter(): T
+  protected abstract _getter(scope: Scope): T
   protected abstract _setter(value: T): boolean
 
   /**
@@ -174,7 +178,7 @@ export abstract class Impulse<T> {
    * @version 1.0.0
    */
   public clone(
-    transform: (value: T) => T,
+    transform: (value: T, scope: Scope) => T,
     options?: ImpulseOptions<T>,
   ): Impulse<T>
 
@@ -186,38 +190,36 @@ export abstract class Impulse<T> {
   public clone(
     ...args:
       | [options?: ImpulseOptions<T>]
-      | [transform: Func<[T], T>, options?: ImpulseOptions<T>]
+      | [transform: Func<[T, Scope], T>, options?: ImpulseOptions<T>]
   ): Impulse<T> {
     const [value, { compare = this._compare } = {}] = isFunction(args[0])
-      ? [args[0](this._getter()), args[1]]
-      : [this._getter(), args[0]]
+      ? [args[0](this._getter(STATIC_SCOPE), STATIC_SCOPE), args[1]]
+      : [this._getter(STATIC_SCOPE), args[0]]
 
     return new DirectImpulse(value, compare ?? eq)
   }
 
   /**
-   * Returns the current value.
+   * Returns the impulse value.
    *
    * @version 1.0.0
    */
-  public getValue(): T
+  public getValue(scope: Scope): T
   /**
-   * Returns a value selected from the current value.
+   * Returns a value selected from the impulse value.
    *
-   * @param select an optional function that applies to the current value before returning.
+   * @param select an optional function that applies to the impulse value before returning.
    *
    * @version 1.0.0
    */
-  public getValue<R>(select: (value: T) => R): R
+  public getValue<R>(scope: Scope, select: (value: T, scope: Scope) => R): R
 
-  public getValue<R>(select?: Func<[T], R>): T | R {
-    const scope = extractScope()
-
+  public getValue<R>(scope: Scope, select?: Func<[T, Scope], R>): T | R {
     scope[EMITTER_KEY]?._attachTo(this._emitters)
 
-    const value = this._getter()
+    const value = this._getter(scope)
 
-    return isFunction(select) ? select(value) : value
+    return isFunction(select) ? select(value, scope) : value
   }
 
   /**
@@ -234,10 +236,12 @@ export abstract class Impulse<T> {
     ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE)
     ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE)
     ._prevent()
-  public setValue(valueOrTransform: T | ((currentValue: T) => T)): void {
+  public setValue(
+    valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
+  ): void {
     this._emit(() => {
       const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(this._getter())
+        ? valueOrTransform(this._getter(STATIC_SCOPE), STATIC_SCOPE)
         : valueOrTransform
 
       return this._setter(nextValue)
@@ -272,15 +276,15 @@ export class TransmittingImpulse<T> extends Impulse<T> {
   private _value?: { _lazy: T }
 
   public constructor(
-    private _getValue: () => T,
-    private readonly _setValue: (value: T) => void,
+    private _getValue: Func<[Scope], T>,
+    private readonly _setValue: Func<[T, Scope]>,
     compare: Compare<T>,
   ) {
     super(compare)
   }
 
-  protected _getter(): T {
-    const value = this._getValue()
+  protected _getter(scope: Scope): T {
+    const value = this._getValue(scope)
 
     if (this._value == null || !this._compare(this._value._lazy, value)) {
       this._value = { _lazy: value }
@@ -290,21 +294,21 @@ export class TransmittingImpulse<T> extends Impulse<T> {
   }
 
   protected _setter(value: T): boolean {
-    this._setValue(value)
+    this._setValue(value, STATIC_SCOPE)
 
     // the TransmittingImpulse does not need to emit changes by itself
     // the transmitted impulses do it instead
     return false
   }
 
-  public _replaceGetter(getter: () => T): void {
+  public _replaceGetter(getter: (scope: Scope) => T): void {
     if (this._getValue !== getter) {
       this._emit(() => {
         const value = this._value
 
         this._getValue = getter
 
-        return value != null && value._lazy !== this._getter()
+        return value != null && value._lazy !== this._getter(STATIC_SCOPE)
       })
     }
   }

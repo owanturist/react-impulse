@@ -127,7 +127,8 @@
       {
         "devDependencies": ["tests/**/*.{ts,tsx}", "./*.{js,ts}"]
       }
-    ]
+    ],
+    "import/no-cycle": ["error"]
   },
   "overrides": [
     {

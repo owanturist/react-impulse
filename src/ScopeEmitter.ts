@@ -8,6 +8,10 @@ import { noop } from "./utils"
  * @private
  */
 export class ScopeEmitter {
+  public static _init(): ScopeEmitter {
+    return new ScopeEmitter()
+  }
+
   private static _queue: null | Array<null | ReadonlySet<ScopeEmitter>> = null
 
   public static _schedule(
@@ -42,6 +46,8 @@ export class ScopeEmitter {
   private _version = 0
 
   private _emit: VoidFunction = noop
+
+  private constructor() {}
 
   private _increment(): void {
     this._version = (this._version + 1) % 10e9

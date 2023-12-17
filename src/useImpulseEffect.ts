@@ -1,10 +1,7 @@
-import {
-  type DependencyList,
-  type EffectCallback,
-  useEffect,
-} from "./dependencies"
+import { type DependencyList, useEffect } from "./dependencies"
+import type { Scope } from "./Scope"
+import type { Destructor } from "./utils"
 import { useScope } from "./useScope"
-import { injectScope } from "./Scope"
 
 /**
  * The hook is an `Impulse` version of the `React.useEffect` hook.
@@ -17,13 +14,13 @@ import { injectScope } from "./Scope"
  * @version 1.0.0
  */
 export function useImpulseEffect(
-  effect: () => ReturnType<EffectCallback>,
+  effect: (scope: Scope) => Destructor,
   dependencies?: DependencyList,
 ): void {
   const getScope = useScope()
 
   useEffect(
-    () => injectScope(getScope(), effect),
+    () => effect(getScope()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies && [...dependencies, getScope],
   )

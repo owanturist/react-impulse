@@ -1,8 +1,8 @@
 import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
 import { type Compare, eq, useEvent } from "./utils"
+import type { Scope } from "./Scope"
 import { useScope } from "./useScope"
 import { defineExecutionContext } from "./validation"
-import { type Scope, injectScope } from "./Scope"
 
 export interface UseWatchImpulseOptions<T> {
   /**
@@ -26,19 +26,12 @@ export interface UseWatchImpulseOptions<T> {
  * @version 1.0.0
  */
 export function useWatchImpulse<T>(
-  watcher: () => T,
+  watcher: (scope: Scope) => T,
   dependencies?: DependencyList,
   { compare }: UseWatchImpulseOptions<T> = {},
 ): T {
   const transform = useCallback(
-    (scope: Scope) => {
-      return defineExecutionContext(
-        "useWatchImpulse",
-        injectScope,
-        scope,
-        watcher,
-      )
-    },
+    (scope: Scope) => defineExecutionContext("useWatchImpulse", watcher, scope),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies ?? [watcher],
   )

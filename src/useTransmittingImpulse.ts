@@ -5,6 +5,7 @@ import {
   type ReadonlyImpulse,
   type TransmittingImpulseOptions,
 } from "./Impulse"
+import type { Scope } from "./Scope"
 import {
   noop,
   eq,
@@ -12,6 +13,7 @@ import {
   usePermanent,
   useIsomorphicLayoutEffect,
   isFunction,
+  type Func,
 } from "./utils"
 
 /**
@@ -26,7 +28,7 @@ import {
  * @version 2.0.0
  */
 export function useTransmittingImpulse<T>(
-  getter: () => T,
+  getter: (scope: Scope) => T,
   dependencies: DependencyList,
   options?: TransmittingImpulseOptions<T>,
 ): ReadonlyImpulse<T>
@@ -44,18 +46,18 @@ export function useTransmittingImpulse<T>(
  * @version 2.0.0
  */
 export function useTransmittingImpulse<T>(
-  getter: () => T,
+  getter: (scope: Scope) => T,
   dependencies: DependencyList,
-  setter: (value: T) => void,
+  setter: (value: T, scope: Scope) => void,
   options?: TransmittingImpulseOptions<T>,
 ): Impulse<T>
 
 export function useTransmittingImpulse<T>(
-  getter: () => T,
+  getter: Func<[Scope], T>,
   dependencies: DependencyList,
   ...rest:
     | [options?: TransmittingImpulseOptions<T>]
-    | [setter: (value: T) => void, options?: TransmittingImpulseOptions<T>]
+    | [setter: Func<[T, Scope]>, options?: TransmittingImpulseOptions<T>]
 ): Impulse<T> {
   const [setter, options] = isFunction(rest[0])
     ? [rest[0], rest[1]]

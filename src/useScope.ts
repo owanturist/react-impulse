@@ -7,7 +7,7 @@ export function useScope<T = () => Scope>(
   transform?: (scope: Scope) => T,
   compare?: Compare<T>,
 ): T {
-  const emitter = usePermanent(() => new ScopeEmitter())
+  const emitter = usePermanent(ScopeEmitter._init)
   const select = useCallback(
     (version: number) => {
       const getScope = (): Scope => {
