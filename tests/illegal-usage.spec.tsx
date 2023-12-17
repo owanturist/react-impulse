@@ -6,7 +6,7 @@ import {
   subscribe,
   useImpulseEffect,
   useImpulseLayoutEffect,
-  useImpulseMemo,
+  useScopedMemo,
   useWatchImpulse,
   watch,
 } from "../src"
@@ -28,10 +28,10 @@ afterAll(() => {
 describe("calling Impulse.of()", () => {
   describe.each([
     [
-      "useImpulseMemo",
-      "You should not call Impulse.of inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
+      "useScopedMemo",
+      "You should not call Impulse.of inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
       () => {
-        return useImpulseMemo(() => Impulse.of(1).getValue(), [])
+        return useScopedMemo(() => Impulse.of(1).getValue(), [])
       },
     ],
     [
@@ -100,10 +100,10 @@ describe("calling Impulse.of()", () => {
 describe("calling Impulse#clone()", () => {
   describe.each([
     [
-      "useImpulseMemo",
-      "You should not call Impulse#clone inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+      "useScopedMemo",
+      "You should not call Impulse#clone inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
-        return useImpulseMemo(() => impulse.clone().getValue(), [impulse])
+        return useScopedMemo(() => impulse.clone().getValue(), [impulse])
       },
     ],
     [
@@ -191,10 +191,10 @@ describe("calling Impulse#clone()", () => {
 describe("calling Impulse#setValue()", () => {
   describe.each([
     [
-      "useImpulseMemo",
-      "You should not call Impulse#setValue inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+      "useScopedMemo",
+      "You should not call Impulse#setValue inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
-        return useImpulseMemo(() => {
+        return useScopedMemo(() => {
           impulse.setValue(3)
 
           return impulse.getValue()

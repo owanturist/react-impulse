@@ -1,6 +1,6 @@
 import type { DependencyList } from "./dependencies"
 import type { Scope } from "./Scope"
-import { useImpulseMemo } from "./useImpulseMemo"
+import { useScopedMemo } from "./useScopedMemo"
 
 /**
  * The hook is an `Impulse` version of the `React.useCallback` hook.
@@ -20,7 +20,7 @@ export function useScopedCallback<
   callback: (scope: Scope, ...args: TArgs) => TResult,
   dependencies: DependencyList,
 ): (...args: TArgs) => TResult {
-  return useImpulseMemo(
+  return useScopedMemo(
     (scope) => {
       return (...args) => callback(scope, ...args)
     },

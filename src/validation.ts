@@ -4,7 +4,7 @@ export type ExecutionContext =
   | "subscribe"
   | "watch"
   | "useWatchImpulse"
-  | "useImpulseMemo"
+  | "useScopedMemo"
 
 let currentExecutionContext: null | ExecutionContext = null
 

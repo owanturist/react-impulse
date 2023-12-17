@@ -11,10 +11,10 @@ import {
   USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE,
   USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE,
   USE_WATCH_IMPULSE_CALLING_IMPULSE_TRANSMIT,
-  USE_IMPULSE_MEMO_CALLING_IMPULSE_OF,
-  USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE,
-  USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE,
-  USE_IMPULSE_MEMO_CALLING_IMPULSE_TRANSMIT,
+  USE_SCOPED_MEMO_CALLING_IMPULSE_OF,
+  USE_SCOPED_MEMO_CALLING_IMPULSE_CLONE,
+  USE_SCOPED_MEMO_CALLING_IMPULSE_SET_VALUE,
+  USE_SCOPED_MEMO_CALLING_IMPULSE_TRANSMIT,
 } from "./messages"
 
 export interface ImpulseOptions<T> {
@@ -56,7 +56,7 @@ export abstract class Impulse<T> {
   @validate
     ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_OF)
     ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_OF)
-    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_OF)
+    ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_OF)
     ._alert()
   public static of<T>(
     initialValue?: T,
@@ -100,7 +100,7 @@ export abstract class Impulse<T> {
   @validate
     ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_TRANSMIT)
     ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_TRANSMIT)
-    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_TRANSMIT)
+    ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_TRANSMIT)
     ._alert()
   public static transmit<T>(
     ...args:
@@ -185,7 +185,7 @@ export abstract class Impulse<T> {
   @validate
     ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_CLONE)
     ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE)
-    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE)
+    ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_CLONE)
     ._alert()
   public clone(
     ...args:
@@ -234,7 +234,7 @@ export abstract class Impulse<T> {
   @validate
     ._when("watch", WATCH_CALLING_IMPULSE_SET_VALUE)
     ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE)
-    ._when("useImpulseMemo", USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE)
+    ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_SET_VALUE)
     ._prevent()
   public setValue(
     valueOrTransform: T | ((currentValue: T, scope: Scope) => T),

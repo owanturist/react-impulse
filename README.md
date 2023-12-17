@@ -598,10 +598,10 @@ const Challenge: React.FC = () => {
 
 > 💡 There is no need to memoize `options.compare` function. The hook does it internally.
 
-### `useImpulseMemo`
+### `useScopedMemo`
 
 ```dart
-function useImpulseMemo<T>(
+function useScopedMemo<T>(
   factory: () => T,
   dependencies: undefined | DependencyList,
 ): T
@@ -623,7 +623,7 @@ const useCalcSum = (left: number, right: Impulse<number>): number => {
   // 1. `left` changes
   // 2. `right` changes (new `Impulse`)
   // 3. `right.getValue()` changes (`right` mutates)
-  return useImpulseMemo(() => {
+  return useScopedMemo(() => {
     return left + right.getValue()
   }, [left, right])
 }
@@ -645,7 +645,7 @@ const useCalcSum = (left: number, right: Impulse<number>): number => {
   // `left` <= 0:
   //   1. `left` changes
   //   2. `right` changes (new `Impulse`)
-  return useImpulseMemo(() => {
+  return useScopedMemo(() => {
     if (left > 0) {
       return left + right.getValue()
     }

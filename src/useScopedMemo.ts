@@ -13,14 +13,14 @@ import type { Scope } from "./Scope"
  *
  * @version 1.0.0
  */
-export function useImpulseMemo<TValue>(
+export function useScopedMemo<TValue>(
   factory: (scope: Scope) => TValue,
   dependencies: DependencyList,
 ): TValue {
   const getScope = useScope()
 
   return useMemo(
-    () => defineExecutionContext("useImpulseMemo", factory, getScope()),
+    () => defineExecutionContext("useScopedMemo", factory, getScope()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [...dependencies, getScope],
   )

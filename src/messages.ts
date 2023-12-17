@@ -51,31 +51,31 @@ export const USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE =
         "The useWatchImpulse hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ].join(" ")
 
-export const USE_IMPULSE_MEMO_CALLING_IMPULSE_OF =
+export const USE_SCOPED_MEMO_CALLING_IMPULSE_OF =
   process.env.NODE_ENV === "production"
     ? ""
     : [
-        "You should not call Impulse.of inside of the useImpulseMemo factory.",
-        "The useImpulseMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
+        "You should not call Impulse.of inside of the useScopedMemo factory.",
+        "The useScopedMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
       ].join(" ")
-export const USE_IMPULSE_MEMO_CALLING_IMPULSE_TRANSMIT =
+export const USE_SCOPED_MEMO_CALLING_IMPULSE_TRANSMIT =
   process.env.NODE_ENV === "production"
     ? ""
-    : USE_IMPULSE_MEMO_CALLING_IMPULSE_OF.replaceAll(
+    : USE_SCOPED_MEMO_CALLING_IMPULSE_OF.replaceAll(
         "Impulse.of",
         "Impulse.transmit",
       )
-export const USE_IMPULSE_MEMO_CALLING_IMPULSE_CLONE =
+export const USE_SCOPED_MEMO_CALLING_IMPULSE_CLONE =
   process.env.NODE_ENV === "production"
     ? ""
     : [
-        "You should not call Impulse#clone inside of the useImpulseMemo factory.",
-        "The useImpulseMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+        "You should not call Impulse#clone inside of the useScopedMemo factory.",
+        "The useScopedMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
       ].join(" ")
-export const USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE =
+export const USE_SCOPED_MEMO_CALLING_IMPULSE_SET_VALUE =
   process.env.NODE_ENV === "production"
     ? ""
     : [
-        "You should not call Impulse#setValue inside of the useImpulseMemo factory.",
-        "The useImpulseMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+        "You should not call Impulse#setValue inside of the useScopedMemo factory.",
+        "The useScopedMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ].join(" ")

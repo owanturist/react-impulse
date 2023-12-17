@@ -16,7 +16,7 @@ export {
 } from "./watch"
 export { useImpulse } from "./useImpulse"
 export { useTransmittingImpulse } from "./useTransmittingImpulse"
-export { useImpulseMemo } from "./useImpulseMemo"
+export { useScopedMemo } from "./useScopedMemo"
 export { useScopedCallback } from "./useScopedCallback"
 export { useImpulseEffect } from "./useImpulseEffect"
 export { useImpulseLayoutEffect } from "./useImpulseLayoutEffect"
