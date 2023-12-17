@@ -5,7 +5,7 @@ import {
   Impulse,
   subscribe,
   useImpulseEffect,
-  useImpulseLayoutEffect,
+  useScopedLayoutEffect,
   useScopedMemo,
   useWatchImpulse,
   watch,
@@ -67,7 +67,7 @@ describe("calling Impulse.of()", () => {
 
   it.each([
     ["useImpulseEffect", useImpulseEffect],
-    ["useImpulseLayoutEffect", useImpulseLayoutEffect],
+    ["useScopedLayoutEffect", useScopedLayoutEffect],
   ])("fine when called inside %s", (_, useImpulseEffectHook) => {
     const { result } = renderHook(() => {
       const [state, setState] = React.useState(Impulse.of(1))
@@ -147,7 +147,7 @@ describe("calling Impulse#clone()", () => {
 
   describe.each([
     ["useImpulseEffect", useImpulseEffect],
-    ["useImpulseLayoutEffect", useImpulseLayoutEffect],
+    ["useScopedLayoutEffect", useScopedLayoutEffect],
   ])("when called inside %s", (_, useImpulseEffectHook) => {
     it("works fine, does not print an error", () => {
       const initial = Impulse.of(1)
@@ -234,7 +234,7 @@ describe("calling Impulse#setValue()", () => {
 
   describe.each([
     ["useImpulseEffect", useImpulseEffect],
-    ["useImpulseLayoutEffect", useImpulseLayoutEffect],
+    ["useScopedLayoutEffect", useScopedLayoutEffect],
   ])("fine when called inside %s", (_, useImpulseEffectHook) => {
     it("works fine, does not print an error", () => {
       const { result } = renderHook(

@@ -731,7 +731,7 @@ const usePrintSum = (left: number, right: Impulse<number>): void => {
 </blockquote>
 </details>
 
-### `useImpulseLayoutEffect`
+### `useScopedLayoutEffect`
 
 The hook is an Impulse version of the [`React.useLayoutEffect`][react__use_layout_effect] hook. Acts similar way as [`useImpulseEffect`][use_impulse_effect].
 

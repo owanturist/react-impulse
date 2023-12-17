@@ -13,7 +13,7 @@ import { useScope } from "./useScope"
  *
  * @version 1.0.0
  */
-export function useImpulseLayoutEffect(
+export function useScopedLayoutEffect(
   effect: (scope: Scope) => Destructor,
   dependencies?: DependencyList,
 ): void {

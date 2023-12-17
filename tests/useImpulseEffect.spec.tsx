@@ -7,18 +7,13 @@ import {
   renderHook,
 } from "@testing-library/react"
 
-import {
-  Impulse,
-  watch,
-  useImpulseEffect,
-  useImpulseLayoutEffect,
-} from "../src"
+import { Impulse, watch, useImpulseEffect, useScopedLayoutEffect } from "../src"
 
 const identity = <T,>(value: T): T => value
 
 describe.each([
   ["useEffect", React.useEffect, useImpulseEffect],
-  ["useLayoutEffect", React.useLayoutEffect, useImpulseLayoutEffect],
+  ["useLayoutEffect", React.useLayoutEffect, useScopedLayoutEffect],
 ])("running %s hook", (hookName, useReactEffect, useCustomImpulseEffect) => {
   describe.each([
     ["nothing", identity as typeof watch],
