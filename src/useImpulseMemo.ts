@@ -15,7 +15,7 @@ import { injectScope } from "./Scope"
  */
 export function useImpulseMemo<TValue>(
   factory: () => TValue,
-  dependencies: undefined | DependencyList,
+  dependencies: DependencyList,
 ): TValue {
   const getScope = useScope()
 
@@ -29,6 +29,6 @@ export function useImpulseMemo<TValue>(
       )
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    dependencies && [...dependencies, getScope],
+    [...dependencies, getScope],
   )
 }
