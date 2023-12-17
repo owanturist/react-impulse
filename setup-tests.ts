@@ -1,5 +1,3 @@
-/* c8 ignore start */
-
 import "@testing-library/jest-dom/vitest"
 import { cleanup } from "@testing-library/react"
 
@@ -40,8 +38,6 @@ vi.mock("@testing-library/react", async () => {
     return actual
   }
 })
-
-/* c8 ignore stop */
 
 const isSet = (anything: unknown): anything is Set<unknown> => {
   return anything instanceof Set

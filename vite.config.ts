@@ -10,6 +10,7 @@ export default defineConfig({
     environment: "happy-dom",
     setupFiles: "./setup-tests.ts",
     coverage: {
+      exclude: ["**/*.js", "**/*.d.ts", "setup-tests.ts", "src/messages.ts"],
       reporter: ["text", "json"],
     },
   },

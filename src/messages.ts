@@ -1,5 +1,3 @@
-/* c8 ignore start */
-
 export const WATCH_CALLING_IMPULSE_SET_VALUE =
   process.env.NODE_ENV === "production"
     ? ""
@@ -81,5 +79,3 @@ export const USE_IMPULSE_MEMO_CALLING_IMPULSE_SET_VALUE =
         "You should not call Impulse#setValue inside of the useImpulseMemo factory.",
         "The useImpulseMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ].join(" ")
-
-/* c8 ignore stop */
