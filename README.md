@@ -672,10 +672,10 @@ function useScopedCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
 
 The hook is an Impulse version of the [`React.useCallback`][react__use_callback] hook. During the `callback` execution, all Impulses that call the [`Impulse#getValue`][impulse__get_value] method become _phantom dependencies_ of the hook.
 
-### `useImpulseEffect`
+### `useScopedEffect`
 
 ```dart
-function useImpulseEffect(
+function useScopedEffect(
   effect: () => (void | VoidFunction),
   dependencies?: DependencyList,
 ): void
@@ -698,7 +698,7 @@ const usePrintSum = (left: number, right: Impulse<number>): void => {
   // 1. `left` changes
   // 2. `right` changes (new `Impulse`)
   // 3. `right.getValue()` changes (`right` mutates)
-  useImpulseEffect(() => {
+  useScopedEffect(() => {
     console.log("sum is %d", left + right.getValue())
   }, [left, right])
 }
@@ -720,7 +720,7 @@ const usePrintSum = (left: number, right: Impulse<number>): void => {
   // `left` <= 0:
   //   1. `left` changes
   //   2. `right` changes (new `Impulse`)
-  useImpulseEffect(() => {
+  useScopedEffect(() => {
     if (left > 0) {
       console.log("sum is %d", left + right.getValue())
     }
@@ -733,9 +733,9 @@ const usePrintSum = (left: number, right: Impulse<number>): void => {
 
 ### `useScopedLayoutEffect`
 
-The hook is an Impulse version of the [`React.useLayoutEffect`][react__use_layout_effect] hook. Acts similar way as [`useImpulseEffect`][use_impulse_effect].
+The hook is an Impulse version of the [`React.useLayoutEffect`][react__use_layout_effect] hook. Acts similar way as [`useScopedEffect`][use_scoped_effect].
 
-### ~~`useImpulseInsertionEffect`~~
+### ~~`useScopedInsertionEffect`~~
 
 There is no Impulse version of the [`React.useInsertionEffect`][react__use_insertion_effect] hook due to backward compatibility with React from `v16.12.0`. The workaround is to use the native `React.useInsertionEffect` hook with the values extracted beforehand:
 
@@ -907,7 +907,7 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
 [impulse__set_value]: #impulsesetvalue
 [use_impulse]: #useimpulse
 [use_transmitting_impulse]: #usetransmittingimpulse
-[use_impulse_effect]: #useimpulseeffect
+[use_scoped_effect]: #usescopedeffect
 [watch]: #watch
 [batch]: #batch
 [impulse_options]: #interface-impulseoptions

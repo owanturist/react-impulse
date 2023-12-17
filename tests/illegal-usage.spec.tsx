@@ -4,7 +4,7 @@ import { render, screen, renderHook } from "@testing-library/react"
 import {
   Impulse,
   subscribe,
-  useImpulseEffect,
+  useScopedEffect,
   useScopedLayoutEffect,
   useScopedMemo,
   useWatchImpulse,
@@ -66,13 +66,13 @@ describe("calling Impulse.of()", () => {
   })
 
   it.each([
-    ["useImpulseEffect", useImpulseEffect],
+    ["useScopedEffect", useScopedEffect],
     ["useScopedLayoutEffect", useScopedLayoutEffect],
-  ])("fine when called inside %s", (_, useImpulseEffectHook) => {
+  ])("fine when called inside %s", (_, useScopedEffectHook) => {
     const { result } = renderHook(() => {
       const [state, setState] = React.useState(Impulse.of(1))
 
-      useImpulseEffectHook(() => {
+      useScopedEffectHook(() => {
         setState(Impulse.of(10))
       }, [])
 
@@ -146,16 +146,16 @@ describe("calling Impulse#clone()", () => {
   })
 
   describe.each([
-    ["useImpulseEffect", useImpulseEffect],
+    ["useScopedEffect", useScopedEffect],
     ["useScopedLayoutEffect", useScopedLayoutEffect],
-  ])("when called inside %s", (_, useImpulseEffectHook) => {
+  ])("when called inside %s", (_, useScopedEffectHook) => {
     it("works fine, does not print an error", () => {
       const initial = Impulse.of(1)
       const { result } = renderHook(
         (impulse) => {
           const [state, setState] = React.useState(impulse)
 
-          useImpulseEffectHook(() => {
+          useScopedEffectHook(() => {
             setState((x) => x.clone())
           }, [])
 
@@ -233,13 +233,13 @@ describe("calling Impulse#setValue()", () => {
   })
 
   describe.each([
-    ["useImpulseEffect", useImpulseEffect],
+    ["useScopedEffect", useScopedEffect],
     ["useScopedLayoutEffect", useScopedLayoutEffect],
-  ])("fine when called inside %s", (_, useImpulseEffectHook) => {
+  ])("fine when called inside %s", (_, useScopedEffectHook) => {
     it("works fine, does not print an error", () => {
       const { result } = renderHook(
         (impulse) => {
-          useImpulseEffectHook(() => {
+          useScopedEffectHook(() => {
             impulse.setValue((x) => x + 1)
           }, [impulse])
 

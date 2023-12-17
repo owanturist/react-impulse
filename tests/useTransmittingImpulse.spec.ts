@@ -7,7 +7,7 @@ import {
   useImpulse,
   useTransmittingImpulse,
   type Compare,
-  useImpulseEffect,
+  useScopedEffect,
   type ReadonlyImpulse,
 } from "../src"
 
@@ -358,7 +358,7 @@ describe("replacing getter", () => {
       (counter: Counter) => {
         const impulse = useTransmittingImpulse(() => counter.count, [counter])
 
-        useImpulseEffect(() => {
+        useScopedEffect(() => {
           onEffect(impulse.getValue())
         }, [impulse])
 

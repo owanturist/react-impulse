@@ -13,7 +13,7 @@ import { useScope } from "./useScope"
  *
  * @version 1.0.0
  */
-export function useImpulseEffect(
+export function useScopedEffect(
   effect: (scope: Scope) => Destructor,
   dependencies?: DependencyList,
 ): void {
