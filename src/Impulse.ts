@@ -304,7 +304,7 @@ export class TransmittingImpulse<T> extends Impulse<T> {
 
         this._getValue = getter
 
-        return value == null || !this._compare(value._lazy, this._getter())
+        return value != null && value._lazy !== this._getter()
       })
     }
   }
