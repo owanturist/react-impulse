@@ -12,8 +12,8 @@ export {
   type PropsWithScope,
   type PropsWithoutScope,
   type ForwardedPropsWithoutScope,
-  watch,
-} from "./watch"
+  scoped,
+} from "./scoped"
 export { useImpulse } from "./useImpulse"
 export { useTransmittingImpulse } from "./useTransmittingImpulse"
 export { useScopedMemo } from "./useScopedMemo"

@@ -18,15 +18,15 @@ npm install react-impulse
 
 ## Quick start
 
-`Impulse` is a box holding any value you want, even another `Impulse`! All [`watch`][watch]ed components that execute the [`Impulse#getValue`][impulse__get_value] during the rendering phase enqueue re-render whenever the Impulse value updates.
+`Impulse` is a box holding any value you want, even another `Impulse`! All [`scoped`][scoped] components that execute the [`Impulse#getValue`][impulse__get_value] during the rendering phase enqueue re-render whenever the Impulse value updates.
 
 ```tsx
-import { Impulse, watch } from "react-impulse"
+import { Impulse, scoped } from "react-impulse"
 
 const Input: React.FC<{
   type: "email" | "password"
   value: Impulse<string>
-}> = watch(({ type, value }) => (
+}> = scoped(({ type, value }) => (
   <input
     type={type}
     value={value.getValue()}
@@ -37,7 +37,7 @@ const Input: React.FC<{
 const Checkbox: React.FC<{
   checked: Impulse<boolean>
   children: React.ReactNode
-}> = watch(({ checked, children }) => (
+}> = scoped(({ checked, children }) => (
   <label>
     <input
       type="checkbox"
@@ -53,9 +53,9 @@ const Checkbox: React.FC<{
 Once created, Impulses can travel thru your components, where you can set and get their values:
 
 ```tsx
-import { useImpulse, watch } from "react-impulse"
+import { useImpulse, scoped } from "react-impulse"
 
-const SignUp: React.FC = watch(() => {
+const SignUp: React.FC = scoped(() => {
   const username = useImpulse("")
   const password = useImpulse("")
   const isAgreeWithTerms = useImpulse(false)
@@ -146,7 +146,7 @@ A static method that creates a new transmitting Impulse. A transmitting Impulse 
 const Drawer: React.FC<{
   isOpen: Impulse<boolean>
   children: React.ReactNode
-}> = watch(({ isOpen, children }) => {
+}> = scoped(({ isOpen, children }) => {
   if (!isOpen.getValue()) {
     return null
   }
@@ -192,7 +192,7 @@ const ProductDetailsDrawer: React.FC<{
 ```tsx
 const Checkbox: React.FC<{
   checked: Impulse<boolean>
-}> = watch(({ checked, children }) => (
+}> = scoped(({ checked, children }) => (
   <input
     type="checkbox"
     checked={checked.getValue()}
@@ -203,7 +203,7 @@ const Checkbox: React.FC<{
 const Agreements: React.FC<{
   isAgreeWithTermsOfUse: Impulse<boolean>
   isAgreeWithPrivacy: Impulse<boolean>
-}> = watch(({ isAgreeWithTermsOfUse, isAgreeWithPrivacy }) => {
+}> = scoped(({ isAgreeWithTermsOfUse, isAgreeWithPrivacy }) => {
   const isAgreeWithAll = useTransmittingImpulse(
     () => isAgreeWithTermsOfUse.getValue() && isAgreeWithPrivacy.getValue(),
     [isAgreeWithTermsOfUse, isAgreeWithPrivacy],
@@ -393,20 +393,20 @@ const cloneOfMutable = mutable.clone((current) => ({
 }))
 ```
 
-### `watch`
+### `scoped`
 
 ```dart
-function watch<TProps>(component: React.FC<TProps>): React.FC<TProps>
+function scoped<TProps>(component: React.FC<TProps>): React.FC<TProps>
 ```
 
-The `watch` function creates a React component that subscribes to all Impulses calling the [`Impulse#getValue`][impulse__get_value] method during the rendering phase of the component.
+The `scoped` function creates a React component that subscribes to all Impulses calling the [`Impulse#getValue`][impulse__get_value] method during the rendering phase of the component.
 
 The `Counter` component below enqueues a re-render whenever the `count`'s value changes, for instance, when the `Counter`'s button clicks:
 
 ```tsx
 const Counter: React.FC<{
   count: Impulse<number>
-}> = watch(({ count }) => (
+}> = scoped(({ count }) => (
   <button onClick={() => count.setValue((x) => x + 1)}>
     {count.getValue()}
   </button>
@@ -415,7 +415,7 @@ const Counter: React.FC<{
 
 But if a component defines an Impulse, passes it thru, or calls the [`Impulse#getValue`][impulse__get_value] method outside of the rendering phase (ex: inside an `onClick` handler), then it does not subscribe to the Impulse changes.
 
-Here the `SumOfTwo` component defines two Impulses, passes them further to the `Counter`s components, and calls [`Impulse#getValue`][impulse__get_value] inside the `button.onClick` handler. It is optional to use the `watch` function in that case:
+Here the `SumOfTwo` component defines two Impulses, passes them further to the `Counter`s components, and calls [`Impulse#getValue`][impulse__get_value] inside the `button.onClick` handler. It is optional to use the `scoped` function in that case:
 
 ```tsx
 const SumOfTwo: React.FC = () => {
@@ -444,37 +444,37 @@ const SumOfTwo: React.FC = () => {
 }
 ```
 
-With or without wrapping the component around the `watch` [HOC][hoc], The `SumOfTwo` component will never re-render due to either `firstCounter` or `secondCounter` updates, but still, it can read and write their values inside the `onClick` listener.
+With or without wrapping the component around the `scoped` [HOC][hoc], The `SumOfTwo` component will never re-render due to either `firstCounter` or `secondCounter` updates, but still, it can read and write their values inside the `onClick` listener.
 
-#### `watch.memo`
-
-Alias for
-
-```ts
-React.memo(watch(Component))
-// equals to
-watch.memo(Component)
-```
-
-#### `watch.forwardRef`
+#### `scoped.memo`
 
 Alias for
 
 ```ts
-React.forwardRef(watch(Component))
+React.memo(scoped(Component))
 // equals to
-watch.forwardRef(Component)
+scoped.memo(Component)
 ```
 
-#### `watch.memo.forwardRef` and `watch.forwardRef.memo`
+#### `scoped.forwardRef`
+
+Alias for
+
+```ts
+React.forwardRef(scoped(Component))
+// equals to
+scoped.forwardRef(Component)
+```
+
+#### `scoped.memo.forwardRef` and `scoped.forwardRef.memo`
 
 Aliases for
 
 ```ts
-React.memo(React.forwardRef(watch(Component)))
+React.memo(React.forwardRef(scoped(Component)))
 // equals to
-watch.memo.forwardRef(Component)
-watch.forwardRef.memo(Component)
+scoped.memo.forwardRef(Component)
+scoped.forwardRef.memo(Component)
 ```
 
 ### `useImpulse`
@@ -551,9 +551,9 @@ function useScoped<T>(
 - `dependencies` is an optional array of dependencies of the `factory` function. If not defined, the `factory` function is called on every render.
 - `[options]` is an optional [`UseScopedOptions`][use_scoped_options] object.
 
-The `useScoped` hook is an alternative to the [`watch`][watch] function. It executes the `factory` function whenever any of the involved Impulses' value update but enqueues a re-render only when the resulting value is different from the previous.
+The `useScoped` hook is an alternative to the [`scoped`][scoped] function. It executes the `factory` function whenever any of the involved Impulses' value update but enqueues a re-render only when the resulting value is different from the previous.
 
-Custom hooks can use `useScoped` for reading and transforming the Impulses' values, so the host component doesn't need to wrap around the [`watch`][watch] HOC:
+Custom hooks can use `useScoped` for reading and transforming the Impulses' values, so the host component doesn't need to wrap around the [`scoped`][scoped] HOC:
 
 ```tsx
 const useSumAllAndMultiply = ({
@@ -763,7 +763,7 @@ The `batch` function is a helper to optimize multiple Impulses updates.
 const SumOfTwo: React.FC<{
   left: Impulse<number>
   right: Impulse<number>
-}> = watch(({ left, right }) => (
+}> = scoped(({ left, right }) => (
   <div>
     <span>Sum is: {left.getValue() + right.getValue()}</span>
 
@@ -908,7 +908,7 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
 [use_impulse]: #useimpulse
 [use_transmitting_impulse]: #usetransmittingimpulse
 [use_scoped_effect]: #usescopedeffect
-[watch]: #watch
+[scoped]: #scoped
 [batch]: #batch
 [impulse_options]: #interface-impulseoptions
 [transmitting_impulse_options]: #interface-transmittingimpulseoptions

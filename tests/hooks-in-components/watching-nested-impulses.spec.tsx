@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useScoped, watch } from "../../src"
+import { Impulse, useScoped, scoped } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -172,7 +172,7 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const WatchedApp: React.FC<AppProps> = watch((props) => {
+  const ScopedApp: React.FC<AppProps> = scoped((props) => {
     const moreThanTen = factoryLeft(props.state)
     const lessThanTwenty = factoryRight(props.state)
 
@@ -190,7 +190,7 @@ describe("watching nested impulses", () => {
     ["single memoized scoped", SingleMemoizedScopedApp, 0],
     ["multiple scoped", MultipleScopedApp, 0],
     ["multiple memoized scoped", MultipleScopedWithDepsApp, 0],
-    ["watch()", WatchedApp, 1],
+    ["scoped()", ScopedApp, 1],
   ])("handles nested Impulses with %s", (_, App, unnecessaryRerendersCount) => {
     const state = Impulse.of<AppState>({
       counts: [],

@@ -35,7 +35,7 @@ const renderWithScope = <TProps, TContext>(
 ): ReactNode => {
   // it uses Object.assign to reduce output file size by avoiding the spread operator
   return defineExecutionContext(
-    "watch",
+    "scoped",
     component,
     Object.assign({}, props, { scope }),
     ctx,
@@ -45,15 +45,15 @@ const renderWithScope = <TProps, TContext>(
 /**
  * Creates a React component that subscribes to all Impulses calling the `Impulse#getValue` method during the rendering phase of the component.
  *
- * @param component a watch component
+ * @param component a scoped component
  *
  * @version 1.0.0
  */
-export function watch<TProps>(component: ExoticComponent<TProps>): never
-export function watch<TProps>(
+export function scoped<TProps>(component: ExoticComponent<TProps>): never
+export function scoped<TProps>(
   component: FC<PropsWithScope<TProps>>,
 ): FC<PropsWithoutScope<TProps>>
-export function watch<TProps>(
+export function scoped<TProps>(
   component: FC<PropsWithScope<TProps>>,
 ): FC<TProps> {
   const ComponentWithScope: FC<TProps> = (props, ctx: unknown) => {
@@ -71,7 +71,15 @@ const memo = <TProps>(
   component: FC<PropsWithScope<TProps>>,
   propsAreEqual?: Compare<Readonly<PropsWithoutScope<TProps>>>,
 ): MemoExoticComponent<FC<PropsWithoutScope<TProps>>> => {
-  return React_memo(watch(component), propsAreEqual)
+  return React_memo(scoped(component), propsAreEqual)
+}
+
+const forwardRef = <TRef, TProps>(
+  render: ForwardRefRenderFunction<TRef, PropsWithScope<TProps>>,
+): ForwardRefExoticComponent<ForwardedPropsWithoutScope<TRef, TProps>> => {
+  return React_forwardRef<TRef, PropsWithoutScope<TProps>>((props, ref) => {
+    return renderWithScope(useScope(), render, props as TProps, ref)
+  })
 }
 
 const forwardRefMemo = <TRef, TProps>(
@@ -83,31 +91,23 @@ const forwardRefMemo = <TRef, TProps>(
   return React_memo(forwardRef(render), propsAreEqual)
 }
 
-const forwardRef = <TRef, TProps>(
-  render: ForwardRefRenderFunction<TRef, PropsWithScope<TProps>>,
-): ForwardRefExoticComponent<ForwardedPropsWithoutScope<TRef, TProps>> => {
-  return React_forwardRef<TRef, PropsWithoutScope<TProps>>((props, ref) => {
-    return renderWithScope(useScope(), render, props as TProps, ref)
-  })
-}
-
 /**
- * An alias for `React.memo(React.forwardRef(watch(...)))`
+ * An alias for `React.memo(React.forwardRef(scoped(...)))`
  *
  * @version 1.0.0
  */
 memo.forwardRef = forwardRef.memo = forwardRefMemo
 
 /**
- * An alias for `React.memo(watch(...))`
+ * An alias for `React.memo(scoped(...))`
  *
  * @version 1.0.0
  */
-watch.memo = memo
+scoped.memo = memo
 
 /**
- * An alias for `React.forwardRef(watch(...))`
+ * An alias for `React.forwardRef(scoped(...))`
  *
  * @version 1.0.0
  */
-watch.forwardRef = forwardRef
+scoped.forwardRef = forwardRef

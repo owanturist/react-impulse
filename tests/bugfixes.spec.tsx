@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, watch, useScoped } from "../src"
+import { Impulse, scoped, useScoped } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -149,7 +149,7 @@ describe("return the same component type from watch #322", () => {
 
   const StatefulInput: React.FC<{
     value: Impulse<string>
-  }> = watch(({ value }) => (
+  }> = scoped(({ value }) => (
     <StatelessInput
       value={value.getValue()}
       onChange={(nextValue) => value.setValue(nextValue)}
@@ -175,7 +175,7 @@ describe("return the same component type from watch #322", () => {
 describe("in StrictMode, fails due to unexpected .setValue during watch call #336", () => {
   const Button: React.FC<{
     count: Impulse<number>
-  }> = watch(({ count }) => {
+  }> = scoped(({ count }) => {
     React.useState(0)
 
     return (

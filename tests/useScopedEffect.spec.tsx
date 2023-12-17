@@ -7,7 +7,7 @@ import {
   renderHook,
 } from "@testing-library/react"
 
-import { Impulse, watch, useScopedEffect, useScopedLayoutEffect } from "../src"
+import { Impulse, scoped, useScopedEffect, useScopedLayoutEffect } from "../src"
 
 const identity = <T,>(value: T): T => value
 
@@ -16,8 +16,8 @@ describe.each([
   ["useLayoutEffect", React.useLayoutEffect, useScopedLayoutEffect],
 ])("running %s hook", (hookName, useReactEffect, useCustomScopedEffect) => {
   describe.each([
-    ["nothing", identity as typeof watch],
-    ["watch", watch],
+    ["nothing", identity as typeof scoped],
+    ["scoped", scoped],
   ])("using %s as hoc", (_, hoc) => {
     describe("single impulse", () => {
       const Component: React.FC<{
@@ -470,7 +470,7 @@ describe.each([
   it("should not trigger effect when unsubscribes", () => {
     const Counter: React.FC<{
       count: Impulse<number>
-    }> = watch(({ count }) => (
+    }> = scoped(({ count }) => (
       <button
         type="button"
         data-testid="count"

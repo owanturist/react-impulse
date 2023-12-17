@@ -3,7 +3,7 @@ import { EMITTER_KEY, type Scope, extractScope, STATIC_SCOPE } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { validate } from "./validation"
 import {
-  WATCH_CALLING_IMPULSE_SET_VALUE,
+  SCOPED_CALLING_IMPULSE_SET_VALUE,
   SUBSCRIBE_CALLING_IMPULSE_OF,
   SUBSCRIBE_CALLING_IMPULSE_CLONE,
   SUBSCRIBE_CALLING_IMPULSE_TRANSMIT,
@@ -232,7 +232,7 @@ export abstract class Impulse<T> {
    * @version 1.0.0
    */
   @validate
-    ._when("watch", WATCH_CALLING_IMPULSE_SET_VALUE)
+    ._when("scoped", SCOPED_CALLING_IMPULSE_SET_VALUE)
     ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_SET_VALUE)
     ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_SET_VALUE)
     ._prevent()

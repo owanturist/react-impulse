@@ -8,7 +8,7 @@ import {
   useScopedLayoutEffect,
   useScopedMemo,
   useScoped,
-  watch,
+  scoped,
 } from "../src"
 
 import type { WithImpulse } from "./common"
@@ -83,8 +83,8 @@ describe("calling Impulse.of()", () => {
     expect(result.current.getValue()).toBe(10)
   })
 
-  it("fine when called inside watch()", () => {
-    const Component = watch(() => {
+  it("fine when called inside scoped()", () => {
+    const Component = scoped(() => {
       const [state] = React.useState(() => Impulse.of(20))
 
       return <div data-testid="count">{state.getValue()}</div>
@@ -172,8 +172,8 @@ describe("calling Impulse#clone()", () => {
     })
   })
 
-  it("fine when called inside watch()", () => {
-    const Component = watch<{
+  it("fine when called inside scoped()", () => {
+    const Component = scoped<{
       impulse: Impulse<number>
     }>(({ impulse }) => {
       const [state] = React.useState(() => impulse.clone())
@@ -269,8 +269,8 @@ describe("calling Impulse#setValue()", () => {
     expect(impulse.getValue()).toBe(2)
   })
 
-  it("warns when called inside watch()", () => {
-    const Component = watch<{
+  it("warns when called inside scoped()", () => {
+    const Component = scoped<{
       impulse: Impulse<number>
     }>(({ impulse }) => {
       impulse.setValue(10)
@@ -281,7 +281,7 @@ describe("calling Impulse#setValue()", () => {
     render(<Component impulse={Impulse.of(20)} />)
 
     expect(console$error).toHaveBeenCalledWith(
-      "You should not call Impulse#setValue during rendering of watch(Component).",
+      "You should not call Impulse#setValue during rendering of scoped(Component).",
     )
     expect(screen.getByTestId("count")).toHaveTextContent("20")
   })

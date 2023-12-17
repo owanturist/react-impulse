@@ -1,13 +1,13 @@
 import React from "react"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 
-import { Impulse, watch, useScopedMemo } from "../src"
+import { Impulse, scoped, useScopedMemo } from "../src"
 
 const identity = <T,>(value: T): T => value
 
 describe.each([
-  ["nothing", identity as typeof watch],
-  ["watch", watch],
+  ["nothing", identity as typeof scoped],
+  ["scoped", scoped],
 ])("using %s as hoc", (_, hoc) => {
   describe("single impulse", () => {
     const Component: React.FC<{

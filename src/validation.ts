@@ -2,7 +2,7 @@ import { type Func, isFunction } from "./utils"
 
 export type ExecutionContext =
   | "subscribe"
-  | "watch"
+  | "scoped"
   | "useScoped"
   | "useScopedMemo"
 

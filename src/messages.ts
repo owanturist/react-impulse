@@ -1,7 +1,7 @@
-export const WATCH_CALLING_IMPULSE_SET_VALUE =
+export const SCOPED_CALLING_IMPULSE_SET_VALUE =
   process.env.NODE_ENV === "production"
     ? ""
-    : "You should not call Impulse#setValue during rendering of watch(Component)."
+    : "You should not call Impulse#setValue during rendering of scoped(Component)."
 
 export const SUBSCRIBE_CALLING_IMPULSE_OF =
   process.env.NODE_ENV === "production"
