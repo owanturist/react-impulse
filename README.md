@@ -658,10 +658,10 @@ const useCalcSum = (left: number, right: Impulse<number>): number => {
 </blockquote>
 </details>
 
-### `useImpulseCallback`
+### `useScopedCallback`
 
 ```dart
-function useImpulseCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
+function useScopedCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
   callback: (...args: TArgs) => TResult,
   dependencies: DependencyList,
 ): (...args: TArgs) => TResult

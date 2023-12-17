@@ -13,7 +13,7 @@ import { useImpulseMemo } from "./useImpulseMemo"
  * @version 1.3.0
  */
 
-export function useImpulseCallback<
+export function useScopedCallback<
   TArgs extends ReadonlyArray<unknown>,
   TResult,
 >(

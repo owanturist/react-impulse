@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, useImpulseCallback } from "../src"
+import { Impulse, useScopedCallback } from "../src"
 
 const onCallback = vi.fn<[number], number>().mockImplementation((x) => x)
 
@@ -12,7 +12,7 @@ describe("single Impulse", () => {
   const setup = (impulse: Impulse<number>) => {
     return renderHook(
       (count: Impulse<number>) => {
-        return useImpulseCallback(
+        return useScopedCallback(
           () => onCallback(count.getValue() * 2),
           [count],
         )
@@ -147,7 +147,7 @@ describe("conditional Impulse", () => {
   const setup = (impulse: Impulse<number>) => {
     return renderHook(
       (count: Impulse<number>) => {
-        return useImpulseCallback(
+        return useScopedCallback(
           (isActive: boolean) => {
             if (isActive) {
               return count.getValue() * 2
@@ -235,7 +235,7 @@ describe("conditional Impulse", () => {
 describe("argument Impulse", () => {
   const setup = () => {
     return renderHook(() => {
-      return useImpulseCallback(
+      return useScopedCallback(
         (count: Impulse<number>) => count.getValue() * 2,
         [],
       )
