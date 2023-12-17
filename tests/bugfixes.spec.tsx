@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, watch, useWatchImpulse } from "../src"
+import { Impulse, watch, useScoped } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -52,14 +52,12 @@ describe("watching misses when defined after useEffect #140", () => {
     )
   }
 
-  const useWatchInline = (impulse: Impulse<number>) => {
-    return useWatchImpulse(() => impulse.getValue())
+  const useScopedInline = (impulse: Impulse<number>) => {
+    return useScoped(() => impulse.getValue())
   }
 
-  const useWatchMemoized = (impulse: Impulse<number>) => {
-    return useWatchImpulse(
-      React.useCallback(() => impulse.getValue(), [impulse]),
-    )
+  const useScopedMemoized = (impulse: Impulse<number>) => {
+    return useScoped(React.useCallback(() => impulse.getValue(), [impulse]))
   }
 
   describe.each([
@@ -67,12 +65,12 @@ describe("watching misses when defined after useEffect #140", () => {
     ["after", ComponentWatchAfterEffect],
   ])("calls depending hook %s useEffect", (_, Component) => {
     describe.each([
-      ["inline useWatchImpulse", useWatchInline],
-      ["memoized useWatchImpulse", useWatchMemoized],
+      ["inline useScoped", useScopedInline],
+      ["memoized useScoped", useScopedMemoized],
     ])("with %s as useGetFirst", (__, useGetFirst) => {
       it.each([
-        ["inline useWatchImpulse", useWatchInline],
-        ["memoized useWatchImpulse", useWatchMemoized],
+        ["inline useScoped", useScopedInline],
+        ["memoized useScoped", useScopedMemoized],
       ])("with %s as useGetSecond", (___, useGetSecond) => {
         const first = Impulse.of(0)
         const second = Impulse.of(5)
@@ -123,7 +121,7 @@ describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321
     const Component: React.FC<{
       count: Impulse<number>
     }> = ({ count }) => {
-      const x = useWatchImpulse(() => convert(count))
+      const x = useScoped(() => convert(count))
 
       return <span data-testid="result">{x}</span>
     }

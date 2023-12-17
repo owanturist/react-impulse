@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useWatchImpulse, watch } from "../../src"
+import { Impulse, useScoped, watch } from "../../src"
 
 import { CounterComponent } from "./common"
 
@@ -28,12 +28,12 @@ describe("watching single impulse", () => {
     </>
   )
 
-  const watcherLeft = (count: Impulse<number>) => {
+  const factoryLeft = (count: Impulse<number>) => {
     const x = count.getValue()
 
     return x > 1
   }
-  const watcherRight = (count: Impulse<number>) => {
+  const factoryRight = (count: Impulse<number>) => {
     const x = count.getValue()
 
     return x < 4
@@ -46,9 +46,9 @@ describe("watching single impulse", () => {
     return left1 === left2 && right1 === right2
   }
 
-  const SingleWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useWatchImpulse(
-      () => [watcherLeft(props.count), watcherRight(props.count)],
+  const SingleScopedApp: React.FC<AppProps> = (props) => {
+    const [moreThanOne, lessThanFour] = useScoped(
+      () => [factoryLeft(props.count), factoryRight(props.count)],
       [props.count],
       {
         compare: (left, right) => compare(left, right),
@@ -64,9 +64,9 @@ describe("watching single impulse", () => {
     )
   }
 
-  const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useWatchImpulse<[boolean, boolean]>(
-      () => [watcherLeft(props.count), watcherRight(props.count)],
+  const SingleMemoizedScopedApp: React.FC<AppProps> = (props) => {
+    const [moreThanOne, lessThanFour] = useScoped<[boolean, boolean]>(
+      () => [factoryLeft(props.count), factoryRight(props.count)],
       [props.count],
       { compare },
     )
@@ -80,9 +80,9 @@ describe("watching single impulse", () => {
     )
   }
 
-  const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchImpulse(() => watcherLeft(props.count))
-    const lessThanFour = useWatchImpulse(() => watcherRight(props.count))
+  const MultipleScopedApp: React.FC<AppProps> = (props) => {
+    const moreThanOne = useScoped(() => factoryLeft(props.count))
+    const lessThanFour = useScoped(() => factoryRight(props.count))
 
     return (
       <GenericApp
@@ -93,13 +93,10 @@ describe("watching single impulse", () => {
     )
   }
 
-  const MultipleWatchersWithDepsApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useWatchImpulse(
-      () => watcherLeft(props.count),
-      [props.count],
-    )
-    const lessThanFour = useWatchImpulse(
-      () => watcherRight(props.count),
+  const MultipleScopedWithDepsApp: React.FC<AppProps> = (props) => {
+    const moreThanOne = useScoped(() => factoryLeft(props.count), [props.count])
+    const lessThanFour = useScoped(
+      () => factoryRight(props.count),
       [props.count],
     )
 
@@ -113,8 +110,8 @@ describe("watching single impulse", () => {
   }
 
   const WatchedApp: React.FC<AppProps> = watch((props) => {
-    const moreThanOne = watcherLeft(props.count)
-    const lessThanFour = watcherRight(props.count)
+    const moreThanOne = factoryLeft(props.count)
+    const lessThanFour = factoryRight(props.count)
 
     return (
       <GenericApp
@@ -126,10 +123,10 @@ describe("watching single impulse", () => {
   })
 
   it.each([
-    ["single watcher", SingleWatcherApp, 0],
-    ["single memoized watcher", SingleMemoizedWatcherApp, 0],
-    ["multiple watchers", MultipleWatchersApp, 0],
-    ["multiple memoized watchers", MultipleWatchersWithDepsApp, 0],
+    ["single scoped", SingleScopedApp, 0],
+    ["single memoized scoped", SingleMemoizedScopedApp, 0],
+    ["multiple scoped", MultipleScopedApp, 0],
+    ["multiple memoized scoped", MultipleScopedWithDepsApp, 0],
     ["watch()", WatchedApp, 1],
   ])("handles single Impulse with %s", (_, App, unnecessaryRerendersCount) => {
     const count = Impulse.of(0)

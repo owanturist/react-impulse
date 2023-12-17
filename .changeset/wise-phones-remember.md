@@ -4,11 +4,11 @@
 
 Drop `useImpulseValue` hook.
 
-The hook was hardly ever used and in all cases it is more natural to use `useWatchImpulse` instead.
+The hook was hardly ever used and in all cases it is more natural to use `useScoped` instead.
 
 ```diff
 -const value = useImpulseValue(impulse);
-+const value = useWatchImpulse(() => impulse.getValue());
++const value = useScoped(() => impulse.getValue());
 +// or
-+const value = useWatchImpulse(() => impulse.getValue(), [impulse]);
++const value = useScoped(() => impulse.getValue(), [impulse]);
 ```

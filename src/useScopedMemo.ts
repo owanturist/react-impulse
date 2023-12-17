@@ -13,10 +13,10 @@ import type { Scope } from "./Scope"
  *
  * @version 1.0.0
  */
-export function useScopedMemo<TValue>(
-  factory: (scope: Scope) => TValue,
+export function useScopedMemo<TResult>(
+  factory: (scope: Scope) => TResult,
   dependencies: DependencyList,
-): TValue {
+): TResult {
   const getScope = useScope()
 
   return useMemo(

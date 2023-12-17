@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, act } from "@testing-library/react"
 import React from "react"
 
-import { type Compare, Impulse, useWatchImpulse, watch } from "../../src"
+import { type Compare, Impulse, useScoped, watch } from "../../src"
 
 describe("watch()", () => {
   it("should work fine together with useState", () => {
@@ -158,11 +158,11 @@ describe("watch()", () => {
     expect(btn).toHaveTextContent("2")
   })
 
-  it("should scope re-renders via useWatchImpulse", () => {
+  it("should scope re-renders via useScoped", () => {
     const Component = watch<{
       count: Impulse<number>
     }>(({ count }) => {
-      const isMoreThanTwo = useWatchImpulse(() => count.getValue() > 2)
+      const isMoreThanTwo = useScoped(() => count.getValue() > 2)
 
       return <span data-testid="result">{isMoreThanTwo && "Done"}</span>
     })
@@ -416,11 +416,11 @@ describe("watch()", () => {
     expect(count).toHaveEmittersSize(0)
   })
 
-  it("should not subscribe twice with useWatchImpulse", () => {
+  it("should not subscribe twice with useScoped", () => {
     const Component = watch<{
       count: Impulse<number>
     }>(({ count }) => {
-      const x = useWatchImpulse(() => count.getValue())
+      const x = useScoped(() => count.getValue())
 
       return <span data-testid="result">{x}</span>
     })

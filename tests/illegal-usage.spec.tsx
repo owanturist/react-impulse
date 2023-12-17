@@ -7,7 +7,7 @@ import {
   useScopedEffect,
   useScopedLayoutEffect,
   useScopedMemo,
-  useWatchImpulse,
+  useScoped,
   watch,
 } from "../src"
 
@@ -35,10 +35,10 @@ describe("calling Impulse.of()", () => {
       },
     ],
     [
-      "useWatchImpulse",
-      "You should not call Impulse.of inside of the useWatchImpulse watcher. The useWatchImpulse hook is for read-only operations but Impulse.of creates a new Impulse.",
+      "useScoped",
+      "You should not call Impulse.of inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse.of creates a new Impulse.",
       () => {
-        return useWatchImpulse(() => Impulse.of(1).getValue())
+        return useScoped(() => Impulse.of(1).getValue())
       },
     ],
   ])("warns when called inside %s", (_, message, useHook) => {
@@ -107,10 +107,10 @@ describe("calling Impulse#clone()", () => {
       },
     ],
     [
-      "useWatchImpulse",
-      "You should not call Impulse#clone inside of the useWatchImpulse watcher. The useWatchImpulse hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+      "useScoped",
+      "You should not call Impulse#clone inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#clone clones an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
-        return useWatchImpulse(() => impulse.clone().getValue())
+        return useScoped(() => impulse.clone().getValue())
       },
     ],
   ])("warn when called inside %s", (_, message, useHook) => {
@@ -202,10 +202,10 @@ describe("calling Impulse#setValue()", () => {
       },
     ],
     [
-      "useWatchImpulse",
-      "You should not call Impulse#setValue inside of the useWatchImpulse watcher. The useWatchImpulse hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+      "useScoped",
+      "You should not call Impulse#setValue inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
-        return useWatchImpulse(() => {
+        return useScoped(() => {
           impulse.setValue(3)
 
           return impulse.getValue()

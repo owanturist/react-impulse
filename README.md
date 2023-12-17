@@ -537,23 +537,23 @@ A hook that initialize a stable (never changing) transmitting Impulse. Look at t
 
 > 💡 There is no need to memoize neither `getter`, `setter`, nor `options.compare` functions. The hook does it internally.
 
-### `useWatchImpulse`
+### `useScoped`
 
 ```dart
-function useWatchImpulse<T>(
-  watcher: () => T,
+function useScoped<T>(
+  factory: () => T,
   dependencies?: DependencyList,
-  options?: UseWatchImpulseOptions<T>
+  options?: UseScopedOptions<T>
 ): T
 ```
 
-- `watcher` is a function that subscribes to all Impulses calling the [`Impulse#getValue`][impulse__get_value] method inside the function.
-- `dependencies` is an optional array of dependencies of the `watcher` function. If not defined, the `watcher` function is called on every render.
-- `[options]` is an optional [`UseWatchImpulseOptions`][use_watch_impulse_options] object.
+- `factory` is a function that subscribes to all Impulses calling the [`Impulse#getValue`][impulse__get_value] method inside the function.
+- `dependencies` is an optional array of dependencies of the `factory` function. If not defined, the `factory` function is called on every render.
+- `[options]` is an optional [`UseScopedOptions`][use_scoped_options] object.
 
-The `useWatchImpulse` hook is an alternative to the [`watch`][watch] function. It executes the `watcher` function whenever any of the involved Impulses' value update but enqueues a re-render only when the resulting value is different from the previous.
+The `useScoped` hook is an alternative to the [`watch`][watch] function. It executes the `factory` function whenever any of the involved Impulses' value update but enqueues a re-render only when the resulting value is different from the previous.
 
-Custom hooks can use `useWatchImpulse` for reading and transforming the Impulses' values, so the host component doesn't need to wrap around the [`watch`][watch] HOC:
+Custom hooks can use `useScoped` for reading and transforming the Impulses' values, so the host component doesn't need to wrap around the [`watch`][watch] HOC:
 
 ```tsx
 const useSumAllAndMultiply = ({
@@ -563,7 +563,7 @@ const useSumAllAndMultiply = ({
   multiplier: Impulse<number>
   counts: Impulse<Array<Impulse<number>>>
 }): number => {
-  return useWatchImpulse(() => {
+  return useScoped(() => {
     const sumAll = counts
       .getValue()
       .map((count) => count.getValue())
@@ -580,7 +580,7 @@ Components can scope watched Impulses to reduce re-rendering:
 const Challenge: React.FC = () => {
   const count = useImpulse(0)
   // the component re-renders only once when the `count` is greater than 5
-  const isMoreThanFive = useWatchImpulse(() => count.getValue() > 5)
+  const isMoreThanFive = useScoped(() => count.getValue() > 5)
 
   return (
     <div>
@@ -592,9 +592,9 @@ const Challenge: React.FC = () => {
 }
 ```
 
-> 💬 The `watcher` function is only for reading the Impulses' values. It should never call [`Impulse.of`][impulse__of], [`Impulse#clone`][impulse__clone], or [`Impulse#setValue`][impulse__set_value] methods inside.
+> 💬 The `factory` function is only for reading the Impulses' values. It should never call [`Impulse.of`][impulse__of], [`Impulse#clone`][impulse__clone], or [`Impulse#setValue`][impulse__set_value] methods inside.
 
-> 💡 Keep in mind that the `watcher` function acts as a "reader" so you'd like to avoid heavy computations inside it. Sometimes it might be a good idea to pass a watcher result to a separated memoization hook. The same is true for the `compare` function - you should choose wisely between avoiding extra re-renders and heavy comparisons.
+> 💡 Keep in mind that the `factory` function acts as a "reader" so you'd like to avoid heavy computations inside it. Sometimes it might be a good idea to pass a factory result to a separated memoization hook. The same is true for the `compare` function - you should choose wisely between avoiding extra re-renders and heavy comparisons.
 
 > 💡 There is no need to memoize `options.compare` function. The hook does it internally.
 
@@ -741,7 +741,7 @@ There is no Impulse version of the [`React.useInsertionEffect`][react__use_inser
 
 ```ts
 const usePrintSum = (left: number, right: Impulse<number>): void => {
-  const rightValue = useWatchImpulse(() => right.getValue())
+  const rightValue = useScoped(() => right.getValue())
 
   React.useInsertionEffect(() => {
     console.log("sum is %d", left + rightValue)
@@ -865,15 +865,15 @@ interface TransmittingImpulseOptions<T> {
   </blockquote>
   </details>
 
-### `interface UseWatchImpulseOptions`
+### `interface UseScopedOptions`
 
 ```ts
-interface UseWatchImpulseOptions<T> {
+interface UseScopedOptions<T> {
   compare?: null | Compare<T>
 }
 ```
 
-- `[compare]` is an optional [`Compare`][compare] function that determines whether or not the watcher result is different. If the watcher result is different, a host component re-renders. In many cases specifying the function leads to better performance because it prevents unnecessary updates.
+- `[compare]` is an optional [`Compare`][compare] function that determines whether or not the factory result is different. If the factory result is different, a host component re-renders. In many cases specifying the function leads to better performance because it prevents unnecessary updates.
 
 ### `type Compare`
 
@@ -892,7 +892,7 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
   "react-hooks/exhaustive-deps": [
     "error",
     {
-      "additionalHooks": "(useTransmittingImpulse|useWatchImpulse|useImpulse(Effect|LayoutEffect|Memo|Callback))"
+      "additionalHooks": "(useScoped(|Effect|LayoutEffect|Memo|Callback)|useTransmittingImpulse)"
     }
   ]
 }
@@ -912,7 +912,7 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
 [batch]: #batch
 [impulse_options]: #interface-impulseoptions
 [transmitting_impulse_options]: #interface-transmittingimpulseoptions
-[use_watch_impulse_options]: #interface-usewatchimpulseoptions
+[use_scoped_options]: #interface-useScopedoptions
 [compare]: #type-compare
 
 <!-- E X T E R N A L  L I N K S -->

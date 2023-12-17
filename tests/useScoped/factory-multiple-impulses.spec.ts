@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, useWatchImpulse, batch } from "../../src"
+import { Impulse, useScoped, batch } from "../../src"
 import {
   Counter,
   type WithImpulse,
@@ -10,8 +10,8 @@ import {
   type WithSpy,
 } from "../common"
 
-describe("multiple watcher", () => {
-  const watcher = ({ first, second }: WithFirst & WithSecond) => {
+describe("multiple factory", () => {
+  const factory = ({ first, second }: WithFirst & WithSecond) => {
     return Counter.merge(first.getValue(), second.getValue())
   }
 
@@ -19,38 +19,29 @@ describe("multiple watcher", () => {
     [
       "without deps",
       ({ first, second }: WithFirst & WithSecond) => {
-        return useWatchImpulse(() => watcher({ first, second }))
+        return useScoped(() => factory({ first, second }))
       },
     ],
     [
       "without comparator",
       ({ first, second }: WithFirst & WithSecond) => {
-        return useWatchImpulse(
-          () => watcher({ first, second }),
-          [first, second],
-        )
+        return useScoped(() => factory({ first, second }), [first, second])
       },
     ],
     [
       "with inline comparator",
       ({ first, second }: WithFirst & WithSecond) => {
-        return useWatchImpulse(
-          () => watcher({ first, second }),
-          [first, second],
-          {
-            compare: (prev, next) => Counter.compare(prev, next),
-          },
-        )
+        return useScoped(() => factory({ first, second }), [first, second], {
+          compare: (prev, next) => Counter.compare(prev, next),
+        })
       },
     ],
     [
       "with memoized comparator",
       ({ first, second }: WithFirst & WithSecond) => {
-        return useWatchImpulse(
-          () => watcher({ first, second }),
-          [first, second],
-          { compare: Counter.compare },
-        )
+        return useScoped(() => factory({ first, second }), [first, second], {
+          compare: Counter.compare,
+        })
       },
     ],
   ])("%s", (__, useHook) => {
@@ -100,14 +91,14 @@ describe("multiple watcher", () => {
   })
 })
 
-describe("triggering watcher for multiple impulses vs single impulse", () => {
-  const watcherSingle = ({ impulse, spy }: WithImpulse & WithSpy) => {
+describe("triggering factory for multiple impulses vs single impulse", () => {
+  const factorySingle = ({ impulse, spy }: WithImpulse & WithSpy) => {
     spy()
 
     return impulse.getValue()
   }
 
-  const watcherMultiple = ({
+  const factoryMultiple = ({
     spy,
     first,
     second,
@@ -122,7 +113,7 @@ describe("triggering watcher for multiple impulses vs single impulse", () => {
     [
       "without deps",
       ({ impulse, spy }: WithImpulse & WithSpy) => {
-        return useWatchImpulse(() => watcherSingle({ impulse, spy }))
+        return useScoped(() => factorySingle({ impulse, spy }))
       },
       ({
         first,
@@ -130,18 +121,13 @@ describe("triggering watcher for multiple impulses vs single impulse", () => {
         third,
         spy,
       }: WithFirst & WithSecond & WithThird & WithSpy) => {
-        return useWatchImpulse(() =>
-          watcherMultiple({ first, second, third, spy }),
-        )
+        return useScoped(() => factoryMultiple({ first, second, third, spy }))
       },
     ],
     [
       "without comparator",
       ({ impulse, spy }: WithImpulse & WithSpy) => {
-        return useWatchImpulse(
-          () => watcherSingle({ impulse, spy }),
-          [impulse, spy],
-        )
+        return useScoped(() => factorySingle({ impulse, spy }), [impulse, spy])
       },
       ({
         first,
@@ -149,8 +135,8 @@ describe("triggering watcher for multiple impulses vs single impulse", () => {
         third,
         spy,
       }: WithFirst & WithSecond & WithThird & WithSpy) => {
-        return useWatchImpulse(
-          () => watcherMultiple({ first, second, third, spy }),
+        return useScoped(
+          () => factoryMultiple({ first, second, third, spy }),
           [first, second, third, spy],
         )
       },
@@ -158,8 +144,8 @@ describe("triggering watcher for multiple impulses vs single impulse", () => {
     [
       "with inline comparator",
       ({ impulse, spy }: WithImpulse & WithSpy) => {
-        return useWatchImpulse(
-          () => watcherSingle({ impulse, spy }),
+        return useScoped(
+          () => factorySingle({ impulse, spy }),
           [impulse, spy],
           {
             compare: (prev, next) => Counter.compare(prev, next),
@@ -172,8 +158,8 @@ describe("triggering watcher for multiple impulses vs single impulse", () => {
         third,
         spy,
       }: WithFirst & WithSecond & WithThird & WithSpy) => {
-        return useWatchImpulse(
-          () => watcherMultiple({ first, second, third, spy }),
+        return useScoped(
+          () => factoryMultiple({ first, second, third, spy }),
           [first, second, third, spy],
           {
             compare: (prev, next) => Counter.compare(prev, next),
@@ -184,10 +170,12 @@ describe("triggering watcher for multiple impulses vs single impulse", () => {
     [
       "with memoized comparator",
       ({ impulse, spy }: WithImpulse & WithSpy) => {
-        return useWatchImpulse(
-          () => watcherSingle({ impulse, spy }),
+        return useScoped(
+          () => factorySingle({ impulse, spy }),
           [impulse, spy],
-          { compare: Counter.compare },
+          {
+            compare: Counter.compare,
+          },
         )
       },
       ({
@@ -196,8 +184,8 @@ describe("triggering watcher for multiple impulses vs single impulse", () => {
         third,
         spy,
       }: WithFirst & WithSecond & WithThird & WithSpy) => {
-        return useWatchImpulse(
-          () => watcherMultiple({ first, second, third, spy }),
+        return useScoped(
+          () => factoryMultiple({ first, second, third, spy }),
           [first, second, third, spy],
           { compare: Counter.compare },
         )
@@ -230,7 +218,7 @@ describe("triggering watcher for multiple impulses vs single impulse", () => {
       }
     }
 
-    it("calls watchers the same amount when initiates", () => {
+    it("calls factorys the same amount when initiates", () => {
       const { spySingle, spyMultiple, resultSingle, resultMultiple } = setup()
 
       expect(resultSingle.current).toStrictEqual({ count: 1 })
@@ -238,7 +226,7 @@ describe("triggering watcher for multiple impulses vs single impulse", () => {
       expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
     })
 
-    it("calls watchers the same amount when only first and second", () => {
+    it("calls factorys the same amount when only first and second", () => {
       const {
         first,
         second,
@@ -259,7 +247,7 @@ describe("triggering watcher for multiple impulses vs single impulse", () => {
       expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
     })
 
-    it("calls watchers the same amount when only first and third", () => {
+    it("calls factorys the same amount when only first and third", () => {
       const {
         first,
         third,
@@ -280,7 +268,7 @@ describe("triggering watcher for multiple impulses vs single impulse", () => {
       expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
     })
 
-    it("calls watchers the same amount when first, second and third", () => {
+    it("calls factorys the same amount when first, second and third", () => {
       const {
         first,
         second,
@@ -306,7 +294,7 @@ describe("triggering watcher for multiple impulses vs single impulse", () => {
       expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
     })
 
-    it("doesn't call single watcher when changes only second and third", () => {
+    it("doesn't call single factory when changes only second and third", () => {
       const {
         second,
         third,

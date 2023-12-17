@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useWatchImpulse, watch } from "../../src"
+import { Impulse, useScoped, watch } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -32,7 +32,7 @@ describe("watching nested impulses", () => {
     onRender,
     onCounterRender,
   }) => {
-    const state = useWatchImpulse(() => appState.getValue())
+    const state = useScoped(() => appState.getValue())
 
     return (
       <>
@@ -91,12 +91,12 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const watcherLeft = (state: Impulse<AppState>) => {
+  const factoryLeft = (state: Impulse<AppState>) => {
     const total = AppState.sum(state.getValue())
 
     return total > 10
   }
-  const watcherRight = (state: Impulse<AppState>) => {
+  const factoryRight = (state: Impulse<AppState>) => {
     const total = AppState.sum(state.getValue())
 
     return total < 20
@@ -109,9 +109,9 @@ describe("watching nested impulses", () => {
     return left1 === left2 && right1 === right2
   }
 
-  const SingleWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanTen, lessThanTwenty] = useWatchImpulse(
-      () => [watcherLeft(props.state), watcherRight(props.state)],
+  const SingleScopedApp: React.FC<AppProps> = (props) => {
+    const [moreThanTen, lessThanTwenty] = useScoped(
+      () => [factoryLeft(props.state), factoryRight(props.state)],
       [props.state],
       {
         compare: (left, right) => compare(left, right),
@@ -127,9 +127,9 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanTen, lessThanTwenty] = useWatchImpulse<[boolean, boolean]>(
-      () => [watcherLeft(props.state), watcherRight(props.state)],
+  const SingleMemoizedScopedApp: React.FC<AppProps> = (props) => {
+    const [moreThanTen, lessThanTwenty] = useScoped<[boolean, boolean]>(
+      () => [factoryLeft(props.state), factoryRight(props.state)],
       [props.state],
       { compare },
     )
@@ -143,9 +143,9 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanTen = useWatchImpulse(() => watcherLeft(props.state))
-    const lessThanTwenty = useWatchImpulse(() => watcherRight(props.state))
+  const MultipleScopedApp: React.FC<AppProps> = (props) => {
+    const moreThanTen = useScoped(() => factoryLeft(props.state))
+    const lessThanTwenty = useScoped(() => factoryRight(props.state))
 
     return (
       <GenericApp
@@ -156,13 +156,10 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const MultipleWatchersWithDepsApp: React.FC<AppProps> = (props) => {
-    const moreThanTen = useWatchImpulse(
-      () => watcherLeft(props.state),
-      [props.state],
-    )
-    const lessThanTwenty = useWatchImpulse(
-      () => watcherRight(props.state),
+  const MultipleScopedWithDepsApp: React.FC<AppProps> = (props) => {
+    const moreThanTen = useScoped(() => factoryLeft(props.state), [props.state])
+    const lessThanTwenty = useScoped(
+      () => factoryRight(props.state),
       [props.state],
     )
 
@@ -176,8 +173,8 @@ describe("watching nested impulses", () => {
   }
 
   const WatchedApp: React.FC<AppProps> = watch((props) => {
-    const moreThanTen = watcherLeft(props.state)
-    const lessThanTwenty = watcherRight(props.state)
+    const moreThanTen = factoryLeft(props.state)
+    const lessThanTwenty = factoryRight(props.state)
 
     return (
       <GenericApp
@@ -189,10 +186,10 @@ describe("watching nested impulses", () => {
   })
 
   it.each([
-    ["single watcher", SingleWatcherApp, 0],
-    ["single memoized watcher", SingleMemoizedWatcherApp, 0],
-    ["multiple watchers", MultipleWatchersApp, 0],
-    ["multiple memoized watchers", MultipleWatchersWithDepsApp, 0],
+    ["single scoped", SingleScopedApp, 0],
+    ["single memoized scoped", SingleMemoizedScopedApp, 0],
+    ["multiple scoped", MultipleScopedApp, 0],
+    ["multiple memoized scoped", MultipleScopedWithDepsApp, 0],
     ["watch()", WatchedApp, 1],
   ])("handles nested Impulses with %s", (_, App, unnecessaryRerendersCount) => {
     const state = Impulse.of<AppState>({

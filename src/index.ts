@@ -1,5 +1,5 @@
 export type { DependencyList } from "./dependencies"
-export type { Compare } from "./utils"
+export type { Compare, Destructor } from "./utils"
 export {
   type ImpulseOptions,
   type TransmittingImpulseOptions,
@@ -20,4 +20,4 @@ export { useScopedMemo } from "./useScopedMemo"
 export { useScopedCallback } from "./useScopedCallback"
 export { useScopedEffect } from "./useScopedEffect"
 export { useScopedLayoutEffect } from "./useScopedLayoutEffect"
-export { type UseWatchImpulseOptions, useWatchImpulse } from "./useWatchImpulse"
+export { type UseScopedOptions, useScoped } from "./useScoped"

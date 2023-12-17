@@ -1,9 +1,9 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, useWatchImpulse } from "../../src"
+import { Impulse, useScoped } from "../../src"
 import { Counter, type WithSpy, type WithImpulse } from "../common"
 
-const watcher = ({ impulse, spy }: WithImpulse & WithSpy) => {
+const factory = ({ impulse, spy }: WithImpulse & WithSpy) => {
   const value = impulse.getValue()
 
   spy(value)
@@ -11,14 +11,14 @@ const watcher = ({ impulse, spy }: WithImpulse & WithSpy) => {
   return value
 }
 
-describe("watcher without deps", () => {
+describe("factory without deps", () => {
   const setup = () => {
     const spy = vi.fn()
     const impulse = Impulse.of({ count: 1 })
 
     const { rerender } = renderHook(
       (props) => {
-        return useWatchImpulse(() => watcher(props))
+        return useScoped(() => factory(props))
       },
       {
         initialProps: { impulse, spy },
@@ -28,14 +28,14 @@ describe("watcher without deps", () => {
     return { spy, impulse, rerender }
   }
 
-  it("should call watcher 1 time on init", () => {
+  it("should call factory 1 time on init", () => {
     const { spy } = setup()
 
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
-  it("should call watcher 1 time on subsequent renders", () => {
+  it("should call factory 1 time on subsequent renders", () => {
     const { spy, impulse, rerender } = setup()
 
     spy.mockReset()
@@ -45,7 +45,7 @@ describe("watcher without deps", () => {
     expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
-  it("should call watcher 2 times when a watching impulse changes", () => {
+  it("should call factory 2 times when a watching impulse changes", () => {
     const { spy, impulse } = setup()
 
     spy.mockReset()
@@ -54,9 +54,9 @@ describe("watcher without deps", () => {
       impulse.setValue(Counter.inc)
     })
 
-    // 1st executes watcher to extract new result
+    // 1st executes factory to extract new result
     // --it causes reconciliation--
-    // 2nd extracts the watcher result
+    // 2nd extracts the factory result
     expect(spy).toHaveBeenCalledTimes(2)
     expect(spy).toHaveBeenNthCalledWith(1, { count: 2 })
     expect(spy).toHaveBeenNthCalledWith(2, { count: 2 })
@@ -65,9 +65,9 @@ describe("watcher without deps", () => {
 
 describe.each([
   [
-    "without comparator",
+    "without",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(() => {
+      return useScoped(() => {
         const value = impulse.getValue()
 
         spy(value)
@@ -77,9 +77,9 @@ describe.each([
     },
   ],
   [
-    "with inline comparator",
+    "with inline",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(
+      return useScoped(
         () => {
           const value = impulse.getValue()
 
@@ -95,9 +95,9 @@ describe.each([
     },
   ],
   [
-    "with memoized comparator",
+    "with memoized",
     ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useWatchImpulse(
+      return useScoped(
         () => {
           const value = impulse.getValue()
 
@@ -110,7 +110,7 @@ describe.each([
       )
     },
   ],
-])("watcher with deps and %s", (_, useCounter) => {
+])("factory with deps and %s comparator", (_, useCounter) => {
   const setup = () => {
     const spy = vi.fn()
     const impulse = Impulse.of({ count: 1 })
@@ -122,14 +122,14 @@ describe.each([
     return { spy, impulse, rerender }
   }
 
-  it("should call watcher 1 time on init", () => {
+  it("should call factory 1 time on init", () => {
     const { spy } = setup()
 
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith({ count: 1 })
   })
 
-  it("should not call watcher on subsequent renders", () => {
+  it("should not call factory on subsequent renders", () => {
     const { spy, impulse, rerender } = setup()
 
     spy.mockReset()
@@ -138,7 +138,7 @@ describe.each([
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it("should call watcher 1 time when a watching impulse changes", () => {
+  it("should call factory 1 time when a watching impulse changes", () => {
     const { spy, impulse } = setup()
 
     spy.mockReset()

@@ -1,9 +1,9 @@
 import { noop } from "./utils"
 
 /**
- * A context to track Impulse#getValue usage inside the watcher function.
+ * A context to track Impulse#getValue usage inside the factory function.
  * The tracked calls will subscribe related stores to updates,
- * so the watcher will execute on each update.
+ * so the factory will execute on each update.
  *
  * @private
  */

@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useWatchImpulse } from "../../src"
+import { Impulse, useScoped } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -15,7 +15,7 @@ describe("nested impulses", () => {
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }> = ({ state, onRender, onCounterRender }) => {
-    const { counts } = useWatchImpulse(() => state.getValue())
+    const { counts } = useScoped(() => state.getValue())
 
     return (
       <>

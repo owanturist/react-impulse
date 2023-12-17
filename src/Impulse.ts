@@ -7,10 +7,10 @@ import {
   SUBSCRIBE_CALLING_IMPULSE_OF,
   SUBSCRIBE_CALLING_IMPULSE_CLONE,
   SUBSCRIBE_CALLING_IMPULSE_TRANSMIT,
-  USE_WATCH_IMPULSE_CALLING_IMPULSE_OF,
-  USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE,
-  USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE,
-  USE_WATCH_IMPULSE_CALLING_IMPULSE_TRANSMIT,
+  USE_SCOPED_CALLING_IMPULSE_OF,
+  USE_SCOPED_CALLING_IMPULSE_CLONE,
+  USE_SCOPED_CALLING_IMPULSE_SET_VALUE,
+  USE_SCOPED_CALLING_IMPULSE_TRANSMIT,
   USE_SCOPED_MEMO_CALLING_IMPULSE_OF,
   USE_SCOPED_MEMO_CALLING_IMPULSE_CLONE,
   USE_SCOPED_MEMO_CALLING_IMPULSE_SET_VALUE,
@@ -55,7 +55,7 @@ export abstract class Impulse<T> {
 
   @validate
     ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_OF)
-    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_OF)
+    ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_OF)
     ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_OF)
     ._alert()
   public static of<T>(
@@ -99,7 +99,7 @@ export abstract class Impulse<T> {
 
   @validate
     ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_TRANSMIT)
-    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_TRANSMIT)
+    ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_TRANSMIT)
     ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_TRANSMIT)
     ._alert()
   public static transmit<T>(
@@ -184,7 +184,7 @@ export abstract class Impulse<T> {
 
   @validate
     ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_CLONE)
-    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_CLONE)
+    ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_CLONE)
     ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_CLONE)
     ._alert()
   public clone(
@@ -233,7 +233,7 @@ export abstract class Impulse<T> {
    */
   @validate
     ._when("watch", WATCH_CALLING_IMPULSE_SET_VALUE)
-    ._when("useWatchImpulse", USE_WATCH_IMPULSE_CALLING_IMPULSE_SET_VALUE)
+    ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_SET_VALUE)
     ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_SET_VALUE)
     ._prevent()
   public setValue(

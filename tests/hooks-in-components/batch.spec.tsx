@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { batch, Impulse, useWatchImpulse } from "../../src"
+import { batch, Impulse, useScoped } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
@@ -14,8 +14,8 @@ describe.each([
     const impulse_2 = Impulse.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useWatchImpulse(() => impulse_1.getValue())
-      const counter_2 = useWatchImpulse(() => impulse_2.getValue())
+      const counter_1 = useScoped(() => impulse_1.getValue())
+      const counter_2 = useScoped(() => impulse_2.getValue())
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -40,14 +40,14 @@ describe.each([
     expect(onRender).toHaveBeenCalledOnce()
   })
 
-  it("re-renders once for useWatchImpulse calls", () => {
+  it("re-renders once for useScoped calls", () => {
     const onRender = vi.fn()
     const impulse_1 = Impulse.of({ count: 1 })
     const impulse_2 = Impulse.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useWatchImpulse(() => impulse_1.getValue())
-      const counter_2 = useWatchImpulse(() => impulse_2.getValue())
+      const counter_1 = useScoped(() => impulse_1.getValue())
+      const counter_2 = useScoped(() => impulse_2.getValue())
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -90,11 +90,11 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const { first: impulse_1, second: impulse_2 } = useWatchImpulse(() =>
+      const { first: impulse_1, second: impulse_2 } = useScoped(() =>
         impulse.getValue(),
       )
-      const counter_1 = useWatchImpulse(() => impulse_1.getValue())
-      const counter_2 = useWatchImpulse(() => impulse_2.getValue())
+      const counter_1 = useScoped(() => impulse_1.getValue())
+      const counter_2 = useScoped(() => impulse_2.getValue())
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -137,7 +137,7 @@ describe.each([
     expect(onRender).toHaveBeenCalledOnce()
   })
 
-  it("re-renders once for useWatchImpulse calls", () => {
+  it("re-renders once for useScoped calls", () => {
     const onRender = vi.fn()
     const impulse = Impulse.of({
       first: Impulse.of({ count: 1 }),
@@ -145,11 +145,11 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const { first: impulse_1, second: impulse_2 } = useWatchImpulse(() =>
+      const { first: impulse_1, second: impulse_2 } = useScoped(() =>
         impulse.getValue(),
       )
-      const counter_1 = useWatchImpulse(() => impulse_1.getValue())
-      const counter_2 = useWatchImpulse(() => impulse_2.getValue())
+      const counter_1 = useScoped(() => impulse_1.getValue())
+      const counter_2 = useScoped(() => impulse_2.getValue())
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -205,46 +205,46 @@ describe.each([
 
 describe.each([
   {
-    name: "no batching for inline watcher",
-    expectedWatcherCallsForMultiple: 3,
-    expectedWatcherCallsForNested: 2,
+    name: "no batching for inline factory",
+    expectedFactoryCallsForMultiple: 3,
+    expectedFactoryCallsForNested: 2,
     execute: (cb: VoidFunction) => cb(),
-    useCount: (watcher: () => number) => {
-      return useWatchImpulse(() => watcher())
+    useCount: (factory: () => number) => {
+      return useScoped(() => factory())
     },
   },
   {
-    name: "with batching for inline watcher",
-    expectedWatcherCallsForMultiple: 2,
-    expectedWatcherCallsForNested: 2,
+    name: "with batching for inline factory",
+    expectedFactoryCallsForMultiple: 2,
+    expectedFactoryCallsForNested: 2,
     execute: batch,
-    useCount: (watcher: () => number) => {
-      return useWatchImpulse(() => watcher())
+    useCount: (factory: () => number) => {
+      return useScoped(() => factory())
     },
   },
   {
-    name: "no batching for memoized watcher",
-    expectedWatcherCallsForMultiple: 2,
-    expectedWatcherCallsForNested: 1,
+    name: "no batching for memoized factory",
+    expectedFactoryCallsForMultiple: 2,
+    expectedFactoryCallsForNested: 1,
     execute: (cb: VoidFunction) => cb(),
-    useCount: (watcher: () => number) => {
-      return useWatchImpulse(React.useCallback(() => watcher(), [watcher]))
+    useCount: (factory: () => number) => {
+      return useScoped(React.useCallback(() => factory(), [factory]))
     },
   },
   {
-    name: "with batching for memoized watcher",
-    expectedWatcherCallsForMultiple: 1,
-    expectedWatcherCallsForNested: 1,
+    name: "with batching for memoized factory",
+    expectedFactoryCallsForMultiple: 1,
+    expectedFactoryCallsForNested: 1,
     execute: batch,
-    useCount: (watcher: () => number) => {
-      return useWatchImpulse(React.useCallback(() => watcher(), [watcher]))
+    useCount: (factory: () => number) => {
+      return useScoped(React.useCallback(() => factory(), [factory]))
     },
   },
 ])(
   "when $name",
   ({
-    expectedWatcherCallsForMultiple,
-    expectedWatcherCallsForNested,
+    expectedFactoryCallsForMultiple,
+    expectedFactoryCallsForNested,
     execute,
     useCount,
   }) => {
@@ -254,7 +254,7 @@ describe.each([
         const onRender = vi.fn()
         const first = Impulse.of({ count: 1 })
         const second = Impulse.of({ count: 2 })
-        const watcher = () => {
+        const factory = () => {
           spy()
 
           return (
@@ -262,14 +262,14 @@ describe.each([
           )
         }
 
-        return { spy, onRender, first, second, watcher }
+        return { spy, onRender, first, second, factory }
       }
 
-      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by Impulse#setValue calls`, () => {
-        const { spy, onRender, first, second, watcher } = setup()
+      it(`calls the factory ${expectedFactoryCallsForMultiple} times by Impulse#setValue calls`, () => {
+        const { spy, onRender, first, second, factory } = setup()
 
         const Component: React.FC = () => {
-          const count = useCount(watcher)
+          const count = useCount(factory)
 
           return (
             <React.Profiler id="test" onRender={onRender}>
@@ -294,14 +294,14 @@ describe.each([
         })
         expect(screen.getByTestId("count")).toHaveTextContent("5")
         expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForMultiple)
+        expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForMultiple)
       })
 
-      it(`calls the watcher ${expectedWatcherCallsForMultiple} times by Impulse#setValue calls`, () => {
-        const { spy, onRender, first, second, watcher } = setup()
+      it(`calls the factory ${expectedFactoryCallsForMultiple} times by Impulse#setValue calls`, () => {
+        const { spy, onRender, first, second, factory } = setup()
 
         const Component: React.FC = () => {
-          const count = useCount(watcher)
+          const count = useCount(factory)
 
           return (
             <React.Profiler id="test" onRender={onRender}>
@@ -330,7 +330,7 @@ describe.each([
         fireEvent.click(screen.getByTestId("inc"))
         expect(screen.getByTestId("count")).toHaveTextContent("5")
         expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForMultiple)
+        expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForMultiple)
       })
     })
 
@@ -342,7 +342,7 @@ describe.each([
           first: Impulse.of({ count: 1 }),
           second: Impulse.of({ count: 2 }),
         })
-        const watcher = () => {
+        const factory = () => {
           spy()
 
           return impulse.getValue(
@@ -352,14 +352,14 @@ describe.each([
           )
         }
 
-        return { spy, onRender, impulse, watcher }
+        return { spy, onRender, impulse, factory }
       }
 
-      it(`calls the watcher ${expectedWatcherCallsForNested} times by Impulse#setValue calls`, () => {
-        const { spy, onRender, impulse, watcher } = setup()
+      it(`calls the factory ${expectedFactoryCallsForNested} times by Impulse#setValue calls`, () => {
+        const { spy, onRender, impulse, factory } = setup()
 
         const Component: React.FC = () => {
-          const count = useCount(watcher)
+          const count = useCount(factory)
 
           return (
             <React.Profiler id="test" onRender={onRender}>
@@ -387,7 +387,7 @@ describe.each([
         })
         expect(screen.getByTestId("count")).toHaveTextContent("5")
         expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
+        expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
         vi.clearAllMocks()
 
         act(() => {
@@ -402,14 +402,14 @@ describe.each([
         })
         expect(screen.getByTestId("count")).toHaveTextContent("7")
         expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
+        expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
       })
 
-      it(`calls the watcher ${expectedWatcherCallsForNested} times by Impulse#setValue calls`, () => {
-        const { spy, onRender, impulse, watcher } = setup()
+      it(`calls the factory ${expectedFactoryCallsForNested} times by Impulse#setValue calls`, () => {
+        const { spy, onRender, impulse, factory } = setup()
 
         const Component: React.FC = () => {
-          const count = useCount(watcher)
+          const count = useCount(factory)
 
           return (
             <React.Profiler id="test" onRender={onRender}>
@@ -456,13 +456,13 @@ describe.each([
         fireEvent.click(screen.getByTestId("inc-1"))
         expect(screen.getByTestId("count")).toHaveTextContent("5")
         expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
+        expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
         vi.clearAllMocks()
 
         fireEvent.click(screen.getByTestId("inc-2"))
         expect(screen.getByTestId("count")).toHaveTextContent("7")
         expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledTimes(expectedWatcherCallsForNested)
+        expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
       })
     })
   },
