@@ -675,7 +675,7 @@ describe.each([
       })
 
       expect(JSON.stringify(impulse)).toMatchInlineSnapshot(
-        '"{\\"number\\":0,\\"string\\":\\"biba\\",\\"boolean\\":false,\\"null\\":null,\\"array\\":[1,\\"boba\\",true,null,null],\\"object\\":{\\"number\\":2,\\"string\\":\\"baba\\",\\"boolean\\":false,\\"null\\":null}}"',
+        `"{"number":0,"string":"biba","boolean":false,"null":null,"array":[1,"boba",true,null,null],"object":{"number":2,"string":"baba","boolean":false,"null":null}}"`,
       )
     })
 
@@ -683,7 +683,7 @@ describe.each([
       const { impulse } = setup({ first: 1, second: 2, third: 3 })
 
       expect(JSON.stringify(impulse, ["first", "third"])).toMatchInlineSnapshot(
-        '"{\\"first\\":1,\\"third\\":3}"',
+        `"{"first":1,"third":3}"`,
       )
     })
 
@@ -698,7 +698,7 @@ describe.each([
 
           return value
         }),
-      ).toMatchInlineSnapshot('"{\\"first\\":2,\\"second\\":4,\\"third\\":6}"')
+      ).toMatchInlineSnapshot(`"{"first":2,"second":4,"third":6}"`)
     })
 
     it("applies spaces", () => {
@@ -707,9 +707,9 @@ describe.each([
       expect(JSON.stringify(impulse, null, 2)).toMatchInlineSnapshot(
         `
         "{
-          \\"first\\": 1,
-          \\"second\\": 2,
-          \\"third\\": 3
+          "first": 1,
+          "second": 2,
+          "third": 3
         }"
       `,
       )
@@ -723,9 +723,9 @@ describe.each([
 
       expect(JSON.stringify(impulse, null, 2)).toMatchInlineSnapshot(`
         "{
-          \\"first\\": 1,
-          \\"second\\": [
-            \\"1\\",
+          "first": 1,
+          "second": [
+            "1",
             false
           ]
         }"
