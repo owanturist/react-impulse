@@ -1,11 +1,11 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useScoped, scoped } from "../../src"
+import { Impulse, useScoped, scoped, type Scope } from "../../src"
 
 import { CounterComponent } from "./common"
 
-describe("watching single impulse", () => {
+describe("scoping single impulse", () => {
   interface AppProps {
     count: Impulse<number>
     onRender: VoidFunction
@@ -28,13 +28,13 @@ describe("watching single impulse", () => {
     </>
   )
 
-  const factoryLeft = (count: Impulse<number>) => {
-    const x = count.getValue()
+  const factoryLeft = (scope: Scope, count: Impulse<number>) => {
+    const x = count.getValue(scope)
 
     return x > 1
   }
-  const factoryRight = (count: Impulse<number>) => {
-    const x = count.getValue()
+  const factoryRight = (scope: Scope, count: Impulse<number>) => {
+    const x = count.getValue(scope)
 
     return x < 4
   }
@@ -46,9 +46,12 @@ describe("watching single impulse", () => {
     return left1 === left2 && right1 === right2
   }
 
-  const SingleScopedApp: React.FC<AppProps> = (props) => {
+  const SingleScopeApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useScoped(
-      () => [factoryLeft(props.count), factoryRight(props.count)],
+      (scope) => [
+        factoryLeft(scope, props.count),
+        factoryRight(scope, props.count),
+      ],
       [props.count],
       {
         compare: (left, right) => compare(left, right),
@@ -64,9 +67,12 @@ describe("watching single impulse", () => {
     )
   }
 
-  const SingleMemoizedScopedApp: React.FC<AppProps> = (props) => {
+  const SingleMemoizedScopeApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useScoped<[boolean, boolean]>(
-      () => [factoryLeft(props.count), factoryRight(props.count)],
+      (scope) => [
+        factoryLeft(scope, props.count),
+        factoryRight(scope, props.count),
+      ],
       [props.count],
       { compare },
     )
@@ -80,9 +86,9 @@ describe("watching single impulse", () => {
     )
   }
 
-  const MultipleScopedApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useScoped(() => factoryLeft(props.count))
-    const lessThanFour = useScoped(() => factoryRight(props.count))
+  const MultipleScopesApp: React.FC<AppProps> = (props) => {
+    const moreThanOne = useScoped((scope) => factoryLeft(scope, props.count))
+    const lessThanFour = useScoped((scope) => factoryRight(scope, props.count))
 
     return (
       <GenericApp
@@ -93,10 +99,13 @@ describe("watching single impulse", () => {
     )
   }
 
-  const MultipleScopedWithDepsApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useScoped(() => factoryLeft(props.count), [props.count])
+  const MultipleMemoizedScopesApp: React.FC<AppProps> = (props) => {
+    const moreThanOne = useScoped(
+      (scope) => factoryLeft(scope, props.count),
+      [props.count],
+    )
     const lessThanFour = useScoped(
-      () => factoryRight(props.count),
+      (scope) => factoryRight(scope, props.count),
       [props.count],
     )
 
@@ -109,9 +118,9 @@ describe("watching single impulse", () => {
     )
   }
 
-  const ScopedApp: React.FC<AppProps> = scoped((props) => {
-    const moreThanOne = factoryLeft(props.count)
-    const lessThanFour = factoryRight(props.count)
+  const ScopedApp: React.FC<AppProps> = scoped(({ scope, ...props }) => {
+    const moreThanOne = factoryLeft(scope, props.count)
+    const lessThanFour = factoryRight(scope, props.count)
 
     return (
       <GenericApp
@@ -123,10 +132,10 @@ describe("watching single impulse", () => {
   })
 
   it.each([
-    ["single scoped", SingleScopedApp, 0],
-    ["single memoized scoped", SingleMemoizedScopedApp, 0],
-    ["multiple scoped", MultipleScopedApp, 0],
-    ["multiple memoized scoped", MultipleScopedWithDepsApp, 0],
+    ["single scope", SingleScopeApp, 0],
+    ["single memoized scope", SingleMemoizedScopeApp, 0],
+    ["multiple scopes", MultipleScopesApp, 0],
+    ["multiple memoized scopes", MultipleMemoizedScopesApp, 0],
     ["scoped()", ScopedApp, 1],
   ])("handles single Impulse with %s", (_, App, unnecessaryRerendersCount) => {
     const count = Impulse.of(0)

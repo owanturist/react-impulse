@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, scoped, useScoped } from "../src"
+import { Impulse, scoped, subscribe, useScoped } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -11,7 +11,7 @@ describe("watching misses when defined after useEffect #140", () => {
     useGetSecond(second: Impulse<number>): number
   }
 
-  const ComponentWatchBeforeEffect: React.FC<ComponentProps> = ({
+  const ComponentScopedBeforeEffect: React.FC<ComponentProps> = ({
     first,
     second,
     useGetFirst,
@@ -31,7 +31,7 @@ describe("watching misses when defined after useEffect #140", () => {
     )
   }
 
-  const ComponentWatchAfterEffect: React.FC<ComponentProps> = ({
+  const ComponentScopedAfterEffect: React.FC<ComponentProps> = ({
     first,
     second,
     useGetFirst,
@@ -53,16 +53,16 @@ describe("watching misses when defined after useEffect #140", () => {
   }
 
   const useScopedInline = (impulse: Impulse<number>) => {
-    return useScoped(() => impulse.getValue())
+    return useScoped((scope) => impulse.getValue(scope))
   }
 
   const useScopedMemoized = (impulse: Impulse<number>) => {
-    return useScoped(React.useCallback(() => impulse.getValue(), [impulse]))
+    return useScoped((scope) => impulse.getValue(scope), [impulse])
   }
 
   describe.each([
-    ["before", ComponentWatchBeforeEffect],
-    ["after", ComponentWatchAfterEffect],
+    ["before", ComponentScopedBeforeEffect],
+    ["after", ComponentScopedAfterEffect],
   ])("calls depending hook %s useEffect", (_, Component) => {
     describe.each([
       ["inline useScoped", useScopedInline],
@@ -117,13 +117,19 @@ describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321
   it.each([
     ["toString()", (value: unknown) => String(value)],
     ["toJSON()", (value: unknown) => JSON.stringify(value)],
-  ])("watches %s execution", (_, convert) => {
+  ])("reacts on %s call via `subscribe`", (_, convert) => {
     const Component: React.FC<{
       count: Impulse<number>
     }> = ({ count }) => {
-      const x = useScoped(() => convert(count))
+      const [value, setValue] = React.useState(() => convert(count))
 
-      return <span data-testid="result">{x}</span>
+      React.useEffect(() => {
+        return subscribe(() => {
+          setValue(convert(count))
+        })
+      }, [count])
+
+      return <span data-testid="result">{value}</span>
     }
 
     const count = Impulse.of(1)
@@ -149,16 +155,16 @@ describe("return the same component type from watch #322", () => {
 
   const StatefulInput: React.FC<{
     value: Impulse<string>
-  }> = scoped(({ value }) => (
+  }> = scoped(({ scope, value }) => (
     <StatelessInput
-      value={value.getValue()}
+      value={value.getValue(scope)}
       onChange={(nextValue) => value.setValue(nextValue)}
     />
   ))
 
   const Input = Object.assign(StatefulInput, { Stateless: StatelessInput })
 
-  it("watches the StatefulInput", () => {
+  it("scopes the StatefulInput", () => {
     const text = Impulse.of("hello")
     render(<Input value={text} />)
 
@@ -175,12 +181,12 @@ describe("return the same component type from watch #322", () => {
 describe("in StrictMode, fails due to unexpected .setValue during watch call #336", () => {
   const Button: React.FC<{
     count: Impulse<number>
-  }> = scoped(({ count }) => {
+  }> = scoped(({ scope, count }) => {
     React.useState(0)
 
     return (
       <button type="button" onClick={() => count.setValue((x) => x + 1)}>
-        {count.getValue()}
+        {count.getValue(scope)}
       </button>
     )
   })

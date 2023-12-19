@@ -22,7 +22,7 @@ export type Func<TArgs extends ReadonlyArray<unknown>, TResult = void> = (
   ...args: TArgs
 ) => TResult
 
-export const eq: Compare<unknown> = Object.is
+export const eq: Compare<unknown> = (left, right) => Object.is(left, right)
 
 export function noop(): void {
   // do nothing

@@ -13,7 +13,7 @@ describe("single Impulse", () => {
     return renderHook(
       (count: Impulse<number>) => {
         return useScopedCallback(
-          () => onCallback(count.getValue() * 2),
+          (scope) => onCallback(count.getValue(scope) * 2),
           [count],
         )
       },
@@ -148,9 +148,9 @@ describe("conditional Impulse", () => {
     return renderHook(
       (count: Impulse<number>) => {
         return useScopedCallback(
-          (isActive: boolean) => {
+          (scope, isActive: boolean) => {
             if (isActive) {
-              return count.getValue() * 2
+              return count.getValue(scope) * 2
             }
 
             return -1
@@ -236,7 +236,7 @@ describe("argument Impulse", () => {
   const setup = () => {
     return renderHook(() => {
       return useScopedCallback(
-        (count: Impulse<number>) => count.getValue() * 2,
+        (scope, count: Impulse<number>) => count.getValue(scope) * 2,
         [],
       )
     })

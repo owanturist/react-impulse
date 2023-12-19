@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { batch, Impulse, useScoped } from "../../src"
+import { batch, Impulse, useScoped, type Scope } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
@@ -14,8 +14,8 @@ describe.each([
     const impulse_2 = Impulse.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useScoped(() => impulse_1.getValue())
-      const counter_2 = useScoped(() => impulse_2.getValue())
+      const counter_1 = useScoped((scope) => impulse_1.getValue(scope))
+      const counter_2 = useScoped((scope) => impulse_2.getValue(scope))
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -40,14 +40,14 @@ describe.each([
     expect(onRender).toHaveBeenCalledOnce()
   })
 
-  it("re-renders once for useScoped calls", () => {
+  it("re-renders once for multiple useScoped", () => {
     const onRender = vi.fn()
     const impulse_1 = Impulse.of({ count: 1 })
     const impulse_2 = Impulse.of({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter_1 = useScoped(() => impulse_1.getValue())
-      const counter_2 = useScoped(() => impulse_2.getValue())
+      const counter_1 = useScoped((scope) => impulse_1.getValue(scope))
+      const counter_2 = useScoped((scope) => impulse_2.getValue(scope))
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -90,11 +90,9 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const { first: impulse_1, second: impulse_2 } = useScoped(() =>
-        impulse.getValue(),
-      )
-      const counter_1 = useScoped(() => impulse_1.getValue())
-      const counter_2 = useScoped(() => impulse_2.getValue())
+      const acc = useScoped((scope) => impulse.getValue(scope))
+      const counter_1 = useScoped((scope) => acc.first.getValue(scope))
+      const counter_2 = useScoped((scope) => acc.second.getValue(scope))
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -137,7 +135,7 @@ describe.each([
     expect(onRender).toHaveBeenCalledOnce()
   })
 
-  it("re-renders once for useScoped calls", () => {
+  it("re-renders once for multiple useScoped", () => {
     const onRender = vi.fn()
     const impulse = Impulse.of({
       first: Impulse.of({ count: 1 }),
@@ -145,11 +143,9 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const { first: impulse_1, second: impulse_2 } = useScoped(() =>
-        impulse.getValue(),
-      )
-      const counter_1 = useScoped(() => impulse_1.getValue())
-      const counter_2 = useScoped(() => impulse_2.getValue())
+      const acc = useScoped((scope) => impulse.getValue(scope))
+      const counter_1 = useScoped((scope) => acc.first.getValue(scope))
+      const counter_2 = useScoped((scope) => acc.second.getValue(scope))
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -209,8 +205,8 @@ describe.each([
     expectedFactoryCallsForMultiple: 3,
     expectedFactoryCallsForNested: 2,
     execute: (cb: VoidFunction) => cb(),
-    useCount: (factory: () => number) => {
-      return useScoped(() => factory())
+    useCount: (factory: (scope: Scope) => number) => {
+      return useScoped((scope) => factory(scope))
     },
   },
   {
@@ -218,8 +214,8 @@ describe.each([
     expectedFactoryCallsForMultiple: 2,
     expectedFactoryCallsForNested: 2,
     execute: batch,
-    useCount: (factory: () => number) => {
-      return useScoped(() => factory())
+    useCount: (factory: (scope: Scope) => number) => {
+      return useScoped((scope) => factory(scope))
     },
   },
   {
@@ -227,8 +223,8 @@ describe.each([
     expectedFactoryCallsForMultiple: 2,
     expectedFactoryCallsForNested: 1,
     execute: (cb: VoidFunction) => cb(),
-    useCount: (factory: () => number) => {
-      return useScoped(React.useCallback(() => factory(), [factory]))
+    useCount: (factory: (scope: Scope) => number) => {
+      return useScoped(React.useCallback((scope) => factory(scope), [factory]))
     },
   },
   {
@@ -236,8 +232,8 @@ describe.each([
     expectedFactoryCallsForMultiple: 1,
     expectedFactoryCallsForNested: 1,
     execute: batch,
-    useCount: (factory: () => number) => {
-      return useScoped(React.useCallback(() => factory(), [factory]))
+    useCount: (factory: (scope: Scope) => number) => {
+      return useScoped(React.useCallback((scope) => factory(scope), [factory]))
     },
   },
 ])(
@@ -254,11 +250,12 @@ describe.each([
         const onRender = vi.fn()
         const first = Impulse.of({ count: 1 })
         const second = Impulse.of({ count: 2 })
-        const factory = () => {
+        const factory = (scope: Scope) => {
           spy()
 
           return (
-            first.getValue(Counter.getCount) + second.getValue(Counter.getCount)
+            first.getValue(scope, Counter.getCount) +
+            second.getValue(scope, Counter.getCount)
           )
         }
 
@@ -342,13 +339,14 @@ describe.each([
           first: Impulse.of({ count: 1 }),
           second: Impulse.of({ count: 2 }),
         })
-        const factory = () => {
+        const factory = (scope: Scope) => {
           spy()
 
           return impulse.getValue(
-            ({ first, second }) =>
-              first.getValue(Counter.getCount) +
-              second.getValue(Counter.getCount),
+            scope,
+            ({ first, second }, localScope) =>
+              first.getValue(localScope, Counter.getCount) +
+              second.getValue(localScope, Counter.getCount),
           )
         }
 

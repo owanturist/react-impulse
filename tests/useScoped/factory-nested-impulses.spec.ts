@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { batch, Impulse, useScoped } from "../../src"
+import { batch, Impulse, type Scope, useScoped } from "../../src"
 import {
   Counter,
   type WithFirst,
@@ -11,29 +11,32 @@ import {
 } from "../common"
 
 describe("nested factory", () => {
-  const factory = ({ impulse }: WithImpulse<WithFirst & WithSecond>) => {
-    const { first, second } = impulse.getValue()
+  const factory = (
+    scope: Scope,
+    { impulse }: WithImpulse<WithFirst & WithSecond>,
+  ) => {
+    const { first, second } = impulse.getValue(scope)
 
-    return Counter.merge(first.getValue(), second.getValue())
+    return Counter.merge(first.getValue(scope), second.getValue(scope))
   }
 
   describe.each([
     [
       "without deps",
       ({ impulse }: WithImpulse<WithFirst & WithSecond>) => {
-        return useScoped(() => factory({ impulse }))
+        return useScoped((scope) => factory(scope, { impulse }))
       },
     ],
     [
       "without comparator",
       ({ impulse }: WithImpulse<WithFirst & WithSecond>) => {
-        return useScoped(() => factory({ impulse }), [impulse])
+        return useScoped((scope) => factory(scope, { impulse }), [impulse])
       },
     ],
     [
       "with inline comparator",
       ({ impulse }: WithImpulse<WithFirst & WithSecond>) => {
-        return useScoped(() => factory({ impulse }), [impulse], {
+        return useScoped((scope) => factory(scope, { impulse }), [impulse], {
           compare: (prev, next) => Counter.compare(prev, next),
         })
       },
@@ -41,7 +44,7 @@ describe("nested factory", () => {
     [
       "with memoized comparator",
       ({ impulse }: WithImpulse<WithFirst & WithSecond>) => {
-        return useScoped(() => factory({ impulse }), [impulse], {
+        return useScoped((scope) => factory(scope, { impulse }), [impulse], {
           compare: Counter.compare,
         })
       },
@@ -122,53 +125,66 @@ describe("nested factory", () => {
 })
 
 describe("triggering factory for nested impulses vs single impulse", () => {
-  const factorySingle = ({ impulse, spy }: WithImpulse & WithSpy) => {
+  const factorySingle = (
+    scope: Scope,
+    { impulse, spy }: WithImpulse & WithSpy,
+  ) => {
     spy()
 
-    return impulse.getValue()
+    return impulse.getValue(scope)
   }
 
-  const factoryNested = ({
-    spy,
-    impulse,
-  }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy) => {
+  const factoryNested = (
+    scope: Scope,
+    { spy, impulse }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy,
+  ) => {
     spy()
 
-    const { first, second, third } = impulse.getValue()
+    const { first, second, third } = impulse.getValue(scope)
 
-    return Counter.merge(first.getValue(), second.getValue(), third.getValue())
+    return Counter.merge(
+      first.getValue(scope),
+      second.getValue(scope),
+      third.getValue(scope),
+    )
   }
 
   describe.each([
     [
       "without deps",
       ({ impulse, spy }: WithImpulse & WithSpy) => {
-        return useScoped(() => factorySingle({ impulse, spy }))
+        return useScoped((scope) => factorySingle(scope, { impulse, spy }))
       },
       ({
         spy,
         impulse,
       }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy) => {
-        return useScoped(() => factoryNested({ impulse, spy }))
+        return useScoped((scope) => factoryNested(scope, { impulse, spy }))
       },
     ],
     [
       "without comparator",
       ({ impulse, spy }: WithImpulse & WithSpy) => {
-        return useScoped(() => factorySingle({ impulse, spy }), [impulse, spy])
+        return useScoped(
+          (scope) => factorySingle(scope, { impulse, spy }),
+          [impulse, spy],
+        )
       },
       ({
         spy,
         impulse,
       }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy) => {
-        return useScoped(() => factoryNested({ impulse, spy }), [impulse, spy])
+        return useScoped(
+          (scope) => factoryNested(scope, { impulse, spy }),
+          [impulse, spy],
+        )
       },
     ],
     [
       "with inline comparator",
       ({ impulse, spy }: WithImpulse & WithSpy) => {
         return useScoped(
-          () => factorySingle({ impulse, spy }),
+          (scope) => factorySingle(scope, { impulse, spy }),
           [impulse, spy],
           {
             compare: (prev, next) => Counter.compare(prev, next),
@@ -180,7 +196,7 @@ describe("triggering factory for nested impulses vs single impulse", () => {
         impulse,
       }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy) => {
         return useScoped(
-          () => factoryNested({ impulse, spy }),
+          (scope) => factoryNested(scope, { impulse, spy }),
           [impulse, spy],
           {
             compare: (prev, next) => Counter.compare(prev, next),
@@ -192,7 +208,7 @@ describe("triggering factory for nested impulses vs single impulse", () => {
       "with memoized comparator",
       ({ impulse, spy }: WithImpulse & WithSpy) => {
         return useScoped(
-          () => factorySingle({ impulse, spy }),
+          (scope) => factorySingle(scope, { impulse, spy }),
           [impulse, spy],
           { compare: Counter.compare },
         )
@@ -202,7 +218,7 @@ describe("triggering factory for nested impulses vs single impulse", () => {
         impulse,
       }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy) => {
         return useScoped(
-          () => factoryNested({ impulse, spy }),
+          (scope) => factoryNested(scope, { impulse, spy }),
           [impulse, spy],
           { compare: Counter.compare },
         )

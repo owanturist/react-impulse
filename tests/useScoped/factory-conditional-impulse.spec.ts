@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, useScoped } from "../../src"
+import { Impulse, type Scope, useScoped } from "../../src"
 import {
   Counter,
   type WithIsActive,
@@ -8,14 +8,13 @@ import {
   type WithSpy,
 } from "../common"
 
-const factory = ({
-  impulse,
-  isActive,
-  spy,
-}: WithImpulse & WithIsActive & Partial<WithSpy>) => {
+const factory = (
+  scope: Scope,
+  { impulse, isActive, spy }: WithImpulse & WithIsActive & Partial<WithSpy>,
+) => {
   spy?.()
 
-  return isActive ? impulse.getValue() : { count: -1 }
+  return isActive ? impulse.getValue(scope) : { count: -1 }
 }
 
 describe.each([
@@ -26,7 +25,7 @@ describe.each([
       isActive,
       spy,
     }: WithImpulse & WithIsActive & Partial<WithSpy>) => {
-      return useScoped(() => factory({ impulse, isActive, spy }))
+      return useScoped((scope) => factory(scope, { impulse, isActive, spy }))
     },
   ],
   [
@@ -37,7 +36,7 @@ describe.each([
       spy,
     }: WithImpulse & WithIsActive & Partial<WithSpy>) => {
       return useScoped(
-        () => factory({ impulse, isActive, spy }),
+        (scope) => factory(scope, { impulse, isActive, spy }),
         [impulse, isActive, spy],
       )
     },
@@ -50,7 +49,7 @@ describe.each([
       spy,
     }: WithImpulse & WithIsActive & Partial<WithSpy>) => {
       return useScoped(
-        () => factory({ impulse, isActive, spy }),
+        (scope) => factory(scope, { impulse, isActive, spy }),
         [impulse, isActive, spy],
         {
           compare: (prev, next) => Counter.compare(prev, next),
@@ -66,7 +65,7 @@ describe.each([
       spy,
     }: WithImpulse & WithIsActive & Partial<WithSpy>) => {
       return useScoped(
-        () => factory({ impulse, isActive, spy }),
+        (scope) => factory(scope, { impulse, isActive, spy }),
         [impulse, isActive, spy],
         { compare: Counter.compare },
       )

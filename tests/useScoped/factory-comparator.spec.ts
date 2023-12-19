@@ -1,9 +1,10 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, useScoped } from "../../src"
+import { Impulse, type Scope, useScoped } from "../../src"
 import { Counter, type WithCompare, type WithImpulse } from "../common"
 
-const factory = ({ impulse }: WithImpulse) => impulse.getValue()
+const factory = (scope: Scope, { impulse }: WithImpulse) =>
+  impulse.getValue(scope)
 
 describe.each([
   [
@@ -11,7 +12,7 @@ describe.each([
     ({ impulse, compare }: WithImpulse & WithCompare) => {
       const cmp = compare ?? Counter.compare
 
-      return useScoped(() => factory({ impulse }), [impulse], {
+      return useScoped((scope) => factory(scope, { impulse }), [impulse], {
         compare: (prev, next) => cmp(prev, next),
       })
     },
@@ -19,7 +20,7 @@ describe.each([
   [
     "memoized",
     ({ impulse, compare }: WithImpulse & WithCompare) => {
-      return useScoped(() => factory({ impulse }), [impulse], {
+      return useScoped((scope) => factory(scope, { impulse }), [impulse], {
         compare: compare ?? Counter.compare,
       })
     },

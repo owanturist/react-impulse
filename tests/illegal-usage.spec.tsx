@@ -31,14 +31,14 @@ describe("calling Impulse.of()", () => {
       "useScopedMemo",
       "You should not call Impulse.of inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
       () => {
-        return useScopedMemo(() => Impulse.of(1).getValue(), [])
+        return useScopedMemo((scope) => Impulse.of(1).getValue(scope), [])
       },
     ],
     [
       "useScoped",
       "You should not call Impulse.of inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse.of creates a new Impulse.",
       () => {
-        return useScoped(() => Impulse.of(1).getValue())
+        return useScoped((scope) => Impulse.of(1).getValue(scope))
       },
     ],
   ])("warns when called inside %s", (_, message, useHook) => {
@@ -65,29 +65,31 @@ describe("calling Impulse.of()", () => {
     )
   })
 
-  it.each([
+  describe.each([
     ["useScopedEffect", useScopedEffect],
     ["useScopedLayoutEffect", useScopedLayoutEffect],
-  ])("fine when called inside %s", (_, useScopedEffectHook) => {
-    const { result } = renderHook(() => {
-      const [state, setState] = React.useState(Impulse.of(1))
+  ])("when called inside %s", (_, useScopedEffectHook) => {
+    it("works fine, does not print an error", ({ scope }) => {
+      const { result } = renderHook(() => {
+        const [state, setState] = React.useState(Impulse.of(1))
 
-      useScopedEffectHook(() => {
-        setState(Impulse.of(10))
-      }, [])
+        useScopedEffectHook(() => {
+          setState(Impulse.of(10))
+        }, [])
 
-      return state
+        return state
+      })
+
+      expect(console$error).not.toHaveBeenCalled()
+      expect(result.current.getValue(scope)).toBe(10)
     })
-
-    expect(console$error).not.toHaveBeenCalled()
-    expect(result.current.getValue()).toBe(10)
   })
 
   it("fine when called inside scoped()", () => {
-    const Component = scoped(() => {
+    const Component = scoped(({ scope }) => {
       const [state] = React.useState(() => Impulse.of(20))
 
-      return <div data-testid="count">{state.getValue()}</div>
+      return <div data-testid="count">{state.getValue(scope)}</div>
     })
 
     render(<Component />)
@@ -103,14 +105,17 @@ describe("calling Impulse#clone()", () => {
       "useScopedMemo",
       "You should not call Impulse#clone inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
-        return useScopedMemo(() => impulse.clone().getValue(), [impulse])
+        return useScopedMemo(
+          (scope) => impulse.clone().getValue(scope),
+          [impulse],
+        )
       },
     ],
     [
       "useScoped",
       "You should not call Impulse#clone inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#clone clones an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
-        return useScoped(() => impulse.clone().getValue())
+        return useScoped((scope) => impulse.clone().getValue(scope))
       },
     ],
   ])("warn when called inside %s", (_, message, useHook) => {
@@ -149,7 +154,7 @@ describe("calling Impulse#clone()", () => {
     ["useScopedEffect", useScopedEffect],
     ["useScopedLayoutEffect", useScopedLayoutEffect],
   ])("when called inside %s", (_, useScopedEffectHook) => {
-    it("works fine, does not print an error", () => {
+    it("works fine, does not print an error", ({ scope }) => {
       const initial = Impulse.of(1)
       const { result } = renderHook(
         (impulse) => {
@@ -168,17 +173,17 @@ describe("calling Impulse#clone()", () => {
 
       expect(console$error).not.toHaveBeenCalled()
       expect(result.current).not.toBe(initial)
-      expect(result.current.getValue()).toBe(1)
+      expect(result.current.getValue(scope)).toBe(1)
     })
   })
 
   it("fine when called inside scoped()", () => {
     const Component = scoped<{
       impulse: Impulse<number>
-    }>(({ impulse }) => {
+    }>(({ scope, impulse }) => {
       const [state] = React.useState(() => impulse.clone())
 
-      return <div data-testid="count">{state.getValue()}</div>
+      return <div data-testid="count">{state.getValue(scope)}</div>
     })
 
     render(<Component impulse={Impulse.of(20)} />)
@@ -194,21 +199,24 @@ describe("calling Impulse#setValue()", () => {
       "useScopedMemo",
       "You should not call Impulse#setValue inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
-        return useScopedMemo(() => {
-          impulse.setValue(3)
+        return useScopedMemo(
+          (scope) => {
+            impulse.setValue(3)
 
-          return impulse.getValue()
-        }, [impulse])
+            return impulse.getValue(scope)
+          },
+          [impulse],
+        )
       },
     ],
     [
       "useScoped",
       "You should not call Impulse#setValue inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
-        return useScoped(() => {
+        return useScoped((scope) => {
           impulse.setValue(3)
 
-          return impulse.getValue()
+          return impulse.getValue(scope)
         })
       },
     ],
@@ -236,7 +244,7 @@ describe("calling Impulse#setValue()", () => {
     ["useScopedEffect", useScopedEffect],
     ["useScopedLayoutEffect", useScopedLayoutEffect],
   ])("fine when called inside %s", (_, useScopedEffectHook) => {
-    it("works fine, does not print an error", () => {
+    it("works fine, does not print an error", ({ scope }) => {
       const { result } = renderHook(
         (impulse) => {
           useScopedEffectHook(() => {
@@ -251,11 +259,11 @@ describe("calling Impulse#setValue()", () => {
       )
 
       expect(console$error).not.toHaveBeenCalled()
-      expect(result.current.getValue()).toBe(2)
+      expect(result.current.getValue(scope)).toBe(2)
     })
   })
 
-  it("fine when called inside subscribe()", () => {
+  it("fine when called inside subscribe()", ({ scope }) => {
     const spy = vi.fn()
     const impulse = Impulse.of(1)
 
@@ -266,16 +274,16 @@ describe("calling Impulse#setValue()", () => {
 
     expect(spy).toHaveBeenCalledOnce()
     expect(console$error).not.toHaveBeenCalled()
-    expect(impulse.getValue()).toBe(2)
+    expect(impulse.getValue(scope)).toBe(2)
   })
 
   it("warns when called inside scoped()", () => {
     const Component = scoped<{
       impulse: Impulse<number>
-    }>(({ impulse }) => {
+    }>(({ scope, impulse }) => {
       impulse.setValue(10)
 
-      return <div data-testid="count">{impulse.getValue()}</div>
+      return <div data-testid="count">{impulse.getValue(scope)}</div>
     })
 
     render(<Component impulse={Impulse.of(20)} />)

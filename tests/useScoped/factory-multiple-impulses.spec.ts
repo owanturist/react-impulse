@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, useScoped, batch } from "../../src"
+import { Impulse, useScoped, batch, type Scope } from "../../src"
 import {
   Counter,
   type WithImpulse,
@@ -11,37 +11,48 @@ import {
 } from "../common"
 
 describe("multiple factory", () => {
-  const factory = ({ first, second }: WithFirst & WithSecond) => {
-    return Counter.merge(first.getValue(), second.getValue())
+  const factory = (scope: Scope, { first, second }: WithFirst & WithSecond) => {
+    return Counter.merge(first.getValue(scope), second.getValue(scope))
   }
 
   describe.each([
     [
       "without deps",
       ({ first, second }: WithFirst & WithSecond) => {
-        return useScoped(() => factory({ first, second }))
+        return useScoped((scope) => factory(scope, { first, second }))
       },
     ],
     [
       "without comparator",
       ({ first, second }: WithFirst & WithSecond) => {
-        return useScoped(() => factory({ first, second }), [first, second])
+        return useScoped(
+          (scope) => factory(scope, { first, second }),
+          [first, second],
+        )
       },
     ],
     [
       "with inline comparator",
       ({ first, second }: WithFirst & WithSecond) => {
-        return useScoped(() => factory({ first, second }), [first, second], {
-          compare: (prev, next) => Counter.compare(prev, next),
-        })
+        return useScoped(
+          (scope) => factory(scope, { first, second }),
+          [first, second],
+          {
+            compare: (prev, next) => Counter.compare(prev, next),
+          },
+        )
       },
     ],
     [
       "with memoized comparator",
       ({ first, second }: WithFirst & WithSecond) => {
-        return useScoped(() => factory({ first, second }), [first, second], {
-          compare: Counter.compare,
-        })
+        return useScoped(
+          (scope) => factory(scope, { first, second }),
+          [first, second],
+          {
+            compare: Counter.compare,
+          },
+        )
       },
     ],
   ])("%s", (__, useHook) => {
@@ -92,28 +103,33 @@ describe("multiple factory", () => {
 })
 
 describe("triggering factory for multiple impulses vs single impulse", () => {
-  const factorySingle = ({ impulse, spy }: WithImpulse & WithSpy) => {
+  const factorySingle = (
+    scope: Scope,
+    { impulse, spy }: WithImpulse & WithSpy,
+  ) => {
     spy()
 
-    return impulse.getValue()
+    return impulse.getValue(scope)
   }
 
-  const factoryMultiple = ({
-    spy,
-    first,
-    second,
-    third,
-  }: WithFirst & WithSecond & WithThird & WithSpy) => {
+  const factoryMultiple = (
+    scope: Scope,
+    { spy, first, second, third }: WithFirst & WithSecond & WithThird & WithSpy,
+  ) => {
     spy()
 
-    return Counter.merge(first.getValue(), second.getValue(), third.getValue())
+    return Counter.merge(
+      first.getValue(scope),
+      second.getValue(scope),
+      third.getValue(scope),
+    )
   }
 
   describe.each([
     [
       "without deps",
       ({ impulse, spy }: WithImpulse & WithSpy) => {
-        return useScoped(() => factorySingle({ impulse, spy }))
+        return useScoped((scope) => factorySingle(scope, { impulse, spy }))
       },
       ({
         first,
@@ -121,13 +137,18 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
         third,
         spy,
       }: WithFirst & WithSecond & WithThird & WithSpy) => {
-        return useScoped(() => factoryMultiple({ first, second, third, spy }))
+        return useScoped((scope) =>
+          factoryMultiple(scope, { first, second, third, spy }),
+        )
       },
     ],
     [
       "without comparator",
       ({ impulse, spy }: WithImpulse & WithSpy) => {
-        return useScoped(() => factorySingle({ impulse, spy }), [impulse, spy])
+        return useScoped(
+          (scope) => factorySingle(scope, { impulse, spy }),
+          [impulse, spy],
+        )
       },
       ({
         first,
@@ -136,7 +157,7 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
         spy,
       }: WithFirst & WithSecond & WithThird & WithSpy) => {
         return useScoped(
-          () => factoryMultiple({ first, second, third, spy }),
+          (scope) => factoryMultiple(scope, { first, second, third, spy }),
           [first, second, third, spy],
         )
       },
@@ -145,7 +166,7 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
       "with inline comparator",
       ({ impulse, spy }: WithImpulse & WithSpy) => {
         return useScoped(
-          () => factorySingle({ impulse, spy }),
+          (scope) => factorySingle(scope, { impulse, spy }),
           [impulse, spy],
           {
             compare: (prev, next) => Counter.compare(prev, next),
@@ -159,7 +180,7 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
         spy,
       }: WithFirst & WithSecond & WithThird & WithSpy) => {
         return useScoped(
-          () => factoryMultiple({ first, second, third, spy }),
+          (scope) => factoryMultiple(scope, { first, second, third, spy }),
           [first, second, third, spy],
           {
             compare: (prev, next) => Counter.compare(prev, next),
@@ -171,7 +192,7 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
       "with memoized comparator",
       ({ impulse, spy }: WithImpulse & WithSpy) => {
         return useScoped(
-          () => factorySingle({ impulse, spy }),
+          (scope) => factorySingle(scope, { impulse, spy }),
           [impulse, spy],
           {
             compare: Counter.compare,
@@ -185,7 +206,7 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
         spy,
       }: WithFirst & WithSecond & WithThird & WithSpy) => {
         return useScoped(
-          () => factoryMultiple({ first, second, third, spy }),
+          (scope) => factoryMultiple(scope, { first, second, third, spy }),
           [first, second, third, spy],
           { compare: Counter.compare },
         )
@@ -218,7 +239,7 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
       }
     }
 
-    it("calls factorys the same amount when initiates", () => {
+    it("calls factories the same amount when initiates", () => {
       const { spySingle, spyMultiple, resultSingle, resultMultiple } = setup()
 
       expect(resultSingle.current).toStrictEqual({ count: 1 })
@@ -226,7 +247,7 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
       expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
     })
 
-    it("calls factorys the same amount when only first and second", () => {
+    it("calls factories the same amount when only first and second", () => {
       const {
         first,
         second,
@@ -247,7 +268,7 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
       expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
     })
 
-    it("calls factorys the same amount when only first and third", () => {
+    it("calls factories the same amount when only first and third", () => {
       const {
         first,
         third,
@@ -268,7 +289,7 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
       expect(spyMultiple).toHaveBeenCalledTimes(spySingle.mock.calls.length)
     })
 
-    it("calls factorys the same amount when first, second and third", () => {
+    it("calls factories the same amount when first, second and third", () => {
       const {
         first,
         second,

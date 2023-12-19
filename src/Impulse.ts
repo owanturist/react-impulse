@@ -262,13 +262,13 @@ class DirectImpulse<T> extends Impulse<T> {
   }
 
   protected _setter(value: T): boolean {
-    if (this._compare(this._value, value)) {
-      return false
+    const isDifferent = !this._compare(this._value, value)
+
+    if (isDifferent) {
+      this._value = value
     }
 
-    this._value = value
-
-    return true
+    return isDifferent
   }
 }
 

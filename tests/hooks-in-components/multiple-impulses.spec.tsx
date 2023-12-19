@@ -9,8 +9,8 @@ describe("multiple impulses", () => {
     password: Impulse<string>
     onRender: VoidFunction
   }> = ({ email: emailImpulse, password: passwordImpulse, onRender }) => {
-    const email = useScoped(() => emailImpulse.getValue())
-    const password = useScoped(() => passwordImpulse.getValue())
+    const email = useScoped((scope) => emailImpulse.getValue(scope))
+    const password = useScoped((scope) => passwordImpulse.getValue(scope))
 
     return (
       <React.Profiler id="test" onRender={onRender}>

@@ -11,7 +11,7 @@ describe("single impulse", () => {
     counter: Impulse<Counter>
     onRender: VoidFunction
   }> = ({ counter, onRender }) => {
-    const { count } = useScoped(() => counter.getValue())
+    const { count } = useScoped((scope) => counter.getValue(scope))
 
     return (
       <React.Profiler id="test" onRender={onRender}>

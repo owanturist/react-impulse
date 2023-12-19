@@ -24,7 +24,7 @@ export const CounterComponent: React.FC<{
   onRender: VoidFunction
 }> = React.memo(
   ({ count: countImpulse, onRender }) => {
-    const count = useScoped(() => countImpulse.getValue())
+    const count = useScoped((scope) => countImpulse.getValue(scope))
 
     return (
       <React.Profiler id="test" onRender={onRender}>

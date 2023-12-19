@@ -6,7 +6,9 @@ export {
   type ReadonlyImpulse,
   Impulse,
 } from "./Impulse"
+export type { Scope } from "./Scope"
 export { batch } from "./batch"
+export { batch as tap } from "./batch"
 export { subscribe } from "./subscribe"
 export {
   type PropsWithScope,

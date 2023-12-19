@@ -57,7 +57,9 @@ export function scoped<TProps>(
   component: FC<PropsWithScope<TProps>>,
 ): FC<TProps> {
   const ComponentWithScope: FC<TProps> = (props, ctx: unknown) => {
-    return renderWithScope(useScope(), component, props, ctx)
+    const getScope = useScope()
+
+    return renderWithScope(getScope(), component, props, ctx)
   }
 
   ComponentWithScope.displayName = `ComponentWithScope${
@@ -78,7 +80,9 @@ const forwardRef = <TRef, TProps>(
   render: ForwardRefRenderFunction<TRef, PropsWithScope<TProps>>,
 ): ForwardRefExoticComponent<ForwardedPropsWithoutScope<TRef, TProps>> => {
   return React_forwardRef<TRef, PropsWithoutScope<TProps>>((props, ref) => {
-    return renderWithScope(useScope(), render, props as TProps, ref)
+    const getScope = useScope()
+
+    return renderWithScope(getScope(), render, props as TProps, ref)
   })
 }
 

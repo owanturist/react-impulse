@@ -14,7 +14,7 @@ describe("factory no impulses", () => {
     [
       "memoized",
       () => {
-        return useScoped(useCallback(() => 1, []))
+        return useScoped(() => 1, [])
       },
     ],
   ])("returns %s factory result", (_, useHook) => {
