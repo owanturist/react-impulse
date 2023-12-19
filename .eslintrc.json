@@ -9,6 +9,7 @@
   },
   "extends": ["eslint:recommended", "plugin:import/recommended"],
   "rules": {
+    // TODO add custom scope rules
     "padding-line-between-statements": [
       "error",
       {
@@ -275,6 +276,7 @@
         "plugin:jest-dom/recommended"
       ],
       "rules": {
+        "jest/no-done-callback": "off",
         "jest/no-deprecated-functions": "off",
         "jest/no-duplicate-hooks": "warn",
         "jest/no-if": "error",
