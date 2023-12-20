@@ -894,6 +894,7 @@ ESLint can also help validate unnecessary and abusive hooks/HOCs usage:
 [scope]: #scope
 [scoped]: #scoped
 [batch]: #batch
+[subscribe]: #subscribe
 [impulse_options]: #interface-impulseoptions
 [transmitting_impulse_options]: #interface-transmittingimpulseoptions
 [use_scoped_options]: #interface-useScopedoptions
