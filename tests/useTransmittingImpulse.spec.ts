@@ -409,10 +409,7 @@ describe("replacing getter", () => {
 
     const { result, rerender } = renderHook(
       (count) => {
-        return useTransmittingImpulse(
-          (localScope) => count.getValue(localScope),
-          [count],
-        )
+        return useTransmittingImpulse((scope) => count.getValue(scope), [count])
       },
       {
         initialProps: impulse_1,

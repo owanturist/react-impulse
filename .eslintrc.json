@@ -155,7 +155,7 @@
         "no-unused-vars": "off",
 
         // Typescript Eslint
-        "@typescript-eslint/no-shadow": "error",
+        "@typescript-eslint/no-shadow": ["error", { "allow": ["scope"] }],
         "@typescript-eslint/array-type": [
           "error",
           {

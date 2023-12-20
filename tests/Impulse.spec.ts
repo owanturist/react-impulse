@@ -135,9 +135,7 @@ describe("Impulse.transmit(getter, options?)", () => {
   it("reads the value from the source", ({ scope }) => {
     const initial = { count: 0 }
     const source = Impulse.of(initial)
-    const impulse = Impulse.transmit((localScope) =>
-      source.getValue(localScope),
-    )
+    const impulse = Impulse.transmit((scope) => source.getValue(scope))
 
     expect(impulse.getValue(scope)).toBe(initial)
     expect(impulse.getValue(scope)).toStrictEqual({ count: 0 })
@@ -150,16 +148,14 @@ describe("Impulse.transmit(getter, options?)", () => {
 
   it("subscribes to Impulse source", ({ scope }) => {
     const source = Impulse.of({ count: 0 }, { compare: Counter.compare })
-    const impulse = Impulse.transmit((localScope) =>
-      source.getValue(localScope),
-    )
+    const impulse = Impulse.transmit((scope) => source.getValue(scope))
     const spy = vi.fn()
 
     expect(source).toHaveEmittersSize(0)
     expect(impulse).toHaveEmittersSize(0)
 
-    const unsubscribe = subscribe((localScope) => {
-      spy(impulse.getValue(localScope))
+    const unsubscribe = subscribe((scope) => {
+      spy(impulse.getValue(scope))
     })
 
     expect(source).toHaveEmittersSize(1)
@@ -212,12 +208,9 @@ describe("Impulse.transmit(getter, options?)", () => {
 
   it("does not call compare on first getValue", ({ scope }) => {
     const source = Impulse.of({ count: 0 })
-    const impulse = Impulse.transmit(
-      (localScope) => source.getValue(localScope),
-      {
-        compare: Counter.compare,
-      },
-    )
+    const impulse = Impulse.transmit((scope) => source.getValue(scope), {
+      compare: Counter.compare,
+    })
 
     impulse.getValue(scope)
     expect(Counter.compare).not.toHaveBeenCalled()
@@ -225,9 +218,7 @@ describe("Impulse.transmit(getter, options?)", () => {
 
   it("calls compare on subsequent calls", ({ scope }) => {
     const source = Impulse.of({ count: 0 })
-    const impulse = Impulse.transmit((localScope) =>
-      source.getValue(localScope),
-    )
+    const impulse = Impulse.transmit((scope) => source.getValue(scope))
 
     impulse.getValue(scope)
     impulse.getValue(scope)
@@ -240,8 +231,8 @@ describe("Impulse.transmit(getter, options?)", () => {
 
   it("assigns Object.is as default compare", ({ scope }) => {
     const source = Impulse.of(0)
-    const impulse = Impulse.transmit((localScope) => ({
-      count: source.getValue(localScope),
+    const impulse = Impulse.transmit((scope) => ({
+      count: source.getValue(scope),
     }))
 
     const value_1 = impulse.getValue(scope)
@@ -255,7 +246,7 @@ describe("Impulse.transmit(getter, options?)", () => {
   it("assigns Object.is by `null` as compare", ({ scope }) => {
     const source = Impulse.of(0)
     const impulse = Impulse.transmit(
-      (localScope) => ({ count: source.getValue(localScope) }),
+      (scope) => ({ count: source.getValue(scope) }),
       {
         compare: null,
       },
@@ -272,7 +263,7 @@ describe("Impulse.transmit(getter, options?)", () => {
   it("assigns custom function as compare", ({ scope }) => {
     const source = Impulse.of(0)
     const impulse = Impulse.transmit(
-      (localScope) => ({ count: source.getValue(localScope) }),
+      (scope) => ({ count: source.getValue(scope) }),
       {
         compare: Counter.compare,
       },
@@ -342,7 +333,7 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
   it("assigns custom function as compare", ({ scope }) => {
     const source = Impulse.of({ count: 0 })
     const impulse = Impulse.transmit(
-      (localScope) => source.getValue(localScope),
+      (scope) => source.getValue(scope),
       (counter) => source.setValue(counter),
       {
         compare: Counter.compare,
@@ -616,14 +607,14 @@ describe.each([
         impulse_2.getValue(scope).name,
       )
       expect(
-        impulse_1.getValue(scope, ({ count, name }, localScope) => ({
-          count: count.getValue(localScope),
-          name: name.getValue(localScope),
+        impulse_1.getValue(scope, ({ count, name }, scope) => ({
+          count: count.getValue(scope),
+          name: name.getValue(scope),
         })),
       ).toStrictEqual(
-        impulse_2.getValue(scope, ({ count, name }, localScope) => ({
-          count: count.getValue(localScope),
-          name: name.getValue(localScope),
+        impulse_2.getValue(scope, ({ count, name }, scope) => ({
+          count: count.getValue(scope),
+          name: name.getValue(scope),
         })),
       )
 

@@ -134,7 +134,7 @@ describe("with lazy initial value", () => {
     const impulse = Impulse.of(1)
 
     const { result } = renderHook(() =>
-      useImpulse((localScope) => impulse.getValue(localScope).toFixed(2)),
+      useImpulse((scope) => impulse.getValue(scope).toFixed(2)),
     )
 
     expect(result.current.getValue(scope)).toBe("1.00")
