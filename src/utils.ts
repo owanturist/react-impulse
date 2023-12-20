@@ -38,9 +38,10 @@ export const useIsomorphicLayoutEffect =
   /* c8 ignore next */
   typeof window === "undefined" ? useEffect : useLayoutEffect
 
-export function useEvent<TArgs extends ReadonlyArray<unknown>, TResult>(
-  handler: Func<TArgs, TResult>,
-): Func<TArgs, TResult> {
+export function useStableCallback<
+  TArgs extends ReadonlyArray<unknown>,
+  TResult,
+>(handler: Func<TArgs, TResult>): Func<TArgs, TResult> {
   const handlerRef = useRef<Func<TArgs, TResult>>(null as never)
 
   useIsomorphicLayoutEffect(() => {

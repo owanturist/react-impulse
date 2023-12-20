@@ -1,5 +1,5 @@
 import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
-import { type Compare, eq, useEvent } from "./utils"
+import { type Compare, eq, useStableCallback } from "./utils"
 import type { Scope } from "./Scope"
 import { useScope } from "./useScope"
 import { defineExecutionContext } from "./validation"
@@ -35,7 +35,7 @@ export function useScoped<TResult>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies ?? [factory],
   )
-  const value = useScope(transform, useEvent(compare ?? eq))
+  const value = useScope(transform, useStableCallback(compare ?? eq))
 
   useDebugValue(value)
 

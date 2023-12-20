@@ -9,7 +9,7 @@ import type { Scope } from "./Scope"
 import {
   noop,
   eq,
-  useEvent,
+  useStableCallback,
   usePermanent,
   useIsomorphicLayoutEffect,
   isFunction,
@@ -63,8 +63,8 @@ export function useTransmittingImpulse<T>(
     ? [rest[0], rest[1]]
     : [noop, rest[0]]
 
-  const stableSetter = useEvent(setter)
-  const stableCompare = useEvent(options?.compare ?? eq)
+  const stableSetter = useStableCallback(setter)
+  const stableCompare = useStableCallback(options?.compare ?? eq)
   const impulse = usePermanent(() => {
     return Impulse.transmit(getter, stableSetter, {
       compare: stableCompare,

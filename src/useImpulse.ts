@@ -1,6 +1,12 @@
 import { Impulse, type ImpulseOptions } from "./Impulse"
 import { STATIC_SCOPE, type Scope } from "./Scope"
-import { isFunction, usePermanent, useEvent, eq, type Func } from "./utils"
+import {
+  isFunction,
+  usePermanent,
+  useStableCallback,
+  eq,
+  type Func,
+} from "./utils"
 
 /**
  * A hook that initiates a stable (never changing) Impulse without an initial value.
@@ -29,7 +35,7 @@ export function useImpulse<T>(
   valueOrInitValue?: T | Func<[Scope], T>,
   { compare }: ImpulseOptions<undefined | T> = {},
 ): Impulse<undefined | T> {
-  const stableCompare = useEvent(compare ?? eq)
+  const stableCompare = useStableCallback(compare ?? eq)
 
   return usePermanent(() => {
     const initialValue = isFunction(valueOrInitValue)
