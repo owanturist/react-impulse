@@ -1,5 +1,6 @@
 import { EMITTER_KEY, type Scope, injectScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
+import { noop, type Destructor } from "./utils"
 import { defineExecutionContext } from "./validation"
 
 /**
@@ -8,11 +9,16 @@ import { defineExecutionContext } from "./validation"
  * @param listener function that will be called on each `Impulse` change, involved in the `listener` execution. Calls first time synchronously when `subscribe` is called.
  * @returns cleanup function that unsubscribes the `listener`
  */
-export function subscribe(listener: (scope: Scope) => void): VoidFunction {
+export function subscribe(
+  listener: (scope: Scope) => Destructor,
+): VoidFunction {
+  let cleanup: Destructor = noop
   const emitter = ScopeEmitter._init()
 
   const emit = (): void => {
-    defineExecutionContext("subscribe", injectScope, listener, {
+    cleanup?.()
+
+    cleanup = defineExecutionContext("subscribe", injectScope, listener, {
       [EMITTER_KEY]: emitter,
       version: emitter._getVersion(),
     })
@@ -20,5 +26,10 @@ export function subscribe(listener: (scope: Scope) => void): VoidFunction {
 
   emit()
 
-  return emitter._onEmit(emit)
+  const emitterCleanup = emitter._onEmit(emit)
+
+  return () => {
+    emitterCleanup()
+    cleanup?.()
+  }
 }

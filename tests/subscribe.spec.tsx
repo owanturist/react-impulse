@@ -31,6 +31,39 @@ describe("single Impulse", () => {
     expect(impulse).toHaveEmittersSize(1)
   })
 
+  it("executes listener cleanup", () => {
+    const spy = vi.fn()
+    const impulse = Impulse.of(1)
+
+    const cleanup = subscribe((scope) => {
+      const count = impulse.getValue(scope)
+
+      return () => {
+        spy(count)
+      }
+    })
+
+    expect(spy).not.toHaveBeenCalled()
+
+    impulse.setValue(2)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(1)
+    vi.clearAllMocks()
+
+    impulse.setValue(5)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(2)
+    vi.clearAllMocks()
+
+    cleanup()
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(5)
+    vi.clearAllMocks()
+
+    impulse.setValue(7)
+    expect(spy).not.toHaveBeenCalled()
+  })
+
   it("doesn't execute listener after unsubscribe", () => {
     const spy = vi.fn()
     const impulse = Impulse.of(1)
