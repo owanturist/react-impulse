@@ -4,11 +4,11 @@ import { render, screen, renderHook } from "@testing-library/react"
 import {
   Impulse,
   subscribe,
-  useImpulseEffect,
-  useImpulseLayoutEffect,
-  useImpulseMemo,
-  useWatchImpulse,
-  watch,
+  useScopedEffect,
+  useScopedLayoutEffect,
+  useScopedMemo,
+  useScoped,
+  scoped,
 } from "../src"
 
 import type { WithImpulse } from "./common"
@@ -28,17 +28,17 @@ afterAll(() => {
 describe("calling Impulse.of()", () => {
   describe.each([
     [
-      "useImpulseMemo",
-      "You should not call Impulse.of inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
+      "useScopedMemo",
+      "You should not call Impulse.of inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse.of creates a new Impulse.",
       () => {
-        return useImpulseMemo(() => Impulse.of(1).getValue(), [])
+        return useScopedMemo((scope) => Impulse.of(1).getValue(scope), [])
       },
     ],
     [
-      "useWatchImpulse",
-      "You should not call Impulse.of inside of the useWatchImpulse watcher. The useWatchImpulse hook is for read-only operations but Impulse.of creates a new Impulse.",
+      "useScoped",
+      "You should not call Impulse.of inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse.of creates a new Impulse.",
       () => {
-        return useWatchImpulse(() => Impulse.of(1).getValue())
+        return useScoped((scope) => Impulse.of(1).getValue(scope))
       },
     ],
   ])("warns when called inside %s", (_, message, useHook) => {
@@ -65,29 +65,32 @@ describe("calling Impulse.of()", () => {
     )
   })
 
-  it.each([
-    ["useImpulseEffect", useImpulseEffect],
-    ["useImpulseLayoutEffect", useImpulseLayoutEffect],
-  ])("fine when called inside %s", (_, useImpulseEffectHook) => {
-    const { result } = renderHook(() => {
-      const [state, setState] = React.useState(Impulse.of(1))
+  describe.each([
+    ["useScopedEffect", useScopedEffect],
+    ["useScopedLayoutEffect", useScopedLayoutEffect],
+  ])("when called inside %s", (_, useScopedEffectHook) => {
+    it("works fine, does not print an error", ({ scope }) => {
+      const { result } = renderHook(() => {
+        const [state, setState] = React.useState(Impulse.of(1))
 
-      useImpulseEffectHook(() => {
-        setState(Impulse.of(10))
-      }, [])
+        // eslint-disable-next-line no-restricted-syntax
+        useScopedEffectHook(() => {
+          setState(Impulse.of(10))
+        }, [])
 
-      return state
+        return state
+      })
+
+      expect(console$error).not.toHaveBeenCalled()
+      expect(result.current.getValue(scope)).toBe(10)
     })
-
-    expect(console$error).not.toHaveBeenCalled()
-    expect(result.current.getValue()).toBe(10)
   })
 
-  it("fine when called inside watch()", () => {
-    const Component = watch(() => {
+  it("fine when called inside scoped()", () => {
+    const Component = scoped(({ scope }) => {
       const [state] = React.useState(() => Impulse.of(20))
 
-      return <div data-testid="count">{state.getValue()}</div>
+      return <div data-testid="count">{state.getValue(scope)}</div>
     })
 
     render(<Component />)
@@ -100,17 +103,20 @@ describe("calling Impulse.of()", () => {
 describe("calling Impulse#clone()", () => {
   describe.each([
     [
-      "useImpulseMemo",
-      "You should not call Impulse#clone inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+      "useScopedMemo",
+      "You should not call Impulse#clone inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#clone clones an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
-        return useImpulseMemo(() => impulse.clone().getValue(), [impulse])
+        return useScopedMemo(
+          (scope) => impulse.clone().getValue(scope),
+          [impulse],
+        )
       },
     ],
     [
-      "useWatchImpulse",
-      "You should not call Impulse#clone inside of the useWatchImpulse watcher. The useWatchImpulse hook is for read-only operations but Impulse#clone clones an existing Impulse.",
+      "useScoped",
+      "You should not call Impulse#clone inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#clone clones an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
-        return useWatchImpulse(() => impulse.clone().getValue())
+        return useScoped((scope) => impulse.clone().getValue(scope))
       },
     ],
   ])("warn when called inside %s", (_, message, useHook) => {
@@ -146,16 +152,17 @@ describe("calling Impulse#clone()", () => {
   })
 
   describe.each([
-    ["useImpulseEffect", useImpulseEffect],
-    ["useImpulseLayoutEffect", useImpulseLayoutEffect],
-  ])("when called inside %s", (_, useImpulseEffectHook) => {
-    it("works fine, does not print an error", () => {
+    ["useScopedEffect", useScopedEffect],
+    ["useScopedLayoutEffect", useScopedLayoutEffect],
+  ])("when called inside %s", (_, useScopedEffectHook) => {
+    it("works fine, does not print an error", ({ scope }) => {
       const initial = Impulse.of(1)
       const { result } = renderHook(
         (impulse) => {
           const [state, setState] = React.useState(impulse)
 
-          useImpulseEffectHook(() => {
+          // eslint-disable-next-line no-restricted-syntax
+          useScopedEffectHook(() => {
             setState((x) => x.clone())
           }, [])
 
@@ -168,17 +175,17 @@ describe("calling Impulse#clone()", () => {
 
       expect(console$error).not.toHaveBeenCalled()
       expect(result.current).not.toBe(initial)
-      expect(result.current.getValue()).toBe(1)
+      expect(result.current.getValue(scope)).toBe(1)
     })
   })
 
-  it("fine when called inside watch()", () => {
-    const Component = watch<{
+  it("fine when called inside scoped()", () => {
+    const Component = scoped<{
       impulse: Impulse<number>
-    }>(({ impulse }) => {
+    }>(({ scope, impulse }) => {
       const [state] = React.useState(() => impulse.clone())
 
-      return <div data-testid="count">{state.getValue()}</div>
+      return <div data-testid="count">{state.getValue(scope)}</div>
     })
 
     render(<Component impulse={Impulse.of(20)} />)
@@ -191,24 +198,27 @@ describe("calling Impulse#clone()", () => {
 describe("calling Impulse#setValue()", () => {
   describe.each([
     [
-      "useImpulseMemo",
-      "You should not call Impulse#setValue inside of the useImpulseMemo factory. The useImpulseMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+      "useScopedMemo",
+      "You should not call Impulse#setValue inside of the useScopedMemo factory. The useScopedMemo hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
-        return useImpulseMemo(() => {
-          impulse.setValue(3)
+        return useScopedMemo(
+          (scope) => {
+            impulse.setValue(3)
 
-          return impulse.getValue()
-        }, [impulse])
+            return impulse.getValue(scope)
+          },
+          [impulse],
+        )
       },
     ],
     [
-      "useWatchImpulse",
-      "You should not call Impulse#setValue inside of the useWatchImpulse watcher. The useWatchImpulse hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
+      "useScoped",
+      "You should not call Impulse#setValue inside of the useScoped factory. The useScoped hook is for read-only operations but Impulse#setValue changes an existing Impulse.",
       ({ impulse }: WithImpulse<number>) => {
-        return useWatchImpulse(() => {
+        return useScoped((scope) => {
           impulse.setValue(3)
 
-          return impulse.getValue()
+          return impulse.getValue(scope)
         })
       },
     ],
@@ -233,13 +243,14 @@ describe("calling Impulse#setValue()", () => {
   })
 
   describe.each([
-    ["useImpulseEffect", useImpulseEffect],
-    ["useImpulseLayoutEffect", useImpulseLayoutEffect],
-  ])("fine when called inside %s", (_, useImpulseEffectHook) => {
-    it("works fine, does not print an error", () => {
+    ["useScopedEffect", useScopedEffect],
+    ["useScopedLayoutEffect", useScopedLayoutEffect],
+  ])("fine when called inside %s", (_, useScopedEffectHook) => {
+    it("works fine, does not print an error", ({ scope }) => {
       const { result } = renderHook(
         (impulse) => {
-          useImpulseEffectHook(() => {
+          // eslint-disable-next-line no-restricted-syntax
+          useScopedEffectHook(() => {
             impulse.setValue((x) => x + 1)
           }, [impulse])
 
@@ -251,11 +262,11 @@ describe("calling Impulse#setValue()", () => {
       )
 
       expect(console$error).not.toHaveBeenCalled()
-      expect(result.current.getValue()).toBe(2)
+      expect(result.current.getValue(scope)).toBe(2)
     })
   })
 
-  it("fine when called inside subscribe()", () => {
+  it("fine when called inside subscribe()", ({ scope }) => {
     const spy = vi.fn()
     const impulse = Impulse.of(1)
 
@@ -266,22 +277,22 @@ describe("calling Impulse#setValue()", () => {
 
     expect(spy).toHaveBeenCalledOnce()
     expect(console$error).not.toHaveBeenCalled()
-    expect(impulse.getValue()).toBe(2)
+    expect(impulse.getValue(scope)).toBe(2)
   })
 
-  it("warns when called inside watch()", () => {
-    const Component = watch<{
+  it("warns when called inside scoped()", () => {
+    const Component = scoped<{
       impulse: Impulse<number>
-    }>(({ impulse }) => {
+    }>(({ scope, impulse }) => {
       impulse.setValue(10)
 
-      return <div data-testid="count">{impulse.getValue()}</div>
+      return <div data-testid="count">{impulse.getValue(scope)}</div>
     })
 
     render(<Component impulse={Impulse.of(20)} />)
 
     expect(console$error).toHaveBeenCalledWith(
-      "You should not call Impulse#setValue during rendering of watch(Component).",
+      "You should not call Impulse#setValue during rendering of scoped(Component).",
     )
     expect(screen.getByTestId("count")).toHaveTextContent("20")
   })

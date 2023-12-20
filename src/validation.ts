@@ -2,9 +2,9 @@ import { type Func, isFunction } from "./utils"
 
 export type ExecutionContext =
   | "subscribe"
-  | "watch"
-  | "useWatchImpulse"
-  | "useImpulseMemo"
+  | "scoped"
+  | "useScoped"
+  | "useScopedMemo"
 
 let currentExecutionContext: null | ExecutionContext = null
 

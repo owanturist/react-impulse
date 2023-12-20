@@ -1,28 +1,29 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { type Compare, Impulse, useWatchImpulse } from "../../src"
+import { type Compare, Impulse, useScoped, type Scope } from "../../src"
 import { Counter, type WithSpy, type WithImpulse } from "../common"
 
-describe("single watcher", () => {
-  const watcher = ({ impulse }: WithImpulse) => impulse.getValue()
+describe("single factory", () => {
+  const factory = (scope: Scope, { impulse }: WithImpulse) =>
+    impulse.getValue(scope)
 
   describe.each([
     [
       "without deps",
       ({ impulse }: WithImpulse) => {
-        return useWatchImpulse(() => watcher({ impulse }))
+        return useScoped((scope) => factory(scope, { impulse }))
       },
     ],
     [
       "without comparator",
       ({ impulse }: WithImpulse) => {
-        return useWatchImpulse(() => watcher({ impulse }), [impulse])
+        return useScoped((scope) => factory(scope, { impulse }), [impulse])
       },
     ],
     [
       "with inline comparator",
       ({ impulse }: WithImpulse) => {
-        return useWatchImpulse(() => watcher({ impulse }), [impulse], {
+        return useScoped((scope) => factory(scope, { impulse }), [impulse], {
           compare: (prev, next) => Counter.compare(prev, next),
         })
       },
@@ -30,7 +31,7 @@ describe("single watcher", () => {
     [
       "with memoized comparator",
       ({ impulse }: WithImpulse) => {
-        return useWatchImpulse(() => watcher({ impulse }), [impulse], {
+        return useScoped((scope) => factory(scope, { impulse }), [impulse], {
           compare: Counter.compare,
         })
       },
@@ -81,7 +82,9 @@ describe("single watcher", () => {
         expect(result.current).toStrictEqual({ count: 10 })
       })
 
-      it("stops watching impulse_1 changes after replacement with impulse_2", () => {
+      it("stops watching impulse_1 changes after replacement with impulse_2", ({
+        scope,
+      }) => {
         const { impulse_1, impulse_2, result, rerender } = setup()
         expect(impulse_1).toHaveEmittersSize(1)
 
@@ -92,12 +95,14 @@ describe("single watcher", () => {
           impulse_1.setValue(Counter.inc)
         })
 
-        expect(impulse_1.getValue()).toStrictEqual({ count: 2 })
+        expect(impulse_1.getValue(scope)).toStrictEqual({ count: 2 })
         expect(result.current).toStrictEqual({ count: 10 })
         expect(impulse_1).toHaveEmittersSize(0)
       })
 
-      it("starts watching impulse_2 changes after replacement of impulse_1", () => {
+      it("starts watching impulse_2 changes after replacement of impulse_1", ({
+        scope,
+      }) => {
         const { impulse_1, impulse_2, result, rerender } = setup()
         expect(impulse_2).toHaveEmittersSize(0)
 
@@ -108,7 +113,7 @@ describe("single watcher", () => {
           impulse_2.setValue(Counter.inc)
         })
 
-        expect(impulse_1.getValue()).toStrictEqual({ count: 1 })
+        expect(impulse_1.getValue(scope)).toStrictEqual({ count: 1 })
         expect(result.current).toStrictEqual({ count: 11 })
         expect(impulse_2).toHaveEmittersSize(1)
       })
@@ -140,7 +145,7 @@ describe("single watcher", () => {
   })
 })
 
-describe("transform watched Impulse's", () => {
+describe("transform scoped Impulse's", () => {
   const toTuple = ({ count }: Counter): [boolean, boolean] => {
     return [count > 2, count < 5]
   }
@@ -152,85 +157,32 @@ describe("transform watched Impulse's", () => {
     return prevLeft === nextLeft && prevRight === nextRight
   }
 
-  const watcherTuple = ({ impulse }: WithImpulse) => impulse.getValue(toTuple)
-
-  it.each([
-    [
-      "without deps",
-      ({ impulse }: WithImpulse) => {
-        return useWatchImpulse(() => watcherTuple({ impulse }))
-      },
-    ],
-    [
-      "without compare",
-      ({ impulse }: WithImpulse) => {
-        return useWatchImpulse(() => watcherTuple({ impulse }), [impulse])
-      },
-    ],
-  ])("produces new value on each Impulse's update %s", (_, useCounter) => {
-    const impulse = Impulse.of({ count: 1 })
-
-    const { result, rerender } = renderHook(useCounter, {
-      initialProps: { impulse },
-    })
-
-    let prev = result.current
-
-    // produces initial result
-    expect(result.current).toStrictEqual([false, true])
-
-    // increments 1 -> 2
-    prev = result.current
-    act(() => {
-      impulse.setValue(Counter.inc)
-    })
-    expect(result.current).not.toBe(prev)
-    expect(result.current).toStrictEqual([false, true])
-
-    // increments 2 -> 3
-    prev = result.current
-    act(() => {
-      impulse.setValue({ count: 3 })
-    })
-    expect(result.current).not.toBe(prev)
-    expect(result.current).toStrictEqual([true, true])
-
-    // rerender
-    rerender({ impulse })
-    expect(result.current).toStrictEqual([true, true])
-
-    // increments 3 -> 4
-    prev = result.current
-    act(() => {
-      impulse.setValue({ count: 4 })
-    })
-    expect(result.current).not.toBe(prev)
-    expect(result.current).toStrictEqual([true, true])
-
-    // increments 4 -> 5
-    prev = result.current
-    act(() => {
-      impulse.setValue(Counter.inc)
-    })
-    expect(result.current).not.toBe(prev)
-    expect(result.current).toStrictEqual([true, false])
-  })
+  const factoryTuple = (scope: Scope, { impulse }: WithImpulse) =>
+    impulse.getValue(scope, toTuple)
 
   it.each([
     [
       "inline comparator",
       ({ impulse }: WithImpulse) => {
-        return useWatchImpulse(() => watcherTuple({ impulse }), [impulse], {
-          compare: (prev, next) => compareTuple(prev, next),
-        })
+        return useScoped(
+          (scope) => factoryTuple(scope, { impulse }),
+          [impulse],
+          {
+            compare: (prev, next) => compareTuple(prev, next),
+          },
+        )
       },
     ],
     [
       "memoized comparator",
       ({ impulse }: WithImpulse) => {
-        return useWatchImpulse(() => watcherTuple({ impulse }), [impulse], {
-          compare: compareTuple,
-        })
+        return useScoped(
+          (scope) => factoryTuple(scope, { impulse }),
+          [impulse],
+          {
+            compare: compareTuple,
+          },
+        )
       },
     ],
   ])(
@@ -285,38 +237,104 @@ describe("transform watched Impulse's", () => {
     },
   )
 
-  describe("when Impulse's changes under watcher are comparably equal with", () => {
-    const watcher = ({ impulse }: WithImpulse) => impulse.getValue()
+  it.each([
+    [
+      "without deps",
+      ({ impulse }: WithImpulse) => {
+        return useScoped((scope) => factoryTuple(scope, { impulse }))
+      },
+    ],
+    [
+      "without compare",
+      ({ impulse }: WithImpulse) => {
+        return useScoped((scope) => factoryTuple(scope, { impulse }), [impulse])
+      },
+    ],
+  ])("produces new value on each Impulse's update %s", (_, useCounter) => {
+    const impulse = Impulse.of({ count: 1 })
+
+    const { result, rerender } = renderHook(useCounter, {
+      initialProps: { impulse },
+    })
+
+    let prev = result.current
+
+    // produces initial result
+    expect(result.current).toStrictEqual([false, true])
+
+    // increments 1 -> 2
+    prev = result.current
+    act(() => {
+      impulse.setValue(Counter.inc)
+    })
+    expect(result.current).not.toBe(prev)
+    expect(result.current).toStrictEqual([false, true])
+
+    // increments 2 -> 3
+    prev = result.current
+    act(() => {
+      impulse.setValue({ count: 3 })
+    })
+    expect(result.current).not.toBe(prev)
+    expect(result.current).toStrictEqual([true, true])
+
+    // rerender
+    rerender({ impulse })
+    expect(result.current).toStrictEqual([true, true])
+
+    // increments 3 -> 4
+    prev = result.current
+    act(() => {
+      impulse.setValue({ count: 4 })
+    })
+    expect(result.current).not.toBe(prev)
+    expect(result.current).toStrictEqual([true, true])
+
+    // increments 4 -> 5
+    prev = result.current
+    act(() => {
+      impulse.setValue(Counter.inc)
+    })
+    expect(result.current).not.toBe(prev)
+    expect(result.current).toStrictEqual([true, false])
+  })
+
+  describe("when Impulse's changes under factory are comparably equal with", () => {
+    const factory = (scope: Scope, { impulse }: WithImpulse) =>
+      impulse.getValue(scope)
 
     it.each([
       [
         "without deps",
         ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useWatchImpulse(() => {
+          return useScoped((scope) => {
             spy()
 
-            return watcher({ impulse })
+            return factory(scope, { impulse })
           })
         },
       ],
       [
         "without comparator",
         ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useWatchImpulse(() => {
-            spy()
+          return useScoped(
+            (scope) => {
+              spy()
 
-            return watcher({ impulse })
-          }, [impulse, spy])
+              return factory(scope, { impulse })
+            },
+            [impulse, spy],
+          )
         },
       ],
       [
         "with inline comparator",
         ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useWatchImpulse(
-            () => {
+          return useScoped(
+            (scope) => {
               spy()
 
-              return watcher({ impulse })
+              return factory(scope, { impulse })
             },
             [impulse, spy],
             {
@@ -328,11 +346,11 @@ describe("transform watched Impulse's", () => {
       [
         "with memoized comparator",
         ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useWatchImpulse(
-            () => {
+          return useScoped(
+            (scope) => {
               spy()
 
-              return watcher({ impulse })
+              return factory(scope, { impulse })
             },
             [impulse, spy],
             {
@@ -341,7 +359,7 @@ describe("transform watched Impulse's", () => {
           )
         },
       ],
-    ])("should not trigger the watcher %s", (_, useCounter) => {
+    ])("should not trigger the factory %s", (_, useCounter) => {
       const impulse = Impulse.of({ count: 1 }, { compare: Counter.compare })
       const spy = vi.fn()
 
@@ -361,40 +379,46 @@ describe("transform watched Impulse's", () => {
   })
 })
 
-describe("multiple Impulse#getValue() calls", () => {
-  const watcherSingle = ({ impulse, spy }: WithImpulse & WithSpy) => {
+describe("multiple Impulse#getValue(scope) calls", () => {
+  const factorySingle = (
+    scope: Scope,
+    { impulse, spy }: WithImpulse & WithSpy,
+  ) => {
     spy()
 
-    return impulse.getValue()
+    return impulse.getValue(scope)
   }
-  const watcherDouble = ({ impulse, spy }: WithImpulse & WithSpy) => {
+  const factoryDouble = (
+    scope: Scope,
+    { impulse, spy }: WithImpulse & WithSpy,
+  ) => {
     spy()
 
-    return Counter.merge(impulse.getValue(), impulse.getValue())
+    return Counter.merge(impulse.getValue(scope), impulse.getValue(scope))
   }
 
-  describe("triggering watcher for multiple Impulse#getValue() calls the same as for a single", () => {
+  describe("triggering factory for multiple Impulse#getValue(scope) calls the same as for a single", () => {
     describe.each([
       [
         "without deps",
         ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useWatchImpulse(() => watcherSingle({ impulse, spy }))
+          return useScoped((scope) => factorySingle(scope, { impulse, spy }))
         },
         ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useWatchImpulse(() => watcherDouble({ impulse, spy }))
+          return useScoped((scope) => factoryDouble(scope, { impulse, spy }))
         },
       ],
       [
         "without comparator",
         ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useWatchImpulse(
-            () => watcherSingle({ impulse, spy }),
+          return useScoped(
+            (scope) => factorySingle(scope, { impulse, spy }),
             [impulse, spy],
           )
         },
         ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useWatchImpulse(
-            () => watcherDouble({ impulse, spy }),
+          return useScoped(
+            (scope) => factoryDouble(scope, { impulse, spy }),
             [impulse, spy],
           )
         },
@@ -402,8 +426,8 @@ describe("multiple Impulse#getValue() calls", () => {
       [
         "with inline comparator",
         ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useWatchImpulse(
-            () => watcherSingle({ impulse, spy }),
+          return useScoped(
+            (scope) => factorySingle(scope, { impulse, spy }),
             [impulse, spy],
             {
               compare: (prev, next) => Counter.compare(prev, next),
@@ -411,8 +435,8 @@ describe("multiple Impulse#getValue() calls", () => {
           )
         },
         ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useWatchImpulse(
-            () => watcherDouble({ impulse, spy }),
+          return useScoped(
+            (scope) => factoryDouble(scope, { impulse, spy }),
             [impulse, spy],
             {
               compare: (prev, next) => Counter.compare(prev, next),
@@ -423,15 +447,15 @@ describe("multiple Impulse#getValue() calls", () => {
       [
         "with memoized comparator",
         ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useWatchImpulse(
-            () => watcherSingle({ impulse, spy }),
+          return useScoped(
+            (scope) => factorySingle(scope, { impulse, spy }),
             [impulse, spy],
             { compare: Counter.compare },
           )
         },
         ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useWatchImpulse(
-            () => watcherDouble({ impulse, spy }),
+          return useScoped(
+            (scope) => factoryDouble(scope, { impulse, spy }),
             [impulse, spy],
             { compare: Counter.compare },
           )

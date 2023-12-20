@@ -1,18 +1,25 @@
 export type { DependencyList } from "./dependencies"
-export type { Compare } from "./utils"
+export type { Compare, Destructor } from "./utils"
 export {
   type ImpulseOptions,
   type TransmittingImpulseOptions,
   type ReadonlyImpulse,
   Impulse,
 } from "./Impulse"
+export type { Scope } from "./Scope"
+export {
+  type PropsWithScope,
+  type PropsWithoutScope,
+  type ForwardedPropsWithoutScope,
+  scoped,
+} from "./scoped"
 export { batch } from "./batch"
+export { batch as tap } from "./batch"
 export { subscribe } from "./subscribe"
-export { watch } from "./watch"
 export { useImpulse } from "./useImpulse"
 export { useTransmittingImpulse } from "./useTransmittingImpulse"
-export { useImpulseMemo } from "./useImpulseMemo"
-export { useImpulseCallback } from "./useImpulseCallback"
-export { useImpulseEffect } from "./useImpulseEffect"
-export { useImpulseLayoutEffect } from "./useImpulseLayoutEffect"
-export { type UseWatchImpulseOptions, useWatchImpulse } from "./useWatchImpulse"
+export { type UseScopedOptions, useScoped } from "./useScoped"
+export { useScopedMemo } from "./useScopedMemo"
+export { useScopedCallback } from "./useScopedCallback"
+export { useScopedEffect } from "./useScopedEffect"
+export { useScopedLayoutEffect } from "./useScopedLayoutEffect"

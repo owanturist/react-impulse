@@ -1,6 +1,8 @@
 import "@testing-library/jest-dom/vitest"
 import { cleanup } from "@testing-library/react"
 
+import { tap } from "./src"
+
 // forces tests to fail in case of illegal usage
 const spy_console$error = vi
   .spyOn(console, "error")
@@ -10,8 +12,12 @@ const spy_console$error = vi
 
 const spy_Object$is = vi.spyOn(Object, "is")
 
-beforeEach(() => {
+beforeEach((context) => {
   spy_Object$is.mockClear()
+
+  tap((scope) => {
+    context.scope = scope
+  })
 })
 
 afterEach(() => {

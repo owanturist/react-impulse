@@ -1,4 +1,5 @@
 import {
+  type EffectCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -15,11 +16,13 @@ import {
  */
 export type Compare<T> = (left: T, right: T) => boolean
 
+export type Destructor = ReturnType<EffectCallback>
+
 export type Func<TArgs extends ReadonlyArray<unknown>, TResult = void> = (
   ...args: TArgs
 ) => TResult
 
-export const eq: Compare<unknown> = Object.is
+export const eq: Compare<unknown> = (left, right) => Object.is(left, right)
 
 export function noop(): void {
   // do nothing
@@ -35,9 +38,10 @@ export const useIsomorphicLayoutEffect =
   /* c8 ignore next */
   typeof window === "undefined" ? useEffect : useLayoutEffect
 
-export function useEvent<TArgs extends ReadonlyArray<unknown>, TResult>(
-  handler: Func<TArgs, TResult>,
-): Func<TArgs, TResult> {
+export function useStableCallback<
+  TArgs extends ReadonlyArray<unknown>,
+  TResult,
+>(handler: Func<TArgs, TResult>): Func<TArgs, TResult> {
   const handlerRef = useRef<Func<TArgs, TResult>>(null as never)
 
   useIsomorphicLayoutEffect(() => {

@@ -7,36 +7,34 @@ import {
   renderHook,
 } from "@testing-library/react"
 
-import {
-  Impulse,
-  watch,
-  useImpulseEffect,
-  useImpulseLayoutEffect,
-} from "../src"
-
-const identity = <T,>(value: T): T => value
+import { Impulse, scoped, useScopedEffect, useScopedLayoutEffect } from "../src"
 
 describe.each([
-  ["useEffect", React.useEffect, useImpulseEffect],
-  ["useLayoutEffect", React.useLayoutEffect, useImpulseLayoutEffect],
-])("running %s hook", (hookName, useReactEffect, useCustomImpulseEffect) => {
+  ["useScopedEffect", useScopedEffect],
+  ["useScopedLayoutEffect", useScopedLayoutEffect],
+])("running %s hook", (_, useCustomScopedEffect) => {
+  const identity = <T,>(value: T): T => value
+
   describe.each([
-    ["nothing", identity as typeof watch],
-    ["watch", watch],
-  ])("using %s as hoc", (_, hoc) => {
+    ["nothing", identity as typeof scoped],
+    ["scoped", scoped],
+  ])("using %s as hoc", (__, hoc) => {
     describe("single impulse", () => {
       const Component: React.FC<{
         value: Impulse<number>
-        useEffect: typeof React.useEffect
+        useEffect: typeof useScopedEffect
         onEffect: React.Dispatch<number>
       }> = hoc(({ onEffect, value, useEffect }) => {
         const [multiplier, setMultiplier] = React.useState(2)
 
-        useEffect(() => {
-          const x = value.getValue() * multiplier
+        useEffect(
+          (scope) => {
+            const x = value.getValue(scope) * multiplier
 
-          onEffect(x)
-        }, [value, multiplier, onEffect])
+            onEffect(x)
+          },
+          [value, multiplier, onEffect],
+        )
 
         return (
           <button
@@ -47,37 +45,14 @@ describe.each([
         )
       })
 
-      it(`cannot watch inside React ${hookName}`, () => {
+      it(`runs an effect when Impulse-dependency updates`, () => {
         const value = Impulse.of(3)
         const onEffect = vi.fn()
 
         render(
           <Component
             onEffect={onEffect}
-            useEffect={useReactEffect}
-            value={value}
-          />,
-        )
-
-        expect(onEffect).toHaveBeenCalledOnce()
-        expect(onEffect).toHaveBeenLastCalledWith(6)
-        vi.clearAllMocks()
-
-        act(() => {
-          value.setValue(2)
-        })
-
-        expect(onEffect).not.toHaveBeenCalled()
-      })
-
-      it(`can watch inside Impulse ${hookName}`, () => {
-        const value = Impulse.of(3)
-        const onEffect = vi.fn()
-
-        render(
-          <Component
-            onEffect={onEffect}
-            useEffect={useCustomImpulseEffect}
+            useEffect={useCustomScopedEffect}
             value={value}
           />,
         )
@@ -102,7 +77,7 @@ describe.each([
         const { rerender } = render(
           <React.Profiler id="test" onRender={onRender}>
             <Component
-              useEffect={useCustomImpulseEffect}
+              useEffect={useCustomScopedEffect}
               onEffect={onEffect}
               value={value}
             />
@@ -117,7 +92,7 @@ describe.each([
         rerender(
           <React.Profiler id="test" onRender={onRender}>
             <Component
-              useEffect={useCustomImpulseEffect}
+              useEffect={useCustomScopedEffect}
               onEffect={onEffect}
               value={value}
             />
@@ -147,7 +122,7 @@ describe.each([
         const { rerender } = render(
           <React.Profiler id="test" onRender={onRender}>
             <Component
-              useEffect={useCustomImpulseEffect}
+              useEffect={useCustomScopedEffect}
               onEffect={onEffect}
               value={value_1}
             />
@@ -158,7 +133,7 @@ describe.each([
         rerender(
           <React.Profiler id="test" onRender={onRender}>
             <Component
-              useEffect={useCustomImpulseEffect}
+              useEffect={useCustomScopedEffect}
               onEffect={onEffect}
               value={value_2}
             />
@@ -179,7 +154,7 @@ describe.each([
         const { rerender } = render(
           <React.Profiler id="test" onRender={onRender}>
             <Component
-              useEffect={useCustomImpulseEffect}
+              useEffect={useCustomScopedEffect}
               onEffect={onEffect}
               value={value_1}
             />
@@ -193,7 +168,7 @@ describe.each([
         rerender(
           <React.Profiler id="test" onRender={onRender}>
             <Component
-              useEffect={useCustomImpulseEffect}
+              useEffect={useCustomScopedEffect}
               onEffect={onEffect}
               value={value_2}
             />
@@ -232,7 +207,7 @@ describe.each([
         render(
           <React.Profiler id="test" onRender={onRender}>
             <Component
-              useEffect={useCustomImpulseEffect}
+              useEffect={useCustomScopedEffect}
               onEffect={onEffect}
               value={value}
             />
@@ -265,11 +240,15 @@ describe.each([
         onEffect: React.Dispatch<number>
       }> = hoc(({ first, second, onEffect }) => {
         const [multiplier, setMultiplier] = React.useState(2)
-        useCustomImpulseEffect(() => {
-          const x = (first.getValue() + second.getValue()) * multiplier
+        useCustomScopedEffect(
+          (scope) => {
+            const x =
+              (first.getValue(scope) + second.getValue(scope)) * multiplier
 
-          onEffect(x)
-        }, [first, second, multiplier, onEffect])
+            onEffect(x)
+          },
+          [first, second, multiplier, onEffect],
+        )
 
         return (
           <button
@@ -319,15 +298,18 @@ describe.each([
       }> = hoc(({ list, onEffect }) => {
         const [multiplier, setMultiplier] = React.useState(2)
 
-        useCustomImpulseEffect(() => {
-          const x =
-            list
-              .getValue()
-              .map((item) => item.getValue())
-              .reduce((acc, val) => acc + val, 0) * multiplier
+        useCustomScopedEffect(
+          (scope) => {
+            const x =
+              list
+                .getValue(scope)
+                .map((item) => item.getValue(scope))
+                .reduce((acc, val) => acc + val, 0) * multiplier
 
-          onEffect(x)
-        }, [list, multiplier, onEffect])
+            onEffect(x)
+          },
+          [list, multiplier, onEffect],
+        )
 
         return (
           <button
@@ -400,8 +382,8 @@ describe.each([
       }> = hoc(({ value, onEffect }) => {
         const [multiplier, setMultiplier] = React.useState(2)
 
-        useCustomImpulseEffect(() => {
-          const x = value.getValue() * multiplier
+        useCustomScopedEffect((scope) => {
+          const x = value.getValue(scope) * multiplier
 
           onEffect(x)
         })
@@ -475,13 +457,13 @@ describe.each([
   it("should not trigger effect when unsubscribes", () => {
     const Counter: React.FC<{
       count: Impulse<number>
-    }> = watch(({ count }) => (
+    }> = scoped(({ scope, count }) => (
       <button
         type="button"
         data-testid="count"
         onClick={() => count.setValue((x) => x + 1)}
       >
-        {count.getValue()}
+        {count.getValue(scope)}
       </button>
     ))
 
@@ -491,9 +473,12 @@ describe.each([
     }> = ({ count, onEffect }) => {
       const [isVisible, setIsVisible] = React.useState(true)
 
-      useCustomImpulseEffect(() => {
-        onEffect(count.getValue())
-      }, [onEffect, count])
+      useCustomScopedEffect(
+        (scope) => {
+          onEffect(count.getValue(scope))
+        },
+        [onEffect, count],
+      )
 
       return (
         <>
@@ -542,9 +527,12 @@ it("triggers the effect when either regular or additional dependencies change", 
   const impulse = Impulse.of(2)
   const { rerender } = renderHook(
     ({ left, right }) => {
-      useImpulseEffect(() => {
-        spy(left + right.getValue())
-      }, [left, right])
+      useScopedEffect(
+        (scope) => {
+          spy(left + right.getValue(scope))
+        },
+        [left, right],
+      )
     },
     {
       initialProps: { left: 1, right: impulse },
@@ -589,9 +577,12 @@ it("triggers the effect when Impulses are not listened in dependencies", () => {
   const right = Impulse.of(2)
   const { rerender } = renderHook(
     ({ state }) => {
-      useImpulseEffect(() => {
-        spy(state.left.getValue() + state.right.getValue())
-      }, [state])
+      useScopedEffect(
+        (scope) => {
+          spy(state.left.getValue(scope) + state.right.getValue(scope))
+        },
+        [state],
+      )
     },
     {
       initialProps: { state: { left, right } },

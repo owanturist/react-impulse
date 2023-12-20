@@ -1,28 +1,30 @@
 import React from "react"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 
-import { Impulse, watch, useImpulseMemo } from "../src"
+import { Impulse, scoped, useScopedMemo } from "../src"
 
 const identity = <T,>(value: T): T => value
 
 describe.each([
-  ["nothing", identity as typeof watch],
-  ["watch", watch],
+  ["nothing", identity as typeof scoped],
+  ["scoped", scoped],
 ])("using %s as hoc", (_, hoc) => {
   describe("single impulse", () => {
     const Component: React.FC<{
       onMemo?: React.Dispatch<number>
       value: Impulse<number>
-      useMemo: typeof React.useMemo
-    }> = hoc(({ onMemo, value, useMemo }) => {
+    }> = hoc(({ onMemo, value }) => {
       const [multiplier, setMultiplier] = React.useState(2)
-      const result = useMemo(() => {
-        const x = value.getValue() * multiplier
+      const result = useScopedMemo(
+        (scope) => {
+          const x = value.getValue(scope) * multiplier
 
-        onMemo?.(x)
+          onMemo?.(x)
 
-        return x
-      }, [value, multiplier, onMemo])
+          return x
+        },
+        [value, multiplier, onMemo],
+      )
 
       return (
         <>
@@ -36,30 +38,14 @@ describe.each([
       )
     })
 
-    it("cannot watch inside React.useMemo", () => {
-      const value = Impulse.of(1)
-
-      render(<Component useMemo={React.useMemo} value={value} />)
-
-      const node = screen.getByTestId("value")
-
-      expect(node).toHaveTextContent("2")
-
-      act(() => {
-        value.setValue(2)
-      })
-
-      expect(node).toHaveTextContent("2")
-    })
-
-    it("can watch inside useImpulseMemo", () => {
+    it("can watch inside useScopedMemo", () => {
       const value = Impulse.of(1)
       const onMemo = vi.fn()
       const onRender = vi.fn()
 
       render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component onMemo={onMemo} useMemo={useImpulseMemo} value={value} />
+          <Component onMemo={onMemo} value={value} />
         </React.Profiler>,
       )
 
@@ -88,7 +74,7 @@ describe.each([
 
       const { rerender } = render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useMemo={useImpulseMemo} onMemo={onMemo} value={value} />
+          <Component onMemo={onMemo} value={value} />
         </React.Profiler>,
       )
 
@@ -99,7 +85,7 @@ describe.each([
 
       rerender(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useMemo={useImpulseMemo} onMemo={onMemo} value={value} />
+          <Component onMemo={onMemo} value={value} />
         </React.Profiler>,
       )
 
@@ -125,14 +111,14 @@ describe.each([
 
       const { rerender } = render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useMemo={useImpulseMemo} onMemo={onMemo} value={value_1} />
+          <Component onMemo={onMemo} value={value_1} />
         </React.Profiler>,
       )
       vi.clearAllMocks()
 
       rerender(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useMemo={useImpulseMemo} onMemo={onMemo} value={value_2} />
+          <Component onMemo={onMemo} value={value_2} />
         </React.Profiler>,
       )
 
@@ -149,7 +135,7 @@ describe.each([
 
       const { rerender } = render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useMemo={useImpulseMemo} onMemo={onMemo} value={value_1} />
+          <Component onMemo={onMemo} value={value_1} />
         </React.Profiler>,
       )
 
@@ -158,7 +144,7 @@ describe.each([
 
       rerender(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useMemo={useImpulseMemo} onMemo={onMemo} value={value_2} />
+          <Component onMemo={onMemo} value={value_2} />
         </React.Profiler>,
       )
       expect(value_1).toHaveEmittersSize(0)
@@ -192,7 +178,7 @@ describe.each([
 
       render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useMemo={useImpulseMemo} onMemo={onMemo} value={value} />
+          <Component onMemo={onMemo} value={value} />
         </React.Profiler>,
       )
       vi.clearAllMocks()
@@ -221,9 +207,12 @@ describe.each([
       second: Impulse<number>
     }> = hoc(({ first, second }) => {
       const [multiplier, setMultiplier] = React.useState(2)
-      const result = useImpulseMemo(() => {
-        return (first.getValue() + second.getValue()) * multiplier
-      }, [first, second, multiplier])
+      const result = useScopedMemo(
+        (scope) => {
+          return (first.getValue(scope) + second.getValue(scope)) * multiplier
+        },
+        [first, second, multiplier],
+      )
 
       return (
         <>
@@ -269,15 +258,18 @@ describe.each([
       list: Impulse<Array<Impulse<number>>>
     }> = hoc(({ list }) => {
       const [multiplier, setMultiplier] = React.useState(2)
-      const result = useImpulseMemo(() => {
-        const x =
-          list
-            .getValue()
-            .map((item) => item.getValue())
-            .reduce((acc, val) => acc + val, 0) * multiplier
+      const result = useScopedMemo(
+        (scope) => {
+          const x =
+            list
+              .getValue(scope)
+              .map((item) => item.getValue(scope))
+              .reduce((acc, val) => acc + val, 0) * multiplier
 
-        return x
-      }, [list, multiplier])
+          return x
+        },
+        [list, multiplier],
+      )
 
       return (
         <>

@@ -1,16 +1,16 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useWatchImpulse, watch } from "../../src"
+import { Impulse, useScoped, scoped, type Scope } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
-describe("watching nested impulses", () => {
+describe("scoping nested impulses", () => {
   abstract class AppState {
     public abstract counts: ReadonlyArray<Impulse<number>>
 
-    public static sum({ counts }: AppState): number {
-      return counts.reduce((acc, count) => acc + count.getValue(), 0)
+    public static sum(scope: Scope, { counts }: AppState): number {
+      return counts.reduce((acc, count) => acc + count.getValue(scope), 0)
     }
   }
 
@@ -32,7 +32,7 @@ describe("watching nested impulses", () => {
     onRender,
     onCounterRender,
   }) => {
-    const state = useWatchImpulse(() => appState.getValue())
+    const state = useScoped((scope) => appState.getValue(scope))
 
     return (
       <>
@@ -91,13 +91,13 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const watcherLeft = (state: Impulse<AppState>) => {
-    const total = AppState.sum(state.getValue())
+  const factoryLeft = (scope: Scope, state: Impulse<AppState>) => {
+    const total = AppState.sum(scope, state.getValue(scope))
 
     return total > 10
   }
-  const watcherRight = (state: Impulse<AppState>) => {
-    const total = AppState.sum(state.getValue())
+  const factoryRight = (scope: Scope, state: Impulse<AppState>) => {
+    const total = AppState.sum(scope, state.getValue(scope))
 
     return total < 20
   }
@@ -109,9 +109,12 @@ describe("watching nested impulses", () => {
     return left1 === left2 && right1 === right2
   }
 
-  const SingleWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanTen, lessThanTwenty] = useWatchImpulse(
-      () => [watcherLeft(props.state), watcherRight(props.state)],
+  const SingleScopeApp: React.FC<AppProps> = (props) => {
+    const [moreThanTen, lessThanTwenty] = useScoped(
+      (scope) => [
+        factoryLeft(scope, props.state),
+        factoryRight(scope, props.state),
+      ],
       [props.state],
       {
         compare: (left, right) => compare(left, right),
@@ -127,9 +130,12 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const SingleMemoizedWatcherApp: React.FC<AppProps> = (props) => {
-    const [moreThanTen, lessThanTwenty] = useWatchImpulse<[boolean, boolean]>(
-      () => [watcherLeft(props.state), watcherRight(props.state)],
+  const SingleMemoizedScopeApp: React.FC<AppProps> = (props) => {
+    const [moreThanTen, lessThanTwenty] = useScoped<[boolean, boolean]>(
+      (scope) => [
+        factoryLeft(scope, props.state),
+        factoryRight(scope, props.state),
+      ],
       [props.state],
       { compare },
     )
@@ -143,27 +149,10 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const MultipleWatchersApp: React.FC<AppProps> = (props) => {
-    const moreThanTen = useWatchImpulse(() => watcherLeft(props.state))
-    const lessThanTwenty = useWatchImpulse(() => watcherRight(props.state))
-
-    return (
-      <GenericApp
-        moreThanTen={moreThanTen}
-        lessThanTwenty={lessThanTwenty}
-        {...props}
-      />
-    )
-  }
-
-  const MultipleWatchersWithDepsApp: React.FC<AppProps> = (props) => {
-    const moreThanTen = useWatchImpulse(
-      () => watcherLeft(props.state),
-      [props.state],
-    )
-    const lessThanTwenty = useWatchImpulse(
-      () => watcherRight(props.state),
-      [props.state],
+  const MultipleScopesApp: React.FC<AppProps> = (props) => {
+    const moreThanTen = useScoped((scope) => factoryLeft(scope, props.state))
+    const lessThanTwenty = useScoped((scope) =>
+      factoryRight(scope, props.state),
     )
 
     return (
@@ -175,9 +164,28 @@ describe("watching nested impulses", () => {
     )
   }
 
-  const WatchedApp: React.FC<AppProps> = watch((props) => {
-    const moreThanTen = watcherLeft(props.state)
-    const lessThanTwenty = watcherRight(props.state)
+  const MultipleMemoizedScopesApp: React.FC<AppProps> = (props) => {
+    const moreThanTen = useScoped(
+      (scope) => factoryLeft(scope, props.state),
+      [props.state],
+    )
+    const lessThanTwenty = useScoped(
+      (scope) => factoryRight(scope, props.state),
+      [props.state],
+    )
+
+    return (
+      <GenericApp
+        moreThanTen={moreThanTen}
+        lessThanTwenty={lessThanTwenty}
+        {...props}
+      />
+    )
+  }
+
+  const ScopedApp: React.FC<AppProps> = scoped(({ scope, ...props }) => {
+    const moreThanTen = factoryLeft(scope, props.state)
+    const lessThanTwenty = factoryRight(scope, props.state)
 
     return (
       <GenericApp
@@ -189,11 +197,11 @@ describe("watching nested impulses", () => {
   })
 
   it.each([
-    ["single watcher", SingleWatcherApp, 0],
-    ["single memoized watcher", SingleMemoizedWatcherApp, 0],
-    ["multiple watchers", MultipleWatchersApp, 0],
-    ["multiple memoized watchers", MultipleWatchersWithDepsApp, 0],
-    ["watch()", WatchedApp, 1],
+    ["single scope", SingleScopeApp, 0],
+    ["single memoized scope", SingleMemoizedScopeApp, 0],
+    ["multiple scopes", MultipleScopesApp, 0],
+    ["multiple memoized scopes", MultipleMemoizedScopesApp, 0],
+    ["scoped()", ScopedApp, 1],
   ])("handles nested Impulses with %s", (_, App, unnecessaryRerendersCount) => {
     const state = Impulse.of<AppState>({
       counts: [],

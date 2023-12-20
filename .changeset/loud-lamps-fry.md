@@ -2,30 +2,36 @@
 "react-impulse": major
 ---
 
-Introduce dependencies optional argument for `useWatchImpulse`:
+Introduce optional dependencies argument for `useScoped`:
 
 ```dart
-function useWatchImpulse<T>(
-  watcher: () => T,
+function useScoped<T>(
+  factory: () => T,
   dependencies?: DependencyList,
-  options?: UseWatchImpulseOptions<T>
+  options?: UseScopedOptions<T>
 ): T
 ```
 
-It works the same way as `useEffect` dependencies argument - if the dependencies are not defined, the `watcher` will be called on every render. Otherwise, it will be called only when the dependencies change.
+It works the same way as `useEffect` dependencies argument - if the dependencies are not defined, the `factory` will be called on every render. Otherwise, it will be called only when the dependencies change.
 
 ```ts
 const impulse = useImpulse(0)
 
 // before
-const count = useWatchImpulse(
-  useCallback(() => {
-    return impulse.getValue()
-  }, [impulse]),
+const count = useScoped(
+  useCallback(
+    (scope) => {
+      return impulse.getValue(scope)
+    },
+    [impulse],
+  ),
 )
 
 // now
-const count = useWatchImpulse(() => {
-  return impulse.getValue()
-}, [impulse])
+const count = useScoped(
+  (scope) => {
+    return impulse.getValue(scope)
+  },
+  [impulse],
+)
 ```

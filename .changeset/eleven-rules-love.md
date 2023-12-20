@@ -2,14 +2,15 @@
 "react-impulse": minor
 ---
 
-Introduce [`useImpulseCallback`](./#useimpulsecallback). The hook is an Impulse version of the `React.useCallback` hook. During the `callback` execution, all Impulses that call the `Impulse#getValue` method become _phantom dependencies_ of the hook.
+Introduce [`useScopedCallback`](./#usescopedcallback).
+The hook is an enchanted [`React.useCallback`][react__use_callback] hook.
 
 ```dart
-function useImpulseCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
-  callback: (...args: TArgs) => TResult,
+function useScopedCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
+  callback: (scope: Scope, ...args: TArgs) => TResult,
   dependencies: DependencyList,
 ): (...args: TArgs) => TResult
 ```
 
-- `callback` is a function to memoize, the memoized function updates whenever any of the `dependencies` values change.
+- `callback` is a function to memoize, the memoized function injects [`Scope`][scope] as the first argument and updates whenever any of the `dependencies` values change.
 - `dependencies` is an array of values used in the `callback` function.

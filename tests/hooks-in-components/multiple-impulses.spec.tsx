@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useWatchImpulse } from "../../src"
+import { Impulse, useScoped } from "../../src"
 
 describe("multiple impulses", () => {
   const LoginForm: React.FC<{
@@ -9,8 +9,8 @@ describe("multiple impulses", () => {
     password: Impulse<string>
     onRender: VoidFunction
   }> = ({ email: emailImpulse, password: passwordImpulse, onRender }) => {
-    const email = useWatchImpulse(() => emailImpulse.getValue())
-    const password = useWatchImpulse(() => passwordImpulse.getValue())
+    const email = useScoped((scope) => emailImpulse.getValue(scope))
+    const password = useScoped((scope) => passwordImpulse.getValue(scope))
 
     return (
       <React.Profiler id="test" onRender={onRender}>

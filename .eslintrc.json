@@ -8,6 +8,7 @@
     "sourceType": "module"
   },
   "extends": ["eslint:recommended", "plugin:import/recommended"],
+  "reportUnusedDisableDirectives": true,
   "rules": {
     "padding-line-between-statements": [
       "error",
@@ -127,7 +128,8 @@
       {
         "devDependencies": ["tests/**/*.{ts,tsx}", "./*.{js,ts}"]
       }
-    ]
+    ],
+    "import/no-cycle": ["error"]
   },
   "overrides": [
     {
@@ -153,7 +155,7 @@
         "no-unused-vars": "off",
 
         // Typescript Eslint
-        "@typescript-eslint/no-shadow": "error",
+        "@typescript-eslint/no-shadow": ["error", { "allow": ["scope"] }],
         "@typescript-eslint/array-type": [
           "error",
           {
@@ -239,6 +241,26 @@
         }
       },
       "rules": {
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "CallExpression:has(:matches(.callee, .callee.property)[name=/(useTransmittingImpulse|use(Scoped)?(|Memo|Callback|Effect|LayoutEffect))/]) > .arguments:nth-child(2) > [name='scope']",
+            "message": "The `scope` dependency changes on each component's re-render. Please use `scope` provided as the first argument in the `useScoped*` hooks."
+          },
+          {
+            "selector": "CallExpression[callee.name=/useScoped(|Memo|Callback|Effect|LayoutEffect)/] > .arguments:nth-child(1)[params.length=0]",
+            "message": "The `scope` argument of the hook effect is not used, consider using React effect hooks instead of Impulse scoped hooks."
+          },
+          {
+            "selector": "CallExpression:has(:matches(.callee, .callee .object)[name='scoped']) > .arguments:nth-child(1) > .params:nth-child(1):not(:has(.properties[key.name='scope']))",
+            "message": "The `scope` prop is not used, consider using the component without wrapping it in the `scoped` HOC."
+          },
+          {
+            "selector": "CallExpression:has(:matches(.callee, .callee .object)[name='scoped']) > .arguments:nth-child(1) > .params:nth-child(1) > .properties[key.name='scope'] > .value[name!='scope']",
+            "message": "Do not rename the `scope` prop created by the `scoped` HOC."
+          }
+        ],
+
         "no-restricted-imports": [
           "error",
           {
@@ -261,7 +283,7 @@
         "react-hooks/exhaustive-deps": [
           "error",
           {
-            "additionalHooks": "(use(\\w+)(Memo|Effect)|useWatchImpulse|useTransmittingImpulse)"
+            "additionalHooks": "(use(\\w+)(Memo|Effect)|useScoped|useTransmittingImpulse)"
           }
         ]
       }
@@ -274,6 +296,7 @@
         "plugin:jest-dom/recommended"
       ],
       "rules": {
+        "jest/no-done-callback": "off",
         "jest/no-deprecated-functions": "off",
         "jest/no-duplicate-hooks": "warn",
         "jest/no-if": "error",

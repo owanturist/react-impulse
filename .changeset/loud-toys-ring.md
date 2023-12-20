@@ -2,20 +2,20 @@
 "react-impulse": major
 ---
 
-Introduce [`ImpulseOptions`](./#impulseoptions) and [`UseWatchImpulseOptions`](./usewatchimpulseoptions) as a replacement for raw `compare` argument:
+Introduce [`ImpulseOptions`](./#impulseoptions) and [`UseScopedOptions`](./useScopedoptions) as a replacement for raw `compare` argument:
 
 ```ts
 // before
 const impulse_1 = Impulse.of({ count: 0 }, shallowEqual)
 const impulse_2 = impulse_1.clone((x) => x, shallowEqual)
 const impulse_3 = useImpulse({ count: 0 }, shallowEqual)
-const value = useWatchImpulse(() => impulse_2.getValue(), shallowEqual)
+const value = useScoped((scope) => impulse_2.getValue(scope), shallowEqual)
 
 // now
 const impulse_1 = Impulse.of({ count: 0 }, { compare: shallowEqual })
 const impulse_2 = impulse_1.clone((x) => x, { compare: shallowEqual })
 const impulse_3 = useImpulse({ count: 0 }, { compare: shallowEqual })
-const value = useWatchImpulse(() => impulse_2.getValue(), {
+const value = useScoped((scope) => impulse_2.getValue(scope), {
   compare: shallowEqual,
 })
 ```
