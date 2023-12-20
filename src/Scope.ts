@@ -14,12 +14,17 @@ export const STATIC_SCOPE: Scope = {
 
 let currentScope = STATIC_SCOPE
 
-export function injectScope(execute: Func<[Scope]>, scope: Scope): void {
+export function injectScope<TResult>(
+  execute: Func<[Scope], TResult>,
+  scope: Scope,
+): TResult {
   const prevScope = currentScope
 
   currentScope = scope
-  execute(scope)
+  const result = execute(scope)
   currentScope = prevScope
+
+  return result
 }
 
 export function extractScope(): Scope {
