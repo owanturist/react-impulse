@@ -73,6 +73,7 @@ describe("calling Impulse.of()", () => {
       const { result } = renderHook(() => {
         const [state, setState] = React.useState(Impulse.of(1))
 
+        // eslint-disable-next-line no-restricted-syntax
         useScopedEffectHook(() => {
           setState(Impulse.of(10))
         }, [])
@@ -160,6 +161,7 @@ describe("calling Impulse#clone()", () => {
         (impulse) => {
           const [state, setState] = React.useState(impulse)
 
+          // eslint-disable-next-line no-restricted-syntax
           useScopedEffectHook(() => {
             setState((x) => x.clone())
           }, [])
@@ -247,6 +249,7 @@ describe("calling Impulse#setValue()", () => {
     it("works fine, does not print an error", ({ scope }) => {
       const { result } = renderHook(
         (impulse) => {
+          // eslint-disable-next-line no-restricted-syntax
           useScopedEffectHook(() => {
             impulse.setValue((x) => x + 1)
           }, [impulse])

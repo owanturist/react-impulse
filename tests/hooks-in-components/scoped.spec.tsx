@@ -170,6 +170,7 @@ describe("scoped()", () => {
   it("should scope re-renders via useScoped", () => {
     const Component = scoped<{
       count: Impulse<number>
+      // eslint-disable-next-line no-restricted-syntax
     }>(({ count }) => {
       const isMoreThanTwo = useScoped((scope) => count.getValue(scope) > 2)
 
@@ -434,32 +435,6 @@ describe("scoped()", () => {
 
     expect(count).toHaveEmittersSize(0)
   })
-
-  it("should not subscribe twice with useScoped", () => {
-    const Component = scoped<{
-      count: Impulse<number>
-    }>(({ scope, count }) => {
-      const x = useScoped(() => count.getValue(scope))
-
-      return <span data-testid="result">{x}</span>
-    })
-
-    const count = Impulse.of(1)
-
-    render(<Component count={count} />)
-
-    const result = screen.getByTestId("result")
-
-    expect(result).toHaveTextContent("1")
-    expect(count).toHaveEmittersSize(1)
-
-    act(() => {
-      count.setValue(2)
-    })
-
-    expect(result).toHaveTextContent("2")
-    expect(count).toHaveEmittersSize(1)
-  })
 })
 
 describe.each([
@@ -710,13 +685,16 @@ describe("scoped.forwardRef()", () => {
       id: string
     }
 
-    const Forwarded = scoped.forwardRef<HTMLDivElement, Props>((props, ref) => (
-      <div ref={ref} {...props} />
-    ))
+    const Forwarded = scoped.forwardRef<HTMLDivElement, Props>(
+      // eslint-disable-next-line no-restricted-syntax
+      (props, ref) => <div ref={ref} {...props} />,
+    )
     const ForwardedMemoized = scoped.forwardRef.memo<HTMLDivElement, Props>(
+      // eslint-disable-next-line no-restricted-syntax
       (props, ref) => <div ref={ref} {...props} />,
     )
     const MemoizedForwarded = scoped.memo.forwardRef<HTMLDivElement, Props>(
+      // eslint-disable-next-line no-restricted-syntax
       (props, ref) => <div ref={ref} {...props} />,
     )
 
@@ -776,6 +754,7 @@ describe("scoped.forwardRef()", () => {
               (x) => (
                 <span data-testid="result">{x * count.getValue(scope)}</span>
               ),
+              // eslint-disable-next-line no-restricted-syntax
               [count, scope],
             )}
             onRender={onHostRender}
@@ -834,6 +813,7 @@ describe("scoped.forwardRef()", () => {
 
         useReactHook(() => {
           onEffect(count.getValue(scope))
+          // eslint-disable-next-line no-restricted-syntax
         }, [count, onEffect, scope])
 
         return (

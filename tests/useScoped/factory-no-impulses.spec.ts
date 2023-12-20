@@ -8,12 +8,14 @@ describe("factory no impulses", () => {
     [
       "inline",
       () => {
+        // eslint-disable-next-line no-restricted-syntax
         return useScoped(() => 1)
       },
     ],
     [
       "memoized",
       () => {
+        // eslint-disable-next-line no-restricted-syntax
         return useScoped(() => 1, [])
       },
     ],
@@ -27,6 +29,7 @@ describe("factory no impulses", () => {
     [
       "inline",
       ({ value }: { value: number }) => {
+        // eslint-disable-next-line no-restricted-syntax
         return useScoped(() => 2 * value)
       },
     ],
