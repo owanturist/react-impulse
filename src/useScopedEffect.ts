@@ -1,7 +1,7 @@
 import { type DependencyList, useEffect } from "./dependencies"
 import type { Scope } from "./Scope"
 import type { Destructor } from "./utils"
-import { useScope } from "./useScope"
+import { subscribe } from "./subscribe"
 
 /**
  * The hook is an `Impulse` version of the `React.useEffect` hook.
@@ -15,11 +15,9 @@ export function useScopedEffect(
   effect: (scope: Scope) => Destructor,
   dependencies?: DependencyList,
 ): void {
-  const getScope = useScope()
-
   useEffect(
-    () => effect(getScope()),
+    () => subscribe(effect),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    dependencies && [...dependencies, getScope],
+    dependencies,
   )
 }

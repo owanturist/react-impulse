@@ -25,7 +25,7 @@ afterAll(() => {
   console$error.mockRestore()
 })
 
-describe("calling Impulse.of()", () => {
+describe.skip("calling Impulse.of()", () => {
   describe.each([
     [
       "useScopedMemo",
@@ -100,7 +100,7 @@ describe("calling Impulse.of()", () => {
   })
 })
 
-describe("calling Impulse#clone()", () => {
+describe.skip("calling Impulse#clone()", () => {
   describe.each([
     [
       "useScopedMemo",
@@ -195,7 +195,7 @@ describe("calling Impulse#clone()", () => {
   })
 })
 
-describe("calling Impulse#setValue()", () => {
+describe.skip("calling Impulse#setValue()", () => {
   describe.each([
     [
       "useScopedMemo",

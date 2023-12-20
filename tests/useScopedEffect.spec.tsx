@@ -110,7 +110,7 @@ describe.each([
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(6)
         expect(value).toHaveEmittersSize(1)
-        expect(onRender).toHaveBeenCalledOnce()
+        expect(onRender).not.toHaveBeenCalled()
       })
 
       it("should call useEffect factory when dep Impulse changes", () => {
@@ -194,7 +194,7 @@ describe.each([
         })
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(10)
-        expect(onRender).toHaveBeenCalledOnce()
+        expect(onRender).not.toHaveBeenCalled()
         expect(value_1).toHaveEmittersSize(0)
         expect(value_2).toHaveEmittersSize(1)
       })
@@ -228,7 +228,7 @@ describe.each([
         })
         expect(onEffect).toHaveBeenCalledOnce()
         expect(onEffect).toHaveBeenLastCalledWith(12)
-        expect(onRender).toHaveBeenCalledOnce()
+        expect(onRender).not.toHaveBeenCalled()
         expect(value).toHaveEmittersSize(1)
       })
     })

@@ -18,7 +18,7 @@ export function subscribe(
   const emit = (): void => {
     cleanup?.()
 
-    cleanup = defineExecutionContext("subscribe", injectScope, listener, {
+    cleanup = injectScope(listener, {
       [EMITTER_KEY]: emitter,
       version: emitter._getVersion(),
     })
