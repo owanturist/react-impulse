@@ -3,6 +3,7 @@
 [![codecov](https://codecov.io/gh/owanturist/react-impulse/branch/master/graph/badge.svg?token=QP3SXO8E9F)](https://codecov.io/gh/owanturist/react-impulse)
 ![known vulnerabilities](https://snyk.io/test/github/owanturist/react-impulse/badge.svg)
 ![types](https://badgen.net/npm/types/react-impulse)
+[![npm version](https://badge.fury.io/js/react-impulse.svg)](https://badge.fury.io/js/react-impulse)
 
 The clean and natural React state management.
 
