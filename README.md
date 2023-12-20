@@ -648,7 +648,7 @@ The hook is an enchanted [`React.useCallback`][react__use_callback] hook.
 
 ```dart
 function useScopedEffect(
-  effect: (scope: Scope) => (void | VoidFunction),
+  effect: (scope: Scope) => void | VoidFunction,
   dependencies?: DependencyList,
 ): void
 ```
@@ -722,7 +722,7 @@ Alias for [`batch`][batch].
 ### `subscribe`
 
 ```dart
-function subscribe(listener: (scope: Scope) => void): VoidFunction
+function subscribe(listener: (scope: Scope) => void | VoidFunction): VoidFunction
 ```
 
 - `listener` is a function that provides [`Scope`][scope] as the first argument and subscribes to changes of all `Impulse` instances that call the [`Impulse#getValue`][impulse__get_value] method inside the `listener`. If `listener` returns a function then it will be called before the next `listener` call.
