@@ -20,11 +20,8 @@ export function useScopedCallback<
   callback: (scope: Scope, ...args: TArgs) => TResult,
   dependencies: DependencyList,
 ): (...args: TArgs) => TResult {
-  return useScopedMemo(
-    (scope) => {
-      return (...args) => callback(scope, ...args)
-    },
+  return useScopedMemo((scope) => {
+    return (...args) => callback(scope, ...args)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    dependencies,
-  )
+  }, dependencies)
 }

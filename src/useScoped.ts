@@ -28,14 +28,14 @@ export interface UseScopedOptions<T> {
 export function useScoped<TResult>(
   factory: (scope: Scope) => TResult,
   dependencies?: DependencyList,
-  { compare }: UseScopedOptions<TResult> = {},
+  options?: UseScopedOptions<TResult>,
 ): TResult {
   const transform = useCallback(
     (scope: Scope) => defineExecutionContext("useScoped", factory, scope),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies ?? [factory],
   )
-  const value = useScope(transform, useStableCallback(compare ?? eq))
+  const value = useScope(transform, useStableCallback(options?.compare ?? eq))
 
   useDebugValue(value)
 
