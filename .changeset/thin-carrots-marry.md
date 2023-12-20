@@ -6,7 +6,7 @@ Drop `Impulse#subscribe` method in favor of [`subscribe`](./#subscribe) higher-o
 
 ```diff
 -const unsubscribe = impulse.subscribe(() => {
-+const unsubscribe = subscribe(() => {
-  console.log(impulse.getValue());
++const unsubscribe = subscribe((scope) => {
+  console.log(impulse.getValue(scope));
 });
 ```

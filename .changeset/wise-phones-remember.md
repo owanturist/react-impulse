@@ -8,7 +8,7 @@ The hook was hardly ever used and in all cases it is more natural to use `useSco
 
 ```diff
 -const value = useImpulseValue(impulse);
-+const value = useScoped(() => impulse.getValue());
++const value = useScoped((scope) => impulse.getValue(scope));
 +// or
-+const value = useScoped(() => impulse.getValue(), [impulse]);
++const value = useScoped((scope) => impulse.getValue(scope), [impulse]);
 ```

@@ -19,7 +19,7 @@ export interface UseScopedOptions<T> {
  * A hook that executes the `factory` function whenever any of the involved Impulses' values update
  * but enqueues a re-render only when the resulting value is different from the previous.
  *
- * @param factory a function that subscribes to all Impulses calling the `Impulse#getValue` method inside the function.
+ * @param factory a function that provides Scope as the first argument and subscribes to all Impulses calling the `Impulse#getValue` method inside the function.
  * @param dependencies optional array of dependencies of the `factory` function. If not defined, the `factory` function is called on every render.
  * @param options optional `UseScopedOptions`.
  *

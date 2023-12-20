@@ -202,12 +202,15 @@ export abstract class Impulse<T> {
   /**
    * Returns the impulse value.
    *
+   * @param scope the Scope that tracks the Impulse value changes.
+   *
    * @version 1.0.0
    */
   public getValue(scope: Scope): T
   /**
    * Returns a value selected from the impulse value.
    *
+   * @param scope the Scope that tracks the Impulse value changes.
    * @param select an optional function that applies to the impulse value before returning.
    *
    * @version 1.0.0

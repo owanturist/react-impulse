@@ -43,7 +43,7 @@ const renderWithScope = <TProps, TContext>(
 }
 
 /**
- * Creates a React component that subscribes to all Impulses calling the `Impulse#getValue` method during the rendering phase of the component.
+ * Creates a React component that provides the `scope: Scope` property and subscribes to all Impulses calling the `Impulse#getValue` method during the rendering phase of the component.
  *
  * @param component a scoped component
  *
@@ -53,9 +53,7 @@ export function scoped<TProps>(component: ExoticComponent<TProps>): never
 export function scoped<TProps>(
   component: FC<PropsWithScope<TProps>>,
 ): FC<PropsWithoutScope<TProps>>
-export function scoped<TProps>(
-  component: FC<PropsWithScope<TProps>>,
-): FC<TProps> {
+export function scoped<TProps>(component: FC<TProps>): FC<TProps> {
   const ComponentWithScope: FC<TProps> = (props, ctx: unknown) => {
     const getScope = useScope()
 

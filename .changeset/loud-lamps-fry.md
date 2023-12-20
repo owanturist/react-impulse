@@ -19,13 +19,19 @@ const impulse = useImpulse(0)
 
 // before
 const count = useScoped(
-  useCallback(() => {
-    return impulse.getValue()
-  }, [impulse]),
+  useCallback(
+    (scope) => {
+      return impulse.getValue(scope)
+    },
+    [impulse],
+  ),
 )
 
 // now
-const count = useScoped(() => {
-  return impulse.getValue()
-}, [impulse])
+const count = useScoped(
+  (scope) => {
+    return impulse.getValue(scope)
+  },
+  [impulse],
+)
 ```

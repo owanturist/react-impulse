@@ -42,7 +42,6 @@ The `Scope` became an explicit argument for all methods, hooks and functions tha
   ```
 - `watch` -> `scoped`
   ```ts
-  export function scoped<TProps>(component: ExoticComponent<TProps>): never
   export function scoped<TProps>(
     component: FC<PropsWithScope<TProps>>,
   ): FC<PropsWithoutScope<TProps>>
