@@ -38,6 +38,10 @@ describe("single Impulse", () => {
     const unsubscribe = subscribe((scope) => {
       const count = impulse.getValue(scope)
 
+      if (count === 2) {
+        return
+      }
+
       return () => {
         cleanup(count)
       }
@@ -51,16 +55,20 @@ describe("single Impulse", () => {
     vi.clearAllMocks()
 
     impulse.setValue(5)
-    expect(cleanup).toHaveBeenCalledOnce()
-    expect(cleanup).toHaveBeenLastCalledWith(2)
+    expect(cleanup).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
-    unsubscribe()
+    impulse.setValue(7)
     expect(cleanup).toHaveBeenCalledOnce()
     expect(cleanup).toHaveBeenLastCalledWith(5)
     vi.clearAllMocks()
 
-    impulse.setValue(7)
+    unsubscribe()
+    expect(cleanup).toHaveBeenCalledOnce()
+    expect(cleanup).toHaveBeenLastCalledWith(7)
+    vi.clearAllMocks()
+
+    impulse.setValue(9)
     expect(cleanup).not.toHaveBeenCalled()
   })
 
