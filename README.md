@@ -725,7 +725,9 @@ Alias for [`batch`][batch].
 function subscribe(listener: (scope: Scope) => void): VoidFunction
 ```
 
-A function that provides [`Scope`][scope] as the first argument and subscribes to changes of all `Impulse` instances that call the [`Impulse#getValue`][impulse__get_value] method inside the `listener`. Returns a cleanup function that unsubscribes the `listener`. The `listener` calls first time synchronously when `subscribe` is called.
+- `listener` is a function that provides [`Scope`][scope] as the first argument and subscribes to changes of all `Impulse` instances that call the [`Impulse#getValue`][impulse__get_value] method inside the `listener`. If `listener` returns a function then it will be called before the next `listener` call.
+
+Returns a cleanup function that unsubscribes the `listener`. The `listener` calls first time synchronously when `subscribe` is called.
 
 It is useful for subscribing to changes of multiple Impulses at once:
 
