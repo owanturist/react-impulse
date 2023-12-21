@@ -3,25 +3,6 @@ export const SCOPED_CALLING_IMPULSE_SET_VALUE =
     ? ""
     : "You should not call Impulse#setValue during rendering of scoped(Component)."
 
-export const SUBSCRIBE_CALLING_IMPULSE_OF =
-  process.env.NODE_ENV === "production"
-    ? ""
-    : [
-        "You should not call Impulse.of inside of the subscribe listener.",
-        "The listener is for read-only operations but Impulse.of creates a new Impulse.",
-      ].join(" ")
-export const SUBSCRIBE_CALLING_IMPULSE_TRANSMIT =
-  process.env.NODE_ENV === "production"
-    ? ""
-    : SUBSCRIBE_CALLING_IMPULSE_OF.replaceAll("Impulse.of", "Impulse.transmit")
-export const SUBSCRIBE_CALLING_IMPULSE_CLONE =
-  process.env.NODE_ENV === "production"
-    ? ""
-    : [
-        "You should not call Impulse#clone inside of the subscribe listener.",
-        "The listener is for read-only operations but Impulse#clone clones an existing Impulse.",
-      ].join(" ")
-
 export const USE_SCOPED_CALLING_IMPULSE_OF =
   process.env.NODE_ENV === "production"
     ? ""

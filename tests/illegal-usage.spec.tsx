@@ -55,16 +55,6 @@ describe("calling Impulse.of()", () => {
     })
   })
 
-  it("warns when called inside subscribe()", () => {
-    subscribe(() => {
-      Impulse.of(1)
-    })
-
-    expect(console$error).toHaveBeenLastCalledWith(
-      "You should not call Impulse.of inside of the subscribe listener. The listener is for read-only operations but Impulse.of creates a new Impulse.",
-    )
-  })
-
   describe.each([
     ["useScopedEffect", useScopedEffect],
     ["useScopedLayoutEffect", useScopedLayoutEffect],
@@ -137,18 +127,6 @@ describe("calling Impulse#clone()", () => {
 
       expect(result.current).toBe(2)
     })
-  })
-
-  it("warns when called inside subscribe()", () => {
-    const impulse = Impulse.of(1)
-
-    subscribe(() => {
-      impulse.clone()
-    })
-
-    expect(console$error).toHaveBeenLastCalledWith(
-      "You should not call Impulse#clone inside of the subscribe listener. The listener is for read-only operations but Impulse#clone clones an existing Impulse.",
-    )
   })
 
   describe.each([

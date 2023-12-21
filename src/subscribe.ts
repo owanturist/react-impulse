@@ -1,7 +1,6 @@
 import { EMITTER_KEY, type Scope, injectScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { noop, type Destructor } from "./utils"
-import { defineExecutionContext } from "./validation"
 
 /**
  * A function that provides `Scope` as the first argument subscribes to changes of all `Impulse` instances that call the `Impulse#getValue` method inside the `listener`.
@@ -18,7 +17,7 @@ export function subscribe(
   const emit = (): void => {
     cleanup?.()
 
-    cleanup = defineExecutionContext("subscribe", injectScope, listener, {
+    cleanup = injectScope(listener, {
       [EMITTER_KEY]: emitter,
       version: emitter._getVersion(),
     })
