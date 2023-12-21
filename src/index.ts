@@ -13,6 +13,7 @@ export {
   type ForwardedPropsWithoutScope,
   scoped,
 } from "./scoped"
+export { untrack } from "./untrack"
 export { batch } from "./batch"
 export { batch as tap } from "./batch"
 export { subscribe } from "./subscribe"
