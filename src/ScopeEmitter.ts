@@ -12,33 +12,35 @@ export class ScopeEmitter {
     return new ScopeEmitter()
   }
 
-  private static _queue: null | Array<null | ReadonlySet<ScopeEmitter>> = null
+  private static _queue: null | Array<ReadonlySet<ScopeEmitter>> = null
 
-  public static _schedule(
-    execute: () => null | ReadonlySet<ScopeEmitter>,
-  ): void {
-    if (ScopeEmitter._queue == null) {
-      ScopeEmitter._queue = []
-
-      ScopeEmitter._queue.push(execute())
-
-      const uniq = new WeakSet<VoidFunction>()
-
-      ScopeEmitter._queue.forEach((emitters) => {
-        emitters?.forEach((emitter) => {
-          if (!uniq.has(emitter._emit)) {
-            uniq.add(emitter._emit)
-            emitter._increment()
-            emitter._detachAll()
-            emitter._emit()
-          }
-        })
-      })
-
-      ScopeEmitter._queue = null
-    } else {
-      ScopeEmitter._queue.push(execute())
+  public static _schedule<TResult>(
+    execute: (queue: Array<ReadonlySet<ScopeEmitter>>) => TResult,
+  ): TResult {
+    if (ScopeEmitter._queue != null) {
+      return execute(ScopeEmitter._queue)
     }
+
+    ScopeEmitter._queue = []
+
+    const result = execute(ScopeEmitter._queue)
+
+    const uniq = new WeakSet<VoidFunction>()
+
+    ScopeEmitter._queue.forEach((emitters) => {
+      emitters.forEach((emitter) => {
+        if (!uniq.has(emitter._emit)) {
+          uniq.add(emitter._emit)
+          emitter._increment()
+          emitter._detachAll()
+          emitter._emit()
+        }
+      })
+    })
+
+    ScopeEmitter._queue = null
+
+    return result
   }
 
   private readonly _cleanups: Array<VoidFunction> = []

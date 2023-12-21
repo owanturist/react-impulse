@@ -11,7 +11,5 @@ import { ScopeEmitter } from "./ScopeEmitter"
 export function batch(execute: (scope: Scope) => void): void {
   ScopeEmitter._schedule(() => {
     execute(STATIC_SCOPE)
-
-    return null
   })
 }

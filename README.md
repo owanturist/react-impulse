@@ -403,6 +403,7 @@ const cloneOfMutable = mutable.clone((current) => ({
 - [`useScoped`][use_scoped] hook provides the `scope` argument. It can be used in custom hooks or inside components to narrow down the re-rendering scope.
 - [`subscribe`][subscribe] function provides the `scope` argument. It is useful outside of the React world.
 - [`batch`][batch] function provides the `scope` argument. Use it to optimize multiple Impulses updates or to access the Impulses' values inside async operations.
+- [`untrack`][untrack] function provides the `scope` argument. Use it when you need to read Impulses' values without reactivity.
 - [`useScopedCallback`][use_scoped_callback], [`useScopedMemo`][use_scoped_memo], [`useScopedEffect`][use_scoped_effect], [`useScopedLayoutEffect`][use_scoped_layout_effect] hooks provide the `scope` argument. They are enchanted versions of the React hooks that provide the `scope` argument as the first argument.
 
 ### `scoped`
@@ -719,6 +720,15 @@ const SumOfTwo: React.FC<{
 
 Alias for [`batch`][batch].
 
+### `untrack`
+
+```dart
+function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
+function untrack<TValue>(impulse: Impulse<TValue>): TValue
+```
+
+The `untrack` function is a helper to read Impulses' values without reactivity. It provides a [`Scope`][scope] to the `factory` function and returns the result of the function. Acts as [`batch`][batch].
+
 ### `subscribe`
 
 ```dart
@@ -896,6 +906,7 @@ ESLint can also help validate unnecessary and abusive hooks/HOCs usage:
 [scope]: #scope
 [scoped]: #scoped
 [batch]: #batch
+[untrack]: #untrack
 [subscribe]: #subscribe
 [impulse_options]: #interface-impulseoptions
 [transmitting_impulse_options]: #interface-transmittingimpulseoptions
