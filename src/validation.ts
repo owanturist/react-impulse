@@ -1,10 +1,6 @@
 import { type Func, isFunction } from "./utils"
 
-export type ExecutionContext =
-  | "subscribe"
-  | "scoped"
-  | "useScoped"
-  | "useScopedMemo"
+export type ExecutionContext = "scoped" | "useScoped" | "useScopedMemo"
 
 let currentExecutionContext: null | ExecutionContext = null
 

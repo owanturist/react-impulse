@@ -25,7 +25,7 @@ afterAll(() => {
   console$error.mockRestore()
 })
 
-describe.skip("calling Impulse.of()", () => {
+describe("calling Impulse.of()", () => {
   describe.each([
     [
       "useScopedMemo",
@@ -53,16 +53,6 @@ describe.skip("calling Impulse.of()", () => {
 
       expect(result.current).toBe(1)
     })
-  })
-
-  it("warns when called inside subscribe()", () => {
-    subscribe(() => {
-      Impulse.of(1)
-    })
-
-    expect(console$error).toHaveBeenLastCalledWith(
-      "You should not call Impulse.of inside of the subscribe listener. The listener is for read-only operations but Impulse.of creates a new Impulse.",
-    )
   })
 
   describe.each([
@@ -100,7 +90,7 @@ describe.skip("calling Impulse.of()", () => {
   })
 })
 
-describe.skip("calling Impulse#clone()", () => {
+describe("calling Impulse#clone()", () => {
   describe.each([
     [
       "useScopedMemo",
@@ -137,18 +127,6 @@ describe.skip("calling Impulse#clone()", () => {
 
       expect(result.current).toBe(2)
     })
-  })
-
-  it("warns when called inside subscribe()", () => {
-    const impulse = Impulse.of(1)
-
-    subscribe(() => {
-      impulse.clone()
-    })
-
-    expect(console$error).toHaveBeenLastCalledWith(
-      "You should not call Impulse#clone inside of the subscribe listener. The listener is for read-only operations but Impulse#clone clones an existing Impulse.",
-    )
   })
 
   describe.each([
@@ -195,7 +173,7 @@ describe.skip("calling Impulse#clone()", () => {
   })
 })
 
-describe.skip("calling Impulse#setValue()", () => {
+describe("calling Impulse#setValue()", () => {
   describe.each([
     [
       "useScopedMemo",

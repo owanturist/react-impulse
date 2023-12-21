@@ -4,9 +4,6 @@ import { ScopeEmitter } from "./ScopeEmitter"
 import { validate } from "./validation"
 import {
   SCOPED_CALLING_IMPULSE_SET_VALUE,
-  SUBSCRIBE_CALLING_IMPULSE_OF,
-  SUBSCRIBE_CALLING_IMPULSE_CLONE,
-  SUBSCRIBE_CALLING_IMPULSE_TRANSMIT,
   USE_SCOPED_CALLING_IMPULSE_OF,
   USE_SCOPED_CALLING_IMPULSE_CLONE,
   USE_SCOPED_CALLING_IMPULSE_SET_VALUE,
@@ -54,7 +51,6 @@ export abstract class Impulse<T> {
   public static of<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
 
   @validate
-    ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_OF)
     ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_OF)
     ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_OF)
     ._alert()
@@ -98,7 +94,6 @@ export abstract class Impulse<T> {
   ): Impulse<T>
 
   @validate
-    ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_TRANSMIT)
     ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_TRANSMIT)
     ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_TRANSMIT)
     ._alert()
@@ -183,7 +178,6 @@ export abstract class Impulse<T> {
   ): Impulse<T>
 
   @validate
-    ._when("subscribe", SUBSCRIBE_CALLING_IMPULSE_CLONE)
     ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_CLONE)
     ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_CLONE)
     ._alert()
