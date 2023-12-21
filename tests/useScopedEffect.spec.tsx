@@ -520,95 +520,143 @@ describe.each([
     expect(screen.getByTestId("count")).toHaveTextContent("4")
     expect(onEffect).not.toHaveBeenCalled()
   })
-})
 
-it("triggers the effect when either regular or additional dependencies change", () => {
-  const spy = vi.fn()
-  const impulse = Impulse.of(2)
-  const { rerender } = renderHook(
-    ({ left, right }) => {
-      useScopedEffect(
-        (scope) => {
-          spy(left + right.getValue(scope))
+  it("triggers the effect when either regular or additional dependencies change", () => {
+    const spy = vi.fn()
+    const impulse = Impulse.of(2)
+    const { rerender } = renderHook(
+      ({ left, right }) => {
+        useCustomScopedEffect(
+          (scope) => {
+            spy(left + right.getValue(scope))
+          },
+          [left, right],
+        )
+      },
+      {
+        initialProps: { left: 1, right: impulse },
+      },
+    )
+
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(3)
+    vi.clearAllMocks()
+
+    rerender({ left: 2, right: impulse })
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(4)
+    vi.clearAllMocks()
+
+    rerender({ left: 2, right: impulse })
+    expect(spy).not.toHaveBeenCalled()
+    vi.clearAllMocks()
+
+    act(() => {
+      impulse.setValue(3)
+    })
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(5)
+    vi.clearAllMocks()
+
+    act(() => {
+      impulse.setValue(3)
+    })
+    expect(spy).not.toHaveBeenCalled()
+    vi.clearAllMocks()
+
+    rerender({ left: 2, right: Impulse.of(4) })
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(6)
+    vi.clearAllMocks()
+  })
+
+  it("triggers the effect when Impulses are not listened in dependencies", () => {
+    const spy = vi.fn()
+    const left = Impulse.of(1)
+    const right = Impulse.of(2)
+    const { rerender } = renderHook(
+      ({ state }) => {
+        useCustomScopedEffect(
+          (scope) => {
+            spy(state.left.getValue(scope) + state.right.getValue(scope))
+          },
+          [state],
+        )
+      },
+      {
+        initialProps: { state: { left, right } },
+      },
+    )
+
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(3)
+    vi.clearAllMocks()
+
+    rerender({ state: { left, right } })
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(3)
+    vi.clearAllMocks()
+
+    act(() => {
+      left.setValue(2)
+    })
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(4)
+    vi.clearAllMocks()
+
+    act(() => {
+      right.setValue(3)
+    })
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(5)
+    vi.clearAllMocks()
+  })
+
+  it("calls effect cleanup function", () => {
+    const cleanup = vi.fn()
+    const counter = Impulse.of({ count: 2 })
+    const { rerender, unmount } = renderHook(
+      (props) => {
+        useCustomScopedEffect(
+          (scope) => {
+            const { count } = props.counter.getValue(scope)
+
+            return () => {
+              cleanup(count * props.multiplier)
+            }
+          },
+          [props.counter, props.multiplier],
+        )
+      },
+      {
+        initialProps: {
+          counter,
+          multiplier: 2,
         },
-        [left, right],
-      )
-    },
-    {
-      initialProps: { left: 1, right: impulse },
-    },
-  )
+      },
+    )
 
-  expect(spy).toHaveBeenCalledOnce()
-  expect(spy).toHaveBeenLastCalledWith(3)
-  vi.clearAllMocks()
+    expect(cleanup).not.toHaveBeenCalled()
 
-  rerender({ left: 2, right: impulse })
-  expect(spy).toHaveBeenCalledOnce()
-  expect(spy).toHaveBeenLastCalledWith(4)
-  vi.clearAllMocks()
+    counter.setValue({ count: 3 })
+    expect(cleanup).toHaveBeenCalledOnce()
+    expect(cleanup).toHaveBeenLastCalledWith(4)
+    vi.clearAllMocks()
 
-  rerender({ left: 2, right: impulse })
-  expect(spy).not.toHaveBeenCalled()
-  vi.clearAllMocks()
+    rerender({
+      counter,
+      multiplier: 3,
+    })
+    expect(cleanup).toHaveBeenCalledOnce()
+    expect(cleanup).toHaveBeenLastCalledWith(6)
+    vi.clearAllMocks()
 
-  act(() => {
-    impulse.setValue(3)
+    unmount()
+    expect(cleanup).toHaveBeenCalledOnce()
+    expect(cleanup).toHaveBeenLastCalledWith(9)
+    vi.clearAllMocks()
+
+    counter.setValue({ count: 4 })
+    expect(cleanup).not.toHaveBeenCalled()
   })
-  expect(spy).toHaveBeenCalledOnce()
-  expect(spy).toHaveBeenLastCalledWith(5)
-  vi.clearAllMocks()
-
-  act(() => {
-    impulse.setValue(3)
-  })
-  expect(spy).not.toHaveBeenCalled()
-  vi.clearAllMocks()
-
-  rerender({ left: 2, right: Impulse.of(4) })
-  expect(spy).toHaveBeenCalledOnce()
-  expect(spy).toHaveBeenLastCalledWith(6)
-  vi.clearAllMocks()
-})
-
-it("triggers the effect when Impulses are not listened in dependencies", () => {
-  const spy = vi.fn()
-  const left = Impulse.of(1)
-  const right = Impulse.of(2)
-  const { rerender } = renderHook(
-    ({ state }) => {
-      useScopedEffect(
-        (scope) => {
-          spy(state.left.getValue(scope) + state.right.getValue(scope))
-        },
-        [state],
-      )
-    },
-    {
-      initialProps: { state: { left, right } },
-    },
-  )
-
-  expect(spy).toHaveBeenCalledOnce()
-  expect(spy).toHaveBeenLastCalledWith(3)
-  vi.clearAllMocks()
-
-  rerender({ state: { left, right } })
-  expect(spy).toHaveBeenCalledOnce()
-  expect(spy).toHaveBeenLastCalledWith(3)
-  vi.clearAllMocks()
-
-  act(() => {
-    left.setValue(2)
-  })
-  expect(spy).toHaveBeenCalledOnce()
-  expect(spy).toHaveBeenLastCalledWith(4)
-  vi.clearAllMocks()
-
-  act(() => {
-    right.setValue(3)
-  })
-  expect(spy).toHaveBeenCalledOnce()
-  expect(spy).toHaveBeenLastCalledWith(5)
-  vi.clearAllMocks()
 })
