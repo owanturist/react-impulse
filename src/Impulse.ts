@@ -145,8 +145,10 @@ export abstract class Impulse<T> {
   }
 
   protected _emit(execute: () => boolean): void {
-    ScopeEmitter._schedule(() => {
-      return execute() ? this._emitters : null
+    ScopeEmitter._schedule((queue) => {
+      if (execute()) {
+        queue.push(this._emitters)
+      }
     })
   }
 
