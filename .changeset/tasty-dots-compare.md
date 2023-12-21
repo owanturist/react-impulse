@@ -8,13 +8,13 @@ Introduce transmitting Impulse.
 
   ```dart
   Impulse.transmit<T>(
-    getter: () => T,
+    getter: (scope: Scope) => T,
     options?: TransmittingImpulseOptions<T>,
   ): ReadonlyImpulse<T>
 
   Impulse.transmit<T>(
-    getter: () => T,
-    setter: (value: T) => void,
+    getter: (scope: Scope) => T,
+    setter: (value: T, scope: Scope) => void,
     options?: TransmittingImpulseOptions<T>,
   ): Impulse<T>
   ```
@@ -28,15 +28,15 @@ Introduce transmitting Impulse.
 
   ```dart
   function useTransmittingImpulse<T>(
-    getter: () => T,
+    getter: (scope: Scope) => T,
     dependencies: DependencyList,
     options?: TransmittingImpulseOptions<T>,
   ): ReadonlyImpulse<T>
 
   function useTransmittingImpulse<T>(
-    getter: () => T,
+    getter: (scope: Scope) => T,
     dependencies: DependencyList,
-    setter: (value: T) => void,
+    setter: (value: T, scope: Scope) => void,
     options?: TransmittingImpulseOptions<T>,
   ): Impulse<T>
   ```
