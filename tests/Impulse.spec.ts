@@ -61,6 +61,13 @@ function setupTransmittingImpulseFromImpulse<T>(
 }
 
 describe("Impulse.of()", () => {
+  it("creates an Impulse of undefined", () => {
+    const impulse = Impulse.of()
+
+    expectTypeOf(impulse).toEqualTypeOf<Impulse<undefined>>()
+    expectTypeOf(impulse).toEqualTypeOf<Impulse<undefined, undefined>>()
+  })
+
   it("creates an Impulse of undefined | T type", ({ scope }) => {
     const impulse = Impulse.of<string>()
 

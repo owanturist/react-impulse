@@ -13,7 +13,10 @@ import {
  *
  * @version 1.2.0
  */
-export function useImpulse<T = undefined>(): Impulse<undefined | T>
+export function useImpulse<
+  TGetter = undefined,
+  TSetter extends undefined | TGetter = undefined | TGetter,
+>(): Impulse<undefined | TGetter, TSetter>
 
 /**
  * A hook that initiates a stable (never changing) Impulse.
@@ -26,10 +29,10 @@ export function useImpulse<T = undefined>(): Impulse<undefined | T>
  *
  * @version 1.0.0
  */
-export function useImpulse<T>(
-  valueOrInitValue: T | ((scope: Scope) => T),
-  options?: ImpulseOptions<T>,
-): Impulse<T>
+export function useImpulse<TGetter, TSetter extends TGetter = TGetter>(
+  valueOrInitValue: TGetter | ((scope: Scope) => TGetter),
+  options?: ImpulseOptions<TGetter>,
+): Impulse<TGetter, TSetter>
 
 export function useImpulse<T>(
   valueOrInitValue?: T | Func<[Scope], T>,

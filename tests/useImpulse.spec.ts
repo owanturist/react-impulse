@@ -8,6 +8,25 @@ describe("without initial value", () => {
 
     // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
     expect(result.current.getValue(scope)).toBeUndefined()
+
+    expectTypeOf(result.current).toEqualTypeOf<Impulse<undefined>>()
+  })
+
+  it("creates the impulse with narrowed setter", () => {
+    const { result } = renderHook(() => useImpulse<boolean, false>())
+
+    expectTypeOf(result.current).toEqualTypeOf<
+      Impulse<undefined | boolean, false>
+    >()
+  })
+
+  it("does not let to create an impulse with wider setter", ({ scope }) => {
+    // @ts-expect-error boolean does not extend false
+    const { result } = renderHook(() => useImpulse<false, boolean>())
+
+    expectTypeOf(result.current.getValue(scope)).toEqualTypeOf<
+      undefined | false
+    >()
   })
 
   it("updates the impulse with a new value", ({ scope }) => {
@@ -16,6 +35,8 @@ describe("without initial value", () => {
     result.current.setValue(1)
 
     expect(result.current.getValue(scope)).toBe(1)
+
+    expectTypeOf(result.current).toEqualTypeOf<Impulse<undefined | number>>()
   })
 
   it("updates the impulse with a undefined", ({ scope }) => {
@@ -36,6 +57,21 @@ describe("with direct initial value", () => {
 
     expect(result.current.getValue(scope)).toBe(initial)
     expect(result.current.getValue(scope)).toStrictEqual({ count: 0 })
+
+    expectTypeOf(result.current).toEqualTypeOf<Impulse<{ count: number }>>()
+  })
+
+  it("creates an impulse with narrowed setter", () => {
+    const { result } = renderHook(() => useImpulse<boolean, false>(true))
+
+    expectTypeOf(result.current).toEqualTypeOf<Impulse<boolean, false>>()
+  })
+
+  it("does not let to create an impulse with wider setter", ({ scope }) => {
+    // @ts-expect-error boolean does not extend false
+    const { result } = renderHook(() => useImpulse<false, boolean>(false))
+
+    expectTypeOf(result.current.getValue(scope)).toEqualTypeOf<false>()
   })
 
   it("keeps the same impulse during re-renders", ({ scope }) => {
