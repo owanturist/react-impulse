@@ -14,30 +14,33 @@ import {
   USE_SCOPED_MEMO_CALLING_IMPULSE_TRANSMIT,
 } from "./messages"
 
-export interface ImpulseOptions<T> {
+export interface ImpulseOptions<TGetter> {
   /**
    * The compare function determines whether or not a new Impulse's value replaces the current one.
    * In many cases specifying the function leads to better performance because it prevents unnecessary updates.
    */
-  readonly compare?: null | Compare<T>
+  readonly compare?: null | Compare<TGetter>
 }
 
-export interface TransmittingImpulseOptions<T> {
+export interface TransmittingImpulseOptions<TGetter> {
   /**
    * The compare function determines whether or not a transmitting value changes when reading it from an external source.
    */
-  readonly compare?: null | Compare<T>
+  readonly compare?: null | Compare<TGetter>
 }
 
-export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
+export type ReadonlyImpulse<TGetter> = Omit<Impulse<TGetter>, "setValue">
 
-export abstract class Impulse<T> {
+export abstract class Impulse<TGetter, TSetter extends TGetter = TGetter> {
   /**
    * Creates new Impulse without an initial value.
    *
    * @version 1.2.0
    */
-  public static of<T = undefined>(): Impulse<undefined | T>
+  public static of<
+    TGetter = undefined,
+    TSetter extends undefined | TGetter = undefined | TGetter,
+  >(): Impulse<undefined | TGetter, TSetter>
 
   /**
    * Creates new Impulse.
@@ -48,7 +51,10 @@ export abstract class Impulse<T> {
    *
    * @version 1.0.0
    */
-  public static of<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
+  public static of<TGetter, TSetter extends TGetter = TGetter>(
+    initialValue: TGetter,
+    options?: ImpulseOptions<TGetter>,
+  ): Impulse<TGetter, TSetter>
 
   @validate
     ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_OF)
@@ -71,10 +77,10 @@ export abstract class Impulse<T> {
    *
    * @version 2.0.0
    */
-  public static transmit<T>(
-    getter: (scope: Scope) => T,
-    options?: TransmittingImpulseOptions<T>,
-  ): ReadonlyImpulse<T>
+  public static transmit<TGetter>(
+    getter: (scope: Scope) => TGetter,
+    options?: TransmittingImpulseOptions<TGetter>,
+  ): ReadonlyImpulse<TGetter>
 
   /**
    * Creates a new transmitting Impulse.
@@ -87,11 +93,11 @@ export abstract class Impulse<T> {
    *
    * @version 2.0.0
    */
-  public static transmit<T>(
-    getter: (scope: Scope) => T,
-    setter: (value: T, scope: Scope) => void,
-    options?: TransmittingImpulseOptions<T>,
-  ): Impulse<T>
+  public static transmit<TGetter, TSetter extends TGetter = TGetter>(
+    getter: (scope: Scope) => TGetter,
+    setter: (value: TSetter, scope: Scope) => void,
+    options?: TransmittingImpulseOptions<TGetter>,
+  ): Impulse<TGetter, TSetter>
 
   @validate
     ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_TRANSMIT)
@@ -115,7 +121,7 @@ export abstract class Impulse<T> {
 
   private readonly _emitters = new Set<ScopeEmitter>()
 
-  protected constructor(protected readonly _compare: Compare<T>) {}
+  protected constructor(protected readonly _compare: Compare<TGetter>) {}
 
   /**
    * Return the value when serializing to JSON.
@@ -152,8 +158,8 @@ export abstract class Impulse<T> {
     })
   }
 
-  protected abstract _getter(scope: Scope): T
-  protected abstract _setter(value: T): boolean
+  protected abstract _getter(scope: Scope): TGetter
+  protected abstract _setter(value: TSetter): boolean
 
   /**
    * Creates a new Impulse instance out of the current one with the same value.
@@ -163,7 +169,7 @@ export abstract class Impulse<T> {
    *
    * @version 2.0.0
    */
-  public clone(options?: ImpulseOptions<T>): Impulse<T>
+  public clone(options?: ImpulseOptions<TGetter>): Impulse<TGetter, TSetter>
 
   /**
    * Creates a new Impulse instance out of the current one with the transformed value. Transforming might be handy when cloning mutable values (such as an Impulse).
@@ -175,9 +181,9 @@ export abstract class Impulse<T> {
    * @version 1.0.0
    */
   public clone(
-    transform: (value: T, scope: Scope) => T,
-    options?: ImpulseOptions<T>,
-  ): Impulse<T>
+    transform: (value: TGetter, scope: Scope) => TGetter,
+    options?: ImpulseOptions<TGetter>,
+  ): Impulse<TGetter, TSetter>
 
   @validate
     ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_CLONE)
@@ -185,9 +191,12 @@ export abstract class Impulse<T> {
     ._alert()
   public clone(
     ...args:
-      | [options?: ImpulseOptions<T>]
-      | [transform: Func<[T, Scope], T>, options?: ImpulseOptions<T>]
-  ): Impulse<T> {
+      | [options?: ImpulseOptions<TGetter>]
+      | [
+          transform: Func<[TGetter, Scope], TGetter>,
+          options?: ImpulseOptions<TGetter>,
+        ]
+  ): Impulse<TGetter, TSetter> {
     const [value, { compare = this._compare } = {}] = isFunction(args[0])
       ? [args[0](this._getter(STATIC_SCOPE), STATIC_SCOPE), args[1]]
       : [this._getter(STATIC_SCOPE), args[0]]
@@ -202,7 +211,7 @@ export abstract class Impulse<T> {
    *
    * @version 1.0.0
    */
-  public getValue(scope: Scope): T
+  public getValue(scope: Scope): TGetter
   /**
    * Returns a value selected from the impulse value.
    *
@@ -211,9 +220,15 @@ export abstract class Impulse<T> {
    *
    * @version 1.0.0
    */
-  public getValue<R>(scope: Scope, select: (value: T, scope: Scope) => R): R
+  public getValue<TResult>(
+    scope: Scope,
+    select: (value: TGetter, scope: Scope) => TResult,
+  ): TResult
 
-  public getValue<R>(scope: Scope, select?: Func<[T, Scope], R>): T | R {
+  public getValue<R>(
+    scope: Scope,
+    select?: Func<[TGetter, Scope], R>,
+  ): TGetter | R {
     scope[EMITTER_KEY]?._attachTo(this._emitters)
 
     const value = this._getter(scope)
@@ -236,7 +251,9 @@ export abstract class Impulse<T> {
     ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_SET_VALUE)
     ._prevent()
   public setValue(
-    valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
+    valueOrTransform:
+      | TSetter
+      | ((currentValue: TGetter, scope: Scope) => TSetter),
   ): void {
     this._emit(() => {
       const nextValue = isFunction(valueOrTransform)

@@ -61,10 +61,72 @@ function setupTransmittingImpulseFromImpulse<T>(
 }
 
 describe("Impulse.of()", () => {
-  it("creates an Impulse of undefined | T type", () => {
+  it("creates an Impulse of undefined | T type", ({ scope }) => {
     const impulse = Impulse.of<string>()
 
     expectTypeOf(impulse).toEqualTypeOf<Impulse<string | undefined>>()
+    expectTypeOf(impulse).toEqualTypeOf<
+      Impulse<string | undefined, string | undefined>
+    >()
+
+    expectTypeOf(impulse.getValue(scope)).toEqualTypeOf<string | undefined>()
+
+    expectTypeOf(impulse.setValue).toEqualTypeOf<
+      (
+        value:
+          | string
+          | undefined
+          | ((
+              currentValue: string | undefined,
+              scope: Scope,
+            ) => string | undefined),
+      ) => void
+    >()
+  })
+
+  it("creates an Impulse with defined setter", ({ scope }) => {
+    const impulse = Impulse.of<boolean, boolean>()
+
+    // @ts-expect-error undefined does not extend boolean
+    impulse.setValue(undefined)
+    expect(impulse.getValue(scope)).toBeUndefined()
+
+    expectTypeOf(impulse).toEqualTypeOf<Impulse<boolean | undefined, boolean>>()
+    expectTypeOf(impulse.getValue(scope)).toEqualTypeOf<undefined | boolean>()
+
+    expectTypeOf(impulse.setValue).toEqualTypeOf<
+      (
+        value:
+          | boolean
+          | ((currentValue: boolean | undefined, scope: Scope) => boolean),
+      ) => void
+    >()
+  })
+
+  it("creates an Impulse with narrowed setter", ({ scope }) => {
+    const impulse = Impulse.of<boolean, false>()
+
+    // @ts-expect-error true does not extend false
+    impulse.setValue(true)
+    expect(impulse.getValue(scope)).toBe(true)
+
+    expectTypeOf(impulse).toEqualTypeOf<Impulse<boolean | undefined, false>>()
+    expectTypeOf(impulse.getValue(scope)).toEqualTypeOf<undefined | boolean>()
+
+    expectTypeOf(impulse.setValue).toEqualTypeOf<
+      (
+        value:
+          | false
+          | ((currentValue: boolean | undefined, scope: Scope) => false),
+      ) => void
+    >()
+  })
+
+  it("does not let to define an Impulse with wider setter", ({ scope }) => {
+    // @ts-expect-error boolean does not extend false
+    const impulse = Impulse.of<false, boolean>()
+
+    expectTypeOf(impulse.getValue(scope)).toEqualTypeOf<undefined | false>()
   })
 
   it("should create an impulse with undefined initial value", ({ scope }) => {
@@ -92,6 +154,42 @@ describe("Impulse.of()", () => {
 })
 
 describe("Impulse.of(value, options?)", () => {
+  it("creates an Impulse of T type", ({ scope }) => {
+    const impulse = Impulse.of(0)
+
+    expectTypeOf(impulse).toEqualTypeOf<Impulse<number>>()
+    expectTypeOf(impulse).toEqualTypeOf<Impulse<number, number>>()
+
+    expectTypeOf(impulse.getValue(scope)).toEqualTypeOf<number>()
+
+    expectTypeOf(impulse.setValue).toEqualTypeOf<
+      (value: number | ((currentValue: number, scope: Scope) => number)) => void
+    >()
+  })
+
+  it("creates an Impulse with narrowed setter", ({ scope }) => {
+    const impulse = Impulse.of<number, 1>(0)
+
+    // @ts-expect-error 2 does not extend 1
+    impulse.setValue(2)
+    expect(impulse.getValue(scope)).toBe(2)
+
+    expectTypeOf(impulse).toEqualTypeOf<Impulse<number, 1>>()
+
+    expectTypeOf(impulse.getValue(scope)).toEqualTypeOf<number>()
+
+    expectTypeOf(impulse.setValue).toEqualTypeOf<
+      (value: 1 | ((currentValue: number, scope: Scope) => 1)) => void
+    >()
+  })
+
+  it("does not let to define an Impulse with wider setter", ({ scope }) => {
+    // @ts-expect-error number does not extend 1
+    const impulse = Impulse.of<1, number>(0)
+
+    expectTypeOf(impulse.getValue(scope)).toEqualTypeOf<1>()
+  })
+
   it("does not call compare on init", () => {
     Impulse.of({ count: 0 }, { compare: Counter.compare })
 
@@ -279,7 +377,7 @@ describe("Impulse.transmit(getter, options?)", () => {
 })
 
 describe("Impulse.transmit(getter, setter, options?)", () => {
-  it("creates an Impulse", () => {
+  it("creates an Impulse", ({ scope }) => {
     let variable = 0
     const impulse = Impulse.transmit(
       () => variable,
@@ -289,7 +387,45 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     )
 
     expectTypeOf(impulse).toEqualTypeOf<Impulse<number>>()
+    expectTypeOf(impulse).toEqualTypeOf<Impulse<number, number>>()
     expectTypeOf(impulse).toMatchTypeOf<ReadonlyImpulse<number>>()
+
+    expectTypeOf(impulse.getValue(scope)).toEqualTypeOf<number>()
+
+    expectTypeOf(impulse.setValue).toEqualTypeOf<
+      (value: number | ((currentValue: number, scope: Scope) => number)) => void
+    >()
+  })
+
+  it("creates an Impulse with narrowed setter", ({ scope }) => {
+    let variable = true
+    const impulse = Impulse.transmit<boolean, false>(
+      () => variable,
+      (value) => {
+        variable = value
+      },
+    )
+
+    expectTypeOf(impulse).toEqualTypeOf<Impulse<boolean, false>>()
+
+    expectTypeOf(impulse.getValue(scope)).toEqualTypeOf<boolean>()
+
+    expectTypeOf(impulse.setValue).toEqualTypeOf<
+      (value: false | ((currentValue: boolean, scope: Scope) => false)) => void
+    >()
+  })
+
+  it("does not let to define an Impulse with wider setter", ({ scope }) => {
+    let variable = false
+    // @ts-expect-error boolean does not extend false
+    const impulse = Impulse.transmit<false, boolean>(
+      () => variable,
+      (value: boolean) => {
+        variable = value
+      },
+    )
+
+    expectTypeOf(impulse.getValue(scope)).toEqualTypeOf<false>()
   })
 
   it("subscribes to Impulse source and back", () => {
