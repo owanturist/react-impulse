@@ -27,11 +27,11 @@ import {
  *
  * @version 2.0.0
  */
-export function useTransmittingImpulse<T>(
-  getter: (scope: Scope) => T,
+export function useTransmittingImpulse<TValue>(
+  getter: (scope: Scope) => TValue,
   dependencies: DependencyList,
-  options?: TransmittingImpulseOptions<T>,
-): ReadonlyImpulse<T>
+  options?: TransmittingImpulseOptions<TValue>,
+): ReadonlyImpulse<TValue>
 
 /**
  * A hook that initialize a stable (never changing) transmitting Impulse.
@@ -45,12 +45,15 @@ export function useTransmittingImpulse<T>(
  *
  * @version 2.0.0
  */
-export function useTransmittingImpulse<T>(
-  getter: (scope: Scope) => T,
+export function useTransmittingImpulse<
+  TGetter,
+  TSetter extends TGetter = TGetter,
+>(
+  getter: (scope: Scope) => TGetter,
   dependencies: DependencyList,
-  setter: (value: T, scope: Scope) => void,
-  options?: TransmittingImpulseOptions<T>,
-): Impulse<T>
+  setter: (value: TSetter, scope: Scope) => void,
+  options?: TransmittingImpulseOptions<TGetter>,
+): Impulse<TGetter, TSetter>
 
 export function useTransmittingImpulse<T>(
   getter: Func<[Scope], T>,

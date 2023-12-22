@@ -233,7 +233,7 @@ describe("Impulse.transmit(getter, options?)", () => {
     const impulse = Impulse.transmit(() => 0)
 
     // @ts-expect-error should be ReadonlyImpulse only
-    expectTypeOf(impulse).toEqualTypeOf<Impulse<number>>()
+    expectTypeOf(impulse).toMatchTypeOf<Impulse<number>>()
     expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<number>>()
   })
 
@@ -414,6 +414,7 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     )
 
     expectTypeOf(impulse).toEqualTypeOf<Impulse<boolean, false>>()
+    expectTypeOf(impulse).toMatchTypeOf<ReadonlyImpulse<boolean>>()
 
     expectTypeOf(impulse.getValue(scope)).toEqualTypeOf<boolean>()
 

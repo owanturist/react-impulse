@@ -518,7 +518,37 @@ describe("type check", () => {
     })
 
     // @ts-expect-error should be ReadonlyImpulse only
-    expectTypeOf(result.current).toEqualTypeOf<Impulse<number>>()
+    expectTypeOf(result.current).toMatchTypeOf<Impulse<number>>()
     expectTypeOf(result.current).toEqualTypeOf<ReadonlyImpulse<number>>()
+  })
+
+  it("narrows down the setter", () => {
+    const { result } = renderHook(() => {
+      return useTransmittingImpulse<boolean, false>(
+        () => true,
+        [],
+        () => {
+          // noop
+        },
+      )
+    })
+
+    expectTypeOf(result.current).toEqualTypeOf<Impulse<boolean, false>>()
+    expectTypeOf(result.current).toMatchTypeOf<ReadonlyImpulse<boolean>>()
+  })
+
+  it("does not let to widen the setter", ({ scope }) => {
+    const { result } = renderHook(() => {
+      // @ts-expect-error boolean does not extend false
+      return useTransmittingImpulse<false, boolean>(
+        () => true,
+        [],
+        () => {
+          // noop
+        },
+      )
+    })
+
+    expectTypeOf(result.current.getValue(scope)).toEqualTypeOf<false>()
   })
 })

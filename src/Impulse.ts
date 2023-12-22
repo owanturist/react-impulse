@@ -14,22 +14,22 @@ import {
   USE_SCOPED_MEMO_CALLING_IMPULSE_TRANSMIT,
 } from "./messages"
 
-export interface ImpulseOptions<TGetter> {
+export interface ImpulseOptions<TValue> {
   /**
    * The compare function determines whether or not a new Impulse's value replaces the current one.
    * In many cases specifying the function leads to better performance because it prevents unnecessary updates.
    */
-  readonly compare?: null | Compare<TGetter>
+  readonly compare?: null | Compare<TValue>
 }
 
-export interface TransmittingImpulseOptions<TGetter> {
+export interface TransmittingImpulseOptions<TValue> {
   /**
    * The compare function determines whether or not a transmitting value changes when reading it from an external source.
    */
-  readonly compare?: null | Compare<TGetter>
+  readonly compare?: null | Compare<TValue>
 }
 
-export type ReadonlyImpulse<TGetter> = Omit<Impulse<TGetter>, "setValue">
+export type ReadonlyImpulse<TValue> = Omit<Impulse<TValue>, "setValue">
 
 export abstract class Impulse<TGetter, TSetter extends TGetter = TGetter> {
   /**
@@ -77,10 +77,10 @@ export abstract class Impulse<TGetter, TSetter extends TGetter = TGetter> {
    *
    * @version 2.0.0
    */
-  public static transmit<TGetter>(
-    getter: (scope: Scope) => TGetter,
-    options?: TransmittingImpulseOptions<TGetter>,
-  ): ReadonlyImpulse<TGetter>
+  public static transmit<TValue>(
+    getter: (scope: Scope) => TValue,
+    options?: TransmittingImpulseOptions<TValue>,
+  ): ReadonlyImpulse<TValue>
 
   /**
    * Creates a new transmitting Impulse.
