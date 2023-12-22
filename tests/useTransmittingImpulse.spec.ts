@@ -156,8 +156,20 @@ describe("transmit many Impulses to one (select all checkboxes example)", () => 
     const selected = initial.map((x) => Impulse.of(x))
 
     const tools = renderHook(() => {
-      return useTransmittingImpulse(
-        (scope) => selected.every((impulse) => impulse.getValue(scope)),
+      return useTransmittingImpulse<boolean | "some", boolean>(
+        (scope) => {
+          const values = selected.map((impulse) => impulse.getValue(scope))
+
+          if (!values.includes(false)) {
+            return true
+          }
+
+          if (!values.includes(true)) {
+            return false
+          }
+
+          return "some"
+        },
         [],
         (x) => {
           batch(() => {
@@ -184,17 +196,21 @@ describe("transmit many Impulses to one (select all checkboxes example)", () => 
     act(() => {
       selected[0]!.setValue(true)
     })
-    expect(result.current.getValue(scope)).toBe(false)
+    expect(result.current.getValue(scope)).toBe("some")
 
     act(() => {
       selected[1]!.setValue(true)
     })
-    expect(result.current.getValue(scope)).toBe(false)
+    expect(result.current.getValue(scope)).toBe("some")
 
     act(() => {
       selected[2]!.setValue(true)
     })
     expect(result.current.getValue(scope)).toBe(true)
+
+    expectTypeOf(result.current).toEqualTypeOf<
+      Impulse<boolean | "some", boolean>
+    >()
   })
 
   it("every becomes true when transmitted value becomes true", ({ scope }) => {
@@ -219,6 +235,19 @@ describe("transmit many Impulses to one (select all checkboxes example)", () => 
     expect(selected[0]!.getValue(scope)).toBe(false)
     expect(selected[1]!.getValue(scope)).toBe(false)
     expect(selected[2]!.getValue(scope)).toBe(false)
+  })
+
+  it('cannot set "some"', ({ scope }) => {
+    const { result, selected } = setup([false, false, false])
+
+    act(() => {
+      // @ts-expect-error "some" does not extend boolean
+      result.current.setValue("some")
+    })
+
+    expect(selected[0]!.getValue(scope)).toBe("some")
+    expect(selected[1]!.getValue(scope)).toBe("some")
+    expect(selected[2]!.getValue(scope)).toBe("some")
   })
 })
 
