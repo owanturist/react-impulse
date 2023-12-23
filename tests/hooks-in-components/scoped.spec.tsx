@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from "@testing-library/react"
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react"
 import React, { type ForwardRefRenderFunction } from "react"
 
 import {
@@ -658,7 +658,7 @@ describe("scoped.forwardRef()", () => {
 
     const LazyComponent = React.lazy<typeof Component>(() => {
       return new Promise((done) => {
-        setTimeout(() => done({ default: Component }), 100)
+        setTimeout(() => done({ default: Component }), 10)
       })
     })
     const count = Impulse.of(0)
@@ -676,7 +676,10 @@ describe("scoped.forwardRef()", () => {
     act(() => {
       count.setValue((x) => x + 1)
     })
-    expect(screen.getByTestId("count")).toHaveTextContent("1")
+
+    await waitFor(() => {
+      expect(screen.getByTestId("count")).toHaveTextContent("1")
+    })
   })
 
   it("forwards correct props", () => {
