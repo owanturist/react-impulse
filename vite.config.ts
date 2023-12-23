@@ -3,6 +3,11 @@ import { defineConfig } from "vitest/config"
 export default defineConfig({
   test: {
     globals: true,
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
     // https://github.com/vitest-dev/vitest/issues/3967#issuecomment-1680585071
     testTransformMode: {
       ssr: ["**/*"],
