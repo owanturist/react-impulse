@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, useScopedCallback } from "../src"
+import { Impulse, useScoped, useScopedCallback } from "../src"
 
 const onCallback = vi.fn<[number], number>().mockImplementation((x) => x)
 
@@ -288,4 +288,49 @@ describe("argument Impulse", () => {
     expect(count_1).toHaveEmittersSize(0)
     expect(count_2).toHaveEmittersSize(0)
   })
+})
+
+it("batches the callback", () => {
+  const impulse_1 = Impulse.of(1)
+  const impulse_2 = Impulse.of(2)
+  const impulse_3 = Impulse.of(3)
+  const { result: callback } = renderHook(() => {
+    return useScopedCallback((scope, diff: number) => {
+      impulse_1.setValue(impulse_1.getValue(scope) + diff)
+      impulse_2.setValue(impulse_2.getValue(scope) + diff)
+      impulse_3.setValue(impulse_3.getValue(scope) + diff)
+    }, [])
+  })
+  const spy = vi.fn()
+
+  const { result } = renderHook(() => {
+    return useScoped((scope) => {
+      spy()
+
+      return (
+        impulse_1.getValue(scope) +
+        impulse_2.getValue(scope) +
+        impulse_3.getValue(scope)
+      )
+    }, [])
+  })
+
+  expect(result.current).toBe(6)
+  expect(spy).toHaveBeenCalledOnce()
+  vi.clearAllMocks()
+
+  act(() => {
+    callback.current(1)
+  })
+
+  expect(result.current).toBe(9)
+  expect(spy).toHaveBeenCalledOnce()
+  vi.clearAllMocks()
+
+  act(() => {
+    callback.current(0)
+  })
+
+  expect(result.current).toBe(9)
+  expect(spy).not.toHaveBeenCalled()
 })

@@ -1,5 +1,6 @@
 import { EMITTER_KEY, type Scope, injectScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
+import { batch } from "./batch"
 import { noop, type Destructor } from "./utils"
 
 /**
@@ -15,11 +16,13 @@ export function subscribe(
   const emitter = ScopeEmitter._init()
 
   const emit = (): void => {
-    cleanup?.()
+    batch(() => {
+      cleanup?.()
 
-    cleanup = injectScope(listener, {
-      [EMITTER_KEY]: emitter,
-      version: emitter._getVersion(),
+      cleanup = injectScope(listener, {
+        [EMITTER_KEY]: emitter,
+        version: emitter._getVersion(),
+      })
     })
   }
 
@@ -28,7 +31,9 @@ export function subscribe(
   const emitterCleanup = emitter._onEmit(emit)
 
   return () => {
-    emitterCleanup()
-    cleanup?.()
+    batch(() => {
+      emitterCleanup()
+      cleanup?.()
+    })
   }
 }

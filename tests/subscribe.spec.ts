@@ -1,4 +1,6 @@
-import { Impulse, batch, subscribe } from "../src"
+import { act, renderHook } from "@testing-library/react"
+
+import { Impulse, batch, subscribe, useScoped } from "../src"
 
 import { Counter } from "./common"
 
@@ -271,7 +273,7 @@ describe("multiple Impulses", () => {
   })
 })
 
-describe("batching", () => {
+describe("batching against subscribe listener", () => {
   it("executes listener on every Impulse update", () => {
     const spy = vi.fn()
     const impulse_1 = Impulse.of(1)
@@ -285,7 +287,8 @@ describe("batching", () => {
     impulse_1.setValue(2)
     impulse_2.setValue(3)
     expect(spy).toHaveBeenCalledTimes(2)
-    expect(spy).toHaveBeenLastCalledWith(5)
+    expect(spy).toHaveBeenNthCalledWith(1, 4)
+    expect(spy).toHaveBeenNthCalledWith(2, 5)
   })
 
   it("executes listener ones for batched Impulse updates", () => {
@@ -304,6 +307,140 @@ describe("batching", () => {
     })
     expect(spy).toHaveBeenCalledOnce()
     expect(spy).toHaveBeenLastCalledWith(5)
+  })
+})
+
+describe("batching against a hook", () => {
+  it("enqueues single re-render to a hook which impulses update inside subscribe's listener", () => {
+    const impulse_1 = Impulse.of(1)
+    const impulse_2 = Impulse.of(2)
+    const impulse_3 = Impulse.of(3)
+    const impulse_4 = Impulse.of(0)
+    const spy = vi.fn()
+
+    const { result } = renderHook(() => {
+      return useScoped((scope) => {
+        spy()
+
+        return (
+          impulse_1.getValue(scope) +
+          impulse_2.getValue(scope) +
+          impulse_3.getValue(scope)
+        )
+      }, [])
+    })
+
+    const unsubscribe = subscribe((scope) => {
+      if (impulse_4.getValue(scope) > 1 && impulse_4.getValue(scope) < 5) {
+        impulse_1.setValue((x) => x + 1)
+        impulse_2.setValue((x) => x + 1)
+        impulse_3.setValue((x) => x + 1)
+      }
+    })
+
+    expect(result.current).toBe(6)
+    expect(spy).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    act(() => {
+      impulse_4.setValue(1)
+    })
+    expect(result.current).toBe(6)
+    expect(spy).not.toHaveBeenCalled()
+    vi.clearAllMocks()
+
+    act(() => {
+      impulse_4.setValue(2)
+    })
+    expect(result.current).toBe(9)
+    expect(spy).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    act(() => {
+      impulse_1.setValue((x) => x + 1)
+      impulse_2.setValue((x) => x + 1)
+      impulse_3.setValue((x) => x + 1)
+    })
+    expect(result.current).toBe(12)
+    expect(spy).toHaveBeenCalledTimes(3)
+    vi.clearAllMocks()
+
+    unsubscribe()
+    act(() => {
+      impulse_4.setValue(3)
+    })
+    expect(result.current).toBe(12)
+    expect(spy).not.toHaveBeenCalled()
+  })
+
+  it("enqueues single re-render to a hook which impulses update inside subscribe's cleanup", () => {
+    const impulse_1 = Impulse.of(1)
+    const impulse_2 = Impulse.of(2)
+    const impulse_3 = Impulse.of(3)
+    const impulse_4 = Impulse.of(0)
+    const spy = vi.fn()
+
+    const { result } = renderHook(() => {
+      return useScoped((scope) => {
+        spy()
+
+        return (
+          impulse_1.getValue(scope) +
+          impulse_2.getValue(scope) +
+          impulse_3.getValue(scope)
+        )
+      }, [])
+    })
+
+    const unsubscribe = subscribe((scope) => {
+      if (impulse_4.getValue(scope) > 1 && impulse_4.getValue(scope) < 5) {
+        return () => {
+          impulse_1.setValue((x) => x + 1)
+          impulse_2.setValue((x) => x + 1)
+          impulse_3.setValue((x) => x + 1)
+        }
+      }
+    })
+
+    expect(result.current).toBe(6)
+    expect(spy).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    act(() => {
+      impulse_4.setValue(1)
+    })
+    expect(result.current).toBe(6)
+    expect(spy).not.toHaveBeenCalled()
+    vi.clearAllMocks()
+
+    act(() => {
+      impulse_4.setValue(2)
+    })
+    expect(result.current).toBe(6)
+    expect(spy).not.toHaveBeenCalled()
+    vi.clearAllMocks()
+
+    act(() => {
+      impulse_4.setValue(3)
+    })
+    expect(result.current).toBe(9)
+    expect(spy).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    act(() => {
+      impulse_1.setValue((x) => x + 1)
+      impulse_2.setValue((x) => x + 1)
+      impulse_3.setValue((x) => x + 1)
+    })
+    expect(result.current).toBe(12)
+    expect(spy).toHaveBeenCalledTimes(3)
+    vi.clearAllMocks()
+
+    act(() => {
+      unsubscribe()
+    })
+    expect(result.current).toBe(15)
+    expect(spy).toHaveBeenCalledOnce()
   })
 })
 
