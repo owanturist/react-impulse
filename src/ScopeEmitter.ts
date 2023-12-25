@@ -17,19 +17,20 @@ export class ScopeEmitter {
   public static _schedule<TResult>(
     execute: (queue: Array<ReadonlySet<ScopeEmitter>>) => TResult,
   ): TResult {
-    if (ScopeEmitter._queue != null) {
-      return execute(ScopeEmitter._queue)
+    let queue = ScopeEmitter._queue
+
+    if (queue != null) {
+      return execute(queue)
     }
 
-    ScopeEmitter._queue = []
+    ScopeEmitter._queue = queue = []
 
-    const result = execute(ScopeEmitter._queue)
-
+    const result = execute(queue)
     const uniq = new WeakSet<VoidFunction>()
 
     // eslint-disable-next-line @typescript-eslint/prefer-for-of
-    for (let index = 0; index < ScopeEmitter._queue.length; index++) {
-      const emitters = ScopeEmitter._queue[index]!
+    for (let index = 0; index < queue.length; index++) {
+      const emitters = queue[index]!
 
       for (const emitter of emitters) {
         if (!uniq.has(emitter._emit)) {
