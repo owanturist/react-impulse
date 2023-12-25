@@ -1,5 +1,6 @@
 import type { DependencyList } from "./dependencies"
 import type { Scope } from "./Scope"
+import { ScopeEmitter } from "./ScopeEmitter"
 import { useScopedMemo } from "./useScopedMemo"
 
 /**
@@ -19,7 +20,9 @@ export function useScopedCallback<
   dependencies: DependencyList,
 ): (...args: TArgs) => TResult {
   return useScopedMemo((scope) => {
-    return (...args) => callback(scope, ...args)
+    return (...args) => {
+      return ScopeEmitter._schedule(() => callback(scope, ...args))
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, dependencies)
 }
