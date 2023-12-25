@@ -2,7 +2,6 @@ import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
 import { type Compare, eq, useStableCallback } from "./utils"
 import type { Scope } from "./Scope"
 import { useScope } from "./useScope"
-import { defineExecutionContext } from "./validation"
 
 export interface UseScopedOptions<T> {
   /**
@@ -31,7 +30,7 @@ export function useScoped<TResult>(
   options?: UseScopedOptions<TResult>,
 ): TResult {
   const transform = useCallback(
-    (scope: Scope) => defineExecutionContext("useScoped", factory, scope),
+    factory,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies ?? [factory],
   )

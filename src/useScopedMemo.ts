@@ -1,6 +1,5 @@
 import { type DependencyList, useMemo } from "./dependencies"
 import { useScope } from "./useScope"
-import { defineExecutionContext } from "./validation"
 import type { Scope } from "./Scope"
 
 /**
@@ -18,7 +17,7 @@ export function useScopedMemo<TResult>(
   const getScope = useScope()
 
   return useMemo(
-    () => defineExecutionContext("useScopedMemo", factory, getScope()),
+    () => factory(getScope()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [...dependencies, getScope],
   )
