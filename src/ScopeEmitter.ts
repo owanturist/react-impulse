@@ -27,8 +27,9 @@ export class ScopeEmitter {
 
     const uniq = new WeakSet<VoidFunction>()
 
-    while (ScopeEmitter._queue.length > 0) {
-      const emitters = ScopeEmitter._queue.pop()!
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
+    for (let index = 0; index < ScopeEmitter._queue.length; index++) {
+      const emitters = ScopeEmitter._queue[index]!
 
       for (const emitter of emitters) {
         if (!uniq.has(emitter._emit)) {
