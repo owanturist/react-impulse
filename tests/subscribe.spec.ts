@@ -311,7 +311,7 @@ describe("batching against subscribe listener", () => {
 })
 
 describe("batching against component", () => {
-  it("enqueues single re-render to a component which impulses update inside subscribe's listener", () => {
+  it("enqueues single re-render to a hook which impulses update inside subscribe's listener", () => {
     const impulse_1 = Impulse.of(1)
     const impulse_2 = Impulse.of(2)
     const impulse_3 = Impulse.of(3)
@@ -373,7 +373,7 @@ describe("batching against component", () => {
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it("enqueues single re-render to a component which impulses update inside subscribe's cleanup", () => {
+  it("enqueues single re-render to a hook which impulses update inside subscribe's cleanup", () => {
     const impulse_1 = Impulse.of(1)
     const impulse_2 = Impulse.of(2)
     const impulse_3 = Impulse.of(3)
