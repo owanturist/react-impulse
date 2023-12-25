@@ -310,7 +310,7 @@ describe("batching against subscribe listener", () => {
   })
 })
 
-describe("batching against component", () => {
+describe("batching against a hook", () => {
   it("enqueues single re-render to a hook which impulses update inside subscribe's listener", () => {
     const impulse_1 = Impulse.of(1)
     const impulse_2 = Impulse.of(2)

@@ -27,6 +27,10 @@ export class ScopeEmitter {
 
     const uniq = new WeakSet<VoidFunction>()
 
+    /**
+     * It should iterate over the queue with a for loop because the queue
+     * can mutate during the iteration, so for-of loop will not cover the incoming changes.
+     */
     // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let index = 0; index < ScopeEmitter._queue.length; index++) {
       const emitters = ScopeEmitter._queue[index]!
