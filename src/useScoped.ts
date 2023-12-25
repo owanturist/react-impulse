@@ -29,11 +29,8 @@ export function useScoped<TResult>(
   dependencies?: DependencyList,
   options?: UseScopedOptions<TResult>,
 ): TResult {
-  const transform = useCallback(
-    factory,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    dependencies ?? [factory],
-  )
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const transform = useCallback(factory, dependencies ?? [factory])
   const value = useScope(transform, useStableCallback(options?.compare ?? eq))
 
   useDebugValue(value)
