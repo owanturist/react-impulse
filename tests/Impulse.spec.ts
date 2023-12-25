@@ -1,3 +1,5 @@
+import { act, renderHook } from "@testing-library/react"
+
 import {
   type ReadonlyImpulse,
   type ImpulseOptions,
@@ -5,6 +7,7 @@ import {
   Impulse,
   subscribe,
   type Scope,
+  useScoped,
 } from "../src"
 
 import { Counter } from "./common"
@@ -344,6 +347,54 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     impulse.getValue(scope)
     expect(Counter.compare).toHaveBeenCalledOnce()
     expect(Counter.compare).toHaveBeenLastCalledWith({ count: 0 }, { count: 0 })
+  })
+
+  it("batches setter", () => {
+    const impulse_1 = Impulse.of(1)
+    const impulse_2 = Impulse.of(2)
+    const impulse_3 = Impulse.of(3)
+    const transmit = Impulse.transmit(
+      (scope) => {
+        return (
+          impulse_1.getValue(scope) +
+          impulse_2.getValue(scope) +
+          impulse_3.getValue(scope)
+        )
+      },
+      (x) => {
+        impulse_1.setValue(x)
+        impulse_2.setValue(x)
+        impulse_3.setValue(x)
+      },
+    )
+    const spy = vi.fn()
+
+    const { result } = renderHook(() => {
+      return useScoped((scope) => {
+        spy()
+
+        return transmit.getValue(scope)
+      }, [])
+    })
+
+    expect(result.current).toBe(6)
+    expect(spy).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    act(() => {
+      transmit.setValue(4)
+    })
+
+    expect(result.current).toBe(12)
+    expect(spy).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    act(() => {
+      transmit.setValue(4)
+    })
+
+    expect(result.current).toBe(12)
+    expect(spy).not.toHaveBeenCalled()
   })
 })
 
