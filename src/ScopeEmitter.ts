@@ -21,15 +21,15 @@ export class ScopeEmitter {
       return execute(ScopeEmitter._queue)
     }
 
-    const queue: Array<ReadonlySet<ScopeEmitter>> = []
+    ScopeEmitter._queue = []
 
-    ScopeEmitter._queue = queue
-    const result = execute(queue)
-    ScopeEmitter._queue = null
+    const result = execute(ScopeEmitter._queue)
 
     const uniq = new WeakSet<VoidFunction>()
 
-    for (const emitters of queue) {
+    while (ScopeEmitter._queue.length > 0) {
+      const emitters = ScopeEmitter._queue.pop()!
+
       for (const emitter of emitters) {
         if (!uniq.has(emitter._emit)) {
           uniq.add(emitter._emit)
@@ -39,6 +39,8 @@ export class ScopeEmitter {
         }
       }
     }
+
+    ScopeEmitter._queue = null
 
     return result
   }
