@@ -14,7 +14,6 @@ import {
 import type { Scope } from "./Scope"
 import type { Compare, Func } from "./utils"
 import { useScope } from "./useScope"
-import { defineExecutionContext } from "./validation"
 
 export type PropsWithScope<TProps = Record<string, unknown>> = TProps & {
   scope: Scope
@@ -34,12 +33,7 @@ const renderWithScope = <TProps, TContext>(
   ctx: TContext,
 ): ReactNode => {
   // it uses Object.assign to reduce output file size by avoiding the spread operator
-  return defineExecutionContext(
-    "scoped",
-    component,
-    Object.assign({}, props, { scope }),
-    ctx,
-  )
+  return component(Object.assign({}, props, { scope }), ctx)
 }
 
 /**

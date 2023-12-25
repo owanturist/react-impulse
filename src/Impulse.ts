@@ -1,18 +1,6 @@
 import { type Func, type Compare, eq, noop, isFunction } from "./utils"
 import { EMITTER_KEY, type Scope, extractScope, STATIC_SCOPE } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
-import { validate } from "./validation"
-import {
-  SCOPED_CALLING_IMPULSE_SET_VALUE,
-  USE_SCOPED_CALLING_IMPULSE_OF,
-  USE_SCOPED_CALLING_IMPULSE_CLONE,
-  USE_SCOPED_CALLING_IMPULSE_SET_VALUE,
-  USE_SCOPED_CALLING_IMPULSE_TRANSMIT,
-  USE_SCOPED_MEMO_CALLING_IMPULSE_OF,
-  USE_SCOPED_MEMO_CALLING_IMPULSE_CLONE,
-  USE_SCOPED_MEMO_CALLING_IMPULSE_SET_VALUE,
-  USE_SCOPED_MEMO_CALLING_IMPULSE_TRANSMIT,
-} from "./messages"
 
 export interface ImpulseOptions<T> {
   /**
@@ -50,10 +38,6 @@ export abstract class Impulse<T> {
    */
   public static of<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
 
-  @validate
-    ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_OF)
-    ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_OF)
-    ._alert()
   public static of<T>(
     initialValue?: T,
     options?: ImpulseOptions<undefined | T>,
@@ -93,10 +77,6 @@ export abstract class Impulse<T> {
     options?: TransmittingImpulseOptions<T>,
   ): Impulse<T>
 
-  @validate
-    ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_TRANSMIT)
-    ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_TRANSMIT)
-    ._alert()
   public static transmit<T>(
     ...args:
       | [getter: Func<[Scope], T>, options?: TransmittingImpulseOptions<T>]
@@ -179,10 +159,6 @@ export abstract class Impulse<T> {
     options?: ImpulseOptions<T>,
   ): Impulse<T>
 
-  @validate
-    ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_CLONE)
-    ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_CLONE)
-    ._alert()
   public clone(
     ...args:
       | [options?: ImpulseOptions<T>]
@@ -230,11 +206,6 @@ export abstract class Impulse<T> {
    *
    * @version 1.0.0
    */
-  @validate
-    ._when("scoped", SCOPED_CALLING_IMPULSE_SET_VALUE)
-    ._when("useScoped", USE_SCOPED_CALLING_IMPULSE_SET_VALUE)
-    ._when("useScopedMemo", USE_SCOPED_MEMO_CALLING_IMPULSE_SET_VALUE)
-    ._prevent()
   public setValue(
     valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
   ): void {
