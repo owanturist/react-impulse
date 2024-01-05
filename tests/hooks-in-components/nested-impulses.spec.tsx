@@ -15,7 +15,7 @@ describe("nested impulses", () => {
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }> = ({ state, onRender, onCounterRender }) => {
-    const { counts } = useScoped((scope) => state.getValue(scope))
+    const { counts } = useScoped(state)
 
     return (
       <>

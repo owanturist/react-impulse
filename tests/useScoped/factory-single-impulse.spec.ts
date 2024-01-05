@@ -3,11 +3,36 @@ import { act, renderHook } from "@testing-library/react"
 import { type Compare, Impulse, useScoped, type Scope } from "../../src"
 import { Counter, type WithSpy, type WithImpulse } from "../common"
 
+describe("impulse shortcut", () => {
+  it("allows to use ReadonlyImpulse", () => {
+    const impulse = Impulse.transmit(() => 1)
+
+    const { result } = renderHook(() => useScoped(impulse))
+
+    expect(result.current).toBe(1)
+  })
+
+  it("does not allow to pass dependencies", () => {
+    const impulse = Impulse.of(1)
+
+    // @ts-expect-error - should not allow to pass dependencies
+    const { result } = renderHook(() => useScoped(impulse, []))
+
+    expect(result.current).toBe(1)
+  })
+})
+
 describe("single factory", () => {
   const factory = (scope: Scope, { impulse }: WithImpulse) =>
     impulse.getValue(scope)
 
   describe.each([
+    [
+      "impulse shortcut",
+      ({ impulse }: WithImpulse) => {
+        return useScoped(impulse)
+      },
+    ],
     [
       "without deps",
       ({ impulse }: WithImpulse) => {

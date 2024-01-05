@@ -60,6 +60,10 @@ describe("watching misses when defined after useEffect #140", () => {
     return useScoped((scope) => impulse.getValue(scope), [impulse])
   }
 
+  const useScopedShortcut = (impulse: Impulse<number>) => {
+    return useScoped(impulse)
+  }
+
   describe.each([
     ["before", ComponentScopedBeforeEffect],
     ["after", ComponentScopedAfterEffect],
@@ -67,10 +71,12 @@ describe("watching misses when defined after useEffect #140", () => {
     describe.each([
       ["inline useScoped", useScopedInline],
       ["memoized useScoped", useScopedMemoized],
+      ["shortcut useScoped", useScopedShortcut],
     ])("with %s as useGetFirst", (__, useGetFirst) => {
       it.each([
         ["inline useScoped", useScopedInline],
         ["memoized useScoped", useScopedMemoized],
+        ["shortcut useScoped", useScopedShortcut],
       ])("with %s as useGetSecond", (___, useGetSecond) => {
         const first = Impulse.of(0)
         const second = Impulse.of(5)

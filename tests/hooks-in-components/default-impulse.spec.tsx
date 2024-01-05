@@ -11,7 +11,7 @@ describe("default impulse", () => {
       const defaultValueImpulse = useImpulse("search for me")
 
       const impulse = valueImpulse ?? defaultValueImpulse
-      const value = useScoped((scope) => impulse.getValue(scope))
+      const value = useScoped(impulse)
 
       return (
         <input

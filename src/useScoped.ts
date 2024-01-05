@@ -1,7 +1,14 @@
 import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
-import { type Compare, eq, useStableCallback } from "./utils"
+import {
+  type Compare,
+  eq,
+  useStableCallback,
+  type Func,
+  isFunction,
+} from "./utils"
 import type { Scope } from "./Scope"
 import { useScope } from "./useScope"
+import type { ReadonlyImpulse } from "./Impulse"
 
 export interface UseScopedOptions<T> {
   /**
@@ -13,6 +20,16 @@ export interface UseScopedOptions<T> {
    */
   readonly compare?: null | Compare<T>
 }
+
+/**
+ * A hook reads that the `impulse` value whenever it updates
+ * but enqueues a re-render only when the resulting value is different from the previous.
+ *
+ * @param impulse an impulse to extract scoped value from.
+ *
+ * @version 2.0.0
+ */
+export function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue
 
 /**
  * A hook that executes the `factory` function whenever any of the involved Impulses' values update
@@ -28,9 +45,24 @@ export function useScoped<TResult>(
   factory: (scope: Scope) => TResult,
   dependencies?: DependencyList,
   options?: UseScopedOptions<TResult>,
+): TResult
+
+export function useScoped<TResult>(
+  impulseOrFactory: ReadonlyImpulse<TResult> | Func<[Scope], TResult>,
+  dependencies?: DependencyList,
+  options?: UseScopedOptions<TResult>,
 ): TResult {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const transform = useCallback(factory, dependencies ?? [factory])
+  const transform = useCallback(
+    (scope: Scope) => {
+      if (isFunction(impulseOrFactory)) {
+        return impulseOrFactory(scope)
+      }
+
+      return impulseOrFactory.getValue(scope)
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    dependencies ?? [impulseOrFactory],
+  )
   const value = useScope(transform, useStableCallback(options?.compare ?? eq))
 
   useDebugValue(value)
