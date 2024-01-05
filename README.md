@@ -559,6 +559,8 @@ A hook that initialize a stable (never changing) transmitting Impulse. Look at t
 ### `useScoped`
 
 ```dart
+function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue
+
 function useScoped<T>(
   factory: (scope: Scope) => T,
   dependencies?: DependencyList,
@@ -566,11 +568,12 @@ function useScoped<T>(
 ): T
 ```
 
+- `impulse` is an `Impulse` instance to read the value from.
 - `factory` is a function that provides [`Scope`][scope] as the first argument and subscribes to all Impulses calling the [`Impulse#getValue`][impulse__get_value] method inside the function.
 - `dependencies` is an optional array of dependencies of the `factory` function. If not defined, the `factory` function is called on every render.
 - `[options]` is an optional [`UseScopedOptions`][use_scoped_options] object.
 
-The `useScoped` hook is an alternative to the [`scoped`][scoped] function. It executes the `factory` function whenever any of the scoped Impulses' value update but enqueues a re-render only when the resulting value is different from the previous.
+The `useScoped` hook is an alternative to the [`scoped`][scoped] function. It either executes the `factory` function whenever any of the scoped Impulses' value update or reads the `impulse` value but enqueues a re-render only when the resulting value is different from the previous.
 
 Custom hooks can use `useScoped` for reading and transforming the Impulses' values, so the host component doesn't need to wrap around the [`scoped`][scoped] HOC:
 

@@ -32,7 +32,7 @@ describe("scoping nested impulses", () => {
     onRender,
     onCounterRender,
   }) => {
-    const state = useScoped((scope) => appState.getValue(scope))
+    const state = useScoped(appState)
 
     return (
       <>

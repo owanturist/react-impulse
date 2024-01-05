@@ -15,7 +15,7 @@ describe.each([
 
     const Component: React.FC = () => {
       const counter_1 = useScoped((scope) => impulse_1.getValue(scope))
-      const counter_2 = useScoped((scope) => impulse_2.getValue(scope))
+      const counter_2 = useScoped(impulse_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -47,7 +47,7 @@ describe.each([
 
     const Component: React.FC = () => {
       const counter_1 = useScoped((scope) => impulse_1.getValue(scope))
-      const counter_2 = useScoped((scope) => impulse_2.getValue(scope))
+      const counter_2 = useScoped(impulse_2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -92,7 +92,7 @@ describe.each([
     const Component: React.FC = () => {
       const acc = useScoped((scope) => impulse.getValue(scope))
       const counter_1 = useScoped((scope) => acc.first.getValue(scope))
-      const counter_2 = useScoped((scope) => acc.second.getValue(scope))
+      const counter_2 = useScoped(acc.second)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -143,7 +143,7 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const acc = useScoped((scope) => impulse.getValue(scope))
+      const acc = useScoped(impulse)
       const counter_1 = useScoped((scope) => acc.first.getValue(scope))
       const counter_2 = useScoped((scope) => acc.second.getValue(scope))
 
@@ -224,7 +224,9 @@ describe.each([
     expectedFactoryCallsForNested: 1,
     execute: (cb: VoidFunction) => cb(),
     useCount: (factory: (scope: Scope) => number) => {
-      return useScoped(React.useCallback((scope) => factory(scope), [factory]))
+      return useScoped(
+        React.useCallback((scope: Scope) => factory(scope), [factory]),
+      )
     },
   },
   {
@@ -233,7 +235,9 @@ describe.each([
     expectedFactoryCallsForNested: 1,
     execute: batch,
     useCount: (factory: (scope: Scope) => number) => {
-      return useScoped(React.useCallback((scope) => factory(scope), [factory]))
+      return useScoped(
+        React.useCallback((scope: Scope) => factory(scope), [factory]),
+      )
     },
   },
 ])(
