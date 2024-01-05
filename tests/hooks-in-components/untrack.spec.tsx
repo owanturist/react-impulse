@@ -53,3 +53,11 @@ it("returns the `factory` function result without tracking impulses", () => {
   expect(screen.getByRole("button")).toHaveTextContent("14")
   expect(onRender).toHaveBeenCalledTimes(1)
 })
+
+it("allows to use ReadonlyImpulse", () => {
+  const impulse = Impulse.transmit(() => 1)
+
+  const value = untrack(impulse)
+
+  expect(value).toBe(1)
+})

@@ -1,4 +1,4 @@
-import type { Impulse } from "./Impulse"
+import type { ReadonlyImpulse } from "./Impulse"
 import { STATIC_SCOPE, type Scope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { type Func, isFunction } from "./utils"
@@ -24,9 +24,11 @@ export function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
  *
  * @version 2.0.0
  */
-export function untrack<TValue>(impulse: Impulse<TValue>): TValue
+export function untrack<TValue>(impulse: ReadonlyImpulse<TValue>): TValue
 
-export function untrack<T>(factoryOrImpulse: Impulse<T> | Func<[Scope], T>): T {
+export function untrack<T>(
+  factoryOrImpulse: ReadonlyImpulse<T> | Func<[Scope], T>,
+): T {
   return ScopeEmitter._schedule(() => {
     if (isFunction(factoryOrImpulse)) {
       return factoryOrImpulse(STATIC_SCOPE)
