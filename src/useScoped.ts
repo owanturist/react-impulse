@@ -22,7 +22,7 @@ export interface UseScopedOptions<T> {
 }
 
 /**
- * A hook reads that the `impulse` value whenever it updates
+ * A hook reads an `impulse` value whenever it updates
  * but enqueues a re-render only when the resulting value is different from the previous.
  *
  * @param impulse an impulse to extract scoped value from.
