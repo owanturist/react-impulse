@@ -34,6 +34,7 @@ The `Scope` became an explicit argument for all methods, hooks and functions tha
   ```
 - `useWatchImpulse` -> `useScoped`
   ```ts
+  function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue
   function useScoped<TResult>(
     factory: (scope: Scope) => TResult,
     dependencies?: DependencyList,
