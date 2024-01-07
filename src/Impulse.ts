@@ -164,15 +164,18 @@ export abstract class Impulse<T> {
   ): Impulse<T>
 
   public clone(
-    ...args:
-      | [options?: ImpulseOptions<T>]
-      | [transform: Func<[T, Scope], T>, options?: ImpulseOptions<T>]
+    transformOrOptions?: Func<[T, Scope], T> | ImpulseOptions<T>,
+    maybeOptions?: ImpulseOptions<T>,
   ): Impulse<T> {
-    const [value, { compare = this._compare } = {}] = isFunction(args[0])
-      ? [args[0](this._getter(STATIC_SCOPE), STATIC_SCOPE), args[1]]
-      : [this._getter(STATIC_SCOPE), args[0]]
+    const value = this._getter(STATIC_SCOPE)
 
-    return new DirectImpulse(value, compare ?? eq)
+    const [clonedValue, { compare = this._compare } = {}] = isFunction(
+      transformOrOptions,
+    )
+      ? [transformOrOptions(value, STATIC_SCOPE), maybeOptions]
+      : [value, transformOrOptions]
+
+    return new DirectImpulse(clonedValue, compare ?? eq)
   }
 
   /**
