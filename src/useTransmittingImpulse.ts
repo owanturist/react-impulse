@@ -55,17 +55,16 @@ export function useTransmittingImpulse<T>(
 export function useTransmittingImpulse<T>(
   getter: ReadonlyImpulse<T> | Func<[Scope], T>,
   dependencies: DependencyList,
-  ...rest:
-    | [options?: TransmittingImpulseOptions<T>]
-    | [
-        setter: Impulse<T> | Func<[T, Scope]>,
-        options?: TransmittingImpulseOptions<T>,
-      ]
+  setterOrOptions?:
+    | Impulse<T>
+    | Func<[T, Scope]>
+    | TransmittingImpulseOptions<T>,
+  maybeOptions?: TransmittingImpulseOptions<T>,
 ): Impulse<T> {
   const [setter, options] =
-    isFunction(rest[0]) || rest[0] instanceof Impulse
-      ? [rest[0], rest[1]]
-      : [noop, rest[0]]
+    isFunction(setterOrOptions) || setterOrOptions instanceof Impulse
+      ? [setterOrOptions, maybeOptions]
+      : [noop, setterOrOptions]
 
   const stableSetter = useStableCallback((value: T, scope: Scope) => {
     if (isFunction(setter)) {
@@ -75,6 +74,7 @@ export function useTransmittingImpulse<T>(
     }
   })
   const stableCompare = useStableCallback(options?.compare ?? eq)
+
   const impulse = usePermanent(() => {
     return Impulse.transmit(getter, stableSetter, {
       compare: stableCompare,
