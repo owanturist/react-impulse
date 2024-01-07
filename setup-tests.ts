@@ -29,7 +29,7 @@ afterAll(() => {
   spy_console$error.mockRestore()
 })
 
-vi.mock("@testing-library/react", async () => {
+vi.doMock("@testing-library/react", async () => {
   const actual = await vi.importActual<typeof import("@testing-library/react")>(
     "@testing-library/react",
   )
