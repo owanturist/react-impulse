@@ -78,21 +78,17 @@ export abstract class Impulse<T> {
   ): Impulse<T>
 
   public static transmit<T>(
-    ...args:
-      | [
-          getter: ReadonlyImpulse<T> | Func<[Scope], T>,
-          options?: TransmittingImpulseOptions<T>,
-        ]
-      | [
-          getter: ReadonlyImpulse<T> | Func<[Scope], T>,
-          setter: Impulse<T> | Func<[T, Scope]>,
-          options?: TransmittingImpulseOptions<T>,
-        ]
+    getter: ReadonlyImpulse<T> | Func<[Scope], T>,
+    setterOrOptions?:
+      | Impulse<T>
+      | Func<[T, Scope]>
+      | TransmittingImpulseOptions<T>,
+    maybeOptions?: TransmittingImpulseOptions<T>,
   ): Impulse<T> {
-    const [getter, setter, options] =
-      isFunction(args[1]) || args[1] instanceof Impulse
-        ? [args[0], args[1], args[2]]
-        : [args[0], noop, args[1]]
+    const [setter, options] =
+      isFunction(setterOrOptions) || setterOrOptions instanceof Impulse
+        ? [setterOrOptions, maybeOptions]
+        : [noop, setterOrOptions]
 
     return new TransmittingImpulse(
       isFunction(getter) ? getter : (scope) => getter.getValue(scope),
