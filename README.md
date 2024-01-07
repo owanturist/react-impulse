@@ -121,14 +121,14 @@ Impulse.transmit<T>(
 ): ReadonlyImpulse<T>
 
 Impulse.transmit<T>(
-  getter: (scope: Scope) => T,
-  setter: (value: T, scope: Scope) => void,
+  getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
+  setter: Impulse<T> | ((value: T, scope: Scope) => void),
   options?: TransmittingImpulseOptions<T>,
 ): Impulse<T>
 ```
 
-- `getter` is a function to read the transmitting value from a source.
-- `[setter]` is an optional function to write the transmitting value back to the source. When not defined, the Impulse is readonly.
+- `getter` is either a source impulse or a function to read the transmitting value from a source.
+- `[setter]` either a destination impulse or is an optional function to write the transmitting value back to the source. When not defined, the Impulse is readonly.
 - `[options]` is an optional [`TransmittingImpulseOptions`][transmitting_impulse_options] object.
   - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
@@ -539,16 +539,16 @@ function useTransmittingImpulse<T>(
 ): ReadonlyImpulse<T>
 
 function useTransmittingImpulse<T>(
-  getter: (scope: Scope) => T,
+  getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
   dependencies: DependencyList,
-  setter: (value: T, scope: Scope) => void,
+  setter: Impulse<T> | ((value: T, scope: Scope) => void),
   options?: TransmittingImpulseOptions<T>,
 ): Impulse<T>
 ```
 
-- `getter` is a function to read the transmitting value from a source.
+- `getter` is either a source impulse or a function to read the transmitting value from a source.
 - `dependencies` an array of values triggering the re-read of the transmitting value.
-- `[setter]` is an optional function to write the transmitting value back to the source. When not defined, the Impulse is readonly.
+- `[setter]` either a destination impulse or is an optional function to write the transmitting value back to the source. When not defined, the Impulse is readonly.
 - `[options]` is an optional [`TransmittingImpulseOptions`][transmitting_impulse_options] object.
   - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 

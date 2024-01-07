@@ -64,33 +64,41 @@ export abstract class Impulse<T> {
    * Creates a new transmitting Impulse.
    * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source and writes it back.
    *
-   * @param getter a function to read the transmitting value from the source.
-   * @param setter a function to write the transmitting value back to the source.
+   * @param getter either a source impulse or a function to read the transmitting value from the source.
+   * @param setter either a destination impulse or a function to write the transmitting value back to the source.
    * @param options optional `TransmittingImpulseOptions`.
    * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
    *
    * @version 2.0.0
    */
   public static transmit<T>(
-    getter: (scope: Scope) => T,
-    setter: (value: T, scope: Scope) => void,
+    getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
+    setter: Impulse<T> | ((value: T, scope: Scope) => void),
     options?: TransmittingImpulseOptions<T>,
   ): Impulse<T>
 
   public static transmit<T>(
     ...args:
-      | [getter: Func<[Scope], T>, options?: TransmittingImpulseOptions<T>]
       | [
-          getter: Func<[Scope], T>,
-          setter: Func<[T, Scope]>,
+          getter: ReadonlyImpulse<T> | Func<[Scope], T>,
+          options?: TransmittingImpulseOptions<T>,
+        ]
+      | [
+          getter: ReadonlyImpulse<T> | Func<[Scope], T>,
+          setter: Impulse<T> | Func<[T, Scope]>,
           options?: TransmittingImpulseOptions<T>,
         ]
   ): Impulse<T> {
-    const [getter, setter, options] = isFunction(args[1])
-      ? [args[0], args[1], args[2]]
-      : [args[0], noop, args[1]]
+    const [getter, setter, options] =
+      isFunction(args[1]) || args[1] instanceof Impulse
+        ? [args[0], args[1], args[2]]
+        : [args[0], noop, args[1]]
 
-    return new TransmittingImpulse(getter, setter, options?.compare ?? eq)
+    return new TransmittingImpulse(
+      isFunction(getter) ? getter : (scope) => getter.getValue(scope),
+      isFunction(setter) ? setter : (value) => setter.setValue(value),
+      options?.compare ?? eq,
+    )
   }
 
   private readonly _emitters = new Set<ScopeEmitter>()

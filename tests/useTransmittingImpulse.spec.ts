@@ -17,15 +17,12 @@ import type { Counter } from "./common"
 function setupWithGlobal() {
   let counter = { count: 0 }
 
-  const getter = vi.fn((x: number) => x)
-  const setter = vi.fn((x: Counter) => x)
-
   const tools = renderHook(() => {
     const impulse = useTransmittingImpulse(
-      () => getter(counter.count),
+      () => counter.count,
       [],
       (x) => {
-        counter = setter({ count: x })
+        counter = { count: x }
       },
     )
 
@@ -38,19 +35,20 @@ function setupWithGlobal() {
     }
   })
 
-  return { ...tools, getter, setter }
+  return {
+    ...tools,
+    getter: vi.spyOn(tools.result.current.impulse, "getValue"),
+    setter: vi.spyOn(tools.result.current.impulse, "setValue"),
+  }
 }
 
 function setupWithReactState() {
-  const getter = vi.fn((x: number) => x)
-  const setter = vi.fn((x: Counter) => x)
-
   const tools = renderHook(() => {
     const [{ count }, setCounter] = useState({ count: 0 })
     const impulse = useTransmittingImpulse(
-      () => getter(count),
+      () => count,
       [count],
-      (x) => setCounter(setter({ count: x })),
+      (x) => setCounter({ count: x }),
     )
 
     return {
@@ -60,19 +58,20 @@ function setupWithReactState() {
     }
   })
 
-  return { ...tools, getter, setter }
+  return {
+    ...tools,
+    getter: vi.spyOn(tools.result.current.impulse, "getValue"),
+    setter: vi.spyOn(tools.result.current.impulse, "setValue"),
+  }
 }
 
 function setupWithImpulse() {
-  const getter = vi.fn((x: number) => x)
-  const setter = vi.fn((x: Counter) => x)
-
   const tools = renderHook(() => {
     const counter = useImpulse({ count: 0 })
     const impulse = useTransmittingImpulse(
-      (scope) => getter(counter.getValue(scope).count),
+      (scope) => counter.getValue(scope).count,
       [counter],
-      (x) => counter.setValue(setter({ count: x })),
+      (x) => counter.setValue({ count: x }),
     )
 
     return {
@@ -82,13 +81,86 @@ function setupWithImpulse() {
     }
   })
 
-  return { ...tools, getter, setter }
+  return {
+    ...tools,
+    getter: vi.spyOn(tools.result.current.impulse, "getValue"),
+    setter: vi.spyOn(tools.result.current.impulse, "setValue"),
+  }
+}
+
+function setupWithImpulseGetterShortcut() {
+  const tools = renderHook(() => {
+    const counter = useImpulse(0)
+    const impulse = useTransmittingImpulse(counter, [counter], (x) =>
+      counter.setValue(x),
+    )
+
+    return {
+      impulse,
+      getCount: (scope: Scope) => counter.getValue(scope),
+      setCount: (x: number) => counter.setValue(x),
+    }
+  })
+
+  return {
+    ...tools,
+    getter: vi.spyOn(tools.result.current.impulse, "getValue"),
+    setter: vi.spyOn(tools.result.current.impulse, "setValue"),
+  }
+}
+
+function setupWithImpulseSetterShortcut() {
+  const tools = renderHook(() => {
+    const counter = useImpulse(0)
+    const impulse = useTransmittingImpulse(
+      (scope) => counter.getValue(scope),
+      [counter],
+      counter,
+    )
+
+    return {
+      impulse,
+      getCount: (scope: Scope) => counter.getValue(scope),
+      setCount: (x: number) => counter.setValue(x),
+    }
+  })
+
+  return {
+    ...tools,
+    getter: vi.spyOn(tools.result.current.impulse, "getValue"),
+    setter: vi.spyOn(tools.result.current.impulse, "setValue"),
+  }
+}
+
+function setupWithImpulseGetterAndSetterShortcuts() {
+  const tools = renderHook(() => {
+    const counter = useImpulse(0)
+    const impulse = useTransmittingImpulse(counter, [counter], counter)
+
+    return {
+      impulse,
+      getCount: (scope: Scope) => counter.getValue(scope),
+      setCount: (x: number) => counter.setValue(x),
+    }
+  })
+
+  return {
+    ...tools,
+    getter: vi.spyOn(tools.result.current.impulse, "getValue"),
+    setter: vi.spyOn(tools.result.current.impulse, "setValue"),
+  }
 }
 
 describe.each([
   ["a global variable", setupWithGlobal],
   ["React.useState", setupWithReactState],
   ["an Impulse", setupWithImpulse],
+  ["an Impulse with getter shortcut", setupWithImpulseGetterShortcut],
+  ["an Impulse with setter shortcut", setupWithImpulseSetterShortcut],
+  [
+    "an Impulse with getter and setter shortcuts",
+    setupWithImpulseGetterAndSetterShortcuts,
+  ],
 ])("transmitting %s to Impulse", (_, setup) => {
   it("initializes the Impulse with the origin value", ({ scope }) => {
     const { result } = setup()
@@ -147,7 +219,7 @@ describe.each([
       result.current.impulse.setValue(1)
     })
     expect(setter).toHaveBeenCalledOnce()
-    expect(setter).toHaveBeenLastCalledWith({ count: 1 })
+    expect(setter).toHaveBeenLastCalledWith(1)
   })
 })
 
@@ -517,8 +589,44 @@ describe("type check", () => {
       return useTransmittingImpulse(() => 1, [])
     })
 
-    // @ts-expect-error should be ReadonlyImpulse only
-    expectTypeOf(result.current).toEqualTypeOf<Impulse<number>>()
+    expectTypeOf(result.current).not.toEqualTypeOf<Impulse<number>>()
     expectTypeOf(result.current).toEqualTypeOf<ReadonlyImpulse<number>>()
+  })
+
+  it("allows ReadonlyImpulse as getter", () => {
+    const { result } = renderHook(() => {
+      const readonly = useTransmittingImpulse(() => 0, [])
+
+      return useTransmittingImpulse(readonly, [readonly], () => {
+        // noop
+      })
+    })
+
+    expectTypeOf(result.current).toEqualTypeOf<Impulse<number>>()
+    expectTypeOf(result.current).not.toEqualTypeOf<ReadonlyImpulse<number>>()
+  })
+
+  it("does not allow ReadonlyImpulse as setter", () => {
+    const { result } = renderHook(() => {
+      const readonly = useTransmittingImpulse(() => 0, [])
+
+      // @ts-expect-error - readonly is not a setter
+      return useTransmittingImpulse(readonly, [readonly], readonly)
+    })
+
+    expectTypeOf(result.current).toEqualTypeOf<ReadonlyImpulse<unknown>>()
+  })
+
+  it("requires getter dependencies", () => {
+    const { result } = renderHook(() => {
+      const x = useTransmittingImpulse(() => 0, [])
+
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      return useTransmittingImpulse(x, [], () => {
+        // noop
+      })
+    })
+
+    expectTypeOf(result.current).toEqualTypeOf<Impulse<number>>()
   })
 })
