@@ -19,7 +19,30 @@ export interface TransmittingImpulseOptions<T> {
 
 export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
 
+const isImpulse = (input: unknown): input is Impulse<unknown> => {
+  return input instanceof Impulse
+}
+
 export abstract class Impulse<T> {
+  public static isImpulse(input: unknown): input is Impulse<unknown>
+  public static isImpulse<T>(
+    scope: Scope,
+    check: (value: unknown) => value is T,
+    input: unknown,
+  ): input is Impulse<T>
+
+  public static isImpulse(
+    ...args:
+      | [input: unknown]
+      | [scope: Scope, check: Func<[unknown], boolean>, input: unknown]
+  ): boolean {
+    if (args.length === 1) {
+      return isImpulse(args[0])
+    }
+
+    return isImpulse(args[2]) && args[2].getValue(args[0], args[1])
+  }
+
   /**
    * Creates new Impulse without an initial value.
    *

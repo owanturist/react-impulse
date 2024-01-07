@@ -12,6 +12,8 @@ import {
 
 import { Counter } from "./common"
 
+const isString = (value: unknown): value is string => typeof value === "string"
+
 describe("Impulse.of()", () => {
   it("creates an Impulse of undefined | T type", () => {
     const impulse = Impulse.of<string>()
@@ -361,6 +363,119 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
 
     expect(result.current).toBe(12)
     expect(spy).not.toHaveBeenCalled()
+  })
+})
+
+describe("Impulse.isImpulse(input)", () => {
+  const check = (input: number | Impulse<number>) => {
+    if (Impulse.isImpulse(input)) {
+      expectTypeOf(input).toEqualTypeOf<Impulse<number>>()
+    } else {
+      expectTypeOf(input).toEqualTypeOf<number>()
+    }
+  }
+
+  it("returns true for Impulse", () => {
+    const impulse = Impulse.of(0)
+
+    expect(Impulse.isImpulse(impulse)).toBe(true)
+
+    if (Impulse.isImpulse(impulse)) {
+      expectTypeOf(impulse).toEqualTypeOf<Impulse<number>>()
+    }
+
+    const unknown = Impulse.of(null as unknown)
+
+    if (Impulse.isImpulse(unknown)) {
+      expectTypeOf(unknown).toEqualTypeOf<Impulse<unknown>>()
+    }
+  })
+
+  it("returns true for ReadonlyImpulse", () => {
+    const impulse = Impulse.transmit(() => 0)
+
+    expect(Impulse.isImpulse(impulse)).toBe(true)
+
+    if (Impulse.isImpulse(impulse)) {
+      expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<number>>()
+    }
+
+    const unknown = Impulse.transmit(() => null as unknown)
+
+    if (Impulse.isImpulse(unknown)) {
+      expectTypeOf(unknown).toEqualTypeOf<ReadonlyImpulse<unknown>>()
+    }
+  })
+
+  it.each([
+    ["number", 1],
+    ["boolean", false],
+    ["null", null],
+    ["undefined", undefined],
+    ["array", [1, 2, 3]],
+    ["object", { count: 0 }],
+  ])("returns false for %s", (_, value) => {
+    expect(Impulse.isImpulse(value)).toBe(false)
+
+    if (Impulse.isImpulse(value)) {
+      expectTypeOf(value).toEqualTypeOf<Impulse<unknown>>()
+    }
+  })
+})
+
+describe("Impulse.isImpulse(scope, check, value)", () => {
+  const known_check = (scope: Scope, impulse: string | Impulse<string>) => {
+    if (Impulse.isImpulse(scope, isString, impulse)) {
+      expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
+
+      return true
+    }
+
+    expectTypeOf(impulse).toEqualTypeOf<string>()
+
+    return false
+  }
+
+  const unknown_check = (scope: Scope, impulse: unknown) => {
+    if (Impulse.isImpulse(scope, isString, impulse)) {
+      expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
+
+      return true
+    }
+
+    expectTypeOf(impulse).toEqualTypeOf<unknown>()
+
+    return false
+  }
+
+  it("returns true for Impulse with success check", ({ scope }) => {
+    const impulse = Impulse.of("")
+
+    expect(known_check(scope, impulse)).toBe(true)
+    expect(unknown_check(scope, impulse)).toBe(true)
+  })
+
+  it("returns false for Impulse with failed check", ({ scope }) => {
+    const impulse = Impulse.of(0)
+
+    // @ts-expect-error should be Impulse<string>
+    expect(known_check(scope, impulse)).toBe(false)
+    expect(unknown_check(scope, impulse)).toBe(false)
+  })
+
+  describe.each([
+    ["number", 1],
+    ["boolean", false],
+    ["null", null],
+    ["undefined", undefined],
+    ["array", [1, 2, 3]],
+    ["object", { count: 0 }],
+  ])("when input is %s", (_, value) => {
+    it("returns false", ({ scope }) => {
+      // @ts-expect-error should be Impulse<string>
+      expect(known_check(scope, value)).toBe(false)
+      expect(unknown_check(scope, value)).toBe(false)
+    })
   })
 })
 
