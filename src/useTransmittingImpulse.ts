@@ -66,13 +66,9 @@ export function useTransmittingImpulse<T>(
       ? [setterOrOptions, maybeOptions]
       : [noop, setterOrOptions]
 
-  const stableSetter = useStableCallback((value: T, scope: Scope) => {
-    if (isFunction(setter)) {
-      setter(value, scope)
-    } else {
-      setter.setValue(value)
-    }
-  })
+  const stableSetter = useStableCallback(
+    isFunction(setter) ? setter : (value: T) => setter.setValue(value),
+  )
   const stableCompare = useStableCallback(options?.compare ?? eq)
 
   const impulse = usePermanent(() => {

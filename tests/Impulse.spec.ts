@@ -253,12 +253,12 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     expect(impulse.getValue(scope)).toBe(0)
   })
 
-  it("does not allow setter as a ReadonlyImpulse", () => {
+  it("does not allow setter as a ReadonlyImpulse", ({ scope }) => {
     const readonly = Impulse.transmit(() => 0)
     // @ts-expect-error should be Impulse only
     const impulse = Impulse.transmit(() => 2, [], readonly)
 
-    expect(impulse).not.toBe(readonly)
+    expect(impulse.getValue(scope)).toBe(2)
   })
 
   it("subscribes to Impulse source and back", () => {
