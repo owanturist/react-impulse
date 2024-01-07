@@ -64,33 +64,37 @@ export abstract class Impulse<T> {
    * Creates a new transmitting Impulse.
    * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source and writes it back.
    *
-   * @param getter a function to read the transmitting value from the source.
-   * @param setter a function to write the transmitting value back to the source.
+   * @param getter either a source impulse or a function to read the transmitting value from the source.
+   * @param setter either a destination impulse or a function to write the transmitting value back to the source.
    * @param options optional `TransmittingImpulseOptions`.
    * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
    *
    * @version 2.0.0
    */
   public static transmit<T>(
-    getter: (scope: Scope) => T,
-    setter: (value: T, scope: Scope) => void,
+    getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
+    setter: Impulse<T> | ((value: T, scope: Scope) => void),
     options?: TransmittingImpulseOptions<T>,
   ): Impulse<T>
 
   public static transmit<T>(
-    ...args:
-      | [getter: Func<[Scope], T>, options?: TransmittingImpulseOptions<T>]
-      | [
-          getter: Func<[Scope], T>,
-          setter: Func<[T, Scope]>,
-          options?: TransmittingImpulseOptions<T>,
-        ]
+    getter: ReadonlyImpulse<T> | Func<[Scope], T>,
+    setterOrOptions?:
+      | Impulse<T>
+      | Func<[T, Scope]>
+      | TransmittingImpulseOptions<T>,
+    maybeOptions?: TransmittingImpulseOptions<T>,
   ): Impulse<T> {
-    const [getter, setter, options] = isFunction(args[1])
-      ? [args[0], args[1], args[2]]
-      : [args[0], noop, args[1]]
+    const [setter, options] =
+      isFunction(setterOrOptions) || setterOrOptions instanceof Impulse
+        ? [setterOrOptions, maybeOptions]
+        : [noop, setterOrOptions]
 
-    return new TransmittingImpulse(getter, setter, options?.compare ?? eq)
+    return new TransmittingImpulse(
+      isFunction(getter) ? getter : (scope) => getter.getValue(scope),
+      isFunction(setter) ? setter : (value) => setter.setValue(value),
+      options?.compare ?? eq,
+    )
   }
 
   private readonly _emitters = new Set<ScopeEmitter>()
@@ -160,15 +164,18 @@ export abstract class Impulse<T> {
   ): Impulse<T>
 
   public clone(
-    ...args:
-      | [options?: ImpulseOptions<T>]
-      | [transform: Func<[T, Scope], T>, options?: ImpulseOptions<T>]
+    transformOrOptions?: Func<[T, Scope], T> | ImpulseOptions<T>,
+    maybeOptions?: ImpulseOptions<T>,
   ): Impulse<T> {
-    const [value, { compare = this._compare } = {}] = isFunction(args[0])
-      ? [args[0](this._getter(STATIC_SCOPE), STATIC_SCOPE), args[1]]
-      : [this._getter(STATIC_SCOPE), args[0]]
+    const value = this._getter(STATIC_SCOPE)
 
-    return new DirectImpulse(value, compare ?? eq)
+    const [clonedValue, { compare = this._compare } = {}] = isFunction(
+      transformOrOptions,
+    )
+      ? [transformOrOptions(value, STATIC_SCOPE), maybeOptions]
+      : [value, transformOrOptions]
+
+    return new DirectImpulse(clonedValue, compare ?? eq)
   }
 
   /**

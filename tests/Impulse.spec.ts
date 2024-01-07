@@ -12,57 +12,6 @@ import {
 
 import { Counter } from "./common"
 
-function setupImpulse<T>(initialValue: T, options?: ImpulseOptions<T>) {
-  const impulse = Impulse.of(initialValue, options)
-
-  return { impulse }
-}
-
-function setupTransmittingImpulseFromGlobalVariable<T>(
-  initialValue: T,
-  options?: TransmittingImpulseOptions<T>,
-) {
-  let variable = initialValue
-
-  const impulse = Impulse.transmit(
-    () => variable,
-    (value) => {
-      variable = value
-    },
-    options,
-  )
-
-  return {
-    impulse,
-    getValue: () => variable,
-    setValue: (value: T) => {
-      variable = value
-    },
-  }
-}
-
-function setupTransmittingImpulseFromImpulse<T>(
-  initialValue: T,
-  options?: TransmittingImpulseOptions<T>,
-) {
-  const source = Impulse.of(initialValue)
-  const impulse = Impulse.transmit(
-    (scope) => source.getValue(scope),
-    (value) => {
-      source.setValue(value)
-    },
-    options,
-  )
-
-  return {
-    impulse,
-    getValue: (scope: Scope) => source.getValue(scope),
-    setValue: (value: T) => {
-      source.setValue(value)
-    },
-  }
-}
-
 describe("Impulse.of()", () => {
   it("creates an Impulse of undefined | T type", () => {
     const impulse = Impulse.of<string>()
@@ -295,6 +244,23 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     expectTypeOf(impulse).toMatchTypeOf<ReadonlyImpulse<number>>()
   })
 
+  it("allows getter as a ReadonlyImpulse", ({ scope }) => {
+    const readonly = Impulse.transmit(() => 0)
+    const impulse = Impulse.transmit(readonly, () => {
+      // noop
+    })
+
+    expect(impulse.getValue(scope)).toBe(0)
+  })
+
+  it("does not allow setter as a ReadonlyImpulse", ({ scope }) => {
+    const readonly = Impulse.transmit(() => 0)
+    // @ts-expect-error should be Impulse only
+    const impulse = Impulse.transmit(() => 2, [], readonly)
+
+    expect(impulse.getValue(scope)).toBe(2)
+  })
+
   it("subscribes to Impulse source and back", () => {
     const source = Impulse.of({ count: 0 }, { compare: Counter.compare })
     const impulse = Impulse.transmit(
@@ -398,13 +364,94 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
   })
 })
 
+function setupImpulse<T>(initialValue: T, options?: ImpulseOptions<T>) {
+  const impulse = Impulse.of(initialValue, options)
+
+  return { impulse }
+}
+
+function setupTransmittingImpulseFromGlobalVariable<T>(
+  initialValue: T,
+  options?: TransmittingImpulseOptions<T>,
+) {
+  let variable = initialValue
+
+  const impulse = Impulse.transmit(
+    () => variable,
+    (value) => {
+      variable = value
+    },
+    options,
+  )
+
+  return {
+    impulse,
+    getValue: () => variable,
+    setValue: (value: T) => {
+      variable = value
+    },
+  }
+}
+
+function setupTransmittingImpulseFromImpulse({
+  getterShortcut,
+  setterShortcut,
+}: {
+  getterShortcut: boolean
+  setterShortcut: boolean
+}) {
+  return <T>(initialValue: T, options?: TransmittingImpulseOptions<T>) => {
+    const source = Impulse.of(initialValue)
+    const impulse = Impulse.transmit(
+      getterShortcut ? source : (scope) => source.getValue(scope),
+      setterShortcut ? source : (value) => source.setValue(value),
+      options,
+    )
+
+    return {
+      impulse,
+      getValue: (scope: Scope) => source.getValue(scope),
+      setValue: (value: T) => {
+        source.setValue(value)
+      },
+    }
+  }
+}
+
 describe.each([
   ["DirectImpulse", setupImpulse],
   [
     "TransmittingImpulse from a global variable",
     setupTransmittingImpulseFromGlobalVariable,
   ],
-  ["TransmittingImpulse from an Impulse", setupTransmittingImpulseFromImpulse],
+  [
+    "TransmittingImpulse from an Impulse",
+    setupTransmittingImpulseFromImpulse({
+      getterShortcut: false,
+      setterShortcut: false,
+    }),
+  ],
+  [
+    "TransmittingImpulse from an Impulse with getter shortcut",
+    setupTransmittingImpulseFromImpulse({
+      getterShortcut: true,
+      setterShortcut: false,
+    }),
+  ],
+  [
+    "TransmittingImpulse from an Impulse with setter shortcut",
+    setupTransmittingImpulseFromImpulse({
+      getterShortcut: false,
+      setterShortcut: true,
+    }),
+  ],
+  [
+    "TransmittingImpulse from an Impulse with both getter and setter shortcuts",
+    setupTransmittingImpulseFromImpulse({
+      getterShortcut: true,
+      setterShortcut: true,
+    }),
+  ],
 ])("Impulse.transmit() from %s", (_, setup) => {
   describe("Impulse#setValue(value)", () => {
     const { impulse } = setup({ count: 0 })
