@@ -367,44 +367,53 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
 })
 
 describe("Impulse.isImpulse(input)", () => {
-  const check = (input: number | Impulse<number>) => {
+  const known_check = (input: number | Impulse<number>) => {
     if (Impulse.isImpulse(input)) {
       expectTypeOf(input).toEqualTypeOf<Impulse<number>>()
-    } else {
-      expectTypeOf(input).toEqualTypeOf<number>()
+
+      return true
     }
+
+    expectTypeOf(input).toEqualTypeOf<number>()
+
+    return false
+  }
+
+  const readonly_check = (input: number | ReadonlyImpulse<number>) => {
+    if (Impulse.isImpulse(input)) {
+      expectTypeOf(input).toEqualTypeOf<ReadonlyImpulse<number>>()
+
+      return true
+    }
+
+    expectTypeOf(input).toEqualTypeOf<number>()
+
+    return false
+  }
+
+  const unknown_check = (input: unknown) => {
+    if (Impulse.isImpulse(input)) {
+      expectTypeOf(input).toEqualTypeOf<Impulse<unknown>>()
+
+      return true
+    }
+
+    expectTypeOf(input).toEqualTypeOf<unknown>()
+
+    return false
   }
 
   it("returns true for Impulse", () => {
     const impulse = Impulse.of(0)
+    const readonly = Impulse.transmit(() => 1)
 
-    expect(Impulse.isImpulse(impulse)).toBe(true)
-
-    if (Impulse.isImpulse(impulse)) {
-      expectTypeOf(impulse).toEqualTypeOf<Impulse<number>>()
-    }
-
-    const unknown = Impulse.of(null as unknown)
-
-    if (Impulse.isImpulse(unknown)) {
-      expectTypeOf(unknown).toEqualTypeOf<Impulse<unknown>>()
-    }
-  })
-
-  it("returns true for ReadonlyImpulse", () => {
-    const impulse = Impulse.transmit(() => 0)
-
-    expect(Impulse.isImpulse(impulse)).toBe(true)
-
-    if (Impulse.isImpulse(impulse)) {
-      expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<number>>()
-    }
-
-    const unknown = Impulse.transmit(() => null as unknown)
-
-    if (Impulse.isImpulse(unknown)) {
-      expectTypeOf(unknown).toEqualTypeOf<ReadonlyImpulse<unknown>>()
-    }
+    expect(known_check(impulse)).toBe(true)
+    // @ts-expect-error should be Impulse<number>
+    expect(known_check(readonly)).toBe(true)
+    expect(readonly_check(impulse)).toBe(true)
+    expect(readonly_check(readonly)).toBe(true)
+    expect(unknown_check(impulse)).toBe(true)
+    expect(unknown_check(readonly)).toBe(true)
   })
 
   it.each([
@@ -414,12 +423,10 @@ describe("Impulse.isImpulse(input)", () => {
     ["undefined", undefined],
     ["array", [1, 2, 3]],
     ["object", { count: 0 }],
-  ])("returns false for %s", (_, value) => {
-    expect(Impulse.isImpulse(value)).toBe(false)
-
-    if (Impulse.isImpulse(value)) {
-      expectTypeOf(value).toEqualTypeOf<Impulse<unknown>>()
-    }
+  ])("returns false for %s", (_, value: unknown) => {
+    // @ts-expect-error should be Impulse<number>
+    expect(known_check(value)).toBe(false)
+    expect(unknown_check(value)).toBe(false)
   })
 })
 
@@ -427,6 +434,20 @@ describe("Impulse.isImpulse(scope, check, value)", () => {
   const known_check = (scope: Scope, impulse: string | Impulse<string>) => {
     if (Impulse.isImpulse(scope, isString, impulse)) {
       expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
+
+      return true
+    }
+
+    expectTypeOf(impulse).toEqualTypeOf<string>()
+
+    return false
+  }
+  const readonly_check = (
+    scope: Scope,
+    impulse: string | ReadonlyImpulse<string>,
+  ) => {
+    if (Impulse.isImpulse(scope, isString, impulse)) {
+      expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<string>>()
 
       return true
     }
@@ -450,9 +471,15 @@ describe("Impulse.isImpulse(scope, check, value)", () => {
 
   it("returns true for Impulse with success check", ({ scope }) => {
     const impulse = Impulse.of("")
+    const readonly = Impulse.transmit(() => "")
 
     expect(known_check(scope, impulse)).toBe(true)
+    // @ts-expect-error should be Impulse<string>
+    expect(known_check(scope, readonly)).toBe(true)
+    expect(readonly_check(scope, impulse)).toBe(true)
+    expect(readonly_check(scope, readonly)).toBe(true)
     expect(unknown_check(scope, impulse)).toBe(true)
+    expect(unknown_check(scope, readonly)).toBe(true)
   })
 
   it("returns false for Impulse with failed check", ({ scope }) => {
