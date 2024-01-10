@@ -19,7 +19,9 @@ export interface TransmittingImpulseOptions<T> {
 
 export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
 
-export const isImpulse = (input: unknown): input is Impulse<unknown> => {
+export const isImpulse = <T, Unknown = unknown>(
+  input: Unknown | Impulse<T>,
+): input is Impulse<T> => {
   return input instanceof Impulse
 }
 
@@ -27,24 +29,24 @@ export abstract class Impulse<T> {
   /**
    * TODO add docs
    */
-  public static isImpulse<T, S = unknown>(
-    input: S | Impulse<T>,
+  public static isImpulse<T, Unknown = unknown>(
+    input: Unknown | Impulse<T>,
   ): input is Impulse<T>
 
-  public static isImpulse<T, S = unknown>(
-    input: S | ReadonlyImpulse<T>,
+  public static isImpulse<T, Unknown = unknown>(
+    input: Unknown | ReadonlyImpulse<T>,
   ): input is ReadonlyImpulse<T>
 
-  public static isImpulse<T, S = unknown>(
+  public static isImpulse<T, Unknown = unknown>(
     scope: Scope,
     check: (value: unknown) => value is T,
-    input: S | Impulse<T>,
+    input: Unknown | Impulse<T>,
   ): input is Impulse<T>
 
-  public static isImpulse<T, S = unknown>(
+  public static isImpulse<T, Unknown = unknown>(
     scope: Scope,
     check: (value: unknown) => value is T,
-    input: S | ReadonlyImpulse<T>,
+    input: Unknown | ReadonlyImpulse<T>,
   ): input is ReadonlyImpulse<T>
 
   public static isImpulse(
@@ -125,7 +127,7 @@ export abstract class Impulse<T> {
     maybeOptions?: TransmittingImpulseOptions<T>,
   ): Impulse<T> {
     const [setter, options] =
-      isFunction(setterOrOptions) || setterOrOptions instanceof Impulse
+      isFunction(setterOrOptions) || isImpulse(setterOrOptions)
         ? [setterOrOptions, maybeOptions]
         : [noop, setterOrOptions]
 

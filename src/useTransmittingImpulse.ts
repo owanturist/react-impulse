@@ -4,6 +4,7 @@ import {
   type TransmittingImpulse,
   type ReadonlyImpulse,
   type TransmittingImpulseOptions,
+  isImpulse,
 } from "./Impulse"
 import type { Scope } from "./Scope"
 import {
@@ -62,7 +63,7 @@ export function useTransmittingImpulse<T>(
   maybeOptions?: TransmittingImpulseOptions<T>,
 ): Impulse<T> {
   const [setter, options] =
-    isFunction(setterOrOptions) || setterOrOptions instanceof Impulse
+    isFunction(setterOrOptions) || isImpulse(setterOrOptions)
       ? [setterOrOptions, maybeOptions]
       : [noop, setterOrOptions]
 
