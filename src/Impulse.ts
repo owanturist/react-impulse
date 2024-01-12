@@ -19,7 +19,65 @@ export interface TransmittingImpulseOptions<T> {
 
 export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
 
+export const isImpulse = <T, Unknown = unknown>(
+  input: Unknown | Impulse<T>,
+): input is Impulse<T> => {
+  return input instanceof Impulse
+}
+
 export abstract class Impulse<T> {
+  /**
+   * A static method to check whether or not the input is an Impulse.
+   *
+   * @version 2.0.0
+   */
+  public static isImpulse<T, Unknown = unknown>(
+    input: Unknown | Impulse<T>,
+  ): input is Impulse<T>
+
+  /**
+   * A static method to check whether or not the input is an Impulse.
+   *
+   * @version 2.0.0
+   */
+  public static isImpulse<T, Unknown = unknown>(
+    input: Unknown | ReadonlyImpulse<T>,
+  ): input is ReadonlyImpulse<T>
+
+  /**
+   * A static method to check whether or not an Impulse value passes the `check`.
+   *
+   * @version 2.0.0
+   */
+  public static isImpulse<T, Unknown = unknown>(
+    scope: Scope,
+    check: (value: unknown) => value is T,
+    input: Unknown | Impulse<T>,
+  ): input is Impulse<T>
+
+  /**
+   * A static method to check whether or not an Impulse value passes the `check`.
+   *
+   * @version 2.0.0
+   */
+  public static isImpulse<T, Unknown = unknown>(
+    scope: Scope,
+    check: (value: unknown) => value is T,
+    input: Unknown | ReadonlyImpulse<T>,
+  ): input is ReadonlyImpulse<T>
+
+  public static isImpulse(
+    ...args:
+      | [input: unknown]
+      | [scope: Scope, check: Func<[unknown], boolean>, input: unknown]
+  ): boolean {
+    if (args.length === 1) {
+      return isImpulse(args[0])
+    }
+
+    return isImpulse(args[2]) && args[2].getValue(args[0], args[1])
+  }
+
   /**
    * Creates new Impulse without an initial value.
    *
@@ -86,7 +144,7 @@ export abstract class Impulse<T> {
     maybeOptions?: TransmittingImpulseOptions<T>,
   ): Impulse<T> {
     const [setter, options] =
-      isFunction(setterOrOptions) || setterOrOptions instanceof Impulse
+      isFunction(setterOrOptions) || isImpulse(setterOrOptions)
         ? [setterOrOptions, maybeOptions]
         : [noop, setterOrOptions]
 
