@@ -1,5 +1,286 @@
 # react-impulse
 
+## 2.0.0
+
+### Major Changes
+
+- d2bf7d0: The `Scope` became an explicit argument for all methods, hooks and functions that read or potentially read an Impulse value. To reflect this change, the following renames were made:
+
+  - `useImpulseCallback` -> `useScopedCallback`
+    ```ts
+    function useScopedCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
+      callback: (scope: Scope, ...args: TArgs) => TResult,
+      dependencies: DependencyList,
+    ): (...args: TArgs) => TResult;
+    ```
+  - `useImpulseMemo` -> `useScopedMemo`
+    ```ts
+    function useScopedMemo<TResult>(
+      factory: (scope: Scope) => TResult,
+      dependencies: DependencyList,
+    ): TResult;
+    ```
+  - `useImpulseEffect` -> `useScopedEffect`
+    ```ts
+    function useScopedEffect(
+      effect: (scope: Scope) => Destructor,
+      dependencies?: DependencyList,
+    ): void;
+    ```
+  - `useImpulseLayoutEffect` -> `useScopedLayoutEffect`
+    ```ts
+    function useScopedLayoutEffect(
+      effect: (scope: Scope) => Destructor,
+      dependencies?: DependencyList,
+    ): void;
+    ```
+  - `useWatchImpulse` -> `useScoped`
+    ```ts
+    function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue;
+    function useScoped<TResult>(
+      factory: (scope: Scope) => TResult,
+      dependencies?: DependencyList,
+      options?: UseScopedOptions<TResult>,
+    ): TResult;
+    ```
+  - `watch` -> `scoped`
+    ```ts
+    export function scoped<TProps>(
+      component: FC<PropsWithScope<TProps>>,
+    ): FC<PropsWithoutScope<TProps>>;
+    ```
+
+- d6fb9b0: Introduce optional dependencies argument for `useScoped`:
+
+  ```dart
+  function useScoped<T>(
+    factory: () => T,
+    dependencies?: DependencyList,
+    options?: UseScopedOptions<T>
+  ): T
+  ```
+
+  It works the same way as `useEffect` dependencies argument - if the dependencies are not defined, the `factory` will be called on every render. Otherwise, it will be called only when the dependencies change.
+
+  ```ts
+  const impulse = useImpulse(0);
+
+  // before
+  const count = useScoped(
+    useCallback(
+      (scope) => {
+        return impulse.getValue(scope);
+      },
+      [impulse],
+    ),
+  );
+
+  // now
+  const count = useScoped(
+    (scope) => {
+      return impulse.getValue(scope);
+    },
+    [impulse],
+  );
+  ```
+
+- 232d0c1: Introduce [`ImpulseOptions`](./#impulseoptions) and [`UseScopedOptions`](./useScopedoptions) as a replacement for raw `compare` argument:
+
+  ```ts
+  // before
+  const impulse_1 = Impulse.of({ count: 0 }, shallowEqual);
+  const impulse_2 = impulse_1.clone((x) => x, shallowEqual);
+  const impulse_3 = useImpulse({ count: 0 }, shallowEqual);
+  const value = useScoped((scope) => impulse_2.getValue(scope), shallowEqual);
+
+  // now
+  const impulse_1 = Impulse.of({ count: 0 }, { compare: shallowEqual });
+  const impulse_2 = impulse_1.clone((x) => x, { compare: shallowEqual });
+  const impulse_3 = useImpulse({ count: 0 }, { compare: shallowEqual });
+  const value = useScoped((scope) => impulse_2.getValue(scope), {
+    compare: shallowEqual,
+  });
+  ```
+
+  The overall functionality is the same, but now it opens up a possibility to add more options in the future and helps TypeScript to distinguish options from other arguments (it was a problem with `compare` and other function arguments).
+
+- 77fd6e2: Introduce the `untrack` function.
+
+  ```dart
+  function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
+  function untrack<TValue>(impulse: ReadonlyImpulse<TValue>): TValue
+  ```
+
+  The `untrack` function is a helper to read Impulses' values without reactivity. It provides a [`Scope`][scope] to the `factory` function and returns the result of the function. Acts as [`batch`][batch].
+
+- fa8141d: Drop the `compare` argument from `Impulse#setValue`.
+
+  Turns out that that in practice that argument is hardly ever used, but it makes the Impulse API confusing: why specifically `compare` is passed to `setValue` and not to `Impulse#of` or `useImpulse`?
+  So, when needed, define `compare` in [`Impulse.of(initialValue, {compare})`](./#impulseof) factory or [`useImpulse(initialValue, {compare})`](./#useimpulse) hook.
+
+- a9eac62: Drop `Impulse#subscribe` method in favor of [`subscribe`](./#subscribe) higher-order function.
+
+  ```diff
+  -const unsubscribe = impulse.subscribe(() => {
+  +const unsubscribe = subscribe((scope) => {
+    console.log(impulse.getValue(scope));
+  });
+  ```
+
+- a594ca9: Make the `Impulse#compare` property protected.
+
+  Turns out that that in practice that property is hardly ever used, so now and it becomes protected.
+  But you still can specify `Impulse#compare` via [`Impulse.of(initialValue, {compare})`](./#impulseof) factory or [`useImpulse(initialValue, {compare})`](./#useimpulse) hook.
+
+- 6157abf: Drop `useImpulseValue` hook.
+
+  The hook was hardly ever used and in all cases it is more natural to use `useScoped` instead.
+
+  ```diff
+  -const value = useImpulseValue(impulse);
+  +const value = useScoped(impulse);
+  +// or
+  +const value = useScoped((scope) => impulse.getValue(scope));
+  +// or
+  +const value = useScoped((scope) => impulse.getValue(scope), [impulse]);
+  ```
+
+### Minor Changes
+
+- 94da9b6: Extends `useScoped` hook API with a shortcut for reading an `Impulse` value:
+
+  ```ts
+  function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue;
+  ```
+
+  So now you it takes less code to read an `Impulse` value:
+
+  ```diff
+  -const value_1 = useScoped((scope) => impulse.getValue(scope));
+  +const value_1 = useImpulseValue(impulse);
+  -const value_2 = useScoped((scope) => impulse.getValue(scope), [impulse]);
+  +const value_2 = useImpulseValue(impulse);
+  ```
+
+- c40ed76: The `subscribe` listener can return a cleanup function to be called for subsequent listeners calls.
+
+  ```ts
+  function subscribe<T>(
+    impulse: Impulse<T>,
+    listener: (value: T) => void | VoidFunction,
+  ): void;
+  ```
+
+- 4095b1a: Introduce [`useScopedCallback`](./#usescopedcallback).
+  The hook is an enchanted [`React.useCallback`][react__use_callback] hook.
+
+  ```dart
+  function useScopedCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
+    callback: (scope: Scope, ...args: TArgs) => TResult,
+    dependencies: DependencyList,
+  ): (...args: TArgs) => TResult
+  ```
+
+  - `callback` is a function to memoize, the memoized function injects [`Scope`][scope] as the first argument and updates whenever any of the `dependencies` values change.
+  - `dependencies` is an array of values used in the `callback` function.
+
+- 1280481: Add the [`Impulse#clone`](./#impulseclone) method's overload to accept `options: ImpulseOptions` as a single argument, so the resulting signature looks like the following:
+
+  ```dart
+  Impulse<T>#clone(
+    options?: ImpulseOptions<T>,
+  ): Impulse<T>
+
+  Impulse<T>#clone(
+    transform?: (value: T) => T,
+    options?: ImpulseOptions<T>,
+  ): Impulse<T>
+  ```
+
+- d45e64a: Pass the `Scope` as 3rd argument to `Compare` function. Useful if it needs to compare values from impulses.
+
+  ```ts
+  type Compare<T> = (left: T, right: T, scope: Scope) => boolean;
+  ```
+
+- 6e39e72: The `useScopedEffect` and `useScopedLayoutEffect` hooks do not enqueue a host component re-render when only scoped Impulses' values change.
+
+  ```ts
+  const count = useImpulse(1);
+
+  useScopedEffect(
+    (scope) => {
+      console.log(count.getVAlue(scope));
+    },
+    [count],
+  );
+  ```
+
+  The effect above depends only on the `count` Impulse. The `useScopedEffect` hook used to trigger the host component's rerender, but now on `count.setValue(2)` the effect runs, and the host component does not re-render.
+
+- 919f387: Introduce transmitting Impulse.
+
+  - `Impulse.transmit` static method that creates a new transmitting Impulse. A transmitting Impulse is an Impulse that does not have its own value but reads it from an external source and writes it back to the source when the value changes. An external source is usually another Impulse or other Impulses.
+
+    ```dart
+    Impulse.transmit<T>(
+      getter: (scope: Scope) => T,
+      options?: TransmittingImpulseOptions<T>,
+    ): ReadonlyImpulse<T>
+
+    Impulse.transmit<T>(
+      getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
+      setter: Impulse<T> | ((value: T, scope: Scope) => void),
+      options?: TransmittingImpulseOptions<T>,
+    ): Impulse<T>
+    ```
+
+    - `getter` is either a source impulse or a function to read the transmitting value from a source.
+    - `[setter]` either a destination impulse or is an optional function to write the transmitting value back to the source. When not defined, the Impulse is readonly.
+    - `[options]` is an optional `TransmittingImpulseOptions` object.
+      - `[options.compare]` when not defined or `null` then `Object.is` applies as a fallback.
+
+  - `useTransmittingImpulse` react that initialize a stable (never changing) transmitting Impulse. Look at the `Impulse.transmit` method for more details and examples.
+
+    ```dart
+    function useTransmittingImpulse<T>(
+      getter: (scope: Scope) => T,
+      dependencies: DependencyList,
+      options?: TransmittingImpulseOptions<T>,
+    ): ReadonlyImpulse<T>
+
+    function useTransmittingImpulse<T>(
+      getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
+      dependencies: DependencyList,
+      setter: Impulse<T> | ((value: T, scope: Scope) => void),
+      options?: TransmittingImpulseOptions<T>,
+    ): Impulse<T>
+    ```
+
+    - `getter` is either a source impulse or a function to read the transmitting value from a source.
+    - `dependencies` an array of values triggering the re-read of the transmitting value.
+    - `[setter]` either a destination impulse or is an optional function to write the transmitting value back to the source. When not defined, the Impulse is readonly.
+    - `[options]` is an optional `TransmittingImpulseOptions` object.
+      - `[options.compare]` when not defined or `null` then `Object.is` applies as a fallback.
+
+  - `type ReadonlyImpulse`
+
+    A type alias for `Impulse` that does not have the `Impulse#setValue` method. It might be handy to store some value inside an Impulse, so the value change trigger a host component re-render only if the component reads the value from the Impulse.
+
+- 5955868: Introduce `Impulse.isImpulse` static method to check if a given object is an impulse.
+
+  ```dart
+  Impulse.isImpulse<T, Unknown = unknown>(
+    input: Unknown | Impulse<T>,
+  ): input is Impulse<T>
+
+  Impulse.isImpulse<T, Unknown = unknown>(
+    scope: Scope,
+    check: (value: unknown) => value is T,
+    input: Unknown | Impulse<T>,
+  ): input is Impulse<T>
+  ```
+
 ## 1.2.3
 
 ### Patch Changes
@@ -28,18 +309,18 @@
 - 18d3fa2: 🚀 feat: extends `Impulse.of` and `useImpulse` signature with an optional value type, the same way as `useState` does.
 
   ```ts
-  const count = Impulse.of(0) // Impulse<number>
-  const optionalCount = Impulse.of<number>() // Impulse<number | undefined>
+  const count = Impulse.of(0); // Impulse<number>
+  const optionalCount = Impulse.of<number>(); // Impulse<number | undefined>
 
   // same for useImpulse
-  const count = useImpulse(0) // number
-  const optionalCount = useImpulse<number>() // number | undefined
+  const count = useImpulse(0); // number
+  const optionalCount = useImpulse<number>(); // number | undefined
   ```
 
   before the changes you had to provide both the optional value initial (`undefined`) value and type explicitly:
 
   ```ts
-  const optionalCount = Impulse.of<number | undefined>(undefined) // Impulse<number | undefined>
+  const optionalCount = Impulse.of<number | undefined>(undefined); // Impulse<number | undefined>
   ```
 
 ## 1.1.1
