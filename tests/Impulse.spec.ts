@@ -442,6 +442,37 @@ describe("Impulse.isImpulse(scope, check, value)", () => {
 
     return false
   }
+
+  const union_check = (
+    scope: Scope,
+    impulse: Impulse<string> | Impulse<number>,
+  ) => {
+    if (Impulse.isImpulse(scope, isString, impulse)) {
+      expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
+
+      return true
+    }
+
+    expectTypeOf(impulse).toEqualTypeOf<Impulse<number>>()
+
+    return false
+  }
+
+  const union_value_check = (
+    scope: Scope,
+    impulse: Impulse<number | string>,
+  ) => {
+    if (Impulse.isImpulse(scope, isString, impulse)) {
+      expectTypeOf(impulse).toEqualTypeOf<Impulse<number | string>>()
+
+      return true
+    }
+
+    expectTypeOf(impulse).toEqualTypeOf<never>()
+
+    return false
+  }
+
   const readonly_check = (
     scope: Scope,
     impulse: string | ReadonlyImpulse<string>,
@@ -474,6 +505,8 @@ describe("Impulse.isImpulse(scope, check, value)", () => {
     const readonly = Impulse.transmit(() => "")
 
     expect(known_check(scope, impulse)).toBe(true)
+    expect(union_check(scope, impulse)).toBe(true)
+    expect(union_value_check(scope, Impulse.of<string | number>(""))).toBe(true)
     // @ts-expect-error should be Impulse<string>
     expect(known_check(scope, readonly)).toBe(true)
     expect(readonly_check(scope, impulse)).toBe(true)

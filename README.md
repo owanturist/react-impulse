@@ -311,6 +311,22 @@ const PageNavigation: React.FC = () => {
 
 > 💡 The [`useTransmittingImpulse`][use_transmitting_impulse] hook helps to create and store a transmitting `Impulse` inside a React component.
 
+### `Impulse.isImpulse`
+
+```dart
+Impulse.isImpulse<T, Unknown = unknown>(
+  input: Unknown | Impulse<T>,
+): input is Impulse<T>
+
+Impulse.isImpulse<T, Unknown = unknown>(
+  scope: Scope,
+  check: (value: unknown) => value is T,
+  input: Unknown | Impulse<T>,
+): input is Impulse<T>
+```
+
+A static method that checks whether the `input` is an `Impulse` instance. If the `check` function is provided, it checks the Impulse's value to match the `check` function.
+
 ### `Impulse#getValue`
 
 ```dart

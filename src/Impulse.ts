@@ -27,22 +27,39 @@ export const isImpulse = <T, Unknown = unknown>(
 
 export abstract class Impulse<T> {
   /**
-   * TODO add docs
+   * A static method to check whether or not the input is an Impulse.
+   *
+   * @version 2.0.0
    */
   public static isImpulse<T, Unknown = unknown>(
     input: Unknown | Impulse<T>,
   ): input is Impulse<T>
 
+  /**
+   * A static method to check whether or not the input is an Impulse.
+   *
+   * @version 2.0.0
+   */
   public static isImpulse<T, Unknown = unknown>(
     input: Unknown | ReadonlyImpulse<T>,
   ): input is ReadonlyImpulse<T>
 
+  /**
+   * A static method to check whether or not an Impulse value passes the `check`.
+   *
+   * @version 2.0.0
+   */
   public static isImpulse<T, Unknown = unknown>(
     scope: Scope,
     check: (value: unknown) => value is T,
     input: Unknown | Impulse<T>,
   ): input is Impulse<T>
 
+  /**
+   * A static method to check whether or not an Impulse value passes the `check`.
+   *
+   * @version 2.0.0
+   */
   public static isImpulse<T, Unknown = unknown>(
     scope: Scope,
     check: (value: unknown) => value is T,
