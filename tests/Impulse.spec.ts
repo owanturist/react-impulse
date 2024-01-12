@@ -68,12 +68,16 @@ describe("Impulse.of(value, options?)", () => {
     expect(Object.is).toHaveBeenLastCalledWith({ count: 0 }, { count: 1 })
   })
 
-  it("assigns custom function as compare", () => {
+  it("assigns custom function as compare", ({ scope }) => {
     const impulse = Impulse.of({ count: 0 }, { compare: Counter.compare })
 
     impulse.setValue({ count: 1 })
     expect(Counter.compare).toHaveBeenCalledOnce()
-    expect(Counter.compare).toHaveBeenLastCalledWith({ count: 0 }, { count: 1 })
+    expect(Counter.compare).toHaveBeenLastCalledWith(
+      { count: 0 },
+      { count: 1 },
+      scope,
+    )
   })
 })
 
@@ -226,7 +230,11 @@ describe("Impulse.transmit(getter, options?)", () => {
     const value_1 = impulse.getValue(scope)
     const value_2 = impulse.getValue(scope)
     expect(Counter.compare).toHaveBeenCalledOnce()
-    expect(Counter.compare).toHaveBeenLastCalledWith({ count: 0 }, { count: 0 })
+    expect(Counter.compare).toHaveBeenLastCalledWith(
+      { count: 0 },
+      { count: 0 },
+      scope,
+    )
     expect(value_1).toBe(value_2)
     expect(value_1).toStrictEqual(value_2)
   })
@@ -314,7 +322,11 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     impulse.getValue(scope)
     impulse.getValue(scope)
     expect(Counter.compare).toHaveBeenCalledOnce()
-    expect(Counter.compare).toHaveBeenLastCalledWith({ count: 0 }, { count: 0 })
+    expect(Counter.compare).toHaveBeenLastCalledWith(
+      { count: 0 },
+      { count: 0 },
+      scope,
+    )
   })
 
   it("batches setter", () => {
@@ -752,7 +764,7 @@ describe.each([
       expect(Object.is).toHaveBeenLastCalledWith({ count: 0 }, { count: 1 })
     })
 
-    it("transfers custom comparator from source Impulse", () => {
+    it("transfers custom comparator from source Impulse", ({ scope }) => {
       const { impulse: impulse_1 } = setup(
         { count: 0 },
         { compare: Counter.compare },
@@ -766,12 +778,13 @@ describe.each([
       expect(Counter.compare).toHaveBeenLastCalledWith(
         { count: 0 },
         { count: 1 },
+        scope,
       )
     })
   })
 
   describe("Impulse#clone(options)", () => {
-    it("inherits custom comparator by empty options", () => {
+    it("inherits custom comparator by empty options", ({ scope }) => {
       const { impulse: impulse_1 } = setup(
         { count: 0 },
         { compare: Counter.compare },
@@ -785,10 +798,13 @@ describe.each([
       expect(Counter.compare).toHaveBeenLastCalledWith(
         { count: 0 },
         { count: 1 },
+        scope,
       )
     })
 
-    it("inherits custom comparator by options.compare: undefined", () => {
+    it("inherits custom comparator by options.compare: undefined", ({
+      scope,
+    }) => {
       const { impulse: impulse_1 } = setup(
         { count: 0 },
         { compare: Counter.compare },
@@ -802,6 +818,7 @@ describe.each([
       expect(Counter.compare).toHaveBeenLastCalledWith(
         { count: 0 },
         { count: 1 },
+        scope,
       )
     })
 
@@ -819,7 +836,7 @@ describe.each([
       expect(Object.is).toHaveBeenLastCalledWith({ count: 0 }, { count: 1 })
     })
 
-    it("overrides comparator by custom options.compare", () => {
+    it("overrides comparator by custom options.compare", ({ scope }) => {
       const { impulse: impulse_1 } = setup({ count: 0 })
       const impulse_2 = impulse_1.clone({ compare: Counter.compare })
 
@@ -830,6 +847,7 @@ describe.each([
       expect(Counter.compare).toHaveBeenLastCalledWith(
         { count: 0 },
         { count: 1 },
+        scope,
       )
     })
   })
@@ -844,7 +862,7 @@ describe.each([
       expect(impulse_1.getValue(scope)).toStrictEqual(impulse_2.getValue(scope))
     })
 
-    it("keeps comparator from source", () => {
+    it("keeps comparator from source", ({ scope }) => {
       const { impulse: impulse_1 } = setup(
         { count: 0 },
         { compare: Counter.compare },
@@ -858,6 +876,7 @@ describe.each([
       expect(Counter.compare).toHaveBeenLastCalledWith(
         { count: 0 },
         { count: 1 },
+        scope,
       )
     })
 
@@ -957,6 +976,7 @@ describe.each([
       expect(Counter.compare).toHaveBeenLastCalledWith(
         { count: 0 },
         { count: 1 },
+        scope,
       )
     })
   })

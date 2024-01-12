@@ -2,7 +2,6 @@ import { render, screen, fireEvent, act, waitFor } from "@testing-library/react"
 import React, { type ForwardRefRenderFunction } from "react"
 
 import {
-  type Compare,
   Impulse,
   useScoped,
   scoped,
@@ -445,7 +444,10 @@ describe.each([
     "React.memo(scoped())",
     <TProps,>(
       Component: React.FC<PropsWithScope<TProps>>,
-      propsAreEqual?: Compare<Readonly<PropsWithoutScope<TProps>>>,
+      propsAreEqual?: (
+        prev: Readonly<PropsWithoutScope<TProps>>,
+        next: Readonly<PropsWithoutScope<TProps>>,
+      ) => boolean,
     ) => {
       return React.memo(scoped(Component), propsAreEqual)
     },

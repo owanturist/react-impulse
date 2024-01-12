@@ -175,7 +175,7 @@ describe("with compare function", () => {
     expect(compare).not.toHaveBeenCalled()
   })
 
-  it("passes custom compare function", () => {
+  it("passes custom compare function", ({ scope }) => {
     const compare = vi.fn<[number], boolean>()
     const { result } = renderHook(() => useImpulse<number>(0, { compare }))
 
@@ -184,10 +184,10 @@ describe("with compare function", () => {
     })
 
     expect(compare).toHaveBeenCalledOnce()
-    expect(compare).toHaveBeenLastCalledWith(0, 1)
+    expect(compare).toHaveBeenLastCalledWith(0, 1, scope)
   })
 
-  it("updates compare function on re-render", () => {
+  it("updates compare function on re-render", ({ scope }) => {
     const compare_1 = vi.fn().mockImplementation(Object.is)
     const compare_2 = vi.fn().mockImplementation(Object.is)
 
@@ -202,7 +202,7 @@ describe("with compare function", () => {
       result.current.setValue((x) => x + 1)
     })
     expect(compare_1).toHaveBeenCalledOnce()
-    expect(compare_1).toHaveBeenLastCalledWith(0, 1)
+    expect(compare_1).toHaveBeenLastCalledWith(0, 1, scope)
     vi.clearAllMocks()
 
     rerender(compare_2)
@@ -211,7 +211,7 @@ describe("with compare function", () => {
     })
     expect(compare_1).not.toHaveBeenCalled()
     expect(compare_2).toHaveBeenCalledOnce()
-    expect(compare_2).toHaveBeenLastCalledWith(1, 2)
+    expect(compare_2).toHaveBeenLastCalledWith(1, 2, scope)
     vi.clearAllMocks()
 
     rerender(null)

@@ -193,7 +193,7 @@ describe("transform scoped Impulse's", () => {
           (scope) => factoryTuple(scope, { impulse }),
           [impulse],
           {
-            compare: (prev, next) => compareTuple(prev, next),
+            compare: (prev, next, scope) => compareTuple(prev, next, scope),
           },
         )
       },

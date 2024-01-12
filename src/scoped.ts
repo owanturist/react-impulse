@@ -12,7 +12,7 @@ import {
   type ReactNode,
 } from "./dependencies"
 import type { Scope } from "./Scope"
-import type { Compare, Func } from "./utils"
+import type { Func } from "./utils"
 import { useScope } from "./useScope"
 
 export type PropsWithScope<TProps = Record<string, unknown>> = TProps & {
@@ -63,7 +63,10 @@ export function scoped<TProps>(component: FC<TProps>): FC<TProps> {
 
 const memo = <TProps>(
   component: FC<PropsWithScope<TProps>>,
-  propsAreEqual?: Compare<Readonly<PropsWithoutScope<TProps>>>,
+  propsAreEqual?: (
+    prev: Readonly<PropsWithoutScope<TProps>>,
+    next: Readonly<PropsWithoutScope<TProps>>,
+  ) => boolean,
 ): MemoExoticComponent<FC<PropsWithoutScope<TProps>>> => {
   return React_memo(scoped(component), propsAreEqual)
 }
@@ -80,7 +83,10 @@ const forwardRef = <TRef, TProps>(
 
 const forwardRefMemo = <TRef, TProps>(
   render: ForwardRefRenderFunction<TRef, PropsWithScope<TProps>>,
-  propsAreEqual?: Compare<Readonly<ForwardedPropsWithoutScope<TRef, TProps>>>,
+  propsAreEqual?: (
+    prev: Readonly<ForwardedPropsWithoutScope<TRef, TProps>>,
+    next: Readonly<ForwardedPropsWithoutScope<TRef, TProps>>,
+  ) => boolean,
 ): MemoExoticComponent<
   NamedExoticComponent<ForwardedPropsWithoutScope<TRef, TProps>>
 > => {

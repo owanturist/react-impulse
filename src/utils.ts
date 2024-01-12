@@ -1,3 +1,4 @@
+import type { Scope } from "./Scope"
 import {
   type EffectCallback,
   useEffect,
@@ -14,7 +15,7 @@ import {
  *
  * @version 1.0.0
  */
-export type Compare<T> = (left: T, right: T) => boolean
+export type Compare<T> = (left: T, right: T, scope: Scope) => boolean
 
 export type Destructor = ReturnType<EffectCallback>
 
@@ -22,7 +23,7 @@ export type Func<TArgs extends ReadonlyArray<unknown>, TResult = void> = (
   ...args: TArgs
 ) => TResult
 
-export const eq: Compare<unknown> = (left, right) => Object.is(left, right)
+export const eq = <T>(left: T, right: T): boolean => Object.is(left, right)
 
 export function noop(): void {
   // do nothing

@@ -35,7 +35,13 @@ export function useImpulse<T>(
   valueOrInitValue?: T | Func<[Scope], T>,
   options?: ImpulseOptions<undefined | T>,
 ): Impulse<undefined | T> {
-  const stableCompare = useStableCallback(options?.compare ?? eq)
+  const stableCompare = useStableCallback(
+    (prev: undefined | T, next: undefined | T, scope: Scope) => {
+      const compare = options?.compare ?? eq
+
+      return compare(prev, next, scope)
+    },
+  )
 
   return usePermanent(() => {
     const initialValue = isFunction(valueOrInitValue)

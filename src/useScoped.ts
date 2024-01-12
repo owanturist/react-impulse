@@ -6,7 +6,7 @@ import {
   type Func,
   isFunction,
 } from "./utils"
-import type { Scope } from "./Scope"
+import { STATIC_SCOPE, type Scope } from "./Scope"
 import { useScope } from "./useScope"
 import type { ReadonlyImpulse } from "./Impulse"
 
@@ -63,7 +63,14 @@ export function useScoped<TResult>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies ?? [impulseOrFactory],
   )
-  const value = useScope(transform, useStableCallback(options?.compare ?? eq))
+  const value = useScope(
+    transform,
+    useStableCallback((prev, next) => {
+      const compare = options?.compare ?? eq
+
+      return compare(prev, next, STATIC_SCOPE)
+    }),
+  )
 
   useDebugValue(value)
 

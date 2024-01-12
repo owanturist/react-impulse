@@ -393,7 +393,7 @@ describe("with compare function", () => {
 
     expect(Object.is).not.toHaveBeenCalled()
     expect(compare).toHaveBeenCalledOnce()
-    expect(compare).toHaveBeenLastCalledWith({ x: false }, { x: false })
+    expect(compare).toHaveBeenLastCalledWith({ x: false }, { x: false }, scope)
   })
 
   it("updates compare function on re-render", ({ scope }) => {
@@ -408,7 +408,11 @@ describe("with compare function", () => {
       result.current.getValue(scope)
     })
     expect(compare_1).toHaveBeenCalledOnce()
-    expect(compare_1).toHaveBeenLastCalledWith({ x: false }, { x: false })
+    expect(compare_1).toHaveBeenLastCalledWith(
+      { x: false },
+      { x: false },
+      scope,
+    )
     vi.clearAllMocks()
 
     rerender(compare_2)
@@ -417,7 +421,11 @@ describe("with compare function", () => {
     })
     expect(compare_1).not.toHaveBeenCalled()
     expect(compare_2).toHaveBeenCalledOnce()
-    expect(compare_2).toHaveBeenLastCalledWith({ x: false }, { x: false })
+    expect(compare_2).toHaveBeenLastCalledWith(
+      { x: false },
+      { x: false },
+      scope,
+    )
     vi.clearAllMocks()
 
     rerender(null)
