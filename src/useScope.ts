@@ -1,16 +1,16 @@
 import { useCallback, useSyncExternalStoreWithSelector } from "./dependencies"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { EMITTER_KEY, type Scope } from "./Scope"
-import { type Compare, isFunction, usePermanent, type Func } from "./utils"
+import { isFunction, usePermanent, type Func } from "./utils"
 
 export function useScope(): Func<[], Scope>
 export function useScope<T = Func<[], Scope>>(
   transform: Func<[Scope], T>,
-  compare?: Compare<T>,
+  compare?: Func<[T, T], boolean>,
 ): T
 export function useScope<T = Func<[], Scope>>(
   transform?: Func<[Scope], T>,
-  compare?: Compare<T>,
+  compare?: Func<[T, T], boolean>,
 ): T {
   const emitter = usePermanent(ScopeEmitter._init)
   const select = useCallback(

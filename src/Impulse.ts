@@ -297,7 +297,7 @@ class DirectImpulse<T> extends Impulse<T> {
   }
 
   protected _setter(value: T): boolean {
-    const isDifferent = !this._compare(this._value, value)
+    const isDifferent = !this._compare(this._value, value, STATIC_SCOPE)
 
     if (isDifferent) {
       this._value = value
@@ -321,7 +321,10 @@ export class TransmittingImpulse<T> extends Impulse<T> {
   protected _getter(scope: Scope): T {
     const value = this._getValue(scope)
 
-    if (this._value == null || !this._compare(this._value._lazy, value)) {
+    if (
+      this._value == null ||
+      !this._compare(this._value._lazy, value, STATIC_SCOPE)
+    ) {
       this._value = { _lazy: value }
     }
 

@@ -13,7 +13,7 @@ describe.each([
       const cmp = compare ?? Counter.compare
 
       return useScoped((scope) => factory(scope, { impulse }), [impulse], {
-        compare: (prev, next) => cmp(prev, next),
+        compare: (prev, next, scope) => cmp(prev, next, scope),
       })
     },
   ],
