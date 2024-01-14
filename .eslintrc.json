@@ -126,7 +126,7 @@
     "import/no-extraneous-dependencies": [
       "error",
       {
-        "devDependencies": ["tests/**/*.{ts,tsx}", "./*.{js,ts}"]
+        "devDependencies": ["**/tests/**/*.{ts,tsx}", "./*.{js,ts}"]
       }
     ],
     "import/no-cycle": ["error"]
@@ -227,13 +227,13 @@
       }
     },
     {
-      "files": ["./*.ts"],
+      "files": ["./*.ts", "./packages/*/*.ts"],
       "rules": {
         "import/no-default-export": "off"
       }
     },
     {
-      "files": ["src/**/*.ts?(x)", "tests/**/*.ts?(x)"],
+      "files": ["**/src/**/*.ts?(x)", "**/tests/**/*.ts?(x)"],
       "extends": ["plugin:react/recommended", "plugin:react-hooks/recommended"],
       "settings": {
         "react": {
@@ -289,7 +289,7 @@
       }
     },
     {
-      "files": ["tests/**/*.ts?(x)"],
+      "files": ["**/tests/**/*.ts?(x)"],
       "extends": [
         "plugin:jest/recommended",
         "plugin:jest/style",
