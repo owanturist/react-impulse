@@ -4,6 +4,7 @@
 ![known vulnerabilities](https://snyk.io/test/github/owanturist/react-impulse/badge.svg)
 ![types](https://badgen.net/npm/types/react-impulse)
 [![npm version](https://badge.fury.io/js/react-impulse.svg)](https://badge.fury.io/js/react-impulse)
+[![view changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/react-impulse)
 
 The clean and natural React state management.
 
