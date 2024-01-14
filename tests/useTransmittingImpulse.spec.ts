@@ -638,15 +638,3 @@ describe("type check", () => {
     expectTypeOf(result.current).toEqualTypeOf<Impulse<number>>()
   })
 })
-
-it("x", ({ scope }) => {
-  const { result } = renderHook(() => {
-    const y = useImpulse(0)
-
-    return useTransmittingImpulse((scope) => y.getValue(scope), [y])
-  })
-
-  expect(result.current.getValue(scope)).toBe(0)
-  expect(result.current.getValue(scope)).toBe(0)
-  expect(result.current.getValue(scope)).toBe(0)
-})

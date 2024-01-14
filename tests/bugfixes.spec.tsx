@@ -1,7 +1,20 @@
-import { act, fireEvent, render, screen } from "@testing-library/react"
+import {
+  act,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+} from "@testing-library/react"
 import React from "react"
 
-import { Impulse, scoped, subscribe, useScoped } from "../src"
+import {
+  Impulse,
+  scoped,
+  subscribe,
+  useImpulse,
+  useScoped,
+  useTransmittingImpulse,
+} from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -219,5 +232,67 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
       impulse.setValue((x) => x + 1)
     })
     expect(btn).toHaveTextContent("3")
+  })
+})
+
+describe("useTransmittingImpulse stable compare throws an error #624", () => {
+  describe("useTransmittingImpulse", () => {
+    it("reads value ones", () => {
+      const { result } = renderHook(() => {
+        const count = useTransmittingImpulse(() => 0, [])
+
+        return useScoped((scope) => `${count.getValue(scope)}`)
+      })
+
+      expect(result.current).toBe("0")
+    })
+
+    it("reads value twice in a row", () => {
+      const { result } = renderHook(() => {
+        const count = useTransmittingImpulse(() => 0, [])
+
+        return useScoped(
+          (scope) => `${count.getValue(scope)} + ${count.getValue(scope)}`,
+        )
+      })
+
+      expect(result.current).toBe("0 + 0")
+    })
+
+    it("returns the same value twice in a row", () => {
+      const { result } = renderHook(() => {
+        const count = useTransmittingImpulse(
+          () => ({ count: 0 }),
+          [],
+          () => {
+            // do nothing
+          },
+          {
+            compare: (left, right) => left.count === right.count,
+          },
+        )
+
+        return useScoped(
+          // eslint-disable-next-line no-self-compare
+          (scope) => count.getValue(scope) === count.getValue(scope),
+        )
+      })
+
+      expect(result.current).toBe(true)
+    })
+  })
+
+  describe("useImpulse", () => {
+    it("calls Impulse#setValue during render", () => {
+      const { result } = renderHook(() => {
+        const count = useImpulse(0)
+
+        count.setValue(1)
+
+        return useScoped(count)
+      })
+
+      expect(result.current).toBe(1)
+    })
   })
 })

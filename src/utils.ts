@@ -4,7 +4,6 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
-  useCallback,
   useState,
 } from "./dependencies"
 
@@ -39,17 +38,19 @@ export const useIsomorphicLayoutEffect =
   /* c8 ignore next */
   typeof window === "undefined" ? useEffect : useLayoutEffect
 
-export function useStableCallback<
-  TArgs extends ReadonlyArray<unknown>,
-  TResult,
->(handler: Func<TArgs, TResult>): Func<TArgs, TResult> {
-  const handlerRef = useRef<Func<TArgs, TResult>>(null as never)
+export function useHandler<TArgs extends ReadonlyArray<unknown>, TResult>(
+  handler: Func<TArgs, TResult>,
+): Func<TArgs, TResult> {
+  const handlerRef = useRef(handler)
+  const stableRef = useRef(
+    (...args: TArgs): TResult => handlerRef.current(...args),
+  )
 
   useIsomorphicLayoutEffect(() => {
     handlerRef.current = handler
   })
 
-  return useCallback((...args) => handlerRef.current(...args), [])
+  return stableRef.current
 }
 
 export function usePermanent<TValue>(init: () => TValue): TValue {
