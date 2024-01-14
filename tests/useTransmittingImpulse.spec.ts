@@ -10,6 +10,7 @@ import {
   useScopedEffect,
   type ReadonlyImpulse,
   type Scope,
+  useScoped,
 } from "../src"
 
 import type { Counter } from "./common"
@@ -28,6 +29,7 @@ function setupWithGlobal() {
 
     return {
       impulse,
+      value: useScoped(impulse),
       getCount: () => counter.count,
       setCount: (x: number) => {
         counter = { count: x }
@@ -53,6 +55,7 @@ function setupWithReactState() {
 
     return {
       impulse,
+      value: useScoped(impulse),
       getCount: () => count,
       setCount: (x: number) => setCounter({ count: x }),
     }
@@ -76,6 +79,7 @@ function setupWithImpulse() {
 
     return {
       impulse,
+      value: useScoped(impulse),
       getCount: (scope: Scope) => counter.getValue(scope).count,
       setCount: (x: number) => counter.setValue({ count: x }),
     }
@@ -97,6 +101,7 @@ function setupWithImpulseGetterShortcut() {
 
     return {
       impulse,
+      value: useScoped(impulse),
       getCount: (scope: Scope) => counter.getValue(scope),
       setCount: (x: number) => counter.setValue(x),
     }
@@ -120,6 +125,7 @@ function setupWithImpulseSetterShortcut() {
 
     return {
       impulse,
+      value: useScoped(impulse),
       getCount: (scope: Scope) => counter.getValue(scope),
       setCount: (x: number) => counter.setValue(x),
     }
@@ -139,6 +145,7 @@ function setupWithImpulseGetterAndSetterShortcuts() {
 
     return {
       impulse,
+      value: useScoped(impulse),
       getCount: (scope: Scope) => counter.getValue(scope),
       setCount: (x: number) => counter.setValue(x),
     }
@@ -200,7 +207,15 @@ describe.each([
     act(() => {
       result.current.setCount(1)
     })
+    // the global value updates on its own without causing a re-render
+    expect([1, 0]).toContain(result.current.value)
     expect(result.current.impulse.getValue(scope)).toBe(1)
+
+    act(() => {
+      result.current.impulse.setValue(2)
+    })
+    expect(result.current.value).toBe(2)
+    expect(result.current.getCount(scope)).toBe(2)
   })
 
   it("update the origin value when the Impulse value changes", ({ scope }) => {
