@@ -1,5 +1,12 @@
 # react-impulse
 
+## 2.0.1
+
+### Patch Changes
+
+- a1577a1: The `TransmittingImpulse#setValue` method always emits changes to enforce the transmitting value update for cases when the value is not reactive (ex. `localStorage`, global values, etc). Resolves #627.
+- 93f698b: Assign a compare function to a stable ref during the initial render so that Impulses created via `useImpulse` and `useTransmittingImpulse` can use `getValue()` and `setValue()` during initial render. Resolves #624.
+
 ## 2.0.0
 
 ### Major Changes
