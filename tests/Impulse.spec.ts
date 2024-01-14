@@ -374,7 +374,7 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     })
 
     expect(result.current).toBe(12)
-    expect(spy).not.toHaveBeenCalled()
+    expect(spy).toHaveBeenCalledOnce()
   })
 })
 

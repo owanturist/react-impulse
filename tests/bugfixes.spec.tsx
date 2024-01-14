@@ -296,3 +296,58 @@ describe("useTransmittingImpulse stable compare throws an error #624", () => {
     })
   })
 })
+
+describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a not reactive value #627", () => {
+  describe("Impulse.transmit()", () => {
+    it("enqueues a rerender when sets a reactive value", () => {
+      const counter = { count: 0 }
+      const impulse = Impulse.transmit(
+        () => counter.count,
+        (count) => {
+          counter.count = count
+        },
+      )
+
+      const { result } = renderHook(() => {
+        return useScoped(impulse)
+      })
+
+      expect(result.current).toBe(0)
+
+      act(() => {
+        impulse.setValue(1)
+      })
+
+      expect(result.current).toBe(1)
+    })
+  })
+
+  describe("useTransmittingImpulse()", () => {
+    it("enqueues a rerender when sets a reactive value", () => {
+      const counter = { count: 0 }
+
+      const { result } = renderHook(() => {
+        const impulse = useTransmittingImpulse(
+          () => counter.count,
+          [],
+          (count) => {
+            counter.count = count
+          },
+        )
+
+        return {
+          impulse,
+          value: useScoped(impulse),
+        }
+      })
+
+      expect(result.current.value).toBe(0)
+
+      act(() => {
+        result.current.impulse.setValue(1)
+      })
+
+      expect(result.current.value).toBe(1)
+    })
+  })
+})

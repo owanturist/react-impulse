@@ -334,9 +334,9 @@ export class TransmittingImpulse<T> extends Impulse<T> {
   protected _setter(value: T): boolean {
     this._setValue(value, STATIC_SCOPE)
 
-    // the TransmittingImpulse does not need to emit changes by itself
-    // the transmitted impulses do it instead
-    return false
+    // should always emit because the transmitting value might be not reactive
+    // so the _getter method does not know about the change of such values
+    return true
   }
 
   public _replaceGetter(getter: (scope: Scope) => T): void {
