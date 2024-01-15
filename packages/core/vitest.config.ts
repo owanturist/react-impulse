@@ -1,6 +1,10 @@
-import { defineConfig } from "vitest/config"
+import { defineProject } from "vitest/config"
+import React from "react"
 
-export default defineConfig({
+// eslint-disable-next-line no-console
+console.log(`Running tests against React@${React.version}`)
+
+export default defineProject({
   test: {
     globals: true,
     poolOptions: {

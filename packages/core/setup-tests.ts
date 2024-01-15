@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom/vitest"
 import { cleanup } from "@testing-library/react"
-import { tap } from "react-impulse"
+
+import { tap } from "./src"
 
 // forces tests to fail in case of illegal usage
 const spy_console$error = vi
