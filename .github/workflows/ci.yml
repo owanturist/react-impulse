@@ -186,30 +186,10 @@ jobs:
           commit_message: "Change .changeset `baseBranch` to ${{ github.ref_name }}"
           file_pattern: ".changeset/config.json"
 
-      - name: Get changeset status
-        run: pnpm cs status --output ./changeset-status.json
-
-      - name: Read the new version
-        id: new-version
-        uses: notiz-dev/github-action-json-property@release
-        continue-on-error: true
-        with:
-          path: ./changeset-status.json
-          prop_path: "releases.0.newVersion"
-
-      - name: Read the old version
-        id: old-version
-        uses: notiz-dev/github-action-json-property@release
-        with:
-          path: ./changeset-status.json
-          prop_path: "releases.0.oldVersion"
-
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
         with:
           publish: pnpm run publish --tag=${{ github.ref_name == 'master' && 'latest' || github.ref_name == 'next' && 'next' || github.ref_name == 'alpha' && 'alpha' || github.ref_name == 'beta' && 'beta' || ' ' }}
-          commit: Release `${{ steps.old-version.outputs.prop }}` -> `${{ steps.new-version.outputs.prop }}`
-          title: Release `${{ steps.old-version.outputs.prop }}` -> `${{ steps.new-version.outputs.prop }}`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
