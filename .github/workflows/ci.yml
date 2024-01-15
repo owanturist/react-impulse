@@ -201,8 +201,8 @@ jobs:
         id: old-version
         uses: notiz-dev/github-action-json-property@release
         with:
-          path: ./package.json
-          prop_path: "version"
+          path: ./changeset-status.json
+          prop_path: "releases.0.oldVersion"
 
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
