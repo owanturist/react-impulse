@@ -20,6 +20,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^6.18.1
         version: 6.18.1(eslint@8.56.0)(typescript@5.3.3)
+      '@vitest/coverage-v8':
+        specifier: ^1.2.0
+        version: 1.2.0(vitest@1.2.0)
       eslint:
         specifier: ^8.56.0
         version: 8.56.0
