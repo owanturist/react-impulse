@@ -21,14 +21,14 @@
   },
   "size-limit": [
     {
-      "path": "packages/core/dist/index.js",
+      "path": "packages/react-impulse/dist/index.js",
       "gzip": true,
       "ignore": [
         "use-sync-external-store"
       ]
     },
     {
-      "path": "packages/core/dist/index.cjs",
+      "path": "packages/react-impulse/dist/index.cjs",
       "gzip": true,
       "ignore": [
         "use-sync-external-store"

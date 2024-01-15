@@ -99,13 +99,13 @@ jobs:
         run: pnpm build
 
       - name: Cleanup src folders
-        run: rm -rf packages/core/src/*
+        run: rm -rf packages/react-impulse/src/*
 
       - name: Create a symlink to the built file from src folder
         # [s] - symbolic
         # [F] - force, remove existing destination files
         # [f] - unlink file if it already exists
-        run: cd packages/core/src && ln -sFf ../dist/${{ matrix.filename }} index.js && cd ..
+        run: cd packages/react-impulse/src && ln -sFf ../dist/${{ matrix.filename }} index.js && cd ..
 
       - name: Test
         run: pnpm test:run
