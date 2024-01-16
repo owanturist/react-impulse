@@ -97,8 +97,6 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0(happy-dom@13.1.4)(terser@5.26.0)
 
-  packages/react-impulse-form: {}
-
 packages:
 
   /@aashutoshrathi/word-wrap@1.2.6:
