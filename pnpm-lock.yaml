@@ -53,6 +53,12 @@ importers:
       size-limit:
         specifier: ^11.0.1
         version: 11.0.1
+      terser:
+        specifier: ^5.26.0
+        version: 5.26.0
+      tsup:
+        specifier: ^8.0.1
+        version: 8.0.1(typescript@5.3.3)
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
@@ -87,15 +93,11 @@ importers:
       react:
         specifier: ^18.2.0
         version: 18.2.0
-      terser:
-        specifier: ^5.26.0
-        version: 5.26.0
-      tsup:
-        specifier: ^8.0.1
-        version: 8.0.1(typescript@5.3.3)
       vitest:
         specifier: ^1.2.0
         version: 1.2.0(happy-dom@13.1.4)(terser@5.26.0)
+
+  packages/react-impulse-form: {}
 
 packages:
 

@@ -15,10 +15,6 @@
     "require": "./dist/index.cjs",
     "default": "./dist/index.cjs"
   },
-  "scripts": {
-    "build": "tsup",
-    "build:minified": "pnpm build --env.NODE_ENV=production --minify=terser"
-  },
   "keywords": [
     "react",
     "react-hooks",
@@ -47,8 +43,6 @@
     "@vitest/coverage-v8": "^1.2.0",
     "happy-dom": "^13.1.4",
     "react": "^18.2.0",
-    "terser": "^5.26.0",
-    "tsup": "^8.0.1",
     "vitest": "^1.2.0"
   }
 }
