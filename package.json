@@ -1,26 +1,14 @@
 {
-  "name": "react-impulse",
+  "name": "root",
   "type": "module",
-  "version": "2.0.1",
-  "description": "The clean and natural React state management",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "exports": {
-    "types": "./dist/index.d.ts",
-    "import": "./dist/index.js",
-    "require": "./dist/index.cjs",
-    "default": "./dist/index.cjs"
-  },
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "size": "size-limit",
-    "build": "tsup",
-    "build:minified": "pnpm build --env.NODE_ENV=production --minify=terser",
-    "test": "node ./print-react-version && vitest",
+    "build": "pnpm --filter ./packages/* run build",
+    "build:minified": "pnpm --filter ./packages/* run build:minified",
+    "test": "vitest",
     "test:run": "pnpm test -- --run --reporter=dot",
     "test:coverage": "pnpm test:run --coverage",
     "lint": "eslint --ext=js,jsx,ts,tsx",
@@ -31,22 +19,6 @@
     "publish": "pnpm build && pnpm cs publish",
     "prepare": "husky install"
   },
-  "size-limit": [
-    {
-      "path": "dist/index.js",
-      "gzip": true,
-      "ignore": [
-        "use-sync-external-store"
-      ]
-    },
-    {
-      "path": "dist/index.cjs",
-      "gzip": true,
-      "ignore": [
-        "use-sync-external-store"
-      ]
-    }
-  ],
   "engines": {
     "node": ">=20.10.0"
   },
@@ -55,32 +27,10 @@
     "type": "git",
     "url": "git+https://github.com/owanturist/react-impulse.git"
   },
-  "keywords": [
-    "react",
-    "react-hooks",
-    "state",
-    "state-management",
-    "store"
-  ],
-  "author": "Anton Ovechkin <owanturist@gmail.com>",
-  "license": "BSD-3-Clause",
-  "bugs": {
-    "url": "https://github.com/owanturist/react-impulse/issues"
-  },
-  "homepage": "https://github.com/owanturist/react-impulse#readme",
-  "peerDependencies": {
-    "react": "^16.12.0 || ^17.0.0 || ^18.0.0"
-  },
-  "dependencies": {
-    "use-sync-external-store": "^1.2.0"
-  },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.1",
     "@size-limit/preset-small-lib": "^11.0.1",
-    "@testing-library/jest-dom": "^6.2.0",
-    "@testing-library/react": "^14.1.2",
-    "@types/react": "^18.2.47",
-    "@types/use-sync-external-store": "^0.0.6",
     "@typescript-eslint/eslint-plugin": "^6.18.1",
     "@typescript-eslint/parser": "^6.18.1",
     "@vitest/coverage-v8": "^1.2.0",
@@ -90,13 +40,9 @@
     "eslint-plugin-jest-dom": "^5.1.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "happy-dom": "^13.0.6",
     "husky": "^8.0.3",
     "prettier": "^3.2.2",
-    "react": "^18.2.0",
     "size-limit": "^11.0.1",
-    "terser": "^5.26.0",
-    "tsup": "^8.0.1",
     "typescript": "^5.3.3",
     "vitest": "^1.2.0"
   }

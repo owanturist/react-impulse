@@ -98,14 +98,14 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Cleanup src folder
-        run: rm -rf src/*
+      - name: Cleanup src folders
+        run: rm -rf packages/react-impulse/src/*
 
       - name: Create a symlink to the built file from src folder
         # [s] - symbolic
         # [F] - force, remove existing destination files
         # [f] - unlink file if it already exists
-        run: cd src && ln -sFf ../dist/${{ matrix.filename }} index.js && cd ..
+        run: cd packages/react-impulse/src && ln -sFf ../dist/${{ matrix.filename }} index.js && cd ..
 
       - name: Test
         run: pnpm test:run
@@ -130,11 +130,11 @@ jobs:
         uses: ./.github/actions/setup-env
 
       - name: Install React@${{ matrix.version }}
-        run: pnpm add -D react@${{ matrix.version }} react-dom@${{ matrix.version }}
+        run: pnpm add -D --filter ./packages/* react@${{ matrix.version }} react-dom@${{ matrix.version }}
 
       - name: Install legacy testing-library
         if: ${{ matrix.legacy_testing_library }}
-        run: pnpm add -D @testing-library/react@12 @testing-library/react-hooks
+        run: pnpm add -D --filter ./packages/* @testing-library/react@12 @testing-library/react-hooks
 
       - name: Test against React@${{ matrix.version }}
         run: pnpm test:run
@@ -186,30 +186,10 @@ jobs:
           commit_message: "Change .changeset `baseBranch` to ${{ github.ref_name }}"
           file_pattern: ".changeset/config.json"
 
-      - name: Get changeset status
-        run: pnpm cs status --output ./changeset-status.json
-
-      - name: Read the new version
-        id: new-version
-        uses: notiz-dev/github-action-json-property@release
-        continue-on-error: true
-        with:
-          path: ./changeset-status.json
-          prop_path: "releases.0.newVersion"
-
-      - name: Read the old version
-        id: old-version
-        uses: notiz-dev/github-action-json-property@release
-        with:
-          path: ./package.json
-          prop_path: "version"
-
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
         with:
           publish: pnpm run publish --tag=${{ github.ref_name == 'master' && 'latest' || github.ref_name == 'next' && 'next' || github.ref_name == 'alpha' && 'alpha' || github.ref_name == 'beta' && 'beta' || ' ' }}
-          commit: Release `${{ steps.old-version.outputs.prop }}` -> `${{ steps.new-version.outputs.prop }}`
-          title: Release `${{ steps.old-version.outputs.prop }}` -> `${{ steps.new-version.outputs.prop }}`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

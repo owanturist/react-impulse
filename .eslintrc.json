@@ -126,7 +126,11 @@
     "import/no-extraneous-dependencies": [
       "error",
       {
-        "devDependencies": ["tests/**/*.{ts,tsx}", "./*.{js,ts}"]
+        "devDependencies": [
+          "./*.{js,ts}",
+          "./packages/*/*.{js,ts}",
+          "./packages/*/tests/**/*.{ts,tsx}"
+        ]
       }
     ],
     "import/no-cycle": ["error"]
@@ -135,7 +139,7 @@
     {
       "files": ["**/*.ts?(x)"],
       "parserOptions": {
-        "project": "./tsconfig.json"
+        "project": ["./tsconfig.json", "./packages/*/tsconfig.json"]
       },
       "env": {
         "es6": true,
@@ -227,13 +231,13 @@
       }
     },
     {
-      "files": ["./*.ts"],
+      "files": ["./*.ts", "./packages/*/*.ts"],
       "rules": {
         "import/no-default-export": "off"
       }
     },
     {
-      "files": ["src/**/*.ts?(x)", "tests/**/*.ts?(x)"],
+      "files": ["packages/*/src/**/*.ts?(x)", "packages/*/tests/**/*.ts?(x)"],
       "extends": ["plugin:react/recommended", "plugin:react-hooks/recommended"],
       "settings": {
         "react": {
@@ -289,7 +293,7 @@
       }
     },
     {
-      "files": ["tests/**/*.ts?(x)"],
+      "files": ["packages/*/tests/**/*.ts?(x)"],
       "extends": [
         "plugin:jest/recommended",
         "plugin:jest/style",
