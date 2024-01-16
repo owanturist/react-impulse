@@ -1,8 +1,14 @@
 module.exports = [
-  "packages/react-impulse/dist/index.js",
-  "packages/react-impulse/dist/index.cjs",
-].map((path) => ({
-  path,
+  {
+    name: "react-impulse.js",
+    path: "packages/react-impulse/dist/index.js",
+  },
+  {
+    name: "react-impulse.cjs",
+    path: "packages/react-impulse/dist/index.cjs",
+  },
+].map((config) => ({
+  ...config,
   gzip: true,
-  ignore: ["use-sync-external-store"],
+  ignore: ["react", "use-sync-external-store"],
 }))
