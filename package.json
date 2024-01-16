@@ -19,22 +19,6 @@
     "publish": "pnpm build && pnpm cs publish",
     "prepare": "husky install"
   },
-  "size-limit": [
-    {
-      "path": "packages/react-impulse/dist/index.js",
-      "gzip": true,
-      "ignore": [
-        "use-sync-external-store"
-      ]
-    },
-    {
-      "path": "packages/react-impulse/dist/index.cjs",
-      "gzip": true,
-      "ignore": [
-        "use-sync-external-store"
-      ]
-    }
-  ],
   "engines": {
     "node": ">=20.10.0"
   },
