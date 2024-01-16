@@ -58,18 +58,15 @@ const manglePlugin: Required<Options>["plugins"][0] = {
 }
 
 export default defineConfig(
-  [
-    {
-      entry: "packages/react-impulse/src/index.ts",
-      outDir: "packages/react-impulse/dist",
-    },
-  ].map(({ entry, outDir }) => ({
-    entry: [entry],
-    outDir,
+  ["react-impulse"].map((name) => ({
+    entry: [`packages/${name}/src/index.ts`],
+    outDir: `packages/${name}/dist`,
     format: ["cjs", "esm"],
     dts: true,
     sourcemap: true,
     clean: true,
     plugins: [manglePlugin],
+    // any package is external
+    external: [/^\w+/],
   })),
 )
