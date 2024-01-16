@@ -10,5 +10,5 @@ module.exports = [
 ].map((config) => ({
   ...config,
   gzip: true,
-  ignore: ["react", "use-sync-external-store"],
+  ignore: ["*"],
 }))
