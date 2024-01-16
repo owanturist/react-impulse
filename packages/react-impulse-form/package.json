@@ -1,0 +1,41 @@
+{
+  "name": "react-impulse-form",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Type-safe declarative React form state management",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs",
+    "default": "./dist/index.cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/owanturist/react-impulse.git"
+  },
+  "keywords": [
+    "react",
+    "react-forms",
+    "forms",
+    "forms-state"
+  ],
+  "author": "Anton Ovechkin <owanturist@gmail.com>",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/owanturist/react-impulse/issues"
+  },
+  "homepage": "https://github.com/owanturist/react-impulse/packages/react-impulse-form#readme",
+  "peerDependencies": {
+    "react": "^16.12.0 || ^17.0.0 || ^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.48",
+    "react": "^18.2.0"
+  }
+}

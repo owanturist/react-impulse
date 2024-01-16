@@ -97,7 +97,14 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0(happy-dom@13.1.4)(terser@5.26.0)
 
-  packages/react-impulse-form: {}
+  packages/react-impulse-form:
+    devDependencies:
+      '@types/react':
+        specifier: ^18.2.48
+        version: 18.2.48
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
 
 packages:
 
