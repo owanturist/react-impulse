@@ -86,7 +86,6 @@
     // Variables
     "init-declarations": "error",
     "no-shadow": "error",
-    "no-undefined": "error",
     "no-unused-vars": "warn",
 
     // ECMAScript 6
@@ -318,7 +317,6 @@
           }
         ],
         "@typescript-eslint/explicit-function-return-type": "off",
-        "no-undefined": "off",
         "no-restricted-imports": [
           "error",
           {
