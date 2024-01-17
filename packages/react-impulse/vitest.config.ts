@@ -3,7 +3,7 @@ import React from "react"
 import type { ProjectConfig } from "vitest"
 
 // eslint-disable-next-line no-console
-console.log(`Running tests against React@${React.version}`)
+console.log(`Running react-impulse tests against React@${React.version}`)
 
 export default defineProject({
   test: {
