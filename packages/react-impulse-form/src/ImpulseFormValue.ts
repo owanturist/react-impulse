@@ -1,5 +1,4 @@
-import { type Compare, Impulse, type Scope, batch } from "react-impulse"
-
+import { type Compare, Impulse, type Scope, batch } from "./dependencies"
 import {
   type Func,
   type Setter,
@@ -229,7 +228,7 @@ export class ImpulseFormValue<
     const initialValue = this.getInitialValue(scope)
     const originalValue = this.getOriginalValue(scope)
     const compare = this.compare.getValue(scope)
-    const dirty = !compare(initialValue, originalValue)
+    const dirty = !compare(initialValue, originalValue, scope)
 
     return select(dirty, dirty)
   }

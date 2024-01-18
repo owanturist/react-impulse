@@ -1,6 +1,12 @@
-export type Key = string | number | symbol
+import { useEffect, useLayoutEffect, useRef } from "./dependencies"
 
-export type Compute<T extends object> = { [K in keyof T]: T[K] }
+export type ObjectCompute<TObject extends object> = {
+  [K in keyof TObject]: TObject[K]
+}
+
+export type ObjectFilter<TObject extends object, TValue> = {
+  [K in keyof TObject]: TObject[K] extends TValue ? K : never
+}[keyof TObject]
 
 export type Func<TArgs, TReturn = void> =
   TArgs extends ReadonlyArray<unknown>
@@ -15,7 +21,7 @@ export type Setter<
 export type AtLeast<
   TObj extends object,
   TKey extends keyof TObj = keyof TObj,
-> = Compute<
+> = ObjectCompute<
   {
     [K in TKey]-?: TObj[K]
   } & {
@@ -23,21 +29,23 @@ export type AtLeast<
   }
 >
 
-type DefinitelyFunction<T> =
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  Extract<T, Function> extends never ? Function : Extract<T, Function>
-
-export function isFunction<T>(
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  data: T | Function,
-): data is DefinitelyFunction<T> {
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function isFunction<T>(data: T | Function): data is Function {
   return typeof data === "function"
 }
 
-export function isDefined<TValue>(
-  value: null | undefined | TValue,
-): value is TValue {
-  return value != null
+export function isBoolean<T>(data: T | boolean): data is boolean {
+  return typeof data === "boolean"
+}
+
+export function isDefined<T>(data: T): data is NonNullable<T> {
+  return data != null
+}
+
+export function isTruthy<T>(
+  data: T,
+): data is Exclude<T, null | undefined | false | "" | 0> {
+  return Boolean(data)
 }
 
 export function identity<T>(value: T): T {
@@ -57,4 +65,23 @@ export function shallowArrayEquals<T>(
   }
 
   return left.every((value, index) => Object.is(value, right[index]))
+}
+
+export const useIsomorphicLayoutEffect =
+  /* c8 ignore next */
+  typeof window === "undefined" ? useEffect : useLayoutEffect
+
+export function useHandler<TArgs extends ReadonlyArray<unknown>>(
+  handler: Func<TArgs>,
+): Func<TArgs> {
+  const handlerRef = useRef<typeof handler | null>(null)
+  const stableRef = useRef((...args: TArgs) => {
+    handlerRef.current?.(...args)
+  })
+
+  useIsomorphicLayoutEffect(() => {
+    handlerRef.current = handler
+  })
+
+  return stableRef.current
 }

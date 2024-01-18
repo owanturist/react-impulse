@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useMemo } from "react"
-import { type Scope, batch, useScoped } from "react-impulse"
-import { identity, isDefined } from "remeda"
-
-import { useStableCallback } from "~/tools/use-stable-callback"
-
+import { identity, isDefined } from "./utils"
+import {
+  type Scope,
+  useEffect,
+  useMemo,
+  useScoped,
+  batch,
+} from "./dependencies"
 import type { GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 import { ImpulseFormContext } from "./ImpulseFormContext"
 

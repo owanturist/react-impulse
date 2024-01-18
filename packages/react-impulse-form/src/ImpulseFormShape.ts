@@ -1,16 +1,13 @@
-import { type Scope, batch } from "react-impulse"
+import { type Scope, batch } from "./dependencies"
 import {
+  type Setter,
+  type ObjectFilter,
   identity,
   isBoolean,
   isDefined,
   isFunction,
   isTruthy,
-  mapValues,
-} from "remeda"
-import type Types from "ts-toolbelt"
-
-import type { Setter } from "~/tools/setter"
-
+} from "./utils"
 import {
   type GetImpulseFormParam,
   ImpulseForm,
@@ -18,24 +15,21 @@ import {
 } from "./ImpulseForm"
 import type { ImpulseFormContext } from "./ImpulseFormContext"
 
-type ImpulseFormShapeFields = Types.Object.Record<string | number>
+type ImpulseFormShapeFields = Record<string | number, unknown>
 
 type ImpulseFormShapeParam<
   TFields extends ImpulseFormShapeFields,
   TKey extends ImpulseFormParamsKeys,
   TFallback extends "field" | "nothing" = "nothing",
-> = Types.Any.Compute<
-  Types.Object.Filter<
-    {
-      readonly [TField in Types.Any.Keys<TFields>]: GetImpulseFormParam<
-        TFields[TField],
-        TKey,
-        TFallback extends "field" ? TFields[TField] : never
-      >
-    },
-    never,
-    "equals"
-  >
+> = ObjectFilter<
+  {
+    readonly [TField in keyof TFields]: GetImpulseFormParam<
+      TFields[TField],
+      TKey,
+      TFallback extends "field" ? TFields[TField] : never
+    >
+  },
+  never
 >
 
 export type ImpulseFormShapeValueSchema<
@@ -157,20 +151,27 @@ export class ImpulseFormShape<
   protected constructor(public readonly fields: Readonly<TFields>) {
     super()
 
-    // TODO investigate why setValue during render
-    // for (const field of Object.values(fields)) {
-    //   if (ImpulseForm.isImpulseForm(field)) {
-    //     ImpulseForm.setParent(field, this)
-    //   }
-    // }
+    for (const field of Object.values(fields)) {
+      if (ImpulseForm.isImpulseForm(field)) {
+        ImpulseForm.setParent(field, this)
+      }
+    }
   }
 
   private mapFormFields<TResult>(
     fn: (form: ImpulseForm) => TResult,
-  ): Types.Object.Record<keyof TFields, TResult, ["!", "R"]> {
-    return mapValues(this.fields, (value) => {
-      return ImpulseForm.isImpulseForm(value) ? fn(value) : value
-    }) as Record<keyof TFields, TResult>
+  ): Readonly<Record<keyof TFields, TResult>> {
+    const acc = {} as Record<keyof TFields, TResult>
+
+    for (const [key, field] of Object.entries(this.fields)) {
+      const value = ImpulseForm.isImpulseForm(field)
+        ? fn(field)
+        : (field as TResult)
+
+      acc[key as keyof typeof acc] = value
+    }
+
+    return acc
   }
 
   public setContext(context: ImpulseFormContext): void {
@@ -408,7 +409,6 @@ export class ImpulseFormShape<
           verbose,
         }))
 
-        // eslint-disable-next-line eqeqeq
         allValid = allValid && value.concise !== null
         valueConcise[key] = value.concise
         valueVerbose[key] = value.verbose

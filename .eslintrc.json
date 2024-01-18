@@ -265,7 +265,7 @@
           {
             "patterns": [
               {
-                "group": ["react", "use-sync-external-store"],
+                "group": ["react", "use-sync-external-store", "react-impulse"],
                 "message": "Import dependencies from dependencies.ts. It makes the imported deps appear only ones in the bundle."
               }
             ]

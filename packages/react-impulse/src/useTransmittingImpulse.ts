@@ -10,7 +10,7 @@ import type { Scope } from "./Scope"
 import {
   noop,
   eq,
-  useHandler,
+  useStableCallback,
   usePermanent,
   useIsomorphicLayoutEffect,
   isFunction,
@@ -67,10 +67,10 @@ export function useTransmittingImpulse<T>(
       ? [setterOrOptions, maybeOptions]
       : [noop, setterOrOptions]
 
-  const stableSetter = useHandler(
+  const stableSetter = useStableCallback(
     isFunction(setter) ? setter : (value: T) => setter.setValue(value),
   )
-  const stableCompare = useHandler((prev: T, next: T, scope: Scope) => {
+  const stableCompare = useStableCallback((prev: T, next: T, scope: Scope) => {
     const compare = options?.compare ?? eq
 
     return compare(prev, next, scope)

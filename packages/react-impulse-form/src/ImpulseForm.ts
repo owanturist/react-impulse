@@ -1,5 +1,4 @@
-import { Impulse, type Scope } from "react-impulse"
-
+import { Impulse, type Scope } from "./dependencies"
 import { isDefined } from "./utils"
 import type { ImpulseFormContext } from "./ImpulseFormContext"
 

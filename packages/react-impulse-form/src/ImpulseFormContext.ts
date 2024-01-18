@@ -1,5 +1,4 @@
-import { Impulse, type Scope, batch, tap } from "react-impulse"
-
+import { Impulse, type Scope, batch, tap } from "./dependencies"
 import type { ImpulseForm } from "./ImpulseForm"
 
 export class ImpulseFormContext {
