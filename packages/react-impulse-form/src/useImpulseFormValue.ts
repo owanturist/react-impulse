@@ -1,9 +1,5 @@
-import { type RefObject, useEffect } from "react"
-import { isDefined, isFunction } from "remeda"
-
-import type { Func } from "~/tools/func"
-import { useStableCallback } from "~/tools/use-stable-callback"
-
+import { type RefObject, useEffect } from "./dependencies"
+import { type Func, isDefined, isFunction, useHandler } from "./utils"
 import type { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormValue } from "./ImpulseFormValue"
 import {
@@ -20,8 +16,7 @@ export interface UseImpulseFormValueOptions<TForm extends ImpulseForm>
     | Func<[errors: ReadonlyArray<string>, form: TForm]>
 }
 
-export interface UseImpulseFormValueResult<TForm extends ImpulseForm>
-  extends UseImpulseFormResult<TForm> {}
+export interface UseImpulseFormValueResult extends UseImpulseFormResult {}
 
 export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
   form: ImpulseFormValue<TOriginalValue, TValue>,
@@ -30,10 +25,10 @@ export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
     onFocusInvalid,
     ...options
   }: UseImpulseFormValueOptions<typeof form> = {},
-): UseImpulseFormValueResult<typeof form> => {
+): UseImpulseFormValueResult => {
   const tools = useImpulseForm(form, options)
 
-  const onFocusInvalidStable = useStableCallback(
+  const onFocusInvalidStable = useHandler(
     isFunction(onFocusInvalid)
       ? onFocusInvalid
       : isDefined(onFocusInvalid)

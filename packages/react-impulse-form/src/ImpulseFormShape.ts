@@ -223,8 +223,8 @@ export class ImpulseFormShape<
     return select(
       errorsNone
         ? null
-        : (errorsConcise as ImpulseFormShapeErrorSchema<TFields>),
-      errorsVerbose as ImpulseFormShapeErrorSchemaVerbose<TFields>,
+        : (errorsConcise as unknown as ImpulseFormShapeErrorSchema<TFields>),
+      errorsVerbose as unknown as ImpulseFormShapeErrorSchemaVerbose<TFields>,
     )
   }
 
@@ -291,8 +291,8 @@ export class ImpulseFormShape<
         ? true
         : touchedNone
           ? false
-          : (touchedConcise as ImpulseFormShapeFlagSchema<TFields>),
-      touchedVerbose as ImpulseFormShapeFlagSchemaVerbose<TFields>,
+          : (touchedConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
+      touchedVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
     )
   }
 
@@ -317,8 +317,6 @@ export class ImpulseFormShape<
     })
   }
 
-  public reset(): void
-  public reset(resetter: ImpulseFormShapeOriginalValueResetter<TFields>): void
   public reset(
     resetter: ImpulseFormShapeOriginalValueResetter<TFields> = identity as typeof resetter,
   ): void {
@@ -377,8 +375,8 @@ export class ImpulseFormShape<
         ? true
         : touchedNone
           ? false
-          : (touchedConcise as ImpulseFormShapeFlagSchema<TFields>),
-      touchedVerbose as ImpulseFormShapeFlagSchemaVerbose<TFields>,
+          : (touchedConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
+      touchedVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
     )
   }
 
@@ -419,8 +417,10 @@ export class ImpulseFormShape<
     }
 
     return select(
-      allValid ? (valueConcise as ImpulseFormShapeValueSchema<TFields>) : null,
-      valueVerbose as ImpulseFormShapeValueSchemaVerbose<TFields>,
+      allValid
+        ? (valueConcise as unknown as ImpulseFormShapeValueSchema<TFields>)
+        : null,
+      valueVerbose as unknown as ImpulseFormShapeValueSchemaVerbose<TFields>,
     )
   }
 

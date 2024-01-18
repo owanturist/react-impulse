@@ -8,10 +8,9 @@ export type ObjectFilter<TObject extends object, TValue> = {
   [K in keyof TObject]: TObject[K] extends TValue ? K : never
 }[keyof TObject]
 
-export type Func<TArgs, TReturn = void> =
-  TArgs extends ReadonlyArray<unknown>
-    ? (...args: TArgs) => TReturn
-    : (arg: TArgs) => TReturn
+export type Func<TArgs extends ReadonlyArray<unknown>, TReturn = void> = (
+  ...args: TArgs
+) => TReturn
 
 export type Setter<
   TValue,
@@ -71,17 +70,17 @@ export const useIsomorphicLayoutEffect =
   /* c8 ignore next */
   typeof window === "undefined" ? useEffect : useLayoutEffect
 
-export function useHandler<TArgs extends ReadonlyArray<unknown>>(
-  handler: Func<TArgs>,
-): Func<TArgs> {
-  const handlerRef = useRef<typeof handler | null>(null)
-  const stableRef = useRef((...args: TArgs) => {
-    handlerRef.current?.(...args)
-  })
+export function useHandler<
+  THandler extends null | undefined | Func<ReadonlyArray<never>, unknown>,
+>(handler: THandler): THandler {
+  const handlerRef = useRef<THandler>(null as never)
+  const stableRef = useRef(((...args) => {
+    return handlerRef.current?.(...args)
+  }) as NonNullable<THandler>)
 
   useIsomorphicLayoutEffect(() => {
     handlerRef.current = handler
   })
 
-  return stableRef.current
+  return handler && stableRef.current
 }
