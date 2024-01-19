@@ -1,5 +1,11 @@
 # react-impulse
 
+## 2.0.2
+
+### Patch Changes
+
+- [#633](https://github.com/owanturist/react-impulse/pull/633) [`bb4dcfa`](https://github.com/owanturist/react-impulse/commit/bb4dcfa0a49de5d1c9407f008ba0d3ae166dbddc) Thanks [@owanturist](https://github.com/owanturist)! - Change import `use-sync-external-store/shim/with-selector` to `use-sync-external-store/shim/with-selector.js`.
+
 ## 2.0.1
 
 ### Patch Changes
