@@ -19,10 +19,6 @@
     "build": "tsup",
     "build:minified": "pnpm build --env.NODE_ENV=production --minify=terser"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/owanturist/react-impulse.git"
-  },
   "keywords": [
     "react",
     "react-hooks",
@@ -35,6 +31,7 @@
   "bugs": {
     "url": "https://github.com/owanturist/react-impulse/issues"
   },
+  "repository": "https://github.com/owanturist/react-impulse/tree/master/packages/react-impulse",
   "homepage": "https://github.com/owanturist/react-impulse/packages/react-impulse#readme",
   "dependencies": {
     "use-sync-external-store": "^1.2.0"
