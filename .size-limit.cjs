@@ -1,22 +1,17 @@
 module.exports = [
   {
-    name: "react-impulse.js",
-    path: "packages/react-impulse/dist/index.js",
+    name: "react-impulse",
+    ignore: ["use-sync-external-store"],
   },
   {
-    name: "react-impulse.cjs",
-    path: "packages/react-impulse/dist/index.cjs",
+    name: "react-impulse-form",
+    ignore: ["react-impulse"],
   },
-  {
-    name: "react-impulse-form.js",
-    path: "packages/react-impulse-form/dist/index.js",
-  },
-  {
-    name: "react-impulse-form.cjs",
-    path: "packages/react-impulse-form/dist/index.cjs",
-  },
-].map((config) => ({
-  ...config,
-  gzip: true,
-  ignore: ["*"],
-}))
+]
+  .flatMap((config) => [".js", ".cjs"].map((ext) => ({ ...config, ext })))
+  .map(({ name, ignore = [], ext }) => ({
+    name: `${name}${ext}`,
+    path: `packages/${name}/dist/index${ext}`,
+    gzip: true,
+    ignore: ["react", ...ignore],
+  }))
