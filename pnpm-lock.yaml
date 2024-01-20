@@ -92,6 +92,13 @@ importers:
         version: 18.2.0
 
   packages/react-impulse-form:
+    dependencies:
+      remeda:
+        specifier: ^1.37.0
+        version: 1.37.0
+      ts-toolbelt:
+        specifier: ^9.6.0
+        version: 9.6.0
     devDependencies:
       '@testing-library/jest-dom':
         specifier: ^6.2.0
@@ -3915,6 +3922,10 @@ packages:
       set-function-name: 2.0.1
     dev: true
 
+  /remeda@1.37.0:
+    resolution: {integrity: sha512-ldZYKtw5A+ijuu4PtRZLfV7msZnsywANIs98vryQgWU5Esa9GC+SVLwWbNcpPj5jJDjIjuW/h+wK+C2jmZnOLA==}
+    dev: false
+
   /require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
     engines: {node: '>=0.10.0'}
@@ -4472,6 +4483,10 @@ packages:
   /ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
     dev: true
+
+  /ts-toolbelt@9.6.0:
+    resolution: {integrity: sha512-nsZd8ZeNUzukXPlJmTBwUAuABDe/9qtVDelJeT/qW0ow3ZS3BsQJtNkan1802aM9Uf68/Y8ljw86Hu0h5IUW3w==}
+    dev: false
 
   /tsconfig-paths@3.15.0:
     resolution: {integrity: sha512-2Ac2RgzDe/cn48GvOe3M+o82pEFewD3UPbyoUHHdKasHwJKjds4fLXWf/Ux5kATBKN20oaFGu+jbElp1pos0mg==}

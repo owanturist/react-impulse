@@ -1,13 +1,15 @@
-import { type Compare, Impulse, type Scope, batch } from "./dependencies"
+import type Types from "ts-toolbelt"
+
 import {
-  type Func,
-  type Setter,
-  type AtLeast,
+  type Compare,
+  type Scope,
+  Impulse,
+  batch,
   isDefined,
   isFunction,
   identity,
-  shallowArrayEquals,
-} from "./utils"
+} from "./dependencies"
+import { type Func, type Setter, shallowArrayEquals } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormContext } from "./ImpulseFormContext"
 import type { ImpulseFormSchema, Result } from "./ImpulseFormSchema"
@@ -61,7 +63,10 @@ export class ImpulseFormValue<
 
   public static of<TOriginalValue, TValue = TOriginalValue>(
     originalValue: TOriginalValue,
-    options: AtLeast<ImpulseFormValueOptions<TOriginalValue, TValue>, "schema">,
+    options: Types.Object.AtLeast<
+      ImpulseFormValueOptions<TOriginalValue, TValue>,
+      "schema"
+    >,
   ): ImpulseFormValue<TOriginalValue, TValue>
 
   public static of<TOriginalValue, TValue = TOriginalValue>(

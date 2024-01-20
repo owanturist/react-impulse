@@ -42,5 +42,9 @@
     "react": "^18.2.0",
     "react-impulse": "workspace:^",
     "zod": "^3.22.4"
+  },
+  "dependencies": {
+    "remeda": "^1.37.0",
+    "ts-toolbelt": "^9.6.0"
   }
 }

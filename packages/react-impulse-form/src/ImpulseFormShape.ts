@@ -1,14 +1,15 @@
-import { type Scope, batch } from "./dependencies"
+import type Types from "ts-toolbelt"
+
 import {
-  type Setter,
-  type ObjectFilter,
+  type Scope,
+  batch,
   identity,
   isBoolean,
   isDefined,
   isFunction,
   isTruthy,
-  type ObjectCompute,
-} from "./utils"
+} from "./dependencies"
+import type { Setter } from "./utils"
 import {
   type GetImpulseFormParam,
   ImpulseForm,
@@ -16,22 +17,23 @@ import {
 } from "./ImpulseForm"
 import type { ImpulseFormContext } from "./ImpulseFormContext"
 
-type ImpulseFormShapeFields = Record<string | number, unknown>
+type ImpulseFormShapeFields = Types.Object.Record<string | number>
 
 type ImpulseFormShapeParam<
   TFields extends ImpulseFormShapeFields,
   TKey extends ImpulseFormParamsKeys,
   TFallback extends "field" | "nothing" = "nothing",
-> = ObjectCompute<
-  ObjectFilter<
+> = Types.Any.Compute<
+  Types.Object.Filter<
     {
-      readonly [TField in keyof TFields]: GetImpulseFormParam<
+      readonly [TField in Types.Any.Keys<TFields>]: GetImpulseFormParam<
         TFields[TField],
         TKey,
         TFallback extends "field" ? TFields[TField] : never
       >
     },
-    never
+    never,
+    "equals"
   >
 >
 

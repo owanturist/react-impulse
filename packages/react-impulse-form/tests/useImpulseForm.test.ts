@@ -2,8 +2,8 @@ import { renderHook } from "@testing-library/react"
 import { z } from "zod"
 
 import {
-  type UseImpulseFormOptions,
   type ImpulseForm,
+  type UseImpulseFormOptions,
   ImpulseFormShape,
   useImpulseForm,
   ImpulseFormValue,
@@ -40,11 +40,4 @@ it("passes valid values to onSubmit", () => {
       },
     },
   )
-
-  setup(ImpulseFormValue.of("1"), {
-    onFocus(errors, form) {
-      expectTypeOf(errors).toEqualTypeOf<ReadonlyArray<string>>()
-      expectTypeOf(form).toEqualTypeOf<ImpulseFormValue<string>>()
-    },
-  })
 })

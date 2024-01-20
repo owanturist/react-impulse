@@ -17,3 +17,4 @@ export {
   untrack,
   useScoped,
 } from "react-impulse"
+export { isFunction, isBoolean, isDefined, isTruthy, identity } from "remeda"

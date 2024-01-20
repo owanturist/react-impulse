@@ -1,8 +1,12 @@
+import { equals, identity } from "remeda"
 import { z } from "zod"
 
-import { type ImpulseForm, ImpulseFormShape, ImpulseFormValue } from "../src"
-
-const identity = (x) => x
+import {
+  type ImpulseForm,
+  type Setter,
+  ImpulseFormShape,
+  ImpulseFormValue,
+} from "../src"
 
 describe("ImpulseFormShape.of()", () => {
   it("composes ImpulseFormShape from ImpulseFormValue", ({ scope }) => {
@@ -324,7 +328,7 @@ describe("ImpulseFormShape.of()", () => {
                 ).toEqualTypeOf<null | ReadonlyArray<string>>()
                 expect(first).toStrictEqual(["first"])
 
-                return [...first, "1"]
+                return [...first!, "1"]
               },
               second: (second) => {
                 expectTypeOf(
@@ -332,7 +336,7 @@ describe("ImpulseFormShape.of()", () => {
                 ).toEqualTypeOf<null | ReadonlyArray<string>>()
                 expect(second).toStrictEqual(["second"])
 
-                return [...second, "2"]
+                return [...second!, "2"]
               },
               third: (third) => {
                 expectTypeOf(third).toEqualTypeOf<{
@@ -351,7 +355,7 @@ describe("ImpulseFormShape.of()", () => {
                     ).toEqualTypeOf<null | ReadonlyArray<string>>()
                     expect(one).toStrictEqual(["one"])
 
-                    return [...one, "1"]
+                    return [...one!, "1"]
                   },
                   two: (two) => {
                     expectTypeOf(
@@ -359,7 +363,7 @@ describe("ImpulseFormShape.of()", () => {
                     ).toEqualTypeOf<null | ReadonlyArray<string>>()
                     expect(two).toStrictEqual(["two"])
 
-                    return [...two, "2"]
+                    return [...two!, "2"]
                   },
                 }
               },
@@ -904,13 +908,13 @@ describe("ImpulseFormShape#setErrors()", () => {
           expectTypeOf(first).toEqualTypeOf<null | ReadonlyArray<string>>()
           expect(first).toStrictEqual(["another"])
 
-          return [...first, "1"]
+          return [...first!, "1"]
         },
         second: (second) => {
           expectTypeOf(second).toEqualTypeOf<null | ReadonlyArray<string>>()
           expect(second).toStrictEqual(["second"])
 
-          return [...second, "2"]
+          return [...second!, "2"]
         },
         third: (third) => {
           expectTypeOf(third).toEqualTypeOf<{
@@ -927,14 +931,14 @@ describe("ImpulseFormShape#setErrors()", () => {
               expectTypeOf(one).toEqualTypeOf<null | ReadonlyArray<string>>()
               expect(one).toStrictEqual(["one"])
 
-              return [...one, "1"]
+              return [...one!, "1"]
             },
 
             two: (two) => {
               expectTypeOf(two).toEqualTypeOf<null | ReadonlyArray<string>>()
               expect(two).toStrictEqual(["two"])
 
-              return [...two, "2"]
+              return [...two!, "2"]
             },
           }
         },
@@ -1776,12 +1780,7 @@ describe("ImpulseFormShape#isDirty()", () => {
       third: ImpulseFormShape.of({
         one: ImpulseFormValue.of(true),
         two: ImpulseFormValue.of([""], {
-          compare: (left, right) => {
-            return (
-              left.length === right.length &&
-              left.every((value, index) => value === right[index])
-            )
-          },
+          compare: (left, right) => equals(left, right),
         }),
       }),
       fourth: ["anything"],
@@ -1943,12 +1942,7 @@ describe("ImpulseFormShape#reset()", () => {
         third: ImpulseFormShape.of({
           one: ImpulseFormValue.of(true),
           two: ImpulseFormValue.of([""], {
-            compare: (left, right) => {
-              return (
-                left.length === right.length &&
-                left.every((value, index) => value === right[index])
-              )
-            },
+            compare: (left, right) => equals(left, right),
           }),
         }),
         fourth: ["anything"],

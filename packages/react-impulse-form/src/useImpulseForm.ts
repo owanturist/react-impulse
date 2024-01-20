@@ -1,11 +1,12 @@
-import { isDefined, useHandler } from "./utils"
 import {
   type Scope,
   useEffect,
   useMemo,
   useScoped,
   untrack,
+  isDefined,
 } from "./dependencies"
+import { useHandler } from "./utils"
 import type { GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 import { ImpulseFormContext } from "./ImpulseFormContext"
 
