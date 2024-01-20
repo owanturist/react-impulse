@@ -93,9 +93,6 @@ importers:
 
   packages/react-impulse-form:
     dependencies:
-      remeda:
-        specifier: ^1.37.0
-        version: 1.37.0
       ts-toolbelt:
         specifier: ^9.6.0
         version: 9.6.0
@@ -118,6 +115,9 @@ importers:
       react-impulse:
         specifier: workspace:^
         version: link:../react-impulse
+      remeda:
+        specifier: ^1.37.0
+        version: 1.37.0
 
 packages:
 
@@ -3924,7 +3924,7 @@ packages:
 
   /remeda@1.37.0:
     resolution: {integrity: sha512-ldZYKtw5A+ijuu4PtRZLfV7msZnsywANIs98vryQgWU5Esa9GC+SVLwWbNcpPj5jJDjIjuW/h+wK+C2jmZnOLA==}
-    dev: false
+    dev: true
 
   /require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
