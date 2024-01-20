@@ -261,7 +261,12 @@ describe("ImpulseFormValue#setOriginalValue()", () => {
   })
 
   it("resets error when originalValue changes", ({ scope }) => {
-    const value = ImpulseFormValue.of({ foo: 1 }, { compare: equals })
+    const value = ImpulseFormValue.of(
+      { foo: 1 },
+      {
+        compare: (left, right) => equals(left, right),
+      },
+    )
 
     value.setErrors(["error"])
     value.setOriginalValue({ foo: 1 })
@@ -329,7 +334,7 @@ describe("ImpulseFormValue#isDirty()", () => {
       { type: "zero", value: 0 },
       {
         initialValue: { type: "zero", value: 0 },
-        compare: equals,
+        compare: (left, right) => equals(left, right),
       },
     )
     expect(value.isDirty(scope)).toBe(false)
