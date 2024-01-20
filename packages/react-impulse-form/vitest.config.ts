@@ -14,5 +14,6 @@ export default defineProject({
       },
     },
     environment: "happy-dom",
+    setupFiles: "./setup-tests.ts",
   } satisfies ProjectConfig,
 })

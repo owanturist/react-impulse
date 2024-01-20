@@ -7,6 +7,7 @@ import {
   isDefined,
   isFunction,
   isTruthy,
+  type ObjectCompute,
 } from "./utils"
 import {
   type GetImpulseFormParam,
@@ -21,15 +22,17 @@ type ImpulseFormShapeParam<
   TFields extends ImpulseFormShapeFields,
   TKey extends ImpulseFormParamsKeys,
   TFallback extends "field" | "nothing" = "nothing",
-> = ObjectFilter<
-  {
-    readonly [TField in keyof TFields]: GetImpulseFormParam<
-      TFields[TField],
-      TKey,
-      TFallback extends "field" ? TFields[TField] : never
-    >
-  },
-  never
+> = ObjectCompute<
+  ObjectFilter<
+    {
+      readonly [TField in keyof TFields]: GetImpulseFormParam<
+        TFields[TField],
+        TKey,
+        TFallback extends "field" ? TFields[TField] : never
+      >
+    },
+    never
+  >
 >
 
 export type ImpulseFormShapeValueSchema<

@@ -1,10 +1,13 @@
 import { renderHook } from "@testing-library/react"
 import { z } from "zod"
 
-import type { ImpulseForm } from "../impulse-form"
-import { ImpulseFormShape } from "../impulse-form-shape"
-import { ImpulseFormValue } from "../impulse-form-value"
-import { type UseImpulseFormOptions, useImpulseForm } from "../use-impulse-form"
+import {
+  type UseImpulseFormOptions,
+  type ImpulseForm,
+  ImpulseFormShape,
+  useImpulseForm,
+  ImpulseFormValue,
+} from "../src"
 
 const setup = <TForm extends ImpulseForm>(
   form: TForm,

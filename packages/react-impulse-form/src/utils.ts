@@ -1,12 +1,13 @@
 import { useEffect, useLayoutEffect, useRef } from "./dependencies"
 
-export type ObjectCompute<TObject extends object> = {
-  [K in keyof TObject]: TObject[K]
-}
+export type ObjectCompute<TObject extends object> = TObject
 
-export type ObjectFilter<TObject extends object, TValue> = {
-  [K in keyof TObject]: TObject[K] extends TValue ? K : never
-}[keyof TObject]
+export type ObjectFilter<TObject extends object, TValue> = Pick<
+  TObject,
+  {
+    [K in keyof TObject]: TObject[K] extends TValue ? K : never
+  }[keyof TObject]
+>
 
 export type Func<TArgs extends ReadonlyArray<unknown>, TReturn = void> = (
   ...args: TArgs

@@ -317,6 +317,7 @@
           }
         ],
         "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/unbound-method": "off",
         "no-restricted-imports": [
           "error",
           {

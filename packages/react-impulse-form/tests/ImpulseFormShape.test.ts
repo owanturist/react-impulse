@@ -1,11 +1,8 @@
-import { equals, identity } from "remeda"
 import { z } from "zod"
 
-import type { Setter } from "~/tools/setter"
+import { type ImpulseForm, ImpulseFormShape, ImpulseFormValue } from "../src"
 
-import type { ImpulseForm } from "../src/ImpulseForm"
-import { ImpulseFormShape } from "../src/ImpulseFormShape"
-import { ImpulseFormValue } from "../src/ImpulseFormValue"
+const identity = (x) => x
 
 describe("ImpulseFormShape.of()", () => {
   it("composes ImpulseFormShape from ImpulseFormValue", ({ scope }) => {
@@ -1778,7 +1775,14 @@ describe("ImpulseFormShape#isDirty()", () => {
       second: ImpulseFormValue.of(0),
       third: ImpulseFormShape.of({
         one: ImpulseFormValue.of(true),
-        two: ImpulseFormValue.of([""], { compare: equals }),
+        two: ImpulseFormValue.of([""], {
+          compare: (left, right) => {
+            return (
+              left.length === right.length &&
+              left.every((value, index) => value === right[index])
+            )
+          },
+        }),
       }),
       fourth: ["anything"],
     })
@@ -1938,7 +1942,14 @@ describe("ImpulseFormShape#reset()", () => {
         second: ImpulseFormValue.of(0),
         third: ImpulseFormShape.of({
           one: ImpulseFormValue.of(true),
-          two: ImpulseFormValue.of([""], { compare: equals }),
+          two: ImpulseFormValue.of([""], {
+            compare: (left, right) => {
+              return (
+                left.length === right.length &&
+                left.every((value, index) => value === right[index])
+              )
+            },
+          }),
         }),
         fourth: ["anything"],
       },

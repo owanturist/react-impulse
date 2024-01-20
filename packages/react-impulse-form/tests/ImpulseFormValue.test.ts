@@ -260,7 +260,10 @@ describe("ImpulseFormValue#setOriginalValue()", () => {
   })
 
   it("resets error when originalValue changes", ({ scope }) => {
-    const value = ImpulseFormValue.of({ foo: 1 }, { compare: equals })
+    const value = ImpulseFormValue.of(
+      { foo: 1 },
+      { compare: (prev, next) => prev.foo === next.foo },
+    )
 
     value.setErrors(["error"])
     value.setOriginalValue({ foo: 1 })
