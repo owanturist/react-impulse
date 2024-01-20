@@ -8,8 +8,8 @@ module.exports = [
     path: "packages/react-impulse/dist/index.cjs",
   },
   {
-    name: "react-impulse-form.cjs",
-    path: "packages/react-impulse-form/dist/index.cjs",
+    name: "react-impulse-form.js",
+    path: "packages/react-impulse-form/dist/index.js",
   },
   {
     name: "react-impulse-form.cjs",
