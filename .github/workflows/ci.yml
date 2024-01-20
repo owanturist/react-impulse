@@ -98,14 +98,15 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Cleanup src folders
-        run: rm -rf packages/react-impulse/src/*
+      - name: Cleanup src folders to make sure the tests do not use source files
+        run: |
+          rm -rf packages/react-impulse/src/*
+          rm -rf packages/react-impulse-form/src/*
 
-      - name: Create a symlink to the built file from src folder
-        # [s] - symbolic
-        # [F] - force, remove existing destination files
-        # [f] - unlink file if it already exists
-        run: cd packages/react-impulse/src && ln -sFf ../dist/${{ matrix.filename }} index.js && cd ..
+      - name: Copy dist/${{ matrix.filename }} as src/index.ts
+        run: |
+          cp packages/react-impulse/dist/${{ matrix.filename }} packages/react-impulse/src/index.ts
+          cp packages/react-impulse-form/dist/${{ matrix.filename }} packages/react-impulse-form/src/index.ts
 
       - name: Test
         run: pnpm test:run
