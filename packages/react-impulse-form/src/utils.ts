@@ -9,6 +9,10 @@ export type Setter<
   TPrevValues extends ReadonlyArray<unknown> = [TValue],
 > = TValue | Func<TPrevValues, TValue>
 
+export function isDefined<T>(data: T): data is NonNullable<T> {
+  return data != null
+}
+
 export function shallowArrayEquals<T>(
   left: ReadonlyArray<T>,
   right: ReadonlyArray<T>,

@@ -1,4 +1,5 @@
-import { Impulse, type Scope, isDefined } from "./dependencies"
+import { Impulse, type Scope } from "./dependencies"
+import { isDefined } from "./utils"
 import type { ImpulseFormContext } from "./ImpulseFormContext"
 
 export interface ImpulseFormParams {

@@ -19,4 +19,4 @@ export {
 } from "react-impulse"
 // remeda is built-in to the bundle
 // eslint-disable-next-line import/no-extraneous-dependencies
-export { isFunction, isBoolean, isDefined, isTruthy, identity } from "remeda"
+export { isFunction, isBoolean, isTruthy, identity } from "remeda"

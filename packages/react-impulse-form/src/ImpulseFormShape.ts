@@ -5,11 +5,10 @@ import {
   batch,
   identity,
   isBoolean,
-  isDefined,
   isFunction,
   isTruthy,
 } from "./dependencies"
-import type { Setter } from "./utils"
+import { type Setter, isDefined } from "./utils"
 import {
   type GetImpulseFormParam,
   ImpulseForm,

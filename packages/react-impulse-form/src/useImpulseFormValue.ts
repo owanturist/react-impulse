@@ -1,10 +1,5 @@
-import {
-  type RefObject,
-  useEffect,
-  isDefined,
-  isFunction,
-} from "./dependencies"
-import { type Func, useHandler } from "./utils"
+import { type RefObject, useEffect, isFunction } from "./dependencies"
+import { type Func, useHandler, isDefined } from "./utils"
 import type { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormValue } from "./ImpulseFormValue"
 import {
