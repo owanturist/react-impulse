@@ -34,8 +34,11 @@ export abstract class ImpulseForm<
     return value instanceof ImpulseForm
   }
 
-  protected static setParent(form: ImpulseForm, parent: ImpulseForm): void {
-    form.parent.setValue((current) => {
+  /**
+   * @private
+   */
+  protected static _setParent(form: ImpulseForm, parent: ImpulseForm): void {
+    form._parent.setValue((current) => {
       if (isDefined(current)) {
         throw new Error("ImpulseForm already has a parent")
       }
@@ -45,15 +48,21 @@ export abstract class ImpulseForm<
   }
 
   // necessary for type inference
-  protected readonly params?: TParams
-  private readonly parent = Impulse.of<ImpulseForm>()
-  protected readonly context = Impulse.of<ImpulseFormContext>()
+  protected readonly _params?: TParams
+  private readonly _parent = Impulse.of<ImpulseForm>()
+  protected readonly _context = Impulse.of<ImpulseFormContext>()
 
-  public getContext(scope: Scope): undefined | ImpulseFormContext {
-    return this.context.getValue(scope)
+  /**
+   * @private
+   */
+  public _getContext(scope: Scope): undefined | ImpulseFormContext {
+    return this._context.getValue(scope)
   }
 
-  public abstract setContext(context: ImpulseFormContext): void
+  /**
+   * @private
+   */
+  public abstract _setContext(context: ImpulseFormContext): void
 
   public isValid(scope: Scope): boolean {
     return !this.isInvalid(scope)
@@ -115,6 +124,9 @@ export abstract class ImpulseForm<
   public abstract getInitialValue(scope: Scope): TParams["originalValue.schema"]
   public abstract setInitialValue(setter: TParams["originalValue.setter"]): void
 
-  public abstract getFocusFirstInvalidValue(scope: Scope): null | VoidFunction
+  /**
+   * @private
+   */
+  public abstract _getFocusFirstInvalidValue(scope: Scope): null | VoidFunction
   public abstract clone(): ImpulseForm<TParams>
 }

@@ -1,41 +1,44 @@
 import { Impulse, type Scope, batch, tap } from "./dependencies"
 import type { ImpulseForm } from "./ImpulseForm"
 
+/**
+ * @private
+ */
 export class ImpulseFormContext {
-  private readonly listeners = new Set<() => Promise<unknown>>()
-  private readonly submitCount = Impulse.of(0)
-  private readonly submitting = Impulse.of(false)
+  private readonly _listeners = new Set<() => Promise<unknown>>()
+  private readonly _submitCount = Impulse.of(0)
+  private readonly _submitting = Impulse.of(false)
 
-  public constructor(private readonly host: ImpulseForm) {}
+  public constructor(private readonly _host: ImpulseForm) {}
 
-  public getSubmitCount(scope: Scope): number {
-    return this.submitCount.getValue(scope)
+  public _getSubmitCount(scope: Scope): number {
+    return this._submitCount.getValue(scope)
   }
 
-  public isSubmitting(scope: Scope): boolean {
-    return this.submitting.getValue(scope)
+  public _isSubmitting(scope: Scope): boolean {
+    return this._submitting.getValue(scope)
   }
 
-  public onSubmit(listener: () => Promise<unknown>): VoidFunction {
-    this.listeners.add(listener)
+  public _onSubmit(listener: () => Promise<unknown>): VoidFunction {
+    this._listeners.add(listener)
 
     return () => {
-      this.listeners.delete(listener)
+      this._listeners.delete(listener)
     }
   }
 
-  public async submit(): Promise<void> {
+  public async _submit(): Promise<void> {
     batch(() => {
-      this.submitCount.setValue((count) => count + 1)
-      this.submitting.setValue(true)
+      this._submitCount.setValue((count) => count + 1)
+      this._submitting.setValue(true)
     })
 
-    await Promise.all(Array.from(this.listeners).map((listener) => listener()))
+    await Promise.all(Array.from(this._listeners).map((listener) => listener()))
   }
 
-  public focusFirstInvalidValue(): void {
+  public _focusFirstInvalidValue(): void {
     tap((scope) => {
-      this.host.getFocusFirstInvalidValue(scope)?.()
+      this._host._getFocusFirstInvalidValue(scope)?.()
     })
   }
 }
