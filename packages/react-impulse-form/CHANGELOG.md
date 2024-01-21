@@ -1,5 +1,11 @@
 # react-impulse-form
 
+## 0.1.1
+
+### Patch Changes
+
+- [`cb0b7ce`](https://github.com/owanturist/react-impulse/commit/cb0b7ce8411133083bb231933c0adf17bdc2eebd) Thanks [@owanturist](https://github.com/owanturist)! - Reduce file size by marking private, protected and internal methods/fields with `_` prefix, so they are mangled during build.
+
 ## 0.1.0
 
 ### Minor Changes
