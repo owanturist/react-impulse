@@ -1,11 +1,5 @@
 import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
-import {
-  type Compare,
-  eq,
-  useStableCallback,
-  type Func,
-  isFunction,
-} from "./utils"
+import { type Compare, eq, useHandler, type Func, isFunction } from "./utils"
 import { STATIC_SCOPE, type Scope } from "./Scope"
 import { useScope } from "./useScope"
 import type { ReadonlyImpulse } from "./Impulse"
@@ -65,7 +59,7 @@ export function useScoped<TResult>(
   )
   const value = useScope(
     transform,
-    useStableCallback((prev, next) => {
+    useHandler((prev, next) => {
       const compare = options?.compare ?? eq
 
       return compare(prev, next, STATIC_SCOPE)

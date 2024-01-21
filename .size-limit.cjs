@@ -9,7 +9,7 @@ module.exports = [
   },
 ]
   .flatMap((config) => [".js", ".cjs"].map((ext) => ({ ...config, ext })))
-  .map(({ name, ignore = [], ext }) => ({
+  .map(({ name, ignore, ext }) => ({
     name: `${name}${ext}`,
     path: `packages/${name}/dist/index${ext}`,
     gzip: true,

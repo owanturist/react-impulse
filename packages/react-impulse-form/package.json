@@ -15,10 +15,6 @@
     "require": "./dist/index.cjs",
     "default": "./dist/index.cjs"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/owanturist/react-impulse.git"
-  },
   "keywords": [
     "react",
     "react-forms",
@@ -30,6 +26,7 @@
   "bugs": {
     "url": "https://github.com/owanturist/react-impulse/issues"
   },
+  "repository": "https://github.com/owanturist/react-impulse/tree/master/packages/react-impulse-form",
   "homepage": "https://github.com/owanturist/react-impulse/packages/react-impulse-form#readme",
   "peerDependencies": {
     "react": "^16.12.0 || ^17.0.0 || ^18.0.0",
