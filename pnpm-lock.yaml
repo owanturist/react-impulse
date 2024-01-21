@@ -113,8 +113,8 @@ importers:
         specifier: ^18.2.0
         version: 18.2.0
       react-impulse:
-        specifier: ^2.0.2
-        version: link:../react-impulse
+        specifier: 2.0.2
+        version: 2.0.2(react@18.2.0)
       remeda:
         specifier: ^1.37.0
         version: 1.37.0
@@ -3835,6 +3835,15 @@ packages:
       scheduler: 0.23.0
     dev: true
 
+  /react-impulse@2.0.2(react@18.2.0):
+    resolution: {integrity: sha512-CmbjRbfpl0JeSvg2REv4xwgzsZn8YqqlHGNKIz0kt7iGkCI5rU15wcPYLdZHrOhDmY8thNqpfd7DSTG4ohvazg==}
+    peerDependencies:
+      react: ^16.12.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.2.0
+      use-sync-external-store: 1.2.0(react@18.2.0)
+    dev: true
+
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
     dev: true
@@ -4675,7 +4684,6 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       react: 18.2.0
-    dev: false
 
   /v8-to-istanbul@9.2.0:
     resolution: {integrity: sha512-/EH/sDgxU2eGxajKdwLCDmQ4FWq+kpi3uCmBGpw1xJtnAxEjlD8j8PEiGWpCIMIs3ciNAgH0d3TTJiUkYzyZjA==}
