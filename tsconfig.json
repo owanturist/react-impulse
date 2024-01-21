@@ -17,7 +17,7 @@
     "noUncheckedIndexedAccess": true,
     "downlevelIteration": true,
     "jsx": "react",
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals"],
   },
-  "include": ["./*.ts"]
+  "include": ["./*.ts"],
 }

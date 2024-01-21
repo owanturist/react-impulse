@@ -42,11 +42,13 @@ jobs:
             eslintrc:
               - .eslintrc.json
               - .eslintignore
+              - pnpm-lock.yaml
             eslint_target:
               - "**/*.{ts,tsx,js,jsx}"
             prettierrc:
               - .prettierrc
               - .prettierignore
+              - pnpm-lock.yaml
             prettier_target:
               - "**/*.*"
 
