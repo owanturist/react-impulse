@@ -157,12 +157,12 @@ export class ImpulseFormShape<
 
     for (const field of Object.values(fields)) {
       if (ImpulseForm.isImpulseForm(field)) {
-        ImpulseForm.setParent(field, this)
+        ImpulseForm._setParent(field, this)
       }
     }
   }
 
-  private mapFormFields<TResult>(
+  private _mapFormFields<TResult>(
     fn: (form: ImpulseForm) => TResult,
   ): Readonly<Record<keyof TFields, TResult>> {
     const acc = {} as Record<keyof TFields, TResult>
@@ -178,13 +178,13 @@ export class ImpulseFormShape<
     return acc
   }
 
-  public setContext(context: ImpulseFormContext): void {
+  public _setContext(context: ImpulseFormContext): void {
     batch(() => {
-      this.context.setValue(context)
+      this._context.setValue(context)
 
       for (const field of Object.values(this.fields)) {
         if (ImpulseForm.isImpulseForm(field)) {
-          field.setContext(context)
+          field._setContext(context)
         }
       }
     })
@@ -431,7 +431,7 @@ export class ImpulseFormShape<
   public getOriginalValue(
     scope: Scope,
   ): ImpulseFormShapeOriginalValueSchema<TFields> {
-    const originalValue = this.mapFormFields((form) =>
+    const originalValue = this._mapFormFields((form) =>
       form.getOriginalValue(scope),
     )
 
@@ -463,7 +463,7 @@ export class ImpulseFormShape<
   public getInitialValue(
     scope: Scope,
   ): ImpulseFormShapeOriginalValueSchema<TFields> {
-    const originalValue = this.mapFormFields((form) =>
+    const originalValue = this._mapFormFields((form) =>
       form.getInitialValue(scope),
     )
 
@@ -492,11 +492,11 @@ export class ImpulseFormShape<
     })
   }
 
-  public getFocusFirstInvalidValue(scope: Scope): VoidFunction | null {
+  public _getFocusFirstInvalidValue(scope: Scope): VoidFunction | null {
     // TODO DRY
     for (const field of Object.values(this.fields)) {
       if (ImpulseForm.isImpulseForm(field)) {
-        const focus = field.getFocusFirstInvalidValue(scope)
+        const focus = field._getFocusFirstInvalidValue(scope)
 
         if (focus != null) {
           return focus
@@ -508,7 +508,7 @@ export class ImpulseFormShape<
   }
 
   public clone(): ImpulseFormShape<TFields> {
-    const fields = this.mapFormFields((form) => form.clone())
+    const fields = this._mapFormFields((form) => form.clone())
 
     return new ImpulseFormShape(fields as Readonly<TFields>)
   }

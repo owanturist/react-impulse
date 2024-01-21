@@ -27,12 +27,12 @@ export const useImpulseForm = <TForm extends ImpulseForm>(
   { onSubmit }: UseImpulseFormOptions<TForm> = {},
 ): UseImpulseFormResult => {
   const onSubmitStable = useHandler(onSubmit)
-  const context = useScoped((scope) => form.getContext(scope), [form])
+  const context = useScoped((scope) => form._getContext(scope), [form])
 
   useEffect(() => {
     if (context == null) {
       // TODO make sure the context setup only to the root
-      form.setContext(new ImpulseFormContext(form))
+      form._setContext(new ImpulseFormContext(form))
     }
   }, [context, form])
 
@@ -41,7 +41,7 @@ export const useImpulseForm = <TForm extends ImpulseForm>(
       return
     }
 
-    context.onSubmit(async () => {
+    context._onSubmit(async () => {
       form.setTouched(true)
 
       return untrack((scope) => {
@@ -52,15 +52,15 @@ export const useImpulseForm = <TForm extends ImpulseForm>(
           )
         }
 
-        context.focusFirstInvalidValue()
+        context._focusFirstInvalidValue()
       })
     })
   }, [context, form, onSubmitStable])
 
   const { getSubmitCount, isSubmitting } = useMemo(
     () => ({
-      getSubmitCount: (scope: Scope) => context?.getSubmitCount(scope) ?? 0,
-      isSubmitting: (scope: Scope) => context?.isSubmitting(scope) ?? false,
+      getSubmitCount: (scope: Scope) => context?._getSubmitCount(scope) ?? 0,
+      isSubmitting: (scope: Scope) => context?._isSubmitting(scope) ?? false,
     }),
     [context],
   )
@@ -69,7 +69,7 @@ export const useImpulseForm = <TForm extends ImpulseForm>(
     getSubmitCount,
     isSubmitting,
     submit: useHandler(() => {
-      void context?.submit()
+      void context?._submit()
     }),
   }
 }

@@ -10,6 +10,9 @@ import {
 
 export interface UseImpulseFormValueOptions<TForm extends ImpulseForm>
   extends UseImpulseFormOptions<TForm> {
+  /**
+   * @default true
+   */
   shouldFocusWhenInvalid?: boolean
   onFocusInvalid?:
     | RefObject<null | undefined | HTMLElement>
@@ -26,8 +29,6 @@ export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
     ...options
   }: UseImpulseFormValueOptions<typeof form> = {},
 ): UseImpulseFormValueResult => {
-  const tools = useImpulseForm(form, options)
-
   const onFocusInvalidStable = useHandler(
     isFunction(onFocusInvalid)
       ? onFocusInvalid
@@ -37,16 +38,16 @@ export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
   )
 
   useEffect(() => {
-    if (isDefined(onFocusInvalidStable) && shouldFocusWhenInvalid) {
-      form.setOnFocus((errors) => {
+    if (shouldFocusWhenInvalid && isDefined(onFocusInvalidStable)) {
+      form._setOnFocus((errors) => {
         onFocusInvalidStable(errors, form)
       })
 
       return () => {
-        form.setOnFocus(null)
+        form._setOnFocus(null)
       }
     }
   }, [form, onFocusInvalidStable, shouldFocusWhenInvalid])
 
-  return tools
+  return useImpulseForm(form, options)
 }
