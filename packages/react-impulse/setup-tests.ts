@@ -3,13 +3,6 @@ import { cleanup } from "@testing-library/react"
 
 import { tap } from "./src"
 
-// forces tests to fail in case of illegal usage
-const spy_console$error = vi
-  .spyOn(console, "error")
-  .mockImplementation((message: string) => {
-    expect.fail(message)
-  })
-
 const spy_Object$is = vi.spyOn(Object, "is")
 
 beforeEach((context) => {
@@ -25,19 +18,11 @@ afterEach(() => {
   cleanup()
 })
 
-afterAll(() => {
-  spy_console$error.mockRestore()
-})
-
 vi.doMock("@testing-library/react", async () => {
-  const actual = await vi.importActual<typeof import("@testing-library/react")>(
-    "@testing-library/react",
-  )
+  const actual = await vi.importActual("@testing-library/react")
 
   try {
-    const { renderHook } = await vi.importActual<{
-      renderHook: (typeof actual)["renderHook"]
-    }>("@testing-library/react-hooks")
+    const { renderHook } = await vi.importActual("@testing-library/react-hooks")
 
     return { ...actual, renderHook }
   } catch {

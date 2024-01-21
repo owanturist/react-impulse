@@ -1,8 +1,8 @@
 {
-  "name": "react-impulse",
+  "name": "react-impulse-form",
   "type": "module",
-  "version": "2.0.2",
-  "description": "The clean and natural React state management",
+  "version": "0.0.0",
+  "description": "Type-safe declarative React form state management",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -17,29 +17,31 @@
   },
   "keywords": [
     "react",
-    "react-hooks",
-    "state",
-    "state-management",
-    "store"
+    "react-forms",
+    "forms",
+    "forms-state"
   ],
   "author": "Anton Ovechkin <owanturist@gmail.com>",
   "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/owanturist/react-impulse/issues"
   },
-  "repository": "https://github.com/owanturist/react-impulse/tree/master/packages/react-impulse",
-  "homepage": "https://github.com/owanturist/react-impulse/packages/react-impulse#readme",
-  "dependencies": {
-    "use-sync-external-store": "^1.2.0"
-  },
+  "repository": "https://github.com/owanturist/react-impulse/tree/master/packages/react-impulse-form",
+  "homepage": "https://github.com/owanturist/react-impulse/packages/react-impulse-form#readme",
   "peerDependencies": {
-    "react": "^16.12.0 || ^17.0.0 || ^18.0.0"
+    "react": "^16.12.0 || ^17.0.0 || ^18.0.0",
+    "react-impulse": "^2.0.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^14.1.2",
     "@types/react": "^18.2.48",
-    "@types/use-sync-external-store": "^0.0.6",
-    "react": "^18.2.0"
+    "react": "^18.2.0",
+    "react-impulse": "^2.0.2",
+    "remeda": "^1.37.0"
+  },
+  "dependencies": {
+    "ts-toolbelt": "^9.6.0",
+    "zod": "^3.22.4"
   }
 }
