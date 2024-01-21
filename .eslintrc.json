@@ -125,7 +125,11 @@
     "import/no-extraneous-dependencies": [
       "error",
       {
-        "devDependencies": ["./*.{js,ts}"]
+        "devDependencies": [
+          "./*.{js,ts}",
+          "./packages/*/*.{js,ts}",
+          "./packages/*/tests/**/*.{ts,tsx}"
+        ]
       }
     ],
     "import/no-cycle": ["error"]
@@ -326,36 +330,6 @@
                 "group": ["../src/*"],
                 "message": "Import only ../src for tests"
               }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "files": ["packages/react-impulse/**/*"],
-      "rules": {
-        "import/no-extraneous-dependencies": [
-          "error",
-          {
-            "packageDir": "./packages/react-impulse",
-            "devDependencies": [
-              "./packages/react-impulse/*.{js,ts}",
-              "./packages/react-impulse/tests/**/*.{ts,tsx}"
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "files": ["packages/react-impulse-form/**/*"],
-      "rules": {
-        "import/no-extraneous-dependencies": [
-          "error",
-          {
-            "packageDir": "./packages/react-impulse-form",
-            "devDependencies": [
-              "./packages/react-impulse-form/*.{js,ts}",
-              "./packages/react-impulse-form/tests/**/*.{ts,tsx}"
             ]
           }
         ]
