@@ -57,7 +57,7 @@ export const useImpulseForm = <TForm extends ImpulseForm>(
     })
   }, [context, form, onSubmitStable])
 
-  const result = useMemo(
+  const { getSubmitCount, isSubmitting } = useMemo(
     () => ({
       getSubmitCount: (scope: Scope) => context?._getSubmitCount(scope) ?? 0,
       isSubmitting: (scope: Scope) => context?._isSubmitting(scope) ?? false,
@@ -66,7 +66,8 @@ export const useImpulseForm = <TForm extends ImpulseForm>(
   )
 
   return {
-    ...result,
+    getSubmitCount,
+    isSubmitting,
     submit: useHandler(() => {
       void context?._submit()
     }),
