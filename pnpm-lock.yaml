@@ -113,7 +113,7 @@ importers:
         specifier: ^18.2.0
         version: 18.2.0
       react-impulse:
-        specifier: 2.0.2
+        specifier: ^2.0.2
         version: 2.0.2(react@18.2.0)
       remeda:
         specifier: ^1.37.0
