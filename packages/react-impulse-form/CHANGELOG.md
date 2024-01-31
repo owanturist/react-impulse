@@ -1,5 +1,11 @@
 # react-impulse-form
 
+## 0.1.2
+
+### Patch Changes
+
+- [#653](https://github.com/owanturist/react-impulse/pull/653) [`04d25d2`](https://github.com/owanturist/react-impulse/commit/04d25d202370407d39aaa98148e1bfb3b3c5ce20) Thanks [@owanturist](https://github.com/owanturist)! - Reset isSubmitting when submit is done
+
 ## 0.1.1
 
 ### Patch Changes
