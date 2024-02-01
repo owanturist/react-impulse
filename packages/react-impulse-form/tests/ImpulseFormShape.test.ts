@@ -754,15 +754,20 @@ describe("ImpulseFormShape.of()", () => {
 
 describe("ImpulseFormShape#getErrors()", () => {
   it("selects errors", ({ scope }) => {
-    const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of("1", { schema: z.string().max(1) }),
-      second: ImpulseFormValue.of(0, { schema: z.number().nonnegative() }),
-      third: ImpulseFormShape.of({
-        one: ImpulseFormValue.of(true),
-        two: ImpulseFormValue.of(["1"], { schema: z.array(z.string().max(1)) }),
-      }),
-      fourth: ["anything"],
-    })
+    const shape = ImpulseFormShape.of(
+      {
+        first: ImpulseFormValue.of("1", { schema: z.string().max(1) }),
+        second: ImpulseFormValue.of(0, { schema: z.number().nonnegative() }),
+        third: ImpulseFormShape.of({
+          one: ImpulseFormValue.of(true),
+          two: ImpulseFormValue.of(["1"], {
+            schema: z.array(z.string().max(1)),
+          }),
+        }),
+        fourth: ["anything"],
+      },
+      { touched: true },
+    )
 
     expect(shape.getErrors(scope)).toBeNull()
     expect(shape.getErrors(scope, identity)).toBeNull()

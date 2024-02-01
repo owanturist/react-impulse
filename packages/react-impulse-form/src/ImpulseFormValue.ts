@@ -98,7 +98,10 @@ export class ImpulseFormValue<
 
     return new ImpulseFormValue(
       Impulse.of(touched),
-      Impulse.of(validateOn === VALIDATE_ON_INIT),
+      Impulse.of(
+        validateOn === VALIDATE_ON_INIT ||
+          (touched && validateOn === VALIDATE_ON_TOUCH),
+      ),
       Impulse.of(validateOn),
       Impulse.of(errors ?? [], { compare: shallowArrayEquals }),
       Impulse.of(initialValue, { compare: compareFn }),
@@ -135,10 +138,6 @@ export class ImpulseFormValue<
       return { success: false, error: errors }
     }
 
-    if (!this._validated.getValue(scope)) {
-      return { success: true, data: null }
-    }
-
     const value = this.getOriginalValue(scope)
     const schema = this._schema.getValue(scope)
 
@@ -150,6 +149,10 @@ export class ImpulseFormValue<
 
     if (result.success) {
       return result
+    }
+
+    if (!this._validated.getValue(scope)) {
+      return { success: true, data: null }
     }
 
     return {

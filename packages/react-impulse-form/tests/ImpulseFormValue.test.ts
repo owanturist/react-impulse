@@ -168,7 +168,10 @@ describe("ImpulseFormValue#getValue()", () => {
 
 describe("ImpulseFormValue#getErrors()", () => {
   it("selects schema error", ({ scope }) => {
-    const value = ImpulseFormValue.of("1", { schema: z.string().max(1) })
+    const value = ImpulseFormValue.of("1", {
+      touched: true,
+      schema: z.string().max(1),
+    })
 
     expect(value.getErrors(scope)).toBeNull()
     expect(value.getErrors(scope, identity)).toBeNull()
@@ -194,7 +197,10 @@ describe("ImpulseFormValue#getErrors()", () => {
   })
 
   it("custom errors overcome schema errors", ({ scope }) => {
-    const value = ImpulseFormValue.of(2, { schema: z.number().max(1) })
+    const value = ImpulseFormValue.of(2, {
+      touched: true,
+      schema: z.number().max(1),
+    })
 
     value.setErrors(["error"])
     expect(value.getErrors(scope)).toStrictEqual(["error"])
@@ -462,6 +468,39 @@ describe("ImpulseFormValue#isValidated()", () => {
       ])
     })
 
+    it("is validated on init when touched=true", ({ scope }) => {
+      const value = setup("", { validateOn: "onTouch", touched: true })
+
+      expect(value.isValidated(scope)).toBe(true)
+      expect(value.getErrors(scope)).toStrictEqual([
+        "String must contain at least 1 character(s)",
+      ])
+    })
+
+    it("is not validated on touch=false", ({ scope }) => {
+      const value = setup("", { validateOn: "onTouch" })
+
+      value.setTouched(false)
+      expect(value.isValidated(scope)).toBe(false)
+      expect(value.getErrors(scope)).toBeNull()
+    })
+
+    it("does not unvalidate on touch=false", ({ scope }) => {
+      const value = setup("", { validateOn: "onTouch" })
+
+      value.setTouched(true)
+      expect(value.isValidated(scope)).toBe(true)
+      expect(value.getErrors(scope)).toStrictEqual([
+        "String must contain at least 1 character(s)",
+      ])
+
+      value.setTouched(false)
+      expect(value.isValidated(scope)).toBe(true)
+      expect(value.getErrors(scope)).toStrictEqual([
+        "String must contain at least 1 character(s)",
+      ])
+    })
+
     it.todo("is validated on submit")
 
     it("is not validated on change", ({ scope }) => {
@@ -481,6 +520,30 @@ describe("ImpulseFormValue#isValidated()", () => {
       expect(value.isValidated(scope)).toBe(true)
       expect(value.getErrors(scope)).toStrictEqual([
         "Expected number, received nan",
+      ])
+    })
+
+    it("is not validated for the same value", ({ scope }) => {
+      const value = setup("x", { validateOn: "onChange" })
+
+      value.setOriginalValue("x")
+      expect(value.isValidated(scope)).toBe(false)
+      expect(value.getErrors(scope)).toBeNull()
+    })
+
+    it("does not unvalidate when the value changes back", ({ scope }) => {
+      const value = setup("", { validateOn: "onChange" })
+
+      value.setOriginalValue("x")
+      expect(value.isValidated(scope)).toBe(true)
+      expect(value.getErrors(scope)).toStrictEqual([
+        "Expected number, received nan",
+      ])
+
+      value.setOriginalValue("")
+      expect(value.isValidated(scope)).toBe(true)
+      expect(value.getErrors(scope)).toStrictEqual([
+        "String must contain at least 1 character(s)",
       ])
     })
 
