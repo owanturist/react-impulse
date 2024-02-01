@@ -12,6 +12,12 @@ import { type Func, type Setter, shallowArrayEquals, isDefined } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormContext } from "./ImpulseFormContext"
 import type { ImpulseFormSchema, Result } from "./ImpulseFormSchema"
+import {
+  VALIDATE_ON_CHANGE,
+  VALIDATE_ON_INIT,
+  VALIDATE_ON_TOUCH,
+  type ValidateStrategy,
+} from "./ValidateStrategy"
 
 export interface ImpulseFormValueOptions<
   TOriginalValue,
@@ -22,6 +28,10 @@ export interface ImpulseFormValueOptions<
   schema?: ImpulseFormSchema<TValue, TOriginalValue>
   compare?: Compare<TOriginalValue>
   initialValue?: TOriginalValue
+  /**
+   * @default "onTouch"
+   */
+  validateOn?: ValidateStrategy
 }
 
 export type ImpulseFormValueOriginalValueSetter<TOriginalValue> =
@@ -76,6 +86,7 @@ export class ImpulseFormValue<
       schema,
       compare = Object.is,
       initialValue = originalValue,
+      validateOn = VALIDATE_ON_TOUCH,
     }: ImpulseFormValueOptions<TOriginalValue, TValue> = {},
   ): ImpulseFormValue<TOriginalValue, TValue> {
     const compareImpulse = Impulse.of(compare)
@@ -87,6 +98,8 @@ export class ImpulseFormValue<
 
     return new ImpulseFormValue(
       Impulse.of(touched),
+      Impulse.of(validateOn === VALIDATE_ON_INIT),
+      Impulse.of(validateOn),
       Impulse.of(errors ?? [], { compare: shallowArrayEquals }),
       Impulse.of(initialValue, { compare: compareFn }),
       Impulse.of(originalValue, { compare: compareFn }),
@@ -100,6 +113,8 @@ export class ImpulseFormValue<
 
   protected constructor(
     private readonly _touched: Impulse<boolean>,
+    private readonly _validated: Impulse<boolean>,
+    private readonly _validateOn: Impulse<ValidateStrategy>,
     private readonly _errors: Impulse<ReadonlyArray<string>>,
     private readonly _initialValue: Impulse<TOriginalValue>,
     private readonly _originalValue: Impulse<TOriginalValue>,
@@ -111,11 +126,17 @@ export class ImpulseFormValue<
     super()
   }
 
-  private _validate(scope: Scope): Result<ReadonlyArray<string>, TValue> {
+  private _validate(
+    scope: Scope,
+  ): Result<ReadonlyArray<string>, null | TValue> {
     const errors = this._errors.getValue(scope)
 
     if (errors.length > 0) {
       return { success: false, error: errors }
+    }
+
+    if (!this._validated.getValue(scope)) {
+      return { success: true, data: null }
     }
 
     const value = this.getOriginalValue(scope)
@@ -157,11 +178,8 @@ export class ImpulseFormValue<
     ) => TResult = identity as typeof select,
   ): TResult {
     const result = this._validate(scope)
-    const error = result.success
-      ? null
-      : result.error.length === 0
-        ? null
-        : result.error
+    const error =
+      result.success || result.error.length === 0 ? null : result.error
 
     return select(error, error)
   }
@@ -174,6 +192,23 @@ export class ImpulseFormValue<
 
       return nextErrors ?? []
     })
+  }
+
+  public isValidated(scope: Scope): boolean
+  public isValidated<TResult>(
+    scope: Scope,
+    select: (concise: boolean, verbose: boolean) => TResult,
+  ): TResult
+  public isValidated<TResult = boolean>(
+    scope: Scope,
+    select: (
+      concise: boolean,
+      verbose: boolean,
+    ) => TResult = identity as typeof select,
+  ): TResult {
+    const validated = this._validated.getValue(scope)
+
+    return select(validated, validated)
   }
 
   public isTouched(scope: Scope): boolean
@@ -194,7 +229,13 @@ export class ImpulseFormValue<
   }
 
   public setTouched(touched: ImpulseFormValueFlagSetter): void {
-    this._touched.setValue(touched)
+    batch((scope) => {
+      this._touched.setValue(touched)
+
+      if (touched && this._validateOn.getValue(scope) === VALIDATE_ON_TOUCH) {
+        this._validated.setValue(true)
+      }
+    })
   }
 
   public setSchema(schema: ImpulseFormSchema<TValue, TOriginalValue>): void {
@@ -274,6 +315,10 @@ export class ImpulseFormValue<
 
       if (originalValue !== this._originalValue.getValue(scope)) {
         this._errors.setValue([])
+
+        if (this._validateOn.getValue(scope) === VALIDATE_ON_CHANGE) {
+          this._validated.setValue(true)
+        }
       }
     })
   }
@@ -313,6 +358,8 @@ export class ImpulseFormValue<
   public clone(): ImpulseFormValue<TOriginalValue, TValue> {
     return new ImpulseFormValue(
       this._touched.clone(),
+      this._validated.clone(),
+      this._validateOn.clone(),
       this._errors.clone(),
       this._initialValue.clone(),
       this._originalValue.clone(),

@@ -254,6 +254,52 @@ export class ImpulseFormShape<
     })
   }
 
+  public isValidated(scope: Scope): boolean
+  public isValidated<TResult>(
+    scope: Scope,
+    select: (
+      concise: ImpulseFormShapeFlagSchema<TFields>,
+      verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
+    ) => TResult,
+  ): TResult
+  public isValidated<TResult = boolean>(
+    scope: Scope,
+    select: (
+      concise: ImpulseFormShapeFlagSchema<TFields>,
+      verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
+    ) => TResult = isTruthy as unknown as typeof select,
+  ): TResult {
+    // TODO DRY
+    let validatedAll = true
+    let validatedNone = true
+    // make it easier for TS
+    const validatedConcise = {} as Record<string, unknown>
+    const validatedVerbose = {} as Record<string, unknown>
+
+    for (const [key, field] of Object.entries(this.fields)) {
+      if (ImpulseForm.isImpulseForm(field)) {
+        const validated = field.isValidated(scope, (concise, verbose) => ({
+          concise,
+          verbose,
+        }))
+
+        validatedAll = validatedAll && validated.concise === true
+        validatedNone = validatedNone && validated.concise === false
+        validatedConcise[key] = validated.concise
+        validatedVerbose[key] = validated.verbose
+      }
+    }
+
+    return select(
+      validatedAll
+        ? true
+        : validatedNone
+          ? false
+          : (validatedConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
+      validatedVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
+    )
+  }
+
   public isTouched(scope: Scope): boolean
   public isTouched<TResult>(
     scope: Scope,

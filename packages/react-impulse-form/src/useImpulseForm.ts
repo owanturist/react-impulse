@@ -42,9 +42,9 @@ export const useImpulseForm = <TForm extends ImpulseForm>(
     }
 
     context._onSubmit(async () => {
-      form.setTouched(true)
-
       return untrack((scope) => {
+        form.setTouched(true)
+
         if (form.isValid(scope)) {
           return onSubmitStable(
             form.getValue(scope) as GetImpulseFormParam<TForm, "value.schema">,

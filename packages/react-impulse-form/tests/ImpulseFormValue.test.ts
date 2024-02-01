@@ -1,7 +1,12 @@
 import { equals, identity } from "remeda"
 import { z } from "zod"
 
-import { type Setter, type ImpulseForm, ImpulseFormValue } from "../src"
+import {
+  type Setter,
+  type ImpulseForm,
+  ImpulseFormValue,
+  type ImpulseFormValueOptions,
+} from "../src"
 
 describe("ImpulseFormValue.of()", () => {
   it("creates ImpulseFormValue without schema", ({ scope }) => {
@@ -411,4 +416,137 @@ describe("ImpulseFormValue#reset()", () => {
     value.reset()
     expect(value.getErrors(scope)).toBeNull()
   })
+})
+
+describe("ImpulseFormValue#isValidated()", () => {
+  const setup = (
+    initialValue: string,
+    options?: ImpulseFormValueOptions<string, number>,
+  ) => {
+    return ImpulseFormValue.of(initialValue, {
+      schema: z.string().min(1).pipe(z.coerce.number()),
+      ...options,
+    })
+  }
+
+  it("selects validated", ({ scope }) => {
+    const value = setup("")
+
+    expect(value.isValidated(scope)).toBe(false)
+    expect(value.isValidated(scope, (x) => !x)).toBe(true)
+    expect(value.getErrors(scope)).toBeNull()
+
+    expectTypeOf(value.isValidated(scope)).toEqualTypeOf<boolean>()
+    expectTypeOf(value.isValidated(scope, identity)).toEqualTypeOf<boolean>()
+  })
+
+  describe("when onInit", () => {
+    it("is validated on init", ({ scope }) => {
+      const value = setup("", { validateOn: "onInit" })
+
+      expect(value.isValidated(scope)).toBe(true)
+      expect(value.getErrors(scope)).toStrictEqual([
+        "String must contain at least 1 character(s)",
+      ])
+    })
+  })
+
+  describe("when onTouch", () => {
+    it("is validated on touch", ({ scope }) => {
+      const value = setup("", { validateOn: "onTouch" })
+
+      value.setTouched(true)
+      expect(value.isValidated(scope)).toBe(true)
+      expect(value.getErrors(scope)).toStrictEqual([
+        "String must contain at least 1 character(s)",
+      ])
+    })
+
+    it.todo("is validated on submit")
+
+    it("is not validated on change", ({ scope }) => {
+      const value = setup("", { validateOn: "onTouch" })
+
+      value.setOriginalValue("x")
+      expect(value.isValidated(scope)).toBe(false)
+      expect(value.getErrors(scope)).toBeNull()
+    })
+  })
+
+  describe("when onChange", () => {
+    it("is validated on change", ({ scope }) => {
+      const value = setup("", { validateOn: "onChange" })
+
+      value.setOriginalValue("x")
+      expect(value.isValidated(scope)).toBe(true)
+      expect(value.getErrors(scope)).toStrictEqual([
+        "Expected number, received nan",
+      ])
+    })
+
+    it.todo("is validated on submit")
+
+    it("is not validated on touch", ({ scope }) => {
+      const value = setup("", { validateOn: "onChange" })
+
+      value.setTouched(true)
+      expect(value.isValidated(scope)).toBe(false)
+      expect(value.getErrors(scope)).toBeNull()
+    })
+  })
+
+  describe("when onSubmit", () => {
+    it.todo("is validated on submit", ({ scope }) => {
+      const value = setup("", { validateOn: "onSubmit" })
+
+      value.setOriginalValue("x")
+      expect(value.isValidated(scope)).toBe(true)
+      expect(value.getErrors(scope)).toStrictEqual([
+        "String must contain at least 1 character(s)",
+      ])
+    })
+
+    it("is not validated on touch", ({ scope }) => {
+      const value = setup("", { validateOn: "onSubmit" })
+
+      value.setTouched(true)
+      expect(value.isValidated(scope)).toBe(false)
+      expect(value.getErrors(scope)).toBeNull()
+    })
+
+    it("is not validated on change", ({ scope }) => {
+      const value = setup("", { validateOn: "onSubmit" })
+
+      value.setOriginalValue("x")
+      expect(value.isValidated(scope)).toBe(false)
+      expect(value.getErrors(scope)).toBeNull()
+    })
+  })
+
+  describe.each(["onTouch", "onChange", "onSubmit"] as const)(
+    "when %s",
+    (validateOn) => {
+      it("is not validated on init", ({ scope }) => {
+        const value = setup("", { validateOn })
+
+        expect(value.isValidated(scope)).toBe(false)
+        expect(value.getErrors(scope)).toBeNull()
+      })
+
+      it("is not validated when initialized with error", ({ scope }) => {
+        const value = setup("", { validateOn, errors: ["error"] })
+
+        expect(value.isValidated(scope)).toBe(false)
+        expect(value.getErrors(scope)).toStrictEqual(["error"])
+      })
+
+      it("is not validated when custom error set", ({ scope }) => {
+        const value = setup("", { validateOn })
+
+        value.setErrors(["error"])
+        expect(value.isValidated(scope)).toBe(false)
+        expect(value.getErrors(scope)).toStrictEqual(["error"])
+      })
+    },
+  )
 })

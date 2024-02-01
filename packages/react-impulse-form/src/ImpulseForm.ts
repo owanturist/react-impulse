@@ -83,6 +83,15 @@ export abstract class ImpulseForm<
 
   public abstract setErrors(setter: TParams["errors.setter"]): void
 
+  public abstract isValidated(scope: Scope): boolean
+  public abstract isValidated<TResult>(
+    scope: Scope,
+    select: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): TResult
+
   public abstract isTouched(scope: Scope): boolean
   public abstract isTouched<TResult>(
     scope: Scope,
@@ -93,6 +102,13 @@ export abstract class ImpulseForm<
   ): TResult
 
   public abstract setTouched(setter: TParams["flag.setter"]): void
+
+  /**
+   * TODO provide reset options, where
+   * untouch: boolean = true - when true, resets touched flag
+   * unvalidate: boolean = true - when true, resets validated flag
+   * unerror: boolean = true - when true, resets errors
+   */
 
   public abstract reset(resetter?: TParams["originalValue.resetter"]): void
 
