@@ -7,6 +7,7 @@ import {
   batch,
   isFunction,
   identity,
+  untrack,
 } from "./dependencies"
 import { type Func, type Setter, shallowArrayEquals, isDefined } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
@@ -26,6 +27,7 @@ export interface ImpulseFormValueOptions<
   errors?: null | ReadonlyArray<string>
   touched?: boolean
   schema?: ImpulseFormSchema<TValue, TOriginalValue>
+  // TODO rename to isOriginalValueEqual (whether or not onChange should replace value), add isOriginalValueDirty and isValueEqual (introduce _value: TransmittingImpulse<TValue>)
   compare?: Compare<TOriginalValue>
   initialValue?: TOriginalValue
   /**
@@ -100,7 +102,9 @@ export class ImpulseFormValue<
       Impulse.of(touched),
       Impulse.of(
         validateOn === VALIDATE_ON_INIT ||
-          (touched && validateOn === VALIDATE_ON_TOUCH),
+          (validateOn === VALIDATE_ON_TOUCH && touched) ||
+          (validateOn === VALIDATE_ON_CHANGE &&
+            untrack((scope) => !compare(initialValue, originalValue, scope))),
       ),
       Impulse.of(validateOn),
       Impulse.of(errors ?? [], { compare: shallowArrayEquals }),

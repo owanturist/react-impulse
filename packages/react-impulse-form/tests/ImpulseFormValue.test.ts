@@ -523,6 +523,23 @@ describe("ImpulseFormValue#isValidated()", () => {
       ])
     })
 
+    it("is validated on init when initialValue!=originalValue", ({ scope }) => {
+      const value = setup("", { validateOn: "onChange", initialValue: "x" })
+
+      expect(value.isValidated(scope)).toBe(true)
+      expect(value.getErrors(scope)).toStrictEqual([
+        "String must contain at least 1 character(s)",
+      ])
+    })
+
+    it("is not validated on initialValue=originalValue", ({ scope }) => {
+      const value = setup("", { validateOn: "onChange", initialValue: "" })
+
+      value.setTouched(false)
+      expect(value.isValidated(scope)).toBe(false)
+      expect(value.getErrors(scope)).toBeNull()
+    })
+
     it("is not validated for the same value", ({ scope }) => {
       const value = setup("x", { validateOn: "onChange" })
 
