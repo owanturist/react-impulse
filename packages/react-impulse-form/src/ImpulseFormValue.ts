@@ -7,8 +7,9 @@ import {
   batch,
   isFunction,
   identity,
+  isDefined,
 } from "./dependencies"
-import { type Func, type Setter, shallowArrayEquals, isDefined } from "./utils"
+import { type Func, type Setter, shallowArrayEquals } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormContext } from "./ImpulseFormContext"
 import type { ImpulseFormSchema, Result } from "./ImpulseFormSchema"

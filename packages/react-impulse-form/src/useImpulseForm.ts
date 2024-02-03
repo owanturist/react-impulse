@@ -4,8 +4,9 @@ import {
   useMemo,
   useScoped,
   untrack,
+  isDefined,
 } from "./dependencies"
-import { useHandler, isDefined } from "./utils"
+import { useHandler } from "./utils"
 import type { GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 import { ImpulseFormContext } from "./ImpulseFormContext"
 

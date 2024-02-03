@@ -7,14 +7,17 @@ import {
   isBoolean,
   isFunction,
   isTruthy,
+  isDefined,
+  isString,
 } from "./dependencies"
-import { type Setter, isDefined } from "./utils"
+import { type ComputeObject, isTrue, type Setter } from "./utils"
 import {
   type GetImpulseFormParam,
   ImpulseForm,
   type ImpulseFormParamsKeys,
 } from "./ImpulseForm"
 import type { ImpulseFormContext } from "./ImpulseFormContext"
+import type { ValidateStrategy } from "./ValidateStrategy"
 
 type ImpulseFormShapeFields = Types.Object.Record<string | number>
 
@@ -22,7 +25,7 @@ type ImpulseFormShapeParam<
   TFields extends ImpulseFormShapeFields,
   TKey extends ImpulseFormParamsKeys,
   TFallback extends "field" | "nothing" = "nothing",
-> = Types.Any.Compute<
+> = ComputeObject<
   Types.Object.Filter<
     {
       readonly [TField in Types.Any.Keys<TFields>]: GetImpulseFormParam<
@@ -78,6 +81,22 @@ export type ImpulseFormShapeFlagSetter<TFields extends ImpulseFormShapeFields> =
     [ImpulseFormShapeFlagSchemaVerbose<TFields>]
   >
 
+export type ImpulseFormShapeValidateOnSchema<
+  TFields extends ImpulseFormShapeFields,
+> = ValidateStrategy | ImpulseFormShapeParam<TFields, "validateOn.schema">
+
+export type ImpulseFormShapeValidateOnSchemaVerbose<
+  TFields extends ImpulseFormShapeFields,
+> = ImpulseFormShapeParam<TFields, "validateOn.schema.verbose">
+
+export type ImpulseFormShapeValidateOnSetter<
+  TFields extends ImpulseFormShapeFields,
+> = Setter<
+  | ValidateStrategy
+  | Partial<ImpulseFormShapeParam<TFields, "validateOn.setter">>,
+  [ImpulseFormShapeValidateOnSchemaVerbose<TFields>]
+>
+
 export type ImpulseFormShapeErrorSetter<
   TFields extends ImpulseFormShapeFields,
 > = Setter<
@@ -99,6 +118,7 @@ export interface ImpulseFormShapeOptions<
   touched?: ImpulseFormShapeFlagSetter<TFields>
   initialValue?: ImpulseFormShapeOriginalValueSetter<TFields>
   originalValue?: ImpulseFormShapeOriginalValueSetter<TFields>
+  validateOn?: ImpulseFormShapeValidateOnSetter<TFields>
   errors?: ImpulseFormShapeErrorSetter<TFields>
 }
 
@@ -116,6 +136,10 @@ export class ImpulseFormShape<
   "flag.schema": ImpulseFormShapeFlagSchema<TFields>
   "flag.schema.verbose": ImpulseFormShapeFlagSchemaVerbose<TFields>
 
+  "validateOn.setter": ImpulseFormShapeValidateOnSetter<TFields>
+  "validateOn.schema": ImpulseFormShapeValidateOnSchema<TFields>
+  "validateOn.schema.verbose": ImpulseFormShapeValidateOnSchemaVerbose<TFields>
+
   "errors.setter": ImpulseFormShapeErrorSetter<TFields>
   "errors.schema": ImpulseFormShapeErrorSchema<TFields>
   "errors.schema.verbose": ImpulseFormShapeErrorSchemaVerbose<TFields>
@@ -126,25 +150,31 @@ export class ImpulseFormShape<
       touched,
       initialValue,
       originalValue,
+      validateOn,
       errors,
     }: ImpulseFormShapeOptions<TFields> = {},
   ): ImpulseFormShape<TFields> {
     const shape = new ImpulseFormShape(fields)
 
     batch(() => {
-      if (isDefined(touched)) {
+      if (isDefined.strict(touched)) {
         shape.setTouched(touched)
       }
 
-      if (isDefined(initialValue)) {
+      if (isDefined.strict(initialValue)) {
         shape.setInitialValue(initialValue)
       }
 
-      if (isDefined(originalValue)) {
+      if (isDefined.strict(originalValue)) {
         shape.setOriginalValue(originalValue)
       }
 
-      if (isDefined(errors)) {
+      if (isDefined(validateOn)) {
+        shape.setValidateOn(validateOn)
+      }
+
+      // TODO add test against null
+      if (isDefined.strict(errors)) {
         shape.setErrors(errors)
       }
     })
@@ -267,7 +297,7 @@ export class ImpulseFormShape<
     select: (
       concise: ImpulseFormShapeFlagSchema<TFields>,
       verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
-    ) => TResult = isTruthy as unknown as typeof select,
+    ) => TResult = isTrue as unknown as typeof select,
   ): TResult {
     // TODO DRY
     let validatedAll = true
@@ -298,6 +328,75 @@ export class ImpulseFormShape<
           : (validatedConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
       validatedVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
     )
+  }
+
+  public getValidateOn(scope: Scope): ImpulseFormShapeValidateOnSchema<TFields>
+  public getValidateOn<TResult>(
+    scope: Scope,
+    select: (
+      concise: ImpulseFormShapeValidateOnSchema<TFields>,
+      verbose: ImpulseFormShapeValidateOnSchemaVerbose<TFields>,
+    ) => TResult,
+  ): TResult
+  public getValidateOn<TResult = ImpulseFormShapeValidateOnSchema<TFields>>(
+    scope: Scope,
+    select: (
+      concise: ImpulseFormShapeValidateOnSchema<TFields>,
+      verbose: ImpulseFormShapeValidateOnSchemaVerbose<TFields>,
+    ) => TResult = identity as typeof select,
+  ): TResult {
+    // TODO DRY
+    // make it easier for TS
+    const validateOnConcise = {} as Record<string, unknown>
+    const validateOnVerbose = {} as Record<string, unknown>
+
+    for (const [key, field] of Object.entries(this.fields)) {
+      if (ImpulseForm.isImpulseForm(field)) {
+        const validateOn = field.getValidateOn(scope, (concise, verbose) => ({
+          concise,
+          verbose,
+        }))
+
+        validateOnConcise[key] = validateOn.concise
+        validateOnVerbose[key] = validateOn.verbose
+      }
+    }
+
+    const validateOnConciseValues = Object.values(validateOnConcise)
+
+    return select(
+      validateOnConciseValues.length === 0
+        ? // defaults to "onTouch"
+          "onTouch"
+        : validateOnConciseValues.every(isString) &&
+            new Set(validateOnConciseValues).size === 1
+          ? (validateOnConciseValues[0] as ValidateStrategy)
+          : (validateOnConcise as unknown as ImpulseFormShapeValidateOnSchema<TFields>),
+      validateOnVerbose as unknown as ImpulseFormShapeValidateOnSchemaVerbose<TFields>,
+    )
+  }
+
+  public setValidateOn(
+    validateOn: ImpulseFormShapeValidateOnSetter<TFields>,
+  ): void {
+    batch((scope) => {
+      const nextValidateOn = isFunction(validateOn)
+        ? validateOn(this.getValidateOn(scope, (_, verbose) => verbose))
+        : validateOn
+
+      for (const [key, field] of Object.entries(this.fields)) {
+        const nextFieldTouched = isString(nextValidateOn)
+          ? nextValidateOn
+          : nextValidateOn[key as keyof typeof nextValidateOn]
+
+        if (
+          ImpulseForm.isImpulseForm(field) &&
+          isDefined.strict(nextFieldTouched)
+        ) {
+          field.setValidateOn(nextFieldTouched)
+        }
+      }
+    })
   }
 
   public isTouched(scope: Scope): boolean

@@ -9,9 +9,12 @@ export type Setter<
   TPrevValues extends ReadonlyArray<unknown> = [TValue],
 > = TValue | Func<TPrevValues, TValue>
 
-export function isDefined<T>(data: T): data is NonNullable<T> {
-  return data != null
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+export type ComputeObject<Obj> = unknown & {
+  [K in keyof Obj]: Obj[K]
 }
+
+export const isTrue = (value: unknown): value is true => value === true
 
 export function shallowArrayEquals<T>(
   left: ReadonlyArray<T>,
