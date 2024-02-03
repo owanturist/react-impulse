@@ -14,6 +14,10 @@ export interface ImpulseFormParams {
   "flag.schema": unknown
   "flag.schema.verbose": unknown
 
+  "validateOn.setter": unknown
+  "validateOn.schema": unknown
+  "validateOn.schema.verbose": unknown
+
   "errors.setter": unknown
   "errors.schema": unknown
   "errors.schema.verbose": unknown
@@ -91,6 +95,17 @@ export abstract class ImpulseForm<
       verbose: TParams["flag.schema.verbose"],
     ) => TResult,
   ): TResult
+
+  public abstract getValidateOn(scope: Scope): TParams["validateOn.schema"]
+  public abstract getValidateOn<TResult>(
+    scope: Scope,
+    select: (
+      concise: TParams["validateOn.schema"],
+      verbose: TParams["validateOn.schema.verbose"],
+    ) => TResult,
+  ): TResult
+
+  public abstract setValidateOn(setter: TParams["validateOn.setter"]): void
 
   public abstract isTouched(scope: Scope): boolean
   public abstract isTouched<TResult>(

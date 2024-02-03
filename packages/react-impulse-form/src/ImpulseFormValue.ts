@@ -7,17 +7,17 @@ import {
   batch,
   isFunction,
   identity,
-  untrack,
 } from "./dependencies"
 import { type Func, type Setter, shallowArrayEquals, isDefined } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormContext } from "./ImpulseFormContext"
 import type { ImpulseFormSchema, Result } from "./ImpulseFormSchema"
 import {
-  VALIDATE_ON_CHANGE,
   VALIDATE_ON_INIT,
+  VALIDATE_ON_CHANGE,
   VALIDATE_ON_TOUCH,
   type ValidateStrategy,
+  VALIDATE_ON_SUBMIT,
 } from "./ValidateStrategy"
 
 export interface ImpulseFormValueOptions<
@@ -46,6 +46,8 @@ export type ImpulseFormValueOriginalValueResetter<TOriginalValue> = Setter<
 
 export type ImpulseFormValueFlagSetter = Setter<boolean>
 
+export type ImpulseFormValueValidateOnSetter = Setter<ValidateStrategy>
+
 export type ImpulseFormValueErrorsSetter = Setter<null | ReadonlyArray<string>>
 
 export class ImpulseFormValue<
@@ -62,6 +64,10 @@ export class ImpulseFormValue<
   "flag.setter": ImpulseFormValueFlagSetter
   "flag.schema": boolean
   "flag.schema.verbose": boolean
+
+  "validateOn.setter": ImpulseFormValueValidateOnSetter
+  "validateOn.schema": ValidateStrategy
+  "validateOn.schema.verbose": ValidateStrategy
 
   "errors.setter": ImpulseFormValueErrorsSetter
   "errors.schema": null | ReadonlyArray<string>
@@ -100,12 +106,6 @@ export class ImpulseFormValue<
 
     return new ImpulseFormValue(
       Impulse.of(touched),
-      Impulse.of(
-        validateOn === VALIDATE_ON_INIT ||
-          (validateOn === VALIDATE_ON_TOUCH && touched) ||
-          (validateOn === VALIDATE_ON_CHANGE &&
-            untrack((scope) => !compare(initialValue, originalValue, scope))),
-      ),
       Impulse.of(validateOn),
       Impulse.of(errors ?? [], { compare: shallowArrayEquals }),
       Impulse.of(initialValue, { compare: compareFn }),
@@ -118,9 +118,10 @@ export class ImpulseFormValue<
   private readonly _onFocus =
     Impulse.of<(errors: ReadonlyArray<string>) => void>()
 
+  private readonly _validated = Impulse.of(false)
+
   protected constructor(
     private readonly _touched: Impulse<boolean>,
-    private readonly _validated: Impulse<boolean>,
     private readonly _validateOn: Impulse<ValidateStrategy>,
     private readonly _errors: Impulse<ReadonlyArray<string>>,
     private readonly _initialValue: Impulse<TOriginalValue>,
@@ -131,6 +132,34 @@ export class ImpulseFormValue<
     private readonly _compare: Impulse<Compare<TOriginalValue>>,
   ) {
     super()
+    this._initValidated()
+  }
+
+  private _initValidated(): void {
+    this._validated.setValue((validated, scope) => {
+      if (validated) {
+        return true
+      }
+
+      switch (this.getValidateOn(scope)) {
+        case VALIDATE_ON_INIT: {
+          return true
+        }
+
+        case VALIDATE_ON_TOUCH: {
+          return this.isTouched(scope)
+        }
+
+        case VALIDATE_ON_CHANGE: {
+          return this.isDirty(scope)
+        }
+
+        case VALIDATE_ON_SUBMIT: {
+          // TODO return true if submitCount > 0
+          return false
+        }
+      }
+    })
   }
 
   private _validate(
@@ -216,6 +245,32 @@ export class ImpulseFormValue<
     const validated = this._validated.getValue(scope)
 
     return select(validated, validated)
+  }
+
+  public getValidateOn(scope: Scope): ValidateStrategy
+  public getValidateOn<TResult>(
+    scope: Scope,
+    select: (concise: ValidateStrategy, verbose: ValidateStrategy) => TResult,
+  ): TResult
+  public getValidateOn<TResult = ValidateStrategy>(
+    scope: Scope,
+    select: (
+      concise: ValidateStrategy,
+      verbose: ValidateStrategy,
+    ) => TResult = identity as typeof select,
+  ): TResult {
+    const validateOn = this._validateOn.getValue(scope)
+
+    return select(validateOn, validateOn)
+  }
+
+  public setValidateOn(setter: ImpulseFormValueValidateOnSetter): void {
+    batch(() => {
+      this._validateOn.setValue((validateOn) => {
+        return isFunction(setter) ? setter(validateOn) : setter
+      })
+      this._initValidated()
+    })
   }
 
   public isTouched(scope: Scope): boolean
@@ -362,10 +417,10 @@ export class ImpulseFormValue<
     this._onFocus.setValue(() => onFocus ?? undefined)
   }
 
+  // TODO add tests against _validated when cloning
   public clone(): ImpulseFormValue<TOriginalValue, TValue> {
     return new ImpulseFormValue(
       this._touched.clone(),
-      this._validated.clone(),
       this._validateOn.clone(),
       this._errors.clone(),
       this._initialValue.clone(),

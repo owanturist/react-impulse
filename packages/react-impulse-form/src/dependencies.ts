@@ -11,6 +11,7 @@ export {
 export {
   type Scope,
   type Compare,
+  type ReadonlyImpulse,
   Impulse,
   tap,
   batch,

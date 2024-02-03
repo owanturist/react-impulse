@@ -6,6 +6,7 @@ import {
   type ImpulseForm,
   ImpulseFormValue,
   type ImpulseFormValueOptions,
+  type ValidateStrategy,
 } from "../src"
 
 describe("ImpulseFormValue.of()", () => {
@@ -142,6 +143,12 @@ describe("ImpulseFormValue.of()", () => {
 
     expect(value.getOriginalValue(scope)).toBe("")
     expect(value.getInitialValue(scope)).toBe("1")
+  })
+
+  it("defaults validateOn to onTouch", ({ scope }) => {
+    const value = ImpulseFormValue.of("")
+
+    expect(value.getValidateOn(scope)).toBe("onTouch")
   })
 })
 
@@ -629,4 +636,205 @@ describe("ImpulseFormValue#isValidated()", () => {
       })
     },
   )
+})
+
+describe("ImpulseFormValue#getValidateOn()", () => {
+  it("selects validateOn", ({ scope }) => {
+    const value = ImpulseFormValue.of("", { validateOn: "onChange" })
+
+    expect(value.getValidateOn(scope)).toBe("onChange")
+    expect(value.getValidateOn(scope, identity)).toBe("onChange")
+
+    expectTypeOf(value.getValidateOn(scope)).toEqualTypeOf<ValidateStrategy>()
+    expectTypeOf(
+      value.getValidateOn(scope, identity),
+    ).toEqualTypeOf<ValidateStrategy>()
+  })
+})
+
+describe("ImpulseFormValue#setValidateOn()", () => {
+  it("sets validateOn", ({ scope }) => {
+    const value = ImpulseFormValue.of("")
+
+    value.setValidateOn("onInit")
+    expect(value.getValidateOn(scope)).toBe("onInit")
+
+    value.setValidateOn((x) => (x === "onInit" ? "onChange" : "onInit"))
+    expect(value.getValidateOn(scope)).toBe("onChange")
+
+    expectTypeOf(value.setValidateOn).parameters.toEqualTypeOf<
+      [Setter<ValidateStrategy>]
+    >()
+  })
+
+  describe("when validateOn=onInit", () => {
+    describe.each([
+      "onInit",
+      "onChange",
+      "onTouch",
+      "onSubmit",
+    ] satisfies ReadonlyArray<ValidateStrategy>)(
+      "when setValidateOn(%s)",
+      (validateOn) => {
+        it("keeps validated", ({ scope }) => {
+          const value = ImpulseFormValue.of("", { validateOn: "onInit" })
+
+          value.setValidateOn(validateOn)
+          expect(value.isValidated(scope)).toBe(true)
+        })
+      },
+    )
+  })
+
+  describe("when validateOn=onTouch", () => {
+    const setup = (options?: ImpulseFormValueOptions<string>) => {
+      return ImpulseFormValue.of("", { ...options, validateOn: "onTouch" })
+    }
+
+    it("validates when setValidateOn(onInit)", ({ scope }) => {
+      const value = setup()
+
+      value.setValidateOn("onInit")
+      expect(value.isValidated(scope)).toBe(true)
+    })
+
+    it("does not validate when setValidateOn(onChange)", ({ scope }) => {
+      const value = setup()
+
+      value.setValidateOn("onChange")
+      expect(value.isValidated(scope)).toBe(false)
+    })
+
+    it("validates when dirty and setValidateOn(onChange)", ({ scope }) => {
+      const value = setup({ initialValue: "x" })
+
+      value.setValidateOn("onChange")
+      expect(value.isValidated(scope)).toBe(true)
+    })
+
+    it.todo("does not validate when setValidateOn(onSubmit)")
+    it.todo("validates when submitted and setValidateOn(onSubmit)")
+
+    describe.each([
+      "onInit",
+      "onChange",
+      "onTouch",
+      "onSubmit",
+    ] satisfies ReadonlyArray<ValidateStrategy>)(
+      "when setValidateOn(%s)",
+      (validateOn) => {
+        it("keeps validated", ({ scope }) => {
+          const value = setup({ touched: true })
+
+          value.setValidateOn(validateOn)
+          expect(value.isValidated(scope)).toBe(true)
+        })
+      },
+    )
+  })
+
+  describe("when validateOn=onChange", () => {
+    const setup = (options?: ImpulseFormValueOptions<string>) => {
+      return ImpulseFormValue.of("", { ...options, validateOn: "onChange" })
+    }
+
+    it("validates when setValidateOn(onInit)", ({ scope }) => {
+      const value = setup()
+
+      value.setValidateOn("onInit")
+      expect(value.isValidated(scope)).toBe(true)
+    })
+
+    it("does not validate when setValidateOn(onTouch)", ({ scope }) => {
+      const value = setup()
+
+      value.setValidateOn("onTouch")
+      expect(value.isValidated(scope)).toBe(false)
+    })
+
+    it('validates when touched and setValidateOn("onTouch")', ({ scope }) => {
+      const value = setup({ touched: true })
+
+      value.setValidateOn("onTouch")
+      expect(value.isValidated(scope)).toBe(true)
+    })
+
+    it.todo("does not validate when setValidateOn(onSubmit)")
+    it.todo("validates when submitted and setValidateOn(onSubmit)")
+
+    describe.each([
+      "onInit",
+      "onChange",
+      "onTouch",
+      "onSubmit",
+    ] satisfies ReadonlyArray<ValidateStrategy>)(
+      "when setValidateOn(%s)",
+      (validateOn) => {
+        it("keeps validated", ({ scope }) => {
+          const value = setup({ initialValue: "x" })
+
+          value.setValidateOn(validateOn)
+          expect(value.isValidated(scope)).toBe(true)
+        })
+      },
+    )
+  })
+
+  describe("when validateOn=onSubmit", () => {
+    const setup = (options?: ImpulseFormValueOptions<string>) => {
+      return ImpulseFormValue.of("", { ...options, validateOn: "onSubmit" })
+    }
+
+    it("validates when setValidateOn(onInit)", ({ scope }) => {
+      const value = setup()
+
+      value.setValidateOn("onInit")
+      expect(value.isValidated(scope)).toBe(true)
+    })
+
+    it("does not validate when setValidateOn(onTouch)", ({ scope }) => {
+      const value = setup()
+
+      value.setValidateOn("onTouch")
+      expect(value.isValidated(scope)).toBe(false)
+    })
+
+    it('validates when touched and setValidateOn("onTouch")', ({ scope }) => {
+      const value = setup({ touched: true })
+
+      value.setValidateOn("onTouch")
+      expect(value.isValidated(scope)).toBe(true)
+    })
+
+    it("does not validate when setValidateOn(onChange)", ({ scope }) => {
+      const value = setup()
+
+      value.setValidateOn("onChange")
+      expect(value.isValidated(scope)).toBe(false)
+    })
+
+    it("validates when dirty and setValidateOn(onChange)", ({ scope }) => {
+      const value = setup({ initialValue: "x" })
+
+      value.setValidateOn("onChange")
+      expect(value.isValidated(scope)).toBe(true)
+    })
+
+    describe.each([
+      "onInit",
+      "onChange",
+      "onTouch",
+      "onSubmit",
+    ] satisfies ReadonlyArray<ValidateStrategy>)(
+      "when setValidateOn(%s)",
+      (validateOn) => {
+        it.todo("keeps validated", ({ scope }) => {
+          const value = setup()
+
+          value.setValidateOn(validateOn)
+          expect(value.isValidated(scope)).toBe(true)
+        })
+      },
+    )
+  })
 })
