@@ -116,8 +116,8 @@ importers:
         specifier: ^2.0.2
         version: 2.0.2(react@18.2.0)
       remeda:
-        specifier: ^1.37.0
-        version: 1.37.0
+        specifier: ^1.40.0
+        version: 1.40.0
 
 packages:
 
@@ -3968,8 +3968,8 @@ packages:
       set-function-name: 2.0.1
     dev: true
 
-  /remeda@1.37.0:
-    resolution: {integrity: sha512-ldZYKtw5A+ijuu4PtRZLfV7msZnsywANIs98vryQgWU5Esa9GC+SVLwWbNcpPj5jJDjIjuW/h+wK+C2jmZnOLA==}
+  /remeda@1.40.0:
+    resolution: {integrity: sha512-jrpzUSPTrCAnzyVko7h9lXyVZFT75hYeZGFLg3JomiUhASiZzbjpf938LJjn1uARNWMreMeTtX1FKzkFOTTziA==}
     dev: true
 
   /require-directory@2.1.1:
