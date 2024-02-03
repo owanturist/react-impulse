@@ -41,7 +41,7 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "happy-dom": "^13.3.8",
-    "husky": "^8.0.3",
+    "husky": "^9.0.10",
     "prettier": "^3.2.4",
     "size-limit": "^11.0.1",
     "terser": "^5.27.0",
