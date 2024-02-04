@@ -1031,8 +1031,6 @@ describe("ImpulseFormShape#setErrors()", () => {
   })
 })
 
-describe.todo("ImpulseFormShape#setValidateOn()")
-
 describe("ImpulseFormShape#getValue()", () => {
   it("selects value", ({ scope }) => {
     const shape = ImpulseFormShape.of({
