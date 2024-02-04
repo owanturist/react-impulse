@@ -19,7 +19,7 @@ import {
 import type { ImpulseFormContext } from "./ImpulseFormContext"
 import type { ValidateStrategy } from "./ValidateStrategy"
 
-type ImpulseFormShapeFields = Types.Object.Record<string | number>
+export type ImpulseFormShapeFields = Types.Object.Record<string | number>
 
 type ImpulseFormShapeParam<
   TFields extends ImpulseFormShapeFields,
@@ -284,7 +284,13 @@ export class ImpulseFormShape<
     })
   }
 
+  /**
+   * @param scope
+   *
+   * @returns true when ALL fields are validated, otherwise false
+   */
   public isValidated(scope: Scope): boolean
+
   public isValidated<TResult>(
     scope: Scope,
     select: (

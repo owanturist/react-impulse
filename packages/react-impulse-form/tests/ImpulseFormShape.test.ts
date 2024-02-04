@@ -1,12 +1,16 @@
 import { equals } from "remeda"
 import { z } from "zod"
+import type { Scope } from "react-impulse"
 
 import {
   type ImpulseForm,
   type Setter,
+  type ImpulseFormShapeOptions,
+  type ValidateStrategy,
   ImpulseFormShape,
   ImpulseFormValue,
-  type ImpulseFormShapeOptions,
+  type ImpulseFormShapeFields,
+  type ImpulseFormShapeValidateOnSchema,
 } from "../src"
 
 const arg =
@@ -1063,13 +1067,13 @@ describe("ImpulseFormShape#isValidated(scope)", () => {
     expectTypeOf(shape.isValidated(scope)).toBeBoolean()
   })
 
-  it("returns false when none are validated", ({ scope }) => {
+  it("returns false when NONE are validated", ({ scope }) => {
     const shape = setup()
 
     expect(shape.isValidated(scope)).toBe(false)
   })
 
-  it("returns false when some are validated", ({ scope }) => {
+  it("returns false when SOME are validated", ({ scope }) => {
     const shape = setup({
       touched: {
         first: true,
@@ -1080,7 +1084,7 @@ describe("ImpulseFormShape#isValidated(scope)", () => {
     expect(shape.isValidated(scope)).toBe(false)
   })
 
-  it("returns true when all are validated", ({ scope }) => {
+  it("returns true when ALL are validated", ({ scope }) => {
     const shape = setup({
       touched: true,
     })
@@ -1110,16 +1114,16 @@ describe("ImpulseFormShape#isValidated(scope, (concise) => concise)", () => {
                 readonly two: boolean
               }
         }
-    >
+    >()
   })
 
-  it("returns false when none are validated", ({ scope }) => {
+  it("returns false when NONE are validated", ({ scope }) => {
     const shape = setup()
 
     expect(shape.isValidated(scope, arg(0))).toBe(false)
   })
 
-  it("returns an object when some are validated", ({ scope }) => {
+  it("returns concise object when SOME are validated", ({ scope }) => {
     const shape = setup({
       touched: {
         first: true,
@@ -1134,7 +1138,7 @@ describe("ImpulseFormShape#isValidated(scope, (concise) => concise)", () => {
     })
   })
 
-  it("returns true when all are validated", ({ scope }) => {
+  it("returns true when ALL are validated", ({ scope }) => {
     const shape = setup({
       touched: true,
     })
@@ -1158,10 +1162,10 @@ describe("ImpulseFormShape#isValidated(scope, (_, verbose) => verbose)", () => {
         readonly one: boolean
         readonly two: boolean
       }
-    }>
+    }>()
   })
 
-  it("returns an object when none are validated", ({ scope }) => {
+  it("returns verbose object when NONE are validated", ({ scope }) => {
     const shape = setup()
 
     expect(shape.isValidated(scope, arg(1))).toStrictEqual({
@@ -1174,7 +1178,7 @@ describe("ImpulseFormShape#isValidated(scope, (_, verbose) => verbose)", () => {
     })
   })
 
-  it("returns an object when some are validated", ({ scope }) => {
+  it("returns verbose object when SOME are validated", ({ scope }) => {
     const shape = setup({
       touched: {
         first: true,
@@ -1192,7 +1196,7 @@ describe("ImpulseFormShape#isValidated(scope, (_, verbose) => verbose)", () => {
     })
   })
 
-  it("returns an object when all are validated", ({ scope }) => {
+  it("returns verbose object when ALL are validated", ({ scope }) => {
     const shape = setup({
       touched: true,
     })
@@ -1207,12 +1211,142 @@ describe("ImpulseFormShape#isValidated(scope, (_, verbose) => verbose)", () => {
     })
   })
 
-  it("returns an object for empty shape", ({ scope }) => {
+  it("returns an empty object for empty shape", ({ scope }) => {
     expect(ImpulseFormShape.of({}).isValidated(scope, arg(1))).toStrictEqual({})
   })
 })
 
-describe.todo("ImpulseFormShape#getValidateOn()")
+describe.each([
+  [
+    "getValidateOn(scope)",
+    <TFields extends ImpulseFormShapeFields>(
+      scope: Scope,
+      shape: ImpulseFormShape<TFields>,
+    ): ImpulseFormShapeValidateOnSchema<TFields> => shape.getValidateOn(scope),
+  ],
+  [
+    "getValidateOn(scope, (concise) => concise)",
+    <TFields extends ImpulseFormShapeFields>(
+      scope: Scope,
+      shape: ImpulseFormShape<TFields>,
+    ): ImpulseFormShapeValidateOnSchema<TFields> =>
+      shape.getValidateOn(scope, arg(0)),
+  ],
+])("ImpulseFormShape#%s", (_, getValidateOn) => {
+  it("returns concise value", ({ scope }) => {
+    const shape = setup()
+
+    expectTypeOf(getValidateOn(scope, shape)).toEqualTypeOf<
+      | ValidateStrategy
+      | {
+          readonly first: ValidateStrategy
+          readonly second: ValidateStrategy
+          readonly third:
+            | ValidateStrategy
+            | {
+                readonly one: ValidateStrategy
+                readonly two: ValidateStrategy
+              }
+        }
+    >()
+  })
+
+  it("returns a ValidateStrategy when ALL fields have the SAME validateOn", ({
+    scope,
+  }) => {
+    const shape = setup({
+      validateOn: "onSubmit",
+    })
+
+    expect(getValidateOn(scope, shape)).toBe("onSubmit")
+  })
+
+  it("returns concise object when SOME fields have DIFFERENT validateOn", ({
+    scope,
+  }) => {
+    const shape = setup({
+      validateOn: {
+        first: (x) => (x === "onTouch" ? "onSubmit" : "onChange"),
+        third: {
+          one: "onInit",
+        },
+      },
+    })
+
+    expect(getValidateOn(scope, shape)).toStrictEqual({
+      first: "onSubmit",
+      second: "onTouch",
+      third: {
+        one: "onInit",
+        two: "onTouch",
+      },
+    })
+  })
+
+  it("returns onTouch for empty shape", ({ scope }) => {
+    expect(getValidateOn(scope, ImpulseFormShape.of({}))).toBe("onTouch")
+  })
+})
+
+describe("ImpulseFormShape#getValidateOn(scope, (_, verbose) => verbose)", () => {
+  it("returns verbose value", ({ scope }) => {
+    const shape = setup()
+
+    expectTypeOf(shape.getValidateOn(scope, arg(1))).toEqualTypeOf<{
+      readonly first: ValidateStrategy
+      readonly second: ValidateStrategy
+      readonly third: {
+        readonly one: ValidateStrategy
+        readonly two: ValidateStrategy
+      }
+    }>()
+  })
+
+  it("returns verbose object when ALL fields have the SAME validateOn", ({
+    scope,
+  }) => {
+    const shape = setup({
+      validateOn: "onSubmit",
+    })
+
+    expect(shape.getValidateOn(scope, arg(1))).toStrictEqual({
+      first: "onSubmit",
+      second: "onSubmit",
+      third: {
+        one: "onSubmit",
+        two: "onSubmit",
+      },
+    })
+  })
+
+  it("returns verbose object when SOME fields have DIFFERENT validateOn", ({
+    scope,
+  }) => {
+    const shape = setup({
+      validateOn: {
+        first: (x) => (x === "onTouch" ? "onSubmit" : "onChange"),
+        third: {
+          one: "onInit",
+        },
+      },
+    })
+
+    expect(shape.getValidateOn(scope, arg(1))).toStrictEqual({
+      first: "onSubmit",
+      second: "onTouch",
+      third: {
+        one: "onInit",
+        two: "onTouch",
+      },
+    })
+  })
+
+  it("returns an empty object for empty shape", ({ scope }) => {
+    expect(ImpulseFormShape.of({}).getValidateOn(scope, arg(1))).toStrictEqual(
+      {},
+    )
+  })
+})
 
 describe.todo("ImpulseFormShape#setValidateOn()")
 
