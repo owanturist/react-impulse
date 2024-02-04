@@ -77,7 +77,7 @@ describe.each([
     >()
   })
 
-  it("returns a ValidateStrategy when ALL fields have the SAME validateOn", ({
+  it("returns ValidateStrategy when ALL fields have the SAME validateOn", ({
     scope,
   }) => {
     const shape = setup({

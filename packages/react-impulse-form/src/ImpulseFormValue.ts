@@ -137,11 +137,7 @@ export class ImpulseFormValue<
   }
 
   private _initValidated(): void {
-    this._validated.setValue((validated, scope) => {
-      if (validated) {
-        return true
-      }
-
+    this._validated.setValue((_, scope) => {
       switch (this.getValidateOn(scope)) {
         case VALIDATE_ON_INIT: {
           return true
@@ -243,7 +239,8 @@ export class ImpulseFormValue<
       verbose: boolean,
     ) => TResult = identity as typeof select,
   ): TResult {
-    const validated = this._validated.getValue(scope)
+    const validated =
+      this._validated.getValue(scope) || this._errors.getValue(scope).length > 0
 
     return select(validated, validated)
   }

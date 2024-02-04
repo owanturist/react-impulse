@@ -249,3 +249,19 @@ describe("ImpulseFormShape#isValidated(scope, (_, verbose) => verbose)", () => {
     expect(isValidated(scope, ImpulseFormShape.of({}))).toStrictEqual({})
   })
 })
+
+describe("ImpulseFormShape#isValidated(..)", () => {
+  it("overrides fields' initial value", ({ scope }) => {
+    const shape = ImpulseFormShape.of(
+      {
+        one: ImpulseFormValue.of(true, { validateOn: "onInit" }),
+        two: ImpulseFormValue.of("", { validateOn: "onSubmit" }),
+      },
+      {
+        validateOn: "onTouch",
+      },
+    )
+
+    expect(shape.isValidated(scope)).toBe(false)
+  })
+})
