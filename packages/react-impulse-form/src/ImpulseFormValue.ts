@@ -263,11 +263,14 @@ export class ImpulseFormValue<
   }
 
   public setValidateOn(setter: ImpulseFormValueValidateOnSetter): void {
-    batch(() => {
-      this._validateOn.setValue((validateOn) => {
-        return isFunction(setter) ? setter(validateOn) : setter
-      })
-      this._initValidated()
+    batch((scope) => {
+      const validateOn = this._validateOn.getValue(scope)
+      const nextValidateOn = isFunction(setter) ? setter(validateOn) : setter
+
+      if (validateOn !== nextValidateOn) {
+        this._validateOn.setValue(nextValidateOn)
+        this._initValidated()
+      }
     })
   }
 
