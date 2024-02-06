@@ -33,9 +33,13 @@ export class ImpulseFormContext {
       this._submitting.setValue(true)
     })
 
-    await Promise.all(Array.from(this._listeners).map((listener) => listener()))
-
-    this._submitting.setValue(false)
+    try {
+      await Promise.all(
+        Array.from(this._listeners).map((listener) => listener()),
+      )
+    } finally {
+      this._submitting.setValue(false)
+    }
   }
 
   public _focusFirstInvalidValue(): void {

@@ -37,9 +37,6 @@ export abstract class ImpulseForm<
     return value instanceof ImpulseForm
   }
 
-  /**
-   * @private
-   */
   protected static _setParent(form: ImpulseForm, parent: ImpulseForm): void {
     form._parent.setValue((current) => {
       if (isDefined(current)) {
@@ -66,6 +63,11 @@ export abstract class ImpulseForm<
    * @private
    */
   public abstract _setContext(context: ImpulseFormContext): void
+
+  /**
+   * @private
+   */
+  public abstract _getFocusFirstInvalidValue(scope: Scope): null | VoidFunction
 
   public isValid(scope: Scope): boolean {
     return !this.isInvalid(scope)
@@ -154,9 +156,5 @@ export abstract class ImpulseForm<
   public abstract getInitialValue(scope: Scope): TParams["originalValue.schema"]
   public abstract setInitialValue(setter: TParams["originalValue.setter"]): void
 
-  /**
-   * @private
-   */
-  public abstract _getFocusFirstInvalidValue(scope: Scope): null | VoidFunction
   public abstract clone(): ImpulseForm<TParams>
 }

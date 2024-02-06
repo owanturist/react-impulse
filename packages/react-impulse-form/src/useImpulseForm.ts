@@ -42,7 +42,7 @@ export const useImpulseForm = <TForm extends ImpulseForm>(
       return
     }
 
-    context._onSubmit(async () => {
+    return context._onSubmit(async () => {
       return untrack((scope) => {
         form.setTouched(true)
 
