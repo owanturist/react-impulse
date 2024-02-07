@@ -53,10 +53,9 @@ export abstract class ImpulseForm<
   }
 
   protected static _getFocusFirstInvalidValue(
-    scope: Scope,
     form: ImpulseForm,
   ): null | VoidFunction {
-    return form._getFocusFirstInvalidValue(scope)
+    return form._getFocusFirstInvalidValue()
   }
 
   // necessary for type inference
@@ -70,9 +69,7 @@ export abstract class ImpulseForm<
 
   protected constructor(private readonly _root: null | ImpulseForm) {}
 
-  protected abstract _getFocusFirstInvalidValue(
-    scope: Scope,
-  ): null | VoidFunction
+  protected abstract _getFocusFirstInvalidValue(): null | VoidFunction
 
   protected abstract _childOf(root: null | ImpulseForm): ImpulseForm<TParams>
 
@@ -119,20 +116,20 @@ export abstract class ImpulseForm<
     })
 
     await untrack((scope) => {
-      if (this.isInvalid(scope)) {
-        return this._getFocusFirstInvalidValue(scope)?.()
+      if (this.isValid(scope)) {
+        const value = this.getValue(scope)!
+
+        return this._submitWith(value)
       }
 
-      const value = this.getValue(scope)!
-
-      return this._submitWith(value)
+      this.focusFirstInvalidValue()
     })
 
     this._getContext()._submitting.setValue(false)
   }
 
   public focusFirstInvalidValue(): void {
-    untrack((scope) => this._getFocusFirstInvalidValue(scope))?.()
+    this._getFocusFirstInvalidValue()?.()
   }
 
   public clone(): ImpulseForm<TParams> {

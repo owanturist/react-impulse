@@ -653,11 +653,11 @@ export class ImpulseFormShape<
     })
   }
 
-  protected _getFocusFirstInvalidValue(scope: Scope): VoidFunction | null {
+  protected _getFocusFirstInvalidValue(): VoidFunction | null {
     // TODO DRY
     for (const field of Object.values(this.fields)) {
       if (ImpulseForm.isImpulseForm(field)) {
-        const focus = ImpulseForm._getFocusFirstInvalidValue(scope, field)
+        const focus = ImpulseForm._getFocusFirstInvalidValue(field)
 
         if (focus != null) {
           return focus

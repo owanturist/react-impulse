@@ -44,13 +44,9 @@ export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
 
   useEffect(() => {
     if (shouldFocusWhenInvalid && isDefined(onFocusInvalidStable)) {
-      form._setOnFocus((errors) => {
+      return form.onFocusWhenInvalid((errors) => {
         onFocusInvalidStable(errors, form)
       })
-
-      return () => {
-        form._setOnFocus(null)
-      }
     }
   }, [form, onFocusInvalidStable, shouldFocusWhenInvalid])
 

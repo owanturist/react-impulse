@@ -8,8 +8,9 @@ import {
   isFunction,
   identity,
   isDefined,
+  untrack,
 } from "./dependencies"
-import { type Func, type Setter, shallowArrayEquals } from "./utils"
+import { type Setter, shallowArrayEquals } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormSchema, Result } from "./ImpulseFormSchema"
 import {
@@ -116,8 +117,8 @@ export class ImpulseFormValue<
     )
   }
 
-  private readonly _onFocus =
-    Impulse.of<(errors: ReadonlyArray<string>) => void>()
+  // TODO introduce PubSub
+  private readonly _onFocus: Array<(errors: ReadonlyArray<string>) => void> = []
 
   private readonly _validated = Impulse.of(false)
 
@@ -195,6 +196,34 @@ export class ImpulseFormValue<
     this._validated.setValue(true)
 
     await super._submitWith(value)
+  }
+
+  protected _getFocusFirstInvalidValue(): null | VoidFunction {
+    const errors = untrack((scope) => this.getErrors(scope))
+
+    if (!isDefined(errors) || this._onFocus.length < 1) {
+      return null
+    }
+
+    return () => {
+      this._onFocus.forEach((onFocus) => onFocus(errors))
+    }
+  }
+
+  // TODO add tests against _validated when cloning
+  protected _childOf(
+    root: null | ImpulseForm,
+  ): ImpulseFormValue<TOriginalValue, TValue> {
+    return new ImpulseFormValue(
+      root,
+      this._touched.clone(),
+      this._validateOn.clone(),
+      this._errors.clone(),
+      this._initialValue.clone(),
+      this._originalValue.clone(),
+      this._schema.clone(),
+      this._compare.clone(),
+    )
   }
 
   public getErrors(scope: Scope): null | ReadonlyArray<string>
@@ -398,42 +427,13 @@ export class ImpulseFormValue<
     this._initialValue.setValue(setter)
   }
 
-  protected _getFocusFirstInvalidValue(scope: Scope): null | VoidFunction {
-    const errors = this.getErrors(scope)
-    const onFocus = this._onFocus.getValue(scope)
-
-    if (!isDefined(errors) || !isDefined(onFocus)) {
-      return null
-    }
+  public onFocusWhenInvalid(
+    onFocus: (errors: ReadonlyArray<string>) => void,
+  ): VoidFunction {
+    this._onFocus.push(onFocus)
 
     return () => {
-      onFocus(errors)
+      this._onFocus.splice(this._onFocus.indexOf(onFocus), 1)
     }
-  }
-
-  /**
-   * TODO make it public
-   * @private
-   */
-  public _setOnFocus(
-    onFocus: null | Func<[errors: ReadonlyArray<string>]>,
-  ): void {
-    this._onFocus.setValue(() => onFocus ?? undefined)
-  }
-
-  // TODO add tests against _validated when cloning
-  protected _childOf(
-    root: null | ImpulseForm,
-  ): ImpulseFormValue<TOriginalValue, TValue> {
-    return new ImpulseFormValue(
-      root,
-      this._touched.clone(),
-      this._validateOn.clone(),
-      this._errors.clone(),
-      this._initialValue.clone(),
-      this._originalValue.clone(),
-      this._schema.clone(),
-      this._compare.clone(),
-    )
   }
 }
