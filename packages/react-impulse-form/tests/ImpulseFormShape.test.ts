@@ -757,6 +757,39 @@ describe("ImpulseFormShape.of()", () => {
           }
       >()
   })
+
+  it("clones the fields", ({ scope }) => {
+    const shape = ImpulseFormShape.of({
+      one: ImpulseFormValue.of("1"),
+      two: ImpulseFormValue.of(2),
+    })
+    const root = ImpulseFormShape.of({
+      first: shape,
+      second: shape,
+    })
+
+    expect(root.fields.first).not.toBe(shape)
+    expect(root.fields.second).not.toBe(shape)
+    expect(root.fields.first.fields.one).not.toBe(shape.fields.one)
+    expect(root.fields.first.fields.two).not.toBe(shape.fields.two)
+
+    expect(root.fields.first).not.toBe(root.fields.second)
+    expect(root.fields.first.fields.one).not.toBe(root.fields.second.fields.one)
+    expect(root.fields.first.fields.two).not.toBe(root.fields.second.fields.two)
+
+    root.fields.first.fields.one.setTouched(true)
+
+    expect(root.isTouched(scope, (_, verbose) => verbose)).toStrictEqual({
+      first: {
+        one: true,
+        two: false,
+      },
+      second: {
+        one: false,
+        two: false,
+      },
+    })
+  })
 })
 
 describe("ImpulseFormShape#getErrors()", () => {

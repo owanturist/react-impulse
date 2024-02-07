@@ -183,14 +183,14 @@ export class ImpulseFormShape<
 
   public readonly fields: Readonly<TFields>
 
-  protected constructor(parent: null | ImpulseForm, fields: Readonly<TFields>) {
-    super(parent)
+  protected constructor(root: null | ImpulseForm, fields: Readonly<TFields>) {
+    super(root)
 
     const acc = {} as TFields
 
     for (const [key, field] of Object.entries(fields)) {
       acc[key as keyof TFields] = ImpulseForm.isImpulseForm(field)
-        ? (ImpulseForm._childOf(this, field) as TFields[keyof TFields])
+        ? (ImpulseForm._childOf(root ?? this, field) as TFields[keyof TFields])
         : (field as TFields[keyof TFields])
     }
 
@@ -668,7 +668,7 @@ export class ImpulseFormShape<
     return null
   }
 
-  protected _childOf(parent: null | ImpulseForm): ImpulseFormShape<TFields> {
-    return new ImpulseFormShape(parent, this.fields)
+  protected _childOf(root: null | ImpulseForm): ImpulseFormShape<TFields> {
+    return new ImpulseFormShape(root, this.fields)
   }
 }

@@ -39,10 +39,10 @@ export abstract class ImpulseForm<
   }
 
   protected static _childOf<TChildParams extends ImpulseFormParams>(
-    parent: ImpulseForm,
+    root: ImpulseForm,
     child: ImpulseForm<TChildParams>,
   ): ImpulseForm<TChildParams> {
-    return child._childOf(parent)
+    return child._childOf(root)
   }
 
   protected static _submitWith<TParams extends ImpulseFormParams>(
@@ -68,17 +68,17 @@ export abstract class ImpulseForm<
 
   private readonly _context = lazy(() => new ImpulseFormContext())
 
-  protected constructor(private readonly _parent: null | ImpulseForm) {}
+  protected constructor(private readonly _root: null | ImpulseForm) {}
 
   protected abstract _getFocusFirstInvalidValue(
     scope: Scope,
   ): null | VoidFunction
 
-  protected abstract _childOf(parent: null | ImpulseForm): ImpulseForm<TParams>
+  protected abstract _childOf(root: null | ImpulseForm): ImpulseForm<TParams>
 
   private _getContext(): ImpulseFormContext {
-    if (isDefined(this._parent)) {
-      return this._parent._getContext()
+    if (isDefined(this._root)) {
+      return this._root._getContext()
     }
 
     return this._context()
@@ -107,8 +107,8 @@ export abstract class ImpulseForm<
   }
 
   public async submit(): Promise<void> {
-    if (isDefined(this._parent)) {
-      return this._parent.submit()
+    if (isDefined(this._root)) {
+      return this._root.submit()
     }
 
     const context = this._getContext()
@@ -190,7 +190,7 @@ export abstract class ImpulseForm<
   public abstract setTouched(setter: TParams["flag.setter"]): void
 
   /**
-   * TODO reset isValidated and submitCount
+   * TODO reset isValidated
    */
 
   public abstract reset(resetter?: TParams["originalValue.resetter"]): void

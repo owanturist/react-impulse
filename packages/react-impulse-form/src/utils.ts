@@ -50,7 +50,9 @@ export function useHandler<
   return handler && stableRef.current
 }
 
-export const lazy = <TValue>(init: () => TValue): Func<[], TValue> => {
+export type Lazy<TValue> = () => TValue
+
+export const lazy = <TValue>(init: () => TValue): Lazy<TValue> => {
   let value: TValue | null = null
 
   return () => {

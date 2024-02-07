@@ -122,7 +122,7 @@ export class ImpulseFormValue<
   private readonly _validated = Impulse.of(false)
 
   protected constructor(
-    parent: null | ImpulseForm,
+    root: null | ImpulseForm,
     private readonly _touched: Impulse<boolean>,
     private readonly _validateOn: Impulse<ValidateStrategy>,
     private readonly _errors: Impulse<ReadonlyArray<string>>,
@@ -133,7 +133,7 @@ export class ImpulseFormValue<
     >,
     private readonly _compare: Impulse<Compare<TOriginalValue>>,
   ) {
-    super(parent)
+    super(root)
     this._initValidated()
   }
 
@@ -423,10 +423,10 @@ export class ImpulseFormValue<
 
   // TODO add tests against _validated when cloning
   protected _childOf(
-    parent: null | ImpulseForm,
+    root: null | ImpulseForm,
   ): ImpulseFormValue<TOriginalValue, TValue> {
     return new ImpulseFormValue(
-      parent,
+      root,
       this._touched.clone(),
       this._validateOn.clone(),
       this._errors.clone(),
