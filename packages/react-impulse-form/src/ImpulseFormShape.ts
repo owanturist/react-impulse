@@ -16,7 +16,6 @@ import {
   ImpulseForm,
   type ImpulseFormParamsKeys,
 } from "./ImpulseForm"
-import type { ImpulseFormContext } from "./ImpulseFormContext"
 import type { ValidateStrategy } from "./ValidateStrategy"
 
 export type ImpulseFormShapeFields = Types.Object.Record<string | number>
@@ -154,7 +153,7 @@ export class ImpulseFormShape<
       errors,
     }: ImpulseFormShapeOptions<TFields> = {},
   ): ImpulseFormShape<TFields> {
-    const shape = new ImpulseFormShape(fields)
+    const shape = new ImpulseFormShape(null, fields)
 
     batch(() => {
       if (isDefined.strict(touched)) {
@@ -182,14 +181,20 @@ export class ImpulseFormShape<
     return shape
   }
 
-  protected constructor(public readonly fields: Readonly<TFields>) {
-    super()
+  public readonly fields: Readonly<TFields>
 
-    for (const field of Object.values(fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
-        ImpulseForm._setParent(field, this)
-      }
+  protected constructor(parent: null | ImpulseForm, fields: Readonly<TFields>) {
+    super(parent)
+
+    const acc = {} as TFields
+
+    for (const [key, field] of Object.entries(fields)) {
+      acc[key as keyof TFields] = ImpulseForm.isImpulseForm(field)
+        ? (ImpulseForm._childOf(this, field) as TFields[keyof TFields])
+        : (field as TFields[keyof TFields])
     }
+
+    this.fields = acc
   }
 
   private _mapFormFields<TResult>(
@@ -208,16 +213,21 @@ export class ImpulseFormShape<
     return acc
   }
 
-  public _setContext(context: ImpulseFormContext): void {
-    batch(() => {
-      this._context.setValue(context)
+  protected async _submitWith(
+    value: ImpulseFormShapeValueSchema<TFields>,
+  ): Promise<void> {
+    const promises: Array<Promise<void>> = []
 
-      for (const field of Object.values(this.fields)) {
-        if (ImpulseForm.isImpulseForm(field)) {
-          field._setContext(context)
-        }
+    // TODO dry
+    for (const [key, field] of Object.entries(this.fields)) {
+      if (ImpulseForm.isImpulseForm(field)) {
+        promises.push(
+          ImpulseForm._submitWith(field, value[key as keyof typeof value]),
+        )
       }
-    })
+    }
+
+    await Promise.all([...promises, super._submitWith(value)])
   }
 
   public getErrors(scope: Scope): ImpulseFormShapeErrorSchema<TFields>
@@ -643,11 +653,11 @@ export class ImpulseFormShape<
     })
   }
 
-  public _getFocusFirstInvalidValue(scope: Scope): VoidFunction | null {
+  protected _getFocusFirstInvalidValue(scope: Scope): VoidFunction | null {
     // TODO DRY
     for (const field of Object.values(this.fields)) {
       if (ImpulseForm.isImpulseForm(field)) {
-        const focus = field._getFocusFirstInvalidValue(scope)
+        const focus = ImpulseForm._getFocusFirstInvalidValue(scope, field)
 
         if (focus != null) {
           return focus
@@ -658,9 +668,7 @@ export class ImpulseFormShape<
     return null
   }
 
-  public clone(): ImpulseFormShape<TFields> {
-    const fields = this._mapFormFields((form) => form.clone())
-
-    return new ImpulseFormShape(fields as Readonly<TFields>)
+  protected _childOf(parent: null | ImpulseForm): ImpulseFormShape<TFields> {
+    return new ImpulseFormShape(parent, this.fields)
   }
 }

@@ -1,5 +1,6 @@
-import { Impulse, type Scope, isDefined } from "./dependencies"
-import type { ImpulseFormContext } from "./ImpulseFormContext"
+import { type Scope, isDefined, batch, untrack } from "./dependencies"
+import { ImpulseFormContext } from "./ImpulseFormContext"
+import { lazy } from "./utils"
 
 export interface ImpulseFormParams {
   "value.schema": unknown
@@ -37,37 +38,106 @@ export abstract class ImpulseForm<
     return value instanceof ImpulseForm
   }
 
-  protected static _setParent(form: ImpulseForm, parent: ImpulseForm): void {
-    form._parent.setValue((current) => {
-      if (isDefined(current)) {
-        throw new Error("ImpulseForm already has a parent")
-      }
+  protected static _childOf<TChildParams extends ImpulseFormParams>(
+    parent: ImpulseForm,
+    child: ImpulseForm<TChildParams>,
+  ): ImpulseForm<TChildParams> {
+    return child._childOf(parent)
+  }
 
-      return parent
-    })
+  protected static _submitWith<TParams extends ImpulseFormParams>(
+    form: ImpulseForm<TParams>,
+    value: TParams["value.schema"],
+  ): Promise<void> {
+    return form._submitWith(value)
+  }
+
+  protected static _getFocusFirstInvalidValue(
+    scope: Scope,
+    form: ImpulseForm,
+  ): null | VoidFunction {
+    return form._getFocusFirstInvalidValue(scope)
   }
 
   // necessary for type inference
   protected readonly _params?: TParams
-  private readonly _parent = Impulse.of<ImpulseForm>()
-  protected readonly _context = Impulse.of<ImpulseFormContext>()
 
-  /**
-   * @private
-   */
-  public _getContext(scope: Scope): undefined | ImpulseFormContext {
-    return this._context.getValue(scope)
+  private readonly _onSubmit: Array<
+    (value: unknown) => void | Promise<unknown>
+  > = []
+
+  private readonly _context = lazy(() => new ImpulseFormContext())
+
+  protected constructor(private readonly _parent: null | ImpulseForm) {}
+
+  protected abstract _getFocusFirstInvalidValue(
+    scope: Scope,
+  ): null | VoidFunction
+
+  protected abstract _childOf(parent: null | ImpulseForm): ImpulseForm<TParams>
+
+  private _getContext(): ImpulseFormContext {
+    if (isDefined(this._parent)) {
+      return this._parent._getContext()
+    }
+
+    return this._context()
   }
 
-  /**
-   * @private
-   */
-  public abstract _setContext(context: ImpulseFormContext): void
+  protected async _submitWith(value: TParams["value.schema"]): Promise<void> {
+    await Promise.all(this._onSubmit.map((listener) => listener(value)))
+  }
 
-  /**
-   * @private
-   */
-  public abstract _getFocusFirstInvalidValue(scope: Scope): null | VoidFunction
+  public getSubmitCount(scope: Scope): number {
+    return this._getContext()._submitCount.getValue(scope)
+  }
+
+  public isSubmitting(scope: Scope): boolean {
+    return this._getContext()._submitting.getValue(scope)
+  }
+
+  public onSubmit(
+    listener: (value: TParams["value.schema"]) => void | Promise<unknown>,
+  ): VoidFunction {
+    this._onSubmit.push(listener)
+
+    return () => {
+      this._onSubmit.splice(this._onSubmit.indexOf(listener), 1)
+    }
+  }
+
+  public async submit(): Promise<void> {
+    if (isDefined(this._parent)) {
+      return this._parent.submit()
+    }
+
+    const context = this._getContext()
+
+    batch(() => {
+      context._submitting.setValue(true)
+      context._submitCount.setValue((count) => count + 1)
+    })
+
+    await untrack((scope) => {
+      if (this.isInvalid(scope)) {
+        return this._getFocusFirstInvalidValue(scope)?.()
+      }
+
+      const value = this.getValue(scope)!
+
+      return this._submitWith(value)
+    })
+
+    this._getContext()._submitting.setValue(false)
+  }
+
+  public focusFirstInvalidValue(): void {
+    untrack((scope) => this._getFocusFirstInvalidValue(scope))?.()
+  }
+
+  public clone(): ImpulseForm<TParams> {
+    return this._childOf(null)
+  }
 
   public isValid(scope: Scope): boolean {
     return !this.isInvalid(scope)
@@ -120,10 +190,7 @@ export abstract class ImpulseForm<
   public abstract setTouched(setter: TParams["flag.setter"]): void
 
   /**
-   * TODO provide reset options, where
-   * untouch: boolean = true - when true, resets touched flag
-   * unvalidate: boolean = true - when true, resets validated flag
-   * unerror: boolean = true - when true, resets errors
+   * TODO reset isValidated and submitCount
    */
 
   public abstract reset(resetter?: TParams["originalValue.resetter"]): void
@@ -155,6 +222,4 @@ export abstract class ImpulseForm<
 
   public abstract getInitialValue(scope: Scope): TParams["originalValue.schema"]
   public abstract setInitialValue(setter: TParams["originalValue.setter"]): void
-
-  public abstract clone(): ImpulseForm<TParams>
 }

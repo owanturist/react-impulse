@@ -11,7 +11,6 @@ import {
 } from "./dependencies"
 import { type Func, type Setter, shallowArrayEquals } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
-import type { ImpulseFormContext } from "./ImpulseFormContext"
 import type { ImpulseFormSchema, Result } from "./ImpulseFormSchema"
 import {
   VALIDATE_ON_INIT,
@@ -106,6 +105,7 @@ export class ImpulseFormValue<
     }
 
     return new ImpulseFormValue(
+      null,
       Impulse.of(touched),
       Impulse.of(validateOn),
       Impulse.of(errors ?? [], { compare: shallowArrayEquals }),
@@ -122,6 +122,7 @@ export class ImpulseFormValue<
   private readonly _validated = Impulse.of(false)
 
   protected constructor(
+    parent: null | ImpulseForm,
     private readonly _touched: Impulse<boolean>,
     private readonly _validateOn: Impulse<ValidateStrategy>,
     private readonly _errors: Impulse<ReadonlyArray<string>>,
@@ -132,7 +133,7 @@ export class ImpulseFormValue<
     >,
     private readonly _compare: Impulse<Compare<TOriginalValue>>,
   ) {
-    super()
+    super(parent)
     this._initValidated()
   }
 
@@ -152,7 +153,6 @@ export class ImpulseFormValue<
         }
 
         case VALIDATE_ON_SUBMIT: {
-          // TODO return true if submitCount > 0
           return false
         }
       }
@@ -191,8 +191,10 @@ export class ImpulseFormValue<
     }
   }
 
-  public _setContext(context: ImpulseFormContext): void {
-    this._context.setValue(context)
+  protected async _submitWith(value: TValue): Promise<void> {
+    this._validated.setValue(true)
+
+    await super._submitWith(value)
   }
 
   public getErrors(scope: Scope): null | ReadonlyArray<string>
@@ -396,7 +398,7 @@ export class ImpulseFormValue<
     this._initialValue.setValue(setter)
   }
 
-  public _getFocusFirstInvalidValue(scope: Scope): null | VoidFunction {
+  protected _getFocusFirstInvalidValue(scope: Scope): null | VoidFunction {
     const errors = this.getErrors(scope)
     const onFocus = this._onFocus.getValue(scope)
 
@@ -410,6 +412,7 @@ export class ImpulseFormValue<
   }
 
   /**
+   * TODO make it public
    * @private
    */
   public _setOnFocus(
@@ -419,8 +422,11 @@ export class ImpulseFormValue<
   }
 
   // TODO add tests against _validated when cloning
-  public clone(): ImpulseFormValue<TOriginalValue, TValue> {
+  protected _childOf(
+    parent: null | ImpulseForm,
+  ): ImpulseFormValue<TOriginalValue, TValue> {
     return new ImpulseFormValue(
+      parent,
       this._touched.clone(),
       this._validateOn.clone(),
       this._errors.clone(),
