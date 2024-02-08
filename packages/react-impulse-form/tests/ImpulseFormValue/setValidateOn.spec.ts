@@ -84,7 +84,11 @@ describe("ImpulseFormValue#setValidateOn(..)", () => {
       expect(value.isValidated(scope)).toBe(true)
     })
 
-    it.todo("does not mark as validated for -> onSubmit when not submitted")
-    it.todo("marks as validated for -> onSubmit when submitted")
+    it("does not mark as validated for -> onSubmit", ({ scope }) => {
+      const value = setup({ validateOn })
+
+      value.setValidateOn("onSubmit")
+      expect(value.isValidated(scope)).toBe(false)
+    })
   })
 })

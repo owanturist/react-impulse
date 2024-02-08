@@ -58,6 +58,13 @@ export abstract class ImpulseForm<
     return form._getFocusFirstInvalidValue()
   }
 
+  protected static _setValidated(
+    form: ImpulseForm,
+    isValidated: boolean,
+  ): void {
+    form._setValidated(isValidated)
+  }
+
   // necessary for type inference
   protected readonly _params?: TParams
 
@@ -87,6 +94,8 @@ export abstract class ImpulseForm<
     await Promise.all(this._onSubmit.map((listener) => listener(value)))
   }
 
+  protected abstract _setValidated(isValidated: boolean): void
+
   public getSubmitCount(scope: Scope): number {
     return this._getContext()._submitCount.getValue(scope)
   }
@@ -115,6 +124,7 @@ export abstract class ImpulseForm<
     batch(() => {
       context._submitting.setValue(true)
       context._submitCount.setValue((count) => count + 1)
+      this._setValidated(true)
     })
 
     await untrack((scope) => {

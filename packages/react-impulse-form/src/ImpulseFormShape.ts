@@ -233,6 +233,35 @@ export class ImpulseFormShape<
     await Promise.all([...promises, super._submitWith(value)])
   }
 
+  protected _getFocusFirstInvalidValue(): VoidFunction | null {
+    // TODO DRY
+    for (const field of Object.values(this.fields)) {
+      if (ImpulseForm.isImpulseForm(field)) {
+        const focus = ImpulseForm._getFocusFirstInvalidValue(field)
+
+        if (focus != null) {
+          return focus
+        }
+      }
+    }
+
+    return null
+  }
+
+  protected _cloneWithRoot(
+    root: null | ImpulseForm,
+  ): ImpulseFormShape<TFields> {
+    return new ImpulseFormShape(root, this.fields)
+  }
+
+  protected _setValidated(isValidated: boolean): void {
+    for (const field of Object.values(this.fields)) {
+      if (ImpulseForm.isImpulseForm(field)) {
+        ImpulseForm._setValidated(field, isValidated)
+      }
+    }
+  }
+
   public getErrors(scope: Scope): ImpulseFormShapeErrorSchema<TFields>
   public getErrors<TResult>(
     scope: Scope,
@@ -654,26 +683,5 @@ export class ImpulseFormShape<
         }
       }
     })
-  }
-
-  protected _getFocusFirstInvalidValue(): VoidFunction | null {
-    // TODO DRY
-    for (const field of Object.values(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
-        const focus = ImpulseForm._getFocusFirstInvalidValue(field)
-
-        if (focus != null) {
-          return focus
-        }
-      }
-    }
-
-    return null
-  }
-
-  protected _cloneWithRoot(
-    root: null | ImpulseForm,
-  ): ImpulseFormShape<TFields> {
-    return new ImpulseFormShape(root, this.fields)
   }
 }

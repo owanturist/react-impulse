@@ -220,6 +220,10 @@ export class ImpulseFormValue<
     )
   }
 
+  protected _setValidated(isValidated: boolean): void {
+    this._validated.setValue(isValidated)
+  }
+
   public getErrors(scope: Scope): null | ReadonlyArray<string>
   public getErrors<TResult>(
     scope: Scope,
