@@ -31,7 +31,7 @@ export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
   {
     shouldFocusWhenInvalid = true,
     onFocusInvalid,
-    ...options
+    onSubmit,
   }: UseImpulseFormValueOptions<typeof form> = {},
 ): UseImpulseFormValueResult => {
   const onFocusInvalidStable = useHandler(
@@ -50,5 +50,5 @@ export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
     }
   }, [form, onFocusInvalidStable, shouldFocusWhenInvalid])
 
-  return useImpulseForm(form, options)
+  return useImpulseForm(form, { onSubmit })
 }

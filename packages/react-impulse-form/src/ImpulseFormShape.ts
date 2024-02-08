@@ -16,7 +16,7 @@ import {
   ImpulseForm,
   type ImpulseFormParamsKeys,
 } from "./ImpulseForm"
-import type { ValidateStrategy } from "./ValidateStrategy"
+import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./ValidateStrategy"
 
 export type ImpulseFormShapeFields = Types.Object.Record<string | number>
 
@@ -415,7 +415,7 @@ export class ImpulseFormShape<
     return select(
       validateOnConciseValues.length === 0
         ? // defaults to "onTouch"
-          "onTouch"
+          VALIDATE_ON_TOUCH
         : validateOnConciseValues.every(isString) &&
             new Set(validateOnConciseValues).size === 1
           ? (validateOnConciseValues[0] as ValidateStrategy)
