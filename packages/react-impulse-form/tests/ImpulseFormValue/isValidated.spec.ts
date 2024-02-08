@@ -203,7 +203,15 @@ describe.each([
       expect(value.getErrors(scope)).toBeNull()
     })
 
-    it.todo("marks as validated on submit")
+    it("marks as validated on submit", async ({ scope }) => {
+      const value = setup({ validateOn })
+
+      await value.submit()
+      expect(isValidated(scope, value)).toBe(true)
+      expect(value.getErrors(scope)).toStrictEqual([
+        "Expected number, received nan",
+      ])
+    })
 
     it("marks as validated when initialized with custom error", ({ scope }) => {
       const value = setup({ validateOn, errors: ["error"] })

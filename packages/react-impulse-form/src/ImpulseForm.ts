@@ -38,11 +38,11 @@ export abstract class ImpulseForm<
     return value instanceof ImpulseForm
   }
 
-  protected static _childOf<TChildParams extends ImpulseFormParams>(
+  protected static _cloneWithRoot<TChildParams extends ImpulseFormParams>(
     root: ImpulseForm,
     child: ImpulseForm<TChildParams>,
   ): ImpulseForm<TChildParams> {
-    return child._childOf(root)
+    return child._cloneWithRoot(root)
   }
 
   protected static _submitWith<TParams extends ImpulseFormParams>(
@@ -71,7 +71,9 @@ export abstract class ImpulseForm<
 
   protected abstract _getFocusFirstInvalidValue(): null | VoidFunction
 
-  protected abstract _childOf(root: null | ImpulseForm): ImpulseForm<TParams>
+  protected abstract _cloneWithRoot(
+    root: null | ImpulseForm,
+  ): ImpulseForm<TParams>
 
   private _getContext(): ImpulseFormContext {
     if (isDefined(this._root)) {
@@ -133,7 +135,7 @@ export abstract class ImpulseForm<
   }
 
   public clone(): ImpulseForm<TParams> {
-    return this._childOf(null)
+    return this._cloneWithRoot(null)
   }
 
   public isValid(scope: Scope): boolean {
@@ -185,10 +187,6 @@ export abstract class ImpulseForm<
   ): TResult
 
   public abstract setTouched(setter: TParams["flag.setter"]): void
-
-  /**
-   * TODO reset isValidated
-   */
 
   public abstract reset(resetter?: TParams["originalValue.resetter"]): void
 

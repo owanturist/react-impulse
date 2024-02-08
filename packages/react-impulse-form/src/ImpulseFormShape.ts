@@ -190,7 +190,10 @@ export class ImpulseFormShape<
 
     for (const [key, field] of Object.entries(fields)) {
       acc[key as keyof TFields] = ImpulseForm.isImpulseForm(field)
-        ? (ImpulseForm._childOf(root ?? this, field) as TFields[keyof TFields])
+        ? (ImpulseForm._cloneWithRoot(
+            root ?? this,
+            field,
+          ) as TFields[keyof TFields])
         : (field as TFields[keyof TFields])
     }
 
@@ -668,7 +671,9 @@ export class ImpulseFormShape<
     return null
   }
 
-  protected _childOf(root: null | ImpulseForm): ImpulseFormShape<TFields> {
+  protected _cloneWithRoot(
+    root: null | ImpulseForm,
+  ): ImpulseFormShape<TFields> {
     return new ImpulseFormShape(root, this.fields)
   }
 }

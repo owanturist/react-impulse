@@ -192,12 +192,6 @@ export class ImpulseFormValue<
     }
   }
 
-  protected async _submitWith(value: TValue): Promise<void> {
-    this._validated.setValue(true)
-
-    await super._submitWith(value)
-  }
-
   protected _getFocusFirstInvalidValue(): null | VoidFunction {
     const errors = untrack((scope) => this.getErrors(scope))
 
@@ -211,7 +205,7 @@ export class ImpulseFormValue<
   }
 
   // TODO add tests against _validated when cloning
-  protected _childOf(
+  protected _cloneWithRoot(
     root: null | ImpulseForm,
   ): ImpulseFormValue<TOriginalValue, TValue> {
     return new ImpulseFormValue(
@@ -350,6 +344,8 @@ export class ImpulseFormValue<
 
       this.setInitialValue(resetValue)
       this.setOriginalValue(resetValue)
+      // TODO test when reset
+      this._validated.setValue(false)
     })
   }
 
@@ -421,6 +417,7 @@ export class ImpulseFormValue<
     return this._initialValue.getValue(scope)
   }
 
+  // TODO update _validated the same way as it does for setOriginalValue
   public setInitialValue(
     setter: ImpulseFormValueOriginalValueSetter<TOriginalValue>,
   ): void {
