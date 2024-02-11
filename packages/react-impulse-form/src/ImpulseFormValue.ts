@@ -20,6 +20,7 @@ import {
   type ValidateStrategy,
   VALIDATE_ON_SUBMIT,
 } from "./ValidateStrategy"
+import { Emitter } from "./Emitter"
 
 export interface ImpulseFormValueOptions<
   TOriginalValue,
@@ -118,7 +119,7 @@ export class ImpulseFormValue<
   }
 
   // TODO introduce PubSub
-  private readonly _onFocus: Array<(errors: ReadonlyArray<string>) => void> = []
+  private readonly _onFocus = Emitter._init<[errors: ReadonlyArray<string>]>()
 
   private readonly _validated = Impulse.of(false)
 
@@ -195,12 +196,12 @@ export class ImpulseFormValue<
   protected _getFocusFirstInvalidValue(): null | VoidFunction {
     const errors = untrack((scope) => this.getErrors(scope))
 
-    if (!isDefined(errors) || this._onFocus.length < 1) {
+    if (!isDefined(errors) || this._onFocus._isEmpty()) {
       return null
     }
 
     return () => {
-      this._onFocus.forEach((onFocus) => onFocus(errors))
+      this._onFocus._emit(errors)
     }
   }
 
@@ -350,6 +351,8 @@ export class ImpulseFormValue<
       this.setOriginalValue(resetValue)
       // TODO test when reset
       this._validated.setValue(false)
+      // TODO test when reset
+      this._errors.setValue([])
     })
   }
 
@@ -431,10 +434,6 @@ export class ImpulseFormValue<
   public onFocusWhenInvalid(
     onFocus: (errors: ReadonlyArray<string>) => void,
   ): VoidFunction {
-    this._onFocus.push(onFocus)
-
-    return () => {
-      this._onFocus.splice(this._onFocus.indexOf(onFocus), 1)
-    }
+    return this._onFocus._subscribe(onFocus)
   }
 }

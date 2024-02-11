@@ -1,4 +1,5 @@
 import { type Scope, isDefined, batch, untrack } from "./dependencies"
+import { Emitter } from "./Emitter"
 import { ImpulseFormContext } from "./ImpulseFormContext"
 import { lazy } from "./utils"
 
@@ -68,9 +69,10 @@ export abstract class ImpulseForm<
   // necessary for type inference
   protected readonly _params?: TParams
 
-  private readonly _onSubmit: Array<
-    (value: unknown) => void | Promise<unknown>
-  > = []
+  private readonly _onSubmit = Emitter._init<
+    [value: unknown],
+    void | Promise<unknown>
+  >()
 
   private readonly _context = lazy(() => new ImpulseFormContext())
 
@@ -91,7 +93,7 @@ export abstract class ImpulseForm<
   }
 
   protected async _submitWith(value: TParams["value.schema"]): Promise<void> {
-    await Promise.all(this._onSubmit.map((listener) => listener(value)))
+    await Promise.all(this._onSubmit._emit(value))
   }
 
   protected abstract _setValidated(isValidated: boolean): void
@@ -107,11 +109,7 @@ export abstract class ImpulseForm<
   public onSubmit(
     listener: (value: TParams["value.schema"]) => void | Promise<unknown>,
   ): VoidFunction {
-    this._onSubmit.push(listener)
-
-    return () => {
-      this._onSubmit.splice(this._onSubmit.indexOf(listener), 1)
-    }
+    return this._onSubmit._subscribe(listener)
   }
 
   public async submit(): Promise<void> {
