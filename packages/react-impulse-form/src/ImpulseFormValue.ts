@@ -136,11 +136,15 @@ export class ImpulseFormValue<
     private readonly _compare: Impulse<Compare<TOriginalValue>>,
   ) {
     super(root)
-    this._initValidated()
+    this._updateValidated()
   }
 
-  private _initValidated(): void {
-    this._validated.setValue((_, scope) => {
+  private _updateValidated(override: boolean = false): void {
+    this._validated.setValue((isValidated, scope) => {
+      if (!override && isValidated) {
+        return true
+      }
+
       switch (this.getValidateOn(scope)) {
         case VALIDATE_ON_INIT: {
           return true
@@ -177,14 +181,14 @@ export class ImpulseFormValue<
       return { success: true, data: value as unknown as TValue }
     }
 
+    if (!this._validated.getValue(scope)) {
+      return { success: true, data: null }
+    }
+
     const result = schema.safeParse(value)
 
     if (result.success) {
       return result
-    }
-
-    if (!this._validated.getValue(scope)) {
-      return { success: true, data: null }
     }
 
     return {
@@ -299,7 +303,7 @@ export class ImpulseFormValue<
 
       if (validateOn !== nextValidateOn) {
         this._validateOn.setValue(nextValidateOn)
-        this._initValidated()
+        this._updateValidated(true)
       }
     })
   }
@@ -322,12 +326,9 @@ export class ImpulseFormValue<
   }
 
   public setTouched(touched: ImpulseFormValueFlagSetter): void {
-    batch((scope) => {
+    batch(() => {
       this._touched.setValue(touched)
-
-      if (touched && this._validateOn.getValue(scope) === VALIDATE_ON_TOUCH) {
-        this._validated.setValue(true)
-      }
+      this._updateValidated()
     })
   }
 
@@ -412,10 +413,7 @@ export class ImpulseFormValue<
 
       if (originalValue !== this._originalValue.getValue(scope)) {
         this._errors.setValue([])
-
-        if (this._validateOn.getValue(scope) === VALIDATE_ON_CHANGE) {
-          this._validated.setValue(true)
-        }
+        this._updateValidated()
       }
     })
   }
@@ -424,11 +422,18 @@ export class ImpulseFormValue<
     return this._initialValue.getValue(scope)
   }
 
-  // TODO update _validated the same way as it does for setOriginalValue
   public setInitialValue(
     setter: ImpulseFormValueOriginalValueSetter<TOriginalValue>,
   ): void {
-    this._initialValue.setValue(setter)
+    batch((scope) => {
+      const initialValue = this._initialValue.getValue(scope)
+
+      this._initialValue.setValue(setter)
+
+      if (initialValue !== this._initialValue.getValue(scope)) {
+        this._updateValidated()
+      }
+    })
   }
 
   public onFocusWhenInvalid(

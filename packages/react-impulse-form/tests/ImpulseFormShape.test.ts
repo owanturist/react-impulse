@@ -1066,15 +1066,22 @@ describe("ImpulseFormShape#setErrors()", () => {
 
 describe("ImpulseFormShape#getValue()", () => {
   it("selects value", ({ scope }) => {
-    const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of(""),
-      second: ImpulseFormValue.of(0, { schema: z.number().nonnegative() }),
-      third: ImpulseFormShape.of({
-        one: ImpulseFormValue.of(true),
-        two: ImpulseFormValue.of(["1"], { schema: z.array(z.string().max(1)) }),
-      }),
-      fourth: ["anything"],
-    })
+    const shape = ImpulseFormShape.of(
+      {
+        first: ImpulseFormValue.of(""),
+        second: ImpulseFormValue.of(0, { schema: z.number().nonnegative() }),
+        third: ImpulseFormShape.of({
+          one: ImpulseFormValue.of(true),
+          two: ImpulseFormValue.of(["1"], {
+            schema: z.array(z.string().max(1)),
+          }),
+        }),
+        fourth: ["anything"],
+      },
+      {
+        validateOn: "onInit",
+      },
+    )
 
     const value = shape.getValue(scope)
     expect(value).toStrictEqual({

@@ -17,6 +17,7 @@ describe("ImpulseFormValue.of()", () => {
   it("creates ImpulseFormValue with same type schema", ({ scope }) => {
     const value = ImpulseFormValue.of("", {
       schema: z.string().trim().min(2),
+      validateOn: "onInit",
     })
 
     expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<string>>()
@@ -33,6 +34,7 @@ describe("ImpulseFormValue.of()", () => {
   it("creates ImpulseFormValue with different type schema", ({ scope }) => {
     const value = ImpulseFormValue.of("", {
       schema: z.string().trim().min(1).pipe(z.coerce.number()),
+      validateOn: "onInit",
     })
 
     expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<string, number>>()
@@ -56,6 +58,7 @@ describe("ImpulseFormValue.of()", () => {
           type: z.enum(["first", "second"]),
           value: z.string().min(1).pipe(z.coerce.boolean()),
         }),
+        validateOn: "onInit",
       },
     )
     expectTypeOf(value).toEqualTypeOf<
@@ -105,6 +108,7 @@ describe("ImpulseFormValue.of()", () => {
     const value = ImpulseFormValue.of<string>("1", {
       // @ts-expect-error schema Input is not string
       schema: z.coerce.number(),
+      validateOn: "onInit",
     })
 
     expect(value.getOriginalValue(scope)).toBe("1")
@@ -117,6 +121,7 @@ describe("ImpulseFormValue.of()", () => {
     const value = ImpulseFormValue.of<number, string>(0, {
       // @ts-expect-error schema Output is not string
       schema: z.number(),
+      validateOn: "onInit",
     })
 
     expect(value.getOriginalValue(scope)).toBe(0)
@@ -141,8 +146,31 @@ describe("ImpulseFormValue.of()", () => {
 })
 
 describe("ImpulseFormValue#getValue()", () => {
+  it("does not select value when not validated", ({ scope }) => {
+    const value = ImpulseFormValue.of("1", {
+      schema: z.string().max(1),
+    })
+
+    expect(value.getValue(scope)).toBeNull()
+    expect(value.getErrors(scope)).toBeNull()
+
+    value.setTouched(true)
+    expect(value.getValue(scope)).toBe("1")
+    expect(value.getErrors(scope)).toBeNull()
+  })
+
+  it("selects value when not validated without schema", ({ scope }) => {
+    const value = ImpulseFormValue.of("1")
+
+    expect(value.getValue(scope)).toBe("1")
+    expect(value.getErrors(scope)).toBeNull()
+  })
+
   it("selects value", ({ scope }) => {
-    const value = ImpulseFormValue.of("1", { schema: z.string().max(1) })
+    const value = ImpulseFormValue.of("1", {
+      schema: z.string().max(1),
+      validateOn: "onInit",
+    })
 
     expect(value.getValue(scope)).toBe("1")
     expect(value.getValue(scope, identity)).toBe("1")

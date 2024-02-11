@@ -129,6 +129,16 @@ describe.each([
       ])
     })
 
+    it("marks as validated on initialValue change", ({ scope }) => {
+      const value = setup({ validateOn: "onChange" })
+
+      value.setInitialValue("x")
+      expect(isValidated(scope, value)).toBe(true)
+      expect(value.getErrors(scope)).toStrictEqual([
+        "Expected number, received nan",
+      ])
+    })
+
     it("does not mark as validated for the same value", ({ scope }) => {
       const value = setup({ validateOn: "onChange" })
 
