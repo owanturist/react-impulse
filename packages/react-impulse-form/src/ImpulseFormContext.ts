@@ -5,8 +5,8 @@ import { Impulse } from "./dependencies"
  */
 export class ImpulseFormContext {
   // private readonly _listeners = new Set<() => Promise<unknown>>()
-  public readonly _submitCount = Impulse.of(0)
-  public readonly _submitting = Impulse.of(false)
+  public readonly _submitAttempts = Impulse.of(0)
+  public readonly _submittingCount = Impulse.of(0)
 
   // public _getSubmitCount(scope: Scope): number {
   //   return this._submitCount.getValue(scope)

@@ -216,21 +216,21 @@ export class ImpulseFormShape<
     return acc
   }
 
-  protected async _submitWith(
+  protected _submitWith(
     value: ImpulseFormShapeValueSchema<TFields>,
-  ): Promise<void> {
-    const promises: Array<Promise<void>> = []
+  ): ReadonlyArray<void | Promise<unknown>> {
+    const promises = super._submitWith(value).slice()
 
     // TODO dry
     for (const [key, field] of Object.entries(this.fields)) {
       if (ImpulseForm.isImpulseForm(field)) {
         promises.push(
-          ImpulseForm._submitWith(field, value[key as keyof typeof value]),
+          ...ImpulseForm._submitWith(field, value[key as keyof typeof value]),
         )
       }
     }
 
-    await Promise.all([...promises, super._submitWith(value)])
+    return promises
   }
 
   protected _getFocusFirstInvalidValue(): VoidFunction | null {

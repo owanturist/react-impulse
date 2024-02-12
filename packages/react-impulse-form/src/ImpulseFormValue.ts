@@ -118,7 +118,6 @@ export class ImpulseFormValue<
     )
   }
 
-  // TODO introduce PubSub
   private readonly _onFocus = Emitter._init<[errors: ReadonlyArray<string>]>()
 
   private readonly _validated = Impulse.of(false)

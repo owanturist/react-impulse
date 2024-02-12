@@ -49,7 +49,7 @@ export abstract class ImpulseForm<
   protected static _submitWith<TParams extends ImpulseFormParams>(
     form: ImpulseForm<TParams>,
     value: TParams["value.schema"],
-  ): Promise<void> {
+  ): ReadonlyArray<void | Promise<unknown>> {
     return form._submitWith(value)
   }
 
@@ -92,18 +92,20 @@ export abstract class ImpulseForm<
     return this._context()
   }
 
-  protected async _submitWith(value: TParams["value.schema"]): Promise<void> {
-    await Promise.all(this._onSubmit._emit(value))
+  protected _submitWith(
+    value: TParams["value.schema"],
+  ): ReadonlyArray<void | Promise<unknown>> {
+    return this._onSubmit._emit(value)
   }
 
   protected abstract _setValidated(isValidated: boolean): void
 
   public getSubmitCount(scope: Scope): number {
-    return this._getContext()._submitCount.getValue(scope)
+    return this._getContext()._submitAttempts.getValue(scope)
   }
 
   public isSubmitting(scope: Scope): boolean {
-    return this._getContext()._submitting.getValue(scope)
+    return this._getContext()._submittingCount.getValue(scope) > 0
   }
 
   public onSubmit(
@@ -120,22 +122,29 @@ export abstract class ImpulseForm<
     const context = this._getContext()
 
     batch(() => {
-      context._submitting.setValue(true)
-      context._submitCount.setValue((count) => count + 1)
+      context._submitAttempts.setValue((count) => count + 1)
       this._setValidated(true)
     })
 
-    await untrack((scope) => {
-      if (this.isValid(scope)) {
-        const value = this.getValue(scope)!
-
-        return this._submitWith(value)
+    const promises = untrack((scope) => {
+      if (this.isInvalid(scope)) {
+        return null
       }
 
-      this.focusFirstInvalidValue()
+      const value = this.getValue(scope)!
+
+      return this._submitWith(value)
     })
 
-    this._getContext()._submitting.setValue(false)
+    if (!isDefined(promises)) {
+      this.focusFirstInvalidValue()
+    } else if (promises.length > 0) {
+      context._submittingCount.setValue((count) => count + 1)
+
+      await Promise.all(promises)
+
+      context._submittingCount.setValue((count) => count - 1)
+    }
   }
 
   public focusFirstInvalidValue(): void {
