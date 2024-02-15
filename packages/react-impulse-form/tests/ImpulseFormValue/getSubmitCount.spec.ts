@@ -11,17 +11,40 @@ describe.each([
     },
   ],
   [
-    "with a single submit listener",
+    "with a single sync submit listener",
+    (value: ImpulseFormValue<string>) => {
+      value.onSubmit(vi.fn())
+    },
+  ],
+  [
+    "with many sync submit listener",
+    (value: ImpulseFormValue<string>) => {
+      value.onSubmit(vi.fn())
+      value.onSubmit(vi.fn())
+      value.onSubmit(vi.fn())
+    },
+  ],
+  [
+    "with a single async submit listener",
     (value: ImpulseFormValue<string>) => {
       value.onSubmit(() => wait(1))
     },
   ],
   [
-    "with many submit listeners",
+    "with many async submit listeners",
     (value: ImpulseFormValue<string>) => {
       value.onSubmit(() => wait(1))
       value.onSubmit(() => wait(2))
       value.onSubmit(() => wait(3))
+    },
+  ],
+  [
+    "with many (a)sync submit listeners",
+    (value: ImpulseFormValue<string>) => {
+      value.onSubmit(() => wait(1))
+      value.onSubmit(vi.fn())
+      value.onSubmit(() => wait(2))
+      value.onSubmit(vi.fn())
     },
   ],
 ])("getSubmitCount(scope) %s", (_, enhance) => {
