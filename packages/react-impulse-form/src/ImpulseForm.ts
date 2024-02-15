@@ -133,7 +133,7 @@ export abstract class ImpulseForm<
 
       const value = this.getValue(scope)!
 
-      return this._submitWith(value)
+      return this._submitWith(value).filter(isDefined)
     })
 
     if (!isDefined(promises)) {
