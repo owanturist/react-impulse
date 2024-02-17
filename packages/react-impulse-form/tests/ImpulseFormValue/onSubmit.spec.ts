@@ -83,6 +83,19 @@ describe("onSubmit(listener)", () => {
     expect(listener_2).toHaveBeenCalledTimes(1)
   })
 
+  it("subscribes the same listener only once", () => {
+    const form = ImpulseFormValue.of("value")
+
+    const listener = vi.fn()
+
+    form.onSubmit(listener)
+    form.onSubmit(listener)
+
+    void form.submit()
+
+    expect(listener).toHaveBeenCalledTimes(1)
+  })
+
   it("calls a listener on every submit", () => {
     const form = ImpulseFormValue.of("value")
 
@@ -113,6 +126,34 @@ describe("onSubmit(listener)", () => {
 
     void form.submit()
 
+    expect(listener).not.toHaveBeenCalled()
+  })
+
+  it('unsubscribes the same listener as many times as it"s been subscribed', () => {
+    const form = ImpulseFormValue.of("value")
+
+    const listener = vi.fn()
+
+    const unsubscribe_1 = form.onSubmit(listener)
+    const unsubscribe_2 = form.onSubmit(listener)
+    const unsubscribe_3 = form.onSubmit(listener)
+
+    void form.submit()
+    expect(listener).toHaveBeenCalled()
+    listener.mockClear()
+    unsubscribe_1()
+
+    void form.submit()
+    expect(listener).toHaveBeenCalled()
+    listener.mockClear()
+    unsubscribe_2()
+
+    void form.submit()
+    expect(listener).toHaveBeenCalled()
+    listener.mockClear()
+    unsubscribe_3()
+
+    void form.submit()
     expect(listener).not.toHaveBeenCalled()
   })
 

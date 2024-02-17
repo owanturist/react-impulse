@@ -69,7 +69,7 @@ export abstract class ImpulseForm<
   // necessary for type inference
   protected readonly _params?: TParams
 
-  private readonly _onSubmit = Emitter._init<
+  private readonly _onSubmit = new Emitter<
     [value: unknown],
     void | Promise<unknown>
   >()
@@ -127,13 +127,11 @@ export abstract class ImpulseForm<
     })
 
     const promises = untrack((scope) => {
-      if (this.isInvalid(scope)) {
-        return null
+      if (this.isValid(scope)) {
+        const value = this.getValue(scope)!
+
+        return this._submitWith(value).filter(isDefined)
       }
-
-      const value = this.getValue(scope)!
-
-      return this._submitWith(value).filter(isDefined)
     })
 
     if (!isDefined(promises)) {

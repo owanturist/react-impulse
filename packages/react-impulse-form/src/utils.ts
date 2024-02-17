@@ -16,6 +16,24 @@ export type ComputeObject<Obj> = unknown & {
 
 export const isTrue = (value: unknown): value is true => value === true
 
+const eq = <T>(left: T, right: T): boolean => Object.is(left, right)
+
+export const uniq = <T>(values: ReadonlyArray<T>): ReadonlyArray<T> => {
+  const acc = new Set<T>()
+
+  const result = values.filter((value) => {
+    if (acc.has(value)) {
+      return false
+    }
+
+    acc.add(value)
+
+    return true
+  })
+
+  return result.length === values.length ? values : result
+}
+
 export function shallowArrayEquals<T>(
   left: ReadonlyArray<T>,
   right: ReadonlyArray<T>,
@@ -28,7 +46,7 @@ export function shallowArrayEquals<T>(
     return false
   }
 
-  return left.every((value, index) => Object.is(value, right[index]))
+  return left.every((value, index) => eq(value, right[index]))
 }
 
 export const useIsomorphicLayoutEffect =

@@ -118,7 +118,7 @@ export class ImpulseFormValue<
     )
   }
 
-  private readonly _onFocus = Emitter._init<[errors: ReadonlyArray<string>]>()
+  private readonly _onFocus = new Emitter<[errors: ReadonlyArray<string>]>()
 
   private readonly _validated = Impulse.of(false)
 
