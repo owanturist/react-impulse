@@ -3,6 +3,10 @@ import { z } from "zod"
 import { type ImpulseFormValueOptions, ImpulseFormValue } from "../../src"
 import { wait } from "../common"
 
+beforeAll(() => {
+  vi.useFakeTimers()
+})
+
 describe.each([
   [
     "without submit listeners",
@@ -27,23 +31,23 @@ describe.each([
   [
     "with a single async submit listener",
     (value: ImpulseFormValue<string>) => {
-      value.onSubmit(() => wait(1))
+      value.onSubmit(() => wait(1000))
     },
   ],
   [
     "with many async submit listeners",
     (value: ImpulseFormValue<string>) => {
-      value.onSubmit(() => wait(1))
-      value.onSubmit(() => wait(2))
-      value.onSubmit(() => wait(3))
+      value.onSubmit(() => wait(1000))
+      value.onSubmit(() => wait(2000))
+      value.onSubmit(() => wait(3000))
     },
   ],
   [
     "with many (a)sync submit listeners",
     (value: ImpulseFormValue<string>) => {
-      value.onSubmit(() => wait(1))
+      value.onSubmit(() => wait(1000))
       value.onSubmit(vi.fn())
-      value.onSubmit(() => wait(2))
+      value.onSubmit(() => wait(2000))
       value.onSubmit(vi.fn())
     },
   ],
@@ -86,6 +90,7 @@ describe.each([
 
   it("keeps the count after async is done", async ({ scope }) => {
     const value = setup()
+    const all_done = vi.fn()
 
     const submits = Promise.all([
       value.submit(),
@@ -94,7 +99,11 @@ describe.each([
     ])
 
     expect(value.getSubmitCount(scope)).toBe(3)
-    await submits
+    void submits.then(all_done)
+    expect(all_done).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(3000)
+    expect(all_done).toHaveBeenCalledOnce()
     expect(value.getSubmitCount(scope)).toBe(3)
   })
 })
