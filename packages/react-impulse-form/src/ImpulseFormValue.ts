@@ -228,12 +228,14 @@ export class ImpulseFormValue<
     this._validated.setValue(isValidated)
   }
 
+  // TODO selects (concise, verbose, custom) => custom ?? concise
   public getErrors(scope: Scope): null | ReadonlyArray<string>
   public getErrors<TResult>(
     scope: Scope,
     select: (
       concise: null | ReadonlyArray<string>,
       verbose: null | ReadonlyArray<string>,
+      // TODO add custom: null | ReadonlyArray<string>
     ) => TResult,
   ): TResult
   public getErrors<TResult = null | ReadonlyArray<string>>(

@@ -2,7 +2,7 @@ import { z } from "zod"
 
 import { type ImpulseFormValueOptions, ImpulseFormValue } from "../../src"
 
-describe("onFocusWhenInvalid() when invalid", () => {
+describe("focusFirstInvalidValue() when invalid", () => {
   const setup = (options?: ImpulseFormValueOptions<string>) => {
     return ImpulseFormValue.of("", {
       touched: true,
@@ -142,7 +142,7 @@ describe("onFocusWhenInvalid() when invalid", () => {
   })
 })
 
-describe("onFocusWhenInvalid() when valid", () => {
+describe("focusFirstInvalidValue() when valid", () => {
   const setup = (options?: ImpulseFormValueOptions<string>) => {
     return ImpulseFormValue.of("", {
       touched: true,

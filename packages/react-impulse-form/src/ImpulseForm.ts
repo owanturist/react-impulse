@@ -84,6 +84,8 @@ export abstract class ImpulseForm<
     root: null | ImpulseForm,
   ): ImpulseForm<TParams>
 
+  protected abstract _setValidated(isValidated: boolean): void
+
   private _getContext(): ImpulseFormContext {
     if (isDefined(this._root)) {
       return this._root._getContext()
@@ -97,8 +99,6 @@ export abstract class ImpulseForm<
   ): ReadonlyArray<void | Promise<unknown>> {
     return this._onSubmit._emit(value)
   }
-
-  protected abstract _setValidated(isValidated: boolean): void
 
   public getSubmitCount(scope: Scope): number {
     return this._getContext()._submitAttempts.getValue(scope)
