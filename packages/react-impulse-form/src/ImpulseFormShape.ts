@@ -114,6 +114,7 @@ export type ImpulseFormShapeErrorSchemaVerbose<
 export interface ImpulseFormShapeOptions<
   TFields extends ImpulseFormShapeFields,
 > {
+  // TODO add schema
   touched?: ImpulseFormShapeFlagSetter<TFields>
   initialValue?: ImpulseFormShapeOriginalValueSetter<TFields>
   originalValue?: ImpulseFormShapeOriginalValueSetter<TFields>
@@ -122,7 +123,7 @@ export interface ImpulseFormShapeOptions<
 }
 
 export class ImpulseFormShape<
-  TFields extends ImpulseFormShapeFields,
+  TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
 > extends ImpulseForm<{
   "value.schema": ImpulseFormShapeValueSchema<TFields>
   "value.schema.verbose": ImpulseFormShapeValueSchemaVerbose<TFields>

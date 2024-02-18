@@ -10,14 +10,14 @@ beforeAll(() => {
 describe.each([
   [
     "without any submit listeners",
-    (options?: ImpulseFormValueOptions<string>) => {
-      return ImpulseFormValue.of("", options)
+    () => {
+      return ImpulseFormValue.of("")
     },
   ],
   [
-    "without only sync submit listeners",
-    (options?: ImpulseFormValueOptions<string>) => {
-      const value = ImpulseFormValue.of("", options)
+    "with only sync submit listeners",
+    () => {
+      const value = ImpulseFormValue.of("")
 
       value.onSubmit(vi.fn())
       value.onSubmit(vi.fn())
@@ -89,13 +89,13 @@ describe("isSubmitting(scope) with async submit listeners", () => {
 
   it("returns false when value is invalid", ({ scope }) => {
     const value = setup({
-      touched: true,
       schema: z.string().min(5),
     })
 
-    expect(value.isInvalid(scope)).toBe(true)
+    expect(value.isInvalid(scope)).toBe(false)
 
     void value.submit()
+    expect(value.isInvalid(scope)).toBe(true)
     expect(value.isSubmitting(scope)).toBe(false)
   })
 
