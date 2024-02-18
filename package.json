@@ -14,7 +14,7 @@
     "lint": "eslint --ext=js,jsx,ts,tsx",
     "format": "prettier --write",
     "format:check": "prettier --check",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit --project packages/react-impulse && tsc --noEmit --project packages/react-impulse-form",
     "cs": "changeset",
     "publish": "pnpm build && pnpm cs publish",
     "prepare": "husky install"
