@@ -197,9 +197,11 @@ export class ImpulseFormValue<
   }
 
   protected _getFocusFirstInvalidValue(): null | VoidFunction {
-    const errors = untrack((scope) => this.getErrors(scope))
+    const errors = untrack((scope) => {
+      return this._onFocus._isEmpty() ? null : this.getErrors(scope)
+    })
 
-    if (!isDefined(errors) || this._onFocus._isEmpty()) {
+    if (!isDefined(errors)) {
       return null
     }
 

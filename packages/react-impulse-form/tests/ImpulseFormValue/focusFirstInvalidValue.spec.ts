@@ -2,15 +2,18 @@ import { z } from "zod"
 
 import { type ImpulseFormValueOptions, ImpulseFormValue } from "../../src"
 
-describe("focusFirstInvalidValue() when invalid", () => {
-  const setup = (options?: ImpulseFormValueOptions<string>) => {
-    return ImpulseFormValue.of("", {
-      touched: true,
-      schema: z.string().min(10),
-      ...options,
-    })
-  }
+const setup = (
+  originalValue?: string,
+  options?: ImpulseFormValueOptions<string>,
+) => {
+  return ImpulseFormValue.of(originalValue ?? "", {
+    touched: true,
+    schema: z.string().min(2),
+    ...options,
+  })
+}
 
+describe("focusFirstInvalidValue() when validated", () => {
   it("nothing happens if a listener is not attached", () => {
     const form = setup()
     const spy = vi.spyOn(form, "focusFirstInvalidValue")
@@ -49,12 +52,12 @@ describe("focusFirstInvalidValue() when invalid", () => {
 
     form.focusFirstInvalidValue()
     expect(listener).toHaveBeenLastCalledWith([
-      "String must contain at least 10 character(s)",
+      "String must contain at least 2 character(s)",
     ])
   })
 
   it("calls a listener with a custom errors", () => {
-    const form = setup({ errors: ["Custom error"] })
+    const form = setup("", { errors: ["Custom error"] })
     const listener = vi.fn()
 
     form.onFocusWhenInvalid(listener)
@@ -142,16 +145,20 @@ describe("focusFirstInvalidValue() when invalid", () => {
   })
 })
 
-describe("focusFirstInvalidValue() when valid", () => {
-  const setup = (options?: ImpulseFormValueOptions<string>) => {
-    return ImpulseFormValue.of("", {
-      touched: true,
-      ...options,
-    })
-  }
-
+describe("focusFirstInvalidValue() when not validated", () => {
   it("does not call a listener", () => {
-    const form = setup()
+    const form = setup("", { touched: false })
+    const listener = vi.fn()
+
+    form.onFocusWhenInvalid(listener)
+
+    expect(listener).not.toHaveBeenCalled()
+  })
+})
+
+describe("focusFirstInvalidValue() when valid", () => {
+  it("does not call a listener", () => {
+    const form = setup("123")
     const listener = vi.fn()
 
     form.onFocusWhenInvalid(listener)

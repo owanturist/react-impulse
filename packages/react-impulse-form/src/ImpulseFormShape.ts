@@ -235,6 +235,7 @@ export class ImpulseFormShape<
 
   protected _getFocusFirstInvalidValue(): VoidFunction | null {
     // TODO DRY
+    // TODO add custom ordering
     for (const field of Object.values(this.fields)) {
       if (ImpulseForm.isImpulseForm(field)) {
         const focus = ImpulseForm._getFocusFirstInvalidValue(field)
