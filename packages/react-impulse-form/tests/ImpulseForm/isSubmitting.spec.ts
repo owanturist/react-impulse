@@ -1,8 +1,8 @@
 import { z } from "zod"
 
 import {
+  type ImpulseForm,
   type ImpulseFormShapeOptions,
-  type ImpulseFormValueOptions,
   ImpulseFormShape,
   ImpulseFormValue,
 } from "../../src"
@@ -14,8 +14,10 @@ const setupValue = (
   description: string,
   enchant?: (form: ImpulseFormValue<string>) => void,
 ) => {
-  const setup = (options?: ImpulseFormValueOptions<string>) => {
-    const form = ImpulseFormValue.of("", options)
+  const setup = () => {
+    const form = ImpulseFormValue.of("", {
+      schema: z.string().max(2),
+    })
 
     enchant?.(form)
 
@@ -25,22 +27,33 @@ const setupValue = (
   return [
     "ImpulseFormValue",
     description,
-    setup,
+    setup as () => ImpulseForm,
     [
       [
         "root.submit()",
-        (options) => {
-          const form = setup(options)
+        () => {
+          const form = setup()
 
           return [form, () => form.submit()]
         },
+        [
+          [
+            "root",
+            () => {
+              const form = setup()
+
+              form.setOriginalValue("abc")
+
+              return [form, () => form.submit()]
+            },
+          ],
+        ],
       ],
     ] as Array<
       [
         string,
-        (
-          options?: ImpulseFormValueOptions<string>,
-        ) => [ImpulseFormValue<string>, () => Promise<unknown>],
+        () => [ImpulseForm, () => Promise<unknown>],
+        Array<[string, () => [ImpulseForm, () => Promise<unknown>]]>,
       ]
     >,
   ] as const
@@ -83,52 +96,58 @@ const setupShape = (
     return form
   }
 
-  const submits = [
-    [
-      "root.submit()",
-      (form: ImpulseFormShape<ShapeFields>) => {
-        return form.submit()
-      },
-    ],
-    [
-      "root.fields.<ImpulseFormValue>.submit()",
-      (form: ImpulseFormShape<ShapeFields>) => {
-        return form.fields._1.submit()
-      },
-    ],
-    [
-      "root.fields.<ImpulseFormShape>.submit()",
-      (form: ImpulseFormShape<ShapeFields>) => {
-        return form.fields._3.submit()
-      },
-    ],
-    [
-      "root.fields.<ImpulseFormShape>.fields.<ImpulseFormValue>.submit()",
-      (form: ImpulseFormShape<ShapeFields>) => {
-        return form.fields._3.fields._1.submit()
-      },
-    ],
-  ] as const
+  const setupSubmit = (
+    descriptionForSubmit: string,
+    submit: (form: ImpulseFormShape<ShapeFields>) => Promise<unknown>,
+  ) => {
+    const setupWithSubmit = (
+      optionsForSubmit?: ImpulseFormShapeOptions<ShapeFields>,
+    ): [ImpulseForm, () => Promise<unknown>] => {
+      const form = setup(optionsForSubmit)
+
+      return [form, () => submit(form)]
+    }
+
+    const setupInvalid = (
+      descriptionForInvalid: string,
+      opts: ImpulseFormShapeOptions<ShapeFields>,
+    ): [string, () => [ImpulseForm, () => Promise<unknown>]] => [
+      descriptionForInvalid,
+      () => setupWithSubmit(opts),
+    ]
+
+    return [
+      descriptionForSubmit,
+      setupWithSubmit,
+      [
+        setupInvalid("root.fields.<ImpulseFormValue>", {
+          originalValue: {
+            _1: "abc",
+          },
+        }),
+      ],
+    ] as const
+  }
 
   return [
     "ImpulseFormShape",
     description,
-    setup,
-    submits.map(
-      ([desc, submit]): [
-        string,
-        (
-          options?: ImpulseFormShapeOptions<ShapeFields>,
-        ) => [ImpulseFormShape<ShapeFields>, () => Promise<unknown>],
-      ] => [
-        desc,
-        (options) => {
-          const form = setup(options)
-
-          return [form, () => submit(form)]
-        },
-      ],
-    ),
+    setup as () => ImpulseForm,
+    [
+      setupSubmit("root.submit()", (form) => {
+        return form.submit()
+      }),
+      setupSubmit("root.fields.<ImpulseFormValue>.submit()", (form) => {
+        return form.fields._1.submit()
+      }),
+      setupSubmit("root.fields.<ImpulseFormShape>.submit()", (form) => {
+        return form.fields._3.submit()
+      }),
+      setupSubmit(
+        "root.fields.<ImpulseFormShape>.fields.<ImpulseFormValue>.submit()",
+        (form) => form.fields._3.fields._1.submit(),
+      ),
+    ],
   ] as const
 }
 
@@ -213,8 +232,6 @@ describe.each([
     form.fields._1.onSubmit(() => wait(SLOWEST_ASYNC_MS / 2))
     form.fields._3.onSubmit(() => wait(SLOWEST_ASYNC_MS / 4))
     form.fields._3.fields._1.onSubmit(() => wait(SLOWEST_ASYNC_MS / 8))
-
-    return form
   }),
 
   setupShape(
@@ -253,72 +270,76 @@ describe.each([
     expect(form.isSubmitting(scope)).toBe(false)
   })
 
-  describe.each(submits)("when submit via", (___, setupWithSubmit) => {
-    it("returns true when submitting starts", ({ scope }) => {
-      const [form, submit] = setupWithSubmit()
+  describe.each(submits)(
+    "when submit via",
+    (___, setupWithSubmit, invalids) => {
+      it("returns true when submitting starts", ({ scope }) => {
+        const [form, submit] = setupWithSubmit()
 
-      void submit()
-      expect(form.isSubmitting(scope)).toBe(true)
-    })
-
-    it.skip("returns false when submitting finishes", async ({ scope }) => {
-      const [form, submit] = setupWithSubmit()
-      const all_done = vi.fn()
-
-      void submit().then(all_done)
-
-      expect(all_done).not.toHaveBeenCalled()
-      expect(form.isSubmitting(scope)).toBe(true)
-
-      await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS - 1)
-      expect(all_done).not.toHaveBeenCalled()
-      expect(form.isSubmitting(scope)).toBe(true)
-
-      await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
-      expect(all_done).toHaveBeenCalledOnce()
-      expect(form.isSubmitting(scope)).toBe(false)
-    })
-
-    it.skip("returns false when value is invalid", ({ scope }) => {
-      const form = setup({
-        originalValue: {
-          _1: "abc",
-        },
+        void submit()
+        expect(form.isSubmitting(scope)).toBe(true)
       })
 
-      expect(form.isInvalid(scope)).toBe(false)
+      it("returns false when submitting finishes", async ({ scope }) => {
+        const [form, submit] = setupWithSubmit()
+        const all_done = vi.fn()
 
-      void submit(form)
-      expect(form.isInvalid(scope)).toBe(true)
-      expect(form.isSubmitting(scope)).toBe(false)
-    })
+        void submit().then(all_done)
 
-    it.skip("returns false when all submit() resolve", async ({ scope }) => {
-      const [form, submit] = setupWithSubmit()
-      const first_done = vi.fn()
-      const second_done = vi.fn()
+        expect(all_done).not.toHaveBeenCalled()
+        expect(form.isSubmitting(scope)).toBe(true)
 
-      void submit().then(first_done)
+        await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS - 1)
+        expect(all_done).not.toHaveBeenCalled()
+        expect(form.isSubmitting(scope)).toBe(true)
 
-      form.onSubmit(() => wait(2 * SLOWEST_ASYNC_MS))
+        await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
+        expect(all_done).toHaveBeenCalledOnce()
+        expect(form.isSubmitting(scope)).toBe(false)
+      })
 
-      void submit().then(second_done)
+      it("returns false when all submit() resolve", async ({ scope }) => {
+        const [form, submit] = setupWithSubmit()
+        const first_done = vi.fn()
+        const second_done = vi.fn()
 
-      expect(first_done).not.toHaveBeenCalled()
-      expect(second_done).not.toHaveBeenCalled()
-      expect(form.isSubmitting(scope)).toBe(true)
+        void submit().then(first_done)
 
-      await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
+        form.onSubmit(() => wait(2 * SLOWEST_ASYNC_MS))
 
-      expect(first_done).toHaveBeenCalledOnce()
-      expect(second_done).not.toHaveBeenCalled()
-      expect(form.isSubmitting(scope)).toBe(true)
+        void submit().then(second_done)
 
-      await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
+        expect(first_done).not.toHaveBeenCalled()
+        expect(second_done).not.toHaveBeenCalled()
+        expect(form.isSubmitting(scope)).toBe(true)
 
-      expect(first_done).toHaveBeenCalledOnce()
-      expect(second_done).toHaveBeenCalledOnce()
-      expect(form.isSubmitting(scope)).toBe(false)
-    })
-  })
+        await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
+
+        expect(first_done).toHaveBeenCalledOnce()
+        expect(second_done).not.toHaveBeenCalled()
+        expect(form.isSubmitting(scope)).toBe(true)
+
+        await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
+
+        expect(first_done).toHaveBeenCalledOnce()
+        expect(second_done).toHaveBeenCalledOnce()
+        expect(form.isSubmitting(scope)).toBe(false)
+      })
+
+      describe.each(invalids)(
+        "when %s is invalid",
+        (____, setupWithInvalid) => {
+          it("returns false when value is invalid", ({ scope }) => {
+            const [form, submit] = setupWithInvalid()
+
+            expect(form.isInvalid(scope)).toBe(false)
+
+            void submit()
+            expect(form.isInvalid(scope)).toBe(true)
+            expect(form.isSubmitting(scope)).toBe(false)
+          })
+        },
+      )
+    },
+  )
 })
