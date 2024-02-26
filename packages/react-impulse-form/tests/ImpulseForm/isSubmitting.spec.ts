@@ -125,6 +125,29 @@ const setupShape = (
             _1: "abc",
           },
         }),
+
+        // TODO test when a shape supports custom error / validation
+        // setupInvalid(
+        //   "root.fields.<ImpulseFormShape>",
+        //   {
+        //     originalValue: {
+        //       _3: {
+        //         _2: ["abc"],
+        //       },
+        //     },
+        //   },
+        // ),
+
+        setupInvalid(
+          "root.fields.<ImpulseFormShape>.fields.<ImpulseFormValue>",
+          {
+            originalValue: {
+              _3: {
+                _2: ["abc"],
+              },
+            },
+          },
+        ),
       ],
     ] as const
   }
