@@ -1,65 +1,56 @@
 import { z } from "zod"
 
-import { type ImpulseFormValueOptions, ImpulseFormValue } from "../../src"
+import { ImpulseFormValue } from "../../src"
 import { wait } from "../common"
+
+const SLOWEST_ASYNC_MS = 3000
 
 beforeAll(() => {
   vi.useFakeTimers()
 })
 
+const setupValue = (
+  description: string,
+  enchant?: (form: ImpulseFormValue<string>) => void,
+) => ({
+  name: "ImpulseFormValue",
+  description,
+  setup: () => {
+    const form = ImpulseFormValue.of("abc", {
+      schema: z.string().max(2),
+    })
+
+    enchant?.(form)
+
+    return form
+  },
+})
+
 describe.each([
-  [
-    "without submit listeners",
-    () => {
-      /* noop */
-    },
-  ],
-  [
-    "with a single sync submit listener",
-    (value: ImpulseFormValue<string>) => {
-      value.onSubmit(vi.fn())
-    },
-  ],
-  [
-    "with many sync submit listener",
-    (value: ImpulseFormValue<string>) => {
-      value.onSubmit(vi.fn())
-      value.onSubmit(vi.fn())
-      value.onSubmit(vi.fn())
-    },
-  ],
-  [
-    "with a single async submit listener",
-    (value: ImpulseFormValue<string>) => {
-      value.onSubmit(() => wait(1000))
-    },
-  ],
-  [
-    "with many async submit listeners",
-    (value: ImpulseFormValue<string>) => {
-      value.onSubmit(() => wait(1000))
-      value.onSubmit(() => wait(2000))
-      value.onSubmit(() => wait(3000))
-    },
-  ],
-  [
-    "with many (a)sync submit listeners",
-    (value: ImpulseFormValue<string>) => {
-      value.onSubmit(() => wait(1000))
-      value.onSubmit(vi.fn())
-      value.onSubmit(() => wait(2000))
-      value.onSubmit(vi.fn())
-    },
-  ],
-])("getSubmitCount(scope) %s", (_, enhance) => {
-  const setup = (options?: ImpulseFormValueOptions<string>) => {
-    const value = ImpulseFormValue.of("", options)
-
-    enhance(value)
-
-    return value
-  }
-
+  setupValue("without submit listeners"),
+  setupValue("with a single sync submit listener", (form) => {
+    form.onSubmit(vi.fn())
+  }),
+  setupValue("with many sync submit listeners", (form) => {
+    form.onSubmit(vi.fn())
+    form.onSubmit(vi.fn())
+    form.onSubmit(vi.fn())
+  }),
+  setupValue("with a single async submit listener", (form) => {
+    form.onSubmit(() => wait(SLOWEST_ASYNC_MS))
+  }),
+  setupValue("with many async submit listeners", (form) => {
+    form.onSubmit(() => wait(SLOWEST_ASYNC_MS / 3))
+    form.onSubmit(() => wait(SLOWEST_ASYNC_MS / 2))
+    form.onSubmit(() => wait(SLOWEST_ASYNC_MS))
+  }),
+  setupValue("with many (a)sync submit listeners", (form) => {
+    form.onSubmit(() => wait(SLOWEST_ASYNC_MS / 2))
+    form.onSubmit(vi.fn())
+    form.onSubmit(() => wait(SLOWEST_ASYNC_MS))
+    form.onSubmit(vi.fn())
+  }),
+])("$name#getSubmitCount(scope) $description", ({ setup }) => {
   it("returns 0 on initial", ({ scope }) => {
     const value = setup()
 
@@ -77,14 +68,12 @@ describe.each([
   })
 
   it("increments when value is invalid", ({ scope }) => {
-    const value = setup({
-      touched: true,
-      schema: z.string().min(5),
-    })
+    const value = setup()
 
-    expect(value.isInvalid(scope)).toBe(true)
+    expect(value.isInvalid(scope)).toBe(false)
 
     void value.submit()
+    expect(value.isInvalid(scope)).toBe(true)
     expect(value.getSubmitCount(scope)).toBe(1)
   })
 
@@ -102,7 +91,7 @@ describe.each([
     void submits.then(all_done)
     expect(all_done).not.toHaveBeenCalled()
 
-    await vi.advanceTimersByTimeAsync(3000)
+    await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
     expect(all_done).toHaveBeenCalledOnce()
     expect(value.getSubmitCount(scope)).toBe(3)
   })
