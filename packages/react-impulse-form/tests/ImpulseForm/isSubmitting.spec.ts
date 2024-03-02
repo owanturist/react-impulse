@@ -99,7 +99,7 @@ describe.each([
     form.fields._3.fields._1.onSubmit(vi.fn())
     form.fields._3.fields._2.onSubmit(vi.fn())
   }),
-])("%s#isSubmitting(scope) %s", ({ setup }) => {
+])("$name#isSubmitting(scope) $description", ({ setup }) => {
   it("returns false on initial", ({ scope }) => {
     const form = setup()
 
@@ -209,6 +209,7 @@ describe.each([
   setupValue("with many async submit listeners", (form) => {
     form.onSubmit(vi.fn())
     form.onSubmit(vi.fn())
+    form.onSubmit(() => wait(SLOWEST_ASYNC_MS / 2))
     form.onSubmit(() => wait(SLOWEST_ASYNC_MS))
   }),
 ])("ImpulseFormValue#isSubmitting(scope) $description", ({ setup }) => {
