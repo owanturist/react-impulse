@@ -3,6 +3,8 @@ import { z } from "zod"
 import { ImpulseFormValue } from "../../src"
 import { wait } from "../common"
 
+const SLOWEST_ASYNC_MS = 3000
+
 beforeAll(() => {
   vi.useFakeTimers()
 })
@@ -165,27 +167,27 @@ describe("onSubmit(listener)", () => {
     const done_3 = vi.fn()
     const all_done = vi.fn()
 
-    form.onSubmit(() => wait(1000).then(done_1))
-    form.onSubmit(() => wait(2000).then(done_2))
-    form.onSubmit(() => wait(3000).then(done_3))
+    form.onSubmit(() => wait(0.25 * SLOWEST_ASYNC_MS).then(done_1))
+    form.onSubmit(() => wait(0.5 * SLOWEST_ASYNC_MS).then(done_2))
+    form.onSubmit(() => wait(SLOWEST_ASYNC_MS).then(done_3))
 
     void form.submit().then(all_done)
 
-    await vi.advanceTimersByTimeAsync(1000)
+    await vi.advanceTimersByTimeAsync(0.25 * SLOWEST_ASYNC_MS)
     expect(done_1).toHaveBeenCalledOnce()
     expect(done_2).not.toHaveBeenCalled()
     expect(done_3).not.toHaveBeenCalled()
     expect(all_done).not.toHaveBeenCalled()
     expect(form.isSubmitting(scope)).toBe(true)
 
-    await vi.advanceTimersByTimeAsync(1000)
+    await vi.advanceTimersByTimeAsync(0.25 * SLOWEST_ASYNC_MS)
     expect(done_1).toHaveBeenCalledOnce()
     expect(done_2).toHaveBeenCalledOnce()
     expect(done_3).not.toHaveBeenCalled()
     expect(all_done).not.toHaveBeenCalled()
     expect(form.isSubmitting(scope)).toBe(true)
 
-    await vi.advanceTimersByTimeAsync(1000)
+    await vi.advanceTimersByTimeAsync(0.5 * SLOWEST_ASYNC_MS)
     expect(done_1).toHaveBeenCalledOnce()
     expect(done_2).toHaveBeenCalledOnce()
     expect(done_3).toHaveBeenCalledOnce()
