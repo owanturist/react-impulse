@@ -18,7 +18,7 @@ describe.each([
   describe.each([
     ["nothing", identity as typeof scoped],
     ["scoped", scoped],
-  ])("using %s as hoc", (__, hoc) => {
+  ])("using %s as hoc", (_, hoc) => {
     describe("single impulse", () => {
       const Component: React.FC<{
         value: Impulse<number>

@@ -61,7 +61,7 @@ describe("single factory", () => {
         })
       },
     ],
-  ])("%s", (__, useCounter) => {
+  ])("%s", (_, useCounter) => {
     it("watches the Impulse's changes", () => {
       const impulse = Impulse.of({ count: 1 })
 
@@ -486,7 +486,7 @@ describe("multiple Impulse#getValue(scope) calls", () => {
           )
         },
       ],
-    ])("%s", (__, useSingleHook, useDoubleHook) => {
+    ])("%s", (_, useSingleHook, useDoubleHook) => {
       const setup = () => {
         const spySingle = vi.fn()
         const spyDouble = vi.fn()

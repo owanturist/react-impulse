@@ -972,7 +972,7 @@ describe.each([
     ],
   ])(
     "should re-render when countChild value changes from the %s",
-    (__, increment) => {
+    (_, increment) => {
       const { onRender, onChildRender, countChild } = setup()
       vi.clearAllMocks()
 

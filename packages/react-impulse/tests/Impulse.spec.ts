@@ -1066,7 +1066,7 @@ describe.each([
       ["undefined", undefined, "undefined"],
       ["array", [1, 2, setup(3).impulse], "1,2,3"],
       ["object", { first: 1 }, "[object Object]"],
-    ])("converts %s value to string", (__, value, expected) => {
+    ])("converts %s value to string", (_, value, expected) => {
       const { impulse } = setup(value)
 
       expect(String(impulse)).toBe(expected)
