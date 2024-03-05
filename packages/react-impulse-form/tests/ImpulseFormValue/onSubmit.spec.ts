@@ -131,7 +131,7 @@ describe("onSubmit(listener)", () => {
     expect(listener).not.toHaveBeenCalled()
   })
 
-  it('unsubscribes the same listener as many times as it"s been subscribed', () => {
+  it("unsubscribes the same listener as many times as it's been subscribed", () => {
     const form = ImpulseFormValue.of("value")
 
     const listener = vi.fn()

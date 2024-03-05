@@ -335,8 +335,10 @@ export class ImpulseFormValue<
     })
   }
 
-  public setSchema(schema: ImpulseFormSchema<TValue, TOriginalValue>): void {
-    this._schema.setValue(schema)
+  public setSchema(
+    schema: null | ImpulseFormSchema<TValue, TOriginalValue>,
+  ): void {
+    this._schema.setValue(schema ?? undefined)
   }
 
   public reset(

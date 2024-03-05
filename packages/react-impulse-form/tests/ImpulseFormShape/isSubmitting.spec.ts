@@ -217,40 +217,38 @@ describe.each([
       expect(form.isSubmitting(scope)).toBe(false)
     })
 
-    it("returns false when root.fields.<ImpulseFormValue> is invalid", ({
-      scope,
-    }) => {
-      const form = setup({
-        originalValue: {
-          _1: "abc",
-        },
+    describe.each([
+      // TODO ["root.fields.<ImpulseFormShape>"]
+      [
+        "root.fields.<ImpulseFormValue>",
+        () =>
+          setup({
+            originalValue: {
+              _1: "abc",
+            },
+          }),
+      ],
+      [
+        "root.fields.<ImpulseFormShape>.fields.<ImpulseFormValue>",
+        () =>
+          setup({
+            originalValue: {
+              _3: {
+                _2: ["abc"],
+              },
+            },
+          }),
+      ],
+    ])("when %s is invalid", (_, setup) => {
+      it("returns false", ({ scope }) => {
+        const form = setup()
+
+        expect(form.isInvalid(scope)).toBe(false)
+
+        void submit(form)
+        expect(form.isInvalid(scope)).toBe(true)
+        expect(form.isSubmitting(scope)).toBe(false)
       })
-
-      expect(form.isInvalid(scope)).toBe(false)
-
-      void submit(form)
-      expect(form.isInvalid(scope)).toBe(true)
-      expect(form.isSubmitting(scope)).toBe(false)
-    })
-
-    it.todo("returns false when root.fields.<ImpulseFormShape> is invalid")
-
-    it("returns false when root.fields.<ImpulseFormShape>.fields.<ImpulseFormValue> is invalid", ({
-      scope,
-    }) => {
-      const form = setup({
-        originalValue: {
-          _3: {
-            _2: ["abc"],
-          },
-        },
-      })
-
-      expect(form.isInvalid(scope)).toBe(false)
-
-      void submit(form)
-      expect(form.isInvalid(scope)).toBe(true)
-      expect(form.isSubmitting(scope)).toBe(false)
     })
   })
 })
