@@ -10,6 +10,16 @@ beforeAll(() => {
 })
 
 describe("onSubmit(listener)", () => {
+  it("provides validated value", () => {
+    const form = ImpulseFormValue.of("value", {
+      schema: z.string().min(2),
+    })
+
+    form.onSubmit((value) => {
+      expectTypeOf(value).toEqualTypeOf<string>()
+    })
+  })
+
   it("does not call the listener when the form is not valid", ({ scope }) => {
     const form = ImpulseFormValue.of("value", {
       schema: z.string().min(10),

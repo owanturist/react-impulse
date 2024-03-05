@@ -53,6 +53,22 @@ describe.each<
     (form) => form.fields._3.fields._1.submit(),
   ],
 ])("onSubmit(listener) when submitting via %s", (_, submit) => {
+  it("provides validated value", () => {
+    const form = setup()
+
+    form.onSubmit((value) => {
+      expectTypeOf(value).toEqualTypeOf<{
+        readonly _1: string
+        readonly _2: number
+        readonly _3: {
+          readonly _1: boolean
+          readonly _2: Array<string>
+        }
+        readonly _4: Array<string>
+      }>()
+    })
+  })
+
   describe.each([
     // TODO ["root.fields.<ImpulseFormShape>"]
     [

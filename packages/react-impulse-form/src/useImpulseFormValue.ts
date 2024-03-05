@@ -7,11 +7,7 @@ import {
 import { type Func, useHandler } from "./utils"
 import type { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormValue } from "./ImpulseFormValue"
-import {
-  type UseImpulseFormOptions,
-  type UseImpulseFormResult,
-  useImpulseForm,
-} from "./useImpulseForm"
+import { type UseImpulseFormOptions, useImpulseForm } from "./useImpulseForm"
 
 export interface UseImpulseFormValueOptions<TForm extends ImpulseForm>
   extends UseImpulseFormOptions<TForm> {
@@ -24,8 +20,6 @@ export interface UseImpulseFormValueOptions<TForm extends ImpulseForm>
     | Func<[errors: ReadonlyArray<string>, form: TForm]>
 }
 
-export interface UseImpulseFormValueResult extends UseImpulseFormResult {}
-
 export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
   form: ImpulseFormValue<TOriginalValue, TValue>,
   {
@@ -33,22 +27,24 @@ export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
     onFocusInvalid,
     onSubmit,
   }: UseImpulseFormValueOptions<typeof form> = {},
-): UseImpulseFormValueResult => {
+): void => {
   const onFocusInvalidStable = useHandler(
-    isFunction(onFocusInvalid)
-      ? onFocusInvalid
-      : isDefined(onFocusInvalid)
-        ? () => onFocusInvalid.current?.focus()
-        : null,
+    !shouldFocusWhenInvalid
+      ? null
+      : isFunction(onFocusInvalid)
+        ? onFocusInvalid
+        : isDefined(onFocusInvalid)
+          ? () => onFocusInvalid.current?.focus()
+          : null,
   )
 
   useEffect(() => {
-    if (shouldFocusWhenInvalid && isDefined(onFocusInvalidStable)) {
+    if (isDefined(onFocusInvalidStable)) {
       return form.onFocusWhenInvalid((errors) => {
         onFocusInvalidStable(errors, form)
       })
     }
-  }, [form, onFocusInvalidStable, shouldFocusWhenInvalid])
+  }, [form, onFocusInvalidStable])
 
-  return useImpulseForm(form, { onSubmit })
+  useImpulseForm(form, { onSubmit })
 }

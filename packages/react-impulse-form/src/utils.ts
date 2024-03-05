@@ -1,6 +1,7 @@
 import { isDefined, useEffect, useLayoutEffect, useRef } from "./dependencies"
 
 export type Func<TArgs extends ReadonlyArray<unknown>, TReturn = void> = (
+  this: void,
   ...args: TArgs
 ) => TReturn
 
