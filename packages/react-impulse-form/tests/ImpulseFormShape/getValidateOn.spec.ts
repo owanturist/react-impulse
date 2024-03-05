@@ -51,7 +51,7 @@ const getValidateOnVerbose = <TFields extends ImpulseFormShapeFields>(
 describe.each([
   ["getValidateOn(scope)", getValidateOnDefault],
   ["getValidateOn(scope, (concise) => concise)", getValidateOnConcise],
-])("ImpulseFormShape#%s", (_, getValidateOn) => {
+])("%s", (_, getValidateOn) => {
   it("returns concise value", ({ scope }) => {
     const shape = setup()
 
@@ -119,7 +119,7 @@ describe.each([
   })
 })
 
-describe("ImpulseFormShape#getValidateOn(scope, (_, verbose) => verbose)", () => {
+describe("getValidateOn(scope, (_, verbose) => verbose)", () => {
   const getValidateOn = getValidateOnVerbose
 
   it("returns verbose value", ({ scope }) => {

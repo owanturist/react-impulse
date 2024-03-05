@@ -31,7 +31,7 @@ const setup = (
   )
 }
 
-describe("ImpulseFormShape#setValidateOn(..)", () => {
+describe("setValidateOn(..)", () => {
   it("matches the type signature", () => {
     const shape = setup()
 

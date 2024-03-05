@@ -48,7 +48,7 @@ describe.each([
       form.onSubmit(() => wait(SLOWEST_ASYNC_MS))
     }),
   ],
-])("ImpulseFormValue#getSubmitCount(scope) %s", (_, setup) => {
+])("getSubmitCount(scope) %s", (_, setup) => {
   it("increments sync when submits", ({ scope }) => {
     const form = setup()
 

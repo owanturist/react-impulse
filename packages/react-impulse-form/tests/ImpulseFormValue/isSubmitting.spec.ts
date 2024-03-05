@@ -32,7 +32,7 @@ describe.each([
       form.onSubmit(vi.fn())
     }),
   ],
-])("ImpulseFormValue#isSubmitting(scope) %s", (_, setup) => {
+])("isSubmitting(scope) %s", (_, setup) => {
   it("returns false on initial", ({ scope }) => {
     const form = setup()
 
@@ -71,7 +71,7 @@ describe.each([
       form.onSubmit(() => wait(SLOWEST_ASYNC_MS))
     }),
   ],
-])("ImpulseFormValue#isSubmitting(scope) %s", (_, setup) => {
+])("isSubmitting(scope) %s", (_, setup) => {
   it("returns true when submitting starts", ({ scope }) => {
     const form = setup()
 

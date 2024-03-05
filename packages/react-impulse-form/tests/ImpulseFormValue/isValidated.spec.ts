@@ -33,7 +33,7 @@ describe.each([
   ["isValidated(scope)", isValidatedDefault],
   ["isValidated(scope, (concise) => concise)", isValidatedConcise],
   ["isValidated(scope, (_, verbose) => concise)", isValidatedVerbose],
-])("ImpulseFormValue#%s", (_, isValidated) => {
+])("%s", (_, isValidated) => {
   it("returns boolean value", ({ scope }) => {
     const value = setup()
 

@@ -120,7 +120,7 @@ describe.each([
       form.onSubmit(() => wait(SLOWEST_ASYNC_MS / 8))
     }),
   ],
-])("ImpulseFormShape#getSubmitCount(scope) %s", (_, setup) => {
+])("getSubmitCount(scope) %s", (_, setup) => {
   describe.each<
     [string, (form: ImpulseFormShape<ShapeFields>) => Promise<unknown>]
   >([

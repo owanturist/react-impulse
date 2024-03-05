@@ -23,7 +23,7 @@ describe.each([
   ["getValidateOn(scope)", getValidateOnDefault],
   ["getValidateOn(scope, (concise) => concise)", getValidateOnConcise],
   ["getValidateOn(scope, (_, verbose) => concise)", getValidateOnVerbose],
-])("ImpulseFormValue#%s", (_, getValidateOn) => {
+])("%s", (_, getValidateOn) => {
   it("returns ValidateStrategy value", ({ scope }) => {
     const value = setup()
 

@@ -9,7 +9,7 @@ const setup = (options?: ImpulseFormValueOptions<string>) => {
   return ImpulseFormValue.of("", options)
 }
 
-describe("ImpulseFormValue#setValidateOn(..)", () => {
+describe("setValidateOn(..)", () => {
   it("matches the type signature", () => {
     const value = setup()
 

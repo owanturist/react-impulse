@@ -47,7 +47,7 @@ const isValidatedVerbose = <TFields extends ImpulseFormShapeFields>(
   shape: ImpulseFormShape<TFields>,
 ) => shape.isValidated(scope, (_, verbose) => verbose)
 
-describe("ImpulseFormShape#isValidated(scope)", () => {
+describe("isValidated(scope)", () => {
   const isValidated = isValidatedDefault
 
   it("returns boolean value", ({ scope }) => {
@@ -92,7 +92,7 @@ describe("ImpulseFormShape#isValidated(scope)", () => {
   })
 })
 
-describe("ImpulseFormShape#isValidated(scope, (concise) => concise)", () => {
+describe("isValidated(scope, (concise) => concise)", () => {
   const isValidated = isValidatedConcise
 
   it("selects concise value", ({ scope }) => {
@@ -165,7 +165,7 @@ describe("ImpulseFormShape#isValidated(scope, (concise) => concise)", () => {
   })
 })
 
-describe("ImpulseFormShape#isValidated(scope, (_, verbose) => verbose)", () => {
+describe("isValidated(scope, (_, verbose) => verbose)", () => {
   const isValidated = isValidatedVerbose
 
   it("selects verbose value", ({ scope }) => {
@@ -250,7 +250,7 @@ describe("ImpulseFormShape#isValidated(scope, (_, verbose) => verbose)", () => {
   })
 })
 
-describe("ImpulseFormShape#isValidated(..)", () => {
+describe("isValidated(..)", () => {
   it("overrides fields' initial value", ({ scope }) => {
     const shape = ImpulseFormShape.of(
       {

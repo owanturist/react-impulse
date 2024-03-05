@@ -71,7 +71,7 @@ describe.each([
       form.fields._3.fields._2.onSubmit(vi.fn())
     }),
   ],
-])("ImpulseFormShape#isSubmitting(scope) %s", (_, setup) => {
+])("isSubmitting(scope) %s", (_, setup) => {
   it("returns false on initial", ({ scope }) => {
     const form = setup()
 
@@ -149,7 +149,7 @@ describe.each([
       form.onSubmit(() => wait(SLOWEST_ASYNC_MS / 8))
     }),
   ],
-])("ImpulseFormShape#isSubmitting(scope) %s", (_, setup) => {
+])("isSubmitting(scope) %s", (_, setup) => {
   describe.each<
     [string, (form: ImpulseFormShape<ShapeFields>) => Promise<unknown>]
   >([
