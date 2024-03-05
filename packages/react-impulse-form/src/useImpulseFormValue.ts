@@ -16,6 +16,9 @@ export interface UseImpulseFormValueOptions<TForm extends ImpulseForm>
    */
   shouldFocusWhenInvalid?: boolean
   onFocusInvalid?:
+    | null
+    | undefined
+    | HTMLElement
     | RefObject<null | undefined | HTMLElement>
     | Func<[errors: ReadonlyArray<string>, form: TForm]>
 }
@@ -33,9 +36,11 @@ export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
       ? null
       : isFunction(onFocusInvalid)
         ? onFocusInvalid
-        : isDefined(onFocusInvalid)
-          ? () => onFocusInvalid.current?.focus()
-          : null,
+        : onFocusInvalid instanceof HTMLElement
+          ? () => onFocusInvalid.focus()
+          : isDefined(onFocusInvalid)
+            ? () => onFocusInvalid.current?.focus()
+            : null,
   )
 
   useEffect(() => {
