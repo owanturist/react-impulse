@@ -308,16 +308,16 @@ describe.each([
     it("returns true when submitting starts", ({ scope }) => {
       expectTrueWhenSubmittingStarts({
         scope,
-        form: setup(),
         submit,
+        form: setup(),
       })
     })
 
     it("returns false when submitting finishes", async ({ scope }) => {
       await expectFalseWhenSingleSubmitFinishes({
         scope,
-        form: setup(),
         submit,
+        form: setup(),
       })
     })
 
@@ -334,12 +334,12 @@ describe.each([
     }) => {
       expectFalseWhenInvalid({
         scope,
+        submit,
         form: setup({
           originalValue: {
             _1: "abc",
           },
         }),
-        submit,
       })
     })
 
@@ -350,6 +350,7 @@ describe.each([
     }) => {
       expectFalseWhenInvalid({
         scope,
+        submit,
         form: setup({
           originalValue: {
             _3: {
@@ -357,7 +358,6 @@ describe.each([
             },
           },
         }),
-        submit,
       })
     })
   })
