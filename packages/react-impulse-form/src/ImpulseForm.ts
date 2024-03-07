@@ -1,7 +1,5 @@
-import { type Scope, isDefined, batch, untrack } from "./dependencies"
+import { type Scope, isDefined, batch, untrack, Impulse } from "./dependencies"
 import { Emitter } from "./Emitter"
-import { ImpulseFormContext } from "./ImpulseFormContext"
-import { lazy } from "./utils"
 
 export interface ImpulseFormParams {
   "value.schema": unknown
@@ -74,9 +72,14 @@ export abstract class ImpulseForm<
     void | Promise<unknown>
   >()
 
-  private readonly _context = lazy(() => new ImpulseFormContext())
+  private readonly _submitAttempts = Impulse.of(0)
+  private readonly _submittingCount = Impulse.of(0)
 
-  protected constructor(private readonly _root: null | ImpulseForm) {}
+  private readonly _root: ImpulseForm
+
+  protected constructor(_root: null | ImpulseForm) {
+    this._root = _root ?? this
+  }
 
   protected abstract _getFocusFirstInvalidValue(): null | VoidFunction
 
@@ -86,14 +89,6 @@ export abstract class ImpulseForm<
 
   protected abstract _setValidated(isValidated: boolean): void
 
-  private _getContext(): ImpulseFormContext {
-    if (isDefined(this._root)) {
-      return this._root._getContext()
-    }
-
-    return this._context()
-  }
-
   protected _submitWith(
     value: TParams["value.schema"],
   ): ReadonlyArray<void | Promise<unknown>> {
@@ -101,11 +96,11 @@ export abstract class ImpulseForm<
   }
 
   public getSubmitCount(scope: Scope): number {
-    return this._getContext()._submitAttempts.getValue(scope)
+    return this._root._submitAttempts.getValue(scope)
   }
 
   public isSubmitting(scope: Scope): boolean {
-    return this._getContext()._submittingCount.getValue(scope) > 0
+    return this._root._submittingCount.getValue(scope) > 0
   }
 
   public onSubmit(
@@ -115,33 +110,27 @@ export abstract class ImpulseForm<
   }
 
   public async submit(): Promise<void> {
-    if (isDefined(this._root)) {
-      return this._root.submit()
-    }
-
-    const context = this._getContext()
-
     batch(() => {
-      context._submitAttempts.setValue((count) => count + 1)
-      this._setValidated(true)
+      this._root._submitAttempts.setValue((count) => count + 1)
+      this._root._setValidated(true)
     })
 
     const promises = untrack((scope) => {
-      if (this.isValid(scope)) {
-        const value = this.getValue(scope)!
+      if (this._root.isValid(scope)) {
+        const value = this._root.getValue(scope)!
 
-        return this._submitWith(value).filter(isDefined)
+        return this._root._submitWith(value).filter(isDefined)
       }
     })
 
     if (!isDefined(promises)) {
-      this.focusFirstInvalidValue()
+      this._root.focusFirstInvalidValue()
     } else if (promises.length > 0) {
-      context._submittingCount.setValue((count) => count + 1)
+      this._root._submittingCount.setValue((count) => count + 1)
 
       await Promise.all(promises)
 
-      context._submittingCount.setValue((count) => count - 1)
+      this._root._submittingCount.setValue((count) => count - 1)
     }
   }
 

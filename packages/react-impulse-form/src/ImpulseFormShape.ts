@@ -13,8 +13,8 @@ import {
 import { type ComputeObject, isTrue, type Setter } from "./utils"
 import {
   type GetImpulseFormParam,
-  ImpulseForm,
   type ImpulseFormParamsKeys,
+  ImpulseForm,
 } from "./ImpulseForm"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./ValidateStrategy"
 
@@ -220,18 +220,16 @@ export class ImpulseFormShape<
   protected _submitWith(
     value: ImpulseFormShapeValueSchema<TFields>,
   ): ReadonlyArray<void | Promise<unknown>> {
-    const promises = super._submitWith(value).slice()
-
-    // TODO dry
-    for (const [key, field] of Object.entries(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
-        promises.push(
-          ...ImpulseForm._submitWith(field, value[key as keyof typeof value]),
-        )
+    // TODO DRY
+    const promises = Object.entries(this.fields).flatMap(([key, field]) => {
+      if (!ImpulseForm.isImpulseForm(field)) {
+        return []
       }
-    }
 
-    return promises
+      return ImpulseForm._submitWith(field, value[key as keyof typeof value])
+    })
+
+    return [...super._submitWith(value), ...promises]
   }
 
   protected _getFocusFirstInvalidValue(): VoidFunction | null {

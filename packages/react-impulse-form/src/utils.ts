@@ -1,4 +1,4 @@
-import { isDefined, useEffect, useLayoutEffect, useRef } from "./dependencies"
+import { useEffect, useLayoutEffect, useRef } from "./dependencies"
 
 export type Func<TArgs extends ReadonlyArray<unknown>, TReturn = void> = (
   this: void,
@@ -71,18 +71,4 @@ export function useHandler<
   })
 
   return handler && stableRef.current
-}
-
-export type Lazy<TValue> = () => TValue
-
-export const lazy = <TValue>(init: () => TValue): Lazy<TValue> => {
-  let value: TValue | null = null
-
-  return () => {
-    if (!isDefined(value)) {
-      value = init()
-    }
-
-    return value
-  }
 }
