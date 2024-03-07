@@ -17,6 +17,10 @@ export type ComputeObject<Obj> = unknown & {
 
 export const isTrue = (value: unknown): value is true => value === true
 
+export const isHtmlElement = (value: unknown): value is HTMLElement => {
+  return value instanceof HTMLElement
+}
+
 const eq = <T>(left: T, right: T): boolean => Object.is(left, right)
 
 export const uniq = <T>(values: ReadonlyArray<T>): ReadonlyArray<T> => {

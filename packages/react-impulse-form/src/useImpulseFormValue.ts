@@ -4,7 +4,7 @@ import {
   isFunction,
   isDefined,
 } from "./dependencies"
-import { type Func, useHandler } from "./utils"
+import { type Func, useHandler, isHtmlElement } from "./utils"
 import type { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormValue } from "./ImpulseFormValue"
 import { type UseImpulseFormOptions, useImpulseForm } from "./useImpulseForm"
@@ -23,6 +23,25 @@ export interface UseImpulseFormValueOptions<TForm extends ImpulseForm>
     | Func<[errors: ReadonlyArray<string>, form: TForm]>
 }
 
+const normalizeOnFocusInvalid = <TArgs extends ReadonlyArray<unknown>>(
+  onFocusInvalid:
+    | HTMLElement
+    | RefObject<null | undefined | HTMLElement>
+    | Func<TArgs>,
+): null | Func<TArgs> => {
+  if (isFunction(onFocusInvalid)) {
+    return onFocusInvalid
+  }
+
+  return () => {
+    if (isHtmlElement(onFocusInvalid)) {
+      onFocusInvalid.focus()
+    } else if (isHtmlElement(onFocusInvalid.current)) {
+      onFocusInvalid.current.focus()
+    }
+  }
+}
+
 export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
   form: ImpulseFormValue<TOriginalValue, TValue>,
   {
@@ -32,15 +51,9 @@ export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
   }: UseImpulseFormValueOptions<typeof form> = {},
 ): void => {
   const onFocusInvalidStable = useHandler(
-    !shouldFocusWhenInvalid
-      ? null
-      : isFunction(onFocusInvalid)
-        ? onFocusInvalid
-        : onFocusInvalid instanceof HTMLElement
-          ? () => onFocusInvalid.focus()
-          : isDefined(onFocusInvalid)
-            ? () => onFocusInvalid.current?.focus()
-            : null,
+    shouldFocusWhenInvalid && isDefined(onFocusInvalid)
+      ? normalizeOnFocusInvalid(onFocusInvalid)
+      : null,
   )
 
   useEffect(() => {
