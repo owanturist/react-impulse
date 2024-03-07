@@ -1,5 +1,105 @@
 # react-impulse-form
 
+## 0.2.0
+
+### Minor Changes
+
+- [#661](https://github.com/owanturist/react-impulse/pull/661) [`01f1f56`](https://github.com/owanturist/react-impulse/commit/01f1f562b759844632d6d7fbd22b0dfb1555470e) Thanks [@owanturist](https://github.com/owanturist)! - Introduce:
+
+  - ```ts
+    abstract class ImpulseForm {
+      isSubmitting(scope: Scope): boolean;
+
+      getSubmitCount(scope: Scope): number;
+
+      onSubmit(
+        listener: (value: TParams["value.schema"]) => void | Promise<unknown>,
+      ): VoidFunction;
+
+      submit(): Promise<void>;
+
+      focusFirstInvalidValue(): void;
+
+      isValidated(scope: Scope): boolean;
+      isValidated<TResult>(
+        scope: Scope,
+        select: (
+          concise: TParams["flag.schema"],
+          verbose: TParams["flag.schema.verbose"],
+        ) => TResult,
+      ): TResult;
+
+      getValidateOn(scope: Scope): TParams["validateOn.schema"];
+      getValidateOn<TResult>(
+        scope: Scope,
+        select: (
+          concise: TParams["validateOn.schema"],
+          verbose: TParams["validateOn.schema.verbose"],
+        ) => TResult,
+      ): TResult;
+
+      setValidateOn(setter: TParams["validateOn.setter"]): void;
+    }
+    ```
+
+  - `ImpulseFormShapeOptions.validateOn`
+  - `ImpulseFormValueOptions.validateOn`
+  - ```ts
+    class ImpulseFormValue {
+      onFocusWhenInvalid(
+        onFocus: (errors: ReadonlyArray<string>) => void,
+      ): VoidFunction;
+    }
+    ```
+
+  Extended:
+
+  - ```diff
+    -ImpulseFormValue#setSchema(schema: Schema): void
+    +ImpulseFormValue#setSchema(schema: Schema | null): void
+    ```
+
+  Change:
+
+  - use `ImpulseForm#submit`, `ImpulseForm#getSubmitCount`, `ImpulseForm#isSubmitting` instead
+
+    ```diff
+    -interface UseImpulseFormResult {
+    -  submit(this: void): void
+    -  getSubmitCount(this: void, scope: Scope): number
+    -  isSubmitting(this: void, scope: Scope): boolean
+    -}
+
+    const useImpulseForm = <TForm extends ImpulseForm>(
+      form: TForm,
+      options?: UseImpulseFormOptions<TForm>,
+    -): UseImpulseFormResult
+    +): void
+    ```
+
+  - use `ImpulseForm#submit`, `ImpulseForm#getSubmitCount`, `ImpulseForm#isSubmitting` instead
+
+    ```diff
+    interface UseImpulseFormValueOptions<TForm extends ImpulseForm> extends UseImpulseFormOptions<TForm> {
+      /**
+      * @default true
+      */
+      shouldFocusWhenInvalid?: boolean
+      onFocusInvalid?:
+    +   | null
+    +   | undefined
+    +   | HTMLElement
+        | RefObject<null | undefined | HTMLElement>
+        | Func<[errors: ReadonlyArray<string>, form: TForm]>
+    }
+
+    const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
+      form: ImpulseFormValue<TOriginalValue, TValue>,
+      options?: UseImpulseFormValueOptions<typeof form>,
+    -): UseImpulseFormValueResult
+    +): void
+    ```
+
 ## 0.1.2
 
 ### Patch Changes
