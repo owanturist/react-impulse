@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from "./dependencies"
 
 export type Func<TArgs extends ReadonlyArray<unknown>, TReturn = void> = (
+  this: void,
   ...args: TArgs
 ) => TReturn
 
@@ -9,8 +10,33 @@ export type Setter<
   TPrevValues extends ReadonlyArray<unknown> = [TValue],
 > = TValue | Func<TPrevValues, TValue>
 
-export function isDefined<T>(data: T): data is NonNullable<T> {
-  return data != null
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+export type ComputeObject<Obj> = unknown & {
+  [K in keyof Obj]: Obj[K]
+}
+
+export const isTrue = (value: unknown): value is true => value === true
+
+export const isHtmlElement = (value: unknown): value is HTMLElement => {
+  return value instanceof HTMLElement
+}
+
+const eq = <T>(left: T, right: T): boolean => Object.is(left, right)
+
+export const uniq = <T>(values: ReadonlyArray<T>): ReadonlyArray<T> => {
+  const acc = new Set<T>()
+
+  const result = values.filter((value) => {
+    if (acc.has(value)) {
+      return false
+    }
+
+    acc.add(value)
+
+    return true
+  })
+
+  return result.length === values.length ? values : result
 }
 
 export function shallowArrayEquals<T>(
@@ -25,7 +51,7 @@ export function shallowArrayEquals<T>(
     return false
   }
 
-  return left.every((value, index) => Object.is(value, right[index]))
+  return left.every((value, index) => eq(value, right[index]))
 }
 
 export const useIsomorphicLayoutEffect =

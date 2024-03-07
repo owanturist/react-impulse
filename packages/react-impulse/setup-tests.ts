@@ -18,6 +18,10 @@ afterEach(() => {
   cleanup()
 })
 
+afterAll(() => {
+  vi.useRealTimers()
+})
+
 vi.doMock("@testing-library/react", async () => {
   const actual = await vi.importActual("@testing-library/react")
 

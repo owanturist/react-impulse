@@ -224,7 +224,7 @@ describe("triggering factory for nested impulses vs single impulse", () => {
         )
       },
     ],
-  ])("%s", (__, useSingleCounter, useNestedCounters) => {
+  ])("%s", (_, useSingleCounter, useNestedCounters) => {
     const setup = () => {
       const first = Impulse.of({ count: 1 })
       const second = Impulse.of({ count: 2 })

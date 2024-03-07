@@ -1,12 +1,13 @@
-import { type RefObject, useEffect, isFunction } from "./dependencies"
-import { type Func, useHandler, isDefined } from "./utils"
+import {
+  type RefObject,
+  useEffect,
+  isFunction,
+  isDefined,
+} from "./dependencies"
+import { type Func, useHandler, isHtmlElement } from "./utils"
 import type { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormValue } from "./ImpulseFormValue"
-import {
-  type UseImpulseFormOptions,
-  type UseImpulseFormResult,
-  useImpulseForm,
-} from "./useImpulseForm"
+import { type UseImpulseFormOptions, useImpulseForm } from "./useImpulseForm"
 
 export interface UseImpulseFormValueOptions<TForm extends ImpulseForm>
   extends UseImpulseFormOptions<TForm> {
@@ -15,39 +16,53 @@ export interface UseImpulseFormValueOptions<TForm extends ImpulseForm>
    */
   shouldFocusWhenInvalid?: boolean
   onFocusInvalid?:
+    | null
+    | undefined
+    | HTMLElement
     | RefObject<null | undefined | HTMLElement>
     | Func<[errors: ReadonlyArray<string>, form: TForm]>
 }
 
-export interface UseImpulseFormValueResult extends UseImpulseFormResult {}
+const normalizeOnFocusInvalid = <TArgs extends ReadonlyArray<unknown>>(
+  onFocusInvalid:
+    | HTMLElement
+    | RefObject<null | undefined | HTMLElement>
+    | Func<TArgs>,
+): null | Func<TArgs> => {
+  if (isFunction(onFocusInvalid)) {
+    return onFocusInvalid
+  }
+
+  return () => {
+    if (isHtmlElement(onFocusInvalid)) {
+      onFocusInvalid.focus()
+    } else if (isHtmlElement(onFocusInvalid.current)) {
+      onFocusInvalid.current.focus()
+    }
+  }
+}
 
 export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
   form: ImpulseFormValue<TOriginalValue, TValue>,
   {
     shouldFocusWhenInvalid = true,
     onFocusInvalid,
-    ...options
+    onSubmit,
   }: UseImpulseFormValueOptions<typeof form> = {},
-): UseImpulseFormValueResult => {
+): void => {
   const onFocusInvalidStable = useHandler(
-    isFunction(onFocusInvalid)
-      ? onFocusInvalid
-      : isDefined(onFocusInvalid)
-        ? () => onFocusInvalid.current?.focus()
-        : null,
+    shouldFocusWhenInvalid && isDefined(onFocusInvalid)
+      ? normalizeOnFocusInvalid(onFocusInvalid)
+      : null,
   )
 
   useEffect(() => {
-    if (shouldFocusWhenInvalid && isDefined(onFocusInvalidStable)) {
-      form._setOnFocus((errors) => {
+    if (isDefined(onFocusInvalidStable)) {
+      return form.onFocusWhenInvalid((errors) => {
         onFocusInvalidStable(errors, form)
       })
-
-      return () => {
-        form._setOnFocus(null)
-      }
     }
-  }, [form, onFocusInvalidStable, shouldFocusWhenInvalid])
+  }, [form, onFocusInvalidStable])
 
-  return useImpulseForm(form, options)
+  useImpulseForm(form, { onSubmit })
 }

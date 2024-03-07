@@ -1,4 +1,6 @@
-import { equals, identity } from "remeda"
+// TODO split all tests like ./ImpulseFormShape/isValidated.test.ts
+
+import { equals } from "remeda"
 import { z } from "zod"
 
 import {
@@ -7,6 +9,11 @@ import {
   ImpulseFormShape,
   ImpulseFormValue,
 } from "../src"
+
+const arg =
+  <TIndex extends number>(index: TIndex) =>
+  <TArgs extends ReadonlyArray<unknown>>(...args: TArgs): TArgs[TIndex] =>
+    args[index]
 
 describe("ImpulseFormShape.of()", () => {
   it("composes ImpulseFormShape from ImpulseFormValue", ({ scope }) => {
@@ -152,7 +159,7 @@ describe("ImpulseFormShape.of()", () => {
         },
       )
 
-      expect(shape.isTouched(scope, (_, verbose) => verbose)).toStrictEqual({
+      expect(shape.isTouched(scope, arg(1))).toStrictEqual({
         first: true,
         second: false,
         third: {
@@ -241,7 +248,7 @@ describe("ImpulseFormShape.of()", () => {
         },
       )
 
-      expect(shape.isTouched(scope, (_, verbose) => verbose)).toStrictEqual({
+      expect(shape.isTouched(scope, arg(1))).toStrictEqual({
         first: false,
         second: true,
         third: {
@@ -272,7 +279,7 @@ describe("ImpulseFormShape.of()", () => {
         },
       )
 
-      expect(shape.getErrors(scope, (_, verbose) => verbose)).toStrictEqual({
+      expect(shape.getErrors(scope, arg(1))).toStrictEqual({
         first: ["another"],
         second: null,
         third: {
@@ -372,7 +379,7 @@ describe("ImpulseFormShape.of()", () => {
         },
       )
 
-      expect(shape.getErrors(scope, (_, verbose) => verbose)).toStrictEqual({
+      expect(shape.getErrors(scope, arg(1))).toStrictEqual({
         first: ["first", "1"],
         second: ["second", "2"],
         third: {
@@ -750,23 +757,61 @@ describe("ImpulseFormShape.of()", () => {
           }
       >()
   })
+
+  it("clones the fields", ({ scope }) => {
+    const shape = ImpulseFormShape.of({
+      one: ImpulseFormValue.of("1"),
+      two: ImpulseFormValue.of(2),
+    })
+    const root = ImpulseFormShape.of({
+      first: shape,
+      second: shape,
+    })
+
+    expect(root.fields.first).not.toBe(shape)
+    expect(root.fields.second).not.toBe(shape)
+    expect(root.fields.first.fields.one).not.toBe(shape.fields.one)
+    expect(root.fields.first.fields.two).not.toBe(shape.fields.two)
+
+    expect(root.fields.first).not.toBe(root.fields.second)
+    expect(root.fields.first.fields.one).not.toBe(root.fields.second.fields.one)
+    expect(root.fields.first.fields.two).not.toBe(root.fields.second.fields.two)
+
+    root.fields.first.fields.one.setTouched(true)
+
+    expect(root.isTouched(scope, (_, verbose) => verbose)).toStrictEqual({
+      first: {
+        one: true,
+        two: false,
+      },
+      second: {
+        one: false,
+        two: false,
+      },
+    })
+  })
 })
 
 describe("ImpulseFormShape#getErrors()", () => {
   it("selects errors", ({ scope }) => {
-    const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of("1", { schema: z.string().max(1) }),
-      second: ImpulseFormValue.of(0, { schema: z.number().nonnegative() }),
-      third: ImpulseFormShape.of({
-        one: ImpulseFormValue.of(true),
-        two: ImpulseFormValue.of(["1"], { schema: z.array(z.string().max(1)) }),
-      }),
-      fourth: ["anything"],
-    })
+    const shape = ImpulseFormShape.of(
+      {
+        first: ImpulseFormValue.of("1", { schema: z.string().max(1) }),
+        second: ImpulseFormValue.of(0, { schema: z.number().nonnegative() }),
+        third: ImpulseFormShape.of({
+          one: ImpulseFormValue.of(true),
+          two: ImpulseFormValue.of(["1"], {
+            schema: z.array(z.string().max(1)),
+          }),
+        }),
+        fourth: ["anything"],
+      },
+      { touched: true },
+    )
 
     expect(shape.getErrors(scope)).toBeNull()
-    expect(shape.getErrors(scope, identity)).toBeNull()
-    expect(shape.getErrors(scope, (_, verbose) => verbose)).toStrictEqual({
+    expect(shape.getErrors(scope, arg(0))).toBeNull()
+    expect(shape.getErrors(scope, arg(1))).toStrictEqual({
       first: null,
       second: null,
       third: {
@@ -783,10 +828,8 @@ describe("ImpulseFormShape#getErrors()", () => {
       second: null,
       third: null,
     })
-    expect(shape.getErrors(scope, identity)).toStrictEqual(
-      shape.getErrors(scope),
-    )
-    expect(shape.getErrors(scope, (_, verbose) => verbose)).toStrictEqual({
+    expect(shape.getErrors(scope, arg(0))).toStrictEqual(shape.getErrors(scope))
+    expect(shape.getErrors(scope, arg(1))).toStrictEqual({
       first: ["String must contain at most 1 character(s)"],
       second: null,
       third: {
@@ -808,12 +851,8 @@ describe("ImpulseFormShape#getErrors()", () => {
         two: ["String must contain at most 1 character(s)"],
       },
     })
-    expect(shape.getErrors(scope, identity)).toStrictEqual(
-      shape.getErrors(scope),
-    )
-    expect(shape.getErrors(scope, (_, verbose) => verbose)).toStrictEqual(
-      shape.getErrors(scope),
-    )
+    expect(shape.getErrors(scope, arg(0))).toStrictEqual(shape.getErrors(scope))
+    expect(shape.getErrors(scope, arg(1))).toStrictEqual(shape.getErrors(scope))
 
     expectTypeOf(shape.getErrors(scope)).toEqualTypeOf<null | {
       readonly first: null | ReadonlyArray<string>
@@ -870,7 +909,7 @@ describe("ImpulseFormShape#setErrors()", () => {
       second: ["second"],
       third: null,
     })
-    expect(shape.getErrors(scope, (_, verbose) => verbose)).toStrictEqual({
+    expect(shape.getErrors(scope, arg(1))).toStrictEqual({
       first: ["another"],
       second: ["second"],
       third: {
@@ -1000,19 +1039,49 @@ describe("ImpulseFormShape#setErrors()", () => {
       >
     >()
   })
+
+  it("resets all errors", ({ scope }) => {
+    const shape = ImpulseFormShape.of({
+      first: ImpulseFormValue.of("", { errors: ["first"] }),
+      second: ImpulseFormValue.of(0, { errors: ["second"] }),
+      third: ImpulseFormShape.of(
+        {
+          one: ImpulseFormValue.of(true),
+          two: ImpulseFormValue.of([""]),
+        },
+        {
+          errors: {
+            one: ["one"],
+            two: ["two"],
+          },
+        },
+      ),
+      fourth: ["anything"],
+    })
+
+    shape.setErrors(null)
+    expect(shape.getErrors(scope)).toBeNull()
+  })
 })
 
 describe("ImpulseFormShape#getValue()", () => {
   it("selects value", ({ scope }) => {
-    const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of(""),
-      second: ImpulseFormValue.of(0, { schema: z.number().nonnegative() }),
-      third: ImpulseFormShape.of({
-        one: ImpulseFormValue.of(true),
-        two: ImpulseFormValue.of(["1"], { schema: z.array(z.string().max(1)) }),
-      }),
-      fourth: ["anything"],
-    })
+    const shape = ImpulseFormShape.of(
+      {
+        first: ImpulseFormValue.of(""),
+        second: ImpulseFormValue.of(0, { schema: z.number().nonnegative() }),
+        third: ImpulseFormShape.of({
+          one: ImpulseFormValue.of(true),
+          two: ImpulseFormValue.of(["1"], {
+            schema: z.array(z.string().max(1)),
+          }),
+        }),
+        fourth: ["anything"],
+      },
+      {
+        validateOn: "onInit",
+      },
+    )
 
     const value = shape.getValue(scope)
     expect(value).toStrictEqual({
@@ -1024,8 +1093,8 @@ describe("ImpulseFormShape#getValue()", () => {
       },
       fourth: ["anything"],
     })
-    expect(shape.getValue(scope, identity)).toStrictEqual(value)
-    expect(shape.getValue(scope, (_, verbose) => verbose)).toStrictEqual(value)
+    expect(shape.getValue(scope, arg(0))).toStrictEqual(value)
+    expect(shape.getValue(scope, arg(1))).toStrictEqual(value)
 
     shape.setOriginalValue({
       second: -1,
@@ -1034,8 +1103,8 @@ describe("ImpulseFormShape#getValue()", () => {
       },
     })
     expect(shape.getValue(scope)).toBeNull()
-    expect(shape.getValue(scope, identity)).toBeNull()
-    expect(shape.getValue(scope, (_, verbose) => verbose)).toStrictEqual({
+    expect(shape.getValue(scope, arg(0))).toBeNull()
+    expect(shape.getValue(scope, arg(1))).toStrictEqual({
       first: "",
       second: null,
       third: {
@@ -1054,7 +1123,7 @@ describe("ImpulseFormShape#getValue()", () => {
       }
       readonly fourth: Array<string>
     }>()
-    expectTypeOf(shape.getValue(scope, identity)).toEqualTypeOf<null | {
+    expectTypeOf(shape.getValue(scope, arg(0))).toEqualTypeOf<null | {
       readonly first: string
       readonly second: number
       readonly third: {
@@ -1063,7 +1132,7 @@ describe("ImpulseFormShape#getValue()", () => {
       }
       readonly fourth: Array<string>
     }>()
-    expectTypeOf(shape.getValue(scope, (_, verbose) => verbose)).toEqualTypeOf<{
+    expectTypeOf(shape.getValue(scope, arg(1))).toEqualTypeOf<{
       readonly first: null | string
       readonly second: null | number
       readonly third: {
@@ -1088,8 +1157,8 @@ describe("ImpulseFormShape#isTouched()", () => {
     })
 
     expect(shape.isTouched(scope)).toBe(false)
-    expect(shape.isTouched(scope, identity)).toBe(false)
-    expect(shape.isTouched(scope, (_, verbose) => verbose)).toStrictEqual({
+    expect(shape.isTouched(scope, arg(0))).toBe(false)
+    expect(shape.isTouched(scope, arg(1))).toStrictEqual({
       first: false,
       second: false,
       third: {
@@ -1098,29 +1167,25 @@ describe("ImpulseFormShape#isTouched()", () => {
       },
     })
     expect(shape.fields.third.isTouched(scope)).toBe(false)
-    expect(shape.fields.third.isTouched(scope, identity)).toBe(false)
-    expect(
-      shape.fields.third.isTouched(scope, (_, verbose) => verbose),
-    ).toStrictEqual({
+    expect(shape.fields.third.isTouched(scope, arg(0))).toBe(false)
+    expect(shape.fields.third.isTouched(scope, arg(1))).toStrictEqual({
       one: false,
       two: false,
     })
 
     shape.fields.third.fields.one.setTouched(true)
     expect(shape.fields.third.isTouched(scope)).toBe(true)
-    expect(shape.fields.third.isTouched(scope, identity)).toStrictEqual({
+    expect(shape.fields.third.isTouched(scope, arg(0))).toStrictEqual({
       one: true,
       two: false,
     })
-    expect(
-      shape.fields.third.isTouched(scope, (_, verbose) => verbose),
-    ).toStrictEqual({
+    expect(shape.fields.third.isTouched(scope, arg(1))).toStrictEqual({
       one: true,
       two: false,
     })
     expect(shape.fields.third.fields.one.isTouched(scope)).toBe(true)
     expect(shape.isTouched(scope)).toBe(true)
-    expect(shape.isTouched(scope, identity)).toStrictEqual({
+    expect(shape.isTouched(scope, arg(0))).toStrictEqual({
       first: false,
       second: false,
       third: {
@@ -1128,7 +1193,7 @@ describe("ImpulseFormShape#isTouched()", () => {
         two: false,
       },
     })
-    expect(shape.isTouched(scope, (_, verbose) => verbose)).toStrictEqual({
+    expect(shape.isTouched(scope, arg(1))).toStrictEqual({
       first: false,
       second: false,
       third: {
@@ -1140,7 +1205,7 @@ describe("ImpulseFormShape#isTouched()", () => {
     shape.fields.first.setTouched(true)
     expect(shape.fields.first.isTouched(scope)).toBe(true)
     expect(shape.isTouched(scope)).toBe(true)
-    expect(shape.isTouched(scope, identity)).toStrictEqual({
+    expect(shape.isTouched(scope, arg(0))).toStrictEqual({
       first: true,
       second: false,
       third: {
@@ -1152,7 +1217,7 @@ describe("ImpulseFormShape#isTouched()", () => {
     shape.fields.second.setTouched(true)
     expect(shape.fields.second.isTouched(scope)).toBe(true)
     expect(shape.isTouched(scope)).toBe(true)
-    expect(shape.isTouched(scope, identity)).toStrictEqual({
+    expect(shape.isTouched(scope, arg(0))).toStrictEqual({
       first: true,
       second: true,
       third: {
@@ -1165,8 +1230,8 @@ describe("ImpulseFormShape#isTouched()", () => {
     expect(shape.fields.third.fields.two.isTouched(scope)).toBe(true)
     expect(shape.fields.third.isTouched(scope)).toBe(true)
     expect(shape.isTouched(scope)).toBe(true)
-    expect(shape.isTouched(scope, identity)).toBe(true)
-    expect(shape.isTouched(scope, (_, verbose) => verbose)).toStrictEqual({
+    expect(shape.isTouched(scope, arg(0))).toBe(true)
+    expect(shape.isTouched(scope, arg(1))).toStrictEqual({
       first: true,
       second: true,
       third: {
@@ -1176,27 +1241,25 @@ describe("ImpulseFormShape#isTouched()", () => {
     })
 
     expectTypeOf(
-      shape.fields.third.fields.one.isTouched(scope, identity),
+      shape.fields.third.fields.one.isTouched(scope, arg(0)),
     ).toEqualTypeOf<boolean>()
     expectTypeOf(
-      shape.fields.third.fields.one.isTouched(scope, (_, verbose) => verbose),
+      shape.fields.third.fields.one.isTouched(scope, arg(1)),
     ).toEqualTypeOf<boolean>()
 
-    expectTypeOf(shape.fields.third.isTouched(scope, identity)).toEqualTypeOf<
+    expectTypeOf(shape.fields.third.isTouched(scope, arg(0))).toEqualTypeOf<
       | boolean
       | {
           readonly one: boolean
           readonly two: boolean
         }
     >()
-    expectTypeOf(
-      shape.fields.third.isTouched(scope, (_, verbose) => verbose),
-    ).toEqualTypeOf<{
+    expectTypeOf(shape.fields.third.isTouched(scope, arg(1))).toEqualTypeOf<{
       readonly one: boolean
       readonly two: boolean
     }>()
 
-    expectTypeOf(shape.isTouched(scope, identity)).toEqualTypeOf<
+    expectTypeOf(shape.isTouched(scope, arg(0))).toEqualTypeOf<
       | boolean
       | {
           readonly first: boolean
@@ -1209,9 +1272,7 @@ describe("ImpulseFormShape#isTouched()", () => {
               }
         }
     >()
-    expectTypeOf(
-      shape.isTouched(scope, (_, verbose) => verbose),
-    ).toEqualTypeOf<{
+    expectTypeOf(shape.isTouched(scope, arg(1))).toEqualTypeOf<{
       readonly first: boolean
       readonly second: boolean
       readonly third: {
@@ -1250,8 +1311,8 @@ describe("ImpulseFormShape#setTouched()", () => {
 
     shape.setTouched(true)
     expect(shape.isTouched(scope)).toBe(true)
-    expect(shape.isTouched(scope, identity)).toBe(true)
-    expect(shape.isTouched(scope, (_, verbose) => verbose)).toStrictEqual({
+    expect(shape.isTouched(scope, arg(0))).toBe(true)
+    expect(shape.isTouched(scope, arg(1))).toStrictEqual({
       first: true,
       second: true,
       third: {
@@ -1262,12 +1323,12 @@ describe("ImpulseFormShape#setTouched()", () => {
 
     shape.fields.third.setTouched(false)
     expect(shape.isTouched(scope)).toBe(true)
-    expect(shape.isTouched(scope, identity)).toStrictEqual({
+    expect(shape.isTouched(scope, arg(0))).toStrictEqual({
       first: true,
       second: true,
       third: false,
     })
-    expect(shape.isTouched(scope, (_, verbose) => verbose)).toStrictEqual({
+    expect(shape.isTouched(scope, arg(1))).toStrictEqual({
       first: true,
       second: true,
       third: {
@@ -1283,7 +1344,7 @@ describe("ImpulseFormShape#setTouched()", () => {
       },
     })
     expect(shape.isTouched(scope)).toBe(true)
-    expect(shape.isTouched(scope, identity)).toStrictEqual({
+    expect(shape.isTouched(scope, arg(0))).toStrictEqual({
       first: true,
       second: true,
       third: {
@@ -1291,7 +1352,7 @@ describe("ImpulseFormShape#setTouched()", () => {
         two: false,
       },
     })
-    expect(shape.isTouched(scope, (_, verbose) => verbose)).toStrictEqual({
+    expect(shape.isTouched(scope, arg(1))).toStrictEqual({
       first: true,
       second: true,
       third: {
@@ -1328,8 +1389,8 @@ describe("ImpulseFormShape#setTouched()", () => {
       }
     })
     expect(shape.isTouched(scope)).toBe(true)
-    expect(shape.isTouched(scope, identity)).toBe(true)
-    expect(shape.isTouched(scope, (_, verbose) => verbose)).toStrictEqual({
+    expect(shape.isTouched(scope, arg(0))).toBe(true)
+    expect(shape.isTouched(scope, arg(1))).toStrictEqual({
       first: true,
       second: true,
       third: {
@@ -1787,8 +1848,8 @@ describe("ImpulseFormShape#isDirty()", () => {
     })
 
     expect(shape.isDirty(scope)).toBe(false)
-    expect(shape.isDirty(scope, identity)).toBe(false)
-    expect(shape.isDirty(scope, (_, verbose) => verbose)).toStrictEqual({
+    expect(shape.isDirty(scope, arg(0))).toBe(false)
+    expect(shape.isDirty(scope, arg(1))).toStrictEqual({
       first: false,
       second: false,
       third: {
@@ -1797,29 +1858,25 @@ describe("ImpulseFormShape#isDirty()", () => {
       },
     })
     expect(shape.fields.third.isDirty(scope)).toBe(false)
-    expect(shape.fields.third.isDirty(scope, identity)).toBe(false)
-    expect(
-      shape.fields.third.isDirty(scope, (_, verbose) => verbose),
-    ).toStrictEqual({
+    expect(shape.fields.third.isDirty(scope, arg(0))).toBe(false)
+    expect(shape.fields.third.isDirty(scope, arg(1))).toStrictEqual({
       one: false,
       two: false,
     })
 
     shape.fields.third.fields.one.setOriginalValue(false)
     expect(shape.fields.third.isDirty(scope)).toBe(true)
-    expect(shape.fields.third.isDirty(scope, identity)).toStrictEqual({
+    expect(shape.fields.third.isDirty(scope, arg(0))).toStrictEqual({
       one: true,
       two: false,
     })
-    expect(
-      shape.fields.third.isDirty(scope, (_, verbose) => verbose),
-    ).toStrictEqual({
+    expect(shape.fields.third.isDirty(scope, arg(1))).toStrictEqual({
       one: true,
       two: false,
     })
     expect(shape.fields.third.fields.one.isDirty(scope)).toBe(true)
     expect(shape.isDirty(scope)).toBe(true)
-    expect(shape.isDirty(scope, identity)).toStrictEqual({
+    expect(shape.isDirty(scope, arg(0))).toStrictEqual({
       first: false,
       second: false,
       third: {
@@ -1827,7 +1884,7 @@ describe("ImpulseFormShape#isDirty()", () => {
         two: false,
       },
     })
-    expect(shape.isDirty(scope, (_, verbose) => verbose)).toStrictEqual({
+    expect(shape.isDirty(scope, arg(1))).toStrictEqual({
       first: false,
       second: false,
       third: {
@@ -1839,7 +1896,7 @@ describe("ImpulseFormShape#isDirty()", () => {
     shape.fields.first.setOriginalValue("1")
     expect(shape.fields.first.isDirty(scope)).toBe(true)
     expect(shape.isDirty(scope)).toBe(true)
-    expect(shape.isDirty(scope, identity)).toStrictEqual({
+    expect(shape.isDirty(scope, arg(0))).toStrictEqual({
       first: true,
       second: false,
       third: {
@@ -1851,7 +1908,7 @@ describe("ImpulseFormShape#isDirty()", () => {
     shape.fields.second.setOriginalValue(2)
     expect(shape.fields.second.isDirty(scope)).toBe(true)
     expect(shape.isDirty(scope)).toBe(true)
-    expect(shape.isDirty(scope, identity)).toStrictEqual({
+    expect(shape.isDirty(scope, arg(0))).toStrictEqual({
       first: true,
       second: true,
       third: {
@@ -1864,8 +1921,8 @@ describe("ImpulseFormShape#isDirty()", () => {
     expect(shape.fields.third.fields.two.isDirty(scope)).toBe(true)
     expect(shape.fields.third.isDirty(scope)).toBe(true)
     expect(shape.isDirty(scope)).toBe(true)
-    expect(shape.isDirty(scope, identity)).toBe(true)
-    expect(shape.isDirty(scope, (_, verbose) => verbose)).toStrictEqual({
+    expect(shape.isDirty(scope, arg(0))).toBe(true)
+    expect(shape.isDirty(scope, arg(1))).toStrictEqual({
       first: true,
       second: true,
       third: {
@@ -1875,27 +1932,25 @@ describe("ImpulseFormShape#isDirty()", () => {
     })
 
     expectTypeOf(
-      shape.fields.third.fields.one.isDirty(scope, identity),
+      shape.fields.third.fields.one.isDirty(scope, arg(0)),
     ).toEqualTypeOf<boolean>()
     expectTypeOf(
-      shape.fields.third.fields.one.isDirty(scope, (_, verbose) => verbose),
+      shape.fields.third.fields.one.isDirty(scope, arg(1)),
     ).toEqualTypeOf<boolean>()
 
-    expectTypeOf(shape.fields.third.isDirty(scope, identity)).toEqualTypeOf<
+    expectTypeOf(shape.fields.third.isDirty(scope, arg(0))).toEqualTypeOf<
       | boolean
       | {
           readonly one: boolean
           readonly two: boolean
         }
     >()
-    expectTypeOf(
-      shape.fields.third.isDirty(scope, (_, verbose) => verbose),
-    ).toEqualTypeOf<{
+    expectTypeOf(shape.fields.third.isDirty(scope, arg(1))).toEqualTypeOf<{
       readonly one: boolean
       readonly two: boolean
     }>()
 
-    expectTypeOf(shape.isDirty(scope, identity)).toEqualTypeOf<
+    expectTypeOf(shape.isDirty(scope, arg(0))).toEqualTypeOf<
       | boolean
       | {
           readonly first: boolean
@@ -1908,7 +1963,7 @@ describe("ImpulseFormShape#isDirty()", () => {
               }
         }
     >()
-    expectTypeOf(shape.isDirty(scope, (_, verbose) => verbose)).toEqualTypeOf<{
+    expectTypeOf(shape.isDirty(scope, arg(1))).toEqualTypeOf<{
       readonly first: boolean
       readonly second: boolean
       readonly third: {
@@ -1962,7 +2017,7 @@ describe("ImpulseFormShape#reset()", () => {
 
   describe.each([
     ["without arguments", (form: ImpulseForm) => form.reset()],
-    ["with resetter=identity", (form: ImpulseForm) => form.reset(identity)],
+    ["with resetter=arg(0)", (form: ImpulseForm) => form.reset(arg(0))],
   ])("%s", (_, reset) => {
     it("resets the shape", ({ scope }) => {
       const shape = setup()

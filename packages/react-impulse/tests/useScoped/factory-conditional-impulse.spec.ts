@@ -71,7 +71,7 @@ describe.each([
       )
     },
   ],
-])("conditional factory %s", (__, useHook) => {
+])("conditional factory %s", (_, useHook) => {
   describe("when active", () => {
     it("should return Impulse's value on init", () => {
       const impulse = Impulse.of({ count: 1 })
