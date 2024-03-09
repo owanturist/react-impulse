@@ -9,6 +9,14 @@ beforeAll(() => {
   vi.useFakeTimers()
 })
 
+it("matches the type signature", () => {
+  const form = ImpulseFormValue.of("value")
+
+  expectTypeOf(form.onSubmit).toEqualTypeOf<
+    (listener: (value: string) => void | Promise<unknown>) => VoidFunction
+  >()
+})
+
 describe("onSubmit(listener)", () => {
   it("provides validated value", () => {
     const form = ImpulseFormValue.of("value", {

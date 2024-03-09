@@ -7,6 +7,27 @@ import {
   ImpulseFormValue,
 } from "../../src"
 
+type ThirdIsValidatedVerbose = {
+  readonly one: boolean
+  readonly two: boolean
+}
+
+type RootIsValidatedVerbose = {
+  readonly first: boolean
+  readonly second: boolean
+  readonly third: ThirdIsValidatedVerbose
+}
+
+type ThirdIsValidatedConcise = boolean | ThirdIsValidatedVerbose
+
+type RootIsValidatedConcise =
+  | boolean
+  | {
+      readonly first: boolean
+      readonly second: boolean
+      readonly third: ThirdIsValidatedConcise
+    }
+
 const setup = (
   options?: ImpulseFormShapeOptions<{
     first: ImpulseFormValue<string>
@@ -46,6 +67,34 @@ const isValidatedVerbose = <TFields extends ImpulseFormShapeFields>(
   scope: Scope,
   shape: ImpulseFormShape<TFields>,
 ) => shape.isValidated(scope, (_, verbose) => verbose)
+
+it("matches the type signature", () => {
+  const form = setup()
+
+  expectTypeOf(form.isValidated).toEqualTypeOf<{
+    (scope: Scope): boolean
+
+    <TResult>(
+      scope: Scope,
+      select: (
+        concise: RootIsValidatedConcise,
+        verbose: RootIsValidatedVerbose,
+      ) => TResult,
+    ): TResult
+  }>()
+
+  expectTypeOf(form.fields.third.isValidated).toEqualTypeOf<{
+    (scope: Scope): boolean
+
+    <TResult>(
+      scope: Scope,
+      select: (
+        concise: ThirdIsValidatedConcise,
+        verbose: ThirdIsValidatedVerbose,
+      ) => TResult,
+    ): TResult
+  }>()
+})
 
 describe("isValidated(scope)", () => {
   const isValidated = isValidatedDefault
@@ -98,26 +147,13 @@ describe("isValidated(scope, (concise) => concise)", () => {
   it("selects concise value", ({ scope }) => {
     const shape = setup()
 
-    expectTypeOf(isValidated(scope, shape)).toEqualTypeOf<
-      | boolean
-      | {
-          readonly first: boolean
-          readonly second: boolean
-          readonly third:
-            | boolean
-            | {
-                readonly one: boolean
-                readonly two: boolean
-              }
-        }
-    >()
-    expectTypeOf(isValidated(scope, shape.fields.third)).toEqualTypeOf<
-      | boolean
-      | {
-          readonly one: boolean
-          readonly two: boolean
-        }
-    >()
+    expectTypeOf(
+      isValidated(scope, shape),
+    ).toEqualTypeOf<RootIsValidatedConcise>()
+
+    expectTypeOf(
+      isValidated(scope, shape.fields.third),
+    ).toEqualTypeOf<ThirdIsValidatedConcise>()
   })
 
   it("returns false when NONE are validated", ({ scope }) => {
@@ -171,18 +207,13 @@ describe("isValidated(scope, (_, verbose) => verbose)", () => {
   it("selects verbose value", ({ scope }) => {
     const shape = setup()
 
-    expectTypeOf(isValidated(scope, shape)).toEqualTypeOf<{
-      readonly first: boolean
-      readonly second: boolean
-      readonly third: {
-        readonly one: boolean
-        readonly two: boolean
-      }
-    }>()
-    expectTypeOf(isValidated(scope, shape.fields.third)).toEqualTypeOf<{
-      readonly one: boolean
-      readonly two: boolean
-    }>()
+    expectTypeOf(
+      isValidated(scope, shape),
+    ).toEqualTypeOf<RootIsValidatedVerbose>()
+
+    expectTypeOf(
+      isValidated(scope, shape.fields.third),
+    ).toEqualTypeOf<ThirdIsValidatedVerbose>()
   })
 
   it("returns verbose object when NONE are validated", ({ scope }) => {

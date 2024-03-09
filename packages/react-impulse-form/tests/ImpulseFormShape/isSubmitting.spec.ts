@@ -1,4 +1,5 @@
 import { z } from "zod"
+import type { Scope } from "react-impulse"
 
 import {
   type ImpulseFormShapeOptions,
@@ -46,6 +47,16 @@ const setupShape =
 
 beforeAll(() => {
   vi.useFakeTimers()
+})
+
+it("matches the type signature", () => {
+  const form = setupShape()()
+
+  expectTypeOf(form.isSubmitting).toEqualTypeOf<(scope: Scope) => boolean>()
+
+  expectTypeOf(form.fields._3.isSubmitting).toEqualTypeOf<
+    (scope: Scope) => boolean
+  >()
 })
 
 describe.each([

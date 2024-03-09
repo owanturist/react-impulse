@@ -19,6 +19,18 @@ const getValidateOnConcise = (scope: Scope, value: ImpulseFormValue<string>) =>
 const getValidateOnVerbose = (scope: Scope, value: ImpulseFormValue<string>) =>
   value.getValidateOn(scope, (_, verbose) => verbose)
 
+it("matches the type signature", () => {
+  const form = setup()
+
+  expectTypeOf(form.getValidateOn).toEqualTypeOf<{
+    (scope: Scope): ValidateStrategy
+    <TResult>(
+      scope: Scope,
+      select: (concise: ValidateStrategy, verbose: ValidateStrategy) => TResult,
+    ): TResult
+  }>()
+})
+
 describe.each([
   ["getValidateOn(scope)", getValidateOnDefault],
   ["getValidateOn(scope, (concise) => concise)", getValidateOnConcise],

@@ -19,6 +19,18 @@ type ShapeFields = {
   _4: Array<string>
 }
 
+type ThirdValueVerbose = {
+  readonly _1: boolean
+  readonly _2: Array<string>
+}
+
+type RootValueVerbose = {
+  readonly _1: string
+  readonly _2: number
+  readonly _3: ThirdValueVerbose
+  readonly _4: Array<string>
+}
+
 const setup = (options?: ImpulseFormShapeOptions<ShapeFields>) => {
   return ImpulseFormShape.of(
     {
@@ -42,6 +54,22 @@ beforeAll(() => {
   vi.useFakeTimers()
 })
 
+it("matches the type signature", () => {
+  const form = setup()
+
+  expectTypeOf(form.onSubmit).toEqualTypeOf<
+    (
+      listener: (value: RootValueVerbose) => void | Promise<unknown>,
+    ) => VoidFunction
+  >()
+
+  expectTypeOf(form.fields._3.onSubmit).toEqualTypeOf<
+    (
+      listener: (value: ThirdValueVerbose) => void | Promise<unknown>,
+    ) => VoidFunction
+  >()
+})
+
 describe.each<
   [string, (form: ImpulseFormShape<ShapeFields>) => Promise<unknown>]
 >([
@@ -57,15 +85,7 @@ describe.each<
     const form = setup()
 
     form.onSubmit((value) => {
-      expectTypeOf(value).toEqualTypeOf<{
-        readonly _1: string
-        readonly _2: number
-        readonly _3: {
-          readonly _1: boolean
-          readonly _2: Array<string>
-        }
-        readonly _4: Array<string>
-      }>()
+      expectTypeOf(value).toEqualTypeOf<RootValueVerbose>()
     })
   })
 

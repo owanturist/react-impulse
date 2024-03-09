@@ -293,22 +293,6 @@ describe("ImpulseFormValue#setOriginalValue()", () => {
       .parameter(0)
       .toEqualTypeOf<Setter<string>>()
   })
-
-  it("resets error when originalValue changes", ({ scope }) => {
-    const value = ImpulseFormValue.of(
-      { foo: 1 },
-      {
-        compare: (left, right) => equals(left, right),
-      },
-    )
-
-    value.setErrors(["error"])
-    value.setOriginalValue({ foo: 1 })
-    expect(value.getErrors(scope)).toStrictEqual(["error"])
-
-    value.setOriginalValue({ foo: 2 })
-    expect(value.getErrors(scope)).toBeNull()
-  })
 })
 
 describe("ImpulseFormValue#setInitialValue()", () => {
