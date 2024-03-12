@@ -31,48 +31,49 @@ const setup = (
   )
 }
 
+it("matches the type signature", () => {
+  const form = setup()
+
+  type ThirdValidateStrategy = {
+    readonly one: ValidateStrategy
+    readonly two: ValidateStrategy
+  }
+
+  type ThirdValidateOnSetter = Setter<
+    | ValidateStrategy
+    | {
+        readonly one?: Setter<ValidateStrategy>
+        readonly two?: Setter<ValidateStrategy>
+      },
+    [ThirdValidateStrategy]
+  >
+
+  type RootValidateOnSetter = Setter<
+    | ValidateStrategy
+    | {
+        readonly first?: Setter<ValidateStrategy>
+        readonly second?: Setter<ValidateStrategy>
+        readonly third?: ThirdValidateOnSetter
+      },
+    [
+      {
+        readonly first: ValidateStrategy
+        readonly second: ValidateStrategy
+        readonly third: ThirdValidateStrategy
+      },
+    ]
+  >
+
+  expectTypeOf(form.setValidateOn).toEqualTypeOf<
+    (setter: RootValidateOnSetter) => void
+  >()
+
+  expectTypeOf(form.fields.third.setValidateOn).toEqualTypeOf<
+    (setter: ThirdValidateOnSetter) => void
+  >()
+})
+
 describe("setValidateOn(..)", () => {
-  it("matches the type signature", () => {
-    const shape = setup()
-
-    type ThirdValidateStrategy = {
-      readonly one: ValidateStrategy
-      readonly two: ValidateStrategy
-    }
-
-    type ThirdValidateOnSetter = Setter<
-      | ValidateStrategy
-      | {
-          readonly one?: Setter<ValidateStrategy>
-          readonly two?: Setter<ValidateStrategy>
-        },
-      [ThirdValidateStrategy]
-    >
-
-    type RootValidateOnSetter = Setter<
-      | ValidateStrategy
-      | {
-          readonly first?: Setter<ValidateStrategy>
-          readonly second?: Setter<ValidateStrategy>
-          readonly third?: ThirdValidateOnSetter
-        },
-      [
-        {
-          readonly first: ValidateStrategy
-          readonly second: ValidateStrategy
-          readonly third: ThirdValidateStrategy
-        },
-      ]
-    >
-
-    expectTypeOf(shape.setValidateOn).toEqualTypeOf<
-      (setter: RootValidateOnSetter) => void
-    >()
-    expectTypeOf(shape.fields.third.setValidateOn).toEqualTypeOf<
-      (setter: ThirdValidateOnSetter) => void
-    >()
-  })
-
   it("sets the ValidateStrategy to ALL fields", ({ scope }) => {
     const shape = setup()
 

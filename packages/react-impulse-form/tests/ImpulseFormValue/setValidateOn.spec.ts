@@ -9,15 +9,15 @@ const setup = (options?: ImpulseFormValueOptions<string>) => {
   return ImpulseFormValue.of("", options)
 }
 
+it("matches the type signature", () => {
+  const value = setup()
+
+  expectTypeOf(value.setValidateOn).toEqualTypeOf<
+    (setter: Setter<ValidateStrategy>) => void
+  >()
+})
+
 describe("setValidateOn(..)", () => {
-  it("matches the type signature", () => {
-    const value = setup()
-
-    expectTypeOf(value.setValidateOn).toEqualTypeOf<
-      (setter: Setter<ValidateStrategy>) => void
-    >()
-  })
-
   it("sets the ValidateStrategy", ({ scope }) => {
     const value = setup({ validateOn: "onInit" })
 

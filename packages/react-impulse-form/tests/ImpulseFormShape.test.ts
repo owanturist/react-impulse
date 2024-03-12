@@ -1,6 +1,5 @@
 // TODO split all tests like ./ImpulseFormShape/isValidated.test.ts
 
-import { equals } from "remeda"
 import { z } from "zod"
 
 import {
@@ -1840,9 +1839,7 @@ describe("ImpulseFormShape#isDirty()", () => {
       second: ImpulseFormValue.of(0),
       third: ImpulseFormShape.of({
         one: ImpulseFormValue.of(true),
-        two: ImpulseFormValue.of([""], {
-          compare: (left, right) => equals(left, right),
-        }),
+        two: ImpulseFormValue.of([""]),
       }),
       fourth: ["anything"],
     })
@@ -1996,9 +1993,7 @@ describe("ImpulseFormShape#reset()", () => {
         second: ImpulseFormValue.of(0),
         third: ImpulseFormShape.of({
           one: ImpulseFormValue.of(true),
-          two: ImpulseFormValue.of([""], {
-            compare: (left, right) => equals(left, right),
-          }),
+          two: ImpulseFormValue.of([""]),
         }),
         fourth: ["anything"],
       },

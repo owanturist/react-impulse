@@ -8,6 +8,29 @@ import {
   ImpulseFormValue,
 } from "../../src"
 
+type ThirdValidateStrategyVerbose = {
+  readonly one: ValidateStrategy
+  readonly two: ValidateStrategy
+}
+
+type RootValidateStrategyVerbose = {
+  readonly first: ValidateStrategy
+  readonly second: ValidateStrategy
+  readonly third: ThirdValidateStrategyVerbose
+}
+
+type ThirdValidateStrategyConcise =
+  | ValidateStrategy
+  | ThirdValidateStrategyVerbose
+
+type RootValidateStrategyConcise =
+  | ValidateStrategy
+  | {
+      readonly first: ValidateStrategy
+      readonly second: ValidateStrategy
+      readonly third: ThirdValidateStrategyConcise
+    }
+
 const setup = (
   options?: ImpulseFormShapeOptions<{
     first: ImpulseFormValue<string>
@@ -48,6 +71,34 @@ const getValidateOnVerbose = <TFields extends ImpulseFormShapeFields>(
   shape: ImpulseFormShape<TFields>,
 ) => shape.getValidateOn(scope, (_, verbose) => verbose)
 
+it("matches the type signature", () => {
+  const form = setup()
+
+  expectTypeOf(form.getValidateOn).toEqualTypeOf<{
+    (scope: Scope): RootValidateStrategyConcise
+
+    <TResult>(
+      scope: Scope,
+      select: (
+        concise: RootValidateStrategyConcise,
+        verbose: RootValidateStrategyVerbose,
+      ) => TResult,
+    ): TResult
+  }>()
+
+  expectTypeOf(form.fields.third.getValidateOn).toEqualTypeOf<{
+    (scope: Scope): ThirdValidateStrategyConcise
+
+    <TResult>(
+      scope: Scope,
+      select: (
+        concise: ThirdValidateStrategyConcise,
+        verbose: ThirdValidateStrategyVerbose,
+      ) => TResult,
+    ): TResult
+  }>()
+})
+
 describe.each([
   ["getValidateOn(scope)", getValidateOnDefault],
   ["getValidateOn(scope, (concise) => concise)", getValidateOnConcise],
@@ -55,26 +106,13 @@ describe.each([
   it("returns concise value", ({ scope }) => {
     const shape = setup()
 
-    expectTypeOf(getValidateOn(scope, shape)).toEqualTypeOf<
-      | ValidateStrategy
-      | {
-          readonly first: ValidateStrategy
-          readonly second: ValidateStrategy
-          readonly third:
-            | ValidateStrategy
-            | {
-                readonly one: ValidateStrategy
-                readonly two: ValidateStrategy
-              }
-        }
-    >()
-    expectTypeOf(getValidateOn(scope, shape.fields.third)).toEqualTypeOf<
-      | ValidateStrategy
-      | {
-          readonly one: ValidateStrategy
-          readonly two: ValidateStrategy
-        }
-    >()
+    expectTypeOf(
+      getValidateOn(scope, shape),
+    ).toEqualTypeOf<RootValidateStrategyConcise>()
+
+    expectTypeOf(
+      getValidateOn(scope, shape.fields.third),
+    ).toEqualTypeOf<ThirdValidateStrategyConcise>()
   })
 
   it("returns ValidateStrategy when ALL fields have the SAME validateOn", ({
@@ -125,18 +163,13 @@ describe("getValidateOn(scope, (_, verbose) => verbose)", () => {
   it("returns verbose value", ({ scope }) => {
     const shape = setup()
 
-    expectTypeOf(getValidateOn(scope, shape)).toEqualTypeOf<{
-      readonly first: ValidateStrategy
-      readonly second: ValidateStrategy
-      readonly third: {
-        readonly one: ValidateStrategy
-        readonly two: ValidateStrategy
-      }
-    }>()
-    expectTypeOf(getValidateOn(scope, shape.fields.third)).toEqualTypeOf<{
-      readonly one: ValidateStrategy
-      readonly two: ValidateStrategy
-    }>()
+    expectTypeOf(
+      getValidateOn(scope, shape),
+    ).toEqualTypeOf<RootValidateStrategyVerbose>()
+
+    expectTypeOf(
+      getValidateOn(scope, shape.fields.third),
+    ).toEqualTypeOf<ThirdValidateStrategyVerbose>()
   })
 
   it("returns verbose object when ALL fields have the SAME validateOn", ({

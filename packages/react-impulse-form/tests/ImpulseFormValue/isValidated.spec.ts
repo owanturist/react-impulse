@@ -29,6 +29,19 @@ const isValidatedVerbose = (
   value: ImpulseFormValue<string, number>,
 ) => value.isValidated(scope, (_, verbose) => verbose)
 
+it("matches the type signature", () => {
+  const form = setup()
+
+  expectTypeOf(form.isValidated).toEqualTypeOf<{
+    (scope: Scope): boolean
+
+    <TResult>(
+      scope: Scope,
+      select: (concise: boolean, verbose: boolean) => TResult,
+    ): TResult
+  }>()
+})
+
 describe.each([
   ["isValidated(scope)", isValidatedDefault],
   ["isValidated(scope, (concise) => concise)", isValidatedConcise],

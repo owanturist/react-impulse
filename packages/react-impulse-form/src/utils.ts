@@ -21,7 +21,7 @@ export const isHtmlElement = (value: unknown): value is HTMLElement => {
   return value instanceof HTMLElement
 }
 
-const eq = <T>(left: T, right: T): boolean => Object.is(left, right)
+export const eq = <T>(left: T, right: T): boolean => Object.is(left, right)
 
 export const uniq = <T>(values: ReadonlyArray<T>): ReadonlyArray<T> => {
   const acc = new Set<T>()
@@ -43,7 +43,7 @@ export function shallowArrayEquals<T>(
   left: ReadonlyArray<T>,
   right: ReadonlyArray<T>,
 ): boolean {
-  if (Object.is(left, right)) {
+  if (eq(left, right)) {
     return true
   }
 

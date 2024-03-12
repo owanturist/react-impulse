@@ -62,6 +62,15 @@ const setup = (
   ] as const
 }
 
+it("matches the type signature", () => {
+  const [form] = setup()
+
+  expectTypeOf(form.focusFirstInvalidValue).toEqualTypeOf<VoidFunction>()
+  expectTypeOf(
+    form.fields._3.focusFirstInvalidValue,
+  ).toEqualTypeOf<VoidFunction>()
+})
+
 describe("focusFirstInvalidValue()", () => {
   it("calls a single validated field's listener", () => {
     const [form, { listener_1, listener_2, listener_3_1, listener_3_2 }] =

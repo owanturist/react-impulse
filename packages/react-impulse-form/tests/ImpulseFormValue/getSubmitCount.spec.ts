@@ -1,4 +1,5 @@
 import { z } from "zod"
+import type { Scope } from "react-impulse"
 
 import { ImpulseFormValue } from "../../src"
 import { wait } from "../common"
@@ -18,6 +19,12 @@ const setupValue =
 
 beforeAll(() => {
   vi.useFakeTimers()
+})
+
+it("matches the type signature", () => {
+  const form = setupValue()()
+
+  expectTypeOf(form.getSubmitCount).toEqualTypeOf<(scope: Scope) => number>()
 })
 
 describe.each([

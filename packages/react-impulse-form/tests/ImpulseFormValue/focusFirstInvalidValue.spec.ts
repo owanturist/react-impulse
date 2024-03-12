@@ -13,6 +13,12 @@ const setup = (
   })
 }
 
+it("matches the type signature", () => {
+  const form = setup()
+
+  expectTypeOf(form.focusFirstInvalidValue).toEqualTypeOf<VoidFunction>()
+})
+
 describe("focusFirstInvalidValue() when validated", () => {
   it("nothing happens if a listener is not attached", () => {
     const form = setup()
