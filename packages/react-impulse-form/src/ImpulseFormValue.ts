@@ -10,7 +10,7 @@ import {
   isDefined,
   untrack,
 } from "./dependencies"
-import { type Setter, shallowArrayEquals } from "./utils"
+import { type Setter, shallowArrayEquals, eq } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormSchema, Result } from "./ImpulseFormSchema"
 import {
@@ -29,8 +29,27 @@ export interface ImpulseFormValueOptions<
   errors?: null | ReadonlyArray<string>
   touched?: boolean
   schema?: ImpulseFormSchema<TValue, TOriginalValue>
-  // TODO rename to isOriginalValueEqual (whether or not onChange should replace value), add isOriginalValueDirty and isValueEqual (introduce _value: TransmittingImpulse<TValue>)
-  compare?: Compare<TOriginalValue>
+
+  // TODO add isOriginalValueDirty and isValueEqual (introduce _value: TransmittingImpulse<TValue>)
+
+  /**
+   * A compare function that determines whether the original value changes.
+   * When it does, the ImpulseFormValue#getOriginalValue returns the new value.
+   * Otherwise, it returns the previous value.
+   *
+   * @default Object.is
+   *
+   * @example
+   * const initial = { count: 0 }
+   *
+   * const form = ImpulseFormValue.of(initial, {
+   *   isOriginalValueEqual: (left, right) => left.count === right.count,
+   * })
+   *
+   * form.setOriginalValue({ count: 0 })
+   * form.getOriginalValue(scope) === initial // true
+   */
+  isOriginalValueEqual?: Compare<TOriginalValue>
   initialValue?: TOriginalValue
   /**
    * @default "onTouch"
@@ -91,19 +110,23 @@ export class ImpulseFormValue<
   public static of<TOriginalValue, TValue = TOriginalValue>(
     originalValue: TOriginalValue,
     {
-      errors = [],
+      errors,
       touched = false,
       schema,
-      compare = Object.is,
+      isOriginalValueEqual = eq,
       initialValue = originalValue,
       validateOn = VALIDATE_ON_TOUCH,
     }: ImpulseFormValueOptions<TOriginalValue, TValue> = {},
   ): ImpulseFormValue<TOriginalValue, TValue> {
-    const compareImpulse = Impulse.of(compare)
-    const compareFn: Compare<TOriginalValue> = (left, right, scope) => {
-      const cmp = compareImpulse.getValue(scope)
+    const isOriginalValueEqualImpulse = Impulse.of(isOriginalValueEqual)
+    const isOriginalValueEqualFn: Compare<TOriginalValue> = (
+      left,
+      right,
+      scope,
+    ) => {
+      const compare = isOriginalValueEqualImpulse.getValue(scope)
 
-      return cmp(left, right, scope)
+      return compare(left, right, scope)
     }
 
     return new ImpulseFormValue(
@@ -111,10 +134,10 @@ export class ImpulseFormValue<
       Impulse.of(touched),
       Impulse.of(validateOn),
       Impulse.of(errors ?? [], { compare: shallowArrayEquals }),
-      Impulse.of(initialValue, { compare: compareFn }),
-      Impulse.of(originalValue, { compare: compareFn }),
+      Impulse.of(initialValue, { compare: isOriginalValueEqualFn }),
+      Impulse.of(originalValue, { compare: isOriginalValueEqualFn }),
       Impulse.of(schema),
-      compareImpulse,
+      isOriginalValueEqualImpulse,
     )
   }
 
@@ -132,7 +155,7 @@ export class ImpulseFormValue<
     private readonly _schema: Impulse<
       undefined | ImpulseFormSchema<TValue, TOriginalValue>
     >,
-    private readonly _compare: Impulse<Compare<TOriginalValue>>,
+    private readonly _isOriginalValueEqual: Impulse<Compare<TOriginalValue>>,
   ) {
     super(root)
     this._updateValidated()
@@ -222,7 +245,7 @@ export class ImpulseFormValue<
       this._initialValue.clone(),
       this._originalValue.clone(),
       this._schema.clone(),
-      this._compare.clone(),
+      this._isOriginalValueEqual.clone(),
     )
   }
 
@@ -376,14 +399,14 @@ export class ImpulseFormValue<
   ): TResult {
     const initialValue = this.getInitialValue(scope)
     const originalValue = this.getOriginalValue(scope)
-    const compare = this._compare.getValue(scope)
+    const compare = this._isOriginalValueEqual.getValue(scope)
     const dirty = !compare(initialValue, originalValue, scope)
 
     return select(dirty, dirty)
   }
 
   public setCompare(setter: Setter<Compare<TOriginalValue>>): void {
-    this._compare.setValue(setter)
+    this._isOriginalValueEqual.setValue(setter)
   }
 
   public getValue(scope: Scope): null | TValue
@@ -417,7 +440,6 @@ export class ImpulseFormValue<
       this._originalValue.setValue(setter)
 
       if (originalValue !== this._originalValue.getValue(scope)) {
-        this._errors.setValue([])
         this._updateValidated()
       }
     })

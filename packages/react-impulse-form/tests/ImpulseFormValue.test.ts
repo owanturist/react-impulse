@@ -352,7 +352,7 @@ describe("ImpulseFormValue#isDirty()", () => {
       { type: "zero", value: 0 },
       {
         initialValue: { type: "zero", value: 0 },
-        compare: (left, right) => equals(left, right),
+        isOriginalValueEqual: (left, right) => equals(left, right),
       },
     )
     expect(value.isDirty(scope)).toBe(false)
