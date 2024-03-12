@@ -212,13 +212,17 @@ export abstract class ImpulseForm<
     ) => TResult,
   ): TResult
 
+  // TODO extend with select
   public abstract getOriginalValue(
     scope: Scope,
   ): TParams["originalValue.schema"]
+
   public abstract setOriginalValue(
     setter: TParams["originalValue.setter"],
   ): void
 
+  // TODO extend with select
   public abstract getInitialValue(scope: Scope): TParams["originalValue.schema"]
+
   public abstract setInitialValue(setter: TParams["originalValue.setter"]): void
 }
