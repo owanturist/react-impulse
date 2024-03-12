@@ -9,7 +9,7 @@ import {
   isString,
   Impulse,
 } from "./dependencies"
-import { isTrue, type Setter } from "./utils"
+import { forEach2, isTrue, shallowArrayEquals, type Setter } from "./utils"
 import { type GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./ValidateStrategy"
 
@@ -164,23 +164,41 @@ export class ImpulseFormList<
       (element) => ImpulseForm._cloneWithRoot(this, element) as TElement,
     )
 
-    this._elements = Impulse.of(elementsWithRoot)
+    this._elements = Impulse.of(elementsWithRoot, {
+      compare: shallowArrayEquals,
+    })
   }
 
-  private _mapFormFields<TResult>(
+  private _mapFormElements<TResult>(
+    scope: Scope,
     fn: (form: ImpulseForm) => TResult,
-  ): Readonly<Record<keyof TElement, TResult>> {
-    const acc = {} as Record<keyof TElement, TResult>
+  ): ReadonlyArray<TResult> {
+    return this._elements.getValue(scope).map(fn)
+  }
 
-    for (const [key, field] of Object.entries(this.fields)) {
-      const value = ImpulseForm.isImpulseForm(field)
-        ? fn(field)
-        : (field as TResult)
+  private _setFormElements<TValue, TPrevValue>(
+    setter: Setter<
+      ReadonlyArray<undefined | TValue>,
+      [ReadonlyArray<TPrevValue>]
+    >,
+    getCurrent: (scope: Scope) => ReadonlyArray<TPrevValue>,
+    setNext: (element: TElement, next: TValue) => void,
+  ): void {
+    batch((scope) => {
+      const nextInitialValue = isFunction(setter)
+        ? setter(getCurrent(scope))
+        : setter
 
-      acc[key as keyof typeof acc] = value
-    }
-
-    return acc
+      forEach2(
+        (element, next) => {
+          if (isDefined.strict(next)) {
+            setNext(element, next)
+          }
+        },
+        this.getElements(scope),
+        nextInitialValue,
+      )
+    })
   }
 
   protected _submitWith(
@@ -604,64 +622,40 @@ export class ImpulseFormList<
   public getOriginalValue(
     scope: Scope,
   ): ImpulseFormListOriginalValueSchema<TElement> {
-    const originalValue = this._mapFormFields((form) =>
-      form.getOriginalValue(scope),
-    )
+    const originalValue = this._mapFormElements(scope, (form) => {
+      return form.getOriginalValue(scope)
+    })
 
-    return originalValue as unknown as ImpulseFormListOriginalValueSchema<TElement>
+    return originalValue as ImpulseFormListOriginalValueSchema<TElement>
   }
 
   public setOriginalValue(
     setter: ImpulseFormListOriginalValueSetter<TElement>,
   ): void {
-    batch((scope) => {
-      const nextOriginalValue = isFunction(setter)
-        ? setter(this.getOriginalValue(scope))
-        : setter
-
-      for (const [key, field] of Object.entries(this.fields)) {
-        const nextFieldOriginalValue =
-          nextOriginalValue[key as keyof typeof nextOriginalValue]
-
-        if (
-          ImpulseForm.isImpulseForm(field) &&
-          nextFieldOriginalValue !== undefined
-        ) {
-          field.setOriginalValue(nextFieldOriginalValue)
-        }
-      }
-    })
+    this._setFormElements(
+      setter,
+      (scope) => this.getOriginalValue(scope),
+      (element, next) => element.setOriginalValue(next),
+    )
   }
 
   public getInitialValue(
     scope: Scope,
   ): ImpulseFormListOriginalValueSchema<TElement> {
-    const originalValue = this._mapFormFields((form) =>
+    const originalValue = this._mapFormElements(scope, (form) =>
       form.getInitialValue(scope),
     )
 
-    return originalValue as unknown as ImpulseFormListOriginalValueSchema<TElement>
+    return originalValue as ImpulseFormListOriginalValueSchema<TElement>
   }
 
   public setInitialValue(
     setter: ImpulseFormListOriginalValueSetter<TElement>,
   ): void {
-    batch((scope) => {
-      const nextInitialValue = isFunction(setter)
-        ? setter(this.getInitialValue(scope))
-        : setter
-
-      for (const [key, field] of Object.entries(this.fields)) {
-        const nextFieldInitialValue =
-          nextInitialValue[key as keyof typeof nextInitialValue]
-
-        if (
-          ImpulseForm.isImpulseForm(field) &&
-          nextFieldInitialValue !== undefined
-        ) {
-          field.setInitialValue(nextFieldInitialValue)
-        }
-      }
-    })
+    this._setFormElements(
+      setter,
+      (scope) => this.getInitialValue(scope),
+      (element, next) => element.setInitialValue(next),
+    )
   }
 }
