@@ -59,7 +59,7 @@
     +ImpulseFormValue#setSchema(schema: Schema | null): void
     ```
 
-  Change:
+  Breaking change:
 
   - use `ImpulseForm#submit`, `ImpulseForm#getSubmitCount`, `ImpulseForm#isSubmitting` instead
 
