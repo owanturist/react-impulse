@@ -143,6 +143,42 @@ describe("ImpulseFormValue.of()", () => {
     expect(value.getOriginalValue(scope)).toBe("")
     expect(value.getInitialValue(scope)).toBe("1")
   })
+
+  it("returns initialValue if it is equals to originalValue with custom isOriginalValueEqual", ({
+    scope,
+  }) => {
+    const initialValue = { count: 0 }
+    const form = ImpulseFormValue.of(
+      { count: 0 },
+      {
+        initialValue,
+        isOriginalValueEqual: (left, right) => left.count === right.count,
+      },
+    )
+
+    expect(form.getOriginalValue(scope)).toBe(initialValue)
+    expect(form.getOriginalValue(scope)).toBe(form.getInitialValue(scope))
+
+    form.setOriginalValue({ count: 1 })
+    expect(form.getOriginalValue(scope)).not.toBe(initialValue)
+  })
+
+  it("keeps the prev value with custom isOriginalValueEqual", ({ scope }) => {
+    const form = ImpulseFormValue.of(
+      { count: 0 },
+      {
+        isOriginalValueEqual: (left, right) => left.count === right.count,
+      },
+    )
+
+    const originalValue = form.getOriginalValue(scope)
+
+    form.setOriginalValue({ count: 0 })
+    expect(form.getOriginalValue(scope)).toBe(originalValue)
+
+    form.setOriginalValue({ count: 1 })
+    expect(form.getOriginalValue(scope)).not.toBe(originalValue)
+  })
 })
 
 describe("ImpulseFormValue#getValue()", () => {

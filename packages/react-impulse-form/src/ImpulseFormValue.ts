@@ -119,7 +119,7 @@ export class ImpulseFormValue<
     }: ImpulseFormValueOptions<TOriginalValue, TValue> = {},
   ): ImpulseFormValue<TOriginalValue, TValue> {
     const isOriginalValueEqualImpulse = Impulse.of(isOriginalValueEqual)
-    const isOriginalValueEqualFn: Compare<TOriginalValue> = (
+    const isOriginalValueEqualStable: Compare<TOriginalValue> = (
       left,
       right,
       scope,
@@ -129,13 +129,21 @@ export class ImpulseFormValue<
       return compare(left, right, scope)
     }
 
+    const initialOriginalValue = untrack((scope) => {
+      if (isOriginalValueEqual(initialValue, originalValue, scope)) {
+        return initialValue
+      }
+
+      return originalValue
+    })
+
     return new ImpulseFormValue(
       null,
       Impulse.of(touched),
       Impulse.of(validateOn),
       Impulse.of(errors ?? [], { compare: shallowArrayEquals }),
-      Impulse.of(initialValue, { compare: isOriginalValueEqualFn }),
-      Impulse.of(originalValue, { compare: isOriginalValueEqualFn }),
+      Impulse.of(initialValue, { compare: isOriginalValueEqualStable }),
+      Impulse.of(initialOriginalValue, { compare: isOriginalValueEqualStable }),
       Impulse.of(schema),
       isOriginalValueEqualImpulse,
     )
