@@ -1,5 +1,22 @@
 # react-impulse-form
 
+## 0.3.0
+
+### Minor Changes
+
+- [#671](https://github.com/owanturist/react-impulse/pull/671) [`9cf128c`](https://github.com/owanturist/react-impulse/commit/9cf128c769ac99c14cf4f14dd2abb50a2f632ce3) Thanks [@owanturist](https://github.com/owanturist)! - Breaking change:
+
+  - Rename `ImpulseFormValueOptions.compare` to `ImpulseFormValueOptions.isOriginalValueEqual`
+  - `ImpulseFormValue#setOriginalValue` does not reset errors on call anymore. Call `ImpulseFormValue#setErrors([])` manually when needed.
+
+- [#674](https://github.com/owanturist/react-impulse/pull/674) [`8f7d9e2`](https://github.com/owanturist/react-impulse/commit/8f7d9e2f3787bf3f7ff1fe49d9ae7711862210f0) Thanks [@owanturist](https://github.com/owanturist)! - Breaking changes:
+
+  - `ImpulseFormShape#isValidated`, `ImpulseFormShape#isDirty`, and `ImpulseFormShape#isTouched` return `false` for empty shapes.
+
+  Introduced:
+
+  - `ImpulseFormList` class.
+
 ## 0.2.0
 
 ### Minor Changes
