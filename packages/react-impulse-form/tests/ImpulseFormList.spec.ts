@@ -7,6 +7,7 @@ import {
   ImpulseFormList,
   ImpulseFormValue,
   type ImpulseFormValueOptions,
+  ImpulseFormListOptions,
 } from "../src"
 
 import { arg } from "./common"
@@ -90,8 +91,22 @@ describe("ImpulseFormList#isValidated()", () => {
 })
 
 describe("ImpulseFormList#getValidateOn()", () => {
+  const setup = (
+    elements: ReadonlyArray<ImpulseFormValue<number>>,
+    options?: ImpulseFormListOptions<ImpulseFormValue<number>>,
+  ) => {
+    return ImpulseFormList.of(elements, options)
+  }
+
+  const setupElement = (
+    initial: number,
+    options?: ImpulseFormValueOptions<number>,
+  ) => {
+    return ImpulseFormValue.of(initial, options)
+  }
+
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([ImpulseFormValue.of(0)])
+    const form = setup([setupElement(0)])
 
     expectTypeOf(form.getValidateOn).toEqualTypeOf<{
       (scope: Scope): ValidateStrategy | ReadonlyArray<ValidateStrategy>
@@ -117,6 +132,46 @@ describe("ImpulseFormList#getValidateOn()", () => {
       ): TResult
     }>()
   })
+
+  it("returns 'onTouch' for empty list", ({ scope }) => {
+    const form = setup([])
+
+    expect(form.getValidateOn(scope)).toBe("onTouch")
+    expect(form.getValidateOn(scope, arg(0))).toBe("onTouch")
+    expect(form.getValidateOn(scope, arg(1))).toStrictEqual([])
+  })
+
+  it("returns verbose when elements use more than a single strategy", ({
+    scope,
+  }) => {
+    const form = setup([
+      setupElement(0, { validateOn: "onInit" }),
+      setupElement(1),
+      setupElement(2, { validateOn: "onSubmit" }),
+    ])
+
+    const expected = ["onInit", "onTouch", "onSubmit"]
+
+    expect(form.getValidateOn(scope)).toStrictEqual(expected)
+    expect(form.getValidateOn(scope, arg(0))).toStrictEqual(expected)
+    expect(form.getValidateOn(scope, arg(1))).toStrictEqual(expected)
+  })
+
+  it("returns concise when all elements use the same strategy", ({ scope }) => {
+    const form = setup([
+      setupElement(0, { validateOn: "onChange" }),
+      setupElement(1, { validateOn: "onChange" }),
+      setupElement(2, { validateOn: "onChange" }),
+    ])
+
+    expect(form.getValidateOn(scope)).toBe("onChange")
+    expect(form.getValidateOn(scope, arg(0))).toBe("onChange")
+    expect(form.getValidateOn(scope, arg(1))).toStrictEqual([
+      "onChange",
+      "onChange",
+      "onChange",
+    ])
+  })
 })
 
 describe("ImpulseFormList#setValidateOn()", () => {
@@ -136,6 +191,20 @@ describe("ImpulseFormList#setValidateOn()", () => {
     expectTypeOf(form.getElements(scope).at(0)!.setValidateOn).toEqualTypeOf<
       (setter: Setter<ValidateStrategy>) => void
     >()
+  })
+
+  it("changes all items", ({ scope }) => {
+    const form = ImpulseFormList.of([
+      ImpulseFormValue.of(0),
+      ImpulseFormValue.of(1),
+      ImpulseFormValue.of(2),
+    ])
+
+    form.setValidateOn("onInit")
+    expect(form.getValidateOn(scope)).toBe("onInit")
+
+    form.setValidateOn("onSubmit")
+    expect(form.getValidateOn(scope)).toBe("onSubmit")
   })
 })
 
@@ -306,6 +375,32 @@ describe("ImpulseFormList#reset()", () => {
     expect(form.isValidated(scope)).toBe(true)
     form.reset()
     expect(form.isValidated(scope)).toBe(false)
+  })
+
+  it("provides the initial value to the element resetter 1st argument", ({
+    scope,
+  }) => {
+    const form = ImpulseFormList.of([
+      ImpulseFormValue.of(0, { initialValue: 1 }),
+      ImpulseFormValue.of(1, { initialValue: 2 }),
+      ImpulseFormValue.of(2, { initialValue: 3 }),
+    ])
+
+    form.reset((initial) => initial.map((x) => x + 1))
+    expect(form.getValue(scope)).toStrictEqual([2, 3, 4])
+  })
+
+  it("provides the original value to the resetter 2nd argument", ({
+    scope,
+  }) => {
+    const form = ImpulseFormList.of([
+      ImpulseFormValue.of(0, { initialValue: 1 }),
+      ImpulseFormValue.of(1, { initialValue: 2 }),
+      ImpulseFormValue.of(2, { initialValue: 3 }),
+    ])
+
+    form.reset((_, original) => original.map((x) => x + 1))
+    expect(form.getOriginalValue(scope)).toStrictEqual([1, 2, 3])
   })
 })
 

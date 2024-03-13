@@ -16,6 +16,7 @@ import {
   isTrue,
   shallowArrayEquals,
   isFalse,
+  uniq,
 } from "./utils"
 import { type GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./ValidateStrategy"
@@ -414,34 +415,25 @@ export class ImpulseFormList<
       verbose: ImpulseFormListValidateOnSchemaVerbose<TElement>,
     ) => TResult = identity as typeof select,
   ): TResult {
-    // TODO DRY
-    // make it easier for TS
-    const validateOnConcise = {} as Record<string, unknown>
-    const validateOnVerbose = {} as Record<string, unknown>
-
-    for (const [key, field] of Object.entries(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
-        const validateOn = field.getValidateOn(scope, (concise, verbose) => ({
+    const [validateOnConcise, validateOnVerbose] = this._mapFormElements(
+      scope,
+      (form) => {
+        return form.getValidateOn(scope, (concise, verbose) => [
           concise,
           verbose,
-        }))
-
-        validateOnConcise[key] = validateOn.concise
-        validateOnVerbose[key] = validateOn.verbose
-      }
-    }
-
-    const validateOnConciseValues = Object.values(validateOnConcise)
+        ])
+      },
+    )
 
     return select(
-      validateOnConciseValues.length === 0
+      validateOnConcise.length === 0
         ? // defaults to "onTouch"
           VALIDATE_ON_TOUCH
-        : validateOnConciseValues.every(isString) &&
-            new Set(validateOnConciseValues).size === 1
-          ? (validateOnConciseValues[0] as ValidateStrategy)
-          : (validateOnConcise as unknown as ImpulseFormListValidateOnSchema<TElement>),
-      validateOnVerbose as unknown as ImpulseFormListValidateOnSchemaVerbose<TElement>,
+        : validateOnConcise.every(isString) &&
+            uniq(validateOnConcise).length === 1
+          ? (validateOnConcise[0] as ValidateStrategy)
+          : (validateOnConcise as ImpulseFormListValidateOnSchema<TElement>),
+      validateOnVerbose as ImpulseFormListValidateOnSchemaVerbose<TElement>,
     )
   }
 
