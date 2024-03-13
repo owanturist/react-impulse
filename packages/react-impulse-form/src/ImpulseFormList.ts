@@ -263,13 +263,8 @@ export class ImpulseFormList<
   protected _submitWith(
     value: ImpulseFormListValueSchema<TElement>,
   ): ReadonlyArray<void | Promise<unknown>> {
-    // TODO DRY
-    const promises = Object.entries(this.fields).flatMap(([key, field]) => {
-      if (!ImpulseForm.isImpulseForm(field)) {
-        return []
-      }
-
-      return ImpulseForm._submitWith(field, value[key as keyof typeof value])
+    const promises = untrack(this._elements).flatMap((element, index) => {
+      return ImpulseForm._submitWith(element, value[index])
     })
 
     return [...super._submitWith(value), ...promises]

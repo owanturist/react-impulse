@@ -990,3 +990,63 @@ describe("ImpulseFormList#focusFirstInvalidValue()", () => {
     expect(listener_2).not.toHaveBeenCalled()
   })
 })
+
+describe("ImpulseFormList#onSubmit()", () => {
+  const setup = (
+    options?: ImpulseFormListOptions<ImpulseFormValue<number>>,
+  ) => {
+    const form = ImpulseFormList.of(
+      [ImpulseFormValue.of(1), ImpulseFormValue.of(2), ImpulseFormValue.of(3)],
+      options,
+    )
+
+    const listener_0 = vi.fn()
+    const listener_1 = vi.fn()
+    const listener_2 = vi.fn()
+    const listener_3 = vi.fn()
+
+    const elements = untrack((scope) => form.getElements(scope))
+
+    form.onSubmit(listener_0)
+    elements.at(0)?.onSubmit(listener_1)
+    elements.at(1)?.onSubmit(listener_2)
+    elements.at(2)?.onSubmit(listener_3)
+
+    return [
+      form,
+      {
+        listener_0,
+        listener_1,
+        listener_2,
+        listener_3,
+      },
+    ] as const
+  }
+
+  it("does not call the listeners on init", () => {
+    const [, { listener_0, listener_1, listener_2, listener_3 }] = setup()
+
+    expect(listener_0).not.toHaveBeenCalled()
+    expect(listener_1).not.toHaveBeenCalled()
+    expect(listener_2).not.toHaveBeenCalled()
+    expect(listener_3).not.toHaveBeenCalled()
+  })
+
+  it("provides values to the listeners", () => {
+    const [form, { listener_0, listener_1, listener_2, listener_3 }] = setup()
+
+    void form.submit()
+
+    expect(listener_0).toHaveBeenCalledOnce()
+    expect(listener_0).toHaveBeenLastCalledWith([1, 2, 3])
+
+    expect(listener_1).toHaveBeenCalledOnce()
+    expect(listener_1).toHaveBeenLastCalledWith(1)
+
+    expect(listener_2).toHaveBeenCalledOnce()
+    expect(listener_2).toHaveBeenLastCalledWith(2)
+
+    expect(listener_3).toHaveBeenCalledOnce()
+    expect(listener_3).toHaveBeenLastCalledWith(3)
+  })
+})
