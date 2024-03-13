@@ -2,7 +2,6 @@ import {
   type Scope,
   batch,
   identity,
-  isBoolean,
   isFunction,
   isTruthy,
   isDefined,
@@ -208,6 +207,7 @@ export class ImpulseFormList<
     getCurrent: (scope: Scope) => [TElementValueLeft, TElementValueRight],
     setNext: (element: TElement, next: TGenericValue | TElementSetter) => void,
   ): void
+
   private _setFormElements<
     TElementSetter,
     TElementValue,
@@ -220,6 +220,7 @@ export class ImpulseFormList<
     getCurrent: (scope: Scope) => [TElementValue],
     setNext: (element: TElement, next: TGenericValue | TElementSetter) => void,
   ): void
+
   private _setFormElements<
     TElementSetter,
     TElementValueLeft,
@@ -316,7 +317,6 @@ export class ImpulseFormList<
     return this._elements.getValue(scope, select)
   }
 
-  // TODO add tests
   public getErrors(scope: Scope): ImpulseFormListErrorSchema<TElement>
   public getErrors<TResult>(
     scope: Scope,
@@ -345,26 +345,12 @@ export class ImpulseFormList<
     )
   }
 
-  public setErrors(errors: ImpulseFormListErrorSetter<TElement>): void {
-    batch((scope) => {
-      const nextErrors = isFunction(errors)
-        ? errors(this.getErrors(scope, (_, verbose) => verbose))
-        : errors
-
-      for (const [key, field] of Object.entries(this.fields)) {
-        const nextFieldTouched =
-          nextErrors == null
-            ? nextErrors
-            : nextErrors[key as keyof typeof nextErrors]
-
-        if (
-          ImpulseForm.isImpulseForm(field) &&
-          nextFieldTouched !== undefined
-        ) {
-          field.setErrors(nextFieldTouched)
-        }
-      }
-    })
+  public setErrors(setter: ImpulseFormListErrorSetter<TElement>): void {
+    this._setFormElements(
+      setter,
+      (scope) => [this.getErrors(scope, (_, verbose) => verbose)],
+      (element, next) => element.setErrors(next),
+    )
   }
 
   public isValidated(scope: Scope): boolean
