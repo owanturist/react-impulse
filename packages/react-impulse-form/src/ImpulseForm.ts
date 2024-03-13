@@ -144,12 +144,15 @@ export abstract class ImpulseForm<
     return this._childOf(null)
   }
 
+  // TODO add select
   public isValid(scope: Scope): boolean {
     return !this.isInvalid(scope)
   }
 
+  // TODO add select
+
   public isInvalid(scope: Scope): boolean {
-    return this.getErrors(scope, isDefined)
+    return this.isValidated(scope) && this.getErrors(scope, isDefined)
   }
 
   public abstract getErrors(scope: Scope): TParams["errors.schema"]
