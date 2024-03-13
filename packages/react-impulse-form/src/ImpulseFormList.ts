@@ -165,9 +165,9 @@ export class ImpulseFormList<
     super(root)
 
     this._elements.setValue((elements) => {
-      return elements.map(
-        (element) => ImpulseForm._cloneWithRoot(this, element) as TElement,
-      )
+      return elements.map((element) => {
+        return ImpulseForm._cloneWithRoot(root ?? this, element) as TElement
+      })
     })
   }
 
