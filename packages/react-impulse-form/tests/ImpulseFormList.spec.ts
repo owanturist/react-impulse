@@ -140,8 +140,19 @@ describe("ImpulseFormList#setValidateOn()", () => {
 })
 
 describe("ImpulseFormList#isTouched()", () => {
+  const setup = (elements: ReadonlyArray<ImpulseFormValue<number>>) => {
+    return ImpulseFormList.of(elements)
+  }
+
+  const setupElement = (
+    initial: number,
+    options?: ImpulseFormValueOptions<number>,
+  ) => {
+    return ImpulseFormValue.of(initial, options)
+  }
+
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([ImpulseFormValue.of(0)])
+    const form = setup([setupElement(0)])
 
     expectTypeOf(form.isTouched).toEqualTypeOf<{
       (scope: Scope): boolean
@@ -164,6 +175,46 @@ describe("ImpulseFormList#isTouched()", () => {
       ): TResult
     }>()
   })
+
+  it("returns false for empty list", ({ scope }) => {
+    const form = setup([])
+
+    expect(form.isTouched(scope)).toBe(false)
+    expect(form.isTouched(scope, arg(0))).toBe(false)
+    expect(form.isTouched(scope, arg(1))).toStrictEqual([])
+  })
+
+  it("returns false when all elements are not touched", ({ scope }) => {
+    const form = setup([setupElement(0), setupElement(1), setupElement(2)])
+
+    expect(form.isTouched(scope)).toBe(false)
+    expect(form.isTouched(scope, arg(0))).toBe(false)
+    expect(form.isTouched(scope, arg(1))).toStrictEqual([false, false, false])
+  })
+
+  it("returns true when at least one element is touched", ({ scope }) => {
+    const form = setup([
+      setupElement(0),
+      setupElement(1),
+      setupElement(2, { touched: true }),
+    ])
+
+    expect(form.isTouched(scope)).toBe(true)
+    expect(form.isTouched(scope, arg(0))).toStrictEqual([false, false, true])
+    expect(form.isTouched(scope, arg(1))).toStrictEqual([false, false, true])
+  })
+
+  it("returns true when all elements are touched", ({ scope }) => {
+    const form = setup([
+      setupElement(0, { touched: true }),
+      setupElement(1, { touched: true }),
+      setupElement(2, { touched: true }),
+    ])
+
+    expect(form.isTouched(scope)).toBe(true)
+    expect(form.isTouched(scope, arg(0))).toBe(true)
+    expect(form.isTouched(scope, arg(1))).toStrictEqual([true, true, true])
+  })
 })
 
 describe("ImpulseFormList#setTouched()", () => {
@@ -182,6 +233,20 @@ describe("ImpulseFormList#setTouched()", () => {
     expectTypeOf(form.getElements(scope).at(0)!.setTouched).toEqualTypeOf<
       (setter: Setter<boolean>) => void
     >()
+  })
+
+  it("touches all items", ({ scope }) => {
+    const form = ImpulseFormList.of([
+      ImpulseFormValue.of(0),
+      ImpulseFormValue.of(1),
+      ImpulseFormValue.of(2),
+    ])
+
+    form.setTouched(true)
+    expect(form.isTouched(scope)).toBe(true)
+
+    form.setTouched(false)
+    expect(form.isTouched(scope)).toBe(false)
   })
 })
 

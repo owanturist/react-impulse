@@ -390,10 +390,10 @@ export class ImpulseFormList<
     )
 
     return select(
-      validatedConcise.every(isTrue)
-        ? true
-        : validatedConcise.every(isFalse)
-          ? false
+      validatedConcise.every(isFalse)
+        ? false
+        : validatedConcise.every(isTrue)
+          ? true
           : (validatedConcise as ImpulseFormListFlagSchema<TElement>),
       valueVerbose as ImpulseFormShapeListSchemaVerbose<TElement>,
     )
@@ -456,7 +456,6 @@ export class ImpulseFormList<
     )
   }
 
-  // TODO add tests
   public isTouched(scope: Scope): boolean
   public isTouched<TResult>(
     scope: Scope,
@@ -487,7 +486,6 @@ export class ImpulseFormList<
     )
   }
 
-  // TODO add tests
   public setTouched(setter: ImpulseFormListFlagSetter<TElement>): void {
     this._setFormElements(
       setter,
