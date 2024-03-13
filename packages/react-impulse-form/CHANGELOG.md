@@ -1,5 +1,14 @@
 # react-impulse-form
 
+## 0.3.1
+
+### Patch Changes
+
+- [#676](https://github.com/owanturist/react-impulse/pull/676) [`98641bd`](https://github.com/owanturist/react-impulse/commit/98641bd199babca7ab0c7c80720ab9e913c7967a) Thanks [@owanturist](https://github.com/owanturist)! - Fixes:
+
+  - `ImpulseForm#isValid` returns true only when `ImpulseForm#isValidated` is true.
+  - `ImpulseFormValue#reset` sets `ImpulseFormValue#isTouched` to false.
+
 ## 0.3.0
 
 ### Minor Changes
