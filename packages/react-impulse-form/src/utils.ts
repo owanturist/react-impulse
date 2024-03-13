@@ -17,6 +17,8 @@ export type ComputeObject<Obj> = unknown & {
 
 export const isTrue = (value: unknown): value is true => value === true
 
+export const isFalse = (value: unknown): value is false => value === false
+
 export const isHtmlElement = (value: unknown): value is HTMLElement => {
   return value instanceof HTMLElement
 }

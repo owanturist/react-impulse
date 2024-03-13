@@ -9,10 +9,7 @@ import {
   ImpulseFormValue,
 } from "../src"
 
-const arg =
-  <TIndex extends number>(index: TIndex) =>
-  <TArgs extends ReadonlyArray<unknown>>(...args: TArgs): TArgs[TIndex] =>
-    args[index]
+import { arg } from "./common"
 
 describe("ImpulseFormShape.of()", () => {
   it("composes ImpulseFormShape from ImpulseFormValue", ({ scope }) => {
@@ -1294,6 +1291,20 @@ describe("ImpulseFormShape#isTouched()", () => {
     expect(isTouched).toBe(false)
     expectTypeOf(isTouched).toEqualTypeOf<boolean>()
   })
+
+  it("returns false for empty shape", ({ scope }) => {
+    const shape = ImpulseFormShape.of({})
+
+    expect(shape.isTouched(scope)).toBe(false)
+  })
+
+  it("returns false for shape without forms", ({ scope }) => {
+    const shape = ImpulseFormShape.of({
+      first: "one",
+    })
+
+    expect(shape.isTouched(scope)).toBe(false)
+  })
 })
 
 describe("ImpulseFormShape#setTouched()", () => {
@@ -1982,6 +1993,20 @@ describe("ImpulseFormShape#isDirty()", () => {
     const isDirty = shape.isDirty<string>(scope)
     expect(isDirty).toBe(false)
     expectTypeOf(isDirty).toEqualTypeOf<boolean>()
+  })
+
+  it("returns false for empty shape", ({ scope }) => {
+    const shape = ImpulseFormShape.of({})
+
+    expect(shape.isDirty(scope)).toBe(false)
+  })
+
+  it("returns false for shape without forms", ({ scope }) => {
+    const shape = ImpulseFormShape.of({
+      first: "one",
+    })
+
+    expect(shape.isDirty(scope)).toBe(false)
   })
 })
 

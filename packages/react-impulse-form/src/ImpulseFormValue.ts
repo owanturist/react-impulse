@@ -242,11 +242,11 @@ export class ImpulseFormValue<
   }
 
   // TODO add tests against _validated when cloning
-  protected _cloneWithRoot(
-    root: null | ImpulseForm,
+  protected _childOf(
+    parent: null | ImpulseForm,
   ): ImpulseFormValue<TOriginalValue, TValue> {
     return new ImpulseFormValue(
-      root,
+      parent,
       this._touched.clone(),
       this._validateOn.clone(),
       this._errors.clone(),

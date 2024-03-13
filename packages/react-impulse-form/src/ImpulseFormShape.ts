@@ -191,10 +191,7 @@ export class ImpulseFormShape<
 
     for (const [key, field] of Object.entries(fields)) {
       acc[key as keyof TFields] = ImpulseForm.isImpulseForm(field)
-        ? (ImpulseForm._cloneWithRoot(
-            root ?? this,
-            field,
-          ) as TFields[keyof TFields])
+        ? (ImpulseForm._childOf(this, field) as TFields[keyof TFields])
         : (field as TFields[keyof TFields])
     }
 
@@ -248,10 +245,8 @@ export class ImpulseFormShape<
     return null
   }
 
-  protected _cloneWithRoot(
-    root: null | ImpulseForm,
-  ): ImpulseFormShape<TFields> {
-    return new ImpulseFormShape(root, this.fields)
+  protected _childOf(parent: null | ImpulseForm): ImpulseFormShape<TFields> {
+    return new ImpulseFormShape(parent, this.fields)
   }
 
   protected _setValidated(isValidated: boolean): void {
@@ -369,10 +364,10 @@ export class ImpulseFormShape<
     }
 
     return select(
-      validatedAll
-        ? true
-        : validatedNone
-          ? false
+      validatedNone
+        ? false
+        : validatedAll
+          ? true
           : (validatedConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
       validatedVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
     )
@@ -484,10 +479,10 @@ export class ImpulseFormShape<
     }
 
     return select(
-      touchedAll
-        ? true
-        : touchedNone
-          ? false
+      touchedNone
+        ? false
+        : touchedAll
+          ? true
           : (touchedConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
       touchedVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
     )
@@ -568,10 +563,10 @@ export class ImpulseFormShape<
     }
 
     return select(
-      touchedAll
-        ? true
-        : touchedNone
-          ? false
+      touchedNone
+        ? false
+        : touchedAll
+          ? true
           : (touchedConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
       touchedVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
     )

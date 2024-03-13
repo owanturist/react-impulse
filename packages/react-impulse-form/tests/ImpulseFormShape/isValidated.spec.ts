@@ -136,8 +136,8 @@ describe("isValidated(scope)", () => {
     expect(shape.fields.third.isValidated(scope)).toBe(true)
   })
 
-  it("returns true for empty shape", ({ scope }) => {
-    expect(ImpulseFormShape.of({}).isValidated(scope)).toBe(true)
+  it("returns false for empty shape", ({ scope }) => {
+    expect(ImpulseFormShape.of({}).isValidated(scope)).toBe(false)
   })
 })
 
@@ -196,8 +196,8 @@ describe("isValidated(scope, (concise) => concise)", () => {
     expect(isValidated(scope, shape.fields.third)).toBe(true)
   })
 
-  it("returns true for empty shape", ({ scope }) => {
-    expect(isValidated(scope, ImpulseFormShape.of({}))).toBe(true)
+  it("returns false for empty shape", ({ scope }) => {
+    expect(isValidated(scope, ImpulseFormShape.of({}))).toBe(false)
   })
 })
 

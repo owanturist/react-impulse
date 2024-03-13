@@ -37,11 +37,15 @@ export abstract class ImpulseForm<
     return value instanceof ImpulseForm
   }
 
-  protected static _cloneWithRoot<TChildParams extends ImpulseFormParams>(
-    root: ImpulseForm,
+  protected static _childOf<TChildParams extends ImpulseFormParams>(
+    parent: ImpulseForm,
     child: ImpulseForm<TChildParams>,
   ): ImpulseForm<TChildParams> {
-    return child._cloneWithRoot(root)
+    if (child._root === parent._root) {
+      return child
+    }
+
+    return child._childOf(parent._root)
   }
 
   protected static _submitWith<TParams extends ImpulseFormParams>(
@@ -83,9 +87,7 @@ export abstract class ImpulseForm<
 
   protected abstract _getFocusFirstInvalidValue(): null | VoidFunction
 
-  protected abstract _cloneWithRoot(
-    root: null | ImpulseForm,
-  ): ImpulseForm<TParams>
+  protected abstract _childOf(parent: null | ImpulseForm): ImpulseForm<TParams>
 
   protected abstract _setValidated(isValidated: boolean): void
 
@@ -139,7 +141,7 @@ export abstract class ImpulseForm<
   }
 
   public clone(): ImpulseForm<TParams> {
-    return this._cloneWithRoot(null)
+    return this._childOf(null)
   }
 
   public isValid(scope: Scope): boolean {
@@ -212,13 +214,17 @@ export abstract class ImpulseForm<
     ) => TResult,
   ): TResult
 
+  // TODO extend with select
   public abstract getOriginalValue(
     scope: Scope,
   ): TParams["originalValue.schema"]
+
   public abstract setOriginalValue(
     setter: TParams["originalValue.setter"],
   ): void
 
+  // TODO extend with select
   public abstract getInitialValue(scope: Scope): TParams["originalValue.schema"]
+
   public abstract setInitialValue(setter: TParams["originalValue.setter"]): void
 }
