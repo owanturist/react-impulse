@@ -17,6 +17,8 @@ export type ComputeObject<Obj> = unknown & {
 
 export const isTrue = (value: unknown): value is true => value === true
 
+export const isFalse = (value: unknown): value is false => value === false
+
 export const isHtmlElement = (value: unknown): value is HTMLElement => {
   return value instanceof HTMLElement
 }
@@ -39,6 +41,7 @@ export const uniq = <T>(values: ReadonlyArray<T>): ReadonlyArray<T> => {
   return result.length === values.length ? values : result
 }
 
+// TODO verify it is necessary
 export const forEach2 = <TLeft, TRight>(
   callback: (left: TLeft, right: TRight, index: number) => void,
   left: ReadonlyArray<TLeft>,

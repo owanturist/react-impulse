@@ -6,7 +6,9 @@ import {
   type Setter,
   ImpulseFormList,
   ImpulseFormValue,
+  type ImpulseFormValueOptions,
 } from "../src"
+
 import { arg } from "./common"
 
 describe("ImpulseFormList#getErrors()", () => {
@@ -207,8 +209,19 @@ describe("ImpulseFormList#reset()", () => {
 })
 
 describe("ImpulseFormList#isDirty()", () => {
+  const setup = (elements: ReadonlyArray<ImpulseFormValue<number>>) => {
+    return ImpulseFormList.of(elements)
+  }
+
+  const setupElement = (
+    initial: number,
+    options?: ImpulseFormValueOptions<number>,
+  ) => {
+    return ImpulseFormValue.of(initial, options)
+  }
+
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([ImpulseFormValue.of(0)])
+    const form = setup([setupElement(0)])
 
     expectTypeOf(form.isDirty).toEqualTypeOf<{
       (scope: Scope): boolean
@@ -230,6 +243,46 @@ describe("ImpulseFormList#isDirty()", () => {
         select: (concise: boolean, verbose: boolean) => TResult,
       ): TResult
     }>()
+  })
+
+  it("returns false for empty list", ({ scope }) => {
+    const form = setup([])
+
+    expect(form.isDirty(scope)).toBe(false)
+    expect(form.isDirty(scope, arg(0))).toBe(false)
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([])
+  })
+
+  it("returns false when all elements are not dirty", ({ scope }) => {
+    const form = setup([setupElement(0), setupElement(1), setupElement(2)])
+
+    expect(form.isDirty(scope)).toBe(false)
+    expect(form.isDirty(scope, arg(0))).toBe(false)
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([false, false, false])
+  })
+
+  it("returns true when at least one element is dirty", ({ scope }) => {
+    const form = setup([
+      setupElement(0),
+      setupElement(1),
+      setupElement(2, { initialValue: 3 }),
+    ])
+
+    expect(form.isDirty(scope)).toBe(true)
+    expect(form.isDirty(scope, arg(0))).toStrictEqual([false, false, true])
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([false, false, true])
+  })
+
+  it("returns true when all elements are dirty", ({ scope }) => {
+    const form = setup([
+      setupElement(0, { initialValue: 1 }),
+      setupElement(1, { initialValue: 2 }),
+      setupElement(2, { initialValue: 3 }),
+    ])
+
+    expect(form.isDirty(scope)).toBe(true)
+    expect(form.isDirty(scope, arg(0))).toBe(true)
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([true, true, true])
   })
 })
 

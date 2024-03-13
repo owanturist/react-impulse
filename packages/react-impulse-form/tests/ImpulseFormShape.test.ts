@@ -1980,6 +1980,20 @@ describe("ImpulseFormShape#isDirty()", () => {
     expect(isDirty).toBe(false)
     expectTypeOf(isDirty).toEqualTypeOf<boolean>()
   })
+
+  it("returns false for empty shape", ({ scope }) => {
+    const shape = ImpulseFormShape.of({})
+
+    expect(shape.isDirty(scope)).toBe(false)
+  })
+
+  it("returns false for shape without forms", ({ scope }) => {
+    const shape = ImpulseFormShape.of({
+      first: "one",
+    })
+
+    expect(shape.isDirty(scope)).toBe(false)
+  })
 })
 
 describe("ImpulseFormShape#reset()", () => {

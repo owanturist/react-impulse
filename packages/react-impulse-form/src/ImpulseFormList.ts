@@ -10,7 +10,13 @@ import {
   isArray,
   Impulse,
 } from "./dependencies"
-import { type Setter, forEach2, isTrue, shallowArrayEquals } from "./utils"
+import {
+  type Setter,
+  forEach2,
+  isTrue,
+  shallowArrayEquals,
+  isFalse,
+} from "./utils"
 import { type GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./ValidateStrategy"
 
@@ -572,34 +578,18 @@ export class ImpulseFormList<
       verbose: ImpulseFormShapeListSchemaVerbose<TElement>,
     ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
-    // TODO DRY
-    let touchedAll = true
-    let touchedNone = true
-    // make it easier for TS
-    const touchedConcise = {} as Record<string, unknown>
-    const touchedVerbose = {} as Record<string, unknown>
-
-    for (const [key, field] of Object.entries(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
-        const touched = field.isDirty(scope, (concise, verbose) => ({
-          concise,
-          verbose,
-        }))
-
-        touchedAll = touchedAll && touched.concise === true
-        touchedNone = touchedNone && touched.concise === false
-        touchedConcise[key] = touched.concise
-        touchedVerbose[key] = touched.verbose
-      }
-    }
+    const [valuesConcise, valuesVerbose] = this._mapFormElements(
+      scope,
+      (form) => form.isDirty(scope, (concise, verbose) => [concise, verbose]),
+    )
 
     return select(
-      touchedAll
-        ? true
-        : touchedNone
-          ? false
-          : (touchedConcise as unknown as ImpulseFormListFlagSchema<TElement>),
-      touchedVerbose as unknown as ImpulseFormShapeListSchemaVerbose<TElement>,
+      valuesConcise.every(isFalse)
+        ? false
+        : valuesConcise.every(isTrue)
+          ? true
+          : (valuesConcise as ImpulseFormListFlagSchema<TElement>),
+      valuesVerbose as ImpulseFormShapeListSchemaVerbose<TElement>,
     )
   }
 
