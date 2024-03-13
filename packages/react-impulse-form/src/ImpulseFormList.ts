@@ -46,13 +46,13 @@ export type ImpulseFormListFlagSchema<TElement extends ImpulseForm> =
   | boolean
   | ReadonlyArray<GetImpulseFormParam<TElement, "flag.schema">>
 
-export type ImpulseFormShapeListSchemaVerbose<TElement extends ImpulseForm> =
+export type ImpulseFormListFlagSchemaVerbose<TElement extends ImpulseForm> =
   ReadonlyArray<GetImpulseFormParam<TElement, "flag.schema.verbose">>
 
 export type ImpulseFormListFlagSetter<TElement extends ImpulseForm> = Setter<
   | boolean
   | ReadonlyArray<undefined | GetImpulseFormParam<TElement, "flag.setter">>,
-  [ImpulseFormShapeListSchemaVerbose<TElement>]
+  [ImpulseFormListFlagSchemaVerbose<TElement>]
 >
 
 export type ImpulseFormListValidateOnSchema<TElement extends ImpulseForm> =
@@ -105,7 +105,7 @@ export class ImpulseFormList<
 
   "flag.setter": ImpulseFormListFlagSetter<TElement>
   "flag.schema": ImpulseFormListFlagSchema<TElement>
-  "flag.schema.verbose": ImpulseFormShapeListSchemaVerbose<TElement>
+  "flag.schema.verbose": ImpulseFormListFlagSchemaVerbose<TElement>
 
   "validateOn.setter": ImpulseFormListValidateOnSetter<TElement>
   "validateOn.schema": ImpulseFormListValidateOnSchema<TElement>
@@ -125,7 +125,7 @@ export class ImpulseFormList<
       errors,
     }: ImpulseFormListOptions<TElement> = {},
   ): ImpulseFormList<TElement> {
-    const shape = new ImpulseFormList(
+    const list = new ImpulseFormList(
       null,
       Impulse.of(elements, {
         compare: shallowArrayEquals,
@@ -134,28 +134,28 @@ export class ImpulseFormList<
 
     batch(() => {
       if (isDefined.strict(touched)) {
-        shape.setTouched(touched)
+        list.setTouched(touched)
       }
 
       if (isDefined.strict(initialValue)) {
-        shape.setInitialValue(initialValue)
+        list.setInitialValue(initialValue)
       }
 
       if (isDefined.strict(originalValue)) {
-        shape.setOriginalValue(originalValue)
+        list.setOriginalValue(originalValue)
       }
 
       if (isDefined(validateOn)) {
-        shape.setValidateOn(validateOn)
+        list.setValidateOn(validateOn)
       }
 
       // TODO add test against null
       if (isDefined.strict(errors)) {
-        shape.setErrors(errors)
+        list.setErrors(errors)
       }
     })
 
-    return shape
+    return list
   }
 
   protected constructor(
@@ -336,14 +336,14 @@ export class ImpulseFormList<
     scope: Scope,
     select: (
       concise: ImpulseFormListFlagSchema<TElement>,
-      verbose: ImpulseFormShapeListSchemaVerbose<TElement>,
+      verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
     ) => TResult,
   ): TResult
   public isValidated<TResult = boolean>(
     scope: Scope,
     select: (
       concise: ImpulseFormListFlagSchema<TElement>,
-      verbose: ImpulseFormShapeListSchemaVerbose<TElement>,
+      verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
     ) => TResult = isTrue as unknown as typeof select,
   ): TResult {
     const [validatedConcise, valueVerbose] = this._mapFormElements(
@@ -358,7 +358,7 @@ export class ImpulseFormList<
         : validatedConcise.every(isTrue)
           ? true
           : (validatedConcise as ImpulseFormListFlagSchema<TElement>),
-      valueVerbose as ImpulseFormShapeListSchemaVerbose<TElement>,
+      valueVerbose as ImpulseFormListFlagSchemaVerbose<TElement>,
     )
   }
 
@@ -414,14 +414,14 @@ export class ImpulseFormList<
     scope: Scope,
     select: (
       concise: ImpulseFormListFlagSchema<TElement>,
-      verbose: ImpulseFormShapeListSchemaVerbose<TElement>,
+      verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
     ) => TResult,
   ): TResult
   public isTouched<TResult = boolean>(
     scope: Scope,
     select: (
       concise: ImpulseFormListFlagSchema<TElement>,
-      verbose: ImpulseFormShapeListSchemaVerbose<TElement>,
+      verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
     ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
     const [touchedConcise, touchedVerbose] = this._mapFormElements(
@@ -435,7 +435,7 @@ export class ImpulseFormList<
         : touchedConcise.every(isTrue)
           ? true
           : (touchedConcise as ImpulseFormListFlagSchema<TElement>),
-      touchedVerbose as ImpulseFormShapeListSchemaVerbose<TElement>,
+      touchedVerbose as ImpulseFormListFlagSchemaVerbose<TElement>,
     )
   }
 
@@ -462,14 +462,14 @@ export class ImpulseFormList<
     scope: Scope,
     select: (
       concise: ImpulseFormListFlagSchema<TElement>,
-      verbose: ImpulseFormShapeListSchemaVerbose<TElement>,
+      verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
     ) => TResult,
   ): TResult
   public isDirty<TResult = boolean>(
     scope: Scope,
     select: (
       concise: ImpulseFormListFlagSchema<TElement>,
-      verbose: ImpulseFormShapeListSchemaVerbose<TElement>,
+      verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
     ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
     const [dirtyConcise, dirtyVerbose] = this._mapFormElements(scope, (form) =>
@@ -482,7 +482,7 @@ export class ImpulseFormList<
         : dirtyConcise.every(isTrue)
           ? true
           : (dirtyConcise as ImpulseFormListFlagSchema<TElement>),
-      dirtyVerbose as ImpulseFormShapeListSchemaVerbose<TElement>,
+      dirtyVerbose as ImpulseFormListFlagSchemaVerbose<TElement>,
     )
   }
 
