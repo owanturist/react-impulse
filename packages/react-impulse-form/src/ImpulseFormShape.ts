@@ -369,10 +369,10 @@ export class ImpulseFormShape<
     }
 
     return select(
-      validatedAll
-        ? true
-        : validatedNone
-          ? false
+      validatedNone
+        ? false
+        : validatedAll
+          ? true
           : (validatedConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
       validatedVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
     )

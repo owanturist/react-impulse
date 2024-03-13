@@ -4,10 +4,10 @@ import { z } from "zod"
 import {
   type ValidateStrategy,
   type Setter,
+  type ImpulseFormValueOptions,
+  type ImpulseFormListOptions,
   ImpulseFormList,
   ImpulseFormValue,
-  type ImpulseFormValueOptions,
-  ImpulseFormListOptions,
 } from "../src"
 
 import { arg } from "./common"
@@ -64,8 +64,19 @@ describe("ImpulseFormList#setErrors()", () => {
 })
 
 describe("ImpulseFormList#isValidated()", () => {
+  const setup = (elements: ReadonlyArray<ImpulseFormValue<number>>) => {
+    return ImpulseFormList.of(elements)
+  }
+
+  const setupElement = (
+    initial: number,
+    options?: ImpulseFormValueOptions<number>,
+  ) => {
+    return ImpulseFormValue.of(initial, options)
+  }
+
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([ImpulseFormValue.of(0)])
+    const form = setup([setupElement(0)])
 
     expectTypeOf(form.isValidated).toEqualTypeOf<{
       (scope: Scope): boolean
@@ -87,6 +98,48 @@ describe("ImpulseFormList#isValidated()", () => {
         select: (concise: boolean, verbose: boolean) => TResult,
       ): TResult
     }>()
+  })
+
+  it("returns false for empty list", ({ scope }) => {
+    const form = setup([])
+
+    expect(form.isValidated(scope)).toBe(false)
+    expect(form.isValidated(scope, arg(0))).toBe(false)
+    expect(form.isValidated(scope, arg(1))).toStrictEqual([])
+  })
+
+  it("returns false when all elements are not validated", ({ scope }) => {
+    const form = setup([setupElement(0), setupElement(1), setupElement(2)])
+
+    expect(form.isValidated(scope)).toBe(false)
+    expect(form.isValidated(scope, arg(0))).toBe(false)
+    expect(form.isValidated(scope, arg(1))).toStrictEqual([false, false, false])
+  })
+
+  it("returns false when at least one element is not validated", ({
+    scope,
+  }) => {
+    const form = setup([
+      setupElement(0, { validateOn: "onInit" }),
+      setupElement(1, { validateOn: "onInit" }),
+      setupElement(2),
+    ])
+
+    expect(form.isValidated(scope)).toBe(false)
+    expect(form.isValidated(scope, arg(0))).toStrictEqual([true, true, false])
+    expect(form.isValidated(scope, arg(1))).toStrictEqual([true, true, false])
+  })
+
+  it("returns true when all elements are validated", ({ scope }) => {
+    const form = setup([
+      setupElement(0, { validateOn: "onInit" }),
+      setupElement(1, { validateOn: "onInit" }),
+      setupElement(2, { validateOn: "onInit" }),
+    ])
+
+    expect(form.isValidated(scope)).toBe(true)
+    expect(form.isValidated(scope, arg(0))).toBe(true)
+    expect(form.isValidated(scope, arg(1))).toStrictEqual([true, true, true])
   })
 })
 

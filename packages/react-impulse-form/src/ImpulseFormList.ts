@@ -367,7 +367,6 @@ export class ImpulseFormList<
     })
   }
 
-  // TODO add tests
   public isValidated(scope: Scope): boolean
 
   public isValidated<TResult>(
@@ -437,7 +436,6 @@ export class ImpulseFormList<
     )
   }
 
-  // TODO add tests
   public setValidateOn(
     setter: ImpulseFormListValidateOnSetter<TElement>,
   ): void {
