@@ -386,9 +386,9 @@ export class ImpulseFormValue<
 
       this.setInitialValue(resetValue)
       this.setOriginalValue(resetValue)
-      // TODO test when reset
+      // TODO test when reset for all below
       this._validated.setValue(false)
-      // TODO test when reset
+      this._touched.setValue(false)
       this._errors.setValue([])
     })
   }
