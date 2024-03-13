@@ -17,5 +17,6 @@ export {
   isBoolean,
   isString,
   isTruthy,
+  isArray,
   identity,
 } from "remeda"

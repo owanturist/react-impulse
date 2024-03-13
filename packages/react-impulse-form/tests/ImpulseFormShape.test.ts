@@ -9,10 +9,7 @@ import {
   ImpulseFormValue,
 } from "../src"
 
-const arg =
-  <TIndex extends number>(index: TIndex) =>
-  <TArgs extends ReadonlyArray<unknown>>(...args: TArgs): TArgs[TIndex] =>
-    args[index]
+import { arg } from "./common"
 
 describe("ImpulseFormShape.of()", () => {
   it("composes ImpulseFormShape from ImpulseFormValue", ({ scope }) => {

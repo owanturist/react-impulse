@@ -7,6 +7,7 @@ import {
   ImpulseFormList,
   ImpulseFormValue,
 } from "../src"
+import { arg } from "./common"
 
 describe("ImpulseFormList#getErrors()", () => {
   it("matches the type definition", ({ scope }) => {
@@ -233,12 +234,23 @@ describe("ImpulseFormList#isDirty()", () => {
 })
 
 describe("ImpulseFormList#getValue()", () => {
+  const setup = (elements: ReadonlyArray<ImpulseFormValue<number, string>>) => {
+    return ImpulseFormList.of(elements, {
+      validateOn: "onInit",
+    })
+  }
+
+  const setupElement = (initial: number) => {
+    return ImpulseFormValue.of(initial, {
+      schema: z
+        .number()
+        .min(1)
+        .transform((x) => x.toFixed()),
+    })
+  }
+
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, {
-        schema: z.number().transform((x) => x.toFixed()),
-      }),
-    ])
+    const form = setup([setupElement(0)])
 
     expectTypeOf(form.getValue).toEqualTypeOf<{
       (scope: Scope): null | ReadonlyArray<string>
@@ -260,6 +272,38 @@ describe("ImpulseFormList#getValue()", () => {
         select: (concise: null | string, verbose: null | string) => TResult,
       ): TResult
     }>()
+  })
+
+  it("returns all items when valid", ({ scope }) => {
+    const form = setup([setupElement(1), setupElement(2), setupElement(3)])
+
+    expect(form.getValue(scope)).toStrictEqual(["1", "2", "3"])
+    expect(form.getValue(scope, arg(0))).toStrictEqual(["1", "2", "3"])
+    expect(form.getValue(scope, arg(1))).toStrictEqual(["1", "2", "3"])
+  })
+
+  it("returns empty array for empty list", ({ scope }) => {
+    const form = setup([])
+
+    expect(form.getValue(scope)).toStrictEqual([])
+    expect(form.getValue(scope, arg(0))).toStrictEqual([])
+    expect(form.getValue(scope, arg(1))).toStrictEqual([])
+  })
+
+  it("returns null if a single element is not valid", ({ scope }) => {
+    const form = setup([setupElement(0)])
+
+    expect(form.getValue(scope)).toBeNull()
+    expect(form.getValue(scope, arg(0))).toBeNull()
+    expect(form.getValue(scope, arg(1))).toStrictEqual([null])
+  })
+
+  it("returns null if at least one element is not valid", ({ scope }) => {
+    const form = setup([setupElement(1), setupElement(0), setupElement(3)])
+
+    expect(form.getValue(scope)).toBeNull()
+    expect(form.getValue(scope, arg(0))).toBeNull()
+    expect(form.getValue(scope, arg(1))).toStrictEqual(["1", null, "3"])
   })
 })
 
