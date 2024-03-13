@@ -41,19 +41,6 @@ export const uniq = <T>(values: ReadonlyArray<T>): ReadonlyArray<T> => {
   return result.length === values.length ? values : result
 }
 
-// TODO verify it is necessary
-export const forEach2 = <TLeft, TRight>(
-  callback: (left: TLeft, right: TRight, index: number) => void,
-  left: ReadonlyArray<TLeft>,
-  right: ReadonlyArray<TRight>,
-): void => {
-  const length = Math.min(left.length, right.length)
-
-  for (let index = 0; index < length; index++) {
-    callback(left[index]!, right[index]!, index)
-  }
-}
-
 export function shallowArrayEquals<T>(
   left: ReadonlyArray<T>,
   right: ReadonlyArray<T>,

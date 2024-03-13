@@ -10,14 +10,7 @@ import {
   Impulse,
   untrack,
 } from "./dependencies"
-import {
-  type Setter,
-  forEach2,
-  isTrue,
-  shallowArrayEquals,
-  isFalse,
-  uniq,
-} from "./utils"
+import { type Setter, isTrue, shallowArrayEquals, isFalse, uniq } from "./utils"
 import { type GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./ValidateStrategy"
 
@@ -237,24 +230,17 @@ export class ImpulseFormList<
     setNext: (element: TElement, next: TGenericValue | TElementSetter) => void,
   ): void {
     batch((scope) => {
-      const elements = this._elements.getValue(scope)
       const nextInitialValue = isFunction(setter)
         ? setter(...getCurrent(scope))
         : setter
 
-      if (isArray(nextInitialValue)) {
-        forEach2(
-          (element, next) => {
-            if (isDefined.strict(next)) {
-              setNext(element, next)
-            }
-          },
-          elements,
-          nextInitialValue,
-        )
-      } else {
-        for (const element of elements) {
-          setNext(element, nextInitialValue)
+      for (const [index, element] of this._elements.getValue(scope).entries()) {
+        const next = isArray(nextInitialValue)
+          ? nextInitialValue.at(index)
+          : nextInitialValue
+
+        if (isDefined.strict(next)) {
+          setNext(element, next)
         }
       }
     })
