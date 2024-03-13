@@ -484,10 +484,10 @@ export class ImpulseFormShape<
     }
 
     return select(
-      touchedAll
-        ? true
-        : touchedNone
-          ? false
+      touchedNone
+        ? false
+        : touchedAll
+          ? true
           : (touchedConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
       touchedVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
     )

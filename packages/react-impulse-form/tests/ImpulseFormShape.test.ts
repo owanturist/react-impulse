@@ -1291,6 +1291,20 @@ describe("ImpulseFormShape#isTouched()", () => {
     expect(isTouched).toBe(false)
     expectTypeOf(isTouched).toEqualTypeOf<boolean>()
   })
+
+  it("returns false for empty shape", ({ scope }) => {
+    const shape = ImpulseFormShape.of({})
+
+    expect(shape.isTouched(scope)).toBe(false)
+  })
+
+  it("returns false for shape without forms", ({ scope }) => {
+    const shape = ImpulseFormShape.of({
+      first: "one",
+    })
+
+    expect(shape.isTouched(scope)).toBe(false)
+  })
 })
 
 describe("ImpulseFormShape#setTouched()", () => {

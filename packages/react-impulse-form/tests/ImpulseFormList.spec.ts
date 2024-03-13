@@ -206,6 +206,42 @@ describe("ImpulseFormList#reset()", () => {
       (resetter?: Setter<number, [number, number]>) => void
     >()
   })
+
+  it("sets initial values for all items", ({ scope }) => {
+    const form = ImpulseFormList.of([
+      ImpulseFormValue.of(0, { initialValue: 1 }),
+      ImpulseFormValue.of(1, { initialValue: 2 }),
+      ImpulseFormValue.of(2, { initialValue: 3 }),
+    ])
+
+    form.reset()
+    expect(form.getValue(scope)).toStrictEqual([1, 2, 3])
+  })
+
+  it("clears custom errors", ({ scope }) => {
+    const form = ImpulseFormList.of([
+      ImpulseFormValue.of(0, { errors: ["error"] }),
+      ImpulseFormValue.of(1, { errors: ["error"] }),
+      ImpulseFormValue.of(2, { errors: ["error"] }),
+    ])
+
+    form.reset()
+    expect(form.getErrors(scope)).toBeNull()
+  })
+
+  it("resets isValidated state", ({ scope }) => {
+    const form = ImpulseFormList.of([
+      ImpulseFormValue.of(0),
+      ImpulseFormValue.of(1),
+      ImpulseFormValue.of(2),
+    ])
+
+    form.setTouched(true)
+
+    expect(form.isValidated(scope)).toBe(true)
+    form.reset()
+    expect(form.isValidated(scope)).toBe(false)
+  })
 })
 
 describe("ImpulseFormList#isDirty()", () => {
