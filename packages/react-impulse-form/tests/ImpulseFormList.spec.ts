@@ -24,6 +24,19 @@ describe("ImpulseFormList#setElements()", () => {
     return ImpulseFormValue.of(initial, options)
   }
 
+  it("matches the type definition", () => {
+    const form = setup([setupElement(0)])
+
+    expectTypeOf(form.setElements).toEqualTypeOf<
+      (
+        setter: Setter<
+          ReadonlyArray<ImpulseFormValue<number>>,
+          [ReadonlyArray<ImpulseFormValue<number>>, Scope]
+        >,
+      ) => void
+    >()
+  })
+
   it("replaces all elements", ({ scope }) => {
     const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 
@@ -31,10 +44,19 @@ describe("ImpulseFormList#setElements()", () => {
     expect(form.getOriginalValue(scope)).toStrictEqual([3, 4, 5])
   })
 
+  it("filters some elements", ({ scope }) => {
+    const form = setup([setupElement(0), setupElement(1), setupElement(2)])
+
+    form.setElements((elements, scope) => {
+      return elements.filter((element) => element.getOriginalValue(scope) > 1)
+    })
+    expect(form.getOriginalValue(scope)).toStrictEqual([2])
+  })
+
   it("modifies existing elements", ({ scope }) => {
     const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 
-    form.setElements((current) => [...current, setupElement(3)])
+    form.setElements((elements) => [...elements, setupElement(3)])
     expect(form.getOriginalValue(scope)).toStrictEqual([0, 1, 2, 3])
   })
 

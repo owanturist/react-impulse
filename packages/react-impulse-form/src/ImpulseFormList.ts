@@ -294,13 +294,14 @@ export class ImpulseFormList<
     return this._elements.getValue(scope, select)
   }
 
-  public setElements(setter: Setter<ReadonlyArray<TElement>>): void {
-    batch(() => {
-      this._elements.setValue(setter)
-      this._elements.setValue((elements) => {
-        return elements.map((element) => {
-          return ImpulseForm._cloneWithParent(this, element) as TElement
-        })
+  public setElements(
+    setter: Setter<ReadonlyArray<TElement>, [ReadonlyArray<TElement>, Scope]>,
+  ): void {
+    this._elements.setValue((elements, scope) => {
+      const nextElements = isFunction(setter) ? setter(elements, scope) : setter
+
+      return nextElements.map((element) => {
+        return ImpulseForm._cloneWithParent(this, element) as TElement
       })
     })
   }
