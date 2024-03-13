@@ -166,7 +166,7 @@ export class ImpulseFormList<
 
     this._elements.setValue((elements) => {
       return elements.map((element) => {
-        return ImpulseForm._cloneWithRoot(root ?? this, element) as TElement
+        return ImpulseForm._cloneWithParent(this, element) as TElement
       })
     })
   }
@@ -268,7 +268,7 @@ export class ImpulseFormList<
     return null
   }
 
-  protected _cloneWithRoot(
+  protected _cloneWithParent(
     root: null | ImpulseForm,
   ): ImpulseFormList<TElement> {
     return new ImpulseFormList(root, this._elements.clone())
@@ -292,6 +292,17 @@ export class ImpulseFormList<
     ) => TResult = identity as typeof select,
   ): TResult {
     return this._elements.getValue(scope, select)
+  }
+
+  public setElements(setter: Setter<ReadonlyArray<TElement>>): void {
+    batch(() => {
+      this._elements.setValue(setter)
+      this._elements.setValue((elements) => {
+        return elements.map((element) => {
+          return ImpulseForm._cloneWithParent(this, element) as TElement
+        })
+      })
+    })
   }
 
   public getErrors(scope: Scope): ImpulseFormListErrorSchema<TElement>

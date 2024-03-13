@@ -12,6 +12,44 @@ import {
 
 import { arg } from "./common"
 
+describe("ImpulseFormList#setElements()", () => {
+  const setup = (elements: ReadonlyArray<ImpulseFormValue<number>>) => {
+    return ImpulseFormList.of(elements)
+  }
+
+  const setupElement = (
+    initial: number,
+    options?: ImpulseFormValueOptions<number>,
+  ) => {
+    return ImpulseFormValue.of(initial, options)
+  }
+
+  it("replaces all elements", ({ scope }) => {
+    const form = setup([setupElement(0), setupElement(1), setupElement(2)])
+
+    form.setElements([setupElement(3), setupElement(4), setupElement(5)])
+    expect(form.getOriginalValue(scope)).toStrictEqual([3, 4, 5])
+  })
+
+  it("modifies existing elements", ({ scope }) => {
+    const form = setup([setupElement(0), setupElement(1), setupElement(2)])
+
+    form.setElements((current) => [...current, setupElement(3)])
+    expect(form.getOriginalValue(scope)).toStrictEqual([0, 1, 2, 3])
+  })
+
+  it("attach the new elements to the form root", ({ scope }) => {
+    const form = setup([setupElement(0), setupElement(1), setupElement(2)])
+
+    form.setElements((current) => [...current, setupElement(3)])
+    void form.submit()
+
+    expect(form.getSubmitCount(scope)).toBe(1)
+    expect(form.getElements(scope).at(0)!.getSubmitCount(scope)).toBe(1)
+    expect(form.getElements(scope).at(3)!.getSubmitCount(scope)).toBe(1)
+  })
+})
+
 describe("ImpulseFormList#getErrors()", () => {
   const setup = (elements: ReadonlyArray<ImpulseFormValue<number>>) => {
     return ImpulseFormList.of(elements)
@@ -882,6 +920,15 @@ describe("ImpulseFormList#getInitialValue()", () => {
     ])
 
     expect(form.getInitialValue(scope)).toStrictEqual([3, 1, 4])
+  })
+
+  it("returns nested list's values", ({ scope }) => {
+    const form = ImpulseFormList.of([
+      ImpulseFormList.of([ImpulseFormValue.of(1)]),
+      ImpulseFormList.of([ImpulseFormValue.of(2), ImpulseFormValue.of(3)]),
+    ])
+
+    expect(form.getInitialValue(scope)).toStrictEqual([[1], [2, 3]])
   })
 })
 
