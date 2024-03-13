@@ -1,5 +1,5 @@
 ---
-"react-impulse-form": minor
+"react-impulse-form": patch
 ---
 
 Fixes:
