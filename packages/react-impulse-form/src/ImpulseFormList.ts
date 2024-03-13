@@ -8,6 +8,7 @@ import {
   isString,
   isArray,
   Impulse,
+  untrack,
 } from "./dependencies"
 import {
   type Setter,
@@ -131,7 +132,12 @@ export class ImpulseFormList<
       errors,
     }: ImpulseFormListOptions<TElement> = {},
   ): ImpulseFormList<TElement> {
-    const shape = new ImpulseFormList(null, elements)
+    const shape = new ImpulseFormList(
+      null,
+      Impulse.of(elements, {
+        compare: shallowArrayEquals,
+      }),
+    )
 
     batch(() => {
       if (isDefined.strict(touched)) {
@@ -159,20 +165,16 @@ export class ImpulseFormList<
     return shape
   }
 
-  private readonly _elements: Impulse<ReadonlyArray<TElement>>
-
   protected constructor(
     root: null | ImpulseForm,
-    elements: ReadonlyArray<TElement>,
+    private readonly _elements: Impulse<ReadonlyArray<TElement>>,
   ) {
     super(root)
 
-    const elementsWithRoot: ReadonlyArray<TElement> = elements.map(
-      (element) => ImpulseForm._cloneWithRoot(this, element) as TElement,
-    )
-
-    this._elements = Impulse.of(elementsWithRoot, {
-      compare: shallowArrayEquals,
+    this._elements.setValue((elements) => {
+      return elements.map(
+        (element) => ImpulseForm._cloneWithRoot(this, element) as TElement,
+      )
     })
   }
 
@@ -274,15 +276,11 @@ export class ImpulseFormList<
   }
 
   protected _getFocusFirstInvalidValue(): VoidFunction | null {
-    // TODO DRY
-    // TODO add custom ordering
-    for (const field of Object.values(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
-        const focus = ImpulseForm._getFocusFirstInvalidValue(field)
+    for (const element of untrack(this._elements)) {
+      const focus = ImpulseForm._getFocusFirstInvalidValue(element)
 
-        if (focus != null) {
-          return focus
-        }
+      if (focus != null) {
+        return focus
       }
     }
 
@@ -292,14 +290,12 @@ export class ImpulseFormList<
   protected _cloneWithRoot(
     root: null | ImpulseForm,
   ): ImpulseFormList<TElement> {
-    return new ImpulseFormList(root, this.fields)
+    return new ImpulseFormList(root, this._elements.clone())
   }
 
   protected _setValidated(isValidated: boolean): void {
-    for (const field of Object.values(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
-        ImpulseForm._setValidated(field, isValidated)
-      }
+    for (const element of untrack(this._elements)) {
+      ImpulseForm._setValidated(element, isValidated)
     }
   }
 

@@ -1,4 +1,4 @@
-import type { Scope } from "react-impulse"
+import { untrack, type Scope } from "react-impulse"
 import { z } from "zod"
 
 import {
@@ -912,5 +912,81 @@ describe("ImpulseFormList#setInitialValue()", () => {
 
     form.setInitialValue([3, 4, 5])
     expect(form.getInitialValue(scope)).toStrictEqual([3, 4, 5])
+  })
+})
+
+describe("ImpulseFormList#focusFirstInvalidValue()", () => {
+  const setup = (
+    options?: ImpulseFormListOptions<ImpulseFormValue<number>>,
+  ) => {
+    const form = ImpulseFormList.of(
+      [ImpulseFormValue.of(0), ImpulseFormValue.of(1), ImpulseFormValue.of(2)],
+      options,
+    )
+
+    const listener_0 = vi.fn()
+    const listener_1 = vi.fn()
+    const listener_2 = vi.fn()
+
+    const elements = untrack((scope) => form.getElements(scope))
+
+    elements.at(0)?.onFocusWhenInvalid(listener_0)
+    elements.at(1)?.onFocusWhenInvalid(listener_1)
+    elements.at(2)?.onFocusWhenInvalid(listener_2)
+
+    return [
+      form,
+      {
+        listener_0,
+        listener_1,
+        listener_2,
+      },
+    ] as const
+  }
+
+  it("does not call listeners on init", () => {
+    const [, { listener_0, listener_1, listener_2 }] = setup({
+      errors: [["error0"], ["error1"], ["error2"]],
+    })
+
+    expect(listener_0).not.toHaveBeenCalled()
+    expect(listener_1).not.toHaveBeenCalled()
+    expect(listener_2).not.toHaveBeenCalled()
+  })
+
+  it("does not focus any when all valid", () => {
+    const [form, { listener_0, listener_1, listener_2 }] = setup()
+
+    form.focusFirstInvalidValue()
+
+    expect(listener_0).not.toHaveBeenCalled()
+    expect(listener_1).not.toHaveBeenCalled()
+    expect(listener_2).not.toHaveBeenCalled()
+  })
+
+  it("focuses the first invalid element", () => {
+    const [form, { listener_0, listener_1, listener_2 }] = setup({
+      errors: [["error0"], ["error1"], ["error2"]],
+    })
+
+    form.focusFirstInvalidValue()
+
+    expect(listener_0).toHaveBeenCalledOnce()
+    expect(listener_0).toHaveBeenLastCalledWith(["error0"])
+    expect(listener_1).not.toHaveBeenCalled()
+    expect(listener_2).not.toHaveBeenCalled()
+  })
+
+  it("calls the only invalid", () => {
+    const [form, { listener_0, listener_1, listener_2 }] = setup({
+      errors: [undefined, ["error1"]],
+    })
+
+    form.focusFirstInvalidValue()
+
+    expect(listener_0).not.toHaveBeenCalled()
+    expect(listener_1).toHaveBeenCalledOnce()
+    expect(listener_1).toHaveBeenLastCalledWith(["error1"])
+    expect(listener_2).not.toHaveBeenCalled()
   })
 })
