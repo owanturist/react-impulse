@@ -166,7 +166,7 @@ export class ImpulseFormList<
 
     this._elements.setValue((elements) => {
       return elements.map((element) => {
-        return ImpulseForm._cloneWithParent(this, element) as TElement
+        return ImpulseForm._childOf(this, element) as TElement
       })
     })
   }
@@ -268,10 +268,8 @@ export class ImpulseFormList<
     return null
   }
 
-  protected _cloneWithParent(
-    root: null | ImpulseForm,
-  ): ImpulseFormList<TElement> {
-    return new ImpulseFormList(root, this._elements.clone())
+  protected _childOf(parent: null | ImpulseForm): ImpulseFormList<TElement> {
+    return new ImpulseFormList(parent, this._elements.clone())
   }
 
   protected _setValidated(isValidated: boolean): void {
@@ -301,7 +299,7 @@ export class ImpulseFormList<
       const nextElements = isFunction(setter) ? setter(elements, scope) : setter
 
       return nextElements.map((element) => {
-        return ImpulseForm._cloneWithParent(this, element) as TElement
+        return ImpulseForm._childOf(this, element) as TElement
       })
     })
   }
