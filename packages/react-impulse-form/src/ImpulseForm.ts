@@ -118,9 +118,9 @@ export abstract class ImpulseForm<
     })
 
     const promises = untrack((scope) => {
-      if (this._root.isValid(scope)) {
-        const value = this._root.getValue(scope)!
+      const value = this._root.getValue(scope)
 
+      if (value !== null && this._root.isValid(scope)) {
         return this._root._submitWith(value).filter(isDefined)
       }
     })
@@ -152,7 +152,7 @@ export abstract class ImpulseForm<
   // TODO add select
 
   public isInvalid(scope: Scope): boolean {
-    return this.isValidated(scope) && this.getErrors(scope, isDefined)
+    return this.getErrors(scope, isDefined)
   }
 
   public abstract getErrors(scope: Scope): TParams["errors.schema"]

@@ -156,6 +156,7 @@ export class ImpulseFormValue<
   protected constructor(
     root: null | ImpulseForm,
     private readonly _touched: Impulse<boolean>,
+    // TODO convert to undefined | ValidateStrategy so it can inherit from parent (List)
     private readonly _validateOn: Impulse<ValidateStrategy>,
     private readonly _errors: Impulse<ReadonlyArray<string>>,
     private readonly _initialValue: Impulse<TOriginalValue>,
