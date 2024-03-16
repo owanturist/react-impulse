@@ -1,5 +1,11 @@
 # react-impulse-form
 
+## 0.3.2
+
+### Patch Changes
+
+- [#682](https://github.com/owanturist/react-impulse/pull/682) [`7cb0620`](https://github.com/owanturist/react-impulse/commit/7cb0620dc120a96b4edf2382526feabf3eb31bd4) Thanks [@owanturist](https://github.com/owanturist)! - `ImpulseForm#isInvalid` does not check for `isValidated` anymore.
+
 ## 0.3.1
 
 ### Patch Changes
