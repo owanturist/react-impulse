@@ -457,6 +457,7 @@ export class ImpulseFormList<
     )
   }
 
+  // TODO reset the elements
   public reset(
     resetter: ImpulseFormListOriginalValueResetter<TElement> = identity as typeof resetter,
   ): void {
