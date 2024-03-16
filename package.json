@@ -40,7 +40,7 @@
     "eslint-plugin-jest-dom": "^5.1.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "happy-dom": "^13.7.0",
+    "happy-dom": "^13.8.6",
     "husky": "^8.0.3",
     "prettier": "^3.2.4",
     "size-limit": "^11.0.1",
