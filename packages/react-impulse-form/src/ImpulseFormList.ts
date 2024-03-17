@@ -14,6 +14,66 @@ import { type Setter, isTrue, shallowArrayEquals, isFalse, uniq } from "./utils"
 import { type GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./ValidateStrategy"
 
+// TODO move back to private method
+function setFormElements<
+  TElement extends ImpulseForm,
+  TElementSetter,
+  TElementValueLeft,
+  TElementValueRight,
+  TGenericValue = never,
+>(
+  elements: Impulse<ReadonlyArray<TElement>>,
+  setter: Setter<
+    TGenericValue | ReadonlyArray<undefined | TElementSetter>,
+    [TElementValueLeft, TElementValueRight]
+  >,
+  getCurrent: (scope: Scope) => [TElementValueLeft, TElementValueRight],
+  setNext: (element: TElement, next: TGenericValue | TElementSetter) => void,
+): void
+
+function setFormElements<
+  TElement extends ImpulseForm,
+  TElementSetter,
+  TElementValue,
+  TGenericValue = never,
+>(
+  elements: Impulse<ReadonlyArray<TElement>>,
+  setter: Setter<
+    TGenericValue | ReadonlyArray<undefined | TElementSetter>,
+    [TElementValue]
+  >,
+  getCurrent: (scope: Scope) => [TElementValue],
+  setNext: (element: TElement, next: TGenericValue | TElementSetter) => void,
+): void
+
+function setFormElements<
+  TElement extends ImpulseForm,
+  TElementSetter,
+  TElementValueLeft,
+  TElementValueRight,
+  TGenericValue = never,
+>(
+  elements: Impulse<ReadonlyArray<TElement>>,
+  setter: Setter<
+    TGenericValue | ReadonlyArray<undefined | TElementSetter>,
+    [TElementValueLeft, TElementValueRight?]
+  >,
+  getCurrent: (scope: Scope) => [TElementValueLeft, TElementValueRight?],
+  setNext: (element: TElement, next: TGenericValue | TElementSetter) => void,
+): void {
+  batch((scope) => {
+    const nextValue = isFunction(setter) ? setter(...getCurrent(scope)) : setter
+
+    for (const [index, element] of elements.getValue(scope).entries()) {
+      const next = isArray(nextValue) ? nextValue.at(index) : nextValue
+
+      if (isDefined.strict(next)) {
+        setNext(element, next)
+      }
+    }
+  })
+}
+
 export type ImpulseFormListValueSchema<TElement extends ImpulseForm> =
   ReadonlyArray<GetImpulseFormParam<TElement, "value.schema">>
 
@@ -161,6 +221,9 @@ export class ImpulseFormList<
   protected constructor(
     root: null | ImpulseForm,
     private readonly _elements: Impulse<ReadonlyArray<TElement>>,
+    private readonly _initialElements: Impulse<
+      ReadonlyArray<TElement>
+    > = _elements.clone(),
   ) {
     super(root)
 
@@ -189,63 +252,6 @@ export class ImpulseFormList<
     return [left, right]
   }
 
-  private _setFormElements<
-    TElementSetter,
-    TElementValueLeft,
-    TElementValueRight,
-    TGenericValue = never,
-  >(
-    setter: Setter<
-      TGenericValue | ReadonlyArray<undefined | TElementSetter>,
-      [TElementValueLeft, TElementValueRight]
-    >,
-    getCurrent: (scope: Scope) => [TElementValueLeft, TElementValueRight],
-    setNext: (element: TElement, next: TGenericValue | TElementSetter) => void,
-  ): void
-
-  private _setFormElements<
-    TElementSetter,
-    TElementValue,
-    TGenericValue = never,
-  >(
-    setter: Setter<
-      TGenericValue | ReadonlyArray<undefined | TElementSetter>,
-      [TElementValue]
-    >,
-    getCurrent: (scope: Scope) => [TElementValue],
-    setNext: (element: TElement, next: TGenericValue | TElementSetter) => void,
-  ): void
-
-  private _setFormElements<
-    TElementSetter,
-    TElementValueLeft,
-    TElementValueRight,
-    TGenericValue = never,
-  >(
-    setter: Setter<
-      TGenericValue | ReadonlyArray<undefined | TElementSetter>,
-      [TElementValueLeft, TElementValueRight?]
-    >,
-    getCurrent: (scope: Scope) => [TElementValueLeft, TElementValueRight?],
-    setNext: (element: TElement, next: TGenericValue | TElementSetter) => void,
-  ): void {
-    batch((scope) => {
-      const nextInitialValue = isFunction(setter)
-        ? setter(...getCurrent(scope))
-        : setter
-
-      for (const [index, element] of this._elements.getValue(scope).entries()) {
-        const next = isArray(nextInitialValue)
-          ? nextInitialValue.at(index)
-          : nextInitialValue
-
-        if (isDefined.strict(next)) {
-          setNext(element, next)
-        }
-      }
-    })
-  }
-
   protected _submitWith(
     value: ImpulseFormListValueSchema<TElement>,
   ): ReadonlyArray<void | Promise<unknown>> {
@@ -269,7 +275,11 @@ export class ImpulseFormList<
   }
 
   protected _childOf(parent: null | ImpulseForm): ImpulseFormList<TElement> {
-    return new ImpulseFormList(parent, this._elements.clone())
+    return new ImpulseFormList(
+      parent,
+      this._elements.clone(),
+      this._initialElements.clone(),
+    )
   }
 
   protected _setValidated(isValidated: boolean): void {
@@ -333,7 +343,8 @@ export class ImpulseFormList<
   }
 
   public setErrors(setter: ImpulseFormListErrorSetter<TElement>): void {
-    this._setFormElements(
+    setFormElements(
+      this._elements,
       setter,
       (scope) => [this.getErrors(scope, (_, verbose) => verbose)],
       (element, next) => element.setErrors(next),
@@ -412,7 +423,8 @@ export class ImpulseFormList<
   public setValidateOn(
     setter: ImpulseFormListValidateOnSetter<TElement>,
   ): void {
-    this._setFormElements(
+    setFormElements(
+      this._elements,
       setter,
       (scope) => [this.getValidateOn(scope, (_, verbose) => verbose)],
       (element, next) => element.setValidateOn(next),
@@ -450,7 +462,8 @@ export class ImpulseFormList<
   }
 
   public setTouched(setter: ImpulseFormListFlagSetter<TElement>): void {
-    this._setFormElements(
+    setFormElements(
+      this._elements,
       setter,
       (scope) => [this.isTouched(scope, (_, verbose) => verbose)],
       (element, next) => element.setTouched(next),
@@ -461,7 +474,8 @@ export class ImpulseFormList<
   public reset(
     resetter: ImpulseFormListOriginalValueResetter<TElement> = identity as typeof resetter,
   ): void {
-    this._setFormElements(
+    setFormElements(
+      this._elements,
       resetter,
       (scope) => [this.getInitialValue(scope), this.getOriginalValue(scope)],
       (element, next) => element.reset(next),
@@ -538,7 +552,8 @@ export class ImpulseFormList<
   public setOriginalValue(
     setter: ImpulseFormListOriginalValueSetter<TElement>,
   ): void {
-    this._setFormElements(
+    setFormElements(
+      this._elements,
       setter,
       (scope) => [this.getOriginalValue(scope)],
       (element, next) => element.setOriginalValue(next),
@@ -548,20 +563,45 @@ export class ImpulseFormList<
   public getInitialValue(
     scope: Scope,
   ): ImpulseFormListOriginalValueSchema<TElement> {
-    const originalValue = this._elements
+    const initialValue = this._initialElements
       .getValue(scope)
       .map((form) => form.getInitialValue(scope))
 
-    return originalValue as ImpulseFormListOriginalValueSchema<TElement>
+    return initialValue as ImpulseFormListOriginalValueSchema<TElement>
   }
 
   public setInitialValue(
     setter: ImpulseFormListOriginalValueSetter<TElement>,
   ): void {
-    this._setFormElements(
-      setter,
-      (scope) => [this.getInitialValue(scope)],
-      (element, next) => element.setInitialValue(next),
-    )
+    batch((scope) => {
+      // TODO now make the code nicer
+      const nextInitialValue = isFunction(setter)
+        ? setter(this.getInitialValue(scope))
+        : setter
+      const elements = this._elements
+        .getValue(scope)
+        .slice(0, nextInitialValue.length)
+      const initialElements = this._initialElements
+        .getValue(scope)
+        .slice(0, nextInitialValue.length)
+
+      for (const [index, next] of nextInitialValue.entries()) {
+        if (isDefined.strict(next)) {
+          const element = elements.at(index)
+
+          if (isDefined(element)) {
+            element.setInitialValue(next)
+          } else {
+            initialElements.at(index)?.setInitialValue(next)
+          }
+        }
+      }
+
+      this._initialElements.setValue(
+        nextInitialValue.length <= elements.length
+          ? elements
+          : [...elements, ...initialElements.slice(elements.length)],
+      )
+    })
   }
 }
