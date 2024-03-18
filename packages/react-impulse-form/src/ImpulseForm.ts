@@ -6,7 +6,6 @@ export interface ImpulseFormParams {
   "value.schema.verbose": unknown
 
   "originalValue.setter": unknown
-  "originalValue.resetter": unknown
   "originalValue.schema": unknown
 
   "flag.setter": unknown
@@ -197,7 +196,7 @@ export abstract class ImpulseForm<
 
   public abstract setTouched(setter: TParams["flag.setter"]): void
 
-  public abstract reset(resetter?: TParams["originalValue.resetter"]): void
+  public abstract reset(resetter?: TParams["originalValue.setter"]): void
 
   public abstract isDirty(scope: Scope): boolean
   public abstract isDirty<TResult>(
