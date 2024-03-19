@@ -327,7 +327,7 @@ describe("ImpulseFormValue#setOriginalValue()", () => {
 
     expectTypeOf(value.setOriginalValue)
       .parameter(0)
-      .toEqualTypeOf<Setter<string>>()
+      .toEqualTypeOf<Setter<string, [string, string]>>()
   })
 })
 
@@ -346,7 +346,7 @@ describe("ImpulseFormValue#setInitialValue()", () => {
 
     expectTypeOf(value.setInitialValue)
       .parameter(0)
-      .toEqualTypeOf<Setter<string>>()
+      .toEqualTypeOf<Setter<string, [string, string]>>()
   })
 })
 
@@ -464,5 +464,15 @@ describe("ImpulseFormValue#reset()", () => {
 
     value.reset()
     expect(value.getErrors(scope)).toBeNull()
+  })
+
+  it("resets isValidated", ({ scope }) => {
+    const value = ImpulseFormValue.of("2", { initialValue: "1" })
+
+    value.setTouched(true)
+    expect(value.isValidated(scope)).toBe(true)
+
+    value.reset()
+    expect(value.isValidated(scope)).toBe(false)
   })
 })
