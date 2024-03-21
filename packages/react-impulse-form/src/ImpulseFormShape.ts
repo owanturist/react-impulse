@@ -10,7 +10,7 @@ import {
   isDefined,
   isString,
 } from "./dependencies"
-import { type ComputeObject, isTrue, type Setter } from "./utils"
+import { type ComputeObject, isTrue, type Setter, resolveSetter } from "./utils"
 import {
   type GetImpulseFormParam,
   type ImpulseFormParamsKeys,
@@ -54,16 +54,9 @@ export type ImpulseFormShapeOriginalValueSetter<
   TFields extends ImpulseFormShapeFields,
 > = Setter<
   Partial<ImpulseFormShapeParam<TFields, "originalValue.setter">>,
-  [originalValue: ImpulseFormShapeOriginalValueSchema<TFields>]
->
-
-export type ImpulseFormShapeOriginalValueResetter<
-  TFields extends ImpulseFormShapeFields,
-> = Setter<
-  Partial<ImpulseFormShapeParam<TFields, "originalValue.resetter">>,
   [
-    initialValue: ImpulseFormShapeOriginalValueSchema<TFields>,
-    originalValue: ImpulseFormShapeOriginalValueSchema<TFields>,
+    ImpulseFormShapeOriginalValueSchema<TFields>,
+    ImpulseFormShapeOriginalValueSchema<TFields>,
   ]
 >
 
@@ -129,7 +122,6 @@ export class ImpulseFormShape<
   "value.schema.verbose": ImpulseFormShapeValueSchemaVerbose<TFields>
 
   "originalValue.setter": ImpulseFormShapeOriginalValueSetter<TFields>
-  "originalValue.resetter": ImpulseFormShapeOriginalValueResetter<TFields>
   "originalValue.schema": ImpulseFormShapeOriginalValueSchema<TFields>
 
   "flag.setter": ImpulseFormShapeFlagSetter<TFields>
@@ -217,7 +209,6 @@ export class ImpulseFormShape<
   protected _submitWith(
     value: ImpulseFormShapeValueSchema<TFields>,
   ): ReadonlyArray<void | Promise<unknown>> {
-    // TODO DRY
     const promises = Object.entries(this.fields).flatMap(([key, field]) => {
       if (!ImpulseForm.isImpulseForm(field)) {
         return []
@@ -230,8 +221,6 @@ export class ImpulseFormShape<
   }
 
   protected _getFocusFirstInvalidValue(): VoidFunction | null {
-    // TODO DRY
-    // TODO add custom ordering
     for (const field of Object.values(this.fields)) {
       if (ImpulseForm.isImpulseForm(field)) {
         const focus = ImpulseForm._getFocusFirstInvalidValue(field)
@@ -272,7 +261,6 @@ export class ImpulseFormShape<
       verbose: ImpulseFormShapeErrorSchemaVerbose<TFields>,
     ) => TResult = identity as typeof select,
   ): TResult {
-    // TODO DRY
     let errorsNone = true
     // make it easier for TS
     const errorsConcise = {} as Record<string, unknown>
@@ -342,7 +330,6 @@ export class ImpulseFormShape<
       verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
     ) => TResult = isTrue as unknown as typeof select,
   ): TResult {
-    // TODO DRY
     let validatedAll = true
     let validatedNone = true
     // make it easier for TS
@@ -388,7 +375,6 @@ export class ImpulseFormShape<
       verbose: ImpulseFormShapeValidateOnSchemaVerbose<TFields>,
     ) => TResult = identity as typeof select,
   ): TResult {
-    // TODO DRY
     // make it easier for TS
     const validateOnConcise = {} as Record<string, unknown>
     const validateOnVerbose = {} as Record<string, unknown>
@@ -457,7 +443,6 @@ export class ImpulseFormShape<
       verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
     ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
-    // TODO DRY
     let touchedAll = true
     let touchedNone = true
     // make it easier for TS
@@ -510,9 +495,8 @@ export class ImpulseFormShape<
   }
 
   public reset(
-    resetter: ImpulseFormShapeOriginalValueResetter<TFields> = identity as typeof resetter,
+    resetter: ImpulseFormShapeOriginalValueSetter<TFields> = identity as typeof resetter,
   ): void {
-    // TODO DRY
     batch((scope) => {
       const resetValue = isFunction(resetter)
         ? resetter(this.getInitialValue(scope), this.getOriginalValue(scope))
@@ -541,7 +525,6 @@ export class ImpulseFormShape<
       verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
     ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
-    // TODO DRY
     let touchedAll = true
     let touchedNone = true
     // make it easier for TS
@@ -626,13 +609,16 @@ export class ImpulseFormShape<
     return originalValue as unknown as ImpulseFormShapeOriginalValueSchema<TFields>
   }
 
+  // TODO add tests against initialValue coming as second argument
   public setOriginalValue(
     setter: ImpulseFormShapeOriginalValueSetter<TFields>,
   ): void {
     batch((scope) => {
-      const nextOriginalValue = isFunction(setter)
-        ? setter(this.getOriginalValue(scope))
-        : setter
+      const nextOriginalValue = resolveSetter(
+        setter,
+        this.getOriginalValue(scope),
+        this.getInitialValue(scope),
+      )
 
       for (const [key, field] of Object.entries(this.fields)) {
         const nextFieldOriginalValue =
@@ -658,13 +644,16 @@ export class ImpulseFormShape<
     return originalValue as unknown as ImpulseFormShapeOriginalValueSchema<TFields>
   }
 
+  // TODO add tests against originalValue coming as second argument
   public setInitialValue(
     setter: ImpulseFormShapeOriginalValueSetter<TFields>,
   ): void {
     batch((scope) => {
-      const nextInitialValue = isFunction(setter)
-        ? setter(this.getInitialValue(scope))
-        : setter
+      const nextInitialValue = resolveSetter(
+        setter,
+        this.getInitialValue(scope),
+        this.getOriginalValue(scope),
+      )
 
       for (const [key, field] of Object.entries(this.fields)) {
         const nextFieldInitialValue =
