@@ -209,7 +209,6 @@ export class ImpulseFormShape<
   protected _submitWith(
     value: ImpulseFormShapeValueSchema<TFields>,
   ): ReadonlyArray<void | Promise<unknown>> {
-    // TODO DRY
     const promises = Object.entries(this.fields).flatMap(([key, field]) => {
       if (!ImpulseForm.isImpulseForm(field)) {
         return []
@@ -222,8 +221,6 @@ export class ImpulseFormShape<
   }
 
   protected _getFocusFirstInvalidValue(): VoidFunction | null {
-    // TODO DRY
-    // TODO add custom ordering
     for (const field of Object.values(this.fields)) {
       if (ImpulseForm.isImpulseForm(field)) {
         const focus = ImpulseForm._getFocusFirstInvalidValue(field)
@@ -264,7 +261,6 @@ export class ImpulseFormShape<
       verbose: ImpulseFormShapeErrorSchemaVerbose<TFields>,
     ) => TResult = identity as typeof select,
   ): TResult {
-    // TODO DRY
     let errorsNone = true
     // make it easier for TS
     const errorsConcise = {} as Record<string, unknown>
@@ -334,7 +330,6 @@ export class ImpulseFormShape<
       verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
     ) => TResult = isTrue as unknown as typeof select,
   ): TResult {
-    // TODO DRY
     let validatedAll = true
     let validatedNone = true
     // make it easier for TS
@@ -380,7 +375,6 @@ export class ImpulseFormShape<
       verbose: ImpulseFormShapeValidateOnSchemaVerbose<TFields>,
     ) => TResult = identity as typeof select,
   ): TResult {
-    // TODO DRY
     // make it easier for TS
     const validateOnConcise = {} as Record<string, unknown>
     const validateOnVerbose = {} as Record<string, unknown>
@@ -449,7 +443,6 @@ export class ImpulseFormShape<
       verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
     ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
-    // TODO DRY
     let touchedAll = true
     let touchedNone = true
     // make it easier for TS
@@ -504,7 +497,6 @@ export class ImpulseFormShape<
   public reset(
     resetter: ImpulseFormShapeOriginalValueSetter<TFields> = identity as typeof resetter,
   ): void {
-    // TODO DRY
     batch((scope) => {
       const resetValue = isFunction(resetter)
         ? resetter(this.getInitialValue(scope), this.getOriginalValue(scope))
@@ -533,7 +525,6 @@ export class ImpulseFormShape<
       verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
     ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
-    // TODO DRY
     let touchedAll = true
     let touchedNone = true
     // make it easier for TS

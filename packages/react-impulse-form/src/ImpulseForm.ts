@@ -143,12 +143,9 @@ export abstract class ImpulseForm<
     return this._childOf(null)
   }
 
-  // TODO add select
   public isValid(scope: Scope): boolean {
     return !this.isInvalid(scope)
   }
-
-  // TODO add select
 
   public isInvalid(scope: Scope): boolean {
     return this.getErrors(scope, isDefined)
@@ -216,7 +213,6 @@ export abstract class ImpulseForm<
     ) => TResult,
   ): TResult
 
-  // TODO extend with select
   public abstract getOriginalValue(
     scope: Scope,
   ): TParams["originalValue.schema"]
@@ -225,7 +221,6 @@ export abstract class ImpulseForm<
     setter: TParams["originalValue.setter"],
   ): void
 
-  // TODO extend with select
   public abstract getInitialValue(scope: Scope): TParams["originalValue.schema"]
 
   public abstract setInitialValue(setter: TParams["originalValue.setter"]): void

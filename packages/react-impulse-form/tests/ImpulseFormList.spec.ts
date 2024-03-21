@@ -835,6 +835,8 @@ describe("ImpulseFormList#isDirty()", () => {
     expect(form.isDirty(scope, arg(0))).toBe(true)
     expect(form.isDirty(scope, arg(1))).toStrictEqual([true, true, true])
   })
+
+  it.todo("check with reset")
 })
 
 describe("ImpulseFormList#getValue()", () => {
