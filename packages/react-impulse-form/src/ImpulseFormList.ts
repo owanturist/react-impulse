@@ -144,7 +144,6 @@ export type ImpulseFormListErrorSchemaVerbose<TElement extends ImpulseForm> =
   ReadonlyArray<GetImpulseFormParam<TElement, "errors.schema.verbose">>
 
 export interface ImpulseFormListOptions<TElement extends ImpulseForm> {
-  // TODO add schema
   touched?: ImpulseFormListFlagSetter<TElement>
   initialValue?: ImpulseFormListOriginalValueSetter<TElement>
   originalValue?: ImpulseFormListOriginalValueSetter<TElement>
