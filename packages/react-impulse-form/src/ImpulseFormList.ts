@@ -215,26 +215,22 @@ export class ImpulseFormList<
     return list
   }
 
+  private readonly _initialElements: Impulse<ReadonlyArray<TElement>>
+
   protected constructor(
     root: null | ImpulseForm,
     private readonly _elements: Impulse<ReadonlyArray<TElement>>,
-    private readonly _initialElements: Impulse<
-      ReadonlyArray<TElement>
-    > = _elements.clone(),
+    _initialElements?: Impulse<ReadonlyArray<TElement>>,
   ) {
     super(root)
 
-    // TODO DRY
-    this._initialElements.setValue((initialElements) => {
-      return initialElements.map((element) => {
-        return ImpulseForm._childOf(this, element) as TElement
-      })
-    })
-    this._elements.setValue((elements) => {
+    _elements.setValue((elements) => {
       return elements.map((element) => {
         return ImpulseForm._childOf(this, element) as TElement
       })
     })
+
+    this._initialElements = _initialElements ?? _elements.clone()
   }
 
   private _mapFormElements<TLeft, TRight>(
@@ -599,34 +595,37 @@ export class ImpulseFormList<
     setter: ImpulseFormListOriginalValueSetter<TElement>,
   ): void {
     batch((scope) => {
-      // TODO now make the code nicer
+      // get next initial value from setter (initial, original) -> next
       const nextInitialValue = resolveSetter(
         setter,
         this.getInitialValue(scope),
         this.getOriginalValue(scope),
       )
 
-      // TODO continue here
-
       const elements = this._elements
         .getValue(scope)
         .slice(0, nextInitialValue.length)
-      const initialElements = this._initialElements
-        .getValue(scope)
-        .slice(0, nextInitialValue.length)
 
-      for (const [index, next] of nextInitialValue.entries()) {
-        if (isDefined.strict(next)) {
-          const element = elements.at(index) ?? initialElements.at(index)
+      const initialElements = [
+        ...elements,
+        // restore initial elements that were removed from the elements
+        ...this._initialElements
+          .getValue(scope)
+          .slice(elements.length, nextInitialValue.length),
+      ]
 
-          element?.setInitialValue(next)
+      // set list's initial elements
+      this._initialElements.setValue(initialElements)
+
+      // set initial values for each element
+      for (const [index, element] of initialElements.entries()) {
+        const initialValue = nextInitialValue.at(index)
+
+        // do not change initial value if it is not defined
+        if (isDefined.strict(initialValue)) {
+          element.setInitialValue(initialValue)
         }
       }
-
-      this._initialElements.setValue([
-        ...elements,
-        ...initialElements.slice(elements.length),
-      ])
     })
   }
 }
