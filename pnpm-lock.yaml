@@ -82,8 +82,8 @@ importers:
         specifier: ^14.2.1
         version: 14.2.1(react-dom@18.2.0)(react@18.3.1)
       '@types/react':
-        specifier: ^18.3.1
-        version: 18.3.1
+        specifier: ^18.3.3
+        version: 18.3.3
       '@types/use-sync-external-store':
         specifier: ^0.0.6
         version: 0.0.6
@@ -107,8 +107,8 @@ importers:
         specifier: ^14.2.1
         version: 14.2.1(react-dom@18.2.0)(react@18.3.1)
       '@types/react':
-        specifier: ^18.3.1
-        version: 18.3.1
+        specifier: ^18.3.3
+        version: 18.3.3
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -1337,11 +1337,11 @@ packages:
   /@types/react-dom@18.2.18:
     resolution: {integrity: sha512-TJxDm6OfAX2KJWJdMEVTwWke5Sc/E/RlnPGvGfS0W7+6ocy2xhDVQVh/KvC2Uf7kACs+gDytdusDSdWfWkaNzw==}
     dependencies:
-      '@types/react': 18.3.1
+      '@types/react': 18.3.3
     dev: true
 
-  /@types/react@18.3.1:
-    resolution: {integrity: sha512-V0kuGBX3+prX+DQ/7r2qsv1NsdfnCLnTgnRJ1pYnxykBhGMz+qj+box5lq7XsO5mtZsBqpjwwTu/7wszPfMBcw==}
+  /@types/react@18.3.3:
+    resolution: {integrity: sha512-hti/R0pS0q1/xx+TsI73XIqk26eBsISZ2R0wUijXIngRK9R/e7Xw/cXVxQK7R5JjW+SV4zGcn5hXjudkN/pLIw==}
     dependencies:
       '@types/prop-types': 15.7.11
       csstype: 3.1.3
