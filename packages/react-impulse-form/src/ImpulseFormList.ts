@@ -503,6 +503,10 @@ export class ImpulseFormList<
     })
   }
 
+  /**
+   * Returns `true` if at least one of the form elements is dirty,
+   * or when at elements array is modified (added, removed, or reordered).
+   */
   public isDirty(scope: Scope): boolean
   public isDirty<TResult>(
     scope: Scope,
@@ -518,16 +522,21 @@ export class ImpulseFormList<
       verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
     ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
+    const initialElements = this._initialElements.getValue(scope)
+    const elements = this._elements.getValue(scope)
+
     const [dirtyConcise, dirtyVerbose] = this._mapFormElements(scope, (form) =>
       form.isDirty(scope, (concise, verbose) => [concise, verbose]),
     )
 
     return select(
-      dirtyConcise.every(isFalse)
-        ? false
-        : dirtyConcise.every(isTrue)
-          ? true
-          : (dirtyConcise as ImpulseFormListFlagSchema<TElement>),
+      !shallowArrayEquals(initialElements, elements)
+        ? true
+        : dirtyConcise.every(isFalse)
+          ? false
+          : dirtyConcise.every(isTrue)
+            ? true
+            : (dirtyConcise as ImpulseFormListFlagSchema<TElement>),
       dirtyVerbose as ImpulseFormListFlagSchemaVerbose<TElement>,
     )
   }

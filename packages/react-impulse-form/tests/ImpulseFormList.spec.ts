@@ -812,6 +812,16 @@ describe("ImpulseFormList#isDirty()", () => {
     expect(form.isDirty(scope, arg(1))).toStrictEqual([false, false, false])
   })
 
+  it("returns true for shuffled clean elements", ({ scope }) => {
+    const form = setup([setupElement(0), setupElement(1), setupElement(2)])
+
+    form.setElements(([first, second, third]) => [second!, third!, first!])
+
+    expect(form.isDirty(scope)).toBe(true)
+    expect(form.isDirty(scope, arg(0))).toBe(true)
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([false, false, false])
+  })
+
   it("returns true when at least one element is dirty", ({ scope }) => {
     const form = setup([
       setupElement(0),
@@ -836,7 +846,72 @@ describe("ImpulseFormList#isDirty()", () => {
     expect(form.isDirty(scope, arg(1))).toStrictEqual([true, true, true])
   })
 
-  it.todo("check with reset")
+  it("returns true for list with a new clean element", ({ scope }) => {
+    const form = setup([setupElement(0), setupElement(1), setupElement(2)])
+
+    form.setElements((elements) => [...elements, setupElement(3)])
+
+    expect(form.isDirty(scope)).toBe(true)
+    expect(form.isDirty(scope, arg(0))).toBe(true)
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+      false,
+      false,
+      false,
+      false,
+    ])
+  })
+
+  it("returns true for list without an element", ({ scope }) => {
+    const form = setup([setupElement(0), setupElement(1), setupElement(2)])
+
+    form.setElements((elements) => elements.slice(0, 2))
+
+    expect(form.isDirty(scope)).toBe(true)
+    expect(form.isDirty(scope, arg(0))).toBe(true)
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([false, false])
+  })
+
+  describe("after reset", () => {
+    it("returns false for not changed list but changed elements", ({
+      scope,
+    }) => {
+      const form = setup([
+        setupElement(0, { initialValue: 1 }),
+        setupElement(1, { initialValue: 2 }),
+        setupElement(2, { initialValue: 3 }),
+      ])
+
+      form.reset()
+
+      expect(form.isDirty(scope)).toBe(false)
+      expect(form.isDirty(scope, arg(0))).toBe(false)
+      expect(form.isDirty(scope, arg(1))).toStrictEqual([false, false, false])
+    })
+  })
+
+  it("returns false for list with a new element", ({ scope }) => {
+    const form = setup([setupElement(0), setupElement(1), setupElement(2)])
+
+    form.setElements((elements) => [...elements, setupElement(3)])
+
+    form.reset()
+
+    expect(form.isDirty(scope)).toBe(false)
+    expect(form.isDirty(scope, arg(0))).toBe(false)
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([false, false, false])
+  })
+
+  it("returns false for list without an element", ({ scope }) => {
+    const form = setup([setupElement(0), setupElement(1), setupElement(2)])
+
+    form.setElements((elements) => elements.slice(0, 2))
+
+    form.reset()
+
+    expect(form.isDirty(scope)).toBe(false)
+    expect(form.isDirty(scope, arg(0))).toBe(false)
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([false, false, false])
+  })
 })
 
 describe("ImpulseFormList#getValue()", () => {
