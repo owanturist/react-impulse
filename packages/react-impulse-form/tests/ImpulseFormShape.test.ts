@@ -691,14 +691,21 @@ describe("ImpulseFormShape.of()", () => {
 
             initialValue?: Setter<
               {
-                readonly first?: Setter<string>
-                readonly second?: Setter<number>
+                readonly first?: Setter<string, [string, string]>
+                readonly second?: Setter<number, [number, number]>
                 readonly third?: Setter<
                   {
-                    readonly one?: Setter<boolean>
-                    readonly two?: Setter<Array<string>>
+                    readonly one?: Setter<boolean, [boolean, boolean]>
+                    readonly two?: Setter<
+                      Array<string>,
+                      [Array<string>, Array<string>]
+                    >
                   },
                   [
+                    {
+                      readonly one: boolean
+                      readonly two: Array<string>
+                    },
                     {
                       readonly one: boolean
                       readonly two: Array<string>
@@ -716,19 +723,35 @@ describe("ImpulseFormShape.of()", () => {
                   }
                   readonly fourth: Array<string>
                 },
+                {
+                  readonly first: string
+                  readonly second: number
+                  readonly third: {
+                    readonly one: boolean
+                    readonly two: Array<string>
+                  }
+                  readonly fourth: Array<string>
+                },
               ]
             >
 
             originalValue?: Setter<
               {
-                readonly first?: Setter<string>
-                readonly second?: Setter<number>
+                readonly first?: Setter<string, [string, string]>
+                readonly second?: Setter<number, [number, number]>
                 readonly third?: Setter<
                   {
-                    readonly one?: Setter<boolean>
-                    readonly two?: Setter<Array<string>>
+                    readonly one?: Setter<boolean, [boolean, boolean]>
+                    readonly two?: Setter<
+                      Array<string>,
+                      [Array<string>, Array<string>]
+                    >
                   },
                   [
+                    {
+                      readonly one: boolean
+                      readonly two: Array<string>
+                    },
                     {
                       readonly one: boolean
                       readonly two: Array<string>
@@ -737,6 +760,15 @@ describe("ImpulseFormShape.of()", () => {
                 >
               },
               [
+                {
+                  readonly first: string
+                  readonly second: number
+                  readonly third: {
+                    readonly one: boolean
+                    readonly two: Array<string>
+                  }
+                  readonly fourth: Array<string>
+                },
                 {
                   readonly first: string
                   readonly second: number
@@ -1604,14 +1636,21 @@ describe("ImpulseFormShape#setOriginalValue()", () => {
     expectTypeOf(shape.setOriginalValue).parameter(0).toEqualTypeOf<
       Setter<
         {
-          readonly first?: Setter<string>
-          readonly second?: Setter<number>
+          readonly first?: Setter<string, [string, string]>
+          readonly second?: Setter<number, [number, number]>
           readonly third?: Setter<
             {
-              readonly one?: Setter<boolean>
-              readonly two?: Setter<Array<string>>
+              readonly one?: Setter<boolean, [boolean, boolean]>
+              readonly two?: Setter<
+                Array<string>,
+                [Array<string>, Array<string>]
+              >
             },
             [
+              {
+                readonly one: boolean
+                readonly two: Array<string>
+              },
               {
                 readonly one: boolean
                 readonly two: Array<string>
@@ -1620,6 +1659,15 @@ describe("ImpulseFormShape#setOriginalValue()", () => {
           >
         },
         [
+          {
+            readonly first: string
+            readonly second: number
+            readonly third: {
+              readonly one: boolean
+              readonly two: Array<string>
+            }
+            readonly fourth: Array<string>
+          },
           {
             readonly first: string
             readonly second: number
@@ -1638,10 +1686,14 @@ describe("ImpulseFormShape#setOriginalValue()", () => {
       .toEqualTypeOf<
         Setter<
           {
-            readonly one?: Setter<boolean>
-            readonly two?: Setter<Array<string>>
+            readonly one?: Setter<boolean, [boolean, boolean]>
+            readonly two?: Setter<Array<string>, [Array<string>, Array<string>]>
           },
           [
+            {
+              readonly one: boolean
+              readonly two: Array<string>
+            },
             {
               readonly one: boolean
               readonly two: Array<string>
@@ -1795,14 +1847,21 @@ describe("ImpulseFormShape#setInitialValue()", () => {
     expectTypeOf(shape.setInitialValue).parameter(0).toEqualTypeOf<
       Setter<
         {
-          readonly first?: Setter<string>
-          readonly second?: Setter<number>
+          readonly first?: Setter<string, [string, string]>
+          readonly second?: Setter<number, [number, number]>
           readonly third?: Setter<
             {
-              readonly one?: Setter<boolean>
-              readonly two?: Setter<Array<string>>
+              readonly one?: Setter<boolean, [boolean, boolean]>
+              readonly two?: Setter<
+                Array<string>,
+                [Array<string>, Array<string>]
+              >
             },
             [
+              {
+                readonly one: boolean
+                readonly two: Array<string>
+              },
               {
                 readonly one: boolean
                 readonly two: Array<string>
@@ -1820,6 +1879,15 @@ describe("ImpulseFormShape#setInitialValue()", () => {
             }
             readonly fourth: Array<string>
           },
+          {
+            readonly first: string
+            readonly second: number
+            readonly third: {
+              readonly one: boolean
+              readonly two: Array<string>
+            }
+            readonly fourth: Array<string>
+          },
         ]
       >
     >()
@@ -1827,10 +1895,14 @@ describe("ImpulseFormShape#setInitialValue()", () => {
     expectTypeOf(shape.fields.third.setInitialValue).parameter(0).toEqualTypeOf<
       Setter<
         {
-          readonly one?: Setter<boolean>
-          readonly two?: Setter<Array<string>>
+          readonly one?: Setter<boolean, [boolean, boolean]>
+          readonly two?: Setter<Array<string>, [Array<string>, Array<string>]>
         },
         [
+          {
+            readonly one: boolean
+            readonly two: Array<string>
+          },
           {
             readonly one: boolean
             readonly two: Array<string>
