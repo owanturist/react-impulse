@@ -475,29 +475,17 @@ export class ImpulseFormList<
     )
   }
 
-  // TODO reset the elements
   public reset(
     resetter: ImpulseFormListOriginalValueSetter<TElement> = identity as typeof resetter,
   ): void {
-    // TODO make the code nicer
     batch((scope) => {
       this.setInitialValue(resetter)
 
-      this._elements.setValue((elements, scope) => {
-        const initialElements = this._initialElements.getValue(scope)
+      const initialElements = this._initialElements.getValue(scope)
 
-        if (elements.length > initialElements.length) {
-          return elements.slice(0, initialElements.length)
-        }
+      this._elements.setValue(initialElements)
 
-        if (elements.length < initialElements.length) {
-          return [...elements, ...initialElements.slice(elements.length)]
-        }
-
-        return elements
-      })
-
-      for (const element of this._elements.getValue(scope)) {
+      for (const element of initialElements) {
         element.reset()
       }
     })
