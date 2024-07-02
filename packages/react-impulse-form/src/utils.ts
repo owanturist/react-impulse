@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from "./dependencies"
+import { isFunction, useEffect, useLayoutEffect, useRef } from "./dependencies"
 
 export type Func<TArgs extends ReadonlyArray<unknown>, TReturn = void> = (
   this: void,
@@ -9,6 +9,17 @@ export type Setter<
   TValue,
   TPrevValues extends ReadonlyArray<unknown> = [TValue],
 > = TValue | Func<TPrevValues, TValue>
+
+// TODO use everywhere
+export const resolveSetter = <
+  TValue,
+  TPrevValues extends ReadonlyArray<unknown>,
+>(
+  setter: Setter<TValue, TPrevValues>,
+  ...prevValues: TPrevValues
+): TValue => {
+  return isFunction(setter) ? setter(...prevValues) : setter
+}
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type ComputeObject<Obj> = unknown & {
