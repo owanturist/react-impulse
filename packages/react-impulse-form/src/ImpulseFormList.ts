@@ -2,7 +2,6 @@ import {
   type Scope,
   batch,
   identity,
-  isFunction,
   isTruthy,
   isDefined,
   isString,
@@ -17,11 +16,11 @@ import {
   isFalse,
   uniq,
   resolveSetter,
+  zipMap,
 } from "./utils"
 import { type GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./ValidateStrategy"
 
-// TODO move back to private method
 function setFormElements<
   TElement extends ImpulseForm,
   TElementSetter,
@@ -69,7 +68,7 @@ function setFormElements<
   setNext: (element: TElement, next: TGenericValue | TElementSetter) => void,
 ): void {
   batch((scope) => {
-    const nextValue = isFunction(setter) ? setter(...getCurrent(scope)) : setter
+    const nextValue = resolveSetter(setter, ...getCurrent(scope))
 
     for (const [index, element] of elements.getValue(scope).entries()) {
       const next = isArray(nextValue) ? nextValue.at(index) : nextValue
@@ -225,30 +224,10 @@ export class ImpulseFormList<
     super(root)
 
     _elements.setValue((elements) => {
-      return elements.map((element) => {
-        return ImpulseForm._childOf(this, element) as TElement
-      })
+      return elements.map((element) => ImpulseForm._childOf(this, element))
     })
 
     this._initialElements = _initialElements ?? _elements.clone()
-  }
-
-  private _mapFormElements<TLeft, TRight>(
-    scope: Scope,
-    fn: (form: ImpulseForm) => [TLeft, TRight],
-  ): [ReadonlyArray<TLeft>, ReadonlyArray<TRight>] {
-    const elements = this._elements.getValue(scope)
-    const left = new Array<TLeft>(elements.length)
-    const right = new Array<TRight>(elements.length)
-
-    for (const [index, element] of elements.entries()) {
-      const [leftItem, rightItem] = fn(element)
-
-      left[index] = leftItem
-      right[index] = rightItem
-    }
-
-    return [left, right]
   }
 
   protected _submitWith(
@@ -305,10 +284,8 @@ export class ImpulseFormList<
     setter: Setter<ReadonlyArray<TElement>, [ReadonlyArray<TElement>, Scope]>,
   ): void {
     this._elements.setValue((elements, scope) => {
-      const nextElements = isFunction(setter) ? setter(elements, scope) : setter
-
-      return nextElements.map((element) => {
-        return ImpulseForm._childOf(this, element) as TElement
+      return resolveSetter(setter, elements, scope).map((element) => {
+        return ImpulseForm._childOf(this, element)
       })
     })
   }
@@ -328,8 +305,8 @@ export class ImpulseFormList<
       verbose: ImpulseFormListErrorSchemaVerbose<TElement>,
     ) => TResult = identity as typeof select,
   ): TResult {
-    const [errorsConcise, errorsVerbose] = this._mapFormElements(
-      scope,
+    const [errorsConcise, errorsVerbose] = zipMap(
+      this._elements.getValue(scope),
       (form) => form.getErrors(scope, (concise, verbose) => [concise, verbose]),
     )
 
@@ -366,8 +343,8 @@ export class ImpulseFormList<
       verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
     ) => TResult = isTrue as unknown as typeof select,
   ): TResult {
-    const [validatedConcise, valueVerbose] = this._mapFormElements(
-      scope,
+    const [validatedConcise, valueVerbose] = zipMap(
+      this._elements.getValue(scope),
       (form) =>
         form.isValidated(scope, (concise, verbose) => [concise, verbose]),
     )
@@ -397,8 +374,8 @@ export class ImpulseFormList<
       verbose: ImpulseFormListValidateOnSchemaVerbose<TElement>,
     ) => TResult = identity as typeof select,
   ): TResult {
-    const [validateOnConcise, validateOnVerbose] = this._mapFormElements(
-      scope,
+    const [validateOnConcise, validateOnVerbose] = zipMap(
+      this._elements.getValue(scope),
       (form) => {
         return form.getValidateOn(scope, (concise, verbose) => [
           concise,
@@ -422,18 +399,20 @@ export class ImpulseFormList<
   public setValidateOn(
     setter: ImpulseFormListValidateOnSetter<TElement>,
   ): void {
-    setFormElements(
-      this._elements,
-      setter,
-      (scope) => [this.getValidateOn(scope, (_, verbose) => verbose)],
-      (element, next) => element.setValidateOn(next),
-    )
-    setFormElements(
-      this._initialElements,
-      setter,
-      (scope) => [this.getValidateOn(scope, (_, verbose) => verbose)],
-      (element, next) => element.setValidateOn(next),
-    )
+    batch(() => {
+      setFormElements(
+        this._elements,
+        setter,
+        (scope) => [this.getValidateOn(scope, (_, verbose) => verbose)],
+        (element, next) => element.setValidateOn(next),
+      )
+      setFormElements(
+        this._initialElements,
+        setter,
+        (scope) => [this.getValidateOn(scope, (_, verbose) => verbose)],
+        (element, next) => element.setValidateOn(next),
+      )
+    })
   }
 
   public isTouched(scope: Scope): boolean
@@ -451,8 +430,8 @@ export class ImpulseFormList<
       verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
     ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
-    const [touchedConcise, touchedVerbose] = this._mapFormElements(
-      scope,
+    const [touchedConcise, touchedVerbose] = zipMap(
+      this._elements.getValue(scope),
       (form) => form.isTouched(scope, (concise, verbose) => [concise, verbose]),
     )
 
@@ -513,8 +492,9 @@ export class ImpulseFormList<
     const initialElements = this._initialElements.getValue(scope)
     const elements = this._elements.getValue(scope)
 
-    const [dirtyConcise, dirtyVerbose] = this._mapFormElements(scope, (form) =>
-      form.isDirty(scope, (concise, verbose) => [concise, verbose]),
+    const [dirtyConcise, dirtyVerbose] = zipMap(
+      this._elements.getValue(scope),
+      (form) => form.isDirty(scope, (concise, verbose) => [concise, verbose]),
     )
 
     return select(
@@ -544,8 +524,8 @@ export class ImpulseFormList<
       verbose: ImpulseFormListValueSchemaVerbose<TElement>,
     ) => TResult = identity as typeof select,
   ): TResult {
-    const [valuesConcise, valuesVerbose] = this._mapFormElements(
-      scope,
+    const [valuesConcise, valuesVerbose] = zipMap(
+      this._elements.getValue(scope),
       (form) => form.getValue(scope, (concise, verbose) => [concise, verbose]),
     )
 

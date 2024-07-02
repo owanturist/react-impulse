@@ -36,15 +36,15 @@ export abstract class ImpulseForm<
     return value instanceof ImpulseForm
   }
 
-  protected static _childOf<TChildParams extends ImpulseFormParams>(
+  protected static _childOf<TChild extends ImpulseForm>(
     parent: ImpulseForm,
-    child: ImpulseForm<TChildParams>,
-  ): ImpulseForm<TChildParams> {
+    child: TChild,
+  ): TChild {
     if (child._root === parent._root) {
       return child
     }
 
-    return child._childOf(parent._root)
+    return child._childOf(parent._root) as TChild
   }
 
   protected static _submitWith<TParams extends ImpulseFormParams>(
