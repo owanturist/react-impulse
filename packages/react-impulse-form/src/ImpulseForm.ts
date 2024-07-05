@@ -67,6 +67,14 @@ export abstract class ImpulseForm<
     form._setValidated(isValidated)
   }
 
+  protected static _isDirtyWith<TParams extends ImpulseFormParams>(
+    scope: Scope,
+    original: ImpulseForm<TParams>,
+    initial: ImpulseForm<TParams>,
+  ): boolean {
+    return original._isDirtyWith(scope, initial)
+  }
+
   // necessary for type inference
   protected readonly _params?: TParams
 
@@ -89,6 +97,11 @@ export abstract class ImpulseForm<
   protected abstract _childOf(parent: null | ImpulseForm): ImpulseForm<TParams>
 
   protected abstract _setValidated(isValidated: boolean): void
+
+  protected abstract _isDirtyWith(
+    scope: Scope,
+    initial: ImpulseForm<TParams>,
+  ): boolean
 
   protected _submitWith(
     value: TParams["value.schema"],

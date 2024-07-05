@@ -17,6 +17,7 @@ import {
   uniq,
   resolveSetter,
   zipMap,
+  arrayEqualsBy,
 } from "./utils"
 import { type GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./ValidateStrategy"
@@ -266,6 +267,32 @@ export class ImpulseFormList<
     }
   }
 
+  protected _isDirtyWith(
+    scope: Scope,
+    initial: ImpulseFormList<TElement>,
+  ): boolean {
+    const originalElements = this._elements.getValue(scope)
+    const initialElements = initial._elements.getValue(scope)
+
+    if (originalElements.length !== initialElements.length) {
+      return false
+    }
+
+    for (const [index, originalElement] of originalElements.entries()) {
+      const initialElement = initialElements[index]!
+
+      if (
+        ImpulseForm.isImpulseForm(originalElement) &&
+        ImpulseForm.isImpulseForm(initialElement) &&
+        !ImpulseForm._isDirtyWith(scope, originalElement, initialElement)
+      ) {
+        return false
+      }
+    }
+
+    return true
+  }
+
   public getElements(scope: Scope): ReadonlyArray<TElement>
   public getElements<TResult>(
     scope: Scope,
@@ -482,7 +509,7 @@ export class ImpulseFormList<
       verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
     ) => TResult,
   ): TResult
-  public isDirty<TResult = boolean>(
+  public isDirty<TResult>(
     scope: Scope,
     select: (
       concise: ImpulseFormListFlagSchema<TElement>,
@@ -495,18 +522,30 @@ export class ImpulseFormList<
     const [dirtyConcise, dirtyVerbose] = zipMap(
       this._elements.getValue(scope),
       (form) => form.isDirty(scope, (concise, verbose) => [concise, verbose]),
+    ) as [
+      Exclude<ImpulseFormListFlagSchema<TElement>, boolean>,
+      ImpulseFormListFlagSchemaVerbose<TElement>,
+    ]
+
+    const areElementEqual = arrayEqualsBy(
+      elements,
+      initialElements,
+      (original, initial) => ImpulseForm._isDirtyWith(scope, original, initial),
     )
 
-    return select(
-      !shallowArrayEquals(initialElements, elements)
-        ? true
-        : dirtyConcise.every(isFalse)
-          ? false
-          : dirtyConcise.every(isTrue)
-            ? true
-            : (dirtyConcise as ImpulseFormListFlagSchema<TElement>),
-      dirtyVerbose as ImpulseFormListFlagSchemaVerbose<TElement>,
-    )
+    if (!areElementEqual) {
+      return select(true, dirtyVerbose)
+    }
+
+    if (dirtyConcise.every(isFalse)) {
+      return select(false, dirtyVerbose)
+    }
+
+    if (dirtyConcise.every(isTrue)) {
+      return select(true, dirtyVerbose)
+    }
+
+    return select(dirtyConcise, dirtyVerbose)
   }
 
   public getValue(scope: Scope): null | ImpulseFormListValueSchema<TElement>

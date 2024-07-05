@@ -258,6 +258,19 @@ export class ImpulseFormValue<
     this._validated.setValue(isValidated)
   }
 
+  protected _isDirtyWith(
+    scope: Scope,
+    initial: ImpulseFormValue<TOriginalValue, TValue>,
+  ): boolean {
+    const compare = this._isOriginalValueEqual.getValue(scope)
+
+    return compare(
+      this.getOriginalValue(scope),
+      initial.getInitialValue(scope),
+      scope,
+    )
+  }
+
   public getErrors(scope: Scope): null | ReadonlyArray<string>
   public getErrors<TResult>(
     scope: Scope,

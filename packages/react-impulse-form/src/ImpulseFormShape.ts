@@ -10,7 +10,13 @@ import {
   isDefined,
   isString,
 } from "./dependencies"
-import { type ComputeObject, isTrue, type Setter, resolveSetter } from "./utils"
+import {
+  type ComputeObject,
+  isTrue,
+  type Setter,
+  resolveSetter,
+  shallowArraySame,
+} from "./utils"
 import {
   type GetImpulseFormParam,
   type ImpulseFormParamsKeys,
@@ -243,6 +249,32 @@ export class ImpulseFormShape<
         ImpulseForm._setValidated(field, isValidated)
       }
     }
+  }
+
+  protected _isDirtyWith(
+    scope: Scope,
+    initial: ImpulseFormShape<TFields>,
+  ): boolean {
+    const keys = Object.keys(this.fields)
+
+    if (!shallowArraySame(keys, Object.keys(initial.fields))) {
+      return false
+    }
+
+    for (const key of keys) {
+      const originalField = this.fields[key]
+      const initialField = initial.fields[key]
+
+      if (
+        ImpulseForm.isImpulseForm(originalField) &&
+        ImpulseForm.isImpulseForm(initialField) &&
+        !ImpulseForm._isDirtyWith(scope, originalField, initialField)
+      ) {
+        return false
+      }
+    }
+
+    return true
   }
 
   public getErrors(scope: Scope): ImpulseFormShapeErrorSchema<TFields>

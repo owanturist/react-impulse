@@ -8,6 +8,7 @@ import {
   type ImpulseFormListOptions,
   ImpulseFormList,
   ImpulseFormValue,
+  ImpulseFormShape,
 } from "../src"
 
 import { arg, wait } from "./common"
@@ -820,6 +821,32 @@ describe("ImpulseFormList#isDirty()", () => {
     expect(form.isDirty(scope)).toBe(true)
     expect(form.isDirty(scope, arg(0))).toBe(true)
     expect(form.isDirty(scope, arg(1))).toStrictEqual([false, false, false])
+  })
+
+  it("returns false if two comparably equal clean elements are swapped", ({
+    scope,
+  }) => {
+    const form = ImpulseFormList.of([
+      ImpulseFormShape.of({
+        one: setupElement(1),
+      }),
+      ImpulseFormShape.of({
+        one: setupElement(2),
+      }),
+      ImpulseFormShape.of({
+        one: setupElement(1),
+      }),
+    ])
+
+    form.setElements(([first, second, third]) => [third!, second!, first!])
+
+    expect(form.isDirty(scope)).toBe(false)
+    expect(form.isDirty(scope, arg(0))).toBe(false)
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+      { one: false },
+      { one: false },
+      { one: false },
+    ])
   })
 
   it("returns true when at least one element is dirty", ({ scope }) => {
