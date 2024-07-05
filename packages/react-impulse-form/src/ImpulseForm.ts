@@ -67,12 +67,12 @@ export abstract class ImpulseForm<
     form._setValidated(isValidated)
   }
 
-  protected static _isDirtyWith<TParams extends ImpulseFormParams>(
+  protected static _isDirtyAgainst<TParams extends ImpulseFormParams>(
     scope: Scope,
     original: ImpulseForm<TParams>,
     initial: ImpulseForm<TParams>,
   ): boolean {
-    return original._isDirtyWith(scope, initial)
+    return original._isDirtyAgainst(scope, initial)
   }
 
   // necessary for type inference
@@ -98,7 +98,7 @@ export abstract class ImpulseForm<
 
   protected abstract _setValidated(isValidated: boolean): void
 
-  protected abstract _isDirtyWith(
+  protected abstract _isDirtyAgainst(
     scope: Scope,
     initial: ImpulseForm<TParams>,
   ): boolean

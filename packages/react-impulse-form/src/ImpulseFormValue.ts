@@ -258,7 +258,7 @@ export class ImpulseFormValue<
     this._validated.setValue(isValidated)
   }
 
-  protected _isDirtyWith(
+  protected _isDirtyAgainst(
     scope: Scope,
     initial: ImpulseFormValue<TOriginalValue, TValue>,
   ): boolean {

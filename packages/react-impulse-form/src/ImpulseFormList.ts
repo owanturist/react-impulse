@@ -267,7 +267,7 @@ export class ImpulseFormList<
     }
   }
 
-  protected _isDirtyWith(
+  protected _isDirtyAgainst(
     scope: Scope,
     initial: ImpulseFormList<TElement>,
   ): boolean {
@@ -284,7 +284,7 @@ export class ImpulseFormList<
       if (
         ImpulseForm.isImpulseForm(originalElement) &&
         ImpulseForm.isImpulseForm(initialElement) &&
-        !ImpulseForm._isDirtyWith(scope, originalElement, initialElement)
+        !ImpulseForm._isDirtyAgainst(scope, originalElement, initialElement)
       ) {
         return false
       }
@@ -530,7 +530,8 @@ export class ImpulseFormList<
     const areElementEqual = arrayEqualsBy(
       elements,
       initialElements,
-      (original, initial) => ImpulseForm._isDirtyWith(scope, original, initial),
+      (original, initial) =>
+        ImpulseForm._isDirtyAgainst(scope, original, initial),
     )
 
     if (!areElementEqual) {

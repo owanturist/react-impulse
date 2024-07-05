@@ -251,7 +251,7 @@ export class ImpulseFormShape<
     }
   }
 
-  protected _isDirtyWith(
+  protected _isDirtyAgainst(
     scope: Scope,
     initial: ImpulseFormShape<TFields>,
   ): boolean {
@@ -268,7 +268,7 @@ export class ImpulseFormShape<
       if (
         ImpulseForm.isImpulseForm(originalField) &&
         ImpulseForm.isImpulseForm(initialField) &&
-        !ImpulseForm._isDirtyWith(scope, originalField, initialField)
+        !ImpulseForm._isDirtyAgainst(scope, originalField, initialField)
       ) {
         return false
       }
