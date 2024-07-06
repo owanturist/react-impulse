@@ -31,6 +31,10 @@ export function isFalse(value: unknown): value is false {
   return value === false
 }
 
+export function isNull(value: unknown): value is null {
+  return value === null
+}
+
 export function isHtmlElement(value: unknown): value is HTMLElement {
   return value instanceof HTMLElement
 }
@@ -39,10 +43,13 @@ export function eq<T>(left: T, right: T): boolean {
   return Object.is(left, right)
 }
 
-export const arg =
-  <TIndex extends number>(index: TIndex) =>
-  <TArgs extends ReadonlyArray<unknown>>(...args: TArgs): TArgs[TIndex] =>
-    args[index]
+export function params<TArgs extends ReadonlyArray<unknown>>(
+  ...args: TArgs
+): TArgs {
+  return args
+}
+
+params._second = <T>(_: unknown, second: T): T => second
 
 export function zipMap<TElement, TLeft, TRight>(
   elements: ReadonlyArray<TElement>,

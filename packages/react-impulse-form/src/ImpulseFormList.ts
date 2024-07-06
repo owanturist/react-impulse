@@ -18,6 +18,8 @@ import {
   resolveSetter,
   zipMap,
   arrayEqualsBy,
+  isNull,
+  params,
 } from "./utils"
 import { type GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./ValidateStrategy"
@@ -332,24 +334,27 @@ export class ImpulseFormList<
       verbose: ImpulseFormListErrorSchemaVerbose<TElement>,
     ) => TResult = identity as typeof select,
   ): TResult {
-    const [errorsConcise, errorsVerbose] = zipMap(
+    const [concise, verbose] = zipMap(
+      //
       this._elements.getValue(scope),
-      (form) => form.getErrors(scope, (concise, verbose) => [concise, verbose]),
-    )
+      (form) => form.getErrors(scope, params),
+    ) as [
+      Exclude<ImpulseFormListErrorSchema<TElement>, null>,
+      ImpulseFormListErrorSchemaVerbose<TElement>,
+    ]
 
-    return select(
-      errorsConcise.every((errors) => errors === null)
-        ? null
-        : (errorsConcise as ImpulseFormListErrorSchema<TElement>),
-      errorsVerbose as ImpulseFormListErrorSchemaVerbose<TElement>,
-    )
+    if (concise.every(isNull)) {
+      return select(null, verbose)
+    }
+
+    return select(concise, verbose)
   }
 
   public setErrors(setter: ImpulseFormListErrorSetter<TElement>): void {
     setFormElements(
       this._elements,
       setter,
-      (scope) => [this.getErrors(scope, (_, verbose) => verbose)],
+      (scope) => [this.getErrors(scope, params._second)],
       (element, next) => element.setErrors(next),
     )
   }
@@ -370,20 +375,24 @@ export class ImpulseFormList<
       verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
     ) => TResult = isTrue as unknown as typeof select,
   ): TResult {
-    const [validatedConcise, valueVerbose] = zipMap(
+    const [concise, verbose] = zipMap(
+      //
       this._elements.getValue(scope),
-      (form) =>
-        form.isValidated(scope, (concise, verbose) => [concise, verbose]),
-    )
+      (form) => form.isValidated(scope, params),
+    ) as [
+      Exclude<ImpulseFormListFlagSchema<TElement>, boolean>,
+      ImpulseFormListFlagSchemaVerbose<TElement>,
+    ]
 
-    return select(
-      validatedConcise.every(isFalse)
-        ? false
-        : validatedConcise.every(isTrue)
-          ? true
-          : (validatedConcise as ImpulseFormListFlagSchema<TElement>),
-      valueVerbose as ImpulseFormListFlagSchemaVerbose<TElement>,
-    )
+    if (concise.every(isFalse)) {
+      return select(false, verbose)
+    }
+
+    if (concise.every(isTrue)) {
+      return select(true, verbose)
+    }
+
+    return select(concise, verbose)
   }
 
   public getValidateOn(scope: Scope): ImpulseFormListValidateOnSchema<TElement>
@@ -401,26 +410,25 @@ export class ImpulseFormList<
       verbose: ImpulseFormListValidateOnSchemaVerbose<TElement>,
     ) => TResult = identity as typeof select,
   ): TResult {
-    const [validateOnConcise, validateOnVerbose] = zipMap(
+    const [concise, verbose] = zipMap(
+      //
       this._elements.getValue(scope),
-      (form) => {
-        return form.getValidateOn(scope, (concise, verbose) => [
-          concise,
-          verbose,
-        ])
-      },
-    )
+      (form) => form.getValidateOn(scope, params),
+    ) as [
+      Exclude<ImpulseFormListValidateOnSchema<TElement>, ValidateStrategy>,
+      ImpulseFormListValidateOnSchemaVerbose<TElement>,
+    ]
 
-    return select(
-      validateOnConcise.length === 0
-        ? // defaults to "onTouch"
-          VALIDATE_ON_TOUCH
-        : validateOnConcise.every(isString) &&
-            uniq(validateOnConcise).length === 1
-          ? (validateOnConcise[0] as ValidateStrategy)
-          : (validateOnConcise as ImpulseFormListValidateOnSchema<TElement>),
-      validateOnVerbose as ImpulseFormListValidateOnSchemaVerbose<TElement>,
-    )
+    // defaults to "onTouch"
+    if (concise.length === 0) {
+      return select(VALIDATE_ON_TOUCH, verbose)
+    }
+
+    if (concise.every(isString) && uniq(concise).length === 1) {
+      return select(concise[0] as ValidateStrategy, verbose)
+    }
+
+    return select(concise, verbose)
   }
 
   public setValidateOn(
@@ -430,13 +438,14 @@ export class ImpulseFormList<
       setFormElements(
         this._elements,
         setter,
-        (scope) => [this.getValidateOn(scope, (_, verbose) => verbose)],
+        (scope) => [this.getValidateOn(scope, params._second)],
         (element, next) => element.setValidateOn(next),
       )
+
       setFormElements(
         this._initialElements,
         setter,
-        (scope) => [this.getValidateOn(scope, (_, verbose) => verbose)],
+        (scope) => [this.getValidateOn(scope, params._second)],
         (element, next) => element.setValidateOn(next),
       )
     })
@@ -457,26 +466,31 @@ export class ImpulseFormList<
       verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
     ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
-    const [touchedConcise, touchedVerbose] = zipMap(
+    const [concise, verbose] = zipMap(
+      //
       this._elements.getValue(scope),
-      (form) => form.isTouched(scope, (concise, verbose) => [concise, verbose]),
-    )
+      (form) => form.isTouched(scope, params),
+    ) as [
+      Exclude<ImpulseFormListFlagSchema<TElement>, boolean>,
+      ImpulseFormListFlagSchemaVerbose<TElement>,
+    ]
 
-    return select(
-      touchedConcise.every(isFalse)
-        ? false
-        : touchedConcise.every(isTrue)
-          ? true
-          : (touchedConcise as ImpulseFormListFlagSchema<TElement>),
-      touchedVerbose as ImpulseFormListFlagSchemaVerbose<TElement>,
-    )
+    if (concise.every(isFalse)) {
+      return select(false, verbose)
+    }
+
+    if (concise.every(isTrue)) {
+      return select(true, verbose)
+    }
+
+    return select(concise, verbose)
   }
 
   public setTouched(setter: ImpulseFormListFlagSetter<TElement>): void {
     setFormElements(
       this._elements,
       setter,
-      (scope) => [this.isTouched(scope, (_, verbose) => verbose)],
+      (scope) => [this.isTouched(scope, params._second)],
       (element, next) => element.setTouched(next),
     )
   }
@@ -499,7 +513,7 @@ export class ImpulseFormList<
 
   /**
    * Returns `true` if at least one of the form elements is dirty,
-   * or when at elements array is modified (added, removed, or reordered).
+   * or when elements array is modified (added, removed, or reordered).
    */
   public isDirty(scope: Scope): boolean
   public isDirty<TResult>(
@@ -519,34 +533,37 @@ export class ImpulseFormList<
     const initialElements = this._initialElements.getValue(scope)
     const elements = this._elements.getValue(scope)
 
-    const [dirtyConcise, dirtyVerbose] = zipMap(
+    const [concise, verbose] = zipMap(
+      //
       this._elements.getValue(scope),
-      (form) => form.isDirty(scope, (concise, verbose) => [concise, verbose]),
+      (form) => form.isDirty(scope, params),
     ) as [
       Exclude<ImpulseFormListFlagSchema<TElement>, boolean>,
       ImpulseFormListFlagSchemaVerbose<TElement>,
     ]
 
+    // TODO NOW it should be just isDirty check
     const areElementEqual = arrayEqualsBy(
       elements,
       initialElements,
-      (original, initial) =>
-        ImpulseForm._isDirtyAgainst(scope, original, initial),
+      (original, initial) => {
+        return ImpulseForm._isDirtyAgainst(scope, original, initial)
+      },
     )
 
     if (!areElementEqual) {
-      return select(true, dirtyVerbose)
+      return select(true, verbose)
     }
 
-    if (dirtyConcise.every(isFalse)) {
-      return select(false, dirtyVerbose)
+    if (concise.every(isFalse)) {
+      return select(false, verbose)
     }
 
-    if (dirtyConcise.every(isTrue)) {
-      return select(true, dirtyVerbose)
+    if (concise.every(isTrue)) {
+      return select(true, verbose)
     }
 
-    return select(dirtyConcise, dirtyVerbose)
+    return select(concise, verbose)
   }
 
   public getValue(scope: Scope): null | ImpulseFormListValueSchema<TElement>
@@ -564,17 +581,16 @@ export class ImpulseFormList<
       verbose: ImpulseFormListValueSchemaVerbose<TElement>,
     ) => TResult = identity as typeof select,
   ): TResult {
-    const [valuesConcise, valuesVerbose] = zipMap(
+    const [concise, verbose] = zipMap(
+      //
       this._elements.getValue(scope),
-      (form) => form.getValue(scope, (concise, verbose) => [concise, verbose]),
-    )
+      (form) => form.getValue(scope, params),
+    ) as [
+      ImpulseFormListValueSchema<TElement>,
+      ImpulseFormListValueSchemaVerbose<TElement>,
+    ]
 
-    return select(
-      valuesConcise.some((value) => value === null)
-        ? null
-        : (valuesConcise as ImpulseFormListValueSchema<TElement>),
-      valuesVerbose as ImpulseFormListValueSchemaVerbose<TElement>,
-    )
+    return select(concise.some(isNull) ? null : concise, verbose)
   }
 
   public getOriginalValue(
