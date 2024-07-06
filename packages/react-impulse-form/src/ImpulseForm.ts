@@ -1,4 +1,11 @@
-import { type Scope, isDefined, batch, untrack, Impulse } from "./dependencies"
+import {
+  type Scope,
+  isDefined,
+  batch,
+  untrack,
+  Impulse,
+  isTruthy,
+} from "./dependencies"
 import { Emitter } from "./Emitter"
 
 export interface ImpulseFormParams {
@@ -67,12 +74,16 @@ export abstract class ImpulseForm<
     form._setValidated(isValidated)
   }
 
-  protected static _isDirtyAgainst<TParams extends ImpulseFormParams>(
+  protected static _isDirty<TParams extends ImpulseFormParams, TResult>(
     scope: Scope,
     original: ImpulseForm<TParams>,
     initial: ImpulseForm<TParams>,
-  ): boolean {
-    return original._isDirtyAgainst(scope, initial)
+    select: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): TResult {
+    return original._isDirty(scope, initial, select)
   }
 
   // necessary for type inference
@@ -98,10 +109,14 @@ export abstract class ImpulseForm<
 
   protected abstract _setValidated(isValidated: boolean): void
 
-  protected abstract _isDirtyAgainst(
+  protected abstract _isDirty<TResult>(
     scope: Scope,
     initial: ImpulseForm<TParams>,
-  ): boolean
+    select: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): TResult
 
   protected _submitWith(
     value: TParams["value.schema"],
@@ -164,6 +179,24 @@ export abstract class ImpulseForm<
     return this.getErrors(scope, isDefined)
   }
 
+  public isDirty(scope: Scope): boolean
+  public isDirty<TResult>(
+    scope: Scope,
+    select: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): TResult
+  public isDirty(
+    scope: Scope,
+    select: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => boolean = isTruthy,
+  ): boolean {
+    return this._isDirty(scope, this, select)
+  }
+
   public abstract getErrors(scope: Scope): TParams["errors.schema"]
   public abstract getErrors<TResult>(
     scope: Scope,
@@ -207,15 +240,6 @@ export abstract class ImpulseForm<
   public abstract setTouched(setter: TParams["flag.setter"]): void
 
   public abstract reset(resetter?: TParams["originalValue.setter"]): void
-
-  public abstract isDirty(scope: Scope): boolean
-  public abstract isDirty<TResult>(
-    scope: Scope,
-    select: (
-      concise: TParams["flag.schema"],
-      verbose: TParams["flag.schema.verbose"],
-    ) => TResult,
-  ): TResult
 
   public abstract getValue(scope: Scope): null | TParams["value.schema"]
   public abstract getValue<TResult>(

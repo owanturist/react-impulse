@@ -15,7 +15,7 @@ import {
   isTrue,
   type Setter,
   resolveSetter,
-  shallowArraySame,
+  params,
 } from "./utils"
 import {
   type GetImpulseFormParam,
@@ -251,30 +251,50 @@ export class ImpulseFormShape<
     }
   }
 
-  protected _isDirtyAgainst(
+  protected _isDirty<TResult>(
     scope: Scope,
     initial: ImpulseFormShape<TFields>,
-  ): boolean {
+    select: (
+      concise: ImpulseFormShapeFlagSchema<TFields>,
+      verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
+    ) => TResult,
+  ): TResult {
     const keys = Object.keys(this.fields)
 
-    if (!shallowArraySame(keys, Object.keys(initial.fields))) {
-      return false
-    }
+    let touchedAll = true
+    let touchedNone = true
+    // make it easier for TS
+    const touchedConcise = {} as Record<string, unknown>
+    const touchedVerbose = {} as Record<string, unknown>
 
     for (const key of keys) {
-      const originalField = this.fields[key]
-      const initialField = initial.fields[key]
+      const field = this.fields[key]
 
-      if (
-        ImpulseForm.isImpulseForm(originalField) &&
-        ImpulseForm.isImpulseForm(initialField) &&
-        !ImpulseForm._isDirtyAgainst(scope, originalField, initialField)
-      ) {
-        return false
+      if (ImpulseForm.isImpulseForm(field)) {
+        const initialField = initial.fields[key] as ImpulseForm
+
+        const [concise, verbose] = ImpulseForm._isDirty(
+          scope,
+          field,
+          initialField,
+          params,
+        )
+
+        touchedAll = touchedAll && concise === true
+        touchedNone = touchedNone && concise === false
+        touchedConcise[key] = concise
+        touchedVerbose[key] = verbose
       }
     }
 
-    return true
+    return select(
+      touchedNone
+        ? false
+        : touchedAll
+          ? true
+          : (touchedConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
+      touchedVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
+    )
   }
 
   public getErrors(scope: Scope): ImpulseFormShapeErrorSchema<TFields>
@@ -539,51 +559,6 @@ export class ImpulseFormShape<
         }
       }
     })
-  }
-
-  public isDirty(scope: Scope): boolean
-  public isDirty<TResult>(
-    scope: Scope,
-    select: (
-      concise: ImpulseFormShapeFlagSchema<TFields>,
-      verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
-    ) => TResult,
-  ): TResult
-  public isDirty<TResult = boolean>(
-    scope: Scope,
-    select: (
-      concise: ImpulseFormShapeFlagSchema<TFields>,
-      verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
-    ) => TResult = isTruthy as unknown as typeof select,
-  ): TResult {
-    let touchedAll = true
-    let touchedNone = true
-    // make it easier for TS
-    const touchedConcise = {} as Record<string, unknown>
-    const touchedVerbose = {} as Record<string, unknown>
-
-    for (const [key, field] of Object.entries(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
-        const touched = field.isDirty(scope, (concise, verbose) => ({
-          concise,
-          verbose,
-        }))
-
-        touchedAll = touchedAll && touched.concise === true
-        touchedNone = touchedNone && touched.concise === false
-        touchedConcise[key] = touched.concise
-        touchedVerbose[key] = touched.verbose
-      }
-    }
-
-    return select(
-      touchedNone
-        ? false
-        : touchedAll
-          ? true
-          : (touchedConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
-      touchedVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
-    )
   }
 
   public getValue(scope: Scope): null | ImpulseFormShapeValueSchema<TFields>

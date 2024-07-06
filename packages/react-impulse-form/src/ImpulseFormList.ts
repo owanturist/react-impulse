@@ -17,7 +17,6 @@ import {
   uniq,
   resolveSetter,
   zipMap,
-  arrayEqualsBy,
   isNull,
   params,
 } from "./utils"
@@ -269,30 +268,48 @@ export class ImpulseFormList<
     }
   }
 
-  protected _isDirtyAgainst(
+  /**
+   * Returns `true` if at least one of the form elements is dirty,
+   * or when elements array is modified (added, removed, or reordered).
+   */
+  protected _isDirty<TResult>(
     scope: Scope,
     initial: ImpulseFormList<TElement>,
-  ): boolean {
-    const originalElements = this._elements.getValue(scope)
-    const initialElements = initial._elements.getValue(scope)
+    select: (
+      concise: ImpulseFormListFlagSchema<TElement>,
+      verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
+    ) => TResult,
+  ): TResult {
+    const elements = this._elements.getValue(scope)
+    const initialElements = initial._initialElements.getValue(scope)
 
-    if (originalElements.length !== initialElements.length) {
-      return false
+    const [concise, verbose] = zipMap(elements, (form, index) => {
+      return ImpulseForm._isDirty(
+        scope,
+        form,
+        // the initial elements might be shorter than the current elements
+        initialElements.at(index) ?? form,
+        params,
+      )
+    }) as [
+      Exclude<ImpulseFormListFlagSchema<TElement>, boolean>,
+      ImpulseFormListFlagSchemaVerbose<TElement>,
+    ]
+
+    // if the elements array size is modified - it is definitely dirty
+    if (elements.length !== initialElements.length) {
+      return select(true, verbose)
     }
 
-    for (const [index, originalElement] of originalElements.entries()) {
-      const initialElement = initialElements[index]!
-
-      if (
-        ImpulseForm.isImpulseForm(originalElement) &&
-        ImpulseForm.isImpulseForm(initialElement) &&
-        !ImpulseForm._isDirtyAgainst(scope, originalElement, initialElement)
-      ) {
-        return false
-      }
+    if (concise.every(isFalse)) {
+      return select(false, verbose)
     }
 
-    return true
+    if (concise.every(isTrue)) {
+      return select(true, verbose)
+    }
+
+    return select(concise, verbose)
   }
 
   public getElements(scope: Scope): ReadonlyArray<TElement>
@@ -509,61 +526,6 @@ export class ImpulseFormList<
         element.reset()
       }
     })
-  }
-
-  /**
-   * Returns `true` if at least one of the form elements is dirty,
-   * or when elements array is modified (added, removed, or reordered).
-   */
-  public isDirty(scope: Scope): boolean
-  public isDirty<TResult>(
-    scope: Scope,
-    select: (
-      concise: ImpulseFormListFlagSchema<TElement>,
-      verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
-    ) => TResult,
-  ): TResult
-  public isDirty<TResult>(
-    scope: Scope,
-    select: (
-      concise: ImpulseFormListFlagSchema<TElement>,
-      verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
-    ) => TResult = isTruthy as unknown as typeof select,
-  ): TResult {
-    const initialElements = this._initialElements.getValue(scope)
-    const elements = this._elements.getValue(scope)
-
-    const [concise, verbose] = zipMap(
-      //
-      this._elements.getValue(scope),
-      (form) => form.isDirty(scope, params),
-    ) as [
-      Exclude<ImpulseFormListFlagSchema<TElement>, boolean>,
-      ImpulseFormListFlagSchemaVerbose<TElement>,
-    ]
-
-    // TODO NOW it should be just isDirty check
-    const areElementEqual = arrayEqualsBy(
-      elements,
-      initialElements,
-      (original, initial) => {
-        return ImpulseForm._isDirtyAgainst(scope, original, initial)
-      },
-    )
-
-    if (!areElementEqual) {
-      return select(true, verbose)
-    }
-
-    if (concise.every(isFalse)) {
-      return select(false, verbose)
-    }
-
-    if (concise.every(isTrue)) {
-      return select(true, verbose)
-    }
-
-    return select(concise, verbose)
   }
 
   public getValue(scope: Scope): null | ImpulseFormListValueSchema<TElement>

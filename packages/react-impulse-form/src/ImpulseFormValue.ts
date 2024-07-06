@@ -258,17 +258,17 @@ export class ImpulseFormValue<
     this._validated.setValue(isValidated)
   }
 
-  protected _isDirtyAgainst(
+  protected _isDirty<TResult>(
     scope: Scope,
     initial: ImpulseFormValue<TOriginalValue, TValue>,
-  ): boolean {
+    select: (concise: boolean, verbose: boolean) => TResult,
+  ): TResult {
+    const initialValue = initial.getInitialValue(scope)
+    const originalValue = this.getOriginalValue(scope)
     const compare = this._isOriginalValueEqual.getValue(scope)
+    const dirty = !compare(initialValue, originalValue, scope)
 
-    return compare(
-      this.getOriginalValue(scope),
-      initial.getInitialValue(scope),
-      scope,
-    )
+    return select(dirty, dirty)
   }
 
   public getErrors(scope: Scope): null | ReadonlyArray<string>
@@ -397,26 +397,6 @@ export class ImpulseFormValue<
       this._touched.setValue(false)
       this._errors.setValue([])
     })
-  }
-
-  public isDirty(scope: Scope): boolean
-  public isDirty<TResult>(
-    scope: Scope,
-    select: (concise: boolean, verbose: boolean) => TResult,
-  ): TResult
-  public isDirty<TResult = boolean>(
-    scope: Scope,
-    select: (
-      concise: boolean,
-      verbose: boolean,
-    ) => TResult = identity as typeof select,
-  ): TResult {
-    const initialValue = this.getInitialValue(scope)
-    const originalValue = this.getOriginalValue(scope)
-    const compare = this._isOriginalValueEqual.getValue(scope)
-    const dirty = !compare(initialValue, originalValue, scope)
-
-    return select(dirty, dirty)
   }
 
   public setCompare(setter: Setter<Compare<TOriginalValue>>): void {

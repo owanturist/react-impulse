@@ -53,13 +53,13 @@ params._second = <T>(_: unknown, second: T): T => second
 
 export function zipMap<TElement, TLeft, TRight>(
   elements: ReadonlyArray<TElement>,
-  fn: (el: TElement) => [TLeft, TRight],
+  fn: (el: TElement, index: number) => [TLeft, TRight],
 ): [ReadonlyArray<TLeft>, ReadonlyArray<TRight>] {
   const left = new Array<TLeft>(elements.length)
   const right = new Array<TRight>(elements.length)
 
   for (const [index, element] of elements.entries()) {
-    const [leftItem, rightItem] = fn(element)
+    const [leftItem, rightItem] = fn(element, index)
 
     left[index] = leftItem
     right[index] = rightItem
@@ -84,10 +84,9 @@ export function uniq<T>(values: ReadonlyArray<T>): ReadonlyArray<T> {
   return result.length === values.length ? values : result
 }
 
-export function arrayEqualsBy<T>(
+export function shallowArrayEquals<T>(
   left: ReadonlyArray<T>,
   right: ReadonlyArray<T>,
-  fn: (left: T, right: T) => boolean,
 ): boolean {
   if (eq(left, right)) {
     return true
@@ -97,49 +96,7 @@ export function arrayEqualsBy<T>(
     return false
   }
 
-  return left.every((value, index) => fn(value, right[index]!))
-}
-
-export function shallowArrayEquals<T>(
-  left: ReadonlyArray<T>,
-  right: ReadonlyArray<T>,
-): boolean {
-  return arrayEqualsBy(left, right, eq)
-}
-
-export function shallowArraySame<T>(
-  left: ReadonlyArray<T>,
-  right: ReadonlyArray<T>,
-): boolean {
-  if (left.length !== right.length) {
-    return false
-  }
-
-  const counts = new Map<T, number>()
-
-  for (const el of left) {
-    const count = counts.get(el) ?? 0
-
-    counts.set(el, count + 1)
-  }
-
-  for (const el of right) {
-    const count = counts.get(el)
-
-    if (count == null) {
-      return false
-    }
-
-    counts.set(el, count - 1)
-  }
-
-  for (const count of counts.values()) {
-    if (count > 0) {
-      return false
-    }
-  }
-
-  return true
+  return left.every((value, index) => eq(value, right[index]!))
 }
 
 export const useIsomorphicLayoutEffect =

@@ -820,7 +820,7 @@ describe("ImpulseFormList#isDirty()", () => {
 
     expect(form.isDirty(scope)).toBe(true)
     expect(form.isDirty(scope, arg(0))).toBe(true)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([false, false, false])
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([true, true, true])
   })
 
   it("returns false if two comparably equal clean elements are swapped", ({
@@ -888,6 +888,27 @@ describe("ImpulseFormList#isDirty()", () => {
     ])
   })
 
+  it("returns verbose for dirty elements with a new clean element", ({
+    scope,
+  }) => {
+    const form = setup([
+      setupElement(0),
+      setupElement(1, { initialValue: 2 }),
+      setupElement(2),
+    ])
+
+    form.setElements((elements) => [...elements, setupElement(3)])
+
+    expect(form.isDirty(scope)).toBe(true)
+    expect(form.isDirty(scope, arg(0))).toBe(true)
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+      false,
+      true,
+      false,
+      false,
+    ])
+  })
+
   it("returns true for list without an element", ({ scope }) => {
     const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 
@@ -896,6 +917,20 @@ describe("ImpulseFormList#isDirty()", () => {
     expect(form.isDirty(scope)).toBe(true)
     expect(form.isDirty(scope, arg(0))).toBe(true)
     expect(form.isDirty(scope, arg(1))).toStrictEqual([false, false])
+  })
+
+  it("returns verbose for dirty elements without an element", ({ scope }) => {
+    const form = setup([
+      setupElement(0),
+      setupElement(1, { initialValue: 2 }),
+      setupElement(2),
+    ])
+
+    form.setElements((elements) => elements.slice(0, 2))
+
+    expect(form.isDirty(scope)).toBe(true)
+    expect(form.isDirty(scope, arg(0))).toBe(true)
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([false, true])
   })
 
   describe("after reset", () => {
