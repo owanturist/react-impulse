@@ -24,7 +24,8 @@ import {
 } from "./ImpulseForm"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./ValidateStrategy"
 
-export type ImpulseFormShapeFields = Types.Object.Record<string | number>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ImpulseFormShapeFields = Record<string | number, any>
 
 type ImpulseFormShapeParam<
   TFields extends ImpulseFormShapeFields,
