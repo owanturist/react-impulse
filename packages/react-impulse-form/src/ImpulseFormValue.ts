@@ -10,13 +10,7 @@ import {
   isDefined,
   untrack,
 } from "./dependencies"
-import {
-  type Setter,
-  shallowArrayEquals,
-  eq,
-  resolveSetter,
-  type Maybe,
-} from "./utils"
+import { type Setter, shallowArrayEquals, eq, resolveSetter } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormSchema, Result } from "./ImpulseFormSchema"
 import {
@@ -112,21 +106,15 @@ export class ImpulseFormValue<
   public static of<TOriginalValue, TValue = TOriginalValue>(
     originalValue: TOriginalValue,
     {
-      schema,
       errors,
       touched = false,
+      schema,
       isOriginalValueEqual = eq,
-      initialValue: initialValueFromOptions,
+      initialValue = originalValue,
       validateOn = VALIDATE_ON_TOUCH,
     }: ImpulseFormValueOptions<TOriginalValue, TValue> = {},
   ): ImpulseFormValue<TOriginalValue, TValue> {
     const isOriginalValueEqualImpulse = Impulse.of(isOriginalValueEqual)
-    const initialValue: Maybe<TOriginalValue> = isDefined.strict(
-      initialValueFromOptions,
-    )
-      ? { _value: initialValueFromOptions }
-      : undefined
-
     const isOriginalValueEqualStable: Compare<TOriginalValue> = (
       left,
       right,
@@ -137,23 +125,9 @@ export class ImpulseFormValue<
       return compare(left, right, scope)
     }
 
-    const isInitialValueEqualStable: Compare<
-      undefined | Maybe<TOriginalValue>
-    > = (left, right, scope) => {
-      if (!isDefined.strict(left) || !isDefined.strict(right)) {
-        // true only when both are undefined
-        return left === right
-      }
-
-      return isOriginalValueEqualStable(left._value, right._value, scope)
-    }
-
     const initialOriginalValue = untrack((scope) => {
-      if (
-        isDefined.strict(initialValue) &&
-        isOriginalValueEqualStable(initialValue._value, originalValue, scope)
-      ) {
-        return initialValue._value
+      if (isOriginalValueEqual(initialValue, originalValue, scope)) {
+        return initialValue
       }
 
       return originalValue
@@ -164,8 +138,7 @@ export class ImpulseFormValue<
       Impulse.of(touched),
       Impulse.of(validateOn),
       Impulse.of(errors ?? [], { compare: shallowArrayEquals }),
-      initialOriginalValue,
-      Impulse.of(initialValue, { compare: isInitialValueEqualStable }),
+      Impulse.of(initialValue, { compare: isOriginalValueEqualStable }),
       Impulse.of(initialOriginalValue, { compare: isOriginalValueEqualStable }),
       Impulse.of(schema),
       isOriginalValueEqualImpulse,
@@ -182,8 +155,7 @@ export class ImpulseFormValue<
     // TODO convert to undefined | ValidateStrategy so it can inherit from parent (List)
     private readonly _validateOn: Impulse<ValidateStrategy>,
     private readonly _errors: Impulse<ReadonlyArray<string>>,
-    private readonly _initialValue: TOriginalValue,
-    private readonly _resetValue: Impulse<Maybe<TOriginalValue>>,
+    private readonly _initialValue: Impulse<TOriginalValue>,
     private readonly _originalValue: Impulse<TOriginalValue>,
     private readonly _schema: Impulse<
       undefined | ImpulseFormSchema<TValue, TOriginalValue>
@@ -275,8 +247,7 @@ export class ImpulseFormValue<
       this._touched.clone(),
       this._validateOn.clone(),
       this._errors.clone(),
-      this._initialValue,
-      this._resetValue.clone(),
+      this._initialValue.clone(),
       this._originalValue.clone(),
       this._schema.clone(),
       this._isOriginalValueEqual.clone(),
@@ -415,7 +386,7 @@ export class ImpulseFormValue<
     batch((scope) => {
       const resetValue = resolveSetter(
         resetter,
-        this.getInitialValue(scope),
+        this._initialValue.getValue(scope),
         this._originalValue.getValue(scope),
       )
 
@@ -462,7 +433,11 @@ export class ImpulseFormValue<
       const originalValue = this._originalValue.getValue(scope)
 
       this._originalValue.setValue(
-        resolveSetter(setter, originalValue, this.getInitialValue(scope)),
+        resolveSetter(
+          setter,
+          originalValue,
+          this._initialValue.getValue(scope),
+        ),
       )
 
       if (originalValue !== this._originalValue.getValue(scope)) {
@@ -472,11 +447,7 @@ export class ImpulseFormValue<
   }
 
   public getInitialValue(scope: Scope): TOriginalValue {
-    return this._resetValue.getValue(scope, (resetValue) => {
-      return isDefined.strict(resetValue)
-        ? resetValue._value
-        : this._initialValue
-    })
+    return this._initialValue.getValue(scope)
   }
 
   // TODO add tests against originalValue coming as second argument
@@ -484,17 +455,17 @@ export class ImpulseFormValue<
     setter: ImpulseFormValueOriginalValueSetter<TOriginalValue>,
   ): void {
     batch((scope) => {
-      const initialValue = this.getInitialValue(scope)
+      const initialValue = this._initialValue.getValue(scope)
 
-      this._resetValue.setValue({
-        _value: resolveSetter(
+      this._initialValue.setValue(
+        resolveSetter(
           setter,
           initialValue,
           this._originalValue.getValue(scope),
         ),
-      })
+      )
 
-      if (initialValue !== this._resetValue.getValue(scope)) {
+      if (initialValue !== this._initialValue.getValue(scope)) {
         this._updateValidated()
       }
     })
