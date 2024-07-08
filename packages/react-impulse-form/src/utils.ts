@@ -10,6 +10,8 @@ export type Setter<
   TPrevValues extends ReadonlyArray<unknown> = [TValue],
 > = TValue | Func<TPrevValues, TValue>
 
+export type Maybe<TValue> = undefined | { _value: TValue }
+
 // TODO use everywhere
 export function resolveSetter<
   TValue,
