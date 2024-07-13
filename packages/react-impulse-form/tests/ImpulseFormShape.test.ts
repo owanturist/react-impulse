@@ -640,6 +640,38 @@ describe("ImpulseFormShape.of()", () => {
         fourth: ["anything"],
       })
     })
+
+    it("does not override the initial value", ({ scope }) => {
+      const shape = ImpulseFormShape.of(
+        {
+          first: ImpulseFormValue.of(""),
+          second: ImpulseFormValue.of(0),
+          third: ImpulseFormShape.of({
+            one: ImpulseFormValue.of(true),
+            two: ImpulseFormValue.of([""]),
+          }),
+          fourth: ["anything"],
+        },
+        {
+          originalValue: {
+            first: "1",
+            third: {
+              one: false,
+            },
+          },
+        },
+      )
+
+      expect(shape.getInitialValue(scope)).toStrictEqual({
+        first: "",
+        second: 0,
+        third: {
+          one: true,
+          two: [""],
+        },
+        fourth: ["anything"],
+      })
+    })
   })
 
   it("follows the options type", () => {

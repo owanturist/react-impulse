@@ -144,6 +144,20 @@ describe("ImpulseFormValue.of()", () => {
     expect(value.getInitialValue(scope)).toBe("1")
   })
 
+  it("assigns initialValue to originalValue by default", ({ scope }) => {
+    const value = ImpulseFormValue.of("1")
+
+    expect(value.getOriginalValue(scope)).toBe("1")
+    expect(value.getInitialValue(scope)).toBe("1")
+  })
+
+  it("assigns custom initialValue", ({ scope }) => {
+    const value = ImpulseFormValue.of("1", { initialValue: "2" })
+
+    expect(value.getOriginalValue(scope)).toBe("1")
+    expect(value.getInitialValue(scope)).toBe("2")
+  })
+
   it("returns initialValue if it is equals to originalValue with custom isOriginalValueEqual", ({
     scope,
   }) => {

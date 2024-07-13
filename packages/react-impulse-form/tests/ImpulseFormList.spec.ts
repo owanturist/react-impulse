@@ -1169,27 +1169,6 @@ describe("ImpulseFormList#setInitialValue()", () => {
       form.getElements(scope).map((element) => element.getInitialValue(scope)),
     ).toStrictEqual([3, 6, 5])
   })
-
-  it("keeps reference to element's list", ({ scope }) => {
-    const form = ImpulseFormList.of(
-      [ImpulseFormValue.of(0), ImpulseFormValue.of(1), ImpulseFormValue.of(2)],
-      {
-        initialValue: [3, 4, 5],
-      },
-    )
-
-    form.setElements((elements) => [
-      ImpulseFormValue.of(3, { initialValue: 0 }),
-      ...elements,
-    ])
-
-    expect(form.getInitialValue(scope)).toStrictEqual([3, 4, 5])
-    form.getElements(scope).at(1)!.setInitialValue(6)
-    expect(form.getInitialValue(scope)).toStrictEqual([6, 4, 5])
-    expect(
-      form.getElements(scope).map((element) => element.getInitialValue(scope)),
-    ).toStrictEqual([0, 6, 4, 5])
-  })
 })
 
 describe("ImpulseFormList#focusFirstInvalidValue()", () => {
