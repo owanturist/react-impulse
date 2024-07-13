@@ -1,4 +1,3 @@
-// TODO do not use zod types here
 import type { Schema, ZodPipeline, ZodTypeDef } from "zod"
 
 export type ImpulseFormSchema<TOutput, TInput = TOutput> =

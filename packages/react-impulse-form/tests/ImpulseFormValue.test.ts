@@ -144,6 +144,20 @@ describe("ImpulseFormValue.of()", () => {
     expect(value.getInitialValue(scope)).toBe("1")
   })
 
+  it("assigns initialValue to originalValue by default", ({ scope }) => {
+    const value = ImpulseFormValue.of("1")
+
+    expect(value.getOriginalValue(scope)).toBe("1")
+    expect(value.getInitialValue(scope)).toBe("1")
+  })
+
+  it("assigns custom initialValue", ({ scope }) => {
+    const value = ImpulseFormValue.of("1", { initialValue: "2" })
+
+    expect(value.getOriginalValue(scope)).toBe("1")
+    expect(value.getInitialValue(scope)).toBe("2")
+  })
+
   it("returns initialValue if it is equals to originalValue with custom isOriginalValueEqual", ({
     scope,
   }) => {
@@ -327,7 +341,7 @@ describe("ImpulseFormValue#setOriginalValue()", () => {
 
     expectTypeOf(value.setOriginalValue)
       .parameter(0)
-      .toEqualTypeOf<Setter<string>>()
+      .toEqualTypeOf<Setter<string, [string, string]>>()
   })
 })
 
@@ -346,7 +360,7 @@ describe("ImpulseFormValue#setInitialValue()", () => {
 
     expectTypeOf(value.setInitialValue)
       .parameter(0)
-      .toEqualTypeOf<Setter<string>>()
+      .toEqualTypeOf<Setter<string, [string, string]>>()
   })
 })
 
@@ -464,5 +478,15 @@ describe("ImpulseFormValue#reset()", () => {
 
     value.reset()
     expect(value.getErrors(scope)).toBeNull()
+  })
+
+  it("resets isValidated", ({ scope }) => {
+    const value = ImpulseFormValue.of("2", { initialValue: "1" })
+
+    value.setTouched(true)
+    expect(value.isValidated(scope)).toBe(true)
+
+    value.reset()
+    expect(value.isValidated(scope)).toBe(false)
   })
 })
