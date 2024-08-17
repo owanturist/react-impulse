@@ -33,7 +33,7 @@
     "react-impulse": "^2.0.2"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/jest-dom": "^6.4.8",
     "@testing-library/react": "^16.0.0",
     "@types/react": "^18.3.3",
     "react": "^18.3.1",
