@@ -828,7 +828,7 @@ describe("after ImpulseFormList#setInitialValue()", () => {
     ).toStrictEqual([false, false, false, false])
   })
 
-  it.skip("returns false when initial elements are extended by the new elements' initial values", ({
+  it("returns false when initial elements are extended by the new elements' initial values", ({
     scope,
   }) => {
     const form = setup([
@@ -853,10 +853,13 @@ describe("after ImpulseFormList#setInitialValue()", () => {
         initialValue: { first: 3, second: "3" },
       }),
     ])
-    form.setInitialValue((initialValues) => [
-      { first: 0, second: "0" },
-      ...initialValues,
+
+    form.setInitialValue(([zero, two, ...rest]) => [
+      zero,
+      { first: 1, second: "1" },
+      two,
       { first: 3, second: "3" },
+      ...rest,
     ])
 
     expect(form.isDirty(scope)).toBe(false)

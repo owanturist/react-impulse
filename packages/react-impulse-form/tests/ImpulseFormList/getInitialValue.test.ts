@@ -118,7 +118,7 @@ describe("adding a new element to the list's beginning", () => {
     ])
   })
 
-  it.skip("overrides initial value for a list by a new element", ({
+  it.only("overrides initial value for a list by a new element", ({
     scope,
   }) => {
     const form = setup([
@@ -159,7 +159,7 @@ describe("adding a new element to the list's beginning", () => {
     ])
   })
 
-  it.skip("updates list's initial value from an element's setInitialValue", ({
+  it("updates list's initial value from an element's setInitialValue", ({
     scope,
   }) => {
     const form = setup([

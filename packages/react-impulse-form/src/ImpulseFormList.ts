@@ -226,9 +226,7 @@ export class ImpulseFormList<
     super(root)
 
     _elements.setValue((elements) => {
-      return elements.map((element) =>
-        ImpulseForm._childOf(this, element, null),
-      )
+      return elements.map((element) => ImpulseForm._childOf(this, element))
     })
 
     this._initialElements = _initialElements ?? _elements.clone()
@@ -256,15 +254,18 @@ export class ImpulseFormList<
     return null
   }
 
-  protected _childOf(
-    parent: null | ImpulseForm,
-    initial,
-  ): ImpulseFormList<TElement> {
+  protected _childOf(parent: null | ImpulseForm): ImpulseFormList<TElement> {
     return new ImpulseFormList(
       parent,
       this._elements.clone(),
       this._initialElements.clone(),
     )
+  }
+
+  protected _assignInitial(
+    initial: ImpulseFormList<TElement>,
+  ): ImpulseFormList<TElement> {
+    return this
   }
 
   protected _setValidated(isValidated: boolean): void {
@@ -338,12 +339,18 @@ export class ImpulseFormList<
       const initialElements = this._initialElements.getValue(scope)
 
       return resolveSetter(setter, elements, scope).map((element, index) => {
-        return ImpulseForm._childOf(
-          this,
-          element,
-          initialElements.at(index) ?? null,
-        )
+        const child = ImpulseForm._childOf(this, element)
+        const initial = initialElements.at(index)
+
+        if (initial == null) {
+          return child
+        }
+
+        return ImpulseForm._assignInitial(child, initial)
       })
+      // .map((element) => {
+      //   return ImpulseForm._childOf(this, element)
+      // })
     })
   }
 
