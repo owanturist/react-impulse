@@ -118,9 +118,7 @@ describe("adding a new element to the list's beginning", () => {
     ])
   })
 
-  it.skip("overrides initial value for a list by a new element", ({
-    scope,
-  }) => {
+  it("overrides initial value for a list by a new element", ({ scope }) => {
     const form = setup([
       setupElement({
         originalValue: { first: 1, second: "1" },
@@ -159,7 +157,7 @@ describe("adding a new element to the list's beginning", () => {
     ])
   })
 
-  it.skip("updates list's initial value from an element's setInitialValue", ({
+  it("updates list's initial value from an element's setInitialValue", ({
     scope,
   }) => {
     const form = setup([
@@ -187,8 +185,8 @@ describe("adding a new element to the list's beginning", () => {
     expect(
       form.getElements(scope).map((element) => element.getInitialValue(scope)),
     ).toStrictEqual([
-      { first: 0, second: "" },
       { first: 1, second: "1" },
+      { first: 2, second: "2" },
       { first: 2, second: "2" },
     ])
 
@@ -201,7 +199,7 @@ describe("adding a new element to the list's beginning", () => {
     expect(
       form.getElements(scope).map((element) => element.getInitialValue(scope)),
     ).toStrictEqual([
-      { first: 0, second: "" },
+      { first: 1, second: "1" },
       { first: 3, second: "3" },
       { first: 2, second: "2" },
     ])

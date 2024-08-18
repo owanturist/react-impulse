@@ -189,7 +189,7 @@ export class ImpulseFormShape<
 
     for (const [key, field] of Object.entries(fields)) {
       acc[key as keyof TFields] = ImpulseForm.isImpulseForm(field)
-        ? (ImpulseForm._childOf(this, field, null) as TFields[keyof TFields])
+        ? (ImpulseForm._childOf(this, field) as TFields[keyof TFields])
         : (field as TFields[keyof TFields])
     }
 
@@ -240,15 +240,23 @@ export class ImpulseFormShape<
     return null
   }
 
-  protected _childOf(
-    parent: null | ImpulseForm,
-    initial: null | ImpulseFormShape<TFields>,
-  ): ImpulseFormShape<TFields> {
-    const fields = this._mapFormFields((form, key) =>
-      ImpulseForm._childOf(this, form, initial?.fields[key] ?? null),
+  protected _childOf(parent: null | ImpulseForm): ImpulseFormShape<TFields> {
+    const fields = this._mapFormFields((form) =>
+      ImpulseForm._childOf(this, form),
     )
 
-    return new ImpulseFormShape(parent, fields)
+    return new ImpulseFormShape(parent, fields as TFields[keyof TFields])
+  }
+
+  protected _setInitial(
+    initial: undefined | ImpulseFormShape<TFields>,
+    isRoot: boolean,
+  ): void {
+    for (const [key, field] of Object.entries(this.fields)) {
+      if (ImpulseForm.isImpulseForm(field)) {
+        ImpulseForm._setInitial(field, initial?.fields[key], isRoot)
+      }
+    }
   }
 
   protected _setValidated(isValidated: boolean): void {

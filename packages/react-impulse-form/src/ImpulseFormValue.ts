@@ -139,9 +139,11 @@ export class ImpulseFormValue<
 
     return new ImpulseFormValue(
       null,
+      Impulse.of(),
       Impulse.of(touched),
       Impulse.of(validateOn),
       Impulse.of(errors ?? [], { compare: shallowArrayEquals }),
+      Impulse.of(isDefined.strict(initialValue)),
       Impulse.of(_initialValue, { compare: isOriginalValueEqualStable }),
       Impulse.of(initialOriginalValue, { compare: isOriginalValueEqualStable }),
       Impulse.of(schema),
@@ -155,10 +157,14 @@ export class ImpulseFormValue<
 
   protected constructor(
     root: null | ImpulseForm,
+    private readonly _initial: Impulse<
+      undefined | ImpulseFormValue<TOriginalValue, TValue>
+    >,
     private readonly _touched: Impulse<boolean>,
     // TODO convert to undefined | ValidateStrategy so it can inherit from parent (List)
     private readonly _validateOn: Impulse<ValidateStrategy>,
     private readonly _errors: Impulse<ReadonlyArray<string>>,
+    private readonly _isExplicitInitialValue: Impulse<boolean>,
     private readonly _initialValue: Impulse<TOriginalValue>,
     private readonly _originalValue: Impulse<TOriginalValue>,
     private readonly _schema: Impulse<
@@ -245,18 +251,36 @@ export class ImpulseFormValue<
   // TODO add tests against _validated when cloning
   protected _childOf(
     parent: null | ImpulseForm,
-    initial: null | ImpulseFormValue<TOriginalValue, TValue>,
   ): ImpulseFormValue<TOriginalValue, TValue> {
     return new ImpulseFormValue(
       parent,
+      this._initial.clone(),
       this._touched.clone(),
       this._validateOn.clone(),
       this._errors.clone(),
-      initial?._initialValue ?? this._initialValue.clone(),
+      this._isExplicitInitialValue.clone(),
+      this._initialValue.clone(),
       this._originalValue.clone(),
       this._schema.clone(),
       this._isOriginalValueEqual.clone(),
     )
+  }
+
+  protected _setInitial(
+    initial: undefined | ImpulseFormValue<TOriginalValue, TValue>,
+    isRoot: boolean,
+  ): void {
+    batch((scope) => {
+      this._initial.setValue(initial)
+
+      if (
+        initial != null &&
+        isRoot &&
+        this._isExplicitInitialValue.getValue(scope)
+      ) {
+        initial.setInitialValue(this._initialValue.getValue(scope))
+      }
+    })
   }
 
   protected _setValidated(isValidated: boolean): void {
@@ -391,7 +415,7 @@ export class ImpulseFormValue<
     batch((scope) => {
       const resetValue = resolveSetter(
         resetter,
-        this._initialValue.getValue(scope),
+        this.getInitialValue(scope),
         this._originalValue.getValue(scope),
       )
 
@@ -438,11 +462,7 @@ export class ImpulseFormValue<
       const originalValue = this._originalValue.getValue(scope)
 
       this._originalValue.setValue(
-        resolveSetter(
-          setter,
-          originalValue,
-          this._initialValue.getValue(scope),
-        ),
+        resolveSetter(setter, originalValue, this.getInitialValue(scope)),
       )
 
       if (originalValue !== this._originalValue.getValue(scope)) {
@@ -452,7 +472,9 @@ export class ImpulseFormValue<
   }
 
   public getInitialValue(scope: Scope): TOriginalValue {
-    return this._initialValue.getValue(scope)
+    const form = this._initial.getValue(scope) ?? this
+
+    return form._initialValue.getValue(scope)
   }
 
   // TODO add tests against originalValue coming as second argument
@@ -460,7 +482,7 @@ export class ImpulseFormValue<
     setter: ImpulseFormValueOriginalValueSetter<TOriginalValue>,
   ): void {
     batch((scope) => {
-      const initialValue = this._initialValue.getValue(scope)
+      const initialValue = this.getInitialValue(scope)
 
       this._initialValue.setValue(
         resolveSetter(
@@ -470,8 +492,11 @@ export class ImpulseFormValue<
         ),
       )
 
+      this._isExplicitInitialValue.setValue(true)
+
       if (initialValue !== this._initialValue.getValue(scope)) {
         this._updateValidated()
+        this._initial.getValue(scope)?.setInitialValue(setter)
       }
     })
   }
