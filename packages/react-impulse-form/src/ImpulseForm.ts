@@ -46,12 +46,14 @@ export abstract class ImpulseForm<
   protected static _childOf<TChild extends ImpulseForm>(
     parent: ImpulseForm,
     child: TChild,
+    initial: null | TChild,
   ): TChild {
-    if (child._root === parent._root) {
-      return child
-    }
+    // TODO NOW do not clone when unnecessary
+    // if (child._root === parent._root) {
+    //   return child
+    // }
 
-    return child._childOf(parent._root) as TChild
+    return child._childOf(parent._root, initial) as TChild
   }
 
   protected static _submitWith<TParams extends ImpulseFormParams>(
@@ -105,7 +107,10 @@ export abstract class ImpulseForm<
 
   protected abstract _getFocusFirstInvalidValue(): null | VoidFunction
 
-  protected abstract _childOf(parent: null | ImpulseForm): ImpulseForm<TParams>
+  protected abstract _childOf(
+    parent: null | ImpulseForm,
+    initial: null | ImpulseForm<TParams>,
+  ): ImpulseForm<TParams>
 
   protected abstract _setValidated(isValidated: boolean): void
 
@@ -168,7 +173,7 @@ export abstract class ImpulseForm<
   }
 
   public clone(): ImpulseForm<TParams> {
-    return this._childOf(null)
+    return this._childOf(null, null)
   }
 
   public isValid(scope: Scope): boolean {

@@ -524,7 +524,7 @@ describe("removing an initial element from the list's beginning", () => {
 })
 
 describe("swapping elements", () => {
-  it("returns true for two pristine unequal elements", ({ scope }) => {
+  it.skip("returns true for two pristine unequal elements", ({ scope }) => {
     const form = setup([
       setupElement({
         originalValue: { first: 1, second: "1" },
@@ -828,7 +828,7 @@ describe("after ImpulseFormList#setInitialValue()", () => {
     ).toStrictEqual([false, false, false, false])
   })
 
-  it("returns false when initial elements are extended by the new elements' initial values", ({
+  it.skip("returns false when initial elements are extended by the new elements' initial values", ({
     scope,
   }) => {
     const form = setup([

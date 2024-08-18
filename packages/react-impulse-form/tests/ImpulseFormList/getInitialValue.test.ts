@@ -69,7 +69,7 @@ it("updates list's initial value from an element's setInitialValue", ({
 })
 
 describe("adding a new element to the list's beginning", () => {
-  it.skip("keeps initial values for an initial element", ({ scope }) => {
+  it("keeps initial values for an initial element", ({ scope }) => {
     const form = setup([
       setupElement({
         originalValue: { first: 1, second: "1" },
@@ -81,7 +81,6 @@ describe("adding a new element to the list's beginning", () => {
 
     expect(form.getInitialValue(scope)).toStrictEqual([
       { first: 1, second: "1" },
-      { first: 1, second: "1" },
     ])
 
     expect(
@@ -92,9 +91,7 @@ describe("adding a new element to the list's beginning", () => {
     ])
   })
 
-  it.skip("inherits initial value for a new element by default", ({
-    scope,
-  }) => {
+  it("inherits initial value for a new element by default", ({ scope }) => {
     const form = setup([
       setupElement({
         originalValue: { first: 1, second: "1" },
@@ -110,7 +107,6 @@ describe("adding a new element to the list's beginning", () => {
     ])
 
     expect(form.getInitialValue(scope)).toStrictEqual([
-      { first: 1, second: "1" },
       { first: 1, second: "1" },
     ])
 
@@ -130,26 +126,36 @@ describe("adding a new element to the list's beginning", () => {
         originalValue: { first: 1, second: "1" },
         initialValue: { first: 1, second: "1" },
       }),
+      setupElement({
+        originalValue: { first: 2, second: "2" },
+        initialValue: { first: 2, second: "2" },
+      }),
     ])
 
     form.setElements((elements) => [
       setupElement({
         originalValue: { first: 0, second: "0" },
-        initialValue: { first: 2, second: "2" },
+        initialValue: { first: 10, second: "10" },
+      }),
+      ImpulseFormShape.of({
+        first: ImpulseFormValue.of(0, { initialValue: 20 }),
+        second: ImpulseFormValue.of("", { initialValue: "20" }),
       }),
       ...elements,
     ])
 
     expect(form.getInitialValue(scope)).toStrictEqual([
-      { first: 2, second: "2" },
-      { first: 1, second: "1" },
+      { first: 10, second: "10" },
+      { first: 20, second: "20" },
     ])
 
     expect(
       form.getElements(scope).map((element) => element.getInitialValue(scope)),
     ).toStrictEqual([
-      { first: 2, second: "2" },
+      { first: 10, second: "10" },
+      { first: 20, second: "20" },
       { first: 1, second: "1" },
+      { first: 2, second: "2" },
     ])
   })
 

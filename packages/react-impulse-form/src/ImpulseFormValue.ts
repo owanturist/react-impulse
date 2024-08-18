@@ -110,10 +110,14 @@ export class ImpulseFormValue<
       touched = false,
       schema,
       isOriginalValueEqual = eq,
-      initialValue = originalValue,
+      initialValue,
       validateOn = VALIDATE_ON_TOUCH,
     }: ImpulseFormValueOptions<TOriginalValue, TValue> = {},
   ): ImpulseFormValue<TOriginalValue, TValue> {
+    const _initialValue = isDefined.strict(initialValue)
+      ? initialValue
+      : originalValue
+
     const isOriginalValueEqualImpulse = Impulse.of(isOriginalValueEqual)
     const isOriginalValueEqualStable: Compare<TOriginalValue> = (
       left,
@@ -126,8 +130,8 @@ export class ImpulseFormValue<
     }
 
     const initialOriginalValue = untrack((scope) => {
-      if (isOriginalValueEqual(initialValue, originalValue, scope)) {
-        return initialValue
+      if (isOriginalValueEqual(_initialValue, originalValue, scope)) {
+        return _initialValue
       }
 
       return originalValue
@@ -138,7 +142,7 @@ export class ImpulseFormValue<
       Impulse.of(touched),
       Impulse.of(validateOn),
       Impulse.of(errors ?? [], { compare: shallowArrayEquals }),
-      Impulse.of(initialValue, { compare: isOriginalValueEqualStable }),
+      Impulse.of(_initialValue, { compare: isOriginalValueEqualStable }),
       Impulse.of(initialOriginalValue, { compare: isOriginalValueEqualStable }),
       Impulse.of(schema),
       isOriginalValueEqualImpulse,
@@ -241,13 +245,14 @@ export class ImpulseFormValue<
   // TODO add tests against _validated when cloning
   protected _childOf(
     parent: null | ImpulseForm,
+    initial: null | ImpulseFormValue<TOriginalValue, TValue>,
   ): ImpulseFormValue<TOriginalValue, TValue> {
     return new ImpulseFormValue(
       parent,
       this._touched.clone(),
       this._validateOn.clone(),
       this._errors.clone(),
-      this._initialValue.clone(),
+      initial?._initialValue ?? this._initialValue.clone(),
       this._originalValue.clone(),
       this._schema.clone(),
       this._isOriginalValueEqual.clone(),
