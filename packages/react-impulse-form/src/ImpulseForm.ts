@@ -43,22 +43,17 @@ export abstract class ImpulseForm<
     return value instanceof ImpulseForm
   }
 
-  protected static _childOf<TForm extends ImpulseForm>(
+  protected static _childOf<TChild extends ImpulseForm>(
     parent: ImpulseForm,
-    form: TForm,
-  ): TForm {
-    if (form._root === parent._root) {
-      return form
-    }
+    child: TChild,
+    initial: null | TChild,
+  ): TChild {
+    // TODO NOW do not clone when unnecessary
+    // if (child._root === parent._root) {
+    //   return child
+    // }
 
-    return form._childOf(parent._root) as TForm
-  }
-
-  protected static _assignInitial<TForm extends ImpulseForm>(
-    form: TForm,
-    initial: TForm,
-  ): TForm {
-    return form._assignInitial(initial) as TForm
+    return child._childOf(parent._root, initial) as TChild
   }
 
   protected static _submitWith<TParams extends ImpulseFormParams>(
@@ -104,7 +99,7 @@ export abstract class ImpulseForm<
   private readonly _submitAttempts = Impulse.of(0)
   private readonly _submittingCount = Impulse.of(0)
 
-  protected readonly _root: ImpulseForm
+  private readonly _root: ImpulseForm
 
   protected constructor(_root: null | ImpulseForm) {
     this._root = _root ?? this
@@ -112,10 +107,9 @@ export abstract class ImpulseForm<
 
   protected abstract _getFocusFirstInvalidValue(): null | VoidFunction
 
-  protected abstract _childOf(parent: null | ImpulseForm): ImpulseForm<TParams>
-
-  protected abstract _assignInitial(
-    initial: ImpulseForm<TParams>,
+  protected abstract _childOf(
+    parent: null | ImpulseForm,
+    initial: null | ImpulseForm<TParams>,
   ): ImpulseForm<TParams>
 
   protected abstract _setValidated(isValidated: boolean): void
@@ -133,10 +127,6 @@ export abstract class ImpulseForm<
     value: TParams["value.schema"],
   ): ReadonlyArray<void | Promise<unknown>> {
     return this._onSubmit._emit(value)
-  }
-
-  protected _isRoot(): boolean {
-    return this._root === this
   }
 
   public getSubmitCount(scope: Scope): number {
@@ -183,7 +173,7 @@ export abstract class ImpulseForm<
   }
 
   public clone(): ImpulseForm<TParams> {
-    return this._childOf(null)
+    return this._childOf(null, null)
   }
 
   public isValid(scope: Scope): boolean {

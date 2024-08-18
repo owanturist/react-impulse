@@ -142,7 +142,6 @@ export class ImpulseFormValue<
       Impulse.of(touched),
       Impulse.of(validateOn),
       Impulse.of(errors ?? [], { compare: shallowArrayEquals }),
-      Impulse.of(isDefined.strict(initialValue)),
       Impulse.of(_initialValue, { compare: isOriginalValueEqualStable }),
       Impulse.of(initialOriginalValue, { compare: isOriginalValueEqualStable }),
       Impulse.of(schema),
@@ -160,7 +159,6 @@ export class ImpulseFormValue<
     // TODO convert to undefined | ValidateStrategy so it can inherit from parent (List)
     private readonly _validateOn: Impulse<ValidateStrategy>,
     private readonly _errors: Impulse<ReadonlyArray<string>>,
-    private readonly _isExplicitInitialValue: Impulse<boolean>,
     private readonly _initialValue: Impulse<TOriginalValue>,
     private readonly _originalValue: Impulse<TOriginalValue>,
     private readonly _schema: Impulse<
@@ -247,47 +245,17 @@ export class ImpulseFormValue<
   // TODO add tests against _validated when cloning
   protected _childOf(
     parent: null | ImpulseForm,
+    initial: null | ImpulseFormValue<TOriginalValue, TValue>,
   ): ImpulseFormValue<TOriginalValue, TValue> {
     return new ImpulseFormValue(
       parent,
       this._touched.clone(),
       this._validateOn.clone(),
       this._errors.clone(),
-      this._isExplicitInitialValue.clone(),
-      this._initialValue.clone(),
+      initial?._initialValue ?? this._initialValue.clone(),
       this._originalValue.clone(),
       this._schema.clone(),
       this._isOriginalValueEqual.clone(),
-    )
-  }
-
-  protected _assignInitial(
-    initial: ImpulseFormValue<TOriginalValue, TValue>,
-  ): ImpulseFormValue<TOriginalValue, TValue> {
-    const initialValue = untrack((scope) => {
-      if (this._isExplicitInitialValue.getValue(scope)) {
-        initial.setInitialValue(this._initialValue.getValue(scope))
-
-        return this._initialValue
-      }
-
-      return initial._initialValue
-    })
-
-    if (initialValue === this._initialValue) {
-      return this
-    }
-
-    return new ImpulseFormValue(
-      this._root,
-      this._touched,
-      this._validateOn,
-      this._errors,
-      this._isExplicitInitialValue,
-      initialValue,
-      this._originalValue,
-      this._schema,
-      this._isOriginalValueEqual,
     )
   }
 
@@ -501,8 +469,6 @@ export class ImpulseFormValue<
           this._originalValue.getValue(scope),
         ),
       )
-
-      this._isExplicitInitialValue.setValue(true)
 
       if (initialValue !== this._initialValue.getValue(scope)) {
         this._updateValidated()
