@@ -433,7 +433,7 @@ describe("adding a new element to the list's beginning", () => {
 })
 
 describe("removing an initial element from the list's end", () => {
-  it.skip("returns true for a pristine list", ({ scope }) => {
+  it("returns true for a pristine list", ({ scope }) => {
     const form = setup([
       setupElement({
         originalValue: { first: 1, second: "1" },
@@ -464,7 +464,7 @@ describe("removing an initial element from the list's end", () => {
     ).toStrictEqual([false, false])
   })
 
-  it.skip("returns true a dirty list", ({ scope }) => {
+  it("returns true a dirty list", ({ scope }) => {
     const form = setup([
       setupElement({
         originalValue: { first: 1, second: "1" },
@@ -483,7 +483,11 @@ describe("removing an initial element from the list's end", () => {
     form.setElements((elements) => elements.slice(0, 2))
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([false, true, true])
+    expect(form.isDirty(scope, arg(0))).toStrictEqual([
+      false,
+      { first: true, second: false },
+      true,
+    ])
     expect(form.isDirty(scope, arg(1))).toStrictEqual([
       { first: false, second: false },
       { first: true, second: false },
@@ -497,7 +501,7 @@ describe("removing an initial element from the list's end", () => {
 })
 
 describe("removing an initial element from the list's beginning", () => {
-  it.skip("returns true for a pristine list", ({ scope }) => {
+  it("returns true for a pristine list", ({ scope }) => {
     const form = setup([
       setupElement({
         originalValue: { first: 1, second: "1" },
@@ -516,19 +520,19 @@ describe("removing an initial element from the list's beginning", () => {
     form.setElements((elements) => elements.slice(1))
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([true, false, false])
+    expect(form.isDirty(scope, arg(0))).toBe(true)
     expect(form.isDirty(scope, arg(1))).toStrictEqual([
       { first: true, second: true },
-      { first: false, second: false },
-      { first: false, second: false },
+      { first: true, second: true },
+      { first: true, second: true },
     ])
 
     expect(
       form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false])
+    ).toStrictEqual([true, true])
   })
 
-  it.skip("returns true a dirty list", ({ scope }) => {
+  it("returns true for a dirty list", ({ scope }) => {
     const form = setup([
       setupElement({
         originalValue: { first: 1, second: "1" },
@@ -547,10 +551,41 @@ describe("removing an initial element from the list's beginning", () => {
     form.setElements((elements) => elements.slice(1))
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([true, false, true])
+    expect(form.isDirty(scope, arg(0))).toBe(true)
     expect(form.isDirty(scope, arg(1))).toStrictEqual([
       { first: true, second: true },
+      { first: true, second: true },
+      { first: true, second: true },
+    ])
+
+    expect(
+      form.getElements(scope).map((element) => element.isDirty(scope)),
+    ).toStrictEqual([true, true])
+  })
+
+  it("returns true for a deleting the same element", ({ scope }) => {
+    const form = setup([
+      setupElement({
+        originalValue: { first: 1, second: "1" },
+        initialValue: { first: 1, second: "1" },
+      }),
+      setupElement({
+        originalValue: { first: 1, second: "1" },
+        initialValue: { first: 1, second: "1" },
+      }),
+      setupElement({
+        originalValue: { first: 2, second: "2" },
+        initialValue: { first: 2, second: "2" },
+      }),
+    ])
+
+    form.setElements((elements) => elements.slice(1))
+
+    expect(form.isDirty(scope)).toBe(true)
+    expect(form.isDirty(scope, arg(0))).toStrictEqual([false, true, true])
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([
       { first: false, second: false },
+      { first: true, second: true },
       { first: true, second: true },
     ])
 
