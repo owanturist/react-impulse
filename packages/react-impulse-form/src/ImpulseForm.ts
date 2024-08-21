@@ -89,6 +89,7 @@ export abstract class ImpulseForm<
     select: (
       concise: TParams["flag.schema"],
       verbose: TParams["flag.schema.verbose"],
+      dirty: TParams["flag.schema.verbose"],
     ) => TResult,
   ): TResult {
     return original._isDirty(scope, initial, select)
@@ -128,6 +129,7 @@ export abstract class ImpulseForm<
     select: (
       concise: TParams["flag.schema"],
       verbose: TParams["flag.schema.verbose"],
+      dirty: TParams["flag.schema.verbose"],
     ) => TResult,
   ): TResult
 

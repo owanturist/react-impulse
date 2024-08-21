@@ -307,38 +307,40 @@ export class ImpulseFormList<
     select: (
       concise: ImpulseFormListFlagSchema<TElement>,
       verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
+      dirty: ImpulseFormListFlagSchemaVerbose<TElement>,
     ) => TResult,
   ): TResult {
     const elements = this._elements.getValue(scope)
     const initialElements = initial._initialElements.getValue(scope)
 
-    const [concise, verbose] = zipMap(elements, (form, index) => {
-      return ImpulseForm._isDirty(
-        scope,
-        form,
-        // the initial elements might be shorter than the current elements
-        initialElements.at(index) ?? form,
-        params,
-      )
+    const [concise, verbose, dirty] = zipMap(elements, (form, index) => {
+      if (index < initialElements.length) {
+        return ImpulseForm._isDirty(
+          scope,
+          form,
+          initialElements.at(index)!,
+          params,
+        )
+      }
+
+      const added = ImpulseForm._isDirty(scope, form, form, params._third)
+
+      return [true, added, added]
     }) as [
       Exclude<ImpulseFormListFlagSchema<TElement>, boolean>,
       ImpulseFormListFlagSchemaVerbose<TElement>,
+      ImpulseFormListFlagSchemaVerbose<TElement>,
     ]
 
-    // if the elements array size is modified - it is definitely dirty
-    if (elements.length !== initialElements.length) {
-      return select(true, verbose)
-    }
-
     if (concise.every(isFalse)) {
-      return select(false, verbose)
+      return select(false, verbose, dirty)
     }
 
     if (concise.every(isTrue)) {
-      return select(true, verbose)
+      return select(true, verbose, dirty)
     }
 
-    return select(concise, verbose)
+    return select(concise, verbose, dirty)
   }
 
   public getElements(scope: Scope): ReadonlyArray<TElement>

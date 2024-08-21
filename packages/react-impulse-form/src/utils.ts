@@ -49,23 +49,30 @@ export function params<TArgs extends ReadonlyArray<unknown>>(
   return args
 }
 
-params._second = <T>(_: unknown, second: T): T => second
+params._second = <T>(_first: unknown, second: T): T => second
+params._third = <T>(_first: unknown, _second: unknown, third: T): T => third
 
-export function zipMap<TElement, TLeft, TRight>(
+export function zipMap<TElement, T0, T1, T2>(
   elements: ReadonlyArray<TElement>,
-  fn: (el: TElement, index: number) => [TLeft, TRight],
-): [ReadonlyArray<TLeft>, ReadonlyArray<TRight>] {
-  const left = new Array<TLeft>(elements.length)
-  const right = new Array<TRight>(elements.length)
+  fn: (el: TElement, index: number) => [T0, T1, T2],
+): [ReadonlyArray<T0>, ReadonlyArray<T1>, ReadonlyArray<T2>]
+export function zipMap<TElement, T0, T1>(
+  elements: ReadonlyArray<TElement>,
+  fn: (el: TElement, index: number) => [T0, T1],
+): [ReadonlyArray<T0>, ReadonlyArray<T1>]
+export function zipMap<TElement>(
+  elements: ReadonlyArray<TElement>,
+  fn: (el: TElement, index: number) => ReadonlyArray<unknown>,
+): ReadonlyArray<ReadonlyArray<unknown>> {
+  const result: Array<Array<unknown>> = [[], [], []]
 
-  for (const [index, element] of elements.entries()) {
-    const [leftItem, rightItem] = fn(element, index)
-
-    left[index] = leftItem
-    right[index] = rightItem
+  for (const [index, tuple] of elements.map(fn).entries()) {
+    for (const [position, entry] of tuple.entries()) {
+      result[position]![index] = entry
+    }
   }
 
-  return [left, right]
+  return result
 }
 
 export function uniq<T>(values: ReadonlyArray<T>): ReadonlyArray<T> {

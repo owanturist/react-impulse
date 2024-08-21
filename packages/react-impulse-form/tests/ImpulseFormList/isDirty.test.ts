@@ -140,7 +140,7 @@ it("returns true when all elements are dirty", ({ scope }) => {
 })
 
 describe("adding a new element to the list's end", () => {
-  it.skip("returns true for a new pristine element and a pristine list", ({
+  it("returns true for a new pristine element and a pristine list", ({
     scope,
   }) => {
     const form = setup([
@@ -169,7 +169,7 @@ describe("adding a new element to the list's end", () => {
     ).toStrictEqual([false, false, false])
   })
 
-  it.skip("returns true for a new pristine element and a dirty list", ({
+  it("returns true for a new pristine element and a dirty list", ({
     scope,
   }) => {
     const form = setup([
@@ -186,7 +186,11 @@ describe("adding a new element to the list's end", () => {
     form.setElements((elements) => [...elements, setupElement()])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([false, true, true])
+    expect(form.isDirty(scope, arg(0))).toStrictEqual([
+      false,
+      { first: true, second: false },
+      true,
+    ])
     expect(form.isDirty(scope, arg(1))).toStrictEqual([
       { first: false, second: false },
       { first: true, second: false },
@@ -198,7 +202,7 @@ describe("adding a new element to the list's end", () => {
     ).toStrictEqual([false, true, false])
   })
 
-  it.skip("returns true for a new dirty element and a pristine list", ({
+  it("returns true for a new dirty element and a pristine list", ({
     scope,
   }) => {
     const form = setup([
@@ -232,9 +236,7 @@ describe("adding a new element to the list's end", () => {
     ).toStrictEqual([false, false, true])
   })
 
-  it.skip("returns true for a new dirty element and a dirty list", ({
-    scope,
-  }) => {
+  it("returns true for a new dirty element and a dirty list", ({ scope }) => {
     const form = setup([
       setupElement({
         originalValue: { first: 1, second: "4" },
@@ -254,7 +256,11 @@ describe("adding a new element to the list's end", () => {
     ])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([true, false, true])
+    expect(form.isDirty(scope, arg(0))).toStrictEqual([
+      { first: false, second: true },
+      false,
+      true,
+    ])
     expect(form.isDirty(scope, arg(1))).toStrictEqual([
       { first: false, second: true },
       { first: false, second: false },
@@ -268,7 +274,7 @@ describe("adding a new element to the list's end", () => {
 })
 
 describe("adding a new element to the list's beginning", () => {
-  it.skip("returns true for a new pristine element and a pristine list", ({
+  it("returns true for a new pristine element and a pristine list", ({
     scope,
   }) => {
     const form = setup([
@@ -294,10 +300,10 @@ describe("adding a new element to the list's beginning", () => {
 
     expect(
       form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false, false])
+    ).toStrictEqual([true, true, false])
   })
 
-  it.skip("returns true for a new pristine element and a dirty list", ({
+  it("returns true for a new pristine element and a dirty list", ({
     scope,
   }) => {
     const form = setup([
@@ -323,10 +329,10 @@ describe("adding a new element to the list's beginning", () => {
 
     expect(
       form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false, true])
+    ).toStrictEqual([true, true, true])
   })
 
-  it.skip("returns true for a new dirty element and a pristine list", ({
+  it("returns true for a new dirty element and a pristine list", ({
     scope,
   }) => {
     const form = setup([
@@ -357,12 +363,10 @@ describe("adding a new element to the list's beginning", () => {
 
     expect(
       form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([true, false, false])
+    ).toStrictEqual([true, true, false])
   })
 
-  it.skip("returns true for a new dirty element and a dirty list", ({
-    scope,
-  }) => {
+  it("returns true for a new dirty element and a dirty list", ({ scope }) => {
     const form = setup([
       setupElement({
         originalValue: { first: 1, second: "4" },
@@ -392,6 +396,39 @@ describe("adding a new element to the list's beginning", () => {
     expect(
       form.getElements(scope).map((element) => element.isDirty(scope)),
     ).toStrictEqual([true, true, false])
+  })
+
+  it("returns true for a new same element and a pristine list", ({ scope }) => {
+    const form = setup([
+      setupElement({
+        originalValue: { first: 1, second: "1" },
+        initialValue: { first: 1, second: "1" },
+      }),
+      setupElement({
+        originalValue: { first: 2, second: "2" },
+        initialValue: { first: 2, second: "2" },
+      }),
+    ])
+
+    form.setElements((elements) => [
+      setupElement({
+        originalValue: { first: 1, second: "1" },
+        initialValue: { first: 1, second: "1" },
+      }),
+      ...elements,
+    ])
+
+    expect(form.isDirty(scope)).toBe(true)
+    expect(form.isDirty(scope, arg(0))).toStrictEqual([false, true, true])
+    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+      { first: false, second: false },
+      { first: true, second: true },
+      { first: true, second: true },
+    ])
+
+    expect(
+      form.getElements(scope).map((element) => element.isDirty(scope)),
+    ).toStrictEqual([false, true, false])
   })
 })
 

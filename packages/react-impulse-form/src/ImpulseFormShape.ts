@@ -273,15 +273,17 @@ export class ImpulseFormShape<
     select: (
       concise: ImpulseFormShapeFlagSchema<TFields>,
       verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
+      dirty: ImpulseFormShapeFlagSchemaVerbose<TFields>,
     ) => TResult,
   ): TResult {
     const keys = Object.keys(this.fields)
 
-    let touchedAll = true
-    let touchedNone = true
+    let isAllDirty = true
+    let isNoneDirty = true
     // make it easier for TS
-    const touchedConcise = {} as Record<string, unknown>
-    const touchedVerbose = {} as Record<string, unknown>
+    const isDirtyConcise = {} as Record<string, unknown>
+    const isDirtyVerbose = {} as Record<string, unknown>
+    const isDirtyDirty = {} as Record<string, unknown>
 
     for (const key of keys) {
       const field = this.fields[key]
@@ -289,27 +291,29 @@ export class ImpulseFormShape<
       if (ImpulseForm.isImpulseForm(field)) {
         const initialField = initial.fields[key] as ImpulseForm
 
-        const [concise, verbose] = ImpulseForm._isDirty(
+        const [concise, verbose, dirty] = ImpulseForm._isDirty(
           scope,
           field,
           initialField,
           params,
         )
 
-        touchedAll = touchedAll && concise === true
-        touchedNone = touchedNone && concise === false
-        touchedConcise[key] = concise
-        touchedVerbose[key] = verbose
+        isAllDirty = isAllDirty && concise === true
+        isNoneDirty = isNoneDirty && concise === false
+        isDirtyConcise[key] = concise
+        isDirtyVerbose[key] = verbose
+        isDirtyDirty[key] = dirty
       }
     }
 
     return select(
-      touchedNone
+      isNoneDirty
         ? false
-        : touchedAll
+        : isAllDirty
           ? true
-          : (touchedConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
-      touchedVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
+          : (isDirtyConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
+      isDirtyVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
+      isDirtyDirty as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
     )
   }
 

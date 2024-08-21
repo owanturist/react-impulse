@@ -290,14 +290,14 @@ export class ImpulseFormValue<
   protected _isDirty<TResult>(
     scope: Scope,
     initial: ImpulseFormValue<TOriginalValue, TValue>,
-    select: (concise: boolean, verbose: boolean) => TResult,
+    select: (concise: boolean, verbose: boolean, dirty: boolean) => TResult,
   ): TResult {
     const initialValue = initial.getInitialValue(scope)
     const originalValue = this.getOriginalValue(scope)
     const compare = this._isOriginalValueEqual.getValue(scope)
     const dirty = !compare(initialValue, originalValue, scope)
 
-    return select(dirty, dirty)
+    return select(dirty, dirty, true)
   }
 
   public getErrors(scope: Scope): null | ReadonlyArray<string>
