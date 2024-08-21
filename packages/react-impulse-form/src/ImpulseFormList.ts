@@ -3,7 +3,6 @@ import {
   batch,
   identity,
   isTruthy,
-  isDefined,
   isString,
   isArray,
   Impulse,
@@ -19,6 +18,7 @@ import {
   zipMap,
   isNull,
   params,
+  isUndefined,
 } from "./utils"
 import { type GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./ValidateStrategy"
@@ -75,7 +75,7 @@ function setFormElements<
     for (const [index, element] of elements.getValue(scope).entries()) {
       const next = isArray(nextValue) ? nextValue.at(index) : nextValue
 
-      if (isDefined.strict(next)) {
+      if (!isUndefined(next)) {
         setNext(element, next)
       }
     }
@@ -191,24 +191,24 @@ export class ImpulseFormList<
     )
 
     batch(() => {
-      if (isDefined.strict(touched)) {
+      if (!isUndefined(touched)) {
         list.setTouched(touched)
       }
 
-      if (isDefined.strict(initialValue)) {
+      if (!isUndefined(initialValue)) {
         list.setInitialValue(initialValue)
       }
 
-      if (isDefined.strict(originalValue)) {
+      if (!isUndefined(originalValue)) {
         list.setOriginalValue(originalValue)
       }
 
-      if (isDefined(validateOn)) {
+      if (!isUndefined(validateOn)) {
         list.setValidateOn(validateOn)
       }
 
       // TODO add test against null
-      if (isDefined.strict(errors)) {
+      if (!isUndefined(errors)) {
         list.setErrors(errors)
       }
     })
@@ -239,7 +239,7 @@ export class ImpulseFormList<
         const child = ImpulseForm._childOf(this, element)
         const initial = initialElements.at(index)
 
-        if (isDefined.strict(initial)) {
+        if (!isUndefined(initial)) {
           ImpulseForm._setInitial(child, initial)
         }
 
@@ -664,7 +664,7 @@ export class ImpulseFormList<
         const initialValue = nextInitialValue.at(index)
 
         // do not change initial value if it is not defined
-        if (isDefined.strict(initialValue)) {
+        if (!isUndefined(initialValue)) {
           element.setInitialValue(initialValue)
         }
       }

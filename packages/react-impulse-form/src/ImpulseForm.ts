@@ -1,12 +1,6 @@
-import {
-  type Scope,
-  isDefined,
-  batch,
-  untrack,
-  Impulse,
-  isTruthy,
-} from "./dependencies"
+import { type Scope, batch, untrack, Impulse, isTruthy } from "./dependencies"
 import { Emitter } from "./Emitter"
+import { isPresent, isUndefined } from "./utils"
 
 export interface ImpulseFormParams {
   "value.schema": unknown
@@ -163,11 +157,11 @@ export abstract class ImpulseForm<
       const value = this._root.getValue(scope)
 
       if (value !== null && this._root.isValid(scope)) {
-        return this._root._submitWith(value).filter(isDefined)
+        return this._root._submitWith(value).filter(isPresent)
       }
     })
 
-    if (!isDefined(promises)) {
+    if (isUndefined(promises)) {
       this._root.focusFirstInvalidValue()
     } else if (promises.length > 0) {
       this._root._submittingCount.setValue((count) => count + 1)
@@ -191,7 +185,7 @@ export abstract class ImpulseForm<
   }
 
   public isInvalid(scope: Scope): boolean {
-    return this.getErrors(scope, isDefined)
+    return this.getErrors(scope, isPresent)
   }
 
   public isDirty(scope: Scope): boolean

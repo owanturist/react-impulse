@@ -7,7 +7,6 @@ import {
   isBoolean,
   isFunction,
   isTruthy,
-  isDefined,
   isString,
 } from "./dependencies"
 import {
@@ -16,6 +15,7 @@ import {
   type Setter,
   resolveSetter,
   params,
+  isUndefined,
 } from "./utils"
 import {
   type GetImpulseFormParam,
@@ -155,24 +155,24 @@ export class ImpulseFormShape<
     const shape = new ImpulseFormShape(null, fields)
 
     batch(() => {
-      if (isDefined.strict(touched)) {
+      if (!isUndefined(touched)) {
         shape.setTouched(touched)
       }
 
-      if (isDefined.strict(initialValue)) {
+      if (!isUndefined(initialValue)) {
         shape.setInitialValue(initialValue)
       }
 
-      if (isDefined.strict(originalValue)) {
+      if (!isUndefined(originalValue)) {
         shape.setOriginalValue(originalValue)
       }
 
-      if (isDefined(validateOn)) {
+      if (!isUndefined(validateOn)) {
         shape.setValidateOn(validateOn)
       }
 
       // TODO add test against null
-      if (isDefined.strict(errors)) {
+      if (!isUndefined(errors)) {
         shape.setErrors(errors)
       }
     })
@@ -491,7 +491,7 @@ export class ImpulseFormShape<
 
         if (
           ImpulseForm.isImpulseForm(field) &&
-          isDefined.strict(nextFieldTouched)
+          !isUndefined(nextFieldTouched)
         ) {
           field.setValidateOn(nextFieldTouched)
         }

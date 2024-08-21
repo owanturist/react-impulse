@@ -12,8 +12,6 @@ export {
 // remeda is built-in to the bundle
 // eslint-disable-next-line import/no-extraneous-dependencies
 export {
-  // TODO NOW define custom isUndefined (=== undefined) and isPresent (!= null)
-  isDefined,
   isFunction,
   isBoolean,
   isString,

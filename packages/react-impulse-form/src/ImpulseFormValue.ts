@@ -7,10 +7,16 @@ import {
   batch,
   isFunction,
   identity,
-  isDefined,
   untrack,
 } from "./dependencies"
-import { type Setter, shallowArrayEquals, eq, resolveSetter } from "./utils"
+import {
+  type Setter,
+  shallowArrayEquals,
+  eq,
+  resolveSetter,
+  isUndefined,
+  isNull,
+} from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormSchema, Result } from "./ImpulseFormSchema"
 import {
@@ -114,9 +120,9 @@ export class ImpulseFormValue<
       validateOn = VALIDATE_ON_TOUCH,
     }: ImpulseFormValueOptions<TOriginalValue, TValue> = {},
   ): ImpulseFormValue<TOriginalValue, TValue> {
-    const _initialValue = isDefined.strict(initialValue)
-      ? initialValue
-      : originalValue
+    const _initialValue = isUndefined(initialValue)
+      ? originalValue
+      : initialValue
 
     const isOriginalValueEqualImpulse = Impulse.of(isOriginalValueEqual)
     const isOriginalValueEqualStable: Compare<TOriginalValue> = (
@@ -143,7 +149,7 @@ export class ImpulseFormValue<
       Impulse.of(touched),
       Impulse.of(validateOn),
       Impulse.of(errors ?? [], { compare: shallowArrayEquals }),
-      Impulse.of(isDefined.strict(initialValue)),
+      Impulse.of(!isUndefined(initialValue)),
       Impulse.of(_initialValue, { compare: isOriginalValueEqualStable }),
       Impulse.of(initialOriginalValue, { compare: isOriginalValueEqualStable }),
       Impulse.of(schema),
@@ -214,7 +220,7 @@ export class ImpulseFormValue<
     const value = this.getOriginalValue(scope)
     const schema = this._schema.getValue(scope)
 
-    if (!isDefined(schema)) {
+    if (isUndefined(schema)) {
       return { success: true, data: value as unknown as TValue }
     }
 
@@ -239,7 +245,7 @@ export class ImpulseFormValue<
       return this._onFocus._isEmpty() ? null : this.getErrors(scope)
     })
 
-    if (!isDefined(errors)) {
+    if (isNull(errors)) {
       return null
     }
 

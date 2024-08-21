@@ -1,10 +1,11 @@
+import { type RefObject, useEffect, isFunction } from "./dependencies"
 import {
-  type RefObject,
-  useEffect,
-  isFunction,
-  isDefined,
-} from "./dependencies"
-import { type Func, useHandler, isHtmlElement } from "./utils"
+  type Func,
+  useHandler,
+  isHtmlElement,
+  isPresent,
+  isNull,
+} from "./utils"
 import type { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormValue } from "./ImpulseFormValue"
 import { type UseImpulseFormOptions, useImpulseForm } from "./useImpulseForm"
@@ -51,13 +52,13 @@ export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
   }: UseImpulseFormValueOptions<typeof form> = {},
 ): void => {
   const onFocusInvalidStable = useHandler(
-    shouldFocusWhenInvalid && isDefined(onFocusInvalid)
+    shouldFocusWhenInvalid && isPresent(onFocusInvalid)
       ? normalizeOnFocusInvalid(onFocusInvalid)
       : null,
   )
 
   useEffect(() => {
-    if (isDefined(onFocusInvalidStable)) {
+    if (!isNull(onFocusInvalidStable)) {
       return form.onFocusWhenInvalid((errors) => {
         onFocusInvalidStable(errors, form)
       })

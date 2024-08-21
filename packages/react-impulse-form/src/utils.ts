@@ -35,6 +35,16 @@ export function isNull(value: unknown): value is null {
   return value === null
 }
 
+export function isUndefined(value: unknown): value is undefined {
+  return value === undefined
+}
+
+export function isPresent<TValue>(
+  data: void | null | undefined | TValue,
+): data is TValue {
+  return data != null
+}
+
 export function isHtmlElement(value: unknown): value is HTMLElement {
   return value instanceof HTMLElement
 }
