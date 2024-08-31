@@ -13,5 +13,6 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "prettier.configPath": ".prettierrc.json",
   "cSpell.enabled": true,
-  "vitest.commandLine": "pnpm vitest"
+  "vitest.commandLine": "pnpm vitest",
+  "eslint.useFlatConfig": false
 }
