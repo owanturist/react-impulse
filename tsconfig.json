@@ -18,7 +18,7 @@
     "downlevelIteration": true,
     "jsx": "react",
     "types": ["vitest/globals"],
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": true
   },
-  "include": ["./*.ts"],
+  "include": ["./*.ts"]
 }
