@@ -116,8 +116,8 @@ importers:
         specifier: ^2.0.2
         version: 2.0.2(react@18.3.1)
       remeda:
-        specifier: ^1.40.0
-        version: 1.40.0
+        specifier: ^2.11.0
+        version: 2.11.0
 
 packages:
 
@@ -4478,8 +4478,10 @@ packages:
       set-function-name: 2.0.2
     dev: true
 
-  /remeda@1.40.0:
-    resolution: {integrity: sha512-jrpzUSPTrCAnzyVko7h9lXyVZFT75hYeZGFLg3JomiUhASiZzbjpf938LJjn1uARNWMreMeTtX1FKzkFOTTziA==}
+  /remeda@2.11.0:
+    resolution: {integrity: sha512-rQO+zcuNvnTcB2vBctblBARZakY0+wMNtrFGqU1+h4jm5p2APcDKQxUZG2CmMPkSQxa2nauU55GBVS/3Fo83fA==}
+    dependencies:
+      type-fest: 4.26.0
     dev: true
 
   /require-directory@2.1.1:
@@ -5213,6 +5215,11 @@ packages:
   /type-fest@0.8.1:
     resolution: {integrity: sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==}
     engines: {node: '>=8'}
+    dev: true
+
+  /type-fest@4.26.0:
+    resolution: {integrity: sha512-OduNjVJsFbifKb57UqZ2EMP1i4u64Xwow3NYXUtBbD4vIwJdQd4+xl8YDou1dlm4DVrtwT/7Ky8z8WyCULVfxw==}
+    engines: {node: '>=16'}
     dev: true
 
   /typed-array-buffer@1.0.0:
