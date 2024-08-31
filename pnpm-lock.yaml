@@ -115,9 +115,6 @@ importers:
       react-impulse:
         specifier: ^2.0.2
         version: 2.0.2(react@18.3.1)
-      remeda:
-        specifier: ^1.40.0
-        version: 1.40.0
 
 packages:
 
@@ -4151,10 +4148,6 @@ packages:
       define-properties: 1.2.1
       es-errors: 1.3.0
       set-function-name: 2.0.2
-    dev: true
-
-  /remeda@1.40.0:
-    resolution: {integrity: sha512-jrpzUSPTrCAnzyVko7h9lXyVZFT75hYeZGFLg3JomiUhASiZzbjpf938LJjn1uARNWMreMeTtX1FKzkFOTTziA==}
     dev: true
 
   /requireindex@1.2.0:

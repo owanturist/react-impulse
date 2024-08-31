@@ -1,4 +1,4 @@
-import { isFunction, useEffect, useLayoutEffect, useRef } from "./dependencies"
+import { useEffect, useLayoutEffect, useRef } from "./dependencies"
 
 export type Func<TArgs extends ReadonlyArray<unknown>, TReturn = void> = (
   this: void,
@@ -31,6 +31,26 @@ export function isFalse(value: unknown): value is false {
   return value === false
 }
 
+export function isBoolean(value: unknown): value is boolean {
+  return typeof value === "boolean"
+}
+
+export function isTruthy<T>(
+  data: T,
+): data is Exclude<T, "" | 0 | false | null | undefined> {
+  return Boolean(data)
+}
+
+export function isArray<T>(
+  data: ArrayLike<unknown> | T,
+): data is ReadonlyArray<unknown> {
+  return Array.isArray(data)
+}
+
+export function isString(value: unknown): value is string {
+  return typeof value === "string"
+}
+
 export function isNull(value: unknown): value is null {
   return value === null
 }
@@ -43,6 +63,17 @@ export function isPresent<TValue>(
   data: void | null | undefined | TValue,
 ): data is TValue {
   return data != null
+}
+
+type DefinitelyFunction<T> =
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  Extract<T, Function> extends never ? Function : Extract<T, Function>
+
+export function isFunction<T>(
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  data: Function | T,
+): data is DefinitelyFunction<T> {
+  return typeof data === "function"
 }
 
 export function isHtmlElement(value: unknown): value is HTMLElement {
@@ -59,6 +90,7 @@ export function params<TArgs extends ReadonlyArray<unknown>>(
   return args
 }
 
+params._first = <T>(first: T): T => first
 params._second = <T>(_first: unknown, second: T): T => second
 params._third = <T>(_first: unknown, _second: unknown, third: T): T => third
 

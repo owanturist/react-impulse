@@ -1,16 +1,10 @@
-import {
-  type Scope,
-  batch,
-  identity,
-  isTruthy,
-  isString,
-  isArray,
-  Impulse,
-  untrack,
-} from "./dependencies"
+import { type Scope, batch, Impulse, untrack } from "./dependencies"
 import {
   type Setter,
   isTrue,
+  isTruthy,
+  isString,
+  isArray,
   shallowArrayEquals,
   isFalse,
   uniq,
@@ -361,7 +355,7 @@ export class ImpulseFormList<
     scope: Scope,
     select: (
       elements: ReadonlyArray<TElement>,
-    ) => TResult = identity as typeof select,
+    ) => TResult = params._first as typeof select,
   ): TResult {
     return this._elements.getValue(scope, select)
   }
@@ -396,7 +390,7 @@ export class ImpulseFormList<
     select: (
       concise: ImpulseFormListErrorSchema<TElement>,
       verbose: ImpulseFormListErrorSchemaVerbose<TElement>,
-    ) => TResult = identity as typeof select,
+    ) => TResult = params._first as typeof select,
   ): TResult {
     const [concise, verbose] = zipMap(
       //
@@ -472,7 +466,7 @@ export class ImpulseFormList<
     select: (
       concise: ImpulseFormListValidateOnSchema<TElement>,
       verbose: ImpulseFormListValidateOnSchemaVerbose<TElement>,
-    ) => TResult = identity as typeof select,
+    ) => TResult = params._first as typeof select,
   ): TResult {
     const [concise, verbose] = zipMap(
       //
@@ -560,7 +554,7 @@ export class ImpulseFormList<
   }
 
   public reset(
-    resetter: ImpulseFormListOriginalValueSetter<TElement> = identity as typeof resetter,
+    resetter: ImpulseFormListOriginalValueSetter<TElement> = params._first as typeof resetter,
   ): void {
     batch((scope) => {
       this.setInitialValue(resetter)
@@ -588,7 +582,7 @@ export class ImpulseFormList<
     select: (
       concise: null | ImpulseFormListValueSchema<TElement>,
       verbose: ImpulseFormListValueSchemaVerbose<TElement>,
-    ) => TResult = identity as typeof select,
+    ) => TResult = params._first as typeof select,
   ): TResult {
     const [concise, verbose] = zipMap(
       //
