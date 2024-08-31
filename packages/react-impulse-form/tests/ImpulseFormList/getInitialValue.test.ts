@@ -205,3 +205,74 @@ describe("adding a new element to the list's beginning", () => {
     ])
   })
 })
+
+describe("nested list", () => {
+  it("returns initial value", ({ scope }) => {
+    const form = ImpulseFormList.of([
+      ImpulseFormShape.of({
+        first: ImpulseFormList.of([
+          ImpulseFormShape.of({
+            one: ImpulseFormValue.of("1"),
+            two: ImpulseFormValue.of(2),
+          }),
+        ]),
+      }),
+    ])
+
+    expect(form.getInitialValue(scope)).toStrictEqual([
+      {
+        first: [{ one: "1", two: 2 }],
+      },
+    ])
+  })
+
+  it("updates initial value", ({ scope }) => {
+    const form = ImpulseFormList.of([
+      ImpulseFormShape.of({
+        first: ImpulseFormList.of([
+          ImpulseFormShape.of({
+            one: ImpulseFormValue.of("1"),
+            two: ImpulseFormValue.of(2),
+          }),
+          ImpulseFormShape.of({
+            one: ImpulseFormValue.of("10"),
+            two: ImpulseFormValue.of(20),
+          }),
+        ]),
+      }),
+    ])
+
+    form
+      .getElements(scope)
+      .at(0)
+      ?.fields.first.getElements(scope)
+      .at(0)
+      ?.fields.one.setInitialValue("10")
+
+    expect(form.getInitialValue(scope)).toStrictEqual([
+      {
+        first: [
+          { one: "10", two: 2 },
+          { one: "10", two: 20 },
+        ],
+      },
+    ])
+
+    form
+      .getElements(scope)
+      .at(0)
+      ?.fields.first.setInitialValue([
+        { one: "100", two: 200 },
+        { one: "1000", two: 2000 },
+      ])
+
+    expect(form.getInitialValue(scope)).toStrictEqual([
+      {
+        first: [
+          { one: "100", two: 200 },
+          { one: "1000", two: 2000 },
+        ],
+      },
+    ])
+  })
+})
