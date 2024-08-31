@@ -1,5 +1,5 @@
-import { useEffect, isDefined } from "./dependencies"
-import { useHandler } from "./utils"
+import { useEffect } from "./dependencies"
+import { isUndefined, useHandler } from "./utils"
 import type { GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 
 export interface UseImpulseFormOptions<TForm extends ImpulseForm> {
@@ -17,7 +17,7 @@ export const useImpulseForm = <TForm extends ImpulseForm>(
   const onSubmitStable = useHandler(onSubmit)
 
   useEffect(() => {
-    if (isDefined(onSubmitStable)) {
+    if (!isUndefined(onSubmitStable)) {
       return form.onSubmit((value) => {
         return onSubmitStable(
           value as GetImpulseFormParam<TForm, "value.schema">,

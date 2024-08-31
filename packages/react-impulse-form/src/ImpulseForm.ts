@@ -1,12 +1,12 @@
-import { type Scope, isDefined, batch, untrack, Impulse } from "./dependencies"
+import { type Scope, batch, untrack, Impulse, isTruthy } from "./dependencies"
 import { Emitter } from "./Emitter"
+import { isPresent, isUndefined } from "./utils"
 
 export interface ImpulseFormParams {
   "value.schema": unknown
   "value.schema.verbose": unknown
 
   "originalValue.setter": unknown
-  "originalValue.resetter": unknown
   "originalValue.schema": unknown
 
   "flag.setter": unknown
@@ -37,15 +37,23 @@ export abstract class ImpulseForm<
     return value instanceof ImpulseForm
   }
 
-  protected static _childOf<TChildParams extends ImpulseFormParams>(
+  protected static _childOf<TChild extends ImpulseForm>(
     parent: ImpulseForm,
-    child: ImpulseForm<TChildParams>,
-  ): ImpulseForm<TChildParams> {
+    child: TChild,
+  ): TChild {
     if (child._root === parent._root) {
       return child
     }
 
-    return child._childOf(parent._root)
+    return child._childOf(parent._root) as TChild
+  }
+
+  protected static _setInitial<TForm extends ImpulseForm>(
+    form: TForm,
+    initial: undefined | TForm,
+    isRoot = form._root === form,
+  ): void {
+    form._setInitial(initial, isRoot)
   }
 
   protected static _submitWith<TParams extends ImpulseFormParams>(
@@ -66,6 +74,19 @@ export abstract class ImpulseForm<
     isValidated: boolean,
   ): void {
     form._setValidated(isValidated)
+  }
+
+  protected static _isDirty<TParams extends ImpulseFormParams, TResult>(
+    scope: Scope,
+    original: ImpulseForm<TParams>,
+    initial: ImpulseForm<TParams>,
+    select: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+      dirty: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): TResult {
+    return original._isDirty(scope, initial, select)
   }
 
   // necessary for type inference
@@ -89,7 +110,22 @@ export abstract class ImpulseForm<
 
   protected abstract _childOf(parent: null | ImpulseForm): ImpulseForm<TParams>
 
+  protected abstract _setInitial(
+    initial: undefined | ImpulseForm<TParams>,
+    isRoot: boolean,
+  ): void
+
   protected abstract _setValidated(isValidated: boolean): void
+
+  protected abstract _isDirty<TResult>(
+    scope: Scope,
+    initial: ImpulseForm<TParams>,
+    select: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+      dirty: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): TResult
 
   protected _submitWith(
     value: TParams["value.schema"],
@@ -121,11 +157,11 @@ export abstract class ImpulseForm<
       const value = this._root.getValue(scope)
 
       if (value !== null && this._root.isValid(scope)) {
-        return this._root._submitWith(value).filter(isDefined)
+        return this._root._submitWith(value).filter(isPresent)
       }
     })
 
-    if (!isDefined(promises)) {
+    if (isUndefined(promises)) {
       this._root.focusFirstInvalidValue()
     } else if (promises.length > 0) {
       this._root._submittingCount.setValue((count) => count + 1)
@@ -144,15 +180,30 @@ export abstract class ImpulseForm<
     return this._childOf(null)
   }
 
-  // TODO add select
   public isValid(scope: Scope): boolean {
     return !this.isInvalid(scope)
   }
 
-  // TODO add select
-
   public isInvalid(scope: Scope): boolean {
-    return this.getErrors(scope, isDefined)
+    return this.getErrors(scope, isPresent)
+  }
+
+  public isDirty(scope: Scope): boolean
+  public isDirty<TResult>(
+    scope: Scope,
+    select: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): TResult
+  public isDirty(
+    scope: Scope,
+    select: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => boolean = isTruthy,
+  ): boolean {
+    return this._isDirty(scope, this, select)
   }
 
   public abstract getErrors(scope: Scope): TParams["errors.schema"]
@@ -197,16 +248,7 @@ export abstract class ImpulseForm<
 
   public abstract setTouched(setter: TParams["flag.setter"]): void
 
-  public abstract reset(resetter?: TParams["originalValue.resetter"]): void
-
-  public abstract isDirty(scope: Scope): boolean
-  public abstract isDirty<TResult>(
-    scope: Scope,
-    select: (
-      concise: TParams["flag.schema"],
-      verbose: TParams["flag.schema.verbose"],
-    ) => TResult,
-  ): TResult
+  public abstract reset(resetter?: TParams["originalValue.setter"]): void
 
   public abstract getValue(scope: Scope): null | TParams["value.schema"]
   public abstract getValue<TResult>(
@@ -217,7 +259,6 @@ export abstract class ImpulseForm<
     ) => TResult,
   ): TResult
 
-  // TODO extend with select
   public abstract getOriginalValue(
     scope: Scope,
   ): TParams["originalValue.schema"]
@@ -226,7 +267,6 @@ export abstract class ImpulseForm<
     setter: TParams["originalValue.setter"],
   ): void
 
-  // TODO extend with select
   public abstract getInitialValue(scope: Scope): TParams["originalValue.schema"]
 
   public abstract setInitialValue(setter: TParams["originalValue.setter"]): void
