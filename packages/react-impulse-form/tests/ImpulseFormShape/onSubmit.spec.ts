@@ -95,7 +95,7 @@ describe.each<
       "root.fields.<ImpulseFormValue>",
       () =>
         setup({
-          originalValue: {
+          input: {
             _1: "abc",
           },
         }),
@@ -104,7 +104,7 @@ describe.each<
       "root.fields.<ImpulseFormShape>.fields.<ImpulseFormValue>",
       () =>
         setup({
-          originalValue: {
+          input: {
             _3: {
               _2: ["abc"],
             },
@@ -158,7 +158,7 @@ describe.each<
       },
       () => {
         const form = setup({
-          originalValue: {
+          input: {
             _1: "value",
             _3: {
               _2: ["value"],
@@ -185,7 +185,7 @@ describe.each<
       },
       () =>
         setup({
-          originalValue: {
+          input: {
             _1: "x",
             _2: 567,
             _3: {
@@ -339,7 +339,7 @@ describe.each<
 
   it("calls the listeners for each field", () => {
     const form = setup({
-      originalValue: {
+      input: {
         _1: "x",
         _2: 567,
         _3: {

@@ -11,7 +11,7 @@ describe("ImpulseFormValue.of()", () => {
     expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<number>>()
     expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<number, number>>()
 
-    expect(value.getOriginalValue(scope)).toBe(1)
+    expect(value.getInput(scope)).toBe(1)
     expect(value.getOutput(scope)).toBe(1)
   })
 
@@ -24,11 +24,11 @@ describe("ImpulseFormValue.of()", () => {
     expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<string>>()
     expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<string, string>>()
 
-    expect(value.getOriginalValue(scope)).toBe("")
+    expect(value.getInput(scope)).toBe("")
     expect(value.getOutput(scope)).toBeNull()
 
-    value.setOriginalValue(" 123 ")
-    expect(value.getOriginalValue(scope)).toBe(" 123 ")
+    value.setInput(" 123 ")
+    expect(value.getInput(scope)).toBe(" 123 ")
     expect(value.getOutput(scope)).toBe("123")
   })
 
@@ -40,11 +40,11 @@ describe("ImpulseFormValue.of()", () => {
 
     expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<string, number>>()
 
-    expect(value.getOriginalValue(scope)).toBe("")
+    expect(value.getInput(scope)).toBe("")
     expect(value.getOutput(scope)).toBeNull()
 
-    value.setOriginalValue(" 123 ")
-    expect(value.getOriginalValue(scope)).toBe(" 123 ")
+    value.setInput(" 123 ")
+    expect(value.getInput(scope)).toBe(" 123 ")
     expect(value.getOutput(scope)).toBe(123)
   })
 
@@ -75,16 +75,16 @@ describe("ImpulseFormValue.of()", () => {
       >
     >()
 
-    expect(value.getOriginalValue(scope)).toStrictEqual({
+    expect(value.getInput(scope)).toStrictEqual({
       type: "",
       value: "",
     })
     expect(value.getOutput(scope)).toBeNull()
 
-    value.setOriginalValue((current) => ({ ...current, type: "first" }))
+    value.setInput((current) => ({ ...current, type: "first" }))
     expect(value.getOutput(scope)).toBeNull()
 
-    value.setOriginalValue((current) => ({ ...current, value: "true" }))
+    value.setInput((current) => ({ ...current, value: "true" }))
     expect(value.getOutput(scope)).toStrictEqual({
       type: "first",
       value: true,
@@ -99,11 +99,11 @@ describe("ImpulseFormValue.of()", () => {
 
     expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<string, number>>()
 
-    expect(value.getOriginalValue(scope)).toBe("1")
+    expect(value.getInput(scope)).toBe("1")
     expect(value.getOutput(scope)).toBe("1")
   })
 
-  it("does not allow to specify schema Input different from TOriginalValue", ({
+  it("does not allow to specify schema TOutput different from TInput", ({
     scope,
   }) => {
     const value = ImpulseFormValue.of<string>("1", {
@@ -112,7 +112,7 @@ describe("ImpulseFormValue.of()", () => {
       validateOn: "onInit",
     })
 
-    expect(value.getOriginalValue(scope)).toBe("1")
+    expect(value.getInput(scope)).toBe("1")
     expect(value.getOutput(scope)).toBe(1)
   })
 
@@ -125,7 +125,7 @@ describe("ImpulseFormValue.of()", () => {
       validateOn: "onInit",
     })
 
-    expect(value.getOriginalValue(scope)).toBe(0)
+    expect(value.getInput(scope)).toBe(0)
     expect(value.getOutput(scope)).toBe(0)
   })
 
@@ -139,60 +139,60 @@ describe("ImpulseFormValue.of()", () => {
   })
 
   it("specifies initial value", ({ scope }) => {
-    const value = ImpulseFormValue.of("", { initialValue: "1" })
+    const value = ImpulseFormValue.of("", { initialInput: "1" })
 
-    expect(value.getOriginalValue(scope)).toBe("")
-    expect(value.getInitialValue(scope)).toBe("1")
+    expect(value.getInput(scope)).toBe("")
+    expect(value.getInitialInput(scope)).toBe("1")
   })
 
-  it("assigns initialValue to originalValue by default", ({ scope }) => {
+  it("assigns initialInput to input by default", ({ scope }) => {
     const value = ImpulseFormValue.of("1")
 
-    expect(value.getOriginalValue(scope)).toBe("1")
-    expect(value.getInitialValue(scope)).toBe("1")
+    expect(value.getInput(scope)).toBe("1")
+    expect(value.getInitialInput(scope)).toBe("1")
   })
 
-  it("assigns custom initialValue", ({ scope }) => {
-    const value = ImpulseFormValue.of("1", { initialValue: "2" })
+  it("assigns custom initialInput", ({ scope }) => {
+    const value = ImpulseFormValue.of("1", { initialInput: "2" })
 
-    expect(value.getOriginalValue(scope)).toBe("1")
-    expect(value.getInitialValue(scope)).toBe("2")
+    expect(value.getInput(scope)).toBe("1")
+    expect(value.getInitialInput(scope)).toBe("2")
   })
 
-  it("returns initialValue if it is equals to originalValue with custom isOriginalValueEqual", ({
+  it("returns initialInput if it is equals to input with custom isInputEqual", ({
     scope,
   }) => {
-    const initialValue = { count: 0 }
+    const initialInput = { count: 0 }
     const form = ImpulseFormValue.of(
       { count: 0 },
       {
-        initialValue,
-        isOriginalValueEqual: (left, right) => left.count === right.count,
+        initialInput,
+        isInputEqual: (left, right) => left.count === right.count,
       },
     )
 
-    expect(form.getOriginalValue(scope)).toBe(initialValue)
-    expect(form.getOriginalValue(scope)).toBe(form.getInitialValue(scope))
+    expect(form.getInput(scope)).toBe(initialInput)
+    expect(form.getInput(scope)).toBe(form.getInitialInput(scope))
 
-    form.setOriginalValue({ count: 1 })
-    expect(form.getOriginalValue(scope)).not.toBe(initialValue)
+    form.setInput({ count: 1 })
+    expect(form.getInput(scope)).not.toBe(initialInput)
   })
 
-  it("keeps the prev value with custom isOriginalValueEqual", ({ scope }) => {
+  it("keeps the prev value with custom isInputEqual", ({ scope }) => {
     const form = ImpulseFormValue.of(
       { count: 0 },
       {
-        isOriginalValueEqual: (left, right) => left.count === right.count,
+        isInputEqual: (left, right) => left.count === right.count,
       },
     )
 
-    const originalValue = form.getOriginalValue(scope)
+    const input = form.getInput(scope)
 
-    form.setOriginalValue({ count: 0 })
-    expect(form.getOriginalValue(scope)).toBe(originalValue)
+    form.setInput({ count: 0 })
+    expect(form.getInput(scope)).toBe(input)
 
-    form.setOriginalValue({ count: 1 })
-    expect(form.getOriginalValue(scope)).not.toBe(originalValue)
+    form.setInput({ count: 1 })
+    expect(form.getInput(scope)).not.toBe(input)
   })
 })
 
@@ -227,7 +227,7 @@ describe("ImpulseFormValue#getOutput()", () => {
     expect(value.getOutput(scope, arg(0))).toBe("1")
     expect(value.getOutput(scope, (_, verbose) => verbose)).toBe("1")
 
-    value.setOriginalValue("12")
+    value.setInput("12")
     expect(value.getOutput(scope)).toBeNull()
     expect(value.getOutput(scope, arg(0))).toBeNull()
     expect(value.getOutput(scope, (_, verbose) => verbose)).toBeNull()
@@ -251,7 +251,7 @@ describe("ImpulseFormValue#getErrors()", () => {
     expect(value.getErrors(scope, arg(0))).toBeNull()
     expect(value.getErrors(scope, (_, verbose) => verbose)).toBeNull()
 
-    value.setOriginalValue("12")
+    value.setInput("12")
     const errors = ["String must contain at most 1 character(s)"]
     expect(value.getErrors(scope)).toStrictEqual(errors)
     expect(value.getErrors(scope, arg(0))).toStrictEqual(errors)
@@ -327,39 +327,39 @@ describe("ImpulseFormValue#isTouched()", () => {
   })
 })
 
-describe("ImpulseFormValue#setOriginalValue()", () => {
+describe("ImpulseFormValue#setInput()", () => {
   it("sets original value", ({ scope }) => {
     const value = ImpulseFormValue.of("")
 
-    expect(value.getOriginalValue(scope)).toBe("")
+    expect(value.getInput(scope)).toBe("")
 
-    value.setOriginalValue("1")
-    expect(value.getOriginalValue(scope)).toBe("1")
+    value.setInput("1")
+    expect(value.getInput(scope)).toBe("1")
 
-    value.setOriginalValue((x) => `${x}2`)
-    expect(value.getOriginalValue(scope)).toBe("12")
-    expect(value.getInitialValue(scope)).toBe("")
+    value.setInput((x) => `${x}2`)
+    expect(value.getInput(scope)).toBe("12")
+    expect(value.getInitialInput(scope)).toBe("")
 
-    expectTypeOf(value.setOriginalValue)
+    expectTypeOf(value.setInput)
       .parameter(0)
       .toEqualTypeOf<Setter<string, [string, string]>>()
   })
 })
 
-describe("ImpulseFormValue#setInitialValue()", () => {
+describe("ImpulseFormValue#setInitialInput()", () => {
   it("sets initial value", ({ scope }) => {
     const value = ImpulseFormValue.of("")
 
-    expect(value.getInitialValue(scope)).toBe("")
+    expect(value.getInitialInput(scope)).toBe("")
 
-    value.setInitialValue("1")
-    expect(value.getInitialValue(scope)).toBe("1")
+    value.setInitialInput("1")
+    expect(value.getInitialInput(scope)).toBe("1")
 
-    value.setInitialValue((x) => `${x}2`)
-    expect(value.getInitialValue(scope)).toBe("12")
-    expect(value.getOriginalValue(scope)).toBe("")
+    value.setInitialInput((x) => `${x}2`)
+    expect(value.getInitialInput(scope)).toBe("12")
+    expect(value.getInput(scope)).toBe("")
 
-    expectTypeOf(value.setInitialValue)
+    expectTypeOf(value.setInitialInput)
       .parameter(0)
       .toEqualTypeOf<Setter<string, [string, string]>>()
   })
@@ -372,16 +372,16 @@ describe("ImpulseFormValue#isDirty()", () => {
     expect(value.isDirty(scope)).toBe(false)
   })
 
-  it("dirty on init when initialValue is different", ({ scope }) => {
-    const value = ImpulseFormValue.of("", { initialValue: "1" })
+  it("dirty on init when initialInput is different", ({ scope }) => {
+    const value = ImpulseFormValue.of("", { initialInput: "1" })
 
     expect(value.isDirty(scope)).toBe(true)
   })
 
   it("clean when original value equals to initial value", ({ scope }) => {
-    const value = ImpulseFormValue.of("", { initialValue: "1" })
+    const value = ImpulseFormValue.of("", { initialInput: "1" })
 
-    value.setOriginalValue("1")
+    value.setInput("1")
 
     expect(value.isDirty(scope)).toBe(false)
   })
@@ -391,7 +391,7 @@ describe("ImpulseFormValue#isDirty()", () => {
   }) => {
     const value = ImpulseFormValue.of("1")
 
-    value.setOriginalValue("2")
+    value.setInput("2")
 
     expect(value.isDirty(scope)).toBe(true)
   })
@@ -402,37 +402,37 @@ describe("ImpulseFormValue#isDirty()", () => {
     const value = ImpulseFormValue.of(
       { type: "zero", value: 0 },
       {
-        initialValue: { type: "zero", value: 0 },
-        isOriginalValueEqual: (left, right) =>
+        initialInput: { type: "zero", value: 0 },
+        isInputEqual: (left, right) =>
           left.type === right.type && left.value === right.value,
       },
     )
     expect(value.isDirty(scope)).toBe(false)
 
-    value.setOriginalValue({ type: "one", value: 1 })
+    value.setInput({ type: "one", value: 1 })
     expect(value.isDirty(scope)).toBe(true)
 
-    value.setOriginalValue({ type: "zero", value: 0 })
+    value.setInput({ type: "zero", value: 0 })
     expect(value.isDirty(scope)).toBe(false)
   })
 
   it("dirty when complex value comparably unequal to initial value", ({
     scope,
   }) => {
-    const initialValue = { type: "zero", value: 0 }
+    const initialInput = { type: "zero", value: 0 }
     const value = ImpulseFormValue.of(
       { type: "zero", value: 0 },
-      { initialValue },
+      { initialInput },
     )
     expect(value.isDirty(scope)).toBe(true)
 
-    value.setOriginalValue({ type: "one", value: 1 })
+    value.setInput({ type: "one", value: 1 })
     expect(value.isDirty(scope)).toBe(true)
 
-    value.setOriginalValue({ type: "zero", value: 0 })
+    value.setInput({ type: "zero", value: 0 })
     expect(value.isDirty(scope)).toBe(true)
 
-    value.setOriginalValue(initialValue)
+    value.setInput(initialInput)
     expect(value.isDirty(scope)).toBe(false)
   })
 })
@@ -443,11 +443,11 @@ describe("ImpulseFormValue#reset()", () => {
     ["with resetter=identity", (form: ImpulseForm) => form.reset(arg(0))],
   ])("%s", (_, reset) => {
     it("resets to initial value", ({ scope }) => {
-      const value = ImpulseFormValue.of("", { initialValue: "1" })
+      const value = ImpulseFormValue.of("", { initialInput: "1" })
 
       reset(value)
-      expect(value.getOriginalValue(scope)).toBe("1")
-      expect(value.getInitialValue(scope)).toBe("1")
+      expect(value.getInput(scope)).toBe("1")
+      expect(value.getInitialInput(scope)).toBe("1")
       expect(value.isDirty(scope)).toBe(false)
     })
   })
@@ -455,25 +455,25 @@ describe("ImpulseFormValue#reset()", () => {
   it("resets to initial value by consuming current original value with resetter", ({
     scope,
   }) => {
-    const value = ImpulseFormValue.of("2", { initialValue: "1" })
+    const value = ImpulseFormValue.of("2", { initialInput: "1" })
 
     value.reset((_, current) => current)
-    expect(value.getOriginalValue(scope)).toBe("2")
-    expect(value.getInitialValue(scope)).toBe("2")
+    expect(value.getInput(scope)).toBe("2")
+    expect(value.getInitialInput(scope)).toBe("2")
     expect(value.isDirty(scope)).toBe(false)
   })
 
   it("resets to new initial value", ({ scope }) => {
-    const value = ImpulseFormValue.of("2", { initialValue: "1" })
+    const value = ImpulseFormValue.of("2", { initialInput: "1" })
 
     value.reset("3")
-    expect(value.getOriginalValue(scope)).toBe("3")
-    expect(value.getInitialValue(scope)).toBe("3")
+    expect(value.getInput(scope)).toBe("3")
+    expect(value.getInitialInput(scope)).toBe("3")
     expect(value.isDirty(scope)).toBe(false)
   })
 
   it("resets custom error", ({ scope }) => {
-    const value = ImpulseFormValue.of("2", { initialValue: "1" })
+    const value = ImpulseFormValue.of("2", { initialInput: "1" })
 
     value.setErrors(["error"])
     expect(value.getErrors(scope)).toStrictEqual(["error"])
@@ -483,7 +483,7 @@ describe("ImpulseFormValue#reset()", () => {
   })
 
   it("resets isValidated", ({ scope }) => {
-    const value = ImpulseFormValue.of("2", { initialValue: "1" })
+    const value = ImpulseFormValue.of("2", { initialInput: "1" })
 
     value.setTouched(true)
     expect(value.isValidated(scope)).toBe(true)

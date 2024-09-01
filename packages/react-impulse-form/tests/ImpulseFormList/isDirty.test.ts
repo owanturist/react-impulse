@@ -88,7 +88,7 @@ it("returns false for pristine list", ({ scope }) => {
 it("returns true when at least one element is dirty", ({ scope }) => {
   const form = setup([
     setupElement({
-      initialValue: {
+      initialInput: {
         first: 1,
       },
     }),
@@ -113,12 +113,12 @@ it("returns true when at least one element is dirty", ({ scope }) => {
 it("returns true when all elements are dirty", ({ scope }) => {
   const form = setup([
     setupElement({
-      initialValue: {
+      initialInput: {
         first: 1,
       },
     }),
     setupElement({
-      initialValue: {
+      initialInput: {
         second: "2",
       },
     }),
@@ -145,12 +145,12 @@ describe("adding a new element to the list's end", () => {
   }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
@@ -174,12 +174,12 @@ describe("adding a new element to the list's end", () => {
   }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 3, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 3, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
@@ -207,19 +207,19 @@ describe("adding a new element to the list's end", () => {
   }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
     form.setElements((elements) => [
       ...elements,
       setupElement({
-        initialValue: { first: 3 },
+        initialInput: { first: 3 },
       }),
     ])
 
@@ -239,19 +239,19 @@ describe("adding a new element to the list's end", () => {
   it("returns true for a new dirty element and a dirty list", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "4" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "4" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
     form.setElements((elements) => [
       ...elements,
       setupElement({
-        initialValue: { first: 3, second: "3" },
+        initialInput: { first: 3, second: "3" },
       }),
     ])
 
@@ -279,12 +279,12 @@ describe("adding a new element to the list's beginning", () => {
   }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
@@ -308,12 +308,12 @@ describe("adding a new element to the list's beginning", () => {
   }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 3, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 3, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
@@ -337,18 +337,18 @@ describe("adding a new element to the list's beginning", () => {
   }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
     form.setElements((elements) => [
       setupElement({
-        originalValue: { first: 3 },
+        input: { first: 3 },
       }),
       ...elements,
     ])
@@ -369,18 +369,18 @@ describe("adding a new element to the list's beginning", () => {
   it("returns true for a new dirty element and a dirty list", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "4" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "4" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
     form.setElements((elements) => [
       setupElement({
-        originalValue: { first: 3, second: "3" },
+        input: { first: 3, second: "3" },
       }),
       ...elements,
     ])
@@ -401,19 +401,19 @@ describe("adding a new element to the list's beginning", () => {
   it("returns true for a new same element and a pristine list", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
     form.setElements((elements) => [
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       ...elements,
     ])
@@ -436,16 +436,16 @@ describe("removing an initial element from the list's end", () => {
   it("returns true for a pristine list", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
       setupElement({
-        originalValue: { first: 3, second: "3" },
-        initialValue: { first: 3, second: "3" },
+        input: { first: 3, second: "3" },
+        initialInput: { first: 3, second: "3" },
       }),
     ])
 
@@ -467,16 +467,16 @@ describe("removing an initial element from the list's end", () => {
   it("returns true a dirty list", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 3, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 3, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
       setupElement({
-        originalValue: { first: 3, second: "3" },
-        initialValue: { first: 3, second: "3" },
+        input: { first: 3, second: "3" },
+        initialInput: { first: 3, second: "3" },
       }),
     ])
 
@@ -504,16 +504,16 @@ describe("removing an initial element from the list's beginning", () => {
   it("returns true for a pristine list", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
       setupElement({
-        originalValue: { first: 3, second: "3" },
-        initialValue: { first: 3, second: "3" },
+        input: { first: 3, second: "3" },
+        initialInput: { first: 3, second: "3" },
       }),
     ])
 
@@ -535,16 +535,16 @@ describe("removing an initial element from the list's beginning", () => {
   it("returns true for a dirty list", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
       setupElement({
-        originalValue: { first: 4, second: "3" },
-        initialValue: { first: 3, second: "3" },
+        input: { first: 4, second: "3" },
+        initialInput: { first: 3, second: "3" },
       }),
     ])
 
@@ -566,16 +566,16 @@ describe("removing an initial element from the list's beginning", () => {
   it("returns true for a deleting the same element", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
@@ -599,16 +599,16 @@ describe("swapping elements", () => {
   it("returns true for two pristine unequal elements", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
       setupElement({
-        originalValue: { first: 3, second: "3" },
-        initialValue: { first: 3, second: "3" },
+        input: { first: 3, second: "3" },
+        initialInput: { first: 3, second: "3" },
       }),
     ])
 
@@ -630,16 +630,16 @@ describe("swapping elements", () => {
   it("returns false for two pristine equal elements", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
     ])
 
@@ -663,13 +663,13 @@ describe("after ImpulseFormList#reset()", () => {
   it("resets original to initial values", ({ scope }) => {
     const form = setup([
       setupElement({
-        initialValue: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        initialValue: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
       setupElement({
-        initialValue: { first: 3, second: "3" },
+        initialInput: { first: 3, second: "3" },
       }),
     ])
 
@@ -691,16 +691,16 @@ describe("after ImpulseFormList#reset()", () => {
   it("restores a removed element", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
       setupElement({
-        originalValue: { first: 3, second: "3" },
-        initialValue: { first: 3, second: "3" },
+        input: { first: 3, second: "3" },
+        initialInput: { first: 3, second: "3" },
       }),
     ])
 
@@ -724,16 +724,16 @@ describe("after ImpulseFormList#reset()", () => {
   it("restores all removed elements", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
       setupElement({
-        originalValue: { first: 3, second: "3" },
-        initialValue: { first: 3, second: "3" },
+        input: { first: 3, second: "3" },
+        initialInput: { first: 3, second: "3" },
       }),
     ])
 
@@ -757,12 +757,12 @@ describe("after ImpulseFormList#reset()", () => {
   it("removes new elements", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
@@ -803,20 +803,20 @@ describe("after ImpulseFormList#reset()", () => {
   })
 })
 
-describe("after ImpulseFormList#setInitialValue()", () => {
+describe("after ImpulseFormList#setInitialInput()", () => {
   it("returns false when dirty elements set as initial", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 3, second: "3" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 3, second: "3" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
-    form.setInitialValue((_, originalValue) => originalValue)
+    form.setInitialInput((_, input) => input)
 
     expect(form.isDirty(scope)).toBe(false)
     expect(form.isDirty(scope, arg(0))).toBe(false)
@@ -833,16 +833,16 @@ describe("after ImpulseFormList#setInitialValue()", () => {
   it("returns true when pristine elements change initial", ({ scope }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
-    form.setInitialValue([
+    form.setInitialInput([
       { first: 2, second: "2" },
       { first: 3, second: "3" },
     ])
@@ -864,27 +864,27 @@ describe("after ImpulseFormList#setInitialValue()", () => {
   }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
     form.setElements((elements) => [
       setupElement({
-        originalValue: { first: 0, second: "0" },
-        initialValue: { first: 0, second: "0" },
+        input: { first: 0, second: "0" },
+        initialInput: { first: 0, second: "0" },
       }),
       ...elements,
       setupElement({
-        originalValue: { first: 3, second: "3" },
-        initialValue: { first: 3, second: "3" },
+        input: { first: 3, second: "3" },
+        initialInput: { first: 3, second: "3" },
       }),
     ])
-    form.setInitialValue((_, originalValues) => originalValues)
+    form.setInitialInput((_, input) => input)
 
     expect(form.isDirty(scope)).toBe(false)
     expect(form.isDirty(scope, arg(0))).toBe(false)
@@ -905,31 +905,31 @@ describe("after ImpulseFormList#setInitialValue()", () => {
   }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
     ])
 
     form.setElements((elements) => [
       setupElement({
-        originalValue: { first: 0, second: "0" },
+        input: { first: 0, second: "0" },
         // reassigns initial value from 1 to 0
-        initialValue: { first: 0, second: "0" },
+        initialInput: { first: 0, second: "0" },
       }),
       // moves 1 (keeps 2 as initial) and 2 (loses initial)
       ...elements,
       // does not affect initial value
       setupElement({
-        originalValue: { first: 3, second: "3" },
-        initialValue: { first: 3, second: "3" },
+        input: { first: 3, second: "3" },
+        initialInput: { first: 3, second: "3" },
       }),
     ])
 
-    form.setInitialValue(([_0, _2, ...rest]) => [
+    form.setInitialInput(([_0, _2, ...rest]) => [
       _0,
       { first: 1, second: "1" },
       _2,
@@ -956,21 +956,21 @@ describe("after ImpulseFormList#setInitialValue()", () => {
   }) => {
     const form = setup([
       setupElement({
-        originalValue: { first: 1, second: "1" },
-        initialValue: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
       }),
       setupElement({
-        originalValue: { first: 2, second: "2" },
-        initialValue: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
       }),
       setupElement({
-        originalValue: { first: 3, second: "3" },
-        initialValue: { first: 3, second: "3" },
+        input: { first: 3, second: "3" },
+        initialInput: { first: 3, second: "3" },
       }),
     ])
 
     form.setElements((elements) => elements.slice(0, 2))
-    form.setInitialValue((initialValues) => initialValues.slice(0, 2))
+    form.setInitialInput((initialInputs) => initialInputs.slice(0, 2))
 
     expect(form.isDirty(scope)).toBe(false)
     expect(form.isDirty(scope, arg(0))).toBe(false)
@@ -985,22 +985,22 @@ describe("after ImpulseFormList#setInitialValue()", () => {
   })
 })
 
-describe("after ImpulseFormList#getElements()#at()#setInitialValue()", () => {
+describe("after ImpulseFormList#getElements()#at()#setInitialInput()", () => {
   it("return true after updating pristine element's initial value", ({
     scope,
   }) => {
     const form = setup([
       setupElement({
-        initialValue: { first: 1, second: "1" },
-        originalValue: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
       }),
       setupElement({
-        initialValue: { first: 2, second: "2" },
-        originalValue: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
       }),
     ])
 
-    form.getElements(scope).at(0)!.setInitialValue({ first: 2 })
+    form.getElements(scope).at(0)!.setInitialInput({ first: 2 })
 
     expect(form.isDirty(scope)).toBe(true)
     expect(form.isDirty(scope, arg(0))).toStrictEqual([
@@ -1022,16 +1022,16 @@ describe("after ImpulseFormList#getElements()#at()#setInitialValue()", () => {
   }) => {
     const form = setup([
       setupElement({
-        initialValue: { first: 2, second: "1" },
-        originalValue: { first: 1, second: "1" },
+        initialInput: { first: 2, second: "1" },
+        input: { first: 1, second: "1" },
       }),
       setupElement({
-        initialValue: { first: 2, second: "2" },
-        originalValue: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
       }),
     ])
 
-    form.getElements(scope).at(0)!.setInitialValue({ first: 1 })
+    form.getElements(scope).at(0)!.setInitialInput({ first: 1 })
 
     expect(form.isDirty(scope)).toBe(false)
     expect(form.isDirty(scope, arg(0))).toBe(false)
@@ -1050,23 +1050,23 @@ describe("after ImpulseFormList#getElements()#at()#setInitialValue()", () => {
   }) => {
     const form = setup([
       setupElement({
-        initialValue: { first: 1, second: "1" },
-        originalValue: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
       }),
       setupElement({
-        initialValue: { first: 2, second: "2" },
-        originalValue: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
       }),
     ])
 
     form.setElements((elements) => [
       ...elements,
       setupElement({
-        originalValue: { first: 3, second: "3" },
+        input: { first: 3, second: "3" },
       }),
     ])
 
-    form.getElements(scope).at(2)!.setInitialValue({ first: 3, second: "3" })
+    form.getElements(scope).at(2)!.setInitialInput({ first: 3, second: "3" })
 
     expect(form.isDirty(scope)).toBe(true)
     expect(form.isDirty(scope, arg(0))).toStrictEqual([false, false, true])
@@ -1086,23 +1086,23 @@ describe("after ImpulseFormList#getElements()#at()#setInitialValue()", () => {
   }) => {
     const form = setup([
       setupElement({
-        initialValue: { first: 1, second: "1" },
-        originalValue: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
       }),
       setupElement({
-        initialValue: { first: 2, second: "2" },
-        originalValue: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
       }),
     ])
 
     form.setElements((elements) => [
       setupElement({
-        originalValue: { first: 3, second: "3" },
+        input: { first: 3, second: "3" },
       }),
       ...elements,
     ])
 
-    form.getElements(scope).at(0)!.setInitialValue({ first: 3, second: "3" })
+    form.getElements(scope).at(0)!.setInitialInput({ first: 3, second: "3" })
 
     expect(form.isDirty(scope)).toBe(true)
     expect(form.isDirty(scope, arg(0))).toStrictEqual([false, true, true])
@@ -1122,23 +1122,23 @@ describe("after ImpulseFormList#getElements()#at()#setInitialValue()", () => {
   }) => {
     const form = setup([
       setupElement({
-        initialValue: { first: 1, second: "1" },
-        originalValue: { first: 1, second: "1" },
+        initialInput: { first: 1, second: "1" },
+        input: { first: 1, second: "1" },
       }),
       setupElement({
-        initialValue: { first: 2, second: "2" },
-        originalValue: { first: 2, second: "2" },
+        initialInput: { first: 2, second: "2" },
+        input: { first: 2, second: "2" },
       }),
     ])
 
     form.setElements((elements) => [
       setupElement({
-        originalValue: { first: 0, second: "0" },
+        input: { first: 0, second: "0" },
       }),
       ...elements,
     ])
 
-    form.getElements(scope).at(0)!.setInitialValue({ first: 0, second: "0" })
+    form.getElements(scope).at(0)!.setInitialInput({ first: 0, second: "0" })
 
     form.setElements((elements) => [setupElement(), ...elements])
     form.reset()
@@ -1149,7 +1149,7 @@ describe("after ImpulseFormList#getElements()#at()#setInitialValue()", () => {
       { first: false, second: false },
       { first: false, second: false },
     ])
-    expect(form.getOriginalValue(scope)).toStrictEqual([
+    expect(form.getInput(scope)).toStrictEqual([
       { first: 0, second: "0" },
       { first: 2, second: "2" },
     ])

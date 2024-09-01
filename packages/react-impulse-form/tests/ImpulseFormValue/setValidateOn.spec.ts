@@ -71,14 +71,14 @@ describe("setValidateOn(..)", () => {
     it("does not mark as validated for -> onChange when not dirty", ({
       scope,
     }) => {
-      const value = setup({ validateOn, initialValue: "" })
+      const value = setup({ validateOn, initialInput: "" })
 
       value.setValidateOn("onChange")
       expect(value.isValidated(scope)).toBe(false)
     })
 
     it("marks as validated for -> onChange when dirty", ({ scope }) => {
-      const value = setup({ validateOn, initialValue: "x" })
+      const value = setup({ validateOn, initialInput: "x" })
 
       value.setValidateOn("onChange")
       expect(value.isValidated(scope)).toBe(true)

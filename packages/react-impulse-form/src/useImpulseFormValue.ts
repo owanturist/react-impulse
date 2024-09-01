@@ -44,8 +44,8 @@ function normalizeOnFocusInvalid<TArgs extends ReadonlyArray<unknown>>(
   }
 }
 
-export function useImpulseFormValue<TOriginalValue, TOutput = TOriginalValue>(
-  form: ImpulseFormValue<TOriginalValue, TOutput>,
+export function useImpulseFormValue<TInput, TOutput = TInput>(
+  form: ImpulseFormValue<TInput, TOutput>,
   {
     shouldFocusWhenInvalid = true,
     onFocusInvalid,

@@ -7,11 +7,9 @@ import {
   useImpulseFormValue,
 } from "../src"
 
-const setup = <TOriginalValue, TValue = TOriginalValue>(
-  form: ImpulseFormValue<TOriginalValue, TValue>,
-  options?: UseImpulseFormValueOptions<
-    ImpulseFormValue<TOriginalValue, TValue>
-  >,
+const setup = <TInput, TOutput = TInput>(
+  form: ImpulseFormValue<TInput, TOutput>,
+  options?: UseImpulseFormValueOptions<ImpulseFormValue<TInput, TOutput>>,
 ) => {
   return renderHook((props) => useImpulseFormValue(props.form, props.options), {
     initialProps: { form, options },

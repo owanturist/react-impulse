@@ -3,11 +3,11 @@ import { Emitter } from "./Emitter"
 import { isPresent, isUndefined, isTruthy } from "./utils"
 
 export interface ImpulseFormParams {
+  "input.setter": unknown
+  "input.schema": unknown
+
   "output.schema": unknown
   "output.schema.verbose": unknown
-
-  "originalValue.setter": unknown
-  "originalValue.schema": unknown
 
   "flag.setter": unknown
   "flag.schema": unknown
@@ -248,7 +248,15 @@ export abstract class ImpulseForm<
 
   public abstract setTouched(setter: TParams["flag.setter"]): void
 
-  public abstract reset(resetter?: TParams["originalValue.setter"]): void
+  public abstract reset(resetter?: TParams["input.setter"]): void
+
+  public abstract getInput(scope: Scope): TParams["input.schema"]
+
+  public abstract setInput(setter: TParams["input.setter"]): void
+
+  public abstract getInitialInput(scope: Scope): TParams["input.schema"]
+
+  public abstract setInitialInput(setter: TParams["input.setter"]): void
 
   public abstract getOutput(scope: Scope): null | TParams["output.schema"]
   public abstract getOutput<TResult>(
@@ -258,16 +266,4 @@ export abstract class ImpulseForm<
       verbose: TParams["output.schema.verbose"],
     ) => TResult,
   ): TResult
-
-  public abstract getOriginalValue(
-    scope: Scope,
-  ): TParams["originalValue.schema"]
-
-  public abstract setOriginalValue(
-    setter: TParams["originalValue.setter"],
-  ): void
-
-  public abstract getInitialValue(scope: Scope): TParams["originalValue.schema"]
-
-  public abstract setInitialValue(setter: TParams["originalValue.setter"]): void
 }

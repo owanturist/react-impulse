@@ -8,8 +8,8 @@ const SLOWEST_ASYNC_MS = 1000
 
 const setupValue =
   (enchant?: (form: ImpulseFormValue<string>) => void) =>
-  (initialValue = "") => {
-    const form = ImpulseFormValue.of(initialValue, {
+  (initialInput = "") => {
+    const form = ImpulseFormValue.of(initialInput, {
       schema: z.string().max(2),
     })
 

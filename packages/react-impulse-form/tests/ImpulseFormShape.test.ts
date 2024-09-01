@@ -25,14 +25,14 @@ describe("ImpulseFormShape.of()", () => {
       }>
     >()
 
-    const originalValue = shape.getOriginalValue(scope)
+    const input = shape.getInput(scope)
 
-    expectTypeOf(originalValue).toEqualTypeOf<{
+    expectTypeOf(input).toEqualTypeOf<{
       readonly first: string
       readonly second: number
       readonly third: Array<boolean>
     }>()
-    expect(originalValue).toStrictEqual({
+    expect(input).toStrictEqual({
       first: "",
       second: 0,
       third: [false],
@@ -89,8 +89,8 @@ describe("ImpulseFormShape.of()", () => {
       second: ImpulseFormValue.of(0),
     })
 
-    expect(shape.fields.first.getOriginalValue(scope)).toBe("")
-    expect(shape.fields.second.getOriginalValue(scope)).toBe(0)
+    expect(shape.fields.first.getInput(scope)).toBe("")
+    expect(shape.fields.second.getInput(scope)).toBe(0)
   })
 
   it("allows to specify none-form fields", ({ scope }) => {
@@ -108,13 +108,13 @@ describe("ImpulseFormShape.of()", () => {
       }>
     >()
 
-    const originalValue = shape.getOriginalValue(scope)
-    expectTypeOf(originalValue).toEqualTypeOf<{
+    const input = shape.getInput(scope)
+    expectTypeOf(input).toEqualTypeOf<{
       readonly first: string
       readonly id: number
       readonly name: string
     }>()
-    expect(originalValue).toStrictEqual({
+    expect(input).toStrictEqual({
       first: "",
       id: 123,
       name: "john",
@@ -384,7 +384,7 @@ describe("ImpulseFormShape.of()", () => {
     })
   })
 
-  describe("ImpulseFormShapeOptions.initialValue", () => {
+  describe("ImpulseFormShapeOptions.initialInput", () => {
     it("specifies initial value", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
@@ -397,7 +397,7 @@ describe("ImpulseFormShape.of()", () => {
           fourth: ["anything"],
         },
         {
-          initialValue: {
+          initialInput: {
             first: "1",
             third: {
               one: false,
@@ -406,7 +406,7 @@ describe("ImpulseFormShape.of()", () => {
         },
       )
 
-      expect(shape.getInitialValue(scope)).toStrictEqual({
+      expect(shape.getInitialInput(scope)).toStrictEqual({
         first: "1",
         second: 0,
         third: {
@@ -415,7 +415,7 @@ describe("ImpulseFormShape.of()", () => {
         },
         fourth: ["anything"],
       })
-      expect(shape.getOriginalValue(scope)).toStrictEqual({
+      expect(shape.getInput(scope)).toStrictEqual({
         first: "",
         second: 0,
         third: {
@@ -429,16 +429,16 @@ describe("ImpulseFormShape.of()", () => {
     it("gets current initial value from setters", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
-          first: ImpulseFormValue.of("", { initialValue: "1" }),
+          first: ImpulseFormValue.of("", { initialInput: "1" }),
           second: ImpulseFormValue.of(0),
           third: ImpulseFormShape.of({
-            one: ImpulseFormValue.of(true, { initialValue: false }),
-            two: ImpulseFormValue.of([""], { initialValue: ["two"] }),
+            one: ImpulseFormValue.of(true, { initialInput: false }),
+            two: ImpulseFormValue.of([""], { initialInput: ["two"] }),
           }),
           fourth: ["anything"],
         },
         {
-          initialValue: (root) => {
+          initialInput: (root) => {
             expectTypeOf(root).toEqualTypeOf<{
               readonly first: string
               readonly second: number
@@ -501,7 +501,7 @@ describe("ImpulseFormShape.of()", () => {
         },
       )
 
-      expect(shape.getInitialValue(scope)).toStrictEqual({
+      expect(shape.getInitialInput(scope)).toStrictEqual({
         first: "1-first",
         second: 2,
         third: {
@@ -513,7 +513,7 @@ describe("ImpulseFormShape.of()", () => {
     })
   })
 
-  describe("ImpulseFormShapeOptions.originalValue", () => {
+  describe("ImpulseFormShapeOptions.input", () => {
     it("specifies initial value", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
@@ -526,7 +526,7 @@ describe("ImpulseFormShape.of()", () => {
           fourth: ["anything"],
         },
         {
-          originalValue: {
+          input: {
             first: "1",
             third: {
               one: false,
@@ -535,7 +535,7 @@ describe("ImpulseFormShape.of()", () => {
         },
       )
 
-      expect(shape.getInitialValue(scope)).toStrictEqual({
+      expect(shape.getInitialInput(scope)).toStrictEqual({
         first: "",
         second: 0,
         third: {
@@ -544,7 +544,7 @@ describe("ImpulseFormShape.of()", () => {
         },
         fourth: ["anything"],
       })
-      expect(shape.getOriginalValue(scope)).toStrictEqual({
+      expect(shape.getInput(scope)).toStrictEqual({
         first: "1",
         second: 0,
         third: {
@@ -567,7 +567,7 @@ describe("ImpulseFormShape.of()", () => {
           fourth: ["anything"],
         },
         {
-          originalValue: (root) => {
+          input: (root) => {
             expectTypeOf(root).toEqualTypeOf<{
               readonly first: string
               readonly second: number
@@ -630,7 +630,7 @@ describe("ImpulseFormShape.of()", () => {
         },
       )
 
-      expect(shape.getOriginalValue(scope)).toStrictEqual({
+      expect(shape.getInput(scope)).toStrictEqual({
         first: "1-first",
         second: 2,
         third: {
@@ -653,7 +653,7 @@ describe("ImpulseFormShape.of()", () => {
           fourth: ["anything"],
         },
         {
-          originalValue: {
+          input: {
             first: "1",
             third: {
               one: false,
@@ -662,7 +662,7 @@ describe("ImpulseFormShape.of()", () => {
         },
       )
 
-      expect(shape.getInitialValue(scope)).toStrictEqual({
+      expect(shape.getInitialInput(scope)).toStrictEqual({
         first: "",
         second: 0,
         third: {
@@ -721,7 +721,7 @@ describe("ImpulseFormShape.of()", () => {
               ]
             >
 
-            initialValue?: Setter<
+            initialInput?: Setter<
               {
                 readonly first?: Setter<string, [string, string]>
                 readonly second?: Setter<number, [number, number]>
@@ -767,7 +767,7 @@ describe("ImpulseFormShape.of()", () => {
               ]
             >
 
-            originalValue?: Setter<
+            input?: Setter<
               {
                 readonly first?: Setter<string, [string, string]>
                 readonly second?: Setter<number, [number, number]>
@@ -878,7 +878,7 @@ describe("ImpulseFormShape#getErrors()", () => {
       },
     })
 
-    shape.setOriginalValue({
+    shape.setInput({
       first: "12",
     })
     expect(shape.getErrors(scope)).toStrictEqual({
@@ -896,7 +896,7 @@ describe("ImpulseFormShape#getErrors()", () => {
       },
     })
 
-    shape.setOriginalValue({
+    shape.setInput({
       third: {
         two: ["1", "12"],
       },
@@ -1154,7 +1154,7 @@ describe("ImpulseFormShape#getOutput()", () => {
     expect(shape.getOutput(scope, arg(0))).toStrictEqual(value)
     expect(shape.getOutput(scope, arg(1))).toStrictEqual(value)
 
-    shape.setOriginalValue({
+    shape.setInput({
       second: -1,
       third: {
         two: ["1", "12"],
@@ -1526,7 +1526,7 @@ describe("ImpulseFormShape#setTouched()", () => {
   })
 })
 
-describe("ImpulseFormShape#setOriginalValue()", () => {
+describe("ImpulseFormShape#setInput()", () => {
   it("updates original value", ({ scope }) => {
     const shape = ImpulseFormShape.of({
       first: ImpulseFormValue.of(""),
@@ -1538,7 +1538,7 @@ describe("ImpulseFormShape#setOriginalValue()", () => {
       fourth: ["anything"],
     })
 
-    expect(shape.getOriginalValue(scope)).toStrictEqual({
+    expect(shape.getInput(scope)).toStrictEqual({
       first: "",
       second: 0,
       third: {
@@ -1548,13 +1548,13 @@ describe("ImpulseFormShape#setOriginalValue()", () => {
       fourth: ["anything"],
     })
 
-    shape.setOriginalValue({
+    shape.setInput({
       third: {
         one: false,
         two: undefined,
       },
     })
-    expect(shape.getOriginalValue(scope)).toStrictEqual({
+    expect(shape.getInput(scope)).toStrictEqual({
       first: "",
       second: 0,
       third: {
@@ -1564,12 +1564,12 @@ describe("ImpulseFormShape#setOriginalValue()", () => {
       fourth: ["anything"],
     })
 
-    shape.setOriginalValue({
+    shape.setInput({
       third: {
         two: (two) => [...two, "hi"],
       },
     })
-    expect(shape.getOriginalValue(scope)).toStrictEqual({
+    expect(shape.getInput(scope)).toStrictEqual({
       first: "",
       second: 0,
       third: {
@@ -1579,7 +1579,7 @@ describe("ImpulseFormShape#setOriginalValue()", () => {
       fourth: ["anything"],
     })
 
-    shape.setOriginalValue({
+    shape.setInput({
       first: "1",
       second: 2,
       third: {
@@ -1587,7 +1587,7 @@ describe("ImpulseFormShape#setOriginalValue()", () => {
         two: ["two"],
       },
     })
-    expect(shape.getOriginalValue(scope)).toStrictEqual({
+    expect(shape.getInput(scope)).toStrictEqual({
       first: "1",
       second: 2,
       third: {
@@ -1597,7 +1597,7 @@ describe("ImpulseFormShape#setOriginalValue()", () => {
       fourth: ["anything"],
     })
 
-    shape.setOriginalValue((root) => {
+    shape.setInput((root) => {
       expect(root).toStrictEqual({
         first: "1",
         second: 2,
@@ -1640,7 +1640,7 @@ describe("ImpulseFormShape#setOriginalValue()", () => {
         },
       }
     })
-    expect(shape.getOriginalValue(scope)).toStrictEqual({
+    expect(shape.getInput(scope)).toStrictEqual({
       first: "one",
       second: 3,
       third: {
@@ -1650,7 +1650,7 @@ describe("ImpulseFormShape#setOriginalValue()", () => {
       fourth: ["anything"],
     })
 
-    expectTypeOf(shape.getOriginalValue(scope)).toEqualTypeOf<{
+    expectTypeOf(shape.getInput(scope)).toEqualTypeOf<{
       readonly first: string
       readonly second: number
       readonly third: {
@@ -1660,12 +1660,12 @@ describe("ImpulseFormShape#setOriginalValue()", () => {
       readonly fourth: Array<string>
     }>()
 
-    expectTypeOf(shape.fields.third.getOriginalValue(scope)).toEqualTypeOf<{
+    expectTypeOf(shape.fields.third.getInput(scope)).toEqualTypeOf<{
       readonly one: boolean
       readonly two: Array<string>
     }>()
 
-    expectTypeOf(shape.setOriginalValue).parameter(0).toEqualTypeOf<
+    expectTypeOf(shape.setInput).parameter(0).toEqualTypeOf<
       Setter<
         {
           readonly first?: Setter<string, [string, string]>
@@ -1713,30 +1713,28 @@ describe("ImpulseFormShape#setOriginalValue()", () => {
       >
     >()
 
-    expectTypeOf(shape.fields.third.setOriginalValue)
-      .parameter(0)
-      .toEqualTypeOf<
-        Setter<
+    expectTypeOf(shape.fields.third.setInput).parameter(0).toEqualTypeOf<
+      Setter<
+        {
+          readonly one?: Setter<boolean, [boolean, boolean]>
+          readonly two?: Setter<Array<string>, [Array<string>, Array<string>]>
+        },
+        [
           {
-            readonly one?: Setter<boolean, [boolean, boolean]>
-            readonly two?: Setter<Array<string>, [Array<string>, Array<string>]>
+            readonly one: boolean
+            readonly two: Array<string>
           },
-          [
-            {
-              readonly one: boolean
-              readonly two: Array<string>
-            },
-            {
-              readonly one: boolean
-              readonly two: Array<string>
-            },
-          ]
-        >
-      >()
+          {
+            readonly one: boolean
+            readonly two: Array<string>
+          },
+        ]
+      >
+    >()
   })
 })
 
-describe("ImpulseFormShape#setInitialValue()", () => {
+describe("ImpulseFormShape#setInitialInput()", () => {
   it("updates initial value", ({ scope }) => {
     const shape = ImpulseFormShape.of({
       first: ImpulseFormValue.of(""),
@@ -1748,7 +1746,7 @@ describe("ImpulseFormShape#setInitialValue()", () => {
       fourth: ["anything"],
     })
 
-    expect(shape.getInitialValue(scope)).toStrictEqual({
+    expect(shape.getInitialInput(scope)).toStrictEqual({
       first: "",
       second: 0,
       third: {
@@ -1758,13 +1756,13 @@ describe("ImpulseFormShape#setInitialValue()", () => {
       fourth: ["anything"],
     })
 
-    shape.setInitialValue({
+    shape.setInitialInput({
       third: {
         one: false,
         two: undefined,
       },
     })
-    expect(shape.getInitialValue(scope)).toStrictEqual({
+    expect(shape.getInitialInput(scope)).toStrictEqual({
       first: "",
       second: 0,
       third: {
@@ -1774,12 +1772,12 @@ describe("ImpulseFormShape#setInitialValue()", () => {
       fourth: ["anything"],
     })
 
-    shape.setInitialValue({
+    shape.setInitialInput({
       third: {
         two: (two) => [...two, "hi"],
       },
     })
-    expect(shape.getInitialValue(scope)).toStrictEqual({
+    expect(shape.getInitialInput(scope)).toStrictEqual({
       first: "",
       second: 0,
       third: {
@@ -1789,7 +1787,7 @@ describe("ImpulseFormShape#setInitialValue()", () => {
       fourth: ["anything"],
     })
 
-    shape.setInitialValue({
+    shape.setInitialInput({
       first: "1",
       second: 2,
       third: {
@@ -1797,7 +1795,7 @@ describe("ImpulseFormShape#setInitialValue()", () => {
         two: ["two"],
       },
     })
-    expect(shape.getInitialValue(scope)).toStrictEqual({
+    expect(shape.getInitialInput(scope)).toStrictEqual({
       first: "1",
       second: 2,
       third: {
@@ -1807,7 +1805,7 @@ describe("ImpulseFormShape#setInitialValue()", () => {
       fourth: ["anything"],
     })
 
-    shape.setInitialValue((root) => {
+    shape.setInitialInput((root) => {
       expect(root).toStrictEqual({
         first: "1",
         second: 2,
@@ -1851,7 +1849,7 @@ describe("ImpulseFormShape#setInitialValue()", () => {
       }
     })
 
-    expect(shape.getInitialValue(scope)).toStrictEqual({
+    expect(shape.getInitialInput(scope)).toStrictEqual({
       first: "one",
       second: 3,
       third: {
@@ -1861,7 +1859,7 @@ describe("ImpulseFormShape#setInitialValue()", () => {
       fourth: ["anything"],
     })
 
-    expectTypeOf(shape.getInitialValue(scope)).toEqualTypeOf<{
+    expectTypeOf(shape.getInitialInput(scope)).toEqualTypeOf<{
       readonly first: string
       readonly second: number
       readonly third: {
@@ -1871,12 +1869,12 @@ describe("ImpulseFormShape#setInitialValue()", () => {
       readonly fourth: Array<string>
     }>()
 
-    expectTypeOf(shape.fields.third.getInitialValue(scope)).toEqualTypeOf<{
+    expectTypeOf(shape.fields.third.getInitialInput(scope)).toEqualTypeOf<{
       readonly one: boolean
       readonly two: Array<string>
     }>()
 
-    expectTypeOf(shape.setInitialValue).parameter(0).toEqualTypeOf<
+    expectTypeOf(shape.setInitialInput).parameter(0).toEqualTypeOf<
       Setter<
         {
           readonly first?: Setter<string, [string, string]>
@@ -1924,7 +1922,7 @@ describe("ImpulseFormShape#setInitialValue()", () => {
       >
     >()
 
-    expectTypeOf(shape.fields.third.setInitialValue).parameter(0).toEqualTypeOf<
+    expectTypeOf(shape.fields.third.setInitialInput).parameter(0).toEqualTypeOf<
       Setter<
         {
           readonly one?: Setter<boolean, [boolean, boolean]>
@@ -1974,7 +1972,7 @@ describe("ImpulseFormShape#isDirty()", () => {
       two: false,
     })
 
-    shape.fields.third.fields.one.setOriginalValue(false)
+    shape.fields.third.fields.one.setInput(false)
     expect(shape.fields.third.isDirty(scope)).toBe(true)
     expect(shape.fields.third.isDirty(scope, arg(0))).toStrictEqual({
       one: true,
@@ -2003,7 +2001,7 @@ describe("ImpulseFormShape#isDirty()", () => {
       },
     })
 
-    shape.fields.first.setOriginalValue("1")
+    shape.fields.first.setInput("1")
     expect(shape.fields.first.isDirty(scope)).toBe(true)
     expect(shape.isDirty(scope)).toBe(true)
     expect(shape.isDirty(scope, arg(0))).toStrictEqual({
@@ -2015,7 +2013,7 @@ describe("ImpulseFormShape#isDirty()", () => {
       },
     })
 
-    shape.fields.second.setOriginalValue(2)
+    shape.fields.second.setInput(2)
     expect(shape.fields.second.isDirty(scope)).toBe(true)
     expect(shape.isDirty(scope)).toBe(true)
     expect(shape.isDirty(scope, arg(0))).toStrictEqual({
@@ -2027,7 +2025,7 @@ describe("ImpulseFormShape#isDirty()", () => {
       },
     })
 
-    shape.fields.third.fields.two.setOriginalValue(["one", "two"])
+    shape.fields.third.fields.two.setInput(["one", "two"])
     expect(shape.fields.third.fields.two.isDirty(scope)).toBe(true)
     expect(shape.fields.third.isDirty(scope)).toBe(true)
     expect(shape.isDirty(scope)).toBe(true)
@@ -2125,7 +2123,7 @@ describe("ImpulseFormShape#reset()", () => {
         fourth: ["anything"],
       },
       {
-        initialValue: {
+        initialInput: {
           first: "1",
           second: 2,
           third: {
@@ -2145,8 +2143,8 @@ describe("ImpulseFormShape#reset()", () => {
       const shape = setup()
 
       reset(shape)
-      const originalValue = shape.getOriginalValue(scope)
-      expect(originalValue).toStrictEqual({
+      const input = shape.getInput(scope)
+      expect(input).toStrictEqual({
         first: "1",
         second: 2,
         third: {
@@ -2155,7 +2153,7 @@ describe("ImpulseFormShape#reset()", () => {
         },
         fourth: ["anything"],
       })
-      expect(shape.getInitialValue(scope)).toStrictEqual(originalValue)
+      expect(shape.getInitialInput(scope)).toStrictEqual(input)
       expect(shape.isDirty(scope)).toBe(false)
     })
   })
@@ -2166,8 +2164,8 @@ describe("ImpulseFormShape#reset()", () => {
     const shape = setup()
 
     shape.reset((_, current) => current)
-    const originalValue = shape.getOriginalValue(scope)
-    expect(originalValue).toStrictEqual({
+    const input = shape.getInput(scope)
+    expect(input).toStrictEqual({
       first: "",
       second: 0,
       third: {
@@ -2176,7 +2174,7 @@ describe("ImpulseFormShape#reset()", () => {
       },
       fourth: ["anything"],
     })
-    expect(shape.getInitialValue(scope)).toStrictEqual(originalValue)
+    expect(shape.getInitialInput(scope)).toStrictEqual(input)
     expect(shape.isDirty(scope)).toBe(false)
   })
 
@@ -2190,8 +2188,8 @@ describe("ImpulseFormShape#reset()", () => {
         two: undefined,
       },
     })
-    const originalValue = shape.getOriginalValue(scope)
-    expect(originalValue).toStrictEqual({
+    const input = shape.getInput(scope)
+    expect(input).toStrictEqual({
       first: "3",
       second: 2,
       third: {
@@ -2200,7 +2198,7 @@ describe("ImpulseFormShape#reset()", () => {
       },
       fourth: ["anything"],
     })
-    expect(shape.getInitialValue(scope)).toStrictEqual(originalValue)
+    expect(shape.getInitialInput(scope)).toStrictEqual(input)
     expect(shape.isDirty(scope)).toBe(false)
   })
 
@@ -2268,8 +2266,8 @@ describe("ImpulseFormShape#reset()", () => {
       }
     })
 
-    const originalValue = shape.getOriginalValue(scope)
-    expect(originalValue).toStrictEqual({
+    const input = shape.getInput(scope)
+    expect(input).toStrictEqual({
       first: "3",
       second: 4,
       third: {
@@ -2278,7 +2276,7 @@ describe("ImpulseFormShape#reset()", () => {
       },
       fourth: ["anything"],
     })
-    expect(shape.getInitialValue(scope)).toStrictEqual(originalValue)
+    expect(shape.getInitialInput(scope)).toStrictEqual(input)
     expect(shape.isDirty(scope)).toBe(false)
   })
 })
