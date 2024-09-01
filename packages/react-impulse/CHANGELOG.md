@@ -1,5 +1,11 @@
 # react-impulse
 
+## 2.0.3
+
+### Patch Changes
+
+- [#740](https://github.com/owanturist/react-impulse/pull/740) [`6dc8557`](https://github.com/owanturist/react-impulse/commit/6dc8557543ad678b30a89cb8b31bcc07230fa50f) Thanks [@owanturist](https://github.com/owanturist)! - Update dependencies.
+
 ## 2.0.2
 
 ### Patch Changes
@@ -24,43 +30,43 @@
     function useScopedCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
       callback: (scope: Scope, ...args: TArgs) => TResult,
       dependencies: DependencyList,
-    ): (...args: TArgs) => TResult;
+    ): (...args: TArgs) => TResult
     ```
   - `useImpulseMemo` -> `useScopedMemo`
     ```ts
     function useScopedMemo<TResult>(
       factory: (scope: Scope) => TResult,
       dependencies: DependencyList,
-    ): TResult;
+    ): TResult
     ```
   - `useImpulseEffect` -> `useScopedEffect`
     ```ts
     function useScopedEffect(
       effect: (scope: Scope) => Destructor,
       dependencies?: DependencyList,
-    ): void;
+    ): void
     ```
   - `useImpulseLayoutEffect` -> `useScopedLayoutEffect`
     ```ts
     function useScopedLayoutEffect(
       effect: (scope: Scope) => Destructor,
       dependencies?: DependencyList,
-    ): void;
+    ): void
     ```
   - `useWatchImpulse` -> `useScoped`
     ```ts
-    function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue;
+    function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue
     function useScoped<TResult>(
       factory: (scope: Scope) => TResult,
       dependencies?: DependencyList,
       options?: UseScopedOptions<TResult>,
-    ): TResult;
+    ): TResult
     ```
   - `watch` -> `scoped`
     ```ts
     export function scoped<TProps>(
       component: FC<PropsWithScope<TProps>>,
-    ): FC<PropsWithoutScope<TProps>>;
+    ): FC<PropsWithoutScope<TProps>>
     ```
 
 - d6fb9b0: Introduce optional dependencies argument for `useScoped`:
@@ -76,43 +82,43 @@
   It works the same way as `useEffect` dependencies argument - if the dependencies are not defined, the `factory` will be called on every render. Otherwise, it will be called only when the dependencies change.
 
   ```ts
-  const impulse = useImpulse(0);
+  const impulse = useImpulse(0)
 
   // before
   const count = useScoped(
     useCallback(
       (scope) => {
-        return impulse.getValue(scope);
+        return impulse.getValue(scope)
       },
       [impulse],
     ),
-  );
+  )
 
   // now
   const count = useScoped(
     (scope) => {
-      return impulse.getValue(scope);
+      return impulse.getValue(scope)
     },
     [impulse],
-  );
+  )
   ```
 
 - 232d0c1: Introduce [`ImpulseOptions`](./#impulseoptions) and [`UseScopedOptions`](./useScopedoptions) as a replacement for raw `compare` argument:
 
   ```ts
   // before
-  const impulse_1 = Impulse.of({ count: 0 }, shallowEqual);
-  const impulse_2 = impulse_1.clone((x) => x, shallowEqual);
-  const impulse_3 = useImpulse({ count: 0 }, shallowEqual);
-  const value = useScoped((scope) => impulse_2.getValue(scope), shallowEqual);
+  const impulse_1 = Impulse.of({ count: 0 }, shallowEqual)
+  const impulse_2 = impulse_1.clone((x) => x, shallowEqual)
+  const impulse_3 = useImpulse({ count: 0 }, shallowEqual)
+  const value = useScoped((scope) => impulse_2.getValue(scope), shallowEqual)
 
   // now
-  const impulse_1 = Impulse.of({ count: 0 }, { compare: shallowEqual });
-  const impulse_2 = impulse_1.clone((x) => x, { compare: shallowEqual });
-  const impulse_3 = useImpulse({ count: 0 }, { compare: shallowEqual });
+  const impulse_1 = Impulse.of({ count: 0 }, { compare: shallowEqual })
+  const impulse_2 = impulse_1.clone((x) => x, { compare: shallowEqual })
+  const impulse_3 = useImpulse({ count: 0 }, { compare: shallowEqual })
   const value = useScoped((scope) => impulse_2.getValue(scope), {
     compare: shallowEqual,
-  });
+  })
   ```
 
   The overall functionality is the same, but now it opens up a possibility to add more options in the future and helps TypeScript to distinguish options from other arguments (it was a problem with `compare` and other function arguments).
@@ -163,7 +169,7 @@
 - 94da9b6: Extends `useScoped` hook API with a shortcut for reading an `Impulse` value:
 
   ```ts
-  function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue;
+  function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue
   ```
 
   So now you it takes less code to read an `Impulse` value:
@@ -181,7 +187,7 @@
   function subscribe<T>(
     impulse: Impulse<T>,
     listener: (value: T) => void | VoidFunction,
-  ): void;
+  ): void
   ```
 
 - 4095b1a: Introduce [`useScopedCallback`](./#usescopedcallback).
@@ -213,20 +219,20 @@
 - d45e64a: Pass the `Scope` as 3rd argument to `Compare` function. Useful if it needs to compare values from impulses.
 
   ```ts
-  type Compare<T> = (left: T, right: T, scope: Scope) => boolean;
+  type Compare<T> = (left: T, right: T, scope: Scope) => boolean
   ```
 
 - 6e39e72: The `useScopedEffect` and `useScopedLayoutEffect` hooks do not enqueue a host component re-render when only scoped Impulses' values change.
 
   ```ts
-  const count = useImpulse(1);
+  const count = useImpulse(1)
 
   useScopedEffect(
     (scope) => {
-      console.log(count.getVAlue(scope));
+      console.log(count.getVAlue(scope))
     },
     [count],
-  );
+  )
   ```
 
   The effect above depends only on the `count` Impulse. The `useScopedEffect` hook used to trigger the host component's rerender, but now on `count.setValue(2)` the effect runs, and the host component does not re-render.
@@ -322,18 +328,18 @@
 - 18d3fa2: 🚀 feat: extends `Impulse.of` and `useImpulse` signature with an optional value type, the same way as `useState` does.
 
   ```ts
-  const count = Impulse.of(0); // Impulse<number>
-  const optionalCount = Impulse.of<number>(); // Impulse<number | undefined>
+  const count = Impulse.of(0) // Impulse<number>
+  const optionalCount = Impulse.of<number>() // Impulse<number | undefined>
 
   // same for useImpulse
-  const count = useImpulse(0); // number
-  const optionalCount = useImpulse<number>(); // number | undefined
+  const count = useImpulse(0) // number
+  const optionalCount = useImpulse<number>() // number | undefined
   ```
 
   before the changes you had to provide both the optional value initial (`undefined`) value and type explicitly:
 
   ```ts
-  const optionalCount = Impulse.of<number | undefined>(undefined); // Impulse<number | undefined>
+  const optionalCount = Impulse.of<number | undefined>(undefined) // Impulse<number | undefined>
   ```
 
 ## 1.1.1
