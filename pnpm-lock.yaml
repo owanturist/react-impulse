@@ -113,8 +113,8 @@ importers:
         specifier: ^18.3.1
         version: 18.3.1
       react-impulse:
-        specifier: ^2.0.3
-        version: link:../react-impulse
+        specifier: ^2.0.2
+        version: 2.0.2(react@18.3.1)
 
 packages:
 
@@ -4076,6 +4076,15 @@ packages:
       scheduler: 0.23.2
     dev: true
 
+  /react-impulse@2.0.2(react@18.3.1):
+    resolution: {integrity: sha512-CmbjRbfpl0JeSvg2REv4xwgzsZn8YqqlHGNKIz0kt7iGkCI5rU15wcPYLdZHrOhDmY8thNqpfd7DSTG4ohvazg==}
+    peerDependencies:
+      react: ^16.12.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.3.1
+      use-sync-external-store: 1.2.2(react@18.3.1)
+    dev: true
+
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
     dev: true
@@ -4883,7 +4892,6 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       react: 18.3.1
-    dev: false
 
   /vite-node@2.0.5(terser@5.31.6):
     resolution: {integrity: sha512-LdsW4pxj0Ot69FAoXZ1yTnA9bjGohr2yNBU7QKRxpz8ITSkhuDl6h3zS/tvgz4qrNjeRnvrWeXQ8ZF7Um4W00Q==}
