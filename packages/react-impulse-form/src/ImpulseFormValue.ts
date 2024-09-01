@@ -5,8 +5,6 @@ import {
   type Scope,
   Impulse,
   batch,
-  isFunction,
-  identity,
   untrack,
 } from "./dependencies"
 import {
@@ -16,6 +14,8 @@ import {
   resolveSetter,
   isUndefined,
   isNull,
+  isFunction,
+  params,
 } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
 import type { ImpulseFormSchema, Result } from "./ImpulseFormSchema"
@@ -319,7 +319,7 @@ export class ImpulseFormValue<
     select: (
       concise: null | ReadonlyArray<string>,
       verbose: null | ReadonlyArray<string>,
-    ) => TResult = identity as typeof select,
+    ) => TResult = params._first as typeof select,
   ): TResult {
     const result = this._validate(scope)
     const error =
@@ -348,7 +348,7 @@ export class ImpulseFormValue<
     select: (
       concise: boolean,
       verbose: boolean,
-    ) => TResult = identity as typeof select,
+    ) => TResult = params._first as typeof select,
   ): TResult {
     const validated =
       this._validated.getValue(scope) || this._errors.getValue(scope).length > 0
@@ -366,7 +366,7 @@ export class ImpulseFormValue<
     select: (
       concise: ValidateStrategy,
       verbose: ValidateStrategy,
-    ) => TResult = identity as typeof select,
+    ) => TResult = params._first as typeof select,
   ): TResult {
     const validateOn = this._validateOn.getValue(scope)
 
@@ -395,7 +395,7 @@ export class ImpulseFormValue<
     select: (
       concise: boolean,
       verbose: boolean,
-    ) => TResult = identity as typeof select,
+    ) => TResult = params._first as typeof select,
   ): TResult {
     const touched = this._touched.getValue(scope)
 
@@ -416,7 +416,7 @@ export class ImpulseFormValue<
   }
 
   public reset(
-    resetter: ImpulseFormValueOriginalValueSetter<TOriginalValue> = identity,
+    resetter: ImpulseFormValueOriginalValueSetter<TOriginalValue> = params._first,
   ): void {
     batch((scope) => {
       const resetValue = resolveSetter(
@@ -448,7 +448,7 @@ export class ImpulseFormValue<
     select: (
       concise: null | TValue,
       verbose: null | TValue,
-    ) => TResult = identity as typeof select,
+    ) => TResult = params._first as typeof select,
   ): TResult {
     const result = this._validate(scope)
     const value = result.success ? result.data : null

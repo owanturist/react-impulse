@@ -1,14 +1,6 @@
 import type Types from "ts-toolbelt"
 
-import {
-  type Scope,
-  batch,
-  identity,
-  isBoolean,
-  isFunction,
-  isTruthy,
-  isString,
-} from "./dependencies"
+import { type Scope, batch } from "./dependencies"
 import {
   type ComputeObject,
   isTrue,
@@ -16,6 +8,10 @@ import {
   resolveSetter,
   params,
   isUndefined,
+  isString,
+  isBoolean,
+  isFunction,
+  isTruthy,
 } from "./utils"
 import {
   type GetImpulseFormParam,
@@ -330,7 +326,7 @@ export class ImpulseFormShape<
     select: (
       concise: ImpulseFormShapeErrorSchema<TFields>,
       verbose: ImpulseFormShapeErrorSchemaVerbose<TFields>,
-    ) => TResult = identity as typeof select,
+    ) => TResult = params._first as typeof select,
   ): TResult {
     let errorsNone = true
     // make it easier for TS
@@ -444,7 +440,7 @@ export class ImpulseFormShape<
     select: (
       concise: ImpulseFormShapeValidateOnSchema<TFields>,
       verbose: ImpulseFormShapeValidateOnSchemaVerbose<TFields>,
-    ) => TResult = identity as typeof select,
+    ) => TResult = params._first as typeof select,
   ): TResult {
     // make it easier for TS
     const validateOnConcise = {} as Record<string, unknown>
@@ -566,7 +562,7 @@ export class ImpulseFormShape<
   }
 
   public reset(
-    resetter: ImpulseFormShapeOriginalValueSetter<TFields> = identity as typeof resetter,
+    resetter: ImpulseFormShapeOriginalValueSetter<TFields> = params._first as typeof resetter,
   ): void {
     batch((scope) => {
       const resetValue = isFunction(resetter)
@@ -594,7 +590,7 @@ export class ImpulseFormShape<
     select: (
       concise: null | ImpulseFormShapeValueSchema<TFields>,
       verbose: ImpulseFormShapeValueSchemaVerbose<TFields>,
-    ) => TResult = identity as typeof select,
+    ) => TResult = params._first as typeof select,
   ): TResult {
     let allValid = true
     // make it easier for TS

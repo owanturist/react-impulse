@@ -1,7 +1,7 @@
-import { equals, identity } from "remeda"
 import { z } from "zod"
 
 import { type Setter, type ImpulseForm, ImpulseFormValue } from "../src"
+import { arg } from "./common"
 
 describe("ImpulseFormValue.of()", () => {
   it("creates ImpulseFormValue without schema", ({ scope }) => {
@@ -223,16 +223,16 @@ describe("ImpulseFormValue#getValue()", () => {
     })
 
     expect(value.getValue(scope)).toBe("1")
-    expect(value.getValue(scope, identity)).toBe("1")
+    expect(value.getValue(scope, arg(0))).toBe("1")
     expect(value.getValue(scope, (_, verbose) => verbose)).toBe("1")
 
     value.setOriginalValue("12")
     expect(value.getValue(scope)).toBeNull()
-    expect(value.getValue(scope, identity)).toBeNull()
+    expect(value.getValue(scope, arg(0))).toBeNull()
     expect(value.getValue(scope, (_, verbose) => verbose)).toBeNull()
 
     expectTypeOf(value.getValue(scope)).toEqualTypeOf<null | string>()
-    expectTypeOf(value.getValue(scope, identity)).toEqualTypeOf<null | string>()
+    expectTypeOf(value.getValue(scope, arg(0))).toEqualTypeOf<null | string>()
     expectTypeOf(value.getValue(scope, (_, verbose) => verbose)).toEqualTypeOf<
       null | string
     >()
@@ -247,13 +247,13 @@ describe("ImpulseFormValue#getErrors()", () => {
     })
 
     expect(value.getErrors(scope)).toBeNull()
-    expect(value.getErrors(scope, identity)).toBeNull()
+    expect(value.getErrors(scope, arg(0))).toBeNull()
     expect(value.getErrors(scope, (_, verbose) => verbose)).toBeNull()
 
     value.setOriginalValue("12")
     const errors = ["String must contain at most 1 character(s)"]
     expect(value.getErrors(scope)).toStrictEqual(errors)
-    expect(value.getErrors(scope, identity)).toStrictEqual(errors)
+    expect(value.getErrors(scope, arg(0))).toStrictEqual(errors)
     expect(value.getErrors(scope, (_, verbose) => verbose)).toStrictEqual(
       errors,
     )
@@ -262,7 +262,7 @@ describe("ImpulseFormValue#getErrors()", () => {
       value.getErrors(scope),
     ).toEqualTypeOf<null | ReadonlyArray<string>>()
     expectTypeOf(
-      value.getErrors(scope, identity),
+      value.getErrors(scope, arg(0)),
     ).toEqualTypeOf<null | ReadonlyArray<string>>()
     expectTypeOf(
       value.getErrors(scope, (_, verbose) => verbose),
@@ -321,7 +321,7 @@ describe("ImpulseFormValue#isTouched()", () => {
     expect(value.isTouched(scope)).toBe(false)
 
     expectTypeOf(value.isTouched(scope)).toEqualTypeOf<boolean>()
-    expectTypeOf(value.isTouched(scope, identity)).toEqualTypeOf<boolean>()
+    expectTypeOf(value.isTouched(scope, arg(0))).toEqualTypeOf<boolean>()
     expectTypeOf(value.setTouched).parameter(0).toEqualTypeOf<Setter<boolean>>()
   })
 })
@@ -402,7 +402,8 @@ describe("ImpulseFormValue#isDirty()", () => {
       { type: "zero", value: 0 },
       {
         initialValue: { type: "zero", value: 0 },
-        isOriginalValueEqual: (left, right) => equals(left, right),
+        isOriginalValueEqual: (left, right) =>
+          left.type === right.type && left.value === right.value,
       },
     )
     expect(value.isDirty(scope)).toBe(false)
@@ -438,7 +439,7 @@ describe("ImpulseFormValue#isDirty()", () => {
 describe("ImpulseFormValue#reset()", () => {
   describe.each([
     ["without arguments", (form: ImpulseForm) => form.reset()],
-    ["with resetter=identity", (form: ImpulseForm) => form.reset(identity)],
+    ["with resetter=identity", (form: ImpulseForm) => form.reset(arg(0))],
   ])("%s", (_, reset) => {
     it("resets to initial value", ({ scope }) => {
       const value = ImpulseFormValue.of("", { initialValue: "1" })

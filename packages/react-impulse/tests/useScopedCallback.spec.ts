@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react"
 
 import { Impulse, useScoped, useScopedCallback } from "../src"
 
-const onCallback = vi.fn<[number], number>().mockImplementation((x) => x)
+const onCallback = vi.fn<(x: number) => number>().mockImplementation((x) => x)
 
 beforeEach(() => {
   onCallback.mockClear()

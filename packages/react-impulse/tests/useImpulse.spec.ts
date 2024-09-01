@@ -176,7 +176,7 @@ describe("with compare function", () => {
   })
 
   it("passes custom compare function", ({ scope }) => {
-    const compare = vi.fn<[number], boolean>()
+    const compare = vi.fn<(x: number) => boolean>()
     const { result } = renderHook(() => useImpulse<number>(0, { compare }))
 
     act(() => {

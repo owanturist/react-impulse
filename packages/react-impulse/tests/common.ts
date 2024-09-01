@@ -7,9 +7,9 @@ afterEach(() => {
 export abstract class Counter {
   public abstract readonly count: number
 
-  public static compare = vi.fn((prev, next) => {
+  public static compare = vi.fn((prev: Counter, next: Counter) => {
     return prev.count === next.count
-  }) satisfies Compare<Counter>
+  })
 
   public static merge(left: Counter, right: Counter, ...rest: Array<Counter>) {
     return {

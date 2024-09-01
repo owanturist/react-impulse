@@ -1,6 +1,6 @@
-import { type Scope, batch, untrack, Impulse, isTruthy } from "./dependencies"
+import { type Scope, batch, untrack, Impulse } from "./dependencies"
 import { Emitter } from "./Emitter"
-import { isPresent, isUndefined } from "./utils"
+import { isPresent, isUndefined, isTruthy } from "./utils"
 
 export interface ImpulseFormParams {
   "value.schema": unknown
