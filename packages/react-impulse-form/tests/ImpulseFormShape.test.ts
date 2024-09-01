@@ -38,7 +38,7 @@ describe("ImpulseFormShape.of()", () => {
       third: [false],
     })
 
-    const value = shape.getValue(scope)
+    const value = shape.getOutput(scope)
 
     expectTypeOf(value).toEqualTypeOf<null | {
       readonly first: string
@@ -74,7 +74,7 @@ describe("ImpulseFormShape.of()", () => {
       }>
     >()
 
-    const value = shape.getValue(scope)
+    const value = shape.getOutput(scope)
 
     expectTypeOf(value).toEqualTypeOf<null | {
       readonly first: boolean
@@ -120,7 +120,7 @@ describe("ImpulseFormShape.of()", () => {
       name: "john",
     })
 
-    const value = shape.getValue(scope)
+    const value = shape.getOutput(scope)
     expectTypeOf(value).toEqualTypeOf<null | {
       readonly first: string
       readonly id: number
@@ -1122,7 +1122,7 @@ describe("ImpulseFormShape#setErrors()", () => {
   })
 })
 
-describe("ImpulseFormShape#getValue()", () => {
+describe("ImpulseFormShape#getOutput()", () => {
   it("selects value", ({ scope }) => {
     const shape = ImpulseFormShape.of(
       {
@@ -1141,7 +1141,7 @@ describe("ImpulseFormShape#getValue()", () => {
       },
     )
 
-    const value = shape.getValue(scope)
+    const value = shape.getOutput(scope)
     expect(value).toStrictEqual({
       first: "",
       second: 0,
@@ -1151,8 +1151,8 @@ describe("ImpulseFormShape#getValue()", () => {
       },
       fourth: ["anything"],
     })
-    expect(shape.getValue(scope, arg(0))).toStrictEqual(value)
-    expect(shape.getValue(scope, arg(1))).toStrictEqual(value)
+    expect(shape.getOutput(scope, arg(0))).toStrictEqual(value)
+    expect(shape.getOutput(scope, arg(1))).toStrictEqual(value)
 
     shape.setOriginalValue({
       second: -1,
@@ -1160,9 +1160,9 @@ describe("ImpulseFormShape#getValue()", () => {
         two: ["1", "12"],
       },
     })
-    expect(shape.getValue(scope)).toBeNull()
-    expect(shape.getValue(scope, arg(0))).toBeNull()
-    expect(shape.getValue(scope, arg(1))).toStrictEqual({
+    expect(shape.getOutput(scope)).toBeNull()
+    expect(shape.getOutput(scope, arg(0))).toBeNull()
+    expect(shape.getOutput(scope, arg(1))).toStrictEqual({
       first: "",
       second: null,
       third: {
@@ -1172,7 +1172,7 @@ describe("ImpulseFormShape#getValue()", () => {
       fourth: ["anything"],
     })
 
-    expectTypeOf(shape.getValue(scope)).toEqualTypeOf<null | {
+    expectTypeOf(shape.getOutput(scope)).toEqualTypeOf<null | {
       readonly first: string
       readonly second: number
       readonly third: {
@@ -1181,7 +1181,7 @@ describe("ImpulseFormShape#getValue()", () => {
       }
       readonly fourth: Array<string>
     }>()
-    expectTypeOf(shape.getValue(scope, arg(0))).toEqualTypeOf<null | {
+    expectTypeOf(shape.getOutput(scope, arg(0))).toEqualTypeOf<null | {
       readonly first: string
       readonly second: number
       readonly third: {
@@ -1190,7 +1190,7 @@ describe("ImpulseFormShape#getValue()", () => {
       }
       readonly fourth: Array<string>
     }>()
-    expectTypeOf(shape.getValue(scope, arg(1))).toEqualTypeOf<{
+    expectTypeOf(shape.getOutput(scope, arg(1))).toEqualTypeOf<{
       readonly first: null | string
       readonly second: null | number
       readonly third: {

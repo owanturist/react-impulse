@@ -572,7 +572,7 @@ describe("ImpulseFormList#reset()", () => {
     ])
 
     form.reset()
-    expect(form.getValue(scope)).toStrictEqual([1, 2, 3])
+    expect(form.getOutput(scope)).toStrictEqual([1, 2, 3])
   })
 
   it("clears custom errors", ({ scope }) => {
@@ -610,7 +610,7 @@ describe("ImpulseFormList#reset()", () => {
     ])
 
     form.reset((initial) => initial.map((x) => x + 1))
-    expect(form.getValue(scope)).toStrictEqual([2, 3, 4])
+    expect(form.getOutput(scope)).toStrictEqual([2, 3, 4])
   })
 
   it("provides the original value to the resetter 2nd argument", ({
@@ -759,7 +759,7 @@ describe("ImpulseFormList#reset()", () => {
   })
 })
 
-describe("ImpulseFormList#getValue()", () => {
+describe("ImpulseFormList#getOutput()", () => {
   const setup = (elements: ReadonlyArray<ImpulseFormValue<number, string>>) => {
     return ImpulseFormList.of(elements, {
       validateOn: "onInit",
@@ -778,7 +778,7 @@ describe("ImpulseFormList#getValue()", () => {
   it("matches the type definition", ({ scope }) => {
     const form = setup([setupElement(0)])
 
-    expectTypeOf(form.getValue).toEqualTypeOf<{
+    expectTypeOf(form.getOutput).toEqualTypeOf<{
       (scope: Scope): null | ReadonlyArray<string>
 
       <TResult>(
@@ -790,7 +790,7 @@ describe("ImpulseFormList#getValue()", () => {
       ): TResult
     }>()
 
-    expectTypeOf(form.getElements(scope).at(0)!.getValue).toEqualTypeOf<{
+    expectTypeOf(form.getElements(scope).at(0)!.getOutput).toEqualTypeOf<{
       (scope: Scope): null | string
 
       <TResult>(
@@ -803,33 +803,33 @@ describe("ImpulseFormList#getValue()", () => {
   it("returns all items when valid", ({ scope }) => {
     const form = setup([setupElement(1), setupElement(2), setupElement(3)])
 
-    expect(form.getValue(scope)).toStrictEqual(["1", "2", "3"])
-    expect(form.getValue(scope, arg(0))).toStrictEqual(["1", "2", "3"])
-    expect(form.getValue(scope, arg(1))).toStrictEqual(["1", "2", "3"])
+    expect(form.getOutput(scope)).toStrictEqual(["1", "2", "3"])
+    expect(form.getOutput(scope, arg(0))).toStrictEqual(["1", "2", "3"])
+    expect(form.getOutput(scope, arg(1))).toStrictEqual(["1", "2", "3"])
   })
 
   it("returns empty array for empty list", ({ scope }) => {
     const form = setup([])
 
-    expect(form.getValue(scope)).toStrictEqual([])
-    expect(form.getValue(scope, arg(0))).toStrictEqual([])
-    expect(form.getValue(scope, arg(1))).toStrictEqual([])
+    expect(form.getOutput(scope)).toStrictEqual([])
+    expect(form.getOutput(scope, arg(0))).toStrictEqual([])
+    expect(form.getOutput(scope, arg(1))).toStrictEqual([])
   })
 
   it("returns null if a single element is not valid", ({ scope }) => {
     const form = setup([setupElement(0)])
 
-    expect(form.getValue(scope)).toBeNull()
-    expect(form.getValue(scope, arg(0))).toBeNull()
-    expect(form.getValue(scope, arg(1))).toStrictEqual([null])
+    expect(form.getOutput(scope)).toBeNull()
+    expect(form.getOutput(scope, arg(0))).toBeNull()
+    expect(form.getOutput(scope, arg(1))).toStrictEqual([null])
   })
 
   it("returns null if at least one element is not valid", ({ scope }) => {
     const form = setup([setupElement(1), setupElement(0), setupElement(3)])
 
-    expect(form.getValue(scope)).toBeNull()
-    expect(form.getValue(scope, arg(0))).toBeNull()
-    expect(form.getValue(scope, arg(1))).toStrictEqual(["1", null, "3"])
+    expect(form.getOutput(scope)).toBeNull()
+    expect(form.getOutput(scope, arg(0))).toBeNull()
+    expect(form.getOutput(scope, arg(1))).toStrictEqual(["1", null, "3"])
   })
 })
 
@@ -1067,7 +1067,7 @@ describe("ImpulseFormList#setInitialValue()", () => {
     ])
 
     form.setElements((elements) => elements.slice(0, 1))
-    expect(form.getValue(scope)).toStrictEqual([0])
+    expect(form.getOutput(scope)).toStrictEqual([0])
 
     expect(form.getInitialValue(scope)).toStrictEqual([0, 1])
     form.setInitialValue([3, 4])

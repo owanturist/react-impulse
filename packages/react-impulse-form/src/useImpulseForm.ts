@@ -5,7 +5,7 @@ import type { GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 export interface UseImpulseFormOptions<TForm extends ImpulseForm> {
   onSubmit?(
     this: void,
-    value: GetImpulseFormParam<TForm, "value.schema">,
+    output: GetImpulseFormParam<TForm, "output.schema">,
     form: TForm,
   ): void | Promise<unknown>
 }
@@ -18,9 +18,9 @@ export const useImpulseForm = <TForm extends ImpulseForm>(
 
   useEffect(() => {
     if (!isUndefined(onSubmitStable)) {
-      return form.onSubmit((value) => {
+      return form.onSubmit((output) => {
         return onSubmitStable(
-          value as GetImpulseFormParam<TForm, "value.schema">,
+          output as GetImpulseFormParam<TForm, "output.schema">,
           form,
         )
       })

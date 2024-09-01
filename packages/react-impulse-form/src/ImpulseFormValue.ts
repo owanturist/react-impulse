@@ -36,8 +36,6 @@ export interface ImpulseFormValueOptions<
   touched?: boolean
   schema?: ImpulseFormSchema<TValue, TOriginalValue>
 
-  // TODO add isOriginalValueDirty and isValueEqual (introduce _value: TransmittingImpulse<TValue>)
-
   /**
    * A compare function that determines whether the original value changes.
    * When it does, the ImpulseFormValue#getOriginalValue returns the new value.
@@ -76,10 +74,10 @@ export type ImpulseFormValueErrorsSetter = Setter<null | ReadonlyArray<string>>
 
 export class ImpulseFormValue<
   TOriginalValue,
-  TValue = TOriginalValue,
+  TInput = TOriginalValue,
 > extends ImpulseForm<{
-  "value.schema": TValue
-  "value.schema.verbose": null | TValue
+  "output.schema": TInput
+  "output.schema.verbose": null | TInput
 
   "originalValue.setter": ImpulseFormValueOriginalValueSetter<TOriginalValue>
   "originalValue.schema": TOriginalValue
@@ -164,7 +162,7 @@ export class ImpulseFormValue<
   protected constructor(
     root: null | ImpulseForm,
     private readonly _initial: Impulse<
-      undefined | ImpulseFormValue<TOriginalValue, TValue>
+      undefined | ImpulseFormValue<TOriginalValue, TInput>
     >,
     private readonly _touched: Impulse<boolean>,
     // TODO convert to undefined | ValidateStrategy so it can inherit from parent (List)
@@ -174,7 +172,7 @@ export class ImpulseFormValue<
     private readonly _initialValue: Impulse<TOriginalValue>,
     private readonly _originalValue: Impulse<TOriginalValue>,
     private readonly _schema: Impulse<
-      undefined | ImpulseFormSchema<TValue, TOriginalValue>
+      undefined | ImpulseFormSchema<TInput, TOriginalValue>
     >,
     private readonly _isOriginalValueEqual: Impulse<Compare<TOriginalValue>>,
   ) {
@@ -210,7 +208,7 @@ export class ImpulseFormValue<
 
   private _validate(
     scope: Scope,
-  ): Result<ReadonlyArray<string>, null | TValue> {
+  ): Result<ReadonlyArray<string>, null | TInput> {
     const errors = this._errors.getValue(scope)
 
     if (errors.length > 0) {
@@ -221,7 +219,7 @@ export class ImpulseFormValue<
     const schema = this._schema.getValue(scope)
 
     if (isUndefined(schema)) {
-      return { success: true, data: value as unknown as TValue }
+      return { success: true, data: value as unknown as TInput }
     }
 
     if (!this._validated.getValue(scope)) {
@@ -257,7 +255,7 @@ export class ImpulseFormValue<
   // TODO add tests against _validated when cloning
   protected _childOf(
     parent: null | ImpulseForm,
-  ): ImpulseFormValue<TOriginalValue, TValue> {
+  ): ImpulseFormValue<TOriginalValue, TInput> {
     return new ImpulseFormValue(
       parent,
       this._initial.clone(),
@@ -273,7 +271,7 @@ export class ImpulseFormValue<
   }
 
   protected _setInitial(
-    initial: undefined | ImpulseFormValue<TOriginalValue, TValue>,
+    initial: undefined | ImpulseFormValue<TOriginalValue, TInput>,
     isRoot: boolean,
   ): void {
     batch((scope) => {
@@ -295,7 +293,7 @@ export class ImpulseFormValue<
 
   protected _isDirty<TResult>(
     scope: Scope,
-    initial: ImpulseFormValue<TOriginalValue, TValue>,
+    initial: ImpulseFormValue<TOriginalValue, TInput>,
     select: (concise: boolean, verbose: boolean, dirty: boolean) => TResult,
   ): TResult {
     const initialValue = initial.getInitialValue(scope)
@@ -410,7 +408,7 @@ export class ImpulseFormValue<
   }
 
   public setSchema(
-    schema: null | ImpulseFormSchema<TValue, TOriginalValue>,
+    schema: null | ImpulseFormSchema<TInput, TOriginalValue>,
   ): void {
     this._schema.setValue(schema ?? undefined)
   }
@@ -438,22 +436,22 @@ export class ImpulseFormValue<
     this._isOriginalValueEqual.setValue(setter)
   }
 
-  public getValue(scope: Scope): null | TValue
-  public getValue<TResult>(
+  public getOutput(scope: Scope): null | TInput
+  public getOutput<TResult>(
     scope: Scope,
-    select: (concise: null | TValue, verbose: null | TValue) => TResult,
+    select: (concise: null | TInput, verbose: null | TInput) => TResult,
   ): TResult
-  public getValue<TResult = null | TValue>(
+  public getOutput<TResult = null | TInput>(
     scope: Scope,
     select: (
-      concise: null | TValue,
-      verbose: null | TValue,
+      concise: null | TInput,
+      verbose: null | TInput,
     ) => TResult = params._first as typeof select,
   ): TResult {
     const result = this._validate(scope)
-    const value = result.success ? result.data : null
+    const output = result.success ? result.data : null
 
-    return select(value, value)
+    return select(output, output)
   }
 
   public getOriginalValue(scope: Scope): TOriginalValue {

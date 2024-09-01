@@ -76,11 +76,11 @@ function setFormElements<
   })
 }
 
-export type ImpulseFormListValueSchema<TElement extends ImpulseForm> =
-  ReadonlyArray<GetImpulseFormParam<TElement, "value.schema">>
+export type ImpulseFormListOutputSchema<TElement extends ImpulseForm> =
+  ReadonlyArray<GetImpulseFormParam<TElement, "output.schema">>
 
-export type ImpulseFormListValueSchemaVerbose<TElement extends ImpulseForm> =
-  ReadonlyArray<GetImpulseFormParam<TElement, "value.schema.verbose">>
+export type ImpulseFormListOutputSchemaVerbose<TElement extends ImpulseForm> =
+  ReadonlyArray<GetImpulseFormParam<TElement, "output.schema.verbose">>
 
 export type ImpulseFormListOriginalValueSchema<TElement extends ImpulseForm> =
   ReadonlyArray<GetImpulseFormParam<TElement, "originalValue.schema">>
@@ -149,8 +149,8 @@ export interface ImpulseFormListOptions<TElement extends ImpulseForm> {
 export class ImpulseFormList<
   TElement extends ImpulseForm = ImpulseForm,
 > extends ImpulseForm<{
-  "value.schema": ImpulseFormListValueSchema<TElement>
-  "value.schema.verbose": ImpulseFormListValueSchemaVerbose<TElement>
+  "output.schema": ImpulseFormListOutputSchema<TElement>
+  "output.schema.verbose": ImpulseFormListOutputSchemaVerbose<TElement>
 
   "originalValue.setter": ImpulseFormListOriginalValueSetter<TElement>
   "originalValue.schema": ImpulseFormListOriginalValueSchema<TElement>
@@ -243,13 +243,13 @@ export class ImpulseFormList<
   }
 
   protected _submitWith(
-    value: ImpulseFormListValueSchema<TElement>,
+    output: ImpulseFormListOutputSchema<TElement>,
   ): ReadonlyArray<void | Promise<unknown>> {
     const promises = untrack(this._elements).flatMap((element, index) => {
-      return ImpulseForm._submitWith(element, value[index])
+      return ImpulseForm._submitWith(element, output[index])
     })
 
-    return [...super._submitWith(value), ...promises]
+    return [...super._submitWith(output), ...promises]
   }
 
   protected _getFocusFirstInvalidValue(): VoidFunction | null {
@@ -569,28 +569,28 @@ export class ImpulseFormList<
     })
   }
 
-  public getValue(scope: Scope): null | ImpulseFormListValueSchema<TElement>
-  public getValue<TResult>(
+  public getOutput(scope: Scope): null | ImpulseFormListOutputSchema<TElement>
+  public getOutput<TResult>(
     scope: Scope,
     select: (
-      concise: null | ImpulseFormListValueSchema<TElement>,
-      verbose: ImpulseFormListValueSchemaVerbose<TElement>,
+      concise: null | ImpulseFormListOutputSchema<TElement>,
+      verbose: ImpulseFormListOutputSchemaVerbose<TElement>,
     ) => TResult,
   ): TResult
-  public getValue<TResult = null | ImpulseFormListValueSchema<TElement>>(
+  public getOutput<TResult = null | ImpulseFormListOutputSchema<TElement>>(
     scope: Scope,
     select: (
-      concise: null | ImpulseFormListValueSchema<TElement>,
-      verbose: ImpulseFormListValueSchemaVerbose<TElement>,
+      concise: null | ImpulseFormListOutputSchema<TElement>,
+      verbose: ImpulseFormListOutputSchemaVerbose<TElement>,
     ) => TResult = params._first as typeof select,
   ): TResult {
     const [concise, verbose] = zipMap(
       //
       this._elements.getValue(scope),
-      (form) => form.getValue(scope, params),
+      (form) => form.getOutput(scope, params),
     ) as [
-      ImpulseFormListValueSchema<TElement>,
-      ImpulseFormListValueSchemaVerbose<TElement>,
+      ImpulseFormListOutputSchema<TElement>,
+      ImpulseFormListOutputSchemaVerbose<TElement>,
     ]
 
     return select(concise.some(isNull) ? null : concise, verbose)

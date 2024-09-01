@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import { type Setter, type ImpulseForm, ImpulseFormValue } from "../src"
+
 import { arg } from "./common"
 
 describe("ImpulseFormValue.of()", () => {
@@ -11,7 +12,7 @@ describe("ImpulseFormValue.of()", () => {
     expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<number, number>>()
 
     expect(value.getOriginalValue(scope)).toBe(1)
-    expect(value.getValue(scope)).toBe(1)
+    expect(value.getOutput(scope)).toBe(1)
   })
 
   it("creates ImpulseFormValue with same type schema", ({ scope }) => {
@@ -24,11 +25,11 @@ describe("ImpulseFormValue.of()", () => {
     expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<string, string>>()
 
     expect(value.getOriginalValue(scope)).toBe("")
-    expect(value.getValue(scope)).toBeNull()
+    expect(value.getOutput(scope)).toBeNull()
 
     value.setOriginalValue(" 123 ")
     expect(value.getOriginalValue(scope)).toBe(" 123 ")
-    expect(value.getValue(scope)).toBe("123")
+    expect(value.getOutput(scope)).toBe("123")
   })
 
   it("creates ImpulseFormValue with different type schema", ({ scope }) => {
@@ -40,11 +41,11 @@ describe("ImpulseFormValue.of()", () => {
     expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<string, number>>()
 
     expect(value.getOriginalValue(scope)).toBe("")
-    expect(value.getValue(scope)).toBeNull()
+    expect(value.getOutput(scope)).toBeNull()
 
     value.setOriginalValue(" 123 ")
     expect(value.getOriginalValue(scope)).toBe(" 123 ")
-    expect(value.getValue(scope)).toBe(123)
+    expect(value.getOutput(scope)).toBe(123)
   })
 
   it("creates ImpulseFormValue with complex value", ({ scope }) => {
@@ -78,13 +79,13 @@ describe("ImpulseFormValue.of()", () => {
       type: "",
       value: "",
     })
-    expect(value.getValue(scope)).toBeNull()
+    expect(value.getOutput(scope)).toBeNull()
 
     value.setOriginalValue((current) => ({ ...current, type: "first" }))
-    expect(value.getValue(scope)).toBeNull()
+    expect(value.getOutput(scope)).toBeNull()
 
     value.setOriginalValue((current) => ({ ...current, value: "true" }))
-    expect(value.getValue(scope)).toStrictEqual({
+    expect(value.getOutput(scope)).toStrictEqual({
       type: "first",
       value: true,
     })
@@ -99,7 +100,7 @@ describe("ImpulseFormValue.of()", () => {
     expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<string, number>>()
 
     expect(value.getOriginalValue(scope)).toBe("1")
-    expect(value.getValue(scope)).toBe("1")
+    expect(value.getOutput(scope)).toBe("1")
   })
 
   it("does not allow to specify schema Input different from TOriginalValue", ({
@@ -112,7 +113,7 @@ describe("ImpulseFormValue.of()", () => {
     })
 
     expect(value.getOriginalValue(scope)).toBe("1")
-    expect(value.getValue(scope)).toBe(1)
+    expect(value.getOutput(scope)).toBe(1)
   })
 
   it("does not allow to specify schema Output different from TValue", ({
@@ -125,7 +126,7 @@ describe("ImpulseFormValue.of()", () => {
     })
 
     expect(value.getOriginalValue(scope)).toBe(0)
-    expect(value.getValue(scope)).toBe(0)
+    expect(value.getOutput(scope)).toBe(0)
   })
 
   it("specifies initial touched", ({ scope }) => {
@@ -195,24 +196,24 @@ describe("ImpulseFormValue.of()", () => {
   })
 })
 
-describe("ImpulseFormValue#getValue()", () => {
+describe("ImpulseFormValue#getOutput()", () => {
   it("does not select value when not validated", ({ scope }) => {
     const value = ImpulseFormValue.of("1", {
       schema: z.string().max(1),
     })
 
-    expect(value.getValue(scope)).toBeNull()
+    expect(value.getOutput(scope)).toBeNull()
     expect(value.getErrors(scope)).toBeNull()
 
     value.setTouched(true)
-    expect(value.getValue(scope)).toBe("1")
+    expect(value.getOutput(scope)).toBe("1")
     expect(value.getErrors(scope)).toBeNull()
   })
 
   it("selects value when not validated without schema", ({ scope }) => {
     const value = ImpulseFormValue.of("1")
 
-    expect(value.getValue(scope)).toBe("1")
+    expect(value.getOutput(scope)).toBe("1")
     expect(value.getErrors(scope)).toBeNull()
   })
 
@@ -222,18 +223,18 @@ describe("ImpulseFormValue#getValue()", () => {
       validateOn: "onInit",
     })
 
-    expect(value.getValue(scope)).toBe("1")
-    expect(value.getValue(scope, arg(0))).toBe("1")
-    expect(value.getValue(scope, (_, verbose) => verbose)).toBe("1")
+    expect(value.getOutput(scope)).toBe("1")
+    expect(value.getOutput(scope, arg(0))).toBe("1")
+    expect(value.getOutput(scope, (_, verbose) => verbose)).toBe("1")
 
     value.setOriginalValue("12")
-    expect(value.getValue(scope)).toBeNull()
-    expect(value.getValue(scope, arg(0))).toBeNull()
-    expect(value.getValue(scope, (_, verbose) => verbose)).toBeNull()
+    expect(value.getOutput(scope)).toBeNull()
+    expect(value.getOutput(scope, arg(0))).toBeNull()
+    expect(value.getOutput(scope, (_, verbose) => verbose)).toBeNull()
 
-    expectTypeOf(value.getValue(scope)).toEqualTypeOf<null | string>()
-    expectTypeOf(value.getValue(scope, arg(0))).toEqualTypeOf<null | string>()
-    expectTypeOf(value.getValue(scope, (_, verbose) => verbose)).toEqualTypeOf<
+    expectTypeOf(value.getOutput(scope)).toEqualTypeOf<null | string>()
+    expectTypeOf(value.getOutput(scope, arg(0))).toEqualTypeOf<null | string>()
+    expectTypeOf(value.getOutput(scope, (_, verbose) => verbose)).toEqualTypeOf<
       null | string
     >()
   })

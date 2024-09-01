@@ -41,13 +41,13 @@ type ImpulseFormShapeParam<
   >
 >
 
-export type ImpulseFormShapeValueSchema<
+export type ImpulseFormShapeOutputSchema<
   TFields extends ImpulseFormShapeFields,
-> = ImpulseFormShapeParam<TFields, "value.schema", "field">
+> = ImpulseFormShapeParam<TFields, "output.schema", "field">
 
-export type ImpulseFormShapeValueSchemaVerbose<
+export type ImpulseFormShapeOutputSchemaVerbose<
   TFields extends ImpulseFormShapeFields,
-> = ImpulseFormShapeParam<TFields, "value.schema.verbose", "field">
+> = ImpulseFormShapeParam<TFields, "output.schema.verbose", "field">
 
 export type ImpulseFormShapeOriginalValueSchema<
   TFields extends ImpulseFormShapeFields,
@@ -120,8 +120,8 @@ export interface ImpulseFormShapeOptions<
 export class ImpulseFormShape<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
 > extends ImpulseForm<{
-  "value.schema": ImpulseFormShapeValueSchema<TFields>
-  "value.schema.verbose": ImpulseFormShapeValueSchemaVerbose<TFields>
+  "output.schema": ImpulseFormShapeOutputSchema<TFields>
+  "output.schema.verbose": ImpulseFormShapeOutputSchemaVerbose<TFields>
 
   "originalValue.setter": ImpulseFormShapeOriginalValueSetter<TFields>
   "originalValue.schema": ImpulseFormShapeOriginalValueSchema<TFields>
@@ -198,28 +198,28 @@ export class ImpulseFormShape<
     const acc = {} as Record<keyof TFields, TResult>
 
     for (const [key, field] of Object.entries(this.fields)) {
-      const value = ImpulseForm.isImpulseForm(field)
+      const result = ImpulseForm.isImpulseForm(field)
         ? fn(field, key)
         : (field as TResult)
 
-      acc[key as keyof typeof acc] = value
+      acc[key as keyof typeof acc] = result
     }
 
     return acc
   }
 
   protected _submitWith(
-    value: ImpulseFormShapeValueSchema<TFields>,
+    output: ImpulseFormShapeOutputSchema<TFields>,
   ): ReadonlyArray<void | Promise<unknown>> {
     const promises = Object.entries(this.fields).flatMap(([key, field]) => {
       if (!ImpulseForm.isImpulseForm(field)) {
         return []
       }
 
-      return ImpulseForm._submitWith(field, value[key as keyof typeof value])
+      return ImpulseForm._submitWith(field, output[key as keyof typeof output])
     })
 
-    return [...super._submitWith(value), ...promises]
+    return [...super._submitWith(output), ...promises]
   }
 
   protected _getFocusFirstInvalidValue(): VoidFunction | null {
@@ -577,19 +577,19 @@ export class ImpulseFormShape<
     })
   }
 
-  public getValue(scope: Scope): null | ImpulseFormShapeValueSchema<TFields>
-  public getValue<TResult>(
+  public getOutput(scope: Scope): null | ImpulseFormShapeOutputSchema<TFields>
+  public getOutput<TResult>(
     scope: Scope,
     select: (
-      concise: null | ImpulseFormShapeValueSchema<TFields>,
-      verbose: ImpulseFormShapeValueSchemaVerbose<TFields>,
+      concise: null | ImpulseFormShapeOutputSchema<TFields>,
+      verbose: ImpulseFormShapeOutputSchemaVerbose<TFields>,
     ) => TResult,
   ): TResult
-  public getValue<TResult = null | ImpulseFormShapeValueSchema<TFields>>(
+  public getOutput<TResult = null | ImpulseFormShapeOutputSchema<TFields>>(
     scope: Scope,
     select: (
-      concise: null | ImpulseFormShapeValueSchema<TFields>,
-      verbose: ImpulseFormShapeValueSchemaVerbose<TFields>,
+      concise: null | ImpulseFormShapeOutputSchema<TFields>,
+      verbose: ImpulseFormShapeOutputSchemaVerbose<TFields>,
     ) => TResult = params._first as typeof select,
   ): TResult {
     let allValid = true
@@ -599,14 +599,14 @@ export class ImpulseFormShape<
 
     for (const [key, field] of Object.entries(this.fields)) {
       if (ImpulseForm.isImpulseForm(field)) {
-        const value = field.getValue(scope, (concise, verbose) => ({
+        const output = field.getOutput(scope, (concise, verbose) => ({
           concise,
           verbose,
         }))
 
-        allValid = allValid && value.concise !== null
-        valueConcise[key] = value.concise
-        valueVerbose[key] = value.verbose
+        allValid = allValid && output.concise !== null
+        valueConcise[key] = output.concise
+        valueVerbose[key] = output.verbose
       } else {
         valueConcise[key] = field
         valueVerbose[key] = field
@@ -615,9 +615,9 @@ export class ImpulseFormShape<
 
     return select(
       allValid
-        ? (valueConcise as unknown as ImpulseFormShapeValueSchema<TFields>)
+        ? (valueConcise as unknown as ImpulseFormShapeOutputSchema<TFields>)
         : null,
-      valueVerbose as unknown as ImpulseFormShapeValueSchemaVerbose<TFields>,
+      valueVerbose as unknown as ImpulseFormShapeOutputSchemaVerbose<TFields>,
     )
   }
 
