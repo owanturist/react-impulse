@@ -1,5 +1,24 @@
 # react-impulse-form
 
+## 0.4.0
+
+### Minor Changes
+
+- [#695](https://github.com/owanturist/react-impulse/pull/695) [`33e677d`](https://github.com/owanturist/react-impulse/commit/33e677dfe94e06fcf10cd04f5e0afe9facbbe5bb) Thanks [@owanturist](https://github.com/owanturist)! - 1. `ImpulseForm#setInitialValue` receives two parameters in the callback:
+  - initial value
+  - current (original) value
+  1. `ImpulseForm#setOriginalValue` receives two parameters in the callback:
+     - current (original) value
+     - initial value
+  1. `ImpulseFormList#reset` and `ImpulseFormList#isDirty` work correctly for removed/added items (Resolves #694)
+
+### Patch Changes
+
+- [#739](https://github.com/owanturist/react-impulse/pull/739) [`aef4d6d`](https://github.com/owanturist/react-impulse/commit/aef4d6d805c0513c11a6fd989f9d878dea57e1bd) Thanks [@owanturist](https://github.com/owanturist)! - Update dependencies. Replace `remeda` by custom functions.
+
+- Updated dependencies [[`aef4d6d`](https://github.com/owanturist/react-impulse/commit/aef4d6d805c0513c11a6fd989f9d878dea57e1bd)]:
+  - react-impulse@2.0.3
+
 ## 0.3.2
 
 ### Patch Changes
@@ -40,37 +59,37 @@
 
   - ```ts
     abstract class ImpulseForm {
-      isSubmitting(scope: Scope): boolean;
+      isSubmitting(scope: Scope): boolean
 
-      getSubmitCount(scope: Scope): number;
+      getSubmitCount(scope: Scope): number
 
       onSubmit(
         listener: (value: TParams["value.schema"]) => void | Promise<unknown>,
-      ): VoidFunction;
+      ): VoidFunction
 
-      submit(): Promise<void>;
+      submit(): Promise<void>
 
-      focusFirstInvalidValue(): void;
+      focusFirstInvalidValue(): void
 
-      isValidated(scope: Scope): boolean;
+      isValidated(scope: Scope): boolean
       isValidated<TResult>(
         scope: Scope,
         select: (
           concise: TParams["flag.schema"],
           verbose: TParams["flag.schema.verbose"],
         ) => TResult,
-      ): TResult;
+      ): TResult
 
-      getValidateOn(scope: Scope): TParams["validateOn.schema"];
+      getValidateOn(scope: Scope): TParams["validateOn.schema"]
       getValidateOn<TResult>(
         scope: Scope,
         select: (
           concise: TParams["validateOn.schema"],
           verbose: TParams["validateOn.schema.verbose"],
         ) => TResult,
-      ): TResult;
+      ): TResult
 
-      setValidateOn(setter: TParams["validateOn.setter"]): void;
+      setValidateOn(setter: TParams["validateOn.setter"]): void
     }
     ```
 
@@ -80,7 +99,7 @@
     class ImpulseFormValue {
       onFocusWhenInvalid(
         onFocus: (errors: ReadonlyArray<string>) => void,
-      ): VoidFunction;
+      ): VoidFunction
     }
     ```
 
