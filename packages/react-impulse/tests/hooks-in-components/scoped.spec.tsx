@@ -1,5 +1,8 @@
 import { render, screen, fireEvent, act, waitFor } from "@testing-library/react"
-import React, { type ForwardRefRenderFunction } from "react"
+import React, {
+  type ForwardRefRenderFunction,
+  type PropsWithoutRef,
+} from "react"
 
 import {
   Impulse,
@@ -607,16 +610,21 @@ describe("scoped.forwardRef()", () => {
     [
       "React.forwardRef(scoped())",
       <TRef, TProps>(
-        renderFn: React.ForwardRefRenderFunction<TRef, PropsWithScope<TProps>>,
+        renderFn: React.ForwardRefRenderFunction<
+          TRef,
+          PropsWithoutRef<PropsWithScope<TProps>>
+        >,
       ): React.ForwardRefExoticComponent<
         ForwardedPropsWithoutScope<TRef, TProps>
       > => {
-        return React.forwardRef(
+        const x = React.forwardRef(
           scoped(renderFn) as ForwardRefRenderFunction<
             TRef,
-            PropsWithoutScope<TProps>
+            PropsWithoutRef<PropsWithoutScope<TProps>>
           >,
         )
+
+        return x
       },
     ],
   ])("should pass the reference with %s", (_, forwardRef) => {
