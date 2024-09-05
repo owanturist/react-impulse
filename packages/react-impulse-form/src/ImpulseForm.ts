@@ -79,14 +79,13 @@ export abstract class ImpulseForm<
   protected static _isDirty<TParams extends ImpulseFormParams, TResult>(
     scope: Scope,
     form: ImpulseForm<TParams>,
-    initial: ImpulseForm<TParams>,
     select: (
       concise: TParams["flag.schema"],
       verbose: TParams["flag.schema.verbose"],
       dirty: TParams["flag.schema.verbose"],
     ) => TResult,
   ): TResult {
-    return form._isDirty(scope, initial, select)
+    return form._isDirty(scope, select)
   }
 
   // necessary for type inference
@@ -119,7 +118,6 @@ export abstract class ImpulseForm<
 
   protected abstract _isDirty<TResult>(
     scope: Scope,
-    form: ImpulseForm<TParams>,
     select: (
       concise: TParams["flag.schema"],
       verbose: TParams["flag.schema.verbose"],
@@ -203,7 +201,7 @@ export abstract class ImpulseForm<
       verbose: TParams["flag.schema.verbose"],
     ) => boolean = isTruthy,
   ): boolean {
-    return this._isDirty(scope, this, select)
+    return this._isDirty(scope, select)
   }
 
   public abstract getErrors(scope: Scope): TParams["errors.schema"]

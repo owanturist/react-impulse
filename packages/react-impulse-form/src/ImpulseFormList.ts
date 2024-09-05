@@ -291,7 +291,6 @@ export class ImpulseFormList<
    */
   protected _isDirty<TResult>(
     scope: Scope,
-    initial: ImpulseFormList<TElement>,
     select: (
       concise: ImpulseFormListFlagSchema<TElement>,
       verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
@@ -299,27 +298,20 @@ export class ImpulseFormList<
     ) => TResult,
   ): TResult {
     const elements = this._elements.getValue(scope)
-    const initialElements = initial._initialElements.getValue(scope)
+    const initialElements = this._initialElements.getValue(scope)
+    const minLength = Math.min(elements.length, initialElements.length)
 
     const [concise, verbose, dirty] = zipMap(
       // the result should always include the longer array
-      elements.length >= initialElements.length
-        ? elements
-        : // fill the shorter elements with initial elements
-          [...elements, ...initialElements.slice(elements.length)],
+      [...elements, ...initialElements.slice(elements.length)],
       (form, index) => {
         // return actual dirty state as long as iterates over elements
-        if (index < initialElements.length && index < elements.length) {
-          return ImpulseForm._isDirty(
-            scope,
-            form,
-            initialElements.at(index)!,
-            params,
-          )
+        if (index < minLength) {
+          return ImpulseForm._isDirty(scope, form, params)
         }
 
-        // otherwise, fallback to hardcoded dirty state
-        const dirt = ImpulseForm._isDirty(scope, form, form, params._third)
+        // otherwise, fallback to hardcoded verbose dirty state
+        const dirt = ImpulseForm._isDirty(scope, form, params._third)
 
         return [true, dirt, dirt]
       },

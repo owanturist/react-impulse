@@ -262,7 +262,6 @@ export class ImpulseFormShape<
 
   protected _isDirty<TResult>(
     scope: Scope,
-    initial: ImpulseFormShape<TFields>,
     select: (
       concise: ImpulseFormShapeFlagSchema<TFields>,
       verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
@@ -282,12 +281,9 @@ export class ImpulseFormShape<
       const field = this.fields[key]
 
       if (ImpulseForm.isImpulseForm(field)) {
-        const initialField = initial.fields[key] as ImpulseForm
-
         const [concise, verbose, dirty] = ImpulseForm._isDirty(
           scope,
           field,
-          initialField,
           params,
         )
 

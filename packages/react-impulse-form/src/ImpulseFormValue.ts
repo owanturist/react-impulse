@@ -287,11 +287,9 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
 
   protected _isDirty<TResult>(
     scope: Scope,
-    initialSource: ImpulseFormValue<TInput, TOutput>,
     select: (concise: boolean, verbose: boolean, dirty: boolean) => TResult,
   ): TResult {
-    console.log("TODO NOW replace initialSource by this._initialSource")
-    const initial = initialSource.getInitial(scope)
+    const initial = this.getInitial(scope)
     const input = this.getInput(scope)
     const compare = this._isInputEqual.getValue(scope)
     const dirty = !compare(initial, input, scope)
