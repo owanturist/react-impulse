@@ -250,13 +250,13 @@ export abstract class ImpulseForm<
 
   public abstract reset(resetter?: TParams["input.setter"]): void
 
+  public abstract getInitial(scope: Scope): TParams["input.schema"]
+
+  public abstract setInitial(setter: TParams["input.setter"]): void
+
   public abstract getInput(scope: Scope): TParams["input.schema"]
 
   public abstract setInput(setter: TParams["input.setter"]): void
-
-  public abstract getInitialInput(scope: Scope): TParams["input.schema"]
-
-  public abstract setInitialInput(setter: TParams["input.setter"]): void
 
   public abstract getOutput(scope: Scope): null | TParams["output.schema"]
   public abstract getOutput<TResult>(

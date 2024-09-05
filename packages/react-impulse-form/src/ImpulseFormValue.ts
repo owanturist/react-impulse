@@ -55,7 +55,7 @@ export interface ImpulseFormValueOptions<TInput, TOutput = TInput> {
   /**
    * @default input
    */
-  initialInput?: TInput
+  initial?: TInput
 
   /**
    * @default "onTouch"
@@ -113,11 +113,11 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
       touched = false,
       schema,
       isInputEqual = eq,
-      initialInput,
+      initial,
       validateOn = VALIDATE_ON_TOUCH,
     }: ImpulseFormValueOptions<TInput, TOutput> = {},
   ): ImpulseFormValue<TInput, TOutput> {
-    const _initialInput = isUndefined(initialInput) ? input : initialInput
+    const _initial = isUndefined(initial) ? input : initial
 
     const isInputEqualImpulse = Impulse.of(isInputEqual)
     const isInputEqualStable: Compare<TInput> = (left, right, scope) => {
@@ -127,9 +127,9 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
     }
 
     // initiate with the same value if specified but equal
-    const inputOrInitialInput = untrack((scope) => {
-      if (isInputEqual(_initialInput, input, scope)) {
-        return _initialInput
+    const inputOrInitial = untrack((scope) => {
+      if (isInputEqual(_initial, input, scope)) {
+        return _initial
       }
 
       return input
@@ -141,9 +141,9 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
       Impulse.of(touched),
       Impulse.of(validateOn),
       Impulse.of(errors ?? [], { compare: shallowArrayEquals }),
-      Impulse.of(!isUndefined(initialInput)),
-      Impulse.of(_initialInput, { compare: isInputEqualStable }),
-      Impulse.of(inputOrInitialInput, { compare: isInputEqualStable }),
+      Impulse.of(!isUndefined(initial)),
+      Impulse.of(_initial, { compare: isInputEqualStable }),
+      Impulse.of(inputOrInitial, { compare: isInputEqualStable }),
       Impulse.of(schema),
       isInputEqualImpulse,
     )
@@ -155,15 +155,15 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
 
   protected constructor(
     root: null | ImpulseForm,
-    private readonly _initial: Impulse<
+    private readonly _initialSource: Impulse<
       undefined | ImpulseFormValue<TInput, TOutput>
     >,
     private readonly _touched: Impulse<boolean>,
     // TODO convert to undefined | ValidateStrategy so it can inherit from parent (List)
     private readonly _validateOn: Impulse<ValidateStrategy>,
     private readonly _errors: Impulse<ReadonlyArray<string>>,
-    private readonly _isExplicitInitialInput: Impulse<boolean>,
-    private readonly _initialInput: Impulse<TInput>,
+    private readonly _isExplicitInitial: Impulse<boolean>,
+    private readonly _initial: Impulse<TInput>,
     private readonly _input: Impulse<TInput>,
     private readonly _schema: Impulse<
       undefined | ImpulseFormSchema<TOutput, TInput>
@@ -252,12 +252,12 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
   ): ImpulseFormValue<TInput, TOutput> {
     return new ImpulseFormValue(
       parent,
-      this._initial.clone(),
+      this._initialSource.clone(),
       this._touched.clone(),
       this._validateOn.clone(),
       this._errors.clone(),
-      this._isExplicitInitialInput.clone(),
-      this._initialInput.clone(),
+      this._isExplicitInitial.clone(),
+      this._initial.clone(),
       this._input.clone(),
       this._schema.clone(),
       this._isInputEqual.clone(),
@@ -269,14 +269,14 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
     isRoot: boolean,
   ): void {
     batch((scope) => {
-      this._initial.setValue(initial)
+      this._initialSource.setValue(initial)
 
       if (
         initial != null &&
         isRoot &&
-        this._isExplicitInitialInput.getValue(scope)
+        this._isExplicitInitial.getValue(scope)
       ) {
-        initial.setInitialInput(this._initialInput.getValue(scope))
+        initial.setInitial(this._initial.getValue(scope))
       }
     })
   }
@@ -287,13 +287,14 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
 
   protected _isDirty<TResult>(
     scope: Scope,
-    initial: ImpulseFormValue<TInput, TOutput>,
+    initialSource: ImpulseFormValue<TInput, TOutput>,
     select: (concise: boolean, verbose: boolean, dirty: boolean) => TResult,
   ): TResult {
-    const initialInput = initial.getInitialInput(scope)
+    console.log("TODO NOW replace initialSource by this._initialSource")
+    const initial = initialSource.getInitial(scope)
     const input = this.getInput(scope)
     const compare = this._isInputEqual.getValue(scope)
-    const dirty = !compare(initialInput, input, scope)
+    const dirty = !compare(initial, input, scope)
 
     return select(dirty, dirty, true)
   }
@@ -411,11 +412,11 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
     batch((scope) => {
       const resetValue = resolveSetter(
         resetter,
-        this.getInitialInput(scope),
+        this.getInitial(scope),
         this._input.getValue(scope),
       )
 
-      this.setInitialInput(resetValue)
+      this.setInitial(resetValue)
       this.setInput(resetValue)
       // TODO test when reset for all below
       this._validated.setValue(false)
@@ -450,14 +451,12 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
     return this._input.getValue(scope)
   }
 
-  // TODO add tests against initialInput coming as second argument
+  // TODO add tests against initial coming as second argument
   public setInput(setter: ImpulseFormValueInputSetter<TInput>): void {
     batch((scope) => {
       const input = this._input.getValue(scope)
 
-      this._input.setValue(
-        resolveSetter(setter, input, this.getInitialInput(scope)),
-      )
+      this._input.setValue(resolveSetter(setter, input, this.getInitial(scope)))
 
       if (input !== this._input.getValue(scope)) {
         this._updateValidated()
@@ -465,26 +464,26 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
     })
   }
 
-  public getInitialInput(scope: Scope): TInput {
-    const form = this._initial.getValue(scope) ?? this
+  public getInitial(scope: Scope): TInput {
+    const form = this._initialSource.getValue(scope) ?? this
 
-    return form._initialInput.getValue(scope)
+    return form._initial.getValue(scope)
   }
 
   // TODO add tests against input coming as second argument
-  public setInitialInput(setter: ImpulseFormValueInputSetter<TInput>): void {
+  public setInitial(setter: ImpulseFormValueInputSetter<TInput>): void {
     batch((scope) => {
-      const initialInput = this.getInitialInput(scope)
+      const initial = this.getInitial(scope)
 
-      this._initialInput.setValue(
-        resolveSetter(setter, initialInput, this._input.getValue(scope)),
+      this._initial.setValue(
+        resolveSetter(setter, initial, this._input.getValue(scope)),
       )
 
-      this._isExplicitInitialInput.setValue(true)
+      this._isExplicitInitial.setValue(true)
 
-      if (initialInput !== this._initialInput.getValue(scope)) {
+      if (initial !== this._initial.getValue(scope)) {
         this._updateValidated()
-        this._initial.getValue(scope)?.setInitialInput(setter)
+        this._initialSource.getValue(scope)?.setInitial(setter)
       }
     })
   }

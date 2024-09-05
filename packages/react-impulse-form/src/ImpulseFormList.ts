@@ -134,7 +134,7 @@ export type ImpulseFormListErrorSchemaVerbose<TElement extends ImpulseForm> =
 
 export interface ImpulseFormListOptions<TElement extends ImpulseForm> {
   input?: ImpulseFormListInputSetter<TElement>
-  initialInput?: ImpulseFormListInputSetter<TElement>
+  initial?: ImpulseFormListInputSetter<TElement>
   touched?: ImpulseFormListFlagSetter<TElement>
   validateOn?: ImpulseFormListValidateOnSetter<TElement>
   errors?: ImpulseFormListErrorSetter<TElement>
@@ -165,7 +165,7 @@ export class ImpulseFormList<
     elements: ReadonlyArray<TElement>,
     {
       input,
-      initialInput,
+      initial,
       touched,
       validateOn,
       errors,
@@ -183,8 +183,8 @@ export class ImpulseFormList<
         list.setTouched(touched)
       }
 
-      if (!isUndefined(initialInput)) {
-        list.setInitialInput(initialInput)
+      if (!isUndefined(initial)) {
+        list.setInitial(initial)
       }
 
       if (!isUndefined(input)) {
@@ -551,7 +551,7 @@ export class ImpulseFormList<
     resetter: ImpulseFormListInputSetter<TElement> = params._first as typeof resetter,
   ): void {
     batch((scope) => {
-      this.setInitialInput(resetter)
+      this.setInitial(resetter)
 
       const initialElements = this._initialElements.getValue(scope)
 
@@ -602,38 +602,38 @@ export class ImpulseFormList<
     setFormElements(
       this._elements,
       setter,
-      (scope) => [this.getInput(scope), this.getInitialInput(scope)],
+      (scope) => [this.getInput(scope), this.getInitial(scope)],
       (element, next) => element.setInput(next),
     )
   }
 
-  public getInitialInput(scope: Scope): ImpulseFormListInputSchema<TElement> {
-    const initialInput = this._initialElements
+  public getInitial(scope: Scope): ImpulseFormListInputSchema<TElement> {
+    const initial = this._initialElements
       .getValue(scope)
-      .map((form) => form.getInitialInput(scope))
+      .map((form) => form.getInitial(scope))
 
-    return initialInput as ImpulseFormListInputSchema<TElement>
+    return initial as ImpulseFormListInputSchema<TElement>
   }
 
-  public setInitialInput(setter: ImpulseFormListInputSetter<TElement>): void {
+  public setInitial(setter: ImpulseFormListInputSetter<TElement>): void {
     batch((scope) => {
       // get next initial value from setter (initial, input) -> next
-      const nextInitialInput = resolveSetter(
+      const nextInitial = resolveSetter(
         setter,
-        this.getInitialInput(scope),
+        this.getInitial(scope),
         this.getInput(scope),
       )
 
       const elements = this._elements
         .getValue(scope)
-        .slice(0, nextInitialInput.length)
+        .slice(0, nextInitial.length)
 
       const initialElements = [
         ...elements,
         // restore initial elements that were removed from the elements
         ...this._initialElements
           .getValue(scope)
-          .slice(elements.length, nextInitialInput.length),
+          .slice(elements.length, nextInitial.length),
       ]
 
       // set list's initial elements
@@ -641,11 +641,11 @@ export class ImpulseFormList<
 
       // set initial values for each element
       for (const [index, element] of initialElements.entries()) {
-        const initialInput = nextInitialInput.at(index)
+        const initial = nextInitial.at(index)
 
         // do not change initial value if it is not defined
-        if (!isUndefined(initialInput)) {
-          element.setInitialInput(initialInput)
+        if (!isUndefined(initial)) {
+          element.setInitial(initial)
         }
       }
     })

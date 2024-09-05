@@ -108,7 +108,7 @@ export interface ImpulseFormShapeOptions<
   TFields extends ImpulseFormShapeFields,
 > {
   input?: ImpulseFormShapeInputSetter<TFields>
-  initialInput?: ImpulseFormShapeInputSetter<TFields>
+  initial?: ImpulseFormShapeInputSetter<TFields>
   touched?: ImpulseFormShapeFlagSetter<TFields>
   validateOn?: ImpulseFormShapeValidateOnSetter<TFields>
   errors?: ImpulseFormShapeErrorSetter<TFields>
@@ -139,7 +139,7 @@ export class ImpulseFormShape<
     fields: Readonly<TFields>,
     {
       input,
-      initialInput,
+      initial,
       touched,
       validateOn,
       errors,
@@ -152,8 +152,8 @@ export class ImpulseFormShape<
         shape.setTouched(touched)
       }
 
-      if (!isUndefined(initialInput)) {
-        shape.setInitialInput(initialInput)
+      if (!isUndefined(initial)) {
+        shape.setInitial(initial)
       }
 
       if (!isUndefined(input)) {
@@ -563,7 +563,7 @@ export class ImpulseFormShape<
   ): void {
     batch((scope) => {
       const resetValue = isFunction(resetter)
-        ? resetter(this.getInitialInput(scope), this.getInput(scope))
+        ? resetter(this.getInitial(scope), this.getInput(scope))
         : resetter
 
       for (const [key, field] of Object.entries(this.fields)) {
@@ -624,13 +624,13 @@ export class ImpulseFormShape<
     return input as unknown as ImpulseFormShapeInputSchema<TFields>
   }
 
-  // TODO add tests against initialInput coming as second argument
+  // TODO add tests against initial coming as second argument
   public setInput(setter: ImpulseFormShapeInputSetter<TFields>): void {
     batch((scope) => {
       const nextInput = resolveSetter(
         setter,
         this.getInput(scope),
-        this.getInitialInput(scope),
+        this.getInitial(scope),
       )
 
       for (const [key, field] of Object.entries(this.fields)) {
@@ -643,32 +643,29 @@ export class ImpulseFormShape<
     })
   }
 
-  public getInitialInput(scope: Scope): ImpulseFormShapeInputSchema<TFields> {
-    const initialInput = this._mapFormFields((form) =>
-      form.getInitialInput(scope),
-    )
+  public getInitial(scope: Scope): ImpulseFormShapeInputSchema<TFields> {
+    const initial = this._mapFormFields((form) => form.getInitial(scope))
 
-    return initialInput as unknown as ImpulseFormShapeInputSchema<TFields>
+    return initial as unknown as ImpulseFormShapeInputSchema<TFields>
   }
 
   // TODO add tests against input coming as second argument
-  public setInitialInput(setter: ImpulseFormShapeInputSetter<TFields>): void {
+  public setInitial(setter: ImpulseFormShapeInputSetter<TFields>): void {
     batch((scope) => {
-      const nextInitialInput = resolveSetter(
+      const nextInitial = resolveSetter(
         setter,
-        this.getInitialInput(scope),
+        this.getInitial(scope),
         this.getInput(scope),
       )
 
       for (const [key, field] of Object.entries(this.fields)) {
-        const nextFieldInitialInput =
-          nextInitialInput[key as keyof typeof nextInitialInput]
+        const nextFieldInitial = nextInitial[key as keyof typeof nextInitial]
 
         if (
           ImpulseForm.isImpulseForm(field) &&
-          nextFieldInitialInput !== undefined
+          nextFieldInitial !== undefined
         ) {
-          field.setInitialInput(nextFieldInitialInput)
+          field.setInitial(nextFieldInitial)
         }
       }
     })
