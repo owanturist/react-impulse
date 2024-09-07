@@ -1,5 +1,50 @@
 # react-impulse-form
 
+## 0.4.0
+
+### Minor Changes
+
+- [#743](https://github.com/owanturist/react-impulse/pull/743) [`bdbe810`](https://github.com/owanturist/react-impulse/commit/bdbe810e84bddcb4176d1235cd31e45a449b2041) Thanks [@owanturist](https://github.com/owanturist)! - 1. `ImpulseForm#setInitialValue` receives two parameters in the callback:
+
+  - initial value
+  - current (original) value
+
+  1. `ImpulseForm#setOriginalValue` receives two parameters in the callback:
+     - current (original) value
+     - initial value
+  1. `ImpulseFormList#reset` and `ImpulseFormList#isDirty` work correctly for removed/added items (Resolves #694)
+
+- [#748](https://github.com/owanturist/react-impulse/pull/748) [`fae44ab`](https://github.com/owanturist/react-impulse/commit/fae44ab46696fbc6c734d6939a5b917fa1cf82ca) Thanks [@owanturist](https://github.com/owanturist)! - Rename all entries of `value` to `output`, `originalValue` to `input`, and `initialValue` to `initial`
+
+  1. `ImpulseForm`:
+     1. `ImpulseFormParams['value.schema']` -> `ImpulseFormParams['output.schema']`
+     2. `ImpulseFormParams['value.schema.verbose']` -> `ImpulseFormParams['output.schema.verbose']`
+     3. `ImpulseFormParams['originalValue.schema']` -> `ImpulseFormParams['input.schema']`
+     4. `ImpulseFormParams['originalValue.setter']` -> `ImpulseFormParams['input.setter']`
+     5. `ImpulseForm#getValue` -> `ImpulseFormParams#getOutput`
+     6. `ImpulseForm#getOriginalValue` -> `ImpulseFormParams#getInput`
+     7. `ImpulseForm#setOriginalValue` -> `ImpulseFormParams#setInput`
+     8. `ImpulseForm#getInitialValue` -> `ImpulseFormParams#getInitial`
+     9. `ImpulseForm#setInitialValue` -> `ImpulseFormParams#setInitial`
+  2. `ImpulseFormList`:
+     1. `ImpulseFormListOptions.initialValue` -> `ImpulseFormListOptions.initial`
+     2. `ImpulseFormListOptions.originalValue` -> `ImpulseFormListOptions.input`
+  3. `ImpulseFormShape`:
+     1. `ImpulseFormShapeOptions.initialValue` -> `ImpulseFormShapeOptions.initial`
+     2. `ImpulseFormShapeOptions.originalValue` -> `ImpulseFormShapeOptions.input`
+  4. `ImpulseFormValue`:
+     1. `ImpulseFormValue<TOriginalValue, TValue>` -> `ImpulseFormValue<TInput, TOutput>`
+     2. `ImpulseFormValueOptions.isOriginalValueEqual` -> `ImpulseFormValueOptions.isInputEqual`
+     3. `ImpulseFormValueOptions.initialValue` -> `ImpulseFormValueOptions.initial`
+
+  ***
+
+  Drop redundant generic from `ImpulseFormValue.of` when `TInput` and `TOutput` are the same.
+
+### Patch Changes
+
+- [#743](https://github.com/owanturist/react-impulse/pull/743) [`bdbe810`](https://github.com/owanturist/react-impulse/commit/bdbe810e84bddcb4176d1235cd31e45a449b2041) Thanks [@owanturist](https://github.com/owanturist)! - Update dependencies. Replace `remeda` by custom functions.
+
 ## 0.3.2
 
 ### Patch Changes
@@ -40,37 +85,37 @@
 
   - ```ts
     abstract class ImpulseForm {
-      isSubmitting(scope: Scope): boolean;
+      isSubmitting(scope: Scope): boolean
 
-      getSubmitCount(scope: Scope): number;
+      getSubmitCount(scope: Scope): number
 
       onSubmit(
         listener: (value: TParams["value.schema"]) => void | Promise<unknown>,
-      ): VoidFunction;
+      ): VoidFunction
 
-      submit(): Promise<void>;
+      submit(): Promise<void>
 
-      focusFirstInvalidValue(): void;
+      focusFirstInvalidValue(): void
 
-      isValidated(scope: Scope): boolean;
+      isValidated(scope: Scope): boolean
       isValidated<TResult>(
         scope: Scope,
         select: (
           concise: TParams["flag.schema"],
           verbose: TParams["flag.schema.verbose"],
         ) => TResult,
-      ): TResult;
+      ): TResult
 
-      getValidateOn(scope: Scope): TParams["validateOn.schema"];
+      getValidateOn(scope: Scope): TParams["validateOn.schema"]
       getValidateOn<TResult>(
         scope: Scope,
         select: (
           concise: TParams["validateOn.schema"],
           verbose: TParams["validateOn.schema.verbose"],
         ) => TResult,
-      ): TResult;
+      ): TResult
 
-      setValidateOn(setter: TParams["validateOn.setter"]): void;
+      setValidateOn(setter: TParams["validateOn.setter"]): void
     }
     ```
 
@@ -80,7 +125,7 @@
     class ImpulseFormValue {
       onFocusWhenInvalid(
         onFocus: (errors: ReadonlyArray<string>) => void,
-      ): VoidFunction;
+      ): VoidFunction
     }
     ```
 
