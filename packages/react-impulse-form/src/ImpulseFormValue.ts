@@ -44,7 +44,7 @@ export interface ImpulseFormValueOptions<TInput, TOutput = TInput> {
    * const initial = { count: 0 }
    *
    * const form = ImpulseFormValue.of(initial, {
-   *   isInitialEqual: (left, right) => left.count === right.count,
+   *   isInputEqual: (left, right) => left.count === right.count,
    * })
    *
    * form.setInput({ count: 0 })
@@ -93,10 +93,10 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
   "errors.schema": null | ReadonlyArray<string>
   "errors.schema.verbose": null | ReadonlyArray<string>
 }> {
-  public static of<TInput extends TOutput, TOutput = TInput>(
+  public static of<TInput>(
     input: TInput,
-    options?: ImpulseFormValueOptions<TInput, TOutput>,
-  ): ImpulseFormValue<TInput, TOutput>
+    options?: ImpulseFormValueOptions<TInput, TInput>,
+  ): ImpulseFormValue<TInput, TInput>
 
   public static of<TInput, TOutput = TInput>(
     input: TInput,

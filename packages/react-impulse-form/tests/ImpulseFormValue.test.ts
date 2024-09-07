@@ -91,18 +91,6 @@ describe("ImpulseFormValue.of()", () => {
     })
   })
 
-  it("does not allow to specify TValue when TOriginValue does not extend it", ({
-    scope,
-  }) => {
-    // @ts-expect-error TOriginValue does not extend TValue
-    const value = ImpulseFormValue.of<string, number>("1")
-
-    expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<string, number>>()
-
-    expect(value.getInput(scope)).toBe("1")
-    expect(value.getOutput(scope)).toBe("1")
-  })
-
   it("does not allow to specify schema TOutput different from TInput", ({
     scope,
   }) => {
@@ -111,6 +99,8 @@ describe("ImpulseFormValue.of()", () => {
       schema: z.coerce.number(),
       validateOn: "onInit",
     })
+
+    expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<string, string>>()
 
     expect(value.getInput(scope)).toBe("1")
     expect(value.getOutput(scope)).toBe(1)
