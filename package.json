@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "postinstall": "pnpm build --env.PACKAGE=react-impulse",
     "size": "size-limit",
     "build": "tsup",
     "build:minified": "pnpm build --env.NODE_ENV=production --minify=terser",
