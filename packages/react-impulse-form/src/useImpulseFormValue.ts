@@ -25,12 +25,12 @@ export interface UseImpulseFormValueOptions<TForm extends ImpulseForm>
     | Func<[errors: ReadonlyArray<string>, form: TForm]>
 }
 
-const normalizeOnFocusInvalid = <TArgs extends ReadonlyArray<unknown>>(
+function normalizeOnFocusInvalid<TArgs extends ReadonlyArray<unknown>>(
   onFocusInvalid:
     | HTMLElement
     | RefObject<null | undefined | HTMLElement>
     | Func<TArgs>,
-): null | Func<TArgs> => {
+): null | Func<TArgs> {
   if (isFunction(onFocusInvalid)) {
     return onFocusInvalid
   }
@@ -44,14 +44,14 @@ const normalizeOnFocusInvalid = <TArgs extends ReadonlyArray<unknown>>(
   }
 }
 
-export const useImpulseFormValue = <TOriginalValue, TValue = TOriginalValue>(
-  form: ImpulseFormValue<TOriginalValue, TValue>,
+export function useImpulseFormValue<TInput, TOutput = TInput>(
+  form: ImpulseFormValue<TInput, TOutput>,
   {
     shouldFocusWhenInvalid = true,
     onFocusInvalid,
     onSubmit,
   }: UseImpulseFormValueOptions<typeof form> = {},
-): void => {
+): void {
   const onFocusInvalidStable = useHandler(
     shouldFocusWhenInvalid && isPresent(onFocusInvalid)
       ? normalizeOnFocusInvalid(onFocusInvalid)

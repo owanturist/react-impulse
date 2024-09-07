@@ -45,23 +45,23 @@ describe("ImpulseFormList#setElements()", () => {
     const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 
     form.setElements([setupElement(3), setupElement(4), setupElement(5)])
-    expect(form.getOriginalValue(scope)).toStrictEqual([3, 4, 5])
+    expect(form.getInput(scope)).toStrictEqual([3, 4, 5])
   })
 
   it("filters some elements", ({ scope }) => {
     const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 
     form.setElements((elements, scope) => {
-      return elements.filter((element) => element.getOriginalValue(scope) > 1)
+      return elements.filter((element) => element.getInput(scope) > 1)
     })
-    expect(form.getOriginalValue(scope)).toStrictEqual([2])
+    expect(form.getInput(scope)).toStrictEqual([2])
   })
 
   it("modifies existing elements", ({ scope }) => {
     const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 
     form.setElements((elements) => [...elements, setupElement(3)])
-    expect(form.getOriginalValue(scope)).toStrictEqual([0, 1, 2, 3])
+    expect(form.getInput(scope)).toStrictEqual([0, 1, 2, 3])
   })
 
   it("attach the new elements to the form root", ({ scope }) => {
@@ -566,13 +566,13 @@ describe("ImpulseFormList#reset()", () => {
 
   it("sets initial values for all items", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { initialValue: 1 }),
-      ImpulseFormValue.of(1, { initialValue: 2 }),
-      ImpulseFormValue.of(2, { initialValue: 3 }),
+      ImpulseFormValue.of(0, { initial: 1 }),
+      ImpulseFormValue.of(1, { initial: 2 }),
+      ImpulseFormValue.of(2, { initial: 3 }),
     ])
 
     form.reset()
-    expect(form.getValue(scope)).toStrictEqual([1, 2, 3])
+    expect(form.getOutput(scope)).toStrictEqual([1, 2, 3])
   })
 
   it("clears custom errors", ({ scope }) => {
@@ -604,93 +604,93 @@ describe("ImpulseFormList#reset()", () => {
     scope,
   }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { initialValue: 1 }),
-      ImpulseFormValue.of(1, { initialValue: 2 }),
-      ImpulseFormValue.of(2, { initialValue: 3 }),
+      ImpulseFormValue.of(0, { initial: 1 }),
+      ImpulseFormValue.of(1, { initial: 2 }),
+      ImpulseFormValue.of(2, { initial: 3 }),
     ])
 
     form.reset((initial) => initial.map((x) => x + 1))
-    expect(form.getValue(scope)).toStrictEqual([2, 3, 4])
+    expect(form.getOutput(scope)).toStrictEqual([2, 3, 4])
   })
 
   it("provides the original value to the resetter 2nd argument", ({
     scope,
   }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { initialValue: 1 }),
-      ImpulseFormValue.of(1, { initialValue: 2 }),
-      ImpulseFormValue.of(2, { initialValue: 3 }),
+      ImpulseFormValue.of(0, { initial: 1 }),
+      ImpulseFormValue.of(1, { initial: 2 }),
+      ImpulseFormValue.of(2, { initial: 3 }),
     ])
 
     form.reset((_, original) => original.map((x) => x + 1))
-    expect(form.getOriginalValue(scope)).toStrictEqual([1, 2, 3])
+    expect(form.getInput(scope)).toStrictEqual([1, 2, 3])
   })
 
   it("restores removed elements", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { initialValue: 1 }),
-      ImpulseFormValue.of(1, { initialValue: 2 }),
-      ImpulseFormValue.of(2, { initialValue: 3 }),
+      ImpulseFormValue.of(0, { initial: 1 }),
+      ImpulseFormValue.of(1, { initial: 2 }),
+      ImpulseFormValue.of(2, { initial: 3 }),
     ])
 
     form.setElements((elements) => elements.slice(0, 2))
-    expect(form.getOriginalValue(scope)).toStrictEqual([0, 1])
-    expect(form.getInitialValue(scope)).toStrictEqual([1, 2, 3])
+    expect(form.getInput(scope)).toStrictEqual([0, 1])
+    expect(form.getInitial(scope)).toStrictEqual([1, 2, 3])
 
     form.reset()
-    expect(form.getOriginalValue(scope)).toStrictEqual([1, 2, 3])
-    expect(form.getInitialValue(scope)).toStrictEqual([1, 2, 3])
+    expect(form.getInput(scope)).toStrictEqual([1, 2, 3])
+    expect(form.getInitial(scope)).toStrictEqual([1, 2, 3])
   })
 
   it("restores all elements", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { initialValue: 1 }),
-      ImpulseFormValue.of(1, { initialValue: 2 }),
-      ImpulseFormValue.of(2, { initialValue: 3 }),
+      ImpulseFormValue.of(0, { initial: 1 }),
+      ImpulseFormValue.of(1, { initial: 2 }),
+      ImpulseFormValue.of(2, { initial: 3 }),
     ])
 
     form.setElements([])
-    expect(form.getOriginalValue(scope)).toStrictEqual([])
-    expect(form.getInitialValue(scope)).toStrictEqual([1, 2, 3])
+    expect(form.getInput(scope)).toStrictEqual([])
+    expect(form.getInitial(scope)).toStrictEqual([1, 2, 3])
 
     form.reset()
-    expect(form.getOriginalValue(scope)).toStrictEqual([1, 2, 3])
-    expect(form.getInitialValue(scope)).toStrictEqual([1, 2, 3])
+    expect(form.getInput(scope)).toStrictEqual([1, 2, 3])
+    expect(form.getInitial(scope)).toStrictEqual([1, 2, 3])
   })
 
   it("removes added element", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { initialValue: 1 }),
-      ImpulseFormValue.of(1, { initialValue: 2 }),
-      ImpulseFormValue.of(2, { initialValue: 3 }),
+      ImpulseFormValue.of(0, { initial: 1 }),
+      ImpulseFormValue.of(1, { initial: 2 }),
+      ImpulseFormValue.of(2, { initial: 3 }),
     ])
 
     form.setElements((elements) => [
       ...elements,
-      ImpulseFormValue.of(3, { initialValue: 4 }),
+      ImpulseFormValue.of(3, { initial: 4 }),
     ])
-    expect(form.getOriginalValue(scope)).toStrictEqual([0, 1, 2, 3])
-    expect(form.getInitialValue(scope)).toStrictEqual([1, 2, 3])
+    expect(form.getInput(scope)).toStrictEqual([0, 1, 2, 3])
+    expect(form.getInitial(scope)).toStrictEqual([1, 2, 3])
 
     form.reset()
-    expect(form.getOriginalValue(scope)).toStrictEqual([1, 2, 3])
-    expect(form.getInitialValue(scope)).toStrictEqual([1, 2, 3])
+    expect(form.getInput(scope)).toStrictEqual([1, 2, 3])
+    expect(form.getInitial(scope)).toStrictEqual([1, 2, 3])
   })
 
   it("removes all elements", ({ scope }) => {
     const form = ImpulseFormList.of<ImpulseFormValue<number>>([])
 
     form.setElements([
-      ImpulseFormValue.of(0, { initialValue: 1 }),
-      ImpulseFormValue.of(1, { initialValue: 2 }),
-      ImpulseFormValue.of(2, { initialValue: 3 }),
+      ImpulseFormValue.of(0, { initial: 1 }),
+      ImpulseFormValue.of(1, { initial: 2 }),
+      ImpulseFormValue.of(2, { initial: 3 }),
     ])
-    expect(form.getOriginalValue(scope)).toStrictEqual([0, 1, 2])
-    expect(form.getInitialValue(scope)).toStrictEqual([])
+    expect(form.getInput(scope)).toStrictEqual([0, 1, 2])
+    expect(form.getInitial(scope)).toStrictEqual([])
 
     form.reset()
-    expect(form.getOriginalValue(scope)).toStrictEqual([])
-    expect(form.getInitialValue(scope)).toStrictEqual([])
+    expect(form.getInput(scope)).toStrictEqual([])
+    expect(form.getInitial(scope)).toStrictEqual([])
   })
 
   it("updates validateOn for restored elements", ({ scope }) => {
@@ -759,7 +759,7 @@ describe("ImpulseFormList#reset()", () => {
   })
 })
 
-describe("ImpulseFormList#getValue()", () => {
+describe("ImpulseFormList#getOutput()", () => {
   const setup = (elements: ReadonlyArray<ImpulseFormValue<number, string>>) => {
     return ImpulseFormList.of(elements, {
       validateOn: "onInit",
@@ -778,7 +778,7 @@ describe("ImpulseFormList#getValue()", () => {
   it("matches the type definition", ({ scope }) => {
     const form = setup([setupElement(0)])
 
-    expectTypeOf(form.getValue).toEqualTypeOf<{
+    expectTypeOf(form.getOutput).toEqualTypeOf<{
       (scope: Scope): null | ReadonlyArray<string>
 
       <TResult>(
@@ -790,7 +790,7 @@ describe("ImpulseFormList#getValue()", () => {
       ): TResult
     }>()
 
-    expectTypeOf(form.getElements(scope).at(0)!.getValue).toEqualTypeOf<{
+    expectTypeOf(form.getElements(scope).at(0)!.getOutput).toEqualTypeOf<{
       (scope: Scope): null | string
 
       <TResult>(
@@ -803,37 +803,37 @@ describe("ImpulseFormList#getValue()", () => {
   it("returns all items when valid", ({ scope }) => {
     const form = setup([setupElement(1), setupElement(2), setupElement(3)])
 
-    expect(form.getValue(scope)).toStrictEqual(["1", "2", "3"])
-    expect(form.getValue(scope, arg(0))).toStrictEqual(["1", "2", "3"])
-    expect(form.getValue(scope, arg(1))).toStrictEqual(["1", "2", "3"])
+    expect(form.getOutput(scope)).toStrictEqual(["1", "2", "3"])
+    expect(form.getOutput(scope, arg(0))).toStrictEqual(["1", "2", "3"])
+    expect(form.getOutput(scope, arg(1))).toStrictEqual(["1", "2", "3"])
   })
 
   it("returns empty array for empty list", ({ scope }) => {
     const form = setup([])
 
-    expect(form.getValue(scope)).toStrictEqual([])
-    expect(form.getValue(scope, arg(0))).toStrictEqual([])
-    expect(form.getValue(scope, arg(1))).toStrictEqual([])
+    expect(form.getOutput(scope)).toStrictEqual([])
+    expect(form.getOutput(scope, arg(0))).toStrictEqual([])
+    expect(form.getOutput(scope, arg(1))).toStrictEqual([])
   })
 
   it("returns null if a single element is not valid", ({ scope }) => {
     const form = setup([setupElement(0)])
 
-    expect(form.getValue(scope)).toBeNull()
-    expect(form.getValue(scope, arg(0))).toBeNull()
-    expect(form.getValue(scope, arg(1))).toStrictEqual([null])
+    expect(form.getOutput(scope)).toBeNull()
+    expect(form.getOutput(scope, arg(0))).toBeNull()
+    expect(form.getOutput(scope, arg(1))).toStrictEqual([null])
   })
 
   it("returns null if at least one element is not valid", ({ scope }) => {
     const form = setup([setupElement(1), setupElement(0), setupElement(3)])
 
-    expect(form.getValue(scope)).toBeNull()
-    expect(form.getValue(scope, arg(0))).toBeNull()
-    expect(form.getValue(scope, arg(1))).toStrictEqual(["1", null, "3"])
+    expect(form.getOutput(scope)).toBeNull()
+    expect(form.getOutput(scope, arg(0))).toBeNull()
+    expect(form.getOutput(scope, arg(1))).toStrictEqual(["1", null, "3"])
   })
 })
 
-describe("ImpulseFormList#getOriginalValue()", () => {
+describe("ImpulseFormList#getInput()", () => {
   it("matches the type definition", ({ scope }) => {
     const form = ImpulseFormList.of([
       ImpulseFormValue.of(0, {
@@ -841,11 +841,11 @@ describe("ImpulseFormList#getOriginalValue()", () => {
       }),
     ])
 
-    expectTypeOf(form.getOriginalValue).toEqualTypeOf<
+    expectTypeOf(form.getInput).toEqualTypeOf<
       (scope: Scope) => ReadonlyArray<number>
     >()
 
-    expectTypeOf(form.getElements(scope).at(0)!.getOriginalValue).toEqualTypeOf<
+    expectTypeOf(form.getElements(scope).at(0)!.getInput).toEqualTypeOf<
       (scope: Scope) => number
     >()
   })
@@ -853,7 +853,7 @@ describe("ImpulseFormList#getOriginalValue()", () => {
   it("returns empty array for empty list", ({ scope }) => {
     const form = ImpulseFormList.of([])
 
-    expect(form.getOriginalValue(scope)).toStrictEqual([])
+    expect(form.getInput(scope)).toStrictEqual([])
   })
 
   it("returns an array of original values", ({ scope }) => {
@@ -863,15 +863,15 @@ describe("ImpulseFormList#getOriginalValue()", () => {
       ImpulseFormValue.of(2),
     ])
 
-    expect(form.getOriginalValue(scope)).toStrictEqual([0, 1, 2])
+    expect(form.getInput(scope)).toStrictEqual([0, 1, 2])
   })
 })
 
-describe("ImpulseFormList#setOriginalValue()", () => {
+describe("ImpulseFormList#setInput()", () => {
   it("matches the type definition", ({ scope }) => {
     const form = ImpulseFormList.of([ImpulseFormValue.of(0)])
 
-    expectTypeOf(form.setOriginalValue).toEqualTypeOf<
+    expectTypeOf(form.setInput).toEqualTypeOf<
       (
         setter: Setter<
           ReadonlyArray<undefined | Setter<number, [number, number]>>,
@@ -880,7 +880,7 @@ describe("ImpulseFormList#setOriginalValue()", () => {
       ) => void
     >()
 
-    expectTypeOf(form.getElements(scope).at(0)!.setOriginalValue).toEqualTypeOf<
+    expectTypeOf(form.getElements(scope).at(0)!.setInput).toEqualTypeOf<
       (setter: Setter<number, [number, number]>) => void
     >()
   })
@@ -892,22 +892,22 @@ describe("ImpulseFormList#setOriginalValue()", () => {
       ImpulseFormValue.of(2),
     ])
 
-    form.setOriginalValue([3, 4, 5])
-    expect(form.getOriginalValue(scope)).toStrictEqual([3, 4, 5])
+    form.setInput([3, 4, 5])
+    expect(form.getInput(scope)).toStrictEqual([3, 4, 5])
   })
 
   it("changes nothing when setting an empty list", ({ scope }) => {
     const form = ImpulseFormList.of([ImpulseFormValue.of(0)])
 
-    form.setOriginalValue([])
-    expect(form.getOriginalValue(scope)).toStrictEqual([0])
+    form.setInput([])
+    expect(form.getInput(scope)).toStrictEqual([0])
   })
 
   it("keeps the list empty", ({ scope }) => {
     const form = ImpulseFormList.of<ImpulseFormValue<number>>([])
 
-    form.setOriginalValue([0, 1])
-    expect(form.getOriginalValue(scope)).toStrictEqual([])
+    form.setInput([0, 1])
+    expect(form.getInput(scope)).toStrictEqual([])
   })
 
   it("changes only defined items", ({ scope }) => {
@@ -917,11 +917,11 @@ describe("ImpulseFormList#setOriginalValue()", () => {
       ImpulseFormValue.of(2),
     ])
 
-    form.setOriginalValue([3])
-    expect(form.getOriginalValue(scope)).toStrictEqual([3, 1, 2])
+    form.setInput([3])
+    expect(form.getInput(scope)).toStrictEqual([3, 1, 2])
 
-    form.setOriginalValue([undefined, undefined, 4])
-    expect(form.getOriginalValue(scope)).toStrictEqual([3, 1, 4])
+    form.setInput([undefined, undefined, 4])
+    expect(form.getInput(scope)).toStrictEqual([3, 1, 4])
   })
 
   it("does not extend existing list", ({ scope }) => {
@@ -931,8 +931,8 @@ describe("ImpulseFormList#setOriginalValue()", () => {
       ImpulseFormValue.of(2),
     ])
 
-    form.setOriginalValue([3, 4, 5, 6])
-    expect(form.getOriginalValue(scope)).toStrictEqual([3, 4, 5])
+    form.setInput([3, 4, 5, 6])
+    expect(form.getInput(scope)).toStrictEqual([3, 4, 5])
   })
 
   it("passes the list in the transform function", ({ scope }) => {
@@ -942,8 +942,8 @@ describe("ImpulseFormList#setOriginalValue()", () => {
       ImpulseFormValue.of(2),
     ])
 
-    form.setOriginalValue((elements) => elements.map((x) => x + 1))
-    expect(form.getOriginalValue(scope)).toStrictEqual([1, 2, 3])
+    form.setInput((elements) => elements.map((x) => x + 1))
+    expect(form.getInput(scope)).toStrictEqual([1, 2, 3])
   })
 
   it("passes an element in the transform function", ({ scope }) => {
@@ -953,8 +953,8 @@ describe("ImpulseFormList#setOriginalValue()", () => {
       ImpulseFormValue.of(2),
     ])
 
-    form.setOriginalValue([undefined, (x) => x + 3])
-    expect(form.getOriginalValue(scope)).toStrictEqual([0, 4, 2])
+    form.setInput([undefined, (x) => x + 3])
+    expect(form.getInput(scope)).toStrictEqual([0, 4, 2])
   })
 
   it("passes an element in the list transform function", ({ scope }) => {
@@ -964,12 +964,12 @@ describe("ImpulseFormList#setOriginalValue()", () => {
       ImpulseFormValue.of(2),
     ])
 
-    form.setOriginalValue((elements) => elements.map(() => (x) => x + 1))
-    expect(form.getOriginalValue(scope)).toStrictEqual([1, 2, 3])
+    form.setInput((elements) => elements.map(() => (x) => x + 1))
+    expect(form.getInput(scope)).toStrictEqual([1, 2, 3])
   })
 })
 
-describe("ImpulseFormList#getInitialValue()", () => {
+describe("ImpulseFormList#getInitial()", () => {
   it("matches the type definition", ({ scope }) => {
     const form = ImpulseFormList.of([
       ImpulseFormValue.of(0, {
@@ -977,11 +977,11 @@ describe("ImpulseFormList#getInitialValue()", () => {
       }),
     ])
 
-    expectTypeOf(form.getInitialValue).toEqualTypeOf<
+    expectTypeOf(form.getInitial).toEqualTypeOf<
       (scope: Scope) => ReadonlyArray<number>
     >()
 
-    expectTypeOf(form.getElements(scope).at(0)!.getInitialValue).toEqualTypeOf<
+    expectTypeOf(form.getElements(scope).at(0)!.getInitial).toEqualTypeOf<
       (scope: Scope) => number
     >()
   })
@@ -989,17 +989,17 @@ describe("ImpulseFormList#getInitialValue()", () => {
   it("returns empty array for empty list", ({ scope }) => {
     const form = ImpulseFormList.of([])
 
-    expect(form.getInitialValue(scope)).toStrictEqual([])
+    expect(form.getInitial(scope)).toStrictEqual([])
   })
 
   it("returns an array of original values", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { initialValue: 3 }),
+      ImpulseFormValue.of(0, { initial: 3 }),
       ImpulseFormValue.of(1),
-      ImpulseFormValue.of(2, { initialValue: 4 }),
+      ImpulseFormValue.of(2, { initial: 4 }),
     ])
 
-    expect(form.getInitialValue(scope)).toStrictEqual([3, 1, 4])
+    expect(form.getInitial(scope)).toStrictEqual([3, 1, 4])
   })
 
   it("returns nested list's values", ({ scope }) => {
@@ -1008,15 +1008,15 @@ describe("ImpulseFormList#getInitialValue()", () => {
       ImpulseFormList.of([ImpulseFormValue.of(2), ImpulseFormValue.of(3)]),
     ])
 
-    expect(form.getInitialValue(scope)).toStrictEqual([[1], [2, 3]])
+    expect(form.getInitial(scope)).toStrictEqual([[1], [2, 3]])
   })
 })
 
-describe("ImpulseFormList#setInitialValue()", () => {
+describe("ImpulseFormList#setInitial()", () => {
   it("matches the type definition", ({ scope }) => {
     const form = ImpulseFormList.of([ImpulseFormValue.of(0)])
 
-    expectTypeOf(form.setInitialValue).toEqualTypeOf<
+    expectTypeOf(form.setInitial).toEqualTypeOf<
       (
         setter: Setter<
           ReadonlyArray<undefined | Setter<number, [number, number]>>,
@@ -1025,7 +1025,7 @@ describe("ImpulseFormList#setInitialValue()", () => {
       ) => void
     >()
 
-    expectTypeOf(form.getElements(scope).at(0)!.setInitialValue).toEqualTypeOf<
+    expectTypeOf(form.getElements(scope).at(0)!.setInitial).toEqualTypeOf<
       (setter: Setter<number, [number, number]>) => void
     >()
   })
@@ -1037,14 +1037,14 @@ describe("ImpulseFormList#setInitialValue()", () => {
       ImpulseFormValue.of(2),
     ])
 
-    form.setInitialValue([3, 4, 5])
-    expect(form.getInitialValue(scope)).toStrictEqual([3, 4, 5])
+    form.setInitial([3, 4, 5])
+    expect(form.getInitial(scope)).toStrictEqual([3, 4, 5])
     expect(
-      form.getElements(scope).map((element) => element.getInitialValue(scope)),
+      form.getElements(scope).map((element) => element.getInitial(scope)),
     ).toStrictEqual([3, 4, 5])
   })
 
-  it("adds an added element's initialValue", ({ scope }) => {
+  it("adds an added element's initial", ({ scope }) => {
     const form = ImpulseFormList.of([
       ImpulseFormValue.of(0),
       ImpulseFormValue.of(1),
@@ -1052,32 +1052,32 @@ describe("ImpulseFormList#setInitialValue()", () => {
 
     form.setElements((elements) => [...elements, ImpulseFormValue.of(2)])
 
-    expect(form.getInitialValue(scope)).toStrictEqual([0, 1])
-    form.setInitialValue([3, 4, 5])
-    expect(form.getInitialValue(scope)).toStrictEqual([3, 4, 5])
+    expect(form.getInitial(scope)).toStrictEqual([0, 1])
+    form.setInitial([3, 4, 5])
+    expect(form.getInitial(scope)).toStrictEqual([3, 4, 5])
     expect(
-      form.getElements(scope).map((element) => element.getInitialValue(scope)),
+      form.getElements(scope).map((element) => element.getInitial(scope)),
     ).toStrictEqual([3, 4, 5])
   })
 
-  it("keeps a removed element's initialValue", ({ scope }) => {
+  it("keeps a removed element's initial", ({ scope }) => {
     const form = ImpulseFormList.of([
       ImpulseFormValue.of(0),
       ImpulseFormValue.of(1),
     ])
 
     form.setElements((elements) => elements.slice(0, 1))
-    expect(form.getValue(scope)).toStrictEqual([0])
+    expect(form.getOutput(scope)).toStrictEqual([0])
 
-    expect(form.getInitialValue(scope)).toStrictEqual([0, 1])
-    form.setInitialValue([3, 4])
-    expect(form.getInitialValue(scope)).toStrictEqual([3, 4])
+    expect(form.getInitial(scope)).toStrictEqual([0, 1])
+    form.setInitial([3, 4])
+    expect(form.getInitial(scope)).toStrictEqual([3, 4])
     expect(
-      form.getElements(scope).map((element) => element.getInitialValue(scope)),
+      form.getElements(scope).map((element) => element.getInitial(scope)),
     ).toStrictEqual([3])
   })
 
-  it("does not add initialValue when neither initial nor current value exist", ({
+  it("does not add initial when neither initial nor current value exist", ({
     scope,
   }) => {
     const form = ImpulseFormList.of([
@@ -1085,88 +1085,88 @@ describe("ImpulseFormList#setInitialValue()", () => {
       ImpulseFormValue.of(1),
     ])
 
-    form.setInitialValue([3, 4, 5])
-    expect(form.getInitialValue(scope)).toStrictEqual([3, 4])
+    form.setInitial([3, 4, 5])
+    expect(form.getInitial(scope)).toStrictEqual([3, 4])
 
     expect(
-      form.getElements(scope).map((element) => element.getInitialValue(scope)),
+      form.getElements(scope).map((element) => element.getInitial(scope)),
     ).toStrictEqual([3, 4])
   })
 
-  it("removes initialValues by shorter list", ({ scope }) => {
+  it("removes initials by shorter list", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { initialValue: 1 }),
-      ImpulseFormValue.of(1, { initialValue: 2 }),
-      ImpulseFormValue.of(2, { initialValue: 3 }),
+      ImpulseFormValue.of(0, { initial: 1 }),
+      ImpulseFormValue.of(1, { initial: 2 }),
+      ImpulseFormValue.of(2, { initial: 3 }),
     ])
 
-    form.setInitialValue([3, 4])
-    expect(form.getInitialValue(scope)).toStrictEqual([3, 4])
+    form.setInitial([3, 4])
+    expect(form.getInitial(scope)).toStrictEqual([3, 4])
     expect(
-      form.getElements(scope).map((element) => element.getInitialValue(scope)),
+      form.getElements(scope).map((element) => element.getInitial(scope)),
     ).toStrictEqual([3, 4, 3])
   })
 
-  it('do not remove initialValues by "undefined" in the list', ({ scope }) => {
+  it('do not remove initials by "undefined" in the list', ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { initialValue: 1 }),
-      ImpulseFormValue.of(1, { initialValue: 2 }),
-      ImpulseFormValue.of(2, { initialValue: 3 }),
+      ImpulseFormValue.of(0, { initial: 1 }),
+      ImpulseFormValue.of(1, { initial: 2 }),
+      ImpulseFormValue.of(2, { initial: 3 }),
     ])
 
-    form.setInitialValue([undefined, 4, undefined])
-    expect(form.getInitialValue(scope)).toStrictEqual([1, 4, 3])
+    form.setInitial([undefined, 4, undefined])
+    expect(form.getInitial(scope)).toStrictEqual([1, 4, 3])
     expect(
-      form.getElements(scope).map((element) => element.getInitialValue(scope)),
+      form.getElements(scope).map((element) => element.getInitial(scope)),
     ).toStrictEqual([1, 4, 3])
   })
 
-  it("remove all initialValues by empty list", ({ scope }) => {
+  it("remove all initials by empty list", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { initialValue: 1 }),
-      ImpulseFormValue.of(1, { initialValue: 2 }),
-      ImpulseFormValue.of(2, { initialValue: 3 }),
+      ImpulseFormValue.of(0, { initial: 1 }),
+      ImpulseFormValue.of(1, { initial: 2 }),
+      ImpulseFormValue.of(2, { initial: 3 }),
     ])
 
-    form.setInitialValue([])
-    expect(form.getInitialValue(scope)).toStrictEqual([])
+    form.setInitial([])
+    expect(form.getInitial(scope)).toStrictEqual([])
     expect(
-      form.getElements(scope).map((element) => element.getInitialValue(scope)),
+      form.getElements(scope).map((element) => element.getInitial(scope)),
     ).toStrictEqual([1, 2, 3])
   })
 
   it("overrides initial values on init", ({ scope }) => {
     const form = ImpulseFormList.of(
       [
-        ImpulseFormValue.of(0, { initialValue: 1 }),
-        ImpulseFormValue.of(1, { initialValue: 2 }),
-        ImpulseFormValue.of(2, { initialValue: 3 }),
+        ImpulseFormValue.of(0, { initial: 1 }),
+        ImpulseFormValue.of(1, { initial: 2 }),
+        ImpulseFormValue.of(2, { initial: 3 }),
       ],
       {
-        initialValue: [4, 5, 6],
+        initial: [4, 5, 6],
       },
     )
 
-    expect(form.getInitialValue(scope)).toStrictEqual([4, 5, 6])
+    expect(form.getInitial(scope)).toStrictEqual([4, 5, 6])
     expect(
-      form.getElements(scope).map((element) => element.getInitialValue(scope)),
+      form.getElements(scope).map((element) => element.getInitial(scope)),
     ).toStrictEqual([4, 5, 6])
   })
 
-  it("changed list's initial values when element's initialValue is changed", ({
+  it("changed list's initial values when element's initial is changed", ({
     scope,
   }) => {
     const form = ImpulseFormList.of(
       [ImpulseFormValue.of(0), ImpulseFormValue.of(1), ImpulseFormValue.of(2)],
       {
-        initialValue: [3, 4, 5],
+        initial: [3, 4, 5],
       },
     )
 
-    form.getElements(scope).at(1)!.setInitialValue(6)
-    expect(form.getInitialValue(scope)).toStrictEqual([3, 6, 5])
+    form.getElements(scope).at(1)!.setInitial(6)
+    expect(form.getInitial(scope)).toStrictEqual([3, 6, 5])
     expect(
-      form.getElements(scope).map((element) => element.getInitialValue(scope)),
+      form.getElements(scope).map((element) => element.getInitial(scope)),
     ).toStrictEqual([3, 6, 5])
   })
 })

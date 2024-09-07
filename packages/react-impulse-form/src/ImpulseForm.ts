@@ -3,11 +3,11 @@ import { Emitter } from "./Emitter"
 import { isPresent, isUndefined, isTruthy } from "./utils"
 
 export interface ImpulseFormParams {
-  "value.schema": unknown
-  "value.schema.verbose": unknown
+  "input.setter": unknown
+  "input.schema": unknown
 
-  "originalValue.setter": unknown
-  "originalValue.schema": unknown
+  "output.schema": unknown
+  "output.schema.verbose": unknown
 
   "flag.setter": unknown
   "flag.schema": unknown
@@ -58,9 +58,9 @@ export abstract class ImpulseForm<
 
   protected static _submitWith<TParams extends ImpulseFormParams>(
     form: ImpulseForm<TParams>,
-    value: TParams["value.schema"],
+    output: TParams["output.schema"],
   ): ReadonlyArray<void | Promise<unknown>> {
-    return form._submitWith(value)
+    return form._submitWith(output)
   }
 
   protected static _getFocusFirstInvalidValue(
@@ -78,22 +78,21 @@ export abstract class ImpulseForm<
 
   protected static _isDirty<TParams extends ImpulseFormParams, TResult>(
     scope: Scope,
-    original: ImpulseForm<TParams>,
-    initial: ImpulseForm<TParams>,
+    form: ImpulseForm<TParams>,
     select: (
       concise: TParams["flag.schema"],
       verbose: TParams["flag.schema.verbose"],
       dirty: TParams["flag.schema.verbose"],
     ) => TResult,
   ): TResult {
-    return original._isDirty(scope, initial, select)
+    return form._isDirty(scope, select)
   }
 
   // necessary for type inference
   protected readonly _params?: TParams
 
   private readonly _onSubmit = new Emitter<
-    [value: unknown],
+    [output: unknown],
     void | Promise<unknown>
   >()
 
@@ -119,7 +118,6 @@ export abstract class ImpulseForm<
 
   protected abstract _isDirty<TResult>(
     scope: Scope,
-    initial: ImpulseForm<TParams>,
     select: (
       concise: TParams["flag.schema"],
       verbose: TParams["flag.schema.verbose"],
@@ -128,9 +126,9 @@ export abstract class ImpulseForm<
   ): TResult
 
   protected _submitWith(
-    value: TParams["value.schema"],
+    output: TParams["output.schema"],
   ): ReadonlyArray<void | Promise<unknown>> {
-    return this._onSubmit._emit(value)
+    return this._onSubmit._emit(output)
   }
 
   public getSubmitCount(scope: Scope): number {
@@ -142,7 +140,7 @@ export abstract class ImpulseForm<
   }
 
   public onSubmit(
-    listener: (value: TParams["value.schema"]) => void | Promise<unknown>,
+    listener: (output: TParams["output.schema"]) => void | Promise<unknown>,
   ): VoidFunction {
     return this._onSubmit._subscribe(listener)
   }
@@ -154,10 +152,10 @@ export abstract class ImpulseForm<
     })
 
     const promises = untrack((scope) => {
-      const value = this._root.getValue(scope)
+      const output = this._root.getOutput(scope)
 
-      if (value !== null && this._root.isValid(scope)) {
-        return this._root._submitWith(value).filter(isPresent)
+      if (output !== null && this._root.isValid(scope)) {
+        return this._root._submitWith(output).filter(isPresent)
       }
     })
 
@@ -203,7 +201,7 @@ export abstract class ImpulseForm<
       verbose: TParams["flag.schema.verbose"],
     ) => boolean = isTruthy,
   ): boolean {
-    return this._isDirty(scope, this, select)
+    return this._isDirty(scope, select)
   }
 
   public abstract getErrors(scope: Scope): TParams["errors.schema"]
@@ -248,26 +246,22 @@ export abstract class ImpulseForm<
 
   public abstract setTouched(setter: TParams["flag.setter"]): void
 
-  public abstract reset(resetter?: TParams["originalValue.setter"]): void
+  public abstract reset(resetter?: TParams["input.setter"]): void
 
-  public abstract getValue(scope: Scope): null | TParams["value.schema"]
-  public abstract getValue<TResult>(
+  public abstract getInitial(scope: Scope): TParams["input.schema"]
+
+  public abstract setInitial(setter: TParams["input.setter"]): void
+
+  public abstract getInput(scope: Scope): TParams["input.schema"]
+
+  public abstract setInput(setter: TParams["input.setter"]): void
+
+  public abstract getOutput(scope: Scope): null | TParams["output.schema"]
+  public abstract getOutput<TResult>(
     scope: Scope,
     select: (
-      concise: null | TParams["value.schema"],
-      verbose: TParams["value.schema.verbose"],
+      concise: null | TParams["output.schema"],
+      verbose: TParams["output.schema.verbose"],
     ) => TResult,
   ): TResult
-
-  public abstract getOriginalValue(
-    scope: Scope,
-  ): TParams["originalValue.schema"]
-
-  public abstract setOriginalValue(
-    setter: TParams["originalValue.setter"],
-  ): void
-
-  public abstract getInitialValue(scope: Scope): TParams["originalValue.schema"]
-
-  public abstract setInitialValue(setter: TParams["originalValue.setter"]): void
 }

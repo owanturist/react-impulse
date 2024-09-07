@@ -234,7 +234,7 @@ describe.each([
         "root.fields.<ImpulseFormValue>",
         () =>
           setup({
-            originalValue: {
+            input: {
               _1: "abc",
             },
           }),
@@ -243,7 +243,7 @@ describe.each([
         "root.fields.<ImpulseFormShape>.fields.<ImpulseFormValue>",
         () =>
           setup({
-            originalValue: {
+            input: {
               _3: {
                 _2: ["abc"],
               },

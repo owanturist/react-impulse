@@ -76,25 +76,19 @@ function setFormElements<
   })
 }
 
-export type ImpulseFormListValueSchema<TElement extends ImpulseForm> =
-  ReadonlyArray<GetImpulseFormParam<TElement, "value.schema">>
+export type ImpulseFormListInputSchema<TElement extends ImpulseForm> =
+  ReadonlyArray<GetImpulseFormParam<TElement, "input.schema">>
 
-export type ImpulseFormListValueSchemaVerbose<TElement extends ImpulseForm> =
-  ReadonlyArray<GetImpulseFormParam<TElement, "value.schema.verbose">>
+export type ImpulseFormListInputSetter<TElement extends ImpulseForm> = Setter<
+  ReadonlyArray<undefined | GetImpulseFormParam<TElement, "input.setter">>,
+  [ImpulseFormListInputSchema<TElement>, ImpulseFormListInputSchema<TElement>]
+>
 
-export type ImpulseFormListOriginalValueSchema<TElement extends ImpulseForm> =
-  ReadonlyArray<GetImpulseFormParam<TElement, "originalValue.schema">>
+export type ImpulseFormListOutputSchema<TElement extends ImpulseForm> =
+  ReadonlyArray<GetImpulseFormParam<TElement, "output.schema">>
 
-export type ImpulseFormListOriginalValueSetter<TElement extends ImpulseForm> =
-  Setter<
-    ReadonlyArray<
-      undefined | GetImpulseFormParam<TElement, "originalValue.setter">
-    >,
-    [
-      ImpulseFormListOriginalValueSchema<TElement>,
-      ImpulseFormListOriginalValueSchema<TElement>,
-    ]
-  >
+export type ImpulseFormListOutputSchemaVerbose<TElement extends ImpulseForm> =
+  ReadonlyArray<GetImpulseFormParam<TElement, "output.schema.verbose">>
 
 export type ImpulseFormListFlagSchema<TElement extends ImpulseForm> =
   | boolean
@@ -139,9 +133,9 @@ export type ImpulseFormListErrorSchemaVerbose<TElement extends ImpulseForm> =
   ReadonlyArray<GetImpulseFormParam<TElement, "errors.schema.verbose">>
 
 export interface ImpulseFormListOptions<TElement extends ImpulseForm> {
+  input?: ImpulseFormListInputSetter<TElement>
+  initial?: ImpulseFormListInputSetter<TElement>
   touched?: ImpulseFormListFlagSetter<TElement>
-  initialValue?: ImpulseFormListOriginalValueSetter<TElement>
-  originalValue?: ImpulseFormListOriginalValueSetter<TElement>
   validateOn?: ImpulseFormListValidateOnSetter<TElement>
   errors?: ImpulseFormListErrorSetter<TElement>
 }
@@ -149,11 +143,11 @@ export interface ImpulseFormListOptions<TElement extends ImpulseForm> {
 export class ImpulseFormList<
   TElement extends ImpulseForm = ImpulseForm,
 > extends ImpulseForm<{
-  "value.schema": ImpulseFormListValueSchema<TElement>
-  "value.schema.verbose": ImpulseFormListValueSchemaVerbose<TElement>
+  "input.schema": ImpulseFormListInputSchema<TElement>
+  "input.setter": ImpulseFormListInputSetter<TElement>
 
-  "originalValue.setter": ImpulseFormListOriginalValueSetter<TElement>
-  "originalValue.schema": ImpulseFormListOriginalValueSchema<TElement>
+  "output.schema": ImpulseFormListOutputSchema<TElement>
+  "output.schema.verbose": ImpulseFormListOutputSchemaVerbose<TElement>
 
   "flag.setter": ImpulseFormListFlagSetter<TElement>
   "flag.schema": ImpulseFormListFlagSchema<TElement>
@@ -170,9 +164,9 @@ export class ImpulseFormList<
   public static of<TElement extends ImpulseForm>(
     elements: ReadonlyArray<TElement>,
     {
+      input,
+      initial,
       touched,
-      initialValue,
-      originalValue,
       validateOn,
       errors,
     }: ImpulseFormListOptions<TElement> = {},
@@ -189,12 +183,12 @@ export class ImpulseFormList<
         list.setTouched(touched)
       }
 
-      if (!isUndefined(initialValue)) {
-        list.setInitialValue(initialValue)
+      if (!isUndefined(initial)) {
+        list.setInitial(initial)
       }
 
-      if (!isUndefined(originalValue)) {
-        list.setOriginalValue(originalValue)
+      if (!isUndefined(input)) {
+        list.setInput(input)
       }
 
       if (!isUndefined(validateOn)) {
@@ -243,13 +237,13 @@ export class ImpulseFormList<
   }
 
   protected _submitWith(
-    value: ImpulseFormListValueSchema<TElement>,
+    output: ImpulseFormListOutputSchema<TElement>,
   ): ReadonlyArray<void | Promise<unknown>> {
     const promises = untrack(this._elements).flatMap((element, index) => {
-      return ImpulseForm._submitWith(element, value[index])
+      return ImpulseForm._submitWith(element, output[index])
     })
 
-    return [...super._submitWith(value), ...promises]
+    return [...super._submitWith(output), ...promises]
   }
 
   protected _getFocusFirstInvalidValue(): VoidFunction | null {
@@ -297,7 +291,6 @@ export class ImpulseFormList<
    */
   protected _isDirty<TResult>(
     scope: Scope,
-    initial: ImpulseFormList<TElement>,
     select: (
       concise: ImpulseFormListFlagSchema<TElement>,
       verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
@@ -305,27 +298,20 @@ export class ImpulseFormList<
     ) => TResult,
   ): TResult {
     const elements = this._elements.getValue(scope)
-    const initialElements = initial._initialElements.getValue(scope)
+    const initialElements = this._initialElements.getValue(scope)
+    const minLength = Math.min(elements.length, initialElements.length)
 
     const [concise, verbose, dirty] = zipMap(
       // the result should always include the longer array
-      elements.length >= initialElements.length
-        ? elements
-        : // fill the shorter elements with initial elements
-          [...elements, ...initialElements.slice(elements.length)],
+      [...elements, ...initialElements.slice(elements.length)],
       (form, index) => {
         // return actual dirty state as long as iterates over elements
-        if (index < initialElements.length && index < elements.length) {
-          return ImpulseForm._isDirty(
-            scope,
-            form,
-            initialElements.at(index)!,
-            params,
-          )
+        if (index < minLength) {
+          return ImpulseForm._isDirty(scope, form, params)
         }
 
-        // otherwise, fallback to hardcoded dirty state
-        const dirt = ImpulseForm._isDirty(scope, form, form, params._third)
+        // otherwise, fallback to hardcoded verbose dirty state
+        const dirt = ImpulseForm._isDirty(scope, form, params._third)
 
         return [true, dirt, dirt]
       },
@@ -554,10 +540,10 @@ export class ImpulseFormList<
   }
 
   public reset(
-    resetter: ImpulseFormListOriginalValueSetter<TElement> = params._first as typeof resetter,
+    resetter: ImpulseFormListInputSetter<TElement> = params._first as typeof resetter,
   ): void {
     batch((scope) => {
-      this.setInitialValue(resetter)
+      this.setInitial(resetter)
 
       const initialElements = this._initialElements.getValue(scope)
 
@@ -569,85 +555,77 @@ export class ImpulseFormList<
     })
   }
 
-  public getValue(scope: Scope): null | ImpulseFormListValueSchema<TElement>
-  public getValue<TResult>(
+  public getOutput(scope: Scope): null | ImpulseFormListOutputSchema<TElement>
+  public getOutput<TResult>(
     scope: Scope,
     select: (
-      concise: null | ImpulseFormListValueSchema<TElement>,
-      verbose: ImpulseFormListValueSchemaVerbose<TElement>,
+      concise: null | ImpulseFormListOutputSchema<TElement>,
+      verbose: ImpulseFormListOutputSchemaVerbose<TElement>,
     ) => TResult,
   ): TResult
-  public getValue<TResult = null | ImpulseFormListValueSchema<TElement>>(
+  public getOutput<TResult = null | ImpulseFormListOutputSchema<TElement>>(
     scope: Scope,
     select: (
-      concise: null | ImpulseFormListValueSchema<TElement>,
-      verbose: ImpulseFormListValueSchemaVerbose<TElement>,
+      concise: null | ImpulseFormListOutputSchema<TElement>,
+      verbose: ImpulseFormListOutputSchemaVerbose<TElement>,
     ) => TResult = params._first as typeof select,
   ): TResult {
     const [concise, verbose] = zipMap(
       //
       this._elements.getValue(scope),
-      (form) => form.getValue(scope, params),
+      (form) => form.getOutput(scope, params),
     ) as [
-      ImpulseFormListValueSchema<TElement>,
-      ImpulseFormListValueSchemaVerbose<TElement>,
+      ImpulseFormListOutputSchema<TElement>,
+      ImpulseFormListOutputSchemaVerbose<TElement>,
     ]
 
     return select(concise.some(isNull) ? null : concise, verbose)
   }
 
-  public getOriginalValue(
-    scope: Scope,
-  ): ImpulseFormListOriginalValueSchema<TElement> {
-    const originalValue = this._elements
+  public getInput(scope: Scope): ImpulseFormListInputSchema<TElement> {
+    const input = this._elements
       .getValue(scope)
-      .map((form) => form.getOriginalValue(scope))
+      .map((form) => form.getInput(scope))
 
-    return originalValue as ImpulseFormListOriginalValueSchema<TElement>
+    return input as ImpulseFormListInputSchema<TElement>
   }
 
-  public setOriginalValue(
-    setter: ImpulseFormListOriginalValueSetter<TElement>,
-  ): void {
+  public setInput(setter: ImpulseFormListInputSetter<TElement>): void {
     setFormElements(
       this._elements,
       setter,
-      (scope) => [this.getOriginalValue(scope), this.getInitialValue(scope)],
-      (element, next) => element.setOriginalValue(next),
+      (scope) => [this.getInput(scope), this.getInitial(scope)],
+      (element, next) => element.setInput(next),
     )
   }
 
-  public getInitialValue(
-    scope: Scope,
-  ): ImpulseFormListOriginalValueSchema<TElement> {
-    const initialValue = this._initialElements
+  public getInitial(scope: Scope): ImpulseFormListInputSchema<TElement> {
+    const initial = this._initialElements
       .getValue(scope)
-      .map((form) => form.getInitialValue(scope))
+      .map((form) => form.getInitial(scope))
 
-    return initialValue as ImpulseFormListOriginalValueSchema<TElement>
+    return initial as ImpulseFormListInputSchema<TElement>
   }
 
-  public setInitialValue(
-    setter: ImpulseFormListOriginalValueSetter<TElement>,
-  ): void {
+  public setInitial(setter: ImpulseFormListInputSetter<TElement>): void {
     batch((scope) => {
-      // get next initial value from setter (initial, original) -> next
-      const nextInitialValue = resolveSetter(
+      // get next initial value from setter (initial, input) -> next
+      const nextInitial = resolveSetter(
         setter,
-        this.getInitialValue(scope),
-        this.getOriginalValue(scope),
+        this.getInitial(scope),
+        this.getInput(scope),
       )
 
       const elements = this._elements
         .getValue(scope)
-        .slice(0, nextInitialValue.length)
+        .slice(0, nextInitial.length)
 
       const initialElements = [
         ...elements,
         // restore initial elements that were removed from the elements
         ...this._initialElements
           .getValue(scope)
-          .slice(elements.length, nextInitialValue.length),
+          .slice(elements.length, nextInitial.length),
       ]
 
       // set list's initial elements
@@ -655,11 +633,11 @@ export class ImpulseFormList<
 
       // set initial values for each element
       for (const [index, element] of initialElements.entries()) {
-        const initialValue = nextInitialValue.at(index)
+        const initial = nextInitial.at(index)
 
         // do not change initial value if it is not defined
-        if (!isUndefined(initialValue)) {
-          element.setInitialValue(initialValue)
+        if (!isUndefined(initial)) {
+          element.setInitial(initial)
         }
       }
     })
