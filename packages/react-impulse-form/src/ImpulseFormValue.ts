@@ -34,7 +34,7 @@ export interface ImpulseFormValueOptions<TInput, TOutput = TInput> {
   schema?: ImpulseFormSchema<TOutput, TInput>
 
   /**
-   * A compare function that determines whether the input changes.
+   * A compare function that determines whether the input value changes.
    * When it does, the ImpulseFormValue#getInput returns the new value.
    * Otherwise, it returns the previous value.
    *
@@ -51,6 +51,23 @@ export interface ImpulseFormValueOptions<TInput, TOutput = TInput> {
    * form.getInput(scope) === initial // true
    */
   isInputEqual?: Compare<TInput>
+
+  /**
+   * A compare function that determines whether the input is dirty.
+   * When it is, the ImpulseFormValue#isDirty returns true.
+   * Fallbacks to not(isInputEqual) if not provided.
+   *
+   * @default not(isInputEqual)
+   *
+   * @example
+   * const form = ImpulseFormValue.of("", {
+   *   isInputDirty: (left, right) => left.trim() !== right.trim(),
+   * })
+   *
+   * form.setInput(" ")
+   * form.isDirty(scope) === false
+   */
+  isInputDirty?: Compare<TInput>
 
   /**
    * @default input
@@ -113,6 +130,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
       touched = false,
       schema,
       isInputEqual = eq,
+      isInputDirty = (left, right, scope) => !isInputEqual(left, right, scope),
       initial,
       validateOn = VALIDATE_ON_TOUCH,
     }: ImpulseFormValueOptions<TInput, TOutput> = {},
@@ -139,6 +157,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
       Impulse.of(inputOrInitial, { compare: isInputEqual }),
       Impulse.of(schema),
       isInputEqual,
+      isInputDirty,
     )
   }
 
@@ -162,6 +181,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
       undefined | ImpulseFormSchema<TOutput, TInput>
     >,
     private readonly _isInputEqual: Compare<TInput>,
+    private readonly _isInputDirty: Compare<TInput>,
   ) {
     super(root)
     this._updateValidated()
@@ -254,6 +274,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
       this._input.clone(),
       this._schema.clone(),
       this._isInputEqual,
+      this._isInputDirty,
     )
   }
 
@@ -284,7 +305,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
   ): TResult {
     const initial = this.getInitial(scope)
     const input = this.getInput(scope)
-    const dirty = !this._isInputEqual(initial, input, scope)
+    const dirty = this._isInputDirty(initial, input, scope)
 
     return select(dirty, dirty, true)
   }
