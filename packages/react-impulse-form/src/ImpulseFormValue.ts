@@ -119,13 +119,6 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
   ): ImpulseFormValue<TInput, TOutput> {
     const _initial = isUndefined(initial) ? input : initial
 
-    const isInputEqualImpulse = Impulse.of(isInputEqual)
-    const isInputEqualStable: Compare<TInput> = (left, right, scope) => {
-      const compare = isInputEqualImpulse.getValue(scope)
-
-      return compare(left, right, scope)
-    }
-
     // initiate with the same value if specified but equal
     const inputOrInitial = untrack((scope) => {
       if (isInputEqual(_initial, input, scope)) {
@@ -142,10 +135,10 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
       Impulse.of(validateOn),
       Impulse.of(errors ?? [], { compare: shallowArrayEquals }),
       Impulse.of(!isUndefined(initial)),
-      Impulse.of(_initial, { compare: isInputEqualStable }),
-      Impulse.of(inputOrInitial, { compare: isInputEqualStable }),
+      Impulse.of(_initial, { compare: isInputEqual }),
+      Impulse.of(inputOrInitial, { compare: isInputEqual }),
       Impulse.of(schema),
-      isInputEqualImpulse,
+      isInputEqual,
     )
   }
 
@@ -168,7 +161,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
     private readonly _schema: Impulse<
       undefined | ImpulseFormSchema<TOutput, TInput>
     >,
-    private readonly _isInputEqual: Impulse<Compare<TInput>>,
+    private readonly _isInputEqual: Compare<TInput>,
   ) {
     super(root)
     this._updateValidated()
@@ -260,7 +253,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
       this._initial.clone(),
       this._input.clone(),
       this._schema.clone(),
-      this._isInputEqual.clone(),
+      this._isInputEqual,
     )
   }
 
@@ -291,8 +284,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
   ): TResult {
     const initial = this.getInitial(scope)
     const input = this.getInput(scope)
-    const compare = this._isInputEqual.getValue(scope)
-    const dirty = !compare(initial, input, scope)
+    const dirty = !this._isInputEqual(initial, input, scope)
 
     return select(dirty, dirty, true)
   }
@@ -421,10 +413,6 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
       this._touched.setValue(false)
       this._errors.setValue([])
     })
-  }
-
-  public setCompare(setter: Setter<Compare<TInput>>): void {
-    this._isInputEqual.setValue(setter)
   }
 
   public getOutput(scope: Scope): null | TOutput
