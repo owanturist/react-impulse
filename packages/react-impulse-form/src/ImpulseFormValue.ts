@@ -38,6 +38,9 @@ export interface ImpulseFormValueOptions<TInput, TOutput = TInput> {
    * When it does, the ImpulseFormValue#getInput returns the new value.
    * Otherwise, it returns the previous value.
    *
+   * Useful for none primitive values such as Objects, Arrays, Date.
+   * Intended to improve performance but do not affect business logic.
+   *
    * @default Object.is
    *
    * @example
@@ -56,6 +59,10 @@ export interface ImpulseFormValueOptions<TInput, TOutput = TInput> {
    * A compare function that determines whether the input is dirty.
    * When it is, the ImpulseFormValue#isDirty returns true.
    * Fallbacks to not(isInputEqual) if not provided.
+   *
+   * Useful for values that have intermediate states deviating from the initial value,
+   * but should not be considered dirty such as strings, unsorted arrays, etc.
+   * Intended to tune business logic and avoid false positives for dirty states.
    *
    * @default not(isInputEqual)
    *
