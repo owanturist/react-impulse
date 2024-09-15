@@ -10,6 +10,10 @@ export type Setter<
   TPrevValues extends ReadonlyArray<unknown> = [TValue],
 > = TValue | Func<TPrevValues, TValue>
 
+export type Result<TError, TData> = [TError] extends [never]
+  ? [null, TData]
+  : [TError, null] | [null, TData]
+
 // TODO use everywhere
 export function resolveSetter<
   TValue,

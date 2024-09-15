@@ -8,6 +8,7 @@ import {
   untrack,
 } from "./dependencies"
 import {
+  type Result,
   type Setter,
   shallowArrayEquals,
   eq,
@@ -18,7 +19,7 @@ import {
   params,
 } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
-import type { ImpulseFormSchema, Result } from "./ImpulseFormSchema"
+import type { ImpulseFormSchema } from "./ImpulseFormSchema"
 import {
   VALIDATE_ON_INIT,
   VALIDATE_ON_CHANGE,
@@ -226,30 +227,27 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
     const errors = this._errors.getValue(scope)
 
     if (errors.length > 0) {
-      return { success: false, error: errors }
+      return [errors, null]
     }
 
     const value = this.getInput(scope)
     const schema = this._schema.getValue(scope)
 
     if (isUndefined(schema)) {
-      return { success: true, data: value as unknown as TOutput }
+      return [null, value as unknown as TOutput]
     }
 
     if (!this._validated.getValue(scope)) {
-      return { success: true, data: null }
+      return [null, null]
     }
 
     const result = schema.safeParse(value)
 
     if (result.success) {
-      return result
+      return [null, result.data]
     }
 
-    return {
-      success: false,
-      error: result.error.errors.map(({ message }) => message),
-    }
+    return [result.error.errors.map(({ message }) => message), null]
   }
 
   protected _getFocusFirstInvalidValue(): null | VoidFunction {
@@ -332,11 +330,9 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
       verbose: null | ReadonlyArray<string>,
     ) => TResult = params._first as typeof select,
   ): TResult {
-    const result = this._validate(scope)
-    const error =
-      result.success || result.error.length === 0 ? null : result.error
+    const [errors] = this._validate(scope)
 
-    return select(error, error)
+    return select(errors, errors)
   }
 
   public setErrors(setter: ImpulseFormValueErrorsSetter): void {
@@ -455,8 +451,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
       verbose: null | TOutput,
     ) => TResult = params._first as typeof select,
   ): TResult {
-    const result = this._validate(scope)
-    const output = result.success ? result.data : null
+    const [, output] = this._validate(scope)
 
     return select(output, output)
   }
