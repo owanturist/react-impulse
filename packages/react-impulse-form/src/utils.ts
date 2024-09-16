@@ -69,6 +69,18 @@ export function isPresent<TValue>(
   return data != null
 }
 
+export function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && isPresent(value)
+}
+
+export function isInstanceOf<
+  TCtor extends
+    | (abstract new () => unknown)
+    | (abstract new (...args: ReadonlyArray<never>) => unknown),
+>(value: unknown, ctor: TCtor): value is InstanceType<TCtor> {
+  return value instanceof ctor
+}
+
 type DefinitelyFunction<T> =
   // eslint-disable-next-line @typescript-eslint/ban-types
   Extract<T, Function> extends never ? Function : Extract<T, Function>

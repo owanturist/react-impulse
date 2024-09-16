@@ -228,6 +228,34 @@ describe("ImpulseFormValue#getOutput()", () => {
       null | string
     >()
   })
+
+  it("transforms value with custom ZodLikeSchema#safeParse", ({ scope }) => {
+    const value = ImpulseFormValue.of(2, {
+      schema: {
+        safeParse(input) {
+          return { success: true, data: String(input) }
+        },
+      },
+      validateOn: "onInit",
+    })
+
+    expect(value.getOutput(scope)).toBe("2")
+    expect(value.getErrors(scope)).toBeNull()
+  })
+
+  it("transforms value with custom ZodLikeSchema#parse", ({ scope }) => {
+    const value = ImpulseFormValue.of(2, {
+      schema: {
+        parse(input) {
+          return String(input)
+        },
+      },
+      validateOn: "onInit",
+    })
+
+    expect(value.getOutput(scope)).toBe("2")
+    expect(value.getErrors(scope)).toBeNull()
+  })
 })
 
 describe("ImpulseFormValue#getErrors()", () => {
@@ -273,6 +301,196 @@ describe("ImpulseFormValue#getErrors()", () => {
     expect(value.getErrors(scope)).toStrictEqual([
       "Number must be less than or equal to 1",
     ])
+  })
+
+  describe("with custom schema", () => {
+    describe.each([
+      [
+        "get errors()",
+        {
+          get errors() {
+            return [
+              { message: "error message #1" },
+              { message: "error message #2" },
+            ]
+          },
+        },
+      ],
+      [
+        "errors",
+        {
+          errors: [
+            { message: "error message #1" },
+            { message: "error message #2" },
+          ],
+        },
+      ],
+      [
+        "issues",
+        {
+          issues: [
+            { message: "error message #1" },
+            { message: "error message #2" },
+          ],
+        },
+      ],
+    ])(
+      "when using ZodLikeSchema#safeParse() with ZodLikeError#%s",
+      (_, error) => {
+        it("returns messages", ({ scope }) => {
+          const value = ImpulseFormValue.of(1, {
+            touched: true,
+            schema: {
+              safeParse() {
+                return { success: false, error }
+              },
+            },
+          })
+
+          expect(value.getErrors(scope)).toStrictEqual([
+            "error message #1",
+            "error message #2",
+          ])
+        })
+      },
+    )
+
+    describe("when using ZodLikeSchema#parse()", () => {
+      it("returns Error.message", ({ scope }) => {
+        const value = ImpulseFormValue.of(1, {
+          touched: true,
+          schema: {
+            parse() {
+              throw new Error("error message")
+            },
+          },
+        })
+
+        expect(value.getErrors(scope)).toStrictEqual(["error message"])
+      })
+
+      describe.each([
+        [
+          "get errors()",
+          {
+            get errors() {
+              return [
+                { message: "error message #1" },
+                { message: "error message #2" },
+              ]
+            },
+          },
+        ],
+        [
+          "errors",
+          {
+            errors: [
+              { message: "error message #1" },
+              { message: "error message #2" },
+            ],
+          },
+        ],
+        [
+          "issues",
+          {
+            issues: [
+              { message: "error message #1" },
+              { message: "error message #2" },
+            ],
+          },
+        ],
+      ])("when messages are in ZodLikeError#%s", (_, error) => {
+        it("returns messages", ({ scope }) => {
+          const value = ImpulseFormValue.of(1, {
+            touched: true,
+            schema: {
+              parse() {
+                throw error
+              },
+            },
+          })
+
+          expect(value.getErrors(scope)).toStrictEqual([
+            "error message #1",
+            "error message #2",
+          ])
+        })
+      })
+
+      it("ignores ZodLikeIssue without the message: string property", ({
+        scope,
+      }) => {
+        const value = ImpulseFormValue.of(1, {
+          touched: true,
+          schema: {
+            parse() {
+              throw {
+                issues: [
+                  { message: "error message #1" },
+                  {},
+                  [],
+                  "error",
+                  { message: {} },
+                  { message: 1 },
+                  { message: "error message #2" },
+                ],
+              }
+            },
+          },
+        })
+
+        expect(value.getErrors(scope)).toStrictEqual([
+          "error message #1",
+          "error message #2",
+        ])
+      })
+
+      it("returns empty array if ZodLikeError does not have errors|issues properties", ({
+        scope,
+      }) => {
+        const value = ImpulseFormValue.of(1, {
+          touched: true,
+          schema: {
+            parse() {
+              throw { anything: [] }
+            },
+          },
+        })
+
+        expect(value.getErrors(scope)).toStrictEqual([])
+      })
+
+      it("returns empty array if ZodLikeError is not an object", ({
+        scope,
+      }) => {
+        const value = ImpulseFormValue.of(1, {
+          touched: true,
+          schema: {
+            parse() {
+              throw "error"
+            },
+          },
+        })
+
+        expect(value.getErrors(scope)).toStrictEqual([])
+      })
+
+      it("returns error from ZodSchema#parse()", ({ scope }) => {
+        const value = ImpulseFormValue.of(1, {
+          touched: true,
+          schema: {
+            parse(input) {
+              return z.number().max(1).parse(input)
+            },
+          },
+        })
+
+        value.setInput(2)
+        expect(value.getErrors(scope)).toStrictEqual([
+          "Number must be less than or equal to 1",
+        ])
+      })
+    })
   })
 })
 

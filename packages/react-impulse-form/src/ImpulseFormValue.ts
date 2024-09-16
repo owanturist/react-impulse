@@ -19,7 +19,7 @@ import {
   params,
 } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
-import type { ImpulseFormSchema } from "./ImpulseFormSchema"
+import { zodLikeParse, type ZodLikeSchema } from "./ZodLikeSchema"
 import {
   VALIDATE_ON_INIT,
   VALIDATE_ON_CHANGE,
@@ -32,7 +32,7 @@ import { Emitter } from "./Emitter"
 export interface ImpulseFormValueOptions<TInput, TOutput = TInput> {
   errors?: null | ReadonlyArray<string>
   touched?: boolean
-  schema?: ImpulseFormSchema<TOutput, TInput>
+  schema?: ZodLikeSchema<TOutput>
 
   /**
    * A compare function that determines whether the input value changes.
@@ -185,9 +185,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
     private readonly _isExplicitInitial: Impulse<boolean>,
     private readonly _initial: Impulse<TInput>,
     private readonly _input: Impulse<TInput>,
-    private readonly _schema: Impulse<
-      undefined | ImpulseFormSchema<TOutput, TInput>
-    >,
+    private readonly _schema: Impulse<undefined | ZodLikeSchema<TOutput>>,
     private readonly _isInputEqual: Compare<TInput>,
     private readonly _isInputDirty: Compare<TInput>,
   ) {
@@ -241,13 +239,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
       return [null, null]
     }
 
-    const result = schema.safeParse(value)
-
-    if (result.success) {
-      return [null, result.data]
-    }
-
-    return [result.error.errors.map(({ message }) => message), null]
+    return zodLikeParse(schema, value)
   }
 
   protected _getFocusFirstInvalidValue(): null | VoidFunction {
@@ -416,7 +408,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
     })
   }
 
-  public setSchema(schema: null | ImpulseFormSchema<TOutput, TInput>): void {
+  public setSchema(schema: null | ZodLikeSchema<TOutput>): void {
     this._schema.setValue(schema ?? undefined)
   }
 

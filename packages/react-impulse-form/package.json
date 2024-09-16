@@ -36,10 +36,10 @@
     "@testing-library/react": "^16.0.1",
     "@types/react": "^18.3.5",
     "react": "^18.3.1",
-    "react-impulse": "workspace:*"
+    "react-impulse": "workspace:*",
+    "zod": "^3.23.8"
   },
   "dependencies": {
-    "ts-toolbelt": "^9.6.0",
-    "zod": "^3.23.8"
+    "ts-toolbelt": "^9.6.0"
   }
 }
