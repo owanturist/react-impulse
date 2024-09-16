@@ -96,9 +96,6 @@ importers:
       ts-toolbelt:
         specifier: ^9.6.0
         version: 9.6.0
-      zod:
-        specifier: ^3.23.8
-        version: 3.23.8
     devDependencies:
       '@testing-library/jest-dom':
         specifier: ^6.5.0
@@ -115,6 +112,9 @@ importers:
       react-impulse:
         specifier: workspace:*
         version: link:../react-impulse
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
 
 packages:
 
@@ -4936,4 +4936,4 @@ packages:
 
   /zod@3.23.8:
     resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
-    dev: false
+    dev: true
