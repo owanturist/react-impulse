@@ -1,5 +1,5 @@
 ---
-"react-impulse-form": major
+"react-impulse-form": minor
 ---
 
 Expose `Result` to the public API.
