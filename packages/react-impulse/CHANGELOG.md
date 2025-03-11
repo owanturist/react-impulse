@@ -1,5 +1,11 @@
 # react-impulse
 
+## 2.0.4
+
+### Patch Changes
+
+- [#764](https://github.com/owanturist/react-impulse/pull/764) [`cf0d1d0`](https://github.com/owanturist/react-impulse/commit/cf0d1d0f7d2026a6a7cdee4bff6e0be7a0b26b9f) Thanks [@dependabot](https://github.com/apps/dependabot)! - Bump rollup from 4.21.2 to 4.22.4
+
 ## 2.0.3
 
 ### Patch Changes
