@@ -1,5 +1,23 @@
 # react-impulse-form
 
+## 0.6.0
+
+### Minor Changes
+
+- [#760](https://github.com/owanturist/react-impulse/pull/760) [`4209542`](https://github.com/owanturist/react-impulse/commit/4209542ade96ec49dfdf564f68ae3515073082c4) Thanks [@owanturist](https://github.com/owanturist)! - Drop `zod` from dependencies but keep `ImpulseFormValueOptions.schema` compatible with `zod` schemas.
+
+- [#758](https://github.com/owanturist/react-impulse/pull/758) [`0ff7450`](https://github.com/owanturist/react-impulse/commit/0ff7450cdb4141b650717ea8fd6f0f3e9ca9e1cd) Thanks [@owanturist](https://github.com/owanturist)! - Expose `Result` to the public API.
+
+  ```ts
+  export type Result<TError, TData> = [TError] extends [never]
+    ? [null, TData]
+    : [TError, null] | [null, TData]
+  ```
+
+### Patch Changes
+
+- [#764](https://github.com/owanturist/react-impulse/pull/764) [`cf0d1d0`](https://github.com/owanturist/react-impulse/commit/cf0d1d0f7d2026a6a7cdee4bff6e0be7a0b26b9f) Thanks [@dependabot](https://github.com/apps/dependabot)! - Bump rollup from 4.21.2 to 4.22.4
+
 ## 0.5.0
 
 ### Minor Changes
