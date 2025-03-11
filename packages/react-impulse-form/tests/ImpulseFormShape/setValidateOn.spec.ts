@@ -34,7 +34,7 @@ const setup = (
 it("matches the type signature", () => {
   const form = setup()
 
-  type ThirdValidateStrategy = {
+  interface ThirdValidateStrategy {
     readonly one: ValidateStrategy
     readonly two: ValidateStrategy
   }

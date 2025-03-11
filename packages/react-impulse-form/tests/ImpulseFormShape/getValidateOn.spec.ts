@@ -8,12 +8,12 @@ import {
   ImpulseFormValue,
 } from "../../src"
 
-type ThirdValidateStrategyVerbose = {
+interface ThirdValidateStrategyVerbose {
   readonly one: ValidateStrategy
   readonly two: ValidateStrategy
 }
 
-type RootValidateStrategyVerbose = {
+interface RootValidateStrategyVerbose {
   readonly first: ValidateStrategy
   readonly second: ValidateStrategy
   readonly third: ThirdValidateStrategyVerbose

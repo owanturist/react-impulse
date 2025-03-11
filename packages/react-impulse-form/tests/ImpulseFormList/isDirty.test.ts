@@ -43,11 +43,20 @@ it("matches the type signature", ({ scope }) => {
       select: (
         concise:
           | boolean
-          | ReadonlyArray<boolean | { first: boolean; second: boolean }>,
-        verbose: ReadonlyArray<{ first: boolean; second: boolean }>,
+          | ReadonlyArray<
+              | boolean
+              | {
+                  readonly first: boolean
+                  readonly second: boolean
+                }
+            >,
+        verbose: ReadonlyArray<{
+          readonly first: boolean
+          readonly second: boolean
+        }>,
       ) => TResult,
     ): TResult
-  }>
+  }>()
 
   expectTypeOf(form.getElements(scope).at(0)!.isDirty).toEqualTypeOf<{
     (scope: Scope): boolean
@@ -55,11 +64,19 @@ it("matches the type signature", ({ scope }) => {
     <TResult>(
       scope: Scope,
       select: (
-        concise: boolean | { first: boolean; second: boolean },
-        verbose: { first: boolean; second: boolean },
+        concise:
+          | boolean
+          | {
+              readonly first: boolean
+              readonly second: boolean
+            },
+        verbose: {
+          readonly first: boolean
+          readonly second: boolean
+        },
       ) => TResult,
     ): TResult
-  }>
+  }>()
 })
 
 it("returns false for empty list", ({ scope }) => {
