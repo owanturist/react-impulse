@@ -7,12 +7,12 @@ import {
   ImpulseFormValue,
 } from "../../src"
 
-type ThirdIsValidatedVerbose = {
+interface ThirdIsValidatedVerbose {
   readonly one: boolean
   readonly two: boolean
 }
 
-type RootIsValidatedVerbose = {
+interface RootIsValidatedVerbose {
   readonly first: boolean
   readonly second: boolean
   readonly third: ThirdIsValidatedVerbose

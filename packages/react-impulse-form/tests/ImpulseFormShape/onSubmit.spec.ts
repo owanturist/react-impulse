@@ -9,7 +9,7 @@ import { wait } from "../common"
 
 const SLOWEST_ASYNC_MS = 3000
 
-type ShapeFields = {
+interface ShapeFields {
   _1: ImpulseFormValue<string>
   _2: ImpulseFormValue<number>
   _3: ImpulseFormShape<{
@@ -19,12 +19,12 @@ type ShapeFields = {
   _4: Array<string>
 }
 
-type ThirdValueVerbose = {
+interface ThirdValueVerbose {
   readonly _1: boolean
   readonly _2: Array<string>
 }
 
-type RootValueVerbose = {
+interface RootValueVerbose {
   readonly _1: string
   readonly _2: number
   readonly _3: ThirdValueVerbose

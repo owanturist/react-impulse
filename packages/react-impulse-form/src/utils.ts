@@ -22,7 +22,6 @@ export function resolveSetter<
   return isFunction(setter) ? setter(...prevValues) : setter
 }
 
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type ComputeObject<Obj> = unknown & {
   [K in keyof Obj]: Obj[K]
 }
@@ -82,11 +81,11 @@ export function isInstanceOf<
 }
 
 type DefinitelyFunction<T> =
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   Extract<T, Function> extends never ? Function : Extract<T, Function>
 
 export function isFunction<T>(
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   data: Function | T,
 ): data is DefinitelyFunction<T> {
   return typeof data === "function"

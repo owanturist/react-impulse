@@ -56,7 +56,9 @@ export class ScopeEmitter {
 
   private _emit: VoidFunction = noop
 
-  private constructor() {}
+  private constructor() {
+    // do not allow to create an instance directly
+  }
 
   private _increment(): void {
     this._version = (this._version + 1) % 10e9

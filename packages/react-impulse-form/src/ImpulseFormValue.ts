@@ -193,7 +193,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
     this._updateValidated()
   }
 
-  private _updateValidated(override: boolean = false): void {
+  private _updateValidated(override = false): void {
     this._validated.setValue((isValidated, scope) => {
       if (!override && isValidated) {
         return true

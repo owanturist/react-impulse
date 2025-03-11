@@ -347,7 +347,6 @@ describe("scoped()", () => {
           data-testid="result"
           onClick={() => setCondition((x) => !x)}
         >
-          {/* eslint-disable-next-line jest/no-if */}
           {condition ? count.getValue(scope) : "none"}
         </button>
       )
