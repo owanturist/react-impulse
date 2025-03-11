@@ -176,7 +176,7 @@ export default tseslint.config([
       },
     },
     plugins: {
-      tslint: tseslint.plugin,
+      "@typescript-eslint": tseslint.plugin,
       import: importPlugin,
     },
     rules: {
@@ -186,65 +186,68 @@ export default tseslint.config([
       "no-unused-vars": "off",
 
       // Typescript Eslint
-      "tslint/no-shadow": ["error", { allow: ["scope"] }],
-      "tslint/array-type": [
+      "@typescript-eslint/no-shadow": ["error", { allow: ["scope"] }],
+      "@typescript-eslint/array-type": [
         "error",
         {
           default: "generic",
           readonly: "generic",
         },
       ],
-      "tslint/explicit-function-return-type": [
+      "@typescript-eslint/explicit-function-return-type": [
         "error",
         {
           allowExpressions: true,
         },
       ],
-      "tslint/unbound-method": [
+      "@typescript-eslint/unbound-method": [
         "error",
         {
           ignoreStatic: true,
         },
       ],
-      "tslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
-      "tslint/explicit-member-accessibility": "error",
-      "tslint/no-non-null-assertion": "off",
-      "tslint/no-confusing-non-null-assertion": "error",
-      "tslint/no-confusing-void-expression": [
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/explicit-member-accessibility": "error",
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-confusing-non-null-assertion": "error",
+      "@typescript-eslint/no-confusing-void-expression": [
         "error",
         {
           ignoreArrowShorthand: true,
         },
       ],
-      "tslint/no-invalid-void-type": "off",
-      "tslint/no-non-null-asserted-nullish-coalescing": "error",
-      "tslint/no-require-imports": "error",
-      "tslint/no-unnecessary-boolean-literal-compare": "error",
-      "tslint/no-unnecessary-condition": "error",
-      "tslint/no-unnecessary-qualifier": "warn",
-      "tslint/no-unnecessary-type-arguments": "warn",
-      "tslint/non-nullable-type-assertion-style": "warn",
-      "tslint/prefer-for-of": "warn",
-      "tslint/prefer-function-type": "error",
-      "tslint/prefer-literal-enum-member": "error",
-      "tslint/prefer-optional-chain": "error",
-      "tslint/prefer-nullish-coalescing": "error",
-      "tslint/prefer-readonly": "error",
-      "tslint/prefer-reduce-type-parameter": "warn",
-      "tslint/prefer-string-starts-ends-with": "error",
-      "tslint/prefer-ts-expect-error": "error",
-      "tslint/require-array-sort-compare": "error",
-      "tslint/restrict-plus-operands": "error",
-      "tslint/switch-exhaustiveness-check": "error",
-      "tslint/consistent-generic-constructors": "warn",
-      "tslint/no-this-alias": [
+      "@typescript-eslint/no-invalid-void-type": "off",
+      "@typescript-eslint/no-non-null-asserted-nullish-coalescing": "error",
+      "@typescript-eslint/no-require-imports": "error",
+      "@typescript-eslint/no-unnecessary-boolean-literal-compare": "error",
+      "@typescript-eslint/no-unnecessary-condition": "error",
+      "@typescript-eslint/no-unnecessary-qualifier": "warn",
+      "@typescript-eslint/no-unnecessary-type-arguments": "warn",
+      "@typescript-eslint/non-nullable-type-assertion-style": "warn",
+      "@typescript-eslint/prefer-for-of": "warn",
+      "@typescript-eslint/prefer-function-type": "error",
+      "@typescript-eslint/prefer-literal-enum-member": "error",
+      "@typescript-eslint/prefer-optional-chain": "error",
+      "@typescript-eslint/prefer-nullish-coalescing": "error",
+      "@typescript-eslint/prefer-readonly": "error",
+      "@typescript-eslint/prefer-reduce-type-parameter": "warn",
+      "@typescript-eslint/prefer-string-starts-ends-with": "error",
+      "@typescript-eslint/prefer-ts-expect-error": "error",
+      "@typescript-eslint/require-array-sort-compare": "error",
+      "@typescript-eslint/restrict-plus-operands": "error",
+      "@typescript-eslint/switch-exhaustiveness-check": "error",
+      "@typescript-eslint/consistent-generic-constructors": "warn",
+      "@typescript-eslint/no-this-alias": [
         "error",
         {
           allowedNames: ["that"],
         },
       ],
-      "tslint/no-import-type-side-effects": "error",
-      "tslint/consistent-type-imports": [
+      "@typescript-eslint/no-import-type-side-effects": "error",
+      "@typescript-eslint/consistent-type-imports": [
         "error",
         {
           prefer: "type-imports",
@@ -368,9 +371,9 @@ export default tseslint.config([
           assertFunctionNames: ["expect*"],
         },
       ],
-      "tslint/explicit-function-return-type": "off",
-      "tslint/unbound-method": "off",
-      "tslint/no-shadow": "off",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/unbound-method": "off",
+      "@typescript-eslint/no-shadow": "off",
       "no-restricted-imports": [
         "error",
         {
