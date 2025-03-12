@@ -1,5 +1,21 @@
 # react-impulse
 
+## 2.1.0
+
+### Minor Changes
+
+- [#785](https://github.com/owanturist/react-impulse/pull/785) [`b8561e4`](https://github.com/owanturist/react-impulse/commit/b8561e457a572a153108ad2ac419cc41b02dcf76) Thanks [@owanturist](https://github.com/owanturist)! - Update dependencies:
+
+  - `@changesets/changelog-github@0.5.1`
+  - `@changesets/cli@2.28.1`
+  - `@size-limit/preset-small-lib@11.2.0`
+  - `happy-dom@17.4.4`
+  - `prettier@3.5.3`
+  - `size-limit@11.2.0`
+  - `terser@5.39.0`
+  - `tsup@8.4.0`
+  - `typescript@5.8.2`
+
 ## 2.0.4
 
 ### Patch Changes
