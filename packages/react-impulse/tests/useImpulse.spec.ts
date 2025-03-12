@@ -191,12 +191,12 @@ describe("with compare function", () => {
     const compare_1 = vi.fn().mockImplementation(Object.is)
     const compare_2 = vi.fn().mockImplementation(Object.is)
 
-    const { result, rerender } = renderHook(
-      (compare: null | Compare<number>) => useImpulse<number>(0, { compare }),
-      {
-        initialProps: compare_1,
-      },
-    )
+    const { result, rerender } = renderHook<
+      Impulse<number>,
+      null | Compare<number>
+    >((compare) => useImpulse<number>(0, { compare }), {
+      initialProps: compare_1,
+    })
 
     act(() => {
       result.current.setValue((x) => x + 1)
