@@ -30,9 +30,12 @@ describe.each([
     const initial = { count: 0 }
     const impulse = Impulse.of(initial)
 
-    const { result, rerender } = renderHook(useHook, {
-      initialProps: { impulse },
-    })
+    const { result, rerender } = renderHook<Counter, WithImpulse & WithCompare>(
+      useHook,
+      {
+        initialProps: { impulse },
+      },
+    )
     expect(result.current).toBe(initial)
 
     act(() => {
