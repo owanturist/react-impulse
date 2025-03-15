@@ -133,7 +133,7 @@ jobs:
         uses: ./.github/actions/setup-env
 
       - name: Install react@${{ matrix.version }}
-        run: pnpm add -D --filter ./packages/* react@${{ matrix.version }} react-dom@${{ matrix.version }}
+        run: pnpm add -D --filter ./packages/* react@${{ matrix.version }} react-dom@${{ matrix.version }} @types/react@${{ matrix.version }}
 
       - name: Type check
         run: pnpm typecheck
@@ -161,9 +161,6 @@ jobs:
 
       - name: Install react-impulse@${{ matrix.version }}
         run: pnpm add -D --filter ./packages/react-impulse-form react-impulse@${{ matrix.version }}
-
-      - name: Type check
-        run: pnpm typecheck
 
       - name: Test against react-impulse@${{ matrix.version }}
         run: pnpm test:run --project react-impulse-form
