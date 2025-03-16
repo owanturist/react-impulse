@@ -1,8 +1,5 @@
 import { render, screen, fireEvent, act, waitFor } from "@testing-library/react"
-import React, {
-  type ForwardRefRenderFunction,
-  type PropsWithoutRef,
-} from "react"
+import React from "react"
 
 import {
   Impulse,
@@ -11,7 +8,6 @@ import {
   type PropsWithScope,
   type Scope,
   type PropsWithoutScope,
-  type ForwardedPropsWithoutScope,
 } from "../../src"
 
 describe("scoped()", () => {
@@ -437,6 +433,38 @@ describe("scoped()", () => {
     expect(count).toHaveEmittersSize(0)
   })
 
+  it("forwards ref", () => {
+    interface Props {
+      ref?: React.Ref<HTMLSpanElement>
+      state: Impulse<number>
+    }
+
+    const MemoizedForwarded = scoped<Props>(({ scope, state, ref }) => (
+      <span ref={ref} data-testid="count">
+        {state.getValue(scope)}
+      </span>
+    ))
+
+    const state = Impulse.of(0)
+    const divRef = vi.fn()
+
+    render(<MemoizedForwarded state={state} ref={divRef} />)
+
+    const count = screen.getByTestId("count")
+
+    expect(count).toHaveTextContent("0")
+    expect(divRef).toHaveBeenCalledOnce()
+    expect(divRef).toHaveBeenLastCalledWith(expect.any(HTMLSpanElement))
+    vi.clearAllMocks()
+
+    act(() => {
+      state.setValue((x) => x + 1)
+    })
+
+    expect(count).toHaveTextContent("1")
+    expect(divRef).not.toHaveBeenCalled()
+  })
+
   it("works with `React.lazy()`", async () => {
     const Component = scoped<{
       count: Impulse<number>
@@ -473,8 +501,6 @@ describe("scoped()", () => {
 
 describe.each([
   ["scoped.memo()", scoped.memo],
-  ["scoped.memo.forwardRef()", scoped.memo.forwardRef],
-  ["scoped.forwardRef.memo()", scoped.forwardRef.memo],
   [
     "React.memo(scoped())",
     <TProps,>(
@@ -487,9 +513,7 @@ describe.each([
       return React.memo(scoped(Component), propsAreEqual)
     },
   ],
-])("memoizing with %s", (_, customMemo) => {
-  const memo = customMemo as typeof scoped.memo
-
+])("memoizing with %s", (_, memo) => {
   it("should memoize", () => {
     const Component: React.FC<{
       scope: Scope
@@ -579,7 +603,7 @@ describe.each([
       state: { count: Impulse<number> }
       onRender: VoidFunction
     }>(
-      ({ scope, state, onRender }, _refSuppressReactWarning) => (
+      ({ scope, state, onRender }) => (
         <React.Profiler id="test" onRender={onRender}>
           <div data-testid="count">{state.count.getValue(scope)}</div>
         </React.Profiler>
@@ -665,54 +689,30 @@ describe.each([
       expect(screen.getByTestId("count")).toHaveTextContent("1")
     })
   })
-})
 
-describe("scoped.forwardRef()", () => {
-  it.each([
-    ["scoped.forwardRef()", scoped.forwardRef],
-    ["scoped.memo.forwardRef()", scoped.memo.forwardRef],
-    ["scoped.forwardRef.memo()", scoped.forwardRef.memo],
-    [
-      "React.forwardRef(scoped())",
-      <TRef, TProps>(
-        renderFn: React.ForwardRefRenderFunction<
-          TRef,
-          PropsWithoutRef<PropsWithScope<TProps>>
-        >,
-      ): React.ForwardRefExoticComponent<
-        ForwardedPropsWithoutScope<TRef, TProps>
-      > => {
-        const x = React.forwardRef(
-          scoped(renderFn) as ForwardRefRenderFunction<
-            TRef,
-            PropsWithoutRef<PropsWithoutScope<TProps>>
-          >,
-        )
+  it("forwards ref", () => {
+    interface Props {
+      ref?: React.Ref<HTMLParagraphElement>
+      state: Impulse<number>
+    }
 
-        return x
-      },
-    ],
-  ])("should pass the reference with %s", (_, forwardRef) => {
-    const Component = forwardRef<
-      HTMLDivElement,
-      {
-        state: Impulse<number>
-      }
-    >(({ scope, state }, ref) => (
-      <div ref={ref} data-testid="count">
+    const MemoizedForwarded = memo<Props>(({ scope, state, ref }) => (
+      <p ref={ref} data-testid="count">
         {state.getValue(scope)}
-      </div>
+      </p>
     ))
 
     const state = Impulse.of(0)
     const divRef = vi.fn()
 
-    render(<Component state={state} ref={divRef} />)
+    render(<MemoizedForwarded state={state} ref={divRef} />)
 
     const count = screen.getByTestId("count")
 
     expect(count).toHaveTextContent("0")
-    expect(divRef).toHaveBeenCalledExactlyOnceWith(expect.any(HTMLDivElement))
+    expect(divRef).toHaveBeenCalledExactlyOnceWith(
+      expect.any(HTMLParagraphElement),
+    )
     vi.clearAllMocks()
 
     act(() => {
@@ -721,83 +721,6 @@ describe("scoped.forwardRef()", () => {
 
     expect(count).toHaveTextContent("1")
     expect(divRef).not.toHaveBeenCalled()
-  })
-
-  it("works with `React.lazy()`", async () => {
-    const Component = scoped.forwardRef<
-      HTMLDivElement,
-      {
-        count: Impulse<number>
-      }
-    >(({ scope, count }, ref) => (
-      <div ref={ref} data-testid="count">
-        {count.getValue(scope)}
-      </div>
-    ))
-
-    const LazyComponent = React.lazy<typeof Component>(() => {
-      return new Promise((done) => {
-        setTimeout(() => done({ default: Component }), 10)
-      })
-    })
-    const count = Impulse.of(0)
-
-    const ref = vi.fn()
-
-    render(
-      <React.Suspense fallback={null}>
-        <LazyComponent count={count} ref={ref} />
-      </React.Suspense>,
-    )
-
-    expect(screen.queryByTestId("count")).not.toBeInTheDocument()
-    expect(ref).not.toHaveBeenCalled()
-
-    expect(await screen.findByTestId("count")).toHaveTextContent("0")
-    expect(ref).toHaveBeenCalledExactlyOnceWith(expect.any(HTMLDivElement))
-
-    act(() => {
-      count.setValue((x) => x + 1)
-    })
-
-    await waitFor(() => {
-      expect(screen.getByTestId("count")).toHaveTextContent("1")
-    })
-  })
-
-  it("forwards correct props", () => {
-    interface Props {
-      className: string
-      id: string
-    }
-
-    const Forwarded = scoped.forwardRef<HTMLDivElement, Props>(
-      // eslint-disable-next-line no-restricted-syntax
-      (props, ref) => <div ref={ref} {...props} />,
-    )
-    const ForwardedMemoized = scoped.forwardRef.memo<HTMLDivElement, Props>(
-      // eslint-disable-next-line no-restricted-syntax
-      (props, ref) => <div ref={ref} {...props} />,
-    )
-    const MemoizedForwarded = scoped.memo.forwardRef<HTMLDivElement, Props>(
-      // eslint-disable-next-line no-restricted-syntax
-      (props, ref) => <div ref={ref} {...props} />,
-    )
-
-    const ref_1: React.Ref<HTMLDivElement> = vi.fn()
-    const ref_2: React.Ref<HTMLDivElement> = vi.fn()
-    const ref_3: React.Ref<HTMLDivElement> = vi.fn()
-    const { rerender } = render(
-      <Forwarded ref={ref_1} className="test" id="test" />,
-    )
-
-    expect(ref_1).toHaveBeenCalledExactlyOnceWith(expect.any(HTMLDivElement))
-
-    rerender(<ForwardedMemoized ref={ref_2} className="test" id="test" />)
-    expect(ref_2).toHaveBeenCalledExactlyOnceWith(expect.any(HTMLDivElement))
-
-    rerender(<MemoizedForwarded ref={ref_3} className="test" id="test" />)
-    expect(ref_3).toHaveBeenCalledExactlyOnceWith(expect.any(HTMLDivElement))
   })
 })
 
