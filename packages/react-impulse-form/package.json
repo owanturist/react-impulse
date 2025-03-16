@@ -28,14 +28,14 @@
   "repository": "https://github.com/owanturist/react-impulse/tree/master/packages/react-impulse-form",
   "homepage": "https://github.com/owanturist/react-impulse/packages/react-impulse-form#readme",
   "peerDependencies": {
-    "react": "^16.12.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
+    "react": "^16.12.0 || ^17.0.0 || ^18.0.0",
     "react-impulse": "^2.0.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
-    "@types/react": "^19.0.10",
-    "react": "^19.0.0",
+    "@types/react": "^18.3.5",
+    "react": "^18.3.1",
     "react-impulse": "workspace:*",
     "zod": "^3.23.8"
   },

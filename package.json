@@ -40,7 +40,6 @@
     "eslint-plugin-vitest": "^0.5.4",
     "happy-dom": "^17.4.4",
     "prettier": "^3.5.3",
-    "react-dom": "^19.0.0",
     "size-limit": "^11.2.0",
     "terser": "^5.39.0",
     "tsup": "^8.4.0",
