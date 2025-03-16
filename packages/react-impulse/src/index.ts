@@ -7,12 +7,7 @@ export {
   Impulse,
 } from "./Impulse"
 export type { Scope } from "./Scope"
-export {
-  type PropsWithScope,
-  type PropsWithoutScope,
-  type ForwardedPropsWithoutScope,
-  scoped,
-} from "./scoped"
+export { type PropsWithScope, type PropsWithoutScope, scoped } from "./scoped"
 export { untrack } from "./untrack"
 export { batch } from "./batch"
 export { batch as tap } from "./batch"
