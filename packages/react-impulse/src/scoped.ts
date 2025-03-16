@@ -43,7 +43,7 @@ export function scoped<TProps>(component: FC<TProps>): FC<TProps> {
   return ComponentWithScope
 }
 
-function memo<TProps extends Record<PropertyKey, unknown>>(
+function memo<TProps>(
   Component: FC<TProps>,
   propsAreEqual?: (
     prevProps: Readonly<PropsWithoutScope<TProps>>,
