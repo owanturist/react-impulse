@@ -453,8 +453,7 @@ describe("scoped()", () => {
     const count = screen.getByTestId("count")
 
     expect(count).toHaveTextContent("0")
-    expect(divRef).toHaveBeenCalledOnce()
-    expect(divRef).toHaveBeenLastCalledWith(expect.any(HTMLSpanElement))
+    expect(divRef).toHaveBeenCalledExactlyOnceWith(expect.any(HTMLSpanElement))
     vi.clearAllMocks()
 
     act(() => {
@@ -710,8 +709,9 @@ describe.each([
     const count = screen.getByTestId("count")
 
     expect(count).toHaveTextContent("0")
-    expect(divRef).toHaveBeenCalledOnce()
-    expect(divRef).toHaveBeenLastCalledWith(expect.any(HTMLParagraphElement))
+    expect(divRef).toHaveBeenCalledExactlyOnceWith(
+      expect.any(HTMLParagraphElement),
+    )
     vi.clearAllMocks()
 
     act(() => {
@@ -840,8 +840,7 @@ describe.each([
     )
 
     expect(count).toHaveEmittersSize(1)
-    expect(onEffect).toHaveBeenCalledOnce()
-    expect(onEffect).toHaveBeenLastCalledWith(0)
+    expect(onEffect).toHaveBeenCalledExactlyOnceWith(0)
     expect(onRender).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
@@ -855,8 +854,7 @@ describe.each([
       count.setValue((x) => x + 1)
     })
     expect(count).toHaveEmittersSize(1)
-    expect(onEffect).toHaveBeenCalledOnce()
-    expect(onEffect).toHaveBeenLastCalledWith(1)
+    expect(onEffect).toHaveBeenCalledExactlyOnceWith(1)
     expect(onRender).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
@@ -864,8 +862,7 @@ describe.each([
       <Component count={count} onEffect={onEffect} onRender={onRender} />,
     )
     expect(count).toHaveEmittersSize(1)
-    expect(onEffect).toHaveBeenCalledOnce()
-    expect(onEffect).toHaveBeenLastCalledWith(1)
+    expect(onEffect).toHaveBeenCalledExactlyOnceWith(1)
     expect(onRender).toHaveBeenCalledOnce()
   })
 })

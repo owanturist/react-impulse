@@ -78,8 +78,7 @@ describe.each([
         </React.Profiler>,
       )
 
-      expect(onMemo).toHaveBeenCalledOnce()
-      expect(onMemo).toHaveBeenLastCalledWith(2)
+      expect(onMemo).toHaveBeenCalledExactlyOnceWith(2)
       expect(onRender).toHaveBeenCalledOnce()
       vi.clearAllMocks()
 
@@ -97,8 +96,7 @@ describe.each([
         value.setValue(3)
       })
 
-      expect(onMemo).toHaveBeenCalledOnce()
-      expect(onMemo).toHaveBeenLastCalledWith(6)
+      expect(onMemo).toHaveBeenCalledExactlyOnceWith(6)
       expect(value).toHaveEmittersSize(1)
       expect(onRender).toHaveBeenCalledOnce()
     })
@@ -122,8 +120,7 @@ describe.each([
         </React.Profiler>,
       )
 
-      expect(onMemo).toHaveBeenCalledOnce()
-      expect(onMemo).toHaveBeenLastCalledWith(6)
+      expect(onMemo).toHaveBeenCalledExactlyOnceWith(6)
       expect(onRender).toHaveBeenCalledOnce()
     })
 
@@ -163,8 +160,7 @@ describe.each([
       act(() => {
         value_2.setValue(5)
       })
-      expect(onMemo).toHaveBeenCalledOnce()
-      expect(onMemo).toHaveBeenLastCalledWith(10)
+      expect(onMemo).toHaveBeenCalledExactlyOnceWith(10)
       expect(onRender).toHaveBeenCalledOnce()
 
       expect(value_1).toHaveEmittersSize(0)
@@ -185,8 +181,7 @@ describe.each([
 
       fireEvent.click(screen.getByTestId("increment"))
 
-      expect(onMemo).toHaveBeenCalledOnce()
-      expect(onMemo).toHaveBeenLastCalledWith(9)
+      expect(onMemo).toHaveBeenCalledExactlyOnceWith(9)
       expect(onRender).toHaveBeenCalledOnce()
       expect(value).toHaveEmittersSize(1)
       vi.clearAllMocks()
@@ -194,8 +189,7 @@ describe.each([
       act(() => {
         value.setValue(4)
       })
-      expect(onMemo).toHaveBeenCalledOnce()
-      expect(onMemo).toHaveBeenLastCalledWith(12)
+      expect(onMemo).toHaveBeenCalledExactlyOnceWith(12)
       expect(onRender).toHaveBeenCalledOnce()
       expect(value).toHaveEmittersSize(1)
     })
