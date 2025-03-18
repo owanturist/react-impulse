@@ -28,6 +28,10 @@
   },
   "repository": "https://github.com/owanturist/react-impulse/tree/master/packages/react-impulse",
   "homepage": "https://github.com/owanturist/react-impulse/packages/react-impulse#readme",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsup --config ../../tsup.config.ts"
+  },
   "dependencies": {
     "use-sync-external-store": "^1.2.2"
   },

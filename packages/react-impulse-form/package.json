@@ -27,6 +27,10 @@
   },
   "repository": "https://github.com/owanturist/react-impulse/tree/master/packages/react-impulse-form",
   "homepage": "https://github.com/owanturist/react-impulse/packages/react-impulse-form#readme",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsup --config ../../tsup.config.ts"
+  },
   "peerDependencies": {
     "react": "^16.12.0 || ^17.0.0 || ^18.0.0",
     "react-impulse": "^2.0.2"
