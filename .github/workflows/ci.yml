@@ -34,6 +34,9 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
+      - name: Build
+        run: pnpm build
+
       - name: Check all files formatting
         if: ${{ always() }}
         run: pnpm format:check .
@@ -121,16 +124,6 @@ jobs:
 
       - name: Setup environment
         uses: ./.github/actions/setup-env
-
-      - name: Change .changeset baseBranch to the current branch
-        run: |
-          perl -i -pe"s/\"baseBranch\":.*/\"baseBranch\": \"${{ github.ref_name }}\",/g" .changeset/config.json
-
-      - name: Commit updated .changeset config
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "Change .changeset `baseBranch` to ${{ github.ref_name }}"
-          file_pattern: ".changeset/config.json"
 
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
