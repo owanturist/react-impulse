@@ -488,27 +488,6 @@ React.memo(scoped(Component))
 scoped.memo(Component)
 ```
 
-#### `scoped.forwardRef`
-
-Alias for
-
-```ts
-React.forwardRef(scoped(Component))
-// equals to
-scoped.forwardRef(Component)
-```
-
-#### `scoped.memo.forwardRef` and `scoped.forwardRef.memo`
-
-Aliases for
-
-```ts
-React.memo(React.forwardRef(scoped(Component)))
-// equals to
-scoped.memo.forwardRef(Component)
-scoped.forwardRef.memo(Component)
-```
-
 ### `useImpulse`
 
 ```dart
