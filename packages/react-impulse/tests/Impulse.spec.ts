@@ -321,7 +321,6 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
 
     impulse.getValue(scope)
     impulse.getValue(scope)
-    expect(Counter.compare).toHaveBeenCalledOnce()
     expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
       { count: 0 },
       { count: 0 },

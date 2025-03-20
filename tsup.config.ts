@@ -7,7 +7,6 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  // plugins: [manglePlugin],
   terserOptions: {
     mangle: {
       module: false,
