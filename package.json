@@ -4,25 +4,24 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
-    "postinstall": "pnpm build --env.PACKAGE=react-impulse",
+    "preinstall": "npx -y only-allow pnpm",
+    "cs": "changeset",
     "size": "size-limit",
-    "build": "tsup",
-    "build:minified": "pnpm build --env.NODE_ENV=production --minify=terser",
     "test": "vitest",
     "test:run": "pnpm test -- --run --reporter=dot",
     "test:coverage": "pnpm test:run --coverage",
     "lint": "eslint",
     "format": "prettier --write",
     "format:check": "prettier --check",
-    "typecheck": "tsc --noEmit --project packages/react-impulse && tsc --noEmit --project packages/react-impulse-form",
-    "cs": "changeset",
-    "publish": "pnpm build && pnpm cs publish"
+    "typecheck": "tsc --noEmit && pnpm --recursive typecheck",
+    "build": "pnpm --recursive build",
+    "build:minified": "pnpm build --env.NODE_ENV=production --minify=terser",
+    "publish": "pnpm build:minified && pnpm cs publish"
   },
   "engines": {
     "node": ">=20.10.0"
   },
-  "packageManager": "pnpm@8.6.3",
+  "packageManager": "pnpm@10.6.5",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/owanturist/react-impulse.git"

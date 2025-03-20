@@ -29,8 +29,7 @@ describe("factory without deps", () => {
   it("should call factory 1 time on init", () => {
     const { spy } = setup()
 
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith({ count: 1 })
+    expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 1 })
   })
 
   it("should call factory 1 time on subsequent renders", () => {
@@ -39,8 +38,7 @@ describe("factory without deps", () => {
     spy.mockReset()
 
     rerender({ spy, impulse })
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith({ count: 1 })
+    expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 1 })
   })
 
   it("should call factory 2 times when a watching impulse changes", () => {
@@ -126,8 +124,7 @@ describe.each([
   it("should call factory 1 time on init", () => {
     const { spy } = setup()
 
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith({ count: 1 })
+    expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 1 })
   })
 
   it("should not call factory on subsequent renders", () => {
@@ -148,7 +145,6 @@ describe.each([
       impulse.setValue(Counter.inc)
     })
 
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith({ count: 2 })
+    expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 2 })
   })
 })

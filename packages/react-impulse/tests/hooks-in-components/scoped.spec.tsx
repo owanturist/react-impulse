@@ -1,8 +1,5 @@
 import { render, screen, fireEvent, act, waitFor } from "@testing-library/react"
-import React, {
-  type ForwardRefRenderFunction,
-  type PropsWithoutRef,
-} from "react"
+import React from "react"
 
 import {
   Impulse,
@@ -11,7 +8,6 @@ import {
   type PropsWithScope,
   type Scope,
   type PropsWithoutScope,
-  type ForwardedPropsWithoutScope,
 } from "../../src"
 
 describe("scoped()", () => {
@@ -436,12 +432,74 @@ describe("scoped()", () => {
 
     expect(count).toHaveEmittersSize(0)
   })
+
+  it("forwards ref", () => {
+    interface Props {
+      ref?: React.Ref<HTMLSpanElement>
+      state: Impulse<number>
+    }
+
+    const MemoizedForwarded = scoped<Props>(({ scope, state, ref }) => (
+      <span ref={ref} data-testid="count">
+        {state.getValue(scope)}
+      </span>
+    ))
+
+    const state = Impulse.of(0)
+    const divRef = vi.fn()
+
+    render(<MemoizedForwarded state={state} ref={divRef} />)
+
+    const count = screen.getByTestId("count")
+
+    expect(count).toHaveTextContent("0")
+    expect(divRef).toHaveBeenCalledExactlyOnceWith(expect.any(HTMLSpanElement))
+    vi.clearAllMocks()
+
+    act(() => {
+      state.setValue((x) => x + 1)
+    })
+
+    expect(count).toHaveTextContent("1")
+    expect(divRef).not.toHaveBeenCalled()
+  })
+
+  it("works with `React.lazy()`", async () => {
+    const Component = scoped<{
+      count: Impulse<number>
+    }>(({ scope, count }) => (
+      <div data-testid="count">{count.getValue(scope)}</div>
+    ))
+
+    const LazyComponent = React.lazy<typeof Component>(() => {
+      return new Promise((done) => {
+        setTimeout(() => done({ default: Component }), 10)
+      })
+    })
+    const count = Impulse.of(0)
+
+    render(
+      <React.Suspense fallback={null}>
+        <LazyComponent count={count} />
+      </React.Suspense>,
+    )
+
+    expect(screen.queryByTestId("count")).not.toBeInTheDocument()
+
+    expect(await screen.findByTestId("count")).toHaveTextContent("0")
+
+    act(() => {
+      count.setValue((x) => x + 1)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("count")).toHaveTextContent("1")
+    })
+  })
 })
 
 describe.each([
   ["scoped.memo()", scoped.memo],
-  ["scoped.memo.forwardRef()", scoped.memo.forwardRef],
-  ["scoped.forwardRef.memo()", scoped.forwardRef.memo],
   [
     "React.memo(scoped())",
     <TProps,>(
@@ -454,9 +512,7 @@ describe.each([
       return React.memo(scoped(Component), propsAreEqual)
     },
   ],
-])("memoizing with %s", (_, customMemo) => {
-  const memo = customMemo as typeof scoped.memo
-
+])("memoizing with %s", (_, memo) => {
   it("should memoize", () => {
     const Component: React.FC<{
       scope: Scope
@@ -546,7 +602,7 @@ describe.each([
       state: { count: Impulse<number> }
       onRender: VoidFunction
     }>(
-      ({ scope, state, onRender }, _refSuppressReactWarning) => (
+      ({ scope, state, onRender }) => (
         <React.Profiler id="test" onRender={onRender}>
           <div data-testid="count">{state.count.getValue(scope)}</div>
         </React.Profiler>
@@ -599,67 +655,9 @@ describe.each([
     expect(counter).toHaveTextContent("1")
     expect(onScopedRender).toHaveBeenCalledOnce()
   })
-})
 
-describe("scoped.forwardRef()", () => {
-  it.each([
-    ["scoped.forwardRef()", scoped.forwardRef],
-    ["scoped.memo.forwardRef()", scoped.memo.forwardRef],
-    ["scoped.forwardRef.memo()", scoped.forwardRef.memo],
-    [
-      "React.forwardRef(scoped())",
-      <TRef, TProps>(
-        renderFn: React.ForwardRefRenderFunction<
-          TRef,
-          PropsWithoutRef<PropsWithScope<TProps>>
-        >,
-      ): React.ForwardRefExoticComponent<
-        ForwardedPropsWithoutScope<TRef, TProps>
-      > => {
-        const x = React.forwardRef(
-          scoped(renderFn) as ForwardRefRenderFunction<
-            TRef,
-            PropsWithoutRef<PropsWithoutScope<TProps>>
-          >,
-        )
-
-        return x
-      },
-    ],
-  ])("should pass the reference with %s", (_, forwardRef) => {
-    const Component = forwardRef<
-      HTMLDivElement,
-      {
-        state: Impulse<number>
-      }
-    >(({ scope, state }, ref) => (
-      <div ref={ref} data-testid="count">
-        {state.getValue(scope)}
-      </div>
-    ))
-
-    const state = Impulse.of(0)
-    const divRef = vi.fn()
-
-    render(<Component state={state} ref={divRef} />)
-
-    const count = screen.getByTestId("count")
-
-    expect(count).toHaveTextContent("0")
-    expect(divRef).toHaveBeenCalledOnce()
-    expect(divRef).toHaveBeenLastCalledWith(expect.any(HTMLDivElement))
-    vi.clearAllMocks()
-
-    act(() => {
-      state.setValue((x) => x + 1)
-    })
-
-    expect(count).toHaveTextContent("1")
-    expect(divRef).not.toHaveBeenCalled()
-  })
-
-  it("should work with `React.lazy()`", async () => {
-    const Component = scoped.memo<{
+  it("works with `React.lazy()`", async () => {
+    const Component = memo<{
       count: Impulse<number>
     }>(({ scope, count }) => (
       <div data-testid="count">{count.getValue(scope)}</div>
@@ -691,192 +689,182 @@ describe("scoped.forwardRef()", () => {
     })
   })
 
-  it("forwards correct props", () => {
+  it("forwards ref", () => {
     interface Props {
-      className: string
-      id: string
+      ref?: React.Ref<HTMLParagraphElement>
+      state: Impulse<number>
     }
 
-    const Forwarded = scoped.forwardRef<HTMLDivElement, Props>(
-      // eslint-disable-next-line no-restricted-syntax
-      (props, ref) => <div ref={ref} {...props} />,
-    )
-    const ForwardedMemoized = scoped.forwardRef.memo<HTMLDivElement, Props>(
-      // eslint-disable-next-line no-restricted-syntax
-      (props, ref) => <div ref={ref} {...props} />,
-    )
-    const MemoizedForwarded = scoped.memo.forwardRef<HTMLDivElement, Props>(
-      // eslint-disable-next-line no-restricted-syntax
-      (props, ref) => <div ref={ref} {...props} />,
-    )
+    const MemoizedForwarded = memo<Props>(({ scope, state, ref }) => (
+      <p ref={ref} data-testid="count">
+        {state.getValue(scope)}
+      </p>
+    ))
 
-    const ref_1: React.Ref<HTMLDivElement> = vi.fn()
-    const ref_2: React.Ref<HTMLDivElement> = vi.fn()
-    const ref_3: React.Ref<HTMLDivElement> = vi.fn()
-    const { rerender } = render(
-      <Forwarded ref={ref_1} className="test" id="test" />,
+    const state = Impulse.of(0)
+    const divRef = vi.fn()
+
+    render(<MemoizedForwarded state={state} ref={divRef} />)
+
+    const count = screen.getByTestId("count")
+
+    expect(count).toHaveTextContent("0")
+    expect(divRef).toHaveBeenCalledExactlyOnceWith(
+      expect.any(HTMLParagraphElement),
     )
+    vi.clearAllMocks()
 
-    expect(ref_1).toHaveBeenCalledOnce()
-    expect(ref_1).toHaveBeenLastCalledWith(expect.any(HTMLDivElement))
+    act(() => {
+      state.setValue((x) => x + 1)
+    })
 
-    rerender(<ForwardedMemoized ref={ref_2} className="test" id="test" />)
-    expect(ref_2).toHaveBeenCalledOnce()
-    expect(ref_2).toHaveBeenLastCalledWith(expect.any(HTMLDivElement))
-
-    rerender(<MemoizedForwarded ref={ref_3} className="test" id="test" />)
-    expect(ref_3).toHaveBeenCalledOnce()
-    expect(ref_3).toHaveBeenLastCalledWith(expect.any(HTMLDivElement))
+    expect(count).toHaveTextContent("1")
+    expect(divRef).not.toHaveBeenCalled()
   })
+})
 
-  it.each([
-    ["not memoized", ((x) => x) as typeof React.useCallback],
-    ["memoized", React.useCallback],
-  ])(
-    "should re-render %s rendering function passed as a prop when impulse value changes",
-    (_, useCallback) => {
-      const Host: React.FC<{
-        renderCount: (x: number) => React.ReactNode
-        onRender: VoidFunction
-      }> = ({ renderCount, onRender }) => {
-        const [count, setCount] = React.useState(2)
+describe.each([
+  ["not memoized", ((x) => x) as typeof React.useCallback],
+  ["memoized", React.useCallback],
+])("when %s rendering function passed as prop", (_, useCallback) => {
+  it("should re-render when impulse value changes", () => {
+    const Host: React.FC<{
+      renderCount: (x: number) => React.ReactNode
+      onRender: VoidFunction
+    }> = ({ renderCount, onRender }) => {
+      const [count, setCount] = React.useState(2)
 
-        return (
-          <React.Profiler id="host" onRender={onRender}>
-            <button
-              type="button"
-              data-testid="increment"
-              onClick={() => setCount((x) => x + 1)}
-            />
-            {renderCount(count)}
-          </React.Profiler>
-        )
-      }
-
-      const Component: React.FC<{
-        count: Impulse<number>
-        onRender: VoidFunction
-        onHostRender: VoidFunction
-      }> = scoped(({ scope, count, onRender, onHostRender }) => {
-        onRender()
-
-        return (
-          <Host
-            renderCount={useCallback(
-              (x) => (
-                <span data-testid="result">{x * count.getValue(scope)}</span>
-              ),
-              // eslint-disable-next-line no-restricted-syntax
-              [count, scope],
-            )}
-            onRender={onHostRender}
+      return (
+        <React.Profiler id="host" onRender={onRender}>
+          <button
+            type="button"
+            data-testid="increment"
+            onClick={() => setCount((x) => x + 1)}
           />
-        )
-      })
-
-      const count = Impulse.of(1)
-      const onRender = vi.fn()
-      const onHostRender = vi.fn()
-      render(
-        <Component
-          count={count}
-          onRender={onRender}
-          onHostRender={onHostRender}
-        />,
+          {renderCount(count)}
+        </React.Profiler>
       )
+    }
 
-      const increment = screen.getByTestId("increment")
-      const result = screen.getByTestId("result")
+    const Component: React.FC<{
+      count: Impulse<number>
+      onRender: VoidFunction
+      onHostRender: VoidFunction
+    }> = scoped(({ scope, count, onRender, onHostRender }) => {
+      onRender()
 
-      expect(result).toHaveTextContent("2")
-      expect(onRender).toHaveBeenCalledOnce()
-      expect(onHostRender).toHaveBeenCalledOnce()
-      vi.clearAllMocks()
-
-      fireEvent.click(increment)
-      expect(result).toHaveTextContent("3")
-      expect(onRender).not.toHaveBeenCalled()
-      expect(onHostRender).toHaveBeenCalledOnce()
-      vi.clearAllMocks()
-
-      act(() => {
-        count.setValue((x) => x + 1)
-      })
-
-      expect(result).toHaveTextContent("6")
-      expect(onRender).toHaveBeenCalledOnce()
-      expect(onHostRender).toHaveBeenCalledOnce()
-    },
-  )
-
-  it.each([
-    ["React.useEffect", React.useEffect],
-    ["React.useLayoutEffect", React.useLayoutEffect],
-    ["React.useMemo", React.useMemo],
-  ])(
-    "should run `%s` on render when scope is a dependency",
-    (_, useReactHook) => {
-      const Component: React.FC<{
-        count: Impulse<number>
-        onEffect: React.Dispatch<number>
-        onRender: VoidFunction
-      }> = scoped(({ scope, count, onEffect, onRender }) => {
-        const [, force] = React.useState(0)
-
-        useReactHook(() => {
-          onEffect(count.getValue(scope))
-          // eslint-disable-next-line no-restricted-syntax
-        }, [count, onEffect, scope])
-
-        return (
-          <React.Profiler id="root" onRender={onRender}>
-            <button
-              type="button"
-              data-testid="force"
-              onClick={() => force((x) => x + 1)}
-            />
-          </React.Profiler>
-        )
-      })
-
-      const count = Impulse.of(0)
-      const onEffect = vi.fn()
-      const onRender = vi.fn()
-
-      const { rerender } = render(
-        <Component count={count} onEffect={onEffect} onRender={onRender} />,
+      return (
+        <Host
+          renderCount={useCallback(
+            (x) => (
+              <span data-testid="result">{x * count.getValue(scope)}</span>
+            ),
+            // eslint-disable-next-line no-restricted-syntax
+            [count, scope],
+          )}
+          onRender={onHostRender}
+        />
       )
+    })
 
-      expect(count).toHaveEmittersSize(1)
-      expect(onEffect).toHaveBeenCalledOnce()
-      expect(onEffect).toHaveBeenLastCalledWith(0)
-      expect(onRender).toHaveBeenCalledOnce()
-      vi.clearAllMocks()
+    const count = Impulse.of(1)
+    const onRender = vi.fn()
+    const onHostRender = vi.fn()
+    render(
+      <Component
+        count={count}
+        onRender={onRender}
+        onHostRender={onHostRender}
+      />,
+    )
 
-      fireEvent.click(screen.getByTestId("force"))
-      expect(count).toHaveEmittersSize(1)
-      expect(onEffect).toHaveBeenCalledOnce()
-      expect(onRender).toHaveBeenCalledOnce()
-      vi.clearAllMocks()
+    const increment = screen.getByTestId("increment")
+    const result = screen.getByTestId("result")
 
-      act(() => {
-        count.setValue((x) => x + 1)
-      })
-      expect(count).toHaveEmittersSize(1)
-      expect(onEffect).toHaveBeenCalledOnce()
-      expect(onEffect).toHaveBeenLastCalledWith(1)
-      expect(onRender).toHaveBeenCalledOnce()
-      vi.clearAllMocks()
+    expect(result).toHaveTextContent("2")
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onHostRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
-      rerender(
-        <Component count={count} onEffect={onEffect} onRender={onRender} />,
+    fireEvent.click(increment)
+    expect(result).toHaveTextContent("3")
+    expect(onRender).not.toHaveBeenCalled()
+    expect(onHostRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    act(() => {
+      count.setValue((x) => x + 1)
+    })
+
+    expect(result).toHaveTextContent("6")
+    expect(onRender).toHaveBeenCalledOnce()
+    expect(onHostRender).toHaveBeenCalledOnce()
+  })
+})
+
+describe.each([
+  ["React.useEffect", React.useEffect],
+  ["React.useLayoutEffect", React.useLayoutEffect],
+  ["React.useMemo", React.useMemo],
+])("when scope is a dependency of %s", (_, useHookWithDependencies) => {
+  it("should run the effect on every render", () => {
+    const Component: React.FC<{
+      count: Impulse<number>
+      onEffect: React.Dispatch<number>
+      onRender: VoidFunction
+    }> = scoped(({ scope, count, onEffect, onRender }) => {
+      const [, force] = React.useState(0)
+
+      useHookWithDependencies(() => {
+        onEffect(count.getValue(scope))
+        // eslint-disable-next-line no-restricted-syntax
+      }, [count, onEffect, scope])
+
+      return (
+        <React.Profiler id="root" onRender={onRender}>
+          <button
+            type="button"
+            data-testid="force"
+            onClick={() => force((x) => x + 1)}
+          />
+        </React.Profiler>
       )
-      expect(count).toHaveEmittersSize(1)
-      expect(onEffect).toHaveBeenCalledOnce()
-      expect(onEffect).toHaveBeenLastCalledWith(1)
-      expect(onRender).toHaveBeenCalledOnce()
-    },
-  )
+    })
+
+    const count = Impulse.of(0)
+    const onEffect = vi.fn()
+    const onRender = vi.fn()
+
+    const { rerender } = render(
+      <Component count={count} onEffect={onEffect} onRender={onRender} />,
+    )
+
+    expect(count).toHaveEmittersSize(1)
+    expect(onEffect).toHaveBeenCalledExactlyOnceWith(0)
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    fireEvent.click(screen.getByTestId("force"))
+    expect(count).toHaveEmittersSize(1)
+    expect(onEffect).toHaveBeenCalledOnce()
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    act(() => {
+      count.setValue((x) => x + 1)
+    })
+    expect(count).toHaveEmittersSize(1)
+    expect(onEffect).toHaveBeenCalledExactlyOnceWith(1)
+    expect(onRender).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    rerender(
+      <Component count={count} onEffect={onEffect} onRender={onRender} />,
+    )
+    expect(count).toHaveEmittersSize(1)
+    expect(onEffect).toHaveBeenCalledExactlyOnceWith(1)
+    expect(onRender).toHaveBeenCalledOnce()
+  })
 })
 
 describe.each([
