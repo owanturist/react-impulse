@@ -5,7 +5,7 @@
     { "repo": "owanturist/react-impulse" }
   ],
   "access": "public",
-  "baseBranch": "master",
+  "baseBranch": "next",
   "commit": false,
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
     "onlyUpdatePeerDependentsWhenOutOfRange": true
