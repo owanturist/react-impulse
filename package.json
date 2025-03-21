@@ -19,7 +19,7 @@
     "publish": "pnpm build:minified && pnpm cs publish"
   },
   "engines": {
-    "node": ">=20.10.0"
+    "node": ">=22.14.0"
   },
   "packageManager": "pnpm@10.6.5",
   "repository": {
