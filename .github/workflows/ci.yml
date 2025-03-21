@@ -107,6 +107,9 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
+      - name: Build
+        run: pnpm build
+
       - name: Install react@${{ matrix.version }}
         run: pnpm add -D --filter ./packages/* react@${{ matrix.version }} react-dom@${{ matrix.version }}
 
