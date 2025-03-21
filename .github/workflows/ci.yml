@@ -34,41 +34,16 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
-      - name: Detect file changes
-        id: changed-files
-        uses: tj-actions/changed-files@v41
-        with:
-          files_yaml: |
-            eslintrc:
-              - .eslintrc.json
-              - .eslintignore
-              - pnpm-lock.yaml
-            eslint_target:
-              - "**/*.{ts,tsx,js,jsx}"
-            prettierrc:
-              - .prettierrc
-              - .prettierignore
-              - pnpm-lock.yaml
-            prettier_target:
-              - "**/*.*"
+      - name: Build
+        run: pnpm build
 
-      - name: Check all fiels formatting
-        id: format-all
-        if: ${{ github.event_name == 'push' || steps.changed-files.outputs.prettierrc_any_changed == 'true' }}
+      - name: Check all files formatting
+        if: ${{ always() }}
         run: pnpm format:check .
 
-      - name: Check changed fiels formatting
-        if: ${{ steps.format-all.outcome == 'skipped' && steps.changed-files.outputs.prettier_target_any_changed == 'true' }}
-        run: pnpm format:check --no-error-on-unmatched-pattern ${{ steps.changed-files.outputs.prettier_target_all_changed_files }}
-
       - name: Lint all files
-        id: lint-all
-        if: ${{ github.event_name == 'push' || steps.changed-files.outputs.eslintrc_any_changed == 'true' }}
+        if: ${{ always() }}
         run: pnpm lint .
-
-      - name: Lint changed files
-        if: ${{ steps.lint-all.outcome == 'skipped' && steps.changed-files.outputs.eslint_target_any_changed == 'true' }}
-        run: pnpm lint ${{ steps.changed-files.outputs.eslint_target_all_changed_files }} --no-error-on-unmatched-pattern
 
       - name: Type check
         if: ${{ always() }}
@@ -131,6 +106,9 @@ jobs:
 
       - name: Setup environment
         uses: ./.github/actions/setup-env
+
+      - name: Build
+        run: pnpm build
 
       - name: Install react@${{ matrix.version }}
         run: pnpm add -D --filter ./packages/* react@${{ matrix.version }} react-dom@${{ matrix.version }}
