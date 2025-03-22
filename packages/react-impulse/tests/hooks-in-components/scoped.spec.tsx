@@ -453,8 +453,7 @@ describe("scoped()", () => {
     const count = screen.getByTestId("count")
 
     expect(count).toHaveTextContent("0")
-    expect(divRef).toHaveBeenCalledOnce()
-    expect(divRef).toHaveBeenLastCalledWith(expect.any(HTMLSpanElement))
+    expect(divRef).toHaveBeenCalledExactlyOnceWith(expect.any(HTMLSpanElement))
     vi.clearAllMocks()
 
     act(() => {
