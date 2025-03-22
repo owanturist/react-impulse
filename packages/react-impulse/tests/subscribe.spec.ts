@@ -13,8 +13,7 @@ describe("single Impulse", () => {
       spy(impulse.getValue(scope))
     })
 
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(1)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(1)
     expect(impulse).toHaveEmittersSize(1)
   })
 
@@ -28,8 +27,7 @@ describe("single Impulse", () => {
 
     spy.mockReset()
     impulse.setValue(2)
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(2)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(2)
     expect(impulse).toHaveEmittersSize(1)
   })
 
@@ -52,8 +50,7 @@ describe("single Impulse", () => {
     expect(cleanup).not.toHaveBeenCalled()
 
     impulse.setValue(2)
-    expect(cleanup).toHaveBeenCalledOnce()
-    expect(cleanup).toHaveBeenLastCalledWith(1)
+    expect(cleanup).toHaveBeenCalledExactlyOnceWith(1)
     vi.clearAllMocks()
 
     impulse.setValue(5)
@@ -61,13 +58,11 @@ describe("single Impulse", () => {
     vi.clearAllMocks()
 
     impulse.setValue(7)
-    expect(cleanup).toHaveBeenCalledOnce()
-    expect(cleanup).toHaveBeenLastCalledWith(5)
+    expect(cleanup).toHaveBeenCalledExactlyOnceWith(5)
     vi.clearAllMocks()
 
     unsubscribe()
-    expect(cleanup).toHaveBeenCalledOnce()
-    expect(cleanup).toHaveBeenLastCalledWith(7)
+    expect(cleanup).toHaveBeenCalledExactlyOnceWith(7)
     vi.clearAllMocks()
 
     impulse.setValue(9)
@@ -136,8 +131,7 @@ describe("single Impulse", () => {
       impulse.setValue(2)
       impulse.setValue(3)
     })
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(3)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(3)
     expect(impulse).toHaveEmittersSize(1)
   })
 
@@ -169,8 +163,7 @@ describe("single Impulse", () => {
 
     spy.mockReset()
     impulse.setValue({ count: 2 })
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith({ count: 2 })
+    expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 2 })
     expect(impulse).toHaveEmittersSize(1)
   })
 })
@@ -185,8 +178,7 @@ describe("multiple Impulses", () => {
       spy(impulse_1.getValue(scope) + impulse_2.getValue(scope))
     })
 
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(3)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(3)
     expect(impulse_1).toHaveEmittersSize(1)
     expect(impulse_2).toHaveEmittersSize(1)
   })
@@ -202,13 +194,11 @@ describe("multiple Impulses", () => {
 
     spy.mockReset()
     impulse_1.setValue(3)
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(5)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(5)
 
     spy.mockReset()
     impulse_2.setValue(4)
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(7)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(7)
     expect(impulse_1).toHaveEmittersSize(1)
     expect(impulse_2).toHaveEmittersSize(1)
   })
@@ -253,15 +243,13 @@ describe("multiple Impulses", () => {
 
     spy.mockReset()
     impulse_1.setValue(2)
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(5)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(5)
     expect(impulse_1).toHaveEmittersSize(1)
     expect(impulse_2).toHaveEmittersSize(1)
 
     spy.mockReset()
     impulse_2.setValue(4)
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(6)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(6)
     expect(impulse_1).toHaveEmittersSize(1)
     expect(impulse_2).toHaveEmittersSize(1)
 
@@ -305,8 +293,7 @@ describe("batching against subscribe listener", () => {
       impulse_1.setValue(2)
       impulse_2.setValue(3)
     })
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(5)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(5)
   })
 })
 
@@ -467,8 +454,7 @@ describe("nested Impulses", () => {
     expect(impulse_2).toHaveEmittersSize(1)
     expect(impulse_3).toHaveEmittersSize(1)
 
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(3)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(3)
   })
 
   it("executes listener on update", () => {
@@ -491,20 +477,17 @@ describe("nested Impulses", () => {
 
     spy.mockReset()
     impulse_1.setValue(3)
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(5)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(5)
 
     spy.mockReset()
     impulse_2.setValue(4)
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(7)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(7)
 
     spy.mockReset()
     impulse_3.setValue({
       first: impulse_2,
       second: impulse_1,
     })
-    expect(spy).toHaveBeenCalledOnce()
-    expect(spy).toHaveBeenLastCalledWith(7)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(7)
   })
 })
