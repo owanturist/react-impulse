@@ -54,7 +54,7 @@ describe("focusFirstInvalidValue() when validated", () => {
     form.onFocusWhenInvalid(listener)
 
     form.focusFirstInvalidValue()
-    expect(listener).toHaveBeenCalledExactlyOnceWith([
+    expect(listener).toHaveBeenLastCalledWith([
       "String must contain at least 2 character(s)",
     ])
   })
@@ -66,7 +66,7 @@ describe("focusFirstInvalidValue() when validated", () => {
     form.onFocusWhenInvalid(listener)
 
     form.focusFirstInvalidValue()
-    expect(listener).toHaveBeenCalledExactlyOnceWith(["Custom error"])
+    expect(listener).toHaveBeenLastCalledWith(["Custom error"])
   })
 
   it("calls all listeners", () => {

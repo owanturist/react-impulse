@@ -56,27 +56,24 @@ describe("Impulse.of(value, options?)", () => {
     const impulse = Impulse.of({ count: 0 })
 
     impulse.setValue({ count: 1 })
-    expect(Object.is).toHaveBeenCalledExactlyOnceWith(
-      { count: 0 },
-      { count: 1 },
-    )
+    expect(Object.is).toHaveBeenCalledOnce()
+    expect(Object.is).toHaveBeenLastCalledWith({ count: 0 }, { count: 1 })
   })
 
   it("assigns Object.is by `null` as compare", () => {
     const impulse = Impulse.of({ count: 0 }, { compare: null })
 
     impulse.setValue({ count: 1 })
-    expect(Object.is).toHaveBeenCalledExactlyOnceWith(
-      { count: 0 },
-      { count: 1 },
-    )
+    expect(Object.is).toHaveBeenCalledOnce()
+    expect(Object.is).toHaveBeenLastCalledWith({ count: 0 }, { count: 1 })
   })
 
   it("assigns custom function as compare", ({ scope }) => {
     const impulse = Impulse.of({ count: 0 }, { compare: Counter.compare })
 
     impulse.setValue({ count: 1 })
-    expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
+    expect(Counter.compare).toHaveBeenCalledOnce()
+    expect(Counter.compare).toHaveBeenLastCalledWith(
       { count: 0 },
       { count: 1 },
       scope,
@@ -121,12 +118,14 @@ describe("Impulse.transmit(getter, options?)", () => {
 
     expect(source).toHaveEmittersSize(1)
     expect(impulse).toHaveEmittersSize(1)
-    expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 0 })
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith({ count: 0 })
     vi.clearAllMocks()
 
     source.setValue({ count: 1 })
     expect(impulse.getValue(scope)).toStrictEqual({ count: 1 })
-    expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 1 })
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith({ count: 1 })
     vi.clearAllMocks()
 
     source.setValue({ count: 1 })
@@ -148,7 +147,8 @@ describe("Impulse.transmit(getter, options?)", () => {
     subscribe((scope) => {
       spy(impulse.getValue(scope))
     })
-    expect(spy).toHaveBeenCalledExactlyOnceWith(0)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(0)
     vi.clearAllMocks()
 
     variable = 1
@@ -195,10 +195,8 @@ describe("Impulse.transmit(getter, options?)", () => {
 
     const value_1 = impulse.getValue(scope)
     const value_2 = impulse.getValue(scope)
-    expect(Object.is).toHaveBeenCalledExactlyOnceWith(
-      { count: 0 },
-      { count: 0 },
-    )
+    expect(Object.is).toHaveBeenCalledOnce()
+    expect(Object.is).toHaveBeenLastCalledWith({ count: 0 }, { count: 0 })
     expect(value_1).not.toBe(value_2)
     expect(value_1).toStrictEqual(value_2)
   })
@@ -214,10 +212,8 @@ describe("Impulse.transmit(getter, options?)", () => {
 
     const value_1 = impulse.getValue(scope)
     const value_2 = impulse.getValue(scope)
-    expect(Object.is).toHaveBeenCalledExactlyOnceWith(
-      { count: 0 },
-      { count: 0 },
-    )
+    expect(Object.is).toHaveBeenCalledOnce()
+    expect(Object.is).toHaveBeenLastCalledWith({ count: 0 }, { count: 0 })
     expect(value_1).not.toBe(value_2)
     expect(value_1).toStrictEqual(value_2)
   })
@@ -233,7 +229,8 @@ describe("Impulse.transmit(getter, options?)", () => {
 
     const value_1 = impulse.getValue(scope)
     const value_2 = impulse.getValue(scope)
-    expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
+    expect(Counter.compare).toHaveBeenCalledOnce()
+    expect(Counter.compare).toHaveBeenLastCalledWith(
       { count: 0 },
       { count: 0 },
       scope,
@@ -290,11 +287,13 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
       spyOnSource(source.getValue(scope))
     })
 
-    expect(spyOnImpulse).toHaveBeenCalledExactlyOnceWith({ count: 0 })
+    expect(spyOnImpulse).toHaveBeenCalledOnce()
+    expect(spyOnImpulse).toHaveBeenLastCalledWith({ count: 0 })
     vi.clearAllMocks()
 
     source.setValue({ count: 1 })
-    expect(spyOnImpulse).toHaveBeenCalledExactlyOnceWith({ count: 1 })
+    expect(spyOnImpulse).toHaveBeenCalledOnce()
+    expect(spyOnImpulse).toHaveBeenLastCalledWith({ count: 1 })
     vi.clearAllMocks()
 
     source.setValue({ count: 1 })
@@ -306,7 +305,8 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     vi.clearAllMocks()
 
     impulse.setValue({ count: 2 })
-    expect(spyOnSource).toHaveBeenCalledExactlyOnceWith({ count: 2 })
+    expect(spyOnSource).toHaveBeenCalledOnce()
+    expect(spyOnSource).toHaveBeenLastCalledWith({ count: 2 })
   })
 
   it("assigns custom function as compare", ({ scope }) => {
@@ -321,7 +321,8 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
 
     impulse.getValue(scope)
     impulse.getValue(scope)
-    expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
+    expect(Counter.compare).toHaveBeenCalledOnce()
+    expect(Counter.compare).toHaveBeenLastCalledWith(
       { count: 0 },
       { count: 0 },
       scope,
@@ -759,10 +760,8 @@ describe.each([
       expect(Object.is).not.toHaveBeenCalled()
       impulse_2.setValue({ count: 1 })
 
-      expect(Object.is).toHaveBeenCalledExactlyOnceWith(
-        { count: 0 },
-        { count: 1 },
-      )
+      expect(Object.is).toHaveBeenCalledOnce()
+      expect(Object.is).toHaveBeenLastCalledWith({ count: 0 }, { count: 1 })
     })
 
     it("transfers custom comparator from source Impulse", ({ scope }) => {
@@ -775,7 +774,8 @@ describe.each([
       expect(Counter.compare).not.toHaveBeenCalled()
       impulse_2.setValue({ count: 1 })
 
-      expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
+      expect(Counter.compare).toHaveBeenCalledOnce()
+      expect(Counter.compare).toHaveBeenLastCalledWith(
         { count: 0 },
         { count: 1 },
         scope,
@@ -794,7 +794,8 @@ describe.each([
       expect(Counter.compare).not.toHaveBeenCalled()
       impulse_2.setValue({ count: 1 })
 
-      expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
+      expect(Counter.compare).toHaveBeenCalledOnce()
+      expect(Counter.compare).toHaveBeenLastCalledWith(
         { count: 0 },
         { count: 1 },
         scope,
@@ -813,7 +814,8 @@ describe.each([
       expect(Counter.compare).not.toHaveBeenCalled()
       impulse_2.setValue({ count: 1 })
 
-      expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
+      expect(Counter.compare).toHaveBeenCalledOnce()
+      expect(Counter.compare).toHaveBeenLastCalledWith(
         { count: 0 },
         { count: 1 },
         scope,
@@ -830,10 +832,8 @@ describe.each([
       expect(Object.is).not.toHaveBeenCalled()
       impulse_2.setValue({ count: 1 })
 
-      expect(Object.is).toHaveBeenCalledExactlyOnceWith(
-        { count: 0 },
-        { count: 1 },
-      )
+      expect(Object.is).toHaveBeenCalledOnce()
+      expect(Object.is).toHaveBeenLastCalledWith({ count: 0 }, { count: 1 })
     })
 
     it("overrides comparator by custom options.compare", ({ scope }) => {
@@ -843,7 +843,8 @@ describe.each([
       expect(Counter.compare).not.toHaveBeenCalled()
       impulse_2.setValue({ count: 1 })
 
-      expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
+      expect(Counter.compare).toHaveBeenCalledOnce()
+      expect(Counter.compare).toHaveBeenLastCalledWith(
         { count: 0 },
         { count: 1 },
         scope,
@@ -871,7 +872,8 @@ describe.each([
       expect(Counter.compare).not.toHaveBeenCalled()
       impulse_2.setValue({ count: 1 })
 
-      expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
+      expect(Counter.compare).toHaveBeenCalledOnce()
+      expect(Counter.compare).toHaveBeenLastCalledWith(
         { count: 0 },
         { count: 1 },
         scope,
@@ -970,7 +972,8 @@ describe.each([
       expect(Counter.compare).not.toHaveBeenCalled()
       impulse_2.setValue({ count: 1 })
 
-      expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
+      expect(Counter.compare).toHaveBeenCalledOnce()
+      expect(Counter.compare).toHaveBeenLastCalledWith(
         { count: 0 },
         { count: 1 },
         scope,

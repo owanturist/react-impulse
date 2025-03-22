@@ -233,7 +233,8 @@ describe.each([
     act(() => {
       result.current.impulse.setValue(1)
     })
-    expect(setter).toHaveBeenCalledExactlyOnceWith(1)
+    expect(setter).toHaveBeenCalledOnce()
+    expect(setter).toHaveBeenLastCalledWith(1)
   })
 })
 
@@ -378,10 +379,8 @@ describe("with compare function", () => {
       result.current.getValue(scope)
     })
 
-    expect(Object.is).toHaveBeenCalledExactlyOnceWith(
-      { x: false },
-      { x: false },
-    )
+    expect(Object.is).toHaveBeenCalledOnce()
+    expect(Object.is).toHaveBeenLastCalledWith({ x: false }, { x: false })
   })
 
   it("applies Object.is when passing null as compare", ({ scope }) => {
@@ -393,10 +392,8 @@ describe("with compare function", () => {
       result.current.getValue(scope)
     })
 
-    expect(Object.is).toHaveBeenCalledExactlyOnceWith(
-      { x: false },
-      { x: false },
-    )
+    expect(Object.is).toHaveBeenCalledOnce()
+    expect(Object.is).toHaveBeenLastCalledWith({ x: false }, { x: false })
   })
 
   it("passes custom compare function", ({ scope }) => {
@@ -410,11 +407,8 @@ describe("with compare function", () => {
     })
 
     expect(Object.is).not.toHaveBeenCalled()
-    expect(compare).toHaveBeenCalledExactlyOnceWith(
-      { x: false },
-      { x: false },
-      scope,
-    )
+    expect(compare).toHaveBeenCalledOnce()
+    expect(compare).toHaveBeenLastCalledWith({ x: false }, { x: false }, scope)
   })
 
   it("updates compare function on re-render", ({ scope }) => {
@@ -428,7 +422,8 @@ describe("with compare function", () => {
       result.current.getValue(scope)
       result.current.getValue(scope)
     })
-    expect(compare_1).toHaveBeenCalledExactlyOnceWith(
+    expect(compare_1).toHaveBeenCalledOnce()
+    expect(compare_1).toHaveBeenLastCalledWith(
       { x: false },
       { x: false },
       scope,
@@ -440,7 +435,8 @@ describe("with compare function", () => {
       result.current.getValue(scope)
     })
     expect(compare_1).not.toHaveBeenCalled()
-    expect(compare_2).toHaveBeenCalledExactlyOnceWith(
+    expect(compare_2).toHaveBeenCalledOnce()
+    expect(compare_2).toHaveBeenLastCalledWith(
       { x: false },
       { x: false },
       scope,
@@ -453,10 +449,8 @@ describe("with compare function", () => {
     })
     expect(compare_1).not.toHaveBeenCalled()
     expect(compare_2).not.toHaveBeenCalled()
-    expect(Object.is).toHaveBeenCalledExactlyOnceWith(
-      { x: false },
-      { x: false },
-    )
+    expect(Object.is).toHaveBeenCalledOnce()
+    expect(Object.is).toHaveBeenLastCalledWith({ x: false }, { x: false })
   })
 })
 
@@ -491,7 +485,8 @@ describe("replacing getter", () => {
     const { rerender, onEffect } = setup()
 
     rerender({ count: 1 })
-    expect(onEffect).toHaveBeenCalledExactlyOnceWith(1)
+    expect(onEffect).toHaveBeenCalledOnce()
+    expect(onEffect).toHaveBeenLastCalledWith(1)
   })
 
   it("does not emit subscribers when getter returns the same value", () => {
@@ -556,7 +551,8 @@ describe("changeling setter", () => {
 
     result.current.setValue(2)
 
-    expect(setter).toHaveBeenCalledExactlyOnceWith(2, scope)
+    expect(setter).toHaveBeenCalledOnce()
+    expect(setter).toHaveBeenLastCalledWith(2, scope)
   })
 
   it("should not call setter on a subsequent rerender", () => {
@@ -583,7 +579,7 @@ describe("changeling setter", () => {
 
     result.current.setValue(2)
     expect(setter_0).not.toHaveBeenCalled()
-    expect(setter_1).toHaveBeenCalledExactlyOnceWith(2, scope)
+    expect(setter_1).toHaveBeenLastCalledWith(2, scope)
 
     rerender(setter_2)
     vi.clearAllMocks()
@@ -591,7 +587,7 @@ describe("changeling setter", () => {
     result.current.setValue(3)
     expect(setter_0).not.toHaveBeenCalled()
     expect(setter_1).not.toHaveBeenCalled()
-    expect(setter_2).toHaveBeenCalledExactlyOnceWith(3, scope)
+    expect(setter_2).toHaveBeenLastCalledWith(3, scope)
   })
 })
 

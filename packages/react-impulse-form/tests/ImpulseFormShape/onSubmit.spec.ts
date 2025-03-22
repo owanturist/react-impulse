@@ -137,7 +137,8 @@ describe.each<
 
       void submit(form)
 
-      expect(focus).toHaveBeenCalledExactlyOnceWith([
+      expect(focus).toHaveBeenCalledTimes(1)
+      expect(focus).toHaveBeenLastCalledWith([
         "String must contain at most 2 character(s)",
       ])
     })
@@ -205,7 +206,8 @@ describe.each<
 
     void submit(form)
 
-    expect(listener).toHaveBeenCalledExactlyOnceWith(value)
+    expect(listener).toHaveBeenCalledTimes(1)
+    expect(listener).toHaveBeenLastCalledWith(value)
   })
 
   it("calls all listeners", () => {
@@ -361,13 +363,22 @@ describe.each<
 
     void submit(form)
 
-    expect(listener_1).toHaveBeenCalledExactlyOnceWith("x")
-    expect(listener_2).toHaveBeenCalledExactlyOnceWith(567)
-    expect(listener_3).toHaveBeenCalledExactlyOnceWith({
+    expect(listener_1).toHaveBeenCalledOnce()
+    expect(listener_1).toHaveBeenLastCalledWith("x")
+
+    expect(listener_2).toHaveBeenCalledOnce()
+    expect(listener_2).toHaveBeenLastCalledWith(567)
+
+    expect(listener_3).toHaveBeenCalledOnce()
+    expect(listener_3).toHaveBeenLastCalledWith({
       _1: false,
       _2: ["y"],
     })
-    expect(listener_3_1).toHaveBeenCalledExactlyOnceWith(false)
-    expect(listener_3_2).toHaveBeenCalledExactlyOnceWith(["y"])
+
+    expect(listener_3_1).toHaveBeenCalledOnce()
+    expect(listener_3_1).toHaveBeenLastCalledWith(false)
+
+    expect(listener_3_2).toHaveBeenCalledOnce()
+    expect(listener_3_2).toHaveBeenLastCalledWith(["y"])
   })
 })

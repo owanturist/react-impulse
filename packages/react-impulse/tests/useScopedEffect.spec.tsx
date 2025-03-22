@@ -57,14 +57,16 @@ describe.each([
           />,
         )
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(6)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(6)
         vi.clearAllMocks()
 
         act(() => {
           value.setValue(2)
         })
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(4)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(4)
       })
 
       it("does not call useEffect factory when deps not changed", () => {
@@ -82,7 +84,8 @@ describe.each([
           </React.Profiler>,
         )
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(2)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(2)
         expect(onRender).toHaveBeenCalledOnce()
         vi.clearAllMocks()
 
@@ -104,7 +107,8 @@ describe.each([
           value.setValue(3)
         })
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(6)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(6)
         expect(value).toHaveEmittersSize(1)
         expect(onRender).not.toHaveBeenCalled()
       })
@@ -136,7 +140,8 @@ describe.each([
           </React.Profiler>,
         )
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(6)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(6)
         expect(onRender).toHaveBeenCalledOnce()
       })
 
@@ -187,7 +192,8 @@ describe.each([
         act(() => {
           value_2.setValue(5)
         })
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(10)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(10)
         expect(onRender).not.toHaveBeenCalled()
         expect(value_1).toHaveEmittersSize(0)
         expect(value_2).toHaveEmittersSize(1)
@@ -211,7 +217,8 @@ describe.each([
 
         fireEvent.click(screen.getByTestId("increment"))
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(9)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(9)
         expect(onRender).toHaveBeenCalledOnce()
         expect(value).toHaveEmittersSize(1)
         vi.clearAllMocks()
@@ -219,7 +226,8 @@ describe.each([
         act(() => {
           value.setValue(4)
         })
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(12)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(12)
         expect(onRender).not.toHaveBeenCalled()
         expect(value).toHaveEmittersSize(1)
       })
@@ -258,7 +266,8 @@ describe.each([
 
         render(<Component first={first} second={second} onEffect={onEffect} />)
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(10)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(10)
         expect(first).toHaveEmittersSize(1)
         expect(second).toHaveEmittersSize(1)
         vi.clearAllMocks()
@@ -267,14 +276,16 @@ describe.each([
           first.setValue(4)
         })
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(14)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(14)
         vi.clearAllMocks()
 
         act(() => {
           second.setValue(5)
         })
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(18)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(18)
         expect(first).toHaveEmittersSize(1)
         expect(second).toHaveEmittersSize(1)
       })
@@ -318,7 +329,8 @@ describe.each([
 
         render(<Component list={list} onEffect={onEffect} />)
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(10)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(10)
         expect(list).toHaveEmittersSize(1)
         expect(_0).toHaveEmittersSize(1)
         expect(_1).toHaveEmittersSize(1)
@@ -329,21 +341,24 @@ describe.each([
           _0.setValue(4)
         })
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(14)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(14)
         vi.clearAllMocks()
 
         act(() => {
           _1.setValue(5)
         })
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(18)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(18)
         vi.clearAllMocks()
 
         act(() => {
           list.setValue((items) => [...items, _2])
         })
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(26)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(26)
         expect(_2).toHaveEmittersSize(1)
         vi.clearAllMocks()
 
@@ -351,7 +366,8 @@ describe.each([
           list.setValue((items) => items.slice(1))
         })
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(18)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(18)
         expect(list).toHaveEmittersSize(1)
         expect(_0).toHaveEmittersSize(0)
         expect(_1).toHaveEmittersSize(1)
@@ -389,12 +405,14 @@ describe.each([
           <Component value={value} onEffect={onEffect} />,
         )
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(6)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(6)
         vi.clearAllMocks()
 
         rerender(<Component value={value} onEffect={onEffect} />)
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(6)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(6)
         expect(value).toHaveEmittersSize(1)
       })
 
@@ -404,12 +422,14 @@ describe.each([
 
         render(<Component value={value} onEffect={onEffect} />)
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(6)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(6)
         vi.clearAllMocks()
 
         fireEvent.click(screen.getByTestId("increment"))
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(9)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(9)
         expect(value).toHaveEmittersSize(1)
       })
 
@@ -419,14 +439,16 @@ describe.each([
 
         render(<Component value={value} onEffect={onEffect} />)
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(6)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(6)
         vi.clearAllMocks()
 
         act(() => {
           value.setValue(4)
         })
 
-        expect(onEffect).toHaveBeenCalledExactlyOnceWith(8)
+        expect(onEffect).toHaveBeenCalledOnce()
+        expect(onEffect).toHaveBeenLastCalledWith(8)
         expect(value).toHaveEmittersSize(1)
       })
     })
@@ -479,12 +501,14 @@ describe.each([
     const visibility = screen.getByTestId("visibility")
 
     expect(count).toHaveTextContent("3")
-    expect(onEffect).toHaveBeenCalledExactlyOnceWith(3)
+    expect(onEffect).toHaveBeenCalledOnce()
+    expect(onEffect).toHaveBeenLastCalledWith(3)
     vi.clearAllMocks()
 
     fireEvent.click(count)
     expect(count).toHaveTextContent("4")
-    expect(onEffect).toHaveBeenCalledExactlyOnceWith(4)
+    expect(onEffect).toHaveBeenCalledOnce()
+    expect(onEffect).toHaveBeenLastCalledWith(4)
     vi.clearAllMocks()
 
     fireEvent.click(visibility)
@@ -514,11 +538,13 @@ describe.each([
       },
     )
 
-    expect(spy).toHaveBeenCalledExactlyOnceWith(3)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(3)
     vi.clearAllMocks()
 
     rerender({ left: 2, right: impulse })
-    expect(spy).toHaveBeenCalledExactlyOnceWith(4)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(4)
     vi.clearAllMocks()
 
     rerender({ left: 2, right: impulse })
@@ -528,7 +554,8 @@ describe.each([
     act(() => {
       impulse.setValue(3)
     })
-    expect(spy).toHaveBeenCalledExactlyOnceWith(5)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(5)
     vi.clearAllMocks()
 
     act(() => {
@@ -538,7 +565,8 @@ describe.each([
     vi.clearAllMocks()
 
     rerender({ left: 2, right: Impulse.of(4) })
-    expect(spy).toHaveBeenCalledExactlyOnceWith(6)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(6)
     vi.clearAllMocks()
   })
 
@@ -560,23 +588,27 @@ describe.each([
       },
     )
 
-    expect(spy).toHaveBeenCalledExactlyOnceWith(3)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(3)
     vi.clearAllMocks()
 
     rerender({ state: { left, right } })
-    expect(spy).toHaveBeenCalledExactlyOnceWith(3)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(3)
     vi.clearAllMocks()
 
     act(() => {
       left.setValue(2)
     })
-    expect(spy).toHaveBeenCalledExactlyOnceWith(4)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(4)
     vi.clearAllMocks()
 
     act(() => {
       right.setValue(3)
     })
-    expect(spy).toHaveBeenCalledExactlyOnceWith(5)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenLastCalledWith(5)
     vi.clearAllMocks()
   })
 
@@ -607,18 +639,21 @@ describe.each([
     expect(cleanup).not.toHaveBeenCalled()
 
     counter.setValue({ count: 3 })
-    expect(cleanup).toHaveBeenCalledExactlyOnceWith(4)
+    expect(cleanup).toHaveBeenCalledOnce()
+    expect(cleanup).toHaveBeenLastCalledWith(4)
     vi.clearAllMocks()
 
     rerender({
       counter,
       multiplier: 3,
     })
-    expect(cleanup).toHaveBeenCalledExactlyOnceWith(6)
+    expect(cleanup).toHaveBeenCalledOnce()
+    expect(cleanup).toHaveBeenLastCalledWith(6)
     vi.clearAllMocks()
 
     unmount()
-    expect(cleanup).toHaveBeenCalledExactlyOnceWith(9)
+    expect(cleanup).toHaveBeenCalledOnce()
+    expect(cleanup).toHaveBeenLastCalledWith(9)
     vi.clearAllMocks()
 
     counter.setValue({ count: 4 })

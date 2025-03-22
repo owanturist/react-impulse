@@ -56,7 +56,8 @@ describe("onSubmit(listener)", () => {
 
     void form.submit()
 
-    expect(focus).toHaveBeenCalledExactlyOnceWith([
+    expect(focus).toHaveBeenCalledTimes(1)
+    expect(focus).toHaveBeenLastCalledWith([
       "String must contain at least 10 character(s)",
     ])
   })
@@ -83,7 +84,8 @@ describe("onSubmit(listener)", () => {
 
     void form.submit()
 
-    expect(listener).toHaveBeenCalledExactlyOnceWith(value)
+    expect(listener).toHaveBeenCalledTimes(1)
+    expect(listener).toHaveBeenLastCalledWith(value)
   })
 
   it("calls all listeners", () => {

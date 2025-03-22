@@ -151,7 +151,8 @@ describe("with compare function", () => {
       result.current.setValue((x) => x + 1)
     })
 
-    expect(Object.is).toHaveBeenCalledExactlyOnceWith(0, 1)
+    expect(Object.is).toHaveBeenCalledOnce()
+    expect(Object.is).toHaveBeenLastCalledWith(0, 1)
   })
 
   it("applies Object.is when passing null as compare", () => {
@@ -163,7 +164,8 @@ describe("with compare function", () => {
       result.current.setValue((x) => x + 1)
     })
 
-    expect(Object.is).toHaveBeenCalledExactlyOnceWith(0, 1)
+    expect(Object.is).toHaveBeenCalledOnce()
+    expect(Object.is).toHaveBeenLastCalledWith(0, 1)
   })
 
   it("does not call the function on init", () => {
@@ -181,7 +183,8 @@ describe("with compare function", () => {
       result.current.setValue(1)
     })
 
-    expect(compare).toHaveBeenCalledExactlyOnceWith(0, 1, scope)
+    expect(compare).toHaveBeenCalledOnce()
+    expect(compare).toHaveBeenLastCalledWith(0, 1, scope)
   })
 
   it("updates compare function on re-render", ({ scope }) => {
@@ -198,7 +201,8 @@ describe("with compare function", () => {
     act(() => {
       result.current.setValue((x) => x + 1)
     })
-    expect(compare_1).toHaveBeenCalledExactlyOnceWith(0, 1, scope)
+    expect(compare_1).toHaveBeenCalledOnce()
+    expect(compare_1).toHaveBeenLastCalledWith(0, 1, scope)
     vi.clearAllMocks()
 
     rerender(compare_2)
@@ -206,7 +210,8 @@ describe("with compare function", () => {
       result.current.setValue((x) => x + 1)
     })
     expect(compare_1).not.toHaveBeenCalled()
-    expect(compare_2).toHaveBeenCalledExactlyOnceWith(1, 2, scope)
+    expect(compare_2).toHaveBeenCalledOnce()
+    expect(compare_2).toHaveBeenLastCalledWith(1, 2, scope)
     vi.clearAllMocks()
 
     rerender(null)
@@ -214,6 +219,7 @@ describe("with compare function", () => {
       result.current.setValue((x) => x + 1)
     })
     expect(compare_2).not.toHaveBeenCalled()
-    expect(Object.is).toHaveBeenCalledExactlyOnceWith(2, 3)
+    expect(Object.is).toHaveBeenCalledOnce()
+    expect(Object.is).toHaveBeenLastCalledWith(2, 3)
   })
 })
