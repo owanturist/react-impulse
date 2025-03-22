@@ -1227,8 +1227,7 @@ describe("ImpulseFormList#focusFirstInvalidValue()", () => {
 
     form.focusFirstInvalidValue()
 
-    expect(listener_0).toHaveBeenCalledOnce()
-    expect(listener_0).toHaveBeenLastCalledWith(["error0"])
+    expect(listener_0).toHaveBeenCalledExactlyOnceWith(["error0"])
     expect(listener_1).not.toHaveBeenCalled()
     expect(listener_2).not.toHaveBeenCalled()
   })
@@ -1241,8 +1240,7 @@ describe("ImpulseFormList#focusFirstInvalidValue()", () => {
     form.focusFirstInvalidValue()
 
     expect(listener_0).not.toHaveBeenCalled()
-    expect(listener_1).toHaveBeenCalledOnce()
-    expect(listener_1).toHaveBeenLastCalledWith(["error1"])
+    expect(listener_1).toHaveBeenCalledExactlyOnceWith(["error1"])
     expect(listener_2).not.toHaveBeenCalled()
   })
 })
@@ -1293,16 +1291,9 @@ describe("ImpulseFormList#onSubmit()", () => {
 
     void form.submit()
 
-    expect(listener_0).toHaveBeenCalledOnce()
-    expect(listener_0).toHaveBeenLastCalledWith([1, 2, 3])
-
-    expect(listener_1).toHaveBeenCalledOnce()
-    expect(listener_1).toHaveBeenLastCalledWith(1)
-
-    expect(listener_2).toHaveBeenCalledOnce()
-    expect(listener_2).toHaveBeenLastCalledWith(2)
-
-    expect(listener_3).toHaveBeenCalledOnce()
-    expect(listener_3).toHaveBeenLastCalledWith(3)
+    expect(listener_0).toHaveBeenCalledExactlyOnceWith([1, 2, 3])
+    expect(listener_1).toHaveBeenCalledExactlyOnceWith(1)
+    expect(listener_2).toHaveBeenCalledExactlyOnceWith(2)
+    expect(listener_3).toHaveBeenCalledExactlyOnceWith(3)
   })
 })

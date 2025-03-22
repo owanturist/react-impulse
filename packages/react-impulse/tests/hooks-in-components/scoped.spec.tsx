@@ -712,8 +712,7 @@ describe("scoped.forwardRef()", () => {
     const count = screen.getByTestId("count")
 
     expect(count).toHaveTextContent("0")
-    expect(divRef).toHaveBeenCalledOnce()
-    expect(divRef).toHaveBeenLastCalledWith(expect.any(HTMLDivElement))
+    expect(divRef).toHaveBeenCalledExactlyOnceWith(expect.any(HTMLDivElement))
     vi.clearAllMocks()
 
     act(() => {
@@ -755,8 +754,7 @@ describe("scoped.forwardRef()", () => {
     expect(ref).not.toHaveBeenCalled()
 
     expect(await screen.findByTestId("count")).toHaveTextContent("0")
-    expect(ref).toHaveBeenCalledOnce()
-    expect(ref).toHaveBeenLastCalledWith(expect.any(HTMLDivElement))
+    expect(ref).toHaveBeenCalledExactlyOnceWith(expect.any(HTMLDivElement))
 
     act(() => {
       count.setValue((x) => x + 1)
@@ -793,16 +791,13 @@ describe("scoped.forwardRef()", () => {
       <Forwarded ref={ref_1} className="test" id="test" />,
     )
 
-    expect(ref_1).toHaveBeenCalledOnce()
-    expect(ref_1).toHaveBeenLastCalledWith(expect.any(HTMLDivElement))
+    expect(ref_1).toHaveBeenCalledExactlyOnceWith(expect.any(HTMLDivElement))
 
     rerender(<ForwardedMemoized ref={ref_2} className="test" id="test" />)
-    expect(ref_2).toHaveBeenCalledOnce()
-    expect(ref_2).toHaveBeenLastCalledWith(expect.any(HTMLDivElement))
+    expect(ref_2).toHaveBeenCalledExactlyOnceWith(expect.any(HTMLDivElement))
 
     rerender(<MemoizedForwarded ref={ref_3} className="test" id="test" />)
-    expect(ref_3).toHaveBeenCalledOnce()
-    expect(ref_3).toHaveBeenLastCalledWith(expect.any(HTMLDivElement))
+    expect(ref_3).toHaveBeenCalledExactlyOnceWith(expect.any(HTMLDivElement))
   })
 })
 
@@ -923,8 +918,7 @@ describe.each([
     )
 
     expect(count).toHaveEmittersSize(1)
-    expect(onEffect).toHaveBeenCalledOnce()
-    expect(onEffect).toHaveBeenLastCalledWith(0)
+    expect(onEffect).toHaveBeenCalledExactlyOnceWith(0)
     expect(onRender).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
@@ -938,8 +932,7 @@ describe.each([
       count.setValue((x) => x + 1)
     })
     expect(count).toHaveEmittersSize(1)
-    expect(onEffect).toHaveBeenCalledOnce()
-    expect(onEffect).toHaveBeenLastCalledWith(1)
+    expect(onEffect).toHaveBeenCalledExactlyOnceWith(1)
     expect(onRender).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
@@ -947,8 +940,7 @@ describe.each([
       <Component count={count} onEffect={onEffect} onRender={onRender} />,
     )
     expect(count).toHaveEmittersSize(1)
-    expect(onEffect).toHaveBeenCalledOnce()
-    expect(onEffect).toHaveBeenLastCalledWith(1)
+    expect(onEffect).toHaveBeenCalledExactlyOnceWith(1)
     expect(onRender).toHaveBeenCalledOnce()
   })
 })
