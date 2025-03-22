@@ -1,5 +1,11 @@
 # react-impulse
 
+## 2.2.0
+
+### Minor Changes
+
+- [#790](https://github.com/owanturist/react-impulse/pull/790) [`167bb77`](https://github.com/owanturist/react-impulse/commit/167bb7760211d1a5966a3f730f534beba78c0e77) Thanks [@owanturist](https://github.com/owanturist)! - Drop custom `manglePlugin` in favor of `terser` default mangling.
+
 ## 2.1.0
 
 ### Minor Changes
