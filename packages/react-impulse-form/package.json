@@ -38,7 +38,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
-    "@types/react": "^18.3.5",
+    "@types/react": "^19.0.12",
     "react-impulse": "workspace:*",
     "zod": "^3.23.8"
   },
