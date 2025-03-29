@@ -1,11 +1,17 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { type Compare, Impulse, useScoped, type Scope } from "../../src"
+import {
+  type Compare,
+  Impulse,
+  useScoped,
+  type Scope,
+  type ReadonlyImpulse,
+} from "../../src"
 import { Counter, type WithSpy, type WithImpulse } from "../common"
 
 describe("impulse shortcut", () => {
   it("allows to use ReadonlyImpulse", () => {
-    const impulse = Impulse.transmit(() => 1)
+    const impulse: ReadonlyImpulse<number> = Impulse.of(1)
 
     const { result } = renderHook(() => useScoped(impulse))
 

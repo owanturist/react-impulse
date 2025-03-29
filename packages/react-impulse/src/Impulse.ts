@@ -1,4 +1,4 @@
-import { type Func, type Compare, eq, noop, isFunction } from "./utils"
+import { type Func, type Compare, eq, isFunction } from "./utils"
 import { EMITTER_KEY, type Scope, extractScope, STATIC_SCOPE } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 
@@ -6,13 +6,6 @@ export interface ImpulseOptions<T> {
   /**
    * The compare function determines whether or not a new Impulse's value replaces the current one.
    * In many cases specifying the function leads to better performance because it prevents unnecessary updates.
-   */
-  readonly compare?: null | Compare<T>
-}
-
-export interface TransmittingImpulseOptions<T> {
-  /**
-   * The compare function determines whether or not a transmitting value changes when reading it from an external source.
    */
   readonly compare?: null | Compare<T>
 }
@@ -101,58 +94,6 @@ export abstract class Impulse<T> {
     options?: ImpulseOptions<undefined | T>,
   ): Impulse<undefined | T> {
     return new DirectImpulse(initialValue, options?.compare ?? eq)
-  }
-
-  /**
-   * Creates a new transmitting ReadonlyImpulse.
-   * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source.
-   *
-   * @param getter a function to read the transmitting value from a source.
-   * @param options optional `TransmittingImpulseOptions`.
-   * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
-   *
-   * @version 2.0.0
-   */
-  public static transmit<T>(
-    getter: (scope: Scope) => T,
-    options?: TransmittingImpulseOptions<T>,
-  ): ReadonlyImpulse<T>
-
-  /**
-   * Creates a new transmitting Impulse.
-   * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source and writes it back.
-   *
-   * @param getter either a source impulse or a function to read the transmitting value from the source.
-   * @param setter either a destination impulse or a function to write the transmitting value back to the source.
-   * @param options optional `TransmittingImpulseOptions`.
-   * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
-   *
-   * @version 2.0.0
-   */
-  public static transmit<T>(
-    getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
-    setter: Impulse<T> | ((value: T, scope: Scope) => void),
-    options?: TransmittingImpulseOptions<T>,
-  ): Impulse<T>
-
-  public static transmit<T>(
-    getter: ReadonlyImpulse<T> | Func<[Scope], T>,
-    setterOrOptions?:
-      | Impulse<T>
-      | Func<[T, Scope]>
-      | TransmittingImpulseOptions<T>,
-    maybeOptions?: TransmittingImpulseOptions<T>,
-  ): Impulse<T> {
-    const [setter, options] =
-      isFunction(setterOrOptions) || isImpulse(setterOrOptions)
-        ? [setterOrOptions, maybeOptions]
-        : [noop, setterOrOptions]
-
-    return new TransmittingImpulse(
-      isFunction(getter) ? getter : (scope) => getter.getValue(scope),
-      isFunction(setter) ? setter : (value) => setter.setValue(value),
-      options?.compare ?? eq,
-    )
   }
 
   private readonly _emitters = new Set<ScopeEmitter>()
@@ -304,50 +245,5 @@ class DirectImpulse<T> extends Impulse<T> {
     }
 
     return isDifferent
-  }
-}
-
-export class TransmittingImpulse<T> extends Impulse<T> {
-  private _value?: { _lazy: T }
-
-  public constructor(
-    private _getValue: Func<[Scope], T>,
-    private readonly _setValue: Func<[T, Scope]>,
-    compare: Compare<T>,
-  ) {
-    super(compare)
-  }
-
-  protected _getter(scope: Scope): T {
-    const value = this._getValue(scope)
-
-    if (
-      this._value == null ||
-      !this._compare(this._value._lazy, value, STATIC_SCOPE)
-    ) {
-      this._value = { _lazy: value }
-    }
-
-    return this._value._lazy
-  }
-
-  protected _setter(value: T): boolean {
-    this._setValue(value, STATIC_SCOPE)
-
-    // should always emit because the transmitting value might be not reactive
-    // so the _getter method does not know about the change of such values
-    return true
-  }
-
-  public _replaceGetter(getter: (scope: Scope) => T): void {
-    if (this._getValue !== getter) {
-      this._emit(() => {
-        const value = this._value
-
-        this._getValue = getter
-
-        return value != null && value._lazy !== this._getter(STATIC_SCOPE)
-      })
-    }
   }
 }

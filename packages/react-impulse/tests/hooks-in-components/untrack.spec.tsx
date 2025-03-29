@@ -1,7 +1,7 @@
 import React from "react"
 import { fireEvent, render, screen } from "@testing-library/react"
 
-import { Impulse, untrack } from "../../src"
+import { Impulse, untrack, type ReadonlyImpulse } from "../../src"
 
 it("returns the `factory` function result without tracking impulses", () => {
   const onRender = vi.fn()
@@ -55,7 +55,7 @@ it("returns the `factory` function result without tracking impulses", () => {
 })
 
 it("allows to use ReadonlyImpulse", () => {
-  const impulse = Impulse.transmit(() => 1)
+  const impulse: ReadonlyImpulse<number> = Impulse.of(1)
 
   const value = untrack(impulse)
 
