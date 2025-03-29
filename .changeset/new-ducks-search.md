@@ -1,6 +1,6 @@
 ---
 "react-impulse": major
-"react-impulse-form": major
+"react-impulse-form": minor
 ---
 
 Enroll React@19 support:
