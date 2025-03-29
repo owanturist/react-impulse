@@ -18,7 +18,7 @@ export const isImpulse = <T, Unknown = unknown>(
   return input instanceof Impulse
 }
 
-export abstract class Impulse<T> {
+export class Impulse<T> {
   /**
    * A static method to check whether or not the input is an Impulse.
    *
@@ -93,12 +93,15 @@ export abstract class Impulse<T> {
     initialValue?: T,
     options?: ImpulseOptions<undefined | T>,
   ): Impulse<undefined | T> {
-    return new DirectImpulse(initialValue, options?.compare ?? eq)
+    return new Impulse(initialValue, options?.compare ?? eq)
   }
 
   private readonly _emitters = new Set<ScopeEmitter>()
 
-  protected constructor(protected readonly _compare: Compare<T>) {}
+  private constructor(
+    private _value: T,
+    protected readonly _compare: Compare<T>,
+  ) {}
 
   /**
    * Return the value when serializing to JSON.
@@ -135,9 +138,6 @@ export abstract class Impulse<T> {
     })
   }
 
-  protected abstract _getter(scope: Scope): T
-  protected abstract _setter(value: T): boolean
-
   /**
    * Creates a new Impulse instance out of the current one with the same value.
    *
@@ -166,15 +166,13 @@ export abstract class Impulse<T> {
     transformOrOptions?: Func<[T, Scope], T> | ImpulseOptions<T>,
     maybeOptions?: ImpulseOptions<T>,
   ): Impulse<T> {
-    const value = this._getter(STATIC_SCOPE)
-
     const [clonedValue, { compare = this._compare } = {}] = isFunction(
       transformOrOptions,
     )
-      ? [transformOrOptions(value, STATIC_SCOPE), maybeOptions]
-      : [value, transformOrOptions]
+      ? [transformOrOptions(this._value, STATIC_SCOPE), maybeOptions]
+      : [this._value, transformOrOptions]
 
-    return new DirectImpulse(clonedValue, compare ?? eq)
+    return new Impulse(clonedValue, compare ?? eq)
   }
 
   /**
@@ -198,9 +196,7 @@ export abstract class Impulse<T> {
   public getValue<R>(scope: Scope, select?: Func<[T, Scope], R>): T | R {
     scope[EMITTER_KEY]?._attachTo(this._emitters)
 
-    const value = this._getter(scope)
-
-    return isFunction(select) ? select(value, scope) : value
+    return isFunction(select) ? select(this._value, scope) : this._value
   }
 
   /**
@@ -215,35 +211,20 @@ export abstract class Impulse<T> {
   public setValue(
     valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
   ): void {
-    this._emit(() => {
+    ScopeEmitter._schedule((queue) => {
       const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(this._getter(STATIC_SCOPE), STATIC_SCOPE)
+        ? valueOrTransform(this._value, STATIC_SCOPE)
         : valueOrTransform
 
-      return this._setter(nextValue)
+      const isDifferent = !this._compare(this._value, nextValue, STATIC_SCOPE)
+
+      if (isDifferent) {
+        this._value = nextValue
+      }
+
+      if (isDifferent) {
+        queue.push(this._emitters)
+      }
     })
-  }
-}
-
-class DirectImpulse<T> extends Impulse<T> {
-  public constructor(
-    private _value: T,
-    compare: Compare<T>,
-  ) {
-    super(compare)
-  }
-
-  protected _getter(): T {
-    return this._value
-  }
-
-  protected _setter(value: T): boolean {
-    const isDifferent = !this._compare(this._value, value, STATIC_SCOPE)
-
-    if (isDifferent) {
-      this._value = value
-    }
-
-    return isDifferent
   }
 }
