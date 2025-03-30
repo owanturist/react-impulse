@@ -124,13 +124,14 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   ): Impulse<T>
 
   public static of<T>(
-    initialValue?: T | ((scope: Scope) => T),
+    valueOrInitValue?: T | ((scope: Scope) => T),
     options?: ImpulseOptions<undefined | T>,
   ): Impulse<undefined | T> {
-    return new DirectImpulse(
-      isFunction(initialValue) ? initialValue(STATIC_SCOPE) : initialValue,
-      options?.compare ?? eq,
-    )
+    const value = isFunction(valueOrInitValue)
+      ? valueOrInitValue(STATIC_SCOPE)
+      : valueOrInitValue
+
+    return new DirectImpulse(value, options?.compare ?? eq)
   }
 
   /**
