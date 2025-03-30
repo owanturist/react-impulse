@@ -100,7 +100,7 @@ export class Impulse<T> {
 
   private constructor(
     private _value: T,
-    protected readonly _compare: Compare<T>,
+    private readonly _compare: Compare<T>,
   ) {}
 
   /**
