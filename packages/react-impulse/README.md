@@ -52,12 +52,14 @@ const Checkbox: React.FC<{
 Once created, Impulses can travel thru your components, where you can set and get their values:
 
 ```tsx
-import { useImpulse, scoped } from "react-impulse"
+import { scoped } from "react-impulse"
 
 const SignUp: React.FC = scoped(({ scope }) => {
-  const username = useImpulse("")
-  const password = useImpulse("")
-  const isAgreeWithTerms = useImpulse(false)
+  const { username, password, isAgreeWithTerms } = React.useState({
+    username: Impulse.of(""),
+    password: Impulse.of(""),
+    isAgreeWithTerms: Impulse.of(false),
+  })
 
   return (
     <form>
@@ -104,8 +106,6 @@ A static method that creates new Impulse.
 - `[initialValue]` is an optional initial value. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
 - `[options]` is an optional [`ImpulseOptions`][impulse_options] object.
   - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
-
-> 💡 The [`useImpulse`][use_impulse] hook helps to create and store an `Impulse` inside a React component.
 
 ```ts
 const count = Impulse.of(1) // Impulse<number>
@@ -475,8 +475,10 @@ Here the `SumOfTwo` component defines two Impulses, passes them further to the `
 
 ```tsx
 const SumOfTwo: React.FC = () => {
-  const firstCounter = useImpulse(0)
-  const secondCounter = useImpulse(0)
+  const [{ firstCounter, secondCounter }] = React.useState({
+    firstCounter: Impulse.of(0),
+    secondCounter: Impulse.of(0),
+  })
 
   return (
     <div>
@@ -536,42 +538,6 @@ scoped.memo.forwardRef(Component)
 scoped.forwardRef.memo(Component)
 ```
 
-### `useImpulse`
-
-```dart
-function useImpulse<T>(): Impulse<undefined | T>
-
-function useImpulse<T>(
-  valueOrInitValue: T | ((scope: Scope) => T),
-  options?: ImpulseOptions<T>
-): Impulse<T>
-```
-
-- `[valueOrInitValue]` is an optional value used during the initial render. If the initial value is the result of an expensive computation, you may provide a function instead, which will be executed only on the initial render. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
-- `[options]` is optional [`ImpulseOptions`][impulse_options] object.
-  - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
-
-A hook that initiates a stable (never changing) Impulse. It's value can be changed with the [`Impulse#setValue`][impulse__set_value] method though.
-
-> 💬 The initial value is disregarded during subsequent re-renders but compare function is not - it uses the latest function passed to the hook.
-
-> 💡 There is no need to memoize `options.compare` function. The hook does it internally.
-
-```ts
-const count = useImpulse(1) // Impulse<number>
-const timeout = useImpulse<number>() // Impulse<undefined | number>
-
-const tableSum = useImpulse(() => {
-  // the function body runs only once on the initial render
-  return bigTable
-    .flatMap((wideRow) => wideRow.map((int) => int * 2))
-    .reduce((acc, x) => acc + x, 0)
-}) // Impulse<number>
-
-// the function provides scope to extract the initial value from other Impulses
-const countDouble = useImpulse((scope) => 2 * count.getValue(scope)) // Impulse<number>
-```
-
 ### `useScoped`
 
 ```dart
@@ -616,7 +582,7 @@ Components can scope watched Impulses to reduce re-rendering:
 
 ```tsx
 const Challenge: React.FC = () => {
-  const count = useImpulse(0)
+  const [count] = React.useState(Impulse.of(0))
   // the component re-renders only once when the `count` is greater than 5
   const isMoreThanFive = useScoped((scope) => count.getValue(scope) > 5)
 
@@ -915,7 +881,6 @@ ESLint can also help validate unnecessary and abusive hooks/HOCs usage:
 [impulse__clone]: #impulseclone
 [impulse__get_value]: #impulsegetvalue
 [impulse__set_value]: #impulsesetvalue
-[use_impulse]: #useimpulse
 [use_scoped]: #usescoped
 [use_scoped_callback]: #usescopedcallback
 [use_scoped_memo]: #usescopedmemo

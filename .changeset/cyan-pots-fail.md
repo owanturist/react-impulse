@@ -4,6 +4,16 @@
 
 The **BREAKING CHANGES** are migration paths:
 
+- Delete `useImpulse`. Replace it with `useState`, `useRef` or any other permanent storage of your choice:
+
+  ```ts
+  // Before
+  const impulse = useImpulse(0)
+
+  // After
+  const [impulse] = useState(Impulse.of(0))
+  ```
+
 - Delete `useTransmittingImpulse`. Replace it with `Impulse.of` for cases with immutable dependencies (not Impulses):
 
   ```ts
