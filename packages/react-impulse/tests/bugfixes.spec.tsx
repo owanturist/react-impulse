@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, scoped, subscribe, useScoped } from "../src"
+import { Impulse, subscribe, useScope, useScoped } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -167,12 +167,16 @@ describe("return the same component type from watch #322", () => {
 
   const StatefulInput: React.FC<{
     value: Impulse<string>
-  }> = scoped(({ scope, value }) => (
-    <StatelessInput
-      value={value.getValue(scope)}
-      onChange={(nextValue) => value.setValue(nextValue)}
-    />
-  ))
+  }> = ({ value }) => {
+    const scope = useScope()
+
+    return (
+      <StatelessInput
+        value={value.getValue(scope)}
+        onChange={(nextValue) => value.setValue(nextValue)}
+      />
+    )
+  }
 
   const Input = Object.assign(StatefulInput, { Stateless: StatelessInput })
 
@@ -193,7 +197,8 @@ describe("return the same component type from watch #322", () => {
 describe("in StrictMode, fails due to unexpected .setValue during watch call #336", () => {
   const Button: React.FC<{
     count: Impulse<number>
-  }> = scoped(({ scope, count }) => {
+  }> = ({ count }) => {
+    const scope = useScope()
     React.useState(0)
 
     return (
@@ -201,7 +206,7 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
         {count.getValue(scope)}
       </button>
     )
-  })
+  }
 
   it("does not fail in strict mode", () => {
     const impulse = Impulse.of(0)

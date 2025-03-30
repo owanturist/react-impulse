@@ -283,27 +283,9 @@ export default tseslint.config([
         "error",
         {
           selector:
-            "CallExpression:has(:matches(.callee, .callee.property)[name=/(useTransmittingImpulse|use(Scoped)?(|Memo|Callback|Effect|LayoutEffect))/]) > .arguments:nth-child(2) > [name='scope']",
-          message:
-            "The `scope` dependency changes on each component's re-render. Please use `scope` provided as the first argument in the `useScoped*` hooks.",
-        },
-        {
-          selector:
             "CallExpression[callee.name=/useScoped(|Memo|Callback|Effect|LayoutEffect)/] > .arguments:nth-child(1)[params.length=0]",
           message:
             "The `scope` argument of the hook effect is not used, consider using React effect hooks instead of Impulse scoped hooks.",
-        },
-        {
-          selector:
-            "CallExpression:has(:matches(.callee, .callee .object)[name='scoped']) > .arguments:nth-child(1) > .params:nth-child(1):not(:has(.properties[key.name='scope']))",
-          message:
-            "The `scope` prop is not used, consider using the component without wrapping it in the `scoped` HOC.",
-        },
-        {
-          selector:
-            "CallExpression:has(:matches(.callee, .callee .object)[name='scoped']) > .arguments:nth-child(1) > .params:nth-child(1) > .properties[key.name='scope'] > .value[name!='scope']",
-          message:
-            "Do not rename the `scope` prop created by the `scoped` HOC.",
         },
       ],
 

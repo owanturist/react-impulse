@@ -28,6 +28,10 @@ export function noop(): void {
   // do nothing
 }
 
+export function identity<T>(value: T): T {
+  return value
+}
+
 export function isFunction<
   TFunction extends Func<ReadonlyArray<never>, unknown>,
 >(anything: unknown): anything is TFunction {

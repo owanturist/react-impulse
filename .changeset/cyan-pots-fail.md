@@ -50,3 +50,36 @@ The **BREAKING CHANGES** are migration paths:
     )
   }, [count])
   ```
+
+- Delete `scoped`. Replace it with new `useScope()` or `useScoped()`:
+
+  ```tsx
+  // Before
+  const Counter: React.FC<{
+    count: Impulse<number>
+  }> = scoped(({ scope, count }) => {
+    return <div>{count.getValue(scope)}</div>
+  })
+
+  // After
+  const Counter: React.FC<{
+    count: Impulse<number>
+  }> = ({ count }) => {
+    const scope = useScope()
+
+    return <div>{count.getValue(scope)}</div>
+  }
+
+  // OR
+  const Counter: React.FC<{
+    count: Impulse<number>
+  }> = ({ count }) => {
+    const value = useScoped(count)
+
+    return <div>{value}</div>
+  }
+  ```
+
+- Delete `scoped.memo`. Replace it with `useScope()` + `React.memo`.
+- Delete `scoped.forwardRef`. Replace it with `useScope()` + `React.forwardRef`.
+- Delete `scoped.memo.forwardRef` and `scoped.forwardRef.memo`. Replace it with `useScope()` + `React.memo` + `React.forwardRef`.

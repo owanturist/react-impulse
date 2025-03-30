@@ -1,5 +1,5 @@
 import { type DependencyList, useMemo } from "./dependencies"
-import { useScope } from "./useScope"
+import { useCreateScope } from "./useCreateScope"
 import type { Scope } from "./Scope"
 
 /**
@@ -14,7 +14,7 @@ export function useScopedMemo<TResult>(
   factory: (scope: Scope) => TResult,
   dependencies: DependencyList,
 ): TResult {
-  const getScope = useScope()
+  const getScope = useCreateScope()
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => factory(getScope()), [...dependencies, getScope])
