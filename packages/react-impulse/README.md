@@ -99,6 +99,10 @@ const SignUp: React.FC = () => {
 
 A core piece of the library is the `Impulse` class - a box that holds value. The value might be anything you like as long as it does not mutate. The class instances are mutable by design, but other Impulses can use them as values.
 
+### `Impulse`
+
+The impulse class. Extends [`ImpulseGetter`][impulse_getter] interface.
+
 ### `Impulse.of`
 
 ```dart
@@ -130,13 +134,13 @@ Impulse.transmit<T>(
 ): ReadonlyImpulse<T>
 
 Impulse.transmit<T>(
-  getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
+  getter: ImpulseGetter<T> | ((scope: Scope) => T),
   setter: Impulse<T> | ((value: T, scope: Scope) => void),
   options?: TransmittingImpulseOptions<T>,
 ): Impulse<T>
 ```
 
-- `getter` is either a source impulse or a function to read the transmitting value from a source.
+- `getter` is either anything that implements the `ImpulseGetter` interface or a function to read the transmitting value from the source.
 - `[setter]` either a destination impulse or is an optional function to write the transmitting value back to the source. When not defined, the Impulse is readonly.
 - `[options]` is an optional [`TransmittingImpulseOptions`][transmitting_impulse_options] object.
   - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
@@ -467,7 +471,7 @@ const cloneOfMutable = mutable.clone((current) => ({
 ### `useScoped`
 
 ```dart
-function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue
+function useScoped<TValue>(impulse: ImpulseGetter<TValue>): TValue
 
 function useScoped<T>(
   factory: (scope: Scope) => T,
@@ -476,7 +480,7 @@ function useScoped<T>(
 ): T
 ```
 
-- `impulse` is an `Impulse` instance to read the value from.
+- `impulse` is anything that implements the [`ImpulseGetter`][impulse_getter] interface.
 - `factory` is a function that provides [`Scope`][scope] as the first argument and subscribes to all Impulses calling the [`Impulse#getValue`][impulse__get_value] method inside the function.
 - `dependencies` is an optional array of dependencies of the `factory` function. If not defined, the `factory` function is called on every render.
 - `[options]` is an optional [`UseScopedOptions`][use_scoped_options] object.
@@ -641,7 +645,7 @@ Alias for [`batch`][batch].
 
 ```dart
 function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
-function untrack<TValue>(impulse: ReadonlyImpulse<TValue>): TValue
+function untrack<TValue>(impulse: ImpulseGetter<TValue>): TValue
 ```
 
 The `untrack` function is a helper to read Impulses' values without reactivity. It provides a [`Scope`][scope] to the `factory` function and returns the result of the function. Acts as [`batch`][batch].
@@ -687,6 +691,10 @@ In the example above the `listener` will not react on the `impulse_2` updates un
 > // console: {"count":2}
 > ```
 
+### `type ImpulseGetter`
+
+An interface that defines the `getValue` method.
+
 ### `type ReadonlyImpulse`
 
 A type alias for `Impulse` that does not have the [`Impulse#setValue`][impulse__set_value] method. It might be handy to store some value inside an Impulse, so the value change trigger a host component re-render only if the component reads the value from the Impulse.
@@ -715,31 +723,34 @@ interface TransmittingImpulseOptions<T> {
   <blockquote>
 
   ```ts
+  const source = Impulse.of(1)
+
+  const counter_1 = Impulse.transmit(
+    // the getter function creates a new object on every read
+    (scope) => ({ count: source.getValue(scope) }),
+    ({ count }) => source.setValue(count),
+  )
+
   tap((scope) => {
-    const source = Impulse.of(1)
-
-    const counter_1 = Impulse.transmit(
-      // the getter function creates a new object on every read
-      () => ({ count: source.getValue(scope) }),
-      ({ count }) => source.setValue(count),
-    )
-
     counter_1.getValue(scope) // { count: 1 }
+    // getValue creates a new object on every call
     counter_1.getValue(scope) === counter_1.getValue(scope) // false
+  })
 
-    // let's transmit the value but with compare function defined
+  // let's transmit the value but with compare function defined
+  const counter_2 = Impulse.transmit(
+    // the getter function creates a new object on every read
+    // but if they are compared equal, the transmitting value is not changed
+    (scope) => ({ count: source.getValue(scope) }),
+    ({ count }) => source.setValue(count),
+    {
+      compare: (left, right) => left.count === right.count,
+    },
+  )
 
-    const counter_1 = Impulse.transmit(
-      // the getter function creates a new object on every read
-      // but if they are compared equal, the transmitting value is not changed
-      (scope) => ({ count: source.getValue(scope) }),
-      ({ count }) => source.setValue(count),
-      {
-        compare: (left, right) => left.count === right.count,
-      },
-    )
-
+  tap((scope) => {
     counter_2.getValue(scope) // { count: 1 }
+    // getValue creates a new object on every call only if the values are comparably different
     counter_2.getValue(scope) === counter_2.getValue(scope) // true
   })
   ```
@@ -797,6 +808,7 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
 [batch]: #batch
 [untrack]: #untrack
 [subscribe]: #subscribe
+[impulse_getter]: #type-impulsegetter
 [impulse_options]: #interface-impulseoptions
 [transmitting_impulse_options]: #interface-transmittingimpulseoptions
 [use_scoped_options]: #interface-useScopedoptions

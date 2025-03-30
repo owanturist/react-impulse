@@ -19,13 +19,17 @@ export interface TransmittingImpulseOptions<T> {
 
 export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
 
-const isImpulse = <T, Unknown = unknown>(
+export interface ImpulseGetter<T> {
+  getValue(scope: Scope): T
+}
+
+export function isImpulse<T, Unknown = unknown>(
   input: Unknown | Impulse<T>,
-): input is Impulse<T> => {
+): input is Impulse<T> {
   return input instanceof Impulse
 }
 
-export abstract class Impulse<T> {
+export abstract class Impulse<T> implements ImpulseGetter<T> {
   /**
    * A static method to check whether or not the input is an Impulse.
    *
@@ -122,7 +126,7 @@ export abstract class Impulse<T> {
    * Creates a new transmitting Impulse.
    * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source and writes it back.
    *
-   * @param getter either a source impulse or a function to read the transmitting value from the source.
+   * @param getter either anything that implements the `ImpulseGetter` interface or a function to read the transmitting value from the source.
    * @param setter either a destination impulse or a function to write the transmitting value back to the source.
    * @param options optional `TransmittingImpulseOptions`.
    * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
@@ -130,13 +134,13 @@ export abstract class Impulse<T> {
    * @version 2.0.0
    */
   public static transmit<T>(
-    getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
+    getter: ImpulseGetter<T> | ((scope: Scope) => T),
     setter: Impulse<T> | ((value: T, scope: Scope) => void),
     options?: TransmittingImpulseOptions<T>,
   ): Impulse<T>
 
   public static transmit<T>(
-    getter: ReadonlyImpulse<T> | Func<[Scope], T>,
+    getter: ImpulseGetter<T> | Func<[Scope], T>,
     setterOrOptions?:
       | Impulse<T>
       | Func<[T, Scope]>

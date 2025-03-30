@@ -2,7 +2,7 @@ import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
 import { type Compare, eq, useHandler, type Func, isFunction } from "./utils"
 import { STATIC_SCOPE, type Scope } from "./Scope"
 import { useCreateScope } from "./useCreateScope"
-import type { ReadonlyImpulse } from "./Impulse"
+import type { ImpulseGetter } from "./Impulse"
 
 export interface UseScopedOptions<T> {
   /**
@@ -19,11 +19,11 @@ export interface UseScopedOptions<T> {
  * A hook reads an `impulse` value whenever it updates
  * but enqueues a re-render only when the resulting value is different from the previous.
  *
- * @param impulse an impulse to extract scoped value from.
+ * @param impulse anything that implements the `ImpulseGetter` interface.
  *
  * @version 2.0.0
  */
-export function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue
+export function useScoped<TValue>(impulse: ImpulseGetter<TValue>): TValue
 
 /**
  * A hook that executes the `factory` function whenever any of the involved Impulses' values update
@@ -42,20 +42,20 @@ export function useScoped<TResult>(
 ): TResult
 
 export function useScoped<TResult>(
-  impulseOrFactory: ReadonlyImpulse<TResult> | Func<[Scope], TResult>,
+  factoryOrImpulseGetter: ImpulseGetter<TResult> | Func<[Scope], TResult>,
   dependencies?: DependencyList,
   options?: UseScopedOptions<TResult>,
 ): TResult {
   const transform = useCallback(
     (scope: Scope) => {
-      if (isFunction(impulseOrFactory)) {
-        return impulseOrFactory(scope)
+      if (isFunction(factoryOrImpulseGetter)) {
+        return factoryOrImpulseGetter(scope)
       }
 
-      return impulseOrFactory.getValue(scope)
+      return factoryOrImpulseGetter.getValue(scope)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    dependencies ?? [impulseOrFactory],
+    dependencies ?? [factoryOrImpulseGetter],
   )
   const value = useCreateScope(
     transform,
