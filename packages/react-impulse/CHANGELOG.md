@@ -1,5 +1,13 @@
 # react-impulse
 
+## 2.1.1
+
+### Patch Changes
+
+- [#790](https://github.com/owanturist/react-impulse/pull/790) [`167bb77`](https://github.com/owanturist/react-impulse/commit/167bb7760211d1a5966a3f730f534beba78c0e77) Thanks [@owanturist](https://github.com/owanturist)! - Drop custom `manglePlugin` in favor of `terser` default mangling.
+
+- [#798](https://github.com/owanturist/react-impulse/pull/798) [`846f22b`](https://github.com/owanturist/react-impulse/commit/846f22bc965bfcd1134678e06ef244e0c72bb7dc) Thanks [@dependabot](https://github.com/apps/dependabot)! - Bump use-sync-external-store from 1.4.0 to 1.5.0
+
 ## 2.1.0
 
 ### Minor Changes
