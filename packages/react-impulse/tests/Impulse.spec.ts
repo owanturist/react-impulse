@@ -704,25 +704,6 @@ describe.each([
     })
   })
 
-  describe("Impulse#getValue(transform)", () => {
-    it("gets initial value", ({ scope }) => {
-      const initial = { count: 0 }
-      const { impulse } = setup(initial)
-
-      expect(impulse.getValue(scope)).toBe(initial)
-      expect(impulse.getValue(scope, Counter.getCount)).toBe(0)
-    })
-
-    it("gets updates value", ({ scope }) => {
-      const initial = { count: 0 }
-      const { impulse } = setup(initial)
-
-      impulse.setValue(Counter.inc)
-      expect(impulse.getValue(scope)).toStrictEqual({ count: 1 })
-      expect(impulse.getValue(scope, Counter.getCount)).toBe(1)
-    })
-  })
-
   describe("Impulse#clone()", () => {
     it("creates new Impulse", ({ scope }) => {
       const { impulse: impulse_1 } = setup({ count: 0 })
@@ -896,17 +877,13 @@ describe.each([
       expect(impulse_1.getValue(scope).name).not.toBe(
         impulse_2.getValue(scope).name,
       )
-      expect(
-        impulse_1.getValue(scope, ({ count, name }, scope) => ({
-          count: count.getValue(scope),
-          name: name.getValue(scope),
-        })),
-      ).toStrictEqual(
-        impulse_2.getValue(scope, ({ count, name }, scope) => ({
-          count: count.getValue(scope),
-          name: name.getValue(scope),
-        })),
-      )
+      expect({
+        count: impulse_1.getValue(scope).count.getValue(scope),
+        name: impulse_1.getValue(scope).name.getValue(scope),
+      }).toStrictEqual({
+        count: impulse_2.getValue(scope).count.getValue(scope),
+        name: impulse_2.getValue(scope).name.getValue(scope),
+      })
 
       // the nested impulses are independent
       impulse_1.getValue(scope).count.setValue(1)
@@ -933,17 +910,13 @@ describe.each([
       expect(impulse_1.getValue(scope).name).toBe(
         impulse_2.getValue(scope).name,
       )
-      expect(
-        impulse_1.getValue(scope, ({ count, name }) => ({
-          count: count.getValue(scope),
-          name: name.getValue(scope),
-        })),
-      ).toStrictEqual(
-        impulse_2.getValue(scope, ({ count, name }) => ({
-          count: count.getValue(scope),
-          name: name.getValue(scope),
-        })),
-      )
+      expect({
+        count: impulse_1.getValue(scope).count.getValue(scope),
+        name: impulse_1.getValue(scope).name.getValue(scope),
+      }).toStrictEqual({
+        count: impulse_1.getValue(scope).count.getValue(scope),
+        name: impulse_1.getValue(scope).name.getValue(scope),
+      })
 
       // the nested impulses are dependent
       impulse_1.getValue(scope).count.setValue(1)

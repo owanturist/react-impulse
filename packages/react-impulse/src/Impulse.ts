@@ -79,7 +79,13 @@ export abstract class Impulse<T> implements ImpulseGetter<T> {
       return isImpulse(args[0])
     }
 
-    return isImpulse(args[2]) && args[2].getValue(args[0], args[1])
+    if (isImpulse(args[2])) {
+      const value = args[2].getValue(args[0])
+
+      return args[1](value)
+    }
+
+    return false
   }
 
   /**
@@ -239,23 +245,10 @@ export abstract class Impulse<T> implements ImpulseGetter<T> {
    *
    * @version 1.0.0
    */
-  public getValue(scope: Scope): T
-  /**
-   * Returns a value selected from the impulse value.
-   *
-   * @param scope the Scope that tracks the Impulse value changes.
-   * @param select an optional function that applies to the impulse value before returning.
-   *
-   * @version 1.0.0
-   */
-  public getValue<R>(scope: Scope, select: (value: T, scope: Scope) => R): R
-
-  public getValue<R>(scope: Scope, select?: Func<[T, Scope], R>): T | R {
+  public getValue(scope: Scope): T {
     scope[EMITTER_KEY]?._attachTo(this._emitters)
 
-    const value = this._getter(scope)
-
-    return isFunction(select) ? select(value, scope) : value
+    return this._getter(scope)
   }
 
   /**

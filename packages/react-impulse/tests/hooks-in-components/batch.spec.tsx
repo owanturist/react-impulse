@@ -258,8 +258,8 @@ describe.each([
           spy()
 
           return (
-            first.getValue(scope, Counter.getCount) +
-            second.getValue(scope, Counter.getCount)
+            Counter.getCount(first.getValue(scope)) +
+            Counter.getCount(second.getValue(scope))
           )
         }
 
@@ -346,12 +346,12 @@ describe.each([
         const factory = (scope: Scope) => {
           spy()
 
-          return impulse.getValue(scope, ({ first, second }, scope) => {
-            return (
-              first.getValue(scope, Counter.getCount) +
-              second.getValue(scope, Counter.getCount)
-            )
-          })
+          const { first, second } = impulse.getValue(scope)
+
+          return (
+            Counter.getCount(first.getValue(scope)) +
+            Counter.getCount(second.getValue(scope))
+          )
         }
 
         return { spy, onRender, impulse, factory }

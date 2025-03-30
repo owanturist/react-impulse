@@ -442,12 +442,9 @@ describe("nested Impulses", () => {
     })
 
     subscribe((scope) => {
-      spy(
-        impulse_3.getValue(
-          scope,
-          ({ first, second }) => first.getValue(scope) + second.getValue(scope),
-        ),
-      )
+      const { first, second } = impulse_3.getValue(scope)
+
+      spy(first.getValue(scope) + second.getValue(scope))
     })
 
     expect(impulse_1).toHaveEmittersSize(1)
@@ -467,12 +464,9 @@ describe("nested Impulses", () => {
     })
 
     subscribe((scope) => {
-      spy(
-        impulse_3.getValue(
-          scope,
-          ({ first, second }) => first.getValue(scope) + second.getValue(scope),
-        ),
-      )
+      const { first, second } = impulse_3.getValue(scope)
+
+      spy(first.getValue(scope) + second.getValue(scope))
     })
 
     spy.mockReset()

@@ -182,8 +182,9 @@ describe("transform scoped Impulse's", () => {
     return prevLeft === nextLeft && prevRight === nextRight
   }
 
-  const factoryTuple = (scope: Scope, { impulse }: WithImpulse) =>
-    impulse.getValue(scope, toTuple)
+  const factoryTuple = (scope: Scope, { impulse }: WithImpulse) => {
+    return toTuple(impulse.getValue(scope))
+  }
 
   it.each([
     [
