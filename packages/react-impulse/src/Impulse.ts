@@ -19,7 +19,7 @@ export interface TransmittingImpulseOptions<T> {
 
 export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
 
-export const isImpulse = <T, Unknown = unknown>(
+const isImpulse = <T, Unknown = unknown>(
   input: Unknown | Impulse<T>,
 ): input is Impulse<T> => {
   return input instanceof Impulse
@@ -307,7 +307,7 @@ class DirectImpulse<T> extends Impulse<T> {
   }
 }
 
-export class TransmittingImpulse<T> extends Impulse<T> {
+class TransmittingImpulse<T> extends Impulse<T> {
   private _value?: { _lazy: T }
 
   public constructor(

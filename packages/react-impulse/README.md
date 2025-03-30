@@ -160,15 +160,16 @@ const Drawer: React.FC<{
 const ProductDetailsDrawer: React.FC<{
   product: Impulse<undefined | Product>
 }> = ({ product }) => {
-  const isOpen = useTransmittingImpulse(
-    (scope) => product.getValue(scope) != null,
-    [product],
-    (open) => {
-      if (!open) {
-        product.setValue(undefined)
-      }
-    },
-  )
+  const isOpen = React.useMemo(() => {
+    return Impulse.transmit(
+      (scope) => product.getValue(scope) != null,
+      (open) => {
+        if (!open) {
+          product.setValue(undefined)
+        }
+      },
+    )
+  }, [product])
 
   return (
     <Drawer isOpen={isOpen}>
@@ -199,16 +200,17 @@ const Agreements: React.FC<{
   isAgreeWithTermsOfUse: Impulse<boolean>
   isAgreeWithPrivacy: Impulse<boolean>
 }> = scoped(({ scope, isAgreeWithTermsOfUse, isAgreeWithPrivacy }) => {
-  const isAgreeWithAll = useTransmittingImpulse(
-    (scope) =>
-      isAgreeWithTermsOfUse.getValue(scope) &&
-      isAgreeWithPrivacy.getValue(scope),
-    [isAgreeWithTermsOfUse, isAgreeWithPrivacy],
-    (agree) => {
-      isAgreeWithTermsOfUse.setValue(agree)
-      isAgreeWithPrivacy.setValue(agree)
-    },
-  )
+  const isAgreeWithAll = React.useMemo(() => {
+    return Impulse.transmit(
+      (scope) =>
+        isAgreeWithTermsOfUse.getValue(scope) &&
+        isAgreeWithPrivacy.getValue(scope),
+      (agree) => {
+        isAgreeWithTermsOfUse.setValue(agree)
+        isAgreeWithPrivacy.setValue(agree)
+      },
+    )
+  }, [isAgreeWithTermsOfUse, isAgreeWithPrivacy])
 
   return (
     <div>
@@ -238,10 +240,20 @@ It can also transmit another store's value, such as `React.useState`, `redux`, U
 ```tsx
 const Counter: React.FC = () => {
   const [count, setCount] = React.useState(0)
-  const countImpulse = useTransmittingImpulse(
-    () => count,
-    [count],
-    (value) => setCount(value),
+
+  const [countImpulse] = React.useState(() => Impulse.of(count))
+
+  React.useEffect(() => {
+    // sync the state with the Impulse
+    countImpulse.setValue(count)
+  }, [count, countImpulse])
+
+  useScopedEffect(
+    (scope) => {
+      // sync the Impulse with the state
+      setValue(countImpulse.getValue(scope))
+    },
+    [countImpulse],
   )
 
   return (
@@ -264,10 +276,20 @@ import { useSelector, useDispatch } from "react-redux"
 const Counter: React.FC = () => {
   const count = useSelector((state) => state.count)
   const dispatch = useDispatch()
-  const countImpulse = useTransmittingImpulse(
-    () => count,
-    [count],
-    (value) => dispatch({ type: "SET_COUNT", payload: value }),
+
+  const [countImpulse] = React.useState(() => Impulse.of(count))
+
+  React.useEffect(() => {
+    // sync the state with the Impulse
+    countImpulse.setValue(count)
+  }, [count, countImpulse])
+
+  useScopedEffect(
+    (scope) => {
+      // sync the Impulse with the state
+      dispatch({ type: "SET_COUNT", payload: countImpulse.getValue(scope) })
+    },
+    [countImpulse, dispatch],
   )
 
   return (
@@ -290,12 +312,19 @@ import { useSearchParams } from "react-router-dom"
 const PageNavigation: React.FC = () => {
   const [{ page_index = 1 }, setSearchParams] = useSearchParams()
 
-  const page = useTransmittingImpulse(
-    () => page_index,
-    [page_index],
-    (index) => {
-      setSearchParams({ page_index: index })
+  const [page] = React.useState(Impulse.of(page_index))
+
+  React.useEffect(() => {
+    // sync the param with the Impulse
+    page.setValue(page_index)
+  }, [page, page_index])
+
+  useScopedEffect(
+    (scope) => {
+      // sync the Impulse with the param
+      setSearchParams({ page_index: page.getValue(scope) })
     },
+    [page, setSearchParams],
   )
 
   return (
@@ -308,8 +337,6 @@ const PageNavigation: React.FC = () => {
 
 </blockquote>
 </details>
-
-> 💡 The [`useTransmittingImpulse`][use_transmitting_impulse] hook helps to create and store a transmitting `Impulse` inside a React component.
 
 ### `Impulse.isImpulse`
 
@@ -544,33 +571,6 @@ const tableSum = useImpulse(() => {
 // the function provides scope to extract the initial value from other Impulses
 const countDouble = useImpulse((scope) => 2 * count.getValue(scope)) // Impulse<number>
 ```
-
-### `useTransmittingImpulse`
-
-```dart
-function useTransmittingImpulse<T>(
-  getter: (scope: Scope) => T,
-  dependencies: DependencyList,
-  options?: TransmittingImpulseOptions<T>,
-): ReadonlyImpulse<T>
-
-function useTransmittingImpulse<T>(
-  getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
-  dependencies: DependencyList,
-  setter: Impulse<T> | ((value: T, scope: Scope) => void),
-  options?: TransmittingImpulseOptions<T>,
-): Impulse<T>
-```
-
-- `getter` is either a source impulse or a function to read the transmitting value from a source.
-- `dependencies` an array of values triggering the re-read of the transmitting value.
-- `[setter]` either a destination impulse or is an optional function to write the transmitting value back to the source. When not defined, the Impulse is readonly.
-- `[options]` is an optional [`TransmittingImpulseOptions`][transmitting_impulse_options] object.
-  - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
-
-A hook that initialize a stable (never changing) transmitting Impulse. Look at the [`Impulse.transmit`][impulse__transmit] method for more details and examples.
-
-> 💡 There is no need to memoize neither `getter`, `setter`, nor `options.compare` functions. The hook does it internally.
 
 ### `useScoped`
 
@@ -876,7 +876,7 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
   "react-hooks/exhaustive-deps": [
     "error",
     {
-      "additionalHooks": "(useScoped(|Effect|LayoutEffect|Memo|Callback)|useTransmittingImpulse)"
+      "additionalHooks": "useScoped(|Effect|LayoutEffect|Memo|Callback)"
     }
   ]
 }
@@ -916,7 +916,6 @@ ESLint can also help validate unnecessary and abusive hooks/HOCs usage:
 [impulse__get_value]: #impulsegetvalue
 [impulse__set_value]: #impulsesetvalue
 [use_impulse]: #useimpulse
-[use_transmitting_impulse]: #usetransmittingimpulse
 [use_scoped]: #usescoped
 [use_scoped_callback]: #usescopedcallback
 [use_scoped_memo]: #usescopedmemo

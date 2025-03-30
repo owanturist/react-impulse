@@ -7,14 +7,7 @@ import {
 } from "@testing-library/react"
 import React from "react"
 
-import {
-  Impulse,
-  scoped,
-  subscribe,
-  useImpulse,
-  useScoped,
-  useTransmittingImpulse,
-} from "../src"
+import { Impulse, scoped, subscribe, useScoped } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -235,68 +228,6 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
   })
 })
 
-describe("useTransmittingImpulse stable compare throws an error #624", () => {
-  describe("useTransmittingImpulse", () => {
-    it("reads value ones", () => {
-      const { result } = renderHook(() => {
-        const count = useTransmittingImpulse(() => 0, [])
-
-        return useScoped((scope) => `${count.getValue(scope)}`)
-      })
-
-      expect(result.current).toBe("0")
-    })
-
-    it("reads value twice in a row", () => {
-      const { result } = renderHook(() => {
-        const count = useTransmittingImpulse(() => 0, [])
-
-        return useScoped(
-          (scope) => `${count.getValue(scope)} + ${count.getValue(scope)}`,
-        )
-      })
-
-      expect(result.current).toBe("0 + 0")
-    })
-
-    it("returns the same value twice in a row", () => {
-      const { result } = renderHook(() => {
-        const count = useTransmittingImpulse(
-          () => ({ count: 0 }),
-          [],
-          () => {
-            // do nothing
-          },
-          {
-            compare: (left, right) => left.count === right.count,
-          },
-        )
-
-        return useScoped(
-          // eslint-disable-next-line no-self-compare
-          (scope) => count.getValue(scope) === count.getValue(scope),
-        )
-      })
-
-      expect(result.current).toBe(true)
-    })
-  })
-
-  describe("useImpulse", () => {
-    it("calls Impulse#setValue during render", () => {
-      const { result } = renderHook(() => {
-        const count = useImpulse(0)
-
-        count.setValue(1)
-
-        return useScoped(count)
-      })
-
-      expect(result.current).toBe(1)
-    })
-  })
-})
-
 describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a not reactive value #627", () => {
   describe("Impulse.transmit()", () => {
     it("enqueues a rerender when sets a reactive value", () => {
@@ -319,35 +250,6 @@ describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a n
       })
 
       expect(result.current).toBe(1)
-    })
-  })
-
-  describe("useTransmittingImpulse()", () => {
-    it("enqueues a rerender when sets a reactive value", () => {
-      const counter = { count: 0 }
-
-      const { result } = renderHook(() => {
-        const impulse = useTransmittingImpulse(
-          () => counter.count,
-          [],
-          (count) => {
-            counter.count = count
-          },
-        )
-
-        return {
-          impulse,
-          value: useScoped(impulse),
-        }
-      })
-
-      expect(result.current.value).toBe(0)
-
-      act(() => {
-        result.current.impulse.setValue(1)
-      })
-
-      expect(result.current.value).toBe(1)
     })
   })
 })

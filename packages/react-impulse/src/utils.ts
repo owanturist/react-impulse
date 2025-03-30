@@ -34,7 +34,7 @@ export function isFunction<
   return typeof anything === "function"
 }
 
-export const useIsomorphicLayoutEffect =
+const useIsomorphicLayoutEffect =
   /* c8 ignore next */
   typeof window === "undefined" ? useEffect : useLayoutEffect
 
