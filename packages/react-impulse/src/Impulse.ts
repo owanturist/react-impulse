@@ -96,6 +96,10 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
    * Creates a new Impulse without an initial value.
    *
    * @version 1.2.0
+   *
+   * @example
+   * const answer = Impulse.of<string>()
+   * const initiallyUndefined = answer.getValue(scope) === undefined
    */
   public static of<T = undefined>(): Impulse<undefined | T>
 
@@ -109,6 +113,10 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
    * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
    *
    * @version 3.0.0
+   *
+   * @example
+   * const counter = Impulse.of(0)
+   * const isGreaterThanZero = Impulse.of(scope => counter.getValue(scope) > 0)
    */
   public static of<T>(
     valueOrInitValue: T | ((scope: Scope) => T),
