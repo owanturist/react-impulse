@@ -1,14 +1,55 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { type Compare, Impulse, useScoped, type Scope } from "../../src"
+import {
+  type Compare,
+  Impulse,
+  useScoped,
+  type Scope,
+  type ImpulseGetter,
+} from "../../src"
 import { Counter, type WithSpy, type WithImpulse } from "../common"
 
 describe("impulse shortcut", () => {
-  it("allows to use ReadonlyImpulse", () => {
-    const impulse = Impulse.transmit(() => 1)
+  it("allows to use Impulse", () => {
+    const impulse = Impulse.of(1)
 
     const { result } = renderHook(() => useScoped(impulse))
 
+    expect(result.current).toBe(1)
+  })
+
+  it("allows to use ReadonlyImpulse", () => {
+    let count = 1
+    const impulse = Impulse.transmit(() => count)
+
+    const { result, rerender } = renderHook(() => useScoped(impulse))
+
+    expect(result.current).toBe(1)
+    count = 2
+    expect(result.current).toBe(1)
+
+    rerender()
+    expect(result.current).toBe(1)
+  })
+
+  it("allows to use ImpulseGetter", () => {
+    class Custom implements ImpulseGetter<number> {
+      public constructor(public value: number) {}
+
+      public getValue(): number {
+        return this.value
+      }
+    }
+
+    const impulse = new Custom(1)
+
+    const { result, rerender } = renderHook(() => useScoped(impulse))
+
+    expect(result.current).toBe(1)
+    impulse.value = 2
+    expect(result.current).toBe(1)
+
+    rerender()
     expect(result.current).toBe(1)
   })
 

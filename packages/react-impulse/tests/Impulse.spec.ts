@@ -8,6 +8,7 @@ import {
   subscribe,
   type Scope,
   useScoped,
+  type ImpulseGetter,
 } from "../src"
 
 import { Counter } from "./common"
@@ -257,19 +258,47 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     expectTypeOf(impulse).toMatchTypeOf<ReadonlyImpulse<number>>()
   })
 
-  it("allows getter as a ReadonlyImpulse", ({ scope }) => {
-    const readonly = Impulse.transmit(() => 0)
-    const impulse = Impulse.transmit(readonly, () => {
+  it("allows source as a Impulse", ({ scope }) => {
+    const source = Impulse.of(0)
+    const impulse = Impulse.transmit(source, () => {
       // noop
     })
 
     expect(impulse.getValue(scope)).toBe(0)
   })
 
+  it("allows source as a ReadonlyImpulse", ({ scope }) => {
+    const source = Impulse.transmit(() => 0)
+    const impulse = Impulse.transmit(source, () => {
+      // noop
+    })
+
+    expect(impulse.getValue(scope)).toBe(0)
+  })
+
+  it("allows source as a ImpulseGetter", ({ scope }) => {
+    class Custom implements ImpulseGetter<number> {
+      public constructor(public value: number) {}
+
+      public getValue(): number {
+        return this.value
+      }
+    }
+
+    const source = new Custom(0)
+    const impulse = Impulse.transmit(source, () => {
+      // noop
+    })
+
+    expect(impulse.getValue(scope)).toBe(0)
+    source.value = 1
+    expect(impulse.getValue(scope)).toBe(1)
+  })
+
   it("does not allow setter as a ReadonlyImpulse", ({ scope }) => {
-    const readonly = Impulse.transmit(() => 0)
+    const destination = Impulse.transmit(() => 0)
     // @ts-expect-error should be Impulse only
-    const impulse = Impulse.transmit(() => 2, [], readonly)
+    const impulse = Impulse.transmit(() => 2, [], destination)
 
     expect(impulse.getValue(scope)).toBe(2)
   })
