@@ -12,7 +12,7 @@ export interface ImpulseOptions<T> {
 
 export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
 
-export const isImpulse = <T, Unknown = unknown>(
+const isImpulse = <T, Unknown = unknown>(
   input: Unknown | Impulse<T>,
 ): input is Impulse<T> => {
   return input instanceof Impulse
