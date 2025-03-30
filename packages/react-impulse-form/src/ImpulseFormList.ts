@@ -343,7 +343,7 @@ export class ImpulseFormList<
       elements: ReadonlyArray<TElement>,
     ) => TResult = params._first as typeof select,
   ): TResult {
-    return this._elements.getValue(scope, select)
+    return select(this._elements.getValue(scope))
   }
 
   public setElements(
