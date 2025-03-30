@@ -101,7 +101,7 @@ A core piece of the library is the `Impulse` class - a box that holds value. The
 
 ### `Impulse`
 
-The impulse class. Extends [`ImpulseGetter`][impulse_getter] interface.
+The impulse class. Extends [`ImpulseGetter`][impulse_getter] and [`ImpulseSetter`][impulse_setter] interfaces.
 
 ### `Impulse.of`
 
@@ -135,13 +135,13 @@ Impulse.transmit<T>(
 
 Impulse.transmit<T>(
   getter: ImpulseGetter<T> | ((scope: Scope) => T),
-  setter: Impulse<T> | ((value: T, scope: Scope) => void),
+  setter: ImpulseSetter<T> | ((value: T, scope: Scope) => void),
   options?: TransmittingImpulseOptions<T>,
 ): Impulse<T>
 ```
 
-- `getter` is either anything that implements the `ImpulseGetter` interface or a function to read the transmitting value from the source.
-- `[setter]` either a destination impulse or is an optional function to write the transmitting value back to the source. When not defined, the Impulse is readonly.
+- `getter` is either anything that implements the [`ImpulseGetter`][impulse_getter] interface or a function to read the transmitting value from the source.
+- `[setter]` is either anything that implements the [`ImpulseSetter`][impulse_setter] interface or a function to write the transmitting value back to the source. or is an optional function to write the transmitting value back to the source. When not defined, the resulting Impulse is readonly.
 - `[options]` is an optional [`TransmittingImpulseOptions`][transmitting_impulse_options] object.
   - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
@@ -691,9 +691,13 @@ In the example above the `listener` will not react on the `impulse_2` updates un
 > // console: {"count":2}
 > ```
 
-### `type ImpulseGetter`
+### `interface ImpulseGetter`
 
 An interface that defines the `getValue` method.
+
+### `interface ImpulseSetter`
+
+An interface that defines the `setValue` method.
 
 ### `type ReadonlyImpulse`
 
@@ -808,7 +812,8 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
 [batch]: #batch
 [untrack]: #untrack
 [subscribe]: #subscribe
-[impulse_getter]: #type-impulsegetter
+[impulse_getter]: #interface-impulsegetter
+[impulse_setter]: #interface-impulsesetter
 [impulse_options]: #interface-impulseoptions
 [transmitting_impulse_options]: #interface-transmittingimpulseoptions
 [use_scoped_options]: #interface-useScopedoptions

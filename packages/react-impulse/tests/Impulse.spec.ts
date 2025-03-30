@@ -9,6 +9,7 @@ import {
   type Scope,
   useScoped,
   type ImpulseGetter,
+  type ImpulseSetter,
 } from "../src"
 
 import { Counter } from "./common"
@@ -305,6 +306,57 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
 
   it("subscribes to Impulse source and back", () => {
     const source = Impulse.of({ count: 0 }, { compare: Counter.compare })
+    const impulse = Impulse.transmit(
+      (scope) => source.getValue(scope),
+      (counter) => source.setValue(counter),
+    )
+    const spyOnImpulse = vi.fn()
+    const spyOnSource = vi.fn()
+
+    subscribe((scope) => {
+      spyOnImpulse(impulse.getValue(scope))
+    })
+    subscribe((scope) => {
+      spyOnSource(source.getValue(scope))
+    })
+
+    expect(spyOnImpulse).toHaveBeenCalledExactlyOnceWith({ count: 0 })
+    vi.clearAllMocks()
+
+    source.setValue({ count: 1 })
+    expect(spyOnImpulse).toHaveBeenCalledExactlyOnceWith({ count: 1 })
+    vi.clearAllMocks()
+
+    source.setValue({ count: 1 })
+    expect(spyOnImpulse).not.toHaveBeenCalled()
+    vi.clearAllMocks()
+
+    impulse.setValue({ count: 1 })
+    expect(spyOnSource).not.toHaveBeenCalled()
+    vi.clearAllMocks()
+
+    impulse.setValue({ count: 2 })
+    expect(spyOnSource).toHaveBeenCalledExactlyOnceWith({ count: 2 })
+  })
+
+  it("subscribes to ImpulseGetter/ImpulseSetter and back", () => {
+    class Custom
+      implements
+        ImpulseGetter<{ count: number }>,
+        ImpulseSetter<{ count: number }>
+    {
+      private readonly counter = Impulse.of(0)
+
+      public getValue(scope: Scope): { count: number } {
+        return { count: this.counter.getValue(scope) }
+      }
+
+      public setValue(value: { count: number }): void {
+        this.counter.setValue(value.count)
+      }
+    }
+
+    const source = new Custom()
     const impulse = Impulse.transmit(
       (scope) => source.getValue(scope),
       (counter) => source.setValue(counter),
