@@ -130,14 +130,6 @@ export class Impulse<T> {
     return String(this.getValue(scope))
   }
 
-  protected _emit(execute: () => boolean): void {
-    ScopeEmitter._schedule((queue) => {
-      if (execute()) {
-        queue.push(this._emitters)
-      }
-    })
-  }
-
   /**
    * Creates a new Impulse instance out of the current one with the same value.
    *
@@ -220,9 +212,6 @@ export class Impulse<T> {
 
       if (isDifferent) {
         this._value = nextValue
-      }
-
-      if (isDifferent) {
         queue.push(this._emitters)
       }
     })
