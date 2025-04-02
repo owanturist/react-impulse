@@ -141,7 +141,7 @@ Impulse.transmit<T>(
 ```
 
 - `getter` is either anything that implements the [`ImpulseGetter`][impulse_getter] interface or a function to read the transmitting value from the source.
-- `[setter]` is either anything that implements the [`ImpulseSetter`][impulse_setter] interface or a function to write the transmitting value back to the source. or is an optional function to write the transmitting value back to the source. When not defined, the resulting Impulse is readonly.
+- `[setter]` is either anything that implements the [`ImpulseSetter`][impulse_setter] interface or a function to write the transmitting value back to the source. When not defined, the resulting Impulse is readonly.
 - `[options]` is an optional [`TransmittingImpulseOptions`][transmitting_impulse_options] object.
   - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
