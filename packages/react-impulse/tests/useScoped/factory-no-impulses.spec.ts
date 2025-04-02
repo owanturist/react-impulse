@@ -5,20 +5,8 @@ import { useScoped } from "../../src"
 
 describe("factory no impulses", () => {
   it.each([
-    [
-      "inline",
-      () => {
-        // eslint-disable-next-line no-restricted-syntax
-        return useScoped(() => 1)
-      },
-    ],
-    [
-      "memoized",
-      () => {
-        // eslint-disable-next-line no-restricted-syntax
-        return useScoped(() => 1, [])
-      },
-    ],
+    ["inline", () => useScoped(() => 1)],
+    ["memoized", () => useScoped(() => 1, [])],
   ])("returns %s factory result", (_, useHook) => {
     const { result } = renderHook(useHook)
 
@@ -26,18 +14,11 @@ describe("factory no impulses", () => {
   })
 
   it.each([
-    [
-      "inline",
-      ({ value }: { value: number }) => {
-        // eslint-disable-next-line no-restricted-syntax
-        return useScoped(() => 2 * value)
-      },
-    ],
+    ["inline", ({ value }: { value: number }) => useScoped(() => 2 * value)],
     [
       "memoized",
-      ({ value }: { value: number }) => {
-        return useScoped(useCallback(() => 2 * value, [value]))
-      },
+      ({ value }: { value: number }) =>
+        useScoped(useCallback(() => 2 * value, [value])),
     ],
   ])("returns %s factory result from clojure", (_, useHook) => {
     const { result, rerender } = renderHook(useHook, {
