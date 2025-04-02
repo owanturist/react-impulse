@@ -279,16 +279,6 @@ export default tseslint.config([
       },
     },
     rules: {
-      "no-restricted-syntax": [
-        "error",
-        {
-          selector:
-            "CallExpression[callee.name=/useScoped(|Memo|Callback|Effect|LayoutEffect)/] > .arguments:nth-child(1)[params.length=0]",
-          message:
-            "The `scope` argument of the hook effect is not used, consider using React effect hooks instead of Impulse scoped hooks.",
-        },
-      ],
-
       "no-restricted-imports": [
         "error",
         {
