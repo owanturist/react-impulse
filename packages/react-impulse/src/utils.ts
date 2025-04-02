@@ -1,11 +1,5 @@
 import type { Scope } from "./Scope"
-import {
-  type EffectCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "./dependencies"
+import { type EffectCallback, useRef } from "./dependencies"
 
 /**
  * A function that compares two values and returns `true` if they are equal.
@@ -38,27 +32,50 @@ export function isFunction<
   return typeof anything === "function"
 }
 
-const useIsomorphicLayoutEffect =
-  /* c8 ignore next */
-  typeof window === "undefined" ? useEffect : useLayoutEffect
-
 export function useHandler<TArgs extends ReadonlyArray<unknown>, TResult>(
-  handler: Func<TArgs, TResult>,
+  value: Func<TArgs, TResult>,
 ): Func<TArgs, TResult> {
-  const handlerRef = useRef(handler)
-  const stableRef = useRef(
-    (...args: TArgs): TResult => handlerRef.current(...args),
-  )
+  /**
+   * Despise React official documentation pointing out:
+   *
+   * > Do not write or read ref.current during rendering, except for initialization.
+   * > This makes your component’s behavior unpredictable.
+   *
+   * While technically useLatest does write to ref.current during rendering (after the initial one), it's a widely accepted pattern because:
+   * - It doesn't trigger re-renders.
+   * - The side effect is predictable and serves a specific purpose (always having the latest value).
+   * - It helps solve the common "stale closure" problem.
+   * This pattern is recommended and used in many React resources despite the general warning in the useRef documentation.
+   * The key is that the update to the ref doesn't directly influence the rendering output of the component in the same render cycle.
+   *
+   * @link https://react.dev/reference/react/useRef#caveats
+   * @link https://react.dev/reference/react/useRef#avoiding-recreating-the-ref-contents
+   */
 
-  useIsomorphicLayoutEffect(() => {
-    handlerRef.current = handler
+  const ref = useRef({
+    _value: value,
+    _getter: (...args: TArgs) => ref.current._value(...args),
   })
 
-  return stableRef.current
+  ref.current._value = value
+
+  return ref.current._getter
 }
 
 export function usePermanent<TValue>(init: () => TValue): TValue {
-  const [value] = useState(init)
+  /**
+   * According to the official React documentation
+   * it is ok to write to the ref object during initialization.
+   *
+   * > Normally, writing or reading ref.current during render is not allowed.
+   * > However, it’s fine in this case because the result is always the same,
+   * > and the condition only executes during initialization so it’s fully predictable.
+   *
+   * @link https://react.dev/reference/react/useRef#avoiding-recreating-the-ref-contents
+   */
+  const ref = useRef<{ _value: TValue }>()
 
-  return value
+  ref.current ??= { _value: init() }
+
+  return ref.current._value
 }
