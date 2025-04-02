@@ -377,7 +377,6 @@ A static method that checks whether the `input` is an `Impulse` instance. If the
 
 ```dart
 Impulse<T>#getValue(scope: Scope): T
-Impulse<T>#getValue<R>(scope: Scope, select: (value: T) => R): R
 ```
 
 An `Impulse` instance's method that returns the current value.
@@ -386,11 +385,10 @@ An `Impulse` instance's method that returns the current value.
 - `[select]` is an optional function that applies to the current value before returning.
 
 ```ts
-tap((scope) => {
-  const count = Impulse.of(3)
+const count = Impulse.of(3)
 
+tap((scope) => {
   count.getValue(scope) // === 3
-  count.getValue(scope, (x) => x > 0) // === true
 })
 ```
 
