@@ -57,13 +57,15 @@ export function useScoped<TResult>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies ?? [factoryOrImpulseGetter],
   )
-  const compare = useHandler((prev: TResult, next: TResult) => {
-    const cmp = options?.compare ?? eq
 
-    return cmp(prev, next, STATIC_SCOPE)
-  })
+  const value = useCreateScope(
+    transform,
+    useHandler((prev, next) => {
+      const compare = options?.compare ?? eq
 
-  const value = useCreateScope(transform, compare)
+      return compare(prev, next, STATIC_SCOPE)
+    }),
+  )
 
   useDebugValue(value)
 
