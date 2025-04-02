@@ -2,7 +2,7 @@
 "react-impulse": major
 ---
 
-Extend `Impulse.of` to accept an init function similar to `useImpulse` signature:
+The `Impulse.of` signature has been extended to support initialization functions:
 
 ```dart
 of<T>(
@@ -11,12 +11,15 @@ of<T>(
 ): Impulse<T>
 ```
 
-- `[valueOrInitValue]` is an optional value used during the initial render. If the initial value infers from another Impulse, you may provide a function instead, which will be executed only during initialization. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
-- `[initialValue]` is an optional initial value. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
-- `[options]` is an optional [`ImpulseOptions`][impulse_options] object.
-  - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
+This allows for dynamic initialization based on other Impulse values:
 
-The **BREAKING CHANGE** is that all Impulses that store a function as a value, should wrap the initialization function with `Impulse.of` to avoid the function being executed during the initial render. Here is the migration guide:
+```ts
+// Initialize based on another Impulse
+const counter = Impulse.of(0)
+const isPositive = Impulse.of((scope) => counter.getValue(scope) > 0)
+```
+
+**BREAKING CHANGE**: If you're storing functions as values in Impulses, you must now wrap them with an initialization function to prevent them from being executed during initialization:
 
 ```ts
 // Before
@@ -27,3 +30,5 @@ const sorting = Impulse.of(() => {
   return (left: number, right: number) => left - right
 })
 ```
+
+This change improves the API's consistency and provides a more intuitive way to initialize Impulses with values derived from other sources.
