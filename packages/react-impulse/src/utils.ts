@@ -33,7 +33,7 @@ export function isFunction<
 }
 
 export function useHandler<TArgs extends ReadonlyArray<unknown>, TResult>(
-  value: Func<TArgs, TResult>,
+  handler: Func<TArgs, TResult>,
 ): Func<TArgs, TResult> {
   /**
    * Despise React official documentation pointing out:
@@ -53,11 +53,11 @@ export function useHandler<TArgs extends ReadonlyArray<unknown>, TResult>(
    */
 
   const ref = useRef({
-    _value: value,
+    _value: handler,
     _getter: (...args: TArgs) => ref.current._value(...args),
   })
 
-  ref.current._value = value
+  ref.current._value = handler
 
   return ref.current._getter
 }
