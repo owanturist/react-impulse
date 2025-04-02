@@ -28,13 +28,17 @@ export function noop(): void {
   // do nothing
 }
 
+export function identity<T>(value: T): T {
+  return value
+}
+
 export function isFunction<
   TFunction extends Func<ReadonlyArray<never>, unknown>,
 >(anything: unknown): anything is TFunction {
   return typeof anything === "function"
 }
 
-export const useIsomorphicLayoutEffect =
+const useIsomorphicLayoutEffect =
   /* c8 ignore next */
   typeof window === "undefined" ? useEffect : useLayoutEffect
 

@@ -1,7 +1,7 @@
 import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
 import { type Compare, eq, useHandler, type Func, isFunction } from "./utils"
 import { STATIC_SCOPE, type Scope } from "./Scope"
-import { useScope } from "./useScope"
+import { useCreateScope } from "./useCreateScope"
 import type { ReadonlyImpulse } from "./Impulse"
 
 export interface UseScopedOptions<T> {
@@ -57,7 +57,7 @@ export function useScoped<TResult>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies ?? [impulseOrFactory],
   )
-  const value = useScope(
+  const value = useCreateScope(
     transform,
     useHandler((prev, next) => {
       const compare = options?.compare ?? eq

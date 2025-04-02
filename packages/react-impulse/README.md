@@ -17,47 +17,58 @@ npm install react-impulse
 
 ## Quick start
 
-`Impulse` is a box holding any value you want, even another `Impulse`! All [`scoped`][scoped] components that execute the [`Impulse#getValue`][impulse__get_value] during the rendering phase enqueue re-render whenever the Impulse value updates.
+`Impulse` is a box holding any value you want, even another `Impulse`! All components that execute the [`Impulse#getValue`][impulse__get_value] during the rendering phase enqueue re-render whenever the Impulse value updates.
 
 ```tsx
-import { Impulse, scoped } from "react-impulse"
+import { Impulse, useScope } from "react-impulse"
 
 const Input: React.FC<{
   type: "email" | "password"
   value: Impulse<string>
-}> = scoped(({ scope, type, value }) => (
-  <input
-    type={type}
-    value={value.getValue(scope)}
-    onChange={(event) => value.setValue(event.target.value)}
-  />
-))
+}> = ({ type, value }) => {
+  const scope = useScope()
+
+  return (
+    <input
+      type={type}
+      value={value.getValue(scope)}
+      onChange={(event) => value.setValue(event.target.value)}
+    />
+  )
+}
 
 const Checkbox: React.FC<{
   checked: Impulse<boolean>
   children: React.ReactNode
-}> = scoped(({ checked, children }) => (
-  <label>
-    <input
-      type="checkbox"
-      checked={checked.getValue(scope)}
-      onChange={(event) => checked.setValue(event.target.checked)}
-    />
+}> = ({ checked, children }) => {
+  const scope = useScope()
+  // the `scope` is passed to the `Impulse#getValue` method
+  return (
+    <label>
+      <input
+        type="checkbox"
+        checked={checked.getValue(scope)}
+        onChange={(event) => checked.setValue(event.target.checked)}
+      />
 
-    {children}
-  </label>
-))
+      {children}
+    </label>
+  )
+}
 ```
 
 Once created, Impulses can travel thru your components, where you can set and get their values:
 
 ```tsx
-import { useImpulse, scoped } from "react-impulse"
+import { Impulse, useScope } from "react-impulse"
 
-const SignUp: React.FC = scoped(({ scope }) => {
-  const username = useImpulse("")
-  const password = useImpulse("")
-  const isAgreeWithTerms = useImpulse(false)
+const SignUp: React.FC = () => {
+  const scope = useScope()
+  const { username, password, isAgreeWithTerms } = React.useState({
+    username: Impulse.of(""),
+    password: Impulse.of(""),
+    isAgreeWithTerms: Impulse.of(false),
+  })
 
   return (
     <form>
@@ -81,7 +92,7 @@ const SignUp: React.FC = scoped(({ scope }) => {
       </button>
     </form>
   )
-})
+}
 ```
 
 ## API
@@ -104,8 +115,6 @@ A static method that creates new Impulse.
 - `[initialValue]` is an optional initial value. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
 - `[options]` is an optional [`ImpulseOptions`][impulse_options] object.
   - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
-
-> 💡 The [`useImpulse`][use_impulse] hook helps to create and store an `Impulse` inside a React component.
 
 ```ts
 const count = Impulse.of(1) // Impulse<number>
@@ -141,7 +150,9 @@ A static method that creates a new transmitting Impulse. A transmitting Impulse 
 const Drawer: React.FC<{
   isOpen: Impulse<boolean>
   children: React.ReactNode
-}> = scoped(({ scope, isOpen, children }) => {
+}> = ({ isOpen, children }) => {
+  const scope = useScope()
+
   if (!isOpen.getValue(scope)) {
     return null
   }
@@ -155,20 +166,21 @@ const Drawer: React.FC<{
       </button>
     </div>
   )
-})
+}
 
 const ProductDetailsDrawer: React.FC<{
   product: Impulse<undefined | Product>
 }> = ({ product }) => {
-  const isOpen = useTransmittingImpulse(
-    (scope) => product.getValue(scope) != null,
-    [product],
-    (open) => {
-      if (!open) {
-        product.setValue(undefined)
-      }
-    },
-  )
+  const isOpen = React.useMemo(() => {
+    return Impulse.transmit(
+      (scope) => product.getValue(scope) != null,
+      (open) => {
+        if (!open) {
+          product.setValue(undefined)
+        }
+      },
+    )
+  }, [product])
 
   return (
     <Drawer isOpen={isOpen}>
@@ -187,28 +199,33 @@ const ProductDetailsDrawer: React.FC<{
 ```tsx
 const Checkbox: React.FC<{
   checked: Impulse<boolean>
-}> = scoped(({ scope, checked, children }) => (
-  <input
-    type="checkbox"
-    checked={checked.getValue(scope)}
-    onChange={(event) => checked.setValue(event.target.checked)}
-  />
-))
+}> = ({ checked, children }) => {
+  const scope = useScope()
+
+  return (
+    <input
+      type="checkbox"
+      checked={checked.getValue(scope)}
+      onChange={(event) => checked.setValue(event.target.checked)}
+    />
+  )
+}
 
 const Agreements: React.FC<{
   isAgreeWithTermsOfUse: Impulse<boolean>
   isAgreeWithPrivacy: Impulse<boolean>
-}> = scoped(({ scope, isAgreeWithTermsOfUse, isAgreeWithPrivacy }) => {
-  const isAgreeWithAll = useTransmittingImpulse(
-    (scope) =>
-      isAgreeWithTermsOfUse.getValue(scope) &&
-      isAgreeWithPrivacy.getValue(scope),
-    [isAgreeWithTermsOfUse, isAgreeWithPrivacy],
-    (agree) => {
-      isAgreeWithTermsOfUse.setValue(agree)
-      isAgreeWithPrivacy.setValue(agree)
-    },
-  )
+}> = ({ isAgreeWithTermsOfUse, isAgreeWithPrivacy }) => {
+  const isAgreeWithAll = React.useMemo(() => {
+    return Impulse.transmit(
+      (scope) =>
+        isAgreeWithTermsOfUse.getValue(scope) &&
+        isAgreeWithPrivacy.getValue(scope),
+      (agree) => {
+        isAgreeWithTermsOfUse.setValue(agree)
+        isAgreeWithPrivacy.setValue(agree)
+      },
+    )
+  }, [isAgreeWithTermsOfUse, isAgreeWithPrivacy])
 
   return (
     <div>
@@ -224,7 +241,7 @@ const Agreements: React.FC<{
       <Checkbox checked={isAgreeWithAll}>I agree with all</Checkbox>
     </div>
   )
-})
+}
 ```
 
 </blockquote>
@@ -238,10 +255,20 @@ It can also transmit another store's value, such as `React.useState`, `redux`, U
 ```tsx
 const Counter: React.FC = () => {
   const [count, setCount] = React.useState(0)
-  const countImpulse = useTransmittingImpulse(
-    () => count,
-    [count],
-    (value) => setCount(value),
+
+  const [countImpulse] = React.useState(() => Impulse.of(count))
+
+  React.useEffect(() => {
+    // sync the state with the Impulse
+    countImpulse.setValue(count)
+  }, [count, countImpulse])
+
+  useScopedEffect(
+    (scope) => {
+      // sync the Impulse with the state
+      setValue(countImpulse.getValue(scope))
+    },
+    [countImpulse],
   )
 
   return (
@@ -264,10 +291,20 @@ import { useSelector, useDispatch } from "react-redux"
 const Counter: React.FC = () => {
   const count = useSelector((state) => state.count)
   const dispatch = useDispatch()
-  const countImpulse = useTransmittingImpulse(
-    () => count,
-    [count],
-    (value) => dispatch({ type: "SET_COUNT", payload: value }),
+
+  const [countImpulse] = React.useState(() => Impulse.of(count))
+
+  React.useEffect(() => {
+    // sync the state with the Impulse
+    countImpulse.setValue(count)
+  }, [count, countImpulse])
+
+  useScopedEffect(
+    (scope) => {
+      // sync the Impulse with the state
+      dispatch({ type: "SET_COUNT", payload: countImpulse.getValue(scope) })
+    },
+    [countImpulse, dispatch],
   )
 
   return (
@@ -290,12 +327,19 @@ import { useSearchParams } from "react-router-dom"
 const PageNavigation: React.FC = () => {
   const [{ page_index = 1 }, setSearchParams] = useSearchParams()
 
-  const page = useTransmittingImpulse(
-    () => page_index,
-    [page_index],
-    (index) => {
-      setSearchParams({ page_index: index })
+  const [page] = React.useState(Impulse.of(page_index))
+
+  React.useEffect(() => {
+    // sync the param with the Impulse
+    page.setValue(page_index)
+  }, [page, page_index])
+
+  useScopedEffect(
+    (scope) => {
+      // sync the Impulse with the param
+      setSearchParams({ page_index: page.getValue(scope) })
     },
+    [page, setSearchParams],
   )
 
   return (
@@ -308,8 +352,6 @@ const PageNavigation: React.FC = () => {
 
 </blockquote>
 </details>
-
-> 💡 The [`useTransmittingImpulse`][use_transmitting_impulse] hook helps to create and store a transmitting `Impulse` inside a React component.
 
 ### `Impulse.isImpulse`
 
@@ -415,162 +457,12 @@ const cloneOfMutable = mutable.clone((current) => ({
 
 `Scope` is a bridge that connects Impulses with host components. It tracks the Impulses' value changes and enqueues re-renders of the host components that read the Impulses' values. The only way to read an Impulse's value is to call the [`Impulse#getValue`][impulse__get_value] method with `Scope` passed as the first argument. The following are the primary ways to create a `Scope`:
 
-- [`scoped`][scoped] components provide the `scope: Scope` property. The `scope` can be used inside the entire component's body.
+- [`useScope`][use_scope] hook returns a `Scope` instance. It is a handy way to create a single component/hook-wide scope. It lacks granularity but is easy to use.
 - [`useScoped`][use_scoped] hook provides the `scope` argument. It can be used in custom hooks or inside components to narrow down the re-rendering scope.
 - [`subscribe`][subscribe] function provides the `scope` argument. It is useful outside of the React world.
 - [`batch`][batch] function provides the `scope` argument. Use it to optimize multiple Impulses updates or to access the Impulses' values inside async operations.
 - [`untrack`][untrack] function provides the `scope` argument. Use it when you need to read Impulses' values without reactivity.
 - [`useScopedCallback`][use_scoped_callback], [`useScopedMemo`][use_scoped_memo], [`useScopedEffect`][use_scoped_effect], [`useScopedLayoutEffect`][use_scoped_layout_effect] hooks provide the `scope` argument. They are enchanted versions of the React hooks that provide the `scope` argument as the first argument.
-
-### `scoped`
-
-```dart
-function scoped<TProps>(component: React.FC<PropsWithScope<TProps>>): React.FC<PropsWithoutScope<TProps>>
-```
-
-The `scoped` function creates a React component that provides the [`scope: Scope`][scope] property and subscribes to all Impulses calling the [`Impulse#getValue`][impulse__get_value] method during the rendering phase of the component.
-
-The `Counter` component below enqueues a re-render whenever the `count`'s value changes, for instance, when the `Counter`'s button clicks:
-
-```tsx
-const Counter: React.FC<{
-  count: Impulse<number>
-}> = scoped(({ scope, count }) => (
-  <button onClick={() => count.setValue((x) => x + 1)}>
-    {count.getValue(scope)}
-  </button>
-))
-```
-
-But if a component defines an Impulse, passes it thru, or calls the [`Impulse#getValue`][impulse__get_value] method outside of the rendering phase (ex: inside an `onClick` handler), then it does not subscribe to the Impulse changes.
-
-Here the `SumOfTwo` component defines two Impulses, passes them further to the `Counter`s components, and calls [`Impulse#getValue`][impulse__get_value] inside the `button.onClick` handler. It is not necessary to use the `scoped` function in that case:
-
-```tsx
-const SumOfTwo: React.FC = () => {
-  const firstCounter = useImpulse(0)
-  const secondCounter = useImpulse(0)
-
-  return (
-    <div>
-      <Counter count={firstCounter} />
-      <Counter count={secondCounter} />
-
-      <button
-        onClick={() => {
-          batch((scope) => {
-            const sum =
-              firstCounter.getValue(scope) + secondCounter.getValue(scope)
-
-            console.log("Sum of two is %d", sum)
-
-            firstCounter.setValue(0)
-            secondCounter.setValue(0)
-          })
-        }}
-      >
-        Save and reset
-      </button>
-    </div>
-  )
-}
-```
-
-With or without wrapping the component around the `scoped` [HOC][hoc], The `SumOfTwo` component will never re-render due to either `firstCounter` or `secondCounter` updates, but still, it can read and write their values inside the `onClick` listener.
-
-#### `scoped.memo`
-
-Alias for
-
-```ts
-React.memo(scoped(Component))
-// equals to
-scoped.memo(Component)
-```
-
-#### `scoped.forwardRef`
-
-Alias for
-
-```ts
-React.forwardRef(scoped(Component))
-// equals to
-scoped.forwardRef(Component)
-```
-
-#### `scoped.memo.forwardRef` and `scoped.forwardRef.memo`
-
-Aliases for
-
-```ts
-React.memo(React.forwardRef(scoped(Component)))
-// equals to
-scoped.memo.forwardRef(Component)
-scoped.forwardRef.memo(Component)
-```
-
-### `useImpulse`
-
-```dart
-function useImpulse<T>(): Impulse<undefined | T>
-
-function useImpulse<T>(
-  valueOrInitValue: T | ((scope: Scope) => T),
-  options?: ImpulseOptions<T>
-): Impulse<T>
-```
-
-- `[valueOrInitValue]` is an optional value used during the initial render. If the initial value is the result of an expensive computation, you may provide a function instead, which will be executed only on the initial render. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
-- `[options]` is optional [`ImpulseOptions`][impulse_options] object.
-  - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
-
-A hook that initiates a stable (never changing) Impulse. It's value can be changed with the [`Impulse#setValue`][impulse__set_value] method though.
-
-> 💬 The initial value is disregarded during subsequent re-renders but compare function is not - it uses the latest function passed to the hook.
-
-> 💡 There is no need to memoize `options.compare` function. The hook does it internally.
-
-```ts
-const count = useImpulse(1) // Impulse<number>
-const timeout = useImpulse<number>() // Impulse<undefined | number>
-
-const tableSum = useImpulse(() => {
-  // the function body runs only once on the initial render
-  return bigTable
-    .flatMap((wideRow) => wideRow.map((int) => int * 2))
-    .reduce((acc, x) => acc + x, 0)
-}) // Impulse<number>
-
-// the function provides scope to extract the initial value from other Impulses
-const countDouble = useImpulse((scope) => 2 * count.getValue(scope)) // Impulse<number>
-```
-
-### `useTransmittingImpulse`
-
-```dart
-function useTransmittingImpulse<T>(
-  getter: (scope: Scope) => T,
-  dependencies: DependencyList,
-  options?: TransmittingImpulseOptions<T>,
-): ReadonlyImpulse<T>
-
-function useTransmittingImpulse<T>(
-  getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
-  dependencies: DependencyList,
-  setter: Impulse<T> | ((value: T, scope: Scope) => void),
-  options?: TransmittingImpulseOptions<T>,
-): Impulse<T>
-```
-
-- `getter` is either a source impulse or a function to read the transmitting value from a source.
-- `dependencies` an array of values triggering the re-read of the transmitting value.
-- `[setter]` either a destination impulse or is an optional function to write the transmitting value back to the source. When not defined, the Impulse is readonly.
-- `[options]` is an optional [`TransmittingImpulseOptions`][transmitting_impulse_options] object.
-  - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
-
-A hook that initialize a stable (never changing) transmitting Impulse. Look at the [`Impulse.transmit`][impulse__transmit] method for more details and examples.
-
-> 💡 There is no need to memoize neither `getter`, `setter`, nor `options.compare` functions. The hook does it internally.
 
 ### `useScoped`
 
@@ -589,9 +481,7 @@ function useScoped<T>(
 - `dependencies` is an optional array of dependencies of the `factory` function. If not defined, the `factory` function is called on every render.
 - `[options]` is an optional [`UseScopedOptions`][use_scoped_options] object.
 
-The `useScoped` hook is an alternative to the [`scoped`][scoped] function. It either executes the `factory` function whenever any of the scoped Impulses' value update or reads the `impulse` value but enqueues a re-render only when the resulting value is different from the previous.
-
-Custom hooks can use `useScoped` for reading and transforming the Impulses' values, so the host component doesn't need to wrap around the [`scoped`][scoped] HOC:
+The `useScoped` hook is the most common way to **read Impulses' values**. It either executes the `factory` function whenever any of the scoped Impulses' value update or reads the `impulse` value but enqueues a re-render only when the resulting value is different from the previous.
 
 ```tsx
 const useSumAllAndMultiply = ({
@@ -616,7 +506,7 @@ Components can scope watched Impulses to reduce re-rendering:
 
 ```tsx
 const Challenge: React.FC = () => {
-  const count = useImpulse(0)
+  const [count] = React.useState(Impulse.of(0))
   // the component re-renders only once when the `count` is greater than 5
   const isMoreThanFive = useScoped((scope) => count.getValue(scope) > 5)
 
@@ -635,6 +525,10 @@ const Challenge: React.FC = () => {
 > 💡 Keep in mind that the `factory` function acts as a "reader" so you'd like to avoid heavy computations inside it. Sometimes it might be a good idea to pass a factory result to a separated memoization hook. The same is true for the `compare` function - you should choose wisely between avoiding extra re-renders and heavy comparisons.
 
 > 💡 There is no need to memoize `options.compare` function. The hook does it internally.
+
+### `useScope`
+
+Alias for `useScoped(identity)`.
 
 ### `useScopedMemo`
 
@@ -711,28 +605,32 @@ The `batch` function is a helper to optimize multiple Impulses updates. It provi
 const SumOfTwo: React.FC<{
   left: Impulse<number>
   right: Impulse<number>
-}> = scoped(({ scope, left, right }) => (
-  <div>
-    <span>Sum is: {left.getValue(scope) + right.getValue(scope)}</span>
+}> = ({ left, right }) => {
+  const scope = useScope()
 
-    <button
-      onClick={() => {
-        batch((scope) => {
-          console.log(
-            "resetting the sum %d",
-            left.getValue(scope) + right.getValue(scope),
-          )
+  return (
+    <div>
+      <span>Sum is: {left.getValue(scope) + right.getValue(scope)}</span>
 
-          // enqueues 1 re-render instead of 2 🎉
-          left.setValue(0)
-          right.setValue(0)
-        })
-      }}
-    >
-      Reset
-    </button>
-  </div>
-))
+      <button
+        onClick={() => {
+          batch((scope) => {
+            console.log(
+              "resetting the sum %d",
+              left.getValue(scope) + right.getValue(scope),
+            )
+
+            // enqueues 1 re-render instead of 2 🎉
+            left.setValue(0)
+            right.setValue(0)
+          })
+        }}
+      >
+        Reset
+      </button>
+    </div>
+  )
+}
 ```
 
 ### `tap`
@@ -876,33 +774,7 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
   "react-hooks/exhaustive-deps": [
     "error",
     {
-      "additionalHooks": "(useScoped(|Effect|LayoutEffect|Memo|Callback)|useTransmittingImpulse)"
-    }
-  ]
-}
-```
-
-ESLint can also help validate unnecessary and abusive hooks/HOCs usage:
-
-```json
-{
-  "no-restricted-syntax": [
-    "error",
-    {
-      "selector": "CallExpression:has(:matches(.callee, .callee.property)[name=/(useTransmittingImpulse|use(Scoped)?(|Memo|Callback|Effect|LayoutEffect))/]) > .arguments:nth-child(2) > [name='scope']",
-      "message": "The `scope` dependency changes on each component's re-render. Please use `scope` provided as the first argument in the `useScoped*` hooks."
-    },
-    {
-      "selector": "CallExpression[callee.name=/useScoped(|Memo|Callback|Effect|LayoutEffect)/] > .arguments:nth-child(1)[params.length=0]",
-      "message": "The `scope` argument of the hook effect is not used, consider using React effect hooks instead of Impulse scoped hooks."
-    },
-    {
-      "selector": "CallExpression:has(:matches(.callee, .callee .object)[name='scoped']) > .arguments:nth-child(1) > .params:nth-child(1):not(:has(.properties[key.name='scope']))",
-      "message": "The `scope` prop is not used, consider using the component without wrapping it in the `scoped` HOC."
-    },
-    {
-      "selector": "CallExpression:has(:matches(.callee, .callee .object)[name='scoped']) > .arguments:nth-child(1) > .params:nth-child(1) > .properties[key.name='scope'] > .value[name!='scope']",
-      "message": "Do not rename the `scope` prop created by the `scoped` HOC."
+      "additionalHooks": "useScoped(|Effect|LayoutEffect|Memo|Callback)"
     }
   ]
 }
@@ -915,15 +787,13 @@ ESLint can also help validate unnecessary and abusive hooks/HOCs usage:
 [impulse__clone]: #impulseclone
 [impulse__get_value]: #impulsegetvalue
 [impulse__set_value]: #impulsesetvalue
-[use_impulse]: #useimpulse
-[use_transmitting_impulse]: #usetransmittingimpulse
+[use_scope]: #usescope
 [use_scoped]: #usescoped
 [use_scoped_callback]: #usescopedcallback
 [use_scoped_memo]: #usescopedmemo
 [use_scoped_effect]: #usescopedeffect
 [use_scoped_layout_effect]: #usescopedlayouteffect
 [scope]: #scope
-[scoped]: #scoped
 [batch]: #batch
 [untrack]: #untrack
 [subscribe]: #subscribe

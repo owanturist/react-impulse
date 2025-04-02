@@ -1,14 +1,14 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useImpulse, useScoped } from "../../src"
+import { Impulse, useScoped } from "../../src"
 
 describe("default impulse", () => {
   it("uses local default Impulse when nullable", () => {
     const SearchBar: React.FC<{
       value?: Impulse<string>
     }> = ({ value: valueImpulse }) => {
-      const defaultValueImpulse = useImpulse("search for me")
+      const [defaultValueImpulse] = React.useState(Impulse.of("search for me"))
 
       const impulse = valueImpulse ?? defaultValueImpulse
       const value = useScoped(impulse)

@@ -1,7 +1,7 @@
 import React from "react"
 import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useScoped, scoped, type Scope } from "../../src"
+import { Impulse, useScoped, useScope, type Scope } from "../../src"
 
 import { CounterComponent, withinNth } from "./common"
 
@@ -150,7 +150,8 @@ describe("scoping multiple impulses", () => {
     )
   }
 
-  const ScopedApp: React.FC<AppProps> = scoped(({ scope, ...props }) => {
+  const ScopedApp: React.FC<AppProps> = (props) => {
+    const scope = useScope()
     const moreThanOne = factoryLeft(scope, props.firstCount, props.secondCount)
     const lessThanFour = factoryRight(
       scope,
@@ -165,7 +166,7 @@ describe("scoping multiple impulses", () => {
         {...props}
       />
     )
-  })
+  }
 
   it.each([
     ["single scope", SingleScopeApp, 0],
