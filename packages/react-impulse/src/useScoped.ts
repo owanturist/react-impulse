@@ -57,6 +57,7 @@ export function useScoped<TResult>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies ?? [factoryOrImpulseGetter],
   )
+
   const value = useCreateScope(
     transform,
     useHandler((prev, next) => {
