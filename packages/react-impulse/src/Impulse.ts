@@ -93,28 +93,45 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   }
 
   /**
-   * Creates new Impulse without an initial value.
+   * Creates a new Impulse without an initial value.
    *
    * @version 1.2.0
+   *
+   * @example
+   * const answer = Impulse.of<string>()
+   * const initiallyUndefined = answer.getValue(scope) === undefined
    */
   public static of<T = undefined>(): Impulse<undefined | T>
 
   /**
-   * Creates new Impulse.
+   * Creates a new Impulse.
    *
-   * @param initialValue the initial value.
+   * *The init function is executed only once when the Impulse is created.*
+   *
+   * @param valueOrInitValue either an initial value or function returning an initial value during the initial render
    * @param options optional `ImpulseOptions`.
    * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
    *
-   * @version 1.0.0
+   * @version 3.0.0
+   *
+   * @example
+   * const counter = Impulse.of(0)
+   * const isGreaterThanZero = Impulse.of(scope => counter.getValue(scope) > 0)
    */
-  public static of<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
+  public static of<T>(
+    valueOrInitValue: T | ((scope: Scope) => T),
+    options?: ImpulseOptions<T>,
+  ): Impulse<T>
 
   public static of<T>(
-    initialValue?: T,
+    valueOrInitValue?: T | ((scope: Scope) => T),
     options?: ImpulseOptions<undefined | T>,
   ): Impulse<undefined | T> {
-    return new DirectImpulse(initialValue, options?.compare ?? eq)
+    const value = isFunction(valueOrInitValue)
+      ? valueOrInitValue(STATIC_SCOPE)
+      : valueOrInitValue
+
+    return new DirectImpulse(value, options?.compare ?? eq)
   }
 
   /**
