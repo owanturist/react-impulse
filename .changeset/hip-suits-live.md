@@ -2,7 +2,7 @@
 "react-impulse": major
 ---
 
-**BREAKING CHANGE**
+**BREAKING CHANGES**
 
 The `Impulse#getValue` no longer supports the selector function as a second parameter. This change simplifies the API and makes behavior more predictable.
 
