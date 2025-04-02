@@ -1,8 +1,8 @@
 ---
-"react-impulse": major
+"react-impulse": minor
 ---
 
-Introduce `ImpulseGetter` and `ImpulseSetter` interfaces:
+Added `ImpulseGetter` and `ImpulseSetter` Interfaces.
 
 ```ts
 interface ImpulseGetter<T> {
@@ -14,12 +14,11 @@ interface ImpulseSetter<T> {
 }
 ```
 
-The following API has been adjusted to handle anything that implements the `ImpulseGetter`/`ImpulseSetter` rather than `Impulse` OR `ReadonlyImpulse`:
+These interfaces allow more flexible usage patterns and third-party integrations. The following APIs now accept anything that implements these interfaces, not just Impulse instances:
 
 - ```dart
   function useScoped<TValue>(impulse: ImpulseGetter<TValue>): TValue
   ```
-
 - ```dart
   Impulse.transmit<T>(
     getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
@@ -27,19 +26,8 @@ The following API has been adjusted to handle anything that implements the `Impu
     options?: TransmittingImpulseOptions<T>,
   ): Impulse<T>
   ```
-
 - ```dart
   function untrack<TValue>(impulse: ImpulseGetter<TValue>): TValue
   ```
 
-The **BREAKING CHANGE** is that the `Impulse#getValue` does not have the select API anymore. Here is the migration guide:
-
-```ts
-const impulse = Impulse.of(0)
-
-// Before
-const result = impulse.getValue(scope, (count) => count + 1)
-
-// After
-const result = impulse.getValue(scope) + 1
-```
+This change is backward compatible with all existing code while allowing for custom implementations of these interfaces.
