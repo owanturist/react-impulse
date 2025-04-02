@@ -8,6 +8,8 @@ import {
   subscribe,
   type Scope,
   useScoped,
+  type ImpulseGetter,
+  type ImpulseSetter,
 } from "../src"
 
 import { Counter } from "./common"
@@ -257,25 +259,104 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     expectTypeOf(impulse).toMatchTypeOf<ReadonlyImpulse<number>>()
   })
 
-  it("allows getter as a ReadonlyImpulse", ({ scope }) => {
-    const readonly = Impulse.transmit(() => 0)
-    const impulse = Impulse.transmit(readonly, () => {
+  it("allows source as a Impulse", ({ scope }) => {
+    const source = Impulse.of(0)
+    const impulse = Impulse.transmit(source, () => {
       // noop
     })
 
     expect(impulse.getValue(scope)).toBe(0)
   })
 
+  it("allows source as a ReadonlyImpulse", ({ scope }) => {
+    const source = Impulse.transmit(() => 0)
+    const impulse = Impulse.transmit(source, () => {
+      // noop
+    })
+
+    expect(impulse.getValue(scope)).toBe(0)
+  })
+
+  it("allows source as a ImpulseGetter", ({ scope }) => {
+    class Custom implements ImpulseGetter<number> {
+      public constructor(public value: number) {}
+
+      public getValue(): number {
+        return this.value
+      }
+    }
+
+    const source = new Custom(0)
+    const impulse = Impulse.transmit(source, () => {
+      // noop
+    })
+
+    expect(impulse.getValue(scope)).toBe(0)
+    source.value = 1
+    expect(impulse.getValue(scope)).toBe(1)
+  })
+
   it("does not allow setter as a ReadonlyImpulse", ({ scope }) => {
-    const readonly = Impulse.transmit(() => 0)
+    const destination = Impulse.transmit(() => 0)
     // @ts-expect-error should be Impulse only
-    const impulse = Impulse.transmit(() => 2, [], readonly)
+    const impulse = Impulse.transmit(() => 2, [], destination)
 
     expect(impulse.getValue(scope)).toBe(2)
   })
 
   it("subscribes to Impulse source and back", () => {
     const source = Impulse.of({ count: 0 }, { compare: Counter.compare })
+    const impulse = Impulse.transmit(
+      (scope) => source.getValue(scope),
+      (counter) => source.setValue(counter),
+    )
+    const spyOnImpulse = vi.fn()
+    const spyOnSource = vi.fn()
+
+    subscribe((scope) => {
+      spyOnImpulse(impulse.getValue(scope))
+    })
+    subscribe((scope) => {
+      spyOnSource(source.getValue(scope))
+    })
+
+    expect(spyOnImpulse).toHaveBeenCalledExactlyOnceWith({ count: 0 })
+    vi.clearAllMocks()
+
+    source.setValue({ count: 1 })
+    expect(spyOnImpulse).toHaveBeenCalledExactlyOnceWith({ count: 1 })
+    vi.clearAllMocks()
+
+    source.setValue({ count: 1 })
+    expect(spyOnImpulse).not.toHaveBeenCalled()
+    vi.clearAllMocks()
+
+    impulse.setValue({ count: 1 })
+    expect(spyOnSource).not.toHaveBeenCalled()
+    vi.clearAllMocks()
+
+    impulse.setValue({ count: 2 })
+    expect(spyOnSource).toHaveBeenCalledExactlyOnceWith({ count: 2 })
+  })
+
+  it("subscribes to ImpulseGetter/ImpulseSetter and back", () => {
+    class Custom
+      implements
+        ImpulseGetter<{ count: number }>,
+        ImpulseSetter<{ count: number }>
+    {
+      private readonly counter = Impulse.of(0)
+
+      public getValue(scope: Scope): { count: number } {
+        return { count: this.counter.getValue(scope) }
+      }
+
+      public setValue(value: { count: number }): void {
+        this.counter.setValue(value.count)
+      }
+    }
+
+    const source = new Custom()
     const impulse = Impulse.transmit(
       (scope) => source.getValue(scope),
       (counter) => source.setValue(counter),
@@ -704,25 +785,6 @@ describe.each([
     })
   })
 
-  describe("Impulse#getValue(transform)", () => {
-    it("gets initial value", ({ scope }) => {
-      const initial = { count: 0 }
-      const { impulse } = setup(initial)
-
-      expect(impulse.getValue(scope)).toBe(initial)
-      expect(impulse.getValue(scope, Counter.getCount)).toBe(0)
-    })
-
-    it("gets updates value", ({ scope }) => {
-      const initial = { count: 0 }
-      const { impulse } = setup(initial)
-
-      impulse.setValue(Counter.inc)
-      expect(impulse.getValue(scope)).toStrictEqual({ count: 1 })
-      expect(impulse.getValue(scope, Counter.getCount)).toBe(1)
-    })
-  })
-
   describe("Impulse#clone()", () => {
     it("creates new Impulse", ({ scope }) => {
       const { impulse: impulse_1 } = setup({ count: 0 })
@@ -896,17 +958,13 @@ describe.each([
       expect(impulse_1.getValue(scope).name).not.toBe(
         impulse_2.getValue(scope).name,
       )
-      expect(
-        impulse_1.getValue(scope, ({ count, name }, scope) => ({
-          count: count.getValue(scope),
-          name: name.getValue(scope),
-        })),
-      ).toStrictEqual(
-        impulse_2.getValue(scope, ({ count, name }, scope) => ({
-          count: count.getValue(scope),
-          name: name.getValue(scope),
-        })),
-      )
+      expect({
+        count: impulse_1.getValue(scope).count.getValue(scope),
+        name: impulse_1.getValue(scope).name.getValue(scope),
+      }).toStrictEqual({
+        count: impulse_2.getValue(scope).count.getValue(scope),
+        name: impulse_2.getValue(scope).name.getValue(scope),
+      })
 
       // the nested impulses are independent
       impulse_1.getValue(scope).count.setValue(1)
@@ -933,17 +991,13 @@ describe.each([
       expect(impulse_1.getValue(scope).name).toBe(
         impulse_2.getValue(scope).name,
       )
-      expect(
-        impulse_1.getValue(scope, ({ count, name }) => ({
-          count: count.getValue(scope),
-          name: name.getValue(scope),
-        })),
-      ).toStrictEqual(
-        impulse_2.getValue(scope, ({ count, name }) => ({
-          count: count.getValue(scope),
-          name: name.getValue(scope),
-        })),
-      )
+      expect({
+        count: impulse_1.getValue(scope).count.getValue(scope),
+        name: impulse_1.getValue(scope).name.getValue(scope),
+      }).toStrictEqual({
+        count: impulse_1.getValue(scope).count.getValue(scope),
+        name: impulse_1.getValue(scope).name.getValue(scope),
+      })
 
       // the nested impulses are dependent
       impulse_1.getValue(scope).count.setValue(1)

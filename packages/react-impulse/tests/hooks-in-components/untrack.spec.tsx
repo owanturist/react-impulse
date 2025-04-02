@@ -1,7 +1,7 @@
 import React from "react"
 import { fireEvent, render, screen } from "@testing-library/react"
 
-import { Impulse, untrack } from "../../src"
+import { Impulse, untrack, type ImpulseGetter } from "../../src"
 
 it("returns the `factory` function result without tracking impulses", () => {
   const onRender = vi.fn()
@@ -54,10 +54,34 @@ it("returns the `factory` function result without tracking impulses", () => {
   expect(onRender).toHaveBeenCalledTimes(1)
 })
 
+it("allows to use Impulse", () => {
+  const impulse = Impulse.of(1)
+
+  const value = untrack(impulse)
+
+  expect(value).toBe(1)
+})
+
 it("allows to use ReadonlyImpulse", () => {
   const impulse = Impulse.transmit(() => 1)
 
   const value = untrack(impulse)
 
   expect(value).toBe(1)
+})
+
+it("allows to use ImpulseGetter", () => {
+  class Custom implements ImpulseGetter<number> {
+    public constructor(public value: number) {}
+
+    public getValue(): number {
+      return this.value
+    }
+  }
+
+  const impulse = new Custom(1)
+
+  expect(untrack(impulse)).toBe(1)
+  impulse.value = 2
+  expect(untrack(impulse)).toBe(2)
 })

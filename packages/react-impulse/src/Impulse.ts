@@ -19,13 +19,21 @@ export interface TransmittingImpulseOptions<T> {
 
 export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
 
-const isImpulse = <T, Unknown = unknown>(
+export interface ImpulseGetter<T> {
+  getValue(scope: Scope): T
+}
+
+export interface ImpulseSetter<T> {
+  setValue(value: T): void
+}
+
+function isImpulse<T, Unknown = unknown>(
   input: Unknown | Impulse<T>,
-): input is Impulse<T> => {
+): input is Impulse<T> {
   return input instanceof Impulse
 }
 
-export abstract class Impulse<T> {
+export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   /**
    * A static method to check whether or not the input is an Impulse.
    *
@@ -75,7 +83,13 @@ export abstract class Impulse<T> {
       return isImpulse(args[0])
     }
 
-    return isImpulse(args[2]) && args[2].getValue(args[0], args[1])
+    if (isImpulse(args[2])) {
+      const value = args[2].getValue(args[0])
+
+      return args[1](value)
+    }
+
+    return false
   }
 
   /**
@@ -122,29 +136,30 @@ export abstract class Impulse<T> {
    * Creates a new transmitting Impulse.
    * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source and writes it back.
    *
-   * @param getter either a source impulse or a function to read the transmitting value from the source.
-   * @param setter either a destination impulse or a function to write the transmitting value back to the source.
+   * @param getter either anything that implements the `ImpulseGetter` interface or a function to read the transmitting value from the source.
+   * @param setter either anything that implements the `ImpulseSetter` interface or a function to write the transmitting value back to the source.
    * @param options optional `TransmittingImpulseOptions`.
    * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
    *
    * @version 2.0.0
    */
   public static transmit<T>(
-    getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
-    setter: Impulse<T> | ((value: T, scope: Scope) => void),
+    getter: ImpulseGetter<T> | ((scope: Scope) => T),
+    setter: ImpulseSetter<T> | ((value: T, scope: Scope) => void),
     options?: TransmittingImpulseOptions<T>,
   ): Impulse<T>
 
   public static transmit<T>(
-    getter: ReadonlyImpulse<T> | Func<[Scope], T>,
+    getter: ImpulseGetter<T> | Func<[Scope], T>,
     setterOrOptions?:
-      | Impulse<T>
+      | ImpulseSetter<T>
       | Func<[T, Scope]>
       | TransmittingImpulseOptions<T>,
     maybeOptions?: TransmittingImpulseOptions<T>,
   ): Impulse<T> {
     const [setter, options] =
-      isFunction(setterOrOptions) || isImpulse(setterOrOptions)
+      setterOrOptions != null &&
+      (isFunction(setterOrOptions) || "setValue" in setterOrOptions)
         ? [setterOrOptions, maybeOptions]
         : [noop, setterOrOptions]
 
@@ -235,23 +250,10 @@ export abstract class Impulse<T> {
    *
    * @version 1.0.0
    */
-  public getValue(scope: Scope): T
-  /**
-   * Returns a value selected from the impulse value.
-   *
-   * @param scope the Scope that tracks the Impulse value changes.
-   * @param select an optional function that applies to the impulse value before returning.
-   *
-   * @version 1.0.0
-   */
-  public getValue<R>(scope: Scope, select: (value: T, scope: Scope) => R): R
-
-  public getValue<R>(scope: Scope, select?: Func<[T, Scope], R>): T | R {
+  public getValue(scope: Scope): T {
     scope[EMITTER_KEY]?._attachTo(this._emitters)
 
-    const value = this._getter(scope)
-
-    return isFunction(select) ? select(value, scope) : value
+    return this._getter(scope)
   }
 
   /**

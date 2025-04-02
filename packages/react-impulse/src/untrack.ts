@@ -1,4 +1,4 @@
-import type { ReadonlyImpulse } from "./Impulse"
+import type { ImpulseGetter } from "./Impulse"
 import { STATIC_SCOPE, type Scope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { type Func, isFunction } from "./utils"
@@ -18,22 +18,22 @@ export function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
 /**
  * Extracts the value from the provided `impulse` without tracking it.
  *
- * @param impulse an `Impulse` instance.
+ * @param impulse anything that implements the `ImpulseGetter` interface.
  *
  * @returns the `impulse` value.
  *
  * @version 2.0.0
  */
-export function untrack<TValue>(impulse: ReadonlyImpulse<TValue>): TValue
+export function untrack<TValue>(impulse: ImpulseGetter<TValue>): TValue
 
 export function untrack<T>(
-  factoryOrImpulse: ReadonlyImpulse<T> | Func<[Scope], T>,
+  factoryOrImpulseGetter: ImpulseGetter<T> | Func<[Scope], T>,
 ): T {
   return ScopeEmitter._schedule(() => {
-    if (isFunction(factoryOrImpulse)) {
-      return factoryOrImpulse(STATIC_SCOPE)
+    if (isFunction(factoryOrImpulseGetter)) {
+      return factoryOrImpulseGetter(STATIC_SCOPE)
     }
 
-    return factoryOrImpulse.getValue(STATIC_SCOPE)
+    return factoryOrImpulseGetter.getValue(STATIC_SCOPE)
   })
 }

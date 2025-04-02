@@ -4,6 +4,8 @@ export {
   type ImpulseOptions,
   type TransmittingImpulseOptions,
   type ReadonlyImpulse,
+  type ImpulseGetter,
+  type ImpulseSetter,
   Impulse,
 } from "./Impulse"
 export type { Scope } from "./Scope"
