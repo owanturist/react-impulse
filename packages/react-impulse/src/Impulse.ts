@@ -186,14 +186,6 @@ export abstract class Impulse<T> {
     return String(this.getValue(scope))
   }
 
-  protected _emit(execute: () => boolean): void {
-    ScopeEmitter._schedule((queue) => {
-      if (execute()) {
-        queue.push(this._emitters)
-      }
-    })
-  }
-
   protected abstract _getter(scope: Scope): T
   protected abstract _setter(value: T): boolean
 
@@ -274,12 +266,14 @@ export abstract class Impulse<T> {
   public setValue(
     valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
   ): void {
-    this._emit(() => {
+    ScopeEmitter._schedule((queue) => {
       const nextValue = isFunction(valueOrTransform)
         ? valueOrTransform(this._getter(STATIC_SCOPE), STATIC_SCOPE)
         : valueOrTransform
 
-      return this._setter(nextValue)
+      if (this._setter(nextValue)) {
+        queue.push(this._emitters)
+      }
     })
   }
 }
@@ -311,7 +305,7 @@ class TransmittingImpulse<T> extends Impulse<T> {
   private _value?: { _lazy: T }
 
   public constructor(
-    private _getValue: Func<[Scope], T>,
+    private readonly _getValue: Func<[Scope], T>,
     private readonly _setValue: Func<[T, Scope]>,
     compare: Compare<T>,
   ) {
@@ -337,17 +331,5 @@ class TransmittingImpulse<T> extends Impulse<T> {
     // should always emit because the transmitting value might be not reactive
     // so the _getter method does not know about the change of such values
     return true
-  }
-
-  public _replaceGetter(getter: (scope: Scope) => T): void {
-    if (this._getValue !== getter) {
-      this._emit(() => {
-        const value = this._value
-
-        this._getValue = getter
-
-        return value != null && value._lazy !== this._getter(STATIC_SCOPE)
-      })
-    }
   }
 }
