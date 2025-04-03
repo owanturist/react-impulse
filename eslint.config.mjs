@@ -279,6 +279,19 @@ export default tseslint.config([
       },
     },
     rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["react", "use-sync-external-store", "react-impulse"],
+              message:
+                "Import dependencies from dependencies.ts. It makes the imported deps appear only ones in the bundle.",
+            },
+          ],
+        },
+      ],
+
       // React Eslint
       "react/button-has-type": ["warn", { reset: false }],
       "react/prop-types": "off",

@@ -1,5 +1,4 @@
-import { type DependencyList, useEffect } from "react"
-
+import { type DependencyList, useEffect } from "./dependencies"
 import type { Scope } from "./Scope"
 import type { Destructor } from "./utils"
 import { subscribe } from "./subscribe"
