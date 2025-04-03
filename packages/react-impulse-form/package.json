@@ -37,12 +37,12 @@
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.2.0",
+    "@testing-library/react": "^16.3.0",
     "@types/react": "^19.1.0",
     "react": "^19.1.0",
     "react-dom": "19.1.0",
     "react-impulse": "workspace:*",
-    "zod": "^3.23.8"
+    "zod": "^3.24.2"
   },
   "dependencies": {
     "ts-toolbelt": "^9.6.0"
