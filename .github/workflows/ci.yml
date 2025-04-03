@@ -19,11 +19,6 @@ on:
       - v[0-9]+.x
       - v[0-9]+.[0-9]+.x
 
-permissions: # Add explicit permissions
-  contents: read
-  pull-requests: write # For changeset action
-  packages: write # For npm publishing
-
 env:
   CI: true
 
