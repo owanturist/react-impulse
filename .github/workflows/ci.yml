@@ -111,7 +111,7 @@ jobs:
         run: pnpm build
 
       - name: Install react@${{ matrix.version }}
-        run: pnpm add -D --filter ./packages/* react@${{ matrix.version }} react-dom@${{ matrix.version }}
+        run: pnpm add -D --filter ./packages/* @types/react@${{ matrix.version }} react@${{ matrix.version }} react-dom@${{ matrix.version }}
 
       - name: Install legacy testing-library
         if: ${{ matrix.legacy_testing_library }}
@@ -119,6 +119,9 @@ jobs:
 
       - name: Test against react@${{ matrix.version }}
         run: pnpm test:run
+
+      - name: Typecheck against react@${{ matrix.version }}
+        run: pnpm typecheck
 
   test-react-impulse-legacy:
     name: Run tests against legacy react-impulse
