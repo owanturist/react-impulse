@@ -10,4 +10,4 @@ export {
   useLayoutEffect,
   useDebugValue,
 } from "react"
-export { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
+export { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector"

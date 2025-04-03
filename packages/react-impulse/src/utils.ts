@@ -73,7 +73,7 @@ export function usePermanent<TValue>(init: () => TValue): TValue {
    *
    * @link https://react.dev/reference/react/useRef#avoiding-recreating-the-ref-contents
    */
-  const ref = useRef<{ _value: TValue }>()
+  const ref = useRef<null | { _value: TValue }>(null)
 
   ref.current ??= { _value: init() }
 
