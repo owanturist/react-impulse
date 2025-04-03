@@ -59,11 +59,13 @@ export function useImpulseFormValue<TInput, TOutput = TInput>(
   )
 
   useEffect(() => {
-    if (!isNull(onFocusInvalidStable)) {
-      return form.onFocusWhenInvalid((errors) => {
-        onFocusInvalidStable(errors, form)
-      })
+    if (isNull(onFocusInvalidStable)) {
+      return undefined
     }
+
+    return form.onFocusWhenInvalid((errors) => {
+      onFocusInvalidStable(errors, form)
+    })
   }, [form, onFocusInvalidStable])
 
   useImpulseForm(form, { onSubmit })

@@ -387,6 +387,8 @@ describe("batching against a hook", () => {
           impulse_3.setValue((x) => x + 1)
         }
       }
+
+      return undefined
     })
 
     expect(result.current).toBe(6)
