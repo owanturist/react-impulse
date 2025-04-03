@@ -1,5 +1,24 @@
 # react-impulse-form
 
+## 0.8.0
+
+### Minor Changes
+
+- [#813](https://github.com/owanturist/react-impulse/pull/813) [`0983fb0`](https://github.com/owanturist/react-impulse/commit/0983fb04e4dc99f382c46abca597a8687d491940) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
+
+  - Added support for React 19
+  - Dropped support for React 16 and React 17
+  - Updated minimum peer dependency to React 18.0.0
+
+### Patch Changes
+
+- [#811](https://github.com/owanturist/react-impulse/pull/811) [`a7d9c1c`](https://github.com/owanturist/react-impulse/commit/a7d9c1c1c150e8092696795881bfde4b410afae9) Thanks [@owanturist](https://github.com/owanturist)! - Update tsconfig.target from `es2017` to `ES2020`.
+
+- [#805](https://github.com/owanturist/react-impulse/pull/805) [`4f4a632`](https://github.com/owanturist/react-impulse/commit/4f4a6320d676761a8e68da0b54c50aaf53adb5e1) Thanks [@owanturist](https://github.com/owanturist)! - Do not use `Impulse#getValue` with the select API anymore.
+
+- Updated dependencies [[`db602c7`](https://github.com/owanturist/react-impulse/commit/db602c7c9601b9a261cfaa1006a57f2a8f61aa68), [`a7d9c1c`](https://github.com/owanturist/react-impulse/commit/a7d9c1c1c150e8092696795881bfde4b410afae9), [`0983fb0`](https://github.com/owanturist/react-impulse/commit/0983fb04e4dc99f382c46abca597a8687d491940), [`db602c7`](https://github.com/owanturist/react-impulse/commit/db602c7c9601b9a261cfaa1006a57f2a8f61aa68), [`4f4a632`](https://github.com/owanturist/react-impulse/commit/4f4a6320d676761a8e68da0b54c50aaf53adb5e1), [`db602c7`](https://github.com/owanturist/react-impulse/commit/db602c7c9601b9a261cfaa1006a57f2a8f61aa68), [`db602c7`](https://github.com/owanturist/react-impulse/commit/db602c7c9601b9a261cfaa1006a57f2a8f61aa68), [`f63f447`](https://github.com/owanturist/react-impulse/commit/f63f4474652bb3d2f8cf1522488893af53d78f2e), [`4f4a632`](https://github.com/owanturist/react-impulse/commit/4f4a6320d676761a8e68da0b54c50aaf53adb5e1), [`7802243`](https://github.com/owanturist/react-impulse/commit/7802243d61837a46b5f4ee130599d34c53eb9775), [`6d1e4a3`](https://github.com/owanturist/react-impulse/commit/6d1e4a3b6be16e242aa10a7c758ade8c900dca27)]:
+  - react-impulse@3.0.0
+
 ## 0.7.1
 
 ### Patch Changes
