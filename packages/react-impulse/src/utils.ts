@@ -1,5 +1,6 @@
+import { type EffectCallback, useRef } from "react"
+
 import type { Scope } from "./Scope"
-import { type EffectCallback, useRef } from "./dependencies"
 
 /**
  * A function that compares two values and returns `true` if they are equal.

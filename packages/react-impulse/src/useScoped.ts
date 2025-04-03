@@ -1,4 +1,5 @@
-import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
+import { type DependencyList, useCallback, useDebugValue } from "react"
+
 import { type Compare, eq, useHandler, type Func, isFunction } from "./utils"
 import { STATIC_SCOPE, type Scope } from "./Scope"
 import { useCreateScope } from "./useCreateScope"

@@ -1,4 +1,4 @@
-export type { DependencyList } from "./dependencies"
+export type { DependencyList } from "react"
 export type { Compare, Destructor } from "./utils"
 export {
   type ImpulseOptions,

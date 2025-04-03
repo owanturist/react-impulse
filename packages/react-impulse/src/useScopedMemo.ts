@@ -1,4 +1,5 @@
-import { type DependencyList, useMemo } from "./dependencies"
+import { type DependencyList, useMemo } from "react"
+
 import { useCreateScope } from "./useCreateScope"
 import type { Scope } from "./Scope"
 

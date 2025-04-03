@@ -1,4 +1,5 @@
-import { type DependencyList, useLayoutEffect } from "./dependencies"
+import { type DependencyList, useLayoutEffect } from "react"
+
 import type { Scope } from "./Scope"
 import type { Destructor } from "./utils"
 import { subscribe } from "./subscribe"

@@ -1,4 +1,6 @@
-import { useCallback, useSyncExternalStoreWithSelector } from "./dependencies"
+import { useCallback } from "react"
+import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector.js"
+
 import { ScopeEmitter } from "./ScopeEmitter"
 import { EMITTER_KEY, type Scope } from "./Scope"
 import { isFunction, usePermanent, type Func } from "./utils"
