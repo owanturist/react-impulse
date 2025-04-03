@@ -17,13 +17,15 @@ export const useImpulseForm = <TForm extends ImpulseForm>(
   const onSubmitStable = useHandler(onSubmit)
 
   useEffect(() => {
-    if (!isUndefined(onSubmitStable)) {
-      return form.onSubmit((output) => {
-        return onSubmitStable(
-          output as GetImpulseFormParam<TForm, "output.schema">,
-          form,
-        )
-      })
+    if (isUndefined(onSubmitStable)) {
+      return undefined
     }
+
+    return form.onSubmit((output) => {
+      return onSubmitStable(
+        output as GetImpulseFormParam<TForm, "output.schema">,
+        form,
+      )
+    })
   }, [form, onSubmitStable])
 }

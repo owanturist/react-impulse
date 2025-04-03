@@ -64,7 +64,7 @@ import { Impulse, useScope } from "react-impulse"
 
 const SignUp: React.FC = () => {
   const scope = useScope()
-  const { username, password, isAgreeWithTerms } = React.useState({
+  const [{ username, password, isAgreeWithTerms }] = React.useState({
     username: Impulse.of(""),
     password: Impulse.of(""),
     isAgreeWithTerms: Impulse.of(false),

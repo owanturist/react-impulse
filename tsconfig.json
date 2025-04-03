@@ -1,12 +1,16 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "target": "ES2020",
+    "module": "ES2022",
+    // https://www.totaltypescript.com/relative-import-paths-need-explicit-file-extensions-in-ecmascript-imports
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "skipLibCheck": true,
     "strictBindCallApply": true,
-    "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
@@ -15,6 +19,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
     "downlevelIteration": true,
     "jsx": "react",
     "types": ["vitest/globals"],

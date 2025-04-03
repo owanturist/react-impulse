@@ -157,6 +157,8 @@ export abstract class ImpulseForm<
       if (output !== null && this._root.isValid(scope)) {
         return this._root._submitWith(output).filter(isPresent)
       }
+
+      return undefined
     })
 
     if (isUndefined(promises)) {
