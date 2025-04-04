@@ -237,7 +237,7 @@ describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a n
   describe("Impulse.transmit()", () => {
     it("enqueues a rerender when sets a reactive value", () => {
       const counter = { count: 0 }
-      const impulse = Impulse.transmit(
+      const impulse = Impulse.of(
         () => counter.count,
         (count) => {
           counter.count = count

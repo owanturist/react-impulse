@@ -2,7 +2,6 @@ export type { DependencyList } from "./dependencies"
 export type { Compare, Destructor } from "./utils"
 export {
   type ImpulseOptions,
-  type TransmittingImpulseOptions,
   type ReadonlyImpulse,
   type ImpulseGetter,
   type ImpulseSetter,

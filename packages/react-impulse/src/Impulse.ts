@@ -1,4 +1,11 @@
-import { type Func, type Compare, eq, noop, isFunction } from "./utils"
+import {
+  type Func,
+  type Compare,
+  eq,
+  noop,
+  isFunction,
+  hasProperty,
+} from "./utils"
 import { EMITTER_KEY, type Scope, extractScope, STATIC_SCOPE } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 
@@ -104,6 +111,38 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   public static of<T = undefined>(): Impulse<undefined | T>
 
   /**
+   * Creates a new transmitting ReadonlyImpulse.
+   * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source.
+   *
+   * @param getter a function to read the transmitting value from a source.
+   * @param options optional `ImpulseOptions`.
+   * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
+   *
+   * @version 3.0.0
+   */
+  public static of<T>(
+    getter: (scope: Scope) => T,
+    options?: ImpulseOptions<T>,
+  ): ReadonlyImpulse<T>
+
+  /**
+   * Creates a new transmitting Impulse.
+   * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source and writes it back.
+   *
+   * @param getter either anything that implements the `ImpulseGetter` interface or a function to read the transmitting value from the source.
+   * @param setter either anything that implements the `ImpulseSetter` interface or a function to write the transmitting value back to the source.
+   * @param options optional `ImpulseOptions`.
+   * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
+   *
+   * @version 3.0.0
+   */
+  public static of<T>(
+    getter: ImpulseGetter<T> | ((scope: Scope) => T),
+    setter: ImpulseSetter<T> | ((value: T, scope: Scope) => void),
+    options?: ImpulseOptions<T>,
+  ): Impulse<T>
+
+  /**
    * Creates a new Impulse.
    *
    * @param initialValue the initial value.
@@ -115,60 +154,29 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   public static of<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
 
   public static of<T>(
-    initialValue?: T,
-    options?: ImpulseOptions<undefined | T>,
-  ): Impulse<undefined | T> {
-    return new DirectImpulse(initialValue, options?.compare ?? eq)
-  }
+    initialValueOrGetter?: T | ImpulseGetter<T> | Func<[Scope], T>,
+    optionsOrSetter?: ImpulseOptions<T> | ImpulseSetter<T> | Func<[T, Scope]>,
+    optionsOrNothing?: ImpulseOptions<T>,
+  ): Impulse<undefined | T> | Impulse<T> {
+    const isGetterFunction = isFunction(initialValueOrGetter)
 
-  /**
-   * Creates a new transmitting ReadonlyImpulse.
-   * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source.
-   *
-   * @param getter a function to read the transmitting value from a source.
-   * @param options optional `TransmittingImpulseOptions`.
-   * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
-   *
-   * @version 2.0.0
-   */
-  public static transmit<T>(
-    getter: (scope: Scope) => T,
-    options?: TransmittingImpulseOptions<T>,
-  ): ReadonlyImpulse<T>
+    if (!isGetterFunction && !hasProperty(initialValueOrGetter, "getValue")) {
+      const options = optionsOrSetter as
+        | undefined
+        | ImpulseOptions<undefined | T>
 
-  /**
-   * Creates a new transmitting Impulse.
-   * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source and writes it back.
-   *
-   * @param getter either anything that implements the `ImpulseGetter` interface or a function to read the transmitting value from the source.
-   * @param setter either anything that implements the `ImpulseSetter` interface or a function to write the transmitting value back to the source.
-   * @param options optional `TransmittingImpulseOptions`.
-   * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
-   *
-   * @version 2.0.0
-   */
-  public static transmit<T>(
-    getter: ImpulseGetter<T> | ((scope: Scope) => T),
-    setter: ImpulseSetter<T> | ((value: T, scope: Scope) => void),
-    options?: TransmittingImpulseOptions<T>,
-  ): Impulse<T>
+      return new DirectImpulse(initialValueOrGetter, options?.compare ?? eq)
+    }
 
-  public static transmit<T>(
-    getter: ImpulseGetter<T> | Func<[Scope], T>,
-    setterOrOptions?:
-      | ImpulseSetter<T>
-      | Func<[T, Scope]>
-      | TransmittingImpulseOptions<T>,
-    maybeOptions?: TransmittingImpulseOptions<T>,
-  ): Impulse<T> {
     const [setter, options] =
-      setterOrOptions != null &&
-      (isFunction(setterOrOptions) || "setValue" in setterOrOptions)
-        ? [setterOrOptions, maybeOptions]
-        : [noop, setterOrOptions]
+      isFunction(optionsOrSetter) || hasProperty(optionsOrSetter, "setValue")
+        ? [optionsOrSetter, optionsOrNothing]
+        : [noop, optionsOrSetter]
 
-    return new TransmittingImpulse(
-      isFunction(getter) ? getter : (scope) => getter.getValue(scope),
+    return new DerivedImpulse(
+      isGetterFunction
+        ? initialValueOrGetter
+        : (scope) => initialValueOrGetter.getValue(scope),
       isFunction(setter) ? setter : (value) => setter.setValue(value),
       options?.compare ?? eq,
     )
@@ -307,7 +315,7 @@ class DirectImpulse<T> extends Impulse<T> {
   }
 }
 
-class TransmittingImpulse<T> extends Impulse<T> {
+class DerivedImpulse<T> extends Impulse<T> {
   private _value?: { _lazy: T }
 
   public constructor(

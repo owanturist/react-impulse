@@ -63,7 +63,7 @@ it("allows to use Impulse", () => {
 })
 
 it("allows to use ReadonlyImpulse", () => {
-  const impulse = Impulse.transmit(() => 1)
+  const impulse = Impulse.of(() => 1)
 
   const value = untrack(impulse)
 
