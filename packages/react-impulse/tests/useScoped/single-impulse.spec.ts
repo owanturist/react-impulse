@@ -20,7 +20,7 @@ describe("impulse shortcut", () => {
 
   it("allows to use ReadonlyImpulse", () => {
     let count = 1
-    const impulse = Impulse.transmit(() => count)
+    const impulse = Impulse.of(() => count)
 
     const { result, rerender } = renderHook(() => useScoped(impulse))
 

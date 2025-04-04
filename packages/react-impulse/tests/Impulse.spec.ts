@@ -3,7 +3,6 @@ import { act, renderHook } from "@testing-library/react"
 import {
   type ReadonlyImpulse,
   type ImpulseOptions,
-  type TransmittingImpulseOptions,
   Impulse,
   subscribe,
   type Scope,
@@ -84,11 +83,25 @@ describe("Impulse.of(value, options?)", () => {
       scope,
     )
   })
+
+  it("carries the function value wrapped in an object", ({ scope }) => {
+    const impulse = Impulse.of({ fn: (input: number) => input })
+
+    expectTypeOf(impulse).toEqualTypeOf<
+      Impulse<{
+        fn: (input: number) => number
+      }>
+    >()
+    expectTypeOf(impulse.getValue(scope)).toEqualTypeOf<{
+      fn: (input: number) => number
+    }>()
+    expect(impulse.getValue(scope).fn(42)).toBe(42)
+  })
 })
 
 describe("Impulse.transmit(getter, options?)", () => {
   it("creates a ReadonlyImpulse", () => {
-    const impulse = Impulse.transmit(() => 0)
+    const impulse = Impulse.of(() => 0)
 
     // @ts-expect-error should be ReadonlyImpulse only
     expectTypeOf(impulse).toEqualTypeOf<Impulse<number>>()
@@ -98,7 +111,7 @@ describe("Impulse.transmit(getter, options?)", () => {
   it("reads the value from the source", ({ scope }) => {
     const initial = { count: 0 }
     const source = Impulse.of(initial)
-    const impulse = Impulse.transmit((scope) => source.getValue(scope))
+    const impulse = Impulse.of((scope) => source.getValue(scope))
 
     expect(impulse.getValue(scope)).toBe(initial)
     expect(impulse.getValue(scope)).toStrictEqual({ count: 0 })
@@ -111,7 +124,7 @@ describe("Impulse.transmit(getter, options?)", () => {
 
   it("subscribes to Impulse source", ({ scope }) => {
     const source = Impulse.of({ count: 0 }, { compare: Counter.compare })
-    const impulse = Impulse.transmit((scope) => source.getValue(scope))
+    const impulse = Impulse.of((scope) => source.getValue(scope))
     const spy = vi.fn()
 
     expect(source).toHaveEmittersSize(0)
@@ -144,7 +157,7 @@ describe("Impulse.transmit(getter, options?)", () => {
 
   it("cannot subscribe to none-Impulse source", () => {
     let variable = 0
-    const impulse = Impulse.transmit(() => variable)
+    const impulse = Impulse.of(() => variable)
     const spy = vi.fn()
 
     subscribe((scope) => {
@@ -159,7 +172,7 @@ describe("Impulse.transmit(getter, options?)", () => {
 
   it("does not call compare on init", () => {
     const source = Impulse.of({ count: 0 })
-    Impulse.transmit((scope) => source.getValue(scope), {
+    Impulse.of((scope) => source.getValue(scope), {
       compare: Counter.compare,
     })
 
@@ -168,7 +181,7 @@ describe("Impulse.transmit(getter, options?)", () => {
 
   it("does not call compare on first getValue", ({ scope }) => {
     const source = Impulse.of({ count: 0 })
-    const impulse = Impulse.transmit((scope) => source.getValue(scope), {
+    const impulse = Impulse.of((scope) => source.getValue(scope), {
       compare: Counter.compare,
     })
 
@@ -178,7 +191,7 @@ describe("Impulse.transmit(getter, options?)", () => {
 
   it("calls compare on subsequent calls", ({ scope }) => {
     const source = Impulse.of({ count: 0 })
-    const impulse = Impulse.transmit((scope) => source.getValue(scope))
+    const impulse = Impulse.of((scope) => source.getValue(scope))
 
     impulse.getValue(scope)
     impulse.getValue(scope)
@@ -191,7 +204,7 @@ describe("Impulse.transmit(getter, options?)", () => {
 
   it("assigns Object.is as default compare", ({ scope }) => {
     const source = Impulse.of(0)
-    const impulse = Impulse.transmit((scope) => ({
+    const impulse = Impulse.of((scope) => ({
       count: source.getValue(scope),
     }))
 
@@ -207,12 +220,9 @@ describe("Impulse.transmit(getter, options?)", () => {
 
   it("assigns Object.is by `null` as compare", ({ scope }) => {
     const source = Impulse.of(0)
-    const impulse = Impulse.transmit(
-      (scope) => ({ count: source.getValue(scope) }),
-      {
-        compare: null,
-      },
-    )
+    const impulse = Impulse.of((scope) => ({ count: source.getValue(scope) }), {
+      compare: null,
+    })
 
     const value_1 = impulse.getValue(scope)
     const value_2 = impulse.getValue(scope)
@@ -226,12 +236,9 @@ describe("Impulse.transmit(getter, options?)", () => {
 
   it("assigns custom function as compare", ({ scope }) => {
     const source = Impulse.of(0)
-    const impulse = Impulse.transmit(
-      (scope) => ({ count: source.getValue(scope) }),
-      {
-        compare: Counter.compare,
-      },
-    )
+    const impulse = Impulse.of((scope) => ({ count: source.getValue(scope) }), {
+      compare: Counter.compare,
+    })
 
     const value_1 = impulse.getValue(scope)
     const value_2 = impulse.getValue(scope)
@@ -248,7 +255,7 @@ describe("Impulse.transmit(getter, options?)", () => {
 describe("Impulse.transmit(getter, setter, options?)", () => {
   it("creates an Impulse", () => {
     let variable = 0
-    const impulse = Impulse.transmit(
+    const impulse = Impulse.of(
       () => variable,
       (value) => {
         variable = value
@@ -261,7 +268,7 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
 
   it("allows source as a Impulse", ({ scope }) => {
     const source = Impulse.of(0)
-    const impulse = Impulse.transmit(source, () => {
+    const impulse = Impulse.of(source, () => {
       // noop
     })
 
@@ -269,8 +276,8 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
   })
 
   it("allows source as a ReadonlyImpulse", ({ scope }) => {
-    const source = Impulse.transmit(() => 0)
-    const impulse = Impulse.transmit(source, () => {
+    const source = Impulse.of(() => 0)
+    const impulse = Impulse.of(source, () => {
       // noop
     })
 
@@ -287,7 +294,7 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     }
 
     const source = new Custom(0)
-    const impulse = Impulse.transmit(source, () => {
+    const impulse = Impulse.of(source, () => {
       // noop
     })
 
@@ -297,16 +304,16 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
   })
 
   it("does not allow setter as a ReadonlyImpulse", ({ scope }) => {
-    const destination = Impulse.transmit(() => 0)
+    const destination = Impulse.of(() => 0)
     // @ts-expect-error should be Impulse only
-    const impulse = Impulse.transmit(() => 2, [], destination)
+    const impulse = Impulse.of(() => 2, [], destination)
 
     expect(impulse.getValue(scope)).toBe(2)
   })
 
   it("subscribes to Impulse source and back", () => {
     const source = Impulse.of({ count: 0 }, { compare: Counter.compare })
-    const impulse = Impulse.transmit(
+    const impulse = Impulse.of(
       (scope) => source.getValue(scope),
       (counter) => source.setValue(counter),
     )
@@ -357,7 +364,7 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     }
 
     const source = new Custom()
-    const impulse = Impulse.transmit(
+    const impulse = Impulse.of(
       (scope) => source.getValue(scope),
       (counter) => source.setValue(counter),
     )
@@ -392,7 +399,7 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
 
   it("assigns custom function as compare", ({ scope }) => {
     const source = Impulse.of({ count: 0 })
-    const impulse = Impulse.transmit(
+    const impulse = Impulse.of(
       (scope) => source.getValue(scope),
       (counter) => source.setValue(counter),
       {
@@ -413,7 +420,7 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     const impulse_1 = Impulse.of(1)
     const impulse_2 = Impulse.of(2)
     const impulse_3 = Impulse.of(3)
-    const transmit = Impulse.transmit(
+    const transmit = Impulse.of(
       (scope) => {
         return (
           impulse_1.getValue(scope) +
@@ -497,7 +504,7 @@ describe("Impulse.isImpulse(input)", () => {
 
   it("returns true for Impulse", () => {
     const impulse = Impulse.of(0)
-    const readonly = Impulse.transmit(() => 1)
+    const readonly = Impulse.of(() => 1)
 
     expect(known_check(impulse)).toBe(true)
     // @ts-expect-error should be Impulse<number>
@@ -594,7 +601,7 @@ describe("Impulse.isImpulse(scope, check, value)", () => {
 
   it("returns true for Impulse with success check", ({ scope }) => {
     const impulse = Impulse.of("")
-    const readonly = Impulse.transmit(() => "")
+    const readonly = Impulse.of(() => "")
 
     expect(known_check(scope, impulse)).toBe(true)
     expect(union_check(scope, impulse)).toBe(true)
@@ -639,11 +646,11 @@ function setupImpulse<T>(initialValue: T, options?: ImpulseOptions<T>) {
 
 function setupTransmittingImpulseFromGlobalVariable<T>(
   initialValue: T,
-  options?: TransmittingImpulseOptions<T>,
+  options?: ImpulseOptions<T>,
 ) {
   let variable = initialValue
 
-  const impulse = Impulse.transmit(
+  const impulse = Impulse.of(
     () => variable,
     (value) => {
       variable = value
@@ -667,9 +674,9 @@ function setupTransmittingImpulseFromImpulse({
   getterShortcut: boolean
   setterShortcut: boolean
 }) {
-  return <T>(initialValue: T, options?: TransmittingImpulseOptions<T>) => {
+  return <T>(initialValue: T, options?: ImpulseOptions<T>) => {
     const source = Impulse.of(initialValue)
-    const impulse = Impulse.transmit(
+    const impulse = Impulse.of(
       getterShortcut ? source : (scope) => source.getValue(scope),
       setterShortcut ? source : (value) => source.setValue(value),
       options,
