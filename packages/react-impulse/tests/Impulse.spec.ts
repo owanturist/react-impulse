@@ -86,46 +86,6 @@ describe("Impulse.of(value, options?)", () => {
   })
 })
 
-describe("Impulse.of(scope => value, options?)", () => {
-  it("passes static scope as the only argument", ({ scope }) => {
-    const init = vi.fn(() => 0)
-    const impulse = Impulse.of(init)
-
-    expect(init).toHaveBeenCalledExactlyOnceWith(scope)
-    expectTypeOf(impulse).toEqualTypeOf<Impulse<number>>()
-  })
-
-  it("creates impulse by using scope", ({ scope }) => {
-    const source = Impulse.of({ count: 0 })
-    const impulse = Impulse.of((scope) => source.getValue(scope))
-
-    expect(impulse.getValue(scope)).toStrictEqual({ count: 0 })
-    expect(impulse.getValue(scope)).toBe(source.getValue(scope))
-    expectTypeOf(impulse).toEqualTypeOf<Impulse<{ count: number }>>()
-  })
-
-  it("stores a function as value", ({ scope }) => {
-    const fn = () => ({ count: 0 })
-    const impulse = Impulse.of(() => fn)
-
-    expect(impulse.getValue(scope)).toBe(fn)
-    expect(impulse.getValue(scope)()).toStrictEqual({ count: 0 })
-    expectTypeOf(impulse).toEqualTypeOf<Impulse<() => { count: number }>>()
-  })
-
-  it("does not allow to specify init function with different arguments", ({
-    scope,
-  }) => {
-    const init = vi.fn((value: number) => value)
-    // @ts-expect-error should be (scope: Scope) => number
-    const impulse = Impulse.of(init)
-
-    expect(init).toHaveBeenCalledExactlyOnceWith(scope)
-    // just passes the scope
-    expect(impulse.getValue(scope)).toBe(scope)
-  })
-})
-
 describe("Impulse.transmit(getter, options?)", () => {
   it("creates a ReadonlyImpulse", () => {
     const impulse = Impulse.transmit(() => 0)

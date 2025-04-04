@@ -116,7 +116,6 @@ Impulse.of<T>(
 
 A static method that creates new Impulse.
 
-- `[valueOrInitValue]` is an optional value used during the initial render. If the initial value infers from another Impulse, you may provide a function instead, which will be executed only during initialization. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
 - `[initialValue]` is an optional initial value. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
 - `[options]` is an optional [`ImpulseOptions`][impulse_options] object.
   - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
