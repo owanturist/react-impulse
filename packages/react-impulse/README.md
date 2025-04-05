@@ -116,145 +116,11 @@ Impulse.of<T>(
 
 A static method that creates new Impulse.
 
-- `[valueOrInitValue]` is an optional value used during the initial render. If the initial value infers from another Impulse, you may provide a function instead, which will be executed only during initialization. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
 - `[initialValue]` is an optional initial value. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
 - `[options]` is an optional [`ImpulseOptions`][impulse_options] object.
   - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
-```ts
-const count = Impulse.of(1) // Impulse<number>
-const timeout = Impulse.of<number>() // Impulse<undefined | number>
-```
-
-### `Impulse.transmit`
-
-```dart
-Impulse.transmit<T>(
-  getter: (scope: Scope) => T,
-  options?: TransmittingImpulseOptions<T>,
-): ReadonlyImpulse<T>
-
-Impulse.transmit<T>(
-  getter: ImpulseGetter<T> | ((scope: Scope) => T),
-  setter: ImpulseSetter<T> | ((value: T, scope: Scope) => void),
-  options?: TransmittingImpulseOptions<T>,
-): Impulse<T>
-```
-
-- `getter` is either anything that implements the [`ImpulseGetter`][impulse_getter] interface or a function to read the transmitting value from the source.
-- `[setter]` is either anything that implements the [`ImpulseSetter`][impulse_setter] interface or a function to write the transmitting value back to the source. When not defined, the resulting Impulse is readonly.
-- `[options]` is an optional [`TransmittingImpulseOptions`][transmitting_impulse_options] object.
-  - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
-
-A static method that creates a new transmitting Impulse. A transmitting Impulse is an Impulse that does not have its own value but reads it from an external source and writes it back to the source when the value changes. An external source is usually another Impulse or other Impulses.
-
-<details><summary><i>Showcase: transmitting an Impulse</i></summary>
-<blockquote>
-
-```tsx
-const Drawer: React.FC<{
-  isOpen: Impulse<boolean>
-  children: React.ReactNode
-}> = ({ isOpen, children }) => {
-  const scope = useScope()
-
-  if (!isOpen.getValue(scope)) {
-    return null
-  }
-
-  return (
-    <div className="drawer">
-      {children}
-
-      <button type="button" onClick={() => isOpen.setValue(false)}>
-        Close
-      </button>
-    </div>
-  )
-}
-
-const ProductDetailsDrawer: React.FC<{
-  product: Impulse<undefined | Product>
-}> = ({ product }) => {
-  const isOpen = React.useMemo(() => {
-    return Impulse.transmit(
-      (scope) => product.getValue(scope) != null,
-      (open) => {
-        if (!open) {
-          product.setValue(undefined)
-        }
-      },
-    )
-  }, [product])
-
-  return (
-    <Drawer isOpen={isOpen}>
-      <ProductDetails product={product} />
-    </Drawer>
-  )
-}
-```
-
-</blockquote>
-</details>
-
-<details><summary><i>Showcase: transmitting many Impulses</i></summary>
-<blockquote>
-
-```tsx
-const Checkbox: React.FC<{
-  checked: Impulse<boolean>
-}> = ({ checked, children }) => {
-  const scope = useScope()
-
-  return (
-    <input
-      type="checkbox"
-      checked={checked.getValue(scope)}
-      onChange={(event) => checked.setValue(event.target.checked)}
-    />
-  )
-}
-
-const Agreements: React.FC<{
-  isAgreeWithTermsOfUse: Impulse<boolean>
-  isAgreeWithPrivacy: Impulse<boolean>
-}> = ({ isAgreeWithTermsOfUse, isAgreeWithPrivacy }) => {
-  const isAgreeWithAll = React.useMemo(() => {
-    return Impulse.transmit(
-      (scope) =>
-        isAgreeWithTermsOfUse.getValue(scope) &&
-        isAgreeWithPrivacy.getValue(scope),
-      (agree) => {
-        isAgreeWithTermsOfUse.setValue(agree)
-        isAgreeWithPrivacy.setValue(agree)
-      },
-    )
-  }, [isAgreeWithTermsOfUse, isAgreeWithPrivacy])
-
-  return (
-    <div>
-      <Checkbox checked={isAgreeWithTermsOfUse}>
-        I agree with terms of use
-      </Checkbox>
-      <Checkbox checked={isAgreeWithPrivacy}>
-        I agree with privacy policy
-      </Checkbox>
-
-      <hr />
-
-      <Checkbox checked={isAgreeWithAll}>I agree with all</Checkbox>
-    </div>
-  )
-}
-```
-
-</blockquote>
-</details>
-
-It can also transmit another store's value, such as `React.useState`, `redux`, URL, etc.
-
-<details><summary><i>Showcase: transmitting a React state</i></summary>
+<details><summary><i>Showcase: bidirectional sync between React state and Impulse</i></summary>
 <blockquote>
 
 ```tsx
@@ -287,7 +153,7 @@ const Counter: React.FC = () => {
 </blockquote>
 </details>
 
-<details><summary><i>Showcase: transmitting a Redux store</i></summary>
+<details><summary><i>Showcase: bidirectional sync between Redux store and Impulse</i></summary>
 <blockquote>
 
 ```tsx
@@ -323,34 +189,125 @@ const Counter: React.FC = () => {
 </blockquote>
 </details>
 
-<details><summary><i>Showcase: transmitting a search param from URL with `react-router`</i></summary>
+### `Impulse.of` derived
+
+```dart
+Impulse.of<T>(
+  getter: (scope: Scope) => T,
+  options?: ImpulseOptions<T>,
+): ReadonlyImpulse<T>
+
+Impulse.of<T>(
+  getter: ImpulseGetter<T> | ((scope: Scope) => T),
+  setter: ImpulseSetter<T> | ((value: T, scope: Scope) => void),
+  options?: ImpulseOptions<T>,
+): Impulse<T>
+```
+
+- `getter` is either anything that implements the [`ImpulseGetter`][impulse_getter] interface or a function to read the derived value from the source.
+- `[setter]` is either anything that implements the [`ImpulseSetter`][impulse_setter] interface or a function to write the derived value back to the source. When not defined, the resulting Impulse is readonly.
+- `[options]` is an optional [`ImpulseOptions`][impulse_options] object.
+  - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
+
+A static method that creates a new derived Impulse. A derived Impulse is an Impulse that does not have its own value but reads it from an external source and writes it back to the source when the value changes. An external source is usually another Impulse or other Impulses.
+
+<details><summary><i>Showcase: derived from Impulse</i></summary>
 <blockquote>
 
 ```tsx
-import { useSearchParams } from "react-router-dom"
+const Drawer: React.FC<{
+  isOpen: Impulse<boolean>
+  children: React.ReactNode
+}> = ({ isOpen, children }) => {
+  const scope = useScope()
 
-const PageNavigation: React.FC = () => {
-  const [{ page_index = 1 }, setSearchParams] = useSearchParams()
-
-  const [page] = React.useState(Impulse.of(page_index))
-
-  React.useEffect(() => {
-    // sync the param with the Impulse
-    page.setValue(page_index)
-  }, [page, page_index])
-
-  useScopedEffect(
-    (scope) => {
-      // sync the Impulse with the param
-      setSearchParams({ page_index: page.getValue(scope) })
-    },
-    [page, setSearchParams],
-  )
+  if (!isOpen.getValue(scope)) {
+    return null
+  }
 
   return (
-    <button type="button" onClick={() => page.setValue((x) => x + 1)}>
-      Go to the next page
-    </button>
+    <div className="drawer">
+      {children}
+
+      <button type="button" onClick={() => isOpen.setValue(false)}>
+        Close
+      </button>
+    </div>
+  )
+}
+
+const ProductDetailsDrawer: React.FC<{
+  product: Impulse<undefined | Product>
+}> = ({ product }) => {
+  const isOpen = React.useMemo(() => {
+    return Impulse.of(
+      (scope) => product.getValue(scope) != null,
+      (open) => {
+        if (!open) {
+          product.setValue(undefined)
+        }
+      },
+    )
+  }, [product])
+
+  return (
+    <Drawer isOpen={isOpen}>
+      <ProductDetails product={product} />
+    </Drawer>
+  )
+}
+```
+
+</blockquote>
+</details>
+
+<details><summary><i>Showcase: derived from many Impulses</i></summary>
+<blockquote>
+
+```tsx
+const Checkbox: React.FC<{
+  checked: Impulse<boolean>
+}> = ({ checked, children }) => {
+  const scope = useScope()
+
+  return (
+    <input
+      type="checkbox"
+      checked={checked.getValue(scope)}
+      onChange={(event) => checked.setValue(event.target.checked)}
+    />
+  )
+}
+
+const Agreements: React.FC<{
+  isAgreeWithTermsOfUse: Impulse<boolean>
+  isAgreeWithPrivacy: Impulse<boolean>
+}> = ({ isAgreeWithTermsOfUse, isAgreeWithPrivacy }) => {
+  const isAgreeWithAll = React.useMemo(() => {
+    return Impulse.of(
+      (scope) =>
+        isAgreeWithTermsOfUse.getValue(scope) &&
+        isAgreeWithPrivacy.getValue(scope),
+      (agree) => {
+        isAgreeWithTermsOfUse.setValue(agree)
+        isAgreeWithPrivacy.setValue(agree)
+      },
+    )
+  }, [isAgreeWithTermsOfUse, isAgreeWithPrivacy])
+
+  return (
+    <div>
+      <Checkbox checked={isAgreeWithTermsOfUse}>
+        I agree with terms of use
+      </Checkbox>
+      <Checkbox checked={isAgreeWithPrivacy}>
+        I agree with privacy policy
+      </Checkbox>
+
+      <hr />
+
+      <Checkbox checked={isAgreeWithAll}>I agree with all</Checkbox>
+    </div>
   )
 }
 ```
@@ -434,7 +391,7 @@ Impulse<T>#clone(
 ): Impulse<T>
 ```
 
-An `Impulse` instance's method for cloning an Impulse. When cloning a transmitting Impulse, the new Impulse is not transmitting, meaning that it does not read nor write the value from/to the external source.
+An `Impulse` instance's method for cloning an Impulse. When cloning a derived Impulse, the new Impulse is not deriving, meaning that it does not read nor write the value from/to the external source but instead it holds the derived value on the moment of cloning.
 
 - `[transform]` is an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
 - `[options]` is optional [`ImpulseOptions`][impulse_options] object.
@@ -712,23 +669,13 @@ interface ImpulseOptions<T> {
 
 - `[compare]` is an optional [`Compare`][compare] function that determines whether or not a new Impulse's value replaces the current one. In many cases specifying the function leads to better performance because it prevents unnecessary updates. But keep an eye on the balance between the performance and the complexity of the function - sometimes it might be better to replace the value without heavy comparisons.
 
-### `interface TransmittingImpulseOptions`
-
-```ts
-interface TransmittingImpulseOptions<T> {
-  compare?: null | Compare<T>
-}
-```
-
-- `[compare]` is an optional [`Compare`][compare] function that determines whether or not a transmitting value changes when reading it from an external source.
-
-  <details><summary><i>Showcase: use compare function in transmitting Impulse</i></summary>
+  <details><summary><i>Showcase: use compare function in derived Impulse</i></summary>
   <blockquote>
 
   ```ts
   const source = Impulse.of(1)
 
-  const counter_1 = Impulse.transmit(
+  const counter_1 = Impulse.of(
     // the getter function creates a new object on every read
     (scope) => ({ count: source.getValue(scope) }),
     ({ count }) => source.setValue(count),
@@ -740,10 +687,10 @@ interface TransmittingImpulseOptions<T> {
     counter_1.getValue(scope) === counter_1.getValue(scope) // false
   })
 
-  // let's transmit the value but with compare function defined
-  const counter_2 = Impulse.transmit(
+  // let's derive the value but with compare function defined
+  const counter_2 = Impulse.of(
     // the getter function creates a new object on every read
-    // but if they are compared equal, the transmitting value is not changed
+    // but if they are comparably equal then the getter function returns the same object
     (scope) => ({ count: source.getValue(scope) }),
     ({ count }) => source.setValue(count),
     {
@@ -797,7 +744,7 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
 <!-- L I N K S -->
 
 [impulse__of]: #impulseof
-[impulse__transmit]: #impulsetransmit
+[impulse__of_derived]: #impulseof-derived
 [impulse__clone]: #impulseclone
 [impulse__get_value]: #impulsegetvalue
 [impulse__set_value]: #impulsesetvalue
@@ -814,7 +761,6 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
 [impulse_getter]: #interface-impulsegetter
 [impulse_setter]: #interface-impulsesetter
 [impulse_options]: #interface-impulseoptions
-[transmitting_impulse_options]: #interface-transmittingimpulseoptions
 [use_scoped_options]: #interface-useScopedoptions
 [compare]: #type-compare
 

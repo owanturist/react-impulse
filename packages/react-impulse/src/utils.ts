@@ -32,6 +32,13 @@ export function isFunction<
   return typeof anything === "function"
 }
 
+export function hasProperty<TKey extends PropertyKey>(
+  input: unknown,
+  key: TKey,
+): input is Record<TKey, unknown> {
+  return typeof input === "object" && input != null && key in input
+}
+
 export function useHandler<TArgs extends ReadonlyArray<unknown>, TResult>(
   handler: Func<TArgs, TResult>,
 ): Func<TArgs, TResult> {
