@@ -99,7 +99,7 @@ describe("Impulse.of(value, options?)", () => {
   })
 })
 
-describe("Impulse.transmit(getter, options?)", () => {
+describe("Impulse.of(getter, options?)", () => {
   it("creates a ReadonlyImpulse", () => {
     const impulse = Impulse.of(() => 0)
 
@@ -252,7 +252,7 @@ describe("Impulse.transmit(getter, options?)", () => {
   })
 })
 
-describe("Impulse.transmit(getter, setter, options?)", () => {
+describe("Impulse.of(getter, setter, options?)", () => {
   it("creates an Impulse", () => {
     let variable = 0
     const impulse = Impulse.of(
@@ -420,7 +420,7 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     const impulse_1 = Impulse.of(1)
     const impulse_2 = Impulse.of(2)
     const impulse_3 = Impulse.of(3)
-    const transmit = Impulse.of(
+    const derived = Impulse.of(
       (scope) => {
         return (
           impulse_1.getValue(scope) +
@@ -440,7 +440,7 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
       return useScoped((scope) => {
         spy()
 
-        return transmit.getValue(scope)
+        return derived.getValue(scope)
       }, [])
     })
 
@@ -449,7 +449,7 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     vi.clearAllMocks()
 
     act(() => {
-      transmit.setValue(4)
+      derived.setValue(4)
     })
 
     expect(result.current).toBe(12)
@@ -457,7 +457,7 @@ describe("Impulse.transmit(getter, setter, options?)", () => {
     vi.clearAllMocks()
 
     act(() => {
-      transmit.setValue(4)
+      derived.setValue(4)
     })
 
     expect(result.current).toBe(12)
@@ -644,7 +644,7 @@ function setupImpulse<T>(initialValue: T, options?: ImpulseOptions<T>) {
   return { impulse }
 }
 
-function setupTransmittingImpulseFromGlobalVariable<T>(
+function setupDerivedImpulseFromGlobalVariable<T>(
   initialValue: T,
   options?: ImpulseOptions<T>,
 ) {
@@ -667,7 +667,7 @@ function setupTransmittingImpulseFromGlobalVariable<T>(
   }
 }
 
-function setupTransmittingImpulseFromImpulse({
+function setupDerivedImpulseFromImpulse({
   getterShortcut,
   setterShortcut,
 }: {
@@ -695,38 +695,38 @@ function setupTransmittingImpulseFromImpulse({
 describe.each([
   ["DirectImpulse", setupImpulse],
   [
-    "TransmittingImpulse from a global variable",
-    setupTransmittingImpulseFromGlobalVariable,
+    "Derived Impulse from a global variable",
+    setupDerivedImpulseFromGlobalVariable,
   ],
   [
-    "TransmittingImpulse from an Impulse",
-    setupTransmittingImpulseFromImpulse({
+    "Derived Impulse from an Impulse",
+    setupDerivedImpulseFromImpulse({
       getterShortcut: false,
       setterShortcut: false,
     }),
   ],
   [
-    "TransmittingImpulse from an Impulse with getter shortcut",
-    setupTransmittingImpulseFromImpulse({
+    "Derived Impulse from an Impulse with getter shortcut",
+    setupDerivedImpulseFromImpulse({
       getterShortcut: true,
       setterShortcut: false,
     }),
   ],
   [
-    "TransmittingImpulse from an Impulse with setter shortcut",
-    setupTransmittingImpulseFromImpulse({
+    "Derived Impulse from an Impulse with setter shortcut",
+    setupDerivedImpulseFromImpulse({
       getterShortcut: false,
       setterShortcut: true,
     }),
   ],
   [
-    "TransmittingImpulse from an Impulse with both getter and setter shortcuts",
-    setupTransmittingImpulseFromImpulse({
+    "Derived Impulse from an Impulse with both getter and setter shortcuts",
+    setupDerivedImpulseFromImpulse({
       getterShortcut: true,
       setterShortcut: true,
     }),
   ],
-])("Impulse.transmit() from %s", (_, setup) => {
+])("Impulse.of() from %s", (_, setup) => {
   describe("Impulse#setValue(value)", () => {
     const { impulse } = setup({ count: 0 })
 

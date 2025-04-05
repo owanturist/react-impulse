@@ -8,7 +8,7 @@ The `useTransmittingImpulse` hook has been removed. Use the following replacemen
 
 #### Migration Guide
 
-- For immutable dependencies (not Impulses), replace with `Impulse.of`:
+- For immutable dependencies (not Impulses), replace with `Impulse.of(value)`:
 
   ```ts
   // Before
@@ -28,7 +28,7 @@ The `useTransmittingImpulse` hook has been removed. Use the following replacemen
   )
   ```
 
-- For mutable dependencies (other Impulses), replace with `Impulse.transmit`:
+- For mutable dependencies (other Impulses), replace with `Impulse.of(getter, [setter])`:
 
   ```ts
   // Before
@@ -36,7 +36,7 @@ The `useTransmittingImpulse` hook has been removed. Use the following replacemen
 
   // After
   const counter = useMemo(() =>
-    Impulse.transmit(
+    Impulse.of(
       (scope) => ({ count: count.getValue(scope) }),
       (next) => count.setValue(next.count),
     ),

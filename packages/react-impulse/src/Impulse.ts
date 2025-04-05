@@ -17,13 +17,6 @@ export interface ImpulseOptions<T> {
   readonly compare?: null | Compare<T>
 }
 
-export interface TransmittingImpulseOptions<T> {
-  /**
-   * The compare function determines whether or not a transmitting value changes when reading it from an external source.
-   */
-  readonly compare?: null | Compare<T>
-}
-
 export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
 
 export interface ImpulseGetter<T> {
@@ -111,10 +104,10 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   public static of<T = undefined>(): Impulse<undefined | T>
 
   /**
-   * Creates a new transmitting ReadonlyImpulse.
-   * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source.
+   * Creates a new derived ReadonlyImpulse.
+   * A derived Impulse is an Impulse that does not have its own value but reads it from the external source.
    *
-   * @param getter a function to read the transmitting value from a source.
+   * @param getter a function to read the derived value from a source.
    * @param options optional `ImpulseOptions`.
    * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
    *
@@ -126,11 +119,11 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   ): ReadonlyImpulse<T>
 
   /**
-   * Creates a new transmitting Impulse.
-   * A transmitting Impulse is an Impulse that does not have its own value but reads it from the external source and writes it back.
+   * Creates a new derived Impulse.
+   * A derived Impulse is an Impulse that does not have its own value but reads it from the external source and writes it back.
    *
-   * @param getter either anything that implements the `ImpulseGetter` interface or a function to read the transmitting value from the source.
-   * @param setter either anything that implements the `ImpulseSetter` interface or a function to write the transmitting value back to the source.
+   * @param getter either anything that implements the `ImpulseGetter` interface or a function to read the derived value from the source.
+   * @param setter either anything that implements the `ImpulseSetter` interface or a function to write the derived value back to the source.
    * @param options optional `ImpulseOptions`.
    * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
    *
@@ -342,7 +335,7 @@ class DerivedImpulse<T> extends Impulse<T> {
   protected _setter(value: T): boolean {
     this._setValue(value, STATIC_SCOPE)
 
-    // should always emit because the transmitting value might be not reactive
+    // should always emit because the deriving value might be not reactive
     // so the _getter method does not know about the change of such values
     return true
   }

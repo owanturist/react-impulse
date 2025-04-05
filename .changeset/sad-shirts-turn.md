@@ -20,10 +20,10 @@ These interfaces allow more flexible usage patterns and third-party integrations
   function useScoped<TValue>(impulse: ImpulseGetter<TValue>): TValue
   ```
 - ```dart
-  Impulse.transmit<T>(
+  Impulse.of<T>(
     getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
     setter: ImpulseSetter<T> | ((value: T, scope: Scope) => void),
-    options?: TransmittingImpulseOptions<T>,
+    options?: ImpulseOptions<T>,
   ): Impulse<T>
   ```
 - ```dart

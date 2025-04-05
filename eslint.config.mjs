@@ -302,8 +302,7 @@ export default tseslint.config([
       "react-hooks/exhaustive-deps": [
         "error",
         {
-          additionalHooks:
-            "(use(\\w+)(Memo|Effect)|useScoped|useTransmittingImpulse)",
+          additionalHooks: "(use(\\w+)(Memo|Effect)|useScoped)",
         },
       ],
       "react-hooks/rules-of-hooks": "error",
