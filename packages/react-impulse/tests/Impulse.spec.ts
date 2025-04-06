@@ -128,14 +128,12 @@ describe("Impulse.of(getter, options?)", () => {
     const spy = vi.fn()
 
     expect(source).toHaveEmittersSize(0)
-    expect(impulse).toHaveEmittersSize(0)
 
     const unsubscribe = subscribe((scope) => {
       spy(impulse.getValue(scope))
     })
 
     expect(source).toHaveEmittersSize(1)
-    expect(impulse).toHaveEmittersSize(1)
     expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 0 })
     vi.clearAllMocks()
 
@@ -149,10 +147,8 @@ describe("Impulse.of(getter, options?)", () => {
     expect(spy).not.toHaveBeenCalled()
 
     expect(source).toHaveEmittersSize(1)
-    expect(impulse).toHaveEmittersSize(1)
     unsubscribe()
     expect(source).toHaveEmittersSize(0)
-    expect(impulse).toHaveEmittersSize(0)
   })
 
   it("cannot subscribe to none-Impulse source", () => {
@@ -461,7 +457,7 @@ describe("Impulse.of(getter, setter, options?)", () => {
     })
 
     expect(result.current).toBe(12)
-    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).not.toHaveBeenCalled()
   })
 })
 

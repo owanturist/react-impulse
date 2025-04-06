@@ -168,8 +168,6 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     )
   }
 
-  private readonly _emitters = new Set<ScopeEmitter>()
-
   protected constructor(protected readonly _compare: Compare<T>) {}
 
   /**
@@ -200,7 +198,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   }
 
   protected abstract _getter(scope: Scope): T
-  protected abstract _setter(value: T): boolean
+  protected abstract _setter(value: T): undefined | Set<ScopeEmitter>
 
   /**
    * Creates a new Impulse instance out of the current one with the same value.
@@ -249,8 +247,6 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
    * @version 1.0.0
    */
   public getValue(scope: Scope): T {
-    scope[EMITTER_KEY]?._attachTo(this._emitters)
-
     return this._getter(scope)
   }
 
@@ -271,14 +267,18 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
         ? valueOrTransform(this._getter(STATIC_SCOPE), STATIC_SCOPE)
         : valueOrTransform
 
-      if (this._setter(nextValue)) {
-        queue.push(this._emitters)
+      const emitters = this._setter(nextValue)
+
+      if (emitters) {
+        queue.push(emitters)
       }
     })
   }
 }
 
 class DirectImpulse<T> extends Impulse<T> {
+  private readonly _emitters = new Set<ScopeEmitter>()
+
   public constructor(
     private _value: T,
     compare: Compare<T>,
@@ -286,18 +286,22 @@ class DirectImpulse<T> extends Impulse<T> {
     super(compare)
   }
 
-  protected _getter(): T {
+  protected _getter(scope: Scope): T {
+    scope[EMITTER_KEY]?._attachTo(this._emitters)
+
     return this._value
   }
 
-  protected _setter(value: T): boolean {
-    const isDifferent = !this._compare(this._value, value, STATIC_SCOPE)
+  protected _setter(value: T): undefined | Set<ScopeEmitter> {
+    const isValueSame = this._compare(this._value, value, STATIC_SCOPE)
 
-    if (isDifferent) {
-      this._value = value
+    if (isValueSame) {
+      return undefined
     }
 
-    return isDifferent
+    this._value = value
+
+    return this._emitters
   }
 }
 
@@ -325,11 +329,10 @@ class DerivedImpulse<T> extends Impulse<T> {
     return this._lazy.value
   }
 
-  protected _setter(value: T): boolean {
+  protected _setter(value: T): undefined {
     this._setValue(value, STATIC_SCOPE)
 
-    // should always emit because the deriving value might be not reactive
-    // so the _getter method does not know about the change of such values
-    return true
+    // a derived Impulse has no own emitters
+    return undefined
   }
 }
