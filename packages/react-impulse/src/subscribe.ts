@@ -1,7 +1,7 @@
 import { EMITTER_KEY, type Scope, injectScope } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 import { batch } from "./batch"
-import { noop, type Destructor } from "./utils"
+import type { Destructor } from "./utils"
 
 /**
  * A function that provides `Scope` as the first argument subscribes to changes of all `Impulse` instances that call the `Impulse#getValue` method inside the `listener`.
@@ -12,7 +12,7 @@ import { noop, type Destructor } from "./utils"
 export function subscribe(
   listener: (scope: Scope) => Destructor,
 ): VoidFunction {
-  let cleanup: Destructor = noop
+  let cleanup: Destructor = undefined
   const emitter = ScopeEmitter._init()
 
   const emit = (): void => {
