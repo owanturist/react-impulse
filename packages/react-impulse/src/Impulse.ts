@@ -302,7 +302,7 @@ class DirectImpulse<T> extends Impulse<T> {
 }
 
 class DerivedImpulse<T> extends Impulse<T> {
-  private _value?: { _lazy: T }
+  private _lazy?: { value: T }
 
   public constructor(
     private readonly _getValue: Func<[Scope], T>,
@@ -316,13 +316,13 @@ class DerivedImpulse<T> extends Impulse<T> {
     const value = this._getValue(scope)
 
     if (
-      this._value == null ||
-      !this._compare(this._value._lazy, value, STATIC_SCOPE)
+      this._lazy == null ||
+      !this._compare(this._lazy.value, value, STATIC_SCOPE)
     ) {
-      this._value = { _lazy: value }
+      this._lazy = { value }
     }
 
-    return this._value._lazy
+    return this._lazy.value
   }
 
   protected _setter(value: T): boolean {
