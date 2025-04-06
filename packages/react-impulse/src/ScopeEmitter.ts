@@ -43,9 +43,7 @@ export class ScopeEmitter {
 
   private _version = 0
 
-  private constructor(private readonly _emit: VoidFunction) {
-    // do not allow to create an instance directly
-  }
+  private constructor(private readonly _emit: VoidFunction) {}
 
   public _cleanup(): void {
     for (const cleanup of this._cleanups) {

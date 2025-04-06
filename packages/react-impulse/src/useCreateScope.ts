@@ -16,7 +16,7 @@ export function useCreateScope<T = Func<[], Scope>>(
   transform?: Func<[Scope], T>,
   compare?: Func<[T, T], boolean>,
 ): T {
-  const emitRef = useRef<VoidFunction>(undefined)
+  const emitRef = useRef<null | VoidFunction>(null)
   const { emitter, onEmit } = usePermanent(() => ({
     emitter: ScopeEmitter._init(() => emitRef.current?.()),
     onEmit: (emit: VoidFunction) => {
