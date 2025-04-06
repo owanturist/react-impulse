@@ -306,7 +306,21 @@ class DirectImpulse<T> extends Impulse<T> {
 }
 
 class DerivedImpulse<T> extends Impulse<T> {
-  private _lazy?: { _value: T }
+  private readonly _scope = {
+    [EMITTER_KEY]: ScopeEmitter._init(() => {
+      ScopeEmitter._schedule((queue) => {
+        if (this._lazy) {
+          this._lazy._shouldChange = true
+        }
+
+        queue.push(this._dependencies)
+      })
+    }),
+  } satisfies Scope
+
+  private readonly _dependencies = new Set<ScopeEmitter>()
+
+  private _lazy?: { _shouldChange: boolean; _value: T }
 
   public constructor(
     private readonly _getValue: Func<[Scope], T>,
@@ -317,13 +331,24 @@ class DerivedImpulse<T> extends Impulse<T> {
   }
 
   protected _getter(scope: Scope): T {
-    const value = this._getValue(scope)
+    scope[EMITTER_KEY]?._attachTo(this._dependencies)
 
-    if (
-      this._lazy == null ||
-      !this._compare(this._lazy._value, value, STATIC_SCOPE)
-    ) {
-      this._lazy = { _value: value }
+    if (!this._lazy) {
+      const value = this._getValue(this._scope)
+      this._lazy = { _shouldChange: false, _value: value }
+
+      return value
+    }
+
+    if (!this._lazy._shouldChange) {
+      return this._lazy._value
+    }
+
+    const value = this._getValue(this._scope)
+
+    if (!this._compare(this._lazy._value, value, STATIC_SCOPE)) {
+      this._lazy._shouldChange = false
+      this._lazy._value = value
     }
 
     return this._lazy._value

@@ -12,6 +12,7 @@ import {
 } from "../src"
 
 import { Counter } from "./common"
+import { useState } from "react"
 
 const isString = (value: unknown): value is string => typeof value === "string"
 
@@ -164,6 +165,78 @@ describe("Impulse.of(getter, options?)", () => {
 
     variable = 1
     expect(spy).not.toHaveBeenCalled()
+  })
+
+  it.only("returns the same value on subsequent calls", () => {
+    const source = Impulse.of(0)
+    const derived = Impulse.of((scope) => ({ count: source.getValue(scope) }))
+
+    const { result: first } = renderHook(() => {
+      const [, force] = useState(0)
+
+      return {
+        force,
+        counter: useScoped((scope) => derived.getValue(scope)),
+      }
+    })
+
+    const { result: second } = renderHook(() => {
+      const [, force] = useState(0)
+
+      return {
+        force,
+        counter: useScoped((scope) => derived.getValue(scope)),
+      }
+    })
+
+    expect(source).toHaveEmittersSize(1)
+
+    const initial = first.current.counter
+    expect(first.current.counter).toBe(second.current.counter)
+    expect(initial).toStrictEqual({ count: 0 })
+
+    act(() => {
+      first.current.force((prev) => prev + 1)
+    })
+
+    expect(initial).toBe(first.current.counter)
+    expect(initial).toBe(second.current.counter)
+
+    act(() => {
+      second.current.force((prev) => prev + 1)
+    })
+
+    expect(initial).toBe(first.current.counter)
+    expect(initial).toBe(second.current.counter)
+
+    act(() => {
+      source.setValue(1)
+      source.setValue(2)
+    })
+
+    expect(initial).not.toBe(first.current.counter)
+    expect(initial).not.toBe(second.current.counter)
+    expect(first.current.counter).toBe(second.current.counter)
+    expect(first.current.counter).toStrictEqual({ count: 2 })
+    expect(source).toHaveEmittersSize(1)
+  })
+
+  it.only("returns the same value for subsequent calls with static scope", ({
+    scope,
+  }) => {
+    const source = Impulse.of(0)
+    const derived = Impulse.of((scope) => ({ count: source.getValue(scope) }))
+
+    expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
+    expect(derived.getValue(scope)).toBe(derived.getValue(scope))
+    expect(source).toHaveEmittersSize(1)
+
+    act(() => {
+      source.setValue(1)
+    })
+
+    expect(derived.getValue(scope)).toStrictEqual({ count: 1 })
+    expect(source).toHaveEmittersSize(1)
   })
 
   it("does not call compare on init", () => {
