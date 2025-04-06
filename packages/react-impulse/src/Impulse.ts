@@ -1,5 +1,5 @@
 import { type Func, type Compare, eq, isFunction, hasProperty } from "./utils"
-import { EMITTER_KEY, type Scope, extractScope, STATIC_SCOPE } from "./Scope"
+import { EMITTER_KEY, type Scope, extractScope, foo } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 
 export interface ImpulseOptions<T> {
@@ -182,9 +182,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
    * @version 1.0.0
    */
   protected toJSON(): unknown {
-    const scope = extractScope()
-
-    return this.getValue(scope)
+    return extractScope((scope) => this.getValue(scope))
   }
 
   /**
@@ -194,9 +192,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
    * @version 1.0.0
    */
   protected toString(): string {
-    const scope = extractScope()
-
-    return String(this.getValue(scope))
+    return String(this.toJSON())
   }
 
   protected abstract _getter(scope: Scope): T
@@ -230,15 +226,17 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     transformOrOptions?: Func<[T, Scope], T> | ImpulseOptions<T>,
     maybeOptions?: ImpulseOptions<T>,
   ): Impulse<T> {
-    const value = this._getter(STATIC_SCOPE)
+    return foo((scope) => {
+      const value = this._getter(scope)
 
-    const [clonedValue, { compare = this._compare } = {}] = isFunction(
-      transformOrOptions,
-    )
-      ? [transformOrOptions(value, STATIC_SCOPE), maybeOptions]
-      : [value, transformOrOptions]
+      const [clonedValue, { compare = this._compare } = {}] = isFunction(
+        transformOrOptions,
+      )
+        ? [transformOrOptions(value, scope), maybeOptions]
+        : [value, transformOrOptions]
 
-    return new DirectImpulse(clonedValue, compare ?? eq)
+      return new DirectImpulse(clonedValue, compare ?? eq)
+    })
   }
 
   /**
@@ -249,7 +247,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
    * @version 1.0.0
    */
   public getValue(scope: Scope): T {
-    scope[EMITTER_KEY]?._attachTo(this._emitters)
+    scope[EMITTER_KEY]._attachTo(this._emitters)
 
     return this._getter(scope)
   }
@@ -268,7 +266,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   ): void {
     ScopeEmitter._schedule((queue) => {
       const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(this._getter(STATIC_SCOPE), STATIC_SCOPE)
+        ? foo((scope) => valueOrTransform(this._getter(scope), scope))
         : valueOrTransform
 
       if (this._setter(nextValue)) {
@@ -291,7 +289,9 @@ class DirectImpulse<T> extends Impulse<T> {
   }
 
   protected _setter(value: T): boolean {
-    const isDifferent = !this._compare(this._value, value, STATIC_SCOPE)
+    const isDifferent = foo(
+      (scope) => !this._compare(this._value, value, scope),
+    )
 
     if (isDifferent) {
       this._value = value
@@ -302,7 +302,7 @@ class DirectImpulse<T> extends Impulse<T> {
 }
 
 class DerivedImpulse<T> extends Impulse<T> {
-  private _value?: { _lazy: T }
+  private _lazy?: { _value: T }
 
   public constructor(
     private readonly _getValue: Func<[Scope], T>,
@@ -314,19 +314,24 @@ class DerivedImpulse<T> extends Impulse<T> {
 
   protected _getter(scope: Scope): T {
     const value = this._getValue(scope)
+    const lazy = this._lazy
 
     if (
-      this._value == null ||
-      !this._compare(this._value._lazy, value, STATIC_SCOPE)
+      lazy == null ||
+      foo((scope) => !this._compare(lazy._value, value, scope))
     ) {
-      this._value = { _lazy: value }
+      this._lazy = { _value: value }
+
+      return value
     }
 
-    return this._value._lazy
+    return lazy._value
   }
 
   protected _setter(value: T): boolean {
-    this._setValue(value, STATIC_SCOPE)
+    foo((scope) => {
+      this._setValue(value, scope)
+    })
 
     // should always emit because the deriving value might be not reactive
     // so the _getter method does not know about the change of such values

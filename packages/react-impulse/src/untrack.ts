@@ -1,6 +1,5 @@
 import type { ImpulseGetter } from "./Impulse"
-import { STATIC_SCOPE, type Scope } from "./Scope"
-import { ScopeEmitter } from "./ScopeEmitter"
+import { foo, type Scope } from "./Scope"
 import { type Func, isFunction } from "./utils"
 
 /**
@@ -29,11 +28,11 @@ export function untrack<TValue>(impulse: ImpulseGetter<TValue>): TValue
 export function untrack<T>(
   factoryOrImpulseGetter: ImpulseGetter<T> | Func<[Scope], T>,
 ): T {
-  return ScopeEmitter._schedule(() => {
+  return foo((scope) => {
     if (isFunction(factoryOrImpulseGetter)) {
-      return factoryOrImpulseGetter(STATIC_SCOPE)
+      return factoryOrImpulseGetter(scope)
     }
 
-    return factoryOrImpulseGetter.getValue(STATIC_SCOPE)
+    return factoryOrImpulseGetter.getValue(scope)
   })
 }

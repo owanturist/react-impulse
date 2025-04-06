@@ -1,5 +1,4 @@
-import { STATIC_SCOPE, type Scope } from "./Scope"
-import { ScopeEmitter } from "./ScopeEmitter"
+import { foo, type Scope } from "./Scope"
 
 /**
  * A helper to optimize multiple Impulse updates.
@@ -9,7 +8,5 @@ import { ScopeEmitter } from "./ScopeEmitter"
  * @version 1.0.0
  */
 export function batch(execute: (scope: Scope) => void): void {
-  ScopeEmitter._schedule(() => {
-    execute(STATIC_SCOPE)
-  })
+  foo(execute)
 }

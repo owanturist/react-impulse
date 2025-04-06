@@ -1,18 +1,30 @@
-import type { ScopeEmitter } from "./ScopeEmitter"
+import { ScopeEmitter } from "./ScopeEmitter"
 import type { Func } from "./utils"
 
 export const EMITTER_KEY = Symbol("scope")
 
 export interface Scope {
-  readonly [EMITTER_KEY]: null | ScopeEmitter
+  readonly [EMITTER_KEY]: ScopeEmitter
   readonly version?: number
 }
 
-export const STATIC_SCOPE: Scope = {
-  [EMITTER_KEY]: null,
+export function bar(): Scope {
+  return {
+    [EMITTER_KEY]: ScopeEmitter._init(),
+  }
 }
 
-let currentScope = STATIC_SCOPE
+export function foo<TResult>(execute: Func<[Scope], TResult>): TResult {
+  const scope = bar()
+
+  const result = ScopeEmitter._schedule(() => execute(scope))
+
+  scope[EMITTER_KEY]._flush()
+
+  return result
+}
+
+let currentScope: null | Scope = null
 
 export function injectScope<TResult>(
   execute: Func<[Scope], TResult>,
@@ -27,6 +39,12 @@ export function injectScope<TResult>(
   return result
 }
 
-export function extractScope(): Scope {
-  return currentScope
+export function extractScope<TResult>(
+  execute: Func<[Scope], TResult>,
+): TResult {
+  if (currentScope) {
+    return execute(currentScope)
+  }
+
+  return foo(execute)
 }
