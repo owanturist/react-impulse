@@ -64,7 +64,7 @@ export class ScopeEmitter {
     this._cleanup()
   }
 
-  public _getVersion = (): number => {
+  public readonly _getVersion = (): number => {
     return this._version
   }
 }
