@@ -6,7 +6,7 @@
  * @private
  */
 export class ScopeEmitter {
-  public static _init(emit?: VoidFunction): ScopeEmitter {
+  public static _init(emit: VoidFunction): ScopeEmitter {
     return new ScopeEmitter(emit)
   }
 
@@ -26,7 +26,7 @@ export class ScopeEmitter {
 
     for (const emitters of ScopeEmitter._queue) {
       for (const emitter of emitters) {
-        if (emitter._emit != null && !executed.has(emitter)) {
+        if (!executed.has(emitter)) {
           executed.add(emitter)
           emitter._flush()
           emitter._emit()
@@ -43,7 +43,7 @@ export class ScopeEmitter {
 
   private _version = 0
 
-  private constructor(private readonly _emit: undefined | VoidFunction) {}
+  private constructor(private readonly _emit: VoidFunction) {}
 
   public _cleanup(): void {
     for (const cleanup of this._cleanups) {

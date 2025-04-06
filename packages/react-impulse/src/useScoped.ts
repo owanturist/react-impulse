@@ -1,6 +1,6 @@
 import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
 import { type Compare, eq, useHandler, type Func, isFunction } from "./utils"
-import { foo, type Scope } from "./Scope"
+import { STATIC_SCOPE, type Scope } from "./Scope"
 import { useCreateScope } from "./useCreateScope"
 import type { ImpulseGetter } from "./Impulse"
 
@@ -63,7 +63,7 @@ export function useScoped<TResult>(
     useHandler((prev, next) => {
       const compare = options?.compare ?? eq
 
-      return foo((scope) => compare(prev, next, scope))
+      return compare(prev, next, STATIC_SCOPE)
     }),
   )
 
