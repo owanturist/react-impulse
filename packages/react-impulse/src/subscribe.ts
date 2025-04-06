@@ -13,7 +13,6 @@ export function subscribe(
   listener: (scope: Scope) => Destructor,
 ): VoidFunction {
   let cleanup: Destructor = undefined
-  const emitter = ScopeEmitter._init()
 
   const emit = (): void => {
     batch(() => {
@@ -26,13 +25,13 @@ export function subscribe(
     })
   }
 
-  emit()
+  const emitter = ScopeEmitter._init(emit)
 
-  const emitterCleanup = emitter._onEmit(emit)
+  emit()
 
   return () => {
     batch(() => {
-      emitterCleanup()
+      emitter._flush()
       cleanup?.()
     })
   }

@@ -1,5 +1,3 @@
-import { noop } from "./utils"
-
 /**
  * A context to track Impulse#getValue usage inside the factory function.
  * The tracked calls will subscribe related stores to updates,
@@ -8,8 +6,8 @@ import { noop } from "./utils"
  * @private
  */
 export class ScopeEmitter {
-  public static _init(): ScopeEmitter {
-    return new ScopeEmitter()
+  public static _init(emit: VoidFunction): ScopeEmitter {
+    return new ScopeEmitter(emit)
   }
 
   private static _queue: null | Array<ReadonlySet<ScopeEmitter>> = null
@@ -24,22 +22,13 @@ export class ScopeEmitter {
     ScopeEmitter._queue = []
 
     const result = execute(ScopeEmitter._queue)
+    const executed = new WeakSet<ScopeEmitter>()
 
-    const uniq = new WeakSet<VoidFunction>()
-
-    /**
-     * It should iterate over the queue with a for loop because the queue
-     * can mutate during the iteration, so for-of loop will not cover the incoming changes.
-     */
-    // eslint-disable-next-line @typescript-eslint/prefer-for-of
-    for (let index = 0; index < ScopeEmitter._queue.length; index++) {
-      const emitters = ScopeEmitter._queue[index]!
-
+    for (const emitters of ScopeEmitter._queue) {
       for (const emitter of emitters) {
-        if (!uniq.has(emitter._emit)) {
-          uniq.add(emitter._emit)
-          emitter._increment()
-          emitter._detachAll()
+        if (!executed.has(emitter)) {
+          executed.add(emitter)
+          emitter._flush()
           emitter._emit()
         }
       }
@@ -54,17 +43,11 @@ export class ScopeEmitter {
 
   private _version = 0
 
-  private _emit: VoidFunction = noop
-
-  private constructor() {
+  private constructor(private readonly _emit: VoidFunction) {
     // do not allow to create an instance directly
   }
 
-  private _increment(): void {
-    this._version = (this._version + 1) % 10e9
-  }
-
-  public _detachAll(): void {
+  public _cleanup(): void {
     for (const cleanup of this._cleanups) {
       cleanup()
     }
@@ -78,14 +61,9 @@ export class ScopeEmitter {
     }
   }
 
-  public _onEmit = (emit: VoidFunction): VoidFunction => {
-    this._emit = emit
-
-    return () => {
-      this._increment()
-      this._detachAll()
-      this._emit = noop
-    }
+  public _flush(): void {
+    this._version = (this._version + 1) % 10e9
+    this._cleanup()
   }
 
   public _getVersion = (): number => {
