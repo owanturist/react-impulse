@@ -1,11 +1,4 @@
-import {
-  type Func,
-  type Compare,
-  eq,
-  noop,
-  isFunction,
-  hasProperty,
-} from "./utils"
+import { type Func, type Compare, eq, isFunction, hasProperty } from "./utils"
 import { EMITTER_KEY, type Scope, extractScope, STATIC_SCOPE } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 
@@ -164,13 +157,13 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     const [setter, options] =
       isFunction(optionsOrSetter) || hasProperty(optionsOrSetter, "setValue")
         ? [optionsOrSetter, optionsOrNothing]
-        : [noop, optionsOrSetter]
+        : [undefined, optionsOrSetter]
 
     return new DerivedImpulse(
       isGetterFunction
         ? initialValueOrGetter
         : (scope) => initialValueOrGetter.getValue(scope),
-      isFunction(setter) ? setter : (value) => setter.setValue(value),
+      isFunction(setter) ? setter : (value) => setter?.setValue(value),
       options?.compare ?? eq,
     )
   }
