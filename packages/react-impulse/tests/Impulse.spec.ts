@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react"
+import { useState } from "react"
 
 import {
   type ReadonlyImpulse,
@@ -12,7 +13,6 @@ import {
 } from "../src"
 
 import { Counter } from "./common"
-import { useState } from "react"
 
 const isString = (value: unknown): value is string => typeof value === "string"
 
@@ -320,7 +320,78 @@ describe("Impulse.of(getter, options?)", () => {
     expect(source).toHaveEmittersSize(1)
   })
 
-  it.todo("verify it causes 1 re-render caused by dependency update")
+  it("causes a single re-render caused by dependency update", () => {
+    const source = Impulse.of(0)
+    const derived = Impulse.of((scope) => ({ count: source.getValue(scope) }))
+
+    const spy = vi.fn()
+
+    renderHook(() => {
+      const counter = useScoped((scope) => derived.getValue(scope))
+
+      spy(counter)
+    })
+
+    expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 0 })
+    vi.clearAllMocks()
+
+    act(() => {
+      source.setValue(0)
+    })
+    expect(spy).not.toHaveBeenCalled()
+
+    act(() => {
+      source.setValue(1)
+    })
+    expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 1 })
+  })
+
+  it("do not re-subscribe to dependencies when they are not in use", () => {
+    const source = Impulse.of(1)
+    const condition = Impulse.of(false)
+    const derived = Impulse.of((scope) => ({
+      count: condition.getValue(scope) ? source.getValue(scope) : 0,
+    }))
+
+    const { result } = renderHook(() =>
+      useScoped((scope) => derived.getValue(scope)),
+    )
+
+    const initial = result.current
+    expect(initial).toStrictEqual({ count: 0 })
+    expect(source).toHaveEmittersSize(0)
+    expect(condition).toHaveEmittersSize(1)
+
+    act(() => {
+      source.setValue(0)
+    })
+    expect(result.current).toBe(initial)
+    expect(source).toHaveEmittersSize(0)
+    expect(condition).toHaveEmittersSize(1)
+
+    act(() => {
+      condition.setValue(true)
+    })
+    expect(result.current).not.toBe(initial)
+    expect(result.current).toStrictEqual({ count: 0 })
+    expect(source).toHaveEmittersSize(1)
+    expect(condition).toHaveEmittersSize(1)
+
+    act(() => {
+      source.setValue(1)
+    })
+    expect(result.current).toStrictEqual({ count: 1 })
+    expect(source).toHaveEmittersSize(1)
+    expect(condition).toHaveEmittersSize(1)
+
+    act(() => {
+      condition.setValue(false)
+    })
+    expect(result.current).not.toBe(initial)
+    expect(result.current).toStrictEqual({ count: 0 })
+    expect(source).toHaveEmittersSize(0)
+    expect(condition).toHaveEmittersSize(1)
+  })
 
   it("does not call compare on init", () => {
     const source = Impulse.of({ count: 0 })
