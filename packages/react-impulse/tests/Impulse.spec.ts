@@ -167,7 +167,52 @@ describe("Impulse.of(getter, options?)", () => {
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it.only("returns the same value on subsequent calls", () => {
+  it.only("does not recalculate the value on subsequent calls", () => {
+    const source = Impulse.of(0)
+    const derived = Impulse.of((scope) => ({ count: source.getValue(scope) }))
+
+    const { result: first } = renderHook(() =>
+      useScoped((scope) => derived.getValue(scope)),
+    )
+
+    const { result: second } = renderHook(() =>
+      useScoped((scope) => derived.getValue(scope)),
+    )
+
+    expect(source).toHaveEmittersSize(1)
+
+    const initial = first.current
+    expect(first.current).toBe(second.current)
+    expect(initial).toStrictEqual({ count: 0 })
+  })
+
+  // TODO
+  it.only("does not recalculate the value on subsequent re-renders", () => {
+    const source = Impulse.of(0)
+    const derived = Impulse.of((scope) => ({ count: source.getValue(scope) }))
+
+    const { result: first, rerender: rerenderFirst } = renderHook(() =>
+      useScoped((scope) => derived.getValue(scope)),
+    )
+
+    const { result: second, rerender: rerenderSecond } = renderHook(() =>
+      useScoped((scope) => derived.getValue(scope)),
+    )
+
+    expect(source).toHaveEmittersSize(1)
+
+    const initial = first.current
+
+    rerenderFirst()
+    rerenderSecond()
+
+    expect(initial).toBe(first.current)
+    expect(initial).toBe(second.current)
+
+    expect(source).toHaveEmittersSize(1)
+  })
+
+  it.only("does not recalculate the value on subsequent inner state updates", () => {
     const source = Impulse.of(0)
     const derived = Impulse.of((scope) => ({ count: source.getValue(scope) }))
 
@@ -192,15 +237,10 @@ describe("Impulse.of(getter, options?)", () => {
     expect(source).toHaveEmittersSize(1)
 
     const initial = first.current.counter
-    expect(first.current.counter).toBe(second.current.counter)
-    expect(initial).toStrictEqual({ count: 0 })
 
     act(() => {
       first.current.force((prev) => prev + 1)
     })
-
-    expect(initial).toBe(first.current.counter)
-    expect(initial).toBe(second.current.counter)
 
     act(() => {
       second.current.force((prev) => prev + 1)
@@ -209,19 +249,10 @@ describe("Impulse.of(getter, options?)", () => {
     expect(initial).toBe(first.current.counter)
     expect(initial).toBe(second.current.counter)
 
-    act(() => {
-      source.setValue(1)
-      source.setValue(2)
-    })
-
-    expect(initial).not.toBe(first.current.counter)
-    expect(initial).not.toBe(second.current.counter)
-    expect(first.current.counter).toBe(second.current.counter)
-    expect(first.current.counter).toStrictEqual({ count: 2 })
     expect(source).toHaveEmittersSize(1)
   })
 
-  it.only("returns the same value for subsequent calls with static scope", ({
+  it.only("does not recalculate for subsequent calls with static scope", ({
     scope,
   }) => {
     const source = Impulse.of(0)
@@ -236,6 +267,57 @@ describe("Impulse.of(getter, options?)", () => {
     })
 
     expect(derived.getValue(scope)).toStrictEqual({ count: 1 })
+    expect(source).toHaveEmittersSize(1)
+  })
+
+  it.only("does not recalculate the value on dependency TODO", () => {
+    const source = Impulse.of(0)
+    const derived = Impulse.of((scope) => ({ count: source.getValue(scope) }))
+
+    const { result: first } = renderHook(() =>
+      useScoped((scope) => derived.getValue(scope)),
+    )
+
+    const { result: second } = renderHook(() =>
+      useScoped((scope) => derived.getValue(scope)),
+    )
+
+    const initial = first.current
+
+    act(() => {
+      source.setValue(0)
+    })
+
+    expect(initial).toBe(first.current)
+    expect(initial).toBe(second.current)
+    expect(first.current).toBe(second.current)
+    expect(first.current).toStrictEqual({ count: 0 })
+    expect(source).toHaveEmittersSize(1)
+  })
+
+  it.only("recalculates the value on dependency change", () => {
+    const source = Impulse.of(0)
+    const derived = Impulse.of((scope) => ({ count: source.getValue(scope) }))
+
+    const { result: first } = renderHook(() =>
+      useScoped((scope) => derived.getValue(scope)),
+    )
+
+    const { result: second } = renderHook(() =>
+      useScoped((scope) => derived.getValue(scope)),
+    )
+
+    const initial = first.current
+
+    act(() => {
+      source.setValue(1)
+      source.setValue(2)
+    })
+
+    expect(initial).not.toBe(first.current)
+    expect(initial).not.toBe(second.current)
+    expect(first.current).toBe(second.current)
+    expect(first.current).toStrictEqual({ count: 2 })
     expect(source).toHaveEmittersSize(1)
   })
 
