@@ -309,10 +309,6 @@ class DerivedImpulse<T> extends Impulse<T> {
   private readonly _scope = {
     [EMITTER_KEY]: ScopeEmitter._init(() => {
       ScopeEmitter._schedule((queue) => {
-        if (this._lazy) {
-          this._lazy._shouldChange = true
-        }
-
         queue.push(this._dependencies)
       })
     }),
@@ -320,7 +316,7 @@ class DerivedImpulse<T> extends Impulse<T> {
 
   private readonly _dependencies = new Set<ScopeEmitter>()
 
-  private _lazy?: { _shouldChange: boolean; _value: T }
+  private _lazy?: { _version: number; _value: T }
 
   public constructor(
     private readonly _getValue: Func<[Scope], T>,
@@ -333,23 +329,26 @@ class DerivedImpulse<T> extends Impulse<T> {
   protected _getter(scope: Scope): T {
     scope[EMITTER_KEY]?._attachTo(this._dependencies)
 
+    const version = this._scope[EMITTER_KEY]._getVersion()
+
     if (!this._lazy) {
       const value = this._getValue(this._scope)
-      this._lazy = { _shouldChange: false, _value: value }
+      this._lazy = { _version: version, _value: value }
 
       return value
     }
 
-    if (!this._lazy._shouldChange) {
+    if (this._lazy._version === version) {
       return this._lazy._value
     }
 
     const value = this._getValue(this._scope)
 
     if (!this._compare(this._lazy._value, value, STATIC_SCOPE)) {
-      this._lazy._shouldChange = false
       this._lazy._value = value
     }
+
+    this._lazy._version = version
 
     return this._lazy._value
   }
