@@ -45,7 +45,7 @@ export class ScopeEmitter {
 
   private constructor(private readonly _emit: VoidFunction) {}
 
-  public _cleanup(): void {
+  public _detachEverywhere(): void {
     for (const cleanup of this._cleanups) {
       cleanup()
     }
@@ -61,7 +61,7 @@ export class ScopeEmitter {
 
   public _flush(): void {
     this._version = (this._version + 1) % 10e9
-    this._cleanup()
+    this._detachEverywhere()
   }
 
   public readonly _getVersion = (): number => {

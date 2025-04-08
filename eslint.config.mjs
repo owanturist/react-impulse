@@ -334,6 +334,7 @@ export default tseslint.config([
       "vitest/prefer-strict-equal": "error",
       "vitest/prefer-todo": "warn",
       "vitest/no-focused-tests": "error",
+      "vitest/no-disabled-tests": "warn",
       "vitest/no-commented-out-tests": "error",
       "vitest/consistent-test-it": ["error", { fn: "it" }],
       "vitest/expect-expect": [

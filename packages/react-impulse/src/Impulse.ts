@@ -333,6 +333,7 @@ class DerivedImpulse<T> extends Impulse<T> {
 
     if (!this._lazy) {
       const value = this._getValue(this._scope)
+
       this._lazy = { _version: version, _value: value }
 
       return value

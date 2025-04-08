@@ -395,83 +395,164 @@ describe("Impulse.of(getter, options?)", () => {
 
   it("does not call compare on init", () => {
     const source = Impulse.of({ count: 0 })
+
     Impulse.of((scope) => source.getValue(scope), {
       compare: Counter.compare,
     })
 
     expect(Counter.compare).not.toHaveBeenCalled()
+    expect(source).toHaveEmittersSize(0)
   })
 
   it("does not call compare on first getValue", ({ scope }) => {
     const source = Impulse.of({ count: 0 })
-    const impulse = Impulse.of((scope) => source.getValue(scope), {
+    const derived = Impulse.of((scope) => source.getValue(scope), {
       compare: Counter.compare,
     })
 
-    impulse.getValue(scope)
+    expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
     expect(Counter.compare).not.toHaveBeenCalled()
+    expect(source).toHaveEmittersSize(1)
   })
 
-  it.skip("calls compare on subsequent calls", ({ scope }) => {
+  it("does not calls compare on subsequent calls when the source does not change", ({
+    scope,
+  }) => {
     const source = Impulse.of({ count: 0 })
-    const impulse = Impulse.of((scope) => source.getValue(scope))
-
-    impulse.getValue(scope)
-    impulse.getValue(scope)
-    impulse.getValue(scope)
-    impulse.getValue(scope)
-    impulse.getValue(scope)
-
-    expect(Object.is).toHaveBeenCalledTimes(4)
-  })
-
-  it.skip("assigns Object.is as default compare", ({ scope }) => {
-    const source = Impulse.of(0)
-    const impulse = Impulse.of((scope) => ({
-      count: source.getValue(scope),
-    }))
-
-    const value_1 = impulse.getValue(scope)
-    const value_2 = impulse.getValue(scope)
-    expect(Object.is).toHaveBeenCalledExactlyOnceWith(
-      { count: 0 },
-      { count: 0 },
-    )
-    expect(value_1).not.toBe(value_2)
-    expect(value_1).toStrictEqual(value_2)
-  })
-
-  it.skip("assigns Object.is by `null` as compare", ({ scope }) => {
-    const source = Impulse.of(0)
-    const impulse = Impulse.of((scope) => ({ count: source.getValue(scope) }), {
-      compare: null,
-    })
-
-    const value_1 = impulse.getValue(scope)
-    const value_2 = impulse.getValue(scope)
-    expect(Object.is).toHaveBeenCalledExactlyOnceWith(
-      { count: 0 },
-      { count: 0 },
-    )
-    expect(value_1).not.toBe(value_2)
-    expect(value_1).toStrictEqual(value_2)
-  })
-
-  it.skip("assigns custom function as compare", ({ scope }) => {
-    const source = Impulse.of(0)
-    const impulse = Impulse.of((scope) => ({ count: source.getValue(scope) }), {
+    const derived = Impulse.of((scope) => source.getValue(scope), {
       compare: Counter.compare,
     })
 
-    const value_1 = impulse.getValue(scope)
-    const value_2 = impulse.getValue(scope)
+    const counter = derived.getValue(scope)
+    expect(counter).toStrictEqual({ count: 0 })
+    expect(derived.getValue(scope)).toBe(counter)
+    expect(derived.getValue(scope)).toBe(counter)
+    expect(derived.getValue(scope)).toBe(counter)
+    expect(derived.getValue(scope)).toBe(counter)
+
+    expect(Counter.compare).not.toHaveBeenCalled()
+    expect(source).toHaveEmittersSize(1)
+  })
+
+  it("does not call compare function when an unobserved source changes", ({
+    scope,
+  }) => {
+    const source = Impulse.of({ count: 0 })
+    const derived = Impulse.of((scope) => source.getValue(scope), {
+      compare: Counter.compare,
+    })
+
+    act(() => {
+      source.setValue({ count: 1 })
+    })
+
+    expect(Counter.compare).not.toHaveBeenCalled()
+    expect(source).toHaveEmittersSize(0)
+
+    expect(derived.getValue(scope)).toStrictEqual({ count: 1 })
+    expect(Counter.compare).not.toHaveBeenCalled()
+    expect(source).toHaveEmittersSize(1)
+  })
+
+  it("calls compare function only when an observed source changes", ({
+    scope,
+  }) => {
+    const source = Impulse.of({ count: 0 })
+    const derived = Impulse.of((scope) => source.getValue(scope), {
+      compare: Counter.compare,
+    })
+
+    expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
+
+    act(() => {
+      source.setValue({ count: 1 })
+    })
+
+    expect(source).toHaveEmittersSize(0)
+    expect(Counter.compare).not.toHaveBeenCalled()
+
+    expect(derived.getValue(scope)).toStrictEqual({ count: 1 })
+    expect(Counter.compare).toHaveBeenCalledOnce()
+    expect(source).toHaveEmittersSize(1)
+  })
+
+  describe.each([
+    ["default", undefined],
+    ["null", null],
+  ])("when compare is %s", (_, compare) => {
+    it("uses Object.is as compare", ({ scope }) => {
+      const source = Impulse.of({ count: 0 }, { compare: Counter.compare })
+      const derived = Impulse.of(
+        (scope) => ({
+          isMoreThanZero: source.getValue(scope).count > 0,
+        }),
+        { compare },
+      )
+      const value_0 = derived.getValue(scope)
+
+      expect(Object.is).not.toHaveBeenCalled()
+      expect(value_0).toStrictEqual({ isMoreThanZero: false })
+      vi.clearAllMocks()
+
+      act(() => {
+        source.setValue({ count: 1 })
+      })
+      expect(Object.is).not.toHaveBeenCalled()
+
+      const value_1 = derived.getValue(scope)
+      expect(Object.is).toHaveBeenCalledExactlyOnceWith(value_0, value_1)
+      expect(value_1).not.toBe(value_0)
+      expect(value_1).toStrictEqual({ isMoreThanZero: true })
+      vi.clearAllMocks()
+
+      act(() => {
+        source.setValue({ count: 2 })
+      })
+      expect(Object.is).not.toHaveBeenCalled()
+
+      const value_2 = derived.getValue(scope)
+      expect(Object.is).toHaveBeenCalledExactlyOnceWith(value_1, value_2)
+      expect(value_2).not.toBe(value_1)
+      expect(value_2).toStrictEqual({ isMoreThanZero: true })
+    })
+  })
+
+  it("assigns custom function as compare", ({ scope }) => {
+    const source = Impulse.of({ count: 0 })
+    const derived = Impulse.of((scope) => source.getValue(scope), {
+      compare: Counter.compare,
+    })
+
+    const value_0 = derived.getValue(scope)
+
+    act(() => {
+      source.setValue({ count: 0 })
+    })
+
+    expect(Counter.compare).not.toHaveBeenCalled()
+
+    const value_1 = derived.getValue(scope)
     expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
       { count: 0 },
       { count: 0 },
       scope,
     )
-    expect(value_1).toBe(value_2)
-    expect(value_1).toStrictEqual(value_2)
+    expect(value_0).toBe(value_1)
+    expect(value_0).toStrictEqual({ count: 0 })
+    vi.clearAllMocks()
+
+    act(() => {
+      source.setValue({ count: 1 })
+    })
+
+    const value_2 = derived.getValue(scope)
+    expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
+      { count: 0 },
+      { count: 1 },
+      scope,
+    )
+    expect(value_2).not.toBe(value_1)
+    expect(value_2).toStrictEqual({ count: 1 })
   })
 })
 
@@ -500,30 +581,34 @@ describe("Impulse.of(getter, setter, options?)", () => {
 
   it("allows source as a ReadonlyImpulse", ({ scope }) => {
     const source = Impulse.of(() => 0)
-    const impulse = Impulse.of(source, () => {
+    const derived = Impulse.of(source, () => {
       // noop
     })
 
-    expect(impulse.getValue(scope)).toBe(0)
+    expect(derived.getValue(scope)).toBe(0)
   })
 
-  it.skip("allows source as a ImpulseGetter", ({ scope }) => {
+  it("allows source as a ImpulseGetter", ({ scope }) => {
     class Custom implements ImpulseGetter<number> {
-      public constructor(public value: number) {}
+      public readonly counter = Impulse.of(0)
 
-      public getValue(): number {
-        return this.value
+      public getValue(scope: Scope): number {
+        return this.counter.getValue(scope)
       }
     }
 
-    const source = new Custom(0)
-    const impulse = Impulse.of(source, () => {
+    const source = new Custom()
+    const derived = Impulse.of(source, () => {
       // noop
     })
 
-    expect(impulse.getValue(scope)).toBe(0)
-    source.value = 1
-    expect(impulse.getValue(scope)).toBe(1)
+    expect(derived.getValue(scope)).toBe(0)
+
+    act(() => {
+      source.counter.setValue(1)
+    })
+
+    expect(derived.getValue(scope)).toBe(1)
   })
 
   it("does not allow setter as a ReadonlyImpulse", ({ scope }) => {
@@ -620,7 +705,7 @@ describe("Impulse.of(getter, setter, options?)", () => {
     expect(spyOnSource).toHaveBeenCalledExactlyOnceWith({ count: 2 })
   })
 
-  it.skip("assigns custom function as compare", ({ scope }) => {
+  it("assigns custom function as compare", ({ scope }) => {
     const source = Impulse.of({ count: 0 })
     const impulse = Impulse.of(
       (scope) => source.getValue(scope),
@@ -630,13 +715,36 @@ describe("Impulse.of(getter, setter, options?)", () => {
       },
     )
 
-    impulse.getValue(scope)
-    impulse.getValue(scope)
+    const value_0 = impulse.getValue(scope)
+
+    act(() => {
+      impulse.setValue({ count: 0 })
+    })
+
+    expect(Counter.compare).not.toHaveBeenCalled()
+
+    const value_1 = impulse.getValue(scope)
     expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
       { count: 0 },
       { count: 0 },
       scope,
     )
+    expect(value_1).toBe(value_0)
+    vi.clearAllMocks()
+
+    act(() => {
+      impulse.setValue({ count: 1 })
+    })
+
+    expect(Counter.compare).not.toHaveBeenCalled()
+    const value_2 = impulse.getValue(scope)
+    expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
+      value_1,
+      value_2,
+      scope,
+    )
+    expect(value_2).not.toBe(value_1)
+    expect(value_2).toStrictEqual({ count: 1 })
   })
 
   it("batches setter", () => {
@@ -867,29 +975,6 @@ function setupImpulse<T>(initialValue: T, options?: ImpulseOptions<T>) {
   return { impulse }
 }
 
-function setupDerivedImpulseFromGlobalVariable<T>(
-  initialValue: T,
-  options?: ImpulseOptions<T>,
-) {
-  let variable = initialValue
-
-  const impulse = Impulse.of(
-    () => variable,
-    (value) => {
-      variable = value
-    },
-    options,
-  )
-
-  return {
-    impulse,
-    getValue: () => variable,
-    setValue: (value: T) => {
-      variable = value
-    },
-  }
-}
-
 function setupDerivedImpulseFromImpulse({
   getterShortcut,
   setterShortcut,
@@ -917,10 +1002,6 @@ function setupDerivedImpulseFromImpulse({
 
 describe.each([
   ["DirectImpulse", setupImpulse],
-  [
-    "Derived Impulse from a global variable",
-    setupDerivedImpulseFromGlobalVariable,
-  ],
   [
     "Derived Impulse from an Impulse",
     setupDerivedImpulseFromImpulse({
@@ -959,7 +1040,7 @@ describe.each([
       expect(impulse.getValue(scope)).toBe(next)
     })
 
-    it.skip("updates with the same value", ({ scope }) => {
+    it("updates with the same value", ({ scope }) => {
       const next = { count: 1 }
       impulse.setValue(next)
       expect(impulse.getValue(scope)).toBe(next)
@@ -973,7 +1054,7 @@ describe.each([
   })
 
   describe("Impulse#setValue(transform)", () => {
-    it.skip("updates value", ({ scope }) => {
+    it("updates value", ({ scope }) => {
       const { impulse } = setup({ count: 0 })
 
       impulse.setValue(Counter.inc)
@@ -988,7 +1069,7 @@ describe.each([
       expect(impulse.getValue(scope)).toBe(initial)
     })
 
-    it.skip("updates with the same value", ({ scope }) => {
+    it("updates with the same value", ({ scope }) => {
       const initial = { count: 0 }
       const { impulse } = setup(initial)
 
@@ -1034,7 +1115,7 @@ describe.each([
       expect(impulse_2.getValue(scope)).toStrictEqual({ count: 1 })
     })
 
-    it.skip("does not update clone value when source updates", ({ scope }) => {
+    it("does not update clone value when source updates", ({ scope }) => {
       const { impulse: impulse_1 } = setup({ count: 0 })
       const impulse_2 = impulse_1.clone()
 
@@ -1170,7 +1251,7 @@ describe.each([
       )
     })
 
-    it.skip("creates new nested Impulse with clone(transform)", ({ scope }) => {
+    it("creates new nested Impulse with clone(transform)", ({ scope }) => {
       const { impulse: impulse_1 } = setup({
         count: setup(0).impulse,
         name: setup("John").impulse,
@@ -1206,7 +1287,7 @@ describe.each([
       expect(impulse_2.getValue(scope).name.getValue(scope)).toBe("John")
     })
 
-    it.skip("creates shallow nested Impulse with clone()", ({ scope }) => {
+    it("creates shallow nested Impulse with clone()", ({ scope }) => {
       const { impulse: impulse_1 } = setup({
         count: setup(0).impulse,
         name: setup("John").impulse,

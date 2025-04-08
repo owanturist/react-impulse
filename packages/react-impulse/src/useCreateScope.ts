@@ -30,7 +30,7 @@ export function useCreateScope<T = Func<[], Scope>>(
   const select = useCallback(
     (version: number) => {
       const getScope = (): Scope => {
-        emitter._cleanup()
+        emitter._detachEverywhere()
 
         return {
           [EMITTER_KEY]: emitter,
