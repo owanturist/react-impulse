@@ -101,6 +101,10 @@ describe("Impulse.of(value, options?)", () => {
 })
 
 describe("Impulse.of(getter, options?)", () => {
+  it.todo(
+    "ensure it works fine when STATIC_SCOPE is used to get the derived value",
+  )
+
   it("creates a ReadonlyImpulse", () => {
     const impulse = Impulse.of(() => 0)
 

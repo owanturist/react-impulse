@@ -168,6 +168,8 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     )
   }
 
+  protected readonly _emitters = new Set<ScopeEmitter>()
+
   protected constructor(protected readonly _compare: Compare<T>) {}
 
   /**
@@ -197,8 +199,8 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     return String(this.getValue(scope))
   }
 
-  protected abstract _getter(scope: Scope): T
-  protected abstract _setter(value: T): undefined | Set<ScopeEmitter>
+  protected abstract _getter(): T
+  protected abstract _setter(value: T): boolean
 
   /**
    * Creates a new Impulse instance out of the current one with the same value.
@@ -228,7 +230,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     transformOrOptions?: Func<[T, Scope], T> | ImpulseOptions<T>,
     maybeOptions?: ImpulseOptions<T>,
   ): Impulse<T> {
-    const value = this._getter(STATIC_SCOPE)
+    const value = this._getter()
 
     const [clonedValue, { compare = this._compare } = {}] = isFunction(
       transformOrOptions,
@@ -247,7 +249,9 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
    * @version 1.0.0
    */
   public getValue(scope: Scope): T {
-    return this._getter(scope)
+    scope[EMITTER_KEY]?._attachTo(this._emitters)
+
+    return this._getter()
   }
 
   /**
@@ -264,21 +268,17 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   ): void {
     ScopeEmitter._schedule((queue) => {
       const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(this._getter(STATIC_SCOPE), STATIC_SCOPE)
+        ? valueOrTransform(this._getter(), STATIC_SCOPE)
         : valueOrTransform
 
-      const emitters = this._setter(nextValue)
-
-      if (emitters) {
-        queue.push(emitters)
+      if (this._setter(nextValue)) {
+        queue.push(this._emitters)
       }
     })
   }
 }
 
 class DirectImpulse<T> extends Impulse<T> {
-  private readonly _emitters = new Set<ScopeEmitter>()
-
   public constructor(
     private _value: T,
     compare: Compare<T>,
@@ -286,22 +286,18 @@ class DirectImpulse<T> extends Impulse<T> {
     super(compare)
   }
 
-  protected _getter(scope: Scope): T {
-    scope[EMITTER_KEY]?._attachTo(this._emitters)
-
+  protected _getter(): T {
     return this._value
   }
 
-  protected _setter(value: T): undefined | Set<ScopeEmitter> {
-    const isValueSame = this._compare(this._value, value, STATIC_SCOPE)
+  protected _setter(value: T): boolean {
+    const hasValueChanged = !this._compare(this._value, value, STATIC_SCOPE)
 
-    if (isValueSame) {
-      return undefined
+    if (hasValueChanged) {
+      this._value = value
     }
 
-    this._value = value
-
-    return this._emitters
+    return hasValueChanged
   }
 }
 
@@ -309,12 +305,10 @@ class DerivedImpulse<T> extends Impulse<T> {
   private readonly _scope = {
     [EMITTER_KEY]: ScopeEmitter._init(() => {
       ScopeEmitter._schedule((queue) => {
-        queue.push(this._dependencies)
+        queue.push(this._emitters)
       })
     }),
   } satisfies Scope
-
-  private readonly _dependencies = new Set<ScopeEmitter>()
 
   private _lazy?: { _version: number; _value: T }
 
@@ -326,9 +320,7 @@ class DerivedImpulse<T> extends Impulse<T> {
     super(compare)
   }
 
-  protected _getter(scope: Scope): T {
-    scope[EMITTER_KEY]?._attachTo(this._dependencies)
-
+  protected _getter(): T {
     const version = this._scope[EMITTER_KEY]._getVersion()
 
     if (!this._lazy) {
@@ -354,10 +346,10 @@ class DerivedImpulse<T> extends Impulse<T> {
     return this._lazy._value
   }
 
-  protected _setter(value: T): undefined {
+  protected _setter(value: T): false {
     this._setValue(value, STATIC_SCOPE)
 
-    // a derived Impulse has no own emitters
-    return undefined
+    // a derived Impulse never queues emit on setValue
+    return false
   }
 }
