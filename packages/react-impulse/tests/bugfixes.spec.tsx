@@ -234,7 +234,7 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
 })
 
 describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a not reactive value #627", () => {
-  it("enqueues a rerender when sets a reactive value", () => {
+  it("does not enqueue a rerender when sets a not reactive value", () => {
     const counter = { count: 0 }
     const impulse = Impulse.of(
       () => counter.count,
@@ -253,6 +253,6 @@ describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a n
       impulse.setValue(1)
     })
 
-    expect(result.current).toBe(1)
+    expect(result.current).toBe(0)
   })
 })
