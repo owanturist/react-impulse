@@ -168,7 +168,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     )
   }
 
-  protected readonly _emitters = new Set<ScopeEmitter>()
+  protected readonly _emitters = new Set<WeakRef<ScopeEmitter>>()
 
   protected constructor(protected readonly _compare: Compare<T>) {}
 

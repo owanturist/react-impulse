@@ -10,10 +10,10 @@ export class ScopeEmitter {
     return new ScopeEmitter(emit)
   }
 
-  private static _queue: null | Array<ReadonlySet<ScopeEmitter>> = null
+  private static _queue: null | Array<ReadonlySet<WeakRef<ScopeEmitter>>> = null
 
   public static _schedule<TResult>(
-    execute: (queue: Array<ReadonlySet<ScopeEmitter>>) => TResult,
+    execute: (queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>) => TResult,
   ): TResult {
     if (ScopeEmitter._queue != null) {
       return execute(ScopeEmitter._queue)
@@ -25,8 +25,10 @@ export class ScopeEmitter {
     const executed = new WeakSet<ScopeEmitter>()
 
     for (const emitters of ScopeEmitter._queue) {
-      for (const emitter of emitters) {
-        if (!executed.has(emitter)) {
+      for (const ref of emitters) {
+        const emitter = ref.deref()
+
+        if (emitter && !executed.has(emitter)) {
           executed.add(emitter)
           emitter._flush()
           emitter._emit()
@@ -41,6 +43,8 @@ export class ScopeEmitter {
 
   private readonly _cleanups: Array<VoidFunction> = []
 
+  private readonly _ref = new WeakRef(this)
+
   private _version = 0
 
   private constructor(private readonly _emit: VoidFunction) {}
@@ -52,10 +56,10 @@ export class ScopeEmitter {
     this._cleanups.length = 0
   }
 
-  public _attachTo(emitters: Set<ScopeEmitter>): void {
-    if (!emitters.has(this)) {
-      emitters.add(this)
-      this._cleanups.push(() => emitters.delete(this))
+  public _attachTo(emitters: Set<WeakRef<ScopeEmitter>>): void {
+    if (!emitters.has(this._ref)) {
+      emitters.add(this._ref)
+      this._cleanups.push(() => emitters.delete(this._ref))
     }
   }
 

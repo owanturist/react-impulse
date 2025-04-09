@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react"
+import { act, configure, renderHook, waitFor } from "@testing-library/react"
 import { useState } from "react"
 
 import {
@@ -10,9 +10,14 @@ import {
   useScoped,
   type ImpulseGetter,
   type ImpulseSetter,
+  untrack,
 } from "../src"
 
 import { Counter } from "./common"
+
+configure({
+  asyncUtilTimeout: 20000,
+})
 
 const isString = (value: unknown): value is string => typeof value === "string"
 
@@ -127,15 +132,15 @@ describe("Impulse.of(getter, options?)", () => {
     expect(impulse.getValue(scope)).toStrictEqual({ count: 1 })
   })
 
-  it.skip("subscribes to Impulse source", ({ scope }) => {
+  it("subscribes to Impulse source", ({ scope }) => {
     const source = Impulse.of({ count: 0 }, { compare: Counter.compare })
-    const impulse = Impulse.of((scope) => source.getValue(scope))
+    const derived = Impulse.of((scope) => source.getValue(scope))
     const spy = vi.fn()
 
     expect(source).toHaveEmittersSize(0)
 
     const unsubscribe = subscribe((scope) => {
-      spy(impulse.getValue(scope))
+      spy(derived.getValue(scope))
     })
 
     expect(source).toHaveEmittersSize(1)
@@ -143,17 +148,18 @@ describe("Impulse.of(getter, options?)", () => {
     vi.clearAllMocks()
 
     source.setValue({ count: 1 })
-    expect(impulse.getValue(scope)).toStrictEqual({ count: 1 })
+    expect(derived.getValue(scope)).toStrictEqual({ count: 1 })
     expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 1 })
     vi.clearAllMocks()
 
     source.setValue({ count: 1 })
-    expect(impulse.getValue(scope)).toStrictEqual({ count: 1 })
+    expect(derived.getValue(scope)).toStrictEqual({ count: 1 })
     expect(spy).not.toHaveBeenCalled()
 
     expect(source).toHaveEmittersSize(1)
     unsubscribe()
-    expect(source).toHaveEmittersSize(0)
+
+    expect(source).toHaveEmittersSize(1)
   })
 
   it("cannot subscribe to none-Impulse source", () => {
@@ -558,6 +564,128 @@ describe("Impulse.of(getter, options?)", () => {
     expect(value_2).not.toBe(value_1)
     expect(value_2).toStrictEqual({ count: 1 })
   })
+
+  describe.concurrent(
+    "when a derived Impulse becomes unreachable but still is dependant",
+    {
+      timeout: 20000,
+      retry: 3,
+    },
+    () => {
+      it("cleanups immediately when source.getValue is called", ({ scope }) => {
+        const source = Impulse.of(0)
+
+        ;(() => {
+          const derived = Impulse.of((scope) => ({
+            count: source.getValue(scope),
+          }))
+
+          expect(source).toHaveEmittersSize(0)
+
+          expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
+          expect(source).toHaveEmittersSize(1)
+          expect(derived).toHaveEmittersSize(0)
+        })()
+
+        expect(source).toHaveEmittersSize(1)
+
+        source.setValue(1)
+        expect(source).toHaveEmittersSize(0)
+      })
+
+      it("cleanups the WekRef", async ({ scope }) => {
+        const source = Impulse.of(0)
+
+        ;(() => {
+          const derived = Impulse.of((scope) => ({
+            count: source.getValue(scope),
+          }))
+
+          expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
+          expect(source).toHaveEmittersSize(1)
+          expect(derived).toHaveEmittersSize(0)
+        })()
+
+        expect(source).toHaveEmittersSize(1)
+
+        await waitFor(() => {
+          expect(source).toHaveEmittersSize(0)
+        })
+      })
+
+      it("cleanups the WekRef in subscribe", async () => {
+        const source = Impulse.of(0)
+
+        ;(() => {
+          const derived = Impulse.of((scope) => ({
+            count: source.getValue(scope),
+          }))
+
+          const spy = vi.fn()
+
+          const cleanup = subscribe((scope) => {
+            spy(derived.getValue(scope))
+          })
+
+          expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 0 })
+
+          expect(source).toHaveEmittersSize(1)
+          expect(derived).toHaveEmittersSize(1)
+
+          cleanup()
+          expect(source).toHaveEmittersSize(1)
+          expect(derived).toHaveEmittersSize(0)
+        })()
+
+        expect(source).toHaveEmittersSize(1)
+
+        await waitFor(() => {
+          expect(source).toHaveEmittersSize(0)
+        })
+      })
+
+      it("cleanups the WeakRef in untrack", async () => {
+        const source = Impulse.of(0)
+
+        ;(() => {
+          const derived = Impulse.of((scope) => ({
+            count: source.getValue(scope),
+          }))
+
+          expect(untrack(derived)).toStrictEqual({ count: 0 })
+          expect(source).toHaveEmittersSize(1)
+          expect(derived).toHaveEmittersSize(0)
+        })()
+        expect(source).toHaveEmittersSize(1)
+
+        await waitFor(() => {
+          expect(source).toHaveEmittersSize(0)
+        })
+      })
+
+      it("cleanups the WeakRef in a hook", async () => {
+        const source = Impulse.of(0)
+
+        const { result, unmount } = renderHook(() => {
+          const derived = Impulse.of((scope) => ({
+            count: source.getValue(scope),
+          }))
+
+          return useScoped(derived)
+        })
+
+        expect(result.current).toStrictEqual({ count: 0 })
+        expect(source).toHaveEmittersSize(1)
+
+        unmount()
+        expect(source).toHaveEmittersSize(1)
+
+        await waitFor(() => {
+          expect(source).toHaveEmittersSize(0)
+        })
+      })
+    },
+  )
 })
 
 describe("Impulse.of(getter, setter, options?)", () => {
