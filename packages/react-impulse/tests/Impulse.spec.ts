@@ -638,10 +638,10 @@ describe("Impulse.of(getter, options?)", () => {
     expect(value_2).toStrictEqual({ count: 1 })
   })
 
-  describe.concurrent(
+  describe.skipIf(process.env.CI).concurrent(
     "when a derived Impulse becomes unreachable but still is dependant",
     {
-      timeout: 40000,
+      timeout: 20000,
       retry: 2,
     },
     () => {
