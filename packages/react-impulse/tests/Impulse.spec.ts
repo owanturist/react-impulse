@@ -646,7 +646,7 @@ describe("Impulse.of(getter, options?)", () => {
     "when a derived Impulse becomes unreachable but still is dependant",
     {
       timeout: 20000,
-      retry: 3,
+      retry: 2,
     },
     () => {
       it("cleanups the WeakRef", async ({ scope }) => {
