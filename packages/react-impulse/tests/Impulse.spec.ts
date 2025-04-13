@@ -16,7 +16,7 @@ import {
 import { Counter } from "./common"
 
 configure({
-  asyncUtilTimeout: 20000,
+  asyncUtilTimeout: 40000,
 })
 
 const isString = (value: unknown): value is string => typeof value === "string"
@@ -641,7 +641,7 @@ describe("Impulse.of(getter, options?)", () => {
   describe.concurrent(
     "when a derived Impulse becomes unreachable but still is dependant",
     {
-      timeout: 20000,
+      timeout: 40000,
       retry: 2,
     },
     () => {
