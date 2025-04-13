@@ -132,11 +132,11 @@ jobs:
       - name: Install react-impulse@${{ matrix.version }}
         run: pnpm add -D --filter ./packages/react-impulse-form react-impulse@${{ matrix.version }}
 
-      - name: Test against react-impulse@${{ matrix.version }}
-        run: pnpm test:run --project react-impulse-form
-
       - name: Build
         run: pnpm build
+
+      - name: Test against react-impulse@${{ matrix.version }}
+        run: pnpm test:run --project react-impulse-form
 
       - name: Typecheck against react-impulse@${{ matrix.version }}
         run: pnpm typecheck react-impulse-form
