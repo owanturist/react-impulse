@@ -649,9 +649,26 @@ describe("Impulse.of(getter, options?)", () => {
       retry: 3,
     },
     () => {
-      it.todo("check that only unreachable dependencies clean up")
-
       it("cleanups the WeakRef", async ({ scope }) => {
+        const source = Impulse.of(0)
+        let derived: null | ReadonlyImpulse<Counter> = Impulse.of((scope) => ({
+          count: source.getValue(scope),
+        }))
+
+        expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
+        expect(source).toHaveEmittersSize(1)
+        expect(derived).toHaveEmittersSize(0)
+
+        derived = null
+
+        expect(source).toHaveEmittersSize(1)
+
+        await waitFor(() => {
+          expect(source).toHaveEmittersSize(0)
+        })
+      })
+
+      it("cleanups the WeakRef from clojure", async ({ scope }) => {
         const source = Impulse.of(0)
 
         ;(() => {
@@ -671,7 +688,7 @@ describe("Impulse.of(getter, options?)", () => {
         })
       })
 
-      it("cleanups the WeakRef in subscribe", async () => {
+      it("cleanups the WeakRef from subscribe", async () => {
         const source = Impulse.of(0)
 
         ;(() => {
@@ -702,7 +719,7 @@ describe("Impulse.of(getter, options?)", () => {
         })
       })
 
-      it("cleanups the WeakRef in untrack", async () => {
+      it("cleanups the WeakRef from untrack", async () => {
         const source = Impulse.of(0)
 
         ;(() => {
@@ -721,7 +738,7 @@ describe("Impulse.of(getter, options?)", () => {
         })
       })
 
-      it("cleanups the WeakRef in a hook", async () => {
+      it("cleanups the WeakRef from a hook", async () => {
         const source = Impulse.of(0)
 
         const { result, unmount } = renderHook(() => {
@@ -740,6 +757,40 @@ describe("Impulse.of(getter, options?)", () => {
 
         await waitFor(() => {
           expect(source).toHaveEmittersSize(0)
+        })
+      })
+
+      it("cleanups only unreachable dependencies", async ({ scope }) => {
+        const source = Impulse.of(0)
+        const derived_1 = Impulse.of((scope) => ({
+          count: source.getValue(scope),
+        }))
+
+        expect(derived_1!.getValue(scope)).toStrictEqual({ count: 0 })
+        expect(source).toHaveEmittersSize(1)
+        ;(() => {
+          const derived_2 = Impulse.of((scope) => ({
+            count: source.getValue(scope),
+          }))
+
+          expect(derived_2.getValue(scope)).toStrictEqual({ count: 0 })
+          expect(source).toHaveEmittersSize(2)
+          expect(derived_2).toHaveEmittersSize(0)
+        })()
+        ;(() => {
+          const derived_3 = Impulse.of((scope) => ({
+            count: source.getValue(scope),
+          }))
+
+          expect(derived_3.getValue(scope)).toStrictEqual({ count: 0 })
+          expect(source).toHaveEmittersSize(3)
+          expect(derived_3).toHaveEmittersSize(0)
+        })()
+
+        expect(source).toHaveEmittersSize(3)
+
+        await waitFor(() => {
+          expect(source).toHaveEmittersSize(1)
         })
       })
     },
