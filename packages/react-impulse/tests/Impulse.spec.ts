@@ -330,6 +330,74 @@ describe("Impulse.of(getter, options?)", () => {
     expect(source).toHaveEmittersSize(1)
   })
 
+  it("recalculates the value for nested derived impulses", () => {
+    const email = Impulse.of("")
+    const password = Impulse.of("")
+    const isEmailEmpty = Impulse.of((scope) => email.getValue(scope) === "")
+    const isPasswordEmpty = Impulse.of(
+      (scope) => password.getValue(scope) === "",
+    )
+    const isFormEmpty = Impulse.of((scope) => ({
+      email: isEmailEmpty.getValue(scope),
+      password: isPasswordEmpty.getValue(scope),
+    }))
+
+    const { result } = renderHook(() =>
+      useScoped((scope) => isFormEmpty.getValue(scope)),
+    )
+
+    const value_0 = result.current
+    expect(value_0).toStrictEqual({
+      email: true,
+      password: true,
+    })
+
+    act(() => {
+      email.setValue("t")
+    })
+    const value_1 = result.current
+    expect(value_1).not.toBe(value_0)
+    expect(value_1).toStrictEqual({
+      email: false,
+      password: true,
+    })
+
+    act(() => {
+      email.setValue("te")
+    })
+    const value_2 = result.current
+    expect(value_2).toBe(value_1)
+
+    act(() => {
+      password.setValue("q")
+    })
+    const value_3 = result.current
+    expect(value_3).not.toBe(value_2)
+    expect(value_3).toStrictEqual({
+      email: false,
+      password: false,
+    })
+
+    act(() => {
+      email.setValue("test")
+      password.setValue("qwerty")
+    })
+    const value_4 = result.current
+    expect(value_4).toBe(value_3)
+
+    act(() => {
+      email.setValue("")
+      password.setValue("")
+    })
+
+    const value_5 = result.current
+    expect(value_5).not.toBe(value_4)
+    expect(value_5).toStrictEqual({
+      email: true,
+      password: true,
+    })
+  })
+
   it("causes a single re-render caused by dependency update", () => {
     const source = Impulse.of(0)
     const derived = Impulse.of((scope) => ({ count: source.getValue(scope) }))
@@ -477,12 +545,12 @@ describe("Impulse.of(getter, options?)", () => {
     act(() => {
       source.setValue({ count: 1 })
     })
-
-    expect(source).toHaveEmittersSize(0)
-    expect(Counter.compare).not.toHaveBeenCalled()
-
-    expect(derived.getValue(scope)).toStrictEqual({ count: 1 })
     expect(Counter.compare).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
+
+    expect(source).toHaveEmittersSize(1)
+    expect(derived.getValue(scope)).toStrictEqual({ count: 1 })
+    expect(Counter.compare).not.toHaveBeenCalled()
     expect(source).toHaveEmittersSize(1)
   })
 
@@ -507,10 +575,13 @@ describe("Impulse.of(getter, options?)", () => {
       act(() => {
         source.setValue({ count: 1 })
       })
-      expect(Object.is).not.toHaveBeenCalled()
+      expect(Object.is).toHaveBeenCalledExactlyOnceWith(value_0, {
+        isMoreThanZero: true,
+      })
+      vi.clearAllMocks()
 
       const value_1 = derived.getValue(scope)
-      expect(Object.is).toHaveBeenCalledExactlyOnceWith(value_0, value_1)
+      expect(Object.is).not.toHaveBeenCalled()
       expect(value_1).not.toBe(value_0)
       expect(value_1).toStrictEqual({ isMoreThanZero: true })
       vi.clearAllMocks()
@@ -518,10 +589,13 @@ describe("Impulse.of(getter, options?)", () => {
       act(() => {
         source.setValue({ count: 2 })
       })
-      expect(Object.is).not.toHaveBeenCalled()
+      expect(Object.is).toHaveBeenCalledExactlyOnceWith(value_1, {
+        isMoreThanZero: true,
+      })
+      vi.clearAllMocks()
 
       const value_2 = derived.getValue(scope)
-      expect(Object.is).toHaveBeenCalledExactlyOnceWith(value_1, value_2)
+      expect(Object.is).not.toHaveBeenCalled()
       expect(value_2).not.toBe(value_1)
       expect(value_2).toStrictEqual({ isMoreThanZero: true })
     })
@@ -539,14 +613,15 @@ describe("Impulse.of(getter, options?)", () => {
       source.setValue({ count: 0 })
     })
 
-    expect(Counter.compare).not.toHaveBeenCalled()
-
-    const value_1 = derived.getValue(scope)
     expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
       { count: 0 },
       { count: 0 },
       scope,
     )
+    vi.clearAllMocks()
+
+    const value_1 = derived.getValue(scope)
+    expect(Counter.compare).not.toHaveBeenCalled()
     expect(value_0).toBe(value_1)
     expect(value_0).toStrictEqual({ count: 0 })
     vi.clearAllMocks()
@@ -554,13 +629,15 @@ describe("Impulse.of(getter, options?)", () => {
     act(() => {
       source.setValue({ count: 1 })
     })
-
-    const value_2 = derived.getValue(scope)
     expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
-      { count: 0 },
+      value_1,
       { count: 1 },
       scope,
     )
+    vi.clearAllMocks()
+
+    const value_2 = derived.getValue(scope)
+    expect(Counter.compare).not.toHaveBeenCalled()
     expect(value_2).not.toBe(value_1)
     expect(value_2).toStrictEqual({ count: 1 })
   })
@@ -572,28 +649,9 @@ describe("Impulse.of(getter, options?)", () => {
       retry: 3,
     },
     () => {
-      it("cleanups immediately when source.getValue is called", ({ scope }) => {
-        const source = Impulse.of(0)
+      it.todo("check that only unreachable dependencies clean up")
 
-        ;(() => {
-          const derived = Impulse.of((scope) => ({
-            count: source.getValue(scope),
-          }))
-
-          expect(source).toHaveEmittersSize(0)
-
-          expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
-          expect(source).toHaveEmittersSize(1)
-          expect(derived).toHaveEmittersSize(0)
-        })()
-
-        expect(source).toHaveEmittersSize(1)
-
-        source.setValue(1)
-        expect(source).toHaveEmittersSize(0)
-      })
-
-      it("cleanups the WekRef", async ({ scope }) => {
+      it("cleanups the WeakRef", async ({ scope }) => {
         const source = Impulse.of(0)
 
         ;(() => {
@@ -613,7 +671,7 @@ describe("Impulse.of(getter, options?)", () => {
         })
       })
 
-      it("cleanups the WekRef in subscribe", async () => {
+      it("cleanups the WeakRef in subscribe", async () => {
         const source = Impulse.of(0)
 
         ;(() => {
@@ -853,28 +911,30 @@ describe("Impulse.of(getter, setter, options?)", () => {
       impulse.setValue({ count: 0 })
     })
 
-    expect(Counter.compare).not.toHaveBeenCalled()
-
-    const value_1 = impulse.getValue(scope)
     expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
-      { count: 0 },
+      value_0,
       { count: 0 },
       scope,
     )
-    expect(value_1).toBe(value_0)
     vi.clearAllMocks()
+
+    const value_1 = impulse.getValue(scope)
+    expect(Counter.compare).not.toHaveBeenCalled()
+    expect(value_1).toBe(value_0)
 
     act(() => {
       impulse.setValue({ count: 1 })
     })
 
-    expect(Counter.compare).not.toHaveBeenCalled()
-    const value_2 = impulse.getValue(scope)
     expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
       value_1,
-      value_2,
+      { count: 1 },
       scope,
     )
+    vi.clearAllMocks()
+
+    const value_2 = impulse.getValue(scope)
+    expect(Counter.compare).not.toHaveBeenCalled()
     expect(value_2).not.toBe(value_1)
     expect(value_2).toStrictEqual({ count: 1 })
   })

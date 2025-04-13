@@ -300,12 +300,29 @@ class DirectImpulse<T> extends Impulse<T> {
     return hasValueChanged
   }
 }
-
+console.log("TODO split Lazy abstraction")
 class DerivedImpulse<T> extends Impulse<T> {
   private readonly _scope = {
     [EMITTER_KEY]: ScopeEmitter._init(() => {
       ScopeEmitter._schedule((queue) => {
-        queue.push(this._emitters)
+        const version = this._scope[EMITTER_KEY]._getVersion()
+
+        if (!this._lazy) {
+          const value = this._getValue(this._scope)
+
+          this._lazy = { _version: version, _value: value }
+
+          queue.push(this._emitters)
+        } else {
+          const value = this._getValue(this._scope)
+
+          if (!this._compare(this._lazy._value, value, STATIC_SCOPE)) {
+            this._lazy._value = value
+            queue.push(this._emitters)
+          }
+
+          this._lazy._version = version
+        }
       })
     }),
   } satisfies Scope
@@ -323,27 +340,15 @@ class DerivedImpulse<T> extends Impulse<T> {
   protected _getter(): T {
     const version = this._scope[EMITTER_KEY]._getVersion()
 
-    if (!this._lazy) {
-      const value = this._getValue(this._scope)
-
-      this._lazy = { _version: version, _value: value }
-
-      return value
-    }
-
-    if (this._lazy._version === version) {
+    if (this._lazy) {
       return this._lazy._value
     }
 
     const value = this._getValue(this._scope)
 
-    if (!this._compare(this._lazy._value, value, STATIC_SCOPE)) {
-      this._lazy._value = value
-    }
+    this._lazy = { _version: version, _value: value }
 
-    this._lazy._version = version
-
-    return this._lazy._value
+    return value
   }
 
   protected _setter(value: T): false {
