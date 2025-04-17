@@ -168,7 +168,8 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     )
   }
 
-  protected readonly _emitters = new Set<WeakRef<ScopeEmitter>>()
+  protected readonly _emitters =
+    console.log("TODO split WeakLink") || new Set<WeakRef<ScopeEmitter>>()
 
   protected constructor(protected readonly _compare: Compare<T>) {}
 
@@ -305,17 +306,30 @@ class DerivedImpulse<T> extends Impulse<T> {
   private readonly _scope = {
     [EMITTER_KEY]: ScopeEmitter._init(() => {
       ScopeEmitter._schedule((queue) => {
-        const value = this._getValue(this._scope)
+        const version = this._scope[EMITTER_KEY]._getVersion()
+        const value = this._getValue(STATIC_SCOPE)
 
-        if (!this._compare(this._getter(), value, STATIC_SCOPE)) {
-          this._lazy = { _value: value }
+        if (
+          !this._lazy ||
+          !this._compare(this._lazy._value, value, STATIC_SCOPE)
+        ) {
+          this._lazy = {
+            _version: version,
+            _value: value,
+          }
           queue.push(this._emitters)
+        } else {
+          this._getValue(this._scope)
+          this._lazy._version = version
         }
       })
     }),
   } satisfies Scope
 
-  private _lazy?: { _value: T }
+  private _lazy?: {
+    _version: number
+    _value: T
+  }
 
   public constructor(
     private readonly _getValue: Func<[Scope], T>,
@@ -326,7 +340,24 @@ class DerivedImpulse<T> extends Impulse<T> {
   }
 
   protected _getter(): T {
-    this._lazy ??= { _value: this._getValue(this._scope) }
+    const version = this._scope[EMITTER_KEY]._getVersion()
+    const value = this._getValue(this._scope)
+
+    if (!this._lazy) {
+      this._lazy = { _version: version, _value: value }
+
+      return value
+    }
+
+    if (this._lazy._version === version) {
+      return this._lazy._value
+    }
+
+    if (!this._compare(this._lazy._value, value, STATIC_SCOPE)) {
+      this._lazy._value = value
+    }
+
+    this._lazy._version = version
 
     return this._lazy._value
   }
