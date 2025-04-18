@@ -173,6 +173,48 @@ describe("Impulse.of(getter, options?)", () => {
     expect(spy).not.toHaveBeenCalled()
   })
 
+  it("does not emit change when derived value does not change", () => {
+    const source = Impulse.of(0)
+    const derived = Impulse.of((scope) => source.getValue(scope) > 0)
+    const spy = vi.fn()
+
+    const unsubscribe = subscribe((scope) => {
+      spy(derived.getValue(scope))
+    })
+    expect(spy).toHaveBeenCalledExactlyOnceWith(false)
+    vi.clearAllMocks()
+
+    source.setValue(1)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(true)
+    vi.clearAllMocks()
+
+    source.setValue(2)
+    expect(spy).not.toHaveBeenCalled()
+
+    unsubscribe()
+    expect(spy).not.toHaveBeenCalled()
+  })
+
+  it("observes Impulse source after setting the source value", ({ scope }) => {
+    const source = Impulse.of({ count: 0 }, { compare: Counter.compare })
+    const derived = Impulse.of((scope) => source.getValue(scope))
+
+    expect(source).toHaveEmittersSize(0)
+
+    source.setValue({ count: 1 })
+    expect(source).toHaveEmittersSize(0)
+    expect(derived.getValue(scope)).toStrictEqual({ count: 1 })
+    expect(source).toHaveEmittersSize(1)
+
+    source.setValue({ count: 2 })
+    expect(source).toHaveEmittersSize(0)
+    expect(derived.getValue(scope)).toStrictEqual({ count: 2 })
+    expect(source).toHaveEmittersSize(1)
+
+    source.setValue({ count: 2 })
+    expect(source).toHaveEmittersSize(1)
+  })
+
   it("does not recalculate the value on subsequent calls", () => {
     const source = Impulse.of(0)
     const derived = Impulse.of((scope) => ({ count: source.getValue(scope) }))
@@ -275,7 +317,7 @@ describe("Impulse.of(getter, options?)", () => {
     expect(source).toHaveEmittersSize(1)
   })
 
-  it("does not recalculate the value on dependency TODO", () => {
+  it("does not recalculate the value when dependency sets the same value", () => {
     const source = Impulse.of(0)
     const derived = Impulse.of((scope) => ({ count: source.getValue(scope) }))
 
@@ -582,7 +624,6 @@ describe("Impulse.of(getter, options?)", () => {
     expect(Counter.compare).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
-    console.log("todo figure out why it is 0")
     expect(source).toHaveEmittersSize(0)
     expect(derived.getValue(scope)).toStrictEqual({ count: 1 })
     expect(Counter.compare).not.toHaveBeenCalled()

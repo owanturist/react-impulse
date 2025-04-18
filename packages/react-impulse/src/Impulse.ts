@@ -168,8 +168,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     )
   }
 
-  protected readonly _emitters =
-    console.log("TODO split WeakLink") || new Set<WeakRef<ScopeEmitter>>()
+  protected readonly _emitters = new Set<WeakRef<ScopeEmitter>>()
 
   protected constructor(protected readonly _compare: Compare<T>) {}
 
@@ -201,7 +200,10 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   }
 
   protected abstract _getter(): T
-  protected abstract _setter(value: T): boolean
+  protected abstract _setter(
+    value: T,
+    queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
+  ): void
 
   /**
    * Creates a new Impulse instance out of the current one with the same value.
@@ -272,9 +274,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
         ? valueOrTransform(this._getter(), STATIC_SCOPE)
         : valueOrTransform
 
-      if (this._setter(nextValue)) {
-        queue.push(this._emitters)
-      }
+      this._setter(nextValue, queue)
     })
   }
 }
@@ -291,45 +291,41 @@ class DirectImpulse<T> extends Impulse<T> {
     return this._value
   }
 
-  protected _setter(value: T): boolean {
-    const hasValueChanged = !this._compare(this._value, value, STATIC_SCOPE)
-
-    if (hasValueChanged) {
+  protected _setter(
+    value: T,
+    queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
+  ): void {
+    if (!this._compare(this._value, value, STATIC_SCOPE)) {
       this._value = value
+      queue.push(this._emitters)
     }
-
-    return hasValueChanged
   }
 }
 
 class DerivedImpulse<T> extends Impulse<T> {
+  // the inner scope proxies the setters to the outer scope
   private readonly _scope = {
     [EMITTER_KEY]: ScopeEmitter._init(() => {
-      ScopeEmitter._schedule((queue) => {
-        const version = this._scope[EMITTER_KEY]._getVersion()
-        const value = this._getValue(STATIC_SCOPE)
+      const value = this._getValue(STATIC_SCOPE)
 
-        if (
-          !this._lazy ||
-          !this._compare(this._lazy._value, value, STATIC_SCOPE)
-        ) {
-          this._lazy = {
-            _version: version,
-            _value: value,
-          }
-          queue.push(this._emitters)
-        } else {
-          this._getValue(this._scope)
-          this._lazy._version = version
-        }
-      })
+      // The emit callback is called when a dependency changes,
+      // so at this point all dependencies are flushed.
+      // This means the lazy value is already initialized.
+      if (this._compare(this._lazy!._value, value, STATIC_SCOPE)) {
+        // Observe the dependencies again in case the derived value didn't change
+        // but do not emit the change.
+        this._getValue(this._scope)
+      } else {
+        // Update the derived value.
+        this._lazy!._value = value
+        // Emit the change,
+        // so it is likely that the _getter will be called and dependency will be observed again.
+        ScopeEmitter._schedule((queue) => queue.push(this._emitters))
+      }
     }),
   } satisfies Scope
 
-  private _lazy?: {
-    _version: number
-    _value: T
-  }
+  private _lazy?: { _value: T }
 
   public constructor(
     private readonly _getValue: Func<[Scope], T>,
@@ -340,32 +336,16 @@ class DerivedImpulse<T> extends Impulse<T> {
   }
 
   protected _getter(): T {
-    const version = this._scope[EMITTER_KEY]._getVersion()
+    // always subscribe on getter so it will update the _lazy value when a dependency change
     const value = this._getValue(this._scope)
 
-    if (!this._lazy) {
-      this._lazy = { _version: version, _value: value }
-
-      return value
-    }
-
-    if (this._lazy._version === version) {
-      return this._lazy._value
-    }
-
-    if (!this._compare(this._lazy._value, value, STATIC_SCOPE)) {
-      this._lazy._value = value
-    }
-
-    this._lazy._version = version
+    // initialize the lazy value only once
+    this._lazy ??= { _value: value }
 
     return this._lazy._value
   }
 
-  protected _setter(value: T): false {
+  protected _setter(value: T): void {
     this._setValue(value, STATIC_SCOPE)
-
-    // a derived Impulse never queues emit on setValue
-    return false
   }
 }
