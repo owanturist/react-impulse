@@ -322,6 +322,7 @@ export default tseslint.config([
     },
     rules: {
       ...vitestPlugin.configs.recommended.rules,
+      "vitest/valid-describe-callback": "off", // false positive
       "vitest/no-done-callback": "off",
       "vitest/no-deprecated-functions": "off",
       "vitest/no-duplicate-hooks": "warn",
@@ -334,6 +335,7 @@ export default tseslint.config([
       "vitest/prefer-strict-equal": "error",
       "vitest/prefer-todo": "warn",
       "vitest/no-focused-tests": "error",
+      "vitest/no-disabled-tests": "warn",
       "vitest/no-commented-out-tests": "error",
       "vitest/consistent-test-it": ["error", { fn: "it" }],
       "vitest/expect-expect": [

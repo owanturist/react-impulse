@@ -1,11 +1,4 @@
-import {
-  type Func,
-  type Compare,
-  eq,
-  noop,
-  isFunction,
-  hasProperty,
-} from "./utils"
+import { type Func, type Compare, eq, isFunction, hasProperty } from "./utils"
 import { EMITTER_KEY, type Scope, extractScope, STATIC_SCOPE } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 
@@ -164,18 +157,18 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     const [setter, options] =
       isFunction(optionsOrSetter) || hasProperty(optionsOrSetter, "setValue")
         ? [optionsOrSetter, optionsOrNothing]
-        : [noop, optionsOrSetter]
+        : [undefined, optionsOrSetter]
 
     return new DerivedImpulse(
       isGetterFunction
         ? initialValueOrGetter
         : (scope) => initialValueOrGetter.getValue(scope),
-      isFunction(setter) ? setter : (value) => setter.setValue(value),
+      isFunction(setter) ? setter : (value) => setter?.setValue(value),
       options?.compare ?? eq,
     )
   }
 
-  private readonly _emitters = new Set<ScopeEmitter>()
+  protected readonly _emitters = new Set<WeakRef<ScopeEmitter>>()
 
   protected constructor(protected readonly _compare: Compare<T>) {}
 
@@ -206,8 +199,11 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     return String(this.getValue(scope))
   }
 
-  protected abstract _getter(scope: Scope): T
-  protected abstract _setter(value: T): boolean
+  protected abstract _getter(): T
+  protected abstract _setter(
+    value: T,
+    queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
+  ): void
 
   /**
    * Creates a new Impulse instance out of the current one with the same value.
@@ -237,7 +233,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     transformOrOptions?: Func<[T, Scope], T> | ImpulseOptions<T>,
     maybeOptions?: ImpulseOptions<T>,
   ): Impulse<T> {
-    const value = this._getter(STATIC_SCOPE)
+    const value = this._getter()
 
     const [clonedValue, { compare = this._compare } = {}] = isFunction(
       transformOrOptions,
@@ -258,7 +254,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   public getValue(scope: Scope): T {
     scope[EMITTER_KEY]?._attachTo(this._emitters)
 
-    return this._getter(scope)
+    return this._getter()
   }
 
   /**
@@ -275,12 +271,10 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   ): void {
     ScopeEmitter._schedule((queue) => {
       const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(this._getter(STATIC_SCOPE), STATIC_SCOPE)
+        ? valueOrTransform(this._getter(), STATIC_SCOPE)
         : valueOrTransform
 
-      if (this._setter(nextValue)) {
-        queue.push(this._emitters)
-      }
+      this._setter(nextValue, queue)
     })
   }
 }
@@ -297,19 +291,41 @@ class DirectImpulse<T> extends Impulse<T> {
     return this._value
   }
 
-  protected _setter(value: T): boolean {
-    const isDifferent = !this._compare(this._value, value, STATIC_SCOPE)
-
-    if (isDifferent) {
+  protected _setter(
+    value: T,
+    queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
+  ): void {
+    if (!this._compare(this._value, value, STATIC_SCOPE)) {
       this._value = value
+      queue.push(this._emitters)
     }
-
-    return isDifferent
   }
 }
 
 class DerivedImpulse<T> extends Impulse<T> {
-  private _value?: { _lazy: T }
+  // the inner scope proxies the setters to the outer scope
+  private readonly _scope = {
+    [EMITTER_KEY]: ScopeEmitter._init(() => {
+      const value = this._getValue(STATIC_SCOPE)
+
+      // The emit callback is called when a dependency changes,
+      // so at this point all dependencies are flushed.
+      // This means the lazy value is already initialized.
+      if (this._compare(this._lazy!._value, value, STATIC_SCOPE)) {
+        // Observe the dependencies again in case the derived value didn't change
+        // but do not emit the change.
+        this._getValue(this._scope)
+      } else {
+        // Update the derived value.
+        this._lazy!._value = value
+        // Emit the change,
+        // so it is likely that the _getter will be called and dependency will be observed again.
+        ScopeEmitter._schedule((queue) => queue.push(this._emitters))
+      }
+    }),
+  } satisfies Scope
+
+  private _lazy?: { _value: T }
 
   public constructor(
     private readonly _getValue: Func<[Scope], T>,
@@ -319,24 +335,17 @@ class DerivedImpulse<T> extends Impulse<T> {
     super(compare)
   }
 
-  protected _getter(scope: Scope): T {
-    const value = this._getValue(scope)
+  protected _getter(): T {
+    // always subscribe on getter so it will update the _lazy value when a dependency change
+    const value = this._getValue(this._scope)
 
-    if (
-      this._value == null ||
-      !this._compare(this._value._lazy, value, STATIC_SCOPE)
-    ) {
-      this._value = { _lazy: value }
-    }
+    // initialize the lazy value only once
+    this._lazy ??= { _value: value }
 
-    return this._value._lazy
+    return this._lazy._value
   }
 
-  protected _setter(value: T): boolean {
+  protected _setter(value: T): void {
     this._setValue(value, STATIC_SCOPE)
-
-    // should always emit because the deriving value might be not reactive
-    // so the _getter method does not know about the change of such values
-    return true
   }
 }

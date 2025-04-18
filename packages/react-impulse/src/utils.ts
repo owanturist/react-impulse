@@ -18,10 +18,6 @@ export type Func<TArgs extends ReadonlyArray<unknown>, TResult = void> = (
 
 export const eq = <T>(left: T, right: T): boolean => Object.is(left, right)
 
-export function noop(): void {
-  // do nothing
-}
-
 export function identity<T>(value: T): T {
   return value
 }
