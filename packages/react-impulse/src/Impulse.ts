@@ -168,7 +168,8 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     )
   }
 
-  protected readonly _emitters = new Set<WeakRef<ScopeEmitter>>()
+  protected readonly _emitters =
+    console.log("TODO split WeakLink") || new Set<WeakRef<ScopeEmitter>>()
 
   protected constructor(protected readonly _compare: Compare<T>) {}
 
@@ -305,27 +306,27 @@ class DirectImpulse<T> extends Impulse<T> {
 class DerivedImpulse<T> extends Impulse<T> {
   // the inner scope proxies the setters to the outer scope
   private readonly _scope = {
-    [EMITTER_KEY]: ScopeEmitter._init(() => {
-      const value = this._getValue(STATIC_SCOPE)
-
-      // The emit callback is called when a dependency changes,
-      // so at this point all dependencies are flushed.
-      // This means the lazy value is already initialized.
-      if (this._compare(this._lazy!._value, value, STATIC_SCOPE)) {
-        // Observe the dependencies again in case the derived value didn't change
-        // but do not emit the change.
-        this._getValue(this._scope)
-      } else {
-        // Update the derived value.
-        this._lazy!._value = value
-        // Emit the change,
-        // so it is likely that the _getter will be called and dependency will be observed again.
-        ScopeEmitter._schedule((queue) => queue.push(this._emitters))
-      }
-    }),
+    [EMITTER_KEY]:
+      console.log("TODO move scope to_lazy") ||
+      ScopeEmitter._init(() => {
+        ScopeEmitter._schedule((queue) => {
+          if (
+            !this._compare(
+              this._lazy._value,
+              this._getValue(STATIC_SCOPE),
+              STATIC_SCOPE,
+            )
+          ) {
+            queue.push(this._emitters)
+          }
+        })
+      }),
   } satisfies Scope
 
-  private _lazy?: { _value: T }
+  private _lazy?: {
+    _value: T
+    _version: number
+  }
 
   public constructor(
     private readonly _getValue: Func<[Scope], T>,
@@ -336,11 +337,24 @@ class DerivedImpulse<T> extends Impulse<T> {
   }
 
   protected _getter(): T {
-    // always subscribe on getter so it will update the _lazy value when a dependency change
+    const version = this._scope[EMITTER_KEY]._getVersion()
     const value = this._getValue(this._scope)
 
-    // initialize the lazy value only once
-    this._lazy ??= { _value: value }
+    if (!this._lazy) {
+      this._lazy = { _version: version, _value: value }
+
+      return value
+    }
+
+    if (this._lazy._version === version) {
+      return this._lazy._value
+    }
+
+    if (!this._compare(this._lazy._value, value, STATIC_SCOPE)) {
+      this._lazy._value = value
+    }
+
+    this._lazy._version = version
 
     return this._lazy._value
   }
