@@ -139,7 +139,7 @@ jobs:
         run: pnpm test:run --project react-impulse-form
 
       - name: Typecheck against react-impulse@${{ matrix.version }}
-        run: pnpm typecheck react-impulse-form
+        run: pnpm run --filter ./packages/react-impulse-form typecheck
 
   size-limit:
     name: Size Limit
