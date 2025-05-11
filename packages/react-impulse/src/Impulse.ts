@@ -98,7 +98,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
 
   /**
    * Creates a new derived ReadonlyImpulse.
-   * A derived Impulse is an Impulse that does not have its own value but reads it from the external source.
+   * A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes.
    *
    * @param getter a function to read the derived value from a source.
    * @param options optional `ImpulseOptions`.
@@ -113,7 +113,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
 
   /**
    * Creates a new derived Impulse.
-   * A derived Impulse is an Impulse that does not have its own value but reads it from the external source and writes it back.
+   * A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes.
    *
    * @param getter either anything that implements the `ImpulseGetter` interface or a function to read the derived value from the source.
    * @param setter either anything that implements the `ImpulseSetter` interface or a function to write the derived value back to the source.

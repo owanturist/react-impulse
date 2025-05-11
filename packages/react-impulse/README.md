@@ -209,7 +209,7 @@ Impulse.of<T>(
 - `[options]` is an optional [`ImpulseOptions`][impulse_options] object.
   - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
-A static method that creates a new derived Impulse. A derived Impulse is an Impulse that does not have its own value but reads it from an external source and writes it back to the source when the value changes. An external source is usually another Impulse or other Impulses.
+A static method that creates a new derived Impulse. A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes. A source is another Impulse or multiple Impulses.
 
 <details><summary><i>Showcase: derived from Impulse</i></summary>
 <blockquote>
@@ -668,45 +668,6 @@ interface ImpulseOptions<T> {
 ```
 
 - `[compare]` is an optional [`Compare`][compare] function that determines whether or not a new Impulse's value replaces the current one. In many cases specifying the function leads to better performance because it prevents unnecessary updates. But keep an eye on the balance between the performance and the complexity of the function - sometimes it might be better to replace the value without heavy comparisons.
-
-  <details><summary><i>Showcase: use compare function in derived Impulse</i></summary>
-  <blockquote>
-
-  ```ts
-  const source = Impulse.of(1)
-
-  const counter_1 = Impulse.of(
-    // the getter function creates a new object on every read
-    (scope) => ({ count: source.getValue(scope) }),
-    ({ count }) => source.setValue(count),
-  )
-
-  tap((scope) => {
-    counter_1.getValue(scope) // { count: 1 }
-    // getValue creates a new object on every call
-    counter_1.getValue(scope) === counter_1.getValue(scope) // false
-  })
-
-  // let's derive the value but with compare function defined
-  const counter_2 = Impulse.of(
-    // the getter function creates a new object on every read
-    // but if they are comparably equal then the getter function returns the same object
-    (scope) => ({ count: source.getValue(scope) }),
-    ({ count }) => source.setValue(count),
-    {
-      compare: (left, right) => left.count === right.count,
-    },
-  )
-
-  tap((scope) => {
-    counter_2.getValue(scope) // { count: 1 }
-    // getValue creates a new object on every call only if the values are comparably different
-    counter_2.getValue(scope) === counter_2.getValue(scope) // true
-  })
-  ```
-
-  </blockquote>
-  </details>
 
 ### `interface UseScopedOptions`
 
