@@ -168,8 +168,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     )
   }
 
-  protected readonly _emitters =
-    console.log("TODO split WeakLink") || new Set<WeakRef<ScopeEmitter>>()
+  protected readonly _emitters = new Set<WeakRef<ScopeEmitter>>()
 
   protected constructor(protected readonly _compare: Compare<T>) {}
 
