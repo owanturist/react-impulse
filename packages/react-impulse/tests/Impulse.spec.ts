@@ -484,7 +484,29 @@ describe.each<{
     expect(source).toHaveEmittersSize(1)
   })
 
-  it("verify against useScoped with deps", () => {
+  it("keeps source observed after changing to the same derived value", ({
+    scope,
+  }) => {
+    const source = Impulse.of({ count: 0 })
+    const derived = Impulse.of((scope) => getValue(source, scope), {
+      compare: Counter.compare,
+    })
+
+    const value_0 = getValue(derived, scope)
+    expect(value_0).toStrictEqual({ count: 0 })
+
+    setValue(source, { count: 1 })
+    const value_1 = getValue(derived, scope)
+    expect(value_1).toStrictEqual({ count: 1 })
+    expect(value_1).not.toBe(value_0)
+
+    setValue(source, { count: 1 })
+    const value_2 = getValue(derived, scope)
+    expect(value_2).toStrictEqual({ count: 1 })
+    expect(value_2).toBe(value_1)
+  })
+
+  it("keeps source observed after useScoped dependency change", () => {
     const source = Impulse.of(1)
     const derived = Impulse.of((scope) => 2 * getValue(source, scope))
 
