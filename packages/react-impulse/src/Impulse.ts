@@ -306,32 +306,23 @@ class DirectImpulse<T> extends Impulse<T> {
 class DerivedImpulse<T> extends Impulse<T> {
   // the inner scope proxies the setters to the outer scope
   private readonly _scope = {
-    [EMITTER_KEY]:
-      console.log("TODO move scope to_lazy") ||
-      ScopeEmitter._init(() => {
-        if (
-          this._compare(
-            this._lazy._value,
-            this._getValue(STATIC_SCOPE),
-            STATIC_SCOPE,
-          )
-        ) {
-          // subscribe back to the getter dependencies
-          this._getValue(this._scope)
-          // adjust the version since the value since the value didn't change
-          this._lazy._version = this._scope[EMITTER_KEY]._getVersion()
-        } else {
-          ScopeEmitter._schedule((queue) => {
-            queue.push(this._emitters)
-          })
-        }
-      }),
+    [EMITTER_KEY]: ScopeEmitter._init(() => {
+      if (
+        this._compare(this._value, this._getValue(STATIC_SCOPE), STATIC_SCOPE)
+      ) {
+        // subscribe back to the dependencies
+        this._getValue(this._scope)
+        // adjust the version since the value didn't change
+        this._version = this._scope[EMITTER_KEY]._getVersion()
+      } else {
+        ScopeEmitter._schedule((queue) => queue.push(this._emitters))
+      }
+    }),
   } satisfies Scope
 
-  private _lazy?: {
-    _value: T
-    _version: number
-  }
+  // the value is never null because it assigns the value from the _getValue on the first _getter call
+  private _value: T = null as never
+  private _version?: number
 
   public constructor(
     private readonly _getValue: Func<[Scope], T>,
@@ -342,20 +333,15 @@ class DerivedImpulse<T> extends Impulse<T> {
   }
 
   protected _getter(): T {
-    const version = this._scope[EMITTER_KEY]._getVersion()
     const value = this._getValue(this._scope)
+    const version = this._scope[EMITTER_KEY]._getVersion()
 
-    if (!this._lazy) {
-      this._lazy = {
-        _version: version,
-        _value: value,
-      }
-    } else if (this._lazy._version !== version) {
-      this._lazy._value = value
-      this._lazy._version = version
+    if (this._version !== version) {
+      this._value = value
+      this._version = version
     }
 
-    return this._lazy._value
+    return this._value
   }
 
   protected _setter(value: T): void {
