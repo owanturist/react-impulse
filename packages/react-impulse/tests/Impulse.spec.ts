@@ -16,7 +16,7 @@ import {
 import { Counter } from "./common"
 
 configure({
-  asyncUtilTimeout: 20000,
+  asyncUtilTimeout: 10000,
 })
 
 const isString = (value: unknown): value is string => typeof value === "string"
@@ -415,7 +415,7 @@ describe("Impulse.of(getter, options?)", () => {
   it.todo("verify against subsequent setValue calls")
   it.todo("verify against subsequent batched setValue calls")
 
-  it.skip("keeps observing while derived value does not change", () => {
+  it("keeps observing while derived value does not change", () => {
     const source = Impulse.of(0)
     const derived = Impulse.of((scope) => source.getValue(scope) > 0)
 
@@ -451,7 +451,7 @@ describe("Impulse.of(getter, options?)", () => {
     expect(result.current).toBe(false)
   })
 
-  it.only("recalculates the value for nested derived impulses", () => {
+  it("recalculates the value for nested derived impulses", () => {
     const email = Impulse.of("")
     const password = Impulse.of("")
     const isEmailEmpty = Impulse.of((scope) => email.getValue(scope) === "")
@@ -477,11 +477,11 @@ describe("Impulse.of(getter, options?)", () => {
       email.setValue("t")
     })
     const value_1 = result.current
-    expect(value_1).not.toBe(value_0)
     expect(value_1).toStrictEqual({
       email: false,
       password: true,
     })
+    expect(value_1).not.toBe(value_0)
 
     act(() => {
       email.setValue("te")
@@ -493,11 +493,11 @@ describe("Impulse.of(getter, options?)", () => {
       password.setValue("q")
     })
     const value_3 = result.current
-    expect(value_3).not.toBe(value_2)
     expect(value_3).toStrictEqual({
       email: false,
       password: false,
     })
+    expect(value_3).not.toBe(value_2)
 
     act(() => {
       email.setValue("test")
@@ -511,13 +511,12 @@ describe("Impulse.of(getter, options?)", () => {
       password.setValue("")
     })
 
-    console.log("CONTINUE FROM HERE")
     const value_5 = result.current
-    expect(value_5).not.toBe(value_4)
     expect(value_5).toStrictEqual({
       email: true,
       password: true,
     })
+    expect(value_5).not.toBe(value_4)
   })
 
   it("causes a single re-render caused by dependency update", () => {
@@ -654,7 +653,7 @@ describe("Impulse.of(getter, options?)", () => {
     expect(source).toHaveEmittersSize(1)
   })
 
-  it.skip("calls compare function only when an observed source changes", ({
+  it("calls compare function only when an observed source setter is called", ({
     scope,
   }) => {
     const source = Impulse.of({ count: 0 })
@@ -663,19 +662,21 @@ describe("Impulse.of(getter, options?)", () => {
     })
 
     expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
+    expect(Counter.compare).not.toHaveBeenCalled()
 
     act(() => {
       source.setValue({ count: 1 })
     })
-    expect(Counter.compare).not.toHaveBeenCalled()
+    expect(Counter.compare).toHaveBeenCalledOnce()
+    vi.clearAllMocks()
 
     expect(source).toHaveEmittersSize(0)
     expect(derived.getValue(scope)).toStrictEqual({ count: 1 })
-    expect(Counter.compare).toHaveBeenCalledOnce()
+    expect(Counter.compare).not.toHaveBeenCalled()
     expect(source).toHaveEmittersSize(1)
   })
 
-  describe.skip.each([
+  describe.each([
     ["default", undefined],
     ["null", null],
   ])("when compare is %s", (_, compare) => {
@@ -722,7 +723,7 @@ describe("Impulse.of(getter, options?)", () => {
     })
   })
 
-  it.skip("assigns custom function as compare", ({ scope }) => {
+  it("assigns custom function as compare", ({ scope }) => {
     const source = Impulse.of({ count: 0 })
     const derived = Impulse.of((scope) => source.getValue(scope), {
       compare: Counter.compare,
@@ -761,11 +762,10 @@ describe("Impulse.of(getter, options?)", () => {
     expect(value_2).toStrictEqual({ count: 1 })
   })
 
-  describe.skipIf(true || process.env.CI).concurrent(
+  describe.skipIf(process.env.CI).concurrent(
     "when a derived Impulse becomes unreachable but still is dependant",
     {
-      timeout: 20000,
-      retry: 2,
+      timeout: 10000,
     },
     () => {
       it("cleanups immediately when source.setValue is called with the different value", ({
@@ -1115,7 +1115,7 @@ describe("Impulse.of(getter, setter, options?)", () => {
     expect(spyOnSource).toHaveBeenCalledExactlyOnceWith({ count: 2 })
   })
 
-  it.skip("assigns custom function as compare", ({ scope }) => {
+  it("assigns custom function as compare", ({ scope }) => {
     const source = Impulse.of({ count: 0 })
     const impulse = Impulse.of(
       (scope) => source.getValue(scope),

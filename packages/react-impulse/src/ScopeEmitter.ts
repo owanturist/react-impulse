@@ -31,6 +31,9 @@ export class ScopeEmitter {
         if (emitter && !executed.has(emitter)) {
           executed.add(emitter)
           emitter._flush()
+          if (false) {
+            console.log("try flushing only when emit returns true")
+          }
           emitter._emit()
         }
       }

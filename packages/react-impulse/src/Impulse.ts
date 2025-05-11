@@ -309,17 +309,22 @@ class DerivedImpulse<T> extends Impulse<T> {
     [EMITTER_KEY]:
       console.log("TODO move scope to_lazy") ||
       ScopeEmitter._init(() => {
-        ScopeEmitter._schedule((queue) => {
-          if (
-            !this._compare(
-              this._lazy._value,
-              this._getValue(STATIC_SCOPE),
-              STATIC_SCOPE,
-            )
-          ) {
+        if (
+          this._compare(
+            this._lazy._value,
+            this._getValue(STATIC_SCOPE),
+            STATIC_SCOPE,
+          )
+        ) {
+          // subscribe back to the getter dependencies
+          this._getValue(this._scope)
+          // adjust the version since the value since the value didn't change
+          this._lazy._version = this._scope[EMITTER_KEY]._getVersion()
+        } else {
+          ScopeEmitter._schedule((queue) => {
             queue.push(this._emitters)
-          }
-        })
+          })
+        }
       }),
   } satisfies Scope
 
@@ -341,20 +346,14 @@ class DerivedImpulse<T> extends Impulse<T> {
     const value = this._getValue(this._scope)
 
     if (!this._lazy) {
-      this._lazy = { _version: version, _value: value }
-
-      return value
-    }
-
-    if (this._lazy._version === version) {
-      return this._lazy._value
-    }
-
-    if (!this._compare(this._lazy._value, value, STATIC_SCOPE)) {
+      this._lazy = {
+        _version: version,
+        _value: value,
+      }
+    } else if (this._lazy._version !== version) {
       this._lazy._value = value
+      this._lazy._version = version
     }
-
-    this._lazy._version = version
 
     return this._lazy._value
   }
