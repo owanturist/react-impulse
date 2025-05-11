@@ -14,24 +14,21 @@ afterAll(() => {
   vi.useRealTimers()
 })
 
-function isSet<T>(anything: unknown): anything is Set<T> {
+const isSet = <T>(anything: unknown): anything is Set<T> => {
   return anything instanceof Set
 }
 
-export function hasProperty<TKey extends PropertyKey>(
-  input: unknown,
-  key: TKey,
-): input is Record<TKey, unknown> {
-  return typeof input === "object" && input != null && key in input
-}
+const getImpulseEmitters = (input: unknown): null | Set<WeakRef<WeakKey>> => {
+  if (input == null || typeof input !== "object") {
+    return null
+  }
 
-function getImpulseEmitters(input: unknown): null | Set<WeakRef<WeakKey>> {
-  if (
-    hasProperty(input, "_emitters") &&
-    hasProperty(input._emitters, "_refs") &&
-    isSet<WeakRef<WeakKey>>(input._emitters._refs)
-  ) {
-    return input._emitters._refs
+  if ("_emitters" in input && isSet<WeakRef<WeakKey>>(input._emitters)) {
+    return input._emitters
+  }
+
+  if ("$" in input && isSet<WeakRef<WeakKey>>(input.$)) {
+    return input.$
   }
 
   return null

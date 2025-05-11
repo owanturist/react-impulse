@@ -1,7 +1,6 @@
 import { type Func, type Compare, eq, isFunction, hasProperty } from "./utils"
 import { EMITTER_KEY, type Scope, extractScope, STATIC_SCOPE } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
-import { WeakLink } from "./WeakLink"
 
 export interface ImpulseOptions<T> {
   /**
@@ -169,7 +168,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     )
   }
 
-  protected readonly _emitters = new WeakLink<ScopeEmitter>()
+  protected readonly _emitters = new Set<WeakRef<ScopeEmitter>>()
 
   protected constructor(protected readonly _compare: Compare<T>) {}
 
@@ -203,7 +202,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   protected abstract _getter(): T
   protected abstract _setter(
     value: T,
-    queue: Array<WeakLink<ScopeEmitter>>,
+    queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
   ): void
 
   /**
@@ -292,7 +291,10 @@ class DirectImpulse<T> extends Impulse<T> {
     return this._value
   }
 
-  protected _setter(value: T, queue: Array<WeakLink<ScopeEmitter>>): void {
+  protected _setter(
+    value: T,
+    queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
+  ): void {
     if (!this._compare(this._value, value, STATIC_SCOPE)) {
       this._value = value
       queue.push(this._emitters)
