@@ -1,3 +1,5 @@
+import type { WeakLink } from "./WeakLink"
+
 /**
  * A context to track Impulse#getValue usage inside the factory function.
  * The tracked calls will subscribe related stores to updates,
@@ -10,10 +12,10 @@ export class ScopeEmitter {
     return new ScopeEmitter(emit)
   }
 
-  private static _queue: null | Array<ReadonlySet<WeakRef<ScopeEmitter>>> = null
+  private static _queue: null | Array<WeakLink<ScopeEmitter>> = null
 
   public static _schedule<TResult>(
-    execute: (queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>) => TResult,
+    execute: (queue: Array<WeakLink<ScopeEmitter>>) => TResult,
   ): TResult {
     if (ScopeEmitter._queue != null) {
       return execute(ScopeEmitter._queue)
@@ -25,10 +27,8 @@ export class ScopeEmitter {
     const executed = new WeakSet<ScopeEmitter>()
 
     for (const emitters of ScopeEmitter._queue) {
-      for (const ref of emitters) {
-        const emitter = ref.deref()
-
-        if (emitter && !executed.has(emitter)) {
+      for (const emitter of emitters) {
+        if (!executed.has(emitter)) {
           executed.add(emitter)
           emitter._flush()
           emitter._emit()
@@ -56,10 +56,11 @@ export class ScopeEmitter {
     this._cleanups.length = 0
   }
 
-  public _attachTo(emitters: Set<WeakRef<ScopeEmitter>>): void {
-    if (!emitters.has(this._ref)) {
-      emitters.add(this._ref)
-      this._cleanups.push(() => emitters.delete(this._ref))
+  public _attachTo(emitters: WeakLink<ScopeEmitter>): void {
+    const cleanup = emitters._link(this._ref)
+
+    if (cleanup) {
+      this._cleanups.push(cleanup)
     }
   }
 
