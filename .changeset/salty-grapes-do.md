@@ -2,7 +2,7 @@
 "react-impulse": patch
 ---
 
-**Refactored `Impulse` and `ScopeEmitter`**: Improved memory management and performance by introducing `WeakRef` for better garbage collection. Additionally, derived impulses now maintain an internal state and only update it when a dependency value changes. This ensures that calling `getValue(scope)` returns the same value unless a dependency of the derived impulse changes.
+Improved memory management and performance by introducing `WeakRef` for better garbage collection. Additionally, derived impulses now maintain an internal state and only update it when a dependency value changes. This ensures that calling `getValue(scope)` returns the same value unless a dependency of the derived impulse changes.
 
 #### Code Example
 
