@@ -1,11 +1,4 @@
-import {
-  type Func,
-  type Compare,
-  eq,
-  noop,
-  isFunction,
-  hasProperty,
-} from "./utils"
+import { type Func, type Compare, eq, isFunction, hasProperty } from "./utils"
 import { EMITTER_KEY, type Scope, extractScope, STATIC_SCOPE } from "./Scope"
 import { ScopeEmitter } from "./ScopeEmitter"
 
@@ -105,7 +98,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
 
   /**
    * Creates a new derived ReadonlyImpulse.
-   * A derived Impulse is an Impulse that does not have its own value but reads it from the external source.
+   * A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes.
    *
    * @param getter a function to read the derived value from a source.
    * @param options optional `ImpulseOptions`.
@@ -120,7 +113,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
 
   /**
    * Creates a new derived Impulse.
-   * A derived Impulse is an Impulse that does not have its own value but reads it from the external source and writes it back.
+   * A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes.
    *
    * @param getter either anything that implements the `ImpulseGetter` interface or a function to read the derived value from the source.
    * @param setter either anything that implements the `ImpulseSetter` interface or a function to write the derived value back to the source.
@@ -164,18 +157,18 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     const [setter, options] =
       isFunction(optionsOrSetter) || hasProperty(optionsOrSetter, "setValue")
         ? [optionsOrSetter, optionsOrNothing]
-        : [noop, optionsOrSetter]
+        : [undefined, optionsOrSetter]
 
     return new DerivedImpulse(
       isGetterFunction
         ? initialValueOrGetter
         : (scope) => initialValueOrGetter.getValue(scope),
-      isFunction(setter) ? setter : (value) => setter.setValue(value),
+      isFunction(setter) ? setter : (value) => setter?.setValue(value),
       options?.compare ?? eq,
     )
   }
 
-  private readonly _emitters = new Set<ScopeEmitter>()
+  protected readonly _emitters = new Set<WeakRef<ScopeEmitter>>()
 
   protected constructor(protected readonly _compare: Compare<T>) {}
 
@@ -206,8 +199,11 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     return String(this.getValue(scope))
   }
 
-  protected abstract _getter(scope: Scope): T
-  protected abstract _setter(value: T): boolean
+  protected abstract _getter(): T
+  protected abstract _setter(
+    value: T,
+    queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
+  ): void
 
   /**
    * Creates a new Impulse instance out of the current one with the same value.
@@ -237,7 +233,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
     transformOrOptions?: Func<[T, Scope], T> | ImpulseOptions<T>,
     maybeOptions?: ImpulseOptions<T>,
   ): Impulse<T> {
-    const value = this._getter(STATIC_SCOPE)
+    const value = this._getter()
 
     const [clonedValue, { compare = this._compare } = {}] = isFunction(
       transformOrOptions,
@@ -258,7 +254,7 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   public getValue(scope: Scope): T {
     scope[EMITTER_KEY]?._attachTo(this._emitters)
 
-    return this._getter(scope)
+    return this._getter()
   }
 
   /**
@@ -275,12 +271,10 @@ export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
   ): void {
     ScopeEmitter._schedule((queue) => {
       const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(this._getter(STATIC_SCOPE), STATIC_SCOPE)
+        ? valueOrTransform(this._getter(), STATIC_SCOPE)
         : valueOrTransform
 
-      if (this._setter(nextValue)) {
-        queue.push(this._emitters)
-      }
+      this._setter(nextValue, queue)
     })
   }
 }
@@ -297,19 +291,37 @@ class DirectImpulse<T> extends Impulse<T> {
     return this._value
   }
 
-  protected _setter(value: T): boolean {
-    const isDifferent = !this._compare(this._value, value, STATIC_SCOPE)
-
-    if (isDifferent) {
+  protected _setter(
+    value: T,
+    queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
+  ): void {
+    if (!this._compare(this._value, value, STATIC_SCOPE)) {
       this._value = value
+      queue.push(this._emitters)
     }
-
-    return isDifferent
   }
 }
 
 class DerivedImpulse<T> extends Impulse<T> {
-  private _value?: { _lazy: T }
+  // the inner scope proxies the setters to the outer scope
+  private readonly _scope = {
+    [EMITTER_KEY]: ScopeEmitter._init(() => {
+      if (
+        this._compare(this._value, this._getValue(STATIC_SCOPE), STATIC_SCOPE)
+      ) {
+        // subscribe back to the dependencies
+        this._getValue(this._scope)
+        // adjust the version since the value didn't change
+        this._version = this._scope[EMITTER_KEY]._getVersion()
+      } else {
+        ScopeEmitter._schedule((queue) => queue.push(this._emitters))
+      }
+    }),
+  } satisfies Scope
+
+  // the value is never null because it assigns the value from the _getValue on the first _getter call
+  private _value: T = null as never
+  private _version?: number
 
   public constructor(
     private readonly _getValue: Func<[Scope], T>,
@@ -319,24 +331,19 @@ class DerivedImpulse<T> extends Impulse<T> {
     super(compare)
   }
 
-  protected _getter(scope: Scope): T {
-    const value = this._getValue(scope)
+  protected _getter(): T {
+    const value = this._getValue(this._scope)
+    const version = this._scope[EMITTER_KEY]._getVersion()
 
-    if (
-      this._value == null ||
-      !this._compare(this._value._lazy, value, STATIC_SCOPE)
-    ) {
-      this._value = { _lazy: value }
+    if (this._version !== version) {
+      this._value = value
+      this._version = version
     }
 
-    return this._value._lazy
+    return this._value
   }
 
-  protected _setter(value: T): boolean {
+  protected _setter(value: T): void {
     this._setValue(value, STATIC_SCOPE)
-
-    // should always emit because the deriving value might be not reactive
-    // so the _getter method does not know about the change of such values
-    return true
   }
 }

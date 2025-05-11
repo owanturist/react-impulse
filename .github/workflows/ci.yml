@@ -89,8 +89,8 @@ jobs:
       - name: Test
         run: pnpm test:run
 
-  test-react-legacy:
-    name: Run tests against legacy react
+  test-react-support:
+    name: Run tests against support react
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -107,18 +107,16 @@ jobs:
         run: pnpm build
 
       - name: Install react@${{ matrix.version }}
-        run: pnpm add -D --filter ./packages/* react@${{ matrix.version }} react-dom@${{ matrix.version }}
+        run: pnpm add -D --filter ./packages/* react@${{ matrix.version }} react-dom@${{ matrix.version }} @types/react@${{ matrix.version }}
 
       - name: Test against react@${{ matrix.version }}
         run: pnpm test:run
 
       - name: Typecheck against react@${{ matrix.version }}
-        run: |
-          pnpm add -D --filter ./packages/* @types/react@${{ matrix.version }}
-          pnpm typecheck
+        run: pnpm typecheck
 
-  test-react-impulse-legacy:
-    name: Run tests against legacy react-impulse
+  test-react-impulse-support:
+    name: Run tests against support react-impulse
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -134,8 +132,14 @@ jobs:
       - name: Install react-impulse@${{ matrix.version }}
         run: pnpm add -D --filter ./packages/react-impulse-form react-impulse@${{ matrix.version }}
 
+      - name: Build
+        run: pnpm build
+
       - name: Test against react-impulse@${{ matrix.version }}
         run: pnpm test:run --project react-impulse-form
+
+      - name: Typecheck against react-impulse@${{ matrix.version }}
+        run: pnpm run --filter ./packages/react-impulse-form typecheck
 
   size-limit:
     name: Size Limit
@@ -159,7 +163,7 @@ jobs:
   release:
     name: Release on npm
     runs-on: ubuntu-latest
-    needs: [checks, test-dist, test-react-legacy, test-react-impulse-legacy]
+    needs: [checks, test-dist, test-react-support, test-react-impulse-support]
     # prevents this action from running on forks and only on pushes
     if: ${{ github.repository_owner == 'owanturist' && github.event_name == 'push' }}
     concurrency: ${{ github.workflow }}-${{ github.ref }}

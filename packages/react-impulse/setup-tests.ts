@@ -1,36 +1,36 @@
 import "@testing-library/jest-dom/vitest"
 
-import { tap } from "./src"
+import { untrack } from "./src"
 
 const spy_Object$is = vi.spyOn(Object, "is")
 
 beforeEach((context) => {
   spy_Object$is.mockClear()
 
-  tap((scope) => {
-    context.scope = scope
-  })
+  context.scope = untrack((scope) => scope)
 })
 
 afterAll(() => {
   vi.useRealTimers()
 })
 
-const isSet = (anything: unknown): anything is Set<unknown> => {
+function isSet<T>(anything: unknown): anything is Set<T> {
   return anything instanceof Set
 }
 
-const getImpulseEmitters = (input: unknown): null | Set<unknown> => {
-  if (input == null || typeof input !== "object") {
-    return null
-  }
+export function hasProperty<TKey extends PropertyKey>(
+  input: unknown,
+  key: TKey,
+): input is Record<TKey, unknown> {
+  return typeof input === "object" && input != null && key in input
+}
 
-  if ("_emitters" in input && isSet(input._emitters)) {
+function getImpulseEmitters(input: unknown): null | Set<WeakRef<WeakKey>> {
+  if (
+    hasProperty(input, "_emitters") &&
+    isSet<WeakRef<WeakKey>>(input._emitters)
+  ) {
     return input._emitters
-  }
-
-  if ("$" in input && isSet(input.$)) {
-    return input.$
   }
 
   return null
@@ -48,17 +48,21 @@ expect.extend({
       }
     }
 
+    const activeEmitters = [...emitters]
+      .map((ref) => ref.deref())
+      .filter((value) => value != null)
+
     return {
-      pass: emitters.size === size,
+      pass: activeEmitters.length === size,
       message: () => {
         return [
           "expected",
-          this.utils.printReceived(emitters.size),
+          this.utils.printReceived(activeEmitters.length),
           "to be",
           this.utils.printExpected(size),
         ].join(" ")
       },
-      actual: emitters.size,
+      actual: activeEmitters.length,
       expected: size,
     }
   },
