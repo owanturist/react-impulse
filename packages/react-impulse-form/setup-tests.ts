@@ -3,6 +3,10 @@ import { untrack } from "react-impulse"
 
 const spy_Object$is = vi.spyOn(Object, "is")
 
+if (process.env.TEST_TARGET != null) {
+  vi.mock("./src", () => import(`./${process.env.TEST_TARGET}`))
+}
+
 beforeEach((context) => {
   spy_Object$is.mockClear()
 

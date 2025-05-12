@@ -4,6 +4,10 @@ import { untrack } from "./src"
 
 const spy_Object$is = vi.spyOn(Object, "is")
 
+if (process.env.TEST_TARGET != null) {
+  vi.mock("./src", () => import(`./${process.env.TEST_TARGET}`))
+}
+
 beforeEach((context) => {
   spy_Object$is.mockClear()
 
@@ -31,6 +35,10 @@ function getImpulseEmitters(input: unknown): null | Set<WeakRef<WeakKey>> {
     isSet<WeakRef<WeakKey>>(input._emitters)
   ) {
     return input._emitters
+  }
+
+  if (hasProperty(input, "$") && isSet<WeakRef<WeakKey>>(input.$)) {
+    // return input.$
   }
 
   return null

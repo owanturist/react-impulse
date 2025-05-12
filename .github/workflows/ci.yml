@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        filename: [index.js, index.cjs]
+        filename: [dist/index.js, dist/index.cjs]
 
     steps:
       - name: Checkout repository
@@ -76,18 +76,8 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Cleanup src folders to make sure the tests do not use source files
-        run: |
-          rm -rf packages/react-impulse/src/*
-          rm -rf packages/react-impulse-form/src/*
-
-      - name: Copy dist/${{ matrix.filename }} as src/index.ts
-        run: |
-          cp packages/react-impulse/dist/${{ matrix.filename }} packages/react-impulse/src/index.ts
-          cp packages/react-impulse-form/dist/${{ matrix.filename }} packages/react-impulse-form/src/index.ts
-
       - name: Test
-        run: pnpm test:run
+        run: TEST_TARGET=${{ matrix.filename }} pnpm test:run
 
   test-react-support:
     name: Run tests against support react
