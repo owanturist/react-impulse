@@ -74,7 +74,7 @@ jobs:
         uses: ./.github/actions/setup-env
 
       - name: Build
-        run: pnpm build
+        run: pnpm build:minified
 
       - name: Cleanup src folders to make sure the tests do not use source files
         run: |

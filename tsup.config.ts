@@ -14,6 +14,13 @@ export default defineConfig({
       keep_fnames: true,
       properties: {
         regex: /^_[^_]\w+[^_]$/,
+        // @ts-expect-error undocumented, but it specifies how to mangle Impulse's properties
+        cache: {
+          props: {
+            $_value: "_",
+            $_emitters: "$",
+          },
+        },
       },
     },
   },

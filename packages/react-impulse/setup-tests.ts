@@ -33,6 +33,10 @@ function getImpulseEmitters(input: unknown): null | Set<WeakRef<WeakKey>> {
     return input._emitters
   }
 
+  if (hasProperty(input, "$") && isSet<WeakRef<WeakKey>>(input.$)) {
+    return input.$
+  }
+
   return null
 }
 
