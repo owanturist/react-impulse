@@ -22,7 +22,7 @@
     "noImplicitReturns": true,
     "downlevelIteration": true,
     "jsx": "react",
-    "types": ["vitest/globals", "vitest/importMeta"],
+    "types": ["vitest/globals"],
     "verbatimModuleSyntax": true
   },
   "include": ["./*.ts"]
