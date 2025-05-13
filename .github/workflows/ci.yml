@@ -74,7 +74,7 @@ jobs:
         uses: ./.github/actions/setup-env
 
       - name: Build
-        run: pnpm build
+        run: pnpm build:minified
 
       - name: Test
         run: TEST_TARGET=${{ matrix.filename }} pnpm test:run
