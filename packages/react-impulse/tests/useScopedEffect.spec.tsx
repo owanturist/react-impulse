@@ -45,7 +45,7 @@ describe.each([
     }
 
     it(`runs an effect when Impulse-dependency updates`, () => {
-      const value = Impulse.of(3)
+      const value = Impulse(3)
       const onEffect = vi.fn()
 
       render(
@@ -67,7 +67,7 @@ describe.each([
     })
 
     it("does not call useEffect factory when deps not changed", () => {
-      const value = Impulse.of(1)
+      const value = Impulse(1)
       const onEffect = vi.fn()
       const onRender = vi.fn()
 
@@ -109,8 +109,8 @@ describe.each([
     })
 
     it("should call useEffect factory when dep Impulse changes", () => {
-      const value_1 = Impulse.of(1)
-      const value_2 = Impulse.of(3)
+      const value_1 = Impulse(1)
+      const value_2 = Impulse(3)
       const onEffect = vi.fn()
       const onRender = vi.fn()
 
@@ -140,8 +140,8 @@ describe.each([
     })
 
     it("should unsubscribe Impulse from useEffect when swapped", () => {
-      const value_1 = Impulse.of(1)
-      const value_2 = Impulse.of(3)
+      const value_1 = Impulse(1)
+      const value_2 = Impulse(3)
       const onEffect = vi.fn()
       const onRender = vi.fn()
 
@@ -193,7 +193,7 @@ describe.each([
     })
 
     it("should call useEffect factory when non Impulse dep changes", () => {
-      const value = Impulse.of(3)
+      const value = Impulse(3)
       const onEffect = vi.fn()
       const onRender = vi.fn()
 
@@ -251,8 +251,8 @@ describe.each([
     }
 
     it("can watch after both impulses", () => {
-      const first = Impulse.of(2)
-      const second = Impulse.of(3)
+      const first = Impulse(2)
+      const second = Impulse(3)
       const onEffect = vi.fn()
 
       render(<Component first={first} second={second} onEffect={onEffect} />)
@@ -309,10 +309,10 @@ describe.each([
     }
 
     it("can watch after all impulses", () => {
-      const _0 = Impulse.of(2)
-      const _1 = Impulse.of(3)
-      const _2 = Impulse.of(4)
-      const list = Impulse.of([_0, _1])
+      const _0 = Impulse(2)
+      const _1 = Impulse(3)
+      const _2 = Impulse(4)
+      const list = Impulse([_0, _1])
       const onEffect = vi.fn()
 
       render(<Component list={list} onEffect={onEffect} />)
@@ -381,7 +381,7 @@ describe.each([
     }
 
     it("calls effect when rerenders", () => {
-      const value = Impulse.of(3)
+      const value = Impulse(3)
       const onEffect = vi.fn()
 
       const { rerender } = render(
@@ -398,7 +398,7 @@ describe.each([
     })
 
     it("calls effect when inner useState changes", () => {
-      const value = Impulse.of(3)
+      const value = Impulse(3)
       const onEffect = vi.fn()
 
       render(<Component value={value} onEffect={onEffect} />)
@@ -413,7 +413,7 @@ describe.each([
     })
 
     it("calls effect when Impulse inside an effect changes", () => {
-      const value = Impulse.of(3)
+      const value = Impulse(3)
       const onEffect = vi.fn()
 
       render(<Component value={value} onEffect={onEffect} />)
@@ -472,7 +472,7 @@ describe.each([
       )
     }
 
-    const value = Impulse.of(3)
+    const value = Impulse(3)
     const onEffect = vi.fn()
 
     render(<Host count={value} onEffect={onEffect} />)
@@ -501,7 +501,7 @@ describe.each([
 
   it("triggers the effect when either regular or additional dependencies change", () => {
     const spy = vi.fn()
-    const impulse = Impulse.of(2)
+    const impulse = Impulse(2)
     const { rerender } = renderHook(
       ({ left, right }) => {
         useCustomScopedEffect(
@@ -539,15 +539,15 @@ describe.each([
     expect(spy).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
-    rerender({ left: 2, right: Impulse.of(4) })
+    rerender({ left: 2, right: Impulse(4) })
     expect(spy).toHaveBeenCalledExactlyOnceWith(6)
     vi.clearAllMocks()
   })
 
   it("triggers the effect when Impulses are not listened in dependencies", () => {
     const spy = vi.fn()
-    const left = Impulse.of(1)
-    const right = Impulse.of(2)
+    const left = Impulse(1)
+    const right = Impulse(2)
     const { rerender } = renderHook(
       ({ state }) => {
         useCustomScopedEffect(
@@ -584,7 +584,7 @@ describe.each([
 
   it("calls effect cleanup function", () => {
     const cleanup = vi.fn()
-    const counter = Impulse.of({ count: 2 })
+    const counter = Impulse({ count: 2 })
     const { rerender, unmount } = renderHook(
       (props) => {
         useCustomScopedEffect(

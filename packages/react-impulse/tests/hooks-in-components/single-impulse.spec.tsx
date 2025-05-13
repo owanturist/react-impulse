@@ -55,7 +55,7 @@ describe("single impulse", () => {
   )
 
   it("single Setter / Getter", () => {
-    const counter = Impulse.of({ count: 0 })
+    const counter = Impulse({ count: 0 })
     const onRootRender = vi.fn()
     const onGetterRender = vi.fn()
     const onSetterRender = vi.fn()
@@ -153,7 +153,7 @@ describe("single impulse", () => {
   )
 
   it("multiple Setters / Getters", () => {
-    const counter = Impulse.of({ count: 0 })
+    const counter = Impulse({ count: 0 })
     const onRootRender = vi.fn()
     const onFirstGetterRender = vi.fn()
     const onSecondGetterRender = vi.fn()

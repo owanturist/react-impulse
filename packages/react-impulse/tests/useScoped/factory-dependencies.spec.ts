@@ -14,7 +14,7 @@ const factory = (scope: Scope, { impulse, spy }: WithImpulse & WithSpy) => {
 describe("factory without deps", () => {
   const setup = () => {
     const spy = vi.fn()
-    const impulse = Impulse.of({ count: 1 })
+    const impulse = Impulse({ count: 1 })
 
     const { rerender } = renderHook(
       (props) => useScoped((scope) => factory(scope, props)),
@@ -112,7 +112,7 @@ describe.each([
 ])("factory with deps and %s comparator", (_, useCounter) => {
   const setup = () => {
     const spy = vi.fn()
-    const impulse = Impulse.of({ count: 1 })
+    const impulse = Impulse({ count: 1 })
 
     const { rerender } = renderHook(useCounter, {
       initialProps: { impulse, spy },

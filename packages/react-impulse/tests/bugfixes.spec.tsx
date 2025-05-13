@@ -84,8 +84,8 @@ describe("watching misses when defined after useEffect #140", () => {
         ["memoized useScoped", useScopedMemoized],
         ["shortcut useScoped", useScopedShortcut],
       ])("with %s as useGetSecond", (_, useGetSecond) => {
-        const first = Impulse.of(0)
-        const second = Impulse.of(5)
+        const first = Impulse(0)
+        const second = Impulse(5)
 
         render(
           <Component
@@ -144,7 +144,7 @@ describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321
       return <span data-testid="result">{value}</span>
     }
 
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     render(<Component count={count} />)
 
     const result = screen.getByTestId("result")
@@ -181,7 +181,7 @@ describe("return the same component type from watch #322", () => {
   const Input = Object.assign(StatefulInput, { Stateless: StatelessInput })
 
   it("scopes the StatefulInput", () => {
-    const text = Impulse.of("hello")
+    const text = Impulse("hello")
     render(<Input value={text} />)
 
     const first = screen.getByRole("textbox")
@@ -209,7 +209,7 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
   }
 
   it("does not fail in strict mode", () => {
-    const impulse = Impulse.of(0)
+    const impulse = Impulse(0)
 
     render(
       <React.StrictMode>
@@ -236,7 +236,7 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
 describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a not reactive value #627", () => {
   it("does not enqueue a rerender when sets a not reactive value", () => {
     const counter = { count: 0 }
-    const impulse = Impulse.of(
+    const impulse = Impulse(
       () => counter.count,
       (count) => {
         counter.count = count

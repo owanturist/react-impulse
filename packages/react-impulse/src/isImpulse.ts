@@ -1,4 +1,5 @@
-import { Impulse, type ReadonlyImpulse } from "./Impulse"
+import { BaseImpulse } from "./BaseImpulse"
+import type { Impulse, ReadonlyImpulse } from "./Impulse"
 import type { Scope } from "./Scope"
 import type { Func } from "./utils"
 
@@ -48,7 +49,7 @@ export function isImpulse(
     | [scope: Scope, check: Func<[unknown], boolean>, input: unknown]
 ): boolean {
   if (args.length === 1) {
-    return args[0] instanceof Impulse
+    return args[0] instanceof BaseImpulse
   }
 
   if (isImpulse(args[2])) {

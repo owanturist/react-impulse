@@ -33,7 +33,7 @@ describe("single impulse", () => {
   }
 
   it("can watch inside useScopedMemo", () => {
-    const value = Impulse.of(1)
+    const value = Impulse(1)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -62,7 +62,7 @@ describe("single impulse", () => {
   })
 
   it("does not call useMemo factory when deps not changed", () => {
-    const value = Impulse.of(1)
+    const value = Impulse(1)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -96,8 +96,8 @@ describe("single impulse", () => {
   })
 
   it("should call useMemo factory when dep Impulse changes", () => {
-    const value_1 = Impulse.of(1)
-    const value_2 = Impulse.of(3)
+    const value_1 = Impulse(1)
+    const value_2 = Impulse(3)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -119,8 +119,8 @@ describe("single impulse", () => {
   })
 
   it("should unsubscribe Impulse from useMemo when swapped", () => {
-    const value_1 = Impulse.of(1)
-    const value_2 = Impulse.of(3)
+    const value_1 = Impulse(1)
+    const value_2 = Impulse(3)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -162,7 +162,7 @@ describe("single impulse", () => {
   })
 
   it("should call useMemo factory when none-Impulse dep changes", () => {
-    const value = Impulse.of(3)
+    const value = Impulse(3)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -215,8 +215,8 @@ describe("multiple impulses", () => {
   }
 
   it("can watch after both impulses", () => {
-    const first = Impulse.of(2)
-    const second = Impulse.of(3)
+    const first = Impulse(2)
+    const second = Impulse(3)
 
     render(<Component first={first} second={second} />)
 
@@ -272,10 +272,10 @@ describe("nested impulses", () => {
   }
 
   it("can watch after all impulses", () => {
-    const _0 = Impulse.of(2)
-    const _1 = Impulse.of(3)
-    const _2 = Impulse.of(4)
-    const list = Impulse.of([_0, _1])
+    const _0 = Impulse(2)
+    const _1 = Impulse(3)
+    const _2 = Impulse(4)
+    const list = Impulse([_0, _1])
 
     render(<Component list={list} />)
 

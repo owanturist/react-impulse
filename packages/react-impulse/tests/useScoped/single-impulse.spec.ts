@@ -5,13 +5,13 @@ import {
   Impulse,
   useScoped,
   type Scope,
-  type ImpulseGetter,
+  type ReadableImpulse,
 } from "../../src"
 import { Counter, type WithSpy, type WithImpulse } from "../common"
 
 describe("impulse shortcut", () => {
   it("allows to use Impulse", () => {
-    const impulse = Impulse.of(1)
+    const impulse = Impulse(1)
 
     const { result } = renderHook(() => useScoped(impulse))
 
@@ -20,7 +20,7 @@ describe("impulse shortcut", () => {
 
   it("allows to use ReadonlyImpulse", () => {
     let count = 1
-    const impulse = Impulse.of(() => count)
+    const impulse = Impulse(() => count)
 
     const { result, rerender } = renderHook(() => useScoped(impulse))
 
@@ -32,8 +32,8 @@ describe("impulse shortcut", () => {
     expect(result.current).toBe(1)
   })
 
-  it("allows to use ImpulseGetter", () => {
-    class Custom implements ImpulseGetter<number> {
+  it("allows to use ReadableImpulse", () => {
+    class Custom implements ReadableImpulse<number> {
       public constructor(public value: number) {}
 
       public getValue(): number {
@@ -54,7 +54,7 @@ describe("impulse shortcut", () => {
   })
 
   it("does not allow to pass dependencies", () => {
-    const impulse = Impulse.of(1)
+    const impulse = Impulse(1)
 
     // @ts-expect-error - should not allow to pass dependencies
     const { result } = renderHook(() => useScoped(impulse, []))
@@ -104,7 +104,7 @@ describe("single factory", () => {
     ],
   ])("%s", (_, useCounter) => {
     it("watches the Impulse's changes", () => {
-      const impulse = Impulse.of({ count: 1 })
+      const impulse = Impulse({ count: 1 })
 
       const { result } = renderHook(useCounter, {
         initialProps: { impulse },
@@ -125,8 +125,8 @@ describe("single factory", () => {
 
     describe("watches the replaced impulse changes", () => {
       const setup = () => {
-        const impulse_1 = Impulse.of({ count: 1 })
-        const impulse_2 = Impulse.of({ count: 10 })
+        const impulse_1 = Impulse({ count: 1 })
+        const impulse_2 = Impulse({ count: 10 })
 
         const { result, rerender } = renderHook(useCounter, {
           initialProps: { impulse: impulse_1 },
@@ -255,7 +255,7 @@ describe("transform scoped Impulse's", () => {
   ])(
     "keeps the old value when it is comparably equal when %s",
     (_, useCounter) => {
-      const impulse = Impulse.of({ count: 1 })
+      const impulse = Impulse({ count: 1 })
 
       const { result, rerender } = renderHook(useCounter, {
         initialProps: { impulse },
@@ -318,7 +318,7 @@ describe("transform scoped Impulse's", () => {
       },
     ],
   ])("produces new value on each Impulse's update %s", (_, useCounter) => {
-    const impulse = Impulse.of({ count: 1 })
+    const impulse = Impulse({ count: 1 })
 
     const { result, rerender } = renderHook(useCounter, {
       initialProps: { impulse },
@@ -427,7 +427,7 @@ describe("transform scoped Impulse's", () => {
         },
       ],
     ])("should not trigger the factory %s", (_, useCounter) => {
-      const impulse = Impulse.of({ count: 1 }, { compare: Counter.compare })
+      const impulse = Impulse({ count: 1 }, { compare: Counter.compare })
       const spy = vi.fn()
 
       renderHook(useCounter, {
@@ -532,7 +532,7 @@ describe("multiple Impulse#getValue(scope) calls", () => {
       const setup = () => {
         const spySingle = vi.fn()
         const spyDouble = vi.fn()
-        const impulse = Impulse.of({ count: 1 })
+        const impulse = Impulse({ count: 1 })
 
         const { result: resultSingle } = renderHook(useSingleHook, {
           initialProps: { spy: spySingle, impulse },

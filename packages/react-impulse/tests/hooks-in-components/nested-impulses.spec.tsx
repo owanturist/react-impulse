@@ -26,7 +26,7 @@ describe("nested impulses", () => {
             onClick={() => {
               state.setValue((current) => ({
                 ...current,
-                counts: [...current.counts, Impulse.of(0)],
+                counts: [...current.counts, Impulse(0)],
               }))
             }}
           />
@@ -55,7 +55,7 @@ describe("nested impulses", () => {
   }
 
   it("performs nested impulse management", ({ scope }) => {
-    const impulse = Impulse.of<AppState>({ counts: [] })
+    const impulse = Impulse<AppState>({ counts: [] })
     const onRender = vi.fn()
     const onCounterRender = vi.fn()
 
@@ -110,7 +110,7 @@ describe("nested impulses", () => {
     act(() => {
       impulse.setValue((current) => ({
         ...current,
-        counts: [...current.counts, Impulse.of(3)],
+        counts: [...current.counts, Impulse(3)],
       }))
     })
     expect(onRender).toHaveBeenCalledOnce()

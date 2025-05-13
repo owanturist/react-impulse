@@ -51,9 +51,9 @@ describe("nested factory", () => {
     ],
   ])("%s", (_, useCounter) => {
     const setup = () => {
-      const first = Impulse.of({ count: 2 })
-      const second = Impulse.of({ count: 3 })
-      const impulse = Impulse.of({ first, second })
+      const first = Impulse({ count: 2 })
+      const second = Impulse({ count: 3 })
+      const impulse = Impulse({ first, second })
       const { result } = renderHook(useCounter, {
         initialProps: { impulse },
       })
@@ -96,7 +96,7 @@ describe("nested factory", () => {
     })
 
     it("replaces nested impulses", () => {
-      const newFirst = Impulse.of({ count: 5 })
+      const newFirst = Impulse({ count: 5 })
       const { impulse, result } = setup()
 
       act(() => {
@@ -226,10 +226,10 @@ describe("triggering factory for nested impulses vs single impulse", () => {
     ],
   ])("%s", (_, useSingleCounter, useNestedCounters) => {
     const setup = () => {
-      const first = Impulse.of({ count: 1 })
-      const second = Impulse.of({ count: 2 })
-      const third = Impulse.of({ count: 3 })
-      const impulse = Impulse.of({ first, second, third })
+      const first = Impulse({ count: 1 })
+      const second = Impulse({ count: 2 })
+      const third = Impulse({ count: 3 })
+      const impulse = Impulse({ first, second, third })
       const spySingle = vi.fn()
       const spyNested = vi.fn()
 

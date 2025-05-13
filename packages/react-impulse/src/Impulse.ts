@@ -17,7 +17,7 @@ export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
  * @version 3.0.0
  *
  * @example
- * const impulse = Impulse.of<string>()
+ * const impulse = Impulse<string>()
  * const initiallyUndefined = impulse.getValue(scope) === undefined
  */
 export function Impulse<T = undefined>(): Impulse<undefined | T>
