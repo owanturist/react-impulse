@@ -1,12 +1,8 @@
-export type { DependencyList } from "./dependencies"
-export type { Compare, Destructor } from "./utils"
-export {
-  type ImpulseOptions,
-  type ReadonlyImpulse,
-  type ImpulseGetter,
-  type ImpulseSetter,
-  Impulse,
-} from "./Impulse"
+export { type ReadonlyImpulse, Impulse } from "./Impulse"
+export type { ReadableImpulse } from "./ReadableImpulse"
+export type { WritableImpulse } from "./WritableImpulse"
+export type { ImpulseOptions } from "./ImpulseOptions"
+export { isImpulse } from "./isImpulse"
 export type { Scope } from "./Scope"
 export { untrack } from "./untrack"
 export { batch } from "./batch"
@@ -18,3 +14,5 @@ export { useScopedMemo } from "./useScopedMemo"
 export { useScopedCallback } from "./useScopedCallback"
 export { useScopedEffect } from "./useScopedEffect"
 export { useScopedLayoutEffect } from "./useScopedLayoutEffect"
+export type { DependencyList } from "./dependencies"
+export type { Compare, Destructor } from "./utils"
