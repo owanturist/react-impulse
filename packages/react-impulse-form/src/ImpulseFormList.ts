@@ -173,7 +173,7 @@ export class ImpulseFormList<
   ): ImpulseFormList<TElement> {
     const list = new ImpulseFormList(
       null,
-      Impulse.of(elements, {
+      Impulse(elements, {
         compare: shallowArrayEquals,
       }),
     )
