@@ -4,7 +4,7 @@
 
 **BREAKING CHANGES**
 
-The `useTransmittingImpulse` hook has been removed. Use the following replacements:
+The `useTransmittingImpulse` hook has been removed.
 
 #### Rationale
 
@@ -12,11 +12,11 @@ Removing this specialized hook simplifies the API surface while making state man
 
 #### Functional Equivalence
 
-All functionality previously provided by `useTransmittingImpulse` can be achieved through the composition of `Impulse.of()`, `useEffect`, and `useScopedEffect`. These replacements give you more precise control over dependency tracking and rendering optimization.
+All functionality previously provided by `useTransmittingImpulse` can be achieved through the composition of `Impulse()`, `useEffect`, and `useScopedEffect`. These replacements give you more precise control over dependency tracking and rendering optimization.
 
 #### Migration Guide
 
-- For immutable dependencies (not Impulses), replace with `Impulse.of(value)` + effects:
+- For immutable dependencies (not Impulses), replace with `Impulse(value)` + effects:
 
   ```ts
   // Before
@@ -27,7 +27,7 @@ All functionality previously provided by `useTransmittingImpulse` can be achieve
   )
 
   // After
-  const impulse = Impulse.of({ query }) // Create Impulse with initial value
+  const impulse = Impulse({ query }) // Create Impulse with initial value
 
   // Update Impulse when dependencies change
   useEffect(() => impulse.setValue({ query }), [impulse, query])
@@ -39,7 +39,7 @@ All functionality previously provided by `useTransmittingImpulse` can be achieve
   )
   ```
 
-- For mutable dependencies (other Impulses), replace with `Impulse.of(getter, [setter])`:
+- For mutable dependencies (other Impulses), replace with `Impulse(getter, [setter])`:
 
   ```ts
   // Before
@@ -51,7 +51,7 @@ All functionality previously provided by `useTransmittingImpulse` can be achieve
 
   // After
   const counter = useMemo(() => {
-    return Impulse.of(
+    return Impulse(
       (scope) => ({ count: count.getValue(scope) }), // Derived getter
       (next) => count.setValue(next.count), // Optional setter
     )

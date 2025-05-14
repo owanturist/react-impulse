@@ -4,19 +4,19 @@
 
 **BREAKING CHANGES**
 
-- The `Impulse.of` static method was removed and replaced with the `Impulse` function providing the same signature. Combined with the `Impulse` type, this is now the sole API for defining types and creating impulses. For example:
-
-  ```ts
-  import { Impulse } from "react-impulse"
-
-  const count: Impulse<number> = Impulse(0)
-  ```
+- The `Impulse.of` static method was removed and replaced with the `Impulse` function providing the same signature.
 
 - The `Impulse.isImpulse` static method was removed and replaced with the `isImpulse` function providing the same signature.
 
-- The `ImpulseGetter` was renamed to `ReadableImpulse`.
+#### Rationale
 
-- The `ImpulseSetter` was renamed to `WritableImpulse`.
+The changes aim to simplify and modernize the API of `react-impulse` while improving its usability and consistency:
+
+- **Removal of `Impulse.of`**: By replacing the static `Impulse.of` method with the `Impulse` function, the API becomes more intuitive. This change also reduces redundancy, as the `Impulse` function now serves as the sole entry point for creating impulses and defining types.
+
+- **Standalone `isImpulse` function**: Moving `isImpulse` from a static method to a standalone function makes it possible to tree shake when unused.
+
+These changes collectively enhance the developer experience, reduce cognitive load, and make the library easier to learn and use.
 
 #### Migration Guide
 
@@ -72,14 +72,4 @@
   if (isImpulse(something)) {
     // ...
   }
-  ```
-
-- Update imports to use `ReadableImpulse` and `WritableImpulse` instead of `ImpulseGetter` and `ImpulseSetter`:
-
-  ```ts
-  // Before
-  import type { ImpulseGetter, ImpulseSetter } from "react-impulse"
-
-  // After
-  import type { ReadableImpulse, WritableImpulse } from "react-impulse"
   ```

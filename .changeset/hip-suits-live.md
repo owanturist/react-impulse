@@ -14,11 +14,11 @@ Simplifying `getValue` to have a single responsibility—retrieving the current 
 
 ```ts
 // Before
-const count = Impulse.of(0)
+const count = Impulse(0)
 const doubled = count.getValue(scope, (value) => value * 2)
 
 // After
-const count = Impulse.of(0)
+const count = Impulse(0)
 const doubled = count.getValue(scope) * 2
 ```
 
