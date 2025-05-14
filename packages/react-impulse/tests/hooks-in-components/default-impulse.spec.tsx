@@ -8,7 +8,7 @@ describe("default impulse", () => {
     const SearchBar: React.FC<{
       value?: Impulse<string>
     }> = ({ value: valueImpulse }) => {
-      const [defaultValueImpulse] = React.useState(Impulse.of("search for me"))
+      const [defaultValueImpulse] = React.useState(Impulse("search for me"))
 
       const impulse = valueImpulse ?? defaultValueImpulse
       const value = useScoped(impulse)
@@ -31,7 +31,7 @@ describe("default impulse", () => {
     fireEvent.change(input, { target: { value: "now" } })
     expect(input).toHaveValue("now")
 
-    const val = Impulse.of("new")
+    const val = Impulse("new")
 
     rerender(<SearchBar value={val} />)
     expect(input).toHaveValue("new")

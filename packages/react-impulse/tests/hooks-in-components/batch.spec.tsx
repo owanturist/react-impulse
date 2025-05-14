@@ -10,8 +10,8 @@ describe.each([
 ])("multiple impulses %s calls with direct impulse access", (_, execute) => {
   it("re-renders once for Impulse#setValue calls", () => {
     const onRender = vi.fn()
-    const impulse_1 = Impulse.of({ count: 1 })
-    const impulse_2 = Impulse.of({ count: 2 })
+    const impulse_1 = Impulse({ count: 1 })
+    const impulse_2 = Impulse({ count: 2 })
 
     const Component: React.FC = () => {
       const counter_1 = useScoped((scope) => impulse_1.getValue(scope))
@@ -42,8 +42,8 @@ describe.each([
 
   it("re-renders once for multiple useScoped", () => {
     const onRender = vi.fn()
-    const impulse_1 = Impulse.of({ count: 1 })
-    const impulse_2 = Impulse.of({ count: 2 })
+    const impulse_1 = Impulse({ count: 1 })
+    const impulse_2 = Impulse({ count: 2 })
 
     const Component: React.FC = () => {
       const counter_1 = useScoped((scope) => impulse_1.getValue(scope))
@@ -84,9 +84,9 @@ describe.each([
 ])("nested impulses %s calls with direct impulse access", (_, execute) => {
   it("re-renders once for Impulse#setValue calls", () => {
     const onRender = vi.fn()
-    const impulse = Impulse.of({
-      first: Impulse.of({ count: 1 }),
-      second: Impulse.of({ count: 2 }),
+    const impulse = Impulse({
+      first: Impulse({ count: 1 }),
+      second: Impulse({ count: 2 }),
     })
 
     const Component: React.FC = () => {
@@ -137,9 +137,9 @@ describe.each([
 
   it("re-renders once for multiple useScoped", () => {
     const onRender = vi.fn()
-    const impulse = Impulse.of({
-      first: Impulse.of({ count: 1 }),
-      second: Impulse.of({ count: 2 }),
+    const impulse = Impulse({
+      first: Impulse({ count: 1 }),
+      second: Impulse({ count: 2 }),
     })
 
     const Component: React.FC = () => {
@@ -252,8 +252,8 @@ describe.each([
       const setup = () => {
         const spy = vi.fn()
         const onRender = vi.fn()
-        const first = Impulse.of({ count: 1 })
-        const second = Impulse.of({ count: 2 })
+        const first = Impulse({ count: 1 })
+        const second = Impulse({ count: 2 })
         const factory = (scope: Scope) => {
           spy()
 
@@ -339,9 +339,9 @@ describe.each([
       const setup = () => {
         const spy = vi.fn()
         const onRender = vi.fn()
-        const impulse = Impulse.of({
-          first: Impulse.of({ count: 1 }),
-          second: Impulse.of({ count: 2 }),
+        const impulse = Impulse({
+          first: Impulse({ count: 1 }),
+          second: Impulse({ count: 2 }),
         })
         const factory = (scope: Scope) => {
           spy()

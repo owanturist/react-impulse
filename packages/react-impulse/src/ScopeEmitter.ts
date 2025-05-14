@@ -15,7 +15,7 @@ export class ScopeEmitter {
   public static _schedule<TResult>(
     execute: (queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>) => TResult,
   ): TResult {
-    if (ScopeEmitter._queue != null) {
+    if (ScopeEmitter._queue) {
       return execute(ScopeEmitter._queue)
     }
 

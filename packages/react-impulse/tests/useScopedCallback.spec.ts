@@ -24,21 +24,21 @@ describe("single Impulse", () => {
   }
 
   it("does not run a callback on init", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     setup(count)
 
     expect(onCallback).not.toHaveBeenCalled()
   })
 
   it("does not attach Impulse to a scope on init", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     setup(count)
 
     expect(count).toHaveEmittersSize(0)
   })
 
   it("does not change resulting function when not attached Impulse's value changes", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result } = setup(count)
     const initial = result.current
 
@@ -50,7 +50,7 @@ describe("single Impulse", () => {
   })
 
   it("the resulting function returns a value", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result } = setup(count)
 
     expect(result.current()).toBe(2)
@@ -63,7 +63,7 @@ describe("single Impulse", () => {
   })
 
   it("changes resulting function when attached Impulse's value changes", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result } = setup(count)
     const initial = result.current
 
@@ -77,7 +77,7 @@ describe("single Impulse", () => {
   })
 
   it("de-attaches an attached Impulse when its value changes", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result } = setup(count)
 
     result.current()
@@ -90,7 +90,7 @@ describe("single Impulse", () => {
   })
 
   it("attach an Impulse when the resulting function calls", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result } = setup(count)
 
     result.current()
@@ -99,7 +99,7 @@ describe("single Impulse", () => {
   })
 
   it("attaches an Impulse only once on the subsequent resulting function calls", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result } = setup(count)
 
     result.current()
@@ -109,7 +109,7 @@ describe("single Impulse", () => {
   })
 
   it("does not change resulting function with same Impulse when re-renders", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result, rerender } = setup(count)
     const initial = result.current
 
@@ -119,11 +119,11 @@ describe("single Impulse", () => {
   })
 
   it("changes resulting function by a new Impulse when re-renders", () => {
-    const count_1 = Impulse.of(1)
+    const count_1 = Impulse(1)
     const { result, rerender } = setup(count_1)
     const initial = result.current
 
-    const count_2 = Impulse.of(2)
+    const count_2 = Impulse(2)
     rerender(count_2)
 
     expect(result.current).not.toBe(initial)
@@ -132,7 +132,7 @@ describe("single Impulse", () => {
   })
 
   it("keeps attached Impulse when re-renders", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result, rerender } = setup(count)
 
     result.current()
@@ -165,7 +165,7 @@ describe("conditional Impulse", () => {
   }
 
   it("the resulting function returns a fallback when not active", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result } = setup(count)
 
     expect(result.current(false)).toBe(-1)
@@ -178,7 +178,7 @@ describe("conditional Impulse", () => {
   })
 
   it("the resulting function returns a value when active", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result } = setup(count)
 
     expect(result.current(true)).toBe(2)
@@ -191,7 +191,7 @@ describe("conditional Impulse", () => {
   })
 
   it("does not attach an Impulse when not active", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result } = setup(count)
 
     result.current(false)
@@ -200,7 +200,7 @@ describe("conditional Impulse", () => {
   })
 
   it("attaches an Impulse when active", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result } = setup(count)
 
     result.current(true)
@@ -209,7 +209,7 @@ describe("conditional Impulse", () => {
   })
 
   it("keeps an Impulse attached ones it was active", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result } = setup(count)
 
     result.current(true)
@@ -219,7 +219,7 @@ describe("conditional Impulse", () => {
   })
 
   it("de-attaches an Impulse when it was active", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result } = setup(count)
 
     result.current(true)
@@ -243,7 +243,7 @@ describe("argument Impulse", () => {
   }
 
   it("attaches an Impulse when the resulting function calls", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result } = setup()
 
     expect(result.current(count)).toBe(2)
@@ -252,7 +252,7 @@ describe("argument Impulse", () => {
   })
 
   it("does not attach the same Impulse twice", () => {
-    const count = Impulse.of(1)
+    const count = Impulse(1)
     const { result } = setup()
 
     expect(result.current(count)).toBe(2)
@@ -262,8 +262,8 @@ describe("argument Impulse", () => {
   })
 
   it("attaches multiple Impulses", () => {
-    const count_1 = Impulse.of(1)
-    const count_2 = Impulse.of(2)
+    const count_1 = Impulse(1)
+    const count_2 = Impulse(2)
     const { result } = setup()
 
     expect(result.current(count_1)).toBe(2)
@@ -274,8 +274,8 @@ describe("argument Impulse", () => {
   })
 
   it("detaches all Impulses when any of the attached Impulse value changes", () => {
-    const count_1 = Impulse.of(1)
-    const count_2 = Impulse.of(2)
+    const count_1 = Impulse(1)
+    const count_2 = Impulse(2)
     const { result } = setup()
 
     result.current(count_1)
@@ -291,9 +291,9 @@ describe("argument Impulse", () => {
 })
 
 it("batches the callback", () => {
-  const impulse_1 = Impulse.of(1)
-  const impulse_2 = Impulse.of(2)
-  const impulse_3 = Impulse.of(3)
+  const impulse_1 = Impulse(1)
+  const impulse_2 = Impulse(2)
+  const impulse_3 = Impulse(3)
   const { result: callback } = renderHook(() => {
     return useScopedCallback((scope, diff: number) => {
       impulse_1.setValue(impulse_1.getValue(scope) + diff)

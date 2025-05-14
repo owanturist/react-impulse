@@ -1,12 +1,12 @@
 import React from "react"
 import { fireEvent, render, screen } from "@testing-library/react"
 
-import { Impulse, untrack, type ImpulseGetter } from "../../src"
+import { Impulse, untrack, type ReadableImpulse } from "../../src"
 
 it("returns the `factory` function result without tracking impulses", () => {
   const onRender = vi.fn()
-  const first = Impulse.of({ count: 1 })
-  const second = Impulse.of({ count: 2 })
+  const first = Impulse({ count: 1 })
+  const second = Impulse({ count: 2 })
 
   const Component: React.FC<{
     multiplier: number
@@ -55,7 +55,7 @@ it("returns the `factory` function result without tracking impulses", () => {
 })
 
 it("allows to use Impulse", () => {
-  const impulse = Impulse.of(1)
+  const impulse = Impulse(1)
 
   const value = untrack(impulse)
 
@@ -63,15 +63,15 @@ it("allows to use Impulse", () => {
 })
 
 it("allows to use ReadonlyImpulse", () => {
-  const impulse = Impulse.of(() => 1)
+  const impulse = Impulse(() => 1)
 
   const value = untrack(impulse)
 
   expect(value).toBe(1)
 })
 
-it("allows to use ImpulseGetter", () => {
-  class Custom implements ImpulseGetter<number> {
+it("allows to use ReadableImpulse", () => {
+  class Custom implements ReadableImpulse<number> {
     public constructor(public value: number) {}
 
     public getValue(): number {

@@ -7,7 +7,7 @@ import { Counter } from "./common"
 describe("single Impulse", () => {
   it("executes listener on init", () => {
     const spy = vi.fn()
-    const impulse = Impulse.of(1)
+    const impulse = Impulse(1)
 
     subscribe((scope) => {
       spy(impulse.getValue(scope))
@@ -19,7 +19,7 @@ describe("single Impulse", () => {
 
   it("executes listener on update", () => {
     const spy = vi.fn()
-    const impulse = Impulse.of(1)
+    const impulse = Impulse(1)
 
     subscribe((scope) => {
       spy(impulse.getValue(scope))
@@ -33,7 +33,7 @@ describe("single Impulse", () => {
 
   it("executes listener cleanup", () => {
     const cleanup = vi.fn()
-    const impulse = Impulse.of(1)
+    const impulse = Impulse(1)
 
     const unsubscribe = subscribe((scope) => {
       const count = impulse.getValue(scope)
@@ -71,7 +71,7 @@ describe("single Impulse", () => {
 
   it("doesn't execute listener after unsubscribe", () => {
     const spy = vi.fn()
-    const impulse = Impulse.of(1)
+    const impulse = Impulse(1)
 
     const unsubscribe = subscribe((scope) => {
       spy(impulse.getValue(scope))
@@ -87,7 +87,7 @@ describe("single Impulse", () => {
 
   it("ignores second unsubscribe", () => {
     const spy = vi.fn()
-    const impulse = Impulse.of(1)
+    const impulse = Impulse(1)
 
     const unsubscribe = subscribe((scope) => {
       spy(impulse.getValue(scope))
@@ -104,7 +104,7 @@ describe("single Impulse", () => {
 
   it("executes listener on every Impulse update", () => {
     const spy = vi.fn()
-    const impulse = Impulse.of(1)
+    const impulse = Impulse(1)
 
     subscribe((scope) => {
       spy(impulse.getValue(scope))
@@ -120,7 +120,7 @@ describe("single Impulse", () => {
 
   it("executes listener ones for batched Impulse updates", () => {
     const spy = vi.fn()
-    const impulse = Impulse.of(1)
+    const impulse = Impulse(1)
 
     subscribe((scope) => {
       spy(impulse.getValue(scope))
@@ -137,7 +137,7 @@ describe("single Impulse", () => {
 
   it("doesn't execute listener when Impulse value does not change", () => {
     const spy = vi.fn()
-    const impulse = Impulse.of(1)
+    const impulse = Impulse(1)
 
     subscribe((scope) => {
       spy(impulse.getValue(scope))
@@ -151,7 +151,7 @@ describe("single Impulse", () => {
 
   it("doesn't execute listener when Impulse value comparably the same", () => {
     const spy = vi.fn()
-    const impulse = Impulse.of({ count: 1 }, { compare: Counter.compare })
+    const impulse = Impulse({ count: 1 }, { compare: Counter.compare })
 
     subscribe((scope) => {
       spy(impulse.getValue(scope))
@@ -171,8 +171,8 @@ describe("single Impulse", () => {
 describe("multiple Impulses", () => {
   it("executes listener on init", () => {
     const spy = vi.fn()
-    const impulse_1 = Impulse.of(1)
-    const impulse_2 = Impulse.of(2)
+    const impulse_1 = Impulse(1)
+    const impulse_2 = Impulse(2)
 
     subscribe((scope) => {
       spy(impulse_1.getValue(scope) + impulse_2.getValue(scope))
@@ -185,8 +185,8 @@ describe("multiple Impulses", () => {
 
   it("executes listener on update", () => {
     const spy = vi.fn()
-    const impulse_1 = Impulse.of(1)
-    const impulse_2 = Impulse.of(2)
+    const impulse_1 = Impulse(1)
+    const impulse_2 = Impulse(2)
 
     subscribe((scope) => {
       spy(impulse_1.getValue(scope) + impulse_2.getValue(scope))
@@ -205,8 +205,8 @@ describe("multiple Impulses", () => {
 
   it("doesn't execute listener after unsubscribe", () => {
     const spy = vi.fn()
-    const impulse_1 = Impulse.of(1)
-    const impulse_2 = Impulse.of(2)
+    const impulse_1 = Impulse(1)
+    const impulse_2 = Impulse(2)
 
     const unsubscribe = subscribe((scope) => {
       spy(impulse_1.getValue(scope) + impulse_2.getValue(scope))
@@ -224,8 +224,8 @@ describe("multiple Impulses", () => {
 
   it("doesn't execute conditional listener when conditional Impulse changes", () => {
     const spy = vi.fn()
-    const impulse_1 = Impulse.of(1)
-    const impulse_2 = Impulse.of(2)
+    const impulse_1 = Impulse(1)
+    const impulse_2 = Impulse(2)
 
     subscribe((scope) => {
       if (impulse_1.getValue(scope) > 1) {
@@ -264,8 +264,8 @@ describe("multiple Impulses", () => {
 describe("batching against subscribe listener", () => {
   it("executes listener on every Impulse update", () => {
     const spy = vi.fn()
-    const impulse_1 = Impulse.of(1)
-    const impulse_2 = Impulse.of(2)
+    const impulse_1 = Impulse(1)
+    const impulse_2 = Impulse(2)
 
     subscribe((scope) => {
       spy(impulse_1.getValue(scope) + impulse_2.getValue(scope))
@@ -281,8 +281,8 @@ describe("batching against subscribe listener", () => {
 
   it("executes listener ones for batched Impulse updates", () => {
     const spy = vi.fn()
-    const impulse_1 = Impulse.of(1)
-    const impulse_2 = Impulse.of(2)
+    const impulse_1 = Impulse(1)
+    const impulse_2 = Impulse(2)
 
     subscribe((scope) => {
       spy(impulse_1.getValue(scope) + impulse_2.getValue(scope))
@@ -299,10 +299,10 @@ describe("batching against subscribe listener", () => {
 
 describe("batching against a hook", () => {
   it("enqueues single re-render to a hook which impulses update inside subscribe's listener", () => {
-    const impulse_1 = Impulse.of(1)
-    const impulse_2 = Impulse.of(2)
-    const impulse_3 = Impulse.of(3)
-    const impulse_4 = Impulse.of(0)
+    const impulse_1 = Impulse(1)
+    const impulse_2 = Impulse(2)
+    const impulse_3 = Impulse(3)
+    const impulse_4 = Impulse(0)
     const spy = vi.fn()
 
     const { result } = renderHook(() => {
@@ -361,10 +361,10 @@ describe("batching against a hook", () => {
   })
 
   it("enqueues single re-render to a hook which impulses update inside subscribe's cleanup", () => {
-    const impulse_1 = Impulse.of(1)
-    const impulse_2 = Impulse.of(2)
-    const impulse_3 = Impulse.of(3)
-    const impulse_4 = Impulse.of(0)
+    const impulse_1 = Impulse(1)
+    const impulse_2 = Impulse(2)
+    const impulse_3 = Impulse(3)
+    const impulse_4 = Impulse(0)
     const spy = vi.fn()
 
     const { result } = renderHook(() => {
@@ -436,9 +436,9 @@ describe("batching against a hook", () => {
 describe("nested Impulses", () => {
   it("executes listener on init", () => {
     const spy = vi.fn()
-    const impulse_1 = Impulse.of(1)
-    const impulse_2 = Impulse.of(2)
-    const impulse_3 = Impulse.of({
+    const impulse_1 = Impulse(1)
+    const impulse_2 = Impulse(2)
+    const impulse_3 = Impulse({
       first: impulse_1,
       second: impulse_2,
     })
@@ -458,9 +458,9 @@ describe("nested Impulses", () => {
 
   it("executes listener on update", () => {
     const spy = vi.fn()
-    const impulse_1 = Impulse.of(1)
-    const impulse_2 = Impulse.of(2)
-    const impulse_3 = Impulse.of({
+    const impulse_1 = Impulse(1)
+    const impulse_2 = Impulse(2)
+    const impulse_3 = Impulse({
       first: impulse_1,
       second: impulse_2,
     })

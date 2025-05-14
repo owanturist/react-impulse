@@ -1,349 +1,108 @@
-import { type Func, type Compare, eq, isFunction, hasProperty } from "./utils"
-import { EMITTER_KEY, type Scope, extractScope, STATIC_SCOPE } from "./Scope"
-import { ScopeEmitter } from "./ScopeEmitter"
+import { type Func, eq, isFunction, hasProperty } from "./utils"
+import type { Scope } from "./Scope"
+import type { BaseImpulse } from "./BaseImpulse"
+import type { ImpulseOptions } from "./ImpulseOptions"
+import type { ReadableImpulse } from "./ReadableImpulse"
+import type { WritableImpulse } from "./WritableImpulse"
+import { DirectImpulse } from "./DirectImpulse"
+import { DerivedImpulse } from "./DerivedImpulse"
 
-export interface ImpulseOptions<T> {
-  /**
-   * The compare function determines whether or not a new Impulse's value replaces the current one.
-   * In many cases specifying the function leads to better performance because it prevents unnecessary updates.
-   */
-  readonly compare?: null | Compare<T>
-}
+export type Impulse<T> = BaseImpulse<T>
 
 export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
 
-export interface ImpulseGetter<T> {
-  getValue(scope: Scope): T
-}
+/**
+ * Creates a new Impulse without an initial value.
+ *
+ * @version 3.0.0
+ *
+ * @example
+ * const impulse = Impulse<string>()
+ * const initiallyUndefined = impulse.getValue(scope) === undefined
+ */
+export function Impulse<T = undefined>(): Impulse<undefined | T>
 
-export interface ImpulseSetter<T> {
-  setValue(value: T): void
-}
+/**
+ * Creates a new derived ReadonlyImpulse.
+ * A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes.
+ *
+ * @param getter a function to read the derived value from a source.
+ * @param options optional `ImpulseOptions`.
+ * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
+ *
+ * @version 3.0.0
+ */
+export function Impulse<T>(
+  getter: (scope: Scope) => T,
+  options?: ImpulseOptions<T>,
+): ReadonlyImpulse<T>
 
-function isImpulse<T, Unknown = unknown>(
-  input: Unknown | Impulse<T>,
-): input is Impulse<T> {
-  return input instanceof Impulse
-}
+/**
+ * Creates a new derived Impulse.
+ * A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes.
+ *
+ * @param getter either anything that implements the `ReadableImpulse` interface or a function to read the derived value from the source.
+ * @param setter either anything that implements the `WritableImpulse` interface or a function to write the derived value back to the source.
+ * @param options optional `ImpulseOptions`.
+ * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
+ *
+ * @version 3.0.0
+ */
+export function Impulse<T>(
+  getter: ReadableImpulse<T> | ((scope: Scope) => T),
+  setter: WritableImpulse<T> | ((value: T, scope: Scope) => void),
+  options?: ImpulseOptions<T>,
+): Impulse<T>
 
-export abstract class Impulse<T> implements ImpulseGetter<T>, ImpulseSetter<T> {
-  /**
-   * A static method to check whether or not the input is an Impulse.
-   *
-   * @version 2.0.0
-   */
-  public static isImpulse<T, Unknown = unknown>(
-    input: Unknown | Impulse<T>,
-  ): input is Impulse<T>
+/**
+ * Creates a new Impulse.
+ *
+ * @param initialValue the initial value.
+ * @param options optional `ImpulseOptions`.
+ * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
+ *
+ * @version 3.0.0
+ */
+export function Impulse<T>(
+  initialValue: T,
+  options?: ImpulseOptions<T>,
+): Impulse<T>
 
-  /**
-   * A static method to check whether or not the input is an Impulse.
-   *
-   * @version 2.0.0
-   */
-  public static isImpulse<T, Unknown = unknown>(
-    input: Unknown | ReadonlyImpulse<T>,
-  ): input is ReadonlyImpulse<T>
+export function Impulse<T>(
+  initialValueOrReadableImpulse?: T | ReadableImpulse<T> | Func<[Scope], T>,
+  optionsOrWritableImpulse?:
+    | ImpulseOptions<T>
+    | WritableImpulse<T>
+    | Func<[T, Scope]>,
+  optionsOrNothing?: ImpulseOptions<T>,
+): Impulse<undefined | T> | Impulse<T> {
+  const isGetterFunction = isFunction(initialValueOrReadableImpulse)
 
-  /**
-   * A static method to check whether or not an Impulse value passes the `check`.
-   *
-   * @version 2.0.0
-   */
-  public static isImpulse<T, Unknown = unknown>(
-    scope: Scope,
-    check: (value: unknown) => value is T,
-    input: Unknown | Impulse<T>,
-  ): input is Impulse<T>
+  if (
+    !isGetterFunction &&
+    !hasProperty(initialValueOrReadableImpulse, "getValue")
+  ) {
+    const options = optionsOrWritableImpulse as
+      | undefined
+      | ImpulseOptions<undefined | T>
 
-  /**
-   * A static method to check whether or not an Impulse value passes the `check`.
-   *
-   * @version 2.0.0
-   */
-  public static isImpulse<T, Unknown = unknown>(
-    scope: Scope,
-    check: (value: unknown) => value is T,
-    input: Unknown | ReadonlyImpulse<T>,
-  ): input is ReadonlyImpulse<T>
-
-  public static isImpulse(
-    ...args:
-      | [input: unknown]
-      | [scope: Scope, check: Func<[unknown], boolean>, input: unknown]
-  ): boolean {
-    if (args.length === 1) {
-      return isImpulse(args[0])
-    }
-
-    if (isImpulse(args[2])) {
-      const value = args[2].getValue(args[0])
-
-      return args[1](value)
-    }
-
-    return false
-  }
-
-  /**
-   * Creates a new Impulse without an initial value.
-   *
-   * @version 1.2.0
-   *
-   * @example
-   * const answer = Impulse.of<string>()
-   * const initiallyUndefined = answer.getValue(scope) === undefined
-   */
-  public static of<T = undefined>(): Impulse<undefined | T>
-
-  /**
-   * Creates a new derived ReadonlyImpulse.
-   * A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes.
-   *
-   * @param getter a function to read the derived value from a source.
-   * @param options optional `ImpulseOptions`.
-   * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
-   *
-   * @version 3.0.0
-   */
-  public static of<T>(
-    getter: (scope: Scope) => T,
-    options?: ImpulseOptions<T>,
-  ): ReadonlyImpulse<T>
-
-  /**
-   * Creates a new derived Impulse.
-   * A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes.
-   *
-   * @param getter either anything that implements the `ImpulseGetter` interface or a function to read the derived value from the source.
-   * @param setter either anything that implements the `ImpulseSetter` interface or a function to write the derived value back to the source.
-   * @param options optional `ImpulseOptions`.
-   * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
-   *
-   * @version 3.0.0
-   */
-  public static of<T>(
-    getter: ImpulseGetter<T> | ((scope: Scope) => T),
-    setter: ImpulseSetter<T> | ((value: T, scope: Scope) => void),
-    options?: ImpulseOptions<T>,
-  ): Impulse<T>
-
-  /**
-   * Creates a new Impulse.
-   *
-   * @param initialValue the initial value.
-   * @param options optional `ImpulseOptions`.
-   * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
-   *
-   * @version 1.0.0
-   */
-  public static of<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
-
-  public static of<T>(
-    initialValueOrGetter?: T | ImpulseGetter<T> | Func<[Scope], T>,
-    optionsOrSetter?: ImpulseOptions<T> | ImpulseSetter<T> | Func<[T, Scope]>,
-    optionsOrNothing?: ImpulseOptions<T>,
-  ): Impulse<undefined | T> | Impulse<T> {
-    const isGetterFunction = isFunction(initialValueOrGetter)
-
-    if (!isGetterFunction && !hasProperty(initialValueOrGetter, "getValue")) {
-      const options = optionsOrSetter as
-        | undefined
-        | ImpulseOptions<undefined | T>
-
-      return new DirectImpulse(initialValueOrGetter, options?.compare ?? eq)
-    }
-
-    const [setter, options] =
-      isFunction(optionsOrSetter) || hasProperty(optionsOrSetter, "setValue")
-        ? [optionsOrSetter, optionsOrNothing]
-        : [undefined, optionsOrSetter]
-
-    return new DerivedImpulse(
-      isGetterFunction
-        ? initialValueOrGetter
-        : (scope) => initialValueOrGetter.getValue(scope),
-      isFunction(setter) ? setter : (value) => setter?.setValue(value),
+    return new DirectImpulse(
+      initialValueOrReadableImpulse,
       options?.compare ?? eq,
     )
   }
 
-  protected readonly _emitters = new Set<WeakRef<ScopeEmitter>>()
+  const [setter, options] =
+    isFunction(optionsOrWritableImpulse) ||
+    hasProperty(optionsOrWritableImpulse, "setValue")
+      ? [optionsOrWritableImpulse, optionsOrNothing]
+      : [undefined, optionsOrWritableImpulse]
 
-  protected constructor(protected readonly _compare: Compare<T>) {}
-
-  /**
-   * Return the value when serializing to JSON.
-   * It does not encode an Impulse for decoding it back due to runtime parts of the class,
-   * that cannot be serialized as JSON.
-   *
-   * The method is protected in order to make it impossible to make the implicit call.
-   *
-   * @version 1.0.0
-   */
-  protected toJSON(): unknown {
-    const scope = extractScope()
-
-    return this.getValue(scope)
-  }
-
-  /**
-   * Return the stringified value when an Impulse converts to a string.
-   *
-   * The method is protected in order to make it impossible to make the implicit call.
-   * @version 1.0.0
-   */
-  protected toString(): string {
-    const scope = extractScope()
-
-    return String(this.getValue(scope))
-  }
-
-  protected abstract _getter(): T
-  protected abstract _setter(
-    value: T,
-    queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
-  ): void
-
-  /**
-   * Creates a new Impulse instance out of the current one with the same value.
-   *
-   * @param options optional `ImpulseOptions`.
-   * @param options.compare when not defined it uses the `compare` function from the origin Impulse, When `null` the `Object.is` function applies to compare the values.
-   *
-   * @version 2.0.0
-   */
-  public clone(options?: ImpulseOptions<T>): Impulse<T>
-
-  /**
-   * Creates a new Impulse instance out of the current one with the transformed value. Transforming might be handy when cloning mutable values (such as an Impulse).
-   *
-   * @param transform an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
-   * @param options optional `ImpulseOptions`.
-   * @param options.compare when not defined it uses the `compare` function from the origin Impulse, When `null` the `Object.is` function applies to compare the values.
-   *
-   * @version 1.0.0
-   */
-  public clone(
-    transform: (value: T, scope: Scope) => T,
-    options?: ImpulseOptions<T>,
-  ): Impulse<T>
-
-  public clone(
-    transformOrOptions?: Func<[T, Scope], T> | ImpulseOptions<T>,
-    maybeOptions?: ImpulseOptions<T>,
-  ): Impulse<T> {
-    const value = this._getter()
-
-    const [clonedValue, { compare = this._compare } = {}] = isFunction(
-      transformOrOptions,
-    )
-      ? [transformOrOptions(value, STATIC_SCOPE), maybeOptions]
-      : [value, transformOrOptions]
-
-    return new DirectImpulse(clonedValue, compare ?? eq)
-  }
-
-  /**
-   * Returns the impulse value.
-   *
-   * @param scope the Scope that tracks the Impulse value changes.
-   *
-   * @version 1.0.0
-   */
-  public getValue(scope: Scope): T {
-    scope[EMITTER_KEY]?._attachTo(this._emitters)
-
-    return this._getter()
-  }
-
-  /**
-   * Updates the value.
-   *
-   * @param valueOrTransform either the new value or a function that transforms the current value.
-   *
-   * @returns `void` to emphasize that Impulses are mutable.
-   *
-   * @version 1.0.0
-   */
-  public setValue(
-    valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
-  ): void {
-    ScopeEmitter._schedule((queue) => {
-      const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(this._getter(), STATIC_SCOPE)
-        : valueOrTransform
-
-      this._setter(nextValue, queue)
-    })
-  }
-}
-
-class DirectImpulse<T> extends Impulse<T> {
-  public constructor(
-    private _value: T,
-    compare: Compare<T>,
-  ) {
-    super(compare)
-  }
-
-  protected _getter(): T {
-    return this._value
-  }
-
-  protected _setter(
-    value: T,
-    queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
-  ): void {
-    if (!this._compare(this._value, value, STATIC_SCOPE)) {
-      this._value = value
-      queue.push(this._emitters)
-    }
-  }
-}
-
-class DerivedImpulse<T> extends Impulse<T> {
-  // the inner scope proxies the setters to the outer scope
-  private readonly _scope = {
-    [EMITTER_KEY]: ScopeEmitter._init(() => {
-      if (
-        this._compare(this._value, this._getValue(STATIC_SCOPE), STATIC_SCOPE)
-      ) {
-        // subscribe back to the dependencies
-        this._getValue(this._scope)
-        // adjust the version since the value didn't change
-        this._version = this._scope[EMITTER_KEY]._getVersion()
-      } else {
-        ScopeEmitter._schedule((queue) => queue.push(this._emitters))
-      }
-    }),
-  } satisfies Scope
-
-  // the value is never null because it assigns the value from the _getValue on the first _getter call
-  private _value: T = null as never
-  private _version?: number
-
-  public constructor(
-    private readonly _getValue: Func<[Scope], T>,
-    private readonly _setValue: Func<[T, Scope]>,
-    compare: Compare<T>,
-  ) {
-    super(compare)
-  }
-
-  protected _getter(): T {
-    const value = this._getValue(this._scope)
-    const version = this._scope[EMITTER_KEY]._getVersion()
-
-    if (this._version !== version) {
-      this._value = value
-      this._version = version
-    }
-
-    return this._value
-  }
-
-  protected _setter(value: T): void {
-    this._setValue(value, STATIC_SCOPE)
-  }
+  return new DerivedImpulse(
+    isGetterFunction
+      ? initialValueOrReadableImpulse
+      : (scope) => initialValueOrReadableImpulse.getValue(scope),
+    isFunction(setter) ? setter : (value) => setter?.setValue(value),
+    options?.compare ?? eq,
+  )
 }

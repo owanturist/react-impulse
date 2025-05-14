@@ -9,8 +9,8 @@ Improved memory management and performance by introducing `WeakRef` for better g
 Before:
 
 ```ts
-const source = Impulse.of(0)
-const derived = Impulse.of((scope) => ({
+const source = Impulse(0)
+const derived = Impulse((scope) => ({
   count: source.getValue(scope),
 }))
 
@@ -27,8 +27,8 @@ console.log(value2 === value3) // false
 After:
 
 ```ts
-const source = Impulse.of(0)
-const derived = Impulse.of((scope) => ({
+const source = Impulse(0)
+const derived = Impulse((scope) => ({
   count: source.getValue(scope),
 }))
 

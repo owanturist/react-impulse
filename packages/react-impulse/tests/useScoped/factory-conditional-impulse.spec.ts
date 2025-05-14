@@ -74,7 +74,7 @@ describe.each([
 ])("conditional factory %s", (_, useHook) => {
   describe("when active", () => {
     it("should return Impulse's value on init", () => {
-      const impulse = Impulse.of({ count: 1 })
+      const impulse = Impulse({ count: 1 })
       const { result } = renderHook(useHook, {
         initialProps: { impulse: impulse, isActive: true },
       })
@@ -84,7 +84,7 @@ describe.each([
     })
 
     it("should return updated Impulse's value", () => {
-      const impulse = Impulse.of({ count: 1 })
+      const impulse = Impulse({ count: 1 })
 
       const { result } = renderHook(useHook, {
         initialProps: { impulse: impulse, isActive: true },
@@ -98,8 +98,8 @@ describe.each([
     })
 
     it("should return replaced Impulse's value", () => {
-      const impulse_1 = Impulse.of({ count: 1 })
-      const impulse_2 = Impulse.of({ count: 10 })
+      const impulse_1 = Impulse({ count: 1 })
+      const impulse_2 = Impulse({ count: 10 })
 
       const { result, rerender } = renderHook(useHook, {
         initialProps: { impulse: impulse_1, isActive: true },
@@ -128,7 +128,7 @@ describe.each([
     })
 
     it("should return fallback value when turns inactive", () => {
-      const impulse = Impulse.of({ count: 1 })
+      const impulse = Impulse({ count: 1 })
       const { result, rerender } = renderHook(useHook, {
         initialProps: { impulse: impulse, isActive: true },
       })
@@ -141,7 +141,7 @@ describe.each([
 
   describe("when inactive", () => {
     it("should return fallback value when inactive", () => {
-      const impulse = Impulse.of({ count: 1 })
+      const impulse = Impulse({ count: 1 })
       const { result } = renderHook(useHook, {
         initialProps: { impulse: impulse, isActive: false },
       })
@@ -151,7 +151,7 @@ describe.each([
     })
 
     it("should return fallback value when inactive when impulse updates", () => {
-      const impulse = Impulse.of({ count: 1 })
+      const impulse = Impulse({ count: 1 })
       const { result } = renderHook(useHook, {
         initialProps: { impulse: impulse, isActive: false },
       })
@@ -164,7 +164,7 @@ describe.each([
     })
 
     it("should return Impulse's value when turns active", () => {
-      const impulse = Impulse.of({ count: 1 })
+      const impulse = Impulse({ count: 1 })
       const { result, rerender } = renderHook(useHook, {
         initialProps: { impulse: impulse, isActive: false },
       })
@@ -182,7 +182,7 @@ describe.each([
 
     it("should not trigger the factory when the impulse updates", () => {
       const spy = vi.fn()
-      const impulse = Impulse.of({ count: 1 })
+      const impulse = Impulse({ count: 1 })
       renderHook(useHook, {
         initialProps: { impulse, isActive: false, spy },
       })

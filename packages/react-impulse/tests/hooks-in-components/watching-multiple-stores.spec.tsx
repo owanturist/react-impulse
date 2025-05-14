@@ -177,8 +177,8 @@ describe("scoping multiple impulses", () => {
   ])(
     "handles multiple Impulses with %s",
     (_, App, unnecessaryRerendersCount) => {
-      const firstCount = Impulse.of(0)
-      const secondCount = Impulse.of(0)
+      const firstCount = Impulse(0)
+      const secondCount = Impulse(0)
       const onFirstCountRender = vi.fn()
       const onSecondCountRender = vi.fn()
       const onRender = vi.fn()

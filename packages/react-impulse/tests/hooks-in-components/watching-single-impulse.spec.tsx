@@ -139,7 +139,7 @@ describe("scoping single impulse", () => {
     ["multiple memoized scopes", MultipleMemoizedScopesApp, 0],
     ["scoped()", ScopedApp, 1],
   ])("handles single Impulse with %s", (_, App, unnecessaryRerendersCount) => {
-    const count = Impulse.of(0)
+    const count = Impulse(0)
     const onCounterRender = vi.fn()
     const onRender = vi.fn()
 
@@ -211,7 +211,7 @@ describe("when drilling an Impulse", () => {
       </>
     )
 
-    const count = Impulse.of(5)
+    const count = Impulse(5)
     const onRender = vi.fn()
     const onCounterRender = vi.fn()
 

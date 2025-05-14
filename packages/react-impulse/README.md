@@ -65,9 +65,9 @@ import { Impulse, useScope } from "react-impulse"
 const SignUp: React.FC = () => {
   const scope = useScope()
   const [{ username, password, isAgreeWithTerms }] = React.useState({
-    username: Impulse.of(""),
-    password: Impulse.of(""),
-    isAgreeWithTerms: Impulse.of(false),
+    username: Impulse(""),
+    password: Impulse(""),
+    isAgreeWithTerms: Impulse(false),
   })
 
   return (
@@ -101,20 +101,16 @@ A core piece of the library is the `Impulse` class - a box that holds value. The
 
 ### `Impulse`
 
-The impulse class. Extends [`ImpulseGetter`][impulse_getter] and [`ImpulseSetter`][impulse_setter] interfaces.
-
-### `Impulse.of`
+The impulse type and factory. Returns an impulse instance which extends [`ReadableImpulse`][readable_impulse] and [`WritableImpulse`][writable_impulse] interfaces.
 
 ```dart
-Impulse.of<T>(): Impulse<undefined | T>
+Impulse<T>(): Impulse<undefined | T>
 
-Impulse.of<T>(
+Impulse<T>(
   initialValue: T,
   options?: ImpulseOptions<T>
 ): Impulse<T>
 ```
-
-A static method that creates new Impulse.
 
 - `[initialValue]` is an optional initial value. If not defined, the Impulse's value is `undefined` but it still can specify the value's type.
 - `[options]` is an optional [`ImpulseOptions`][impulse_options] object.
@@ -127,7 +123,7 @@ A static method that creates new Impulse.
 const Counter: React.FC = () => {
   const [count, setCount] = React.useState(0)
 
-  const [countImpulse] = React.useState(() => Impulse.of(count))
+  const [countImpulse] = React.useState(() => Impulse(count))
 
   React.useEffect(() => {
     // sync the state with the Impulse
@@ -163,7 +159,7 @@ const Counter: React.FC = () => {
   const count = useSelector((state) => state.count)
   const dispatch = useDispatch()
 
-  const [countImpulse] = React.useState(() => Impulse.of(count))
+  const [countImpulse] = React.useState(() => Impulse(count))
 
   React.useEffect(() => {
     // sync the state with the Impulse
@@ -189,27 +185,27 @@ const Counter: React.FC = () => {
 </blockquote>
 </details>
 
-### `Impulse.of` derived
+### `Impulse` derived
 
 ```dart
-Impulse.of<T>(
+Impulse<T>(
   getter: (scope: Scope) => T,
   options?: ImpulseOptions<T>,
 ): ReadonlyImpulse<T>
 
-Impulse.of<T>(
-  getter: ImpulseGetter<T> | ((scope: Scope) => T),
-  setter: ImpulseSetter<T> | ((value: T, scope: Scope) => void),
+Impulse<T>(
+  getter: ReadableImpulse<T> | ((scope: Scope) => T),
+  setter: WritableImpulse<T> | ((value: T, scope: Scope) => void),
   options?: ImpulseOptions<T>,
 ): Impulse<T>
 ```
 
-- `getter` is either anything that implements the [`ImpulseGetter`][impulse_getter] interface or a function to read the derived value from the source.
-- `[setter]` is either anything that implements the [`ImpulseSetter`][impulse_setter] interface or a function to write the derived value back to the source. When not defined, the resulting Impulse is readonly.
+- `getter` is either anything that implements the [`ReadableImpulse`][readable_impulse] interface or a function to read the derived value from the source.
+- `[setter]` is either anything that implements the [`WritableImpulse`][writable_impulse] interface or a function to write the derived value back to the source. When not defined, the resulting Impulse is readonly.
 - `[options]` is an optional [`ImpulseOptions`][impulse_options] object.
   - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
-A static method that creates a new derived Impulse. A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes. A source is another Impulse or multiple Impulses.
+A function that creates a new derived Impulse. A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes. A source is another Impulse or multiple Impulses.
 
 <details><summary><i>Showcase: derived from Impulse</i></summary>
 <blockquote>
@@ -240,7 +236,7 @@ const ProductDetailsDrawer: React.FC<{
   product: Impulse<undefined | Product>
 }> = ({ product }) => {
   const isOpen = React.useMemo(() => {
-    return Impulse.of(
+    return Impulse(
       (scope) => product.getValue(scope) != null,
       (open) => {
         if (!open) {
@@ -284,7 +280,7 @@ const Agreements: React.FC<{
   isAgreeWithPrivacy: Impulse<boolean>
 }> = ({ isAgreeWithTermsOfUse, isAgreeWithPrivacy }) => {
   const isAgreeWithAll = React.useMemo(() => {
-    return Impulse.of(
+    return Impulse(
       (scope) =>
         isAgreeWithTermsOfUse.getValue(scope) &&
         isAgreeWithPrivacy.getValue(scope),
@@ -315,22 +311,6 @@ const Agreements: React.FC<{
 </blockquote>
 </details>
 
-### `Impulse.isImpulse`
-
-```dart
-Impulse.isImpulse<T, Unknown = unknown>(
-  input: Unknown | Impulse<T>,
-): input is Impulse<T>
-
-Impulse.isImpulse<T, Unknown = unknown>(
-  scope: Scope,
-  check: (value: unknown) => value is T,
-  input: Unknown | Impulse<T>,
-): input is Impulse<T>
-```
-
-A static method that checks whether the `input` is an `Impulse` instance. If the `check` function is provided, it checks the Impulse's value to match the `check` function.
-
 ### `Impulse#getValue`
 
 ```dart
@@ -343,7 +323,7 @@ An `Impulse` instance's method that returns the current value.
 - `[select]` is an optional function that applies to the current value before returning.
 
 ```ts
-const count = Impulse.of(3)
+const count = Impulse(3)
 
 tap((scope) => {
   count.getValue(scope) // === 3
@@ -364,7 +344,7 @@ An `Impulse` instance's method to update the value.
 
 ```ts
 tap((scope) => {
-  const isActive = Impulse.of(false)
+  const isActive = Impulse(false)
 
   isActive.setValue((x) => !x)
   isActive.getValue(scope) // true
@@ -398,13 +378,13 @@ An `Impulse` instance's method for cloning an Impulse. When cloning a derived Im
   - `[options.compare]` when not defined it uses the `compare` function from the origin Impulse, when `null` the [`Object.is`][object_is] function applies to compare the values.
 
 ```ts
-const immutable = Impulse.of({
+const immutable = Impulse({
   count: 0,
 })
 const cloneOfImmutable = immutable.clone()
 
-const mutable = Impulse.of({
-  username: Impulse.of(""),
+const mutable = Impulse({
+  username: Impulse(""),
   blacklist: new Set(),
 })
 const cloneOfMutable = mutable.clone((current) => ({
@@ -427,7 +407,7 @@ const cloneOfMutable = mutable.clone((current) => ({
 ### `useScoped`
 
 ```dart
-function useScoped<TValue>(impulse: ImpulseGetter<TValue>): TValue
+function useScoped<TValue>(impulse: ReadableImpulse<TValue>): TValue
 
 function useScoped<T>(
   factory: (scope: Scope) => T,
@@ -436,7 +416,7 @@ function useScoped<T>(
 ): T
 ```
 
-- `impulse` is anything that implements the [`ImpulseGetter`][impulse_getter] interface.
+- `impulse` is anything that implements the [`ReadableImpulse`][readable_impulse] interface.
 - `factory` is a function that provides [`Scope`][scope] as the first argument and subscribes to all Impulses calling the [`Impulse#getValue`][impulse__get_value] method inside the function.
 - `dependencies` is an optional array of dependencies of the `factory` function. If not defined, the `factory` function is called on every render.
 - `[options]` is an optional [`UseScopedOptions`][use_scoped_options] object.
@@ -466,7 +446,7 @@ Components can scope watched Impulses to reduce re-rendering:
 
 ```tsx
 const Challenge: React.FC = () => {
-  const [count] = React.useState(Impulse.of(0))
+  const [count] = React.useState(Impulse(0))
   // the component re-renders only once when the `count` is greater than 5
   const isMoreThanFive = useScoped((scope) => count.getValue(scope) > 5)
 
@@ -480,7 +460,7 @@ const Challenge: React.FC = () => {
 }
 ```
 
-> 💬 The `factory` function is only for reading the Impulses' values. It should never call [`Impulse.of`][impulse__of], [`Impulse#clone`][impulse__clone], or [`Impulse#setValue`][impulse__set_value] methods inside.
+> 💬 The `factory` function is only for reading the Impulses' values. It should never call [`Impulse`][impulse], [`Impulse#clone`][impulse__clone], or [`Impulse#setValue`][impulse__set_value] methods inside.
 
 > 💡 Keep in mind that the `factory` function acts as a "reader" so you'd like to avoid heavy computations inside it. Sometimes it might be a good idea to pass a factory result to a separated memoization hook. The same is true for the `compare` function - you should choose wisely between avoiding extra re-renders and heavy comparisons.
 
@@ -601,7 +581,7 @@ Alias for [`batch`][batch].
 
 ```dart
 function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
-function untrack<TValue>(impulse: ImpulseGetter<TValue>): TValue
+function untrack<TValue>(impulse: ReadableImpulse<TValue>): TValue
 ```
 
 The `untrack` function is a helper to read Impulses' values without reactivity. It provides a [`Scope`][scope] to the `factory` function and returns the result of the function. Acts as [`batch`][batch].
@@ -636,7 +616,7 @@ In the example above the `listener` will not react on the `impulse_2` updates un
 > 💬 The `subscribe` function is the only function that injects [`Scope`][scope] to the `Impulse#toJSON()` and `Impulse#toString()` methods because the methods do not have access to the `scope`:
 >
 > ```ts
-> const counter = Impulse.of({ count: 0 })
+> const counter = Impulse({ count: 0 })
 >
 > subscribe(() => {
 >   console.log(JSON.stringify(counter))
@@ -647,11 +627,27 @@ In the example above the `listener` will not react on the `impulse_2` updates un
 > // console: {"count":2}
 > ```
 
-### `interface ImpulseGetter`
+### `isImpulse`
+
+```dart
+isImpulse<T, Unknown = unknown>(
+  input: Unknown | Impulse<T>,
+): input is Impulse<T>
+
+isImpulse<T, Unknown = unknown>(
+  scope: Scope,
+  check: (value: unknown) => value is T,
+  input: Unknown | Impulse<T>,
+): input is Impulse<T>
+```
+
+A function that checks whether the `input` is an `Impulse` instance. If the `check` function is provided, it checks the Impulse's value to match the `check` function.
+
+### `interface ReadableImpulse`
 
 An interface that defines the `getValue` method.
 
-### `interface ImpulseSetter`
+### `interface WritableImpulse`
 
 An interface that defines the `setValue` method.
 
@@ -704,8 +700,7 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
 
 <!-- L I N K S -->
 
-[impulse__of]: #impulseof
-[impulse__of_derived]: #impulseof-derived
+[impulse]: #impulse
 [impulse__clone]: #impulseclone
 [impulse__get_value]: #impulsegetvalue
 [impulse__set_value]: #impulsesetvalue
@@ -719,8 +714,8 @@ Want to see ESLint suggestions for the dependencies? Add the hook name to the ES
 [batch]: #batch
 [untrack]: #untrack
 [subscribe]: #subscribe
-[impulse_getter]: #interface-impulsegetter
-[impulse_setter]: #interface-impulsesetter
+[readable_impulse]: #interface-readableimpulse
+[writable_impulse]: #interface-writableimpulse
 [impulse_options]: #interface-impulseoptions
 [use_scoped_options]: #interface-useScopedoptions
 [compare]: #type-compare

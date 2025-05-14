@@ -96,8 +96,8 @@ export abstract class ImpulseForm<
     void | Promise<unknown>
   >()
 
-  private readonly _submitAttempts = Impulse.of(0)
-  private readonly _submittingCount = Impulse.of(0)
+  private readonly _submitAttempts = Impulse(0)
+  private readonly _submittingCount = Impulse(0)
 
   private readonly _root: ImpulseForm
 

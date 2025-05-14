@@ -57,8 +57,8 @@ describe("multiple factory", () => {
     ],
   ])("%s", (_, useHook) => {
     const setup = () => {
-      const first = Impulse.of({ count: 2 })
-      const second = Impulse.of({ count: 3 })
+      const first = Impulse({ count: 2 })
+      const second = Impulse({ count: 3 })
       const { result } = renderHook(useHook, {
         initialProps: { first, second },
       })
@@ -214,9 +214,9 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
     ],
   ])("%s", (_, useSingleHook, useMultipleHook) => {
     const setup = () => {
-      const first = Impulse.of({ count: 1 })
-      const second = Impulse.of({ count: 2 })
-      const third = Impulse.of({ count: 3 })
+      const first = Impulse({ count: 1 })
+      const second = Impulse({ count: 2 })
+      const third = Impulse({ count: 3 })
       const spySingle = vi.fn()
       const spyMultiple = vi.fn()
 

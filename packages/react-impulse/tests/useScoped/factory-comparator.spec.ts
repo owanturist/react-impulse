@@ -28,7 +28,7 @@ describe.each([
 ])("factory with %s comparator", (_, useHook) => {
   it("swapping compare", () => {
     const initial = { count: 0 }
-    const impulse = Impulse.of(initial)
+    const impulse = Impulse(initial)
 
     const { result, rerender } = renderHook<Counter, WithImpulse & WithCompare>(
       useHook,

@@ -46,7 +46,7 @@ describe("scoping nested impulses", () => {
             onClick={() => {
               appState.setValue({
                 ...state,
-                counts: [...state.counts, Impulse.of(0)],
+                counts: [...state.counts, Impulse(0)],
               })
             }}
           />
@@ -204,7 +204,7 @@ describe("scoping nested impulses", () => {
     ["multiple memoized scopes", MultipleMemoizedScopesApp, 0],
     ["scoped()", ScopedApp, 1],
   ])("handles nested Impulses with %s", (_, App, unnecessaryRerendersCount) => {
-    const state = Impulse.of<AppState>({
+    const state = Impulse<AppState>({
       counts: [],
     })
     const onRender = vi.fn()
@@ -292,7 +292,7 @@ describe("scoping nested impulses", () => {
     act(() => {
       state.setValue((current) => ({
         ...current,
-        counts: [...current.counts, Impulse.of(9)],
+        counts: [...current.counts, Impulse(9)],
       }))
     })
     expect(onRender).toHaveBeenCalledOnce()

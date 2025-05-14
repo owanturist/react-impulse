@@ -39,8 +39,8 @@ describe("multiple impulses", () => {
   }
 
   it("performs multi impulse management", () => {
-    const email = Impulse.of("")
-    const password = Impulse.of("")
+    const email = Impulse("")
+    const password = Impulse("")
     const onRender = vi.fn()
 
     const { container } = render(

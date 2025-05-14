@@ -156,14 +156,14 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
 
     return new ImpulseFormValue(
       null,
-      Impulse.of(),
-      Impulse.of(touched),
-      Impulse.of(validateOn),
-      Impulse.of(errors ?? [], { compare: shallowArrayEquals }),
-      Impulse.of(!isUndefined(initial)),
-      Impulse.of(_initial, { compare: isInputEqual }),
-      Impulse.of(inputOrInitial, { compare: isInputEqual }),
-      Impulse.of(schema),
+      Impulse(),
+      Impulse(touched),
+      Impulse(validateOn),
+      Impulse(errors ?? [], { compare: shallowArrayEquals }),
+      Impulse(!isUndefined(initial)),
+      Impulse(_initial, { compare: isInputEqual }),
+      Impulse(inputOrInitial, { compare: isInputEqual }),
+      Impulse(schema),
       isInputEqual,
       isInputDirty,
     )
@@ -171,7 +171,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
 
   private readonly _onFocus = new Emitter<[errors: ReadonlyArray<string>]>()
 
-  private readonly _validated = Impulse.of(false)
+  private readonly _validated = Impulse(false)
 
   protected constructor(
     root: null | ImpulseForm,

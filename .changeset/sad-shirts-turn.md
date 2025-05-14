@@ -2,14 +2,14 @@
 "react-impulse": minor
 ---
 
-Added `ImpulseGetter` and `ImpulseSetter` Interfaces.
+Added `ReadableImpulse` and `WritableImpulse` Interfaces.
 
 ```ts
-interface ImpulseGetter<T> {
+interface ReadableImpulse<T> {
   getValue(scope: Scope): T
 }
 
-interface ImpulseSetter<T> {
+interface WritableImpulse<T> {
   setValue(value: T): void
 }
 ```
@@ -17,17 +17,17 @@ interface ImpulseSetter<T> {
 These interfaces allow more flexible usage patterns and third-party integrations. The following APIs now accept anything that implements these interfaces, not just Impulse instances:
 
 - ```dart
-  function useScoped<TValue>(impulse: ImpulseGetter<TValue>): TValue
+  function useScoped<TValue>(impulse: ReadableImpulse<TValue>): TValue
   ```
 - ```dart
-  Impulse.of<T>(
+  Impulse<T>(
     getter: ReadonlyImpulse<T> | ((scope: Scope) => T),
-    setter: ImpulseSetter<T> | ((value: T, scope: Scope) => void),
+    setter: WritableImpulse<T> | ((value: T, scope: Scope) => void),
     options?: ImpulseOptions<T>,
   ): Impulse<T>
   ```
 - ```dart
-  function untrack<TValue>(impulse: ImpulseGetter<TValue>): TValue
+  function untrack<TValue>(impulse: ReadableImpulse<TValue>): TValue
   ```
 
 This change is backward compatible with all existing code while allowing for custom implementations of these interfaces.

@@ -8,7 +8,7 @@ The `useImpulse` hook has been removed. Replace it with `useState`, `useRef`, or
 
 #### Rationale
 
-Removing this hook simplifies the API by encouraging direct use of standard React hooks with `Impulse.of()`. This approach provides more explicit control over when Impulses are created and how they're stored in your components, leading to more predictable behavior across renders and better integration with other React patterns.
+Removing this hook simplifies the API by encouraging direct use of standard React hooks with `Impulse()` factory. This approach provides more explicit control over when Impulses are created and how they're stored in your components, leading to more predictable behavior across renders and better integration with other React patterns.
 
 #### Migration Guide
 
@@ -19,8 +19,8 @@ Removing this hook simplifies the API by encouraging direct use of standard Reac
   const impulse = useImpulse(0)
 
   // After with useState
-  const [impulse] = useState(() => Impulse.of(0))
+  const [impulse] = useState(() => Impulse(0))
 
   // After with useRef
-  const impulseRef = useRef(Impulse.of(0))
+  const impulseRef = useRef(Impulse(0))
   ```

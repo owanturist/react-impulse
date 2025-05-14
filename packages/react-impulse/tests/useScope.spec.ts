@@ -5,7 +5,7 @@ import { Impulse, useScope } from "../src"
 
 it("does not change scope value unless scoped impulse changes", () => {
   const spy = vi.fn()
-  const impulse = Impulse.of(1)
+  const impulse = Impulse(1)
   const { result, rerender } = renderHook(() => {
     const scope = useScope()
 
