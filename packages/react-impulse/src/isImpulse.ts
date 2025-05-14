@@ -4,7 +4,7 @@ import type { Scope } from "./Scope"
 import type { Func } from "./utils"
 
 /**
- * A static method to check whether or not the input is an Impulse.
+ * A function to check whether or not the input is an Impulse.
  *
  * @version 3.0.0
  */
@@ -13,7 +13,7 @@ export function isImpulse<T, Unknown = unknown>(
 ): input is Impulse<T>
 
 /**
- * A static method to check whether or not the input is an Impulse.
+ * A function to check whether or not the input is an Impulse.
  *
  * @version 3.0.0
  */
@@ -22,7 +22,7 @@ export function isImpulse<T, Unknown = unknown>(
 ): input is ReadonlyImpulse<T>
 
 /**
- * A static method to check whether or not an Impulse value passes the `check`.
+ * A function to check whether or not an Impulse value passes the `check`.
  *
  * @version 3.0.0
  */
@@ -33,7 +33,7 @@ export function isImpulse<T, Unknown = unknown>(
 ): input is Impulse<T>
 
 /**
- * A static method to check whether or not an Impulse value passes the `check`.
+ * A function to check whether or not an Impulse value passes the `check`.
  *
  * @version 3.0.0
  */

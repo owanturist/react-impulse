@@ -8,7 +8,7 @@ The `Impulse.transmit` method has been merged into the `Impulse` function. The `
 
 #### Rationale
 
-This change simplifies the API by consolidating related functionality into a single method, making the library more intuitive with fewer entry points to learn. It also aligns with established reactive programming patterns by using the widely recognized "derived" terminology instead of "transmit".
+This change simplifies the API by consolidating related functionality into a single function, making the library more intuitive with fewer entry points to learn. It also aligns with established reactive programming patterns by using the widely recognized "derived" terminology instead of "transmit".
 
 #### Functional Equivalence
 

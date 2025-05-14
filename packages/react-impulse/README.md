@@ -205,7 +205,7 @@ Impulse<T>(
 - `[options]` is an optional [`ImpulseOptions`][impulse_options] object.
   - `[options.compare]` when not defined or `null` then [`Object.is`][object_is] applies as a fallback.
 
-A static method that creates a new derived Impulse. A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes. A source is another Impulse or multiple Impulses.
+A function that creates a new derived Impulse. A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes. A source is another Impulse or multiple Impulses.
 
 <details><summary><i>Showcase: derived from Impulse</i></summary>
 <blockquote>
@@ -641,7 +641,7 @@ isImpulse<T, Unknown = unknown>(
 ): input is Impulse<T>
 ```
 
-A static method that checks whether the `input` is an `Impulse` instance. If the `check` function is provided, it checks the Impulse's value to match the `check` function.
+A function that checks whether the `input` is an `Impulse` instance. If the `check` function is provided, it checks the Impulse's value to match the `check` function.
 
 ### `interface ReadableImpulse`
 
