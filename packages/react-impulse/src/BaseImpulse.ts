@@ -14,6 +14,7 @@ export abstract class BaseImpulse<T>
   protected constructor(protected readonly _compare: Compare<T>) {}
 
   protected abstract _getter(): T
+
   protected abstract _setter(
     value: T,
     queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
