@@ -89,7 +89,7 @@ export abstract class BaseImpulse<T>
    *
    * @version 2.0.0
    */
-  public clone(options?: ImpulseOptions<T>): DirectImpulse<T>
+  public clone(options?: ImpulseOptions<T>): BaseImpulse<T>
 
   /**
    * Creates a new Impulse instance out of the current one with the transformed value. Transforming might be handy when cloning mutable values (such as an Impulse).
@@ -103,12 +103,12 @@ export abstract class BaseImpulse<T>
   public clone(
     transform: (value: T, scope: Scope) => T,
     options?: ImpulseOptions<T>,
-  ): DirectImpulse<T>
+  ): BaseImpulse<T>
 
   public clone(
     transformOrOptions?: Func<[T, Scope], T> | ImpulseOptions<T>,
     maybeOptions?: ImpulseOptions<T>,
-  ): DirectImpulse<T> {
+  ): BaseImpulse<T> {
     const value = this._getter()
 
     const [clonedValue, { compare = this._compare } = {}] = isFunction(
