@@ -116,11 +116,13 @@ jobs:
         run: pnpm typecheck
 
   test-react-impulse-support:
+    # skip the job while the 3.0.0 is not released
+    if: ${{ cancelled() }}
     name: Run tests against support react-impulse
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: []
+        version: [3.0.0]
 
     steps:
       - name: Checkout repository
