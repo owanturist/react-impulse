@@ -1,10 +1,10 @@
-import { BaseImpulse } from "./BaseImpulse"
+import { DerivedImpulse } from "./DerivedImpulse"
 import type { Impulse, ReadonlyImpulse } from "./Impulse"
 import { isImpulseFactory } from "./isImpulseFactory"
 import type { Scope } from "./Scope"
 
-export const isImpulse = isImpulseFactory(
-  (input) => input instanceof BaseImpulse,
+export const isDerivedImpulse = isImpulseFactory(
+  (input) => input instanceof DerivedImpulse,
 ) as {
   /**
    * A function to check whether or not the input is an Impulse.
