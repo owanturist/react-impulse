@@ -16,4 +16,4 @@ isDerivedImpulse<T, Unknown = unknown>(
 ): input is Impulse<T>
 ```
 
-A function that checks whether the `input` is an `DerivedImpulse` instance. If the `check` function is provided, it checks the Impulse's value to match the `check` function.
+A function that checks whether the `input` is a `DerivedImpulse` instance. If the `check` function is provided, it checks the Impulse's value to match the `check` function.
