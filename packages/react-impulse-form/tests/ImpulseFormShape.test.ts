@@ -687,7 +687,7 @@ describe("ImpulseFormShape.of()", () => {
       }>,
     )
       .parameter(1)
-      .toMatchTypeOf<
+      .toExtend<
         | undefined
         | {
             touched?: Setter<

@@ -116,6 +116,44 @@ describe.each<{
     expect(getValue(impulse, scope)).toStrictEqual({ count: 1 })
   })
 
+  it("allows source as a Impulse", ({ scope }) => {
+    const source = Impulse(0)
+    const derived = Impulse(source)
+
+    expectTypeOf(derived).toEqualTypeOf<ReadonlyImpulse<number>>()
+    expect(derived.getValue(scope)).toBe(0)
+  })
+
+  it("allows source as a ReadonlyImpulse", ({ scope }) => {
+    const source = Impulse(() => 0)
+    const derived = Impulse(source)
+
+    expectTypeOf(derived).toEqualTypeOf<ReadonlyImpulse<number>>()
+    expect(derived.getValue(scope)).toBe(0)
+  })
+
+  it("allows source as a ReadableImpulse", ({ scope }) => {
+    class Custom implements ReadableImpulse<number> {
+      public readonly counter = Impulse(0)
+
+      public getValue(scope: Scope): number {
+        return this.counter.getValue(scope)
+      }
+    }
+
+    const source = new Custom()
+    const derived = Impulse(source)
+
+    expectTypeOf(derived).toEqualTypeOf<ReadonlyImpulse<number>>()
+    expect(derived.getValue(scope)).toBe(0)
+
+    act(() => {
+      source.counter.setValue(1)
+    })
+
+    expect(derived.getValue(scope)).toBe(1)
+  })
+
   it("subscribes to Impulse source", ({ scope }) => {
     const source = Impulse({ count: 0 }, { compare: Counter.compare })
     const derived = Impulse((scope) => getValue(source, scope))
@@ -1017,16 +1055,17 @@ describe("Impulse(getter, setter, options?)", () => {
     )
 
     expectTypeOf(impulse).toEqualTypeOf<Impulse<number>>()
-    expectTypeOf(impulse).toMatchTypeOf<ReadonlyImpulse<number>>()
+    expectTypeOf(impulse).toExtend<ReadonlyImpulse<number>>()
   })
 
   it("allows source as a Impulse", ({ scope }) => {
     const source = Impulse(0)
-    const impulse = Impulse(source, () => {
+    const derived = Impulse(source, () => {
       // noop
     })
 
-    expect(impulse.getValue(scope)).toBe(0)
+    expectTypeOf(derived).toEqualTypeOf<Impulse<number>>()
+    expect(derived.getValue(scope)).toBe(0)
   })
 
   it("allows source as a ReadonlyImpulse", ({ scope }) => {
@@ -1035,6 +1074,7 @@ describe("Impulse(getter, setter, options?)", () => {
       // noop
     })
 
+    expectTypeOf(derived).toEqualTypeOf<Impulse<number>>()
     expect(derived.getValue(scope)).toBe(0)
   })
 
@@ -1052,6 +1092,7 @@ describe("Impulse(getter, setter, options?)", () => {
       // noop
     })
 
+    expectTypeOf(derived).toEqualTypeOf<Impulse<number>>()
     expect(derived.getValue(scope)).toBe(0)
 
     act(() => {
