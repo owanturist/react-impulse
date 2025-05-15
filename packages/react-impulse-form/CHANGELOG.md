@@ -1,5 +1,23 @@
 # react-impulse-form
 
+## 0.8.0
+
+### Minor Changes
+
+- [#813](https://github.com/owanturist/react-impulse/pull/813) [`0983fb0`](https://github.com/owanturist/react-impulse/commit/0983fb04e4dc99f382c46abca597a8687d491940) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
+
+  - Added support for React 19
+  - Dropped support for React 16 and React 17
+  - Updated minimum peer dependency to React 18.0.0
+
+- [#839](https://github.com/owanturist/react-impulse/pull/839) [`a365443`](https://github.com/owanturist/react-impulse/commit/a3654439578dc15ad8ecbf5a5edf0ecf37d8879b) Thanks [@owanturist](https://github.com/owanturist)! - Bump `react-impulse` peer dependency to `^3.0.0`.
+
+### Patch Changes
+
+- [#811](https://github.com/owanturist/react-impulse/pull/811) [`a7d9c1c`](https://github.com/owanturist/react-impulse/commit/a7d9c1c1c150e8092696795881bfde4b410afae9) Thanks [@owanturist](https://github.com/owanturist)! - Update tsconfig.target from `es2017` to `ES2020`.
+
+- [#805](https://github.com/owanturist/react-impulse/pull/805) [`4f4a632`](https://github.com/owanturist/react-impulse/commit/4f4a6320d676761a8e68da0b54c50aaf53adb5e1) Thanks [@owanturist](https://github.com/owanturist)! - Do not use `Impulse#getValue` with the select API anymore.
+
 ## 0.7.1
 
 ### Patch Changes
