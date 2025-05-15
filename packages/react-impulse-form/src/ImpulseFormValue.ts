@@ -230,7 +230,7 @@ export class ImpulseFormValue<
       Impulse(!isUndefined(initial)),
       Impulse(_initial, { compare: isInputEqual }),
       Impulse(inputOrInitial, { compare: isInputEqual }),
-      Impulse(validate),
+      Impulse({ _validator: validate }),
     )
   }
 
@@ -276,7 +276,9 @@ export class ImpulseFormValue<
       Impulse(!isUndefined(initial)),
       Impulse(_initial, { compare: isInputEqual }),
       Impulse(inputOrInitial, { compare: isInputEqual }),
-      Impulse((value) => zodLikeParse(schema, value)),
+      Impulse({
+        _validator: (value) => zodLikeParse(schema, value),
+      }),
     )
   }
 
@@ -313,7 +315,9 @@ export class ImpulseFormValue<
       Impulse(!isUndefined(initial)),
       Impulse(_initial, { compare: isInputEqual }),
       Impulse(inputOrInitial, { compare: isInputEqual }),
-      Impulse((value): Result<TError, TInput> => [null, value]),
+      Impulse({
+        _validator: (value): Result<TError, TInput> => [null, value],
+      }),
     )
   }
 
@@ -335,9 +339,9 @@ export class ImpulseFormValue<
     private readonly _isExplicitInitial: Impulse<boolean>,
     private readonly _initial: Impulse<TInput>,
     private readonly _input: Impulse<TInput>,
-    private readonly _validate: Impulse<
-      Func<[TInput], Result<TError, TOutput>>
-    >,
+    private readonly _validate: Impulse<{
+      _validator: Func<[TInput], Result<TError, TOutput>>
+    }>,
   ) {
     super(root)
     this._updateValidated()
@@ -380,10 +384,9 @@ export class ImpulseFormValue<
       return [null, null]
     }
 
-    const value = this.getInput(scope)
-    const validate = this._validate.getValue(scope)
+    const { _validator } = this._validate.getValue(scope)
 
-    return validate(value)
+    return _validator(this.getInput(scope))
   }
 
   protected _getFocusFirstInvalidValue(): null | VoidFunction {
@@ -555,8 +558,10 @@ export class ImpulseFormValue<
       ? ZodLikeSchema<TOutput>
       : never,
   ): void {
-    this._validate.setValue(() => (input: TInput) => {
-      return zodLikeParse(schema, input) as Result<TError, TOutput>
+    this._validate.setValue({
+      _validator: (input) => {
+        return zodLikeParse(schema, input) as Result<TError, TOutput>
+      },
     })
   }
 
