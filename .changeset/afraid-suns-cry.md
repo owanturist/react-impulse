@@ -63,13 +63,13 @@ These changes collectively enhance the developer experience, reduce cognitive lo
   ```ts
   // Before
   if (Impulse.isImpulse(something)) {
-    // ..
+    // ...
   }
 
   // After
   import { isImpulse } from "react-impulse"
 
   if (isImpulse(something)) {
-    // ..
+    // ...
   }
   ```
