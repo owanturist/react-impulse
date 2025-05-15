@@ -117,7 +117,7 @@ jobs:
 
   test-react-impulse-support:
     # skip the job while the 3.0.0 is not released
-    if: ${{ cancelled() }}
+    if: false
     name: Run tests against support react-impulse
     runs-on: ubuntu-latest
     strategy:
