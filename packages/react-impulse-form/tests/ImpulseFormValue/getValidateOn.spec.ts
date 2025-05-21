@@ -170,10 +170,10 @@ describe("when options: ImpulseFormValueOptions", () => {
       ).toEqualTypeOf<ValidateStrategy>()
     })
 
-    it("defaults to onInit", ({ scope }) => {
+    it("defaults to onTouch", ({ scope }) => {
       const value = setup()
 
-      expect(getValidateOn(scope, value)).toBe("onInit")
+      expect(getValidateOn(scope, value)).toBe("onTouch")
     })
   })
 })

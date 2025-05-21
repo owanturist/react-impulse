@@ -9,14 +9,22 @@ import { wait } from "../common"
 
 const SLOWEST_ASYNC_MS = 3000
 
-interface ShapeFields {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _1: ImpulseFormValue<string, any>
+interface ValidatedShapeFields {
+  _1: ImpulseFormValue<string, ReadonlyArray<string>>
   _2: ImpulseFormValue<number>
   _3: ImpulseFormShape<{
     _1: ImpulseFormValue<boolean>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _2: ImpulseFormValue<Array<string>, any>
+    _2: ImpulseFormValue<Array<string>, ReadonlyArray<string>>
+  }>
+  _4: Array<string>
+}
+
+interface ShapeFields {
+  _1: ImpulseFormValue<string>
+  _2: ImpulseFormValue<number>
+  _3: ImpulseFormShape<{
+    _1: ImpulseFormValue<boolean>
+    _2: ImpulseFormValue<Array<string>>
   }>
   _4: Array<string>
 }
@@ -33,7 +41,7 @@ interface RootValueVerbose {
   readonly _4: Array<string>
 }
 
-function setup(options?: ImpulseFormShapeOptions<ShapeFields>) {
+function setup(options?: ImpulseFormShapeOptions<ValidatedShapeFields>) {
   return ImpulseFormShape.of(
     {
       _1: ImpulseFormValue.of("", {
@@ -75,8 +83,10 @@ it("matches the type signature", () => {
 describe.each<
   [
     string,
-    <TShape extends ShapeFields>(
-      form: ImpulseFormShape<TShape>,
+    (
+      form:
+        | ImpulseFormShape<ValidatedShapeFields>
+        | ImpulseFormShape<ShapeFields>,
     ) => Promise<unknown>,
   ]
 >([
@@ -163,7 +173,7 @@ describe.each<
         _4: ["anything"],
       },
       () => {
-        const form = ImpulseFormShape.of({
+        return ImpulseFormShape.of({
           _1: ImpulseFormValue.of("value"),
           _2: ImpulseFormValue.of(0),
           _3: ImpulseFormShape.of({
@@ -172,8 +182,6 @@ describe.each<
           }),
           _4: ["anything"],
         })
-
-        return form
       },
     ],
     [

@@ -129,7 +129,7 @@ describe("isValidated(scope)", () => {
     expect(isValidated(scope, shape.fields.third)).toBe(false)
   })
 
-  it.skip("returns false when SOME are validated", ({ scope }) => {
+  it("returns false when SOME are validated", ({ scope }) => {
     const shape = setup({
       touched: {
         first: true,
@@ -172,14 +172,14 @@ describe("isValidated(scope, (concise) => concise)", () => {
     ).toEqualTypeOf<ThirdIsValidatedConcise>()
   })
 
-  it.skip("returns false when NONE are validated", ({ scope }) => {
+  it("returns false when NONE are validated", ({ scope }) => {
     const shape = setup()
 
     expect(isValidated(scope, shape)).toBe(false)
     expect(isValidated(scope, shape.fields.third)).toBe(false)
   })
 
-  it.skip("returns concise object when SOME are validated", ({ scope }) => {
+  it("returns concise object when SOME are validated", ({ scope }) => {
     const shape = setup({
       touched: {
         first: true,
@@ -232,7 +232,7 @@ describe("isValidated(scope, (_, verbose) => verbose)", () => {
     ).toEqualTypeOf<ThirdIsValidatedVerbose>()
   })
 
-  it.skip("returns verbose object when NONE are validated", ({ scope }) => {
+  it("returns verbose object when NONE are validated", ({ scope }) => {
     const shape = setup()
 
     expect(isValidated(scope, shape)).toStrictEqual({
@@ -249,7 +249,7 @@ describe("isValidated(scope, (_, verbose) => verbose)", () => {
     })
   })
 
-  it.skip("returns verbose object when SOME are validated", ({ scope }) => {
+  it("returns verbose object when SOME are validated", ({ scope }) => {
     const shape = setup({
       touched: {
         first: true,

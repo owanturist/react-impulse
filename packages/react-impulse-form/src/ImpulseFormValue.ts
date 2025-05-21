@@ -44,7 +44,7 @@ export type ImpulseFormValueValidator<TInput, TError, TOutput> = (
   input: TInput,
 ) => Result<TError, TOutput>
 
-export interface ImpulseFormValueOptions<TInput, TError = null> {
+export interface ImpulseFormValueOptions<TInput, TError = never> {
   errors?: null | TError
   touched?: boolean
 
@@ -146,7 +146,7 @@ export type ImpulseFormValueErrorsSetter<TError> = Setter<null | TError>
 
 export class ImpulseFormValue<
   TInput,
-  TError = null,
+  TError = never,
   TOutput = TInput,
 > extends ImpulseForm<{
   "input.setter": ImpulseFormValueInputSetter<TInput>
@@ -170,19 +170,19 @@ export class ImpulseFormValue<
   public static of<TInput, TError, TOutput = TInput>(
     input: TInput,
     options: ImpulseFormValueValidatedOptions<TInput, TError, TOutput>,
-  ): ImpulseFormValue<TInput, TError, TOutput>
+  ): ImpulseFormValue<TInput, NonNullable<TError>, NonNullable<TOutput>>
 
   public static of<TInput, TOutput = TInput>(
     input: TInput,
     options: ImpulseFormValueSchemaOptions<TInput, TOutput>,
   ): ImpulseFormValue<TInput, ReadonlyArray<string>, TOutput>
 
-  public static of<TInput, TError = null>(
+  public static of<TInput, TError = never>(
     input: TInput,
     options?: ImpulseFormValueOptions<TInput, TError>,
-  ): ImpulseFormValue<TInput, TError, TInput>
+  ): ImpulseFormValue<TInput, NonNullable<TError>, TInput>
 
-  public static of<TInput, TError = null, TOutput = TInput>(
+  public static of<TInput, TError = never, TOutput = TInput>(
     input: TInput,
     options?:
       | ImpulseFormValueOptions<TInput, TError>
@@ -261,7 +261,7 @@ export class ImpulseFormValue<
       null,
       Impulse(),
       Impulse(touched),
-      Impulse<ValidateStrategy>(VALIDATE_ON_INIT),
+      Impulse<ValidateStrategy>(VALIDATE_ON_TOUCH),
       Impulse<null | TError>(options?.errors ?? null),
       Impulse(isExplicitInitial),
       Impulse(initial, { compare: isInputEqual }),
@@ -303,7 +303,10 @@ export class ImpulseFormValue<
 
   private _updateValidated(override = false): void {
     this._validated.setValue((isValidated, scope) => {
-      if (!override && isValidated) {
+      if (
+        (!override && isValidated) ||
+        this._validator.getValue(scope) == null
+      ) {
         return true
       }
 

@@ -8,6 +8,7 @@ import {
   type ImpulseFormListOptions,
   ImpulseFormList,
   ImpulseFormValue,
+  type ImpulseFormValueSchemaOptions,
 } from "../src"
 
 import { arg, wait } from "./common"
@@ -17,14 +18,14 @@ beforeAll(() => {
 })
 
 describe("ImpulseFormList#setElements()", () => {
-  const setup = (elements: ReadonlyArray<ImpulseFormValue<number>>) => {
+  function setup(elements: ReadonlyArray<ImpulseFormValue<number>>) {
     return ImpulseFormList.of(elements)
   }
 
-  const setupElement = (
+  function setupElement(
     initial: number,
     options?: ImpulseFormValueOptions<number>,
-  ) => {
+  ) {
     return ImpulseFormValue.of(initial, options)
   }
 
@@ -77,15 +78,20 @@ describe("ImpulseFormList#setElements()", () => {
 })
 
 describe("ImpulseFormList#getErrors()", () => {
-  const setup = (elements: ReadonlyArray<ImpulseFormValue<number>>) => {
+  function setup<TError>(
+    elements: ReadonlyArray<ImpulseFormValue<number, TError>>,
+  ) {
     return ImpulseFormList.of(elements)
   }
 
-  const setupElement = (
+  function setupElement(
     initial: number,
-    options?: ImpulseFormValueOptions<number>,
-  ) => {
-    return ImpulseFormValue.of(initial, options)
+    options?: Partial<ImpulseFormValueSchemaOptions<number>>,
+  ) {
+    return ImpulseFormValue.of(initial, {
+      schema: z.number(),
+      ...options,
+    })
   }
 
   it("matches the type definition", ({ scope }) => {
@@ -163,21 +169,23 @@ describe("ImpulseFormList#getErrors()", () => {
 
 describe("ImpulseFormList#setErrors()", () => {
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([ImpulseFormValue.of(0)])
+    const form = ImpulseFormList.of([
+      ImpulseFormValue.of(0, {
+        validate: (input) => (input === 0 ? ["fail", null] : [null, input]),
+      }),
+    ])
 
     expectTypeOf(form.setErrors).toEqualTypeOf<
       (
         setter: Setter<
-          null | ReadonlyArray<
-            undefined | Setter<null | ReadonlyArray<string>>
-          >,
-          [ReadonlyArray<null | ReadonlyArray<string>>]
+          null | ReadonlyArray<undefined | Setter<null | string>>,
+          [ReadonlyArray<null | string>]
         >,
       ) => void
     >()
 
     expectTypeOf(form.getElements(scope).at(0)!.setErrors).toEqualTypeOf<
-      (setter: Setter<null | ReadonlyArray<string>>) => void
+      (setter: Setter<null | string>) => void
     >()
   })
 
@@ -199,7 +207,7 @@ describe("ImpulseFormList#setErrors()", () => {
       ImpulseFormValue.of(2, { errors: ["err2"] }),
     ])
 
-    form.setErrors([["e0"], ["e1"], []])
+    form.setErrors([["e0"], ["e1"], null])
     expect(form.getErrors(scope)).toStrictEqual([["e0"], ["e1"], null])
   })
 
@@ -220,15 +228,20 @@ describe("ImpulseFormList#setErrors()", () => {
 })
 
 describe("ImpulseFormList#isValidated()", () => {
-  const setup = (elements: ReadonlyArray<ImpulseFormValue<number>>) => {
+  function setup<TError>(
+    elements: ReadonlyArray<ImpulseFormValue<number, TError>>,
+  ) {
     return ImpulseFormList.of(elements)
   }
 
-  const setupElement = (
+  function setupElement(
     initial: number,
-    options?: ImpulseFormValueOptions<number>,
-  ) => {
-    return ImpulseFormValue.of(initial, options)
+    options?: Partial<ImpulseFormValueSchemaOptions<number>>,
+  ) {
+    return ImpulseFormValue.of(initial, {
+      schema: z.number(),
+      ...options,
+    })
   }
 
   it("matches the type definition", ({ scope }) => {
@@ -314,18 +327,21 @@ describe("ImpulseFormList#isValidated()", () => {
 })
 
 describe("ImpulseFormList#getValidateOn()", () => {
-  const setup = (
-    elements: ReadonlyArray<ImpulseFormValue<number>>,
-    options?: ImpulseFormListOptions<ImpulseFormValue<number>>,
-  ) => {
+  function setup<TError>(
+    elements: ReadonlyArray<ImpulseFormValue<number, TError>>,
+    options?: ImpulseFormListOptions<ImpulseFormValue<number, TError>>,
+  ) {
     return ImpulseFormList.of(elements, options)
   }
 
-  const setupElement = (
+  function setupElement(
     initial: number,
-    options?: ImpulseFormValueOptions<number>,
-  ) => {
-    return ImpulseFormValue.of(initial, options)
+    options?: Partial<ImpulseFormValueSchemaOptions<number>>,
+  ) {
+    return ImpulseFormValue.of(initial, {
+      schema: z.number(),
+      ...options,
+    })
   }
 
   it("matches the type definition", ({ scope }) => {
@@ -695,9 +711,9 @@ describe("ImpulseFormList#reset()", () => {
 
   it("updates validateOn for restored elements", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { validateOn: "onChange" }),
-      ImpulseFormValue.of(1, { validateOn: "onChange" }),
-      ImpulseFormValue.of(2, { validateOn: "onChange" }),
+      ImpulseFormValue.of(0, { schema: z.number(), validateOn: "onChange" }),
+      ImpulseFormValue.of(1, { schema: z.number(), validateOn: "onChange" }),
+      ImpulseFormValue.of(2, { schema: z.number(), validateOn: "onChange" }),
     ])
 
     form.setElements([ImpulseFormValue.of(0)])
@@ -760,13 +776,15 @@ describe("ImpulseFormList#reset()", () => {
 })
 
 describe("ImpulseFormList#getOutput()", () => {
-  const setup = (elements: ReadonlyArray<ImpulseFormValue<number, string>>) => {
+  function setup<TError>(
+    elements: ReadonlyArray<ImpulseFormValue<number, TError, string>>,
+  ) {
     return ImpulseFormList.of(elements, {
       validateOn: "onInit",
     })
   }
 
-  const setupElement = (initial: number) => {
+  function setupElement(initial: number) {
     return ImpulseFormValue.of(initial, {
       schema: z
         .number()
@@ -1172,11 +1190,17 @@ describe("ImpulseFormList#setInitial()", () => {
 })
 
 describe("ImpulseFormList#focusFirstInvalidValue()", () => {
-  const setup = (
-    options?: ImpulseFormListOptions<ImpulseFormValue<number>>,
-  ) => {
+  function setup(
+    options?: ImpulseFormListOptions<
+      ImpulseFormValue<number, ReadonlyArray<string>>
+    >,
+  ) {
     const form = ImpulseFormList.of(
-      [ImpulseFormValue.of(0), ImpulseFormValue.of(1), ImpulseFormValue.of(2)],
+      [
+        ImpulseFormValue.of(0, { schema: z.number() }),
+        ImpulseFormValue.of(1, { schema: z.number() }),
+        ImpulseFormValue.of(2, { schema: z.number() }),
+      ],
       options,
     )
 
