@@ -6,17 +6,17 @@ import {
   ImpulseFormValue,
 } from "../../src"
 
-const setup = (
+function setup(
   options?: ImpulseFormShapeOptions<{
-    _1: ImpulseFormValue<string>
-    _2: ImpulseFormValue<number>
+    _1: ImpulseFormValue<string, ReadonlyArray<string>>
+    _2: ImpulseFormValue<number, ReadonlyArray<string>>
     _3: ImpulseFormShape<{
-      _1: ImpulseFormValue<undefined | boolean, boolean>
-      _2: ImpulseFormValue<Array<string>>
+      _1: ImpulseFormValue<undefined | boolean, ReadonlyArray<string>, boolean>
+      _2: ImpulseFormValue<Array<string>, ReadonlyArray<string>>
     }>
     _4: Array<string>
   }>,
-) => {
+) {
   const form = ImpulseFormShape.of(
     {
       _1: ImpulseFormValue.of("", {

@@ -10,11 +10,13 @@ import { wait } from "../common"
 const SLOWEST_ASYNC_MS = 3000
 
 interface ShapeFields {
-  _1: ImpulseFormValue<string>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  _1: ImpulseFormValue<string, any>
   _2: ImpulseFormValue<number>
   _3: ImpulseFormShape<{
     _1: ImpulseFormValue<boolean>
-    _2: ImpulseFormValue<Array<string>>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    _2: ImpulseFormValue<Array<string>, any>
   }>
   _4: Array<string>
 }
@@ -31,7 +33,7 @@ interface RootValueVerbose {
   readonly _4: Array<string>
 }
 
-const setup = (options?: ImpulseFormShapeOptions<ShapeFields>) => {
+function setup(options?: ImpulseFormShapeOptions<ShapeFields>) {
   return ImpulseFormShape.of(
     {
       _1: ImpulseFormValue.of("", {
@@ -71,7 +73,12 @@ it("matches the type signature", () => {
 })
 
 describe.each<
-  [string, (form: ImpulseFormShape<ShapeFields>) => Promise<unknown>]
+  [
+    string,
+    <TShape extends ShapeFields>(
+      form: ImpulseFormShape<TShape>,
+    ) => Promise<unknown>,
+  ]
 >([
   ["root", (form) => form.submit()],
   ["root.fields.<ImpulseFormValue>", (form) => form.fields._1.submit()],
@@ -156,17 +163,15 @@ describe.each<
         _4: ["anything"],
       },
       () => {
-        const form = setup({
-          input: {
-            _1: "value",
-            _3: {
-              _2: ["value"],
-            },
-          },
+        const form = ImpulseFormShape.of({
+          _1: ImpulseFormValue.of("value"),
+          _2: ImpulseFormValue.of(0),
+          _3: ImpulseFormShape.of({
+            _1: ImpulseFormValue.of(true),
+            _2: ImpulseFormValue.of(["value"]),
+          }),
+          _4: ["anything"],
         })
-
-        form.fields._1.setSchema(null)
-        form.fields._3.fields._2.setSchema(null)
 
         return form
       },

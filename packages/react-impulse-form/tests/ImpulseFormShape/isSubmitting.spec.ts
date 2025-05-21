@@ -11,11 +11,11 @@ import { wait } from "../common"
 const SLOWEST_ASYNC_MS = 1000
 
 interface ShapeFields {
-  _1: ImpulseFormValue<string>
+  _1: ImpulseFormValue<string, ReadonlyArray<string>>
   _2: ImpulseFormValue<number>
   _3: ImpulseFormShape<{
     _1: ImpulseFormValue<boolean>
-    _2: ImpulseFormValue<Array<string>>
+    _2: ImpulseFormValue<Array<string>, ReadonlyArray<string>>
   }>
   _4: Array<string>
 }

@@ -330,7 +330,7 @@ export class ImpulseFormValue<
   private _validate(scope: Scope): [null | TError, null | TOutput] {
     const error = this._errors.getValue(scope)
 
-    if (error != null) {
+    if (!isNull(error)) {
       return [error, null]
     }
 
@@ -447,7 +447,7 @@ export class ImpulseFormValue<
     ) => TResult = params._first as typeof select,
   ): TResult {
     const validated =
-      this._validated.getValue(scope) || this._errors.getValue(scope) != null
+      this._validated.getValue(scope) || !isNull(this._errors.getValue(scope))
 
     return select(validated, validated)
   }
