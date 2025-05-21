@@ -2,32 +2,40 @@ import { z } from "zod"
 import type { Scope } from "react-impulse"
 
 import {
-  type ImpulseFormValueOptions,
+  type ImpulseFormValueSchemaOptions,
   type ValidateStrategy,
   ImpulseFormValue,
 } from "../../src"
 
-const setup = (options?: ImpulseFormValueOptions<string, number>) => {
+const setup = (
+  options?: Partial<ImpulseFormValueSchemaOptions<string, number>>,
+) => {
   return ImpulseFormValue.of("y", {
     schema: z.string().min(1).pipe(z.coerce.number()),
     ...options,
   })
 }
 
-const isValidatedDefault = (
+function isValidatedDefault<TError, TOutput>(
   scope: Scope,
-  value: ImpulseFormValue<string, number>,
-) => value.isValidated(scope)
+  value: ImpulseFormValue<string, TError, TOutput>,
+) {
+  return value.isValidated(scope)
+}
 
-const isValidatedConcise = (
+function isValidatedConcise<TError, TOutput>(
   scope: Scope,
-  value: ImpulseFormValue<string, number>,
-) => value.isValidated(scope, (concise) => concise)
+  value: ImpulseFormValue<string, TError, TOutput>,
+) {
+  return value.isValidated(scope, (concise) => concise)
+}
 
-const isValidatedVerbose = (
+function isValidatedVerbose<TError, TOutput>(
   scope: Scope,
-  value: ImpulseFormValue<string, number>,
-) => value.isValidated(scope, (_, verbose) => verbose)
+  value: ImpulseFormValue<string, TError, TOutput>,
+) {
+  return value.isValidated(scope, (_, verbose) => verbose)
+}
 
 it("matches the type signature", () => {
   const form = setup()
@@ -43,10 +51,10 @@ it("matches the type signature", () => {
 })
 
 describe.each([
-  ["isValidated(scope)", isValidatedDefault],
-  ["isValidated(scope, (concise) => concise)", isValidatedConcise],
-  ["isValidated(scope, (_, verbose) => concise)", isValidatedVerbose],
-])("%s", (_, isValidated) => {
+  ["(scope)", isValidatedDefault],
+  ["(scope, (concise) => concise)", isValidatedConcise],
+  ["(scope, (_, verbose) => concise)", isValidatedVerbose],
+])("isValidated%s", (_, isValidated) => {
   it("returns boolean value", ({ scope }) => {
     const value = setup()
 

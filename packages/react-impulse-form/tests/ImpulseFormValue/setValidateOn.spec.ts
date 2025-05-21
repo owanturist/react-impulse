@@ -1,12 +1,17 @@
+import { z } from "zod"
+
 import {
   type Setter,
-  type ImpulseFormValueOptions,
   type ValidateStrategy,
   ImpulseFormValue,
+  type ImpulseFormValueSchemaOptions,
 } from "../../src"
 
-const setup = (options?: ImpulseFormValueOptions<string>) => {
-  return ImpulseFormValue.of("", options)
+function setup(options?: Partial<ImpulseFormValueSchemaOptions<string>>) {
+  return ImpulseFormValue.of("", {
+    ...options,
+    schema: z.string(),
+  })
 }
 
 it("matches the type signature", () => {

@@ -1,58 +1,179 @@
 import type { Scope } from "react-impulse"
+import { z } from "zod"
 
 import {
   type ValidateStrategy,
   type ImpulseFormValueOptions,
   ImpulseFormValue,
+  type ImpulseFormValueSchemaOptions,
+  type ImpulseFormValueValidatedOptions,
 } from "../../src"
+import { arg } from "../common"
 
-const setup = (options?: ImpulseFormValueOptions<string>) => {
-  return ImpulseFormValue.of("", options)
+function getValidateOnDefault<TError, TOutput>(
+  scope: Scope,
+  value: ImpulseFormValue<string, TError, TOutput>,
+) {
+  return value.getValidateOn(scope)
 }
 
-const getValidateOnDefault = (scope: Scope, value: ImpulseFormValue<string>) =>
-  value.getValidateOn(scope)
+function getValidateOnConcise<TError, TOutput>(
+  scope: Scope,
+  value: ImpulseFormValue<string, TError, TOutput>,
+) {
+  return value.getValidateOn(scope, arg(0))
+}
 
-const getValidateOnConcise = (scope: Scope, value: ImpulseFormValue<string>) =>
-  value.getValidateOn(scope, (concise) => concise)
+function getValidateOnVerbose<TError, TOutput>(
+  scope: Scope,
+  value: ImpulseFormValue<string, TError, TOutput>,
+) {
+  return value.getValidateOn(scope, arg(1))
+}
 
-const getValidateOnVerbose = (scope: Scope, value: ImpulseFormValue<string>) =>
-  value.getValidateOn(scope, (_, verbose) => verbose)
+describe("when options: ImpulseFormValueSchemaOptions", () => {
+  function setup(options?: Partial<ImpulseFormValueSchemaOptions<string>>) {
+    return ImpulseFormValue.of("", {
+      schema: z.string(),
+      ...options,
+    })
+  }
 
-it("matches the type signature", () => {
-  const form = setup()
+  it("matches the type signature", () => {
+    const form = setup()
 
-  expectTypeOf(form.getValidateOn).toEqualTypeOf<{
-    (scope: Scope): ValidateStrategy
-    <TResult>(
-      scope: Scope,
-      select: (concise: ValidateStrategy, verbose: ValidateStrategy) => TResult,
-    ): TResult
-  }>()
-})
-
-describe.each([
-  ["getValidateOn(scope)", getValidateOnDefault],
-  ["getValidateOn(scope, (concise) => concise)", getValidateOnConcise],
-  ["getValidateOn(scope, (_, verbose) => concise)", getValidateOnVerbose],
-])("%s", (_, getValidateOn) => {
-  it("returns ValidateStrategy value", ({ scope }) => {
-    const value = setup()
-
-    expectTypeOf(getValidateOn(scope, value)).toEqualTypeOf<ValidateStrategy>()
+    expectTypeOf(form.getValidateOn).toEqualTypeOf<{
+      (scope: Scope): ValidateStrategy
+      <TResult>(
+        scope: Scope,
+        select: (
+          concise: ValidateStrategy,
+          verbose: ValidateStrategy,
+        ) => TResult,
+      ): TResult
+    }>()
   })
 
-  it("defaults to onTouch", ({ scope }) => {
-    const value = setup()
+  describe.each([
+    ["(scope)", getValidateOnDefault],
+    ["(scope, (concise) => concise)", getValidateOnConcise],
+    ["(scope, (_, verbose) => concise)", getValidateOnVerbose],
+  ])("getValidateOn%s", (_, getValidateOn) => {
+    it("returns ValidateStrategy value", ({ scope }) => {
+      const value = setup()
 
-    expect(getValidateOn(scope, value)).toBe("onTouch")
-  })
-
-  it("returns initial ValidateStrategy", ({ scope }) => {
-    const value = setup({
-      validateOn: "onSubmit",
+      expectTypeOf(
+        getValidateOn(scope, value),
+      ).toEqualTypeOf<ValidateStrategy>()
     })
 
-    expect(getValidateOn(scope, value)).toBe("onSubmit")
+    it("defaults to onTouch", ({ scope }) => {
+      const value = setup()
+
+      expect(getValidateOn(scope, value)).toBe("onTouch")
+    })
+
+    it("returns initial ValidateStrategy", ({ scope }) => {
+      const value = setup({
+        validateOn: "onSubmit",
+      })
+
+      expect(getValidateOn(scope, value)).toBe("onSubmit")
+    })
+  })
+})
+
+describe("when options: ImpulseFormValueValidatedOptions", () => {
+  function setup(
+    options?: Partial<ImpulseFormValueValidatedOptions<string, number>>,
+  ) {
+    return ImpulseFormValue.of("", {
+      ...options,
+      validate: (input) => (input.length > 0 ? [null, input] : [1, null]),
+    })
+  }
+
+  it("matches the type signature", () => {
+    const form = setup()
+
+    expectTypeOf(form.getValidateOn).toEqualTypeOf<{
+      (scope: Scope): ValidateStrategy
+      <TResult>(
+        scope: Scope,
+        select: (
+          concise: ValidateStrategy,
+          verbose: ValidateStrategy,
+        ) => TResult,
+      ): TResult
+    }>()
+  })
+
+  describe.each([
+    ["(scope)", getValidateOnDefault],
+    ["(scope, (concise) => concise)", getValidateOnConcise],
+    ["(scope, (_, verbose) => concise)", getValidateOnVerbose],
+  ])("getValidateOn%s", (_, getValidateOn) => {
+    it("returns ValidateStrategy value", ({ scope }) => {
+      const value = setup()
+
+      expectTypeOf(
+        getValidateOn(scope, value),
+      ).toEqualTypeOf<ValidateStrategy>()
+    })
+
+    it("defaults to onTouch", ({ scope }) => {
+      const value = setup()
+
+      expect(getValidateOn(scope, value)).toBe("onTouch")
+    })
+
+    it("returns initial ValidateStrategy", ({ scope }) => {
+      const value = setup({
+        validateOn: "onSubmit",
+      })
+
+      expect(getValidateOn(scope, value)).toBe("onSubmit")
+    })
+  })
+})
+
+describe("when options: ImpulseFormValueOptions", () => {
+  function setup(options?: ImpulseFormValueOptions<string>) {
+    return ImpulseFormValue.of("", options)
+  }
+
+  it("matches the type signature", () => {
+    const form = setup()
+
+    expectTypeOf(form.getValidateOn).toEqualTypeOf<{
+      (scope: Scope): ValidateStrategy
+      <TResult>(
+        scope: Scope,
+        select: (
+          concise: ValidateStrategy,
+          verbose: ValidateStrategy,
+        ) => TResult,
+      ): TResult
+    }>()
+  })
+
+  describe.each([
+    ["(scope)", getValidateOnDefault],
+    ["(scope, (concise) => concise)", getValidateOnConcise],
+    ["(scope, (_, verbose) => concise)", getValidateOnVerbose],
+  ])("getValidateOn%s", (_, getValidateOn) => {
+    it("returns ValidateStrategy value", ({ scope }) => {
+      const value = setup()
+
+      expectTypeOf(
+        getValidateOn(scope, value),
+      ).toEqualTypeOf<ValidateStrategy>()
+    })
+
+    it("defaults to onInit", ({ scope }) => {
+      const value = setup()
+
+      expect(getValidateOn(scope, value)).toBe("onInit")
+    })
   })
 })

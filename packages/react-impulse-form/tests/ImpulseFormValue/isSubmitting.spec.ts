@@ -7,7 +7,7 @@ import { wait } from "../common"
 const SLOWEST_ASYNC_MS = 1000
 
 const setupValue =
-  (enchant?: (form: ImpulseFormValue<string>) => void) =>
+  (enchant?: (form: ImpulseFormValue<string, ReadonlyArray<string>>) => void) =>
   (initial = "") => {
     const form = ImpulseFormValue.of(initial, {
       schema: z.string().max(2),

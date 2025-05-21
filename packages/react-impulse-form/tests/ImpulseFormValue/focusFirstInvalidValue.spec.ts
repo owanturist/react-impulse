@@ -1,8 +1,11 @@
 import { z } from "zod"
 
-import { type ImpulseFormValueOptions, ImpulseFormValue } from "../../src"
+import { type ImpulseFormValueSchemaOptions, ImpulseFormValue } from "../../src"
 
-const setup = (input?: string, options?: ImpulseFormValueOptions<string>) => {
+const setup = (
+  input?: string,
+  options?: Partial<ImpulseFormValueSchemaOptions<string>>,
+) => {
   return ImpulseFormValue.of(input ?? "", {
     touched: true,
     schema: z.string().min(2),
