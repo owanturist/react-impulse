@@ -80,6 +80,13 @@ export function isFunction<T>(
   return typeof data === "function"
 }
 
+export function hasProperty<TKey extends PropertyKey>(
+  input: unknown,
+  key: TKey,
+): input is Record<TKey, unknown> {
+  return typeof input === "object" && input != null && key in input
+}
+
 export function eq<T>(left: T, right: T): boolean {
   return Object.is(left, right)
 }
