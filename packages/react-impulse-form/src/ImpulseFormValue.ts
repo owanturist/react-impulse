@@ -15,7 +15,6 @@ import {
   resolveSetter,
   isUndefined,
   isNull,
-  isFunction,
   params,
 } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
@@ -329,11 +328,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
 
   public setErrors(setter: ImpulseFormValueErrorsSetter): void {
     this._errors.setValue((errors) => {
-      const nextErrors = isFunction(setter)
-        ? setter(errors.length === 0 ? null : errors)
-        : setter
-
-      return nextErrors ?? []
+      return resolveSetter(setter, errors.length === 0 ? null : errors) ?? []
     })
   }
 
@@ -375,7 +370,7 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
   public setValidateOn(setter: ImpulseFormValueValidateOnSetter): void {
     batch((scope) => {
       const validateOn = this._validateOn.getValue(scope)
-      const nextValidateOn = isFunction(setter) ? setter(validateOn) : setter
+      const nextValidateOn = resolveSetter(setter, validateOn)
 
       if (validateOn !== nextValidateOn) {
         this._validateOn.setValue(nextValidateOn)
