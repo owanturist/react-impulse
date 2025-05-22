@@ -164,9 +164,9 @@ export class ImpulseFormValue<
   "validateOn.schema": ValidateStrategy
   "validateOn.schema.verbose": ValidateStrategy
 
-  "errors.setter": ImpulseFormValueErrorsSetter<TError>
-  "errors.schema": null | TError
-  "errors.schema.verbose": null | TError
+  "error.setter": ImpulseFormValueErrorsSetter<TError>
+  "error.schema": null | TError
+  "error.schema.verbose": null | TError
 }> {
   public static of<TInput, TError = null, TOutput = TInput>(
     input: TInput,

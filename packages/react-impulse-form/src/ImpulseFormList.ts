@@ -122,16 +122,16 @@ export type ImpulseFormListValidateOnSetter<TElement extends ImpulseForm> =
 
 export type ImpulseFormListErrorSetter<TElement extends ImpulseForm> = Setter<
   null | ReadonlyArray<
-    undefined | GetImpulseFormParam<TElement, "errors.setter">
+    undefined | GetImpulseFormParam<TElement, "error.setter">
   >,
   [ImpulseFormListErrorSchemaVerbose<TElement>]
 >
 
 export type ImpulseFormListErrorSchema<TElement extends ImpulseForm> =
-  null | ReadonlyArray<GetImpulseFormParam<TElement, "errors.schema">>
+  null | ReadonlyArray<GetImpulseFormParam<TElement, "error.schema">>
 
 export type ImpulseFormListErrorSchemaVerbose<TElement extends ImpulseForm> =
-  ReadonlyArray<GetImpulseFormParam<TElement, "errors.schema.verbose">>
+  ReadonlyArray<GetImpulseFormParam<TElement, "error.schema.verbose">>
 
 export interface ImpulseFormListOptions<TElement extends ImpulseForm> {
   input?: ImpulseFormListInputSetter<TElement>
@@ -158,9 +158,9 @@ export class ImpulseFormList<
   "validateOn.schema": ImpulseFormListValidateOnSchema<TElement>
   "validateOn.schema.verbose": ImpulseFormListValidateOnSchemaVerbose<TElement>
 
-  "errors.setter": ImpulseFormListErrorSetter<TElement>
-  "errors.schema": ImpulseFormListErrorSchema<TElement>
-  "errors.schema.verbose": ImpulseFormListErrorSchemaVerbose<TElement>
+  "error.setter": ImpulseFormListErrorSetter<TElement>
+  "error.schema": ImpulseFormListErrorSchema<TElement>
+  "error.schema.verbose": ImpulseFormListErrorSchemaVerbose<TElement>
 }> {
   public static of<TElement extends ImpulseForm>(
     elements: ReadonlyArray<TElement>,

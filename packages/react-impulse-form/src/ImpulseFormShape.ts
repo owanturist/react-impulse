@@ -92,17 +92,17 @@ export type ImpulseFormShapeValidateOnSetter<
 export type ImpulseFormShapeErrorSetter<
   TFields extends ImpulseFormShapeFields,
 > = Setter<
-  null | Partial<ImpulseFormShapeParam<TFields, "errors.setter">>,
+  null | Partial<ImpulseFormShapeParam<TFields, "error.setter">>,
   [ImpulseFormShapeErrorSchemaVerbose<TFields>]
 >
 
 export type ImpulseFormShapeErrorSchema<
   TFields extends ImpulseFormShapeFields,
-> = null | ImpulseFormShapeParam<TFields, "errors.schema">
+> = null | ImpulseFormShapeParam<TFields, "error.schema">
 
 export type ImpulseFormShapeErrorSchemaVerbose<
   TFields extends ImpulseFormShapeFields,
-> = ImpulseFormShapeParam<TFields, "errors.schema.verbose">
+> = ImpulseFormShapeParam<TFields, "error.schema.verbose">
 
 export interface ImpulseFormShapeOptions<
   TFields extends ImpulseFormShapeFields,
@@ -131,9 +131,9 @@ export class ImpulseFormShape<
   "validateOn.schema": ImpulseFormShapeValidateOnSchema<TFields>
   "validateOn.schema.verbose": ImpulseFormShapeValidateOnSchemaVerbose<TFields>
 
-  "errors.setter": ImpulseFormShapeErrorSetter<TFields>
-  "errors.schema": ImpulseFormShapeErrorSchema<TFields>
-  "errors.schema.verbose": ImpulseFormShapeErrorSchemaVerbose<TFields>
+  "error.setter": ImpulseFormShapeErrorSetter<TFields>
+  "error.schema": ImpulseFormShapeErrorSchema<TFields>
+  "error.schema.verbose": ImpulseFormShapeErrorSchemaVerbose<TFields>
 }> {
   public static of<TFields extends ImpulseFormShapeFields>(
     fields: Readonly<TFields>,
