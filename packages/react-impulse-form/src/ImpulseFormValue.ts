@@ -15,6 +15,7 @@ import {
   params,
   isFunction,
   hasProperty,
+  type NullOrNonNullable,
 } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
 import { zodLikeParse, type ZodLikeSchema } from "./ZodLikeSchema"
@@ -44,7 +45,7 @@ export type ImpulseFormValueValidator<TInput, TError, TOutput> = (
   input: TInput,
 ) => Result<TError, TOutput>
 
-export interface ImpulseFormValueOptions<TInput, TError = never> {
+export interface ImpulseFormValueOptions<TInput, TError = null> {
   errors?: null | TError
   touched?: boolean
 
@@ -109,7 +110,7 @@ export interface ImpulseFormValueSchemaOptions<TInput, TOutput = TInput>
 
 export interface ImpulseFormValueValidatedOptions<
   TInput,
-  TError,
+  TError = null,
   TOutput = TInput,
 > extends ImpulseFormValueOptions<TInput, TError> {
   /**
@@ -146,7 +147,7 @@ export type ImpulseFormValueErrorsSetter<TError> = Setter<null | TError>
 
 export class ImpulseFormValue<
   TInput,
-  TError = never,
+  TError = null,
   TOutput = TInput,
 > extends ImpulseForm<{
   "input.setter": ImpulseFormValueInputSetter<TInput>
@@ -167,22 +168,26 @@ export class ImpulseFormValue<
   "errors.schema": null | TError
   "errors.schema.verbose": null | TError
 }> {
-  public static of<TInput, TError, TOutput = TInput>(
+  public static of<TInput, TError = null, TOutput = TInput>(
     input: TInput,
     options: ImpulseFormValueValidatedOptions<TInput, TError, TOutput>,
-  ): ImpulseFormValue<TInput, NonNullable<TError>, NonNullable<TOutput>>
+  ): ImpulseFormValue<
+    TInput,
+    NullOrNonNullable<TError>,
+    NullOrNonNullable<TOutput>
+  >
 
   public static of<TInput, TOutput = TInput>(
     input: TInput,
     options: ImpulseFormValueSchemaOptions<TInput, TOutput>,
-  ): ImpulseFormValue<TInput, ReadonlyArray<string>, TOutput>
+  ): ImpulseFormValue<TInput, ReadonlyArray<string>, NullOrNonNullable<TOutput>>
 
-  public static of<TInput, TError = never>(
+  public static of<TInput, TError = null>(
     input: TInput,
     options?: ImpulseFormValueOptions<TInput, TError>,
-  ): ImpulseFormValue<TInput, NonNullable<TError>, TInput>
+  ): ImpulseFormValue<TInput, TError, TInput>
 
-  public static of<TInput, TError = never, TOutput = TInput>(
+  public static of<TInput, TError = null, TOutput = TInput>(
     input: TInput,
     options?:
       | ImpulseFormValueOptions<TInput, TError>
@@ -331,10 +336,10 @@ export class ImpulseFormValue<
   }
 
   private _validate(scope: Scope): [null | TError, null | TOutput] {
-    const error = this._errors.getValue(scope)
+    const customError = this._errors.getValue(scope)
 
-    if (!isNull(error)) {
-      return [error, null]
+    if (!isNull(customError)) {
+      return [customError, null]
     }
 
     const input = this.getInput(scope)

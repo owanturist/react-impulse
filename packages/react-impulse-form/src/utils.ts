@@ -7,6 +7,10 @@ export type Result<TError, TData> = [TError] extends [never]
   ? [null, TData]
   : [TError, null] | [null, TData]
 
+export type NullOrNonNullable<T> = [T, null] extends [null, T]
+  ? null
+  : NonNullable<T>
+
 export type Setter<
   TValue,
   TPrevValues extends ReadonlyArray<unknown> = [TValue],

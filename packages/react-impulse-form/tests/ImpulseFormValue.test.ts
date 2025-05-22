@@ -10,8 +10,8 @@ describe("ImpulseFormValue.of()", () => {
 
     expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<number>>()
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
-    expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<number, never>>()
-    expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<number, never, number>>()
+    expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<number, null>>()
+    expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<number, null, number>>()
 
     expect(value.getInput(scope)).toBe(1)
     expect(value.getOutput(scope)).toBe(1)
@@ -19,12 +19,12 @@ describe("ImpulseFormValue.of()", () => {
 
   it("creates ImpulseFormValue with same type validator", ({ scope }) => {
     const value = ImpulseFormValue.of("", {
+      validateOn: "onInit",
       validate: (input) => {
         const trimmed = input.trim()
 
         return trimmed.length < 2 ? ["too short", null] : [null, trimmed]
       },
-      validateOn: "onInit",
     })
 
     expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<string, string>>()
