@@ -1,20 +1,17 @@
-import { useEffect, useLayoutEffect, useRef } from "./dependencies"
-
 export type Func<TArgs extends ReadonlyArray<unknown>, TReturn = void> = (
   this: void,
   ...args: TArgs
 ) => TReturn
+
+export type Result<TError, TData> = [TError] extends [never]
+  ? [null, TData]
+  : [TError, null] | [null, TData]
 
 export type Setter<
   TValue,
   TPrevValues extends ReadonlyArray<unknown> = [TValue],
 > = TValue | Func<TPrevValues, TValue>
 
-export type Result<TError, TData> = [TError] extends [never]
-  ? [null, TData]
-  : [TError, null] | [null, TData]
-
-// TODO use everywhere
 export function resolveSetter<
   TValue,
   TPrevValues extends ReadonlyArray<unknown>,
@@ -72,14 +69,6 @@ export function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && isPresent(value)
 }
 
-export function isInstanceOf<
-  TCtor extends
-    | (abstract new () => unknown)
-    | (abstract new (...args: ReadonlyArray<never>) => unknown),
->(value: unknown, ctor: TCtor): value is InstanceType<TCtor> {
-  return value instanceof ctor
-}
-
 type DefinitelyFunction<T> =
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   Extract<T, Function> extends never ? Function : Extract<T, Function>
@@ -89,10 +78,6 @@ export function isFunction<T>(
   data: Function | T,
 ): data is DefinitelyFunction<T> {
   return typeof data === "function"
-}
-
-export function isHtmlElement(value: unknown): value is HTMLElement {
-  return value instanceof HTMLElement
 }
 
 export function eq<T>(left: T, right: T): boolean {
@@ -161,23 +146,4 @@ export function shallowArrayEquals<T>(
   }
 
   return left.every((value, index) => eq(value, right[index]!))
-}
-
-export const useIsomorphicLayoutEffect =
-  /* c8 ignore next */
-  typeof window === "undefined" ? useEffect : useLayoutEffect
-
-export function useHandler<
-  THandler extends null | undefined | Func<ReadonlyArray<never>, unknown>,
->(handler: THandler): THandler {
-  const handlerRef = useRef<THandler>(null as never)
-  const stableRef = useRef(((...args) => {
-    return handlerRef.current?.(...args)
-  }) as NonNullable<THandler>)
-
-  useIsomorphicLayoutEffect(() => {
-    handlerRef.current = handler
-  })
-
-  return handler && stableRef.current
 }

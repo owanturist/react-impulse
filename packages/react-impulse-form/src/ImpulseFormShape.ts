@@ -5,13 +5,13 @@ import {
   type ComputeObject,
   isTrue,
   type Setter,
-  resolveSetter,
   params,
   isUndefined,
   isString,
   isBoolean,
   isFunction,
   isTruthy,
+  isNull,
 } from "./utils"
 import {
   type GetImpulseFormParam,
@@ -361,7 +361,7 @@ export class ImpulseFormShape<
 
         if (
           ImpulseForm.isImpulseForm(field) &&
-          nextFieldTouched !== undefined
+          !isUndefined(nextFieldTouched)
         ) {
           field.setErrors(nextFieldTouched)
         }
@@ -546,7 +546,7 @@ export class ImpulseFormShape<
 
         if (
           ImpulseForm.isImpulseForm(field) &&
-          nextFieldTouched !== undefined
+          !isUndefined(nextFieldTouched)
         ) {
           field.setTouched(nextFieldTouched)
         }
@@ -597,7 +597,7 @@ export class ImpulseFormShape<
           verbose,
         }))
 
-        allValid = allValid && output.concise !== null
+        allValid = allValid && !isNull(output.concise)
         valueConcise[key] = output.concise
         valueVerbose[key] = output.verbose
       } else {
@@ -623,16 +623,14 @@ export class ImpulseFormShape<
   // TODO add tests against initial coming as second argument
   public setInput(setter: ImpulseFormShapeInputSetter<TFields>): void {
     batch((scope) => {
-      const nextInput = resolveSetter(
-        setter,
-        this.getInput(scope),
-        this.getInitial(scope),
-      )
+      const nextInput = isFunction(setter)
+        ? setter(this.getInput(scope), this.getInitial(scope))
+        : setter
 
       for (const [key, field] of Object.entries(this.fields)) {
         const nextFieldInput = nextInput[key as keyof typeof nextInput]
 
-        if (ImpulseForm.isImpulseForm(field) && nextFieldInput !== undefined) {
+        if (ImpulseForm.isImpulseForm(field) && !isUndefined(nextFieldInput)) {
           field.setInput(nextFieldInput)
         }
       }
@@ -648,18 +646,16 @@ export class ImpulseFormShape<
   // TODO add tests against input coming as second argument
   public setInitial(setter: ImpulseFormShapeInputSetter<TFields>): void {
     batch((scope) => {
-      const nextInitial = resolveSetter(
-        setter,
-        this.getInitial(scope),
-        this.getInput(scope),
-      )
+      const nextInitial = isFunction(setter)
+        ? setter(this.getInitial(scope), this.getInput(scope))
+        : setter
 
       for (const [key, field] of Object.entries(this.fields)) {
         const nextFieldInitial = nextInitial[key as keyof typeof nextInitial]
 
         if (
           ImpulseForm.isImpulseForm(field) &&
-          nextFieldInitial !== undefined
+          !isUndefined(nextFieldInitial)
         ) {
           field.setInitial(nextFieldInitial)
         }
