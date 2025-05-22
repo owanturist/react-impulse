@@ -1,6 +1,6 @@
 import { type Scope, batch, untrack, Impulse } from "./dependencies"
 import { Emitter } from "./Emitter"
-import { isPresent, isUndefined, isTruthy } from "./utils"
+import { isPresent, isUndefined, isTruthy, isNull } from "./utils"
 
 export interface ImpulseFormParams {
   "input.setter": unknown
@@ -154,7 +154,7 @@ export abstract class ImpulseForm<
     const promises = untrack((scope) => {
       const output = this._root.getOutput(scope)
 
-      if (output !== null && this._root.isValid(scope)) {
+      if (!isNull(output) && this._root.isValid(scope)) {
         return this._root._submitWith(output).filter(isPresent)
       }
 

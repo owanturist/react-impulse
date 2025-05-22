@@ -12,6 +12,7 @@ import {
   isBoolean,
   isFunction,
   isTruthy,
+  isNull,
 } from "./utils"
 import {
   type GetImpulseFormParam,
@@ -361,7 +362,7 @@ export class ImpulseFormShape<
 
         if (
           ImpulseForm.isImpulseForm(field) &&
-          nextFieldTouched !== undefined
+          !isUndefined(nextFieldTouched)
         ) {
           field.setErrors(nextFieldTouched)
         }
@@ -546,7 +547,7 @@ export class ImpulseFormShape<
 
         if (
           ImpulseForm.isImpulseForm(field) &&
-          nextFieldTouched !== undefined
+          !isUndefined(nextFieldTouched)
         ) {
           field.setTouched(nextFieldTouched)
         }
@@ -597,7 +598,7 @@ export class ImpulseFormShape<
           verbose,
         }))
 
-        allValid = allValid && output.concise !== null
+        allValid = allValid && !isNull(output.concise)
         valueConcise[key] = output.concise
         valueVerbose[key] = output.verbose
       } else {
@@ -632,7 +633,7 @@ export class ImpulseFormShape<
       for (const [key, field] of Object.entries(this.fields)) {
         const nextFieldInput = nextInput[key as keyof typeof nextInput]
 
-        if (ImpulseForm.isImpulseForm(field) && nextFieldInput !== undefined) {
+        if (ImpulseForm.isImpulseForm(field) && !isUndefined(nextFieldInput)) {
           field.setInput(nextFieldInput)
         }
       }
@@ -659,7 +660,7 @@ export class ImpulseFormShape<
 
         if (
           ImpulseForm.isImpulseForm(field) &&
-          nextFieldInitial !== undefined
+          !isUndefined(nextFieldInitial)
         ) {
           field.setInitial(nextFieldInitial)
         }
