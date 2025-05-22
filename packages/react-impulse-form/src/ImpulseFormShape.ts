@@ -5,7 +5,6 @@ import {
   type ComputeObject,
   isTrue,
   type Setter,
-  resolveSetter,
   params,
   isUndefined,
   isString,
@@ -624,11 +623,9 @@ export class ImpulseFormShape<
   // TODO add tests against initial coming as second argument
   public setInput(setter: ImpulseFormShapeInputSetter<TFields>): void {
     batch((scope) => {
-      const nextInput = resolveSetter(
-        setter,
-        this.getInput(scope),
-        this.getInitial(scope),
-      )
+      const nextInput = isFunction(setter)
+        ? setter(this.getInput(scope), this.getInitial(scope))
+        : setter
 
       for (const [key, field] of Object.entries(this.fields)) {
         const nextFieldInput = nextInput[key as keyof typeof nextInput]
@@ -649,11 +646,9 @@ export class ImpulseFormShape<
   // TODO add tests against input coming as second argument
   public setInitial(setter: ImpulseFormShapeInputSetter<TFields>): void {
     batch((scope) => {
-      const nextInitial = resolveSetter(
-        setter,
-        this.getInitial(scope),
-        this.getInput(scope),
-      )
+      const nextInitial = isFunction(setter)
+        ? setter(this.getInitial(scope), this.getInput(scope))
+        : setter
 
       for (const [key, field] of Object.entries(this.fields)) {
         const nextFieldInitial = nextInitial[key as keyof typeof nextInitial]

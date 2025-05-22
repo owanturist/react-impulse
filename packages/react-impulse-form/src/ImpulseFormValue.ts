@@ -16,6 +16,7 @@ import {
   isUndefined,
   isNull,
   params,
+  isFunction,
 } from "./utils"
 import { ImpulseForm } from "./ImpulseForm"
 import { zodLikeParse, type ZodLikeSchema } from "./ZodLikeSchema"
@@ -411,11 +412,9 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
     resetter: ImpulseFormValueInputSetter<TInput> = params._first,
   ): void {
     batch((scope) => {
-      const resetValue = resolveSetter(
-        resetter,
-        this.getInitial(scope),
-        this._input.getValue(scope),
-      )
+      const resetValue = isFunction(resetter)
+        ? resetter(this.getInitial(scope), this._input.getValue(scope))
+        : resetter
 
       this.setInitial(resetValue)
       this.setInput(resetValue)
@@ -451,8 +450,11 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
   public setInput(setter: ImpulseFormValueInputSetter<TInput>): void {
     batch((scope) => {
       const input = this._input.getValue(scope)
+      const nextValue = isFunction(setter)
+        ? setter(input, this.getInitial(scope))
+        : setter
 
-      this._input.setValue(resolveSetter(setter, input, this.getInitial(scope)))
+      this._input.setValue(nextValue)
 
       if (input !== this._input.getValue(scope)) {
         this._updateValidated()
@@ -470,10 +472,11 @@ export class ImpulseFormValue<TInput, TOutput = TInput> extends ImpulseForm<{
   public setInitial(setter: ImpulseFormValueInputSetter<TInput>): void {
     batch((scope) => {
       const initial = this.getInitial(scope)
+      const nextInitial = isFunction(setter)
+        ? setter(initial, this._input.getValue(scope))
+        : setter
 
-      this._initial.setValue(
-        resolveSetter(setter, initial, this._input.getValue(scope)),
-      )
+      this._initial.setValue(nextInitial)
 
       this._isExplicitInitial.setValue(true)
 

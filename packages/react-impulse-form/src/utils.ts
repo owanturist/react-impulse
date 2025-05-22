@@ -12,7 +12,6 @@ export type Setter<
   TPrevValues extends ReadonlyArray<unknown> = [TValue],
 > = TValue | Func<TPrevValues, TValue>
 
-// TODO use everywhere
 export function resolveSetter<
   TValue,
   TPrevValues extends ReadonlyArray<unknown>,

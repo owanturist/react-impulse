@@ -13,6 +13,7 @@ import {
   isNull,
   params,
   isUndefined,
+  isFunction,
 } from "./utils"
 import { type GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./ValidateStrategy"
@@ -64,7 +65,7 @@ function setFormElements<
   setNext: (element: TElement, next: TGenericValue | TElementSetter) => void,
 ): void {
   batch((scope) => {
-    const nextValue = resolveSetter(setter, ...getCurrent(scope))
+    const nextValue = isFunction(setter) ? setter(...getCurrent(scope)) : setter
 
     for (const [index, element] of elements.getValue(scope).entries()) {
       const next = isArray(nextValue) ? nextValue.at(index) : nextValue
@@ -610,11 +611,9 @@ export class ImpulseFormList<
   public setInitial(setter: ImpulseFormListInputSetter<TElement>): void {
     batch((scope) => {
       // get next initial value from setter (initial, input) -> next
-      const nextInitial = resolveSetter(
-        setter,
-        this.getInitial(scope),
-        this.getInput(scope),
-      )
+      const nextInitial = isFunction(setter)
+        ? setter(this.getInitial(scope), this.getInput(scope))
+        : setter
 
       const elements = this._elements
         .getValue(scope)
