@@ -1,4 +1,114 @@
+import { z } from "zod"
+
 import { ImpulseFormValue } from "../../src"
+
+describe("ImpulseFormValueValidatedOptions", () => {
+  it("defines impulse with validate as transformer", ({ scope }) => {
+    const value = ImpulseFormValue.of(123, {
+      validateOn: "onInit",
+      validate: (input) => [null, input.toFixed(2)],
+    })
+
+    expectTypeOf(value).toEqualTypeOf<ImpulseFormValue<number, null, string>>()
+    expect(value.getInput(scope)).toBe(123)
+    expect(value.getOutput(scope)).toBe("123.00")
+  })
+
+  it("defines impulse with validate as validator", ({ scope }) => {
+    const value = ImpulseFormValue.of(0, {
+      validateOn: "onInit",
+      validate: (input) => {
+        return input > 0 ? [null, input] : ["should be positive", null]
+      },
+    })
+
+    expectTypeOf(value).toEqualTypeOf<
+      ImpulseFormValue<number, string, number>
+    >()
+    expect(value.getInput(scope)).toBe(0)
+    expect(value.getErrors(scope)).toBe("should be positive")
+    expect(value.getOutput(scope)).toBeNull()
+
+    value.setInput(1)
+    expect(value.getInput(scope)).toBe(1)
+    expect(value.getErrors(scope)).toBeNull()
+    expect(value.getOutput(scope)).toBe(1)
+  })
+
+  it("defines impulse with validate as validator and transformer", ({
+    scope,
+  }) => {
+    const value = ImpulseFormValue.of(0, {
+      validateOn: "onInit",
+      validate: (input) => {
+        return input > 0
+          ? [null, input.toFixed(2)]
+          : ["should be positive", null]
+      },
+    })
+
+    expectTypeOf(value).toEqualTypeOf<
+      ImpulseFormValue<number, string, string>
+    >()
+    expect(value.getInput(scope)).toBe(0)
+    expect(value.getErrors(scope)).toBe("should be positive")
+    expect(value.getOutput(scope)).toBeNull()
+
+    value.setInput(1)
+    expect(value.getInput(scope)).toBe(1)
+    expect(value.getErrors(scope)).toBeNull()
+    expect(value.getOutput(scope)).toBe("1.00")
+  })
+})
+
+describe("ImpulseFormValueSchemaOptions", () => {
+  it("defines impulse with schema as validator", ({ scope }) => {
+    const value = ImpulseFormValue.of(0, {
+      validateOn: "onInit",
+      schema: z.number().min(1),
+    })
+
+    expectTypeOf(value).toEqualTypeOf<
+      ImpulseFormValue<number, ReadonlyArray<string>, number>
+    >()
+    expect(value.getInput(scope)).toBe(0)
+    expect(value.getErrors(scope)).toStrictEqual([
+      "Number must be greater than or equal to 1",
+    ])
+    expect(value.getOutput(scope)).toBeNull()
+
+    value.setInput(1)
+    expect(value.getInput(scope)).toBe(1)
+    expect(value.getErrors(scope)).toBeNull()
+    expect(value.getOutput(scope)).toBe(1)
+  })
+
+  it("defines impulse with schema as validator and transformer", ({
+    scope,
+  }) => {
+    const value = ImpulseFormValue.of(0, {
+      validateOn: "onInit",
+      schema: z
+        .number()
+        .min(1)
+        .transform((input) => input.toFixed(2)),
+    })
+
+    expectTypeOf(value).toEqualTypeOf<
+      ImpulseFormValue<number, ReadonlyArray<string>, string>
+    >()
+    expect(value.getInput(scope)).toBe(0)
+    expect(value.getErrors(scope)).toStrictEqual([
+      "Number must be greater than or equal to 1",
+    ])
+    expect(value.getOutput(scope)).toBeNull()
+
+    value.setInput(1)
+    expect(value.getInput(scope)).toBe(1)
+    expect(value.getErrors(scope)).toBeNull()
+    expect(value.getOutput(scope)).toBe("1.00")
+  })
+})
 
 describe("ImpulseFormValueOptions.isInputDirty", () => {
   it("uses Object.is when not provided", ({ scope }) => {
