@@ -350,7 +350,7 @@ export class ImpulseFormShape<
   public setErrors(errors: ImpulseFormShapeErrorSetter<TFields>): void {
     batch((scope) => {
       const nextErrors = isFunction(errors)
-        ? errors(this.getErrors(scope, (_, verbose) => verbose))
+        ? errors(this.getErrors(scope, params._second))
         : errors
 
       for (const [key, field] of Object.entries(this.fields)) {
@@ -470,7 +470,7 @@ export class ImpulseFormShape<
   ): void {
     batch((scope) => {
       const nextValidateOn = isFunction(validateOn)
-        ? validateOn(this.getValidateOn(scope, (_, verbose) => verbose))
+        ? validateOn(this.getValidateOn(scope, params._second))
         : validateOn
 
       for (const [key, field] of Object.entries(this.fields)) {
@@ -536,7 +536,7 @@ export class ImpulseFormShape<
   public setTouched(touched: ImpulseFormShapeFlagSetter<TFields>): void {
     batch((scope) => {
       const nextTouched = isFunction(touched)
-        ? touched(this.isTouched(scope, (_, verbose) => verbose))
+        ? touched(this.isTouched(scope, params._second))
         : touched
 
       for (const [key, field] of Object.entries(this.fields)) {
