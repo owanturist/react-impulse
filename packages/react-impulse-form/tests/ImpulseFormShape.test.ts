@@ -253,20 +253,20 @@ describe("ImpulseFormShape.of()", () => {
     })
   })
 
-  describe("ImpulseFormShapeOptions.errors", () => {
-    it("specifies initial errors", ({ scope }) => {
+  describe("ImpulseFormShapeOptions.error", () => {
+    it("specifies initial error", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
           first: ImpulseFormValue.of("", { schema: z.string() }),
           second: ImpulseFormValue.of(0),
           third: ImpulseFormShape.of({
-            one: ImpulseFormValue.of(true, { errors: ["some"] }),
+            one: ImpulseFormValue.of(true, { error: ["some"] }),
             two: ImpulseFormValue.of([""]),
           }),
           fourth: ["anything"],
         },
         {
-          errors: {
+          error: {
             first: ["another"],
             third: null,
           },
@@ -283,10 +283,10 @@ describe("ImpulseFormShape.of()", () => {
       })
     })
 
-    it("gets current errors from setters", ({ scope }) => {
+    it("gets current error from setters", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
-          first: ImpulseFormValue.of("", { errors: 1 }),
+          first: ImpulseFormValue.of("", { error: 1 }),
           second: ImpulseFormValue.of(0, {
             validate: (input) =>
               input > 0 ? [null, input] : ["must be positive", null],
@@ -297,7 +297,7 @@ describe("ImpulseFormShape.of()", () => {
               two: ImpulseFormValue.of([""], { schema: z.array(z.string()) }),
             },
             {
-              errors: {
+              error: {
                 one: ["one"],
                 two: ["two"],
               },
@@ -306,7 +306,7 @@ describe("ImpulseFormShape.of()", () => {
           fourth: ["anything"],
         },
         {
-          errors: (root) => {
+          error: (root) => {
             expectTypeOf(root).toEqualTypeOf<{
               readonly first: null | number
               readonly second: null | string
@@ -850,7 +850,7 @@ describe("ImpulseFormShape.of()", () => {
 })
 
 describe("ImpulseFormShape#getError()", () => {
-  it("selects errors", ({ scope }) => {
+  it("selects error", ({ scope }) => {
     const shape = ImpulseFormShape.of(
       {
         first: ImpulseFormValue.of("1", { schema: z.string().max(1) }),
@@ -911,9 +911,9 @@ describe("ImpulseFormShape#getError()", () => {
     expect(shape.getError(scope, arg(0))).toStrictEqual(shape.getError(scope))
     expect(shape.getError(scope, arg(1))).toStrictEqual(shape.getError(scope))
 
-    const errors = shape.getError(scope)
+    const error = shape.getError(scope)
 
-    expectTypeOf(errors).toEqualTypeOf<null | {
+    expectTypeOf(error).toEqualTypeOf<null | {
       readonly first: null | ReadonlyArray<string>
       readonly second: null | ReadonlyArray<string>
       readonly third: null | {
@@ -930,20 +930,20 @@ describe("ImpulseFormShape#getError()", () => {
 })
 
 describe("ImpulseFormShape#setError()", () => {
-  it("specifies errors", ({ scope }) => {
+  it("specifies error", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of("", { errors: ["first"] }),
-      second: ImpulseFormValue.of(0, { errors: ["second"] }),
+      first: ImpulseFormValue.of("", { error: ["first"] }),
+      second: ImpulseFormValue.of(0, { error: ["second"] }),
       third: ImpulseFormShape.of(
         {
           one: ImpulseFormValue.of(true, {
             validate: (input) =>
               input ? [null, input] : ["must be true", null],
           }),
-          two: ImpulseFormValue.of([""], { errors: "an error" }),
+          two: ImpulseFormValue.of([""], { error: "an error" }),
         },
         {
-          errors: {
+          error: {
             one: "one",
             two: "two",
           },
@@ -1104,17 +1104,17 @@ describe("ImpulseFormShape#setError()", () => {
 
   it("resets all errors", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of("", { errors: ["first"] }),
-      second: ImpulseFormValue.of(0, { errors: ["second"] }),
+      first: ImpulseFormValue.of("", { error: ["first"] }),
+      second: ImpulseFormValue.of(0, { error: ["second"] }),
       third: ImpulseFormShape.of(
         {
           one: ImpulseFormValue.of(true, {
             validate: (input) => (input ? [null, input] : [1, null]),
           }),
-          two: ImpulseFormValue.of([""], { errors: "an error" }),
+          two: ImpulseFormValue.of([""], { error: "an error" }),
         },
         {
-          errors: {
+          error: {
             one: 0,
             two: "initial error",
           },

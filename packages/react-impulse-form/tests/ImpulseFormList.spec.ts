@@ -142,7 +142,7 @@ describe("ImpulseFormList#getError()", () => {
     const form = setup([
       setupElement(0),
       setupElement(1),
-      setupElement(2, { errors: ["err"] }),
+      setupElement(2, { error: ["err"] }),
     ])
 
     const expected = [null, null, ["err"]]
@@ -154,9 +154,9 @@ describe("ImpulseFormList#getError()", () => {
 
   it("returns concise when all elements have errors", ({ scope }) => {
     const form = setup([
-      setupElement(0, { errors: ["err0"] }),
-      setupElement(1, { errors: ["err1"] }),
-      setupElement(2, { errors: ["err2"] }),
+      setupElement(0, { error: ["err0"] }),
+      setupElement(1, { error: ["err1"] }),
+      setupElement(2, { error: ["err2"] }),
     ])
 
     const expected = [["err0"], ["err1"], ["err2"]]
@@ -191,9 +191,9 @@ describe("ImpulseFormList#setError()", () => {
 
   it("resets all errors with null", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { errors: ["err0"] }),
-      ImpulseFormValue.of(1, { errors: ["err1"] }),
-      ImpulseFormValue.of(2, { errors: ["err2"] }),
+      ImpulseFormValue.of(0, { error: ["err0"] }),
+      ImpulseFormValue.of(1, { error: ["err1"] }),
+      ImpulseFormValue.of(2, { error: ["err2"] }),
     ])
 
     form.setError(null)
@@ -202,9 +202,9 @@ describe("ImpulseFormList#setError()", () => {
 
   it("changes all errors", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { errors: ["err0"] }),
-      ImpulseFormValue.of(1, { errors: ["err1"] }),
-      ImpulseFormValue.of(2, { errors: ["err2"] }),
+      ImpulseFormValue.of(0, { error: ["err0"] }),
+      ImpulseFormValue.of(1, { error: ["err1"] }),
+      ImpulseFormValue.of(2, { error: ["err2"] }),
     ])
 
     form.setError([["e0"], ["e1"], null])
@@ -213,9 +213,9 @@ describe("ImpulseFormList#setError()", () => {
 
   it("changes some errors", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { errors: ["err0"] }),
-      ImpulseFormValue.of(1, { errors: ["err1"] }),
-      ImpulseFormValue.of(2, { errors: ["err2"] }),
+      ImpulseFormValue.of(0, { error: ["err0"] }),
+      ImpulseFormValue.of(1, { error: ["err1"] }),
+      ImpulseFormValue.of(2, { error: ["err2"] }),
     ])
 
     form.setError([(x) => [...x!, "x"], undefined, (x) => [...x!, "x"]])
@@ -315,7 +315,7 @@ describe("ImpulseFormList#isValidated()", () => {
     scope,
   }) => {
     const form = setup([
-      setupElement(0, { errors: ["error"] }),
+      setupElement(0, { error: ["error"] }),
       setupElement(1),
       setupElement(2),
     ])
@@ -593,9 +593,9 @@ describe("ImpulseFormList#reset()", () => {
 
   it("clears custom errors", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { errors: ["error"] }),
-      ImpulseFormValue.of(1, { errors: ["error"] }),
-      ImpulseFormValue.of(2, { errors: ["error"] }),
+      ImpulseFormValue.of(0, { error: ["error"] }),
+      ImpulseFormValue.of(1, { error: ["error"] }),
+      ImpulseFormValue.of(2, { error: ["error"] }),
     ])
 
     form.reset()
@@ -1226,7 +1226,7 @@ describe("ImpulseFormList#focusFirstInvalidValue()", () => {
 
   it("does not call listeners on init", () => {
     const [, { listener_0, listener_1, listener_2 }] = setup({
-      errors: [["error0"], ["error1"], ["error2"]],
+      error: [["error0"], ["error1"], ["error2"]],
     })
 
     expect(listener_0).not.toHaveBeenCalled()
@@ -1246,7 +1246,7 @@ describe("ImpulseFormList#focusFirstInvalidValue()", () => {
 
   it("focuses the first invalid element", () => {
     const [form, { listener_0, listener_1, listener_2 }] = setup({
-      errors: [["error0"], ["error1"], ["error2"]],
+      error: [["error0"], ["error1"], ["error2"]],
     })
 
     form.focusFirstInvalidValue()
@@ -1258,7 +1258,7 @@ describe("ImpulseFormList#focusFirstInvalidValue()", () => {
 
   it("calls the only invalid", () => {
     const [form, { listener_0, listener_1, listener_2 }] = setup({
-      errors: [undefined, ["error1"]],
+      error: [undefined, ["error1"]],
     })
 
     form.focusFirstInvalidValue()

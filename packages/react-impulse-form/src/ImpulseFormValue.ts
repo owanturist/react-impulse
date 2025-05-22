@@ -46,7 +46,7 @@ export type ImpulseFormValueValidator<TInput, TError, TOutput> = (
 ) => Result<TError, TOutput>
 
 export interface ImpulseFormValueOptions<TInput, TError = null> {
-  errors?: null | TError
+  error?: null | TError
   touched?: boolean
 
   /**
@@ -216,7 +216,7 @@ export class ImpulseFormValue<
         Impulse(),
         Impulse(touched),
         Impulse(options.validateOn ?? VALIDATE_ON_TOUCH),
-        Impulse(options.errors ?? null, {
+        Impulse(options.error ?? null, {
           compare: createErrorImpulseCompare(shallowArrayEquals),
         }),
         Impulse(isExplicitInitial),
@@ -245,7 +245,7 @@ export class ImpulseFormValue<
         Impulse(),
         Impulse(touched),
         Impulse(options.validateOn ?? VALIDATE_ON_TOUCH),
-        Impulse<null | TError>(options.errors ?? null, {
+        Impulse<null | TError>(options.error ?? null, {
           compare: createErrorImpulseCompare(options.isErrorEqual ?? eq),
         }),
         Impulse(isExplicitInitial),
@@ -267,7 +267,7 @@ export class ImpulseFormValue<
       Impulse(),
       Impulse(touched),
       Impulse<ValidateStrategy>(VALIDATE_ON_TOUCH),
-      Impulse<null | TError>(options?.errors ?? null),
+      Impulse<null | TError>(options?.error ?? null),
       Impulse(isExplicitInitial),
       Impulse(initial, { compare: isInputEqual }),
       Impulse(inputOrInitial, { compare: isInputEqual }),
@@ -277,7 +277,7 @@ export class ImpulseFormValue<
     )
   }
 
-  private readonly _onFocus = new Emitter<[errors: TError]>()
+  private readonly _onFocus = new Emitter<[error: TError]>()
 
   private readonly _validated = Impulse(false)
 
@@ -357,16 +357,16 @@ export class ImpulseFormValue<
   }
 
   protected _getFocusFirstInvalidValue(): null | VoidFunction {
-    const errors = this._onFocus._isEmpty()
+    const error = this._onFocus._isEmpty()
       ? null
       : untrack((scope) => this.getError(scope))
 
-    if (errors == null) {
+    if (error == null) {
       return null
     }
 
     return () => {
-      this._onFocus._emit(errors)
+      this._onFocus._emit(error)
     }
   }
 
@@ -433,13 +433,13 @@ export class ImpulseFormValue<
       verbose: null | TError,
     ) => TResult = params._first as typeof select,
   ): TResult {
-    const [errors] = this._validate(scope)
+    const [error] = this._validate(scope)
 
-    return select(errors, errors)
+    return select(error, error)
   }
 
   public setError(setter: ImpulseFormValueErrorsSetter<TError>): void {
-    this._errors.setValue((errors) => resolveSetter(setter, errors))
+    this._errors.setValue((error) => resolveSetter(setter, error))
   }
 
   public isValidated(scope: Scope): boolean
@@ -608,7 +608,7 @@ export class ImpulseFormValue<
     })
   }
 
-  public onFocusWhenInvalid(onFocus: (errors: TError) => void): VoidFunction {
+  public onFocusWhenInvalid(onFocus: (error: TError) => void): VoidFunction {
     return this._onFocus._subscribe(onFocus)
   }
 }

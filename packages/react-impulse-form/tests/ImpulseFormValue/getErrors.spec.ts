@@ -62,14 +62,14 @@ describe("when neither schema nor initial error are defined", () => {
   it("uses setter value", ({ scope }) => {
     const value = setup()
 
-    value.setError((errors) => (errors ?? 1) + 1)
+    value.setError((error) => (error ?? 1) + 1)
     expect(value.getError(scope)).toBe(2)
   })
 })
 
 describe("when initial error is defined", () => {
   function setup() {
-    return ImpulseFormValue.of("1", { errors: 2 })
+    return ImpulseFormValue.of("1", { error: 2 })
   }
 
   it("returns the initial error", ({ scope }) => {
@@ -97,7 +97,7 @@ describe("when initial error is defined", () => {
   it("uses setter value", ({ scope }) => {
     const value = setup()
 
-    value.setError((errors) => errors! + 1)
+    value.setError((error) => error! + 1)
     expect(value.getError(scope)).toBe(3)
   })
 })
@@ -128,7 +128,7 @@ describe("when validator is defined", () => {
   })
 
   it("prioritizes initial error over validation error", ({ scope }) => {
-    const value = setup({ validateOn: "onInit", errors: 2 })
+    const value = setup({ validateOn: "onInit", error: 2 })
 
     const error_0 = value.getError(scope)
     expect(error_0).toBe(2)
@@ -152,7 +152,7 @@ describe("when validator is defined", () => {
 
   it("uses setter value", ({ scope }) => {
     const value = setup()
-    value.setError((errors) => (errors ?? 1) + 1)
+    value.setError((error) => (error ?? 1) + 1)
     expect(value.getError(scope)).toBe(2)
   })
 })
@@ -178,7 +178,7 @@ describe("when schema is defined", () => {
   })
 
   it("prioritizes initial error over validation error", ({ scope }) => {
-    const value = setup({ validateOn: "onInit", errors: ["custom error"] })
+    const value = setup({ validateOn: "onInit", error: ["custom error"] })
 
     const error_0 = value.getError(scope)
     expect(error_0).toStrictEqual(["custom error"])
@@ -202,7 +202,7 @@ describe("when schema is defined", () => {
 
   it("uses setter value", ({ scope }) => {
     const value = setup()
-    value.setError((errors) => [...(errors ?? ["initial"]), "custom error"])
+    value.setError((error) => [...(error ?? ["initial"]), "custom error"])
     expect(value.getError(scope)).toStrictEqual(["initial", "custom error"])
   })
 })

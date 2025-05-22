@@ -111,7 +111,7 @@ export interface ImpulseFormShapeOptions<
   initial?: ImpulseFormShapeInputSetter<TFields>
   touched?: ImpulseFormShapeFlagSetter<TFields>
   validateOn?: ImpulseFormShapeValidateOnSetter<TFields>
-  errors?: ImpulseFormShapeErrorSetter<TFields>
+  error?: ImpulseFormShapeErrorSetter<TFields>
 }
 
 export class ImpulseFormShape<
@@ -142,7 +142,7 @@ export class ImpulseFormShape<
       initial,
       touched,
       validateOn,
-      errors,
+      error,
     }: ImpulseFormShapeOptions<TFields> = {},
   ): ImpulseFormShape<TFields> {
     const shape = new ImpulseFormShape(null, fields)
@@ -165,8 +165,8 @@ export class ImpulseFormShape<
       }
 
       // TODO add test against null
-      if (!isUndefined(errors)) {
-        shape.setError(errors)
+      if (!isUndefined(error)) {
+        shape.setError(error)
       }
     })
 
@@ -328,14 +328,14 @@ export class ImpulseFormShape<
 
     for (const [key, field] of Object.entries(this.fields)) {
       if (ImpulseForm.isImpulseForm(field)) {
-        const errors = field.getError(scope, (concise, verbose) => ({
+        const error = field.getError(scope, (concise, verbose) => ({
           concise,
           verbose,
         }))
 
-        errorsNone = errorsNone && errors.concise == null
-        errorsConcise[key] = errors.concise
-        errorsVerbose[key] = errors.verbose
+        errorsNone = errorsNone && error.concise == null
+        errorsConcise[key] = error.concise
+        errorsVerbose[key] = error.verbose
       }
     }
 
@@ -347,11 +347,11 @@ export class ImpulseFormShape<
     )
   }
 
-  public setError(errors: ImpulseFormShapeErrorSetter<TFields>): void {
+  public setError(setter: ImpulseFormShapeErrorSetter<TFields>): void {
     batch((scope) => {
-      const nextErrors = isFunction(errors)
-        ? errors(this.getError(scope, params._second))
-        : errors
+      const nextErrors = isFunction(setter)
+        ? setter(this.getError(scope, params._second))
+        : setter
 
       for (const [key, field] of Object.entries(this.fields)) {
         const nextFieldTouched =

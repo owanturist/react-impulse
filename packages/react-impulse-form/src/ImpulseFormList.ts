@@ -138,7 +138,7 @@ export interface ImpulseFormListOptions<TElement extends ImpulseForm> {
   initial?: ImpulseFormListInputSetter<TElement>
   touched?: ImpulseFormListFlagSetter<TElement>
   validateOn?: ImpulseFormListValidateOnSetter<TElement>
-  errors?: ImpulseFormListErrorSetter<TElement>
+  error?: ImpulseFormListErrorSetter<TElement>
 }
 
 export class ImpulseFormList<
@@ -169,7 +169,7 @@ export class ImpulseFormList<
       initial,
       touched,
       validateOn,
-      errors,
+      error,
     }: ImpulseFormListOptions<TElement> = {},
   ): ImpulseFormList<TElement> {
     const list = new ImpulseFormList(
@@ -197,8 +197,8 @@ export class ImpulseFormList<
       }
 
       // TODO add test against null
-      if (!isUndefined(errors)) {
-        list.setError(errors)
+      if (!isUndefined(error)) {
+        list.setError(error)
       }
     })
 

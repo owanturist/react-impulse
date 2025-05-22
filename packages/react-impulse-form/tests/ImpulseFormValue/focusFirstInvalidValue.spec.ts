@@ -62,8 +62,8 @@ describe("focusFirstInvalidValue() when validated", () => {
     ])
   })
 
-  it("calls a listener with a custom errors", () => {
-    const form = setup("", { errors: ["Custom error"] })
+  it("calls a listener with a custom error", () => {
+    const form = setup("", { error: ["Custom error"] })
     const listener = vi.fn()
 
     form.onFocusWhenInvalid(listener)

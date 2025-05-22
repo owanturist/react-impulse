@@ -245,7 +245,7 @@ describe.each([
     })
 
     it("marks as validated when initialized with custom error", ({ scope }) => {
-      const value = setup({ validateOn, errors: ["error"] })
+      const value = setup({ validateOn, error: ["error"] })
 
       expect(isValidated(scope, value)).toBe(true)
       expect(value.getError(scope)).toStrictEqual(["error"])
@@ -260,7 +260,7 @@ describe.each([
     })
 
     it("unmarks as validated when custom error is removed", ({ scope }) => {
-      const value = setup({ validateOn, errors: ["error"] })
+      const value = setup({ validateOn, error: ["error"] })
 
       value.setError(null)
       expect(isValidated(scope, value)).toBe(false)
