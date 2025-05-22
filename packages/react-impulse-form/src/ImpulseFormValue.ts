@@ -122,7 +122,7 @@ export interface ImpulseFormValueValidatedOptions<
 
   /**
    * A compare function that determines whether the validation error change.
-   * When it does, the ImpulseFormValue#getErrors returns the new value.
+   * When it does, the ImpulseFormValue#getError returns the new value.
    * Otherwise, it returns the previous value.
    *
    * Useful for none primitive values such as Objects, Arrays, Date, etc.
@@ -359,7 +359,7 @@ export class ImpulseFormValue<
   protected _getFocusFirstInvalidValue(): null | VoidFunction {
     const errors = this._onFocus._isEmpty()
       ? null
-      : untrack((scope) => this.getErrors(scope))
+      : untrack((scope) => this.getError(scope))
 
     if (errors == null) {
       return null
@@ -421,12 +421,12 @@ export class ImpulseFormValue<
     return select(dirty, dirty, true)
   }
 
-  public getErrors(scope: Scope): null | TError
-  public getErrors<TResult>(
+  public getError(scope: Scope): null | TError
+  public getError<TResult>(
     scope: Scope,
     select: (concise: null | TError, verbose: null | TError) => TResult,
   ): TResult
-  public getErrors<TResult = null | TError>(
+  public getError<TResult = null | TError>(
     scope: Scope,
     select: (
       concise: null | TError,
@@ -438,7 +438,7 @@ export class ImpulseFormValue<
     return select(errors, errors)
   }
 
-  public setErrors(setter: ImpulseFormValueErrorsSetter<TError>): void {
+  public setError(setter: ImpulseFormValueErrorsSetter<TError>): void {
     this._errors.setValue((errors) => resolveSetter(setter, errors))
   }
 

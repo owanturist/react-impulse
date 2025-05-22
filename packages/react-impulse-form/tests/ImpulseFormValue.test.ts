@@ -223,18 +223,18 @@ describe("ImpulseFormValue#getOutput()", () => {
     })
 
     expect(value.getOutput(scope)).toBeNull()
-    expect(value.getErrors(scope)).toBeNull()
+    expect(value.getError(scope)).toBeNull()
 
     value.setTouched(true)
     expect(value.getOutput(scope)).toBe("1")
-    expect(value.getErrors(scope)).toBeNull()
+    expect(value.getError(scope)).toBeNull()
   })
 
   it("selects value when not validated without schema", ({ scope }) => {
     const value = ImpulseFormValue.of("1")
 
     expect(value.getOutput(scope)).toBe("1")
-    expect(value.getErrors(scope)).toBeNull()
+    expect(value.getError(scope)).toBeNull()
   })
 
   it("selects value", ({ scope }) => {
@@ -270,7 +270,7 @@ describe("ImpulseFormValue#getOutput()", () => {
     })
 
     expect(value.getOutput(scope)).toBe("2")
-    expect(value.getErrors(scope)).toBeNull()
+    expect(value.getError(scope)).toBeNull()
   })
 
   it("transforms value with custom ZodLikeSchema#parse", ({ scope }) => {
@@ -284,7 +284,7 @@ describe("ImpulseFormValue#getOutput()", () => {
     })
 
     expect(value.getOutput(scope)).toBe("2")
-    expect(value.getErrors(scope)).toBeNull()
+    expect(value.getError(scope)).toBeNull()
   })
 })
 
@@ -455,11 +455,11 @@ describe("ImpulseFormValue#reset()", () => {
   it("resets custom error", ({ scope }) => {
     const value = ImpulseFormValue.of("2", { schema: z.string(), initial: "1" })
 
-    value.setErrors(["error"])
-    expect(value.getErrors(scope)).toStrictEqual(["error"])
+    value.setError(["error"])
+    expect(value.getError(scope)).toStrictEqual(["error"])
 
     value.reset()
-    expect(value.getErrors(scope)).toBeNull()
+    expect(value.getError(scope)).toBeNull()
   })
 
   it("resets isValidated", ({ scope }) => {

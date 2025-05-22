@@ -13,22 +13,22 @@ it("selects error", ({ scope }) => {
     validate: (input) => (input.length > 1 ? [1, null] : [null, input]),
   })
 
-  const error_default = value.getErrors(scope)
+  const error_default = value.getError(scope)
   expect(error_default).toBeNull()
   expectTypeOf(error_default).toEqualTypeOf<null | number>()
 
-  const error_concise = value.getErrors(scope, arg(0))
+  const error_concise = value.getError(scope, arg(0))
   expect(error_concise).toBeNull()
   expectTypeOf(error_concise).toEqualTypeOf<null | number>()
 
-  const error_verbose = value.getErrors(scope, arg(1))
+  const error_verbose = value.getError(scope, arg(1))
   expect(error_verbose).toBeNull()
   expectTypeOf(error_verbose).toEqualTypeOf<null | number>()
 
   value.setInput("12")
-  expect(value.getErrors(scope)).toBe(1)
-  expect(value.getErrors(scope, arg(0))).toBe(1)
-  expect(value.getErrors(scope, arg(1))).toBe(1)
+  expect(value.getError(scope)).toBe(1)
+  expect(value.getError(scope, arg(0))).toBe(1)
+  expect(value.getError(scope, arg(1))).toBe(1)
 })
 
 describe("when neither schema nor initial error are defined", () => {
@@ -38,7 +38,7 @@ describe("when neither schema nor initial error are defined", () => {
 
   it("returns null", ({ scope }) => {
     const value = setup()
-    const error = value.getErrors(scope)
+    const error = value.getError(scope)
 
     expect(error).toBeNull()
     expectTypeOf(error).toEqualTypeOf<null | number>()
@@ -47,23 +47,23 @@ describe("when neither schema nor initial error are defined", () => {
   it("sets an error", ({ scope }) => {
     const value = setup()
 
-    value.setErrors(2)
-    expect(value.getErrors(scope)).toBe(2)
+    value.setError(2)
+    expect(value.getError(scope)).toBe(2)
   })
 
   it("resets to null", ({ scope }) => {
     const value = setup()
 
-    value.setErrors(2)
-    value.setErrors(null)
-    expect(value.getErrors(scope)).toBeNull()
+    value.setError(2)
+    value.setError(null)
+    expect(value.getError(scope)).toBeNull()
   })
 
   it("uses setter value", ({ scope }) => {
     const value = setup()
 
-    value.setErrors((errors) => (errors ?? 1) + 1)
-    expect(value.getErrors(scope)).toBe(2)
+    value.setError((errors) => (errors ?? 1) + 1)
+    expect(value.getError(scope)).toBe(2)
   })
 })
 
@@ -74,7 +74,7 @@ describe("when initial error is defined", () => {
 
   it("returns the initial error", ({ scope }) => {
     const value = setup()
-    const error = value.getErrors(scope)
+    const error = value.getError(scope)
 
     expect(error).toBe(2)
     expectTypeOf(error).toEqualTypeOf<null | number>()
@@ -83,22 +83,22 @@ describe("when initial error is defined", () => {
   it("updates an error", ({ scope }) => {
     const value = setup()
 
-    value.setErrors(3)
-    expect(value.getErrors(scope)).toBe(3)
+    value.setError(3)
+    expect(value.getError(scope)).toBe(3)
   })
 
   it("resets to null", ({ scope }) => {
     const value = setup()
 
-    value.setErrors(null)
-    expect(value.getErrors(scope)).toBeNull()
+    value.setError(null)
+    expect(value.getError(scope)).toBeNull()
   })
 
   it("uses setter value", ({ scope }) => {
     const value = setup()
 
-    value.setErrors((errors) => errors! + 1)
-    expect(value.getErrors(scope)).toBe(3)
+    value.setError((errors) => errors! + 1)
+    expect(value.getError(scope)).toBe(3)
   })
 })
 
@@ -114,7 +114,7 @@ describe("when validator is defined", () => {
 
   it("returns null on init by default", ({ scope }) => {
     const value = setup()
-    const error = value.getErrors(scope)
+    const error = value.getError(scope)
 
     expectTypeOf(error).toEqualTypeOf<null | number>()
     expect(error).toBeNull()
@@ -122,7 +122,7 @@ describe("when validator is defined", () => {
 
   it("returns validation error on init when validated", ({ scope }) => {
     const value = setup({ validateOn: "onInit" })
-    const error = value.getErrors(scope)
+    const error = value.getError(scope)
 
     expect(error).toBe(1)
   })
@@ -130,30 +130,30 @@ describe("when validator is defined", () => {
   it("prioritizes initial error over validation error", ({ scope }) => {
     const value = setup({ validateOn: "onInit", errors: 2 })
 
-    const error_0 = value.getErrors(scope)
+    const error_0 = value.getError(scope)
     expect(error_0).toBe(2)
 
-    value.setErrors(null)
-    const error_1 = value.getErrors(scope)
+    value.setError(null)
+    const error_1 = value.getError(scope)
     expect(error_1).toBe(1)
   })
 
   it("prioritizes custom error over validation error", ({ scope }) => {
     const value = setup({ validateOn: "onInit" })
 
-    value.setErrors(4)
-    const error_0 = value.getErrors(scope)
+    value.setError(4)
+    const error_0 = value.getError(scope)
     expect(error_0).toBe(4)
 
-    value.setErrors(null)
-    const error_1 = value.getErrors(scope)
+    value.setError(null)
+    const error_1 = value.getError(scope)
     expect(error_1).toBe(1)
   })
 
   it("uses setter value", ({ scope }) => {
     const value = setup()
-    value.setErrors((errors) => (errors ?? 1) + 1)
-    expect(value.getErrors(scope)).toBe(2)
+    value.setError((errors) => (errors ?? 1) + 1)
+    expect(value.getError(scope)).toBe(2)
   })
 })
 
@@ -164,7 +164,7 @@ describe("when schema is defined", () => {
 
   it("returns null on init by default", ({ scope }) => {
     const value = setup()
-    const error = value.getErrors(scope)
+    const error = value.getError(scope)
 
     expectTypeOf(error).toEqualTypeOf<null | ReadonlyArray<string>>()
     expect(error).toBeNull()
@@ -172,7 +172,7 @@ describe("when schema is defined", () => {
 
   it("returns validation error on init when validated", ({ scope }) => {
     const value = setup({ validateOn: "onInit" })
-    const error = value.getErrors(scope)
+    const error = value.getError(scope)
 
     expect(error).toStrictEqual(["Number must be greater than or equal to 2"])
   })
@@ -180,30 +180,30 @@ describe("when schema is defined", () => {
   it("prioritizes initial error over validation error", ({ scope }) => {
     const value = setup({ validateOn: "onInit", errors: ["custom error"] })
 
-    const error_0 = value.getErrors(scope)
+    const error_0 = value.getError(scope)
     expect(error_0).toStrictEqual(["custom error"])
 
-    value.setErrors(null)
-    const error_1 = value.getErrors(scope)
+    value.setError(null)
+    const error_1 = value.getError(scope)
     expect(error_1).toStrictEqual(["Number must be greater than or equal to 2"])
   })
 
   it("prioritizes custom error over validation error", ({ scope }) => {
     const value = setup({ validateOn: "onInit" })
 
-    value.setErrors(["custom error"])
-    const error_0 = value.getErrors(scope)
+    value.setError(["custom error"])
+    const error_0 = value.getError(scope)
     expect(error_0).toStrictEqual(["custom error"])
 
-    value.setErrors(null)
-    const error_1 = value.getErrors(scope)
+    value.setError(null)
+    const error_1 = value.getError(scope)
     expect(error_1).toStrictEqual(["Number must be greater than or equal to 2"])
   })
 
   it("uses setter value", ({ scope }) => {
     const value = setup()
-    value.setErrors((errors) => [...(errors ?? ["initial"]), "custom error"])
-    expect(value.getErrors(scope)).toStrictEqual(["initial", "custom error"])
+    value.setError((errors) => [...(errors ?? ["initial"]), "custom error"])
+    expect(value.getError(scope)).toStrictEqual(["initial", "custom error"])
   })
 })
 
@@ -251,7 +251,7 @@ describe("when ZodLikeSchema is used", () => {
           },
         })
 
-        expect(value.getErrors(scope)).toStrictEqual([
+        expect(value.getError(scope)).toStrictEqual([
           "error message #1",
           "error message #2",
         ])
@@ -270,7 +270,7 @@ describe("when ZodLikeSchema is used", () => {
         },
       })
 
-      expect(value.getErrors(scope)).toStrictEqual(["error message"])
+      expect(value.getError(scope)).toStrictEqual(["error message"])
     })
 
     describe.each([
@@ -314,7 +314,7 @@ describe("when ZodLikeSchema is used", () => {
           },
         })
 
-        expect(value.getErrors(scope)).toStrictEqual([
+        expect(value.getError(scope)).toStrictEqual([
           "error message #1",
           "error message #2",
         ])
@@ -343,7 +343,7 @@ describe("when ZodLikeSchema is used", () => {
         },
       })
 
-      expect(value.getErrors(scope)).toStrictEqual([
+      expect(value.getError(scope)).toStrictEqual([
         "error message #1",
         "error message #2",
       ])
@@ -361,7 +361,7 @@ describe("when ZodLikeSchema is used", () => {
         },
       })
 
-      expect(value.getErrors(scope)).toStrictEqual([])
+      expect(value.getError(scope)).toStrictEqual([])
     })
 
     it("returns empty array if ZodLikeError is not an object", ({ scope }) => {
@@ -374,7 +374,7 @@ describe("when ZodLikeSchema is used", () => {
         },
       })
 
-      expect(value.getErrors(scope)).toStrictEqual([])
+      expect(value.getError(scope)).toStrictEqual([])
     })
 
     it("returns error from ZodSchema#parse()", ({ scope }) => {
@@ -388,7 +388,7 @@ describe("when ZodLikeSchema is used", () => {
       })
 
       value.setInput(2)
-      expect(value.getErrors(scope)).toStrictEqual([
+      expect(value.getError(scope)).toStrictEqual([
         "Number must be less than or equal to 1",
       ])
     })

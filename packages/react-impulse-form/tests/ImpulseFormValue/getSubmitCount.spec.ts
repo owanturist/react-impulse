@@ -72,7 +72,7 @@ describe.each([
   it("increments when form is invalid", ({ scope }) => {
     const form = setup()
 
-    expect(form.getErrors(scope)).toBe(null)
+    expect(form.getError(scope)).toBe(null)
     expect(form.isInvalid(scope)).toBe(false)
 
     void form.submit()

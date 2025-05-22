@@ -26,12 +26,12 @@ describe("ImpulseFormValueValidatedOptions", () => {
       ImpulseFormValue<number, string, number>
     >()
     expect(value.getInput(scope)).toBe(0)
-    expect(value.getErrors(scope)).toBe("should be positive")
+    expect(value.getError(scope)).toBe("should be positive")
     expect(value.getOutput(scope)).toBeNull()
 
     value.setInput(1)
     expect(value.getInput(scope)).toBe(1)
-    expect(value.getErrors(scope)).toBeNull()
+    expect(value.getError(scope)).toBeNull()
     expect(value.getOutput(scope)).toBe(1)
   })
 
@@ -51,12 +51,12 @@ describe("ImpulseFormValueValidatedOptions", () => {
       ImpulseFormValue<number, string, string>
     >()
     expect(value.getInput(scope)).toBe(0)
-    expect(value.getErrors(scope)).toBe("should be positive")
+    expect(value.getError(scope)).toBe("should be positive")
     expect(value.getOutput(scope)).toBeNull()
 
     value.setInput(1)
     expect(value.getInput(scope)).toBe(1)
-    expect(value.getErrors(scope)).toBeNull()
+    expect(value.getError(scope)).toBeNull()
     expect(value.getOutput(scope)).toBe("1.00")
   })
 })
@@ -72,14 +72,14 @@ describe("ImpulseFormValueSchemaOptions", () => {
       ImpulseFormValue<number, ReadonlyArray<string>, number>
     >()
     expect(value.getInput(scope)).toBe(0)
-    expect(value.getErrors(scope)).toStrictEqual([
+    expect(value.getError(scope)).toStrictEqual([
       "Number must be greater than or equal to 1",
     ])
     expect(value.getOutput(scope)).toBeNull()
 
     value.setInput(1)
     expect(value.getInput(scope)).toBe(1)
-    expect(value.getErrors(scope)).toBeNull()
+    expect(value.getError(scope)).toBeNull()
     expect(value.getOutput(scope)).toBe(1)
   })
 
@@ -98,14 +98,14 @@ describe("ImpulseFormValueSchemaOptions", () => {
       ImpulseFormValue<number, ReadonlyArray<string>, string>
     >()
     expect(value.getInput(scope)).toBe(0)
-    expect(value.getErrors(scope)).toStrictEqual([
+    expect(value.getError(scope)).toStrictEqual([
       "Number must be greater than or equal to 1",
     ])
     expect(value.getOutput(scope)).toBeNull()
 
     value.setInput(1)
     expect(value.getInput(scope)).toBe(1)
-    expect(value.getErrors(scope)).toBeNull()
+    expect(value.getError(scope)).toBeNull()
     expect(value.getOutput(scope)).toBe("1.00")
   })
 })

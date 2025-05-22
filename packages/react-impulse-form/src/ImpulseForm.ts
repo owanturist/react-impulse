@@ -185,7 +185,7 @@ export abstract class ImpulseForm<
   }
 
   public isInvalid(scope: Scope): boolean {
-    return this.getErrors(scope, isPresent)
+    return this.getError(scope, isPresent)
   }
 
   public isDirty(scope: Scope): boolean
@@ -206,8 +206,8 @@ export abstract class ImpulseForm<
     return this._isDirty(scope, select)
   }
 
-  public abstract getErrors(scope: Scope): TParams["error.schema"]
-  public abstract getErrors<TResult>(
+  public abstract getError(scope: Scope): TParams["error.schema"]
+  public abstract getError<TResult>(
     scope: Scope,
     select: (
       concise: TParams["error.schema"],
@@ -215,7 +215,7 @@ export abstract class ImpulseForm<
     ) => TResult,
   ): TResult
 
-  public abstract setErrors(setter: TParams["error.setter"]): void
+  public abstract setError(setter: TParams["error.setter"]): void
 
   public abstract isValidated(scope: Scope): boolean
   public abstract isValidated<TResult>(

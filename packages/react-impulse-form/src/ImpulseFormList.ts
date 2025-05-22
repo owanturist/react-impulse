@@ -198,7 +198,7 @@ export class ImpulseFormList<
 
       // TODO add test against null
       if (!isUndefined(errors)) {
-        list.setErrors(errors)
+        list.setError(errors)
       }
     })
 
@@ -364,15 +364,15 @@ export class ImpulseFormList<
     })
   }
 
-  public getErrors(scope: Scope): ImpulseFormListErrorSchema<TElement>
-  public getErrors<TResult>(
+  public getError(scope: Scope): ImpulseFormListErrorSchema<TElement>
+  public getError<TResult>(
     scope: Scope,
     select: (
       concise: ImpulseFormListErrorSchema<TElement>,
       verbose: ImpulseFormListErrorSchemaVerbose<TElement>,
     ) => TResult,
   ): TResult
-  public getErrors<TResult = ImpulseFormListErrorSchema<TElement>>(
+  public getError<TResult = ImpulseFormListErrorSchema<TElement>>(
     scope: Scope,
     select: (
       concise: ImpulseFormListErrorSchema<TElement>,
@@ -382,7 +382,7 @@ export class ImpulseFormList<
     const [concise, verbose] = zipMap(
       //
       this._elements.getValue(scope),
-      (form) => form.getErrors(scope, params),
+      (form) => form.getError(scope, params),
     ) as [
       Exclude<ImpulseFormListErrorSchema<TElement>, null>,
       ImpulseFormListErrorSchemaVerbose<TElement>,
@@ -395,12 +395,12 @@ export class ImpulseFormList<
     return select(concise, verbose)
   }
 
-  public setErrors(setter: ImpulseFormListErrorSetter<TElement>): void {
+  public setError(setter: ImpulseFormListErrorSetter<TElement>): void {
     setFormElements(
       this._elements,
       setter,
-      (scope) => [this.getErrors(scope, params._second)],
-      (element, next) => element.setErrors(next),
+      (scope) => [this.getError(scope, params._second)],
+      (element, next) => element.setError(next),
     )
   }
 
