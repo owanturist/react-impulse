@@ -1,4 +1,4 @@
-import { isArray, isInstanceOf, isObject, isString, type Result } from "./utils"
+import { isArray, isObject, isString, type Result } from "./utils"
 
 export interface ZodLikeIssue {
   message: string
@@ -44,7 +44,7 @@ function unknownErrors(error: unknown): ReadonlyArray<string> {
       .filter(isString)
   }
 
-  if (isInstanceOf(error, Error)) {
+  if (error instanceof Error) {
     return [error.message]
   }
 
