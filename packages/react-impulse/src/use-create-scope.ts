@@ -1,3 +1,5 @@
+import { isFunction } from "~/is-function"
+
 import {
   useCallback,
   useRef,
@@ -6,7 +8,6 @@ import {
 import { ScopeEmitter } from "./scope-emitter"
 import { EMITTER_KEY, type Scope } from "./scope"
 import { usePermanent } from "./use-permanent"
-import { isFunction } from "./is-function"
 
 export function useCreateScope(): () => Scope
 export function useCreateScope<T = () => Scope>(

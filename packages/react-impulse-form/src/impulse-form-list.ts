@@ -1,22 +1,20 @@
+import { params } from "~/params"
+import { uniq } from "~/uniq"
+import { isTrue } from "~/is-true"
+import { isFalse } from "~/is-false"
+import { isTruthy } from "~/is-truthy"
+import { isArray } from "~/is-array"
+import { isString } from "~/is-string"
+import { isNull } from "~/is-null"
+import { isUndefined } from "~/is-undefined"
+import { isFunction } from "~/is-function"
+import { type Setter, resolveSetter } from "~/setter"
+import { isShallowArrayEqual } from "~/is-shallow-array-equal"
+import { zipMap } from "~/zip-map"
+
 import { type Scope, batch, Impulse, untrack } from "./dependencies"
-import {
-  type Setter,
-  isTrue,
-  isTruthy,
-  isString,
-  isArray,
-  shallowArrayEquals,
-  isFalse,
-  uniq,
-  resolveSetter,
-  zipMap,
-  isNull,
-  params,
-  isUndefined,
-  isFunction,
-} from "./utils"
-import { type GetImpulseFormParam, ImpulseForm } from "./ImpulseForm"
-import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./ValidateStrategy"
+import { type GetImpulseFormParam, ImpulseForm } from "./impulse-form"
+import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./validate-strategy"
 
 function setFormElements<
   TElement extends ImpulseForm,
@@ -175,7 +173,7 @@ export class ImpulseFormList<
     const list = new ImpulseFormList(
       null,
       Impulse(elements, {
-        compare: shallowArrayEquals,
+        compare: isShallowArrayEqual,
       }),
     )
 

@@ -1,6 +1,10 @@
+import { isTruthy } from "~/is-truthy"
+import { isNull } from "~/is-null"
+import { isDefined } from "~/is-defined"
+import { isUndefined } from "~/is-undefined"
+
 import { type Scope, batch, untrack, Impulse } from "./dependencies"
-import { Emitter } from "./Emitter"
-import { isPresent, isUndefined, isTruthy, isNull } from "./utils"
+import { Emitter } from "./_Emitter"
 
 export interface ImpulseFormParams {
   "input.setter": unknown
@@ -155,7 +159,7 @@ export abstract class ImpulseForm<
       const output = this._root.getOutput(scope)
 
       if (!isNull(output) && this._root.isValid(scope)) {
-        return this._root._submitWith(output).filter(isPresent)
+        return this._root._submitWith(output).filter(isDefined)
       }
 
       return undefined
@@ -185,7 +189,7 @@ export abstract class ImpulseForm<
   }
 
   public isInvalid(scope: Scope): boolean {
-    return this.getError(scope, isPresent)
+    return this.getError(scope, isDefined)
   }
 
   public isDirty(scope: Scope): boolean

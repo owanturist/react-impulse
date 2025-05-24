@@ -1,7 +1,8 @@
+import type { Setter } from "~/setter"
+
 import {
   type ImpulseFormShapeOptions,
   type ValidateStrategy,
-  type Setter,
   ImpulseFormShape,
   ImpulseFormValue,
 } from "../../src"

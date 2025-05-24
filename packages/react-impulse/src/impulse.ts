@@ -1,3 +1,7 @@
+import { hasProperty } from "~/has-property"
+import { isStrictEqual } from "~/is-strict-equal"
+import { isFunction } from "~/is-function"
+
 import type { Scope } from "./scope"
 import type { BaseImpulse } from "./base-impulse"
 import type { ImpulseOptions } from "./impulse-options"
@@ -5,9 +9,6 @@ import type { ReadableImpulse } from "./readable-impulse"
 import type { WritableImpulse } from "./writable-impulse"
 import { DirectImpulse } from "./direct-impulse"
 import { DerivedImpulse } from "./derived-impulse"
-import { hasProperty } from "./has-property"
-import { isFunction } from "./is-function"
-import { isStrictEqual } from "./is-strict-equal"
 
 export type Impulse<T> = BaseImpulse<T>
 

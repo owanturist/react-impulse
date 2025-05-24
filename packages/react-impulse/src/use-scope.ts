@@ -1,7 +1,8 @@
-import { isStrictEqual } from "./is-strict-equal"
+import { isStrictEqual } from "~/is-strict-equal"
+import { identity } from "~/identity"
+
 import type { Scope } from "./scope"
 import { useCreateScope } from "./use-create-scope"
-import { identity } from "./identity"
 
 /**
  * A hook that returns a Scope.

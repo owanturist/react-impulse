@@ -23,7 +23,11 @@
     "downlevelIteration": true,
     "jsx": "react",
     "types": ["vitest/globals"],
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["tools/*"]
+    }
   },
-  "include": ["./*.ts"]
+  "include": ["./*.ts", "tools/**/*.ts"]
 }

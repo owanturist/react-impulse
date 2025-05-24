@@ -1,7 +1,8 @@
+import { isFunction } from "~/is-function"
+
 import type { ReadableImpulse } from "./readable-impulse"
 import { STATIC_SCOPE, type Scope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
-import { isFunction } from "./is-function"
 
 /**
  * Ignores tracking any of the impulses attached to the provided Scope.

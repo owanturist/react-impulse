@@ -1,12 +1,12 @@
-import { uniq, type Func } from "./utils"
+import { uniq } from "~/uniq"
 
 export class Emitter<
   TArgs extends ReadonlyArray<unknown> = [],
   TResult = void,
 > {
-  private readonly _listeners: Array<Func<TArgs, TResult>> = []
+  private readonly _listeners: Array<(...args: TArgs) => TResult> = []
 
-  public _subscribe(listener: Func<TArgs, TResult>): VoidFunction {
+  public _subscribe(listener: (...args: TArgs) => TResult): VoidFunction {
     this._listeners.push(listener)
 
     return () => {

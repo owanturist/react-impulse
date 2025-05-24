@@ -1,4 +1,9 @@
-import { hasProperty, isArray, isObject, isString, type Result } from "./utils"
+import { isArray } from "~/is-array"
+import { isString } from "~/is-string"
+import { isObject } from "~/is-object"
+import { hasProperty } from "~/has-property"
+
+import type { Result } from "./result"
 
 export interface ZodLikeIssue {
   message: string

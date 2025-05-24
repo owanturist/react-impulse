@@ -1,11 +1,12 @@
+import { isStrictEqual } from "~/is-strict-equal"
+import { isFunction } from "~/is-function"
+
 import { DirectImpulse } from "./direct-impulse"
 import type { ImpulseOptions } from "./impulse-options"
 import type { ReadableImpulse } from "./readable-impulse"
 import { type Scope, extractScope, STATIC_SCOPE, EMITTER_KEY } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
-import { isFunction } from "./is-function"
 import type { WritableImpulse } from "./writable-impulse"
-import { isStrictEqual } from "./is-strict-equal"
 import type { Compare } from "./compare"
 
 export abstract class BaseImpulse<T>

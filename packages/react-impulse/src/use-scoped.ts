@@ -1,11 +1,12 @@
+import { isStrictEqual } from "~/is-strict-equal"
+import { isFunction } from "~/is-function"
+
 import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
 import type { Compare } from "./compare"
-import { isFunction } from "./is-function"
 import { STATIC_SCOPE, type Scope } from "./scope"
 import { useCreateScope } from "./use-create-scope"
 import type { ReadableImpulse } from "./readable-impulse"
 import { useHandler } from "./use-handler"
-import { isStrictEqual } from "./is-strict-equal"
 
 export interface UseScopedOptions<T> {
   /**

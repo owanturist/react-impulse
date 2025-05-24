@@ -1,3 +1,12 @@
+import { isNull } from "~/is-null"
+import { isFunction } from "~/is-function"
+import { isStrictEqual } from "~/is-strict-equal"
+import { isShallowArrayEqual } from "~/is-shallow-array-equal"
+import { type Setter, resolveSetter } from "~/setter"
+import { hasProperty } from "~/has-property"
+import type { NullOrNonNullable } from "~/null-or-non-nullable"
+import { params } from "~/params"
+
 import {
   type Compare,
   type Scope,
@@ -5,28 +14,17 @@ import {
   batch,
   untrack,
 } from "./dependencies"
-import {
-  type Result,
-  type Setter,
-  shallowArrayEquals,
-  eq,
-  resolveSetter,
-  isNull,
-  params,
-  isFunction,
-  hasProperty,
-  type NullOrNonNullable,
-} from "./utils"
-import { ImpulseForm } from "./ImpulseForm"
-import { zodLikeParse, type ZodLikeSchema } from "./ZodLikeSchema"
+import type { Result } from "./result"
+import { ImpulseForm } from "./impulse-form"
+import { zodLikeParse, type ZodLikeSchema } from "./zod-like-schema"
 import {
   VALIDATE_ON_INIT,
   VALIDATE_ON_CHANGE,
   VALIDATE_ON_TOUCH,
   type ValidateStrategy,
   VALIDATE_ON_SUBMIT,
-} from "./ValidateStrategy"
-import { Emitter } from "./Emitter"
+} from "./validate-strategy"
+import { Emitter } from "./_Emitter"
 
 function createErrorImpulseCompare<TError>(compare: Compare<TError>) {
   return (left: null | TError, right: null | TError, scope: Scope) => {
@@ -206,7 +204,7 @@ export class ImpulseFormValue<
     | ImpulseFormValue<TInput, TError, TOutput> /* enforce syntax highlight */ {
     const touched = options?.touched ?? false
 
-    const isInputEqual = options?.isInputEqual ?? eq
+    const isInputEqual = options?.isInputEqual ?? isStrictEqual
     const isInputDirty =
       options?.isInputDirty ??
       ((left, right, scope) => !isInputEqual(left, right, scope))
@@ -224,7 +222,7 @@ export class ImpulseFormValue<
         Impulse(touched),
         Impulse(options.validateOn ?? VALIDATE_ON_TOUCH),
         Impulse(options.error ?? null, {
-          compare: createErrorImpulseCompare(shallowArrayEquals),
+          compare: createErrorImpulseCompare(isShallowArrayEqual),
         }),
         Impulse(isExplicitInitial),
         Impulse(initial, { compare: isInputEqual }),
@@ -253,7 +251,9 @@ export class ImpulseFormValue<
         Impulse(touched),
         Impulse(options.validateOn ?? VALIDATE_ON_TOUCH),
         Impulse<null | TError>(options.error ?? null, {
-          compare: createErrorImpulseCompare(options.isErrorEqual ?? eq),
+          compare: createErrorImpulseCompare(
+            options.isErrorEqual ?? isStrictEqual,
+          ),
         }),
         Impulse(isExplicitInitial),
         Impulse(initial, { compare: isInputEqual }),

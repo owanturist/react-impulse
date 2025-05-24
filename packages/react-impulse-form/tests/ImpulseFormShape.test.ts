@@ -1,11 +1,8 @@
 import { z } from "zod"
 
-import {
-  type ImpulseForm,
-  type Setter,
-  ImpulseFormShape,
-  ImpulseFormValue,
-} from "../src"
+import type { Setter } from "~/setter"
+
+import { type ImpulseForm, ImpulseFormShape, ImpulseFormValue } from "../src"
 
 import { arg } from "./common"
 
