@@ -1,4 +1,4 @@
-import { isArray, isObject, isString, type Result } from "./utils"
+import { hasProperty, isArray, isObject, isString, type Result } from "./utils"
 
 export interface ZodLikeIssue {
   message: string
@@ -24,8 +24,9 @@ function zodLikeSafeParseResultToResult<TOutput>(
     return [null, result.data]
   }
 
-  const errors =
-    "errors" in result.error ? result.error.errors : result.error.issues
+  const errors = hasProperty(result.error, "errors")
+    ? result.error.errors
+    : result.error.issues
 
   return [errors.map(({ message }) => message), null]
 }

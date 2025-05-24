@@ -1,8 +1,11 @@
 import { z } from "zod"
 
-import { type ImpulseFormValueOptions, ImpulseFormValue } from "../../src"
+import { type ImpulseFormValueSchemaOptions, ImpulseFormValue } from "../../src"
 
-const setup = (input?: string, options?: ImpulseFormValueOptions<string>) => {
+const setup = (
+  input?: string,
+  options?: Partial<ImpulseFormValueSchemaOptions<string>>,
+) => {
   return ImpulseFormValue.of(input ?? "", {
     touched: true,
     schema: z.string().min(2),
@@ -59,8 +62,8 @@ describe("focusFirstInvalidValue() when validated", () => {
     ])
   })
 
-  it("calls a listener with a custom errors", () => {
-    const form = setup("", { errors: ["Custom error"] })
+  it("calls a listener with a custom error", () => {
+    const form = setup("", { error: ["Custom error"] })
     const listener = vi.fn()
 
     form.onFocusWhenInvalid(listener)

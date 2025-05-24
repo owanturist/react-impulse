@@ -122,23 +122,23 @@ export type ImpulseFormListValidateOnSetter<TElement extends ImpulseForm> =
 
 export type ImpulseFormListErrorSetter<TElement extends ImpulseForm> = Setter<
   null | ReadonlyArray<
-    undefined | GetImpulseFormParam<TElement, "errors.setter">
+    undefined | GetImpulseFormParam<TElement, "error.setter">
   >,
   [ImpulseFormListErrorSchemaVerbose<TElement>]
 >
 
 export type ImpulseFormListErrorSchema<TElement extends ImpulseForm> =
-  null | ReadonlyArray<GetImpulseFormParam<TElement, "errors.schema">>
+  null | ReadonlyArray<GetImpulseFormParam<TElement, "error.schema">>
 
 export type ImpulseFormListErrorSchemaVerbose<TElement extends ImpulseForm> =
-  ReadonlyArray<GetImpulseFormParam<TElement, "errors.schema.verbose">>
+  ReadonlyArray<GetImpulseFormParam<TElement, "error.schema.verbose">>
 
 export interface ImpulseFormListOptions<TElement extends ImpulseForm> {
   input?: ImpulseFormListInputSetter<TElement>
   initial?: ImpulseFormListInputSetter<TElement>
   touched?: ImpulseFormListFlagSetter<TElement>
   validateOn?: ImpulseFormListValidateOnSetter<TElement>
-  errors?: ImpulseFormListErrorSetter<TElement>
+  error?: ImpulseFormListErrorSetter<TElement>
 }
 
 export class ImpulseFormList<
@@ -158,9 +158,9 @@ export class ImpulseFormList<
   "validateOn.schema": ImpulseFormListValidateOnSchema<TElement>
   "validateOn.schema.verbose": ImpulseFormListValidateOnSchemaVerbose<TElement>
 
-  "errors.setter": ImpulseFormListErrorSetter<TElement>
-  "errors.schema": ImpulseFormListErrorSchema<TElement>
-  "errors.schema.verbose": ImpulseFormListErrorSchemaVerbose<TElement>
+  "error.setter": ImpulseFormListErrorSetter<TElement>
+  "error.schema": ImpulseFormListErrorSchema<TElement>
+  "error.schema.verbose": ImpulseFormListErrorSchemaVerbose<TElement>
 }> {
   public static of<TElement extends ImpulseForm>(
     elements: ReadonlyArray<TElement>,
@@ -169,7 +169,7 @@ export class ImpulseFormList<
       initial,
       touched,
       validateOn,
-      errors,
+      error,
     }: ImpulseFormListOptions<TElement> = {},
   ): ImpulseFormList<TElement> {
     const list = new ImpulseFormList(
@@ -197,8 +197,8 @@ export class ImpulseFormList<
       }
 
       // TODO add test against null
-      if (!isUndefined(errors)) {
-        list.setErrors(errors)
+      if (!isUndefined(error)) {
+        list.setError(error)
       }
     })
 
@@ -364,15 +364,15 @@ export class ImpulseFormList<
     })
   }
 
-  public getErrors(scope: Scope): ImpulseFormListErrorSchema<TElement>
-  public getErrors<TResult>(
+  public getError(scope: Scope): ImpulseFormListErrorSchema<TElement>
+  public getError<TResult>(
     scope: Scope,
     select: (
       concise: ImpulseFormListErrorSchema<TElement>,
       verbose: ImpulseFormListErrorSchemaVerbose<TElement>,
     ) => TResult,
   ): TResult
-  public getErrors<TResult = ImpulseFormListErrorSchema<TElement>>(
+  public getError<TResult = ImpulseFormListErrorSchema<TElement>>(
     scope: Scope,
     select: (
       concise: ImpulseFormListErrorSchema<TElement>,
@@ -382,7 +382,7 @@ export class ImpulseFormList<
     const [concise, verbose] = zipMap(
       //
       this._elements.getValue(scope),
-      (form) => form.getErrors(scope, params),
+      (form) => form.getError(scope, params),
     ) as [
       Exclude<ImpulseFormListErrorSchema<TElement>, null>,
       ImpulseFormListErrorSchemaVerbose<TElement>,
@@ -395,12 +395,12 @@ export class ImpulseFormList<
     return select(concise, verbose)
   }
 
-  public setErrors(setter: ImpulseFormListErrorSetter<TElement>): void {
+  public setError(setter: ImpulseFormListErrorSetter<TElement>): void {
     setFormElements(
       this._elements,
       setter,
-      (scope) => [this.getErrors(scope, params._second)],
-      (element, next) => element.setErrors(next),
+      (scope) => [this.getError(scope, params._second)],
+      (element, next) => element.setError(next),
     )
   }
 

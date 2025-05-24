@@ -7,6 +7,10 @@ export type Result<TError, TData> = [TError] extends [never]
   ? [null, TData]
   : [TError, null] | [null, TData]
 
+export type NullOrNonNullable<T> = [T, null] extends [null, T]
+  ? null
+  : NonNullable<T>
+
 export type Setter<
   TValue,
   TPrevValues extends ReadonlyArray<unknown> = [TValue],
@@ -78,6 +82,13 @@ export function isFunction<T>(
   data: Function | T,
 ): data is DefinitelyFunction<T> {
   return typeof data === "function"
+}
+
+export function hasProperty<TKey extends PropertyKey>(
+  input: unknown,
+  key: TKey,
+): input is Record<TKey, unknown> {
+  return typeof input === "object" && input != null && key in input
 }
 
 export function eq<T>(left: T, right: T): boolean {

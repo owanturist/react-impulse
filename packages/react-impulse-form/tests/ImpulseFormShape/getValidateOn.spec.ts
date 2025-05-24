@@ -7,6 +7,7 @@ import {
   ImpulseFormShape,
   ImpulseFormValue,
 } from "../../src"
+import { arg } from "../common"
 
 interface ThirdValidateStrategyVerbose {
   readonly one: ValidateStrategy
@@ -31,7 +32,7 @@ type RootValidateStrategyConcise =
       readonly third: ThirdValidateStrategyConcise
     }
 
-const setup = (
+function setup(
   options?: ImpulseFormShapeOptions<{
     first: ImpulseFormValue<string>
     second: ImpulseFormValue<number>
@@ -41,7 +42,7 @@ const setup = (
     }>
     fourth: Array<string>
   }>,
-) => {
+) {
   return ImpulseFormShape.of(
     {
       first: ImpulseFormValue.of(""),
@@ -56,20 +57,26 @@ const setup = (
   )
 }
 
-const getValidateOnDefault = <TFields extends ImpulseFormShapeFields>(
+function getValidateOnDefault<TFields extends ImpulseFormShapeFields>(
   scope: Scope,
   shape: ImpulseFormShape<TFields>,
-) => shape.getValidateOn(scope)
+) {
+  return shape.getValidateOn(scope)
+}
 
-const getValidateOnConcise = <TFields extends ImpulseFormShapeFields>(
+function getValidateOnConcise<TFields extends ImpulseFormShapeFields>(
   scope: Scope,
   shape: ImpulseFormShape<TFields>,
-) => shape.getValidateOn(scope, (concise) => concise)
+) {
+  return shape.getValidateOn(scope, arg(0))
+}
 
-const getValidateOnVerbose = <TFields extends ImpulseFormShapeFields>(
+function getValidateOnVerbose<TFields extends ImpulseFormShapeFields>(
   scope: Scope,
   shape: ImpulseFormShape<TFields>,
-) => shape.getValidateOn(scope, (_, verbose) => verbose)
+) {
+  return shape.getValidateOn(scope, arg(1))
+}
 
 it("matches the type signature", () => {
   const form = setup()

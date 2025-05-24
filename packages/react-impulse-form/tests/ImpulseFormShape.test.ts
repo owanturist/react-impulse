@@ -69,8 +69,8 @@ describe("ImpulseFormShape.of()", () => {
 
     expectTypeOf(shape).toEqualTypeOf<
       ImpulseFormShape<{
-        first: ImpulseFormValue<string, boolean>
-        second: ImpulseFormValue<number, string>
+        first: ImpulseFormValue<string, ReadonlyArray<string>, boolean>
+        second: ImpulseFormValue<number, ReadonlyArray<string>, string>
       }>
     >()
 
@@ -253,27 +253,27 @@ describe("ImpulseFormShape.of()", () => {
     })
   })
 
-  describe("ImpulseFormShapeOptions.errors", () => {
-    it("specifies initial errors", ({ scope }) => {
+  describe("ImpulseFormShapeOptions.error", () => {
+    it("specifies initial error", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
-          first: ImpulseFormValue.of(""),
+          first: ImpulseFormValue.of("", { schema: z.string() }),
           second: ImpulseFormValue.of(0),
           third: ImpulseFormShape.of({
-            one: ImpulseFormValue.of(true, { errors: ["some"] }),
+            one: ImpulseFormValue.of(true, { error: ["some"] }),
             two: ImpulseFormValue.of([""]),
           }),
           fourth: ["anything"],
         },
         {
-          errors: {
+          error: {
             first: ["another"],
             third: null,
           },
         },
       )
 
-      expect(shape.getErrors(scope, arg(1))).toStrictEqual({
+      expect(shape.getError(scope, arg(1))).toStrictEqual({
         first: ["another"],
         second: null,
         third: {
@@ -283,18 +283,21 @@ describe("ImpulseFormShape.of()", () => {
       })
     })
 
-    it("gets current errors from setters", ({ scope }) => {
+    it("gets current error from setters", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
-          first: ImpulseFormValue.of("", { errors: ["first"] }),
-          second: ImpulseFormValue.of(0, { errors: ["second"] }),
+          first: ImpulseFormValue.of("", { error: 1 }),
+          second: ImpulseFormValue.of(0, {
+            validate: (input) =>
+              input > 0 ? [null, input] : ["must be positive", null],
+          }),
           third: ImpulseFormShape.of(
             {
-              one: ImpulseFormValue.of(true),
-              two: ImpulseFormValue.of([""]),
+              one: ImpulseFormValue.of(true, { schema: z.boolean() }),
+              two: ImpulseFormValue.of([""], { schema: z.array(z.string()) }),
             },
             {
-              errors: {
+              error: {
                 one: ["one"],
                 two: ["two"],
               },
@@ -303,10 +306,10 @@ describe("ImpulseFormShape.of()", () => {
           fourth: ["anything"],
         },
         {
-          errors: (root) => {
+          error: (root) => {
             expectTypeOf(root).toEqualTypeOf<{
-              readonly first: null | ReadonlyArray<string>
-              readonly second: null | ReadonlyArray<string>
+              readonly first: null | number
+              readonly second: null | string
               readonly third: {
                 readonly one: null | ReadonlyArray<string>
                 readonly two: null | ReadonlyArray<string>
@@ -314,8 +317,8 @@ describe("ImpulseFormShape.of()", () => {
             }>()
 
             expect(root).toStrictEqual({
-              first: ["first"],
-              second: ["second"],
+              first: 1,
+              second: null,
               third: {
                 one: ["one"],
                 two: ["two"],
@@ -324,20 +327,16 @@ describe("ImpulseFormShape.of()", () => {
 
             return {
               first: (first) => {
-                expectTypeOf(
-                  first,
-                ).toEqualTypeOf<null | ReadonlyArray<string>>()
-                expect(first).toStrictEqual(["first"])
+                expectTypeOf(first).toEqualTypeOf<null | number>()
+                expect(first).toStrictEqual(1)
 
-                return [...first!, "1"]
+                return 2
               },
               second: (second) => {
-                expectTypeOf(
-                  second,
-                ).toEqualTypeOf<null | ReadonlyArray<string>>()
-                expect(second).toStrictEqual(["second"])
+                expectTypeOf(second).toEqualTypeOf<null | string>()
+                expect(second).toStrictEqual(null)
 
-                return [...second!, "2"]
+                return "2"
               },
               third: (third) => {
                 expectTypeOf(third).toEqualTypeOf<{
@@ -373,9 +372,9 @@ describe("ImpulseFormShape.of()", () => {
         },
       )
 
-      expect(shape.getErrors(scope, arg(1))).toStrictEqual({
-        first: ["first", "1"],
-        second: ["second", "2"],
+      expect(shape.getError(scope, arg(1))).toStrictEqual({
+        first: 2,
+        second: "2",
         third: {
           one: ["one", "1"],
           two: ["two", "2"],
@@ -850,8 +849,8 @@ describe("ImpulseFormShape.of()", () => {
   })
 })
 
-describe("ImpulseFormShape#getErrors()", () => {
-  it("selects errors", ({ scope }) => {
+describe("ImpulseFormShape#getError()", () => {
+  it("selects error", ({ scope }) => {
     const shape = ImpulseFormShape.of(
       {
         first: ImpulseFormValue.of("1", { schema: z.string().max(1) }),
@@ -867,9 +866,9 @@ describe("ImpulseFormShape#getErrors()", () => {
       { touched: true },
     )
 
-    expect(shape.getErrors(scope)).toBeNull()
-    expect(shape.getErrors(scope, arg(0))).toBeNull()
-    expect(shape.getErrors(scope, arg(1))).toStrictEqual({
+    expect(shape.getError(scope)).toBeNull()
+    expect(shape.getError(scope, arg(0))).toBeNull()
+    expect(shape.getError(scope, arg(1))).toStrictEqual({
       first: null,
       second: null,
       third: {
@@ -881,13 +880,13 @@ describe("ImpulseFormShape#getErrors()", () => {
     shape.setInput({
       first: "12",
     })
-    expect(shape.getErrors(scope)).toStrictEqual({
+    expect(shape.getError(scope)).toStrictEqual({
       first: ["String must contain at most 1 character(s)"],
       second: null,
       third: null,
     })
-    expect(shape.getErrors(scope, arg(0))).toStrictEqual(shape.getErrors(scope))
-    expect(shape.getErrors(scope, arg(1))).toStrictEqual({
+    expect(shape.getError(scope, arg(0))).toStrictEqual(shape.getError(scope))
+    expect(shape.getError(scope, arg(1))).toStrictEqual({
       first: ["String must contain at most 1 character(s)"],
       second: null,
       third: {
@@ -901,7 +900,7 @@ describe("ImpulseFormShape#getErrors()", () => {
         two: ["1", "12"],
       },
     })
-    expect(shape.getErrors(scope)).toStrictEqual({
+    expect(shape.getError(scope)).toStrictEqual({
       first: ["String must contain at most 1 character(s)"],
       second: null,
       third: {
@@ -909,65 +908,70 @@ describe("ImpulseFormShape#getErrors()", () => {
         two: ["String must contain at most 1 character(s)"],
       },
     })
-    expect(shape.getErrors(scope, arg(0))).toStrictEqual(shape.getErrors(scope))
-    expect(shape.getErrors(scope, arg(1))).toStrictEqual(shape.getErrors(scope))
+    expect(shape.getError(scope, arg(0))).toStrictEqual(shape.getError(scope))
+    expect(shape.getError(scope, arg(1))).toStrictEqual(shape.getError(scope))
 
-    expectTypeOf(shape.getErrors(scope)).toEqualTypeOf<null | {
+    const error = shape.getError(scope)
+
+    expectTypeOf(error).toEqualTypeOf<null | {
       readonly first: null | ReadonlyArray<string>
       readonly second: null | ReadonlyArray<string>
       readonly third: null | {
-        readonly one: null | ReadonlyArray<string>
+        readonly one: null
         readonly two: null | ReadonlyArray<string>
       }
     }>()
 
-    expectTypeOf(shape.fields.third.getErrors(scope)).toEqualTypeOf<null | {
-      readonly one: null | ReadonlyArray<string>
+    expectTypeOf(shape.fields.third.getError(scope)).toEqualTypeOf<null | {
+      readonly one: null
       readonly two: null | ReadonlyArray<string>
     }>()
   })
 })
 
-describe("ImpulseFormShape#setErrors()", () => {
-  it("specifies errors", ({ scope }) => {
+describe("ImpulseFormShape#setError()", () => {
+  it("specifies error", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of("", { errors: ["first"] }),
-      second: ImpulseFormValue.of(0, { errors: ["second"] }),
+      first: ImpulseFormValue.of("", { error: ["first"] }),
+      second: ImpulseFormValue.of(0, { error: ["second"] }),
       third: ImpulseFormShape.of(
         {
-          one: ImpulseFormValue.of(true),
-          two: ImpulseFormValue.of([""]),
+          one: ImpulseFormValue.of(true, {
+            validate: (input) =>
+              input ? [null, input] : ["must be true", null],
+          }),
+          two: ImpulseFormValue.of([""], { error: "an error" }),
         },
         {
-          errors: {
-            one: ["one"],
-            two: ["two"],
+          error: {
+            one: "one",
+            two: "two",
           },
         },
       ),
       fourth: ["anything"],
     })
 
-    expect(shape.getErrors(scope)).toStrictEqual({
+    expect(shape.getError(scope)).toStrictEqual({
       first: ["first"],
       second: ["second"],
       third: {
-        one: ["one"],
-        two: ["two"],
+        one: "one",
+        two: "two",
       },
     })
 
-    shape.setErrors({
+    shape.setError({
       first: ["another"],
       second: undefined,
       third: null,
     })
-    expect(shape.getErrors(scope)).toStrictEqual({
+    expect(shape.getError(scope)).toStrictEqual({
       first: ["another"],
       second: ["second"],
       third: null,
     })
-    expect(shape.getErrors(scope, arg(1))).toStrictEqual({
+    expect(shape.getError(scope, arg(1))).toStrictEqual({
       first: ["another"],
       second: ["second"],
       third: {
@@ -976,122 +980,122 @@ describe("ImpulseFormShape#setErrors()", () => {
       },
     })
 
-    shape.setErrors({
+    shape.setError({
       third: {
-        one: ["one"],
-        two: ["two"],
+        one: "one",
+        two: "two",
       },
     })
-    shape.setErrors((root) => {
+    shape.setError((root) => {
       expectTypeOf(root).toEqualTypeOf<{
-        readonly first: null | ReadonlyArray<string>
-        readonly second: null | ReadonlyArray<string>
+        readonly first: null | Array<string>
+        readonly second: null | Array<string>
         readonly third: {
-          readonly one: null | ReadonlyArray<string>
-          readonly two: null | ReadonlyArray<string>
+          readonly one: null | string
+          readonly two: null | string
         }
       }>()
       expect(root).toStrictEqual({
         first: ["another"],
         second: ["second"],
         third: {
-          one: ["one"],
-          two: ["two"],
+          one: "one",
+          two: "two",
         },
       })
 
       return {
         first: (first) => {
-          expectTypeOf(first).toEqualTypeOf<null | ReadonlyArray<string>>()
+          expectTypeOf(first).toEqualTypeOf<null | Array<string>>()
           expect(first).toStrictEqual(["another"])
 
           return [...first!, "1"]
         },
         second: (second) => {
-          expectTypeOf(second).toEqualTypeOf<null | ReadonlyArray<string>>()
+          expectTypeOf(second).toEqualTypeOf<null | Array<string>>()
           expect(second).toStrictEqual(["second"])
 
           return [...second!, "2"]
         },
         third: (third) => {
           expectTypeOf(third).toEqualTypeOf<{
-            readonly one: null | ReadonlyArray<string>
-            readonly two: null | ReadonlyArray<string>
+            readonly one: null | string
+            readonly two: null | string
           }>()
           expect(third).toStrictEqual({
-            one: ["one"],
-            two: ["two"],
+            one: "one",
+            two: "two",
           })
 
           return {
             one: (one) => {
-              expectTypeOf(one).toEqualTypeOf<null | ReadonlyArray<string>>()
-              expect(one).toStrictEqual(["one"])
+              expectTypeOf(one).toEqualTypeOf<null | string>()
+              expect(one).toStrictEqual("one")
 
-              return [...one!, "1"]
+              return "1"
             },
 
             two: (two) => {
-              expectTypeOf(two).toEqualTypeOf<null | ReadonlyArray<string>>()
-              expect(two).toStrictEqual(["two"])
+              expectTypeOf(two).toEqualTypeOf<null | string>()
+              expect(two).toStrictEqual("two")
 
-              return [...two!, "2"]
+              return "2"
             },
           }
         },
       }
     })
 
-    expect(shape.getErrors(scope)).toStrictEqual({
+    expect(shape.getError(scope)).toStrictEqual({
       first: ["another", "1"],
       second: ["second", "2"],
       third: {
-        one: ["one", "1"],
-        two: ["two", "2"],
+        one: "1",
+        two: "2",
       },
     })
 
-    expectTypeOf(shape.setErrors).parameter(0).toEqualTypeOf<
+    expectTypeOf(shape.setError).parameter(0).toEqualTypeOf<
       Setter<
         null | {
-          readonly first?: Setter<null | ReadonlyArray<string>>
-          readonly second?: Setter<null | ReadonlyArray<string>>
+          readonly first?: Setter<null | Array<string>>
+          readonly second?: Setter<null | Array<string>>
           readonly third?: Setter<
             null | {
-              readonly one?: Setter<null | ReadonlyArray<string>>
-              readonly two?: Setter<null | ReadonlyArray<string>>
+              readonly one?: Setter<null | string>
+              readonly two?: Setter<null | string>
             },
             [
               {
-                readonly one: null | ReadonlyArray<string>
-                readonly two: null | ReadonlyArray<string>
+                readonly one: null | string
+                readonly two: null | string
               },
             ]
           >
         },
         [
           {
-            readonly first: null | ReadonlyArray<string>
-            readonly second: null | ReadonlyArray<string>
+            readonly first: null | Array<string>
+            readonly second: null | Array<string>
             readonly third: {
-              readonly one: null | ReadonlyArray<string>
-              readonly two: null | ReadonlyArray<string>
+              readonly one: null | string
+              readonly two: null | string
             }
           },
         ]
       >
     >()
 
-    expectTypeOf(shape.fields.third.setErrors).parameter(0).toEqualTypeOf<
+    expectTypeOf(shape.fields.third.setError).parameter(0).toEqualTypeOf<
       Setter<
         null | {
-          readonly one?: Setter<null | ReadonlyArray<string>>
-          readonly two?: Setter<null | ReadonlyArray<string>>
+          readonly one?: Setter<null | string>
+          readonly two?: Setter<null | string>
         },
         [
           {
-            readonly one: null | ReadonlyArray<string>
-            readonly two: null | ReadonlyArray<string>
+            readonly one: null | string
+            readonly two: null | string
           },
         ]
       >
@@ -1100,25 +1104,27 @@ describe("ImpulseFormShape#setErrors()", () => {
 
   it("resets all errors", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of("", { errors: ["first"] }),
-      second: ImpulseFormValue.of(0, { errors: ["second"] }),
+      first: ImpulseFormValue.of("", { error: ["first"] }),
+      second: ImpulseFormValue.of(0, { error: ["second"] }),
       third: ImpulseFormShape.of(
         {
-          one: ImpulseFormValue.of(true),
-          two: ImpulseFormValue.of([""]),
+          one: ImpulseFormValue.of(true, {
+            validate: (input) => (input ? [null, input] : [1, null]),
+          }),
+          two: ImpulseFormValue.of([""], { error: "an error" }),
         },
         {
-          errors: {
-            one: ["one"],
-            two: ["two"],
+          error: {
+            one: 0,
+            two: "initial error",
           },
         },
       ),
       fourth: ["anything"],
     })
 
-    shape.setErrors(null)
-    expect(shape.getErrors(scope)).toBeNull()
+    shape.setError(null)
+    expect(shape.getError(scope)).toBeNull()
   })
 })
 

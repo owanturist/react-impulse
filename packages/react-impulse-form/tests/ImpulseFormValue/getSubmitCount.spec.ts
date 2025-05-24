@@ -7,7 +7,8 @@ import { wait } from "../common"
 const SLOWEST_ASYNC_MS = 3000
 
 const setupValue =
-  (enchant?: (form: ImpulseFormValue<string>) => void) => () => {
+  (enchant?: (form: ImpulseFormValue<string, ReadonlyArray<string>>) => void) =>
+  () => {
     const form = ImpulseFormValue.of("abc", {
       schema: z.string().max(2),
     })
@@ -71,6 +72,7 @@ describe.each([
   it("increments when form is invalid", ({ scope }) => {
     const form = setup()
 
+    expect(form.getError(scope)).toBe(null)
     expect(form.isInvalid(scope)).toBe(false)
 
     void form.submit()

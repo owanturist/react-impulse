@@ -8,6 +8,7 @@ import {
   type ImpulseFormListOptions,
   ImpulseFormList,
   ImpulseFormValue,
+  type ImpulseFormValueSchemaOptions,
 } from "../src"
 
 import { arg, wait } from "./common"
@@ -17,14 +18,14 @@ beforeAll(() => {
 })
 
 describe("ImpulseFormList#setElements()", () => {
-  const setup = (elements: ReadonlyArray<ImpulseFormValue<number>>) => {
+  function setup(elements: ReadonlyArray<ImpulseFormValue<number>>) {
     return ImpulseFormList.of(elements)
   }
 
-  const setupElement = (
+  function setupElement(
     initial: number,
     options?: ImpulseFormValueOptions<number>,
-  ) => {
+  ) {
     return ImpulseFormValue.of(initial, options)
   }
 
@@ -76,22 +77,27 @@ describe("ImpulseFormList#setElements()", () => {
   })
 })
 
-describe("ImpulseFormList#getErrors()", () => {
-  const setup = (elements: ReadonlyArray<ImpulseFormValue<number>>) => {
+describe("ImpulseFormList#getError()", () => {
+  function setup<TError>(
+    elements: ReadonlyArray<ImpulseFormValue<number, TError>>,
+  ) {
     return ImpulseFormList.of(elements)
   }
 
-  const setupElement = (
+  function setupElement(
     initial: number,
-    options?: ImpulseFormValueOptions<number>,
-  ) => {
-    return ImpulseFormValue.of(initial, options)
+    options?: Partial<ImpulseFormValueSchemaOptions<number>>,
+  ) {
+    return ImpulseFormValue.of(initial, {
+      schema: z.number(),
+      ...options,
+    })
   }
 
   it("matches the type definition", ({ scope }) => {
     const form = setup([setupElement(0)])
 
-    expectTypeOf(form.getErrors).toEqualTypeOf<{
+    expectTypeOf(form.getError).toEqualTypeOf<{
       (scope: Scope): null | ReadonlyArray<null | ReadonlyArray<string>>
 
       <TResult>(
@@ -103,7 +109,7 @@ describe("ImpulseFormList#getErrors()", () => {
       ): TResult
     }>()
 
-    expectTypeOf(form.getElements(scope).at(0)!.getErrors).toEqualTypeOf<{
+    expectTypeOf(form.getElements(scope).at(0)!.getError).toEqualTypeOf<{
       (scope: Scope): null | ReadonlyArray<string>
 
       <TResult>(
@@ -119,99 +125,101 @@ describe("ImpulseFormList#getErrors()", () => {
   it("returns null for empty list", ({ scope }) => {
     const form = setup([])
 
-    expect(form.getErrors(scope)).toBeNull()
-    expect(form.getErrors(scope, arg(0))).toBeNull()
-    expect(form.getErrors(scope, arg(1))).toStrictEqual([])
+    expect(form.getError(scope)).toBeNull()
+    expect(form.getError(scope, arg(0))).toBeNull()
+    expect(form.getError(scope, arg(1))).toStrictEqual([])
   })
 
   it("returns null when none of the elements have errors", ({ scope }) => {
     const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 
-    expect(form.getErrors(scope)).toBeNull()
-    expect(form.getErrors(scope, arg(0))).toBeNull()
-    expect(form.getErrors(scope, arg(1))).toStrictEqual([null, null, null])
+    expect(form.getError(scope)).toBeNull()
+    expect(form.getError(scope, arg(0))).toBeNull()
+    expect(form.getError(scope, arg(1))).toStrictEqual([null, null, null])
   })
 
   it("returns concise when at least one element has errors", ({ scope }) => {
     const form = setup([
       setupElement(0),
       setupElement(1),
-      setupElement(2, { errors: ["err"] }),
+      setupElement(2, { error: ["err"] }),
     ])
 
     const expected = [null, null, ["err"]]
 
-    expect(form.getErrors(scope)).toStrictEqual(expected)
-    expect(form.getErrors(scope, arg(0))).toStrictEqual(expected)
-    expect(form.getErrors(scope, arg(1))).toStrictEqual(expected)
+    expect(form.getError(scope)).toStrictEqual(expected)
+    expect(form.getError(scope, arg(0))).toStrictEqual(expected)
+    expect(form.getError(scope, arg(1))).toStrictEqual(expected)
   })
 
   it("returns concise when all elements have errors", ({ scope }) => {
     const form = setup([
-      setupElement(0, { errors: ["err0"] }),
-      setupElement(1, { errors: ["err1"] }),
-      setupElement(2, { errors: ["err2"] }),
+      setupElement(0, { error: ["err0"] }),
+      setupElement(1, { error: ["err1"] }),
+      setupElement(2, { error: ["err2"] }),
     ])
 
     const expected = [["err0"], ["err1"], ["err2"]]
 
-    expect(form.getErrors(scope)).toStrictEqual(expected)
-    expect(form.getErrors(scope, arg(0))).toStrictEqual(expected)
-    expect(form.getErrors(scope, arg(1))).toStrictEqual(expected)
+    expect(form.getError(scope)).toStrictEqual(expected)
+    expect(form.getError(scope, arg(0))).toStrictEqual(expected)
+    expect(form.getError(scope, arg(1))).toStrictEqual(expected)
   })
 })
 
-describe("ImpulseFormList#setErrors()", () => {
+describe("ImpulseFormList#setError()", () => {
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([ImpulseFormValue.of(0)])
+    const form = ImpulseFormList.of([
+      ImpulseFormValue.of(0, {
+        validate: (input) => (input === 0 ? ["fail", null] : [null, input]),
+      }),
+    ])
 
-    expectTypeOf(form.setErrors).toEqualTypeOf<
+    expectTypeOf(form.setError).toEqualTypeOf<
       (
         setter: Setter<
-          null | ReadonlyArray<
-            undefined | Setter<null | ReadonlyArray<string>>
-          >,
-          [ReadonlyArray<null | ReadonlyArray<string>>]
+          null | ReadonlyArray<undefined | Setter<null | string>>,
+          [ReadonlyArray<null | string>]
         >,
       ) => void
     >()
 
-    expectTypeOf(form.getElements(scope).at(0)!.setErrors).toEqualTypeOf<
-      (setter: Setter<null | ReadonlyArray<string>>) => void
+    expectTypeOf(form.getElements(scope).at(0)!.setError).toEqualTypeOf<
+      (setter: Setter<null | string>) => void
     >()
   })
 
   it("resets all errors with null", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { errors: ["err0"] }),
-      ImpulseFormValue.of(1, { errors: ["err1"] }),
-      ImpulseFormValue.of(2, { errors: ["err2"] }),
+      ImpulseFormValue.of(0, { error: ["err0"] }),
+      ImpulseFormValue.of(1, { error: ["err1"] }),
+      ImpulseFormValue.of(2, { error: ["err2"] }),
     ])
 
-    form.setErrors(null)
-    expect(form.getErrors(scope)).toBeNull()
+    form.setError(null)
+    expect(form.getError(scope)).toBeNull()
   })
 
   it("changes all errors", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { errors: ["err0"] }),
-      ImpulseFormValue.of(1, { errors: ["err1"] }),
-      ImpulseFormValue.of(2, { errors: ["err2"] }),
+      ImpulseFormValue.of(0, { error: ["err0"] }),
+      ImpulseFormValue.of(1, { error: ["err1"] }),
+      ImpulseFormValue.of(2, { error: ["err2"] }),
     ])
 
-    form.setErrors([["e0"], ["e1"], []])
-    expect(form.getErrors(scope)).toStrictEqual([["e0"], ["e1"], null])
+    form.setError([["e0"], ["e1"], null])
+    expect(form.getError(scope)).toStrictEqual([["e0"], ["e1"], null])
   })
 
   it("changes some errors", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { errors: ["err0"] }),
-      ImpulseFormValue.of(1, { errors: ["err1"] }),
-      ImpulseFormValue.of(2, { errors: ["err2"] }),
+      ImpulseFormValue.of(0, { error: ["err0"] }),
+      ImpulseFormValue.of(1, { error: ["err1"] }),
+      ImpulseFormValue.of(2, { error: ["err2"] }),
     ])
 
-    form.setErrors([(x) => [...x!, "x"], undefined, (x) => [...x!, "x"]])
-    expect(form.getErrors(scope)).toStrictEqual([
+    form.setError([(x) => [...x!, "x"], undefined, (x) => [...x!, "x"]])
+    expect(form.getError(scope)).toStrictEqual([
       ["err0", "x"],
       ["err1"],
       ["err2", "x"],
@@ -220,15 +228,20 @@ describe("ImpulseFormList#setErrors()", () => {
 })
 
 describe("ImpulseFormList#isValidated()", () => {
-  const setup = (elements: ReadonlyArray<ImpulseFormValue<number>>) => {
+  function setup<TError>(
+    elements: ReadonlyArray<ImpulseFormValue<number, TError>>,
+  ) {
     return ImpulseFormList.of(elements)
   }
 
-  const setupElement = (
+  function setupElement(
     initial: number,
-    options?: ImpulseFormValueOptions<number>,
-  ) => {
-    return ImpulseFormValue.of(initial, options)
+    options?: Partial<ImpulseFormValueSchemaOptions<number>>,
+  ) {
+    return ImpulseFormValue.of(initial, {
+      schema: z.number(),
+      ...options,
+    })
   }
 
   it("matches the type definition", ({ scope }) => {
@@ -302,7 +315,7 @@ describe("ImpulseFormList#isValidated()", () => {
     scope,
   }) => {
     const form = setup([
-      setupElement(0, { errors: ["error"] }),
+      setupElement(0, { error: ["error"] }),
       setupElement(1),
       setupElement(2),
     ])
@@ -314,18 +327,21 @@ describe("ImpulseFormList#isValidated()", () => {
 })
 
 describe("ImpulseFormList#getValidateOn()", () => {
-  const setup = (
-    elements: ReadonlyArray<ImpulseFormValue<number>>,
-    options?: ImpulseFormListOptions<ImpulseFormValue<number>>,
-  ) => {
+  function setup<TError>(
+    elements: ReadonlyArray<ImpulseFormValue<number, TError>>,
+    options?: ImpulseFormListOptions<ImpulseFormValue<number, TError>>,
+  ) {
     return ImpulseFormList.of(elements, options)
   }
 
-  const setupElement = (
+  function setupElement(
     initial: number,
-    options?: ImpulseFormValueOptions<number>,
-  ) => {
-    return ImpulseFormValue.of(initial, options)
+    options?: Partial<ImpulseFormValueSchemaOptions<number>>,
+  ) {
+    return ImpulseFormValue.of(initial, {
+      schema: z.number(),
+      ...options,
+    })
   }
 
   it("matches the type definition", ({ scope }) => {
@@ -577,13 +593,13 @@ describe("ImpulseFormList#reset()", () => {
 
   it("clears custom errors", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { errors: ["error"] }),
-      ImpulseFormValue.of(1, { errors: ["error"] }),
-      ImpulseFormValue.of(2, { errors: ["error"] }),
+      ImpulseFormValue.of(0, { error: ["error"] }),
+      ImpulseFormValue.of(1, { error: ["error"] }),
+      ImpulseFormValue.of(2, { error: ["error"] }),
     ])
 
     form.reset()
-    expect(form.getErrors(scope)).toBeNull()
+    expect(form.getError(scope)).toBeNull()
   })
 
   it("resets isValidated state", ({ scope }) => {
@@ -695,9 +711,9 @@ describe("ImpulseFormList#reset()", () => {
 
   it("updates validateOn for restored elements", ({ scope }) => {
     const form = ImpulseFormList.of([
-      ImpulseFormValue.of(0, { validateOn: "onChange" }),
-      ImpulseFormValue.of(1, { validateOn: "onChange" }),
-      ImpulseFormValue.of(2, { validateOn: "onChange" }),
+      ImpulseFormValue.of(0, { schema: z.number(), validateOn: "onChange" }),
+      ImpulseFormValue.of(1, { schema: z.number(), validateOn: "onChange" }),
+      ImpulseFormValue.of(2, { schema: z.number(), validateOn: "onChange" }),
     ])
 
     form.setElements([ImpulseFormValue.of(0)])
@@ -760,13 +776,15 @@ describe("ImpulseFormList#reset()", () => {
 })
 
 describe("ImpulseFormList#getOutput()", () => {
-  const setup = (elements: ReadonlyArray<ImpulseFormValue<number, string>>) => {
+  function setup<TError>(
+    elements: ReadonlyArray<ImpulseFormValue<number, TError, string>>,
+  ) {
     return ImpulseFormList.of(elements, {
       validateOn: "onInit",
     })
   }
 
-  const setupElement = (initial: number) => {
+  function setupElement(initial: number) {
     return ImpulseFormValue.of(initial, {
       schema: z
         .number()
@@ -1172,11 +1190,17 @@ describe("ImpulseFormList#setInitial()", () => {
 })
 
 describe("ImpulseFormList#focusFirstInvalidValue()", () => {
-  const setup = (
-    options?: ImpulseFormListOptions<ImpulseFormValue<number>>,
-  ) => {
+  function setup(
+    options?: ImpulseFormListOptions<
+      ImpulseFormValue<number, ReadonlyArray<string>>
+    >,
+  ) {
     const form = ImpulseFormList.of(
-      [ImpulseFormValue.of(0), ImpulseFormValue.of(1), ImpulseFormValue.of(2)],
+      [
+        ImpulseFormValue.of(0, { schema: z.number() }),
+        ImpulseFormValue.of(1, { schema: z.number() }),
+        ImpulseFormValue.of(2, { schema: z.number() }),
+      ],
       options,
     )
 
@@ -1202,7 +1226,7 @@ describe("ImpulseFormList#focusFirstInvalidValue()", () => {
 
   it("does not call listeners on init", () => {
     const [, { listener_0, listener_1, listener_2 }] = setup({
-      errors: [["error0"], ["error1"], ["error2"]],
+      error: [["error0"], ["error1"], ["error2"]],
     })
 
     expect(listener_0).not.toHaveBeenCalled()
@@ -1222,7 +1246,7 @@ describe("ImpulseFormList#focusFirstInvalidValue()", () => {
 
   it("focuses the first invalid element", () => {
     const [form, { listener_0, listener_1, listener_2 }] = setup({
-      errors: [["error0"], ["error1"], ["error2"]],
+      error: [["error0"], ["error1"], ["error2"]],
     })
 
     form.focusFirstInvalidValue()
@@ -1234,7 +1258,7 @@ describe("ImpulseFormList#focusFirstInvalidValue()", () => {
 
   it("calls the only invalid", () => {
     const [form, { listener_0, listener_1, listener_2 }] = setup({
-      errors: [undefined, ["error1"]],
+      error: [undefined, ["error1"]],
     })
 
     form.focusFirstInvalidValue()

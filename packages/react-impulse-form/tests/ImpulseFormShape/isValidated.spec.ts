@@ -1,4 +1,5 @@
 import type { Scope } from "react-impulse"
+import { z } from "zod"
 
 import {
   type ImpulseFormShapeOptions,
@@ -6,6 +7,7 @@ import {
   ImpulseFormShape,
   ImpulseFormValue,
 } from "../../src"
+import { arg } from "../common"
 
 interface ThirdIsValidatedVerbose {
   readonly one: boolean
@@ -33,19 +35,27 @@ const setup = (
     first: ImpulseFormValue<string>
     second: ImpulseFormValue<number>
     third: ImpulseFormShape<{
-      one: ImpulseFormValue<boolean>
-      two: ImpulseFormValue<Array<string>>
+      one: ImpulseFormValue<boolean, ReadonlyArray<string>>
+      two: ImpulseFormValue<Array<string>, ReadonlyArray<string>>
     }>
     fourth: Array<string>
   }>,
 ) => {
   return ImpulseFormShape.of(
     {
-      first: ImpulseFormValue.of(""),
-      second: ImpulseFormValue.of(0),
+      first: ImpulseFormValue.of("", {
+        validate: (input) => [null, input],
+      }),
+      second: ImpulseFormValue.of(0, {
+        validate: (input) => [null, input],
+      }),
       third: ImpulseFormShape.of({
-        one: ImpulseFormValue.of(true),
-        two: ImpulseFormValue.of([""]),
+        one: ImpulseFormValue.of(true, {
+          schema: z.boolean(),
+        }),
+        two: ImpulseFormValue.of([""], {
+          schema: z.array(z.string()),
+        }),
       }),
       fourth: ["anything"],
     },
@@ -53,20 +63,26 @@ const setup = (
   )
 }
 
-const isValidatedDefault = <TFields extends ImpulseFormShapeFields>(
+function isValidatedDefault<TFields extends ImpulseFormShapeFields>(
   scope: Scope,
   shape: ImpulseFormShape<TFields>,
-) => shape.isValidated(scope)
+) {
+  return shape.isValidated(scope)
+}
 
-const isValidatedConcise = <TFields extends ImpulseFormShapeFields>(
+function isValidatedConcise<TFields extends ImpulseFormShapeFields>(
   scope: Scope,
   shape: ImpulseFormShape<TFields>,
-) => shape.isValidated(scope, (concise) => concise)
+) {
+  return shape.isValidated(scope, arg(0))
+}
 
-const isValidatedVerbose = <TFields extends ImpulseFormShapeFields>(
+function isValidatedVerbose<TFields extends ImpulseFormShapeFields>(
   scope: Scope,
   shape: ImpulseFormShape<TFields>,
-) => shape.isValidated(scope, (_, verbose) => verbose)
+) {
+  return shape.isValidated(scope, arg(1))
+}
 
 it("matches the type signature", () => {
   const form = setup()
@@ -285,8 +301,14 @@ describe("isValidated(..)", () => {
   it("overrides fields' initial value", ({ scope }) => {
     const shape = ImpulseFormShape.of(
       {
-        one: ImpulseFormValue.of(true, { validateOn: "onInit" }),
-        two: ImpulseFormValue.of("", { validateOn: "onSubmit" }),
+        one: ImpulseFormValue.of(true, {
+          schema: z.boolean(),
+          validateOn: "onInit",
+        }),
+        two: ImpulseFormValue.of("", {
+          schema: z.string(),
+          validateOn: "onSubmit",
+        }),
       },
       {
         validateOn: "onTouch",

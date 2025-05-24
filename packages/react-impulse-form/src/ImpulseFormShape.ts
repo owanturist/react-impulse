@@ -92,17 +92,17 @@ export type ImpulseFormShapeValidateOnSetter<
 export type ImpulseFormShapeErrorSetter<
   TFields extends ImpulseFormShapeFields,
 > = Setter<
-  null | Partial<ImpulseFormShapeParam<TFields, "errors.setter">>,
+  null | Partial<ImpulseFormShapeParam<TFields, "error.setter">>,
   [ImpulseFormShapeErrorSchemaVerbose<TFields>]
 >
 
 export type ImpulseFormShapeErrorSchema<
   TFields extends ImpulseFormShapeFields,
-> = null | ImpulseFormShapeParam<TFields, "errors.schema">
+> = null | ImpulseFormShapeParam<TFields, "error.schema">
 
 export type ImpulseFormShapeErrorSchemaVerbose<
   TFields extends ImpulseFormShapeFields,
-> = ImpulseFormShapeParam<TFields, "errors.schema.verbose">
+> = ImpulseFormShapeParam<TFields, "error.schema.verbose">
 
 export interface ImpulseFormShapeOptions<
   TFields extends ImpulseFormShapeFields,
@@ -111,7 +111,7 @@ export interface ImpulseFormShapeOptions<
   initial?: ImpulseFormShapeInputSetter<TFields>
   touched?: ImpulseFormShapeFlagSetter<TFields>
   validateOn?: ImpulseFormShapeValidateOnSetter<TFields>
-  errors?: ImpulseFormShapeErrorSetter<TFields>
+  error?: ImpulseFormShapeErrorSetter<TFields>
 }
 
 export class ImpulseFormShape<
@@ -131,9 +131,9 @@ export class ImpulseFormShape<
   "validateOn.schema": ImpulseFormShapeValidateOnSchema<TFields>
   "validateOn.schema.verbose": ImpulseFormShapeValidateOnSchemaVerbose<TFields>
 
-  "errors.setter": ImpulseFormShapeErrorSetter<TFields>
-  "errors.schema": ImpulseFormShapeErrorSchema<TFields>
-  "errors.schema.verbose": ImpulseFormShapeErrorSchemaVerbose<TFields>
+  "error.setter": ImpulseFormShapeErrorSetter<TFields>
+  "error.schema": ImpulseFormShapeErrorSchema<TFields>
+  "error.schema.verbose": ImpulseFormShapeErrorSchemaVerbose<TFields>
 }> {
   public static of<TFields extends ImpulseFormShapeFields>(
     fields: Readonly<TFields>,
@@ -142,7 +142,7 @@ export class ImpulseFormShape<
       initial,
       touched,
       validateOn,
-      errors,
+      error,
     }: ImpulseFormShapeOptions<TFields> = {},
   ): ImpulseFormShape<TFields> {
     const shape = new ImpulseFormShape(null, fields)
@@ -165,8 +165,8 @@ export class ImpulseFormShape<
       }
 
       // TODO add test against null
-      if (!isUndefined(errors)) {
-        shape.setErrors(errors)
+      if (!isUndefined(error)) {
+        shape.setError(error)
       }
     })
 
@@ -306,15 +306,15 @@ export class ImpulseFormShape<
     )
   }
 
-  public getErrors(scope: Scope): ImpulseFormShapeErrorSchema<TFields>
-  public getErrors<TResult>(
+  public getError(scope: Scope): ImpulseFormShapeErrorSchema<TFields>
+  public getError<TResult>(
     scope: Scope,
     select: (
       concise: ImpulseFormShapeErrorSchema<TFields>,
       verbose: ImpulseFormShapeErrorSchemaVerbose<TFields>,
     ) => TResult,
   ): TResult
-  public getErrors<TResult = ImpulseFormShapeErrorSchema<TFields>>(
+  public getError<TResult = ImpulseFormShapeErrorSchema<TFields>>(
     scope: Scope,
     select: (
       concise: ImpulseFormShapeErrorSchema<TFields>,
@@ -328,14 +328,14 @@ export class ImpulseFormShape<
 
     for (const [key, field] of Object.entries(this.fields)) {
       if (ImpulseForm.isImpulseForm(field)) {
-        const errors = field.getErrors(scope, (concise, verbose) => ({
+        const error = field.getError(scope, (concise, verbose) => ({
           concise,
           verbose,
         }))
 
-        errorsNone = errorsNone && errors.concise == null
-        errorsConcise[key] = errors.concise
-        errorsVerbose[key] = errors.verbose
+        errorsNone = errorsNone && error.concise == null
+        errorsConcise[key] = error.concise
+        errorsVerbose[key] = error.verbose
       }
     }
 
@@ -347,11 +347,11 @@ export class ImpulseFormShape<
     )
   }
 
-  public setErrors(errors: ImpulseFormShapeErrorSetter<TFields>): void {
+  public setError(setter: ImpulseFormShapeErrorSetter<TFields>): void {
     batch((scope) => {
-      const nextErrors = isFunction(errors)
-        ? errors(this.getErrors(scope, (_, verbose) => verbose))
-        : errors
+      const nextErrors = isFunction(setter)
+        ? setter(this.getError(scope, params._second))
+        : setter
 
       for (const [key, field] of Object.entries(this.fields)) {
         const nextFieldTouched =
@@ -363,7 +363,7 @@ export class ImpulseFormShape<
           ImpulseForm.isImpulseForm(field) &&
           !isUndefined(nextFieldTouched)
         ) {
-          field.setErrors(nextFieldTouched)
+          field.setError(nextFieldTouched)
         }
       }
     })
@@ -470,7 +470,7 @@ export class ImpulseFormShape<
   ): void {
     batch((scope) => {
       const nextValidateOn = isFunction(validateOn)
-        ? validateOn(this.getValidateOn(scope, (_, verbose) => verbose))
+        ? validateOn(this.getValidateOn(scope, params._second))
         : validateOn
 
       for (const [key, field] of Object.entries(this.fields)) {
@@ -536,7 +536,7 @@ export class ImpulseFormShape<
   public setTouched(touched: ImpulseFormShapeFlagSetter<TFields>): void {
     batch((scope) => {
       const nextTouched = isFunction(touched)
-        ? touched(this.isTouched(scope, (_, verbose) => verbose))
+        ? touched(this.isTouched(scope, params._second))
         : touched
 
       for (const [key, field] of Object.entries(this.fields)) {
