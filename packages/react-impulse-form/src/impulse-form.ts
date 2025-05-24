@@ -4,7 +4,7 @@ import { isDefined } from "~/is-defined"
 import { isUndefined } from "~/is-undefined"
 
 import { type Scope, batch, untrack, Impulse } from "./dependencies"
-import { Emitter } from "./_Emitter"
+import { Emitter } from "./emitter"
 
 export interface ImpulseFormParams {
   "input.setter": unknown

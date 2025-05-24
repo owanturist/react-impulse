@@ -311,7 +311,7 @@ export default tseslint.config([
 
   // Test files config
   {
-    files: ["packages/*/tests/**/*.ts?(x)"],
+    files: ["packages/*/tests/**/*.spec.ts?(x)"],
     plugins: {
       vitest: vitestPlugin,
     },

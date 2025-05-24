@@ -24,7 +24,7 @@ import {
   type ValidateStrategy,
   VALIDATE_ON_SUBMIT,
 } from "./validate-strategy"
-import { Emitter } from "./_Emitter"
+import { Emitter } from "./emitter"
 
 function createErrorImpulseCompare<TError>(compare: Compare<TError>) {
   return (left: null | TError, right: null | TError, scope: Scope) => {
