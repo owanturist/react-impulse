@@ -46,7 +46,14 @@ export type ImpulseFormValueValidator<TInput, TError, TOutput> = (
 ) => Result<TError, TOutput>
 
 export interface ImpulseFormValueOptions<TInput, TError = null> {
+  /**
+   * The initial or custom error associated with the form value.
+   * This can be used to set an error state manually.
+   *
+   * @default null
+   */
   error?: null | TError
+
   touched?: boolean
 
   /**
@@ -520,7 +527,7 @@ export class ImpulseFormValue<
   }
 
   public setSchema(
-    schema: TOutput extends ReadonlyArray<string>
+    schema: TError extends ReadonlyArray<string>
       ? ZodLikeSchema<TOutput>
       : never,
   ): void {
