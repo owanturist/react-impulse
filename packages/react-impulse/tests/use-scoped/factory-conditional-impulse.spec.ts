@@ -3,8 +3,8 @@ import { act, renderHook } from "@testing-library/react"
 import { Impulse, type Scope, useScoped } from "../../src"
 import {
   Counter,
-  type WithIsActive,
   type WithImpulse,
+  type WithIsActive,
   type WithSpy,
 } from "../common"
 

@@ -1,7 +1,7 @@
 import { BaseImpulse } from "./base-impulse"
+import type { Compare } from "./compare"
 import { EMITTER_KEY, STATIC_SCOPE, type Scope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
-import type { Compare } from "./compare"
 
 export class DerivedImpulse<T> extends BaseImpulse<T> {
   // the inner scope proxies the setters to the outer scope

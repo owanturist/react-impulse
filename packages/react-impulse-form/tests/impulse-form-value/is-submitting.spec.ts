@@ -1,5 +1,5 @@
-import { z } from "zod"
 import type { Scope } from "react-impulse"
+import { z } from "zod"
 
 import { ImpulseFormValue } from "../../src"
 import { wait } from "../common"

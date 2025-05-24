@@ -1,6 +1,6 @@
-import { defineProject } from "vitest/config"
 import React from "react"
 import type { ProjectConfig } from "vitest"
+import { defineProject } from "vitest/config"
 
 // eslint-disable-next-line no-console
 console.log(`Running react-impulse-form tests against react@${React.version}`)

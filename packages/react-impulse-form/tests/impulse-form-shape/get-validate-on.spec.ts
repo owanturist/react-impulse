@@ -1,11 +1,11 @@
 import type { Scope } from "react-impulse"
 
 import {
-  type ImpulseFormShapeOptions,
-  type ImpulseFormShapeFields,
-  type ValidateStrategy,
   ImpulseFormShape,
+  type ImpulseFormShapeFields,
+  type ImpulseFormShapeOptions,
   ImpulseFormValue,
+  type ValidateStrategy,
 } from "../../src"
 import { arg } from "../common"
 

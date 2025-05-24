@@ -1,5 +1,5 @@
-import { useCallback } from "react"
 import { renderHook } from "@testing-library/react"
+import { useCallback } from "react"
 
 import { useScoped } from "../../src"
 

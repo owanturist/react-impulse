@@ -1,10 +1,10 @@
 import {
-  ImpulseFormValue,
+  type ImpulseForm,
   ImpulseFormList,
   type ImpulseFormListOptions,
-  type ImpulseForm,
   ImpulseFormShape,
   type ImpulseFormShapeOptions,
+  ImpulseFormValue,
 } from "../../src"
 
 const setup = <T extends ImpulseForm>(

@@ -1,7 +1,7 @@
+import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
-import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { Impulse, useScoped, useScope, type Scope } from "../../src"
+import { Impulse, type Scope, useScope, useScoped } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 

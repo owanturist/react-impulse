@@ -1,10 +1,10 @@
 import type { Setter } from "~/setter"
 
 import {
-  type ImpulseFormShapeOptions,
-  type ValidateStrategy,
   ImpulseFormShape,
+  type ImpulseFormShapeOptions,
   ImpulseFormValue,
+  type ValidateStrategy,
 } from "../../src"
 
 const setup = (

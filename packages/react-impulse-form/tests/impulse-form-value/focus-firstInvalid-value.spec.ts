@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { type ImpulseFormValueSchemaOptions, ImpulseFormValue } from "../../src"
+import { ImpulseFormValue, type ImpulseFormValueSchemaOptions } from "../../src"
 
 const setup = (
   input?: string,

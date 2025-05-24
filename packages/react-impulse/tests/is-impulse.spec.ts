@@ -1,4 +1,4 @@
-import { Impulse, type Scope, isImpulse, type ReadonlyImpulse } from "../src"
+import { Impulse, type ReadonlyImpulse, type Scope, isImpulse } from "../src"
 
 function isString(value: unknown): value is string {
   return typeof value === "string"

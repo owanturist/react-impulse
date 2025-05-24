@@ -1,7 +1,7 @@
-import { EMITTER_KEY, type Scope, injectScope } from "./scope"
-import { ScopeEmitter } from "./scope-emitter"
 import { batch } from "./batch"
 import type { Destructor } from "./destructor"
+import { EMITTER_KEY, type Scope, injectScope } from "./scope"
+import { ScopeEmitter } from "./scope-emitter"
 
 /**
  * A function that provides `Scope` as the first argument subscribes to changes of all `Impulse` instances that call the `Impulse#getValue` method inside the `listener`.

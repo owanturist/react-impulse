@@ -1,8 +1,8 @@
 import { z } from "zod"
 
 import {
-  type ImpulseFormShapeOptions,
   ImpulseFormShape,
+  type ImpulseFormShapeOptions,
   ImpulseFormValue,
 } from "../../src"
 

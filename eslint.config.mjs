@@ -1,10 +1,10 @@
 import eslint from "@eslint/js"
-import tseslint from "typescript-eslint"
+import { globalIgnores } from "eslint/config"
+import importPlugin from "eslint-plugin-import"
 import reactPlugin from "eslint-plugin-react"
 import reactHooksPlugin from "eslint-plugin-react-hooks"
-import importPlugin from "eslint-plugin-import"
 import vitestPlugin from "eslint-plugin-vitest"
-import { globalIgnores } from "eslint/config"
+import tseslint from "typescript-eslint"
 
 export default tseslint.config([
   globalIgnores(["**/node_modules/**", "**/dist/**/*", "**/*.d.ts", "**/*.md"]),
@@ -40,6 +40,13 @@ export default tseslint.config([
           blankLine: "always",
           prev: "*",
           next: "return",
+        },
+      ],
+      "sort-imports": [
+        "warn",
+        {
+          // don't sort imports, import/order does it
+          ignoreDeclarationSort: true,
         },
       ],
       // Possible Errors
@@ -135,6 +142,10 @@ export default tseslint.config([
             },
           ],
           "newlines-between": "always",
+          alphabetize: {
+            order: "asc",
+            caseInsensitive: true,
+          },
         },
       ],
       "import/no-relative-packages": "error",

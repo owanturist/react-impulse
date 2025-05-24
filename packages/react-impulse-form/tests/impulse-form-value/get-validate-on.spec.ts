@@ -2,11 +2,11 @@ import type { Scope } from "react-impulse"
 import { z } from "zod"
 
 import {
-  type ValidateStrategy,
-  type ImpulseFormValueOptions,
   ImpulseFormValue,
+  type ImpulseFormValueOptions,
   type ImpulseFormValueSchemaOptions,
   type ImpulseFormValueValidatedOptions,
+  type ValidateStrategy,
 } from "../../src"
 import { arg } from "../common"
 

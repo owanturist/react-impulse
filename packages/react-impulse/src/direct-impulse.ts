@@ -1,7 +1,7 @@
 import { BaseImpulse } from "./base-impulse"
+import type { Compare } from "./compare"
 import { STATIC_SCOPE } from "./scope"
 import type { ScopeEmitter } from "./scope-emitter"
-import type { Compare } from "./compare"
 
 export class DirectImpulse<T> extends BaseImpulse<T> {
   public constructor(

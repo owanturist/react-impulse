@@ -2,16 +2,16 @@ import { act, configure, renderHook, waitFor } from "@testing-library/react"
 import { useState } from "react"
 
 import {
-  type ReadonlyImpulse,
-  type ImpulseOptions,
   Impulse,
-  subscribe,
-  type Scope,
-  useScoped,
+  type ImpulseOptions,
   type ReadableImpulse,
+  type ReadonlyImpulse,
+  type Scope,
   type WritableImpulse,
-  untrack,
   batch,
+  subscribe,
+  untrack,
+  useScoped,
 } from "../src"
 
 import { Counter } from "./common"

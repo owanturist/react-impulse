@@ -1,13 +1,13 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, useScoped, batch, type Scope } from "../../src"
+import { Impulse, type Scope, batch, useScoped } from "../../src"
 import {
   Counter,
-  type WithImpulse,
   type WithFirst,
+  type WithImpulse,
   type WithSecond,
-  type WithThird,
   type WithSpy,
+  type WithThird,
 } from "../common"
 
 describe("multiple factory", () => {

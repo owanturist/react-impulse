@@ -1,7 +1,7 @@
-import { z } from "zod"
 import type { Scope } from "react-impulse"
+import { z } from "zod"
 
-import { ImpulseFormValue, ImpulseFormShape } from "../../src"
+import { ImpulseFormShape, ImpulseFormValue } from "../../src"
 import { wait } from "../common"
 
 const SLOWEST_ASYNC_MS = 3000

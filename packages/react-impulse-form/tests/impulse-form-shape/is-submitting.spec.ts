@@ -1,9 +1,9 @@
-import { z } from "zod"
 import type { Scope } from "react-impulse"
+import { z } from "zod"
 
 import {
-  type ImpulseFormShapeOptions,
   ImpulseFormShape,
+  type ImpulseFormShapeOptions,
   ImpulseFormValue,
 } from "../../src"
 import { wait } from "../common"

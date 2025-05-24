@@ -1,30 +1,30 @@
-import { isNull } from "~/is-null"
-import { isFunction } from "~/is-function"
-import { isStrictEqual } from "~/is-strict-equal"
-import { isShallowArrayEqual } from "~/is-shallow-array-equal"
-import { type Setter, resolveSetter } from "~/setter"
 import { hasProperty } from "~/has-property"
+import { isFunction } from "~/is-function"
+import { isNull } from "~/is-null"
+import { isShallowArrayEqual } from "~/is-shallow-array-equal"
+import { isStrictEqual } from "~/is-strict-equal"
 import type { NullOrNonNullable } from "~/null-or-non-nullable"
 import { params } from "~/params"
+import { type Setter, resolveSetter } from "~/setter"
 
 import {
   type Compare,
-  type Scope,
   Impulse,
+  type Scope,
   batch,
   untrack,
 } from "./dependencies"
-import type { Result } from "./result"
+import { Emitter } from "./emitter"
 import { ImpulseForm } from "./impulse-form"
-import { zodLikeParse, type ZodLikeSchema } from "./zod-like-schema"
+import type { Result } from "./result"
 import {
-  VALIDATE_ON_INIT,
   VALIDATE_ON_CHANGE,
+  VALIDATE_ON_INIT,
+  VALIDATE_ON_SUBMIT,
   VALIDATE_ON_TOUCH,
   type ValidateStrategy,
-  VALIDATE_ON_SUBMIT,
 } from "./validate-strategy"
-import { Emitter } from "./emitter"
+import { type ZodLikeSchema, zodLikeParse } from "./zod-like-schema"
 
 function createErrorImpulseCompare<TError>(compare: Compare<TError>) {
   return (left: null | TError, right: null | TError, scope: Scope) => {

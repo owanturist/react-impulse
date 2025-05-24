@@ -5,8 +5,8 @@ import {
   useRef,
   useSyncExternalStoreWithSelector,
 } from "./dependencies"
-import { ScopeEmitter } from "./scope-emitter"
 import { EMITTER_KEY, type Scope } from "./scope"
+import { ScopeEmitter } from "./scope-emitter"
 import { usePermanent } from "./use-permanent"
 
 export function useCreateScope(): () => Scope

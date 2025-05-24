@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
 
 import { Impulse, type Scope, useScoped } from "../../src"
-import { Counter, type WithSpy, type WithImpulse } from "../common"
+import { Counter, type WithImpulse, type WithSpy } from "../common"
 
 const factory = (scope: Scope, { impulse, spy }: WithImpulse & WithSpy) => {
   const value = impulse.getValue(scope)

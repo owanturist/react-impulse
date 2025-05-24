@@ -1,9 +1,9 @@
-import { isTruthy } from "~/is-truthy"
-import { isNull } from "~/is-null"
 import { isDefined } from "~/is-defined"
+import { isNull } from "~/is-null"
+import { isTruthy } from "~/is-truthy"
 import { isUndefined } from "~/is-undefined"
 
-import { type Scope, batch, untrack, Impulse } from "./dependencies"
+import { Impulse, type Scope, batch, untrack } from "./dependencies"
 import { Emitter } from "./emitter"
 
 export interface ImpulseFormParams {

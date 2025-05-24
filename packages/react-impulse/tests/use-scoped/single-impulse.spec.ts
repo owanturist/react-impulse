@@ -3,11 +3,11 @@ import { act, renderHook } from "@testing-library/react"
 import {
   type Compare,
   Impulse,
-  useScoped,
-  type Scope,
   type ReadableImpulse,
+  type Scope,
+  useScoped,
 } from "../../src"
-import { Counter, type WithSpy, type WithImpulse } from "../common"
+import { Counter, type WithImpulse, type WithSpy } from "../common"
 
 describe("impulse shortcut", () => {
   it("allows to use Impulse", () => {

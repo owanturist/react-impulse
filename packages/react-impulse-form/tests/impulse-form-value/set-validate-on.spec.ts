@@ -3,9 +3,9 @@ import { z } from "zod"
 import type { Setter } from "~/setter"
 
 import {
-  type ValidateStrategy,
   ImpulseFormValue,
   type ImpulseFormValueSchemaOptions,
+  type ValidateStrategy,
 } from "../../src"
 
 function setup(options?: Partial<ImpulseFormValueSchemaOptions<string>>) {

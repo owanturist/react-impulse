@@ -1,10 +1,10 @@
-import { z } from "zod"
 import type { Scope } from "react-impulse"
+import { z } from "zod"
 
 import {
+  ImpulseFormValue,
   type ImpulseFormValueSchemaOptions,
   type ValidateStrategy,
-  ImpulseFormValue,
 } from "../../src"
 
 const setup = (

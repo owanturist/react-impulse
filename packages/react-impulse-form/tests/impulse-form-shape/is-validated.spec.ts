@@ -2,9 +2,9 @@ import type { Scope } from "react-impulse"
 import { z } from "zod"
 
 import {
-  type ImpulseFormShapeOptions,
-  type ImpulseFormShapeFields,
   ImpulseFormShape,
+  type ImpulseFormShapeFields,
+  type ImpulseFormShapeOptions,
   ImpulseFormValue,
 } from "../../src"
 import { arg } from "../common"

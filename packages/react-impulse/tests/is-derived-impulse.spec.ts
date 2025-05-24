@@ -1,8 +1,8 @@
 import {
   Impulse,
+  type ReadonlyImpulse,
   type Scope,
   isDerivedImpulse,
-  type ReadonlyImpulse,
 } from "../src"
 
 function isString(value: unknown): value is string {
