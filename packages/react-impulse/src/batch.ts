@@ -1,5 +1,5 @@
-import { STATIC_SCOPE, type Scope } from "./Scope"
-import { ScopeEmitter } from "./ScopeEmitter"
+import { STATIC_SCOPE, type Scope } from "./_Scope"
+import { ScopeEmitter } from "./scope-emitter"
 
 /**
  * A helper to optimize multiple Impulse updates.

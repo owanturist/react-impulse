@@ -1,6 +1,5 @@
-import type { BaseImpulse } from "./BaseImpulse"
-import type { Scope } from "./Scope"
-import type { Func } from "./utils"
+import type { BaseImpulse } from "./base-impulse"
+import type { Scope } from "./_Scope"
 
 export function isImpulseFactory(
   isImpulse: (input: unknown) => input is BaseImpulse<unknown>,
@@ -8,7 +7,7 @@ export function isImpulseFactory(
   return (
     ...[inputOrScope, maybeCheck, maybeInput]:
       | [input: unknown]
-      | [scope: Scope, check: Func<[unknown], boolean>, input: unknown]
+      | [scope: Scope, check: (input: unknown) => boolean, input: unknown]
   ) => {
     if (!maybeCheck) {
       return isImpulse(inputOrScope)

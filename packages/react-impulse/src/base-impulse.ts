@@ -1,10 +1,12 @@
-import { DirectImpulse } from "./DirectImpulse"
-import type { ImpulseOptions } from "./ImpulseOptions"
-import type { ReadableImpulse } from "./ReadableImpulse"
-import { type Scope, extractScope, STATIC_SCOPE, EMITTER_KEY } from "./Scope"
-import { ScopeEmitter } from "./ScopeEmitter"
-import { type Func, isFunction, eq, type Compare } from "./utils"
-import type { WritableImpulse } from "./WritableImpulse"
+import { DirectImpulse } from "./direct-impulse"
+import type { ImpulseOptions } from "./impulse-options"
+import type { ReadableImpulse } from "./readable-impulse"
+import { type Scope, extractScope, STATIC_SCOPE, EMITTER_KEY } from "./_Scope"
+import { ScopeEmitter } from "./scope-emitter"
+import { isFunction } from "./is-function"
+import type { WritableImpulse } from "./writable-impulse"
+import { isStrictEqual } from "./is-strict-equal"
+import type { Compare } from "./compare"
 
 export abstract class BaseImpulse<T>
   implements ReadableImpulse<T>, WritableImpulse<T>
@@ -106,7 +108,7 @@ export abstract class BaseImpulse<T>
   ): DirectImpulse<T>
 
   public clone(
-    transformOrOptions?: Func<[T, Scope], T> | ImpulseOptions<T>,
+    transformOrOptions?: ((value: T, scope: Scope) => T) | ImpulseOptions<T>,
     maybeOptions?: ImpulseOptions<T>,
   ): DirectImpulse<T> {
     const value = this._getter()
@@ -117,6 +119,6 @@ export abstract class BaseImpulse<T>
       ? [transformOrOptions(value, STATIC_SCOPE), maybeOptions]
       : [value, transformOrOptions]
 
-    return new DirectImpulse(clonedValue, compare ?? eq)
+    return new DirectImpulse(clonedValue, compare ?? isStrictEqual)
   }
 }

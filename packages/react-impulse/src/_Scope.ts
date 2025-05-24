@@ -1,5 +1,4 @@
-import type { ScopeEmitter } from "./ScopeEmitter"
-import type { Func } from "./utils"
+import type { ScopeEmitter } from "./scope-emitter"
 
 export const EMITTER_KEY = Symbol("scope")
 
@@ -15,7 +14,7 @@ export const STATIC_SCOPE: Scope = {
 let currentScope = STATIC_SCOPE
 
 export function injectScope<TResult>(
-  execute: Func<[Scope], TResult>,
+  execute: (scope: Scope) => TResult,
   scope: Scope,
 ): TResult {
   const prevScope = currentScope

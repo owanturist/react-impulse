@@ -3,18 +3,19 @@ import {
   useRef,
   useSyncExternalStoreWithSelector,
 } from "./dependencies"
-import { ScopeEmitter } from "./ScopeEmitter"
-import { EMITTER_KEY, type Scope } from "./Scope"
-import { isFunction, usePermanent, type Func } from "./utils"
+import { ScopeEmitter } from "./scope-emitter"
+import { EMITTER_KEY, type Scope } from "./_Scope"
+import { usePermanent } from "./use-permanent"
+import { isFunction } from "./is-function"
 
-export function useCreateScope(): Func<[], Scope>
-export function useCreateScope<T = Func<[], Scope>>(
-  transform: Func<[Scope], T>,
-  compare?: Func<[T, T], boolean>,
+export function useCreateScope(): () => Scope
+export function useCreateScope<T = () => Scope>(
+  transform: (scope: Scope) => T,
+  compare?: (left: T, right: T) => boolean,
 ): T
-export function useCreateScope<T = Func<[], Scope>>(
-  transform?: Func<[Scope], T>,
-  compare?: Func<[T, T], boolean>,
+export function useCreateScope<T = () => Scope>(
+  transform?: (scope: Scope) => T,
+  compare?: (left: T, right: T) => boolean,
 ): T {
   const emitRef = useRef<null | VoidFunction>(null)
   const { emitter, onEmit } = usePermanent(() => ({

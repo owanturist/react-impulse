@@ -1,4 +1,4 @@
-import type { Compare } from "./utils"
+import type { Compare } from "./compare"
 
 export interface ImpulseOptions<T> {
   /**

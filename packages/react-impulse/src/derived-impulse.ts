@@ -1,7 +1,7 @@
-import { BaseImpulse } from "./BaseImpulse"
-import { EMITTER_KEY, STATIC_SCOPE, type Scope } from "./Scope"
-import { ScopeEmitter } from "./ScopeEmitter"
-import type { Func, Compare } from "./utils"
+import { BaseImpulse } from "./base-impulse"
+import { EMITTER_KEY, STATIC_SCOPE, type Scope } from "./_Scope"
+import { ScopeEmitter } from "./scope-emitter"
+import type { Compare } from "./compare"
 
 export class DerivedImpulse<T> extends BaseImpulse<T> {
   // the inner scope proxies the setters to the outer scope
@@ -25,8 +25,8 @@ export class DerivedImpulse<T> extends BaseImpulse<T> {
   private _version?: number
 
   public constructor(
-    private readonly _getValue: Func<[Scope], T>,
-    private readonly _setValue: Func<[T, Scope]>,
+    private readonly _getValue: (scope: Scope) => T,
+    private readonly _setValue: (value: T, scope: Scope) => void,
     compare: Compare<T>,
   ) {
     super(compare)

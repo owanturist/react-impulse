@@ -1,6 +1,6 @@
 import { type DependencyList, useMemo } from "./dependencies"
-import { useCreateScope } from "./useCreateScope"
-import type { Scope } from "./Scope"
+import { useCreateScope } from "./use-create-scope"
+import type { Scope } from "./_Scope"
 
 /**
  * The hook is an `Impulse` version of the `React.useMemo` hook.

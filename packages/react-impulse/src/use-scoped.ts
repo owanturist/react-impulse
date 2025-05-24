@@ -1,8 +1,11 @@
 import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
-import { type Compare, eq, useHandler, type Func, isFunction } from "./utils"
-import { STATIC_SCOPE, type Scope } from "./Scope"
-import { useCreateScope } from "./useCreateScope"
-import type { ReadableImpulse } from "./ReadableImpulse"
+import type { Compare } from "./compare"
+import { isFunction } from "./is-function"
+import { STATIC_SCOPE, type Scope } from "./_Scope"
+import { useCreateScope } from "./use-create-scope"
+import type { ReadableImpulse } from "./readable-impulse"
+import { useHandler } from "./use-handler"
+import { isStrictEqual } from "./is-strict-equal"
 
 export interface UseScopedOptions<T> {
   /**
@@ -42,7 +45,9 @@ export function useScoped<TResult>(
 ): TResult
 
 export function useScoped<TResult>(
-  factoryOrReadableImpulse: ReadableImpulse<TResult> | Func<[Scope], TResult>,
+  factoryOrReadableImpulse:
+    | ((scope: Scope) => TResult)
+    | ReadableImpulse<TResult>,
   dependencies?: DependencyList,
   options?: UseScopedOptions<TResult>,
 ): TResult {
@@ -61,7 +66,7 @@ export function useScoped<TResult>(
   const value = useCreateScope(
     transform,
     useHandler((prev, next) => {
-      const compare = options?.compare ?? eq
+      const compare = options?.compare ?? isStrictEqual
 
       return compare(prev, next, STATIC_SCOPE)
     }),

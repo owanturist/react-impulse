@@ -1,11 +1,13 @@
-import { type Func, eq, isFunction, hasProperty } from "./utils"
-import type { Scope } from "./Scope"
-import type { BaseImpulse } from "./BaseImpulse"
-import type { ImpulseOptions } from "./ImpulseOptions"
-import type { ReadableImpulse } from "./ReadableImpulse"
-import type { WritableImpulse } from "./WritableImpulse"
-import { DirectImpulse } from "./DirectImpulse"
-import { DerivedImpulse } from "./DerivedImpulse"
+import type { Scope } from "./_Scope"
+import type { BaseImpulse } from "./base-impulse"
+import type { ImpulseOptions } from "./impulse-options"
+import type { ReadableImpulse } from "./readable-impulse"
+import type { WritableImpulse } from "./writable-impulse"
+import { DirectImpulse } from "./direct-impulse"
+import { DerivedImpulse } from "./derived-impulse"
+import { hasProperty } from "./has-property"
+import { isFunction } from "./is-function"
+import { isStrictEqual } from "./is-strict-equal"
 
 export type Impulse<T> = BaseImpulse<T>
 
@@ -69,11 +71,14 @@ export function Impulse<T>(
 ): Impulse<T>
 
 export function Impulse<T>(
-  initialValueOrReadableImpulse?: T | ReadableImpulse<T> | Func<[Scope], T>,
+  initialValueOrReadableImpulse?:
+    | T
+    | ReadableImpulse<T>
+    | ((scope: Scope) => T),
   optionsOrWritableImpulse?:
     | ImpulseOptions<T>
     | WritableImpulse<T>
-    | Func<[T, Scope]>,
+    | ((value: T, scope: Scope) => void),
   optionsOrNothing?: ImpulseOptions<T>,
 ): Impulse<undefined | T> | Impulse<T> {
   const isGetterFunction = isFunction(initialValueOrReadableImpulse)
@@ -88,7 +93,7 @@ export function Impulse<T>(
 
     return new DirectImpulse(
       initialValueOrReadableImpulse,
-      options?.compare ?? eq,
+      options?.compare ?? isStrictEqual,
     )
   }
 
@@ -103,6 +108,6 @@ export function Impulse<T>(
       ? initialValueOrReadableImpulse
       : (scope) => initialValueOrReadableImpulse.getValue(scope),
     isFunction(setter) ? setter : (value) => setter?.setValue(value),
-    options?.compare ?? eq,
+    options?.compare ?? isStrictEqual,
   )
 }

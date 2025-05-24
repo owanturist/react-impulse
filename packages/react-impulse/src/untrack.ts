@@ -1,7 +1,7 @@
-import type { ReadableImpulse } from "./ReadableImpulse"
-import { STATIC_SCOPE, type Scope } from "./Scope"
-import { ScopeEmitter } from "./ScopeEmitter"
-import { type Func, isFunction } from "./utils"
+import type { ReadableImpulse } from "./readable-impulse"
+import { STATIC_SCOPE, type Scope } from "./_Scope"
+import { ScopeEmitter } from "./scope-emitter"
+import { isFunction } from "./is-function"
 
 /**
  * Ignores tracking any of the impulses attached to the provided Scope.
@@ -27,7 +27,7 @@ export function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
 export function untrack<TValue>(impulse: ReadableImpulse<TValue>): TValue
 
 export function untrack<T>(
-  factoryOrReadableImpulse: ReadableImpulse<T> | Func<[Scope], T>,
+  factoryOrReadableImpulse: ((scope: Scope) => T) | ReadableImpulse<T>,
 ): T {
   return ScopeEmitter._schedule(() => {
     if (isFunction(factoryOrReadableImpulse)) {

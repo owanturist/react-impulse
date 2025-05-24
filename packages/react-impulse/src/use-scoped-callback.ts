@@ -1,7 +1,7 @@
 import type { DependencyList } from "./dependencies"
-import type { Scope } from "./Scope"
-import { ScopeEmitter } from "./ScopeEmitter"
-import { useScopedMemo } from "./useScopedMemo"
+import type { Scope } from "./_Scope"
+import { ScopeEmitter } from "./scope-emitter"
+import { useScopedMemo } from "./use-scoped-memo"
 
 /**
  * The hook is an `Impulse` version of the `React.useCallback` hook.

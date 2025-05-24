@@ -1,7 +1,7 @@
-import { DerivedImpulse } from "./DerivedImpulse"
-import type { Impulse, ReadonlyImpulse } from "./Impulse"
-import { isImpulseFactory } from "./isImpulseFactory"
-import type { Scope } from "./Scope"
+import { DerivedImpulse } from "./derived-impulse"
+import type { Impulse, ReadonlyImpulse } from "./_Impulse"
+import { isImpulseFactory } from "./is-impulse-factory"
+import type { Scope } from "./_Scope"
 
 export const isDerivedImpulse = isImpulseFactory(
   (input) => input instanceof DerivedImpulse,
