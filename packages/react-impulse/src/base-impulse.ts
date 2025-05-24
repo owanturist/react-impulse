@@ -1,7 +1,7 @@
 import { DirectImpulse } from "./direct-impulse"
 import type { ImpulseOptions } from "./impulse-options"
 import type { ReadableImpulse } from "./readable-impulse"
-import { type Scope, extractScope, STATIC_SCOPE, EMITTER_KEY } from "./_Scope"
+import { type Scope, extractScope, STATIC_SCOPE, EMITTER_KEY } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 import { isFunction } from "./is-function"
 import type { WritableImpulse } from "./writable-impulse"

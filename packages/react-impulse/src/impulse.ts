@@ -1,4 +1,4 @@
-import type { Scope } from "./_Scope"
+import type { Scope } from "./scope"
 import type { BaseImpulse } from "./base-impulse"
 import type { ImpulseOptions } from "./impulse-options"
 import type { ReadableImpulse } from "./readable-impulse"

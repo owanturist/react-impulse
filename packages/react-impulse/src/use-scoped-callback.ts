@@ -1,5 +1,5 @@
 import type { DependencyList } from "./dependencies"
-import type { Scope } from "./_Scope"
+import type { Scope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 import { useScopedMemo } from "./use-scoped-memo"
 

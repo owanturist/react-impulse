@@ -1,5 +1,5 @@
 import { BaseImpulse } from "./base-impulse"
-import { STATIC_SCOPE } from "./_Scope"
+import { STATIC_SCOPE } from "./scope"
 import type { ScopeEmitter } from "./scope-emitter"
 import type { Compare } from "./compare"
 

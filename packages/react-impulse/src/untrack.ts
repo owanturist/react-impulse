@@ -1,5 +1,5 @@
 import type { ReadableImpulse } from "./readable-impulse"
-import { STATIC_SCOPE, type Scope } from "./_Scope"
+import { STATIC_SCOPE, type Scope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 import { isFunction } from "./is-function"
 

@@ -1,7 +1,7 @@
 import { BaseImpulse } from "./base-impulse"
-import type { Impulse, ReadonlyImpulse } from "./_Impulse"
+import type { Impulse, ReadonlyImpulse } from "./impulse"
 import { isImpulseFactory } from "./is-impulse-factory"
-import type { Scope } from "./_Scope"
+import type { Scope } from "./scope"
 
 export const isImpulse = isImpulseFactory(
   (input) => input instanceof BaseImpulse,

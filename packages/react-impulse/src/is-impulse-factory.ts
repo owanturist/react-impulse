@@ -1,5 +1,5 @@
 import type { BaseImpulse } from "./base-impulse"
-import type { Scope } from "./_Scope"
+import type { Scope } from "./scope"
 
 export function isImpulseFactory(
   isImpulse: (input: unknown) => input is BaseImpulse<unknown>,

@@ -1,7 +1,7 @@
 import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
 import type { Compare } from "./compare"
 import { isFunction } from "./is-function"
-import { STATIC_SCOPE, type Scope } from "./_Scope"
+import { STATIC_SCOPE, type Scope } from "./scope"
 import { useCreateScope } from "./use-create-scope"
 import type { ReadableImpulse } from "./readable-impulse"
 import { useHandler } from "./use-handler"

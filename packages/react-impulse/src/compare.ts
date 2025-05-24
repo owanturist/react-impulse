@@ -1,4 +1,4 @@
-import type { Scope } from "./_Scope"
+import type { Scope } from "./scope"
 
 /**
  * A function that compares two values and returns `true` if they are equal.

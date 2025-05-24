@@ -1,4 +1,4 @@
-import { EMITTER_KEY, type Scope, injectScope } from "./_Scope"
+import { EMITTER_KEY, type Scope, injectScope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 import { batch } from "./batch"
 import type { Destructor } from "./destructor"

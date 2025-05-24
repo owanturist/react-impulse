@@ -1,5 +1,5 @@
 import { BaseImpulse } from "./base-impulse"
-import { EMITTER_KEY, STATIC_SCOPE, type Scope } from "./_Scope"
+import { EMITTER_KEY, STATIC_SCOPE, type Scope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 import type { Compare } from "./compare"
 
