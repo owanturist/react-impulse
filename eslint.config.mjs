@@ -173,6 +173,7 @@ export default tseslint.config([
   // TypeScript files config
   tseslint.configs.strict,
   tseslint.configs.stylistic,
+  importPlugin.flatConfigs.typescript,
 
   {
     files: ["**/*.ts?(x)"],

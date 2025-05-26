@@ -2,7 +2,7 @@ import { isFunction } from "~/tools/is-function"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 
 import type { Compare } from "./compare"
-import { DirectImpulse } from "./direct-impulse"
+import type { Impulse } from "./impulse"
 import type { ImpulseOptions } from "./impulse-options"
 import type { ReadableImpulse } from "./readable-impulse"
 import { EMITTER_KEY, STATIC_SCOPE, type Scope, extractScope } from "./scope"
@@ -22,6 +22,8 @@ export abstract class BaseImpulse<T>
     value: T,
     queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
   ): void
+
+  protected abstract _clone(value: T, compare: Compare<T>): Impulse<T>
 
   /**
    * Return the value when serializing to JSON.
@@ -92,7 +94,7 @@ export abstract class BaseImpulse<T>
    *
    * @version 2.0.0
    */
-  public clone(options?: ImpulseOptions<T>): DirectImpulse<T>
+  public clone(options?: ImpulseOptions<T>): Impulse<T>
 
   /**
    * Creates a new Impulse instance out of the current one with the transformed value. Transforming might be handy when cloning mutable values (such as an Impulse).
@@ -106,12 +108,12 @@ export abstract class BaseImpulse<T>
   public clone(
     transform: (value: T, scope: Scope) => T,
     options?: ImpulseOptions<T>,
-  ): DirectImpulse<T>
+  ): Impulse<T>
 
   public clone(
     transformOrOptions?: ((value: T, scope: Scope) => T) | ImpulseOptions<T>,
     maybeOptions?: ImpulseOptions<T>,
-  ): DirectImpulse<T> {
+  ): Impulse<T> {
     const value = this._getter()
 
     const [clonedValue, { compare = this._compare } = {}] = isFunction(
@@ -120,6 +122,6 @@ export abstract class BaseImpulse<T>
       ? [transformOrOptions(value, STATIC_SCOPE), maybeOptions]
       : [value, transformOrOptions]
 
-    return new DirectImpulse(clonedValue, compare ?? isStrictEqual)
+    return this._clone(clonedValue, compare ?? isStrictEqual)
   }
 }

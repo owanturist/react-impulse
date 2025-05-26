@@ -1,5 +1,6 @@
 import { BaseImpulse } from "./base-impulse"
 import type { Compare } from "./compare"
+import { DirectImpulse } from "./direct-impulse"
 import { EMITTER_KEY, STATIC_SCOPE, type Scope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 
@@ -46,5 +47,9 @@ export class DerivedImpulse<T> extends BaseImpulse<T> {
 
   protected _setter(value: T): void {
     this._setValue(value, STATIC_SCOPE)
+  }
+
+  protected _clone(value: T, compare: Compare<T>): DirectImpulse<T> {
+    return new DirectImpulse(value, compare)
   }
 }

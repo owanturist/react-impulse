@@ -24,4 +24,8 @@ export class DirectImpulse<T> extends BaseImpulse<T> {
       queue.push(this._emitters)
     }
   }
+
+  protected _clone(value: T, compare: Compare<T>): DirectImpulse<T> {
+    return new DirectImpulse(value, compare)
+  }
 }
