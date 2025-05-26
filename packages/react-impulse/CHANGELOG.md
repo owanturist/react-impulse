@@ -1,5 +1,19 @@
 # react-impulse
 
+## 3.0.1
+
+### Patch Changes
+
+- [#850](https://github.com/owanturist/react-impulse/pull/850) [`5100c67`](https://github.com/owanturist/react-impulse/commit/5100c679fa631a4d136a7ad0cd68869a96520e90) Thanks [@dependabot](https://github.com/apps/dependabot)! - Bump @types/react from 19.1.3 to 19.1.5
+
+- [#861](https://github.com/owanturist/react-impulse/pull/861) [`7c8cf05`](https://github.com/owanturist/react-impulse/commit/7c8cf054425c53ecba205044fa8c2f4eecd6658c) Thanks [@owanturist](https://github.com/owanturist)! - Replace `BaseImpulse#clone` return type from `DirectImpulse` to `Impulse`.
+
+  #### Rationale
+
+  The `DirectImpulse` does not add any additional functionality to `Impulse` when it extends `BaseImpulse`, so it is more appropriate to return the base type `Impulse` instead of the derived type `DirectImpulse`. This change improves type consistency and reduces confusion for users of the library.
+
+- [#861](https://github.com/owanturist/react-impulse/pull/861) [`7c8cf05`](https://github.com/owanturist/react-impulse/commit/7c8cf054425c53ecba205044fa8c2f4eecd6658c) Thanks [@owanturist](https://github.com/owanturist)! - Reorganize the internal source code structure of the `react-impulse` and `react-impulse-form` packages to improve consistency across the file and folder structure. Split the set of common tools to reuse them in both packages without introducing a common npm package.
+
 ## 3.0.0
 
 ### Major Changes

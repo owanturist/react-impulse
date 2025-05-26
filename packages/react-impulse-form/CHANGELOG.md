@@ -1,5 +1,97 @@
 # react-impulse-form
 
+## 0.9.0
+
+### Minor Changes
+
+- [#853](https://github.com/owanturist/react-impulse/pull/853) [`ec25ec3`](https://github.com/owanturist/react-impulse/commit/ec25ec331680fdbe0cef9a9580acd39e163bf298) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
+
+  A custom error generic for `ImpulseFormValue<TInput, TError = null, TOutput = TInput>` has been introduced. The `ImpulseForm#setErrors` and `ImpulseForm#getErrors` methods were renamed to `ImpulseForm#setError` and `ImpulseForm#getError`, respectively.
+
+  #### Rationale
+
+  This change was made to provide a more flexible and type-safe way to handle errors in the `ImpulseFormValue` class. By allowing users to specify a custom error type, we can better accommodate different use cases and improve the overall usability of the library.
+
+  #### Migration Guide
+
+  1. Specify the `TError` as `ReadonlyArray<string>` when creating an `ImpulseFormValue` with `schema`:
+
+     ```ts
+     const form: ImpulseFormValue<
+       string,
+       ReadonlyArray<string>
+     > = ImpulseFormValue.of("", { schema: z.string() })
+     ```
+
+  2. Specify custom error type when creating an `ImpulseFormValue` with `validate`:
+
+     ```ts
+     const form: ImpulseFormValue<string, string> = ImpulseFormValue.of("", {
+       validate: (value) => {
+         return value.length > 0 ? [null, value] : ["Value is required", null]
+       },
+     })
+     ```
+
+- [#855](https://github.com/owanturist/react-impulse/pull/855) [`00d5240`](https://github.com/owanturist/react-impulse/commit/00d52409fbcc201887c03cd92ad2e412c8a0f598) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
+
+  The `useImpulseForm` and `useImpulseFormValue` hooks have been removed from the library. The `react` is no longer a peer dependency.
+
+  #### Rationale
+
+  This change was made to decouple the library from React, allowing it to be used in any JavaScript environment without being tied to a specific framework.
+
+  #### Migration Guide
+
+  1. Replace use of `useImpulseForm` by combining `ImpulseFormValue#onSubmit` and `React.useEffect` hook:
+
+     ```ts
+     const form = ImpulseFormValue.of("")
+
+     // before
+     useImpulseForm(form, {
+       onSubmit: (values, itself) => {
+         console.log(values, itself)
+       },
+     })
+
+     // after
+     React.useEffect(() => {
+       // the method returns cleanup function
+       return form.onSubmit((values) => {
+         console.log(values, form)
+       })
+     }, [form])
+     ```
+
+  2. Replace use of `useImpulseFormValue` by combining `ImpulseFormValue#onFocusWhenInvalid` and `React.useEffect` hook:
+
+     ```tsx
+     const form = ImpulseFormValue.of("")
+     const inputRef = React.useRef(null)
+
+     <input ref={inputRef} />
+
+     // before
+     useImpulseFormValue(form, {
+       onFocusInvalid: inputRef
+     })
+
+     // after
+     React.useEffect(() => {
+       // the method returns cleanup function
+       return form.onFocusWhenInvalid(() => {
+         inputRef.current?.focus()
+       })
+     }, [form, inputRef])
+     ```
+
+### Patch Changes
+
+- [#850](https://github.com/owanturist/react-impulse/pull/850) [`5100c67`](https://github.com/owanturist/react-impulse/commit/5100c679fa631a4d136a7ad0cd68869a96520e90) Thanks [@dependabot](https://github.com/apps/dependabot)! - Bump @types/react from 19.1.3 to 19.1.5
+
+- [#861](https://github.com/owanturist/react-impulse/pull/861) [`7c8cf05`](https://github.com/owanturist/react-impulse/commit/7c8cf054425c53ecba205044fa8c2f4eecd6658c) Thanks [@owanturist](https://github.com/owanturist)! - Reorganize the internal source code structure of the `react-impulse` and `react-impulse-form` packages to improve consistency across the file and folder structure. Split the set of common tools to reuse them in both packages without introducing a common npm package.
+
 ## 0.8.0
 
 ### Minor Changes
