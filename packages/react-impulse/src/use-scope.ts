@@ -1,5 +1,5 @@
-import { identity } from "~/identity"
-import { isStrictEqual } from "~/is-strict-equal"
+import { identity } from "~/tools/identity"
+import { isStrictEqual } from "~/tools/is-strict-equal"
 
 import type { Scope } from "./scope"
 import { useCreateScope } from "./use-create-scope"

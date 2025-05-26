@@ -1,6 +1,6 @@
-import { hasProperty } from "~/has-property"
-import { isFunction } from "~/is-function"
-import { isStrictEqual } from "~/is-strict-equal"
+import { hasProperty } from "~/tools/has-property"
+import { isFunction } from "~/tools/is-function"
+import { isStrictEqual } from "~/tools/is-strict-equal"
 
 import type { BaseImpulse } from "./base-impulse"
 import { DerivedImpulse } from "./derived-impulse"

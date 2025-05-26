@@ -5,7 +5,6 @@
     "allowUnusedLabels": false,
     "target": "ES2020",
     "module": "ES2022",
-    // https://www.totaltypescript.com/relative-import-paths-need-explicit-file-extensions-in-ecmascript-imports
     "moduleResolution": "bundler",
     "esModuleInterop": true,
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
@@ -26,8 +25,8 @@
     "verbatimModuleSyntax": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["tools/*"]
+      "~/tools/*": ["./tools/*"]
     }
   },
-  "include": ["./*.ts", "tools/**/*.ts"]
+  "include": ["./*.ts", "./*.mts"]
 }

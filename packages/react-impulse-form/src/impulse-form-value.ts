@@ -1,11 +1,11 @@
-import { hasProperty } from "~/has-property"
-import { isFunction } from "~/is-function"
-import { isNull } from "~/is-null"
-import { isShallowArrayEqual } from "~/is-shallow-array-equal"
-import { isStrictEqual } from "~/is-strict-equal"
-import type { NullOrNonNullable } from "~/null-or-non-nullable"
-import { params } from "~/params"
-import { type Setter, resolveSetter } from "~/setter"
+import { hasProperty } from "~/tools/has-property"
+import { isFunction } from "~/tools/is-function"
+import { isNull } from "~/tools/is-null"
+import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
+import { isStrictEqual } from "~/tools/is-strict-equal"
+import type { NullOrNonNullable } from "~/tools/null-or-non-nullable"
+import { params } from "~/tools/params"
+import { type Setter, resolveSetter } from "~/tools/setter"
 
 import {
   type Compare,

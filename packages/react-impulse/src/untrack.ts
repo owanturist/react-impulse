@@ -1,4 +1,4 @@
-import { isFunction } from "~/is-function"
+import { isFunction } from "~/tools/is-function"
 
 import type { ReadableImpulse } from "./readable-impulse"
 import { STATIC_SCOPE, type Scope } from "./scope"

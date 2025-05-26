@@ -1,4 +1,4 @@
-import { isFunction } from "~/is-function"
+import { isFunction } from "~/tools/is-function"
 
 export type Setter<
   TValue,

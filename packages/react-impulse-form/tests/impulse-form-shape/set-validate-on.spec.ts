@@ -1,4 +1,4 @@
-import type { Setter } from "~/setter"
+import type { Setter } from "~/tools/setter"
 
 import {
   ImpulseFormShape,

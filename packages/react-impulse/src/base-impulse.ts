@@ -1,5 +1,5 @@
-import { isFunction } from "~/is-function"
-import { isStrictEqual } from "~/is-strict-equal"
+import { isFunction } from "~/tools/is-function"
+import { isStrictEqual } from "~/tools/is-strict-equal"
 
 import type { Compare } from "./compare"
 import { DirectImpulse } from "./direct-impulse"

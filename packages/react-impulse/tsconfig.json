@@ -1,11 +1,4 @@
 {
   "extends": "../../tsconfig.json",
-  "include": [
-    "src",
-    "tests",
-    "./*.ts",
-    "../../tools/has-property.ts",
-    "../../tools/is-strict-equal.ts",
-    "../../tools/identity.ts"
-  ]
+  "include": ["src", "tests", "./*.ts"]
 }

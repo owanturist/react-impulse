@@ -1,7 +1,7 @@
-import { hasProperty } from "~/has-property"
-import { isArray } from "~/is-array"
-import { isObject } from "~/is-object"
-import { isString } from "~/is-string"
+import { hasProperty } from "~/tools/has-property"
+import { isArray } from "~/tools/is-array"
+import { isObject } from "~/tools/is-object"
+import { isString } from "~/tools/is-string"
 
 import type { Result } from "./result"
 

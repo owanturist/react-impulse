@@ -1,4 +1,4 @@
-import { uniq } from "~/uniq"
+import { uniq } from "~/tools/uniq"
 
 export class Emitter<
   TArgs extends ReadonlyArray<unknown> = [],

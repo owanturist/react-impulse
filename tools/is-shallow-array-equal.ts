@@ -1,4 +1,4 @@
-import { isStrictEqual } from "~/is-strict-equal"
+import { isStrictEqual } from "~/tools/is-strict-equal"
 
 export function isShallowArrayEqual<T>(
   left: ReadonlyArray<T>,

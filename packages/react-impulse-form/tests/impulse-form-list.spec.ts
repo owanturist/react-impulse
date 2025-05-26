@@ -1,7 +1,7 @@
 import { type Scope, untrack } from "react-impulse"
 import { z } from "zod"
 
-import type { Setter } from "~/setter"
+import type { Setter } from "~/tools/setter"
 
 import {
   ImpulseFormList,
