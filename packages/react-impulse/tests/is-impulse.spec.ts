@@ -1,8 +1,6 @@
-import { Impulse, type ReadonlyImpulse, type Scope, isImpulse } from "../src"
+import { isString } from "~/tools/is-string"
 
-function isString(value: unknown): value is string {
-  return typeof value === "string"
-}
+import { Impulse, type ReadonlyImpulse, type Scope, isImpulse } from "../src"
 
 describe("isImpulse(input)", () => {
   const known_check = (input: number | Impulse<number>) => {
