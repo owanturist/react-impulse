@@ -1,7 +1,7 @@
+import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
-import { act, render, screen, fireEvent } from "@testing-library/react"
 
-import { batch, Impulse, useScoped, type Scope } from "../../src"
+import { Impulse, type Scope, batch, useScoped } from "../../src"
 import { Counter } from "../common"
 
 describe.each([

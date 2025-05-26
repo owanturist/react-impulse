@@ -1,5 +1,5 @@
-import React from "react"
 import { screen, within } from "@testing-library/react"
+import React from "react"
 
 import { type Impulse, useScoped } from "../../src"
 

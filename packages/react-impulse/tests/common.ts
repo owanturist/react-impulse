@@ -11,7 +11,11 @@ export abstract class Counter {
     return prev.count === next.count
   })
 
-  public static merge(left: Counter, right: Counter, ...rest: Array<Counter>) {
+  public static merge(
+    left: Counter,
+    right: Counter,
+    ...rest: Array<Counter>
+  ): Counter {
     return {
       count: [left, right, ...rest]
         .map(Counter.getCount)

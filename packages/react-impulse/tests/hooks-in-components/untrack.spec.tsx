@@ -1,7 +1,7 @@
-import React from "react"
 import { fireEvent, render, screen } from "@testing-library/react"
+import React from "react"
 
-import { Impulse, untrack, type ReadableImpulse } from "../../src"
+import { Impulse, type ReadableImpulse, untrack } from "../../src"
 
 it("returns the `factory` function result without tracking impulses", () => {
   const onRender = vi.fn()
