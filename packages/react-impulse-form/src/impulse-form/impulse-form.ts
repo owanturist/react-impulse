@@ -3,36 +3,10 @@ import { isNull } from "~/tools/is-null"
 import { isTruthy } from "~/tools/is-truthy"
 import { isUndefined } from "~/tools/is-undefined"
 
-import { Impulse, type Scope, batch, untrack } from "./dependencies"
-import { Emitter } from "./emitter"
+import { Impulse, type Scope, batch, untrack } from "../dependencies"
+import { Emitter } from "../emitter"
 
-export interface ImpulseFormParams {
-  "input.setter": unknown
-  "input.schema": unknown
-
-  "output.schema": unknown
-  "output.schema.verbose": unknown
-
-  "flag.setter": unknown
-  "flag.schema": unknown
-  "flag.schema.verbose": unknown
-
-  "validateOn.setter": unknown
-  "validateOn.schema": unknown
-  "validateOn.schema.verbose": unknown
-
-  "error.setter": unknown
-  "error.schema": unknown
-  "error.schema.verbose": unknown
-}
-
-export type ImpulseFormParamsKeys = keyof ImpulseFormParams
-
-export type GetImpulseFormParam<
-  TTarget,
-  TKey extends ImpulseFormParamsKeys,
-  TFallback = never,
-> = TTarget extends ImpulseForm<infer TParams> ? TParams[TKey] : TFallback
+import type { ImpulseFormParams } from "./impulse-form-params"
 
 export abstract class ImpulseForm<
   TParams extends ImpulseFormParams = ImpulseFormParams,
