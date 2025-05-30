@@ -1181,7 +1181,7 @@ describe("ImpulseFormList#setInitial()", () => {
   })
 })
 
-describe("ImpulseFormList#focusFirstInvalidValue()", () => {
+describe("ImpulseFormList#focusFirstInvalid()", () => {
   function setup(
     options?: ImpulseFormListOptions<
       ImpulseFormUnit<number, ReadonlyArray<string>>
@@ -1229,7 +1229,7 @@ describe("ImpulseFormList#focusFirstInvalidValue()", () => {
   it("does not focus any when all valid", () => {
     const [form, { listener_0, listener_1, listener_2 }] = setup()
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
 
     expect(listener_0).not.toHaveBeenCalled()
     expect(listener_1).not.toHaveBeenCalled()
@@ -1241,7 +1241,7 @@ describe("ImpulseFormList#focusFirstInvalidValue()", () => {
       error: [["error0"], ["error1"], ["error2"]],
     })
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
 
     expect(listener_0).toHaveBeenCalledExactlyOnceWith(["error0"])
     expect(listener_1).not.toHaveBeenCalled()
@@ -1253,7 +1253,7 @@ describe("ImpulseFormList#focusFirstInvalidValue()", () => {
       error: [undefined, ["error1"]],
     })
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
 
     expect(listener_0).not.toHaveBeenCalled()
     expect(listener_1).toHaveBeenCalledExactlyOnceWith(["error1"])

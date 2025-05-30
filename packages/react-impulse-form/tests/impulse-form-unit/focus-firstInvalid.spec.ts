@@ -16,16 +16,16 @@ const setup = (
 it("matches the type signature", () => {
   const form = setup()
 
-  expectTypeOf(form.focusFirstInvalidValue).toEqualTypeOf<VoidFunction>()
+  expectTypeOf(form.focusFirstInvalid).toEqualTypeOf<VoidFunction>()
 })
 
-describe("focusFirstInvalidValue() when validated", () => {
+describe("focusFirstInvalid() when validated", () => {
   it("nothing happens if a listener is not attached", () => {
     const form = setup()
-    const spy = vi.spyOn(form, "focusFirstInvalidValue")
+    const spy = vi.spyOn(form, "focusFirstInvalid")
 
     expect(() => {
-      form.focusFirstInvalidValue()
+      form.focusFirstInvalid()
     }).not.toThrow()
 
     expect(spy).toHaveBeenCalledOnce()
@@ -46,7 +46,7 @@ describe("focusFirstInvalidValue() when validated", () => {
 
     form.onFocusWhenInvalid(listener)
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
     expect(listener).toHaveBeenCalledOnce()
   })
 
@@ -56,7 +56,7 @@ describe("focusFirstInvalidValue() when validated", () => {
 
     form.onFocusWhenInvalid(listener)
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
     expect(listener).toHaveBeenCalledExactlyOnceWith([
       "String must contain at least 2 character(s)",
     ])
@@ -68,7 +68,7 @@ describe("focusFirstInvalidValue() when validated", () => {
 
     form.onFocusWhenInvalid(listener)
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
     expect(listener).toHaveBeenCalledExactlyOnceWith(["Custom error"])
   })
 
@@ -80,20 +80,20 @@ describe("focusFirstInvalidValue() when validated", () => {
     form.onFocusWhenInvalid(listener_1)
     form.onFocusWhenInvalid(listener_2)
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
     expect(listener_1).toHaveBeenCalledOnce()
     expect(listener_2).toHaveBeenCalledOnce()
   })
 
-  it("calls a listener per each focusFirstInvalidValue()", () => {
+  it("calls a listener per each focusFirstInvalid()", () => {
     const form = setup()
     const listener = vi.fn()
 
     form.onFocusWhenInvalid(listener)
 
-    form.focusFirstInvalidValue()
-    form.focusFirstInvalidValue()
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
+    form.focusFirstInvalid()
+    form.focusFirstInvalid()
     expect(listener).toHaveBeenCalledTimes(3)
   })
 
@@ -103,12 +103,12 @@ describe("focusFirstInvalidValue() when validated", () => {
 
     const unsubscribe = form.onFocusWhenInvalid(listener)
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
     expect(listener).toHaveBeenCalledTimes(1)
     listener.mockClear()
 
     unsubscribe()
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
     expect(listener).not.toHaveBeenCalled()
   })
 
@@ -119,7 +119,7 @@ describe("focusFirstInvalidValue() when validated", () => {
     form.onFocusWhenInvalid(listener)
     form.onFocusWhenInvalid(listener)
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
     expect(listener).toHaveBeenCalledTimes(1)
   })
 
@@ -131,27 +131,27 @@ describe("focusFirstInvalidValue() when validated", () => {
     const unsubscribe_2 = form.onFocusWhenInvalid(listener)
     const unsubscribe_3 = form.onFocusWhenInvalid(listener)
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
     expect(listener).toHaveBeenCalled()
     listener.mockClear()
 
     unsubscribe_1()
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
     expect(listener).toHaveBeenCalled()
     listener.mockClear()
 
     unsubscribe_2()
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
     expect(listener).toHaveBeenCalled()
     listener.mockClear()
 
     unsubscribe_3()
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
     expect(listener).not.toHaveBeenCalled()
   })
 })
 
-describe("focusFirstInvalidValue() when not validated", () => {
+describe("focusFirstInvalid() when not validated", () => {
   it("does not call a listener", () => {
     const form = setup("", { touched: false })
     const listener = vi.fn()
@@ -162,7 +162,7 @@ describe("focusFirstInvalidValue() when not validated", () => {
   })
 })
 
-describe("focusFirstInvalidValue() when valid", () => {
+describe("focusFirstInvalid() when valid", () => {
   it("does not call a listener", () => {
     const form = setup("123")
     const listener = vi.fn()

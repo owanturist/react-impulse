@@ -136,7 +136,7 @@ export abstract class ImpulseForm<
     })
 
     if (isUndefined(promises)) {
-      this._root.focusFirstInvalidValue()
+      this._root.focusFirstInvalid()
     } else if (promises.length > 0) {
       this._root._submittingCount.setValue((count) => count + 1)
 
@@ -146,7 +146,7 @@ export abstract class ImpulseForm<
     }
   }
 
-  public focusFirstInvalidValue(): void {
+  public focusFirstInvalid(): void {
     this._getFocusFirstInvalidValue()?.()
   }
 

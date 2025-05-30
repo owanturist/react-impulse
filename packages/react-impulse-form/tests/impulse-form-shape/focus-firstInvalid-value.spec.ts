@@ -65,18 +65,16 @@ function setup(
 it("matches the type signature", () => {
   const [form] = setup()
 
-  expectTypeOf(form.focusFirstInvalidValue).toEqualTypeOf<VoidFunction>()
-  expectTypeOf(
-    form.fields._3.focusFirstInvalidValue,
-  ).toEqualTypeOf<VoidFunction>()
+  expectTypeOf(form.focusFirstInvalid).toEqualTypeOf<VoidFunction>()
+  expectTypeOf(form.fields._3.focusFirstInvalid).toEqualTypeOf<VoidFunction>()
 })
 
-describe("focusFirstInvalidValue()", () => {
+describe("focusFirstInvalid()", () => {
   it("calls a single validated field's listener", () => {
     const [form, { listener_1, listener_2, listener_3_1, listener_3_2 }] =
       setup()
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
 
     expect(listener_1).toHaveBeenCalledOnce()
     expect(listener_2).not.toHaveBeenCalled()
@@ -93,7 +91,7 @@ describe("focusFirstInvalidValue()", () => {
         },
       })
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
 
     expect(listener_1).not.toHaveBeenCalled()
     expect(listener_2).toHaveBeenCalledOnce()
@@ -109,7 +107,7 @@ describe("focusFirstInvalidValue()", () => {
         },
       })
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
 
     expect(listener_1).not.toHaveBeenCalled()
     expect(listener_2).not.toHaveBeenCalled()
@@ -127,7 +125,7 @@ describe("focusFirstInvalidValue()", () => {
         },
       })
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
 
     expect(listener_1).not.toHaveBeenCalled()
     expect(listener_2).not.toHaveBeenCalled()
@@ -136,7 +134,7 @@ describe("focusFirstInvalidValue()", () => {
   })
 })
 
-describe("fields.*.focusFirstInvalidValue()", () => {
+describe("fields.*.focusFirstInvalid()", () => {
   it("calls the first validated field's listener", () => {
     const [form, { listener_1, listener_2, listener_3_1, listener_3_2 }] =
       setup({
@@ -145,7 +143,7 @@ describe("fields.*.focusFirstInvalidValue()", () => {
         },
       })
 
-    form.fields._3.focusFirstInvalidValue()
+    form.fields._3.focusFirstInvalid()
 
     expect(listener_1).not.toHaveBeenCalled()
     expect(listener_2).not.toHaveBeenCalled()
@@ -162,7 +160,7 @@ describe("fields.*.focusFirstInvalidValue()", () => {
         },
       })
 
-    form.fields._3.focusFirstInvalidValue()
+    form.fields._3.focusFirstInvalid()
 
     expect(listener_1).not.toHaveBeenCalled()
     expect(listener_2).not.toHaveBeenCalled()
