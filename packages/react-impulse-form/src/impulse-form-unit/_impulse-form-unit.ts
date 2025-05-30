@@ -123,11 +123,17 @@ export class ImpulseFormUnit<
       return [null, input as unknown as TOutput]
     }
 
-    if (!this._validated.getValue(scope)) {
-      return [null, null]
+    const [error, output] = validator._validate(this.getInput(scope))
+
+    if (isNull(error)) {
+      return [null, output]
     }
 
-    return validator._validate(this.getInput(scope))
+    if (this._validated.getValue(scope)) {
+      return [error, null]
+    }
+
+    return [null, null]
   }
 
   protected _getFocusFirstInvalidValue(): null | VoidFunction {
