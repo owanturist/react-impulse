@@ -17,6 +17,7 @@ import {
   ImpulseForm,
   type ImpulseFormParamsKeys,
 } from "./impulse-form"
+import { isImpulseForm } from "./is-impulse-form"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./validate-strategy"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -180,7 +181,7 @@ export class ImpulseFormShape<
     const acc = {} as TFields
 
     for (const [key, field] of Object.entries(fields)) {
-      acc[key as keyof TFields] = ImpulseForm.isImpulseForm(field)
+      acc[key as keyof TFields] = isImpulseForm(field)
         ? (ImpulseForm._childOf(this, field) as TFields[keyof TFields])
         : (field as TFields[keyof TFields])
     }
@@ -194,9 +195,7 @@ export class ImpulseFormShape<
     const acc = {} as Record<keyof TFields, TResult>
 
     for (const [key, field] of Object.entries(this.fields)) {
-      const result = ImpulseForm.isImpulseForm(field)
-        ? fn(field, key)
-        : (field as TResult)
+      const result = isImpulseForm(field) ? fn(field, key) : (field as TResult)
 
       acc[key as keyof typeof acc] = result
     }
@@ -208,7 +207,7 @@ export class ImpulseFormShape<
     output: ImpulseFormShapeOutputSchema<TFields>,
   ): ReadonlyArray<void | Promise<unknown>> {
     const promises = Object.entries(this.fields).flatMap(([key, field]) => {
-      if (!ImpulseForm.isImpulseForm(field)) {
+      if (!isImpulseForm(field)) {
         return []
       }
 
@@ -220,7 +219,7 @@ export class ImpulseFormShape<
 
   protected _getFocusFirstInvalidValue(): VoidFunction | null {
     for (const field of Object.values(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
+      if (isImpulseForm(field)) {
         const focus = ImpulseForm._getFocusFirstInvalidValue(field)
 
         if (focus != null) {
@@ -245,7 +244,7 @@ export class ImpulseFormShape<
     isRoot: boolean,
   ): void {
     for (const [key, field] of Object.entries(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
+      if (isImpulseForm(field)) {
         ImpulseForm._setInitial(field, initial?.fields[key], isRoot)
       }
     }
@@ -253,7 +252,7 @@ export class ImpulseFormShape<
 
   protected _setValidated(isValidated: boolean): void {
     for (const field of Object.values(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
+      if (isImpulseForm(field)) {
         ImpulseForm._setValidated(field, isValidated)
       }
     }
@@ -279,7 +278,7 @@ export class ImpulseFormShape<
     for (const key of keys) {
       const field = this.fields[key]
 
-      if (ImpulseForm.isImpulseForm(field)) {
+      if (isImpulseForm(field)) {
         const [concise, verbose, dirty] = ImpulseForm._isDirty(
           scope,
           field,
@@ -326,7 +325,7 @@ export class ImpulseFormShape<
     const errorsVerbose = {} as Record<string, unknown>
 
     for (const [key, field] of Object.entries(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
+      if (isImpulseForm(field)) {
         const error = field.getError(scope, (concise, verbose) => ({
           concise,
           verbose,
@@ -358,10 +357,7 @@ export class ImpulseFormShape<
             ? nextErrors
             : nextErrors[key as keyof typeof nextErrors]
 
-        if (
-          ImpulseForm.isImpulseForm(field) &&
-          !isUndefined(nextFieldTouched)
-        ) {
+        if (isImpulseForm(field) && !isUndefined(nextFieldTouched)) {
           field.setError(nextFieldTouched)
         }
       }
@@ -396,7 +392,7 @@ export class ImpulseFormShape<
     const validatedVerbose = {} as Record<string, unknown>
 
     for (const [key, field] of Object.entries(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
+      if (isImpulseForm(field)) {
         const validated = field.isValidated(scope, (concise, verbose) => ({
           concise,
           verbose,
@@ -439,7 +435,7 @@ export class ImpulseFormShape<
     const validateOnVerbose = {} as Record<string, unknown>
 
     for (const [key, field] of Object.entries(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
+      if (isImpulseForm(field)) {
         const validateOn = field.getValidateOn(scope, (concise, verbose) => ({
           concise,
           verbose,
@@ -477,10 +473,7 @@ export class ImpulseFormShape<
           ? nextValidateOn
           : nextValidateOn[key as keyof typeof nextValidateOn]
 
-        if (
-          ImpulseForm.isImpulseForm(field) &&
-          !isUndefined(nextFieldTouched)
-        ) {
+        if (isImpulseForm(field) && !isUndefined(nextFieldTouched)) {
           field.setValidateOn(nextFieldTouched)
         }
       }
@@ -509,7 +502,7 @@ export class ImpulseFormShape<
     const touchedVerbose = {} as Record<string, unknown>
 
     for (const [key, field] of Object.entries(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
+      if (isImpulseForm(field)) {
         const touched = field.isTouched(scope, (concise, verbose) => ({
           concise,
           verbose,
@@ -543,10 +536,7 @@ export class ImpulseFormShape<
           ? nextTouched
           : nextTouched[key as keyof typeof nextTouched]
 
-        if (
-          ImpulseForm.isImpulseForm(field) &&
-          !isUndefined(nextFieldTouched)
-        ) {
+        if (isImpulseForm(field) && !isUndefined(nextFieldTouched)) {
           field.setTouched(nextFieldTouched)
         }
       }
@@ -562,7 +552,7 @@ export class ImpulseFormShape<
         : resetter
 
       for (const [key, field] of Object.entries(this.fields)) {
-        if (ImpulseForm.isImpulseForm(field)) {
+        if (isImpulseForm(field)) {
           field.reset(resetValue[key as keyof typeof resetValue])
         }
       }
@@ -590,7 +580,7 @@ export class ImpulseFormShape<
     const valueVerbose = {} as Record<string, unknown>
 
     for (const [key, field] of Object.entries(this.fields)) {
-      if (ImpulseForm.isImpulseForm(field)) {
+      if (isImpulseForm(field)) {
         const output = field.getOutput(scope, (concise, verbose) => ({
           concise,
           verbose,
@@ -629,7 +619,7 @@ export class ImpulseFormShape<
       for (const [key, field] of Object.entries(this.fields)) {
         const nextFieldInput = nextInput[key as keyof typeof nextInput]
 
-        if (ImpulseForm.isImpulseForm(field) && !isUndefined(nextFieldInput)) {
+        if (isImpulseForm(field) && !isUndefined(nextFieldInput)) {
           field.setInput(nextFieldInput)
         }
       }
@@ -652,10 +642,7 @@ export class ImpulseFormShape<
       for (const [key, field] of Object.entries(this.fields)) {
         const nextFieldInitial = nextInitial[key as keyof typeof nextInitial]
 
-        if (
-          ImpulseForm.isImpulseForm(field) &&
-          !isUndefined(nextFieldInitial)
-        ) {
+        if (isImpulseForm(field) && !isUndefined(nextFieldInitial)) {
           field.setInitial(nextFieldInitial)
         }
       }

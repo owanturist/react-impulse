@@ -1,4 +1,6 @@
 export * from "./impulse-form"
+export * from "./is-impulse-form"
+
 export * from "./impulse-form-value"
 export * from "./impulse-form-shape"
 export * from "./impulse-form-list"

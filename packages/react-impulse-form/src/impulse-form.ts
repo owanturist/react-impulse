@@ -37,10 +37,6 @@ export type GetImpulseFormParam<
 export abstract class ImpulseForm<
   TParams extends ImpulseFormParams = ImpulseFormParams,
 > {
-  public static isImpulseForm(value: unknown): value is ImpulseForm {
-    return value instanceof ImpulseForm
-  }
-
   protected static _childOf<TChild extends ImpulseForm>(
     parent: ImpulseForm,
     child: TChild,
