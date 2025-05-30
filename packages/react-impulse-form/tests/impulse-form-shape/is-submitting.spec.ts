@@ -23,15 +23,15 @@ interface ShapeFields {
 const setupShape =
   (enchant?: (form: ImpulseFormShape<ShapeFields>) => void) =>
   (options?: ImpulseFormShapeOptions<ShapeFields>) => {
-    const form = ImpulseFormShape.of(
+    const form = ImpulseFormShape(
       {
-        _1: ImpulseFormUnit.of("", {
+        _1: ImpulseFormUnit("", {
           schema: z.string().max(2),
         }),
-        _2: ImpulseFormUnit.of(0),
-        _3: ImpulseFormShape.of({
-          _1: ImpulseFormUnit.of(true),
-          _2: ImpulseFormUnit.of([""], {
+        _2: ImpulseFormUnit(0),
+        _3: ImpulseFormShape({
+          _1: ImpulseFormUnit(true),
+          _2: ImpulseFormUnit([""], {
             schema: z.array(z.string().max(2)),
           }),
         }),

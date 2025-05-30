@@ -14,7 +14,7 @@ const setup = <T extends ImpulseForm>(
   elements: ReadonlyArray<T>,
   options?: ImpulseFormListOptions<T>,
 ) => {
-  return ImpulseFormList.of(elements, options)
+  return ImpulseFormList(elements, options)
 }
 
 interface Element {
@@ -23,10 +23,10 @@ interface Element {
 }
 
 const setupElement = (options?: ImpulseFormShapeOptions<Element>) => {
-  return ImpulseFormShape.of(
+  return ImpulseFormShape(
     {
-      first: ImpulseFormUnit.of(0),
-      second: ImpulseFormUnit.of(""),
+      first: ImpulseFormUnit(0),
+      second: ImpulseFormUnit(""),
     },
     options,
   )

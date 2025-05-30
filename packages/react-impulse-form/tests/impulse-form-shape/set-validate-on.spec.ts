@@ -18,13 +18,13 @@ const setup = (
     fourth: Array<string>
   }>,
 ) => {
-  return ImpulseFormShape.of(
+  return ImpulseFormShape(
     {
-      first: ImpulseFormUnit.of(""),
-      second: ImpulseFormUnit.of(0),
-      third: ImpulseFormShape.of({
-        one: ImpulseFormUnit.of(true),
-        two: ImpulseFormUnit.of([""]),
+      first: ImpulseFormUnit(""),
+      second: ImpulseFormUnit(0),
+      third: ImpulseFormShape({
+        one: ImpulseFormUnit(true),
+        two: ImpulseFormUnit([""]),
       }),
       fourth: ["anything"],
     },

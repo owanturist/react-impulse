@@ -6,9 +6,9 @@ import { type ImpulseForm, ImpulseFormUnit } from "../src"
 
 import { arg } from "./common"
 
-describe("ImpulseFormUnit.of()", () => {
+describe("ImpulseFormUnit()", () => {
   it("creates ImpulseFormUnit without validation", ({ scope }) => {
-    const value = ImpulseFormUnit.of(1)
+    const value = ImpulseFormUnit(1)
 
     expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<number>>()
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
@@ -20,7 +20,7 @@ describe("ImpulseFormUnit.of()", () => {
   })
 
   it("creates ImpulseFormUnit with same type validator", ({ scope }) => {
-    const value = ImpulseFormUnit.of("", {
+    const value = ImpulseFormUnit("", {
       validateOn: "onInit",
       validate: (input) => {
         const trimmed = input.trim()
@@ -41,7 +41,7 @@ describe("ImpulseFormUnit.of()", () => {
   })
 
   it("creates ImpulseFormUnit with same type schema", ({ scope }) => {
-    const value = ImpulseFormUnit.of("", {
+    const value = ImpulseFormUnit("", {
       schema: z.string().trim().min(2),
       validateOn: "onInit",
     })
@@ -62,7 +62,7 @@ describe("ImpulseFormUnit.of()", () => {
   })
 
   it("creates ImpulseFormUnit with converting type schema", ({ scope }) => {
-    const value = ImpulseFormUnit.of("", {
+    const value = ImpulseFormUnit("", {
       schema: z.string().trim().min(1).pipe(z.coerce.number()),
       validateOn: "onInit",
     })
@@ -80,7 +80,7 @@ describe("ImpulseFormUnit.of()", () => {
   })
 
   it("creates ImpulseFormUnit with complex value", ({ scope }) => {
-    const value = ImpulseFormUnit.of(
+    const value = ImpulseFormUnit(
       {
         type: "",
         value: "",
@@ -126,7 +126,7 @@ describe("ImpulseFormUnit.of()", () => {
   it("does not allow to specify schema TOutput different from TInput", ({
     scope,
   }) => {
-    const value = ImpulseFormUnit.of<string>("1", {
+    const value = ImpulseFormUnit<string>("1", {
       // @ts-expect-error schema Input is not string
       schema: z.coerce.number(),
       validateOn: "onInit",
@@ -139,7 +139,7 @@ describe("ImpulseFormUnit.of()", () => {
   it("does not allow to specify schema Output different from TValue", ({
     scope,
   }) => {
-    const value = ImpulseFormUnit.of<number, string>(0, {
+    const value = ImpulseFormUnit<number, string>(0, {
       // @ts-expect-error schema Output is not string
       schema: z.number(),
       validateOn: "onInit",
@@ -150,7 +150,7 @@ describe("ImpulseFormUnit.of()", () => {
   })
 
   it("specifies initial touched", ({ scope }) => {
-    const value = ImpulseFormUnit.of("", { touched: true })
+    const value = ImpulseFormUnit("", { touched: true })
 
     expect(value.isTouched(scope)).toBe(true)
 
@@ -159,21 +159,21 @@ describe("ImpulseFormUnit.of()", () => {
   })
 
   it("specifies initial value", ({ scope }) => {
-    const value = ImpulseFormUnit.of("", { initial: "1" })
+    const value = ImpulseFormUnit("", { initial: "1" })
 
     expect(value.getInput(scope)).toBe("")
     expect(value.getInitial(scope)).toBe("1")
   })
 
   it("assigns initial to input by default", ({ scope }) => {
-    const value = ImpulseFormUnit.of("1")
+    const value = ImpulseFormUnit("1")
 
     expect(value.getInput(scope)).toBe("1")
     expect(value.getInitial(scope)).toBe("1")
   })
 
   it("assigns custom initial", ({ scope }) => {
-    const value = ImpulseFormUnit.of("1", { initial: "2" })
+    const value = ImpulseFormUnit("1", { initial: "2" })
 
     expect(value.getInput(scope)).toBe("1")
     expect(value.getInitial(scope)).toBe("2")
@@ -183,7 +183,7 @@ describe("ImpulseFormUnit.of()", () => {
     scope,
   }) => {
     const initial = { count: 0 }
-    const form = ImpulseFormUnit.of(
+    const form = ImpulseFormUnit(
       { count: 0 },
       {
         initial: initial,
@@ -199,7 +199,7 @@ describe("ImpulseFormUnit.of()", () => {
   })
 
   it("keeps the prev value with custom isInputEqual", ({ scope }) => {
-    const form = ImpulseFormUnit.of(
+    const form = ImpulseFormUnit(
       { count: 0 },
       {
         isInputEqual: (left, right) => left.count === right.count,
@@ -218,7 +218,7 @@ describe("ImpulseFormUnit.of()", () => {
 
 describe("ImpulseFormUnit#getOutput()", () => {
   it("does not select value when not validated", ({ scope }) => {
-    const value = ImpulseFormUnit.of("1", {
+    const value = ImpulseFormUnit("1", {
       schema: z.string().max(1),
     })
 
@@ -231,14 +231,14 @@ describe("ImpulseFormUnit#getOutput()", () => {
   })
 
   it("selects value when not validated without schema", ({ scope }) => {
-    const value = ImpulseFormUnit.of("1")
+    const value = ImpulseFormUnit("1")
 
     expect(value.getOutput(scope)).toBe("1")
     expect(value.getError(scope)).toBeNull()
   })
 
   it("selects value", ({ scope }) => {
-    const value = ImpulseFormUnit.of("1", {
+    const value = ImpulseFormUnit("1", {
       schema: z.string().max(1),
       validateOn: "onInit",
     })
@@ -260,7 +260,7 @@ describe("ImpulseFormUnit#getOutput()", () => {
   })
 
   it("transforms value with custom ZodLikeSchema#safeParse", ({ scope }) => {
-    const value = ImpulseFormUnit.of(2, {
+    const value = ImpulseFormUnit(2, {
       schema: {
         safeParse(input) {
           return { success: true, data: String(input) }
@@ -274,7 +274,7 @@ describe("ImpulseFormUnit#getOutput()", () => {
   })
 
   it("transforms value with custom ZodLikeSchema#parse", ({ scope }) => {
-    const value = ImpulseFormUnit.of(2, {
+    const value = ImpulseFormUnit(2, {
       schema: {
         parse(input) {
           return String(input)
@@ -290,7 +290,7 @@ describe("ImpulseFormUnit#getOutput()", () => {
 
 describe("ImpulseFormUnit#isTouched()", () => {
   it("selects touched", ({ scope }) => {
-    const value = ImpulseFormUnit.of("")
+    const value = ImpulseFormUnit("")
 
     expect(value.isTouched(scope)).toBe(false)
     expect(value.isTouched(scope, (x) => !x)).toBe(true)
@@ -309,7 +309,7 @@ describe("ImpulseFormUnit#isTouched()", () => {
 
 describe("ImpulseFormUnit#setInput()", () => {
   it("sets original value", ({ scope }) => {
-    const value = ImpulseFormUnit.of("")
+    const value = ImpulseFormUnit("")
 
     expect(value.getInput(scope)).toBe("")
 
@@ -328,7 +328,7 @@ describe("ImpulseFormUnit#setInput()", () => {
 
 describe("ImpulseFormUnit#setInitial()", () => {
   it("sets initial value", ({ scope }) => {
-    const value = ImpulseFormUnit.of("")
+    const value = ImpulseFormUnit("")
 
     expect(value.getInitial(scope)).toBe("")
 
@@ -347,19 +347,19 @@ describe("ImpulseFormUnit#setInitial()", () => {
 
 describe("ImpulseFormUnit#isDirty()", () => {
   it("clean on init", ({ scope }) => {
-    const value = ImpulseFormUnit.of("")
+    const value = ImpulseFormUnit("")
 
     expect(value.isDirty(scope)).toBe(false)
   })
 
   it("dirty on init when initial is different", ({ scope }) => {
-    const value = ImpulseFormUnit.of("", { initial: "1" })
+    const value = ImpulseFormUnit("", { initial: "1" })
 
     expect(value.isDirty(scope)).toBe(true)
   })
 
   it("clean when original value equals to initial value", ({ scope }) => {
-    const value = ImpulseFormUnit.of("", { initial: "1" })
+    const value = ImpulseFormUnit("", { initial: "1" })
 
     value.setInput("1")
 
@@ -369,7 +369,7 @@ describe("ImpulseFormUnit#isDirty()", () => {
   it("dirty when original value is different from initial value", ({
     scope,
   }) => {
-    const value = ImpulseFormUnit.of("1")
+    const value = ImpulseFormUnit("1")
 
     value.setInput("2")
 
@@ -379,7 +379,7 @@ describe("ImpulseFormUnit#isDirty()", () => {
   it("clean when complex value comparably equal to initial value", ({
     scope,
   }) => {
-    const value = ImpulseFormUnit.of(
+    const value = ImpulseFormUnit(
       { type: "zero", value: 0 },
       {
         initial: { type: "zero", value: 0 },
@@ -400,7 +400,7 @@ describe("ImpulseFormUnit#isDirty()", () => {
     scope,
   }) => {
     const initial = { type: "zero", value: 0 }
-    const value = ImpulseFormUnit.of(
+    const value = ImpulseFormUnit(
       { type: "zero", value: 0 },
       { initial: initial },
     )
@@ -423,7 +423,7 @@ describe("ImpulseFormUnit#reset()", () => {
     ["with resetter=identity", (form: ImpulseForm) => form.reset(arg(0))],
   ])("%s", (_, reset) => {
     it("resets to initial value", ({ scope }) => {
-      const value = ImpulseFormUnit.of("", { initial: "1" })
+      const value = ImpulseFormUnit("", { initial: "1" })
 
       reset(value)
       expect(value.getInput(scope)).toBe("1")
@@ -435,7 +435,7 @@ describe("ImpulseFormUnit#reset()", () => {
   it("resets to initial value by consuming current original value with resetter", ({
     scope,
   }) => {
-    const value = ImpulseFormUnit.of("2", { initial: "1" })
+    const value = ImpulseFormUnit("2", { initial: "1" })
 
     value.reset((_, current) => current)
     expect(value.getInput(scope)).toBe("2")
@@ -444,7 +444,7 @@ describe("ImpulseFormUnit#reset()", () => {
   })
 
   it("resets to new initial value", ({ scope }) => {
-    const value = ImpulseFormUnit.of("2", { initial: "1" })
+    const value = ImpulseFormUnit("2", { initial: "1" })
 
     value.reset("3")
     expect(value.getInput(scope)).toBe("3")
@@ -453,7 +453,7 @@ describe("ImpulseFormUnit#reset()", () => {
   })
 
   it("resets custom error", ({ scope }) => {
-    const value = ImpulseFormUnit.of("2", { schema: z.string(), initial: "1" })
+    const value = ImpulseFormUnit("2", { schema: z.string(), initial: "1" })
 
     value.setError(["error"])
     expect(value.getError(scope)).toStrictEqual(["error"])
@@ -463,7 +463,7 @@ describe("ImpulseFormUnit#reset()", () => {
   })
 
   it("resets isValidated", ({ scope }) => {
-    const value = ImpulseFormUnit.of("2", { initial: "1" })
+    const value = ImpulseFormUnit("2", { initial: "1" })
 
     value.setTouched(true)
     expect(value.isValidated(scope)).toBe(true)

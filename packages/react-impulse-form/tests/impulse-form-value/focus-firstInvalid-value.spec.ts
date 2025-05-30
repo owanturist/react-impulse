@@ -6,7 +6,7 @@ const setup = (
   input?: string,
   options?: Partial<ImpulseFormUnitSchemaOptions<string>>,
 ) => {
-  return ImpulseFormUnit.of(input ?? "", {
+  return ImpulseFormUnit(input ?? "", {
     touched: true,
     schema: z.string().min(2),
     ...options,

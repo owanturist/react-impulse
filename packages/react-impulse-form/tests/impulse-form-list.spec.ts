@@ -20,14 +20,14 @@ beforeAll(() => {
 
 describe("ImpulseFormList#setElements()", () => {
   function setup(elements: ReadonlyArray<ImpulseFormUnit<number>>) {
-    return ImpulseFormList.of(elements)
+    return ImpulseFormList(elements)
   }
 
   function setupElement(
     initial: number,
     options?: ImpulseFormUnitOptions<number>,
   ) {
-    return ImpulseFormUnit.of(initial, options)
+    return ImpulseFormUnit(initial, options)
   }
 
   it("matches the type definition", () => {
@@ -82,14 +82,14 @@ describe("ImpulseFormList#getError()", () => {
   function setup<TError>(
     elements: ReadonlyArray<ImpulseFormUnit<number, TError>>,
   ) {
-    return ImpulseFormList.of(elements)
+    return ImpulseFormList(elements)
   }
 
   function setupElement(
     initial: number,
     options?: Partial<ImpulseFormUnitSchemaOptions<number>>,
   ) {
-    return ImpulseFormUnit.of(initial, {
+    return ImpulseFormUnit(initial, {
       schema: z.number(),
       ...options,
     })
@@ -170,8 +170,8 @@ describe("ImpulseFormList#getError()", () => {
 
 describe("ImpulseFormList#setError()", () => {
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, {
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, {
         validate: (input) => (input === 0 ? ["fail", null] : [null, input]),
       }),
     ])
@@ -191,10 +191,10 @@ describe("ImpulseFormList#setError()", () => {
   })
 
   it("resets all errors with null", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { error: ["err0"] }),
-      ImpulseFormUnit.of(1, { error: ["err1"] }),
-      ImpulseFormUnit.of(2, { error: ["err2"] }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { error: ["err0"] }),
+      ImpulseFormUnit(1, { error: ["err1"] }),
+      ImpulseFormUnit(2, { error: ["err2"] }),
     ])
 
     form.setError(null)
@@ -202,10 +202,10 @@ describe("ImpulseFormList#setError()", () => {
   })
 
   it("changes all errors", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { error: ["err0"] }),
-      ImpulseFormUnit.of(1, { error: ["err1"] }),
-      ImpulseFormUnit.of(2, { error: ["err2"] }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { error: ["err0"] }),
+      ImpulseFormUnit(1, { error: ["err1"] }),
+      ImpulseFormUnit(2, { error: ["err2"] }),
     ])
 
     form.setError([["e0"], ["e1"], null])
@@ -213,10 +213,10 @@ describe("ImpulseFormList#setError()", () => {
   })
 
   it("changes some errors", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { error: ["err0"] }),
-      ImpulseFormUnit.of(1, { error: ["err1"] }),
-      ImpulseFormUnit.of(2, { error: ["err2"] }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { error: ["err0"] }),
+      ImpulseFormUnit(1, { error: ["err1"] }),
+      ImpulseFormUnit(2, { error: ["err2"] }),
     ])
 
     form.setError([(x) => [...x!, "x"], undefined, (x) => [...x!, "x"]])
@@ -232,14 +232,14 @@ describe("ImpulseFormList#isValidated()", () => {
   function setup<TError>(
     elements: ReadonlyArray<ImpulseFormUnit<number, TError>>,
   ) {
-    return ImpulseFormList.of(elements)
+    return ImpulseFormList(elements)
   }
 
   function setupElement(
     initial: number,
     options?: Partial<ImpulseFormUnitSchemaOptions<number>>,
   ) {
-    return ImpulseFormUnit.of(initial, {
+    return ImpulseFormUnit(initial, {
       schema: z.number(),
       ...options,
     })
@@ -332,14 +332,14 @@ describe("ImpulseFormList#getValidateOn()", () => {
     elements: ReadonlyArray<ImpulseFormUnit<number, TError>>,
     options?: ImpulseFormListOptions<ImpulseFormUnit<number, TError>>,
   ) {
-    return ImpulseFormList.of(elements, options)
+    return ImpulseFormList(elements, options)
   }
 
   function setupElement(
     initial: number,
     options?: Partial<ImpulseFormUnitSchemaOptions<number>>,
   ) {
-    return ImpulseFormUnit.of(initial, {
+    return ImpulseFormUnit(initial, {
       schema: z.number(),
       ...options,
     })
@@ -416,7 +416,7 @@ describe("ImpulseFormList#getValidateOn()", () => {
 
 describe("ImpulseFormList#setValidateOn()", () => {
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([ImpulseFormUnit.of(0)])
+    const form = ImpulseFormList([ImpulseFormUnit(0)])
 
     expectTypeOf(form.setValidateOn).toEqualTypeOf<
       (
@@ -434,10 +434,10 @@ describe("ImpulseFormList#setValidateOn()", () => {
   })
 
   it("changes all items", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-      ImpulseFormUnit.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0),
+      ImpulseFormUnit(1),
+      ImpulseFormUnit(2),
     ])
 
     form.setValidateOn("onInit")
@@ -450,14 +450,14 @@ describe("ImpulseFormList#setValidateOn()", () => {
 
 describe("ImpulseFormList#isTouched()", () => {
   const setup = (elements: ReadonlyArray<ImpulseFormUnit<number>>) => {
-    return ImpulseFormList.of(elements)
+    return ImpulseFormList(elements)
   }
 
   const setupElement = (
     initial: number,
     options?: ImpulseFormUnitOptions<number>,
   ) => {
-    return ImpulseFormUnit.of(initial, options)
+    return ImpulseFormUnit(initial, options)
   }
 
   it("matches the type definition", ({ scope }) => {
@@ -528,7 +528,7 @@ describe("ImpulseFormList#isTouched()", () => {
 
 describe("ImpulseFormList#setTouched()", () => {
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([ImpulseFormUnit.of(0)])
+    const form = ImpulseFormList([ImpulseFormUnit(0)])
 
     expectTypeOf(form.setTouched).toEqualTypeOf<
       (
@@ -545,10 +545,10 @@ describe("ImpulseFormList#setTouched()", () => {
   })
 
   it("touches all items", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-      ImpulseFormUnit.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0),
+      ImpulseFormUnit(1),
+      ImpulseFormUnit(2),
     ])
 
     form.setTouched(true)
@@ -561,8 +561,8 @@ describe("ImpulseFormList#setTouched()", () => {
 
 describe("ImpulseFormList#reset()", () => {
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, {
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, {
         schema: z.number().transform((x) => x.toFixed()),
       }),
     ])
@@ -582,10 +582,10 @@ describe("ImpulseFormList#reset()", () => {
   })
 
   it("sets initial values for all items", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { initial: 1 }),
-      ImpulseFormUnit.of(1, { initial: 2 }),
-      ImpulseFormUnit.of(2, { initial: 3 }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { initial: 1 }),
+      ImpulseFormUnit(1, { initial: 2 }),
+      ImpulseFormUnit(2, { initial: 3 }),
     ])
 
     form.reset()
@@ -593,10 +593,10 @@ describe("ImpulseFormList#reset()", () => {
   })
 
   it("clears custom errors", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { error: ["error"] }),
-      ImpulseFormUnit.of(1, { error: ["error"] }),
-      ImpulseFormUnit.of(2, { error: ["error"] }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { error: ["error"] }),
+      ImpulseFormUnit(1, { error: ["error"] }),
+      ImpulseFormUnit(2, { error: ["error"] }),
     ])
 
     form.reset()
@@ -604,10 +604,10 @@ describe("ImpulseFormList#reset()", () => {
   })
 
   it("resets isValidated state", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-      ImpulseFormUnit.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0),
+      ImpulseFormUnit(1),
+      ImpulseFormUnit(2),
     ])
 
     form.setTouched(true)
@@ -620,10 +620,10 @@ describe("ImpulseFormList#reset()", () => {
   it("provides the initial value to the element resetter 1st argument", ({
     scope,
   }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { initial: 1 }),
-      ImpulseFormUnit.of(1, { initial: 2 }),
-      ImpulseFormUnit.of(2, { initial: 3 }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { initial: 1 }),
+      ImpulseFormUnit(1, { initial: 2 }),
+      ImpulseFormUnit(2, { initial: 3 }),
     ])
 
     form.reset((initial) => initial.map((x) => x + 1))
@@ -633,10 +633,10 @@ describe("ImpulseFormList#reset()", () => {
   it("provides the original value to the resetter 2nd argument", ({
     scope,
   }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { initial: 1 }),
-      ImpulseFormUnit.of(1, { initial: 2 }),
-      ImpulseFormUnit.of(2, { initial: 3 }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { initial: 1 }),
+      ImpulseFormUnit(1, { initial: 2 }),
+      ImpulseFormUnit(2, { initial: 3 }),
     ])
 
     form.reset((_, original) => original.map((x) => x + 1))
@@ -644,10 +644,10 @@ describe("ImpulseFormList#reset()", () => {
   })
 
   it("restores removed elements", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { initial: 1 }),
-      ImpulseFormUnit.of(1, { initial: 2 }),
-      ImpulseFormUnit.of(2, { initial: 3 }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { initial: 1 }),
+      ImpulseFormUnit(1, { initial: 2 }),
+      ImpulseFormUnit(2, { initial: 3 }),
     ])
 
     form.setElements((elements) => elements.slice(0, 2))
@@ -660,10 +660,10 @@ describe("ImpulseFormList#reset()", () => {
   })
 
   it("restores all elements", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { initial: 1 }),
-      ImpulseFormUnit.of(1, { initial: 2 }),
-      ImpulseFormUnit.of(2, { initial: 3 }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { initial: 1 }),
+      ImpulseFormUnit(1, { initial: 2 }),
+      ImpulseFormUnit(2, { initial: 3 }),
     ])
 
     form.setElements([])
@@ -676,15 +676,15 @@ describe("ImpulseFormList#reset()", () => {
   })
 
   it("removes added element", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { initial: 1 }),
-      ImpulseFormUnit.of(1, { initial: 2 }),
-      ImpulseFormUnit.of(2, { initial: 3 }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { initial: 1 }),
+      ImpulseFormUnit(1, { initial: 2 }),
+      ImpulseFormUnit(2, { initial: 3 }),
     ])
 
     form.setElements((elements) => [
       ...elements,
-      ImpulseFormUnit.of(3, { initial: 4 }),
+      ImpulseFormUnit(3, { initial: 4 }),
     ])
     expect(form.getInput(scope)).toStrictEqual([0, 1, 2, 3])
     expect(form.getInitial(scope)).toStrictEqual([1, 2, 3])
@@ -695,12 +695,12 @@ describe("ImpulseFormList#reset()", () => {
   })
 
   it("removes all elements", ({ scope }) => {
-    const form = ImpulseFormList.of<ImpulseFormUnit<number>>([])
+    const form = ImpulseFormList<ImpulseFormUnit<number>>([])
 
     form.setElements([
-      ImpulseFormUnit.of(0, { initial: 1 }),
-      ImpulseFormUnit.of(1, { initial: 2 }),
-      ImpulseFormUnit.of(2, { initial: 3 }),
+      ImpulseFormUnit(0, { initial: 1 }),
+      ImpulseFormUnit(1, { initial: 2 }),
+      ImpulseFormUnit(2, { initial: 3 }),
     ])
     expect(form.getInput(scope)).toStrictEqual([0, 1, 2])
     expect(form.getInitial(scope)).toStrictEqual([])
@@ -711,13 +711,13 @@ describe("ImpulseFormList#reset()", () => {
   })
 
   it("updates validateOn for restored elements", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { schema: z.number(), validateOn: "onChange" }),
-      ImpulseFormUnit.of(1, { schema: z.number(), validateOn: "onChange" }),
-      ImpulseFormUnit.of(2, { schema: z.number(), validateOn: "onChange" }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { schema: z.number(), validateOn: "onChange" }),
+      ImpulseFormUnit(1, { schema: z.number(), validateOn: "onChange" }),
+      ImpulseFormUnit(2, { schema: z.number(), validateOn: "onChange" }),
     ])
 
-    form.setElements([ImpulseFormUnit.of(0)])
+    form.setElements([ImpulseFormUnit(0)])
     form.setValidateOn("onInit")
     expect(form.getValidateOn(scope)).toBe("onInit")
 
@@ -726,13 +726,13 @@ describe("ImpulseFormList#reset()", () => {
   })
 
   it("updates submit count for restored elements", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-      ImpulseFormUnit.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0),
+      ImpulseFormUnit(1),
+      ImpulseFormUnit(2),
     ])
 
-    form.setElements([ImpulseFormUnit.of(0)])
+    form.setElements([ImpulseFormUnit(0)])
     void form.submit()
     expect(form.getSubmitCount(scope)).toBe(1)
     expect(
@@ -747,15 +747,15 @@ describe("ImpulseFormList#reset()", () => {
   })
 
   it("updates isSubmitting for restored elements", async ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-      ImpulseFormUnit.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0),
+      ImpulseFormUnit(1),
+      ImpulseFormUnit(2),
     ])
 
     form.onSubmit(() => wait(1000))
 
-    form.setElements([ImpulseFormUnit.of(0)])
+    form.setElements([ImpulseFormUnit(0)])
     void form.submit()
     expect(form.isSubmitting(scope)).toBe(true)
     expect(
@@ -780,13 +780,13 @@ describe("ImpulseFormList#getOutput()", () => {
   function setup<TError>(
     elements: ReadonlyArray<ImpulseFormUnit<number, TError, string>>,
   ) {
-    return ImpulseFormList.of(elements, {
+    return ImpulseFormList(elements, {
       validateOn: "onInit",
     })
   }
 
   function setupElement(initial: number) {
-    return ImpulseFormUnit.of(initial, {
+    return ImpulseFormUnit(initial, {
       schema: z
         .number()
         .min(1)
@@ -854,8 +854,8 @@ describe("ImpulseFormList#getOutput()", () => {
 
 describe("ImpulseFormList#getInput()", () => {
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, {
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, {
         schema: z.number().transform((x) => x.toFixed()),
       }),
     ])
@@ -870,16 +870,16 @@ describe("ImpulseFormList#getInput()", () => {
   })
 
   it("returns empty array for empty list", ({ scope }) => {
-    const form = ImpulseFormList.of([])
+    const form = ImpulseFormList([])
 
     expect(form.getInput(scope)).toStrictEqual([])
   })
 
   it("returns an array of original values", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-      ImpulseFormUnit.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0),
+      ImpulseFormUnit(1),
+      ImpulseFormUnit(2),
     ])
 
     expect(form.getInput(scope)).toStrictEqual([0, 1, 2])
@@ -888,7 +888,7 @@ describe("ImpulseFormList#getInput()", () => {
 
 describe("ImpulseFormList#setInput()", () => {
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([ImpulseFormUnit.of(0)])
+    const form = ImpulseFormList([ImpulseFormUnit(0)])
 
     expectTypeOf(form.setInput).toEqualTypeOf<
       (
@@ -905,10 +905,10 @@ describe("ImpulseFormList#setInput()", () => {
   })
 
   it("changes all items", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-      ImpulseFormUnit.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0),
+      ImpulseFormUnit(1),
+      ImpulseFormUnit(2),
     ])
 
     form.setInput([3, 4, 5])
@@ -916,24 +916,24 @@ describe("ImpulseFormList#setInput()", () => {
   })
 
   it("changes nothing when setting an empty list", ({ scope }) => {
-    const form = ImpulseFormList.of([ImpulseFormUnit.of(0)])
+    const form = ImpulseFormList([ImpulseFormUnit(0)])
 
     form.setInput([])
     expect(form.getInput(scope)).toStrictEqual([0])
   })
 
   it("keeps the list empty", ({ scope }) => {
-    const form = ImpulseFormList.of<ImpulseFormUnit<number>>([])
+    const form = ImpulseFormList<ImpulseFormUnit<number>>([])
 
     form.setInput([0, 1])
     expect(form.getInput(scope)).toStrictEqual([])
   })
 
   it("changes only defined items", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-      ImpulseFormUnit.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0),
+      ImpulseFormUnit(1),
+      ImpulseFormUnit(2),
     ])
 
     form.setInput([3])
@@ -944,10 +944,10 @@ describe("ImpulseFormList#setInput()", () => {
   })
 
   it("does not extend existing list", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-      ImpulseFormUnit.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0),
+      ImpulseFormUnit(1),
+      ImpulseFormUnit(2),
     ])
 
     form.setInput([3, 4, 5, 6])
@@ -955,10 +955,10 @@ describe("ImpulseFormList#setInput()", () => {
   })
 
   it("passes the list in the transform function", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-      ImpulseFormUnit.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0),
+      ImpulseFormUnit(1),
+      ImpulseFormUnit(2),
     ])
 
     form.setInput((elements) => elements.map((x) => x + 1))
@@ -966,10 +966,10 @@ describe("ImpulseFormList#setInput()", () => {
   })
 
   it("passes an element in the transform function", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-      ImpulseFormUnit.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0),
+      ImpulseFormUnit(1),
+      ImpulseFormUnit(2),
     ])
 
     form.setInput([undefined, (x) => x + 3])
@@ -977,10 +977,10 @@ describe("ImpulseFormList#setInput()", () => {
   })
 
   it("passes an element in the list transform function", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-      ImpulseFormUnit.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0),
+      ImpulseFormUnit(1),
+      ImpulseFormUnit(2),
     ])
 
     form.setInput((elements) => elements.map(() => (x) => x + 1))
@@ -990,8 +990,8 @@ describe("ImpulseFormList#setInput()", () => {
 
 describe("ImpulseFormList#getInitial()", () => {
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, {
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, {
         schema: z.number().transform((x) => x.toFixed()),
       }),
     ])
@@ -1006,25 +1006,25 @@ describe("ImpulseFormList#getInitial()", () => {
   })
 
   it("returns empty array for empty list", ({ scope }) => {
-    const form = ImpulseFormList.of([])
+    const form = ImpulseFormList([])
 
     expect(form.getInitial(scope)).toStrictEqual([])
   })
 
   it("returns an array of original values", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { initial: 3 }),
-      ImpulseFormUnit.of(1),
-      ImpulseFormUnit.of(2, { initial: 4 }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { initial: 3 }),
+      ImpulseFormUnit(1),
+      ImpulseFormUnit(2, { initial: 4 }),
     ])
 
     expect(form.getInitial(scope)).toStrictEqual([3, 1, 4])
   })
 
   it("returns nested list's values", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormList.of([ImpulseFormUnit.of(1)]),
-      ImpulseFormList.of([ImpulseFormUnit.of(2), ImpulseFormUnit.of(3)]),
+    const form = ImpulseFormList([
+      ImpulseFormList([ImpulseFormUnit(1)]),
+      ImpulseFormList([ImpulseFormUnit(2), ImpulseFormUnit(3)]),
     ])
 
     expect(form.getInitial(scope)).toStrictEqual([[1], [2, 3]])
@@ -1033,7 +1033,7 @@ describe("ImpulseFormList#getInitial()", () => {
 
 describe("ImpulseFormList#setInitial()", () => {
   it("matches the type definition", ({ scope }) => {
-    const form = ImpulseFormList.of([ImpulseFormUnit.of(0)])
+    const form = ImpulseFormList([ImpulseFormUnit(0)])
 
     expectTypeOf(form.setInitial).toEqualTypeOf<
       (
@@ -1050,10 +1050,10 @@ describe("ImpulseFormList#setInitial()", () => {
   })
 
   it("changes all items", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-      ImpulseFormUnit.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0),
+      ImpulseFormUnit(1),
+      ImpulseFormUnit(2),
     ])
 
     form.setInitial([3, 4, 5])
@@ -1064,12 +1064,9 @@ describe("ImpulseFormList#setInitial()", () => {
   })
 
   it("adds an added element's initial", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-    ])
+    const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1)])
 
-    form.setElements((elements) => [...elements, ImpulseFormUnit.of(2)])
+    form.setElements((elements) => [...elements, ImpulseFormUnit(2)])
 
     expect(form.getInitial(scope)).toStrictEqual([0, 1])
     form.setInitial([3, 4, 5])
@@ -1080,10 +1077,7 @@ describe("ImpulseFormList#setInitial()", () => {
   })
 
   it("keeps a removed element's initial", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-    ])
+    const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1)])
 
     form.setElements((elements) => elements.slice(0, 1))
     expect(form.getOutput(scope)).toStrictEqual([0])
@@ -1099,10 +1093,7 @@ describe("ImpulseFormList#setInitial()", () => {
   it("does not add initial when neither initial nor current value exist", ({
     scope,
   }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0),
-      ImpulseFormUnit.of(1),
-    ])
+    const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1)])
 
     form.setInitial([3, 4, 5])
     expect(form.getInitial(scope)).toStrictEqual([3, 4])
@@ -1113,10 +1104,10 @@ describe("ImpulseFormList#setInitial()", () => {
   })
 
   it("removes initials by shorter list", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { initial: 1 }),
-      ImpulseFormUnit.of(1, { initial: 2 }),
-      ImpulseFormUnit.of(2, { initial: 3 }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { initial: 1 }),
+      ImpulseFormUnit(1, { initial: 2 }),
+      ImpulseFormUnit(2, { initial: 3 }),
     ])
 
     form.setInitial([3, 4])
@@ -1127,10 +1118,10 @@ describe("ImpulseFormList#setInitial()", () => {
   })
 
   it('do not remove initials by "undefined" in the list', ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { initial: 1 }),
-      ImpulseFormUnit.of(1, { initial: 2 }),
-      ImpulseFormUnit.of(2, { initial: 3 }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { initial: 1 }),
+      ImpulseFormUnit(1, { initial: 2 }),
+      ImpulseFormUnit(2, { initial: 3 }),
     ])
 
     form.setInitial([undefined, 4, undefined])
@@ -1141,10 +1132,10 @@ describe("ImpulseFormList#setInitial()", () => {
   })
 
   it("remove all initials by empty list", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormUnit.of(0, { initial: 1 }),
-      ImpulseFormUnit.of(1, { initial: 2 }),
-      ImpulseFormUnit.of(2, { initial: 3 }),
+    const form = ImpulseFormList([
+      ImpulseFormUnit(0, { initial: 1 }),
+      ImpulseFormUnit(1, { initial: 2 }),
+      ImpulseFormUnit(2, { initial: 3 }),
     ])
 
     form.setInitial([])
@@ -1155,11 +1146,11 @@ describe("ImpulseFormList#setInitial()", () => {
   })
 
   it("overrides initial values on init", ({ scope }) => {
-    const form = ImpulseFormList.of(
+    const form = ImpulseFormList(
       [
-        ImpulseFormUnit.of(0, { initial: 1 }),
-        ImpulseFormUnit.of(1, { initial: 2 }),
-        ImpulseFormUnit.of(2, { initial: 3 }),
+        ImpulseFormUnit(0, { initial: 1 }),
+        ImpulseFormUnit(1, { initial: 2 }),
+        ImpulseFormUnit(2, { initial: 3 }),
       ],
       {
         initial: [4, 5, 6],
@@ -1175,8 +1166,8 @@ describe("ImpulseFormList#setInitial()", () => {
   it("changed list's initial values when element's initial is changed", ({
     scope,
   }) => {
-    const form = ImpulseFormList.of(
-      [ImpulseFormUnit.of(0), ImpulseFormUnit.of(1), ImpulseFormUnit.of(2)],
+    const form = ImpulseFormList(
+      [ImpulseFormUnit(0), ImpulseFormUnit(1), ImpulseFormUnit(2)],
       {
         initial: [3, 4, 5],
       },
@@ -1196,11 +1187,11 @@ describe("ImpulseFormList#focusFirstInvalidValue()", () => {
       ImpulseFormUnit<number, ReadonlyArray<string>>
     >,
   ) {
-    const form = ImpulseFormList.of(
+    const form = ImpulseFormList(
       [
-        ImpulseFormUnit.of(0, { schema: z.number() }),
-        ImpulseFormUnit.of(1, { schema: z.number() }),
-        ImpulseFormUnit.of(2, { schema: z.number() }),
+        ImpulseFormUnit(0, { schema: z.number() }),
+        ImpulseFormUnit(1, { schema: z.number() }),
+        ImpulseFormUnit(2, { schema: z.number() }),
       ],
       options,
     )
@@ -1272,8 +1263,8 @@ describe("ImpulseFormList#focusFirstInvalidValue()", () => {
 
 describe("ImpulseFormList#onSubmit()", () => {
   const setup = (options?: ImpulseFormListOptions<ImpulseFormUnit<number>>) => {
-    const form = ImpulseFormList.of(
-      [ImpulseFormUnit.of(1), ImpulseFormUnit.of(2), ImpulseFormUnit.of(3)],
+    const form = ImpulseFormList(
+      [ImpulseFormUnit(1), ImpulseFormUnit(2), ImpulseFormUnit(3)],
       options,
     )
 

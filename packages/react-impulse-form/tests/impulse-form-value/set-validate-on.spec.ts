@@ -9,7 +9,7 @@ import {
 } from "../../src"
 
 function setup(options?: Partial<ImpulseFormUnitSchemaOptions<string>>) {
-  return ImpulseFormUnit.of("", {
+  return ImpulseFormUnit("", {
     ...options,
     schema: z.string(),
   })

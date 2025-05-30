@@ -10,7 +10,7 @@ import {
 const setup = (
   options?: Partial<ImpulseFormUnitSchemaOptions<string, number>>,
 ) => {
-  return ImpulseFormUnit.of("y", {
+  return ImpulseFormUnit("y", {
     schema: z.string().min(1).pipe(z.coerce.number()),
     ...options,
   })

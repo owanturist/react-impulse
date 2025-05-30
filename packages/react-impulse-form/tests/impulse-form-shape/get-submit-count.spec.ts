@@ -18,14 +18,14 @@ interface ShapeFields {
 
 const setupShape =
   (enchant?: (form: ImpulseFormShape<ShapeFields>) => void) => () => {
-    const form = ImpulseFormShape.of({
-      _1: ImpulseFormUnit.of("abc", {
+    const form = ImpulseFormShape({
+      _1: ImpulseFormUnit("abc", {
         schema: z.string().max(2),
       }),
-      _2: ImpulseFormUnit.of(0),
-      _3: ImpulseFormShape.of({
-        _1: ImpulseFormUnit.of(true),
-        _2: ImpulseFormUnit.of(["abc"], {
+      _2: ImpulseFormUnit(0),
+      _3: ImpulseFormShape({
+        _1: ImpulseFormUnit(true),
+        _2: ImpulseFormUnit(["abc"], {
           schema: z.array(z.string().max(2)),
         }),
       }),

@@ -4,7 +4,7 @@ import { ImpulseFormUnit } from "../../src"
 
 describe("ImpulseFormUnitValidatedOptions", () => {
   it("defines impulse with validate as transformer", ({ scope }) => {
-    const value = ImpulseFormUnit.of(123, {
+    const value = ImpulseFormUnit(123, {
       validateOn: "onInit",
       validate: (input) => [null, input.toFixed(2)],
     })
@@ -15,7 +15,7 @@ describe("ImpulseFormUnitValidatedOptions", () => {
   })
 
   it("defines impulse with validate as validator", ({ scope }) => {
-    const value = ImpulseFormUnit.of(0, {
+    const value = ImpulseFormUnit(0, {
       validateOn: "onInit",
       validate: (input) => {
         return input > 0 ? [null, input] : ["should be positive", null]
@@ -36,7 +36,7 @@ describe("ImpulseFormUnitValidatedOptions", () => {
   it("defines impulse with validate as validator and transformer", ({
     scope,
   }) => {
-    const value = ImpulseFormUnit.of(0, {
+    const value = ImpulseFormUnit(0, {
       validateOn: "onInit",
       validate: (input) => {
         return input > 0
@@ -59,7 +59,7 @@ describe("ImpulseFormUnitValidatedOptions", () => {
 
 describe("ImpulseFormUnitSchemaOptions", () => {
   it("defines impulse with schema as validator", ({ scope }) => {
-    const value = ImpulseFormUnit.of(0, {
+    const value = ImpulseFormUnit(0, {
       validateOn: "onInit",
       schema: z.number().min(1),
     })
@@ -82,7 +82,7 @@ describe("ImpulseFormUnitSchemaOptions", () => {
   it("defines impulse with schema as validator and transformer", ({
     scope,
   }) => {
-    const value = ImpulseFormUnit.of(0, {
+    const value = ImpulseFormUnit(0, {
       validateOn: "onInit",
       schema: z
         .number()
@@ -108,7 +108,7 @@ describe("ImpulseFormUnitSchemaOptions", () => {
 
 describe("ImpulseFormUnitOptions.isInputDirty", () => {
   it("uses Object.is when not provided", ({ scope }) => {
-    const value = ImpulseFormUnit.of({ value: "value" })
+    const value = ImpulseFormUnit({ value: "value" })
 
     expect(value.isDirty(scope)).toBe(false)
 
@@ -117,7 +117,7 @@ describe("ImpulseFormUnitOptions.isInputDirty", () => {
   })
 
   it("fallbacks to isInputEqual when not provided", ({ scope }) => {
-    const value = ImpulseFormUnit.of(
+    const value = ImpulseFormUnit(
       { value: "value" },
       {
         isInputEqual: (left, right) => left.value === right.value,
@@ -131,7 +131,7 @@ describe("ImpulseFormUnitOptions.isInputDirty", () => {
   })
 
   it("takes isInputDirty over isInputEqual", ({ scope }) => {
-    const value = ImpulseFormUnit.of(
+    const value = ImpulseFormUnit(
       { value: "value" },
       {
         isInputEqual: (left, right) => left.value === right.value,
@@ -149,7 +149,7 @@ describe("ImpulseFormUnitOptions.isInputDirty", () => {
   })
 
   it("returns not dirty when isInputDirty returns false", ({ scope }) => {
-    const value = ImpulseFormUnit.of("", {
+    const value = ImpulseFormUnit("", {
       isInputDirty: (left, right) => left.trim() !== right.trim(),
     })
 
@@ -160,7 +160,7 @@ describe("ImpulseFormUnitOptions.isInputDirty", () => {
   })
 
   it("returns dirty when isInputDirty returns true", ({ scope }) => {
-    const value = ImpulseFormUnit.of("", {
+    const value = ImpulseFormUnit("", {
       isInputDirty: (left, right) => left.trim() !== right.trim(),
     })
 

@@ -42,15 +42,15 @@ interface RootValueVerbose {
 }
 
 function setup(options?: ImpulseFormShapeOptions<ValidatedShapeFields>) {
-  return ImpulseFormShape.of(
+  return ImpulseFormShape(
     {
-      _1: ImpulseFormUnit.of("", {
+      _1: ImpulseFormUnit("", {
         schema: z.string().max(2),
       }),
-      _2: ImpulseFormUnit.of(0),
-      _3: ImpulseFormShape.of({
-        _1: ImpulseFormUnit.of(true),
-        _2: ImpulseFormUnit.of([""], {
+      _2: ImpulseFormUnit(0),
+      _3: ImpulseFormShape({
+        _1: ImpulseFormUnit(true),
+        _2: ImpulseFormUnit([""], {
           schema: z.array(z.string().max(2)),
         }),
       }),
@@ -173,12 +173,12 @@ describe.each<
         _4: ["anything"],
       },
       () => {
-        return ImpulseFormShape.of({
-          _1: ImpulseFormUnit.of("value"),
-          _2: ImpulseFormUnit.of(0),
-          _3: ImpulseFormShape.of({
-            _1: ImpulseFormUnit.of(true),
-            _2: ImpulseFormUnit.of(["value"]),
+        return ImpulseFormShape({
+          _1: ImpulseFormUnit("value"),
+          _2: ImpulseFormUnit(0),
+          _3: ImpulseFormShape({
+            _1: ImpulseFormUnit(true),
+            _2: ImpulseFormUnit(["value"]),
           }),
           _4: ["anything"],
         })

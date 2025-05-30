@@ -33,7 +33,7 @@ function getValidateOnVerbose<TError, TOutput>(
 
 describe("when options: ImpulseFormUnitSchemaOptions", () => {
   function setup(options?: Partial<ImpulseFormUnitSchemaOptions<string>>) {
-    return ImpulseFormUnit.of("", {
+    return ImpulseFormUnit("", {
       schema: z.string(),
       ...options,
     })
@@ -87,7 +87,7 @@ describe("when options: ImpulseFormUnitValidatedOptions", () => {
   function setup(
     options?: Partial<ImpulseFormUnitValidatedOptions<string, number>>,
   ) {
-    return ImpulseFormUnit.of("", {
+    return ImpulseFormUnit("", {
       ...options,
       validate: (input) => (input.length > 0 ? [null, input] : [1, null]),
     })
@@ -139,7 +139,7 @@ describe("when options: ImpulseFormUnitValidatedOptions", () => {
 
 describe("when options: ImpulseFormUnitOptions", () => {
   function setup(options?: ImpulseFormUnitOptions<string>) {
-    return ImpulseFormUnit.of("", options)
+    return ImpulseFormUnit("", options)
   }
 
   it("matches the type signature", () => {

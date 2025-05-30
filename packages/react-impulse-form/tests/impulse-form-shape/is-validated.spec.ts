@@ -41,19 +41,19 @@ const setup = (
     fourth: Array<string>
   }>,
 ) => {
-  return ImpulseFormShape.of(
+  return ImpulseFormShape(
     {
-      first: ImpulseFormUnit.of("", {
+      first: ImpulseFormUnit("", {
         validate: (input) => [null, input],
       }),
-      second: ImpulseFormUnit.of(0, {
+      second: ImpulseFormUnit(0, {
         validate: (input) => [null, input],
       }),
-      third: ImpulseFormShape.of({
-        one: ImpulseFormUnit.of(true, {
+      third: ImpulseFormShape({
+        one: ImpulseFormUnit(true, {
           schema: z.boolean(),
         }),
-        two: ImpulseFormUnit.of([""], {
+        two: ImpulseFormUnit([""], {
           schema: z.array(z.string()),
         }),
       }),
@@ -153,7 +153,7 @@ describe("isValidated(scope)", () => {
   })
 
   it("returns false for empty shape", ({ scope }) => {
-    expect(ImpulseFormShape.of({}).isValidated(scope)).toBe(false)
+    expect(ImpulseFormShape({}).isValidated(scope)).toBe(false)
   })
 })
 
@@ -213,7 +213,7 @@ describe("isValidated(scope, (concise) => concise)", () => {
   })
 
   it("returns false for empty shape", ({ scope }) => {
-    expect(isValidated(scope, ImpulseFormShape.of({}))).toBe(false)
+    expect(isValidated(scope, ImpulseFormShape({}))).toBe(false)
   })
 })
 
@@ -293,19 +293,19 @@ describe("isValidated(scope, (_, verbose) => verbose)", () => {
   })
 
   it("returns an empty object for empty shape", ({ scope }) => {
-    expect(isValidated(scope, ImpulseFormShape.of({}))).toStrictEqual({})
+    expect(isValidated(scope, ImpulseFormShape({}))).toStrictEqual({})
   })
 })
 
 describe("isValidated(..)", () => {
   it("overrides fields' initial value", ({ scope }) => {
-    const shape = ImpulseFormShape.of(
+    const shape = ImpulseFormShape(
       {
-        one: ImpulseFormUnit.of(true, {
+        one: ImpulseFormUnit(true, {
           schema: z.boolean(),
           validateOn: "onInit",
         }),
-        two: ImpulseFormUnit.of("", {
+        two: ImpulseFormUnit("", {
           schema: z.string(),
           validateOn: "onSubmit",
         }),

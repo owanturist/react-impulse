@@ -17,19 +17,19 @@ function setup(
     _4: Array<string>
   }>,
 ) {
-  const form = ImpulseFormShape.of(
+  const form = ImpulseFormShape(
     {
-      _1: ImpulseFormUnit.of("", {
+      _1: ImpulseFormUnit("", {
         schema: z.string().min(2),
       }),
-      _2: ImpulseFormUnit.of(0, {
+      _2: ImpulseFormUnit(0, {
         schema: z.number().min(1),
       }),
-      _3: ImpulseFormShape.of({
-        _1: ImpulseFormUnit.of<undefined | boolean>(undefined, {
+      _3: ImpulseFormShape({
+        _1: ImpulseFormUnit<undefined | boolean>(undefined, {
           schema: z.boolean(),
         }),
-        _2: ImpulseFormUnit.of([""], {
+        _2: ImpulseFormUnit([""], {
           schema: z.array(z.string()).min(2),
         }),
       }),

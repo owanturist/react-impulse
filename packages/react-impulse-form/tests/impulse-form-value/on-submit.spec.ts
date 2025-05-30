@@ -10,7 +10,7 @@ beforeAll(() => {
 })
 
 it("matches the type signature", () => {
-  const form = ImpulseFormUnit.of("value")
+  const form = ImpulseFormUnit("value")
 
   expectTypeOf(form.onSubmit).toEqualTypeOf<
     (listener: (value: string) => void | Promise<unknown>) => VoidFunction
@@ -19,7 +19,7 @@ it("matches the type signature", () => {
 
 describe("onSubmit(listener)", () => {
   it("provides validated value", () => {
-    const form = ImpulseFormUnit.of("value", {
+    const form = ImpulseFormUnit("value", {
       schema: z.string().min(2),
     })
 
@@ -29,7 +29,7 @@ describe("onSubmit(listener)", () => {
   })
 
   it("does not call the listener when the form is not valid", ({ scope }) => {
-    const form = ImpulseFormUnit.of("value", {
+    const form = ImpulseFormUnit("value", {
       schema: z.string().min(10),
     })
 
@@ -44,7 +44,7 @@ describe("onSubmit(listener)", () => {
   })
 
   it("calls the focus listener when the form is not valid", () => {
-    const form = ImpulseFormUnit.of("value", {
+    const form = ImpulseFormUnit("value", {
       schema: z.string().min(10),
     })
 
@@ -62,12 +62,12 @@ describe("onSubmit(listener)", () => {
   })
 
   it.each([
-    ["schema is not defined", "value", () => ImpulseFormUnit.of("value")],
+    ["schema is not defined", "value", () => ImpulseFormUnit("value")],
     [
       "schema is defined and value is valid",
       1234,
       () => {
-        return ImpulseFormUnit.of("1234", {
+        return ImpulseFormUnit("1234", {
           schema: z.string().pipe(z.coerce.number()),
         })
       },
@@ -87,7 +87,7 @@ describe("onSubmit(listener)", () => {
   })
 
   it("calls all listeners", () => {
-    const form = ImpulseFormUnit.of("value")
+    const form = ImpulseFormUnit("value")
 
     const listener_1 = vi.fn()
     const listener_2 = vi.fn()
@@ -102,7 +102,7 @@ describe("onSubmit(listener)", () => {
   })
 
   it("subscribes the same listener only once", () => {
-    const form = ImpulseFormUnit.of("value")
+    const form = ImpulseFormUnit("value")
 
     const listener = vi.fn()
 
@@ -115,7 +115,7 @@ describe("onSubmit(listener)", () => {
   })
 
   it("calls a listener on every submit", () => {
-    const form = ImpulseFormUnit.of("value")
+    const form = ImpulseFormUnit("value")
 
     const listener = vi.fn()
 
@@ -129,7 +129,7 @@ describe("onSubmit(listener)", () => {
   })
 
   it("does not call a listener after it is unsubscribed", () => {
-    const form = ImpulseFormUnit.of("value")
+    const form = ImpulseFormUnit("value")
 
     const listener = vi.fn()
 
@@ -148,7 +148,7 @@ describe("onSubmit(listener)", () => {
   })
 
   it("unsubscribes the same listener as many times as it's been subscribed", () => {
-    const form = ImpulseFormUnit.of("value")
+    const form = ImpulseFormUnit("value")
 
     const listener = vi.fn()
 
@@ -176,7 +176,7 @@ describe("onSubmit(listener)", () => {
   })
 
   it("waits the slowest listener", async ({ scope }) => {
-    const form = ImpulseFormUnit.of("value")
+    const form = ImpulseFormUnit("value")
 
     const done_1 = vi.fn()
     const done_2 = vi.fn()

@@ -43,13 +43,13 @@ function setup(
     fourth: Array<string>
   }>,
 ) {
-  return ImpulseFormShape.of(
+  return ImpulseFormShape(
     {
-      first: ImpulseFormUnit.of(""),
-      second: ImpulseFormUnit.of(0),
-      third: ImpulseFormShape.of({
-        one: ImpulseFormUnit.of(true),
-        two: ImpulseFormUnit.of([""]),
+      first: ImpulseFormUnit(""),
+      second: ImpulseFormUnit(0),
+      third: ImpulseFormShape({
+        one: ImpulseFormUnit(true),
+        two: ImpulseFormUnit([""]),
       }),
       fourth: ["anything"],
     },
@@ -160,7 +160,7 @@ describe.each([
   })
 
   it("returns onTouch for empty shape", ({ scope }) => {
-    expect(getValidateOn(scope, ImpulseFormShape.of({}))).toBe("onTouch")
+    expect(getValidateOn(scope, ImpulseFormShape({}))).toBe("onTouch")
   })
 })
 
@@ -227,6 +227,6 @@ describe("getValidateOn(scope, (_, verbose) => verbose)", () => {
   })
 
   it("returns an empty object for empty shape", ({ scope }) => {
-    expect(getValidateOn(scope, ImpulseFormShape.of({}))).toStrictEqual({})
+    expect(getValidateOn(scope, ImpulseFormShape({}))).toStrictEqual({})
   })
 })
