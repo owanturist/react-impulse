@@ -3,28 +3,28 @@ import { z } from "zod"
 import {
   ImpulseFormShape,
   type ImpulseFormShapeOptions,
-  ImpulseFormValue,
+  ImpulseFormUnit,
 } from "../../src"
 import { wait } from "../common"
 
 const SLOWEST_ASYNC_MS = 3000
 
 interface ValidatedShapeFields {
-  _1: ImpulseFormValue<string, ReadonlyArray<string>>
-  _2: ImpulseFormValue<number>
+  _1: ImpulseFormUnit<string, ReadonlyArray<string>>
+  _2: ImpulseFormUnit<number>
   _3: ImpulseFormShape<{
-    _1: ImpulseFormValue<boolean>
-    _2: ImpulseFormValue<Array<string>, ReadonlyArray<string>>
+    _1: ImpulseFormUnit<boolean>
+    _2: ImpulseFormUnit<Array<string>, ReadonlyArray<string>>
   }>
   _4: Array<string>
 }
 
 interface ShapeFields {
-  _1: ImpulseFormValue<string>
-  _2: ImpulseFormValue<number>
+  _1: ImpulseFormUnit<string>
+  _2: ImpulseFormUnit<number>
   _3: ImpulseFormShape<{
-    _1: ImpulseFormValue<boolean>
-    _2: ImpulseFormValue<Array<string>>
+    _1: ImpulseFormUnit<boolean>
+    _2: ImpulseFormUnit<Array<string>>
   }>
   _4: Array<string>
 }
@@ -42,15 +42,15 @@ interface RootValueVerbose {
 }
 
 function setup(options?: ImpulseFormShapeOptions<ValidatedShapeFields>) {
-  return ImpulseFormShape.of(
+  return ImpulseFormShape(
     {
-      _1: ImpulseFormValue.of("", {
+      _1: ImpulseFormUnit("", {
         schema: z.string().max(2),
       }),
-      _2: ImpulseFormValue.of(0),
-      _3: ImpulseFormShape.of({
-        _1: ImpulseFormValue.of(true),
-        _2: ImpulseFormValue.of([""], {
+      _2: ImpulseFormUnit(0),
+      _3: ImpulseFormShape({
+        _1: ImpulseFormUnit(true),
+        _2: ImpulseFormUnit([""], {
           schema: z.array(z.string().max(2)),
         }),
       }),
@@ -91,10 +91,10 @@ describe.each<
   ]
 >([
   ["root", (form) => form.submit()],
-  ["root.fields.<ImpulseFormValue>", (form) => form.fields._1.submit()],
+  ["root.fields.<ImpulseFormUnit>", (form) => form.fields._1.submit()],
   ["root.fields.<ImpulseFormShape>", (form) => form.fields._3.submit()],
   [
-    "root.fields.<ImpulseFormShape>.fields.<ImpulseFormValue>",
+    "root.fields.<ImpulseFormShape>.fields.<ImpulseFormUnit>",
     (form) => form.fields._3.fields._1.submit(),
   ],
 ])("onSubmit(listener) when submitting via %s", (_, submit) => {
@@ -109,7 +109,7 @@ describe.each<
   describe.each([
     // TODO ["root.fields.<ImpulseFormShape>"]
     [
-      "root.fields.<ImpulseFormValue>",
+      "root.fields.<ImpulseFormUnit>",
       () =>
         setup({
           input: {
@@ -118,7 +118,7 @@ describe.each<
         }),
     ],
     [
-      "root.fields.<ImpulseFormShape>.fields.<ImpulseFormValue>",
+      "root.fields.<ImpulseFormShape>.fields.<ImpulseFormUnit>",
       () =>
         setup({
           input: {
@@ -173,12 +173,12 @@ describe.each<
         _4: ["anything"],
       },
       () => {
-        return ImpulseFormShape.of({
-          _1: ImpulseFormValue.of("value"),
-          _2: ImpulseFormValue.of(0),
-          _3: ImpulseFormShape.of({
-            _1: ImpulseFormValue.of(true),
-            _2: ImpulseFormValue.of(["value"]),
+        return ImpulseFormShape({
+          _1: ImpulseFormUnit("value"),
+          _2: ImpulseFormUnit(0),
+          _3: ImpulseFormShape({
+            _1: ImpulseFormUnit(true),
+            _2: ImpulseFormUnit(["value"]),
           }),
           _4: ["anything"],
         })

@@ -4,26 +4,26 @@ import {
   type ImpulseFormListOptions,
   ImpulseFormShape,
   type ImpulseFormShapeOptions,
-  ImpulseFormValue,
+  ImpulseFormUnit,
 } from "../../src"
 
 const setup = <T extends ImpulseForm>(
   elements: ReadonlyArray<T>,
   options?: ImpulseFormListOptions<T>,
 ) => {
-  return ImpulseFormList.of(elements, options)
+  return ImpulseFormList(elements, options)
 }
 
 interface Element {
-  first: ImpulseFormValue<number>
-  second: ImpulseFormValue<string>
+  first: ImpulseFormUnit<number>
+  second: ImpulseFormUnit<string>
 }
 
 const setupElement = (options?: ImpulseFormShapeOptions<Element>) => {
-  return ImpulseFormShape.of(
+  return ImpulseFormShape(
     {
-      first: ImpulseFormValue.of(0),
-      second: ImpulseFormValue.of(""),
+      first: ImpulseFormUnit(0),
+      second: ImpulseFormUnit(""),
     },
     options,
   )
@@ -129,9 +129,9 @@ describe("adding a new element to the list's beginning", () => {
         input: { first: 0, second: "0" },
         initial: { first: 10, second: "10" },
       }),
-      ImpulseFormShape.of({
-        first: ImpulseFormValue.of(0, { initial: 20 }),
-        second: ImpulseFormValue.of("", { initial: "20" }),
+      ImpulseFormShape({
+        first: ImpulseFormUnit(0, { initial: 20 }),
+        second: ImpulseFormUnit("", { initial: "20" }),
       }),
       ...elements,
     ])
@@ -202,12 +202,12 @@ describe("adding a new element to the list's beginning", () => {
 
 describe("nested list", () => {
   it("returns initial value", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormShape.of({
-        first: ImpulseFormList.of([
-          ImpulseFormShape.of({
-            one: ImpulseFormValue.of("1"),
-            two: ImpulseFormValue.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormShape({
+        first: ImpulseFormList([
+          ImpulseFormShape({
+            one: ImpulseFormUnit("1"),
+            two: ImpulseFormUnit(2),
           }),
         ]),
       }),
@@ -221,16 +221,16 @@ describe("nested list", () => {
   })
 
   it("updates initial value", ({ scope }) => {
-    const form = ImpulseFormList.of([
-      ImpulseFormShape.of({
-        first: ImpulseFormList.of([
-          ImpulseFormShape.of({
-            one: ImpulseFormValue.of("1"),
-            two: ImpulseFormValue.of(2),
+    const form = ImpulseFormList([
+      ImpulseFormShape({
+        first: ImpulseFormList([
+          ImpulseFormShape({
+            one: ImpulseFormUnit("1"),
+            two: ImpulseFormUnit(2),
           }),
-          ImpulseFormShape.of({
-            one: ImpulseFormValue.of("10"),
-            two: ImpulseFormValue.of(20),
+          ImpulseFormShape({
+            one: ImpulseFormUnit("10"),
+            two: ImpulseFormUnit(20),
           }),
         ]),
       }),

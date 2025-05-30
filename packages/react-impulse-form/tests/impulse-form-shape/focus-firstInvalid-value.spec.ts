@@ -3,33 +3,33 @@ import { z } from "zod"
 import {
   ImpulseFormShape,
   type ImpulseFormShapeOptions,
-  ImpulseFormValue,
+  ImpulseFormUnit,
 } from "../../src"
 
 function setup(
   options?: ImpulseFormShapeOptions<{
-    _1: ImpulseFormValue<string, ReadonlyArray<string>>
-    _2: ImpulseFormValue<number, ReadonlyArray<string>>
+    _1: ImpulseFormUnit<string, ReadonlyArray<string>>
+    _2: ImpulseFormUnit<number, ReadonlyArray<string>>
     _3: ImpulseFormShape<{
-      _1: ImpulseFormValue<undefined | boolean, ReadonlyArray<string>, boolean>
-      _2: ImpulseFormValue<Array<string>, ReadonlyArray<string>>
+      _1: ImpulseFormUnit<undefined | boolean, ReadonlyArray<string>, boolean>
+      _2: ImpulseFormUnit<Array<string>, ReadonlyArray<string>>
     }>
     _4: Array<string>
   }>,
 ) {
-  const form = ImpulseFormShape.of(
+  const form = ImpulseFormShape(
     {
-      _1: ImpulseFormValue.of("", {
+      _1: ImpulseFormUnit("", {
         schema: z.string().min(2),
       }),
-      _2: ImpulseFormValue.of(0, {
+      _2: ImpulseFormUnit(0, {
         schema: z.number().min(1),
       }),
-      _3: ImpulseFormShape.of({
-        _1: ImpulseFormValue.of<undefined | boolean>(undefined, {
+      _3: ImpulseFormShape({
+        _1: ImpulseFormUnit<undefined | boolean>(undefined, {
           schema: z.boolean(),
         }),
-        _2: ImpulseFormValue.of([""], {
+        _2: ImpulseFormUnit([""], {
           schema: z.array(z.string()).min(2),
         }),
       }),
@@ -65,18 +65,16 @@ function setup(
 it("matches the type signature", () => {
   const [form] = setup()
 
-  expectTypeOf(form.focusFirstInvalidValue).toEqualTypeOf<VoidFunction>()
-  expectTypeOf(
-    form.fields._3.focusFirstInvalidValue,
-  ).toEqualTypeOf<VoidFunction>()
+  expectTypeOf(form.focusFirstInvalid).toEqualTypeOf<VoidFunction>()
+  expectTypeOf(form.fields._3.focusFirstInvalid).toEqualTypeOf<VoidFunction>()
 })
 
-describe("focusFirstInvalidValue()", () => {
+describe("focusFirstInvalid()", () => {
   it("calls a single validated field's listener", () => {
     const [form, { listener_1, listener_2, listener_3_1, listener_3_2 }] =
       setup()
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
 
     expect(listener_1).toHaveBeenCalledOnce()
     expect(listener_2).not.toHaveBeenCalled()
@@ -93,7 +91,7 @@ describe("focusFirstInvalidValue()", () => {
         },
       })
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
 
     expect(listener_1).not.toHaveBeenCalled()
     expect(listener_2).toHaveBeenCalledOnce()
@@ -109,7 +107,7 @@ describe("focusFirstInvalidValue()", () => {
         },
       })
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
 
     expect(listener_1).not.toHaveBeenCalled()
     expect(listener_2).not.toHaveBeenCalled()
@@ -127,7 +125,7 @@ describe("focusFirstInvalidValue()", () => {
         },
       })
 
-    form.focusFirstInvalidValue()
+    form.focusFirstInvalid()
 
     expect(listener_1).not.toHaveBeenCalled()
     expect(listener_2).not.toHaveBeenCalled()
@@ -136,7 +134,7 @@ describe("focusFirstInvalidValue()", () => {
   })
 })
 
-describe("fields.*.focusFirstInvalidValue()", () => {
+describe("fields.*.focusFirstInvalid()", () => {
   it("calls the first validated field's listener", () => {
     const [form, { listener_1, listener_2, listener_3_1, listener_3_2 }] =
       setup({
@@ -145,7 +143,7 @@ describe("fields.*.focusFirstInvalidValue()", () => {
         },
       })
 
-    form.fields._3.focusFirstInvalidValue()
+    form.fields._3.focusFirstInvalid()
 
     expect(listener_1).not.toHaveBeenCalled()
     expect(listener_2).not.toHaveBeenCalled()
@@ -162,7 +160,7 @@ describe("fields.*.focusFirstInvalidValue()", () => {
         },
       })
 
-    form.fields._3.focusFirstInvalidValue()
+    form.fields._3.focusFirstInvalid()
 
     expect(listener_1).not.toHaveBeenCalled()
     expect(listener_2).not.toHaveBeenCalled()

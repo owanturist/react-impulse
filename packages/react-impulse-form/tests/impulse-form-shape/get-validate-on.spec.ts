@@ -4,7 +4,7 @@ import {
   ImpulseFormShape,
   type ImpulseFormShapeFields,
   type ImpulseFormShapeOptions,
-  ImpulseFormValue,
+  ImpulseFormUnit,
   type ValidateStrategy,
 } from "../../src"
 import { arg } from "../common"
@@ -34,22 +34,22 @@ type RootValidateStrategyConcise =
 
 function setup(
   options?: ImpulseFormShapeOptions<{
-    first: ImpulseFormValue<string>
-    second: ImpulseFormValue<number>
+    first: ImpulseFormUnit<string>
+    second: ImpulseFormUnit<number>
     third: ImpulseFormShape<{
-      one: ImpulseFormValue<boolean>
-      two: ImpulseFormValue<Array<string>>
+      one: ImpulseFormUnit<boolean>
+      two: ImpulseFormUnit<Array<string>>
     }>
     fourth: Array<string>
   }>,
 ) {
-  return ImpulseFormShape.of(
+  return ImpulseFormShape(
     {
-      first: ImpulseFormValue.of(""),
-      second: ImpulseFormValue.of(0),
-      third: ImpulseFormShape.of({
-        one: ImpulseFormValue.of(true),
-        two: ImpulseFormValue.of([""]),
+      first: ImpulseFormUnit(""),
+      second: ImpulseFormUnit(0),
+      third: ImpulseFormShape({
+        one: ImpulseFormUnit(true),
+        two: ImpulseFormUnit([""]),
       }),
       fourth: ["anything"],
     },
@@ -160,7 +160,7 @@ describe.each([
   })
 
   it("returns onTouch for empty shape", ({ scope }) => {
-    expect(getValidateOn(scope, ImpulseFormShape.of({}))).toBe("onTouch")
+    expect(getValidateOn(scope, ImpulseFormShape({}))).toBe("onTouch")
   })
 })
 
@@ -227,6 +227,6 @@ describe("getValidateOn(scope, (_, verbose) => verbose)", () => {
   })
 
   it("returns an empty object for empty shape", ({ scope }) => {
-    expect(getValidateOn(scope, ImpulseFormShape.of({}))).toStrictEqual({})
+    expect(getValidateOn(scope, ImpulseFormShape({}))).toStrictEqual({})
   })
 })

@@ -5,7 +5,7 @@ import {
   ImpulseFormShape,
   type ImpulseFormShapeFields,
   type ImpulseFormShapeOptions,
-  ImpulseFormValue,
+  ImpulseFormUnit,
 } from "../../src"
 import { arg } from "../common"
 
@@ -32,28 +32,28 @@ type RootIsValidatedConcise =
 
 const setup = (
   options?: ImpulseFormShapeOptions<{
-    first: ImpulseFormValue<string>
-    second: ImpulseFormValue<number>
+    first: ImpulseFormUnit<string>
+    second: ImpulseFormUnit<number>
     third: ImpulseFormShape<{
-      one: ImpulseFormValue<boolean, ReadonlyArray<string>>
-      two: ImpulseFormValue<Array<string>, ReadonlyArray<string>>
+      one: ImpulseFormUnit<boolean, ReadonlyArray<string>>
+      two: ImpulseFormUnit<Array<string>, ReadonlyArray<string>>
     }>
     fourth: Array<string>
   }>,
 ) => {
-  return ImpulseFormShape.of(
+  return ImpulseFormShape(
     {
-      first: ImpulseFormValue.of("", {
+      first: ImpulseFormUnit("", {
         validate: (input) => [null, input],
       }),
-      second: ImpulseFormValue.of(0, {
+      second: ImpulseFormUnit(0, {
         validate: (input) => [null, input],
       }),
-      third: ImpulseFormShape.of({
-        one: ImpulseFormValue.of(true, {
+      third: ImpulseFormShape({
+        one: ImpulseFormUnit(true, {
           schema: z.boolean(),
         }),
-        two: ImpulseFormValue.of([""], {
+        two: ImpulseFormUnit([""], {
           schema: z.array(z.string()),
         }),
       }),
@@ -153,7 +153,7 @@ describe("isValidated(scope)", () => {
   })
 
   it("returns false for empty shape", ({ scope }) => {
-    expect(ImpulseFormShape.of({}).isValidated(scope)).toBe(false)
+    expect(ImpulseFormShape({}).isValidated(scope)).toBe(false)
   })
 })
 
@@ -213,7 +213,7 @@ describe("isValidated(scope, (concise) => concise)", () => {
   })
 
   it("returns false for empty shape", ({ scope }) => {
-    expect(isValidated(scope, ImpulseFormShape.of({}))).toBe(false)
+    expect(isValidated(scope, ImpulseFormShape({}))).toBe(false)
   })
 })
 
@@ -293,19 +293,19 @@ describe("isValidated(scope, (_, verbose) => verbose)", () => {
   })
 
   it("returns an empty object for empty shape", ({ scope }) => {
-    expect(isValidated(scope, ImpulseFormShape.of({}))).toStrictEqual({})
+    expect(isValidated(scope, ImpulseFormShape({}))).toStrictEqual({})
   })
 })
 
 describe("isValidated(..)", () => {
   it("overrides fields' initial value", ({ scope }) => {
-    const shape = ImpulseFormShape.of(
+    const shape = ImpulseFormShape(
       {
-        one: ImpulseFormValue.of(true, {
+        one: ImpulseFormUnit(true, {
           schema: z.boolean(),
           validateOn: "onInit",
         }),
-        two: ImpulseFormValue.of("", {
+        two: ImpulseFormUnit("", {
           schema: z.string(),
           validateOn: "onSubmit",
         }),
