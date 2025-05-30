@@ -1,6 +1,3 @@
-import type Types from "ts-toolbelt"
-
-import type { Compute } from "~/tools/compute"
 import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
@@ -9,173 +6,50 @@ import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
 import { isUndefined } from "~/tools/is-undefined"
 import { params } from "~/tools/params"
-import type { Setter } from "~/tools/setter"
 
-import { type Scope, batch } from "./dependencies"
-import {
-  type GetImpulseFormParam,
-  ImpulseForm,
-  type ImpulseFormParamsKeys,
-} from "./impulse-form"
-import { isImpulseForm } from "./is-impulse-form"
-import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./validate-strategy"
+import { type Scope, batch } from "../dependencies"
+import { ImpulseForm, isImpulseForm } from "../impulse-form"
+import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ImpulseFormShapeFields = Record<string | number, any>
-
-type ImpulseFormShapeParam<
-  TFields extends ImpulseFormShapeFields,
-  TKey extends ImpulseFormParamsKeys,
-  TFallback extends "field" | "nothing" = "nothing",
-> = Compute<
-  Types.Object.Filter<
-    {
-      readonly [TField in Types.Any.Keys<TFields>]: GetImpulseFormParam<
-        TFields[TField],
-        TKey,
-        TFallback extends "field" ? TFields[TField] : never
-      >
-    },
-    never,
-    "equals"
-  >
->
-
-export type ImpulseFormShapeInputSchema<
-  TFields extends ImpulseFormShapeFields,
-> = ImpulseFormShapeParam<TFields, "input.schema", "field">
-
-export type ImpulseFormShapeInputSetter<
-  TFields extends ImpulseFormShapeFields,
-> = Setter<
-  Partial<ImpulseFormShapeParam<TFields, "input.setter">>,
-  [ImpulseFormShapeInputSchema<TFields>, ImpulseFormShapeInputSchema<TFields>]
->
-
-export type ImpulseFormShapeOutputSchema<
-  TFields extends ImpulseFormShapeFields,
-> = ImpulseFormShapeParam<TFields, "output.schema", "field">
-
-export type ImpulseFormShapeOutputSchemaVerbose<
-  TFields extends ImpulseFormShapeFields,
-> = ImpulseFormShapeParam<TFields, "output.schema.verbose", "field">
-
-export type ImpulseFormShapeFlagSchema<TFields extends ImpulseFormShapeFields> =
-  boolean | ImpulseFormShapeParam<TFields, "flag.schema">
-
-export type ImpulseFormShapeFlagSchemaVerbose<
-  TFields extends ImpulseFormShapeFields,
-> = ImpulseFormShapeParam<TFields, "flag.schema.verbose">
-
-export type ImpulseFormShapeFlagSetter<TFields extends ImpulseFormShapeFields> =
-  Setter<
-    boolean | Partial<ImpulseFormShapeParam<TFields, "flag.setter">>,
-    [ImpulseFormShapeFlagSchemaVerbose<TFields>]
-  >
-
-export type ImpulseFormShapeValidateOnSchema<
-  TFields extends ImpulseFormShapeFields,
-> = ValidateStrategy | ImpulseFormShapeParam<TFields, "validateOn.schema">
-
-export type ImpulseFormShapeValidateOnSchemaVerbose<
-  TFields extends ImpulseFormShapeFields,
-> = ImpulseFormShapeParam<TFields, "validateOn.schema.verbose">
-
-export type ImpulseFormShapeValidateOnSetter<
-  TFields extends ImpulseFormShapeFields,
-> = Setter<
-  | ValidateStrategy
-  | Partial<ImpulseFormShapeParam<TFields, "validateOn.setter">>,
-  [ImpulseFormShapeValidateOnSchemaVerbose<TFields>]
->
-
-export type ImpulseFormShapeErrorSetter<
-  TFields extends ImpulseFormShapeFields,
-> = Setter<
-  null | Partial<ImpulseFormShapeParam<TFields, "error.setter">>,
-  [ImpulseFormShapeErrorSchemaVerbose<TFields>]
->
-
-export type ImpulseFormShapeErrorSchema<
-  TFields extends ImpulseFormShapeFields,
-> = null | ImpulseFormShapeParam<TFields, "error.schema">
-
-export type ImpulseFormShapeErrorSchemaVerbose<
-  TFields extends ImpulseFormShapeFields,
-> = ImpulseFormShapeParam<TFields, "error.schema.verbose">
-
-export interface ImpulseFormShapeOptions<
-  TFields extends ImpulseFormShapeFields,
-> {
-  input?: ImpulseFormShapeInputSetter<TFields>
-  initial?: ImpulseFormShapeInputSetter<TFields>
-  touched?: ImpulseFormShapeFlagSetter<TFields>
-  validateOn?: ImpulseFormShapeValidateOnSetter<TFields>
-  error?: ImpulseFormShapeErrorSetter<TFields>
-}
+import type { ImpulseFormShapeError } from "./impulse-form-shape-error"
+import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"
+import type { ImpulseFormShapeErrorVerbose } from "./impulse-form-shape-error-verbose"
+import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
+import type { ImpulseFormShapeFlag } from "./impulse-form-shape-flag"
+import type { ImpulseFormShapeFlagSetter } from "./impulse-form-shape-flag-setter"
+import type { ImpulseFormShapeFlagVerbose } from "./impulse-form-shape-flag-verbose"
+import type { ImpulseFormShapeInput } from "./impulse-form-shape-input"
+import type { ImpulseFormShapeInputSetter } from "./impulse-form-shape-input-setter"
+import type { ImpulseFormShapeOutput } from "./impulse-form-shape-output"
+import type { ImpulseFormShapeOutputVerbose } from "./impulse-form-shape-output-verbose"
+import type { ImpulseFormShapeValidateOnSetter } from "./impulse-form-shape-validate-on-setter"
+import type { ImpulseFormShapeValidateOnVerbose } from "./impulse-form-shape-validate-on-verbose"
+import type { ImpulseFormShapeValidateOn } from "./impulse-form-shape-validate-on"
 
 export class ImpulseFormShape<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
 > extends ImpulseForm<{
-  "input.schema": ImpulseFormShapeInputSchema<TFields>
+  "input.schema": ImpulseFormShapeInput<TFields>
   "input.setter": ImpulseFormShapeInputSetter<TFields>
 
-  "output.schema": ImpulseFormShapeOutputSchema<TFields>
-  "output.schema.verbose": ImpulseFormShapeOutputSchemaVerbose<TFields>
+  "output.schema": ImpulseFormShapeOutput<TFields>
+  "output.schema.verbose": ImpulseFormShapeOutputVerbose<TFields>
 
   "flag.setter": ImpulseFormShapeFlagSetter<TFields>
-  "flag.schema": ImpulseFormShapeFlagSchema<TFields>
-  "flag.schema.verbose": ImpulseFormShapeFlagSchemaVerbose<TFields>
+  "flag.schema": ImpulseFormShapeFlag<TFields>
+  "flag.schema.verbose": ImpulseFormShapeFlagVerbose<TFields>
 
   "validateOn.setter": ImpulseFormShapeValidateOnSetter<TFields>
-  "validateOn.schema": ImpulseFormShapeValidateOnSchema<TFields>
-  "validateOn.schema.verbose": ImpulseFormShapeValidateOnSchemaVerbose<TFields>
+  "validateOn.schema": ImpulseFormShapeValidateOn<TFields>
+  "validateOn.schema.verbose": ImpulseFormShapeValidateOnVerbose<TFields>
 
   "error.setter": ImpulseFormShapeErrorSetter<TFields>
-  "error.schema": ImpulseFormShapeErrorSchema<TFields>
-  "error.schema.verbose": ImpulseFormShapeErrorSchemaVerbose<TFields>
+  "error.schema": ImpulseFormShapeError<TFields>
+  "error.schema.verbose": ImpulseFormShapeErrorVerbose<TFields>
 }> {
-  public static of<TFields extends ImpulseFormShapeFields>(
-    fields: Readonly<TFields>,
-    {
-      input,
-      initial,
-      touched,
-      validateOn,
-      error,
-    }: ImpulseFormShapeOptions<TFields> = {},
-  ): ImpulseFormShape<TFields> {
-    const shape = new ImpulseFormShape(null, fields)
-
-    batch(() => {
-      if (!isUndefined(touched)) {
-        shape.setTouched(touched)
-      }
-
-      if (!isUndefined(initial)) {
-        shape.setInitial(initial)
-      }
-
-      if (!isUndefined(input)) {
-        shape.setInput(input)
-      }
-
-      if (!isUndefined(validateOn)) {
-        shape.setValidateOn(validateOn)
-      }
-
-      // TODO add test against null
-      if (!isUndefined(error)) {
-        shape.setError(error)
-      }
-    })
-
-    return shape
-  }
-
   public readonly fields: Readonly<TFields>
 
-  protected constructor(root: null | ImpulseForm, fields: Readonly<TFields>) {
+  public constructor(root: null | ImpulseForm, fields: Readonly<TFields>) {
     super(root)
 
     const acc = {} as TFields
@@ -204,7 +78,7 @@ export class ImpulseFormShape<
   }
 
   protected _submitWith(
-    output: ImpulseFormShapeOutputSchema<TFields>,
+    output: ImpulseFormShapeOutput<TFields>,
   ): ReadonlyArray<void | Promise<unknown>> {
     const promises = Object.entries(this.fields).flatMap(([key, field]) => {
       if (!isImpulseForm(field)) {
@@ -261,9 +135,9 @@ export class ImpulseFormShape<
   protected _isDirty<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormShapeFlagSchema<TFields>,
-      verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
-      dirty: ImpulseFormShapeFlagSchemaVerbose<TFields>,
+      concise: ImpulseFormShapeFlag<TFields>,
+      verbose: ImpulseFormShapeFlagVerbose<TFields>,
+      dirty: ImpulseFormShapeFlagVerbose<TFields>,
     ) => TResult,
   ): TResult {
     const keys = Object.keys(this.fields)
@@ -298,25 +172,25 @@ export class ImpulseFormShape<
         ? false
         : isAllDirty
           ? true
-          : (isDirtyConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
-      isDirtyVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
-      isDirtyDirty as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
+          : (isDirtyConcise as unknown as ImpulseFormShapeFlag<TFields>),
+      isDirtyVerbose as unknown as ImpulseFormShapeFlagVerbose<TFields>,
+      isDirtyDirty as unknown as ImpulseFormShapeFlagVerbose<TFields>,
     )
   }
 
-  public getError(scope: Scope): ImpulseFormShapeErrorSchema<TFields>
+  public getError(scope: Scope): ImpulseFormShapeError<TFields>
   public getError<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormShapeErrorSchema<TFields>,
-      verbose: ImpulseFormShapeErrorSchemaVerbose<TFields>,
+      concise: ImpulseFormShapeError<TFields>,
+      verbose: ImpulseFormShapeErrorVerbose<TFields>,
     ) => TResult,
   ): TResult
-  public getError<TResult = ImpulseFormShapeErrorSchema<TFields>>(
+  public getError<TResult = ImpulseFormShapeError<TFields>>(
     scope: Scope,
     select: (
-      concise: ImpulseFormShapeErrorSchema<TFields>,
-      verbose: ImpulseFormShapeErrorSchemaVerbose<TFields>,
+      concise: ImpulseFormShapeError<TFields>,
+      verbose: ImpulseFormShapeErrorVerbose<TFields>,
     ) => TResult = params._first as typeof select,
   ): TResult {
     let errorsNone = true
@@ -340,8 +214,8 @@ export class ImpulseFormShape<
     return select(
       errorsNone
         ? null
-        : (errorsConcise as unknown as ImpulseFormShapeErrorSchema<TFields>),
-      errorsVerbose as unknown as ImpulseFormShapeErrorSchemaVerbose<TFields>,
+        : (errorsConcise as unknown as ImpulseFormShapeError<TFields>),
+      errorsVerbose as unknown as ImpulseFormShapeErrorVerbose<TFields>,
     )
   }
 
@@ -374,15 +248,15 @@ export class ImpulseFormShape<
   public isValidated<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormShapeFlagSchema<TFields>,
-      verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
+      concise: ImpulseFormShapeFlag<TFields>,
+      verbose: ImpulseFormShapeFlagVerbose<TFields>,
     ) => TResult,
   ): TResult
   public isValidated<TResult = boolean>(
     scope: Scope,
     select: (
-      concise: ImpulseFormShapeFlagSchema<TFields>,
-      verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
+      concise: ImpulseFormShapeFlag<TFields>,
+      verbose: ImpulseFormShapeFlagVerbose<TFields>,
     ) => TResult = isTrue as unknown as typeof select,
   ): TResult {
     let validatedAll = true
@@ -410,24 +284,24 @@ export class ImpulseFormShape<
         ? false
         : validatedAll
           ? true
-          : (validatedConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
-      validatedVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
+          : (validatedConcise as unknown as ImpulseFormShapeFlag<TFields>),
+      validatedVerbose as unknown as ImpulseFormShapeFlagVerbose<TFields>,
     )
   }
 
-  public getValidateOn(scope: Scope): ImpulseFormShapeValidateOnSchema<TFields>
+  public getValidateOn(scope: Scope): ImpulseFormShapeValidateOn<TFields>
   public getValidateOn<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormShapeValidateOnSchema<TFields>,
-      verbose: ImpulseFormShapeValidateOnSchemaVerbose<TFields>,
+      concise: ImpulseFormShapeValidateOn<TFields>,
+      verbose: ImpulseFormShapeValidateOnVerbose<TFields>,
     ) => TResult,
   ): TResult
-  public getValidateOn<TResult = ImpulseFormShapeValidateOnSchema<TFields>>(
+  public getValidateOn<TResult = ImpulseFormShapeValidateOn<TFields>>(
     scope: Scope,
     select: (
-      concise: ImpulseFormShapeValidateOnSchema<TFields>,
-      verbose: ImpulseFormShapeValidateOnSchemaVerbose<TFields>,
+      concise: ImpulseFormShapeValidateOn<TFields>,
+      verbose: ImpulseFormShapeValidateOnVerbose<TFields>,
     ) => TResult = params._first as typeof select,
   ): TResult {
     // make it easier for TS
@@ -455,8 +329,8 @@ export class ImpulseFormShape<
         : validateOnConciseValues.every(isString) &&
             new Set(validateOnConciseValues).size === 1
           ? (validateOnConciseValues[0] as ValidateStrategy)
-          : (validateOnConcise as unknown as ImpulseFormShapeValidateOnSchema<TFields>),
-      validateOnVerbose as unknown as ImpulseFormShapeValidateOnSchemaVerbose<TFields>,
+          : (validateOnConcise as unknown as ImpulseFormShapeValidateOn<TFields>),
+      validateOnVerbose as unknown as ImpulseFormShapeValidateOnVerbose<TFields>,
     )
   }
 
@@ -484,15 +358,15 @@ export class ImpulseFormShape<
   public isTouched<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormShapeFlagSchema<TFields>,
-      verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
+      concise: ImpulseFormShapeFlag<TFields>,
+      verbose: ImpulseFormShapeFlagVerbose<TFields>,
     ) => TResult,
   ): TResult
   public isTouched<TResult = boolean>(
     scope: Scope,
     select: (
-      concise: ImpulseFormShapeFlagSchema<TFields>,
-      verbose: ImpulseFormShapeFlagSchemaVerbose<TFields>,
+      concise: ImpulseFormShapeFlag<TFields>,
+      verbose: ImpulseFormShapeFlagVerbose<TFields>,
     ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
     let touchedAll = true
@@ -520,8 +394,8 @@ export class ImpulseFormShape<
         ? false
         : touchedAll
           ? true
-          : (touchedConcise as unknown as ImpulseFormShapeFlagSchema<TFields>),
-      touchedVerbose as unknown as ImpulseFormShapeFlagSchemaVerbose<TFields>,
+          : (touchedConcise as unknown as ImpulseFormShapeFlag<TFields>),
+      touchedVerbose as unknown as ImpulseFormShapeFlagVerbose<TFields>,
     )
   }
 
@@ -559,19 +433,19 @@ export class ImpulseFormShape<
     })
   }
 
-  public getOutput(scope: Scope): null | ImpulseFormShapeOutputSchema<TFields>
+  public getOutput(scope: Scope): null | ImpulseFormShapeOutput<TFields>
   public getOutput<TResult>(
     scope: Scope,
     select: (
-      concise: null | ImpulseFormShapeOutputSchema<TFields>,
-      verbose: ImpulseFormShapeOutputSchemaVerbose<TFields>,
+      concise: null | ImpulseFormShapeOutput<TFields>,
+      verbose: ImpulseFormShapeOutputVerbose<TFields>,
     ) => TResult,
   ): TResult
-  public getOutput<TResult = null | ImpulseFormShapeOutputSchema<TFields>>(
+  public getOutput<TResult = null | ImpulseFormShapeOutput<TFields>>(
     scope: Scope,
     select: (
-      concise: null | ImpulseFormShapeOutputSchema<TFields>,
-      verbose: ImpulseFormShapeOutputSchemaVerbose<TFields>,
+      concise: null | ImpulseFormShapeOutput<TFields>,
+      verbose: ImpulseFormShapeOutputVerbose<TFields>,
     ) => TResult = params._first as typeof select,
   ): TResult {
     let allValid = true
@@ -597,16 +471,16 @@ export class ImpulseFormShape<
 
     return select(
       allValid
-        ? (valueConcise as unknown as ImpulseFormShapeOutputSchema<TFields>)
+        ? (valueConcise as unknown as ImpulseFormShapeOutput<TFields>)
         : null,
-      valueVerbose as unknown as ImpulseFormShapeOutputSchemaVerbose<TFields>,
+      valueVerbose as unknown as ImpulseFormShapeOutputVerbose<TFields>,
     )
   }
 
-  public getInput(scope: Scope): ImpulseFormShapeInputSchema<TFields> {
+  public getInput(scope: Scope): ImpulseFormShapeInput<TFields> {
     const input = this._mapFormFields((form) => form.getInput(scope))
 
-    return input as unknown as ImpulseFormShapeInputSchema<TFields>
+    return input as unknown as ImpulseFormShapeInput<TFields>
   }
 
   // TODO add tests against initial coming as second argument
@@ -626,10 +500,10 @@ export class ImpulseFormShape<
     })
   }
 
-  public getInitial(scope: Scope): ImpulseFormShapeInputSchema<TFields> {
+  public getInitial(scope: Scope): ImpulseFormShapeInput<TFields> {
     const initial = this._mapFormFields((form) => form.getInitial(scope))
 
-    return initial as unknown as ImpulseFormShapeInputSchema<TFields>
+    return initial as unknown as ImpulseFormShapeInput<TFields>
   }
 
   // TODO add tests against input coming as second argument

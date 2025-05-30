@@ -2,6 +2,7 @@ export * from "./impulse-form"
 export * from "./is-impulse-form"
 
 export type * from "./impulse-form-params"
+export type * from "./get-impulse-form-param"
 
 export type * from "./get-impulse-form-error-setter"
 export type * from "./get-impulse-form-error"
