@@ -3,13 +3,13 @@ import { z } from "zod"
 import type { Setter } from "~/tools/setter"
 
 import {
-  ImpulseFormValue,
-  type ImpulseFormValueSchemaOptions,
+  ImpulseFormUnit,
+  type ImpulseFormUnitSchemaOptions,
   type ValidateStrategy,
 } from "../../src"
 
-function setup(options?: Partial<ImpulseFormValueSchemaOptions<string>>) {
-  return ImpulseFormValue.of("", {
+function setup(options?: Partial<ImpulseFormUnitSchemaOptions<string>>) {
+  return ImpulseFormUnit.of("", {
     ...options,
     schema: z.string(),
   })

@@ -1,14 +1,14 @@
 import { z } from "zod"
 
 import {
-  ImpulseFormValue,
-  type ImpulseFormValueSchemaOptions,
-  type ImpulseFormValueValidatedOptions,
+  ImpulseFormUnit,
+  type ImpulseFormUnitSchemaOptions,
+  type ImpulseFormUnitValidatedOptions,
 } from "../../src"
 import { arg } from "../common"
 
 it("selects error", ({ scope }) => {
-  const value = ImpulseFormValue.of("1", {
+  const value = ImpulseFormUnit.of("1", {
     validateOn: "onInit",
     validate: (input) => (input.length > 1 ? [1, null] : [null, input]),
   })
@@ -33,7 +33,7 @@ it("selects error", ({ scope }) => {
 
 describe("when neither schema nor initial error are defined", () => {
   function setup() {
-    return ImpulseFormValue.of<string, number>("1")
+    return ImpulseFormUnit.of<string, number>("1")
   }
 
   it("returns null", ({ scope }) => {
@@ -69,7 +69,7 @@ describe("when neither schema nor initial error are defined", () => {
 
 describe("when initial error is defined", () => {
   function setup() {
-    return ImpulseFormValue.of("1", { error: 2 })
+    return ImpulseFormUnit.of("1", { error: 2 })
   }
 
   it("returns the initial error", ({ scope }) => {
@@ -104,9 +104,9 @@ describe("when initial error is defined", () => {
 
 describe("when validator is defined", () => {
   function setup(
-    options?: Partial<ImpulseFormValueValidatedOptions<string, number>>,
+    options?: Partial<ImpulseFormUnitValidatedOptions<string, number>>,
   ) {
-    return ImpulseFormValue.of("", {
+    return ImpulseFormUnit.of("", {
       validate: (input) => (input.length > 0 ? [null, input] : [1, null]),
       ...options,
     })
@@ -158,8 +158,8 @@ describe("when validator is defined", () => {
 })
 
 describe("when schema is defined", () => {
-  function setup(options?: Partial<ImpulseFormValueSchemaOptions<number>>) {
-    return ImpulseFormValue.of(1, { schema: z.number().min(2), ...options })
+  function setup(options?: Partial<ImpulseFormUnitSchemaOptions<number>>) {
+    return ImpulseFormUnit.of(1, { schema: z.number().min(2), ...options })
   }
 
   it("returns null on init by default", ({ scope }) => {
@@ -242,7 +242,7 @@ describe("when ZodLikeSchema is used", () => {
     "when using ZodLikeSchema#safeParse() with ZodLikeError#%s",
     (_, error) => {
       it("returns messages", ({ scope }) => {
-        const value = ImpulseFormValue.of(1, {
+        const value = ImpulseFormUnit.of(1, {
           touched: true,
           schema: {
             safeParse() {
@@ -261,7 +261,7 @@ describe("when ZodLikeSchema is used", () => {
 
   describe("when using ZodLikeSchema#parse()", () => {
     it("returns Error.message", ({ scope }) => {
-      const value = ImpulseFormValue.of(1, {
+      const value = ImpulseFormUnit.of(1, {
         touched: true,
         schema: {
           parse() {
@@ -305,7 +305,7 @@ describe("when ZodLikeSchema is used", () => {
       ],
     ])("when messages are in ZodLikeError#%s", (_, error) => {
       it("returns messages", ({ scope }) => {
-        const value = ImpulseFormValue.of(1, {
+        const value = ImpulseFormUnit.of(1, {
           touched: true,
           schema: {
             parse() {
@@ -324,7 +324,7 @@ describe("when ZodLikeSchema is used", () => {
     it("ignores ZodLikeIssue without the message: string property", ({
       scope,
     }) => {
-      const value = ImpulseFormValue.of(1, {
+      const value = ImpulseFormUnit.of(1, {
         touched: true,
         schema: {
           parse() {
@@ -352,7 +352,7 @@ describe("when ZodLikeSchema is used", () => {
     it("returns empty array if ZodLikeError does not have errors|issues properties", ({
       scope,
     }) => {
-      const value = ImpulseFormValue.of(1, {
+      const value = ImpulseFormUnit.of(1, {
         touched: true,
         schema: {
           parse() {
@@ -365,7 +365,7 @@ describe("when ZodLikeSchema is used", () => {
     })
 
     it("returns empty array if ZodLikeError is not an object", ({ scope }) => {
-      const value = ImpulseFormValue.of(1, {
+      const value = ImpulseFormUnit.of(1, {
         touched: true,
         schema: {
           parse() {
@@ -378,7 +378,7 @@ describe("when ZodLikeSchema is used", () => {
     })
 
     it("returns error from ZodSchema#parse()", ({ scope }) => {
-      const value = ImpulseFormValue.of(1, {
+      const value = ImpulseFormUnit.of(1, {
         touched: true,
         schema: {
           parse(input) {

@@ -2,15 +2,15 @@ import type { Scope } from "react-impulse"
 import { z } from "zod"
 
 import {
-  ImpulseFormValue,
-  type ImpulseFormValueSchemaOptions,
+  ImpulseFormUnit,
+  type ImpulseFormUnitSchemaOptions,
   type ValidateStrategy,
 } from "../../src"
 
 const setup = (
-  options?: Partial<ImpulseFormValueSchemaOptions<string, number>>,
+  options?: Partial<ImpulseFormUnitSchemaOptions<string, number>>,
 ) => {
-  return ImpulseFormValue.of("y", {
+  return ImpulseFormUnit.of("y", {
     schema: z.string().min(1).pipe(z.coerce.number()),
     ...options,
   })
@@ -18,21 +18,21 @@ const setup = (
 
 function isValidatedDefault<TError, TOutput>(
   scope: Scope,
-  value: ImpulseFormValue<string, TError, TOutput>,
+  value: ImpulseFormUnit<string, TError, TOutput>,
 ) {
   return value.isValidated(scope)
 }
 
 function isValidatedConcise<TError, TOutput>(
   scope: Scope,
-  value: ImpulseFormValue<string, TError, TOutput>,
+  value: ImpulseFormUnit<string, TError, TOutput>,
 ) {
   return value.isValidated(scope, (concise) => concise)
 }
 
 function isValidatedVerbose<TError, TOutput>(
   scope: Scope,
-  value: ImpulseFormValue<string, TError, TOutput>,
+  value: ImpulseFormUnit<string, TError, TOutput>,
 ) {
   return value.isValidated(scope, (_, verbose) => verbose)
 }

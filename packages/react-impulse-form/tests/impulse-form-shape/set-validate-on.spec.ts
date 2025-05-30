@@ -3,28 +3,28 @@ import type { Setter } from "~/tools/setter"
 import {
   ImpulseFormShape,
   type ImpulseFormShapeOptions,
-  ImpulseFormValue,
+  ImpulseFormUnit,
   type ValidateStrategy,
 } from "../../src"
 
 const setup = (
   options?: ImpulseFormShapeOptions<{
-    first: ImpulseFormValue<string>
-    second: ImpulseFormValue<number>
+    first: ImpulseFormUnit<string>
+    second: ImpulseFormUnit<number>
     third: ImpulseFormShape<{
-      one: ImpulseFormValue<boolean>
-      two: ImpulseFormValue<Array<string>>
+      one: ImpulseFormUnit<boolean>
+      two: ImpulseFormUnit<Array<string>>
     }>
     fourth: Array<string>
   }>,
 ) => {
   return ImpulseFormShape.of(
     {
-      first: ImpulseFormValue.of(""),
-      second: ImpulseFormValue.of(0),
+      first: ImpulseFormUnit.of(""),
+      second: ImpulseFormUnit.of(0),
       third: ImpulseFormShape.of({
-        one: ImpulseFormValue.of(true),
-        two: ImpulseFormValue.of([""]),
+        one: ImpulseFormUnit.of(true),
+        two: ImpulseFormUnit.of([""]),
       }),
       fourth: ["anything"],
     },

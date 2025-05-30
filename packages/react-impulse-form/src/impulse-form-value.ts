@@ -39,11 +39,11 @@ function createErrorImpulseCompare<TError>(compare: Compare<TError>) {
   }
 }
 
-export type ImpulseFormValueValidator<TInput, TError, TOutput> = (
+export type ImpulseFormUnitValidator<TInput, TError, TOutput> = (
   input: TInput,
 ) => Result<TError, TOutput>
 
-export interface ImpulseFormValueOptions<TInput, TError = null> {
+export interface ImpulseFormUnitOptions<TInput, TError = null> {
   /**
    * The initial or custom error associated with the form value.
    * This can be used to set an error state manually.
@@ -56,7 +56,7 @@ export interface ImpulseFormValueOptions<TInput, TError = null> {
 
   /**
    * A compare function that determines whether the input value changes.
-   * When it does, the ImpulseFormValue#getInput returns the new value.
+   * When it does, the ImpulseFormUnit#getInput returns the new value.
    * Otherwise, it returns the previous value.
    *
    * Useful for none primitive values such as Objects, Arrays, Date, etc.
@@ -67,7 +67,7 @@ export interface ImpulseFormValueOptions<TInput, TError = null> {
    * @example
    * const initial = { count: 0 }
    *
-   * const form = ImpulseFormValue.of(initial, {
+   * const form = ImpulseFormUnit.of(initial, {
    *   isInputEqual: (left, right) => left.count === right.count,
    * })
    *
@@ -78,7 +78,7 @@ export interface ImpulseFormValueOptions<TInput, TError = null> {
 
   /**
    * A compare function that determines whether the input is dirty.
-   * When it is, the ImpulseFormValue#isDirty returns true.
+   * When it is, the ImpulseFormUnit#isDirty returns true.
    * Fallbacks to not(isInputEqual) if not provided.
    *
    * Useful for values that have intermediate states deviating from the initial value,
@@ -88,7 +88,7 @@ export interface ImpulseFormValueOptions<TInput, TError = null> {
    * @default not(isInputEqual)
    *
    * @example
-   * const form = ImpulseFormValue.of("", {
+   * const form = ImpulseFormUnit.of("", {
    *   isInputDirty: (left, right) => left.trim() !== right.trim(),
    * })
    *
@@ -103,8 +103,8 @@ export interface ImpulseFormValueOptions<TInput, TError = null> {
   initial?: TInput
 }
 
-export interface ImpulseFormValueSchemaOptions<TInput, TOutput = TInput>
-  extends ImpulseFormValueOptions<TInput, ReadonlyArray<string>> {
+export interface ImpulseFormUnitSchemaOptions<TInput, TOutput = TInput>
+  extends ImpulseFormUnitOptions<TInput, ReadonlyArray<string>> {
   /**
    * @default "onTouch"
    */
@@ -113,21 +113,21 @@ export interface ImpulseFormValueSchemaOptions<TInput, TOutput = TInput>
   schema: ZodLikeSchema<TOutput>
 }
 
-export interface ImpulseFormValueValidatedOptions<
+export interface ImpulseFormUnitValidatedOptions<
   TInput,
   TError = null,
   TOutput = TInput,
-> extends ImpulseFormValueOptions<TInput, TError> {
+> extends ImpulseFormUnitOptions<TInput, TError> {
   /**
    * @default "onTouch"
    */
   validateOn?: ValidateStrategy
 
-  validate: ImpulseFormValueValidator<TInput, TError, TOutput>
+  validate: ImpulseFormUnitValidator<TInput, TError, TOutput>
 
   /**
    * A compare function that determines whether the validation error change.
-   * When it does, the ImpulseFormValue#getError returns the new value.
+   * When it does, the ImpulseFormUnit#getError returns the new value.
    * Otherwise, it returns the previous value.
    *
    * Useful for none primitive values such as Objects, Arrays, Date, etc.
@@ -139,44 +139,44 @@ export interface ImpulseFormValueValidatedOptions<
   isErrorEqual?: Compare<TError>
 }
 
-export type ImpulseFormValueInputSetter<TInput> = Setter<
+export type ImpulseFormUnitInputSetter<TInput> = Setter<
   TInput,
   [TInput, TInput]
 >
 
-export type ImpulseFormValueFlagSetter = Setter<boolean>
+export type ImpulseFormUnitFlagSetter = Setter<boolean>
 
-export type ImpulseFormValueValidateOnSetter = Setter<ValidateStrategy>
+export type ImpulseFormUnitValidateOnSetter = Setter<ValidateStrategy>
 
-export type ImpulseFormValueErrorsSetter<TError> = Setter<null | TError>
+export type ImpulseFormUnitErrorsSetter<TError> = Setter<null | TError>
 
-export class ImpulseFormValue<
+export class ImpulseFormUnit<
   TInput,
   TError = null,
   TOutput = TInput,
 > extends ImpulseForm<{
-  "input.setter": ImpulseFormValueInputSetter<TInput>
+  "input.setter": ImpulseFormUnitInputSetter<TInput>
   "input.schema": TInput
 
   "output.schema": TOutput
   "output.schema.verbose": null | TOutput
 
-  "flag.setter": ImpulseFormValueFlagSetter
+  "flag.setter": ImpulseFormUnitFlagSetter
   "flag.schema": boolean
   "flag.schema.verbose": boolean
 
-  "validateOn.setter": ImpulseFormValueValidateOnSetter
+  "validateOn.setter": ImpulseFormUnitValidateOnSetter
   "validateOn.schema": ValidateStrategy
   "validateOn.schema.verbose": ValidateStrategy
 
-  "error.setter": ImpulseFormValueErrorsSetter<TError>
+  "error.setter": ImpulseFormUnitErrorsSetter<TError>
   "error.schema": null | TError
   "error.schema.verbose": null | TError
 }> {
   public static of<TInput, TError = null, TOutput = TInput>(
     input: TInput,
-    options: ImpulseFormValueValidatedOptions<TInput, TError, TOutput>,
-  ): ImpulseFormValue<
+    options: ImpulseFormUnitValidatedOptions<TInput, TError, TOutput>,
+  ): ImpulseFormUnit<
     TInput,
     NullOrNonNullable<TError>,
     NullOrNonNullable<TOutput>
@@ -184,24 +184,24 @@ export class ImpulseFormValue<
 
   public static of<TInput, TOutput = TInput>(
     input: TInput,
-    options: ImpulseFormValueSchemaOptions<TInput, TOutput>,
-  ): ImpulseFormValue<TInput, ReadonlyArray<string>, NullOrNonNullable<TOutput>>
+    options: ImpulseFormUnitSchemaOptions<TInput, TOutput>,
+  ): ImpulseFormUnit<TInput, ReadonlyArray<string>, NullOrNonNullable<TOutput>>
 
   public static of<TInput, TError = null>(
     input: TInput,
-    options?: ImpulseFormValueOptions<TInput, TError>,
-  ): ImpulseFormValue<TInput, TError, TInput>
+    options?: ImpulseFormUnitOptions<TInput, TError>,
+  ): ImpulseFormUnit<TInput, TError, TInput>
 
   public static of<TInput, TError = null, TOutput = TInput>(
     input: TInput,
     options?:
-      | ImpulseFormValueOptions<TInput, TError>
-      | ImpulseFormValueSchemaOptions<TInput, TOutput>
-      | ImpulseFormValueValidatedOptions<TInput, TError, TOutput>,
+      | ImpulseFormUnitOptions<TInput, TError>
+      | ImpulseFormUnitSchemaOptions<TInput, TOutput>
+      | ImpulseFormUnitValidatedOptions<TInput, TError, TOutput>,
   ):
-    | ImpulseFormValue<TInput, TError>
-    | ImpulseFormValue<TInput, ReadonlyArray<string>, TOutput>
-    | ImpulseFormValue<TInput, TError, TOutput> /* enforce syntax highlight */ {
+    | ImpulseFormUnit<TInput, TError>
+    | ImpulseFormUnit<TInput, ReadonlyArray<string>, TOutput>
+    | ImpulseFormUnit<TInput, TError, TOutput> /* enforce syntax highlight */ {
     const touched = options?.touched ?? false
 
     const isInputEqual = options?.isInputEqual ?? isStrictEqual
@@ -216,7 +216,7 @@ export class ImpulseFormValue<
     })
 
     if (hasProperty(options, "schema")) {
-      return new ImpulseFormValue<TInput, ReadonlyArray<string>, TOutput>(
+      return new ImpulseFormUnit<TInput, ReadonlyArray<string>, TOutput>(
         null,
         Impulse(),
         Impulse(touched),
@@ -230,7 +230,7 @@ export class ImpulseFormValue<
         Impulse<
           | undefined
           | {
-              _validate: ImpulseFormValueValidator<
+              _validate: ImpulseFormUnitValidator<
                 TInput,
                 ReadonlyArray<string>,
                 TOutput
@@ -245,7 +245,7 @@ export class ImpulseFormValue<
     }
 
     if (hasProperty(options, "validate")) {
-      return new ImpulseFormValue<TInput, TError, TOutput>(
+      return new ImpulseFormUnit<TInput, TError, TOutput>(
         null,
         Impulse(),
         Impulse(touched),
@@ -261,7 +261,7 @@ export class ImpulseFormValue<
         Impulse<
           | undefined
           | {
-              _validate: ImpulseFormValueValidator<TInput, TError, TOutput>
+              _validate: ImpulseFormUnitValidator<TInput, TError, TOutput>
             }
         >({ _validate: options.validate }),
         isInputEqual,
@@ -269,7 +269,7 @@ export class ImpulseFormValue<
       )
     }
 
-    return new ImpulseFormValue<TInput, TError>(
+    return new ImpulseFormUnit<TInput, TError>(
       null,
       Impulse(),
       Impulse(touched),
@@ -291,7 +291,7 @@ export class ImpulseFormValue<
   protected constructor(
     root: null | ImpulseForm,
     private readonly _initialSource: Impulse<
-      undefined | ImpulseFormValue<TInput, TError, TOutput>
+      undefined | ImpulseFormUnit<TInput, TError, TOutput>
     >,
     private readonly _touched: Impulse<boolean>,
     // TODO convert to undefined | ValidateStrategy so it can inherit from parent (List)
@@ -303,7 +303,7 @@ export class ImpulseFormValue<
     private readonly _validator: Impulse<
       | undefined
       | {
-          _validate: ImpulseFormValueValidator<TInput, TError, TOutput>
+          _validate: ImpulseFormUnitValidator<TInput, TError, TOutput>
         }
     >,
     private readonly _isInputEqual: Compare<TInput>,
@@ -380,8 +380,8 @@ export class ImpulseFormValue<
   // TODO add tests against _validated when cloning
   protected _childOf(
     parent: null | ImpulseForm,
-  ): ImpulseFormValue<TInput, TError, TOutput> {
-    return new ImpulseFormValue(
+  ): ImpulseFormUnit<TInput, TError, TOutput> {
+    return new ImpulseFormUnit(
       parent,
       this._initialSource.clone(),
       this._touched.clone(),
@@ -397,7 +397,7 @@ export class ImpulseFormValue<
   }
 
   protected _setInitial(
-    initial: undefined | ImpulseFormValue<TInput, TError, TOutput>,
+    initial: undefined | ImpulseFormUnit<TInput, TError, TOutput>,
     isRoot: boolean,
   ): void {
     batch((scope) => {
@@ -445,7 +445,7 @@ export class ImpulseFormValue<
     return select(error, error)
   }
 
-  public setError(setter: ImpulseFormValueErrorsSetter<TError>): void {
+  public setError(setter: ImpulseFormUnitErrorsSetter<TError>): void {
     this._errors.setValue((error) => resolveSetter(setter, error))
   }
 
@@ -484,7 +484,7 @@ export class ImpulseFormValue<
     return select(validateOn, validateOn)
   }
 
-  public setValidateOn(setter: ImpulseFormValueValidateOnSetter): void {
+  public setValidateOn(setter: ImpulseFormUnitValidateOnSetter): void {
     batch((scope) => {
       const validateOn = this._validateOn.getValue(scope)
       const nextValidateOn = resolveSetter(setter, validateOn)
@@ -513,7 +513,7 @@ export class ImpulseFormValue<
     return select(touched, touched)
   }
 
-  public setTouched(touched: ImpulseFormValueFlagSetter): void {
+  public setTouched(touched: ImpulseFormUnitFlagSetter): void {
     batch(() => {
       this._touched.setValue(touched)
       this._updateValidated()
@@ -521,7 +521,7 @@ export class ImpulseFormValue<
   }
 
   public setValidator(
-    validator: ImpulseFormValueValidator<TInput, TError, TOutput>,
+    validator: ImpulseFormUnitValidator<TInput, TError, TOutput>,
   ): void {
     this._validator.setValue({ _validate: validator })
   }
@@ -537,7 +537,7 @@ export class ImpulseFormValue<
   }
 
   public reset(
-    resetter: ImpulseFormValueInputSetter<TInput> = params._first,
+    resetter: ImpulseFormUnitInputSetter<TInput> = params._first,
   ): void {
     batch((scope) => {
       const resetValue = isFunction(resetter)
@@ -575,7 +575,7 @@ export class ImpulseFormValue<
   }
 
   // TODO add tests against initial coming as second argument
-  public setInput(setter: ImpulseFormValueInputSetter<TInput>): void {
+  public setInput(setter: ImpulseFormUnitInputSetter<TInput>): void {
     batch((scope) => {
       const input = this._input.getValue(scope)
       const nextValue = isFunction(setter)
@@ -597,7 +597,7 @@ export class ImpulseFormValue<
   }
 
   // TODO add tests against input coming as second argument
-  public setInitial(setter: ImpulseFormValueInputSetter<TInput>): void {
+  public setInitial(setter: ImpulseFormUnitInputSetter<TInput>): void {
     batch((scope) => {
       const initial = this.getInitial(scope)
       const nextInitial = isFunction(setter)

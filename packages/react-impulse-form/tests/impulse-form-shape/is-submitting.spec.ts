@@ -4,18 +4,18 @@ import { z } from "zod"
 import {
   ImpulseFormShape,
   type ImpulseFormShapeOptions,
-  ImpulseFormValue,
+  ImpulseFormUnit,
 } from "../../src"
 import { wait } from "../common"
 
 const SLOWEST_ASYNC_MS = 1000
 
 interface ShapeFields {
-  _1: ImpulseFormValue<string, ReadonlyArray<string>>
-  _2: ImpulseFormValue<number>
+  _1: ImpulseFormUnit<string, ReadonlyArray<string>>
+  _2: ImpulseFormUnit<number>
   _3: ImpulseFormShape<{
-    _1: ImpulseFormValue<boolean>
-    _2: ImpulseFormValue<Array<string>, ReadonlyArray<string>>
+    _1: ImpulseFormUnit<boolean>
+    _2: ImpulseFormUnit<Array<string>, ReadonlyArray<string>>
   }>
   _4: Array<string>
 }
@@ -25,13 +25,13 @@ const setupShape =
   (options?: ImpulseFormShapeOptions<ShapeFields>) => {
     const form = ImpulseFormShape.of(
       {
-        _1: ImpulseFormValue.of("", {
+        _1: ImpulseFormUnit.of("", {
           schema: z.string().max(2),
         }),
-        _2: ImpulseFormValue.of(0),
+        _2: ImpulseFormUnit.of(0),
         _3: ImpulseFormShape.of({
-          _1: ImpulseFormValue.of(true),
-          _2: ImpulseFormValue.of([""], {
+          _1: ImpulseFormUnit.of(true),
+          _2: ImpulseFormUnit.of([""], {
             schema: z.array(z.string().max(2)),
           }),
         }),
@@ -165,10 +165,10 @@ describe.each([
     [string, (form: ImpulseFormShape<ShapeFields>) => Promise<unknown>]
   >([
     ["root", (form) => form.submit()],
-    ["root.fields.<ImpulseFormValue>", (form) => form.fields._1.submit()],
+    ["root.fields.<ImpulseFormUnit>", (form) => form.fields._1.submit()],
     ["root.fields.<ImpulseFormShape>", (form) => form.fields._3.submit()],
     [
-      "root.fields.<ImpulseFormShape>.fields.<ImpulseFormValue>",
+      "root.fields.<ImpulseFormShape>.fields.<ImpulseFormUnit>",
       (form) => form.fields._3.fields._1.submit(),
     ],
   ])("when submitting via %s.submit()", (_, submit) => {
@@ -231,7 +231,7 @@ describe.each([
     describe.each([
       // TODO ["root.fields.<ImpulseFormShape>"]
       [
-        "root.fields.<ImpulseFormValue>",
+        "root.fields.<ImpulseFormUnit>",
         () =>
           setup({
             input: {
@@ -240,7 +240,7 @@ describe.each([
           }),
       ],
       [
-        "root.fields.<ImpulseFormShape>.fields.<ImpulseFormValue>",
+        "root.fields.<ImpulseFormShape>.fields.<ImpulseFormUnit>",
         () =>
           setup({
             input: {

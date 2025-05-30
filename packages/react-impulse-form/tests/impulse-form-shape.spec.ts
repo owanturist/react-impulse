@@ -2,23 +2,23 @@ import { z } from "zod"
 
 import type { Setter } from "~/tools/setter"
 
-import { type ImpulseForm, ImpulseFormShape, ImpulseFormValue } from "../src"
+import { type ImpulseForm, ImpulseFormShape, ImpulseFormUnit } from "../src"
 
 import { arg } from "./common"
 
 describe("ImpulseFormShape.of()", () => {
-  it("composes ImpulseFormShape from ImpulseFormValue", ({ scope }) => {
+  it("composes ImpulseFormShape from ImpulseFormUnit", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of(""),
-      second: ImpulseFormValue.of(0),
-      third: ImpulseFormValue.of([false]),
+      first: ImpulseFormUnit.of(""),
+      second: ImpulseFormUnit.of(0),
+      third: ImpulseFormUnit.of([false]),
     })
 
     expectTypeOf(shape).toEqualTypeOf<
       ImpulseFormShape<{
-        first: ImpulseFormValue<string>
-        second: ImpulseFormValue<number>
-        third: ImpulseFormValue<Array<boolean>>
+        first: ImpulseFormUnit<string>
+        second: ImpulseFormUnit<number>
+        third: ImpulseFormUnit<Array<boolean>>
       }>
     >()
 
@@ -49,14 +49,14 @@ describe("ImpulseFormShape.of()", () => {
     })
   })
 
-  it("composes ImpulseFormShape from ImpulseFormValue with schema", ({
+  it("composes ImpulseFormShape from ImpulseFormUnit with schema", ({
     scope,
   }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of("", {
+      first: ImpulseFormUnit.of("", {
         schema: z.string().min(1).pipe(z.coerce.boolean()),
       }),
-      second: ImpulseFormValue.of(0, {
+      second: ImpulseFormUnit.of(0, {
         schema: z
           .number()
           .min(100)
@@ -66,8 +66,8 @@ describe("ImpulseFormShape.of()", () => {
 
     expectTypeOf(shape).toEqualTypeOf<
       ImpulseFormShape<{
-        first: ImpulseFormValue<string, ReadonlyArray<string>, boolean>
-        second: ImpulseFormValue<number, ReadonlyArray<string>, string>
+        first: ImpulseFormUnit<string, ReadonlyArray<string>, boolean>
+        second: ImpulseFormUnit<number, ReadonlyArray<string>, string>
       }>
     >()
 
@@ -82,8 +82,8 @@ describe("ImpulseFormShape.of()", () => {
 
   it("gives direct access to the fields", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of(""),
-      second: ImpulseFormValue.of(0),
+      first: ImpulseFormUnit.of(""),
+      second: ImpulseFormUnit.of(0),
     })
 
     expect(shape.fields.first.getInput(scope)).toBe("")
@@ -92,14 +92,14 @@ describe("ImpulseFormShape.of()", () => {
 
   it("allows to specify none-form fields", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of(""),
+      first: ImpulseFormUnit.of(""),
       id: 123,
       name: "john",
     })
 
     expectTypeOf(shape).toEqualTypeOf<
       ImpulseFormShape<{
-        first: ImpulseFormValue<string>
+        first: ImpulseFormUnit<string>
         id: number
         name: string
       }>
@@ -134,11 +134,11 @@ describe("ImpulseFormShape.of()", () => {
     it("specifies initial touched", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
-          first: ImpulseFormValue.of(""),
-          second: ImpulseFormValue.of(0),
+          first: ImpulseFormUnit.of(""),
+          second: ImpulseFormUnit.of(0),
           third: ImpulseFormShape.of({
-            one: ImpulseFormValue.of(true),
-            two: ImpulseFormValue.of([""]),
+            one: ImpulseFormUnit.of(true),
+            two: ImpulseFormUnit.of([""]),
           }),
           fourth: ["anything"],
         },
@@ -163,12 +163,12 @@ describe("ImpulseFormShape.of()", () => {
     it("gets current touched from setters", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
-          first: ImpulseFormValue.of("", { touched: true }),
-          second: ImpulseFormValue.of(0),
+          first: ImpulseFormUnit.of("", { touched: true }),
+          second: ImpulseFormUnit.of(0),
           third: ImpulseFormShape.of(
             {
-              one: ImpulseFormValue.of(true),
-              two: ImpulseFormValue.of([""]),
+              one: ImpulseFormUnit.of(true),
+              two: ImpulseFormUnit.of([""]),
             },
             {
               touched: true,
@@ -254,11 +254,11 @@ describe("ImpulseFormShape.of()", () => {
     it("specifies initial error", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
-          first: ImpulseFormValue.of("", { schema: z.string() }),
-          second: ImpulseFormValue.of(0),
+          first: ImpulseFormUnit.of("", { schema: z.string() }),
+          second: ImpulseFormUnit.of(0),
           third: ImpulseFormShape.of({
-            one: ImpulseFormValue.of(true, { error: ["some"] }),
-            two: ImpulseFormValue.of([""]),
+            one: ImpulseFormUnit.of(true, { error: ["some"] }),
+            two: ImpulseFormUnit.of([""]),
           }),
           fourth: ["anything"],
         },
@@ -283,15 +283,15 @@ describe("ImpulseFormShape.of()", () => {
     it("gets current error from setters", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
-          first: ImpulseFormValue.of("", { error: 1 }),
-          second: ImpulseFormValue.of(0, {
+          first: ImpulseFormUnit.of("", { error: 1 }),
+          second: ImpulseFormUnit.of(0, {
             validate: (input) =>
               input > 0 ? [null, input] : ["must be positive", null],
           }),
           third: ImpulseFormShape.of(
             {
-              one: ImpulseFormValue.of(true, { schema: z.boolean() }),
-              two: ImpulseFormValue.of([""], { schema: z.array(z.string()) }),
+              one: ImpulseFormUnit.of(true, { schema: z.boolean() }),
+              two: ImpulseFormUnit.of([""], { schema: z.array(z.string()) }),
             },
             {
               error: {
@@ -384,11 +384,11 @@ describe("ImpulseFormShape.of()", () => {
     it("specifies initial value", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
-          first: ImpulseFormValue.of(""),
-          second: ImpulseFormValue.of(0),
+          first: ImpulseFormUnit.of(""),
+          second: ImpulseFormUnit.of(0),
           third: ImpulseFormShape.of({
-            one: ImpulseFormValue.of(true),
-            two: ImpulseFormValue.of([""]),
+            one: ImpulseFormUnit.of(true),
+            two: ImpulseFormUnit.of([""]),
           }),
           fourth: ["anything"],
         },
@@ -425,11 +425,11 @@ describe("ImpulseFormShape.of()", () => {
     it("gets current initial value from setters", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
-          first: ImpulseFormValue.of("", { initial: "1" }),
-          second: ImpulseFormValue.of(0),
+          first: ImpulseFormUnit.of("", { initial: "1" }),
+          second: ImpulseFormUnit.of(0),
           third: ImpulseFormShape.of({
-            one: ImpulseFormValue.of(true, { initial: false }),
-            two: ImpulseFormValue.of([""], { initial: ["two"] }),
+            one: ImpulseFormUnit.of(true, { initial: false }),
+            two: ImpulseFormUnit.of([""], { initial: ["two"] }),
           }),
           fourth: ["anything"],
         },
@@ -513,11 +513,11 @@ describe("ImpulseFormShape.of()", () => {
     it("specifies initial value", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
-          first: ImpulseFormValue.of(""),
-          second: ImpulseFormValue.of(0),
+          first: ImpulseFormUnit.of(""),
+          second: ImpulseFormUnit.of(0),
           third: ImpulseFormShape.of({
-            one: ImpulseFormValue.of(true),
-            two: ImpulseFormValue.of([""]),
+            one: ImpulseFormUnit.of(true),
+            two: ImpulseFormUnit.of([""]),
           }),
           fourth: ["anything"],
         },
@@ -554,11 +554,11 @@ describe("ImpulseFormShape.of()", () => {
     it("gets current initial value from setters", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
-          first: ImpulseFormValue.of("1"),
-          second: ImpulseFormValue.of(0),
+          first: ImpulseFormUnit.of("1"),
+          second: ImpulseFormUnit.of(0),
           third: ImpulseFormShape.of({
-            one: ImpulseFormValue.of(false),
-            two: ImpulseFormValue.of(["two"]),
+            one: ImpulseFormUnit.of(false),
+            two: ImpulseFormUnit.of(["two"]),
           }),
           fourth: ["anything"],
         },
@@ -640,11 +640,11 @@ describe("ImpulseFormShape.of()", () => {
     it("does not override the initial value", ({ scope }) => {
       const shape = ImpulseFormShape.of(
         {
-          first: ImpulseFormValue.of(""),
-          second: ImpulseFormValue.of(0),
+          first: ImpulseFormUnit.of(""),
+          second: ImpulseFormUnit.of(0),
           third: ImpulseFormShape.of({
-            one: ImpulseFormValue.of(true),
-            two: ImpulseFormValue.of([""]),
+            one: ImpulseFormUnit.of(true),
+            two: ImpulseFormUnit.of([""]),
           }),
           fourth: ["anything"],
         },
@@ -673,11 +673,11 @@ describe("ImpulseFormShape.of()", () => {
   it("follows the options type", () => {
     expectTypeOf(
       ImpulseFormShape.of<{
-        first: ImpulseFormValue<string>
-        second: ImpulseFormValue<number>
+        first: ImpulseFormUnit<string>
+        second: ImpulseFormUnit<number>
         third: ImpulseFormShape<{
-          one: ImpulseFormValue<boolean>
-          two: ImpulseFormValue<Array<string>>
+          one: ImpulseFormUnit<boolean>
+          two: ImpulseFormUnit<Array<string>>
         }>
         fourth: Array<string>
       }>,
@@ -814,8 +814,8 @@ describe("ImpulseFormShape.of()", () => {
 
   it("clones the fields", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      one: ImpulseFormValue.of("1"),
-      two: ImpulseFormValue.of(2),
+      one: ImpulseFormUnit.of("1"),
+      two: ImpulseFormUnit.of(2),
     })
     const root = ImpulseFormShape.of({
       first: shape,
@@ -850,11 +850,11 @@ describe("ImpulseFormShape#getError()", () => {
   it("selects error", ({ scope }) => {
     const shape = ImpulseFormShape.of(
       {
-        first: ImpulseFormValue.of("1", { schema: z.string().max(1) }),
-        second: ImpulseFormValue.of(0, { schema: z.number().nonnegative() }),
+        first: ImpulseFormUnit.of("1", { schema: z.string().max(1) }),
+        second: ImpulseFormUnit.of(0, { schema: z.number().nonnegative() }),
         third: ImpulseFormShape.of({
-          one: ImpulseFormValue.of(true),
-          two: ImpulseFormValue.of(["1"], {
+          one: ImpulseFormUnit.of(true),
+          two: ImpulseFormUnit.of(["1"], {
             schema: z.array(z.string().max(1)),
           }),
         }),
@@ -929,15 +929,15 @@ describe("ImpulseFormShape#getError()", () => {
 describe("ImpulseFormShape#setError()", () => {
   it("specifies error", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of("", { error: ["first"] }),
-      second: ImpulseFormValue.of(0, { error: ["second"] }),
+      first: ImpulseFormUnit.of("", { error: ["first"] }),
+      second: ImpulseFormUnit.of(0, { error: ["second"] }),
       third: ImpulseFormShape.of(
         {
-          one: ImpulseFormValue.of(true, {
+          one: ImpulseFormUnit.of(true, {
             validate: (input) =>
               input ? [null, input] : ["must be true", null],
           }),
-          two: ImpulseFormValue.of([""], { error: "an error" }),
+          two: ImpulseFormUnit.of([""], { error: "an error" }),
         },
         {
           error: {
@@ -1101,14 +1101,14 @@ describe("ImpulseFormShape#setError()", () => {
 
   it("resets all errors", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of("", { error: ["first"] }),
-      second: ImpulseFormValue.of(0, { error: ["second"] }),
+      first: ImpulseFormUnit.of("", { error: ["first"] }),
+      second: ImpulseFormUnit.of(0, { error: ["second"] }),
       third: ImpulseFormShape.of(
         {
-          one: ImpulseFormValue.of(true, {
+          one: ImpulseFormUnit.of(true, {
             validate: (input) => (input ? [null, input] : [1, null]),
           }),
-          two: ImpulseFormValue.of([""], { error: "an error" }),
+          two: ImpulseFormUnit.of([""], { error: "an error" }),
         },
         {
           error: {
@@ -1129,11 +1129,11 @@ describe("ImpulseFormShape#getOutput()", () => {
   it("selects value", ({ scope }) => {
     const shape = ImpulseFormShape.of(
       {
-        first: ImpulseFormValue.of(""),
-        second: ImpulseFormValue.of(0, { schema: z.number().nonnegative() }),
+        first: ImpulseFormUnit.of(""),
+        second: ImpulseFormUnit.of(0, { schema: z.number().nonnegative() }),
         third: ImpulseFormShape.of({
-          one: ImpulseFormValue.of(true),
-          two: ImpulseFormValue.of(["1"], {
+          one: ImpulseFormUnit.of(true),
+          two: ImpulseFormUnit.of(["1"], {
             schema: z.array(z.string().max(1)),
           }),
         }),
@@ -1208,11 +1208,11 @@ describe("ImpulseFormShape#getOutput()", () => {
 describe("ImpulseFormShape#isTouched()", () => {
   it("selects touched", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of(""),
-      second: ImpulseFormValue.of(0),
+      first: ImpulseFormUnit.of(""),
+      second: ImpulseFormUnit.of(0),
       third: ImpulseFormShape.of({
-        one: ImpulseFormValue.of(true),
-        two: ImpulseFormValue.of([""]),
+        one: ImpulseFormUnit.of(true),
+        two: ImpulseFormUnit.of([""]),
       }),
       fourth: ["anything"],
     })
@@ -1347,8 +1347,8 @@ describe("ImpulseFormShape#isTouched()", () => {
     scope,
   }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of(""),
-      second: ImpulseFormValue.of(0),
+      first: ImpulseFormUnit.of(""),
+      second: ImpulseFormUnit.of(0),
     })
 
     // @ts-expect-error it should select string to return string
@@ -1375,11 +1375,11 @@ describe("ImpulseFormShape#isTouched()", () => {
 describe("ImpulseFormShape#setTouched()", () => {
   it("specifies touched", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of(""),
-      second: ImpulseFormValue.of(0),
+      first: ImpulseFormUnit.of(""),
+      second: ImpulseFormUnit.of(0),
       third: ImpulseFormShape.of({
-        one: ImpulseFormValue.of(true),
-        two: ImpulseFormValue.of([""]),
+        one: ImpulseFormUnit.of(true),
+        two: ImpulseFormUnit.of([""]),
       }),
       fourth: ["anything"],
     })
@@ -1532,11 +1532,11 @@ describe("ImpulseFormShape#setTouched()", () => {
 describe("ImpulseFormShape#setInput()", () => {
   it("updates original value", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of(""),
-      second: ImpulseFormValue.of(0),
+      first: ImpulseFormUnit.of(""),
+      second: ImpulseFormUnit.of(0),
       third: ImpulseFormShape.of({
-        one: ImpulseFormValue.of(true),
-        two: ImpulseFormValue.of([""]),
+        one: ImpulseFormUnit.of(true),
+        two: ImpulseFormUnit.of([""]),
       }),
       fourth: ["anything"],
     })
@@ -1740,11 +1740,11 @@ describe("ImpulseFormShape#setInput()", () => {
 describe("ImpulseFormShape#setInitial()", () => {
   it("updates initial value", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of(""),
-      second: ImpulseFormValue.of(0),
+      first: ImpulseFormUnit.of(""),
+      second: ImpulseFormUnit.of(0),
       third: ImpulseFormShape.of({
-        one: ImpulseFormValue.of(true),
-        two: ImpulseFormValue.of([""]),
+        one: ImpulseFormUnit.of(true),
+        two: ImpulseFormUnit.of([""]),
       }),
       fourth: ["anything"],
     })
@@ -1949,11 +1949,11 @@ describe("ImpulseFormShape#setInitial()", () => {
 describe("ImpulseFormShape#isDirty()", () => {
   it("selects touched", ({ scope }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of(""),
-      second: ImpulseFormValue.of(0),
+      first: ImpulseFormUnit.of(""),
+      second: ImpulseFormUnit.of(0),
       third: ImpulseFormShape.of({
-        one: ImpulseFormValue.of(true),
-        two: ImpulseFormValue.of([""]),
+        one: ImpulseFormUnit.of(true),
+        two: ImpulseFormUnit.of([""]),
       }),
       fourth: ["anything"],
     })
@@ -2088,8 +2088,8 @@ describe("ImpulseFormShape#isDirty()", () => {
     scope,
   }) => {
     const shape = ImpulseFormShape.of({
-      first: ImpulseFormValue.of(""),
-      second: ImpulseFormValue.of(0),
+      first: ImpulseFormUnit.of(""),
+      second: ImpulseFormUnit.of(0),
     })
 
     // @ts-expect-error it should select string to return string
@@ -2117,11 +2117,11 @@ describe("ImpulseFormShape#reset()", () => {
   const setup = () => {
     return ImpulseFormShape.of(
       {
-        first: ImpulseFormValue.of(""),
-        second: ImpulseFormValue.of(0),
+        first: ImpulseFormUnit.of(""),
+        second: ImpulseFormUnit.of(0),
         third: ImpulseFormShape.of({
-          one: ImpulseFormValue.of(true),
-          two: ImpulseFormValue.of([""]),
+          one: ImpulseFormUnit.of(true),
+          two: ImpulseFormUnit.of([""]),
         }),
         fourth: ["anything"],
       },

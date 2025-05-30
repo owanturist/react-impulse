@@ -3,33 +3,33 @@ import { z } from "zod"
 import {
   ImpulseFormShape,
   type ImpulseFormShapeOptions,
-  ImpulseFormValue,
+  ImpulseFormUnit,
 } from "../../src"
 
 function setup(
   options?: ImpulseFormShapeOptions<{
-    _1: ImpulseFormValue<string, ReadonlyArray<string>>
-    _2: ImpulseFormValue<number, ReadonlyArray<string>>
+    _1: ImpulseFormUnit<string, ReadonlyArray<string>>
+    _2: ImpulseFormUnit<number, ReadonlyArray<string>>
     _3: ImpulseFormShape<{
-      _1: ImpulseFormValue<undefined | boolean, ReadonlyArray<string>, boolean>
-      _2: ImpulseFormValue<Array<string>, ReadonlyArray<string>>
+      _1: ImpulseFormUnit<undefined | boolean, ReadonlyArray<string>, boolean>
+      _2: ImpulseFormUnit<Array<string>, ReadonlyArray<string>>
     }>
     _4: Array<string>
   }>,
 ) {
   const form = ImpulseFormShape.of(
     {
-      _1: ImpulseFormValue.of("", {
+      _1: ImpulseFormUnit.of("", {
         schema: z.string().min(2),
       }),
-      _2: ImpulseFormValue.of(0, {
+      _2: ImpulseFormUnit.of(0, {
         schema: z.number().min(1),
       }),
       _3: ImpulseFormShape.of({
-        _1: ImpulseFormValue.of<undefined | boolean>(undefined, {
+        _1: ImpulseFormUnit.of<undefined | boolean>(undefined, {
           schema: z.boolean(),
         }),
-        _2: ImpulseFormValue.of([""], {
+        _2: ImpulseFormUnit.of([""], {
           schema: z.array(z.string()).min(2),
         }),
       }),

@@ -2,38 +2,38 @@ import type { Scope } from "react-impulse"
 import { z } from "zod"
 
 import {
-  ImpulseFormValue,
-  type ImpulseFormValueOptions,
-  type ImpulseFormValueSchemaOptions,
-  type ImpulseFormValueValidatedOptions,
+  ImpulseFormUnit,
+  type ImpulseFormUnitOptions,
+  type ImpulseFormUnitSchemaOptions,
+  type ImpulseFormUnitValidatedOptions,
   type ValidateStrategy,
 } from "../../src"
 import { arg } from "../common"
 
 function getValidateOnDefault<TError, TOutput>(
   scope: Scope,
-  value: ImpulseFormValue<string, TError, TOutput>,
+  value: ImpulseFormUnit<string, TError, TOutput>,
 ) {
   return value.getValidateOn(scope)
 }
 
 function getValidateOnConcise<TError, TOutput>(
   scope: Scope,
-  value: ImpulseFormValue<string, TError, TOutput>,
+  value: ImpulseFormUnit<string, TError, TOutput>,
 ) {
   return value.getValidateOn(scope, arg(0))
 }
 
 function getValidateOnVerbose<TError, TOutput>(
   scope: Scope,
-  value: ImpulseFormValue<string, TError, TOutput>,
+  value: ImpulseFormUnit<string, TError, TOutput>,
 ) {
   return value.getValidateOn(scope, arg(1))
 }
 
-describe("when options: ImpulseFormValueSchemaOptions", () => {
-  function setup(options?: Partial<ImpulseFormValueSchemaOptions<string>>) {
-    return ImpulseFormValue.of("", {
+describe("when options: ImpulseFormUnitSchemaOptions", () => {
+  function setup(options?: Partial<ImpulseFormUnitSchemaOptions<string>>) {
+    return ImpulseFormUnit.of("", {
       schema: z.string(),
       ...options,
     })
@@ -83,11 +83,11 @@ describe("when options: ImpulseFormValueSchemaOptions", () => {
   })
 })
 
-describe("when options: ImpulseFormValueValidatedOptions", () => {
+describe("when options: ImpulseFormUnitValidatedOptions", () => {
   function setup(
-    options?: Partial<ImpulseFormValueValidatedOptions<string, number>>,
+    options?: Partial<ImpulseFormUnitValidatedOptions<string, number>>,
   ) {
-    return ImpulseFormValue.of("", {
+    return ImpulseFormUnit.of("", {
       ...options,
       validate: (input) => (input.length > 0 ? [null, input] : [1, null]),
     })
@@ -137,9 +137,9 @@ describe("when options: ImpulseFormValueValidatedOptions", () => {
   })
 })
 
-describe("when options: ImpulseFormValueOptions", () => {
-  function setup(options?: ImpulseFormValueOptions<string>) {
-    return ImpulseFormValue.of("", options)
+describe("when options: ImpulseFormUnitOptions", () => {
+  function setup(options?: ImpulseFormUnitOptions<string>) {
+    return ImpulseFormUnit.of("", options)
   }
 
   it("matches the type signature", () => {

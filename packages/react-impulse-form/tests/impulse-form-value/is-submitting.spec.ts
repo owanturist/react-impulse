@@ -1,15 +1,15 @@
 import type { Scope } from "react-impulse"
 import { z } from "zod"
 
-import { ImpulseFormValue } from "../../src"
+import { ImpulseFormUnit } from "../../src"
 import { wait } from "../common"
 
 const SLOWEST_ASYNC_MS = 1000
 
 const setupValue =
-  (enchant?: (form: ImpulseFormValue<string, ReadonlyArray<string>>) => void) =>
+  (enchant?: (form: ImpulseFormUnit<string, ReadonlyArray<string>>) => void) =>
   (initial = "") => {
-    const form = ImpulseFormValue.of(initial, {
+    const form = ImpulseFormUnit.of(initial, {
       schema: z.string().max(2),
     })
 

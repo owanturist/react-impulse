@@ -5,7 +5,7 @@ import {
   ImpulseFormShape,
   type ImpulseFormShapeFields,
   type ImpulseFormShapeOptions,
-  ImpulseFormValue,
+  ImpulseFormUnit,
 } from "../../src"
 import { arg } from "../common"
 
@@ -32,28 +32,28 @@ type RootIsValidatedConcise =
 
 const setup = (
   options?: ImpulseFormShapeOptions<{
-    first: ImpulseFormValue<string>
-    second: ImpulseFormValue<number>
+    first: ImpulseFormUnit<string>
+    second: ImpulseFormUnit<number>
     third: ImpulseFormShape<{
-      one: ImpulseFormValue<boolean, ReadonlyArray<string>>
-      two: ImpulseFormValue<Array<string>, ReadonlyArray<string>>
+      one: ImpulseFormUnit<boolean, ReadonlyArray<string>>
+      two: ImpulseFormUnit<Array<string>, ReadonlyArray<string>>
     }>
     fourth: Array<string>
   }>,
 ) => {
   return ImpulseFormShape.of(
     {
-      first: ImpulseFormValue.of("", {
+      first: ImpulseFormUnit.of("", {
         validate: (input) => [null, input],
       }),
-      second: ImpulseFormValue.of(0, {
+      second: ImpulseFormUnit.of(0, {
         validate: (input) => [null, input],
       }),
       third: ImpulseFormShape.of({
-        one: ImpulseFormValue.of(true, {
+        one: ImpulseFormUnit.of(true, {
           schema: z.boolean(),
         }),
-        two: ImpulseFormValue.of([""], {
+        two: ImpulseFormUnit.of([""], {
           schema: z.array(z.string()),
         }),
       }),
@@ -301,11 +301,11 @@ describe("isValidated(..)", () => {
   it("overrides fields' initial value", ({ scope }) => {
     const shape = ImpulseFormShape.of(
       {
-        one: ImpulseFormValue.of(true, {
+        one: ImpulseFormUnit.of(true, {
           schema: z.boolean(),
           validateOn: "onInit",
         }),
-        two: ImpulseFormValue.of("", {
+        two: ImpulseFormUnit.of("", {
           schema: z.string(),
           validateOn: "onSubmit",
         }),

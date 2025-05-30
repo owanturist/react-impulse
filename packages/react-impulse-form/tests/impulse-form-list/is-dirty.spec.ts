@@ -6,7 +6,7 @@ import {
   type ImpulseFormListOptions,
   ImpulseFormShape,
   type ImpulseFormShapeOptions,
-  ImpulseFormValue,
+  ImpulseFormUnit,
 } from "../../src"
 import { arg } from "../common"
 
@@ -18,15 +18,15 @@ const setup = <T extends ImpulseForm>(
 }
 
 interface Element {
-  first: ImpulseFormValue<number>
-  second: ImpulseFormValue<string>
+  first: ImpulseFormUnit<number>
+  second: ImpulseFormUnit<string>
 }
 
 const setupElement = (options?: ImpulseFormShapeOptions<Element>) => {
   return ImpulseFormShape.of(
     {
-      first: ImpulseFormValue.of(0),
-      second: ImpulseFormValue.of(""),
+      first: ImpulseFormUnit.of(0),
+      second: ImpulseFormUnit.of(""),
     },
     options,
   )

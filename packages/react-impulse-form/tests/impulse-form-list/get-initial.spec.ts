@@ -4,7 +4,7 @@ import {
   type ImpulseFormListOptions,
   ImpulseFormShape,
   type ImpulseFormShapeOptions,
-  ImpulseFormValue,
+  ImpulseFormUnit,
 } from "../../src"
 
 const setup = <T extends ImpulseForm>(
@@ -15,15 +15,15 @@ const setup = <T extends ImpulseForm>(
 }
 
 interface Element {
-  first: ImpulseFormValue<number>
-  second: ImpulseFormValue<string>
+  first: ImpulseFormUnit<number>
+  second: ImpulseFormUnit<string>
 }
 
 const setupElement = (options?: ImpulseFormShapeOptions<Element>) => {
   return ImpulseFormShape.of(
     {
-      first: ImpulseFormValue.of(0),
-      second: ImpulseFormValue.of(""),
+      first: ImpulseFormUnit.of(0),
+      second: ImpulseFormUnit.of(""),
     },
     options,
   )
@@ -130,8 +130,8 @@ describe("adding a new element to the list's beginning", () => {
         initial: { first: 10, second: "10" },
       }),
       ImpulseFormShape.of({
-        first: ImpulseFormValue.of(0, { initial: 20 }),
-        second: ImpulseFormValue.of("", { initial: "20" }),
+        first: ImpulseFormUnit.of(0, { initial: 20 }),
+        second: ImpulseFormUnit.of("", { initial: "20" }),
       }),
       ...elements,
     ])
@@ -206,8 +206,8 @@ describe("nested list", () => {
       ImpulseFormShape.of({
         first: ImpulseFormList.of([
           ImpulseFormShape.of({
-            one: ImpulseFormValue.of("1"),
-            two: ImpulseFormValue.of(2),
+            one: ImpulseFormUnit.of("1"),
+            two: ImpulseFormUnit.of(2),
           }),
         ]),
       }),
@@ -225,12 +225,12 @@ describe("nested list", () => {
       ImpulseFormShape.of({
         first: ImpulseFormList.of([
           ImpulseFormShape.of({
-            one: ImpulseFormValue.of("1"),
-            two: ImpulseFormValue.of(2),
+            one: ImpulseFormUnit.of("1"),
+            two: ImpulseFormUnit.of(2),
           }),
           ImpulseFormShape.of({
-            one: ImpulseFormValue.of("10"),
-            two: ImpulseFormValue.of(20),
+            one: ImpulseFormUnit.of("10"),
+            two: ImpulseFormUnit.of(20),
           }),
         ]),
       }),
