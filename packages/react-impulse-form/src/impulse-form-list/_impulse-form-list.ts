@@ -1,8 +1,6 @@
-import { isArray } from "~/tools/is-array"
 import { isFalse } from "~/tools/is-false"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
-import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isString } from "~/tools/is-string"
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
@@ -12,201 +10,50 @@ import { type Setter, resolveSetter } from "~/tools/setter"
 import { uniq } from "~/tools/uniq"
 import { zipMap } from "~/tools/zip-map"
 
-import { Impulse, type Scope, batch, untrack } from "./dependencies"
-import { type GetImpulseFormParam, ImpulseForm } from "./impulse-form"
-import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "./validate-strategy"
+import { type Impulse, type Scope, batch, untrack } from "../dependencies"
+import { ImpulseForm } from "../impulse-form"
+import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
-function setFormElements<
-  TElement extends ImpulseForm,
-  TElementSetter,
-  TElementValueLeft,
-  TElementValueRight,
-  TGenericValue = never,
->(
-  elements: Impulse<ReadonlyArray<TElement>>,
-  setter: Setter<
-    TGenericValue | ReadonlyArray<undefined | TElementSetter>,
-    [TElementValueLeft, TElementValueRight]
-  >,
-  getCurrent: (scope: Scope) => [TElementValueLeft, TElementValueRight],
-  setNext: (element: TElement, next: TGenericValue | TElementSetter) => void,
-): void
-
-function setFormElements<
-  TElement extends ImpulseForm,
-  TElementSetter,
-  TElementValue,
-  TGenericValue = never,
->(
-  elements: Impulse<ReadonlyArray<TElement>>,
-  setter: Setter<
-    TGenericValue | ReadonlyArray<undefined | TElementSetter>,
-    [TElementValue]
-  >,
-  getCurrent: (scope: Scope) => [TElementValue],
-  setNext: (element: TElement, next: TGenericValue | TElementSetter) => void,
-): void
-
-function setFormElements<
-  TElement extends ImpulseForm,
-  TElementSetter,
-  TElementValueLeft,
-  TElementValueRight,
-  TGenericValue = never,
->(
-  elements: Impulse<ReadonlyArray<TElement>>,
-  setter: Setter<
-    TGenericValue | ReadonlyArray<undefined | TElementSetter>,
-    [TElementValueLeft, TElementValueRight?]
-  >,
-  getCurrent: (scope: Scope) => [TElementValueLeft, TElementValueRight?],
-  setNext: (element: TElement, next: TGenericValue | TElementSetter) => void,
-): void {
-  batch((scope) => {
-    const nextValue = isFunction(setter) ? setter(...getCurrent(scope)) : setter
-
-    for (const [index, element] of elements.getValue(scope).entries()) {
-      const next = isArray(nextValue) ? nextValue.at(index) : nextValue
-
-      if (!isUndefined(next)) {
-        setNext(element, next)
-      }
-    }
-  })
-}
-
-export type ImpulseFormListInputSchema<TElement extends ImpulseForm> =
-  ReadonlyArray<GetImpulseFormParam<TElement, "input.schema">>
-
-export type ImpulseFormListInputSetter<TElement extends ImpulseForm> = Setter<
-  ReadonlyArray<undefined | GetImpulseFormParam<TElement, "input.setter">>,
-  [ImpulseFormListInputSchema<TElement>, ImpulseFormListInputSchema<TElement>]
->
-
-export type ImpulseFormListOutputSchema<TElement extends ImpulseForm> =
-  ReadonlyArray<GetImpulseFormParam<TElement, "output.schema">>
-
-export type ImpulseFormListOutputSchemaVerbose<TElement extends ImpulseForm> =
-  ReadonlyArray<GetImpulseFormParam<TElement, "output.schema.verbose">>
-
-export type ImpulseFormListFlagSchema<TElement extends ImpulseForm> =
-  | boolean
-  | ReadonlyArray<GetImpulseFormParam<TElement, "flag.schema">>
-
-export type ImpulseFormListFlagSchemaVerbose<TElement extends ImpulseForm> =
-  ReadonlyArray<GetImpulseFormParam<TElement, "flag.schema.verbose">>
-
-export type ImpulseFormListFlagSetter<TElement extends ImpulseForm> = Setter<
-  | boolean
-  | ReadonlyArray<undefined | GetImpulseFormParam<TElement, "flag.setter">>,
-  [ImpulseFormListFlagSchemaVerbose<TElement>]
->
-
-export type ImpulseFormListValidateOnSchema<TElement extends ImpulseForm> =
-  | ValidateStrategy
-  | ReadonlyArray<GetImpulseFormParam<TElement, "validateOn.schema">>
-export type ImpulseFormListValidateOnSchemaVerbose<
-  TElement extends ImpulseForm,
-> = ReadonlyArray<GetImpulseFormParam<TElement, "validateOn.schema.verbose">>
-
-export type ImpulseFormListValidateOnSetter<TElement extends ImpulseForm> =
-  Setter<
-    | ValidateStrategy
-    | ReadonlyArray<
-        undefined | GetImpulseFormParam<TElement, "validateOn.setter">
-      >,
-    [ImpulseFormListValidateOnSchemaVerbose<TElement>]
-  >
-
-export type ImpulseFormListErrorSetter<TElement extends ImpulseForm> = Setter<
-  null | ReadonlyArray<
-    undefined | GetImpulseFormParam<TElement, "error.setter">
-  >,
-  [ImpulseFormListErrorSchemaVerbose<TElement>]
->
-
-export type ImpulseFormListErrorSchema<TElement extends ImpulseForm> =
-  null | ReadonlyArray<GetImpulseFormParam<TElement, "error.schema">>
-
-export type ImpulseFormListErrorSchemaVerbose<TElement extends ImpulseForm> =
-  ReadonlyArray<GetImpulseFormParam<TElement, "error.schema.verbose">>
-
-export interface ImpulseFormListOptions<TElement extends ImpulseForm> {
-  input?: ImpulseFormListInputSetter<TElement>
-  initial?: ImpulseFormListInputSetter<TElement>
-  touched?: ImpulseFormListFlagSetter<TElement>
-  validateOn?: ImpulseFormListValidateOnSetter<TElement>
-  error?: ImpulseFormListErrorSetter<TElement>
-}
+import { setListFormElements } from "./_set-list-form-elements"
+import type { ImpulseFormListError } from "./impulse-form-list-error"
+import type { ImpulseFormListErrorSetter } from "./impulse-form-list-error-setter"
+import type { ImpulseFormListErrorVerbose } from "./impulse-form-list-error-verbose"
+import type { ImpulseFormListFlag } from "./impulse-form-list-flag"
+import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"
+import type { ImpulseFormListFlagVerbose } from "./impulse-form-list-flag-verbose"
+import type { ImpulseFormListInput } from "./impulse-form-list-input"
+import type { ImpulseFormListInputSetter } from "./impulse-form-list-input-setter"
+import type { ImpulseFormListOutput } from "./impulse-form-list-output"
+import type { ImpulseFormListOutputVerbose } from "./impulse-form-list-output-verbose"
+import type { ImpulseFormListValidateOn } from "./impulse-form-list-validate-on"
+import type { ImpulseFormListValidateOnSetter } from "./impulse-form-list-validate-on-setter"
+import type { ImpulseFormListValidateOnVerbose } from "./impulse-form-list-validate-on-verbose"
 
 export class ImpulseFormList<
   TElement extends ImpulseForm = ImpulseForm,
 > extends ImpulseForm<{
-  "input.schema": ImpulseFormListInputSchema<TElement>
+  "input.schema": ImpulseFormListInput<TElement>
   "input.setter": ImpulseFormListInputSetter<TElement>
 
-  "output.schema": ImpulseFormListOutputSchema<TElement>
-  "output.schema.verbose": ImpulseFormListOutputSchemaVerbose<TElement>
+  "output.schema": ImpulseFormListOutput<TElement>
+  "output.schema.verbose": ImpulseFormListOutputVerbose<TElement>
 
   "flag.setter": ImpulseFormListFlagSetter<TElement>
-  "flag.schema": ImpulseFormListFlagSchema<TElement>
-  "flag.schema.verbose": ImpulseFormListFlagSchemaVerbose<TElement>
+  "flag.schema": ImpulseFormListFlag<TElement>
+  "flag.schema.verbose": ImpulseFormListFlagVerbose<TElement>
 
   "validateOn.setter": ImpulseFormListValidateOnSetter<TElement>
-  "validateOn.schema": ImpulseFormListValidateOnSchema<TElement>
-  "validateOn.schema.verbose": ImpulseFormListValidateOnSchemaVerbose<TElement>
+  "validateOn.schema": ImpulseFormListValidateOn<TElement>
+  "validateOn.schema.verbose": ImpulseFormListValidateOnVerbose<TElement>
 
   "error.setter": ImpulseFormListErrorSetter<TElement>
-  "error.schema": ImpulseFormListErrorSchema<TElement>
-  "error.schema.verbose": ImpulseFormListErrorSchemaVerbose<TElement>
+  "error.schema": ImpulseFormListError<TElement>
+  "error.schema.verbose": ImpulseFormListErrorVerbose<TElement>
 }> {
-  public static of<TElement extends ImpulseForm>(
-    elements: ReadonlyArray<TElement>,
-    {
-      input,
-      initial,
-      touched,
-      validateOn,
-      error,
-    }: ImpulseFormListOptions<TElement> = {},
-  ): ImpulseFormList<TElement> {
-    const list = new ImpulseFormList(
-      null,
-      Impulse(elements, {
-        compare: isShallowArrayEqual,
-      }),
-    )
-
-    batch(() => {
-      if (!isUndefined(touched)) {
-        list.setTouched(touched)
-      }
-
-      if (!isUndefined(initial)) {
-        list.setInitial(initial)
-      }
-
-      if (!isUndefined(input)) {
-        list.setInput(input)
-      }
-
-      if (!isUndefined(validateOn)) {
-        list.setValidateOn(validateOn)
-      }
-
-      // TODO add test against null
-      if (!isUndefined(error)) {
-        list.setError(error)
-      }
-    })
-
-    return list
-  }
-
   private readonly _elements: Impulse<ReadonlyArray<TElement>>
   private readonly _initialElements: Impulse<ReadonlyArray<TElement>>
 
-  protected constructor(
+  public constructor(
     root: null | ImpulseForm,
     _elements: Impulse<ReadonlyArray<TElement>>,
     _initialElements: Impulse<ReadonlyArray<TElement>> = _elements,
@@ -236,7 +83,7 @@ export class ImpulseFormList<
   }
 
   protected _submitWith(
-    output: ImpulseFormListOutputSchema<TElement>,
+    output: ImpulseFormListOutput<TElement>,
   ): ReadonlyArray<void | Promise<unknown>> {
     const promises = untrack(this._elements).flatMap((element, index) => {
       return ImpulseForm._submitWith(element, output[index])
@@ -291,9 +138,9 @@ export class ImpulseFormList<
   protected _isDirty<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormListFlagSchema<TElement>,
-      verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
-      dirty: ImpulseFormListFlagSchemaVerbose<TElement>,
+      concise: ImpulseFormListFlag<TElement>,
+      verbose: ImpulseFormListFlagVerbose<TElement>,
+      dirty: ImpulseFormListFlagVerbose<TElement>,
     ) => TResult,
   ): TResult {
     const elements = this._elements.getValue(scope)
@@ -315,9 +162,9 @@ export class ImpulseFormList<
         return [true, dirt, dirt]
       },
     ) as [
-      Exclude<ImpulseFormListFlagSchema<TElement>, boolean>,
-      ImpulseFormListFlagSchemaVerbose<TElement>,
-      ImpulseFormListFlagSchemaVerbose<TElement>,
+      Exclude<ImpulseFormListFlag<TElement>, boolean>,
+      ImpulseFormListFlagVerbose<TElement>,
+      ImpulseFormListFlagVerbose<TElement>,
     ]
 
     if (concise.every(isFalse)) {
@@ -362,19 +209,19 @@ export class ImpulseFormList<
     })
   }
 
-  public getError(scope: Scope): ImpulseFormListErrorSchema<TElement>
+  public getError(scope: Scope): ImpulseFormListError<TElement>
   public getError<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormListErrorSchema<TElement>,
-      verbose: ImpulseFormListErrorSchemaVerbose<TElement>,
+      concise: ImpulseFormListError<TElement>,
+      verbose: ImpulseFormListErrorVerbose<TElement>,
     ) => TResult,
   ): TResult
-  public getError<TResult = ImpulseFormListErrorSchema<TElement>>(
+  public getError<TResult = ImpulseFormListError<TElement>>(
     scope: Scope,
     select: (
-      concise: ImpulseFormListErrorSchema<TElement>,
-      verbose: ImpulseFormListErrorSchemaVerbose<TElement>,
+      concise: ImpulseFormListError<TElement>,
+      verbose: ImpulseFormListErrorVerbose<TElement>,
     ) => TResult = params._first as typeof select,
   ): TResult {
     const [concise, verbose] = zipMap(
@@ -382,8 +229,8 @@ export class ImpulseFormList<
       this._elements.getValue(scope),
       (form) => form.getError(scope, params),
     ) as [
-      Exclude<ImpulseFormListErrorSchema<TElement>, null>,
-      ImpulseFormListErrorSchemaVerbose<TElement>,
+      Exclude<ImpulseFormListError<TElement>, null>,
+      ImpulseFormListErrorVerbose<TElement>,
     ]
 
     if (concise.every(isNull)) {
@@ -394,7 +241,7 @@ export class ImpulseFormList<
   }
 
   public setError(setter: ImpulseFormListErrorSetter<TElement>): void {
-    setFormElements(
+    setListFormElements(
       this._elements,
       setter,
       (scope) => [this.getError(scope, params._second)],
@@ -407,15 +254,15 @@ export class ImpulseFormList<
   public isValidated<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormListFlagSchema<TElement>,
-      verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
+      concise: ImpulseFormListFlag<TElement>,
+      verbose: ImpulseFormListFlagVerbose<TElement>,
     ) => TResult,
   ): TResult
   public isValidated<TResult = boolean>(
     scope: Scope,
     select: (
-      concise: ImpulseFormListFlagSchema<TElement>,
-      verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
+      concise: ImpulseFormListFlag<TElement>,
+      verbose: ImpulseFormListFlagVerbose<TElement>,
     ) => TResult = isTrue as unknown as typeof select,
   ): TResult {
     const [concise, verbose] = zipMap(
@@ -423,8 +270,8 @@ export class ImpulseFormList<
       this._elements.getValue(scope),
       (form) => form.isValidated(scope, params),
     ) as [
-      Exclude<ImpulseFormListFlagSchema<TElement>, boolean>,
-      ImpulseFormListFlagSchemaVerbose<TElement>,
+      Exclude<ImpulseFormListFlag<TElement>, boolean>,
+      ImpulseFormListFlagVerbose<TElement>,
     ]
 
     if (concise.every(isFalse)) {
@@ -438,19 +285,19 @@ export class ImpulseFormList<
     return select(concise, verbose)
   }
 
-  public getValidateOn(scope: Scope): ImpulseFormListValidateOnSchema<TElement>
+  public getValidateOn(scope: Scope): ImpulseFormListValidateOn<TElement>
   public getValidateOn<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormListValidateOnSchema<TElement>,
-      verbose: ImpulseFormListValidateOnSchemaVerbose<TElement>,
+      concise: ImpulseFormListValidateOn<TElement>,
+      verbose: ImpulseFormListValidateOnVerbose<TElement>,
     ) => TResult,
   ): TResult
-  public getValidateOn<TResult = ImpulseFormListValidateOnSchema<TElement>>(
+  public getValidateOn<TResult = ImpulseFormListValidateOn<TElement>>(
     scope: Scope,
     select: (
-      concise: ImpulseFormListValidateOnSchema<TElement>,
-      verbose: ImpulseFormListValidateOnSchemaVerbose<TElement>,
+      concise: ImpulseFormListValidateOn<TElement>,
+      verbose: ImpulseFormListValidateOnVerbose<TElement>,
     ) => TResult = params._first as typeof select,
   ): TResult {
     const [concise, verbose] = zipMap(
@@ -458,8 +305,8 @@ export class ImpulseFormList<
       this._elements.getValue(scope),
       (form) => form.getValidateOn(scope, params),
     ) as [
-      Exclude<ImpulseFormListValidateOnSchema<TElement>, ValidateStrategy>,
-      ImpulseFormListValidateOnSchemaVerbose<TElement>,
+      Exclude<ImpulseFormListValidateOn<TElement>, ValidateStrategy>,
+      ImpulseFormListValidateOnVerbose<TElement>,
     ]
 
     // defaults to "onTouch"
@@ -478,14 +325,14 @@ export class ImpulseFormList<
     setter: ImpulseFormListValidateOnSetter<TElement>,
   ): void {
     batch(() => {
-      setFormElements(
+      setListFormElements(
         this._elements,
         setter,
         (scope) => [this.getValidateOn(scope, params._second)],
         (element, next) => element.setValidateOn(next),
       )
 
-      setFormElements(
+      setListFormElements(
         this._initialElements,
         setter,
         (scope) => [this.getValidateOn(scope, params._second)],
@@ -498,15 +345,15 @@ export class ImpulseFormList<
   public isTouched<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormListFlagSchema<TElement>,
-      verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
+      concise: ImpulseFormListFlag<TElement>,
+      verbose: ImpulseFormListFlagVerbose<TElement>,
     ) => TResult,
   ): TResult
   public isTouched<TResult = boolean>(
     scope: Scope,
     select: (
-      concise: ImpulseFormListFlagSchema<TElement>,
-      verbose: ImpulseFormListFlagSchemaVerbose<TElement>,
+      concise: ImpulseFormListFlag<TElement>,
+      verbose: ImpulseFormListFlagVerbose<TElement>,
     ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
     const [concise, verbose] = zipMap(
@@ -514,8 +361,8 @@ export class ImpulseFormList<
       this._elements.getValue(scope),
       (form) => form.isTouched(scope, params),
     ) as [
-      Exclude<ImpulseFormListFlagSchema<TElement>, boolean>,
-      ImpulseFormListFlagSchemaVerbose<TElement>,
+      Exclude<ImpulseFormListFlag<TElement>, boolean>,
+      ImpulseFormListFlagVerbose<TElement>,
     ]
 
     if (concise.every(isFalse)) {
@@ -530,7 +377,7 @@ export class ImpulseFormList<
   }
 
   public setTouched(setter: ImpulseFormListFlagSetter<TElement>): void {
-    setFormElements(
+    setListFormElements(
       this._elements,
       setter,
       (scope) => [this.isTouched(scope, params._second)],
@@ -554,19 +401,19 @@ export class ImpulseFormList<
     })
   }
 
-  public getOutput(scope: Scope): null | ImpulseFormListOutputSchema<TElement>
+  public getOutput(scope: Scope): null | ImpulseFormListOutput<TElement>
   public getOutput<TResult>(
     scope: Scope,
     select: (
-      concise: null | ImpulseFormListOutputSchema<TElement>,
-      verbose: ImpulseFormListOutputSchemaVerbose<TElement>,
+      concise: null | ImpulseFormListOutput<TElement>,
+      verbose: ImpulseFormListOutputVerbose<TElement>,
     ) => TResult,
   ): TResult
-  public getOutput<TResult = null | ImpulseFormListOutputSchema<TElement>>(
+  public getOutput<TResult = null | ImpulseFormListOutput<TElement>>(
     scope: Scope,
     select: (
-      concise: null | ImpulseFormListOutputSchema<TElement>,
-      verbose: ImpulseFormListOutputSchemaVerbose<TElement>,
+      concise: null | ImpulseFormListOutput<TElement>,
+      verbose: ImpulseFormListOutputVerbose<TElement>,
     ) => TResult = params._first as typeof select,
   ): TResult {
     const [concise, verbose] = zipMap(
@@ -574,23 +421,23 @@ export class ImpulseFormList<
       this._elements.getValue(scope),
       (form) => form.getOutput(scope, params),
     ) as [
-      ImpulseFormListOutputSchema<TElement>,
-      ImpulseFormListOutputSchemaVerbose<TElement>,
+      ImpulseFormListOutput<TElement>,
+      ImpulseFormListOutputVerbose<TElement>,
     ]
 
     return select(concise.some(isNull) ? null : concise, verbose)
   }
 
-  public getInput(scope: Scope): ImpulseFormListInputSchema<TElement> {
+  public getInput(scope: Scope): ImpulseFormListInput<TElement> {
     const input = this._elements
       .getValue(scope)
       .map((form) => form.getInput(scope))
 
-    return input as ImpulseFormListInputSchema<TElement>
+    return input as ImpulseFormListInput<TElement>
   }
 
   public setInput(setter: ImpulseFormListInputSetter<TElement>): void {
-    setFormElements(
+    setListFormElements(
       this._elements,
       setter,
       (scope) => [this.getInput(scope), this.getInitial(scope)],
@@ -598,12 +445,12 @@ export class ImpulseFormList<
     )
   }
 
-  public getInitial(scope: Scope): ImpulseFormListInputSchema<TElement> {
+  public getInitial(scope: Scope): ImpulseFormListInput<TElement> {
     const initial = this._initialElements
       .getValue(scope)
       .map((form) => form.getInitial(scope))
 
-    return initial as ImpulseFormListInputSchema<TElement>
+    return initial as ImpulseFormListInput<TElement>
   }
 
   public setInitial(setter: ImpulseFormListInputSetter<TElement>): void {
