@@ -1,5 +1,40 @@
 # react-impulse-form
 
+## 0.10.0
+
+### Minor Changes
+
+- [#862](https://github.com/owanturist/react-impulse/pull/862) [`821639a`](https://github.com/owanturist/react-impulse/commit/821639a2a201898f223306854d48005d61bf7533) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
+
+  Rename `ImpulseForm#focusFirstInvalidValue` to `ImpulseForm#focusFirstInvalid`.
+
+- [#862](https://github.com/owanturist/react-impulse/pull/862) [`821639a`](https://github.com/owanturist/react-impulse/commit/821639a2a201898f223306854d48005d61bf7533) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
+
+  - Merge `ImpulseFormValue.of` fabric and `ImpulseFormValue` type into a single `ImpulseFormUnit` definition.
+  - Merge `ImpulseFormList.of` fabric and `ImpulseFormList` type into a single `ImpulseFormList` definition.
+  - Merge `ImpulseFormShape.of` fabric and `ImpulseFormShape` type into a single `ImpulseFormShape` definition.
+
+  #### Rationale
+
+  The changes were made to align the `react-impulse` API with the `react-impulse-form` API, which already has a single definition for `Impulse`.
+
+- [#862](https://github.com/owanturist/react-impulse/pull/862) [`821639a`](https://github.com/owanturist/react-impulse/commit/821639a2a201898f223306854d48005d61bf7533) Thanks [@owanturist](https://github.com/owanturist)! - - Introduce new `isImpulseFormUnit` high order function to check if a value is an instance of `ImpulseFormUnit`.
+
+  - Introduce new `isImpulseFormList` high order function to check if a value is an instance of `ImpulseFormList`.
+  - Introduce new `isImpulseFormShape` high order function to check if a value is an instance of `ImpulseFormShape`.
+
+- [#863](https://github.com/owanturist/react-impulse/pull/863) [`fb58e0a`](https://github.com/owanturist/react-impulse/commit/fb58e0aa9ef6786beb21a92f5aedfc148de9f9cb) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
+
+  The `ImpulseFormUnit#getOutput` returns the output value even when the unit is **not validated**. It used to return `[null, null]` in such cases.
+
+- [#862](https://github.com/owanturist/react-impulse/pull/862) [`821639a`](https://github.com/owanturist/react-impulse/commit/821639a2a201898f223306854d48005d61bf7533) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
+
+  Split `ImpulseForm.isImpulseForm` to a hight order function `isImpulseForm`.
+
+- [#862](https://github.com/owanturist/react-impulse/pull/862) [`821639a`](https://github.com/owanturist/react-impulse/commit/821639a2a201898f223306854d48005d61bf7533) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
+
+  Remove export of `type Setter`.
+
 ## 0.9.0
 
 ### Minor Changes
