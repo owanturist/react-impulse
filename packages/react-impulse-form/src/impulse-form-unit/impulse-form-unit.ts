@@ -41,7 +41,7 @@ export interface ImpulseFormUnitOptions<TInput, TError = null> {
    * @example
    * const initial = { count: 0 }
    *
-   * const form = ImpulseFormUnit.of(initial, {
+   * const form = ImpulseFormUnit(initial, {
    *   isInputEqual: (left, right) => left.count === right.count,
    * })
    *
@@ -62,7 +62,7 @@ export interface ImpulseFormUnitOptions<TInput, TError = null> {
    * @default not(isInputEqual)
    *
    * @example
-   * const form = ImpulseFormUnit.of("", {
+   * const form = ImpulseFormUnit("", {
    *   isInputDirty: (left, right) => left.trim() !== right.trim(),
    * })
    *

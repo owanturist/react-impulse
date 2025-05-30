@@ -22,9 +22,9 @@ import type { ImpulseFormShapeInput } from "./impulse-form-shape-input"
 import type { ImpulseFormShapeInputSetter } from "./impulse-form-shape-input-setter"
 import type { ImpulseFormShapeOutput } from "./impulse-form-shape-output"
 import type { ImpulseFormShapeOutputVerbose } from "./impulse-form-shape-output-verbose"
+import type { ImpulseFormShapeValidateOn } from "./impulse-form-shape-validate-on"
 import type { ImpulseFormShapeValidateOnSetter } from "./impulse-form-shape-validate-on-setter"
 import type { ImpulseFormShapeValidateOnVerbose } from "./impulse-form-shape-validate-on-verbose"
-import type { ImpulseFormShapeValidateOn } from "./impulse-form-shape-validate-on"
 
 export class ImpulseFormShape<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
