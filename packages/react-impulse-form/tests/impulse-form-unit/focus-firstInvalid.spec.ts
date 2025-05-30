@@ -157,6 +157,7 @@ describe("focusFirstInvalid() when not validated", () => {
     const listener = vi.fn()
 
     form.onFocusWhenInvalid(listener)
+    form.focusFirstInvalid()
 
     expect(listener).not.toHaveBeenCalled()
   })
@@ -168,6 +169,7 @@ describe("focusFirstInvalid() when valid", () => {
     const listener = vi.fn()
 
     form.onFocusWhenInvalid(listener)
+    form.focusFirstInvalid()
 
     expect(listener).not.toHaveBeenCalled()
   })

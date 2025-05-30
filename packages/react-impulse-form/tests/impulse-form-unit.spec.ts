@@ -217,12 +217,12 @@ describe("ImpulseFormUnit()", () => {
 })
 
 describe("ImpulseFormUnit#getOutput()", () => {
-  it("does not select value when not validated", ({ scope }) => {
+  it("selects value when not validated", ({ scope }) => {
     const value = ImpulseFormUnit("1", {
       schema: z.string().max(1),
     })
 
-    expect(value.getOutput(scope)).toBeNull()
+    expect(value.getOutput(scope)).toBe("1")
     expect(value.getError(scope)).toBeNull()
 
     value.setTouched(true)
