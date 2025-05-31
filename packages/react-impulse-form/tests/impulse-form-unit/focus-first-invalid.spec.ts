@@ -2,10 +2,10 @@ import { z } from "zod"
 
 import { ImpulseFormUnit, type ImpulseFormUnitSchemaOptions } from "../../src"
 
-const setup = (
+function setup(
   input?: string,
   options?: Partial<ImpulseFormUnitSchemaOptions<string>>,
-) => {
+) {
   return ImpulseFormUnit(input ?? "", {
     touched: true,
     schema: z.string().min(2),

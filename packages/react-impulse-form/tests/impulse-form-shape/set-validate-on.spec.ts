@@ -7,7 +7,7 @@ import {
   type ValidateStrategy,
 } from "../../src"
 
-const setup = (
+function setup(
   options?: ImpulseFormShapeOptions<{
     first: ImpulseFormUnit<string>
     second: ImpulseFormUnit<number>
@@ -17,7 +17,7 @@ const setup = (
     }>
     fourth: Array<string>
   }>,
-) => {
+) {
   return ImpulseFormShape(
     {
       first: ImpulseFormUnit(""),

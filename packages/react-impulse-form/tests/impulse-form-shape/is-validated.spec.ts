@@ -1,13 +1,14 @@
 import type { Scope } from "react-impulse"
 import { z } from "zod"
 
+import { params } from "~/tools/params"
+
 import {
   ImpulseFormShape,
   type ImpulseFormShapeFields,
   type ImpulseFormShapeOptions,
   ImpulseFormUnit,
 } from "../../src"
-import { arg } from "../common"
 
 interface ThirdIsValidatedVerbose {
   readonly one: boolean
@@ -30,7 +31,7 @@ type RootIsValidatedConcise =
       readonly third: ThirdIsValidatedConcise
     }
 
-const setup = (
+function setup(
   options?: ImpulseFormShapeOptions<{
     first: ImpulseFormUnit<string>
     second: ImpulseFormUnit<number>
@@ -40,7 +41,7 @@ const setup = (
     }>
     fourth: Array<string>
   }>,
-) => {
+) {
   return ImpulseFormShape(
     {
       first: ImpulseFormUnit("", {
@@ -74,14 +75,14 @@ function isValidatedConcise<TFields extends ImpulseFormShapeFields>(
   scope: Scope,
   shape: ImpulseFormShape<TFields>,
 ) {
-  return shape.isValidated(scope, arg(0))
+  return shape.isValidated(scope, params._first)
 }
 
 function isValidatedVerbose<TFields extends ImpulseFormShapeFields>(
   scope: Scope,
   shape: ImpulseFormShape<TFields>,
 ) {
-  return shape.isValidated(scope, arg(1))
+  return shape.isValidated(scope, params._second)
 }
 
 it("matches the type signature", () => {

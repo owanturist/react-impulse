@@ -7,9 +7,9 @@ import {
   type ValidateStrategy,
 } from "../../src"
 
-const setup = (
+function setup(
   options?: Partial<ImpulseFormUnitSchemaOptions<string, number>>,
-) => {
+) {
   return ImpulseFormUnit("y", {
     schema: z.string().min(1).pipe(z.coerce.number()),
     ...options,

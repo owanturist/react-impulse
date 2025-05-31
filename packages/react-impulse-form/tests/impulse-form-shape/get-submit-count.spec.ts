@@ -16,8 +16,8 @@ interface ShapeFields {
   _4: Array<string>
 }
 
-const setupShape =
-  (enchant?: (form: ImpulseFormShape<ShapeFields>) => void) => () => {
+function setupShape(enchant?: (form: ImpulseFormShape<ShapeFields>) => void) {
+  return () => {
     const form = ImpulseFormShape({
       _1: ImpulseFormUnit("abc", {
         schema: z.string().max(2),
@@ -36,6 +36,7 @@ const setupShape =
 
     return form
   }
+}
 
 beforeAll(() => {
   vi.useFakeTimers()

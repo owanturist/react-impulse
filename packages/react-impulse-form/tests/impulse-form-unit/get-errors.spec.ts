@@ -1,11 +1,12 @@
 import { z } from "zod"
 
+import { params } from "~/tools/params"
+
 import {
   ImpulseFormUnit,
   type ImpulseFormUnitSchemaOptions,
   type ImpulseFormUnitValidatedOptions,
 } from "../../src"
-import { arg } from "../common"
 
 it("selects error", ({ scope }) => {
   const value = ImpulseFormUnit("1", {
@@ -17,18 +18,18 @@ it("selects error", ({ scope }) => {
   expect(error_default).toBeNull()
   expectTypeOf(error_default).toEqualTypeOf<null | number>()
 
-  const error_concise = value.getError(scope, arg(0))
+  const error_concise = value.getError(scope, params._first)
   expect(error_concise).toBeNull()
   expectTypeOf(error_concise).toEqualTypeOf<null | number>()
 
-  const error_verbose = value.getError(scope, arg(1))
+  const error_verbose = value.getError(scope, params._second)
   expect(error_verbose).toBeNull()
   expectTypeOf(error_verbose).toEqualTypeOf<null | number>()
 
   value.setInput("12")
   expect(value.getError(scope)).toBe(1)
-  expect(value.getError(scope, arg(0))).toBe(1)
-  expect(value.getError(scope, arg(1))).toBe(1)
+  expect(value.getError(scope, params._first)).toBe(1)
+  expect(value.getError(scope, params._second)).toBe(1)
 })
 
 describe("when neither schema nor initial error are defined", () => {

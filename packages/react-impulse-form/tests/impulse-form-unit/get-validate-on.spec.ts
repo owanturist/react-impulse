@@ -1,6 +1,8 @@
 import type { Scope } from "react-impulse"
 import { z } from "zod"
 
+import { params } from "~/tools/params"
+
 import {
   ImpulseFormUnit,
   type ImpulseFormUnitOptions,
@@ -8,7 +10,6 @@ import {
   type ImpulseFormUnitValidatedOptions,
   type ValidateStrategy,
 } from "../../src"
-import { arg } from "../common"
 
 function getValidateOnDefault<TError, TOutput>(
   scope: Scope,
@@ -21,14 +22,14 @@ function getValidateOnConcise<TError, TOutput>(
   scope: Scope,
   value: ImpulseFormUnit<string, TError, TOutput>,
 ) {
-  return value.getValidateOn(scope, arg(0))
+  return value.getValidateOn(scope, params._first)
 }
 
 function getValidateOnVerbose<TError, TOutput>(
   scope: Scope,
   value: ImpulseFormUnit<string, TError, TOutput>,
 ) {
-  return value.getValidateOn(scope, arg(1))
+  return value.getValidateOn(scope, params._second)
 }
 
 describe("when options: ImpulseFormUnitSchemaOptions", () => {
