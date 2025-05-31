@@ -22,7 +22,7 @@ importers:
         version: 11.2.0(size-limit@11.2.0)
       '@vitest/coverage-v8':
         specifier: ^3.1.1
-        version: 3.1.1(vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.39.2))
+        version: 3.1.1(vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0))
       eslint:
         specifier: ^9.27.0
         version: 9.27.0(jiti@2.4.2)
@@ -37,7 +37,7 @@ importers:
         version: 5.2.0(eslint@9.27.0(jiti@2.4.2))
       eslint-plugin-vitest:
         specifier: ^0.5.4
-        version: 0.5.4(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.39.2))
+        version: 0.5.4(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0))
       happy-dom:
         specifier: ^17.4.7
         version: 17.4.7
@@ -48,8 +48,8 @@ importers:
         specifier: ^11.2.0
         version: 11.2.0
       terser:
-        specifier: ^5.39.2
-        version: 5.39.2
+        specifier: ^5.40.0
+        version: 5.40.0
       tsup:
         specifier: ^8.5.0
         version: 8.5.0(jiti@2.4.2)(postcss@8.5.3)(typescript@5.8.3)
@@ -61,7 +61,7 @@ importers:
         version: 8.33.0(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.3)
       vitest:
         specifier: ^3.1.1
-        version: 3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.39.2)
+        version: 3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0)
 
   packages/react-impulse:
     dependencies:
@@ -89,7 +89,7 @@ importers:
         version: 19.1.0(react@19.1.0)
       vite-tsconfig-paths:
         specifier: ^5.1.4
-        version: 5.1.4(typescript@5.8.3)(vite@6.2.2(jiti@2.4.2)(terser@5.39.2))
+        version: 5.1.4(typescript@5.8.3)(vite@6.2.2(jiti@2.4.2)(terser@5.40.0))
 
   packages/react-impulse-form:
     dependencies:
@@ -117,7 +117,7 @@ importers:
         version: link:../react-impulse
       vite-tsconfig-paths:
         specifier: ^5.1.4
-        version: 5.1.4(typescript@5.8.3)(vite@6.2.2(jiti@2.4.2)(terser@5.39.2))
+        version: 5.1.4(typescript@5.8.3)(vite@6.2.2(jiti@2.4.2)(terser@5.40.0))
       zod:
         specifier: ^3.25.28
         version: 3.25.28
@@ -2193,8 +2193,8 @@ packages:
     resolution: {integrity: sha512-wK0Ri4fOGjv/XPy8SBHZChl8CM7uMc5VML7SqiQ0zG7+J5Vr+RMQDoHa2CNT6KHUnTGIXH34UDMkPzAUyapBZg==}
     engines: {node: '>=8'}
 
-  terser@5.39.2:
-    resolution: {integrity: sha512-yEPUmWve+VA78bI71BW70Dh0TuV4HHd+I5SHOAfS1+QBOmvmCiiffgjR8ryyEd3KIfvPGFqoADt8LdQ6XpXIvg==}
+  terser@5.40.0:
+    resolution: {integrity: sha512-cfeKl/jjwSR5ar7d0FGmave9hFGJT8obyo0z+CrQOylLDbk7X81nPU6vq9VORa5jU30SkDnT2FXjLbR8HLP+xA==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -3147,7 +3147,7 @@ snapshots:
       '@typescript-eslint/types': 8.33.0
       eslint-visitor-keys: 4.2.0
 
-  '@vitest/coverage-v8@3.1.1(vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.39.2))':
+  '@vitest/coverage-v8@3.1.1(vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 1.0.2
@@ -3161,7 +3161,7 @@ snapshots:
       std-env: 3.9.0
       test-exclude: 7.0.1
       tinyrainbow: 2.0.0
-      vitest: 3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.39.2)
+      vitest: 3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -3172,13 +3172,13 @@ snapshots:
       chai: 5.2.0
       tinyrainbow: 2.0.0
 
-  '@vitest/mocker@3.1.1(vite@6.2.2(jiti@2.4.2)(terser@5.39.2))':
+  '@vitest/mocker@3.1.1(vite@6.2.2(jiti@2.4.2)(terser@5.40.0))':
     dependencies:
       '@vitest/spy': 3.1.1
       estree-walker: 3.0.3
       magic-string: 0.30.17
     optionalDependencies:
-      vite: 6.2.2(jiti@2.4.2)(terser@5.39.2)
+      vite: 6.2.2(jiti@2.4.2)(terser@5.40.0)
 
   '@vitest/pretty-format@3.1.1':
     dependencies:
@@ -3710,12 +3710,12 @@ snapshots:
       string.prototype.matchall: 4.0.12
       string.prototype.repeat: 1.0.0
 
-  eslint-plugin-vitest@0.5.4(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.39.2)):
+  eslint-plugin-vitest@0.5.4(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0)):
     dependencies:
       '@typescript-eslint/utils': 7.18.0(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.3)
       eslint: 9.27.0(jiti@2.4.2)
     optionalDependencies:
-      vitest: 3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.39.2)
+      vitest: 3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -4793,7 +4793,7 @@ snapshots:
 
   term-size@2.2.1: {}
 
-  terser@5.39.2:
+  terser@5.40.0:
     dependencies:
       '@jridgewell/source-map': 0.3.6
       acorn: 8.14.1
@@ -4969,13 +4969,13 @@ snapshots:
     dependencies:
       react: 19.1.0
 
-  vite-node@3.1.1(jiti@2.4.2)(terser@5.39.2):
+  vite-node@3.1.1(jiti@2.4.2)(terser@5.40.0):
     dependencies:
       cac: 6.7.14
       debug: 4.4.1
       es-module-lexer: 1.6.0
       pathe: 2.0.3
-      vite: 6.2.2(jiti@2.4.2)(terser@5.39.2)
+      vite: 6.2.2(jiti@2.4.2)(terser@5.40.0)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -4990,18 +4990,18 @@ snapshots:
       - tsx
       - yaml
 
-  vite-tsconfig-paths@5.1.4(typescript@5.8.3)(vite@6.2.2(jiti@2.4.2)(terser@5.39.2)):
+  vite-tsconfig-paths@5.1.4(typescript@5.8.3)(vite@6.2.2(jiti@2.4.2)(terser@5.40.0)):
     dependencies:
       debug: 4.4.1
       globrex: 0.1.2
       tsconfck: 3.1.6(typescript@5.8.3)
     optionalDependencies:
-      vite: 6.2.2(jiti@2.4.2)(terser@5.39.2)
+      vite: 6.2.2(jiti@2.4.2)(terser@5.40.0)
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  vite@6.2.2(jiti@2.4.2)(terser@5.39.2):
+  vite@6.2.2(jiti@2.4.2)(terser@5.40.0):
     dependencies:
       esbuild: 0.25.4
       postcss: 8.5.3
@@ -5009,12 +5009,12 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
       jiti: 2.4.2
-      terser: 5.39.2
+      terser: 5.40.0
 
-  vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.39.2):
+  vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0):
     dependencies:
       '@vitest/expect': 3.1.1
-      '@vitest/mocker': 3.1.1(vite@6.2.2(jiti@2.4.2)(terser@5.39.2))
+      '@vitest/mocker': 3.1.1(vite@6.2.2(jiti@2.4.2)(terser@5.40.0))
       '@vitest/pretty-format': 3.1.1
       '@vitest/runner': 3.1.1
       '@vitest/snapshot': 3.1.1
@@ -5030,8 +5030,8 @@ snapshots:
       tinyexec: 0.3.2
       tinypool: 1.0.2
       tinyrainbow: 2.0.0
-      vite: 6.2.2(jiti@2.4.2)(terser@5.39.2)
-      vite-node: 3.1.1(jiti@2.4.2)(terser@5.39.2)
+      vite: 6.2.2(jiti@2.4.2)(terser@5.40.0)
+      vite-node: 3.1.1(jiti@2.4.2)(terser@5.40.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
       happy-dom: 17.4.7
