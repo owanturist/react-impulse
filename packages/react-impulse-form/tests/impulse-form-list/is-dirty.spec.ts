@@ -10,10 +10,10 @@ import {
 } from "../../src"
 import { arg } from "../common"
 
-const setup = <T extends ImpulseForm>(
+function setup<T extends ImpulseForm>(
   elements: ReadonlyArray<T>,
   options?: ImpulseFormListOptions<T>,
-) => {
+) {
   return ImpulseFormList(elements, options)
 }
 
@@ -22,7 +22,7 @@ interface Element {
   second: ImpulseFormUnit<string>
 }
 
-const setupElement = (options?: ImpulseFormShapeOptions<Element>) => {
+function setupElement(options?: ImpulseFormShapeOptions<Element>) {
   return ImpulseFormShape(
     {
       first: ImpulseFormUnit(0),
