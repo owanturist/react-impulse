@@ -1,5 +1,7 @@
 import type { Scope } from "react-impulse"
 
+import { params } from "~/tools/params"
+
 import {
   ImpulseFormShape,
   type ImpulseFormShapeFields,
@@ -7,7 +9,6 @@ import {
   ImpulseFormUnit,
   type ValidateStrategy,
 } from "../../src"
-import { arg } from "../common"
 
 interface ThirdValidateStrategyVerbose {
   readonly one: ValidateStrategy
@@ -68,14 +69,14 @@ function getValidateOnConcise<TFields extends ImpulseFormShapeFields>(
   scope: Scope,
   shape: ImpulseFormShape<TFields>,
 ) {
-  return shape.getValidateOn(scope, arg(0))
+  return shape.getValidateOn(scope, params._first)
 }
 
 function getValidateOnVerbose<TFields extends ImpulseFormShapeFields>(
   scope: Scope,
   shape: ImpulseFormShape<TFields>,
 ) {
-  return shape.getValidateOn(scope, arg(1))
+  return shape.getValidateOn(scope, params._second)
 }
 
 it("matches the type signature", () => {

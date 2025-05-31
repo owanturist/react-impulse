@@ -1,7 +1,8 @@
 import { z } from "zod"
 
+import { params } from "~/tools/params"
+
 import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
-import { arg } from "../common"
 
 it("selects error", ({ scope }) => {
   const shape = ImpulseFormShape(
@@ -20,8 +21,8 @@ it("selects error", ({ scope }) => {
   )
 
   expect(shape.getError(scope)).toBeNull()
-  expect(shape.getError(scope, arg(0))).toBeNull()
-  expect(shape.getError(scope, arg(1))).toStrictEqual({
+  expect(shape.getError(scope, params._first)).toBeNull()
+  expect(shape.getError(scope, params._second)).toStrictEqual({
     first: null,
     second: null,
     third: {
@@ -38,8 +39,10 @@ it("selects error", ({ scope }) => {
     second: null,
     third: null,
   })
-  expect(shape.getError(scope, arg(0))).toStrictEqual(shape.getError(scope))
-  expect(shape.getError(scope, arg(1))).toStrictEqual({
+  expect(shape.getError(scope, params._first)).toStrictEqual(
+    shape.getError(scope),
+  )
+  expect(shape.getError(scope, params._second)).toStrictEqual({
     first: ["String must contain at most 1 character(s)"],
     second: null,
     third: {
@@ -61,8 +64,12 @@ it("selects error", ({ scope }) => {
       two: ["String must contain at most 1 character(s)"],
     },
   })
-  expect(shape.getError(scope, arg(0))).toStrictEqual(shape.getError(scope))
-  expect(shape.getError(scope, arg(1))).toStrictEqual(shape.getError(scope))
+  expect(shape.getError(scope, params._first)).toStrictEqual(
+    shape.getError(scope),
+  )
+  expect(shape.getError(scope, params._second)).toStrictEqual(
+    shape.getError(scope),
+  )
 
   const error = shape.getError(scope)
 

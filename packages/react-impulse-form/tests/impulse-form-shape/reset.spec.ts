@@ -1,5 +1,6 @@
+import { params } from "~/tools/params"
+
 import { type ImpulseForm, ImpulseFormShape, ImpulseFormUnit } from "../../src"
-import { arg } from "../common"
 
 function setup() {
   return ImpulseFormShape(
@@ -27,7 +28,10 @@ function setup() {
 
 describe.each([
   ["without arguments", (form: ImpulseForm) => form.reset()],
-  ["with resetter=arg(0)", (form: ImpulseForm) => form.reset(arg(0))],
+  [
+    "with resetter=params._first",
+    (form: ImpulseForm) => form.reset(params._first),
+  ],
 ])("%s", (_, reset) => {
   it("resets the shape", ({ scope }) => {
     const shape = setup()

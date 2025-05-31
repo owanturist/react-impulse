@@ -1,5 +1,7 @@
 import type { Scope } from "react-impulse"
 
+import { params } from "~/tools/params"
+
 import {
   type ImpulseForm,
   ImpulseFormList,
@@ -8,7 +10,6 @@ import {
   type ImpulseFormShapeOptions,
   ImpulseFormUnit,
 } from "../../src"
-import { arg } from "../common"
 
 function setup<T extends ImpulseForm>(
   elements: ReadonlyArray<T>,
@@ -83,16 +84,16 @@ it("returns false for empty list", ({ scope }) => {
   const form = setup([])
 
   expect(form.isDirty(scope)).toBe(false)
-  expect(form.isDirty(scope, arg(0))).toBe(false)
-  expect(form.isDirty(scope, arg(1))).toStrictEqual([])
+  expect(form.isDirty(scope, params._first)).toBe(false)
+  expect(form.isDirty(scope, params._second)).toStrictEqual([])
 })
 
 it("returns false for pristine list", ({ scope }) => {
   const form = setup([setupElement(), setupElement()])
 
   expect(form.isDirty(scope)).toBe(false)
-  expect(form.isDirty(scope, arg(0))).toBe(false)
-  expect(form.isDirty(scope, arg(1))).toStrictEqual([
+  expect(form.isDirty(scope, params._first)).toBe(false)
+  expect(form.isDirty(scope, params._second)).toStrictEqual([
     { first: false, second: false },
     { first: false, second: false },
   ])
@@ -113,11 +114,11 @@ it("returns true when at least one element is dirty", ({ scope }) => {
   ])
 
   expect(form.isDirty(scope)).toBe(true)
-  expect(form.isDirty(scope, arg(0))).toStrictEqual([
+  expect(form.isDirty(scope, params._first)).toStrictEqual([
     { first: true, second: false },
     false,
   ])
-  expect(form.isDirty(scope, arg(1))).toStrictEqual([
+  expect(form.isDirty(scope, params._second)).toStrictEqual([
     { first: true, second: false },
     { first: false, second: false },
   ])
@@ -142,11 +143,11 @@ it("returns true when all elements are dirty", ({ scope }) => {
   ])
 
   expect(form.isDirty(scope)).toBe(true)
-  expect(form.isDirty(scope, arg(0))).toStrictEqual([
+  expect(form.isDirty(scope, params._first)).toStrictEqual([
     { first: true, second: false },
     { first: false, second: true },
   ])
-  expect(form.isDirty(scope, arg(1))).toStrictEqual([
+  expect(form.isDirty(scope, params._second)).toStrictEqual([
     { first: true, second: false },
     { first: false, second: true },
   ])
@@ -174,8 +175,12 @@ describe("adding a new element to the list's end", () => {
     form.setElements((elements) => [...elements, setupElement()])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([false, false, true])
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toStrictEqual([
+      false,
+      false,
+      true,
+    ])
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
       { first: true, second: true },
@@ -203,12 +208,12 @@ describe("adding a new element to the list's end", () => {
     form.setElements((elements) => [...elements, setupElement()])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toStrictEqual([
       false,
       { first: true, second: false },
       true,
     ])
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: true, second: false },
       { first: true, second: true },
@@ -241,8 +246,12 @@ describe("adding a new element to the list's end", () => {
     ])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([false, false, true])
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toStrictEqual([
+      false,
+      false,
+      true,
+    ])
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
       { first: true, second: true },
@@ -273,12 +282,12 @@ describe("adding a new element to the list's end", () => {
     ])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toStrictEqual([
       { first: false, second: true },
       false,
       true,
     ])
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: true },
       { first: false, second: false },
       { first: true, second: true },
@@ -308,8 +317,8 @@ describe("adding a new element to the list's beginning", () => {
     form.setElements((elements) => [setupElement(), ...elements])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toBe(true)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(true)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: true, second: true },
       { first: true, second: true },
       { first: true, second: true },
@@ -337,8 +346,8 @@ describe("adding a new element to the list's beginning", () => {
     form.setElements((elements) => [setupElement(), ...elements])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toBe(true)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(true)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: true, second: true },
       { first: true, second: true },
       { first: true, second: true },
@@ -371,8 +380,8 @@ describe("adding a new element to the list's beginning", () => {
     ])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toBe(true)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(true)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: true, second: true },
       { first: true, second: true },
       { first: true, second: true },
@@ -403,8 +412,8 @@ describe("adding a new element to the list's beginning", () => {
     ])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toBe(true)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(true)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: true, second: true },
       { first: true, second: true },
       { first: true, second: true },
@@ -436,8 +445,12 @@ describe("adding a new element to the list's beginning", () => {
     ])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([false, true, true])
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toStrictEqual([
+      false,
+      true,
+      true,
+    ])
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: true, second: true },
       { first: true, second: true },
@@ -469,8 +482,12 @@ describe("removing an initial element from the list's end", () => {
     form.setElements((elements) => elements.slice(0, 2))
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([false, false, true])
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toStrictEqual([
+      false,
+      false,
+      true,
+    ])
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
       { first: true, second: true },
@@ -500,12 +517,12 @@ describe("removing an initial element from the list's end", () => {
     form.setElements((elements) => elements.slice(0, 2))
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toStrictEqual([
       false,
       { first: true, second: false },
       true,
     ])
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: true, second: false },
       { first: true, second: true },
@@ -537,8 +554,8 @@ describe("removing an initial element from the list's beginning", () => {
     form.setElements((elements) => elements.slice(1))
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toBe(true)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(true)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: true, second: true },
       { first: true, second: true },
       { first: true, second: true },
@@ -568,8 +585,8 @@ describe("removing an initial element from the list's beginning", () => {
     form.setElements((elements) => elements.slice(1))
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toBe(true)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(true)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: true, second: true },
       { first: true, second: true },
       { first: true, second: true },
@@ -599,8 +616,12 @@ describe("removing an initial element from the list's beginning", () => {
     form.setElements((elements) => elements.slice(1))
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([false, true, true])
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toStrictEqual([
+      false,
+      true,
+      true,
+    ])
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: true, second: true },
       { first: true, second: true },
@@ -632,8 +653,12 @@ describe("swapping elements", () => {
     form.setElements(([first, second, third]) => [third!, second!, first!])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([true, false, true])
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toStrictEqual([
+      true,
+      false,
+      true,
+    ])
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: true, second: true },
       { first: false, second: false },
       { first: true, second: true },
@@ -663,8 +688,8 @@ describe("swapping elements", () => {
     form.setElements(([first, second, third]) => [third!, second!, first!])
 
     expect(form.isDirty(scope)).toBe(false)
-    expect(form.isDirty(scope, arg(0))).toBe(false)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(false)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
       { first: false, second: false },
@@ -693,8 +718,8 @@ describe("after ImpulseFormList#reset()", () => {
     form.reset()
 
     expect(form.isDirty(scope)).toBe(false)
-    expect(form.isDirty(scope, arg(0))).toBe(false)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(false)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
       { first: false, second: false },
@@ -726,8 +751,8 @@ describe("after ImpulseFormList#reset()", () => {
     form.reset()
 
     expect(form.isDirty(scope)).toBe(false)
-    expect(form.isDirty(scope, arg(0))).toBe(false)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(false)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
       { first: false, second: false },
@@ -759,8 +784,8 @@ describe("after ImpulseFormList#reset()", () => {
     form.reset()
 
     expect(form.isDirty(scope)).toBe(false)
-    expect(form.isDirty(scope, arg(0))).toBe(false)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(false)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
       { first: false, second: false },
@@ -792,8 +817,8 @@ describe("after ImpulseFormList#reset()", () => {
     form.reset()
 
     expect(form.isDirty(scope)).toBe(false)
-    expect(form.isDirty(scope, arg(0))).toBe(false)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(false)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
     ])
@@ -811,8 +836,8 @@ describe("after ImpulseFormList#reset()", () => {
     form.reset()
 
     expect(form.isDirty(scope)).toBe(false)
-    expect(form.isDirty(scope, arg(0))).toBe(false)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([])
+    expect(form.isDirty(scope, params._first)).toBe(false)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([])
 
     expect(
       form.getElements(scope).map((element) => element.isDirty(scope)),
@@ -836,8 +861,8 @@ describe("after ImpulseFormList#setInitial()", () => {
     form.setInitial((_, input) => input)
 
     expect(form.isDirty(scope)).toBe(false)
-    expect(form.isDirty(scope, arg(0))).toBe(false)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(false)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
     ])
@@ -865,8 +890,8 @@ describe("after ImpulseFormList#setInitial()", () => {
     ])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toBe(true)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(true)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: true, second: true },
       { first: true, second: true },
     ])
@@ -904,8 +929,8 @@ describe("after ImpulseFormList#setInitial()", () => {
     form.setInitial((_, input) => input)
 
     expect(form.isDirty(scope)).toBe(false)
-    expect(form.isDirty(scope, arg(0))).toBe(false)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(false)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
       { first: false, second: false },
@@ -955,8 +980,8 @@ describe("after ImpulseFormList#setInitial()", () => {
     ])
 
     expect(form.isDirty(scope)).toBe(false)
-    expect(form.isDirty(scope, arg(0))).toBe(false)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(false)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
       { first: false, second: false },
@@ -990,8 +1015,8 @@ describe("after ImpulseFormList#setInitial()", () => {
     form.setInitial((initial) => initial.slice(0, 2))
 
     expect(form.isDirty(scope)).toBe(false)
-    expect(form.isDirty(scope, arg(0))).toBe(false)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(false)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
     ])
@@ -1020,11 +1045,11 @@ describe("after ImpulseFormList#getElements()#at()#setInitial()", () => {
     form.getElements(scope).at(0)!.setInitial({ first: 2 })
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toStrictEqual([
       { first: true, second: false },
       false,
     ])
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: true, second: false },
       { first: false, second: false },
     ])
@@ -1051,8 +1076,8 @@ describe("after ImpulseFormList#getElements()#at()#setInitial()", () => {
     form.getElements(scope).at(0)!.setInitial({ first: 1 })
 
     expect(form.isDirty(scope)).toBe(false)
-    expect(form.isDirty(scope, arg(0))).toBe(false)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(false)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
     ])
@@ -1086,8 +1111,12 @@ describe("after ImpulseFormList#getElements()#at()#setInitial()", () => {
     form.getElements(scope).at(2)!.setInitial({ first: 3, second: "3" })
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([false, false, true])
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toStrictEqual([
+      false,
+      false,
+      true,
+    ])
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
       { first: true, second: true },
@@ -1122,8 +1151,12 @@ describe("after ImpulseFormList#getElements()#at()#setInitial()", () => {
     form.getElements(scope).at(0)!.setInitial({ first: 3, second: "3" })
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, arg(0))).toStrictEqual([false, true, true])
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toStrictEqual([
+      false,
+      true,
+      true,
+    ])
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: true, second: true },
       { first: true, second: true },
@@ -1161,8 +1194,8 @@ describe("after ImpulseFormList#getElements()#at()#setInitial()", () => {
     form.reset()
 
     expect(form.isDirty(scope)).toBe(false)
-    expect(form.isDirty(scope, arg(0))).toBe(false)
-    expect(form.isDirty(scope, arg(1))).toStrictEqual([
+    expect(form.isDirty(scope, params._first)).toBe(false)
+    expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
     ])

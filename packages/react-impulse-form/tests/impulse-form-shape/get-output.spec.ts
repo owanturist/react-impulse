@@ -1,7 +1,8 @@
 import { z } from "zod"
 
+import { params } from "~/tools/params"
+
 import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
-import { arg } from "../common"
 
 it("selects value", ({ scope }) => {
   const shape = ImpulseFormShape(
@@ -31,8 +32,8 @@ it("selects value", ({ scope }) => {
     },
     fourth: ["anything"],
   })
-  expect(shape.getOutput(scope, arg(0))).toStrictEqual(value)
-  expect(shape.getOutput(scope, arg(1))).toStrictEqual(value)
+  expect(shape.getOutput(scope, params._first)).toStrictEqual(value)
+  expect(shape.getOutput(scope, params._second)).toStrictEqual(value)
 
   shape.setInput({
     second: -1,
@@ -41,8 +42,8 @@ it("selects value", ({ scope }) => {
     },
   })
   expect(shape.getOutput(scope)).toBeNull()
-  expect(shape.getOutput(scope, arg(0))).toBeNull()
-  expect(shape.getOutput(scope, arg(1))).toStrictEqual({
+  expect(shape.getOutput(scope, params._first)).toBeNull()
+  expect(shape.getOutput(scope, params._second)).toStrictEqual({
     first: "",
     second: null,
     third: {
@@ -61,7 +62,7 @@ it("selects value", ({ scope }) => {
     }
     readonly fourth: Array<string>
   }>()
-  expectTypeOf(shape.getOutput(scope, arg(0))).toEqualTypeOf<null | {
+  expectTypeOf(shape.getOutput(scope, params._first)).toEqualTypeOf<null | {
     readonly first: string
     readonly second: number
     readonly third: {
@@ -70,7 +71,7 @@ it("selects value", ({ scope }) => {
     }
     readonly fourth: Array<string>
   }>()
-  expectTypeOf(shape.getOutput(scope, arg(1))).toEqualTypeOf<{
+  expectTypeOf(shape.getOutput(scope, params._second)).toEqualTypeOf<{
     readonly first: null | string
     readonly second: null | number
     readonly third: {

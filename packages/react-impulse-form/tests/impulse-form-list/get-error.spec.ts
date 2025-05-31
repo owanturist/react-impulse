@@ -1,12 +1,13 @@
 import type { Scope } from "react-impulse"
 import { z } from "zod"
 
+import { params } from "~/tools/params"
+
 import {
   ImpulseFormList,
   ImpulseFormUnit,
   type ImpulseFormUnitSchemaOptions,
 } from "../../src"
-import { arg } from "../common"
 
 function setup<TError>(
   elements: ReadonlyArray<ImpulseFormUnit<number, TError>>,
@@ -56,16 +57,16 @@ it("returns null for empty list", ({ scope }) => {
   const form = setup([])
 
   expect(form.getError(scope)).toBeNull()
-  expect(form.getError(scope, arg(0))).toBeNull()
-  expect(form.getError(scope, arg(1))).toStrictEqual([])
+  expect(form.getError(scope, params._first)).toBeNull()
+  expect(form.getError(scope, params._second)).toStrictEqual([])
 })
 
 it("returns null when none of the elements have errors", ({ scope }) => {
   const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 
   expect(form.getError(scope)).toBeNull()
-  expect(form.getError(scope, arg(0))).toBeNull()
-  expect(form.getError(scope, arg(1))).toStrictEqual([null, null, null])
+  expect(form.getError(scope, params._first)).toBeNull()
+  expect(form.getError(scope, params._second)).toStrictEqual([null, null, null])
 })
 
 it("returns concise when at least one element has errors", ({ scope }) => {
@@ -78,8 +79,8 @@ it("returns concise when at least one element has errors", ({ scope }) => {
   const expected = [null, null, ["err"]]
 
   expect(form.getError(scope)).toStrictEqual(expected)
-  expect(form.getError(scope, arg(0))).toStrictEqual(expected)
-  expect(form.getError(scope, arg(1))).toStrictEqual(expected)
+  expect(form.getError(scope, params._first)).toStrictEqual(expected)
+  expect(form.getError(scope, params._second)).toStrictEqual(expected)
 })
 
 it("returns concise when all elements have errors", ({ scope }) => {
@@ -92,6 +93,6 @@ it("returns concise when all elements have errors", ({ scope }) => {
   const expected = [["err0"], ["err1"], ["err2"]]
 
   expect(form.getError(scope)).toStrictEqual(expected)
-  expect(form.getError(scope, arg(0))).toStrictEqual(expected)
-  expect(form.getError(scope, arg(1))).toStrictEqual(expected)
+  expect(form.getError(scope, params._first)).toStrictEqual(expected)
+  expect(form.getError(scope, params._second)).toStrictEqual(expected)
 })

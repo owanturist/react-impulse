@@ -1,12 +1,16 @@
 import { z } from "zod"
 
+import { params } from "~/tools/params"
+
 import { type ImpulseForm, ImpulseFormUnit } from "../../src"
-import { arg } from "../common"
 
 describe("ImpulseFormUnit#reset()", () => {
   describe.each([
     ["without arguments", (form: ImpulseForm) => form.reset()],
-    ["with resetter=identity", (form: ImpulseForm) => form.reset(arg(0))],
+    [
+      "with resetter=identity",
+      (form: ImpulseForm) => form.reset(params._first),
+    ],
   ])("%s", (_, reset) => {
     it("resets to initial value", ({ scope }) => {
       const value = ImpulseFormUnit("", { initial: "1" })

@@ -1,7 +1,7 @@
+import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
 import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
-import { arg } from "../common"
 
 it("specifies error", ({ scope }) => {
   const shape = ImpulseFormShape({
@@ -43,7 +43,7 @@ it("specifies error", ({ scope }) => {
     second: ["second"],
     third: null,
   })
-  expect(shape.getError(scope, arg(1))).toStrictEqual({
+  expect(shape.getError(scope, params._second)).toStrictEqual({
     first: ["another"],
     second: ["second"],
     third: {

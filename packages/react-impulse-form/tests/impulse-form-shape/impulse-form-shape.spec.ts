@@ -1,9 +1,9 @@
 import { z } from "zod"
 
+import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
 import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
-import { arg } from "../common"
 
 it("composes ImpulseFormShape from ImpulseFormUnit", ({ scope }) => {
   const shape = ImpulseFormShape({
@@ -148,7 +148,7 @@ describe("ImpulseFormShapeOptions.touched", () => {
       },
     )
 
-    expect(shape.isTouched(scope, arg(1))).toStrictEqual({
+    expect(shape.isTouched(scope, params._second)).toStrictEqual({
       first: true,
       second: false,
       third: {
@@ -237,7 +237,7 @@ describe("ImpulseFormShapeOptions.touched", () => {
       },
     )
 
-    expect(shape.isTouched(scope, arg(1))).toStrictEqual({
+    expect(shape.isTouched(scope, params._second)).toStrictEqual({
       first: false,
       second: true,
       third: {
@@ -268,7 +268,7 @@ describe("ImpulseFormShapeOptions.error", () => {
       },
     )
 
-    expect(shape.getError(scope, arg(1))).toStrictEqual({
+    expect(shape.getError(scope, params._second)).toStrictEqual({
       first: ["another"],
       second: null,
       third: {
@@ -367,7 +367,7 @@ describe("ImpulseFormShapeOptions.error", () => {
       },
     )
 
-    expect(shape.getError(scope, arg(1))).toStrictEqual({
+    expect(shape.getError(scope, params._second)).toStrictEqual({
       first: 2,
       second: "2",
       third: {

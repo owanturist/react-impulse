@@ -1,6 +1,8 @@
 import type { Scope } from "react-impulse"
 import { z } from "zod"
 
+import { params } from "~/tools/params"
+
 import {
   ImpulseFormList,
   type ImpulseFormListOptions,
@@ -8,7 +10,6 @@ import {
   type ImpulseFormUnitSchemaOptions,
   type ValidateStrategy,
 } from "../../src"
-import { arg } from "../common"
 
 function setup<TError>(
   elements: ReadonlyArray<ImpulseFormUnit<number, TError>>,
@@ -56,8 +57,8 @@ it("returns 'onTouch' for empty list", ({ scope }) => {
   const form = setup([])
 
   expect(form.getValidateOn(scope)).toBe("onTouch")
-  expect(form.getValidateOn(scope, arg(0))).toBe("onTouch")
-  expect(form.getValidateOn(scope, arg(1))).toStrictEqual([])
+  expect(form.getValidateOn(scope, params._first)).toBe("onTouch")
+  expect(form.getValidateOn(scope, params._second)).toStrictEqual([])
 })
 
 it("returns verbose when elements use more than a single strategy", ({
@@ -72,8 +73,8 @@ it("returns verbose when elements use more than a single strategy", ({
   const expected = ["onInit", "onTouch", "onSubmit"]
 
   expect(form.getValidateOn(scope)).toStrictEqual(expected)
-  expect(form.getValidateOn(scope, arg(0))).toStrictEqual(expected)
-  expect(form.getValidateOn(scope, arg(1))).toStrictEqual(expected)
+  expect(form.getValidateOn(scope, params._first)).toStrictEqual(expected)
+  expect(form.getValidateOn(scope, params._second)).toStrictEqual(expected)
 })
 
 it("returns concise when all elements use the same strategy", ({ scope }) => {
@@ -84,8 +85,8 @@ it("returns concise when all elements use the same strategy", ({ scope }) => {
   ])
 
   expect(form.getValidateOn(scope)).toBe("onChange")
-  expect(form.getValidateOn(scope, arg(0))).toBe("onChange")
-  expect(form.getValidateOn(scope, arg(1))).toStrictEqual([
+  expect(form.getValidateOn(scope, params._first)).toBe("onChange")
+  expect(form.getValidateOn(scope, params._second)).toStrictEqual([
     "onChange",
     "onChange",
     "onChange",

@@ -1,5 +1,6 @@
+import { params } from "~/tools/params"
+
 import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
-import { arg } from "../common"
 
 it("selects touched", ({ scope }) => {
   const shape = ImpulseFormShape({
@@ -13,8 +14,8 @@ it("selects touched", ({ scope }) => {
   })
 
   expect(shape.isTouched(scope)).toBe(false)
-  expect(shape.isTouched(scope, arg(0))).toBe(false)
-  expect(shape.isTouched(scope, arg(1))).toStrictEqual({
+  expect(shape.isTouched(scope, params._first)).toBe(false)
+  expect(shape.isTouched(scope, params._second)).toStrictEqual({
     first: false,
     second: false,
     third: {
@@ -23,25 +24,25 @@ it("selects touched", ({ scope }) => {
     },
   })
   expect(shape.fields.third.isTouched(scope)).toBe(false)
-  expect(shape.fields.third.isTouched(scope, arg(0))).toBe(false)
-  expect(shape.fields.third.isTouched(scope, arg(1))).toStrictEqual({
+  expect(shape.fields.third.isTouched(scope, params._first)).toBe(false)
+  expect(shape.fields.third.isTouched(scope, params._second)).toStrictEqual({
     one: false,
     two: false,
   })
 
   shape.fields.third.fields.one.setTouched(true)
   expect(shape.fields.third.isTouched(scope)).toBe(true)
-  expect(shape.fields.third.isTouched(scope, arg(0))).toStrictEqual({
+  expect(shape.fields.third.isTouched(scope, params._first)).toStrictEqual({
     one: true,
     two: false,
   })
-  expect(shape.fields.third.isTouched(scope, arg(1))).toStrictEqual({
+  expect(shape.fields.third.isTouched(scope, params._second)).toStrictEqual({
     one: true,
     two: false,
   })
   expect(shape.fields.third.fields.one.isTouched(scope)).toBe(true)
   expect(shape.isTouched(scope)).toBe(true)
-  expect(shape.isTouched(scope, arg(0))).toStrictEqual({
+  expect(shape.isTouched(scope, params._first)).toStrictEqual({
     first: false,
     second: false,
     third: {
@@ -49,7 +50,7 @@ it("selects touched", ({ scope }) => {
       two: false,
     },
   })
-  expect(shape.isTouched(scope, arg(1))).toStrictEqual({
+  expect(shape.isTouched(scope, params._second)).toStrictEqual({
     first: false,
     second: false,
     third: {
@@ -61,7 +62,7 @@ it("selects touched", ({ scope }) => {
   shape.fields.first.setTouched(true)
   expect(shape.fields.first.isTouched(scope)).toBe(true)
   expect(shape.isTouched(scope)).toBe(true)
-  expect(shape.isTouched(scope, arg(0))).toStrictEqual({
+  expect(shape.isTouched(scope, params._first)).toStrictEqual({
     first: true,
     second: false,
     third: {
@@ -73,7 +74,7 @@ it("selects touched", ({ scope }) => {
   shape.fields.second.setTouched(true)
   expect(shape.fields.second.isTouched(scope)).toBe(true)
   expect(shape.isTouched(scope)).toBe(true)
-  expect(shape.isTouched(scope, arg(0))).toStrictEqual({
+  expect(shape.isTouched(scope, params._first)).toStrictEqual({
     first: true,
     second: true,
     third: {
@@ -86,8 +87,8 @@ it("selects touched", ({ scope }) => {
   expect(shape.fields.third.fields.two.isTouched(scope)).toBe(true)
   expect(shape.fields.third.isTouched(scope)).toBe(true)
   expect(shape.isTouched(scope)).toBe(true)
-  expect(shape.isTouched(scope, arg(0))).toBe(true)
-  expect(shape.isTouched(scope, arg(1))).toStrictEqual({
+  expect(shape.isTouched(scope, params._first)).toBe(true)
+  expect(shape.isTouched(scope, params._second)).toStrictEqual({
     first: true,
     second: true,
     third: {
@@ -97,25 +98,29 @@ it("selects touched", ({ scope }) => {
   })
 
   expectTypeOf(
-    shape.fields.third.fields.one.isTouched(scope, arg(0)),
+    shape.fields.third.fields.one.isTouched(scope, params._first),
   ).toEqualTypeOf<boolean>()
   expectTypeOf(
-    shape.fields.third.fields.one.isTouched(scope, arg(1)),
+    shape.fields.third.fields.one.isTouched(scope, params._second),
   ).toEqualTypeOf<boolean>()
 
-  expectTypeOf(shape.fields.third.isTouched(scope, arg(0))).toEqualTypeOf<
+  expectTypeOf(
+    shape.fields.third.isTouched(scope, params._first),
+  ).toEqualTypeOf<
     | boolean
     | {
         readonly one: boolean
         readonly two: boolean
       }
   >()
-  expectTypeOf(shape.fields.third.isTouched(scope, arg(1))).toEqualTypeOf<{
+  expectTypeOf(
+    shape.fields.third.isTouched(scope, params._second),
+  ).toEqualTypeOf<{
     readonly one: boolean
     readonly two: boolean
   }>()
 
-  expectTypeOf(shape.isTouched(scope, arg(0))).toEqualTypeOf<
+  expectTypeOf(shape.isTouched(scope, params._first)).toEqualTypeOf<
     | boolean
     | {
         readonly first: boolean
@@ -128,7 +133,7 @@ it("selects touched", ({ scope }) => {
             }
       }
   >()
-  expectTypeOf(shape.isTouched(scope, arg(1))).toEqualTypeOf<{
+  expectTypeOf(shape.isTouched(scope, params._second)).toEqualTypeOf<{
     readonly first: boolean
     readonly second: boolean
     readonly third: {

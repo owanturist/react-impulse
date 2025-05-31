@@ -1,8 +1,9 @@
 import type { Scope } from "react-impulse"
 import { z } from "zod"
 
+import { params } from "~/tools/params"
+
 import { ImpulseFormList, ImpulseFormUnit } from "../../src"
-import { arg } from "../common"
 
 function setup<TError>(
   elements: ReadonlyArray<ImpulseFormUnit<number, TError, string>>,
@@ -50,30 +51,30 @@ it("returns all items when valid", ({ scope }) => {
   const form = setup([setupElement(1), setupElement(2), setupElement(3)])
 
   expect(form.getOutput(scope)).toStrictEqual(["1", "2", "3"])
-  expect(form.getOutput(scope, arg(0))).toStrictEqual(["1", "2", "3"])
-  expect(form.getOutput(scope, arg(1))).toStrictEqual(["1", "2", "3"])
+  expect(form.getOutput(scope, params._first)).toStrictEqual(["1", "2", "3"])
+  expect(form.getOutput(scope, params._second)).toStrictEqual(["1", "2", "3"])
 })
 
 it("returns empty array for empty list", ({ scope }) => {
   const form = setup([])
 
   expect(form.getOutput(scope)).toStrictEqual([])
-  expect(form.getOutput(scope, arg(0))).toStrictEqual([])
-  expect(form.getOutput(scope, arg(1))).toStrictEqual([])
+  expect(form.getOutput(scope, params._first)).toStrictEqual([])
+  expect(form.getOutput(scope, params._second)).toStrictEqual([])
 })
 
 it("returns null if a single element is not valid", ({ scope }) => {
   const form = setup([setupElement(0)])
 
   expect(form.getOutput(scope)).toBeNull()
-  expect(form.getOutput(scope, arg(0))).toBeNull()
-  expect(form.getOutput(scope, arg(1))).toStrictEqual([null])
+  expect(form.getOutput(scope, params._first)).toBeNull()
+  expect(form.getOutput(scope, params._second)).toStrictEqual([null])
 })
 
 it("returns null if at least one element is not valid", ({ scope }) => {
   const form = setup([setupElement(1), setupElement(0), setupElement(3)])
 
   expect(form.getOutput(scope)).toBeNull()
-  expect(form.getOutput(scope, arg(0))).toBeNull()
-  expect(form.getOutput(scope, arg(1))).toStrictEqual(["1", null, "3"])
+  expect(form.getOutput(scope, params._first)).toBeNull()
+  expect(form.getOutput(scope, params._second)).toStrictEqual(["1", null, "3"])
 })

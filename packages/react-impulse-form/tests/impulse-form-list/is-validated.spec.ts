@@ -1,12 +1,13 @@
 import type { Scope } from "react-impulse"
 import { z } from "zod"
 
+import { params } from "~/tools/params"
+
 import {
   ImpulseFormList,
   ImpulseFormUnit,
   type ImpulseFormUnitSchemaOptions,
 } from "../../src"
-import { arg } from "../common"
 
 function setup<TError>(
   elements: ReadonlyArray<ImpulseFormUnit<number, TError>>,
@@ -53,16 +54,20 @@ it("returns false for empty list", ({ scope }) => {
   const form = setup([])
 
   expect(form.isValidated(scope)).toBe(false)
-  expect(form.isValidated(scope, arg(0))).toBe(false)
-  expect(form.isValidated(scope, arg(1))).toStrictEqual([])
+  expect(form.isValidated(scope, params._first)).toBe(false)
+  expect(form.isValidated(scope, params._second)).toStrictEqual([])
 })
 
 it("returns false when all elements are not validated", ({ scope }) => {
   const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 
   expect(form.isValidated(scope)).toBe(false)
-  expect(form.isValidated(scope, arg(0))).toBe(false)
-  expect(form.isValidated(scope, arg(1))).toStrictEqual([false, false, false])
+  expect(form.isValidated(scope, params._first)).toBe(false)
+  expect(form.isValidated(scope, params._second)).toStrictEqual([
+    false,
+    false,
+    false,
+  ])
 })
 
 it("returns false when at least one element is not validated", ({ scope }) => {
@@ -73,8 +78,16 @@ it("returns false when at least one element is not validated", ({ scope }) => {
   ])
 
   expect(form.isValidated(scope)).toBe(false)
-  expect(form.isValidated(scope, arg(0))).toStrictEqual([true, true, false])
-  expect(form.isValidated(scope, arg(1))).toStrictEqual([true, true, false])
+  expect(form.isValidated(scope, params._first)).toStrictEqual([
+    true,
+    true,
+    false,
+  ])
+  expect(form.isValidated(scope, params._second)).toStrictEqual([
+    true,
+    true,
+    false,
+  ])
 })
 
 it("returns true when all elements are validated", ({ scope }) => {
@@ -85,8 +98,12 @@ it("returns true when all elements are validated", ({ scope }) => {
   ])
 
   expect(form.isValidated(scope)).toBe(true)
-  expect(form.isValidated(scope, arg(0))).toBe(true)
-  expect(form.isValidated(scope, arg(1))).toStrictEqual([true, true, true])
+  expect(form.isValidated(scope, params._first)).toBe(true)
+  expect(form.isValidated(scope, params._second)).toStrictEqual([
+    true,
+    true,
+    true,
+  ])
 })
 
 it("returns false when at least one element has custom errors", ({ scope }) => {
@@ -97,6 +114,14 @@ it("returns false when at least one element has custom errors", ({ scope }) => {
   ])
 
   expect(form.isValidated(scope)).toBe(false)
-  expect(form.isValidated(scope, arg(0))).toStrictEqual([true, false, false])
-  expect(form.isValidated(scope, arg(1))).toStrictEqual([true, false, false])
+  expect(form.isValidated(scope, params._first)).toStrictEqual([
+    true,
+    false,
+    false,
+  ])
+  expect(form.isValidated(scope, params._second)).toStrictEqual([
+    true,
+    false,
+    false,
+  ])
 })

@@ -1,7 +1,8 @@
 import { z } from "zod"
 
+import { params } from "~/tools/params"
+
 import { ImpulseFormUnit } from "../../src"
-import { arg } from "../common"
 
 it("selects value when not validated", ({ scope }) => {
   const value = ImpulseFormUnit("1", {
@@ -30,16 +31,18 @@ it("selects value", ({ scope }) => {
   })
 
   expect(value.getOutput(scope)).toBe("1")
-  expect(value.getOutput(scope, arg(0))).toBe("1")
+  expect(value.getOutput(scope, params._first)).toBe("1")
   expect(value.getOutput(scope, (_, verbose) => verbose)).toBe("1")
 
   value.setInput("12")
   expect(value.getOutput(scope)).toBeNull()
-  expect(value.getOutput(scope, arg(0))).toBeNull()
+  expect(value.getOutput(scope, params._first)).toBeNull()
   expect(value.getOutput(scope, (_, verbose) => verbose)).toBeNull()
 
   expectTypeOf(value.getOutput(scope)).toEqualTypeOf<null | string>()
-  expectTypeOf(value.getOutput(scope, arg(0))).toEqualTypeOf<null | string>()
+  expectTypeOf(value.getOutput(scope, params._first)).toEqualTypeOf<
+    null | string
+  >()
   expectTypeOf(value.getOutput(scope, (_, verbose) => verbose)).toEqualTypeOf<
     null | string
   >()

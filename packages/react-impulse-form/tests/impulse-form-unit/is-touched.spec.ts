@@ -1,7 +1,7 @@
+import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
 import { ImpulseFormUnit } from "../../src"
-import { arg } from "../common"
 
 it("selects touched", ({ scope }) => {
   const value = ImpulseFormUnit("")
@@ -16,6 +16,6 @@ it("selects touched", ({ scope }) => {
   expect(value.isTouched(scope)).toBe(false)
 
   expectTypeOf(value.isTouched(scope)).toEqualTypeOf<boolean>()
-  expectTypeOf(value.isTouched(scope, arg(0))).toEqualTypeOf<boolean>()
+  expectTypeOf(value.isTouched(scope, params._first)).toEqualTypeOf<boolean>()
   expectTypeOf(value.setTouched).parameter(0).toEqualTypeOf<Setter<boolean>>()
 })

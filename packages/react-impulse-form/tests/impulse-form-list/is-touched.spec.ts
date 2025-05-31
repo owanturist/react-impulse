@@ -1,11 +1,12 @@
 import type { Scope } from "react-impulse"
 
+import { params } from "~/tools/params"
+
 import {
   ImpulseFormList,
   ImpulseFormUnit,
   type ImpulseFormUnitOptions,
 } from "../../src"
-import { arg } from "../common"
 
 function setup(elements: ReadonlyArray<ImpulseFormUnit<number>>) {
   return ImpulseFormList(elements)
@@ -47,16 +48,20 @@ it("returns false for empty list", ({ scope }) => {
   const form = setup([])
 
   expect(form.isTouched(scope)).toBe(false)
-  expect(form.isTouched(scope, arg(0))).toBe(false)
-  expect(form.isTouched(scope, arg(1))).toStrictEqual([])
+  expect(form.isTouched(scope, params._first)).toBe(false)
+  expect(form.isTouched(scope, params._second)).toStrictEqual([])
 })
 
 it("returns false when all elements are not touched", ({ scope }) => {
   const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 
   expect(form.isTouched(scope)).toBe(false)
-  expect(form.isTouched(scope, arg(0))).toBe(false)
-  expect(form.isTouched(scope, arg(1))).toStrictEqual([false, false, false])
+  expect(form.isTouched(scope, params._first)).toBe(false)
+  expect(form.isTouched(scope, params._second)).toStrictEqual([
+    false,
+    false,
+    false,
+  ])
 })
 
 it("returns true when at least one element is touched", ({ scope }) => {
@@ -67,8 +72,16 @@ it("returns true when at least one element is touched", ({ scope }) => {
   ])
 
   expect(form.isTouched(scope)).toBe(true)
-  expect(form.isTouched(scope, arg(0))).toStrictEqual([false, false, true])
-  expect(form.isTouched(scope, arg(1))).toStrictEqual([false, false, true])
+  expect(form.isTouched(scope, params._first)).toStrictEqual([
+    false,
+    false,
+    true,
+  ])
+  expect(form.isTouched(scope, params._second)).toStrictEqual([
+    false,
+    false,
+    true,
+  ])
 })
 
 it("returns true when all elements are touched", ({ scope }) => {
@@ -79,6 +92,10 @@ it("returns true when all elements are touched", ({ scope }) => {
   ])
 
   expect(form.isTouched(scope)).toBe(true)
-  expect(form.isTouched(scope, arg(0))).toBe(true)
-  expect(form.isTouched(scope, arg(1))).toStrictEqual([true, true, true])
+  expect(form.isTouched(scope, params._first)).toBe(true)
+  expect(form.isTouched(scope, params._second)).toStrictEqual([
+    true,
+    true,
+    true,
+  ])
 })
