@@ -6,9 +6,10 @@ import { wait } from "../common"
 
 const SLOWEST_ASYNC_MS = 1000
 
-const setupValue =
-  (enchant?: (form: ImpulseFormUnit<string, ReadonlyArray<string>>) => void) =>
-  (initial = "") => {
+function setupValue(
+  enchant?: (form: ImpulseFormUnit<string, ReadonlyArray<string>>) => void,
+) {
+  return (initial = "") => {
     const form = ImpulseFormUnit(initial, {
       schema: z.string().max(2),
     })
@@ -17,6 +18,7 @@ const setupValue =
 
     return form
   }
+}
 
 beforeAll(() => {
   vi.useFakeTimers()
