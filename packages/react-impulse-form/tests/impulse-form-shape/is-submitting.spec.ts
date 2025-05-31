@@ -20,9 +20,8 @@ interface ShapeFields {
   _4: Array<string>
 }
 
-const setupShape =
-  (enchant?: (form: ImpulseFormShape<ShapeFields>) => void) =>
-  (options?: ImpulseFormShapeOptions<ShapeFields>) => {
+function setupShape(enchant?: (form: ImpulseFormShape<ShapeFields>) => void) {
+  return (options?: ImpulseFormShapeOptions<ShapeFields>) => {
     const form = ImpulseFormShape(
       {
         _1: ImpulseFormUnit("", {
@@ -44,6 +43,7 @@ const setupShape =
 
     return form
   }
+}
 
 beforeAll(() => {
   vi.useFakeTimers()

@@ -30,7 +30,7 @@ type RootIsValidatedConcise =
       readonly third: ThirdIsValidatedConcise
     }
 
-const setup = (
+function setup(
   options?: ImpulseFormShapeOptions<{
     first: ImpulseFormUnit<string>
     second: ImpulseFormUnit<number>
@@ -40,7 +40,7 @@ const setup = (
     }>
     fourth: Array<string>
   }>,
-) => {
+) {
   return ImpulseFormShape(
     {
       first: ImpulseFormUnit("", {
