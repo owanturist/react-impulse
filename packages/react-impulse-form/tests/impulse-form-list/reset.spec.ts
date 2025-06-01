@@ -54,14 +54,14 @@ it("clears custom errors", ({ scope }) => {
 
 it("resets isValidated state", ({ scope }) => {
   const form = ImpulseFormList([
-    ImpulseFormUnit(0),
-    ImpulseFormUnit(1),
-    ImpulseFormUnit(2),
+    ImpulseFormUnit(0, { schema: z.number() }),
+    ImpulseFormUnit(1, { schema: z.number() }),
+    ImpulseFormUnit(2, { schema: z.number() }),
   ])
 
   form.setTouched(true)
-
   expect(form.isValidated(scope)).toBe(true)
+
   form.reset()
   expect(form.isValidated(scope)).toBe(false)
 })

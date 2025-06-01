@@ -320,9 +320,9 @@ export class ImpulseFormUnit<
       this.setInitial(resetValue)
       this.setInput(resetValue)
       // TODO test when reset for all below
-      this._validated.setValue(false)
       this._touched.setValue(false)
       this._errors.setValue(null)
+      this._updateValidated(true)
     })
   }
 
