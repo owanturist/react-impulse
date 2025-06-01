@@ -63,7 +63,7 @@ export class ImpulseFormUnit<
     private readonly _touched: Impulse<boolean>,
     // TODO convert to undefined | ValidateStrategy so it can inherit from parent (List)
     private readonly _validateOn: Impulse<ValidateStrategy>,
-    private readonly _errors: Impulse<null | TError>,
+    private readonly _error: Impulse<null | TError>,
     private readonly _isExplicitInitial: Impulse<boolean>,
     private readonly _initial: Impulse<TInput>,
     private readonly _input: Impulse<TInput>,
@@ -110,7 +110,7 @@ export class ImpulseFormUnit<
   }
 
   private _validate(scope: Scope): [null | TError, null | TOutput] {
-    const customError = this._errors.getValue(scope)
+    const customError = this._error.getValue(scope)
 
     if (!isNull(customError)) {
       return [customError, null]
@@ -159,7 +159,7 @@ export class ImpulseFormUnit<
       this._initialSource.clone(),
       this._touched.clone(),
       this._validateOn.clone(),
-      this._errors.clone(),
+      this._error.clone(),
       this._isExplicitInitial.clone(),
       this._initial.clone(),
       this._input.clone(),
@@ -219,7 +219,7 @@ export class ImpulseFormUnit<
   }
 
   public setError(setter: ImpulseFormUnitErrorSetter<TError>): void {
-    this._errors.setValue((error) => resolveSetter(setter, error))
+    this._error.setValue((error) => resolveSetter(setter, error))
   }
 
   public isValidated(scope: Scope): boolean
@@ -235,7 +235,7 @@ export class ImpulseFormUnit<
     ) => TResult = params._first as typeof select,
   ): TResult {
     const validated =
-      this._validated.getValue(scope) || !isNull(this._errors.getValue(scope))
+      this._validated.getValue(scope) || !isNull(this._error.getValue(scope))
 
     return select(validated, validated)
   }
@@ -320,9 +320,9 @@ export class ImpulseFormUnit<
       this.setInitial(resetValue)
       this.setInput(resetValue)
       // TODO test when reset for all below
-      this._validated.setValue(false)
       this._touched.setValue(false)
-      this._errors.setValue(null)
+      this._error.setValue(null)
+      this._updateValidated(true)
     })
   }
 
