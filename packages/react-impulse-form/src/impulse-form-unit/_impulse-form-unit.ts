@@ -1,5 +1,7 @@
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
+import { isStrictEqual } from "~/tools/is-strict-equal"
+import { None, type Option, Some } from "~/tools/option"
 import { params } from "~/tools/params"
 import { resolveSetter } from "~/tools/setter"
 
@@ -54,21 +56,11 @@ export class ImpulseFormUnit<
 
   public constructor(
     root: null | ImpulseForm,
-    private readonly _initialSource: Impulse<
-      undefined | ImpulseFormUnit<TInput, TError, TOutput>
-    >,
-    private readonly _touched: Impulse<boolean>,
-    // TODO convert to undefined | ValidateStrategy so it can inherit from parent (List)
-    private readonly _validateOn: Impulse<ValidateStrategy>,
-    private readonly _error: Impulse<null | TError>,
-    private readonly _isExplicitInitial: Impulse<boolean>,
-    private readonly _initial: Impulse<TInput>,
+    private readonly _spec: ImpulseFormUnitSpec<TInput, TError, TOutput>,
     private readonly _input: Impulse<TInput>,
     private readonly _transform: Impulse<
       undefined | ImpulseFormUnitTransform<TInput, TError, TOutput>
     >,
-    private readonly _isInputEqual: Compare<TInput>,
-    private readonly _isInputDirty: Compare<TInput>,
   ) {
     super(root)
     this._updateValidated()
@@ -107,7 +99,7 @@ export class ImpulseFormUnit<
   }
 
   private _validate(scope: Scope): [null | TError, null | TOutput] {
-    const customError = this._error.getValue(scope)
+    const customError = this._error.getValue(scope)._getOrElse(null)
 
     if (!isNull(customError)) {
       return [customError, null]
@@ -139,12 +131,9 @@ export class ImpulseFormUnit<
   ): ImpulseFormUnit<TInput, TError, TOutput> {
     return new ImpulseFormUnit(
       parent,
-      this._initialSource.clone(),
+      this._spec._clone(),
       this._touched.clone(),
-      this._validateOn.clone(),
       this._error.clone(),
-      this._isExplicitInitial.clone(),
-      this._initial.clone(),
       this._input.clone(),
       this._transform.clone(),
       this._isInputEqual,
@@ -155,19 +144,7 @@ export class ImpulseFormUnit<
   protected _setInitial(
     initial: undefined | ImpulseFormUnit<TInput, TError, TOutput>,
     isRoot: boolean,
-  ): void {
-    batch((scope) => {
-      this._initialSource.setValue(initial)
-
-      if (
-        initial != null &&
-        isRoot &&
-        this._isExplicitInitial.getValue(scope)
-      ) {
-        initial.setInitial(this._initial.getValue(scope))
-      }
-    })
-  }
+  ): void {}
 
   protected _setValidated(isValidated: boolean): void {
     this._validated.setValue(isValidated)
@@ -179,7 +156,11 @@ export class ImpulseFormUnit<
   ): TResult {
     const initial = this.getInitial(scope)
     const input = this.getInput(scope)
-    const dirty = this._isInputDirty(initial, input, scope)
+    const dirty = this._spec._isInputDirty._getOrElse(isStrictEqual)(
+      initial,
+      input,
+      scope,
+    )
 
     return select(dirty, dirty, true)
   }
@@ -202,7 +183,11 @@ export class ImpulseFormUnit<
   }
 
   public setError(setter: ImpulseFormUnitErrorSetter<TError>): void {
-    this._error.setValue((error) => resolveSetter(setter, error))
+    this._error.setValue((error) => {
+      const nextError = resolveSetter(setter, error._getOrElse(null))
+
+      return isNull(nextError) ? None : new Some(nextError)
+    })
   }
 
   public isValidated(scope: Scope): boolean
@@ -301,19 +286,16 @@ export class ImpulseFormUnit<
     })
   }
 
-  public reset(
-    resetter: ImpulseFormUnitInputSetter<TInput> = params._first,
-  ): void {
+  public reset(): void {
     batch((scope) => {
-      const resetValue = isFunction(resetter)
-        ? resetter(this.getInitial(scope), this._input.getValue(scope))
-        : resetter
+      this._input.setValue(this.getInitial(scope))
+      this._touched.setValue(this._spec._touched._getOrElse(false))
+      this._error.setValue(this._spec._error)
+      this._validateOn.setValue(
+        this._spec._validateOn._getOrElse(VALIDATE_ON_TOUCH),
+      )
+      this._validator.setValue(this._spec._validator)
 
-      this.setInitial(resetValue)
-      this.setInput(resetValue)
-      // TODO test when reset for all below
-      this._touched.setValue(false)
-      this._error.setValue(null)
       this._updateValidated(true)
     })
   }
@@ -356,27 +338,6 @@ export class ImpulseFormUnit<
   }
 
   public getInitial(scope: Scope): TInput {
-    const form = this._initialSource.getValue(scope) ?? this
-
-    return form._initial.getValue(scope)
-  }
-
-  // TODO add tests against input coming as second argument
-  public setInitial(setter: ImpulseFormUnitInputSetter<TInput>): void {
-    batch((scope) => {
-      const initial = this.getInitial(scope)
-      const nextInitial = isFunction(setter)
-        ? setter(initial, this._input.getValue(scope))
-        : setter
-
-      this._initial.setValue(nextInitial)
-
-      this._isExplicitInitial.setValue(true)
-
-      if (initial !== this._initial.getValue(scope)) {
-        this._updateValidated()
-        this._initialSource.getValue(scope)?.setInitial(setter)
-      }
-    })
+    return this._spec._initial._getOrElse(this._input.getValue(scope))
   }
 }

@@ -81,7 +81,7 @@ export abstract class ImpulseForm<
     this._root = _root ?? this
   }
 
-  protected abstract _childOf(parent: null | ImpulseForm): ImpulseForm<TParams>
+  protected abstract _childOf(root: null | ImpulseForm): ImpulseForm<TParams>
 
   protected abstract _setInitial(
     initial: undefined | ImpulseForm<TParams>,
@@ -243,11 +243,9 @@ export abstract class ImpulseForm<
 
   public abstract setTouched(setter: TParams["flag.setter"]): void
 
-  public abstract reset(resetter?: TParams["input.setter"]): void
+  public abstract reset(): void
 
   public abstract getInitial(scope: Scope): TParams["input.schema"]
-
-  public abstract setInitial(setter: TParams["input.setter"]): void
 
   public abstract getInput(scope: Scope): TParams["input.schema"]
 
