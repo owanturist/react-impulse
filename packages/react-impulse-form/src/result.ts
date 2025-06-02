@@ -1,3 +1,1 @@
-export type Result<TError, TData> = [TError] extends [null]
-  ? [null, TData]
-  : [TError, null] | [null, TData]
+export type Result<TError, TData> = [TError, null] | [null, TData]

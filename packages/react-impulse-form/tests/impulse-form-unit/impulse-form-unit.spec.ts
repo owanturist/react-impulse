@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { ImpulseFormUnit } from "../../src"
+import { ImpulseFormUnit, type Result } from "../../src"
 
 it("creates ImpulseFormUnit without validation", ({ scope }) => {
   const value = ImpulseFormUnit(1)
@@ -17,7 +17,7 @@ it("creates ImpulseFormUnit without validation", ({ scope }) => {
 it("creates ImpulseFormUnit with same type validator", ({ scope }) => {
   const value = ImpulseFormUnit("", {
     validateOn: "onInit",
-    validate: (input) => {
+    validate: (input): Result<string, string> => {
       const trimmed = input.trim()
 
       return trimmed.length < 2 ? ["too short", null] : [null, trimmed]
@@ -33,6 +33,26 @@ it("creates ImpulseFormUnit with same type validator", ({ scope }) => {
   value.setInput(" 123 ")
   expect(value.getInput(scope)).toBe(" 123 ")
   expect(value.getOutput(scope)).toBe("123")
+})
+
+it("creates ImpulseFormUnit with converting type validator", ({ scope }) => {
+  const value = ImpulseFormUnit("", {
+    validateOn: "onInit",
+    validate: (input): Result<string, number> => {
+      const trimmed = input.trim()
+
+      return trimmed.length < 2 ? ["too short", null] : [null, trimmed.length]
+    },
+  })
+
+  expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<string, string, number>>()
+
+  expect(value.getInput(scope)).toBe("")
+  expect(value.getOutput(scope)).toBeNull()
+
+  value.setInput(" 123 ")
+  expect(value.getInput(scope)).toBe(" 123 ")
+  expect(value.getOutput(scope)).toBe(3)
 })
 
 it("creates ImpulseFormUnit with same type schema", ({ scope }) => {
@@ -72,6 +92,48 @@ it("creates ImpulseFormUnit with converting type schema", ({ scope }) => {
   value.setInput(" 123 ")
   expect(value.getInput(scope)).toBe(" 123 ")
   expect(value.getOutput(scope)).toBe(123)
+})
+
+/**
+ * bugfix: ImpulseFormUnit ignores nullable transformations #874
+ * @link https://github.com/owanturist/react-impulse/issues/874
+ */
+it("creates ImpulseFormUnit with undefinable output", ({ scope }) => {
+  const unit = ImpulseFormUnit("", {
+    validateOn: "onInit",
+    schema: z.string().optional(),
+  })
+
+  expectTypeOf(unit).toEqualTypeOf<
+    ImpulseFormUnit<string, ReadonlyArray<string>, undefined | string>
+  >()
+  expect(unit.getOutput(scope)).toBe("")
+
+  // @ts-expect-error test the schema
+  unit.setInput(undefined)
+
+  expect(unit.getInput(scope)).toBeUndefined()
+})
+
+/**
+ * bugfix: ImpulseFormUnit ignores nullable transformations #874
+ * @link https://github.com/owanturist/react-impulse/issues/874
+ */
+it("creates ImpulseFormUnit with nullable output", ({ scope }) => {
+  const unit = ImpulseFormUnit("", {
+    validateOn: "onInit",
+    schema: z.string().nullable(),
+  })
+
+  expectTypeOf(unit).toEqualTypeOf<
+    ImpulseFormUnit<string, ReadonlyArray<string>, null | string>
+  >()
+  expect(unit.getOutput(scope)).toBe("")
+
+  // @ts-expect-error test the schema
+  unit.setInput(null)
+
+  expect(unit.getInput(scope)).toBeNull()
 })
 
 it("creates ImpulseFormUnit with complex value", ({ scope }) => {
@@ -225,7 +287,7 @@ describe("ImpulseFormUnitValidatedOptions", () => {
   it("defines impulse with validate as validator", ({ scope }) => {
     const value = ImpulseFormUnit(0, {
       validateOn: "onInit",
-      validate: (input) => {
+      validate: (input): Result<string, number> => {
         return input > 0 ? [null, input] : ["should be positive", null]
       },
     })
@@ -246,7 +308,7 @@ describe("ImpulseFormUnitValidatedOptions", () => {
   }) => {
     const value = ImpulseFormUnit(0, {
       validateOn: "onInit",
-      validate: (input) => {
+      validate: (input): Result<string, string> => {
         return input > 0
           ? [null, input.toFixed(2)]
           : ["should be positive", null]

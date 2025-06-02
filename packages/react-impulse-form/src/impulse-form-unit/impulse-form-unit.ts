@@ -2,7 +2,6 @@ import { hasProperty } from "~/tools/has-property"
 import { isNull } from "~/tools/is-null"
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isStrictEqual } from "~/tools/is-strict-equal"
-import type { NullOrNonNullable } from "~/tools/null-or-non-nullable"
 
 import { type Compare, Impulse, type Scope, untrack } from "../dependencies"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
@@ -116,16 +115,12 @@ export interface ImpulseFormUnitValidatedOptions<
 export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
   input: TInput,
   options: ImpulseFormUnitValidatedOptions<TInput, TError, TOutput>,
-): ImpulseFormUnit<
-  TInput,
-  NullOrNonNullable<TError>,
-  NullOrNonNullable<TOutput>
->
+): ImpulseFormUnit<TInput, TError, TOutput>
 
 export function ImpulseFormUnit<TInput, TOutput = TInput>(
   input: TInput,
   options: ImpulseFormUnitSchemaOptions<TInput, TOutput>,
-): ImpulseFormUnit<TInput, ReadonlyArray<string>, NullOrNonNullable<TOutput>>
+): ImpulseFormUnit<TInput, ReadonlyArray<string>, TOutput>
 
 export function ImpulseFormUnit<TInput, TError = null>(
   input: TInput,
