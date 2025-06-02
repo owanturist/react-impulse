@@ -1,3 +1,4 @@
+import { hasProperty } from "~/tools/has-property"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
 import { params } from "~/tools/params"
@@ -25,6 +26,7 @@ import { type ZodLikeSchema, zodLikeParse } from "../zod-like-schema"
 import type { ImpulseFormUnitErrorSetter } from "./impulse-form-unit-error-setter"
 import type { ImpulseFormUnitFlagSetter } from "./impulse-form-unit-flag-setter"
 import type { ImpulseFormUnitInputSetter } from "./impulse-form-unit-input-setter"
+import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer"
 import type { ImpulseFormUnitValidateOnSetter } from "./impulse-form-unit-validate-on-setter"
 import type { ImpulseFormUnitValidator } from "./impulse-form-unit-validator"
 
@@ -72,6 +74,9 @@ export class ImpulseFormUnit<
       | {
           _validate: ImpulseFormUnitValidator<TInput, TError, TOutput>
         }
+      | {
+          _transform: ImpulseFormUnitTransformer<TInput, TOutput>
+        }
     >,
     private readonly _isInputEqual: Compare<TInput>,
     private readonly _isInputDirty: Compare<TInput>,
@@ -82,10 +87,12 @@ export class ImpulseFormUnit<
 
   private _updateValidated(override = false): void {
     this._validated.setValue((isValidated, scope) => {
-      if (
-        (!override && isValidated) ||
-        this._validator.getValue(scope) == null
-      ) {
+      if (!override && isValidated) {
+        return true
+      }
+      const validator = this._validator.getValue(scope)
+
+      if (validator == null || hasProperty(validator, "_transform")) {
         return true
       }
 
@@ -121,6 +128,10 @@ export class ImpulseFormUnit<
 
     if (!validator) {
       return [null, input as unknown as TOutput]
+    }
+
+    if (hasProperty(validator, "_transform")) {
+      return [null, validator._transform(input) as TOutput]
     }
 
     const [error, output] = validator._validate(this.getInput(scope))
@@ -297,6 +308,15 @@ export class ImpulseFormUnit<
     validator: ImpulseFormUnitValidator<TInput, TError, TOutput>,
   ): void {
     this._validator.setValue({ _validate: validator })
+  }
+
+  public setTransform(
+    transformer: ImpulseFormUnitTransformer<TInput, TOutput>,
+  ): void {
+    batch(() => {
+      this._validator.setValue({ _transform: transformer })
+      this._updateValidated()
+    })
   }
 
   public setSchema(

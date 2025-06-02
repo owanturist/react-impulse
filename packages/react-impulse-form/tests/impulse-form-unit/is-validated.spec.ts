@@ -50,6 +50,38 @@ it("matches the type signature", () => {
   }>()
 })
 
+it("returns true on init without transform, validate, or schema", ({
+  scope,
+}) => {
+  const unit = ImpulseFormUnit("y")
+
+  expect(unit.isValidated(scope)).toBe(true)
+})
+
+it("returns true on init when transform", ({ scope }) => {
+  const unit = ImpulseFormUnit("y", {
+    transform: (input) => input,
+  })
+
+  expect(unit.isValidated(scope)).toBe(true)
+})
+
+it("returns false on init when validate", ({ scope }) => {
+  const unit = ImpulseFormUnit("y", {
+    validate: (input) => [null, input],
+  })
+
+  expect(unit.isValidated(scope)).toBe(false)
+})
+
+it("returns false on init when schema", ({ scope }) => {
+  const unit = ImpulseFormUnit("y", {
+    schema: z.string(),
+  })
+
+  expect(unit.isValidated(scope)).toBe(false)
+})
+
 describe.each([
   ["(scope)", isValidatedDefault],
   ["(scope, (concise) => concise)", isValidatedConcise],
