@@ -1,5 +1,13 @@
 # react-impulse-form
 
+## 0.10.1
+
+### Patch Changes
+
+- [#873](https://github.com/owanturist/react-impulse/pull/873) [`cde1f46`](https://github.com/owanturist/react-impulse/commit/cde1f4619702bfebe6f0c85f336f00617ea85f0b) Thanks [@owanturist](https://github.com/owanturist)! - Calling `ImpulseForm#reset()` updates the `isValidated` state according the `validateOn` strategy. Resolves [#797](https://github.com/owanturist/react-impulse/issues/797).
+
+- [#868](https://github.com/owanturist/react-impulse/pull/868) [`d48327e`](https://github.com/owanturist/react-impulse/commit/d48327e6ed48aa060f8c0ea80821a24555b83baf) Thanks [@dependabot](https://github.com/apps/dependabot)! - Bump @types/react from 19.1.5 to 19.1.6
+
 ## 0.10.0
 
 ### Minor Changes
