@@ -65,7 +65,7 @@ export abstract class ImpulseForm<
   // necessary for type inference
   protected readonly _params?: TParams
 
-  protected readonly _onFocus = new Emitter<[error: unknown]>()
+  private readonly _onFocus = new Emitter<[error: unknown]>()
 
   private readonly _onSubmit = new Emitter<
     [output: unknown],
@@ -105,6 +105,19 @@ export abstract class ImpulseForm<
     output: TParams["output.schema"],
   ): ReadonlyArray<void | Promise<unknown>> {
     return this._onSubmit._emit(output)
+  }
+
+  protected _getFocusInvalid(scope: Scope): null | VoidFunction {
+    // ignore if the focus handlers are not set
+    const error = this._onFocus._isEmpty() ? null : this.getError(scope)
+
+    if (error == null) {
+      return null
+    }
+
+    return () => {
+      this._onFocus._emit(error)
+    }
   }
 
   public onFocusWhenInvalid(

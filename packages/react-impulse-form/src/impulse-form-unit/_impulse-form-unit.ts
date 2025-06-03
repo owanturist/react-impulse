@@ -134,16 +134,7 @@ export class ImpulseFormUnit<
   }
 
   protected _getFocusFirstInvalid(scope: Scope): null | VoidFunction {
-    // ignore if the focus handlers are not set
-    const error = this._onFocus._isEmpty() ? null : this.getError(scope)
-
-    if (error == null) {
-      return null
-    }
-
-    return () => {
-      this._onFocus._emit(error)
-    }
+    return this._getFocusInvalid(scope)
   }
 
   // TODO add tests against _validated when cloning

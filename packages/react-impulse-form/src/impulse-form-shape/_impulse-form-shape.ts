@@ -102,7 +102,7 @@ export class ImpulseFormShape<
       }
     }
 
-    return null
+    return this._getFocusInvalid(scope)
   }
 
   protected _childOf(parent: null | ImpulseForm): ImpulseFormShape<TFields> {
