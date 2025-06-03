@@ -82,7 +82,7 @@ export class ImpulseFormList<
     })
   }
 
-  protected _submitWith(
+  protected override _submitWith(
     output: ImpulseFormListOutput<TElement>,
   ): ReadonlyArray<void | Promise<unknown>> {
     const promises = untrack(this._elements).flatMap((element, index) => {
@@ -92,16 +92,16 @@ export class ImpulseFormList<
     return [...super._submitWith(output), ...promises]
   }
 
-  protected _getFocusFirstInvalidValue(): VoidFunction | null {
-    for (const element of untrack(this._elements)) {
-      const focus = ImpulseForm._getFocusFirstInvalidValue(element)
+  protected override _getFocusFirstInvalid(scope: Scope): VoidFunction | null {
+    for (const element of this._elements.getValue(scope)) {
+      const focus = ImpulseForm._getFocusFirstInvalid(scope, element)
 
       if (focus != null) {
         return focus
       }
     }
 
-    return null
+    return super._getFocusFirstInvalid(scope)
   }
 
   protected _childOf(parent: null | ImpulseForm): ImpulseFormList<TElement> {

@@ -77,7 +77,7 @@ export class ImpulseFormShape<
     return acc
   }
 
-  protected _submitWith(
+  protected override _submitWith(
     output: ImpulseFormShapeOutput<TFields>,
   ): ReadonlyArray<void | Promise<unknown>> {
     const promises = Object.entries(this.fields).flatMap(([key, field]) => {
@@ -91,10 +91,10 @@ export class ImpulseFormShape<
     return [...super._submitWith(output), ...promises]
   }
 
-  protected _getFocusFirstInvalidValue(): VoidFunction | null {
+  protected override _getFocusFirstInvalid(scope: Scope): VoidFunction | null {
     for (const field of Object.values(this.fields)) {
       if (isImpulseForm(field)) {
-        const focus = ImpulseForm._getFocusFirstInvalidValue(field)
+        const focus = ImpulseForm._getFocusFirstInvalid(scope, field)
 
         if (focus != null) {
           return focus
@@ -102,7 +102,7 @@ export class ImpulseFormShape<
       }
     }
 
-    return null
+    return super._getFocusFirstInvalid(scope)
   }
 
   protected _childOf(parent: null | ImpulseForm): ImpulseFormShape<TFields> {

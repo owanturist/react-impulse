@@ -84,3 +84,97 @@ it("calls the only invalid", () => {
   expect(listener_1).toHaveBeenCalledExactlyOnceWith(["error1"])
   expect(listener_2).not.toHaveBeenCalled()
 })
+
+it("does not focus invalid without listener", ({ scope }) => {
+  const form = ImpulseFormList([
+    ImpulseFormUnit(1, { error: "err-1" }),
+    ImpulseFormUnit(2, { error: "err-2" }),
+  ])
+
+  const listener_1 = vi.fn()
+
+  form.getElements(scope).at(1)?.onFocusWhenInvalid(listener_1)
+
+  form.focusFirstInvalid()
+  expect(listener_1).toHaveBeenCalledExactlyOnceWith("err-2")
+})
+
+describe("with onFocusWhenInvalid()", () => {
+  it("does nothing when elements are empty", () => {
+    const form = ImpulseFormList([])
+    const listener_0 = vi.fn()
+
+    form.onFocusWhenInvalid(listener_0)
+    form.focusFirstInvalid()
+    expect(listener_0).not.toHaveBeenCalled()
+  })
+
+  it("does not call a listener when elements are not validated", () => {
+    const form = ImpulseFormList([
+      ImpulseFormUnit("", {
+        schema: z.string(),
+      }),
+    ])
+
+    const listener_0 = vi.fn()
+
+    form.onFocusWhenInvalid(listener_0)
+    form.focusFirstInvalid()
+    expect(listener_0).not.toHaveBeenCalled()
+  })
+
+  it("does not call a listener when elements are valid", () => {
+    const form = ImpulseFormList([
+      ImpulseFormUnit("valid", {
+        validateOn: "onInit",
+        schema: z.string().min(2),
+      }),
+    ])
+
+    const listener_0 = vi.fn()
+
+    form.onFocusWhenInvalid(listener_0)
+    form.focusFirstInvalid()
+    expect(listener_0).not.toHaveBeenCalled()
+  })
+
+  it("calls a listener when an element is not valid", () => {
+    const form = ImpulseFormList([
+      ImpulseFormUnit("", {
+        validateOn: "onInit",
+        schema: z.string().min(2),
+      }),
+    ])
+
+    const listener_0 = vi.fn()
+
+    form.onFocusWhenInvalid(listener_0)
+    form.focusFirstInvalid()
+    expect(listener_0).toHaveBeenCalledExactlyOnceWith([
+      ["String must contain at least 2 character(s)"],
+    ])
+  })
+
+  it("does not call a listener when an element is invalid and has own listener", ({
+    scope,
+  }) => {
+    const form = ImpulseFormList([
+      ImpulseFormUnit("", {
+        validateOn: "onInit",
+        schema: z.string().min(2),
+      }),
+    ])
+
+    const listener_0 = vi.fn()
+    const listener_1 = vi.fn()
+
+    form.onFocusWhenInvalid(listener_0)
+    form.getElements(scope).at(0)?.onFocusWhenInvalid(listener_1)
+    form.focusFirstInvalid()
+
+    expect(listener_0).not.toHaveBeenCalled()
+    expect(listener_1).toHaveBeenCalledExactlyOnceWith([
+      "String must contain at least 2 character(s)",
+    ])
+  })
+})

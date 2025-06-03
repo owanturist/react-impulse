@@ -168,3 +168,81 @@ describe("fields.*.focusFirstInvalid()", () => {
     expect(listener_3_2).not.toHaveBeenCalled()
   })
 })
+
+describe("with onFocusWhenInvalid()", () => {
+  it("does nothing when fields are empty", () => {
+    const form = ImpulseFormShape({})
+    const listener_0 = vi.fn()
+
+    form.onFocusWhenInvalid(listener_0)
+    form.focusFirstInvalid()
+    expect(listener_0).not.toHaveBeenCalled()
+  })
+
+  it("does not call a listener when fields are not validated", () => {
+    const form = ImpulseFormShape({
+      _1: ImpulseFormUnit("", {
+        schema: z.string(),
+      }),
+    })
+
+    const listener_0 = vi.fn()
+
+    form.onFocusWhenInvalid(listener_0)
+    form.focusFirstInvalid()
+    expect(listener_0).not.toHaveBeenCalled()
+  })
+
+  it("does not call a listener when fields are valid", () => {
+    const form = ImpulseFormShape({
+      _1: ImpulseFormUnit("valid", {
+        validateOn: "onInit",
+        schema: z.string().min(2),
+      }),
+    })
+
+    const listener_0 = vi.fn()
+
+    form.onFocusWhenInvalid(listener_0)
+    form.focusFirstInvalid()
+    expect(listener_0).not.toHaveBeenCalled()
+  })
+
+  it("calls a listener when a field is not valid", () => {
+    const form = ImpulseFormShape({
+      _1: ImpulseFormUnit("", {
+        validateOn: "onInit",
+        schema: z.string().min(2),
+      }),
+    })
+
+    const listener_0 = vi.fn()
+
+    form.onFocusWhenInvalid(listener_0)
+    form.focusFirstInvalid()
+    expect(listener_0).toHaveBeenCalledExactlyOnceWith({
+      _1: ["String must contain at least 2 character(s)"],
+    })
+  })
+
+  it("does not call a listener when a field is invalid and has own listener", () => {
+    const form = ImpulseFormShape({
+      _1: ImpulseFormUnit("", {
+        validateOn: "onInit",
+        schema: z.string().min(2),
+      }),
+    })
+
+    const listener_0 = vi.fn()
+    const listener_1 = vi.fn()
+
+    form.onFocusWhenInvalid(listener_0)
+    form.fields._1.onFocusWhenInvalid(listener_1)
+    form.focusFirstInvalid()
+
+    expect(listener_0).not.toHaveBeenCalled()
+    expect(listener_1).toHaveBeenCalledExactlyOnceWith([
+      "String must contain at least 2 character(s)",
+    ])
+  })
+})

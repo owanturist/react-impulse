@@ -3,14 +3,7 @@ import { isNull } from "~/tools/is-null"
 import { params } from "~/tools/params"
 import { resolveSetter } from "~/tools/setter"
 
-import {
-  type Compare,
-  Impulse,
-  type Scope,
-  batch,
-  untrack,
-} from "../dependencies"
-import { Emitter } from "../emitter"
+import { type Compare, Impulse, type Scope, batch } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 import type { Result } from "../result"
 import {
@@ -57,8 +50,6 @@ export class ImpulseFormUnit<
   "error.schema": null | TError
   "error.schema.verbose": null | TError
 }> {
-  private readonly _onFocus = new Emitter<[error: TError]>()
-
   private readonly _validated = Impulse(false)
 
   public constructor(
@@ -140,20 +131,6 @@ export class ImpulseFormUnit<
     }
 
     return [null, null]
-  }
-
-  protected _getFocusFirstInvalidValue(): null | VoidFunction {
-    const error = this._onFocus._isEmpty()
-      ? null
-      : untrack((scope) => this.getError(scope))
-
-    if (error == null) {
-      return null
-    }
-
-    return () => {
-      this._onFocus._emit(error)
-    }
   }
 
   // TODO add tests against _validated when cloning
@@ -401,9 +378,5 @@ export class ImpulseFormUnit<
         this._initialSource.getValue(scope)?.setInitial(setter)
       }
     })
-  }
-
-  public onFocusWhenInvalid(onFocus: (error: TError) => void): VoidFunction {
-    return this._onFocus._subscribe(onFocus)
   }
 }

@@ -23,6 +23,7 @@
     "jsx": "react",
     "types": ["vitest/globals"],
     "verbatimModuleSyntax": true,
+    "noImplicitOverride": true,
     "baseUrl": ".",
     "paths": {
       "~/tools/*": ["./tools/*"]

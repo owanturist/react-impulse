@@ -1,7 +1,6 @@
 import { isDefined } from "~/tools/is-defined"
 import { isNull } from "~/tools/is-null"
 import { isTruthy } from "~/tools/is-truthy"
-import { isUndefined } from "~/tools/is-undefined"
 
 import { Impulse, type Scope, batch, untrack } from "../dependencies"
 import { Emitter } from "../emitter"
@@ -37,10 +36,11 @@ export abstract class ImpulseForm<
     return form._submitWith(output)
   }
 
-  protected static _getFocusFirstInvalidValue(
+  protected static _getFocusFirstInvalid(
+    scope: Scope,
     form: ImpulseForm,
   ): null | VoidFunction {
-    return form._getFocusFirstInvalidValue()
+    return form._getFocusFirstInvalid(scope)
   }
 
   protected static _setValidated(
@@ -65,6 +65,8 @@ export abstract class ImpulseForm<
   // necessary for type inference
   protected readonly _params?: TParams
 
+  private readonly _onFocus = new Emitter<[error: unknown]>()
+
   private readonly _onSubmit = new Emitter<
     [output: unknown],
     void | Promise<unknown>
@@ -78,8 +80,6 @@ export abstract class ImpulseForm<
   protected constructor(_root: null | ImpulseForm) {
     this._root = _root ?? this
   }
-
-  protected abstract _getFocusFirstInvalidValue(): null | VoidFunction
 
   protected abstract _childOf(parent: null | ImpulseForm): ImpulseForm<TParams>
 
@@ -103,6 +103,25 @@ export abstract class ImpulseForm<
     output: TParams["output.schema"],
   ): ReadonlyArray<void | Promise<unknown>> {
     return this._onSubmit._emit(output)
+  }
+
+  protected _getFocusFirstInvalid(scope: Scope): null | VoidFunction {
+    // ignore if the focus handlers are not set
+    const error = this._onFocus._isEmpty() ? null : this.getError(scope)
+
+    if (error == null) {
+      return null
+    }
+
+    return () => {
+      this._onFocus._emit(error)
+    }
+  }
+
+  public onFocusWhenInvalid(
+    onFocus: (error: TParams["error.schema.verbose"]) => void,
+  ): VoidFunction {
+    return this._onFocus._subscribe(onFocus)
   }
 
   public getSubmitCount(scope: Scope): number {
@@ -135,7 +154,7 @@ export abstract class ImpulseForm<
       return undefined
     })
 
-    if (isUndefined(promises)) {
+    if (!promises) {
       this._root.focusFirstInvalid()
     } else if (promises.length > 0) {
       this._root._submittingCount.setValue((count) => count + 1)
@@ -147,7 +166,9 @@ export abstract class ImpulseForm<
   }
 
   public focusFirstInvalid(): void {
-    this._getFocusFirstInvalidValue()?.()
+    batch((scope) => {
+      this._getFocusFirstInvalid(scope)?.()
+    })
   }
 
   public clone(): ImpulseForm<TParams> {
