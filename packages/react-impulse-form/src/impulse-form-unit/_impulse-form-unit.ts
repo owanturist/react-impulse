@@ -3,13 +3,7 @@ import { isNull } from "~/tools/is-null"
 import { params } from "~/tools/params"
 import { resolveSetter } from "~/tools/setter"
 
-import {
-  type Compare,
-  Impulse,
-  type Scope,
-  batch,
-  untrack,
-} from "../dependencies"
+import { type Compare, Impulse, type Scope, batch } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 import type { Result } from "../result"
 import {
@@ -139,10 +133,9 @@ export class ImpulseFormUnit<
     return [null, null]
   }
 
-  protected _getFocusFirstInvalid(): null | VoidFunction {
-    const error = this._onFocus._isEmpty()
-      ? null
-      : untrack((scope) => this.getError(scope))
+  protected _getFocusFirstInvalid(scope: Scope): null | VoidFunction {
+    // ignore if the focus handlers are not set
+    const error = this._onFocus._isEmpty() ? null : this.getError(scope)
 
     if (error == null) {
       return null

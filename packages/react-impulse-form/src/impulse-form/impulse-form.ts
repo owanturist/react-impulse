@@ -37,9 +37,10 @@ export abstract class ImpulseForm<
   }
 
   protected static _getFocusFirstInvalid(
+    scope: Scope,
     form: ImpulseForm,
   ): null | VoidFunction {
-    return form._getFocusFirstInvalid()
+    return form._getFocusFirstInvalid(scope)
   }
 
   protected static _setValidated(
@@ -80,7 +81,7 @@ export abstract class ImpulseForm<
     this._root = _root ?? this
   }
 
-  protected abstract _getFocusFirstInvalid(): null | VoidFunction
+  protected abstract _getFocusFirstInvalid(scope: Scope): null | VoidFunction
 
   protected abstract _childOf(parent: null | ImpulseForm): ImpulseForm<TParams>
 
@@ -154,7 +155,9 @@ export abstract class ImpulseForm<
   }
 
   public focusFirstInvalid(): void {
-    this._getFocusFirstInvalid()?.()
+    batch((scope) => {
+      this._getFocusFirstInvalid(scope)?.()
+    })
   }
 
   public clone(): ImpulseForm<TParams> {

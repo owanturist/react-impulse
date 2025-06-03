@@ -92,9 +92,9 @@ export class ImpulseFormList<
     return [...super._submitWith(output), ...promises]
   }
 
-  protected _getFocusFirstInvalid(): VoidFunction | null {
-    for (const element of untrack(this._elements)) {
-      const focus = ImpulseForm._getFocusFirstInvalid(element)
+  protected _getFocusFirstInvalid(scope: Scope): VoidFunction | null {
+    for (const element of this._elements.getValue(scope)) {
+      const focus = ImpulseForm._getFocusFirstInvalid(scope, element)
 
       if (focus != null) {
         return focus

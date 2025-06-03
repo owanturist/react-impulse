@@ -91,10 +91,10 @@ export class ImpulseFormShape<
     return [...super._submitWith(output), ...promises]
   }
 
-  protected _getFocusFirstInvalid(): VoidFunction | null {
+  protected _getFocusFirstInvalid(scope: Scope): VoidFunction | null {
     for (const field of Object.values(this.fields)) {
       if (isImpulseForm(field)) {
-        const focus = ImpulseForm._getFocusFirstInvalid(field)
+        const focus = ImpulseForm._getFocusFirstInvalid(scope, field)
 
         if (focus != null) {
           return focus
