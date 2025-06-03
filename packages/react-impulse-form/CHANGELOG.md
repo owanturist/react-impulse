@@ -1,5 +1,17 @@
 # react-impulse-form
 
+## 0.11.0
+
+### Minor Changes
+
+- [#875](https://github.com/owanturist/react-impulse/pull/875) [`4751d23`](https://github.com/owanturist/react-impulse/commit/4751d2346f325c788b8640f2a97a912edb7b75fc) Thanks [@owanturist](https://github.com/owanturist)! - Do not use `NonNullable` for output and error types in `FormImpulseUnit` fabric.
+
+- [#877](https://github.com/owanturist/react-impulse/pull/877) [`0d7f207`](https://github.com/owanturist/react-impulse/commit/0d7f20748acbc6b9dccaea3d005e82c5dc81909b) Thanks [@owanturist](https://github.com/owanturist)! - Introduce `transform` option to `ImpulseFormUnit` fabric allowing to transform the form output without introducing a validation error.
+
+- [#878](https://github.com/owanturist/react-impulse/pull/878) [`0e6bef2`](https://github.com/owanturist/react-impulse/commit/0e6bef277c8dc44d367674f775b7141c14a6248a) Thanks [@owanturist](https://github.com/owanturist)! - The `ImpulseForm#onFocusWhenInvalid` method has been implemented, so it is now possible to attach a listener to any form, not only `ImpulseFormUnit`. It focuses on the furthest first invalid field with the `onFocus` listener attached to it.
+
+- [#875](https://github.com/owanturist/react-impulse/pull/875) [`4751d23`](https://github.com/owanturist/react-impulse/commit/4751d2346f325c788b8640f2a97a912edb7b75fc) Thanks [@owanturist](https://github.com/owanturist)! - The `Result` type does not narrow nullable error type anymore.
+
 ## 0.10.1
 
 ### Patch Changes
