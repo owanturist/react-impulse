@@ -56,7 +56,7 @@ export abstract class ImpulseForm<
     select: (
       concise: TParams["flag.schema"],
       verbose: TParams["flag.schema.verbose"],
-      dirty: TParams["flag.schema.verbose"],
+      hardcoded: TParams["flag.schema.verbose"],
     ) => TResult,
   ): TResult {
     return form._isDirty(scope, select)
@@ -95,7 +95,7 @@ export abstract class ImpulseForm<
     select: (
       concise: TParams["flag.schema"],
       verbose: TParams["flag.schema.verbose"],
-      dirty: TParams["flag.schema.verbose"],
+      hardcoded: TParams["flag.schema.verbose"],
     ) => TResult,
   ): TResult
 
@@ -198,7 +198,7 @@ export abstract class ImpulseForm<
       verbose: TParams["flag.schema.verbose"],
     ) => boolean = isTruthy,
   ): boolean {
-    return this._isDirty(scope, select)
+    return this._isDirty(scope, (concise, verbose) => select(concise, verbose))
   }
 
   public abstract getError(scope: Scope): TParams["error.schema"]

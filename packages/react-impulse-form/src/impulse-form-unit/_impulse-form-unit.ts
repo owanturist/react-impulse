@@ -175,7 +175,7 @@ export class ImpulseFormUnit<
 
   protected _isDirty<TResult>(
     scope: Scope,
-    select: (concise: boolean, verbose: boolean, dirty: boolean) => TResult,
+    select: (concise: boolean, verbose: boolean, hardcoded: boolean) => TResult,
   ): TResult {
     const initial = this.getInitial(scope)
     const input = this.getInput(scope)
