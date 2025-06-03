@@ -5,9 +5,15 @@ import { isStrictEqual } from "~/tools/is-strict-equal"
 
 import { type Compare, Impulse, type Scope, untrack } from "../dependencies"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
-import { type ZodLikeSchema, zodLikeParse } from "../zod-like-schema"
+import type { ZodLikeSchema } from "../zod-like-schema"
 
 import { ImpulseFormUnit as ImpulseFormUnitImpl } from "./_impulse-form-unit"
+import {
+  type ImpulseFormUnitTransform,
+  transformFromSchema,
+  transformFromTransformer,
+  transformFromValidator,
+} from "./_impulse-form-unit-transform"
 import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer"
 import type { ImpulseFormUnitValidator } from "./impulse-form-unit-validator"
 
@@ -179,18 +185,8 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       Impulse(inputOrInitial, { compare: isInputEqual }),
       Impulse<
         | undefined
-        | {
-            _transform: boolean
-            _validate: ImpulseFormUnitValidator<
-              TInput,
-              ReadonlyArray<string>,
-              TOutput
-            >
-          }
-      >({
-        _transform: false,
-        _validate: (_input) => zodLikeParse(options.schema, _input),
-      }),
+        | ImpulseFormUnitTransform<TInput, ReadonlyArray<string>, TOutput>
+      >(transformFromSchema(options.schema)),
       isInputEqual,
       isInputDirty,
     )
@@ -210,13 +206,9 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       Impulse(isExplicitInitial),
       Impulse(initial, { compare: isInputEqual }),
       Impulse(inputOrInitial, { compare: isInputEqual }),
-      Impulse<
-        | undefined
-        | {
-            _transform: boolean
-            _validate: ImpulseFormUnitValidator<TInput, TError, TOutput>
-          }
-      >({ _transform: false, _validate: options.validate }),
+      Impulse<undefined | ImpulseFormUnitTransform<TInput, TError, TOutput>>(
+        transformFromValidator(options.validate),
+      ),
       isInputEqual,
       isInputDirty,
     )
@@ -232,16 +224,9 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       Impulse(isExplicitInitial),
       Impulse(initial, { compare: isInputEqual }),
       Impulse(inputOrInitial, { compare: isInputEqual }),
-      Impulse<
-        | undefined
-        | {
-            _transform: boolean
-            _validate: ImpulseFormUnitValidator<TInput, TError, TOutput>
-          }
-      >({
-        _transform: true,
-        _validate: (_input) => [null, options.transform(_input)],
-      }),
+      Impulse<undefined | ImpulseFormUnitTransform<TInput, TError, TOutput>>(
+        transformFromTransformer(options.transform),
+      ),
       isInputEqual,
       isInputDirty,
     )
