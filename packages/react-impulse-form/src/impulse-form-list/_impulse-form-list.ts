@@ -101,7 +101,7 @@ export class ImpulseFormList<
       }
     }
 
-    return null
+    return this._getFocusInvalid(scope)
   }
 
   protected _childOf(parent: null | ImpulseForm): ImpulseFormList<TElement> {
