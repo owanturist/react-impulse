@@ -14,6 +14,37 @@ it("creates ImpulseFormUnit without validation", ({ scope }) => {
   expect(value.getOutput(scope)).toBe(1)
 })
 
+it("creates ImpulseFormUnit with same type transformer", ({ scope }) => {
+  const value = ImpulseFormUnit("", {
+    transform: (input) => input.trim(),
+  })
+
+  expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<string>>()
+  expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<string, null, string>>()
+
+  expect(value.getInput(scope)).toBe("")
+  expect(value.getOutput(scope)).toBe("")
+
+  value.setInput(" 123 ")
+  expect(value.getInput(scope)).toBe(" 123 ")
+  expect(value.getOutput(scope)).toBe("123")
+})
+
+it("creates ImpulseFormUnit with converting type transformer", ({ scope }) => {
+  const value = ImpulseFormUnit("", {
+    transform: (input) => input.trim().length,
+  })
+
+  expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<string, null, number>>()
+
+  expect(value.getInput(scope)).toBe("")
+  expect(value.getOutput(scope)).toBe(0)
+
+  value.setInput(" 123 ")
+  expect(value.getInput(scope)).toBe(" 123 ")
+  expect(value.getOutput(scope)).toBe(3)
+})
+
 it("creates ImpulseFormUnit with same type validator", ({ scope }) => {
   const value = ImpulseFormUnit("", {
     validateOn: "onInit",

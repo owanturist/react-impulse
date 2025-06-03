@@ -22,9 +22,15 @@ import {
 } from "../validate-strategy"
 import { type ZodLikeSchema, zodLikeParse } from "../zod-like-schema"
 
+import {
+  type ImpulseFormUnitTransform,
+  transformFromTransformer,
+  transformFromValidator,
+} from "./_impulse-form-unit-transform"
 import type { ImpulseFormUnitErrorSetter } from "./impulse-form-unit-error-setter"
 import type { ImpulseFormUnitFlagSetter } from "./impulse-form-unit-flag-setter"
 import type { ImpulseFormUnitInputSetter } from "./impulse-form-unit-input-setter"
+import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer"
 import type { ImpulseFormUnitValidateOnSetter } from "./impulse-form-unit-validate-on-setter"
 import type { ImpulseFormUnitValidator } from "./impulse-form-unit-validator"
 
@@ -67,11 +73,8 @@ export class ImpulseFormUnit<
     private readonly _isExplicitInitial: Impulse<boolean>,
     private readonly _initial: Impulse<TInput>,
     private readonly _input: Impulse<TInput>,
-    private readonly _validator: Impulse<
-      | undefined
-      | {
-          _validate: ImpulseFormUnitValidator<TInput, TError, TOutput>
-        }
+    private readonly _transform: Impulse<
+      undefined | ImpulseFormUnitTransform<TInput, TError, TOutput>
     >,
     private readonly _isInputEqual: Compare<TInput>,
     private readonly _isInputDirty: Compare<TInput>,
@@ -82,10 +85,13 @@ export class ImpulseFormUnit<
 
   private _updateValidated(override = false): void {
     this._validated.setValue((isValidated, scope) => {
-      if (
-        (!override && isValidated) ||
-        this._validator.getValue(scope) == null
-      ) {
+      if (!override && isValidated) {
+        return true
+      }
+
+      const transformer = this._transform.getValue(scope)
+
+      if (!transformer || transformer._transformer) {
         return true
       }
 
@@ -117,13 +123,13 @@ export class ImpulseFormUnit<
     }
 
     const input = this.getInput(scope)
-    const validator = this._validator.getValue(scope)
+    const transform = this._transform.getValue(scope)
 
-    if (!validator) {
+    if (!transform) {
       return [null, input as unknown as TOutput]
     }
 
-    const [error, output] = validator._validate(this.getInput(scope))
+    const [error, output] = transform._validator(this.getInput(scope))
 
     if (isNull(error)) {
       return [null, output]
@@ -163,7 +169,7 @@ export class ImpulseFormUnit<
       this._isExplicitInitial.clone(),
       this._initial.clone(),
       this._input.clone(),
-      this._validator.clone(),
+      this._transform.clone(),
       this._isInputEqual,
       this._isInputDirty,
     )
@@ -296,7 +302,16 @@ export class ImpulseFormUnit<
   public setValidator(
     validator: ImpulseFormUnitValidator<TInput, TError, TOutput>,
   ): void {
-    this._validator.setValue({ _validate: validator })
+    this._transform.setValue(transformFromValidator(validator))
+  }
+
+  public setTransform(
+    transformer: ImpulseFormUnitTransformer<TInput, TOutput>,
+  ): void {
+    batch(() => {
+      this._transform.setValue(transformFromTransformer(transformer))
+      this._updateValidated()
+    })
   }
 
   public setSchema(
