@@ -81,8 +81,6 @@ export abstract class ImpulseForm<
     this._root = _root ?? this
   }
 
-  protected abstract _getFocusFirstInvalid(scope: Scope): null | VoidFunction
-
   protected abstract _childOf(parent: null | ImpulseForm): ImpulseForm<TParams>
 
   protected abstract _setInitial(
@@ -107,7 +105,7 @@ export abstract class ImpulseForm<
     return this._onSubmit._emit(output)
   }
 
-  protected _getFocusInvalid(scope: Scope): null | VoidFunction {
+  protected _getFocusFirstInvalid(scope: Scope): null | VoidFunction {
     // ignore if the focus handlers are not set
     const error = this._onFocus._isEmpty() ? null : this.getError(scope)
 

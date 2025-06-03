@@ -133,10 +133,6 @@ export class ImpulseFormUnit<
     return [null, null]
   }
 
-  protected _getFocusFirstInvalid(scope: Scope): null | VoidFunction {
-    return this._getFocusInvalid(scope)
-  }
-
   // TODO add tests against _validated when cloning
   protected _childOf(
     parent: null | ImpulseForm,
