@@ -37,10 +37,10 @@ export abstract class ImpulseForm<
     return form._submitWith(output)
   }
 
-  protected static _getFocusFirstInvalidValue(
+  protected static _getFocusFirstInvalid(
     form: ImpulseForm,
   ): null | VoidFunction {
-    return form._getFocusFirstInvalidValue()
+    return form._getFocusFirstInvalid()
   }
 
   protected static _setValidated(
@@ -65,6 +65,8 @@ export abstract class ImpulseForm<
   // necessary for type inference
   protected readonly _params?: TParams
 
+  protected readonly _onFocus = new Emitter<[error: unknown]>()
+
   private readonly _onSubmit = new Emitter<
     [output: unknown],
     void | Promise<unknown>
@@ -79,7 +81,7 @@ export abstract class ImpulseForm<
     this._root = _root ?? this
   }
 
-  protected abstract _getFocusFirstInvalidValue(): null | VoidFunction
+  protected abstract _getFocusFirstInvalid(): null | VoidFunction
 
   protected abstract _childOf(parent: null | ImpulseForm): ImpulseForm<TParams>
 
@@ -103,6 +105,12 @@ export abstract class ImpulseForm<
     output: TParams["output.schema"],
   ): ReadonlyArray<void | Promise<unknown>> {
     return this._onSubmit._emit(output)
+  }
+
+  public onFocusWhenInvalid(
+    onFocus: (error: TParams["error.schema.verbose"]) => void,
+  ): VoidFunction {
+    return this._onFocus._subscribe(onFocus)
   }
 
   public getSubmitCount(scope: Scope): number {
@@ -147,7 +155,7 @@ export abstract class ImpulseForm<
   }
 
   public focusFirstInvalid(): void {
-    this._getFocusFirstInvalidValue()?.()
+    this._getFocusFirstInvalid()?.()
   }
 
   public clone(): ImpulseForm<TParams> {
