@@ -84,3 +84,17 @@ it("calls the only invalid", () => {
   expect(listener_1).toHaveBeenCalledExactlyOnceWith(["error1"])
   expect(listener_2).not.toHaveBeenCalled()
 })
+
+it("does not focus invalid without listener", ({ scope }) => {
+  const form = ImpulseFormList([
+    ImpulseFormUnit(1, { error: "err-1" }),
+    ImpulseFormUnit(2, { error: "err-2" }),
+  ])
+
+  const listener_1 = vi.fn()
+
+  form.getElements(scope).at(1)?.onFocusWhenInvalid(listener_1)
+
+  form.focusFirstInvalid()
+  expect(listener_1).toHaveBeenCalledExactlyOnceWith("err-2")
+})

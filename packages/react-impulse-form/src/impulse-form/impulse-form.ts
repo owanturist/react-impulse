@@ -1,7 +1,6 @@
 import { isDefined } from "~/tools/is-defined"
 import { isNull } from "~/tools/is-null"
 import { isTruthy } from "~/tools/is-truthy"
-import { isUndefined } from "~/tools/is-undefined"
 
 import { Impulse, type Scope, batch, untrack } from "../dependencies"
 import { Emitter } from "../emitter"
@@ -143,7 +142,7 @@ export abstract class ImpulseForm<
       return undefined
     })
 
-    if (isUndefined(promises)) {
+    if (!promises) {
       this._root.focusFirstInvalid()
     } else if (promises.length > 0) {
       this._root._submittingCount.setValue((count) => count + 1)
