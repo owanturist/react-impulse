@@ -137,7 +137,7 @@ export class ImpulseFormShape<
     select: (
       concise: ImpulseFormShapeFlag<TFields>,
       verbose: ImpulseFormShapeFlagVerbose<TFields>,
-      dirty: ImpulseFormShapeFlagVerbose<TFields>,
+      hardcoded: ImpulseFormShapeFlagVerbose<TFields>,
     ) => TResult,
   ): TResult {
     const keys = Object.keys(this.fields)
@@ -147,13 +147,13 @@ export class ImpulseFormShape<
     // make it easier for TS
     const isDirtyConcise = {} as Record<string, unknown>
     const isDirtyVerbose = {} as Record<string, unknown>
-    const isDirtyDirty = {} as Record<string, unknown>
+    const isDirtyHardcoded = {} as Record<string, unknown>
 
     for (const key of keys) {
       const field = this.fields[key]
 
       if (isImpulseForm(field)) {
-        const [concise, verbose, dirty] = ImpulseForm._isDirty(
+        const [concise, verbose, hardcoded] = ImpulseForm._isDirty(
           scope,
           field,
           params,
@@ -163,7 +163,7 @@ export class ImpulseFormShape<
         isNoneDirty = isNoneDirty && concise === false
         isDirtyConcise[key] = concise
         isDirtyVerbose[key] = verbose
-        isDirtyDirty[key] = dirty
+        isDirtyHardcoded[key] = hardcoded
       }
     }
 
@@ -174,7 +174,7 @@ export class ImpulseFormShape<
           ? true
           : (isDirtyConcise as unknown as ImpulseFormShapeFlag<TFields>),
       isDirtyVerbose as unknown as ImpulseFormShapeFlagVerbose<TFields>,
-      isDirtyDirty as unknown as ImpulseFormShapeFlagVerbose<TFields>,
+      isDirtyHardcoded as unknown as ImpulseFormShapeFlagVerbose<TFields>,
     )
   }
 
