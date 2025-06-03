@@ -140,26 +140,29 @@ export class ImpulseFormList<
     select: (
       concise: ImpulseFormListFlag<TElement>,
       verbose: ImpulseFormListFlagVerbose<TElement>,
-      dirty: ImpulseFormListFlagVerbose<TElement>,
+      hardcoded: ImpulseFormListFlagVerbose<TElement>,
     ) => TResult,
   ): TResult {
     const elements = this._elements.getValue(scope)
     const initialElements = this._initialElements.getValue(scope)
-    const minLength = Math.min(elements.length, initialElements.length)
+    const overlappingElementsCount = Math.min(
+      elements.length,
+      initialElements.length,
+    )
 
-    const [concise, verbose, dirty] = zipMap(
+    const [concise, verbose, hardcoded] = zipMap(
       // the result should always include the longer array
       [...elements, ...initialElements.slice(elements.length)],
       (form, index) => {
         // return actual dirty state as long as iterates over elements
-        if (index < minLength) {
+        if (index < overlappingElementsCount) {
           return ImpulseForm._isDirty(scope, form, params)
         }
 
         // otherwise, fallback to hardcoded verbose dirty state
-        const dirt = ImpulseForm._isDirty(scope, form, params._third)
+        const hardcode = ImpulseForm._isDirty(scope, form, params._third)
 
-        return [true, dirt, dirt]
+        return [true, hardcode, hardcode]
       },
     ) as [
       Exclude<ImpulseFormListFlag<TElement>, boolean>,
@@ -168,14 +171,14 @@ export class ImpulseFormList<
     ]
 
     if (concise.every(isFalse)) {
-      return select(false, verbose, dirty)
+      return select(false, verbose, hardcoded)
     }
 
     if (concise.every(isTrue)) {
-      return select(true, verbose, dirty)
+      return select(true, verbose, hardcoded)
     }
 
-    return select(concise, verbose, dirty)
+    return select(concise, verbose, hardcoded)
   }
 
   public getElements(scope: Scope): ReadonlyArray<TElement>
