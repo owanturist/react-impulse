@@ -1,4 +1,3 @@
-import { hasProperty } from "~/tools/has-property"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
 import { params } from "~/tools/params"
@@ -72,10 +71,8 @@ export class ImpulseFormUnit<
     private readonly _validator: Impulse<
       | undefined
       | {
+          _transform: boolean
           _validate: ImpulseFormUnitValidator<TInput, TError, TOutput>
-        }
-      | {
-          _transform: ImpulseFormUnitTransformer<TInput, TOutput>
         }
     >,
     private readonly _isInputEqual: Compare<TInput>,
@@ -92,7 +89,7 @@ export class ImpulseFormUnit<
       }
       const validator = this._validator.getValue(scope)
 
-      if (validator == null || hasProperty(validator, "_transform")) {
+      if (validator == null || validator._transform) {
         return true
       }
 
@@ -128,10 +125,6 @@ export class ImpulseFormUnit<
 
     if (!validator) {
       return [null, input as unknown as TOutput]
-    }
-
-    if (hasProperty(validator, "_transform")) {
-      return [null, validator._transform(input) as TOutput]
     }
 
     const [error, output] = validator._validate(this.getInput(scope))
@@ -307,14 +300,17 @@ export class ImpulseFormUnit<
   public setValidator(
     validator: ImpulseFormUnitValidator<TInput, TError, TOutput>,
   ): void {
-    this._validator.setValue({ _validate: validator })
+    this._validator.setValue({ _transform: false, _validate: validator })
   }
 
   public setTransform(
     transformer: ImpulseFormUnitTransformer<TInput, TOutput>,
   ): void {
     batch(() => {
-      this._validator.setValue({ _transform: transformer })
+      this._validator.setValue({
+        _transform: true,
+        _validate: (input) => [null, transformer(input)],
+      })
       this._updateValidated()
     })
   }

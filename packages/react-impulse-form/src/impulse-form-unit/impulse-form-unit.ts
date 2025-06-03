@@ -180,16 +180,15 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       Impulse<
         | undefined
         | {
+            _transform: boolean
             _validate: ImpulseFormUnitValidator<
               TInput,
               ReadonlyArray<string>,
               TOutput
             >
           }
-        | {
-            _transform: ImpulseFormUnitTransformer<TInput, TOutput>
-          }
       >({
+        _transform: false,
         _validate: (_input) => zodLikeParse(options.schema, _input),
       }),
       isInputEqual,
@@ -214,12 +213,10 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       Impulse<
         | undefined
         | {
+            _transform: boolean
             _validate: ImpulseFormUnitValidator<TInput, TError, TOutput>
           }
-        | {
-            _transform: ImpulseFormUnitTransformer<TInput, TOutput>
-          }
-      >({ _validate: options.validate }),
+      >({ _transform: false, _validate: options.validate }),
       isInputEqual,
       isInputDirty,
     )
@@ -238,12 +235,13 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       Impulse<
         | undefined
         | {
+            _transform: boolean
             _validate: ImpulseFormUnitValidator<TInput, TError, TOutput>
           }
-        | {
-            _transform: ImpulseFormUnitTransformer<TInput, TOutput>
-          }
-      >({ _transform: options.transform }),
+      >({
+        _transform: true,
+        _validate: (_input) => [null, options.transform(_input)],
+      }),
       isInputEqual,
       isInputDirty,
     )
