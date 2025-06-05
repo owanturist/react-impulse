@@ -29,5 +29,5 @@
       "~/tools/*": ["./tools/*"]
     }
   },
-  "include": ["./*.ts", "./*.mts"]
+  "include": ["./*.ts", "./tools/**/*.ts"]
 }
