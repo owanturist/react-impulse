@@ -62,8 +62,8 @@ export abstract class ImpulseForm<
     batch((scope) => {
       const initial = this._spec._inputFromSetter(
         setter,
-        () => this.getInput(scope),
         () => this.getInitial(scope),
+        () => this.getInput(scope),
       )
 
       this._state()._initial.setValue(initial)

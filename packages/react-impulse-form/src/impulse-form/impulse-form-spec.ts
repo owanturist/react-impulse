@@ -3,6 +3,14 @@ import type { Compare } from "../dependencies"
 import type { ImpulseForm } from "./impulse-form"
 import type { ImpulseFormParams } from "./impulse-form-params"
 
+export interface ImpulseFormSpecPatch<TParams extends ImpulseFormParams> {
+  _input: (input: TParams["input.schema"]) => TParams["input.schema"]
+  _initial: (initial: TParams["input.schema"]) => TParams["input.schema"]
+  _error: (
+    error: null | TParams["error.schema.verbose"],
+  ) => null | TParams["error.schema.verbose"]
+}
+
 export interface ImpulseFormSpec<TParams extends ImpulseFormParams> {
   _isOutputEqual: Compare<null | TParams["output.schema"]>
 
@@ -21,6 +29,10 @@ export interface ImpulseFormSpec<TParams extends ImpulseFormParams> {
     first: () => TParams["input.schema"],
     second: () => TParams["input.schema"],
   ): TParams["input.schema"]
+
+  _update(
+    patch: Partial<ImpulseFormSpecPatch<TParams>>,
+  ): ImpulseFormSpec<TParams>
 
   _create(): ImpulseForm<TParams>
 }
