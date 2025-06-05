@@ -8,4 +8,6 @@ export interface ImpulseFormState<TParams extends ImpulseFormParams> {
   _initial: Impulse<TParams["input.schema"]>
 
   _input: Impulse<TParams["input.schema"]>
+
+  _error: Impulse<TParams["error.schema.verbose"]>
 }

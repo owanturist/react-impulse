@@ -1,9 +1,12 @@
 import { isFunction } from "~/tools/is-function"
 import { Lazy } from "~/tools/lazy"
-import type { Option } from "~/tools/option"
+import { type Option, Some } from "~/tools/option"
 
 import { type Compare, Impulse, untrack } from "../dependencies"
-import type { ImpulseFormSpec } from "../impulse-form/impulse-form-spec"
+import type {
+  ImpulseFormSpec,
+  ImpulseFormSpecPatch,
+} from "../impulse-form/impulse-form-spec"
 
 import { ImpulseFormUnit } from "./_impulse-form-unit"
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
@@ -38,6 +41,34 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
     second: () => TInput,
   ): TInput {
     return isFunction(setter) ? setter(first(), second()) : setter
+  }
+
+  public _update({
+    _input,
+    _initial,
+    _error,
+  }: Partial<
+    ImpulseFormSpecPatch<ImpulseFormUnitParams<TInput, TError, TOutput>>
+  >): ImpulseFormUnitSpec<TInput, TError, TOutput> {
+    const input = _input ? _input(this._input) : this._input
+
+    const initial = _initial
+      ? Some(_initial(this._initial._getOrElse(input)))
+      : this._initial
+
+    const error = _error
+      ? Some(_error(this._error._getOrElse(null)))
+      : this._error
+
+    return new ImpulseFormUnitSpec(
+      input,
+      initial,
+      error,
+      this._transform,
+      this._isInputEqual,
+      this._isOutputEqual,
+      this._isErrorEqual,
+    )
   }
 
   public _create(): ImpulseFormUnit<TInput, TError, TOutput> {
