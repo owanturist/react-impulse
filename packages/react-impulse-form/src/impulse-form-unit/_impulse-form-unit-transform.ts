@@ -8,6 +8,17 @@ export interface ImpulseFormUnitTransform<TInput, TError, TOutput> {
   _validator: ImpulseFormUnitValidator<TInput, TError, TOutput>
 }
 
+export function transformFromInput<TInput>(): ImpulseFormUnitTransform<
+  TInput,
+  never,
+  TInput
+> {
+  return {
+    _transformer: true,
+    _validator: (input) => [null, input],
+  }
+}
+
 export function transformFromTransformer<TInput, TOutput>(
   transformer: ImpulseFormUnitTransformer<TInput, TOutput>,
 ): ImpulseFormUnitTransform<TInput, never, TOutput> {
