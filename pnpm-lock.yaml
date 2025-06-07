@@ -22,7 +22,7 @@ importers:
         version: 11.2.0(size-limit@11.2.0)
       '@vitest/coverage-v8':
         specifier: ^3.1.1
-        version: 3.1.1(vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0))
+        version: 3.1.1(vitest@3.1.1(happy-dom@17.6.3)(jiti@2.4.2)(terser@5.40.0))
       eslint:
         specifier: ^9.28.0
         version: 9.28.0(jiti@2.4.2)
@@ -37,10 +37,10 @@ importers:
         version: 5.2.0(eslint@9.28.0(jiti@2.4.2))
       eslint-plugin-vitest:
         specifier: ^0.5.4
-        version: 0.5.4(eslint@9.28.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0))
+        version: 0.5.4(eslint@9.28.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.1(happy-dom@17.6.3)(jiti@2.4.2)(terser@5.40.0))
       happy-dom:
-        specifier: ^17.4.7
-        version: 17.4.7
+        specifier: ^17.6.3
+        version: 17.6.3
       prettier:
         specifier: ^3.5.3
         version: 3.5.3
@@ -61,7 +61,7 @@ importers:
         version: 8.33.0(eslint@9.28.0(jiti@2.4.2))(typescript@5.8.3)
       vitest:
         specifier: ^3.1.1
-        version: 3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0)
+        version: 3.1.1(happy-dom@17.6.3)(jiti@2.4.2)(terser@5.40.0)
 
   packages/react-impulse:
     dependencies:
@@ -160,8 +160,8 @@ packages:
     resolution: {integrity: sha512-1x3D2xEk2fRo3PAhwQwu5UubzgiVWSXTBfWpVd2Mx2AzRqJuDJCsgaDVZ7HB5iGzDW1Hl1sWN2mFyKjmR9uAog==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/runtime@7.27.4':
-    resolution: {integrity: sha512-t3yaEOuGu9NlIZ+hIeGbBjFtZT7j2cb2tg0fuaJKeGotchRjjLfrBA9Kwf8quhpP1EUuxModQg04q/mBwyg8uA==}
+  '@babel/runtime@7.27.6':
+    resolution: {integrity: sha512-vbavdySgbTTrmFE+EsiqUTzlOr5bzlnJtUv9PynGCAKvfQqjIXbvFdumPM/GxMDfyuGMJaJAU6TO4zc1Jf1i8Q==}
     engines: {node: '>=6.9.0'}
 
   '@babel/types@7.27.0':
@@ -1391,9 +1391,9 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
-  happy-dom@17.4.7:
-    resolution: {integrity: sha512-NZypxadhCiV5NT4A+Y86aQVVKQ05KDmueja3sz008uJfDRwz028wd0aTiJPwo4RQlvlz0fznkEEBBCHVNWc08g==}
-    engines: {node: '>=18.0.0'}
+  happy-dom@17.6.3:
+    resolution: {integrity: sha512-UVIHeVhxmxedbWPCfgS55Jg2rDfwf2BCKeylcPSqazLz5w3Kri7Q4xdBJubsr/+VUzFLh0VjIvh13RaDA2/Xug==}
+    engines: {node: '>=20.0.0'}
 
   has-bigints@1.1.0:
     resolution: {integrity: sha512-R3pbpkcIqv2Pm3dUwgjclDRVmWpTJW2DcMzcIhEXEx1oh/CEMObMm3KLmRJOdvhM7o4uQBnwr8pzRK2sJWIqfg==}
@@ -2531,7 +2531,7 @@ snapshots:
 
   '@babel/runtime@7.27.1': {}
 
-  '@babel/runtime@7.27.4': {}
+  '@babel/runtime@7.27.6': {}
 
   '@babel/types@7.27.0':
     dependencies:
@@ -2974,7 +2974,7 @@ snapshots:
   '@testing-library/dom@10.4.0':
     dependencies:
       '@babel/code-frame': 7.27.1
-      '@babel/runtime': 7.27.4
+      '@babel/runtime': 7.27.6
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
       chalk: 4.1.2
@@ -3147,7 +3147,7 @@ snapshots:
       '@typescript-eslint/types': 8.33.0
       eslint-visitor-keys: 4.2.0
 
-  '@vitest/coverage-v8@3.1.1(vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0))':
+  '@vitest/coverage-v8@3.1.1(vitest@3.1.1(happy-dom@17.6.3)(jiti@2.4.2)(terser@5.40.0))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 1.0.2
@@ -3161,7 +3161,7 @@ snapshots:
       std-env: 3.9.0
       test-exclude: 7.0.1
       tinyrainbow: 2.0.0
-      vitest: 3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0)
+      vitest: 3.1.1(happy-dom@17.6.3)(jiti@2.4.2)(terser@5.40.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -3710,12 +3710,12 @@ snapshots:
       string.prototype.matchall: 4.0.12
       string.prototype.repeat: 1.0.0
 
-  eslint-plugin-vitest@0.5.4(eslint@9.28.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0)):
+  eslint-plugin-vitest@0.5.4(eslint@9.28.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.1(happy-dom@17.6.3)(jiti@2.4.2)(terser@5.40.0)):
     dependencies:
       '@typescript-eslint/utils': 7.18.0(eslint@9.28.0(jiti@2.4.2))(typescript@5.8.3)
       eslint: 9.28.0(jiti@2.4.2)
     optionalDependencies:
-      vitest: 3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0)
+      vitest: 3.1.1(happy-dom@17.6.3)(jiti@2.4.2)(terser@5.40.0)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -3964,7 +3964,7 @@ snapshots:
 
   graphemer@1.4.0: {}
 
-  happy-dom@17.4.7:
+  happy-dom@17.6.3:
     dependencies:
       webidl-conversions: 7.0.0
       whatwg-mimetype: 3.0.0
@@ -5011,7 +5011,7 @@ snapshots:
       jiti: 2.4.2
       terser: 5.40.0
 
-  vitest@3.1.1(happy-dom@17.4.7)(jiti@2.4.2)(terser@5.40.0):
+  vitest@3.1.1(happy-dom@17.6.3)(jiti@2.4.2)(terser@5.40.0):
     dependencies:
       '@vitest/expect': 3.1.1
       '@vitest/mocker': 3.1.1(vite@6.2.2(jiti@2.4.2)(terser@5.40.0))
@@ -5034,7 +5034,7 @@ snapshots:
       vite-node: 3.1.1(jiti@2.4.2)(terser@5.40.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      happy-dom: 17.4.7
+      happy-dom: 17.6.3
     transitivePeerDependencies:
       - jiti
       - less
