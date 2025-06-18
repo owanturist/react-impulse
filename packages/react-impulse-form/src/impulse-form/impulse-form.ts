@@ -1,6 +1,6 @@
 import type { Lazy } from "~/tools/lazy"
 
-import { Impulse, type Scope, batch } from "../dependencies"
+import type { Scope } from "../dependencies"
 
 import type { ImpulseFormParams } from "./impulse-form-params"
 import type { ImpulseFormSpec } from "./impulse-form-spec"
@@ -11,17 +11,6 @@ export abstract class ImpulseForm<
 > {
   // necessary for type inference
   protected readonly _params?: TParams
-
-  private readonly _output = Impulse(
-    (scope) => {
-      const verbose = this._state()._output.getValue(scope)
-
-      return this._spec._outputFromVerbose(verbose)
-    },
-    {
-      compare: this._spec._isOutputEqual,
-    },
-  )
 
   protected constructor(
     private readonly _spec: ImpulseFormSpec<TParams>,
@@ -43,15 +32,16 @@ export abstract class ImpulseForm<
       verbose: TParams["output.schema.verbose"],
     ) => TResult,
   ): null | TParams["output.schema"] | TResult {
-    const output = this._output.getValue(scope)
+    const { _output, _outputVerbose } = this._state()
+    const output = _output.getValue(scope)
 
-    if (select) {
-      const verbose = this._state()._output.getValue(scope)
-
-      return select(output, verbose)
+    if (!select) {
+      return output
     }
 
-    return output
+    const verbose = _outputVerbose.getValue(scope)
+
+    return select(output, verbose)
   }
 
   public getInitial(scope: Scope): TParams["input.schema"] {
@@ -59,14 +49,12 @@ export abstract class ImpulseForm<
   }
 
   public setInitial(setter: TParams["input.setter"]): void {
-    batch((scope) => {
-      const initial = this._spec._resolveInputSetter(
+    this._state()._initial.setValue((initial, scope) => {
+      return this._state()._resolveInputSetter(
         setter,
-        () => this.getInitial(scope),
-        () => this.getInput(scope),
+        initial,
+        this.getInput(scope),
       )
-
-      this._state()._initial.setValue(initial)
     })
   }
 
@@ -75,14 +63,12 @@ export abstract class ImpulseForm<
   }
 
   public setInput(setter: TParams["input.setter"]): void {
-    batch((scope) => {
-      const input = this._spec._resolveInputSetter(
+    this._state()._input.setValue((input, scope) => {
+      return this._state()._resolveInputSetter(
         setter,
-        () => this.getInput(scope),
-        () => this.getInitial(scope),
+        input,
+        this.getInitial(scope),
       )
-
-      this._state()._input.setValue(input)
     })
   }
 }

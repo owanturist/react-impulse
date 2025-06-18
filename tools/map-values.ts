@@ -1,4 +1,4 @@
-import { entries } from "~/tools/entries"
+import { tapValues } from "./tap-values"
 
 export function mapValues<TObject, TResult>(
   object: TObject,
@@ -6,9 +6,9 @@ export function mapValues<TObject, TResult>(
 ): Record<keyof TObject, TResult> {
   const result = {} as Record<keyof TObject, TResult>
 
-  for (const [key, value] of entries(object)) {
+  tapValues(object, (value, key) => {
     result[key] = fn(value, key)
-  }
+  })
 
   return result
 }

@@ -1,21 +1,25 @@
 import { isNull } from "~/tools/is-null"
+import { resolveSetter } from "~/tools/setter"
 
 import { Impulse, type ReadonlyImpulse } from "../dependencies"
-import type { ImpulseFormState } from "../impulse-form/impulse-form-state"
+import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
 
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
 import type { ImpulseFormUnitSpec } from "./_impulse-form-unit-spec"
 import type { ImpulseFormUnitTransform } from "./_impulse-form-unit-transform"
+import type { ImpulseFormUnitInputSetter } from "./impulse-form-unit-input-setter"
 
-export class ImpulseFormUnitState<TInput, TError, TOutput>
-  implements ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>>
-{
+export class ImpulseFormUnitState<
+  TInput,
+  TError,
+  TOutput,
+> extends ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>> {
   private readonly _validated = Impulse(false)
 
   private readonly _result: ReadonlyImpulse<Result<null | TError, TOutput>>
 
-  public readonly _output = Impulse((scope) => {
+  public readonly _outputVerbose = Impulse((scope) => {
     const [, output] = this._result.getValue(scope)
 
     return output
@@ -30,6 +34,8 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
       ImpulseFormUnitTransform<TInput, TError, TOutput>
     >,
   ) {
+    super(spec)
+
     this._result = Impulse(
       (scope) => {
         const customError = this._error.getValue(scope)
@@ -62,5 +68,17 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
         },
       },
     )
+  }
+
+  protected _outputFromVerbose(verbose: TOutput | null): null | TOutput {
+    return verbose
+  }
+
+  public _resolveInputSetter(
+    setter: ImpulseFormUnitInputSetter<TInput>,
+    main: TInput,
+    additional: TInput,
+  ): TInput {
+    return resolveSetter(setter, main, additional)
   }
 }

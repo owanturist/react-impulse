@@ -1,13 +1,19 @@
-import { isUndefined } from "~/tools/is-undefined"
+import { Option } from "~/tools/option"
+import { partitionValues } from "~/tools/partition-values"
 
-import { batch } from "../dependencies"
+import { isImpulseForm } from "../impulse-form"
 
-import { ImpulseFormShape as ImpulseFormShapeImpl } from "./_impulse-form-shape"
+import type { ImpulseFormShape as ImpulseFormShapeImpl } from "./_impulse-form-shape"
+import {
+  ImpulseFormShapeSpec,
+  type ImpulseFormShapeSpecFields,
+} from "./_impulse-form-shape-spec"
 import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 import type { ImpulseFormShapeFlagSetter } from "./impulse-form-shape-flag-setter"
 import type { ImpulseFormShapeInputSetter } from "./impulse-form-shape-input-setter"
 import type { ImpulseFormShapeValidateOnSetter } from "./impulse-form-shape-validate-on-setter"
+import { mapValues } from "~/tools/map-values"
 
 export type ImpulseFormShape<TFields extends ImpulseFormShapeFields> =
   ImpulseFormShapeImpl<TFields>
@@ -23,7 +29,7 @@ export interface ImpulseFormShapeOptions<
 }
 
 export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
-  fields: Readonly<TFields>,
+  fields: TFields,
   {
     input,
     initial,
@@ -32,30 +38,16 @@ export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
     error,
   }: ImpulseFormShapeOptions<TFields> = {},
 ): ImpulseFormShape<TFields> {
-  const shape = new ImpulseFormShapeImpl(null, fields)
+  const [impulseFields, constantFields] = partitionValues(fields, isImpulseForm)
 
-  batch(() => {
-    if (!isUndefined(touched)) {
-      shape.setTouched(touched)
-    }
-
-    if (!isUndefined(initial)) {
-      shape.setInitial(initial)
-    }
-
-    if (!isUndefined(input)) {
-      shape.setInput(input)
-    }
-
-    if (!isUndefined(validateOn)) {
-      shape.setValidateOn(validateOn)
-    }
-
-    // TODO add test against null
-    if (!isUndefined(error)) {
-      shape.setError(error)
-    }
-  })
-
-  return shape
+  return new ImpulseFormShapeSpec(
+    mapValues(impulseFields, (field) => field._spec),
+    constantFields as Omit<TFields, keyof ImpulseFormShapeSpecFields<TFields>>,
+  )
+    ._override({
+      _input: Option(input),
+      _initial: Option(initial),
+      _error: Option(error),
+    })
+    ._create()
 }
