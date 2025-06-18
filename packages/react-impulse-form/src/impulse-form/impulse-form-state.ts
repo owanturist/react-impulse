@@ -1,36 +1,30 @@
-import type { Impulse, ReadonlyImpulse } from "../dependencies"
+import type { ReadonlyImpulse } from "../dependencies"
 
 import type { ImpulseFormParams } from "./impulse-form-params"
 
 export interface ImpulseFormState<TParams extends ImpulseFormParams> {
-  readonly _output: ReadonlyImpulse<null | TParams["output.schema"]>
-  readonly _outputVerbose: ReadonlyImpulse<TParams["output.schema.verbose"]>
+  readonly _initial: ReadonlyImpulse<TParams["input.schema"]>
+  _setInitial(setter: TParams["input.setter"]): void
 
-  readonly _initial: Impulse<TParams["input.schema"]>
-
-  readonly _input: Impulse<TParams["input.schema"]>
-
-  _resolveInputSetter(
-    setter: TParams["input.setter"],
-    current: TParams["input.schema"],
-    additional: TParams["input.schema"],
-  ): TParams["input.schema"]
+  readonly _input: ReadonlyImpulse<TParams["input.schema"]>
+  _setInput(setter: TParams["input.setter"]): void
 
   readonly _error: ReadonlyImpulse<null | TParams["error.schema"]>
-  readonly _errorVerbose: Impulse<TParams["error.schema.verbose"]>
-
-  _resolveErrorSetter(
-    setter: TParams["error.setter"],
-    current: TParams["error.schema.verbose"],
-  ): TParams["error.schema.verbose"]
+  readonly _errorVerbose: ReadonlyImpulse<TParams["error.schema.verbose"]>
+  _setError(setter: TParams["error.setter"]): void
 
   readonly _validateOn: ReadonlyImpulse<TParams["validateOn.schema"]>
-  readonly _validateOnVerbose: Impulse<TParams["validateOn.schema.verbose"]>
+  readonly _validateOnVerbose: ReadonlyImpulse<
+    TParams["validateOn.schema.verbose"]
+  >
+  _setValidateOn(setter: TParams["validateOn.setter"]): void
 
-  _resolveValidateOnSetter(
-    setter: TParams["validateOn.setter"],
-    current: TParams["validateOn.schema.verbose"],
-  ): TParams["validateOn.schema.verbose"]
+  readonly _touched: ReadonlyImpulse<TParams["flag.schema"]>
+  readonly _touchedVerbose: ReadonlyImpulse<TParams["flag.schema.verbose"]>
+  _setTouched(setter: TParams["flag.setter"]): void
+
+  readonly _output: ReadonlyImpulse<null | TParams["output.schema"]>
+  readonly _outputVerbose: ReadonlyImpulse<TParams["output.schema.verbose"]>
 
   readonly _valid: ReadonlyImpulse<TParams["flag.schema"]>
   readonly _validVerbose: ReadonlyImpulse<TParams["flag.schema.verbose"]>
@@ -43,12 +37,4 @@ export interface ImpulseFormState<TParams extends ImpulseFormParams> {
 
   readonly _dirty: ReadonlyImpulse<TParams["flag.schema"]>
   readonly _dirtyVerbose: ReadonlyImpulse<TParams["flag.schema.verbose"]>
-
-  readonly _touched: ReadonlyImpulse<TParams["flag.schema"]>
-  readonly _touchedVerbose: Impulse<TParams["flag.schema.verbose"]>
-
-  _resolveFlagSetter(
-    setter: TParams["flag.setter"],
-    current: TParams["flag.schema.verbose"],
-  ): TParams["flag.schema.verbose"]
 }
