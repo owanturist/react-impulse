@@ -8,6 +8,7 @@ import type { Result } from "../result"
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
 import type { ImpulseFormUnitSpec } from "./_impulse-form-unit-spec"
 import type { ImpulseFormUnitTransform } from "./_impulse-form-unit-transform"
+import type { ImpulseFormUnitErrorSetter } from "./impulse-form-unit-error-setter"
 import type { ImpulseFormUnitInputSetter } from "./impulse-form-unit-input-setter"
 
 export class ImpulseFormUnitState<
@@ -19,19 +20,27 @@ export class ImpulseFormUnitState<
 
   private readonly _result: ReadonlyImpulse<Result<null | TError, TOutput>>
 
-  public readonly _output = Impulse((scope) => {
+  public readonly _outputVerbose = Impulse((scope) => {
     const [, output] = this._result.getValue(scope)
 
     return output
   })
 
-  public override _outputVerbose = this._output
+  public readonly _output = this._outputVerbose
+
+  public readonly _errorVerbose = Impulse<null | TError>((scope) => {
+    const [customError] = this._result.getValue(scope)
+
+    return customError
+  }, this._customError)
+
+  public readonly _error = this._errorVerbose
 
   public constructor(
     spec: ImpulseFormUnitSpec<TInput, TError, TOutput>,
     public readonly _input: Impulse<TInput>,
     public readonly _initial: Impulse<TInput>,
-    public readonly _error: Impulse<null | TError>,
+    private readonly _customError: Impulse<null | TError>,
     private readonly _transform: Impulse<
       ImpulseFormUnitTransform<TInput, TError, TOutput>
     >,
@@ -40,7 +49,7 @@ export class ImpulseFormUnitState<
 
     this._result = Impulse(
       (scope) => {
-        const customError = this._error.getValue(scope)
+        const customError = this._customError.getValue(scope)
 
         if (!isNull(customError)) {
           return [customError, null]
@@ -74,9 +83,16 @@ export class ImpulseFormUnitState<
 
   public _resolveInputSetter(
     setter: ImpulseFormUnitInputSetter<TInput>,
-    main: TInput,
+    current: TInput,
     additional: TInput,
   ): TInput {
-    return resolveSetter(setter, main, additional)
+    return resolveSetter(setter, current, additional)
+  }
+
+  public _resolveErrorSetter(
+    setter: ImpulseFormUnitErrorSetter<TError>,
+    current: null | TError,
+  ): null | TError {
+    return resolveSetter(setter, current)
   }
 }
