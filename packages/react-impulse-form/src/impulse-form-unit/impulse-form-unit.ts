@@ -1,8 +1,7 @@
 import { hasProperty } from "~/tools/has-property"
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isStrictEqual } from "~/tools/is-strict-equal"
-import { isUndefined } from "~/tools/is-undefined"
-import { None, Some } from "~/tools/option"
+import { None, Option } from "~/tools/option"
 
 import { createNullableCompare } from "../create-nullable-compare"
 import type { Compare } from "../dependencies"
@@ -161,15 +160,22 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
   | ImpulseFormUnit<TInput, TError>
   | ImpulseFormUnit<TInput, ReadonlyArray<string>, TOutput>
   | ImpulseFormUnit<TInput, TError, TOutput> /* enforce syntax highlight */ {
-  const initial = !isUndefined(options?.initial) ? Some(options.initial) : None
+  const initial = Option(options?.initial)
+  const touched = Option(options?.touched)
   const isInputEqual = options?.isInputEqual ?? isStrictEqual
+  const isInputDirty =
+    options?.isInputDirty ??
+    ((left, right, scope) => !isInputEqual(left, right, scope))
 
   if (hasProperty(options, "schema")) {
     const spec = new ImpulseFormUnitSpec(
       input,
       initial,
-      hasProperty(options, "error") ? Some(options.error!) : None,
+      Option(options.error),
+      Option(options.validateOn),
+      touched,
       transformFromSchema(options.schema),
+      isInputDirty,
       isInputEqual,
       isStrictEqual,
       createNullableCompare(isShallowArrayEqual),
@@ -178,7 +184,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     return spec._create()
   }
 
-  const error = !isUndefined(options?.error) ? Some(options.error) : None
+  const error = Option(options?.error)
   const isErrorEqual = createNullableCompare<TError>(
     options?.isErrorEqual ?? isStrictEqual,
   )
@@ -188,7 +194,10 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       input,
       initial,
       error,
+      Option(options.validateOn),
+      touched,
       transformFromValidator(options.validate),
+      isInputDirty,
       isInputEqual,
       isStrictEqual,
       isErrorEqual,
@@ -202,7 +211,10 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       input,
       initial,
       error,
+      None,
+      touched,
       transformFromTransformer(options.transform),
+      isInputDirty,
       isInputEqual,
       isStrictEqual,
       isErrorEqual,
@@ -215,7 +227,10 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     input,
     initial,
     error,
+    None,
+    touched,
     transformFromInput(),
+    isInputDirty,
     isInputEqual,
     createNullableCompare(isInputEqual),
     isErrorEqual,

@@ -8,13 +8,7 @@ import type {
   ImpulseFormSpecPatch,
 } from "../impulse-form/impulse-form-spec"
 import type { Result } from "../result"
-import {
-  VALIDATE_ON_CHANGE,
-  VALIDATE_ON_INIT,
-  VALIDATE_ON_SUBMIT,
-  VALIDATE_ON_TOUCH,
-  type ValidateStrategy,
-} from "../validate-strategy"
+import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
 import { ImpulseFormUnit } from "./_impulse-form-unit"
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
@@ -105,7 +99,9 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
   }
 
   public _create(): ImpulseFormUnit<TInput, TError, TOutput> {
-    const input = Impulse(this._input, { compare: this._isInputEqual })
+    const input = Impulse(this._input, {
+      compare: this._isInputEqual,
+    })
 
     const initial = Impulse(
       untrack((scope) => {
@@ -113,7 +109,9 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
           ? this._input
           : this._initial
       }),
-      { compare: this._isInputEqual },
+      {
+        compare: this._isInputEqual,
+      },
     )
 
     const transform = Impulse(this._transform)
@@ -130,35 +128,11 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
 
     const validateOn = Impulse(this._validateOn)
 
-    const persistValidated = Impulse(false)
-    const validated = Impulse((scope) => {
-      if (
-        persistValidated.getValue(scope) ||
-        transform.getValue(scope)._transformer
-      ) {
-        return true
-      }
+    const validated = Impulse(false)
 
-      switch (validateOn.getValue(scope)) {
-        case VALIDATE_ON_INIT: {
-          return true
-        }
-
-        case VALIDATE_ON_TOUCH: {
-          return touched.getValue(scope)
-        }
-
-        case VALIDATE_ON_CHANGE: {
-          return dirty.getValue(scope)
-        }
-
-        case VALIDATE_ON_SUBMIT: {
-          return false
-        }
-      }
+    const customError = Impulse(this._error, {
+      compare: this._isErrorEqual,
     })
-
-    const customError = Impulse(this._error, { compare: this._isErrorEqual })
 
     const result = Impulse<Result<null | TError, TOutput>>(
       (scope) => {

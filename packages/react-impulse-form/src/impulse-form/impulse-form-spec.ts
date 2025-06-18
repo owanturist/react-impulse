@@ -1,7 +1,5 @@
 import type { Option } from "~/tools/option"
 
-import type { Compare } from "../dependencies"
-
 import type { ImpulseForm } from "./impulse-form"
 import type { ImpulseFormParams } from "./impulse-form-params"
 
