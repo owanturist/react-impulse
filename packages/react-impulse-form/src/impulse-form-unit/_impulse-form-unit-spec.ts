@@ -1,4 +1,3 @@
-import { Lazy } from "~/tools/lazy"
 import type { Option } from "~/tools/option"
 import { resolveSetter } from "~/tools/setter"
 
@@ -72,26 +71,24 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
     )
   }
 
-  public _create(
-    state = Lazy(() => {
-      const input = this._input
-      const initial = untrack((scope) => {
-        return this._isInputEqual(this._initial, input, scope)
-          ? input
-          : this._initial
-      })
+  public _create(): ImpulseFormUnit<TInput, TError, TOutput> {
+    const input = this._input
+    const initial = untrack((scope) => {
+      return this._isInputEqual(this._initial, input, scope)
+        ? input
+        : this._initial
+    })
 
-      const error = this._error
+    const error = this._error
 
-      return new ImpulseFormUnitState(
-        this,
-        Impulse(input, { compare: this._isInputEqual }),
-        Impulse(initial, { compare: this._isInputEqual }),
-        Impulse(error, { compare: this._isErrorEqual }),
-        Impulse(this._transform),
-      )
-    }),
-  ): ImpulseFormUnit<TInput, TError, TOutput> {
+    const state = new ImpulseFormUnitState(
+      this,
+      Impulse(input, { compare: this._isInputEqual }),
+      Impulse(initial, { compare: this._isInputEqual }),
+      Impulse(error, { compare: this._isErrorEqual }),
+      Impulse(this._transform),
+    )
+
     return new ImpulseFormUnit(this, state)
   }
 }

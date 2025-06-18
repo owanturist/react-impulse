@@ -146,7 +146,7 @@ export class ImpulseFormShapeState<
       const fieldSetter = setters[key as keyof typeof setters]
 
       if (isUndefined(fieldSetter)) {
-        return field
+        return main[key]
       }
 
       return field._resolveInputSetter(

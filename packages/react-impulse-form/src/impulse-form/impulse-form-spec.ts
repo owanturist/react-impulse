@@ -1,11 +1,9 @@
-import type { Lazy } from "~/tools/lazy"
 import type { Option } from "~/tools/option"
 
 import type { Compare } from "../dependencies"
 
 import type { ImpulseForm } from "./impulse-form"
 import type { ImpulseFormParams } from "./impulse-form-params"
-import type { ImpulseFormState } from "./impulse-form-state"
 
 export interface ImpulseFormSpecPatch<TParams extends ImpulseFormParams> {
   _input: Option<TParams["input.setter"]>
@@ -26,5 +24,5 @@ export interface ImpulseFormSpec<
 
   _override(patch: ImpulseFormSpecPatch<TParams>): ImpulseFormSpec<TParams>
 
-  _create(state?: Lazy<ImpulseFormState<TParams>>): ImpulseForm<TParams>
+  _create(): ImpulseForm<TParams>
 }

@@ -1,5 +1,3 @@
-import type { Lazy } from "~/tools/lazy"
-
 import { ImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
@@ -13,7 +11,7 @@ export class ImpulseFormUnit<
 > extends ImpulseForm<ImpulseFormUnitParams<TInput, TError, TOutput>> {
   public constructor(
     spec: ImpulseFormUnitSpec<TInput, TError, TOutput>,
-    state: Lazy<ImpulseFormUnitState<TInput, TError, TOutput>>,
+    state: ImpulseFormUnitState<TInput, TError, TOutput>,
   ) {
     super(spec, state)
   }

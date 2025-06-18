@@ -1,6 +1,5 @@
 import { isNull } from "~/tools/is-null"
 import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
-import { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
 import { Option, Some } from "~/tools/option"
@@ -109,20 +108,14 @@ export class ImpulseFormShapeSpec<
     )
   }
 
-  public _create(
-    state = Lazy(() => {
-      const fields = mapValues(this._fields, (field) => field._create())
+  public _create(): ImpulseFormShape<TFields> {
+    const fields = mapValues(this._fields, (field) => field._create())
+    const state = new ImpulseFormShapeState(
+      this,
+      mapValues(fields, (field) => field._state),
+      this._constants,
+    )
 
-      return new ImpulseFormShapeState(
-        this,
-        fields as unknown as ImpulseFormShapeStateFields<TFields>,
-        this._constants as unknown as Omit<
-          TFields,
-          keyof ImpulseFormShapeStateFields<TFields>
-        >,
-      )
-    }),
-  ): ImpulseFormShape<TFields> {
-    return new ImpulseFormShape(this, state)
+    return new ImpulseFormShape(this, state, fields)
   }
 }
