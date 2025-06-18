@@ -1,6 +1,6 @@
-import { isFunction } from "~/tools/is-function"
 import { Lazy } from "~/tools/lazy"
-import { type Option, Some } from "~/tools/option"
+import type { Option } from "~/tools/option"
+import { resolveSetter } from "~/tools/setter"
 
 import { type Compare, Impulse, untrack } from "../dependencies"
 import type {
@@ -12,21 +12,20 @@ import { ImpulseFormUnit } from "./_impulse-form-unit"
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
 import { ImpulseFormUnitState } from "./_impulse-form-unit-state"
 import type { ImpulseFormUnitTransform } from "./_impulse-form-unit-transform"
-import type { ImpulseFormUnitInputSetter } from "./impulse-form-unit-input-setter"
 
 export class ImpulseFormUnitSpec<TInput, TError, TOutput>
   implements ImpulseFormSpec<ImpulseFormUnitParams<TInput, TError, TOutput>>
 {
   public constructor(
     public readonly _input: TInput,
-    public readonly _initial: Option<TInput>,
-    public readonly _error: Option<null | TError>,
-    public readonly _transform: ImpulseFormUnitTransform<
+    private readonly _optionalInitial: Option<TInput>,
+    private readonly _optionalError: Option<null | TError>,
+    private readonly _transform: ImpulseFormUnitTransform<
       TInput,
       TError,
       TOutput
     >,
-    public readonly _isInputEqual: Compare<TInput>,
+    private readonly _isInputEqual: Compare<TInput>,
     public readonly _isOutputEqual: Compare<null | TOutput>,
     public readonly _isErrorEqual: Compare<null | TError>,
   ) {}
@@ -35,35 +34,37 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
     return output
   }
 
-  public _inputFromSetter(
-    setter: ImpulseFormUnitInputSetter<TInput>,
-    first: () => TInput,
-    second: () => TInput,
-  ): TInput {
-    return isFunction(setter) ? setter(first(), second()) : setter
+  public get _initial(): TInput {
+    return this._optionalInitial._getOrElse(this._input)
   }
 
-  public _update({
+  public get _error(): null | TError {
+    return this._optionalError._getOrElse(null)
+  }
+
+  public _override({
     _input,
     _initial,
     _error,
-  }: Partial<
-    ImpulseFormSpecPatch<ImpulseFormUnitParams<TInput, TError, TOutput>>
+  }: ImpulseFormSpecPatch<
+    ImpulseFormUnitParams<TInput, TError, TOutput>
   >): ImpulseFormUnitSpec<TInput, TError, TOutput> {
-    const input = _input ? _input(this._input) : this._input
+    const input = _input._map((setter) => {
+      return resolveSetter(setter, this._input, this._initial)
+    })
 
-    const initial = _initial
-      ? Some(_initial(this._initial._getOrElse(input)))
-      : this._initial
+    const initial = _initial._map((setter) => {
+      return resolveSetter(setter, this._initial, this._input)
+    })
 
-    const error = _error
-      ? Some(_error(this._error._getOrElse(null)))
-      : this._error
+    const error = _error._map((setter) => {
+      return resolveSetter(setter, this._error)
+    })
 
     return new ImpulseFormUnitSpec(
-      input,
-      initial,
-      error,
+      input._getOrElse(this._input),
+      initial._orElse(this._optionalInitial),
+      error._orElse(this._optionalError),
       this._transform,
       this._isInputEqual,
       this._isOutputEqual,
@@ -72,20 +73,21 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
   }
 
   public _create(): ImpulseFormUnit<TInput, TError, TOutput> {
-    throw new ImpulseFormUnit(
+    return new ImpulseFormUnit(
       this,
       Lazy(() => {
         const input = this._input
-        const initial = this._initial._getOrElse(input)
-        const inputOrInitial = untrack((scope) => {
-          return this._isInputEqual(initial, input, scope) ? initial : input
+        const initial = untrack((scope) => {
+          return this._isInputEqual(this._initial, input, scope)
+            ? input
+            : this._initial
         })
 
-        const error = this._error._getOrElse(null)
+        const error = this._error
 
         return new ImpulseFormUnitState(
           this,
-          Impulse(inputOrInitial, { compare: this._isInputEqual }),
+          Impulse(input, { compare: this._isInputEqual }),
           Impulse(initial, { compare: this._isInputEqual }),
           Impulse(error, { compare: this._isErrorEqual }),
           Impulse(this._transform),

@@ -43,8 +43,5 @@
     "react-impulse": "workspace:*",
     "vite-tsconfig-paths": "^5.1.4",
     "zod": "^3.25.67"
-  },
-  "dependencies": {
-    "ts-toolbelt": "^9.6.0"
   }
 }
