@@ -13,6 +13,8 @@ import type { ImpulseForm } from "../impulse-form/impulse-form"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 
 import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"
+import type { ImpulseFormShapeError } from "./impulse-form-shape-error"
+import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"
 import type { ImpulseFormShapeErrorVerbose } from "./impulse-form-shape-error-verbose"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 import type { ImpulseFormShapeInput } from "./impulse-form-shape-input"
@@ -78,18 +80,30 @@ export class ImpulseFormShapeState<
     },
   )
 
-  public readonly _error = Impulse(
+  public readonly _error = Impulse((scope) => {
+    const error = mapValues(this._fields, ({ _error }) =>
+      _error.getValue(scope),
+    )
+
+    if (values(error).some(isNull)) {
+      return null
+    }
+
+    return error as ImpulseFormShapeError<TFields>
+  })
+
+  public readonly _errorVerbose = Impulse(
     (scope) => {
-      const error = mapValues(this._fields, ({ _error }) => {
-        return _error.getValue(scope)
+      const error = mapValues(this._fields, ({ _errorVerbose }) => {
+        return _errorVerbose.getValue(scope)
       })
 
       return error as ImpulseFormShapeErrorVerbose<TFields>
     },
 
     (next) => {
-      tapValues(this._fields, ({ _error }, key) => {
-        _error.setValue(next[key as keyof typeof next])
+      tapValues(this._fields, ({ _errorVerbose }, key) => {
+        _errorVerbose.setValue(next[key as keyof typeof next])
       })
     },
 
@@ -104,10 +118,8 @@ export class ImpulseFormShapeState<
         _output.getValue(scope),
       )
 
-      for (const value of values(output)) {
-        if (isNull(value)) {
-          return null
-        }
+      if (values(output).some(isNull)) {
+        return null
       }
 
       return {
@@ -148,25 +160,44 @@ export class ImpulseFormShapeState<
 
   public _resolveInputSetter(
     setter: ImpulseFormShapeInputSetter<TFields>,
-    main: ImpulseFormShapeInput<TFields>,
+    current: ImpulseFormShapeInput<TFields>,
     additional: ImpulseFormShapeInput<TFields>,
   ): ImpulseFormShapeInput<TFields> {
-    const setters = resolveSetter(setter, main, additional)
+    const setters = resolveSetter(setter, current, additional)
 
     const inputs = mapValues(this._fields, (field, key) => {
       const fieldSetter = setters[key as keyof typeof setters]
 
       if (isUndefined(fieldSetter)) {
-        return main[key]
+        return current[key]
       }
 
       return field._resolveInputSetter(
         fieldSetter,
-        main[key as keyof typeof main],
-        additional[key as keyof typeof additional],
+        current[key],
+        additional[key],
       )
     })
 
     return inputs as ImpulseFormShapeInput<TFields>
+  }
+
+  public _resolveErrorSetter(
+    setter: ImpulseFormShapeErrorSetter<TFields>,
+    current: ImpulseFormShapeErrorVerbose<TFields>,
+  ): ImpulseFormShapeErrorVerbose<TFields> {
+    const setters = resolveSetter(setter, current)
+
+    const errors = mapValues(this._fields, (field, key) => {
+      const fieldSetter = setters[key]
+
+      if (isUndefined(fieldSetter)) {
+        return current[key]
+      }
+
+      return field._resolveErrorSetter(fieldSetter, current[key])
+    })
+
+    return errors as ImpulseFormShapeErrorVerbose<TFields>
   }
 }
