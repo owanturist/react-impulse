@@ -60,7 +60,7 @@ export abstract class ImpulseForm<
 
   public setInitial(setter: TParams["input.setter"]): void {
     batch((scope) => {
-      const initial = this._spec._inputFromSetter(
+      const initial = this._spec._resolveInputSetter(
         setter,
         () => this.getInitial(scope),
         () => this.getInput(scope),
@@ -76,7 +76,7 @@ export abstract class ImpulseForm<
 
   public setInput(setter: TParams["input.setter"]): void {
     batch((scope) => {
-      const input = this._spec._inputFromSetter(
+      const input = this._spec._resolveInputSetter(
         setter,
         () => this.getInput(scope),
         () => this.getInitial(scope),

@@ -1,6 +1,4 @@
-import type Types from "ts-toolbelt"
-
-import type { Compute } from "~/tools/compute"
+import type { OmitValues } from "~/tools/omit-values"
 
 import type { ImpulseFormParams } from "../impulse-form"
 import type { GetImpulseFormParam } from "../impulse-form"
@@ -20,16 +18,13 @@ type FallbackParamWhenNever<
 export type GetImpulseFormShapeParam<
   TFields extends ImpulseFormShapeFields,
   TKey extends keyof ImpulseFormParams,
-> = Compute<
-  Types.Object.Filter<
-    {
-      readonly [TField in Types.Any.Keys<TFields>]: FallbackParamWhenNever<
-        TKey,
-        TFields[TField],
-        GetImpulseFormParam<TFields[TField], TKey>
-      >
-    },
-    never,
-    "equals"
-  >
+> = OmitValues<
+  {
+    readonly [TField in keyof TFields]: FallbackParamWhenNever<
+      TKey,
+      TFields[TField],
+      GetImpulseFormParam<TFields[TField], TKey>
+    >
+  },
+  never
 >

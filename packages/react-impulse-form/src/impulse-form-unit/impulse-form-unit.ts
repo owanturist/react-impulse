@@ -1,11 +1,11 @@
 import { hasProperty } from "~/tools/has-property"
-import { isNull } from "~/tools/is-null"
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 import { isUndefined } from "~/tools/is-undefined"
 import { None, Some } from "~/tools/option"
 
-import type { Compare, Scope } from "../dependencies"
+import { createNullableCompare } from "../create-nullable-compare"
+import type { Compare } from "../dependencies"
 import type { ValidateStrategy } from "../validate-strategy"
 import type { ZodLikeSchema } from "../zod-like-schema"
 
@@ -222,17 +222,4 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
   )
 
   return spec._create()
-}
-
-function createNullableCompare<TValue>(compare: Compare<TValue>) {
-  return (left: null | TValue, right: null | TValue, scope: Scope) => {
-    if (isNull(left) || isNull(right)) {
-      // null === null -> true
-      // null === unknown -> false
-      // unknown === null -> false
-      return left === right
-    }
-
-    return compare(left, right, scope)
-  }
 }
