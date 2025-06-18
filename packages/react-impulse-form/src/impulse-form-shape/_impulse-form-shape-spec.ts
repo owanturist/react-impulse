@@ -14,10 +14,7 @@ import type {
 
 import { ImpulseFormShape } from "./_impulse-form-shape"
 import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"
-import {
-  ImpulseFormShapeState,
-  type ImpulseFormShapeStateFields,
-} from "./_impulse-form-shape-state"
+import { ImpulseFormShapeState } from "./_impulse-form-shape-state"
 import type { ImpulseFormShapeErrorVerbose } from "./impulse-form-shape-error-verbose"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 import type { ImpulseFormShapeInput } from "./impulse-form-shape-input"
@@ -111,7 +108,6 @@ export class ImpulseFormShapeSpec<
   public _create(): ImpulseFormShape<TFields> {
     const fields = mapValues(this._fields, (field) => field._create())
     const state = new ImpulseFormShapeState(
-      this,
       mapValues(fields, (field) => field._state),
       this._constants,
     )
