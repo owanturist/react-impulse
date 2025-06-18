@@ -77,13 +77,7 @@ export abstract class ImpulseForm<
   }
 
   public setInitial(setter: TParams["input.setter"]): void {
-    this._state._initial.setValue((initial, scope) => {
-      return this._state._resolveInputSetter(
-        setter,
-        initial,
-        this.getInput(scope),
-      )
-    })
+    this._state._setInitial(setter)
   }
 
   public getInput(scope: Scope): TParams["input.schema"] {
@@ -91,13 +85,7 @@ export abstract class ImpulseForm<
   }
 
   public setInput(setter: TParams["input.setter"]): void {
-    this._state._input.setValue((input, scope) => {
-      return this._state._resolveInputSetter(
-        setter,
-        input,
-        this.getInitial(scope),
-      )
-    })
+    this._state._setInput(setter)
   }
 
   public getError(scope: Scope): null | TParams["error.schema"]
@@ -121,9 +109,7 @@ export abstract class ImpulseForm<
   }
 
   public setError(setter: TParams["error.setter"]): void {
-    this._state._errorVerbose.setValue((error) => {
-      return this._state._resolveErrorSetter(setter, error)
-    })
+    this._state._setError(setter)
   }
 
   public getValidateOn(scope: Scope): TParams["validateOn.schema"]
@@ -147,9 +133,7 @@ export abstract class ImpulseForm<
   }
 
   public setValidateOn(setter: TParams["validateOn.setter"]): void {
-    this._state._validateOnVerbose.setValue((validateOn) => {
-      return this._state._resolveValidateOnSetter(setter, validateOn)
-    })
+    this._state._setValidateOn(setter)
   }
 
   public isValid(scope: Scope): boolean
@@ -253,8 +237,6 @@ export abstract class ImpulseForm<
   }
 
   public setTouched(setter: TParams["flag.setter"]): void {
-    this._state._touchedVerbose.setValue((touched) => {
-      return this._state._resolveFlagSetter(setter, touched)
-    })
+    this._state._setTouched(setter)
   }
 }
