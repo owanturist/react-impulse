@@ -2,84 +2,71 @@ import { isNull } from "~/tools/is-null"
 import { resolveSetter } from "~/tools/setter"
 
 import { Impulse, type ReadonlyImpulse } from "../dependencies"
-import { ImpulseFormState } from "../impulse-form/impulse-form-state"
+import type { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
+import type { ValidateStrategy } from "../validate-strategy"
 
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
-import type { ImpulseFormUnitSpec } from "./_impulse-form-unit-spec"
 import type { ImpulseFormUnitTransform } from "./_impulse-form-unit-transform"
 import type { ImpulseFormUnitErrorSetter } from "./impulse-form-unit-error-setter"
 import type { ImpulseFormUnitInputSetter } from "./impulse-form-unit-input-setter"
 
-export class ImpulseFormUnitState<
-  TInput,
-  TError,
-  TOutput,
-> extends ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>> {
-  private readonly _validated = Impulse(false)
-
-  private readonly _result: ReadonlyImpulse<Result<null | TError, TOutput>>
-
+export class ImpulseFormUnitState<TInput, TError, TOutput>
+  implements ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>>
+{
   public readonly _outputVerbose = Impulse((scope) => {
     const [, output] = this._result.getValue(scope)
 
     return output
   })
 
-  public readonly _output = this._outputVerbose
+  public _output = this._outputVerbose
 
-  public readonly _errorVerbose = Impulse<null | TError>((scope) => {
+  public readonly _error = Impulse<null | TError>((scope) => {
     const [customError] = this._result.getValue(scope)
 
     return customError
   }, this._customError)
 
-  public readonly _error = this._errorVerbose
+  public _errorVerbose = this._error
+
+  public _validateOnVerbose = this._validateOn
+
+  public readonly _valid = Impulse((scope) => {
+    const error = this._error.getValue(scope)
+
+    return isNull(error)
+  })
+
+  public _validVerbose = this._valid
+
+  public readonly _invalid = Impulse((scope) => {
+    const error = this._error.getValue(scope)
+
+    return !isNull(error)
+  })
+
+  public _invalidVerbose = this._invalid
+
+  public _validatedVerbose = this._validated
+
+  public _touchedVerbose = this._touched
+
+  public _dirtyVerbose = this._dirty
 
   public constructor(
-    spec: ImpulseFormUnitSpec<TInput, TError, TOutput>,
     public readonly _input: Impulse<TInput>,
     public readonly _initial: Impulse<TInput>,
-    private readonly _customError: Impulse<null | TError>,
-    private readonly _transform: Impulse<
+    public readonly _transform: Impulse<
       ImpulseFormUnitTransform<TInput, TError, TOutput>
     >,
-  ) {
-    super()
-
-    this._result = Impulse(
-      (scope) => {
-        const customError = this._customError.getValue(scope)
-
-        if (!isNull(customError)) {
-          return [customError, null]
-        }
-
-        const input = this._input.getValue(scope)
-        const transform = this._transform.getValue(scope)
-
-        const [error, output] = transform._validator(input)
-
-        if (!isNull(output)) {
-          return [null, output]
-        }
-
-        return [this._validated.getValue(scope) ? error : null, null]
-      },
-      {
-        compare: (
-          [leftError, leftOutput],
-          [rightError, rightOutput],
-          scope,
-        ) => {
-          return (
-            spec._isErrorEqual(leftError, rightError, scope) &&
-            spec._isOutputEqual(leftOutput, rightOutput, scope)
-          )
-        },
-      },
-    )
-  }
+    public readonly _touched: Impulse<boolean>,
+    public readonly _dirty: ReadonlyImpulse<boolean>,
+    public readonly _validateOn: Impulse<ValidateStrategy>,
+    public readonly _validated: Impulse<boolean>,
+    private readonly _customError: Impulse<null | TError>,
+    private readonly _result: ReadonlyImpulse<Result<null | TError, TOutput>>,
+  ) {}
 
   public _resolveInputSetter(
     setter: ImpulseFormUnitInputSetter<TInput>,
@@ -93,6 +80,20 @@ export class ImpulseFormUnitState<
     setter: ImpulseFormUnitErrorSetter<TError>,
     current: null | TError,
   ): null | TError {
+    return resolveSetter(setter, current)
+  }
+
+  public _resolveValidateOnSetter(
+    setter: ImpulseFormUnitParams<TInput, TError, TOutput>["validateOn.setter"],
+    current: ValidateStrategy,
+  ): ValidateStrategy {
+    return resolveSetter(setter, current)
+  }
+
+  public _resolveFlagSetter(
+    setter: ImpulseFormUnitParams<TInput, TError, TOutput>["flag.setter"],
+    current: boolean,
+  ): boolean {
     return resolveSetter(setter, current)
   }
 }

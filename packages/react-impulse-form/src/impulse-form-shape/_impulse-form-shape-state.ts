@@ -10,7 +10,7 @@ import { values } from "~/tools/values"
 import { createNullableCompare } from "../create-nullable-compare"
 import { Impulse } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
-import { ImpulseFormState } from "../impulse-form/impulse-form-state"
+import type { ImpulseFormState } from "../impulse-form/impulse-form-state"
 
 import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"
 import type { ImpulseFormShapeError } from "./impulse-form-shape-error"
@@ -37,7 +37,8 @@ export type ImpulseFormShapeStateFields<
 
 export class ImpulseFormShapeState<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
-> extends ImpulseFormState<ImpulseFormShapeParams<TFields>> {
+> implements ImpulseFormState<ImpulseFormShapeParams<TFields>>
+{
   public readonly _initial = Impulse(
     (scope) => {
       const initial = {
@@ -154,9 +155,7 @@ export class ImpulseFormShapeState<
       TFields,
       keyof ImpulseFormShapeStateFields<TFields>
     >,
-  ) {
-    super()
-  }
+  ) {}
 
   public _resolveInputSetter(
     setter: ImpulseFormShapeInputSetter<TFields>,

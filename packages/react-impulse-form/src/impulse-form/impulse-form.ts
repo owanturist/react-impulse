@@ -103,4 +103,178 @@ export abstract class ImpulseForm<
       return this._state._resolveErrorSetter(setter, error)
     })
   }
+
+  public getValidateOn(scope: Scope): TParams["validateOn.schema"]
+  public getValidateOn<TResult>(
+    scope: Scope,
+    select: (
+      concise: TParams["validateOn.schema"],
+      verbose: TParams["validateOn.schema.verbose"],
+    ) => TResult,
+  ): TResult
+  public getValidateOn<TResult>(
+    scope: Scope,
+    select?: (
+      concise: TParams["validateOn.schema"],
+      verbose: TParams["validateOn.schema.verbose"],
+    ) => TResult,
+  ): TParams["validateOn.schema"] | TResult {
+    const { _validateOn, _validateOnVerbose } = this._state
+    const validateOn = _validateOn.getValue(scope)
+
+    if (!select) {
+      return validateOn
+    }
+
+    const verbose = _validateOnVerbose.getValue(scope)
+
+    return select(validateOn, verbose)
+  }
+
+  public setValidateOn(setter: TParams["validateOn.setter"]): void {
+    this._state._validateOnVerbose.setValue((validateOn) => {
+      return this._state._resolveValidateOnSetter(setter, validateOn)
+    })
+  }
+
+  public isValid(scope: Scope): boolean
+  public isValid<TResult>(
+    scope: Scope,
+    select: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): TResult
+  public isValid<TResult>(
+    scope: Scope,
+    select?: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): boolean | TResult {
+    const { _valid, _validVerbose } = this._state
+    const validated = _valid.getValue(scope)
+
+    if (!select) {
+      return isTrue(validated)
+    }
+
+    const verbose = _validVerbose.getValue(scope)
+
+    return select(validated, verbose)
+  }
+
+  public isInvalid(scope: Scope): boolean
+  public isInvalid<TResult>(
+    scope: Scope,
+    select: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): TResult
+  public isInvalid<TResult>(
+    scope: Scope,
+    select?: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): boolean | TResult {
+    const { _invalid, _invalidVerbose } = this._state
+    const validated = _invalid.getValue(scope)
+
+    if (!select) {
+      return isTrue(validated)
+    }
+
+    const verbose = _invalidVerbose.getValue(scope)
+
+    return select(validated, verbose)
+  }
+
+  public isValidated(scope: Scope): boolean
+  public isValidated<TResult>(
+    scope: Scope,
+    select: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): TResult
+  public isValidated<TResult>(
+    scope: Scope,
+    select?: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): boolean | TResult {
+    const { _validated, _validatedVerbose } = this._state
+    const validated = _validated.getValue(scope)
+
+    if (!select) {
+      return isTrue(validated)
+    }
+
+    const verbose = _validatedVerbose.getValue(scope)
+
+    return select(validated, verbose)
+  }
+
+  public isDirty(scope: Scope): boolean
+  public isDirty<TResult>(
+    scope: Scope,
+    select: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): TResult
+  public isDirty<TResult>(
+    scope: Scope,
+    select?: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): boolean | TResult {
+    const { _dirty, _dirtyVerbose } = this._state
+    const dirty = _dirty.getValue(scope)
+
+    if (!select) {
+      return isTruthy(dirty)
+    }
+
+    const verbose = _dirtyVerbose.getValue(scope)
+
+    return select(dirty, verbose)
+  }
+
+  public isTouched(scope: Scope): boolean
+  public isTouched<TResult>(
+    scope: Scope,
+    select: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): TResult
+  public isTouched<TResult>(
+    scope: Scope,
+    select?: (
+      concise: TParams["flag.schema"],
+      verbose: TParams["flag.schema.verbose"],
+    ) => TResult,
+  ): boolean | TResult {
+    const { _touched, _touchedVerbose } = this._state
+    const touched = _touched.getValue(scope)
+
+    if (!select) {
+      return isTruthy(touched)
+    }
+
+    const verbose = _touchedVerbose.getValue(scope)
+
+    return select(touched, verbose)
+  }
+
+  public setTouched(setter: TParams["flag.setter"]): void {
+    this._state._touchedVerbose.setValue((touched) => {
+      return this._state._resolveFlagSetter(setter, touched)
+    })
+  }
 }
