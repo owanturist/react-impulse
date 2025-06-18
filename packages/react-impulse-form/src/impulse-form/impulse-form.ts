@@ -70,4 +70,37 @@ export abstract class ImpulseForm<
       )
     })
   }
+
+  public getError(scope: Scope): null | TParams["error.schema"]
+  public getError<TResult>(
+    scope: Scope,
+    select: (
+      concise: null | TParams["error.schema"],
+      verbose: TParams["error.schema.verbose"],
+    ) => TResult,
+  ): TResult
+  public getError<TResult>(
+    scope: Scope,
+    select?: (
+      concise: null | TParams["error.schema"],
+      verbose: TParams["error.schema.verbose"],
+    ) => TResult,
+  ): null | TParams["error.schema"] | TResult {
+    const { _error, _errorVerbose } = this._state
+    const error = _error.getValue(scope)
+
+    if (!select) {
+      return error
+    }
+
+    const verbose = _errorVerbose.getValue(scope)
+
+    return select(error, verbose)
+  }
+
+  public setError(setter: TParams["error.setter"]): void {
+    this._state._errorVerbose.setValue((error) => {
+      return this._state._resolveErrorSetter(setter, error)
+    })
+  }
 }
