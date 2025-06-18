@@ -1,8 +1,44 @@
-import type { Scope } from "../dependencies"
+import { isTrue } from "~/tools/is-true"
+import { isTruthy } from "~/tools/is-truthy"
+
+import type { ReadonlyImpulse, Scope } from "../dependencies"
 
 import type { ImpulseFormParams } from "./impulse-form-params"
 import type { ImpulseFormSpec } from "./impulse-form-spec"
 import type { ImpulseFormState } from "./impulse-form-state"
+
+function resolveGetter<TValue, TVerbose, TSelected>(
+  scope: Scope,
+  value: ReadonlyImpulse<TValue>,
+  verbose: ReadonlyImpulse<TVerbose>,
+  select: undefined | ((value: TValue, verbose: TVerbose) => TSelected),
+): TSelected | TValue
+function resolveGetter<TValue, TVerbose, TSelected, TFallback>(
+  scope: Scope,
+  value: ReadonlyImpulse<TValue>,
+  verbose: ReadonlyImpulse<TVerbose>,
+  select: undefined | ((value: TValue, verbose: TVerbose) => TSelected),
+  fallback: (value: TValue) => TFallback,
+): TSelected | TFallback
+function resolveGetter<TValue, TVerbose, TSelected, TFallback>(
+  scope: Scope,
+  value: ReadonlyImpulse<TValue>,
+  verbose: ReadonlyImpulse<TVerbose>,
+  select: undefined | ((value: TValue, verbose: TVerbose) => TSelected),
+  fallback?: (value: TValue) => TFallback,
+): TSelected | TFallback | TValue {
+  const value_ = value.getValue(scope)
+
+  if (select) {
+    return select(value_, verbose.getValue(scope))
+  }
+
+  if (fallback) {
+    return fallback(value_)
+  }
+
+  return value_
+}
 
 export abstract class ImpulseForm<
   TParams extends ImpulseFormParams = ImpulseFormParams,
@@ -32,15 +68,8 @@ export abstract class ImpulseForm<
     ) => TResult,
   ): null | TParams["output.schema"] | TResult {
     const { _output, _outputVerbose } = this._state
-    const output = _output.getValue(scope)
 
-    if (!select) {
-      return output
-    }
-
-    const verbose = _outputVerbose.getValue(scope)
-
-    return select(output, verbose)
+    return resolveGetter(scope, _output, _outputVerbose, select)
   }
 
   public getInitial(scope: Scope): TParams["input.schema"] {
@@ -87,15 +116,8 @@ export abstract class ImpulseForm<
     ) => TResult,
   ): null | TParams["error.schema"] | TResult {
     const { _error, _errorVerbose } = this._state
-    const error = _error.getValue(scope)
 
-    if (!select) {
-      return error
-    }
-
-    const verbose = _errorVerbose.getValue(scope)
-
-    return select(error, verbose)
+    return resolveGetter(scope, _error, _errorVerbose, select)
   }
 
   public setError(setter: TParams["error.setter"]): void {
@@ -120,15 +142,8 @@ export abstract class ImpulseForm<
     ) => TResult,
   ): TParams["validateOn.schema"] | TResult {
     const { _validateOn, _validateOnVerbose } = this._state
-    const validateOn = _validateOn.getValue(scope)
 
-    if (!select) {
-      return validateOn
-    }
-
-    const verbose = _validateOnVerbose.getValue(scope)
-
-    return select(validateOn, verbose)
+    return resolveGetter(scope, _validateOn, _validateOnVerbose, select)
   }
 
   public setValidateOn(setter: TParams["validateOn.setter"]): void {
@@ -153,15 +168,8 @@ export abstract class ImpulseForm<
     ) => TResult,
   ): boolean | TResult {
     const { _valid, _validVerbose } = this._state
-    const validated = _valid.getValue(scope)
 
-    if (!select) {
-      return isTrue(validated)
-    }
-
-    const verbose = _validVerbose.getValue(scope)
-
-    return select(validated, verbose)
+    return resolveGetter(scope, _valid, _validVerbose, select, isTrue)
   }
 
   public isInvalid(scope: Scope): boolean
@@ -180,15 +188,8 @@ export abstract class ImpulseForm<
     ) => TResult,
   ): boolean | TResult {
     const { _invalid, _invalidVerbose } = this._state
-    const validated = _invalid.getValue(scope)
 
-    if (!select) {
-      return isTrue(validated)
-    }
-
-    const verbose = _invalidVerbose.getValue(scope)
-
-    return select(validated, verbose)
+    return resolveGetter(scope, _invalid, _invalidVerbose, select, isTrue)
   }
 
   public isValidated(scope: Scope): boolean
@@ -207,15 +208,8 @@ export abstract class ImpulseForm<
     ) => TResult,
   ): boolean | TResult {
     const { _validated, _validatedVerbose } = this._state
-    const validated = _validated.getValue(scope)
 
-    if (!select) {
-      return isTrue(validated)
-    }
-
-    const verbose = _validatedVerbose.getValue(scope)
-
-    return select(validated, verbose)
+    return resolveGetter(scope, _validated, _validatedVerbose, select, isTrue)
   }
 
   public isDirty(scope: Scope): boolean
@@ -234,15 +228,8 @@ export abstract class ImpulseForm<
     ) => TResult,
   ): boolean | TResult {
     const { _dirty, _dirtyVerbose } = this._state
-    const dirty = _dirty.getValue(scope)
 
-    if (!select) {
-      return isTruthy(dirty)
-    }
-
-    const verbose = _dirtyVerbose.getValue(scope)
-
-    return select(dirty, verbose)
+    return resolveGetter(scope, _dirty, _dirtyVerbose, select, isTruthy)
   }
 
   public isTouched(scope: Scope): boolean
@@ -261,15 +248,8 @@ export abstract class ImpulseForm<
     ) => TResult,
   ): boolean | TResult {
     const { _touched, _touchedVerbose } = this._state
-    const touched = _touched.getValue(scope)
 
-    if (!select) {
-      return isTruthy(touched)
-    }
-
-    const verbose = _touchedVerbose.getValue(scope)
-
-    return select(touched, verbose)
+    return resolveGetter(scope, _touched, _touchedVerbose, select, isTruthy)
   }
 
   public setTouched(setter: TParams["flag.setter"]): void {
