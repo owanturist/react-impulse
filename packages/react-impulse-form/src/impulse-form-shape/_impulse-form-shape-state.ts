@@ -7,12 +7,12 @@ import { resolveSetter } from "~/tools/setter"
 import { tapValues } from "~/tools/tap-values"
 import { values } from "~/tools/values"
 
+import { createNullableCompare } from "../create-nullable-compare"
 import { Impulse } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 
 import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"
-import type { ImpulseFormShapeSpec } from "./_impulse-form-shape-spec"
 import type { ImpulseFormShapeErrorVerbose } from "./impulse-form-shape-error-verbose"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 import type { ImpulseFormShapeInput } from "./impulse-form-shape-input"
@@ -98,10 +98,34 @@ export class ImpulseFormShapeState<
     },
   )
 
+  public readonly _output = Impulse(
+    (scope) => {
+      const output = mapValues(this._fields, ({ _output }) =>
+        _output.getValue(scope),
+      )
+
+      for (const value of values(output)) {
+        if (isNull(value)) {
+          return null
+        }
+      }
+
+      return {
+        ...output,
+        ...this._constants,
+      } as ImpulseFormShapeOutput<TFields>
+    },
+    {
+      compare: createNullableCompare(isShallowObjectEqual),
+    },
+  )
+
   public readonly _outputVerbose = Impulse(
     (scope) => {
       const output = {
-        ...mapValues(this._fields, ({ _output }) => _output.getValue(scope)),
+        ...mapValues(this._fields, ({ _outputVerbose }) =>
+          _outputVerbose.getValue(scope),
+        ),
         ...this._constants,
       }
 
@@ -113,26 +137,13 @@ export class ImpulseFormShapeState<
   )
 
   public constructor(
-    spec: ImpulseFormShapeSpec<TFields>,
     private readonly _fields: ImpulseFormShapeStateFields<TFields>,
     private readonly _constants: Omit<
       TFields,
       keyof ImpulseFormShapeStateFields<TFields>
     >,
   ) {
-    super(spec)
-  }
-
-  protected _outputFromVerbose(
-    verbose: ImpulseFormShapeOutputVerbose<TFields>,
-  ): null | ImpulseFormShapeOutput<TFields> {
-    for (const value of values(verbose)) {
-      if (isNull(value)) {
-        return null
-      }
-    }
-
-    return verbose as unknown as ImpulseFormShapeOutput<TFields>
+    super()
   }
 
   public _resolveInputSetter(

@@ -19,11 +19,13 @@ export class ImpulseFormUnitState<
 
   private readonly _result: ReadonlyImpulse<Result<null | TError, TOutput>>
 
-  public readonly _outputVerbose = Impulse((scope) => {
+  public readonly _output = Impulse((scope) => {
     const [, output] = this._result.getValue(scope)
 
     return output
   })
+
+  public override _outputVerbose = this._output
 
   public constructor(
     spec: ImpulseFormUnitSpec<TInput, TError, TOutput>,
@@ -34,7 +36,7 @@ export class ImpulseFormUnitState<
       ImpulseFormUnitTransform<TInput, TError, TOutput>
     >,
   ) {
-    super(spec)
+    super()
 
     this._result = Impulse(
       (scope) => {
@@ -68,10 +70,6 @@ export class ImpulseFormUnitState<
         },
       },
     )
-  }
-
-  protected _outputFromVerbose(verbose: TOutput | null): null | TOutput {
-    return verbose
   }
 
   public _resolveInputSetter(
