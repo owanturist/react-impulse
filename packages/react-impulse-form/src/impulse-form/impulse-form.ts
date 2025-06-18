@@ -1,5 +1,3 @@
-import type { Lazy } from "~/tools/lazy"
-
 import type { Scope } from "../dependencies"
 
 import type { ImpulseFormParams } from "./impulse-form-params"
@@ -14,7 +12,8 @@ export abstract class ImpulseForm<
 
   protected constructor(
     private readonly _spec: ImpulseFormSpec<TParams>,
-    private readonly _state: Lazy<ImpulseFormState<TParams>>,
+    // TODO make it private/protected AND make it Lazy
+    public readonly _state: ImpulseFormState<TParams>,
   ) {}
 
   public getOutput(scope: Scope): null | TParams["output.schema"]
@@ -32,7 +31,7 @@ export abstract class ImpulseForm<
       verbose: TParams["output.schema.verbose"],
     ) => TResult,
   ): null | TParams["output.schema"] | TResult {
-    const { _output, _outputVerbose } = this._state()
+    const { _output, _outputVerbose } = this._state
     const output = _output.getValue(scope)
 
     if (!select) {
@@ -45,12 +44,12 @@ export abstract class ImpulseForm<
   }
 
   public getInitial(scope: Scope): TParams["input.schema"] {
-    return this._state()._initial.getValue(scope)
+    return this._state._initial.getValue(scope)
   }
 
   public setInitial(setter: TParams["input.setter"]): void {
-    this._state()._initial.setValue((initial, scope) => {
-      return this._state()._resolveInputSetter(
+    this._state._initial.setValue((initial, scope) => {
+      return this._state._resolveInputSetter(
         setter,
         initial,
         this.getInput(scope),
@@ -59,12 +58,12 @@ export abstract class ImpulseForm<
   }
 
   public getInput(scope: Scope): TParams["input.schema"] {
-    return this._state()._input.getValue(scope)
+    return this._state._input.getValue(scope)
   }
 
   public setInput(setter: TParams["input.setter"]): void {
-    this._state()._input.setValue((input, scope) => {
-      return this._state()._resolveInputSetter(
+    this._state._input.setValue((input, scope) => {
+      return this._state._resolveInputSetter(
         setter,
         input,
         this.getInitial(scope),
