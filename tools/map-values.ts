@@ -1,12 +1,12 @@
-import { tapValues } from "./tap-values"
+import { forEntries } from "~/tools/for-entries"
 
 export function mapValues<TObject, TResult>(
   object: TObject,
-  fn: (value: TObject[keyof TObject], key: keyof TObject) => TResult,
+  fn: (value: TObject[typeof key], key: keyof TObject) => TResult,
 ): Record<keyof TObject, TResult> {
   const result = {} as Record<keyof TObject, TResult>
 
-  tapValues(object, (value, key) => {
+  forEntries(object, (value, key) => {
     result[key] = fn(value, key)
   })
 

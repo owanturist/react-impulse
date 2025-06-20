@@ -145,13 +145,13 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
     })
   }
 
-  public readonly _outputVerbose = Impulse((scope) => {
+  public readonly _output = Impulse((scope) => {
     const [, output] = this._result.getValue(scope)
 
     return output
   })
 
-  public _output = this._outputVerbose
+  public _outputVerbose = this._output
 
   public readonly _valid = Impulse((scope) => {
     const error = this._error.getValue(scope)
