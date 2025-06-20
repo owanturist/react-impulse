@@ -1,26 +1,60 @@
+import { forIntersection } from "~/tools/for-intersection"
+import { isBoolean } from "~/tools/is-boolean"
 import { isNull } from "~/tools/is-null"
-import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
+import { isString } from "~/tools/is-string"
 import { isUndefined } from "~/tools/is-undefined"
 import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
 import { resolveSetter } from "~/tools/setter"
-import { tapValues } from "~/tools/tap-values"
 import { values } from "~/tools/values"
 
-import { createNullableCompare } from "../create-nullable-compare"
-import { Impulse } from "../dependencies"
+import { Impulse, batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type { ImpulseFormState } from "../impulse-form/impulse-form-state"
+import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
 import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"
-import type { ImpulseFormShapeError } from "./impulse-form-shape-error"
+import {
+  type ImpulseFormShapeError,
+  isImpulseFormShapeErrorEqual,
+} from "./impulse-form-shape-error"
 import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"
-import type { ImpulseFormShapeErrorVerbose } from "./impulse-form-shape-error-verbose"
+import {
+  type ImpulseFormShapeErrorVerbose,
+  isImpulseFormShapeErrorVerboseEqual,
+} from "./impulse-form-shape-error-verbose"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
-import type { ImpulseFormShapeInput } from "./impulse-form-shape-input"
+import {
+  type ImpulseFormShapeFlag,
+  isImpulseFormShapeFlagEqual,
+} from "./impulse-form-shape-flag"
+import type { ImpulseFormShapeFlagSetter } from "./impulse-form-shape-flag-setter"
+import {
+  type ImpulseFormShapeFlagVerbose,
+  isImpulseFormShapeFlagVerboseEqual,
+} from "./impulse-form-shape-flag-verbose"
+import {
+  type ImpulseFormShapeInput,
+  isImpulseFormShapeInputEqual,
+} from "./impulse-form-shape-input"
 import type { ImpulseFormShapeInputSetter } from "./impulse-form-shape-input-setter"
-import type { ImpulseFormShapeOutput } from "./impulse-form-shape-output"
-import type { ImpulseFormShapeOutputVerbose } from "./impulse-form-shape-output-verbose"
+import {
+  type ImpulseFormShapeOutput,
+  isImpulseFormShapeOutputEqual,
+} from "./impulse-form-shape-output"
+import {
+  type ImpulseFormShapeOutputVerbose,
+  isImpulseFormShapeOutputVerboseEqual,
+} from "./impulse-form-shape-output-verbose"
+import {
+  type ImpulseFormShapeValidateOn,
+  isImpulseFormShapeValidateOnEqual,
+} from "./impulse-form-shape-validate-on"
+import type { ImpulseFormShapeValidateOnSetter } from "./impulse-form-shape-validate-on-setter"
+import {
+  type ImpulseFormShapeValidateOnVerbose,
+  isImpulseFormShapeValidateOnVerboseEqual,
+} from "./impulse-form-shape-validate-on-verbose"
 
 export type ImpulseFormShapeStateFields<
   TFields extends ImpulseFormShapeFields,
@@ -39,85 +73,241 @@ export class ImpulseFormShapeState<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
 > implements ImpulseFormState<ImpulseFormShapeParams<TFields>>
 {
+  public constructor(
+    private readonly _fields: ImpulseFormShapeStateFields<TFields>,
+    private readonly _constants: Omit<
+      TFields,
+      keyof ImpulseFormShapeStateFields<TFields>
+    >,
+  ) {}
+
   public readonly _initial = Impulse(
     (scope) => {
-      const initial = {
-        ...mapValues(this._fields, ({ _initial }) => _initial.getValue(scope)),
-        ...this._constants,
-      }
-
-      return initial as ImpulseFormShapeInput<TFields>
-    },
-
-    (next) => {
-      tapValues(this._fields, ({ _initial }, key) => {
-        _initial.setValue(next[key as keyof typeof next])
+      const initial = mapValues(this._fields, ({ _initial }) => {
+        return _initial.getValue(scope)
       })
+
+      return {
+        ...initial,
+        ...this._constants,
+      } as ImpulseFormShapeInput<TFields>
     },
 
     {
-      compare: isShallowObjectEqual,
+      compare: isImpulseFormShapeInputEqual,
     },
   )
+
+  public _setInitial(setter: ImpulseFormShapeInputSetter<TFields>): void {
+    batch((scope) => {
+      const setters = resolveSetter(
+        setter,
+        this._initial.getValue(scope),
+        this._input.getValue(scope),
+      )
+
+      forIntersection(this._fields, setters, (field, fieldSetter: unknown) => {
+        if (!isUndefined(fieldSetter)) {
+          field._setInitial(fieldSetter)
+        }
+      })
+    })
+  }
 
   public readonly _input = Impulse(
     (scope) => {
-      const input = {
-        ...mapValues(this._fields, ({ _input }) => _input.getValue(scope)),
-        ...this._constants,
-      }
-
-      return input as ImpulseFormShapeInput<TFields>
-    },
-
-    (next) => {
-      tapValues(this._fields, ({ _input }, key) => {
-        _input.setValue(next[key as keyof typeof next])
+      const input = mapValues(this._fields, ({ _input }) => {
+        return _input.getValue(scope)
       })
+
+      return {
+        ...input,
+        ...this._constants,
+      } as ImpulseFormShapeInput<TFields>
     },
 
     {
-      compare: isShallowObjectEqual,
+      compare: isImpulseFormShapeInputEqual,
     },
   )
 
-  public readonly _error = Impulse((scope) => {
-    const error = mapValues(this._fields, ({ _error }) =>
-      _error.getValue(scope),
-    )
+  public _setInput(setter: ImpulseFormShapeInputSetter<TFields>): void {
+    batch((scope) => {
+      const setters = resolveSetter(
+        setter,
+        this._input.getValue(scope),
+        this._initial.getValue(scope),
+      )
 
-    if (values(error).some(isNull)) {
-      return null
-    }
+      forIntersection(this._fields, setters, (field, fieldSetter: unknown) => {
+        if (!isUndefined(fieldSetter)) {
+          field._setInput(fieldSetter)
+        }
+      })
+    })
+  }
 
-    return error as ImpulseFormShapeError<TFields>
-  })
+  public readonly _error = Impulse(
+    (scope) => {
+      const error = mapValues(this._fields, ({ _error }) => {
+        return _error.getValue(scope)
+      })
+
+      if (values(error).every(isNull)) {
+        return null
+      }
+
+      return error as ImpulseFormShapeError<TFields>
+    },
+    {
+      compare: isImpulseFormShapeErrorEqual,
+    },
+  )
 
   public readonly _errorVerbose = Impulse(
     (scope) => {
-      const error = mapValues(this._fields, ({ _errorVerbose }) => {
+      const errorVerbose = mapValues(this._fields, ({ _errorVerbose }) => {
         return _errorVerbose.getValue(scope)
       })
 
-      return error as ImpulseFormShapeErrorVerbose<TFields>
-    },
-
-    (next) => {
-      tapValues(this._fields, ({ _errorVerbose }, key) => {
-        _errorVerbose.setValue(next[key as keyof typeof next])
-      })
+      return errorVerbose as ImpulseFormShapeErrorVerbose<TFields>
     },
 
     {
-      compare: isShallowObjectEqual,
+      compare: isImpulseFormShapeErrorVerboseEqual,
     },
   )
 
+  public _setError(setter: ImpulseFormShapeErrorSetter<TFields>): void {
+    batch((scope) => {
+      const setters = resolveSetter(setter, this._errorVerbose.getValue(scope))
+
+      forIntersection(this._fields, setters, (field, fieldSetter: unknown) => {
+        if (!isUndefined(fieldSetter)) {
+          field._setError(fieldSetter)
+        }
+      })
+    })
+  }
+
+  public readonly _validateOn = Impulse(
+    (scope) => {
+      const validateOn = mapValues(this._fields, ({ _validateOn }) => {
+        return _validateOn.getValue(scope)
+      })
+
+      const allValidateOn = values(validateOn)
+
+      /**
+       * Fallback to onTouch if none string validateOn is present.
+       * When the fields are empty it will use it.
+       * When the fields are not empty and have any value different than it uses the fields.
+       */
+      const onlyValidateOn = allValidateOn.find(isString) ?? VALIDATE_ON_TOUCH
+
+      for (const fieldValidateOn of allValidateOn) {
+        if (fieldValidateOn !== onlyValidateOn) {
+          return validateOn as ImpulseFormShapeValidateOn<TFields>
+        }
+      }
+
+      return onlyValidateOn as ValidateStrategy
+    },
+
+    {
+      compare: isImpulseFormShapeValidateOnEqual,
+    },
+  )
+
+  public readonly _validateOnVerbose = Impulse(
+    (scope) => {
+      const validateOnVerbose = mapValues(
+        this._fields,
+        ({ _validateOnVerbose }) => _validateOnVerbose.getValue(scope),
+      )
+
+      return validateOnVerbose as ImpulseFormShapeValidateOnVerbose<TFields>
+    },
+
+    {
+      compare: isImpulseFormShapeValidateOnVerboseEqual,
+    },
+  )
+
+  public _setValidateOn(
+    setter: ImpulseFormShapeValidateOnSetter<TFields>,
+  ): void {
+    batch((scope) => {
+      const setters = resolveSetter(
+        setter,
+        this._validateOnVerbose.getValue(scope),
+      )
+
+      forIntersection(this._fields, setters, (field, fieldSetter: unknown) => {
+        if (!isUndefined(fieldSetter)) {
+          field._setValidateOn(fieldSetter)
+        }
+      })
+    })
+  }
+
+  public readonly _touched = Impulse(
+    (scope) => {
+      const touched = mapValues(this._fields, ({ _touched }) => {
+        return _touched.getValue(scope)
+      })
+
+      const allTouched = values(touched)
+      const onlyTouched = allTouched.find(isBoolean) ?? false
+
+      for (const fieldTouched of allTouched) {
+        if (fieldTouched !== onlyTouched) {
+          return touched as ImpulseFormShapeFlag<TFields>
+        }
+      }
+
+      return onlyTouched
+    },
+
+    {
+      compare: isImpulseFormShapeFlagEqual,
+    },
+  )
+
+  public readonly _touchedVerbose = Impulse(
+    (scope) => {
+      const touchedVerbose = mapValues(this._fields, ({ _touchedVerbose }) =>
+        _touchedVerbose.getValue(scope),
+      )
+
+      return touchedVerbose as ImpulseFormShapeFlagVerbose<TFields>
+    },
+
+    {
+      compare: isImpulseFormShapeFlagVerboseEqual,
+    },
+  )
+
+  public _setTouched(setter: ImpulseFormShapeFlagSetter<TFields>): void {
+    batch((scope) => {
+      const setters = resolveSetter(
+        setter,
+        this._touchedVerbose.getValue(scope),
+      )
+
+      forIntersection(this._fields, setters, (field, fieldSetter: unknown) => {
+        if (!isUndefined(fieldSetter)) {
+          field._setTouched(fieldSetter)
+        }
+      })
+    })
+  }
+
   public readonly _output = Impulse(
     (scope) => {
-      const output = mapValues(this._fields, ({ _output }) =>
-        _output.getValue(scope),
-      )
+      const output = mapValues(this._fields, ({ _output }) => {
+        return _output.getValue(scope)
+      })
 
       if (values(output).some(isNull)) {
         return null
@@ -129,74 +319,172 @@ export class ImpulseFormShapeState<
       } as ImpulseFormShapeOutput<TFields>
     },
     {
-      compare: createNullableCompare(isShallowObjectEqual),
+      compare: isImpulseFormShapeOutputEqual,
     },
   )
 
   public readonly _outputVerbose = Impulse(
     (scope) => {
-      const output = {
-        ...mapValues(this._fields, ({ _outputVerbose }) =>
-          _outputVerbose.getValue(scope),
-        ),
-        ...this._constants,
-      }
+      const outputVerbose = mapValues(this._fields, ({ _outputVerbose }) => {
+        return _outputVerbose.getValue(scope)
+      })
 
-      return output as ImpulseFormShapeOutputVerbose<TFields>
+      return {
+        ...outputVerbose,
+        ...this._constants,
+      } as ImpulseFormShapeOutputVerbose<TFields>
     },
     {
-      compare: isShallowObjectEqual,
+      compare: isImpulseFormShapeOutputVerboseEqual,
     },
   )
 
-  public constructor(
-    private readonly _fields: ImpulseFormShapeStateFields<TFields>,
-    private readonly _constants: Omit<
-      TFields,
-      keyof ImpulseFormShapeStateFields<TFields>
-    >,
-  ) {}
+  public readonly _valid = Impulse(
+    (scope) => {
+      const valid = mapValues(this._fields, ({ _valid }) => {
+        return _valid.getValue(scope)
+      })
 
-  public _resolveInputSetter(
-    setter: ImpulseFormShapeInputSetter<TFields>,
-    current: ImpulseFormShapeInput<TFields>,
-    additional: ImpulseFormShapeInput<TFields>,
-  ): ImpulseFormShapeInput<TFields> {
-    const setters = resolveSetter(setter, current, additional)
+      const allValid = values(valid)
+      const onlyValid = allValid.find(isBoolean) ?? false
 
-    const inputs = mapValues(this._fields, (field, key) => {
-      const fieldSetter = setters[key as keyof typeof setters]
-
-      if (isUndefined(fieldSetter)) {
-        return current[key]
+      for (const fieldValid of allValid) {
+        if (fieldValid !== onlyValid) {
+          return valid as ImpulseFormShapeFlag<TFields>
+        }
       }
 
-      return field._resolveInputSetter(
-        fieldSetter,
-        current[key],
-        additional[key],
+      return onlyValid
+    },
+
+    {
+      compare: isImpulseFormShapeFlagEqual,
+    },
+  )
+
+  public readonly _validVerbose = Impulse(
+    (scope) => {
+      const validVerbose = mapValues(this._fields, ({ _validVerbose }) =>
+        _validVerbose.getValue(scope),
       )
-    })
 
-    return inputs as ImpulseFormShapeInput<TFields>
-  }
+      return validVerbose as ImpulseFormShapeFlagVerbose<TFields>
+    },
 
-  public _resolveErrorSetter(
-    setter: ImpulseFormShapeErrorSetter<TFields>,
-    current: ImpulseFormShapeErrorVerbose<TFields>,
-  ): ImpulseFormShapeErrorVerbose<TFields> {
-    const setters = resolveSetter(setter, current)
+    {
+      compare: isImpulseFormShapeFlagVerboseEqual,
+    },
+  )
 
-    const errors = mapValues(this._fields, (field, key) => {
-      const fieldSetter = setters[key]
+  public readonly _invalid = Impulse(
+    (scope) => {
+      const invalid = mapValues(this._fields, ({ _invalid }) => {
+        return _invalid.getValue(scope)
+      })
 
-      if (isUndefined(fieldSetter)) {
-        return current[key]
+      const allInvalid = values(invalid)
+      const onlyInvalid = allInvalid.find(isBoolean) ?? false
+
+      for (const fieldInvalid of allInvalid) {
+        if (fieldInvalid !== onlyInvalid) {
+          return invalid as ImpulseFormShapeFlag<TFields>
+        }
       }
 
-      return field._resolveErrorSetter(fieldSetter, current[key])
-    })
+      return onlyInvalid
+    },
 
-    return errors as ImpulseFormShapeErrorVerbose<TFields>
-  }
+    {
+      compare: isImpulseFormShapeFlagEqual,
+    },
+  )
+
+  public readonly _invalidVerbose = Impulse(
+    (scope) => {
+      const invalidVerbose = mapValues(this._fields, ({ _invalidVerbose }) => {
+        return _invalidVerbose.getValue(scope)
+      })
+
+      return invalidVerbose as ImpulseFormShapeFlagVerbose<TFields>
+    },
+
+    {
+      compare: isImpulseFormShapeFlagVerboseEqual,
+    },
+  )
+
+  public readonly _validated = Impulse(
+    (scope) => {
+      const validated = mapValues(this._fields, ({ _validated }) => {
+        return _validated.getValue(scope)
+      })
+
+      const allValidated = values(validated)
+      const onlyValidated = allValidated.find(isBoolean) ?? false
+
+      for (const fieldValidated of allValidated) {
+        if (fieldValidated !== onlyValidated) {
+          return validated as ImpulseFormShapeFlag<TFields>
+        }
+      }
+
+      return onlyValidated
+    },
+
+    {
+      compare: isImpulseFormShapeFlagEqual,
+    },
+  )
+
+  public readonly _validatedVerbose = Impulse(
+    (scope) => {
+      const validatedVerbose = mapValues(
+        this._fields,
+        ({ _validatedVerbose }) => _validatedVerbose.getValue(scope),
+      )
+
+      return validatedVerbose as ImpulseFormShapeFlagVerbose<TFields>
+    },
+
+    {
+      compare: isImpulseFormShapeFlagVerboseEqual,
+    },
+  )
+
+  public readonly _dirty = Impulse(
+    (scope) => {
+      const dirty = mapValues(this._fields, ({ _dirty }) => {
+        return _dirty.getValue(scope)
+      })
+
+      const allDirty = values(dirty)
+      const onlyDirty = allDirty.find(isBoolean) ?? false
+
+      for (const fieldDirty of allDirty) {
+        if (fieldDirty !== onlyDirty) {
+          return dirty as ImpulseFormShapeFlag<TFields>
+        }
+      }
+
+      return onlyDirty
+    },
+
+    {
+      compare: isImpulseFormShapeFlagEqual,
+    },
+  )
+
+  public readonly _dirtyVerbose = Impulse(
+    (scope) => {
+      const dirtyVerbose = mapValues(this._fields, ({ _dirtyVerbose }) => {
+        return _dirtyVerbose.getValue(scope)
+      })
+
+      return dirtyVerbose as ImpulseFormShapeFlagVerbose<TFields>
+    },
+
+    {
+      compare: isImpulseFormShapeFlagVerboseEqual,
+    },
+  )
 }
