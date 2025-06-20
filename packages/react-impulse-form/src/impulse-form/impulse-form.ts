@@ -47,7 +47,7 @@ export abstract class ImpulseForm<
   protected readonly _params?: TParams
 
   protected constructor(
-    private readonly _spec: ImpulseFormSpec<TParams>,
+    public readonly _spec: ImpulseFormSpec<TParams>,
     // TODO make it private/protected AND make it Lazy
     public readonly _state: ImpulseFormState<TParams>,
   ) {}
