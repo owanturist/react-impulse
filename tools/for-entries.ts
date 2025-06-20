@@ -1,8 +1,8 @@
 import { entries } from "~/tools/entries"
 
-export function tapValues<TObject>(
+export function forEntries<TObject>(
   object: TObject,
-  fn: (value: TObject[keyof TObject], key: keyof TObject) => void,
+  fn: (value: TObject[typeof key], key: keyof TObject) => void,
 ): void {
   for (const [key, value] of entries(object)) {
     fn(value, key)
