@@ -267,23 +267,18 @@ it("assigns custom initial", ({ scope }) => {
   expect(value.getInitial(scope)).toBe("2")
 })
 
-it("returns initial if it is equals to input with custom isInputEqual", ({
-  scope,
-}) => {
-  const initial = { count: 0 }
-  const form = ImpulseFormUnit(
-    { count: 0 },
-    {
-      initial: initial,
-      isInputEqual: (left, right) => left.count === right.count,
-    },
-  )
+it("assigns custom initial to equal input custom isInputEqual", ({ scope }) => {
+  const input = { count: 0 }
+  const form = ImpulseFormUnit(input, {
+    initial: { count: 0 },
+    isInputEqual: (left, right) => left.count === right.count,
+  })
 
-  expect(form.getInput(scope)).toBe(initial)
+  expect(form.getInitial(scope)).toBe(input)
   expect(form.getInput(scope)).toBe(form.getInitial(scope))
 
   form.setInput({ count: 1 })
-  expect(form.getInput(scope)).not.toBe(initial)
+  expect(form.getInput(scope)).not.toBe(input)
 })
 
 it("keeps the prev value with custom isInputEqual", ({ scope }) => {
