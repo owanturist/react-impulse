@@ -6,33 +6,57 @@
  * @private
  */
 export class ScopeEmitter {
-  public static _init(emit: VoidFunction): ScopeEmitter {
-    return new ScopeEmitter(emit)
+  private static _queue: null | Array<ScopeEmitter> = null
+
+  public static _init(emit: VoidFunction, shouldBatch = true): ScopeEmitter {
+    return new ScopeEmitter(emit, shouldBatch)
   }
 
-  private static _queue: null | Array<ReadonlySet<WeakRef<ScopeEmitter>>> = null
-
   public static _schedule<TResult>(
-    execute: (queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>) => TResult,
+    execute: (
+      enqueue: (emitters: ReadonlySet<WeakRef<ScopeEmitter>>) => void,
+    ) => TResult,
   ): TResult {
-    if (ScopeEmitter._queue) {
-      return execute(ScopeEmitter._queue)
+    const queue = ScopeEmitter._queue
+
+    if (queue) {
+      return execute((emitters) => {
+        for (const ref of emitters) {
+          const emitter = ref.deref()
+
+          if (emitter?._shouldBatch) {
+            queue.push(emitter)
+          } else if (emitter) {
+            emitter._flush()
+            emitter._emit()
+          }
+        }
+      })
     }
 
     ScopeEmitter._queue = []
 
-    const result = execute(ScopeEmitter._queue)
-    const executed = new WeakSet<ScopeEmitter>()
+    const qq = ScopeEmitter._queue
 
-    for (const emitters of ScopeEmitter._queue) {
+    const result = execute((emitters) => {
       for (const ref of emitters) {
         const emitter = ref.deref()
 
-        if (emitter && !executed.has(emitter)) {
-          executed.add(emitter)
+        if (emitter?._shouldBatch) {
+          qq.push(emitter)
+        } else if (emitter) {
           emitter._flush()
           emitter._emit()
         }
+      }
+    })
+    const executed = new WeakSet<ScopeEmitter>()
+
+    for (const emitter of ScopeEmitter._queue) {
+      if (!executed.has(emitter)) {
+        executed.add(emitter)
+        emitter._flush()
+        emitter._emit()
       }
     }
 
@@ -47,7 +71,10 @@ export class ScopeEmitter {
 
   private _version = 0
 
-  private constructor(private readonly _emit: VoidFunction) {}
+  private constructor(
+    private readonly _emit: VoidFunction,
+    private readonly _shouldBatch: boolean,
+  ) {}
 
   public _detachEverywhere(): void {
     for (const cleanup of this._cleanups) {
