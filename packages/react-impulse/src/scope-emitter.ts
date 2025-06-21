@@ -6,7 +6,7 @@
  * @private
  */
 export class ScopeEmitter {
-  private static _queue: null | Array<ScopeEmitter> = null
+  private static _queue: null | Set<ScopeEmitter> = null
 
   public static _init(emit: VoidFunction, shouldBatch = true): ScopeEmitter {
     return new ScopeEmitter(emit, shouldBatch)
@@ -24,17 +24,18 @@ export class ScopeEmitter {
         for (const ref of emitters) {
           const emitter = ref.deref()
 
-          if (emitter?._shouldBatch) {
-            queue.push(emitter)
-          } else if (emitter) {
-            emitter._flush()
-            emitter._emit()
+          if (emitter) {
+            if (!emitter._shouldBatch) {
+              emitter._flush()
+            }
+
+            queue.add(emitter)
           }
         }
       })
     }
 
-    ScopeEmitter._queue = []
+    ScopeEmitter._queue = new Set()
 
     const qq = ScopeEmitter._queue
 
@@ -42,22 +43,22 @@ export class ScopeEmitter {
       for (const ref of emitters) {
         const emitter = ref.deref()
 
-        if (emitter?._shouldBatch) {
-          qq.push(emitter)
-        } else if (emitter) {
-          emitter._flush()
-          emitter._emit()
+        if (emitter) {
+          if (!emitter._shouldBatch) {
+            emitter._flush()
+          }
+
+          qq.add(emitter)
         }
       }
     })
-    const executed = new WeakSet<ScopeEmitter>()
 
     for (const emitter of ScopeEmitter._queue) {
-      if (!executed.has(emitter)) {
-        executed.add(emitter)
+      if (emitter._shouldBatch) {
         emitter._flush()
-        emitter._emit()
       }
+
+      emitter._emit()
     }
 
     ScopeEmitter._queue = null
