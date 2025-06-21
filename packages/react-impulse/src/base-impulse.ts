@@ -20,7 +20,7 @@ export abstract class BaseImpulse<T>
 
   protected abstract _setter(
     value: T,
-    queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
+    enqueue: (emitters: ReadonlySet<WeakRef<ScopeEmitter>>) => void,
   ): void
 
   protected abstract _clone(value: T, compare: Compare<T>): Impulse<T>
@@ -77,12 +77,12 @@ export abstract class BaseImpulse<T>
   public setValue(
     valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
   ): void {
-    ScopeEmitter._schedule((queue) => {
+    ScopeEmitter._schedule((enqueue) => {
       const nextValue = isFunction(valueOrTransform)
         ? valueOrTransform(this._getter(), STATIC_SCOPE)
         : valueOrTransform
 
-      this._setter(nextValue, queue)
+      this._setter(nextValue, enqueue)
     })
   }
 

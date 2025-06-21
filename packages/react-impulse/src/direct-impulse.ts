@@ -17,11 +17,11 @@ export class DirectImpulse<T> extends BaseImpulse<T> {
 
   protected _setter(
     value: T,
-    queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
+    enqueue: (emitters: ReadonlySet<WeakRef<ScopeEmitter>>) => void,
   ): void {
     if (!this._compare(this._value, value, STATIC_SCOPE)) {
       this._value = value
-      queue.push(this._emitters)
+      enqueue(this._emitters)
     }
   }
 
