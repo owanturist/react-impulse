@@ -71,10 +71,6 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
   }
 
   public _setInitial(setter: ImpulseFormUnitInputSetter<TInput>): void {
-    this._initial.setValue((initial, scope) => {
-      return resolveSetter(setter, initial, this._input.getValue(scope))
-    })
-
     batch((scope) => {
       const before = this._initial.getValue(scope)
 
