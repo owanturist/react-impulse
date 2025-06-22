@@ -51,7 +51,7 @@ export class ScopeEmitter {
     return result
   }
 
-  private readonly _cleanups: Array<VoidFunction> = []
+  private readonly _attachedTo = new Set<Set<WeakRef<ScopeEmitter>>>()
 
   private readonly _ref = new WeakRef(this)
 
@@ -60,17 +60,16 @@ export class ScopeEmitter {
   private constructor(private readonly _emit: VoidFunction) {}
 
   public _detachEverywhere(): void {
-    for (const cleanup of this._cleanups) {
-      cleanup()
+    for (const emitters of this._attachedTo) {
+      emitters.delete(this._ref)
     }
-    this._cleanups.length = 0
+
+    this._attachedTo.clear()
   }
 
   public _attachTo(emitters: Set<WeakRef<ScopeEmitter>>): void {
-    if (!emitters.has(this._ref)) {
-      emitters.add(this._ref)
-      this._cleanups.push(() => emitters.delete(this._ref))
-    }
+    emitters.add(this._ref)
+    this._attachedTo.add(emitters)
   }
 
   public _flush(): void {
