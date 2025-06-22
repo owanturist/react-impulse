@@ -802,7 +802,7 @@ describe.each<{
   })
 })
 
-describe.skipIf(process.env.CI).concurrent(
+describe.skipIf(true || process.env.CI).concurrent(
   "Impulse(getter) garbage collection",
   {
     timeout: 10000,

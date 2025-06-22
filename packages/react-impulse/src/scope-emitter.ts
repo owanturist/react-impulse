@@ -8,8 +8,8 @@
 export class ScopeEmitter {
   private static _queue: null | Set<ScopeEmitter> = null
 
-  public static _init(emit: VoidFunction, shouldBatch = true): ScopeEmitter {
-    return new ScopeEmitter(emit, shouldBatch)
+  public static _init(emit: VoidFunction): ScopeEmitter {
+    return new ScopeEmitter(emit)
   }
 
   public static _schedule<TResult>(
@@ -25,10 +25,7 @@ export class ScopeEmitter {
           const emitter = ref.deref()
 
           if (emitter) {
-            if (!emitter._shouldBatch) {
-              emitter._flush()
-            }
-
+            emitter._flush()
             queue.add(emitter)
           }
         }
@@ -44,9 +41,7 @@ export class ScopeEmitter {
         const emitter = ref.deref()
 
         if (emitter) {
-          if (!emitter._shouldBatch) {
-            emitter._flush()
-          }
+          emitter._flush()
 
           qq.add(emitter)
         }
@@ -54,10 +49,6 @@ export class ScopeEmitter {
     })
 
     for (const emitter of ScopeEmitter._queue) {
-      if (emitter._shouldBatch) {
-        emitter._flush()
-      }
-
       emitter._emit()
     }
 
@@ -72,10 +63,7 @@ export class ScopeEmitter {
 
   private _version = 0
 
-  private constructor(
-    private readonly _emit: VoidFunction,
-    private readonly _shouldBatch: boolean,
-  ) {}
+  private constructor(private readonly _emit: VoidFunction) {}
 
   public _detachEverywhere(): void {
     for (const cleanup of this._cleanups) {

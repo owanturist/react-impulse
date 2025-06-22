@@ -18,7 +18,7 @@ export class DerivedImpulse<T> extends BaseImpulse<T> {
       } else {
         ScopeEmitter._schedule((enqueue) => enqueue(this._emitters))
       }
-    }, false),
+    }),
   } satisfies Scope
 
   // the value is never null because it assigns the value from the _getValue on the first _getter call
