@@ -565,7 +565,9 @@ describe("when reading derived value during batching", () => {
     expect(derived.getValue(scope)).toBe(7)
   })
 
-  it("returns the same value after a source change", ({ scope }) => {
+  it("returns the same subsequent value after a source change", ({ scope }) => {
+    expect.assertions(4)
+
     const source = Impulse(1)
     const derived = Impulse((scope) => ({ count: source.getValue(scope) }), {
       compare: Counter.compare,
@@ -582,5 +584,40 @@ describe("when reading derived value during batching", () => {
     })
 
     expect(derived.getValue(scope)).toBe(derived.getValue(scope))
+  })
+
+  it("returns the comparably equal value after a source change", ({
+    scope,
+  }) => {
+    expect.assertions(7)
+
+    const source = Impulse({ count: 1 })
+    const derived = Impulse((scope) => source.getValue(scope), {
+      compare: Counter.compare,
+    })
+
+    const source_0 = source.getValue(scope)
+    const derived_0 = derived.getValue(scope)
+    expect(source_0).toBe(derived_0)
+
+    source.setValue(Counter.clone)
+
+    const source_1 = source.getValue(scope)
+    expect(source_1).not.toBe(source_0)
+    expect(source_1).toStrictEqual(source_0)
+
+    const derived_1 = derived.getValue(scope)
+    expect(derived_1).toBe(derived_0)
+
+    batch((scope) => {
+      source.setValue(Counter.clone)
+
+      const source_2 = source.getValue(scope)
+      expect(source_2).not.toBe(source_0)
+      expect(source_2).toStrictEqual(source_0)
+
+      const derived_2 = derived.getValue(scope)
+      expect(derived_2).toBe(derived_0)
+    })
   })
 })
