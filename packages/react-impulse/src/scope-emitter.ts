@@ -24,7 +24,7 @@ export class ScopeEmitterQueue {
           /**
            * Emit immediately so `DerivedImpulse` utilizes the compare function to either:
            * 1. NOT CHANGED: resubscribe to sources and set its._version = emitter._version
-           * 2. CHANGED: _push'es its._emitters so they end up here either emitting (DirectImpulse) or scheduling (DerivedImpulse).
+           * 2. CHANGED: _push'es its._emitters so they end up here either emitting (DerivedImpulse) or scheduling (DirectImpulse).
            */
           emitter._emit()
         } else {
