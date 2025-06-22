@@ -459,7 +459,7 @@ export class ImpulseFormShape<
           verbose,
         }))
 
-        allValid = allValid && field.isValidated(scope) && field.isValid(scope)
+        allValid = allValid && field.isValid(scope)
         valueConcise[key] = output.concise
         valueVerbose[key] = output.verbose
       } else {

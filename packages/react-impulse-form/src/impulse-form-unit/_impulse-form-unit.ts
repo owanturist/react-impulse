@@ -80,9 +80,15 @@ export class ImpulseFormUnit<
         return true
       }
 
-      const transformer = this._transform.getValue(scope)
+      const customError = this._error.getValue(scope)
 
-      if (!transformer || transformer._transformer) {
+      if (!isNull(customError)) {
+        return true
+      }
+
+      const transform = this._transform.getValue(scope)
+
+      if (!transform || transform._transformer) {
         return true
       }
 
@@ -202,7 +208,10 @@ export class ImpulseFormUnit<
   }
 
   public setError(setter: ImpulseFormUnitErrorSetter<TError>): void {
-    this._error.setValue((error) => resolveSetter(setter, error))
+    batch(() => {
+      this._error.setValue((error) => resolveSetter(setter, error))
+      this._updateValidated(true)
+    })
   }
 
   public isValidated(scope: Scope): boolean
@@ -217,8 +226,7 @@ export class ImpulseFormUnit<
       verbose: boolean,
     ) => TResult = params._first as typeof select,
   ): TResult {
-    const validated =
-      this._validated.getValue(scope) || !isNull(this._error.getValue(scope))
+    const validated = this._validated.getValue(scope)
 
     return select(validated, validated)
   }
