@@ -6,7 +6,7 @@ import type { Impulse } from "./impulse"
 import type { ImpulseOptions } from "./impulse-options"
 import type { ReadableImpulse } from "./readable-impulse"
 import { EMITTER_KEY, STATIC_SCOPE, type Scope, extractScope } from "./scope"
-import { ScopeEmitter } from "./scope-emitter"
+import { ScopeEmitter, type ScopeEmitterQueue } from "./scope-emitter"
 import type { WritableImpulse } from "./writable-impulse"
 
 export abstract class BaseImpulse<T>
@@ -18,10 +18,7 @@ export abstract class BaseImpulse<T>
 
   protected abstract _getter(): T
 
-  protected abstract _setter(
-    value: T,
-    queue: Array<ReadonlySet<WeakRef<ScopeEmitter>>>,
-  ): void
+  protected abstract _setter(value: T, queue: ScopeEmitterQueue): void
 
   protected abstract _clone(value: T, compare: Compare<T>): Impulse<T>
 

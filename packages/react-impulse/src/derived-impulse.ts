@@ -16,9 +16,11 @@ export class DerivedImpulse<T> extends BaseImpulse<T> {
         // adjust the version since the value didn't change
         this._version = this._scope[EMITTER_KEY]._getVersion()
       } else {
-        ScopeEmitter._schedule((queue) => queue.push(this._emitters))
+        ScopeEmitter._schedule((queue) => {
+          queue._push(this._emitters)
+        })
       }
-    }),
+    }, true),
   } satisfies Scope
 
   // the value is never null because it assigns the value from the _getValue on the first _getter call

@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, type Scope, batch, useScoped } from "../../src"
+import { Impulse, type Scope, batch, subscribe, useScoped } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
@@ -469,3 +469,254 @@ describe.each([
     })
   },
 )
+
+describe("when reading value during batching", () => {
+  it("returns new value right after update", ({ scope }) => {
+    const source = Impulse(1)
+    const spy = vi.fn()
+
+    expect(source.getValue(scope)).toBe(1)
+
+    batch((scope) => {
+      source.setValue(2)
+      spy(source.getValue(scope))
+
+      source.setValue(3)
+      spy(source.getValue(scope))
+    })
+
+    expect(source.getValue(scope)).toBe(3)
+
+    expect(spy).toHaveBeenCalledTimes(2)
+    expect(spy).toHaveBeenNthCalledWith(1, 2)
+    expect(spy).toHaveBeenNthCalledWith(2, 3)
+  })
+})
+
+/**
+ * bugfix: DerivedImpulse does not update it's value when batching #893
+ * @link https://github.com/owanturist/react-impulse/issues/893
+ */
+describe("when reading derived value during batching", () => {
+  it("updates derived value after source changes", ({ scope }) => {
+    expect.assertions(5)
+
+    const source = Impulse(1)
+    const derived = Impulse(source)
+
+    expect(derived.getValue(scope)).toBe(1)
+
+    batch((scope) => {
+      source.setValue(1)
+      expect(derived.getValue(scope)).toBe(1)
+
+      source.setValue(2)
+      expect(derived.getValue(scope)).toBe(2)
+
+      source.setValue(3)
+      expect(derived.getValue(scope)).toBe(3)
+    })
+
+    expect(derived.getValue(scope)).toBe(3)
+  })
+
+  it("updates derived values after source changes in subscribe", () => {
+    expect.assertions(5)
+
+    const source = Impulse(1)
+    const derived = Impulse(source)
+    const spy = vi.fn()
+
+    subscribe((scope) => {
+      spy(derived.getValue(scope))
+    })
+
+    expect(spy).toHaveBeenCalledExactlyOnceWith(1)
+    vi.clearAllMocks()
+
+    batch((scope) => {
+      source.setValue(1)
+      expect(derived.getValue(scope)).toBe(1)
+
+      source.setValue(2)
+      expect(derived.getValue(scope)).toBe(2)
+
+      source.setValue(3)
+      expect(derived.getValue(scope)).toBe(3)
+    })
+
+    expect(spy).toHaveBeenCalledExactlyOnceWith(3)
+  })
+
+  it("updates derived value after some sources change", ({ scope }) => {
+    expect.assertions(4)
+
+    const source_1 = Impulse(1)
+    const source_2 = Impulse(2)
+    const derived = Impulse(
+      (scope) => source_1.getValue(scope) + source_2.getValue(scope),
+    )
+
+    expect(derived.getValue(scope)).toBe(3)
+
+    batch((scope) => {
+      source_1.setValue(2)
+      expect(derived.getValue(scope)).toBe(4)
+
+      source_2.setValue(3)
+      expect(derived.getValue(scope)).toBe(5)
+    })
+
+    expect(derived.getValue(scope)).toBe(5)
+  })
+
+  it("updates derived value after all sources change", ({ scope }) => {
+    expect.assertions(4)
+
+    const source_1 = Impulse(1)
+    const source_2 = Impulse(2)
+    const derived = Impulse(
+      (scope) => source_1.getValue(scope) + source_2.getValue(scope),
+    )
+
+    expect(derived.getValue(scope)).toBe(3)
+
+    batch((scope) => {
+      source_1.setValue(2)
+      source_2.setValue(3)
+      expect(derived.getValue(scope)).toBe(5)
+
+      source_1.setValue(3)
+      source_2.setValue(4)
+      expect(derived.getValue(scope)).toBe(7)
+    })
+
+    expect(derived.getValue(scope)).toBe(7)
+  })
+
+  it("updates derived values after source changes", ({ scope }) => {
+    expect.assertions(8)
+
+    const source = Impulse(1)
+    const derived_1 = Impulse(source)
+    const derived_2 = Impulse(source)
+
+    expect(derived_1.getValue(scope)).toBe(1)
+    expect(derived_2.getValue(scope)).toBe(1)
+
+    batch((scope) => {
+      source.setValue(2)
+      expect(derived_1.getValue(scope)).toBe(2)
+      expect(derived_2.getValue(scope)).toBe(2)
+
+      source.setValue(3)
+      expect(derived_1.getValue(scope)).toBe(3)
+      expect(derived_2.getValue(scope)).toBe(3)
+    })
+
+    expect(derived_1.getValue(scope)).toBe(3)
+    expect(derived_2.getValue(scope)).toBe(3)
+  })
+
+  it("updates chained derived values after source changes", ({ scope }) => {
+    const source = Impulse(1)
+    const derived = Impulse(source)
+    const derived_derived = Impulse(derived)
+
+    batch((scope) => {
+      expect(derived_derived.getValue(scope)).toBe(1)
+
+      batch((scope) => {
+        source.setValue(2)
+        expect(derived_derived.getValue(scope)).toBe(2)
+
+        source.setValue(3)
+        expect(derived_derived.getValue(scope)).toBe(3)
+      })
+
+      expect(derived_derived.getValue(scope)).toBe(3)
+    })
+
+    expect(derived.getValue(scope)).toBe(3)
+    expect(derived_derived.getValue(scope)).toBe(3)
+  })
+
+  it("updates derived value after derived change", ({ scope }) => {
+    expect.assertions(7)
+
+    const source = Impulse(1)
+    const derived = Impulse(source, source)
+
+    batch((scope) => {
+      derived.setValue(1)
+      expect(source.getValue(scope)).toBe(1)
+      expect(derived.getValue(scope)).toBe(1)
+
+      derived.setValue(2)
+      expect(source.getValue(scope)).toBe(2)
+      expect(derived.getValue(scope)).toBe(2)
+
+      derived.setValue(3)
+      expect(source.getValue(scope)).toBe(3)
+      expect(derived.getValue(scope)).toBe(3)
+    })
+
+    expect(source.getValue(scope)).toBe(3)
+  })
+
+  it("returns the same subsequent value after a source change", ({ scope }) => {
+    expect.assertions(4)
+
+    const source = Impulse(1)
+    const derived = Impulse((scope) => ({ count: source.getValue(scope) }), {
+      compare: Counter.compare,
+    })
+
+    expect(derived.getValue(scope)).toBe(derived.getValue(scope))
+
+    batch((scope) => {
+      source.setValue(2)
+      expect(derived.getValue(scope)).toBe(derived.getValue(scope))
+
+      source.setValue(3)
+      expect(derived.getValue(scope)).toBe(derived.getValue(scope))
+    })
+
+    expect(derived.getValue(scope)).toBe(derived.getValue(scope))
+  })
+
+  it("returns the comparably equal value after a source change", ({
+    scope,
+  }) => {
+    expect.assertions(7)
+
+    const source = Impulse({ count: 1 })
+    const derived = Impulse((scope) => source.getValue(scope), {
+      compare: Counter.compare,
+    })
+
+    const source_0 = source.getValue(scope)
+    const derived_0 = derived.getValue(scope)
+    expect(source_0).toBe(derived_0)
+
+    source.setValue(Counter.clone)
+
+    const source_1 = source.getValue(scope)
+    expect(source_1).not.toBe(source_0)
+    expect(source_1).toStrictEqual(source_0)
+
+    const derived_1 = derived.getValue(scope)
+    expect(derived_1).toBe(derived_0)
+
+    batch((scope) => {
+      source.setValue(Counter.clone)
+
+      const source_2 = source.getValue(scope)
+      expect(source_2).not.toBe(source_0)
+      expect(source_2).toStrictEqual(source_0)
+
+      const derived_2 = derived.getValue(scope)
+      expect(derived_2).toBe(derived_0)
+    })
+  })
+})
