@@ -7,6 +7,8 @@ export class ScopeEmitterQueue {
 
       if (emitter) {
         this._queue.add(emitter)
+        // flush the emitter as soon as it is scheduled
+        // so the derived impulses can read a fresh value due to version increment
         emitter._flush()
       }
     }
@@ -34,13 +36,18 @@ export class ScopeEmitter {
   public static _schedule<TResult>(
     execute: (queue: ScopeEmitterQueue) => TResult,
   ): TResult {
+    // continue the execution if the queue is already initialized
     if (ScopeEmitter._queue) {
       return execute(ScopeEmitter._queue)
     }
 
-    const queue = (ScopeEmitter._queue = new ScopeEmitterQueue())
+    // initialize the queue and start the execution sequence
+    ScopeEmitter._queue = new ScopeEmitterQueue()
 
-    const result = execute(queue)
+    // the execution might lead to other `_schedule` calls,
+    // so they all will collect the emitters in the same queue
+    // ensuring that an emitter is emitted only once
+    const result = execute(ScopeEmitter._queue)
 
     for (const emitter of ScopeEmitter._queue) {
       emitter._emit()
