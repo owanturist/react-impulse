@@ -1006,6 +1006,86 @@ describe.skipIf(process.env.CI).concurrent(
   },
 )
 
+describe("Impulse(source)", () => {
+  it("creates an Impulse from a source", () => {
+    const source = Impulse(0)
+    const impulse = Impulse(source)
+
+    expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<number>>()
+  })
+
+  it("allows source as a ReadonlyImpulse", () => {
+    const source = Impulse(() => 0)
+    const impulse = Impulse(source)
+
+    expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<number>>()
+  })
+
+  it("allows source as a ReadableImpulse", ({ scope }) => {
+    class Custom implements ReadableImpulse<number> {
+      public readonly counter = Impulse(0)
+
+      public getValue(scope: Scope): number {
+        return this.counter.getValue(scope)
+      }
+    }
+
+    const source = new Custom()
+    const derived = Impulse(source)
+
+    expect(derived.getValue(scope)).toBe(0)
+
+    act(() => {
+      source.counter.setValue(1)
+    })
+
+    expect(derived.getValue(scope)).toBe(1)
+  })
+})
+
+describe("Impulse(source, options)", () => {
+  it("creates an Impulse from a source", () => {
+    const source = Impulse<Counter>({ count: 0 })
+    const impulse = Impulse(source, { compare: Counter.compare })
+
+    expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<Counter>>()
+  })
+
+  it("allows source as a ReadonlyImpulse", () => {
+    const source = Impulse<Counter>(() => ({ count: 0 }))
+    const impulse = Impulse(source, { compare: Counter.compare })
+
+    expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<Counter>>()
+  })
+
+  it("allows source as a ReadableImpulse", ({ scope }) => {
+    class Custom implements ReadableImpulse<Counter> {
+      public readonly counter = Impulse({ count: 0 })
+
+      public getValue(scope: Scope): Counter {
+        return this.counter.getValue(scope)
+      }
+    }
+
+    const source = new Custom()
+    const derived = Impulse(source, { compare: Counter.compare })
+
+    expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
+    expect(Counter.compare).not.toHaveBeenCalled()
+
+    act(() => {
+      source.counter.setValue(Counter.inc)
+    })
+
+    expect(derived.getValue(scope)).toStrictEqual({ count: 1 })
+    expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
+      { count: 0 },
+      { count: 1 },
+      scope,
+    )
+  })
+})
+
 describe("Impulse(getter, setter, options?)", () => {
   it("creates an Impulse", () => {
     let variable = 0
