@@ -119,8 +119,8 @@ importers:
         specifier: ^5.1.4
         version: 5.1.4(typescript@5.8.3)(vite@6.2.2(jiti@2.4.2)(terser@5.40.0))
       zod:
-        specifier: ^3.25.28
-        version: 3.25.28
+        specifier: ^3.25.67
+        version: 3.25.67
 
 packages:
 
@@ -2503,8 +2503,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod@3.25.28:
-    resolution: {integrity: sha512-/nt/67WYKnr5by3YS7LroZJbtcCBurDKKPBPWWzaxvVCGuG/NOsiKkrjoOhI8mJ+SQUXEbUzeB3S+6XDUEEj7Q==}
+  zod@3.25.67:
+    resolution: {integrity: sha512-idA2YXwpCdqUSKRCACDE6ItZD9TZzy3OZMtpfLoh6oPR47lipysRrJfjzMqFxQ3uJuUPyUeWe1r9vLH33xO/Qw==}
 
 snapshots:
 
@@ -5142,4 +5142,4 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod@3.25.28: {}
+  zod@3.25.67: {}
