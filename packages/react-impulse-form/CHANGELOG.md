@@ -1,5 +1,13 @@
 # react-impulse-form
 
+## 0.11.1
+
+### Patch Changes
+
+- [#892](https://github.com/owanturist/react-impulse/pull/892) [`9e22f05`](https://github.com/owanturist/react-impulse/commit/9e22f053852f796e25b5fbd4dc6f3c3d8aea5d83) Thanks [@dependabot](https://github.com/apps/dependabot)! - Bump terser from 5.40.0 to 5.43.1
+
+- [#898](https://github.com/owanturist/react-impulse/pull/898) [`b81e684`](https://github.com/owanturist/react-impulse/commit/b81e6844562601f5f052fc6b59df17448808d524) Thanks [@owanturist](https://github.com/owanturist)! - Minify class and function names in production builds.
+
 ## 0.11.0
 
 ### Minor Changes

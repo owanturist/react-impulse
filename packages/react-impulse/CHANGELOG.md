@@ -1,5 +1,15 @@
 # react-impulse
 
+## 3.0.3
+
+### Patch Changes
+
+- [#892](https://github.com/owanturist/react-impulse/pull/892) [`9e22f05`](https://github.com/owanturist/react-impulse/commit/9e22f053852f796e25b5fbd4dc6f3c3d8aea5d83) Thanks [@dependabot](https://github.com/apps/dependabot)! - Bump terser from 5.40.0 to 5.43.1
+
+- [#896](https://github.com/owanturist/react-impulse/pull/896) [`0ce1c41`](https://github.com/owanturist/react-impulse/commit/0ce1c41424a45f94d31608f6283a74e4b0018a3e) Thanks [@owanturist](https://github.com/owanturist)! - Ensure that the `DerivedImpulse` updates its value when `batch`ing. Resolves [#893](https://github.com/owanturist/react-impulse/issues/893).
+
+- [#898](https://github.com/owanturist/react-impulse/pull/898) [`b81e684`](https://github.com/owanturist/react-impulse/commit/b81e6844562601f5f052fc6b59df17448808d524) Thanks [@owanturist](https://github.com/owanturist)! - Minify class and function names in production builds.
+
 ## 3.0.2
 
 ### Patch Changes
