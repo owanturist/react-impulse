@@ -32,7 +32,7 @@ export function useCreateScope<T = () => Scope>(
   const select = useCallback(
     (version: number) => {
       const getScope = (): Scope => {
-        emitter._detachEverywhere()
+        emitter._detachFromAll()
 
         return {
           [EMITTER_KEY]: emitter,

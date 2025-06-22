@@ -59,7 +59,7 @@ export class ScopeEmitter {
 
   private constructor(private readonly _emit: VoidFunction) {}
 
-  public _detachEverywhere(): void {
+  public _detachFromAll(): void {
     for (const emitters of this._attachedTo) {
       emitters.delete(this._ref)
     }
@@ -74,7 +74,7 @@ export class ScopeEmitter {
 
   public _flush(): void {
     this._version = (this._version + 1) % 10e9
-    this._detachEverywhere()
+    this._detachFromAll()
   }
 
   public readonly _getVersion = (): number => {
