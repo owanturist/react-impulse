@@ -1,3 +1,22 @@
+export class ScopeEmitterQueue {
+  private readonly _queue = new Set<ScopeEmitter>()
+
+  public _push(emitters: ReadonlySet<WeakRef<ScopeEmitter>>): void {
+    for (const ref of emitters) {
+      const emitter = ref.deref()
+
+      if (emitter) {
+        this._queue.add(emitter)
+        emitter._flush()
+      }
+    }
+  }
+
+  public [Symbol.iterator](): IterableIterator<ScopeEmitter> {
+    return this._queue[Symbol.iterator]()
+  }
+}
+
 /**
  * A context to track Impulse#getValue usage inside the factory function.
  * The tracked calls will subscribe related stores to updates,
@@ -6,47 +25,22 @@
  * @private
  */
 export class ScopeEmitter {
-  private static _queue: null | Set<ScopeEmitter> = null
+  private static _queue: null | ScopeEmitterQueue = null
 
   public static _init(emit: VoidFunction): ScopeEmitter {
     return new ScopeEmitter(emit)
   }
 
   public static _schedule<TResult>(
-    execute: (
-      enqueue: (emitters: ReadonlySet<WeakRef<ScopeEmitter>>) => void,
-    ) => TResult,
+    execute: (queue: ScopeEmitterQueue) => TResult,
   ): TResult {
-    const queue = ScopeEmitter._queue
-
-    if (queue) {
-      return execute((emitters) => {
-        for (const ref of emitters) {
-          const emitter = ref.deref()
-
-          if (emitter) {
-            emitter._flush()
-            queue.add(emitter)
-          }
-        }
-      })
+    if (ScopeEmitter._queue) {
+      return execute(ScopeEmitter._queue)
     }
 
-    ScopeEmitter._queue = new Set()
+    const queue = (ScopeEmitter._queue = new ScopeEmitterQueue())
 
-    const qq = ScopeEmitter._queue
-
-    const result = execute((emitters) => {
-      for (const ref of emitters) {
-        const emitter = ref.deref()
-
-        if (emitter) {
-          emitter._flush()
-
-          qq.add(emitter)
-        }
-      }
-    })
+    const result = execute(queue)
 
     for (const emitter of ScopeEmitter._queue) {
       emitter._emit()

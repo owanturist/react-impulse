@@ -16,7 +16,7 @@ export class DerivedImpulse<T> extends BaseImpulse<T> {
         // adjust the version since the value didn't change
         this._version = this._scope[EMITTER_KEY]._getVersion()
       } else {
-        ScopeEmitter._schedule((enqueue) => enqueue(this._emitters))
+        ScopeEmitter._schedule((queue) => queue._push(this._emitters))
       }
     }),
   } satisfies Scope
