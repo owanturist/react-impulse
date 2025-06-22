@@ -10,8 +10,8 @@ export default defineConfig({
   terserOptions: {
     mangle: {
       module: false,
-      keep_classnames: true,
-      keep_fnames: true,
+      keep_classnames: false,
+      keep_fnames: false,
       properties: {
         regex: /^_[^_]\w+[^_]$/,
         // @ts-expect-error undocumented, but it specifies how to mangle Impulse's properties
