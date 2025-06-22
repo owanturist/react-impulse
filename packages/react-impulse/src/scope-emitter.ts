@@ -2,20 +2,37 @@ export class ScopeEmitterQueue {
   private readonly _queue = new Set<ScopeEmitter>()
 
   public _push(emitters: ReadonlySet<WeakRef<ScopeEmitter>>): void {
-    for (const ref of emitters) {
+    /**
+     * Calling the `_emit` might cause the same Impulse (host of the `emitters`)
+     * to be scheduled again for the same scope (DerivedImpulse when source sets the comparably equal value).
+     * It causes infinite loop, where the `emitter._flush()` first unsubscribes from the source Impulse but
+     * the DerivedImpulse's `emitter._emit()` subscribes it back.
+     *
+     * To prevent this, the _push should only iterate over the emitters present at the moment of the call.
+     */
+    for (const ref of Array.from(emitters)) {
       const emitter = ref.deref()
 
       if (emitter) {
-        this._queue.add(emitter)
-        // flush the emitter as soon as it is scheduled
-        // so the derived impulses can read a fresh value due to version increment
+        /**
+         * Flush the emitter as soon as it is scheduled
+         * so the derived impulses can read a fresh value due to version increment.
+         */
         emitter._flush()
+
+        if (emitter._skipBatching) {
+          emitter._emit()
+        } else {
+          this._queue.add(emitter)
+        }
       }
     }
   }
 
-  public [Symbol.iterator](): IterableIterator<ScopeEmitter> {
-    return this._queue[Symbol.iterator]()
+  public _process(): void {
+    for (const emitter of this._queue) {
+      emitter._emit()
+    }
   }
 }
 
@@ -29,30 +46,35 @@ export class ScopeEmitterQueue {
 export class ScopeEmitter {
   private static _queue: null | ScopeEmitterQueue = null
 
-  public static _init(emit: VoidFunction): ScopeEmitter {
-    return new ScopeEmitter(emit)
+  /**
+   * Initializes and returns a new instance of the `ScopeEmitter` class.
+   *
+   * @param emit - A callback function to be invoked when the scope emits.
+   * @param skipBatching - opt-out from emit batching. Necessary for derived impulses.
+   */
+  public static _init(emit: VoidFunction, skipBatching = false): ScopeEmitter {
+    return new ScopeEmitter(emit, skipBatching)
   }
 
   public static _schedule<TResult>(
     execute: (queue: ScopeEmitterQueue) => TResult,
   ): TResult {
-    // continue the execution if the queue is already initialized
+    // Continue the execution if the queue is already initialized.
     if (ScopeEmitter._queue) {
       return execute(ScopeEmitter._queue)
     }
 
-    // initialize the queue and start the execution sequence
+    // Initialize the queue and start the execution sequence.
     ScopeEmitter._queue = new ScopeEmitterQueue()
 
-    // the execution might lead to other `_schedule` calls,
-    // so they all will collect the emitters in the same queue
-    // ensuring that an emitter is emitted only once
+    /**
+     * The execution might lead to other `_schedule` calls,
+     * so they all will collect the emitters in the same queue
+     * ensuring that an emitter is emitted only once.
+     */
     const result = execute(ScopeEmitter._queue)
 
-    for (const emitter of ScopeEmitter._queue) {
-      emitter._emit()
-    }
-
+    ScopeEmitter._queue._process()
     ScopeEmitter._queue = null
 
     return result
@@ -64,7 +86,10 @@ export class ScopeEmitter {
 
   private _version = 0
 
-  private constructor(private readonly _emit: VoidFunction) {}
+  private constructor(
+    public readonly _emit: VoidFunction,
+    public readonly _skipBatching: boolean,
+  ) {}
 
   public _detachFromAll(): void {
     for (const emitters of this._attachedTo) {
