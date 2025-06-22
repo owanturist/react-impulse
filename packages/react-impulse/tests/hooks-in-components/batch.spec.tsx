@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, type Scope, batch, useScoped } from "../../src"
+import { Impulse, type Scope, batch, subscribe, useScoped } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
@@ -499,7 +499,7 @@ describe("when reading value during batching", () => {
  */
 describe("when reading derived value during batching", () => {
   it("updates derived value after source changes", ({ scope }) => {
-    expect.assertions(4)
+    expect.assertions(5)
 
     const source = Impulse(1)
     const derived = Impulse(source)
@@ -507,6 +507,9 @@ describe("when reading derived value during batching", () => {
     expect(derived.getValue(scope)).toBe(1)
 
     batch((scope) => {
+      source.setValue(1)
+      expect(derived.getValue(scope)).toBe(1)
+
       source.setValue(2)
       expect(derived.getValue(scope)).toBe(2)
 
@@ -515,6 +518,34 @@ describe("when reading derived value during batching", () => {
     })
 
     expect(derived.getValue(scope)).toBe(3)
+  })
+
+  it("updates derived values after source changes in subscribe", () => {
+    expect.assertions(5)
+
+    const source = Impulse(1)
+    const derived = Impulse(source)
+    const spy = vi.fn()
+
+    subscribe((scope) => {
+      spy(derived.getValue(scope))
+    })
+
+    expect(spy).toHaveBeenCalledExactlyOnceWith(1)
+    vi.clearAllMocks()
+
+    batch((scope) => {
+      source.setValue(1)
+      expect(derived.getValue(scope)).toBe(1)
+
+      source.setValue(2)
+      expect(derived.getValue(scope)).toBe(2)
+
+      source.setValue(3)
+      expect(derived.getValue(scope)).toBe(3)
+    })
+
+    expect(spy).toHaveBeenCalledExactlyOnceWith(3)
   })
 
   it("updates derived value after some sources change", ({ scope }) => {
@@ -611,12 +642,16 @@ describe("when reading derived value during batching", () => {
   })
 
   it("updates derived value after derived change", ({ scope }) => {
-    expect.assertions(5)
+    expect.assertions(7)
 
     const source = Impulse(1)
     const derived = Impulse(source, source)
 
     batch((scope) => {
+      derived.setValue(1)
+      expect(source.getValue(scope)).toBe(1)
+      expect(derived.getValue(scope)).toBe(1)
+
       derived.setValue(2)
       expect(source.getValue(scope)).toBe(2)
       expect(derived.getValue(scope)).toBe(2)

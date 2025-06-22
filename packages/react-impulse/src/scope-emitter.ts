@@ -21,8 +21,14 @@ export class ScopeEmitterQueue {
         emitter._flush()
 
         if (emitter._skipBatching) {
+          /**
+           * Emit immediately so `DerivedImpulse` utilizes the compare function to either:
+           * 1. NOT CHANGED: resubscribe to sources and set its._version = emitter._version
+           * 2. CHANGED: _push'es its._emitters so they end up here either emitting (DirectImpulse) or scheduling (DerivedImpulse).
+           */
           emitter._emit()
         } else {
+          // Schedule the emit when all the emitters are collected.
           this._queue.add(emitter)
         }
       }

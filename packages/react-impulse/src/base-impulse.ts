@@ -74,12 +74,12 @@ export abstract class BaseImpulse<T>
   public setValue(
     valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
   ): void {
-    ScopeEmitter._schedule((enqueue) => {
+    ScopeEmitter._schedule((queue) => {
       const nextValue = isFunction(valueOrTransform)
         ? valueOrTransform(this._getter(), STATIC_SCOPE)
         : valueOrTransform
 
-      this._setter(nextValue, enqueue)
+      this._setter(nextValue, queue)
     })
   }
 
