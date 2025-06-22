@@ -416,16 +416,25 @@ export class ImpulseFormList<
       verbose: ImpulseFormListOutputVerbose<TElement>,
     ) => TResult = params._first as typeof select,
   ): TResult {
+    const elements = this._elements.getValue(scope)
+
     const [concise, verbose] = zipMap(
       //
-      this._elements.getValue(scope),
+      elements,
       (form) => form.getOutput(scope, params),
     ) as [
       ImpulseFormListOutput<TElement>,
       ImpulseFormListOutputVerbose<TElement>,
     ]
 
-    return select(concise.some(isNull) ? null : concise, verbose)
+    return select(
+      elements.every(
+        (element) => element.isValidated(scope) && element.isValid(scope),
+      )
+        ? concise
+        : null,
+      verbose,
+    )
   }
 
   public getInput(scope: Scope): ImpulseFormListInput<TElement> {
