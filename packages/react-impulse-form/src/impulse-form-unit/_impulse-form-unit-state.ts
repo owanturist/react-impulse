@@ -1,7 +1,12 @@
 import { isNull } from "~/tools/is-null"
 import { resolveSetter } from "~/tools/setter"
 
-import { Impulse, type ReadonlyImpulse, batch } from "../dependencies"
+import {
+  type Compare,
+  Impulse,
+  type ReadonlyImpulse,
+  batch,
+} from "../dependencies"
 import type { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
 import {
@@ -26,18 +31,66 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
   implements ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>>
 {
   public constructor(
-    public readonly _input: Impulse<TInput>,
     public readonly _initial: Impulse<TInput>,
-    public readonly _transform: Impulse<
+    public readonly _input: Impulse<TInput>,
+    public readonly _customError: Impulse<null | TError>,
+    public readonly _validateOn: Impulse<ValidateStrategy>,
+    public readonly _touched: Impulse<boolean>,
+    private readonly _transform: Impulse<
       ImpulseFormUnitTransform<TInput, TError, TOutput>
     >,
-    public readonly _touched: Impulse<boolean>,
-    public readonly _dirty: ReadonlyImpulse<boolean>,
-    public readonly _validateOn: Impulse<ValidateStrategy>,
-    public readonly _validated: Impulse<boolean>,
-    private readonly _customError: Impulse<null | TError>,
-    private readonly _result: ReadonlyImpulse<Result<null | TError, TOutput>>,
+    isInputDirty: Compare<TInput>,
+    isOutputEqual: Compare<null | TOutput>,
+    isErrorEqual: Compare<null | TError>,
   ) {
+    const result = Impulse<Result<null | TError, TOutput>>((scope) => {
+      const customError = _customError.getValue(scope)
+
+      if (!isNull(customError)) {
+        return [customError, null]
+      }
+
+      const input = _input.getValue(scope)
+      const transform = _transform.getValue(scope)
+
+      const [error, output] = transform._validator(input)
+
+      if (!isNull(output)) {
+        return [null, output]
+      }
+
+      return [this._validated.getValue(scope) ? error : null, null]
+    })
+
+    this._error = this._errorVerbose = Impulse(
+      (scope) => {
+        const [error] = result.getValue(scope)
+
+        return error
+      },
+      {
+        compare: isErrorEqual,
+      },
+    )
+
+    this._output = this._outputVerbose = Impulse(
+      (scope) => {
+        const [, output] = result.getValue(scope)
+
+        return output
+      },
+      {
+        compare: isOutputEqual,
+      },
+    )
+
+    this._dirty = this._dirtyVerbose = Impulse((scope) => {
+      const initial = this._initial.getValue(scope)
+      const input = this._input.getValue(scope)
+
+      return isInputDirty(initial, input, scope)
+    })
+
     this._validate()
   }
 
@@ -102,13 +155,9 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
     })
   }
 
-  public readonly _error = Impulse<null | TError>((scope) => {
-    const [error] = this._result.getValue(scope)
+  public readonly _error: ReadonlyImpulse<null | TError>
 
-    return error
-  })
-
-  public readonly _errorVerbose = this._error
+  public readonly _errorVerbose: ReadonlyImpulse<null | TError>
 
   public _setError(setter: ImpulseFormUnitErrorSetter<TError>): void {
     this._customError.setValue((error) => resolveSetter(setter, error))
@@ -141,13 +190,9 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
     })
   }
 
-  public readonly _output = Impulse((scope) => {
-    const [, output] = this._result.getValue(scope)
+  public readonly _output: ReadonlyImpulse<null | TOutput>
 
-    return output
-  })
-
-  public readonly _outputVerbose = this._output
+  public readonly _outputVerbose: ReadonlyImpulse<null | TOutput>
 
   public readonly _valid = Impulse((scope) => {
     const error = this._error.getValue(scope)
@@ -165,9 +210,12 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
 
   public readonly _invalidVerbose = this._invalid
 
+  public readonly _validated = Impulse(false)
   public readonly _validatedVerbose = this._validated
 
-  public readonly _dirtyVerbose = this._dirty
+  public readonly _dirty: ReadonlyImpulse<boolean>
+
+  public readonly _dirtyVerbose: ReadonlyImpulse<boolean>
 
   public reset(): void {
     // TODO add rest of reset logic
