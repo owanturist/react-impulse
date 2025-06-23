@@ -1,4 +1,3 @@
-import { isNull } from "~/tools/is-null"
 import type { Option } from "~/tools/option"
 import { resolveSetter } from "~/tools/setter"
 
@@ -7,7 +6,6 @@ import type {
   ImpulseFormSpec,
   ImpulseFormSpecPatch,
 } from "../impulse-form/impulse-form-spec"
-import type { Result } from "../result"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
 import { ImpulseFormUnit } from "./_impulse-form-unit"
@@ -99,84 +97,22 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
   }
 
   public _create(): ImpulseFormUnit<TInput, TError, TOutput> {
-    const input = Impulse(this._input, {
-      compare: this._isInputEqual,
+    const initialOrInput = untrack((scope) => {
+      return this._isInputEqual(this._initial, this._input, scope)
+        ? this._input
+        : this._initial
     })
-
-    const initial = Impulse(
-      untrack((scope) => {
-        return this._isInputEqual(this._initial, this._input, scope)
-          ? this._input
-          : this._initial
-      }),
-      {
-        compare: this._isInputEqual,
-      },
-    )
-
-    const transform = Impulse(this._transform)
-
-    const touched = Impulse(this._touched)
-
-    const dirty = Impulse((scope) => {
-      return this._isInputDirty(
-        initial.getValue(scope),
-        input.getValue(scope),
-        scope,
-      )
-    })
-
-    const validateOn = Impulse(this._validateOn)
-
-    const validated = Impulse(false)
-
-    const customError = Impulse(this._error, {
-      compare: this._isErrorEqual,
-    })
-
-    const result = Impulse<Result<null | TError, TOutput>>(
-      (scope) => {
-        const _customError = customError.getValue(scope)
-
-        if (!isNull(_customError)) {
-          return [_customError, null]
-        }
-
-        const _input = input.getValue(scope)
-        const _transform = transform.getValue(scope)
-
-        const [error, output] = _transform._validator(_input)
-
-        if (!isNull(output)) {
-          return [null, output]
-        }
-
-        return [validated.getValue(scope) ? error : null, null]
-      },
-      {
-        compare: (
-          [leftError, leftOutput],
-          [rightError, rightOutput],
-          scope,
-        ) => {
-          return (
-            this._isErrorEqual(leftError, rightError, scope) &&
-            this._isOutputEqual(leftOutput, rightOutput, scope)
-          )
-        },
-      },
-    )
 
     const state = new ImpulseFormUnitState(
-      input,
-      initial,
-      transform,
-      touched,
-      dirty,
-      validateOn,
-      validated,
-      customError,
-      result,
+      Impulse(this._input, { compare: this._isInputEqual }),
+      Impulse(initialOrInput, { compare: this._isInputEqual }),
+      Impulse(this._error, { compare: this._isErrorEqual }),
+      Impulse(this._validateOn),
+      Impulse(this._touched),
+      Impulse(this._transform),
+      this._isInputDirty,
+      this._isOutputEqual,
+      this._isErrorEqual,
     )
 
     return new ImpulseFormUnit(this, state)
