@@ -1,5 +1,20 @@
 # react-impulse
 
+## 3.1.0
+
+### Minor Changes
+
+- [#901](https://github.com/owanturist/react-impulse/pull/901) [`b8b8c99`](https://github.com/owanturist/react-impulse/commit/b8b8c9968d6c7395603fc29b34fe62acc27892b0) Thanks [@owanturist](https://github.com/owanturist)! - Extend `Impulse(getter, options?)` by allowing `getter` to be a `ReadableImpulse<T>`:
+
+  ```dart
+  Impulse<T>(
+    getter: ReadableImpulse<T> | ((scope: Scope) => T),
+    options?: ImpulseOptions<T>,
+  ): ReadonlyImpulse<T>
+  ```
+
+  Resolves [#895](https://github.com/owanturist/react-impulse/issues/895)
+
 ## 3.0.3
 
 ### Patch Changes
