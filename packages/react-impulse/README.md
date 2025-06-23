@@ -189,7 +189,7 @@ const Counter: React.FC = () => {
 
 ```dart
 Impulse<T>(
-  getter: (scope: Scope) => T,
+  getter: ReadableImpulse<T> | ((scope: Scope) => T),
   options?: ImpulseOptions<T>,
 ): ReadonlyImpulse<T>
 

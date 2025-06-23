@@ -29,14 +29,14 @@ export function Impulse<T = undefined>(): Impulse<undefined | T>
  * Creates a new derived ReadonlyImpulse.
  * A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes.
  *
- * @param getter a function to read the derived value from a source.
+ * @param getter either anything that implements the `ReadableImpulse` interface or a function to read the derived value from the source.
  * @param options optional `ImpulseOptions`.
  * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
  *
  * @version 3.0.0
  */
 export function Impulse<T>(
-  getter: (scope: Scope) => T,
+  getter: ReadableImpulse<T> | ((scope: Scope) => T),
   options?: ImpulseOptions<T>,
 ): ReadonlyImpulse<T>
 
