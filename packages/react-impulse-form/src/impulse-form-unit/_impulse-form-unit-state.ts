@@ -108,13 +108,13 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
     return error
   })
 
-  public _errorVerbose = this._error
+  public readonly _errorVerbose = this._error
 
   public _setError(setter: ImpulseFormUnitErrorSetter<TError>): void {
     this._customError.setValue((error) => resolveSetter(setter, error))
   }
 
-  public _validateOnVerbose = this._validateOn
+  public readonly _validateOnVerbose = this._validateOn
 
   public _setValidateOn(setter: ImpulseFormUnitValidateOnSetter): void {
     batch((scope) => {
@@ -130,7 +130,7 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
     })
   }
 
-  public _touchedVerbose = this._touched
+  public readonly _touchedVerbose = this._touched
 
   public _setTouched(
     setter: ImpulseFormUnitParams<TInput, TError, TOutput>["flag.setter"],
@@ -147,7 +147,7 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
     return output
   })
 
-  public _outputVerbose = this._output
+  public readonly _outputVerbose = this._output
 
   public readonly _valid = Impulse((scope) => {
     const error = this._error.getValue(scope)
@@ -155,7 +155,7 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
     return isNull(error)
   })
 
-  public _validVerbose = this._valid
+  public readonly _validVerbose = this._valid
 
   public readonly _invalid = Impulse((scope) => {
     const error = this._error.getValue(scope)
@@ -163,11 +163,11 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
     return !isNull(error)
   })
 
-  public _invalidVerbose = this._invalid
+  public readonly _invalidVerbose = this._invalid
 
-  public _validatedVerbose = this._validated
+  public readonly _validatedVerbose = this._validated
 
-  public _dirtyVerbose = this._dirty
+  public readonly _dirtyVerbose = this._dirty
 
   public reset(): void {
     // TODO add rest of reset logic
