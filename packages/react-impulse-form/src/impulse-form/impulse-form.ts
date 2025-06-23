@@ -176,7 +176,7 @@ export abstract class ImpulseForm<
   }
 
   public isValid(scope: Scope): boolean {
-    return !this.isInvalid(scope)
+    return this.isValidated(scope) && !this.isInvalid(scope)
   }
 
   public isInvalid(scope: Scope): boolean {
