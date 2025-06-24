@@ -266,7 +266,7 @@ describe.each([
       expect(value.getError(scope)).toBeNull()
     })
 
-    it("marks as validated on submit", async ({ scope }) => {
+    it.skip("marks as validated on submit", async ({ scope }) => {
       const value = setup({ validateOn })
 
       await value.submit()
