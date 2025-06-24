@@ -31,8 +31,8 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
   implements ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>>
 {
   public constructor(
-    public readonly _initial: Impulse<TInput>,
     public readonly _input: Impulse<TInput>,
+    public readonly _initial: Impulse<TInput>,
     public readonly _customError: Impulse<null | TError>,
     public readonly _validateOn: Impulse<ValidateStrategy>,
     public readonly _touched: Impulse<boolean>,
@@ -43,6 +43,45 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
     isOutputEqual: Compare<null | TOutput>,
     isErrorEqual: Compare<null | TError>,
   ) {
+    // holds the actual validated state
+    const validated = Impulse(false)
+
+    this._validated = this._validatedVerbose = Impulse<boolean>(
+      // mixes the validated and invalid states
+      (scope) => validated.getValue(scope) || this._invalid.getValue(scope),
+      // proxies the validated setter where `false` means just "validate if not validated yet"
+      // and `true` means "revalidate even if already validated"
+      (revalidate, scope) => {
+        validated.setValue((_validated) => {
+          if (!revalidate && _validated) {
+            return true
+          }
+
+          if (_transform.getValue(scope)._transformer) {
+            return true
+          }
+
+          switch (_validateOn.getValue(scope)) {
+            case VALIDATE_ON_INIT: {
+              return true
+            }
+
+            case VALIDATE_ON_TOUCH: {
+              return _touched.getValue(scope)
+            }
+
+            case VALIDATE_ON_CHANGE: {
+              return this._dirty.getValue(scope)
+            }
+
+            case VALIDATE_ON_SUBMIT: {
+              return false
+            }
+          }
+        })
+      },
+    )
+
     const result = Impulse<Result<null | TError, TOutput>>((scope) => {
       const customError = _customError.getValue(scope)
 
@@ -59,7 +98,7 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
         return [null, output]
       }
 
-      return [this._validated.getValue(scope) ? error : null, null]
+      return [validated.getValue(scope) ? error : null, null]
     })
 
     this._error = this._errorVerbose = Impulse(
@@ -85,40 +124,27 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
     )
 
     this._dirty = this._dirtyVerbose = Impulse((scope) => {
-      const initial = this._initial.getValue(scope)
-      const input = this._input.getValue(scope)
+      const initial = _initial.getValue(scope)
+      const input = _input.getValue(scope)
 
       return isInputDirty(initial, input, scope)
     })
 
-    this._validate()
+    this._validated.setValue(false)
   }
 
-  private _validate(revalidate = false): void {
-    this._validated.setValue((validated, scope) => {
-      if (
-        (!revalidate && validated) ||
-        this._transform.getValue(scope)._transformer
-      ) {
-        return true
-      }
+  public _setInput(setter: ImpulseFormUnitInputSetter<TInput>): void {
+    batch((scope) => {
+      const before = this._input.getValue(scope)
 
-      switch (this._validateOn.getValue(scope)) {
-        case VALIDATE_ON_INIT: {
-          return true
-        }
+      this._input.setValue(
+        resolveSetter(setter, before, this._initial.getValue(scope)),
+      )
 
-        case VALIDATE_ON_TOUCH: {
-          return this._touched.getValue(scope)
-        }
+      const after = this._input.getValue(scope)
 
-        case VALIDATE_ON_CHANGE: {
-          return this._dirty.getValue(scope)
-        }
-
-        case VALIDATE_ON_SUBMIT: {
-          return false
-        }
+      if (before !== after) {
+        this._validated.setValue(false)
       }
     })
   }
@@ -134,29 +160,12 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
       const after = this._initial.getValue(scope)
 
       if (before !== after) {
-        this._validate()
-      }
-    })
-  }
-
-  public _setInput(setter: ImpulseFormUnitInputSetter<TInput>): void {
-    batch((scope) => {
-      const before = this._input.getValue(scope)
-
-      this._input.setValue(
-        resolveSetter(setter, before, this._initial.getValue(scope)),
-      )
-
-      const after = this._input.getValue(scope)
-
-      if (before !== after) {
-        this._validate()
+        this._validated.setValue(false)
       }
     })
   }
 
   public readonly _error: ReadonlyImpulse<null | TError>
-
   public readonly _errorVerbose: ReadonlyImpulse<null | TError>
 
   public _setError(setter: ImpulseFormUnitErrorSetter<TError>): void {
@@ -174,7 +183,7 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
       const after = this._validateOn.getValue(scope)
 
       if (before !== after) {
-        this._validate(true)
+        this._validated.setValue(true)
       }
     })
   }
@@ -186,12 +195,11 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
   ): void {
     batch(() => {
       this._touched.setValue((touched) => resolveSetter(setter, touched))
-      this._validate()
+      this._validated.setValue(false)
     })
   }
 
   public readonly _output: ReadonlyImpulse<null | TOutput>
-
   public readonly _outputVerbose: ReadonlyImpulse<null | TOutput>
 
   public readonly _valid = Impulse((scope) => {
@@ -210,16 +218,15 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
 
   public readonly _invalidVerbose = this._invalid
 
-  public readonly _validated = Impulse(false)
-  public readonly _validatedVerbose = this._validated
+  public readonly _validated: Impulse<boolean>
+  public readonly _validatedVerbose: ReadonlyImpulse<boolean>
 
   public readonly _dirty: ReadonlyImpulse<boolean>
-
   public readonly _dirtyVerbose: ReadonlyImpulse<boolean>
 
   public reset(): void {
     // TODO add rest of reset logic
-    this._validate(true)
+    this._validated.setValue(true)
   }
 
   public _setTransform(
@@ -227,7 +234,7 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
   ): void {
     batch(() => {
       this._transform.setValue(transformFromTransformer(transformer))
-      this._validate()
+      this._validated.setValue(false)
     })
   }
 }
