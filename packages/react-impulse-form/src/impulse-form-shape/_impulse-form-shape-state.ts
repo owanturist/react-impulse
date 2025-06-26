@@ -1,4 +1,5 @@
-import { forIntersection } from "~/tools/for-intersection"
+import { forEntries } from "~/tools/for-entries"
+import { hasProperty } from "~/tools/has-property"
 import { isBoolean } from "~/tools/is-boolean"
 import { isNull } from "~/tools/is-null"
 import { isString } from "~/tools/is-string"
@@ -106,9 +107,9 @@ export class ImpulseFormShapeState<
         this._input.getValue(scope),
       )
 
-      forIntersection(this._fields, setters, (field, fieldSetter: unknown) => {
-        if (!isUndefined(fieldSetter)) {
-          field._setInitial(fieldSetter)
+      forEntries(this._fields, (field, key) => {
+        if (hasProperty(setters, key) && !isUndefined(setters[key])) {
+          field._setInitial(setters[key])
         }
       })
     })
@@ -139,9 +140,9 @@ export class ImpulseFormShapeState<
         this._initial.getValue(scope),
       )
 
-      forIntersection(this._fields, setters, (field, fieldSetter: unknown) => {
-        if (!isUndefined(fieldSetter)) {
-          field._setInput(fieldSetter)
+      forEntries(this._fields, (field, key) => {
+        if (hasProperty(setters, key) && !isUndefined(setters[key])) {
+          field._setInput(setters[key])
         }
       })
     })
@@ -182,9 +183,11 @@ export class ImpulseFormShapeState<
     batch((scope) => {
       const setters = resolveSetter(setter, this._errorVerbose.getValue(scope))
 
-      forIntersection(this._fields, setters, (field, fieldSetter: unknown) => {
-        if (!isUndefined(fieldSetter)) {
-          field._setError(fieldSetter)
+      forEntries(this._fields, (field, key) => {
+        if (isNull(setters)) {
+          field._setError(setters)
+        } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
+          field._setError(setters[key])
         }
       })
     })
@@ -243,9 +246,11 @@ export class ImpulseFormShapeState<
         this._validateOnVerbose.getValue(scope),
       )
 
-      forIntersection(this._fields, setters, (field, fieldSetter: unknown) => {
-        if (!isUndefined(fieldSetter)) {
-          field._setValidateOn(fieldSetter)
+      forEntries(this._fields, (field, key) => {
+        if (isString(setters)) {
+          field._setValidateOn(setters)
+        } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
+          field._setValidateOn(setters[key])
         }
       })
     })
@@ -295,9 +300,11 @@ export class ImpulseFormShapeState<
         this._touchedVerbose.getValue(scope),
       )
 
-      forIntersection(this._fields, setters, (field, fieldSetter: unknown) => {
-        if (!isUndefined(fieldSetter)) {
-          field._setTouched(fieldSetter)
+      forEntries(this._fields, (field, key) => {
+        if (isBoolean(setters)) {
+          field._setTouched(setters)
+        } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
+          field._setTouched(setters[key])
         }
       })
     })
