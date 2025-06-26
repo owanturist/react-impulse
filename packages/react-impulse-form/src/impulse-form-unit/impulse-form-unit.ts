@@ -1,9 +1,10 @@
 import { hasProperty } from "~/tools/has-property"
+import { isNull } from "~/tools/is-null"
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 import { None, Option } from "~/tools/option"
 
-import { createNullableCompare } from "../create-nullable-compare"
+import { createUnionCompare } from "../create-union-compare"
 import type { Compare } from "../dependencies"
 import type { ValidateStrategy } from "../validate-strategy"
 import type { ZodLikeSchema } from "../zod-like-schema"
@@ -178,14 +179,18 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       isInputDirty,
       isInputEqual,
       isStrictEqual,
-      createNullableCompare(isShallowArrayEqual),
+      createUnionCompare<null, ReadonlyArray<string>>(
+        isNull,
+        isShallowArrayEqual,
+      ),
     )
 
     return spec._create()
   }
 
   const error = Option(options?.error)
-  const isErrorEqual = createNullableCompare<TError>(
+  const isErrorEqual = createUnionCompare<null, TError>(
+    isNull,
     options?.isErrorEqual ?? isStrictEqual,
   )
 
@@ -232,7 +237,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     transformFromInput(),
     isInputDirty,
     isInputEqual,
-    createNullableCompare(isInputEqual),
+    createUnionCompare(isNull, isInputEqual),
     isErrorEqual,
   )
 

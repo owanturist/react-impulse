@@ -1,13 +1,11 @@
 import { isBoolean } from "~/tools/is-boolean"
 import { isNull } from "~/tools/is-null"
-import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
 import { isString } from "~/tools/is-string"
 import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
 import { Option, Some } from "~/tools/option"
 import { resolveSetter } from "~/tools/setter"
 
-import { createNullableCompare } from "../create-nullable-compare"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type {
   ImpulseFormSpec,
@@ -71,8 +69,6 @@ export class ImpulseFormShapeSpec<
     this._fields,
     ({ _touched }) => _touched,
   ) as ImpulseFormShapeFlagVerbose<TFields>
-
-  public readonly _isOutputEqual = createNullableCompare(isShallowObjectEqual)
 
   public _override({
     _input,
