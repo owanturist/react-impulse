@@ -1,9 +1,10 @@
+import { isBoolean } from "~/tools/is-boolean"
 import { isNull } from "~/tools/is-null"
 import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
+import { isString } from "~/tools/is-string"
 import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
 import { Option, Some } from "~/tools/option"
-import { selectValues } from "~/tools/select-values"
 import { resolveSetter } from "~/tools/setter"
 
 import { createNullableCompare } from "../create-nullable-compare"
@@ -47,28 +48,28 @@ export class ImpulseFormShapeSpec<
   ) {}
 
   public readonly _initial = {
-    ...selectValues(this._fields, "_initial"),
+    ...mapValues(this._fields, ({ _initial }) => _initial),
     ...this._constants,
   } as ImpulseFormShapeInput<TFields>
 
   public readonly _input = {
-    ...selectValues(this._fields, "_input"),
+    ...mapValues(this._fields, ({ _input }) => _input),
     ...this._constants,
   } as ImpulseFormShapeInput<TFields>
 
-  public readonly _error = selectValues(
+  public readonly _error = mapValues(
     this._fields,
-    "_error",
+    ({ _error }) => _error,
   ) as ImpulseFormShapeErrorVerbose<TFields>
 
-  public readonly _validateOn = selectValues(
+  public readonly _validateOn = mapValues(
     this._fields,
-    "_validateOn",
+    ({ _validateOn }) => _validateOn,
   ) as ImpulseFormShapeValidateOnVerbose<TFields>
 
-  public readonly _touched = selectValues(
+  public readonly _touched = mapValues(
     this._fields,
-    "_touched",
+    ({ _touched }) => _touched,
   ) as ImpulseFormShapeFlagVerbose<TFields>
 
   public readonly _isOutputEqual = createNullableCompare(isShallowObjectEqual)
@@ -121,10 +122,18 @@ export class ImpulseFormShapeSpec<
         }),
 
         _validateOn: validateOn._chain((shape) => {
+          if (isString(shape)) {
+            return Some(shape)
+          }
+
           return Option(shape[key])
         }),
 
         _touched: touched._chain((shape) => {
+          if (isBoolean(shape)) {
+            return Some(shape)
+          }
+
           return Option(shape[key])
         }),
       })
