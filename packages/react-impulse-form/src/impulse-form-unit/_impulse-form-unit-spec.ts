@@ -18,7 +18,7 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
 {
   public constructor(
     public readonly _input: TInput,
-    private readonly _optionalInitial: Option<TInput>,
+    public readonly _initial: TInput,
     private readonly _optionalError: Option<null | TError>,
     private readonly _optionalValidateOn: Option<ValidateStrategy>,
     private readonly _optionalTouched: Option<boolean>,
@@ -35,10 +35,6 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
 
   public _outputFromVerbose(output: null | TOutput): null | TOutput {
     return output
-  }
-
-  public get _initial(): TInput {
-    return this._optionalInitial._getOrElse(this._input)
   }
 
   public get _error(): null | TError {
@@ -84,7 +80,7 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
 
     return new ImpulseFormUnitSpec(
       input._getOrElse(this._input),
-      initial._orElse(this._optionalInitial),
+      initial._getOrElse(this._initial),
       error._orElse(this._optionalError),
       validateOn._orElse(this._optionalValidateOn),
       touched._orElse(this._optionalTouched),
