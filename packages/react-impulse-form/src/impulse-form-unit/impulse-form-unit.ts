@@ -160,7 +160,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
   | ImpulseFormUnit<TInput, TError>
   | ImpulseFormUnit<TInput, ReadonlyArray<string>, TOutput>
   | ImpulseFormUnit<TInput, TError, TOutput> /* enforce syntax highlight */ {
-  const initial = Option(options?.initial)
+  const initial = options?.initial ?? input
   const touched = Option(options?.touched)
   const isInputEqual = options?.isInputEqual ?? isStrictEqual
   const isInputDirty =
