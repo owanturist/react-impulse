@@ -87,3 +87,42 @@ it("selects error", ({ scope }) => {
     readonly two: null | ReadonlyArray<string>
   }>()
 })
+
+console.log("TODO continue from here")
+
+it("selects the same subsequent error", ({ scope }) => {
+  const shape = ImpulseFormShape(
+    {
+      first: ImpulseFormUnit("", { error: ["first"] }),
+      second: ImpulseFormUnit(0, { error: ["second"] }),
+      third: ImpulseFormShape(
+        {
+          one: ImpulseFormUnit(true, {
+            validate: (input) =>
+              input ? [null, input] : ["must be true", null],
+          }),
+          two: ImpulseFormUnit([""], { error: "an error" }),
+        },
+        {
+          error: {
+            one: "one",
+            two: "two",
+          },
+        },
+      ),
+      fourth: ["anything"],
+    },
+    {
+      validateOn: "onInit",
+    },
+  )
+
+  expect(shape.getError(scope)).not.toBeNull()
+  expect(shape.getError(scope)).toBe(shape.getError(scope))
+  expect(shape.getError(scope, params._first)).toBe(
+    shape.getError(scope, params._first),
+  )
+  expect(shape.getError(scope, params._second)).toBe(
+    shape.getError(scope, params._second),
+  )
+})
