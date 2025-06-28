@@ -38,6 +38,8 @@ export interface ImpulseFormUnitOptions<TInput, TError = null> {
   touched?: boolean
 
   /**
+   * PERFORMANCE OPTIMIZATION
+   *
    * A compare function that determines whether the input value changes.
    * When it does, the ImpulseFormUnit#getInput returns the new value.
    * Otherwise, it returns the previous value.
@@ -60,6 +62,8 @@ export interface ImpulseFormUnitOptions<TInput, TError = null> {
   isInputEqual?: Compare<TInput>
 
   /**
+   * BUSINESS LOGIC TUNING
+   *
    * A compare function that determines whether the input is dirty.
    * When it is, the ImpulseFormUnit#isDirty returns true.
    * Fallbacks to not(isInputEqual) if not provided.
@@ -81,6 +85,8 @@ export interface ImpulseFormUnitOptions<TInput, TError = null> {
   isInputDirty?: Compare<TInput>
 
   /**
+   * PERFORMANCE OPTIMIZATION
+   *
    * A compare function that determines whether the validation error change.
    * When it does, the ImpulseFormUnit#getError returns the new value.
    * Otherwise, it returns the previous value.
@@ -103,14 +109,27 @@ export interface ImpulseFormUnitTransformedOptions<
   TInput,
   TError = null,
   TOutput = TInput,
-> extends ImpulseFormUnitOptions<TInput, TError> {
+> extends Omit<ImpulseFormUnitOptions<TInput, TError>, "isOutputEqual"> {
   transform: ImpulseFormUnitTransformer<TInput, TOutput>
+
+  /**
+   * PERFORMANCE OPTIMIZATION
+   *
+   * A compare function that determines whether the output value changes.
+   * When it does, the ImpulseFormUnit#getOutput returns the new value.
+   *
+   * Useful for none primitive values such as Objects, Arrays, Date, etc.
+   * Intended to improve performance but do not affect business logic.
+   *
+   * @default Object.is
+   */
+  isOutputEqual?: Compare<TOutput>
 }
 
 export interface ImpulseFormUnitSchemaOptions<TInput, TOutput = TInput>
   extends Omit<
-    ImpulseFormUnitOptions<TInput, ReadonlyArray<string>>,
-    "isErrorEqual"
+    ImpulseFormUnitTransformedOptions<TInput, ReadonlyArray<string>, TOutput>,
+    "transform" | "isErrorEqual"
   > {
   /**
    * @default "onTouch"
@@ -124,7 +143,10 @@ export interface ImpulseFormUnitValidatedOptions<
   TInput,
   TError = null,
   TOutput = TInput,
-> extends ImpulseFormUnitOptions<TInput, TError> {
+> extends Omit<
+    ImpulseFormUnitTransformedOptions<TInput, TError, TOutput>,
+    "transform"
+  > {
   /**
    * @default "onTouch"
    */
@@ -178,7 +200,10 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       transformFromSchema(options.schema),
       isInputDirty,
       isInputEqual,
-      isStrictEqual,
+      createUnionCompare<null, TOutput>(
+        isNull,
+        options.isOutputEqual ?? isStrictEqual,
+      ),
       createUnionCompare<null, ReadonlyArray<string>>(
         isNull,
         isShallowArrayEqual,
@@ -204,7 +229,10 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       transformFromValidator(options.validate),
       isInputDirty,
       isInputEqual,
-      isStrictEqual,
+      createUnionCompare<null, TOutput>(
+        isNull,
+        options.isOutputEqual ?? isStrictEqual,
+      ),
       isErrorEqual,
     )
 
@@ -221,7 +249,10 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       transformFromTransformer(options.transform),
       isInputDirty,
       isInputEqual,
-      isStrictEqual,
+      createUnionCompare<null, TOutput>(
+        isNull,
+        options.isOutputEqual ?? isStrictEqual,
+      ),
       isErrorEqual,
     )
 
