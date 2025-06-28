@@ -105,7 +105,7 @@ describe("when initial error is defined", () => {
     expect(value.getError(scope)).toBe(3)
   })
 
-  it("subsequently selects different error value when isErrorEqual is not specified", ({
+  it("selects different error value when isErrorEqual is not specified", ({
     scope,
   }) => {
     const value = ImpulseFormUnit("1", {
@@ -121,9 +121,7 @@ describe("when initial error is defined", () => {
     expect(error_0).toStrictEqual(error_1)
   })
 
-  it("subsequently selects same error value when isErrorEqual not specified", ({
-    scope,
-  }) => {
+  it("selects same error value when isErrorEqual is specified", ({ scope }) => {
     const value = ImpulseFormUnit("1", {
       error: ["error"],
       isErrorEqual: isShallowArrayEqual,
@@ -193,7 +191,7 @@ describe("when validator is defined", () => {
     expect(value.getError(scope)).toBe(2)
   })
 
-  it("subsequently selects different error value when isErrorEqual is not specified", ({
+  it("selects different error value when isErrorEqual is not specified", ({
     scope,
   }) => {
     const value = ImpulseFormUnit(-1, {
@@ -213,9 +211,7 @@ describe("when validator is defined", () => {
     expect(error_0).toStrictEqual(error_1)
   })
 
-  it("subsequently selects same error value when isErrorEqual not specified", ({
-    scope,
-  }) => {
+  it("selects same error value when isErrorEqual is specified", ({ scope }) => {
     const value = ImpulseFormUnit(-1, {
       validateOn: "onInit",
       validate: (input): Result<{ message: string }, number> => {
@@ -284,7 +280,7 @@ describe("when schema is defined", () => {
     expect(value.getError(scope)).toStrictEqual(["initial", "custom error"])
   })
 
-  it("subsequently selects same error value", ({ scope }) => {
+  it("selects same error value", ({ scope }) => {
     const value = ImpulseFormUnit(-1, {
       validateOn: "onInit",
       schema: z.number().min(0),
