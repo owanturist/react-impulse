@@ -81,3 +81,7 @@ it("selects value", ({ scope }) => {
     readonly fourth: Array<string>
   }>()
 })
+
+console.log(
+  "TODO continue from here by adding the same tests as in get-error.spec.ts for get-output.spec.ts",
+)
