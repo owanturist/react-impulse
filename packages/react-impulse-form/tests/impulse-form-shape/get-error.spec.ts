@@ -88,36 +88,22 @@ it("selects error", ({ scope }) => {
   }>()
 })
 
-console.log("TODO continue from here")
-
-it("selects the same subsequent error", ({ scope }) => {
+it("subsequently selects same error shape", ({ scope }) => {
   const shape = ImpulseFormShape(
     {
-      first: ImpulseFormUnit("", { error: ["first"] }),
-      second: ImpulseFormUnit(0, { error: ["second"] }),
-      third: ImpulseFormShape(
-        {
-          one: ImpulseFormUnit(true, {
-            validate: (input) =>
-              input ? [null, input] : ["must be true", null],
-          }),
-          two: ImpulseFormUnit([""], { error: "an error" }),
-        },
-        {
-          error: {
-            one: "one",
-            two: "two",
-          },
-        },
-      ),
-      fourth: ["anything"],
+      first: ImpulseFormUnit("1", { error: "first" }),
+      second: ImpulseFormUnit(2, { error: "second" }),
     },
     {
       validateOn: "onInit",
     },
   )
 
-  expect(shape.getError(scope)).not.toBeNull()
+  expect(shape.getError(scope)).toStrictEqual({
+    first: "first",
+    second: "second",
+  })
+  expect(shape.getError(scope)).toBe(shape.getError(scope))
   expect(shape.getError(scope)).toBe(shape.getError(scope))
   expect(shape.getError(scope, params._first)).toBe(
     shape.getError(scope, params._first),
@@ -125,4 +111,52 @@ it("selects the same subsequent error", ({ scope }) => {
   expect(shape.getError(scope, params._second)).toBe(
     shape.getError(scope, params._second),
   )
+})
+
+it("selects only changed error fields as different values", ({ scope }) => {
+  const shape = ImpulseFormShape({
+    first: ImpulseFormShape({
+      _0: ImpulseFormUnit("1", { error: "first" }),
+      _1: ImpulseFormUnit("2", { error: "second" }),
+    }),
+    second: ImpulseFormShape({
+      _3: ImpulseFormUnit("3", { error: "third" }),
+      _4: ImpulseFormUnit("4", { error: "fourth" }),
+    }),
+  })
+
+  const error_0 = shape.getError(scope)
+
+  expect(error_0).toStrictEqual({
+    first: {
+      _0: "first",
+      _1: "second",
+    },
+    second: {
+      _3: "third",
+      _4: "fourth",
+    },
+  })
+
+  shape.setError({
+    second: {
+      _3: "third changed",
+    },
+  })
+
+  const error_1 = shape.getError(scope)
+
+  expect(error_1).toStrictEqual({
+    first: {
+      _0: "first",
+      _1: "second",
+    },
+    second: {
+      _3: "third changed",
+      _4: "fourth",
+    },
+  })
+  expect(error_1).not.toBe(error_0)
+  expect(error_1?.first).toBe(error_0?.first)
+  expect(error_1?.second).not.toBe(error_0?.second)
 })
