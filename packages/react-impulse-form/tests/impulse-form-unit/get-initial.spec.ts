@@ -17,7 +17,7 @@ it("selects custom initial", ({ scope }) => {
   expect(value.getInitial(scope)).toBe("1")
 })
 
-it("selects different value for input custom initial when isInputEqual is not specified", ({
+it("selects unequal custom input and initial values when isInputEqual is not specified", ({
   scope,
 }) => {
   const input = { count: 0 }
@@ -30,7 +30,7 @@ it("selects different value for input custom initial when isInputEqual is not sp
   expect(form.getInput(scope)).toStrictEqual(form.getInitial(scope))
 })
 
-it("selects same value for input custom initial when isInputEqual is specified", ({
+it("selects equal custom input and initial values when isInputEqual is not specified", ({
   scope,
 }) => {
   const input = { count: 0 }
@@ -64,7 +64,7 @@ it("updates initial", ({ scope }) => {
   expect(value.getInitial(scope)).toBe(2)
 })
 
-it("selects different initial value when isInputEqual is not specified", ({
+it("selects unequal initial values when isInputEqual is not specified", ({
   scope,
 }) => {
   const value = ImpulseFormUnit([0])
@@ -78,7 +78,9 @@ it("selects different initial value when isInputEqual is not specified", ({
   expect(initial_0).toStrictEqual(initial_1)
 })
 
-it("selects same initial value when isInputEqual is specified", ({ scope }) => {
+it("selects equal initial values when isInputEqual is specified", ({
+  scope,
+}) => {
   const value = ImpulseFormUnit([0], {
     isInputEqual: isShallowArrayEqual,
   })

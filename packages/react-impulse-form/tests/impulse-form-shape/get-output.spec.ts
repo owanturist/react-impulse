@@ -82,7 +82,7 @@ it("selects value", ({ scope }) => {
   }>()
 })
 
-it("subsequently selects same output shape", ({ scope }) => {
+it("subsequently selects equal output shapes", ({ scope }) => {
   const shape = ImpulseFormShape({
     first: ImpulseFormUnit("1"),
     second: ImpulseFormUnit(2),
