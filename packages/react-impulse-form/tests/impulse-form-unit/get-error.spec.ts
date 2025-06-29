@@ -110,7 +110,7 @@ describe("when initial error is defined", () => {
     expect(value.getError(scope)).toBe(3)
   })
 
-  it("selects different error value when isErrorEqual is not specified", ({
+  it("selects unequal error values when isErrorEqual is not specified", ({
     scope,
   }) => {
     const value = ImpulseFormUnit("1", {
@@ -126,7 +126,9 @@ describe("when initial error is defined", () => {
     expect(error_0).toStrictEqual(error_1)
   })
 
-  it("selects same error value when isErrorEqual is specified", ({ scope }) => {
+  it("selects equal error values when isErrorEqual is specified", ({
+    scope,
+  }) => {
     const value = ImpulseFormUnit("1", {
       error: ["error"],
       isErrorEqual: isShallowArrayEqual,
@@ -196,7 +198,7 @@ describe("when validator is defined", () => {
     expect(value.getError(scope)).toBe(2)
   })
 
-  it("selects different error value when isErrorEqual is not specified", ({
+  it("selects unequal error values when isErrorEqual is not specified", ({
     scope,
   }) => {
     const value = ImpulseFormUnit(-1, {
@@ -216,7 +218,9 @@ describe("when validator is defined", () => {
     expect(error_0).toStrictEqual(error_1)
   })
 
-  it("selects same error value when isErrorEqual is specified", ({ scope }) => {
+  it("selects equal error values when isErrorEqual is specified", ({
+    scope,
+  }) => {
     const value = ImpulseFormUnit(-1, {
       validateOn: "onInit",
       validate: (input): Result<{ message: string }, number> => {

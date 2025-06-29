@@ -32,7 +32,7 @@ it("updates input", ({ scope }) => {
   expect(value.getInput(scope)).toBe(2)
 })
 
-it("selects different input value when isInputEqual is not specified", ({
+it("selects unequal input values when isInputEqual is not specified", ({
   scope,
 }) => {
   const value = ImpulseFormUnit([0])
@@ -46,7 +46,7 @@ it("selects different input value when isInputEqual is not specified", ({
   expect(input_0).toStrictEqual(input_1)
 })
 
-it("selects same input value when isInputEqual is specified", ({ scope }) => {
+it("selects equal input values when isInputEqual is specified", ({ scope }) => {
   const value = ImpulseFormUnit([0], {
     isInputEqual: isShallowArrayEqual,
   })

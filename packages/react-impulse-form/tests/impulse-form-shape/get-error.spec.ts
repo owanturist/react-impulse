@@ -88,7 +88,7 @@ it("selects error", ({ scope }) => {
   }>()
 })
 
-it("subsequently selects same error shape", ({ scope }) => {
+it("subsequently selects equal error shapes", ({ scope }) => {
   const shape = ImpulseFormShape(
     {
       first: ImpulseFormUnit("1", { error: "first" }),
