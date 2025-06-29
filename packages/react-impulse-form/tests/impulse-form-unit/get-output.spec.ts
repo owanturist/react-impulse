@@ -62,7 +62,7 @@ describe("when neither schema nor initial error are defined", () => {
     expect(value.getOutput(scope)).toBeNull()
   })
 
-  it("selects different output value when isInputEqual is not specified", ({
+  it("selects unequal output values when isInputEqual is not specified", ({
     scope,
   }) => {
     const value = ImpulseFormUnit(["1"])
@@ -76,7 +76,7 @@ describe("when neither schema nor initial error are defined", () => {
     expect(output_0).toStrictEqual(output_1)
   })
 
-  it("selects same output value when isInputEqual is specified", ({
+  it("selects equal output values when isInputEqual is specified", ({
     scope,
   }) => {
     const value = ImpulseFormUnit(["1"], {
@@ -206,7 +206,7 @@ describe("when transform is defined", () => {
     expect(output_2).toBe(1)
   })
 
-  it("selects different output value when isOutputEqual is not specified", ({
+  it("selects unequal output values when isOutputEqual is not specified", ({
     scope,
   }) => {
     const value = ImpulseFormUnit(1, {
@@ -223,7 +223,7 @@ describe("when transform is defined", () => {
     expect(output_0).toStrictEqual(output_1)
   })
 
-  it("selects same output value when isOutputEqual is specified", ({
+  it("selects equal output values when isOutputEqual is specified", ({
     scope,
   }) => {
     const value = ImpulseFormUnit(1, {
@@ -312,7 +312,7 @@ describe("when validator is defined", () => {
     expect(output_2).toBe("1")
   })
 
-  it("selects different output value when isOutputEqual is not specified", ({
+  it("selects unequal output values when isOutputEqual is not specified", ({
     scope,
   }) => {
     const value = ImpulseFormUnit(1, {
@@ -331,7 +331,7 @@ describe("when validator is defined", () => {
     expect(output_0).toStrictEqual(output_1)
   })
 
-  it("selects same output value when isOutputEqual is specified", ({
+  it("selects equal output values when isOutputEqual is specified", ({
     scope,
   }) => {
     const value = ImpulseFormUnit(1, {
@@ -419,7 +419,7 @@ describe("when schema is defined", () => {
     expect(output_2).toBe(4)
   })
 
-  it("selects different output value when isOutputEqual is not specified", ({
+  it("selects unequal output values when isOutputEqual is not specified", ({
     scope,
   }) => {
     const value = ImpulseFormUnit(4, {
@@ -439,7 +439,7 @@ describe("when schema is defined", () => {
     expect(output_0).toStrictEqual(output_1)
   })
 
-  it("selects same output value when isOutputEqual is specified", ({
+  it("selects equal output values when isOutputEqual is specified", ({
     scope,
   }) => {
     const value = ImpulseFormUnit(4, {
