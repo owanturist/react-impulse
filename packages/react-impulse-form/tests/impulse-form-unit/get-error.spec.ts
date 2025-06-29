@@ -10,6 +10,7 @@ import {
   type ImpulseFormUnitValidatedOptions,
   type Result,
 } from "../../src"
+import type { Setter } from "~/tools/setter"
 
 it("selects error", ({ scope }) => {
   const value = ImpulseFormUnit("1", {
@@ -53,6 +54,10 @@ describe("when neither schema nor initial error are defined", () => {
 
     value.setError(2)
     expect(value.getError(scope)).toBe(2)
+
+    expectTypeOf(value.setError)
+      .parameter(0)
+      .toEqualTypeOf<Setter<null | number>>()
   })
 
   it("resets to null", ({ scope }) => {
