@@ -3,6 +3,7 @@ import { z } from "zod"
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
 import { params } from "~/tools/params"
+import type { Setter } from "~/tools/setter"
 
 import {
   ImpulseFormUnit,
@@ -10,7 +11,6 @@ import {
   type ImpulseFormUnitValidatedOptions,
   type Result,
 } from "../../src"
-import type { Setter } from "~/tools/setter"
 
 it("selects error", ({ scope }) => {
   const value = ImpulseFormUnit("1", {
