@@ -102,7 +102,7 @@ it("subsequently selects equal output shapes", ({ scope }) => {
   )
 })
 
-it("selects only changed output fields as different values", ({ scope }) => {
+it("persists unchanged output fields between changes", ({ scope }) => {
   const shape = ImpulseFormShape({
     first: ImpulseFormShape({
       _0: ImpulseFormUnit("1"),

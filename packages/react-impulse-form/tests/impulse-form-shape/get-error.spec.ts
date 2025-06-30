@@ -113,7 +113,7 @@ it("subsequently selects equal error shapes", ({ scope }) => {
   )
 })
 
-it("selects only changed error fields as different values", ({ scope }) => {
+it("persists unchanged error fields between changes", ({ scope }) => {
   const shape = ImpulseFormShape({
     first: ImpulseFormShape({
       _0: ImpulseFormUnit("1", { error: "first" }),
