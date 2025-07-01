@@ -240,6 +240,10 @@ export abstract class ImpulseForm<
     this._state._setTouched(setter)
   }
 
+  public reset(resetter?: TParams["input.setter"]): void {
+    this._state._reset(resetter)
+  }
+
   public onFocusWhenInvalid(
     onFocus: (error: TParams["error.schema.verbose"]) => void,
   ): VoidFunction {

@@ -493,6 +493,18 @@ export class ImpulseFormShapeState<
     },
   )
 
+  public _reset(resetter?: ImpulseFormShapeInputSetter<TFields>): void {
+    batch((scope) => {
+      const resetters = isFunction(resetter)
+        ? resetter(this._initial.getValue(scope), this._input.getValue(scope))
+        : resetter
+
+      forEntries(this._fields, (field, key) => {
+        field._reset(hasProperty(resetters, key) ? resetters[key] : undefined)
+      })
+    })
+  }
+
   public _getChildren(): ReadonlyArray<ImpulseFormState<ImpulseFormParams>> {
     return values(this._fields)
   }
