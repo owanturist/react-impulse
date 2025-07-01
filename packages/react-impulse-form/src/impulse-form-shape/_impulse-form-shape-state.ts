@@ -11,6 +11,7 @@ import { values } from "~/tools/values"
 
 import { Impulse, batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
@@ -495,4 +496,8 @@ export class ImpulseFormShapeState<
       compare: isImpulseFormShapeFlagVerboseEqual,
     },
   )
+
+  public _getChildren(): ReadonlyArray<ImpulseFormState<ImpulseFormParams>> {
+    return values(this._fields)
+  }
 }
