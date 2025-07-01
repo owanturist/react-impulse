@@ -1,4 +1,5 @@
 import { isNull } from "~/tools/is-null"
+import { params } from "~/tools/params"
 import { resolveSetter } from "~/tools/setter"
 
 import {
@@ -227,6 +228,25 @@ export class ImpulseFormUnitState<
 
   public readonly _dirty: ReadonlyImpulse<boolean>
   public readonly _dirtyVerbose: ReadonlyImpulse<boolean>
+
+  public _reset(
+    resetter: ImpulseFormUnitInputSetter<TInput> = params._first,
+  ): void {
+    batch((scope) => {
+      const resetValue = resolveSetter(
+        resetter,
+        this._initial.getValue(scope),
+        this._input.getValue(scope),
+      )
+
+      this._setInitial(resetValue)
+      this._setInput(resetValue)
+      // TODO test when reset for all below
+      this._touched.setValue(false)
+      this._customError.setValue(null)
+      this._validated.setValue(true)
+    })
+  }
 
   public _getChildren(): ReadonlyArray<never> {
     return []

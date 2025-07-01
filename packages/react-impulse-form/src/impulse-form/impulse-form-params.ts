@@ -1,19 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export interface ImpulseFormParams {
-  "input.setter": unknown
-  "input.schema": unknown
+  "input.setter": any
+  "input.schema": any
 
-  "output.schema": unknown
-  "output.schema.verbose": unknown
+  "output.schema": any
+  "output.schema.verbose": any
 
-  "flag.setter": unknown
-  "flag.schema": unknown
-  "flag.schema.verbose": unknown
+  "flag.setter": any
+  "flag.schema": any
+  "flag.schema.verbose": any
 
-  "validateOn.setter": unknown
-  "validateOn.schema": unknown
-  "validateOn.schema.verbose": unknown
+  "validateOn.setter": any
+  "validateOn.schema": any
+  "validateOn.schema.verbose": any
 
-  "error.setter": unknown
-  "error.schema": unknown
-  "error.schema.verbose": unknown
+  "error.setter": any
+  "error.schema": any
+  "error.schema.verbose": any
 }

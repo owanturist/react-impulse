@@ -107,6 +107,10 @@ export abstract class ImpulseFormState<TParams extends ImpulseFormParams> {
     }
   }
 
+  // R E S E T
+
+  public abstract _reset(resetter?: TParams["input.setter"]): void
+
   // C H I L D R E N
 
   public abstract _getChildren(
