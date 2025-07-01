@@ -1,12 +1,12 @@
 import { forEntries } from "~/tools/for-entries"
 import { hasProperty } from "~/tools/has-property"
 import { isBoolean } from "~/tools/is-boolean"
+import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
 import { isString } from "~/tools/is-string"
 import { isUndefined } from "~/tools/is-undefined"
 import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
-import { resolveSetter } from "~/tools/setter"
 import { values } from "~/tools/values"
 
 import { Impulse, batch } from "../dependencies"
@@ -103,11 +103,9 @@ export class ImpulseFormShapeState<
 
   public _setInitial(setter: ImpulseFormShapeInputSetter<TFields>): void {
     batch((scope) => {
-      const setters = resolveSetter(
-        setter,
-        this._initial.getValue(scope),
-        this._input.getValue(scope),
-      )
+      const setters = isFunction(setter)
+        ? setter(this._initial.getValue(scope), this._input.getValue(scope))
+        : setter
 
       forEntries(this._fields, (field, key) => {
         if (hasProperty(setters, key) && !isUndefined(setters[key])) {
@@ -136,11 +134,9 @@ export class ImpulseFormShapeState<
 
   public _setInput(setter: ImpulseFormShapeInputSetter<TFields>): void {
     batch((scope) => {
-      const setters = resolveSetter(
-        setter,
-        this._input.getValue(scope),
-        this._initial.getValue(scope),
-      )
+      const setters = isFunction(setter)
+        ? setter(this._input.getValue(scope), this._initial.getValue(scope))
+        : setter
 
       forEntries(this._fields, (field, key) => {
         if (hasProperty(setters, key) && !isUndefined(setters[key])) {
@@ -183,7 +179,9 @@ export class ImpulseFormShapeState<
 
   public _setError(setter: ImpulseFormShapeErrorSetter<TFields>): void {
     batch((scope) => {
-      const setters = resolveSetter(setter, this._errorVerbose.getValue(scope))
+      const setters = isFunction(setter)
+        ? setter(this._errorVerbose.getValue(scope))
+        : setter
 
       forEntries(this._fields, (field, key) => {
         if (isNull(setters)) {
@@ -243,10 +241,9 @@ export class ImpulseFormShapeState<
     setter: ImpulseFormShapeValidateOnSetter<TFields>,
   ): void {
     batch((scope) => {
-      const setters = resolveSetter(
-        setter,
-        this._validateOnVerbose.getValue(scope),
-      )
+      const setters = isFunction(setter)
+        ? setter(this._validateOnVerbose.getValue(scope))
+        : setter
 
       forEntries(this._fields, (field, key) => {
         if (isString(setters)) {
@@ -297,10 +294,9 @@ export class ImpulseFormShapeState<
 
   public _setTouched(setter: ImpulseFormShapeFlagSetter<TFields>): void {
     batch((scope) => {
-      const setters = resolveSetter(
-        setter,
-        this._touchedVerbose.getValue(scope),
-      )
+      const setters = isFunction(setter)
+        ? setter(this._touchedVerbose.getValue(scope))
+        : setter
 
       forEntries(this._fields, (field, key) => {
         if (isBoolean(setters)) {
