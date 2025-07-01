@@ -232,11 +232,6 @@ export class ImpulseFormUnitState<
     return []
   }
 
-  public reset(): void {
-    // TODO add rest of reset logic
-    this._validated.setValue(true)
-  }
-
   public _setTransform(
     transformer: ImpulseFormUnitTransformer<TInput, TOutput>,
   ): void {
