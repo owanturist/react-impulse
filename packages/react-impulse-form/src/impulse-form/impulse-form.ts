@@ -1,7 +1,7 @@
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
 
-import type { ReadonlyImpulse, Scope } from "../dependencies"
+import { type ReadonlyImpulse, type Scope, batch } from "../dependencies"
 
 import type { ImpulseFormParams } from "./impulse-form-params"
 import type { ImpulseFormSpec } from "./impulse-form-spec"
@@ -238,5 +238,17 @@ export abstract class ImpulseForm<
 
   public setTouched(setter: TParams["flag.setter"]): void {
     this._state._setTouched(setter)
+  }
+
+  public onFocusWhenInvalid(
+    onFocus: (error: TParams["error.schema.verbose"]) => void,
+  ): VoidFunction {
+    return this._state._onFocus._subscribe(onFocus)
+  }
+
+  public focusFirstInvalid(): void {
+    batch((scope) => {
+      this._state._getFocusFirstInvalid(scope)?.()
+    })
   }
 }

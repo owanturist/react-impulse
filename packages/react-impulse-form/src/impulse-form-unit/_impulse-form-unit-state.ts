@@ -228,6 +228,10 @@ export class ImpulseFormUnitState<
   public readonly _dirty: ReadonlyImpulse<boolean>
   public readonly _dirtyVerbose: ReadonlyImpulse<boolean>
 
+  public _getChildren(): ReadonlyArray<never> {
+    return []
+  }
+
   public reset(): void {
     // TODO add rest of reset logic
     this._validated.setValue(true)

@@ -1,4 +1,7 @@
-import type { ReadonlyImpulse } from "../dependencies"
+import { isNull } from "~/tools/is-null"
+
+import type { ReadonlyImpulse, Scope } from "../dependencies"
+import { Emitter } from "../emitter"
 
 import type { ImpulseFormParams } from "./impulse-form-params"
 
@@ -57,4 +60,34 @@ export abstract class ImpulseFormState<TParams extends ImpulseFormParams> {
   public abstract readonly _dirtyVerbose: ReadonlyImpulse<
     TParams["flag.schema.verbose"]
   >
+
+  // F O C U S   I N V A L I D
+
+  public readonly _onFocus = new Emitter<[error: unknown]>()
+
+  public _getFocusFirstInvalid(scope: Scope): null | VoidFunction {
+    // go deep first and then the current element
+    for (const element of this._getChildren(scope)) {
+      const callback = element._getFocusFirstInvalid(scope)
+
+      if (callback) {
+        return callback
+      }
+    }
+
+    // ignore if the focus handlers are not set
+    const error = this._onFocus._isEmpty() ? null : this._error.getValue(scope)
+
+    if (isNull(error)) {
+      return null
+    }
+
+    return () => {
+      this._onFocus._emit(error)
+    }
+  }
+
+  public abstract _getChildren(
+    scope: Scope,
+  ): ReadonlyArray<ImpulseFormState<ImpulseFormParams>>
 }
