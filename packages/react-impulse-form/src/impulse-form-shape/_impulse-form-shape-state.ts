@@ -11,7 +11,7 @@ import { values } from "~/tools/values"
 
 import { Impulse, batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
-import type { ImpulseFormState } from "../impulse-form/impulse-form-state"
+import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
 import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"
@@ -72,15 +72,16 @@ export type ImpulseFormShapeStateFields<
 
 export class ImpulseFormShapeState<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
-> implements ImpulseFormState<ImpulseFormShapeParams<TFields>>
-{
+> extends ImpulseFormState<ImpulseFormShapeParams<TFields>> {
   public constructor(
     private readonly _fields: ImpulseFormShapeStateFields<TFields>,
     private readonly _constants: Omit<
       TFields,
       keyof ImpulseFormShapeStateFields<TFields>
     >,
-  ) {}
+  ) {
+    super()
+  }
 
   public readonly _initial = Impulse(
     (scope) => {
