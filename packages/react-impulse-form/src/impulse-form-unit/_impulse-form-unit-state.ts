@@ -7,7 +7,7 @@ import {
   type ReadonlyImpulse,
   batch,
 } from "../dependencies"
-import type { ImpulseFormState } from "../impulse-form/impulse-form-state"
+import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
 import {
   VALIDATE_ON_CHANGE,
@@ -27,9 +27,11 @@ import type { ImpulseFormUnitInputSetter } from "./impulse-form-unit-input-sette
 import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer"
 import type { ImpulseFormUnitValidateOnSetter } from "./impulse-form-unit-validate-on-setter"
 
-export class ImpulseFormUnitState<TInput, TError, TOutput>
-  implements ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>>
-{
+export class ImpulseFormUnitState<
+  TInput,
+  TError,
+  TOutput,
+> extends ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>> {
   public constructor(
     public readonly _input: Impulse<TInput>,
     public readonly _initial: Impulse<TInput>,
@@ -43,6 +45,8 @@ export class ImpulseFormUnitState<TInput, TError, TOutput>
     isOutputEqual: Compare<null | TOutput>,
     isErrorEqual: Compare<null | TError>,
   ) {
+    super()
+
     // holds the actual validated state
     const validated = Impulse(false)
 
