@@ -26,8 +26,8 @@
     "noImplicitOverride": true,
     "baseUrl": ".",
     "paths": {
-      "~/tools/*": ["./tools/*"]
+      "~/tools/*": ["./packages/tools/src/*"]
     }
   },
-  "include": ["./*.ts", "./tools/**/*.ts"]
+  "include": ["./*.ts"]
 }

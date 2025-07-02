@@ -359,12 +359,19 @@ export default tseslint.config([
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/unbound-method": "off",
       "@typescript-eslint/no-shadow": "off",
+    },
+  },
+
+  // Only tests for react-impulse* packages
+  {
+    files: ["packages/react-impulse*/tests/**/*.ts?(x)"],
+    rules: {
       "no-restricted-imports": [
         "error",
         {
           patterns: [
             {
-              group: ["../src/*"],
+              group: ["**/src/*"],
               message: "Import only ../src for tests",
             },
           ],
