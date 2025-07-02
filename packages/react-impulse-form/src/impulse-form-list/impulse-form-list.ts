@@ -14,11 +14,11 @@ export type ImpulseFormList<TElement extends ImpulseForm> =
   ImpulseFormListImpl<TElement>
 
 export interface ImpulseFormListOptions<TElement extends ImpulseForm> {
-  input?: ImpulseFormListInputSetter<TElement>
-  initial?: ImpulseFormListInputSetter<TElement>
-  touched?: ImpulseFormListFlagSetter<TElement>
-  validateOn?: ImpulseFormListValidateOnSetter<TElement>
-  error?: ImpulseFormListErrorSetter<TElement>
+  readonly input?: ImpulseFormListInputSetter<TElement>
+  readonly initial?: ImpulseFormListInputSetter<TElement>
+  readonly touched?: ImpulseFormListFlagSetter<TElement>
+  readonly validateOn?: ImpulseFormListValidateOnSetter<TElement>
+  readonly error?: ImpulseFormListErrorSetter<TElement>
 }
 
 export function ImpulseFormList<TElement extends ImpulseForm>(

@@ -33,9 +33,9 @@ export interface ImpulseFormUnitOptions<TInput, TError = null> {
    *
    * @default null
    */
-  error?: null | TError
+  readonly error?: null | TError
 
-  touched?: boolean
+  readonly touched?: boolean
 
   /**
    * PERFORMANCE OPTIMIZATION
@@ -59,7 +59,7 @@ export interface ImpulseFormUnitOptions<TInput, TError = null> {
    * form.setInput({ count: 0 })
    * form.getInput(scope) === initial // true
    */
-  isInputEqual?: Compare<TInput>
+  readonly isInputEqual?: Compare<TInput>
 
   /**
    * BUSINESS LOGIC TUNING
@@ -82,7 +82,7 @@ export interface ImpulseFormUnitOptions<TInput, TError = null> {
    * form.setInput(" ")
    * form.isDirty(scope) === false
    */
-  isInputDirty?: Compare<TInput>
+  readonly isInputDirty?: Compare<TInput>
 
   /**
    * PERFORMANCE OPTIMIZATION
@@ -97,12 +97,12 @@ export interface ImpulseFormUnitOptions<TInput, TError = null> {
    * @default Object.is
    */
 
-  isErrorEqual?: Compare<TError>
+  readonly isErrorEqual?: Compare<TError>
 
   /**
    * @default input
    */
-  initial?: TInput
+  readonly initial?: TInput
 }
 
 export interface ImpulseFormUnitTransformedOptions<
@@ -110,7 +110,7 @@ export interface ImpulseFormUnitTransformedOptions<
   TError = null,
   TOutput = TInput,
 > extends Omit<ImpulseFormUnitOptions<TInput, TError>, "isOutputEqual"> {
-  transform: ImpulseFormUnitTransformer<TInput, TOutput>
+  readonly transform: ImpulseFormUnitTransformer<TInput, TOutput>
 
   /**
    * PERFORMANCE OPTIMIZATION
@@ -123,7 +123,7 @@ export interface ImpulseFormUnitTransformedOptions<
    *
    * @default Object.is
    */
-  isOutputEqual?: Compare<TOutput>
+  readonly isOutputEqual?: Compare<TOutput>
 }
 
 export interface ImpulseFormUnitSchemaOptions<TInput, TOutput = TInput>
@@ -134,9 +134,9 @@ export interface ImpulseFormUnitSchemaOptions<TInput, TOutput = TInput>
   /**
    * @default "onTouch"
    */
-  validateOn?: ValidateStrategy
+  readonly validateOn?: ValidateStrategy
 
-  schema: ZodLikeSchema<TOutput>
+  readonly schema: ZodLikeSchema<TOutput>
 }
 
 export interface ImpulseFormUnitValidatedOptions<
@@ -150,9 +150,9 @@ export interface ImpulseFormUnitValidatedOptions<
   /**
    * @default "onTouch"
    */
-  validateOn?: ValidateStrategy
+  readonly validateOn?: ValidateStrategy
 
-  validate: ImpulseFormUnitValidator<TInput, TError, TOutput>
+  readonly validate: ImpulseFormUnitValidator<TInput, TError, TOutput>
 }
 
 export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
