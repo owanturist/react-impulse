@@ -18,11 +18,11 @@ export type ImpulseFormShape<TFields extends ImpulseFormShapeFields> =
 export interface ImpulseFormShapeOptions<
   TFields extends ImpulseFormShapeFields,
 > {
-  input?: ImpulseFormShapeInputSetter<TFields>
-  initial?: ImpulseFormShapeInputSetter<TFields>
-  touched?: ImpulseFormShapeFlagSetter<TFields>
-  validateOn?: ImpulseFormShapeValidateOnSetter<TFields>
-  error?: ImpulseFormShapeErrorSetter<TFields>
+  readonly input?: ImpulseFormShapeInputSetter<TFields>
+  readonly initial?: ImpulseFormShapeInputSetter<TFields>
+  readonly touched?: ImpulseFormShapeFlagSetter<TFields>
+  readonly validateOn?: ImpulseFormShapeValidateOnSetter<TFields>
+  readonly error?: ImpulseFormShapeErrorSetter<TFields>
 }
 
 export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(

@@ -18,21 +18,21 @@ import type { ImpulseFormShapeValidateOnVerbose } from "./impulse-form-shape-val
 export interface ImpulseFormShapeParams<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
 > extends ImpulseFormParams {
-  "input.schema": ImpulseFormShapeInput<TFields>
-  "input.setter": ImpulseFormShapeInputSetter<TFields>
+  readonly "input.schema": ImpulseFormShapeInput<TFields>
+  readonly "input.setter": ImpulseFormShapeInputSetter<TFields>
 
-  "output.schema": ImpulseFormShapeOutput<TFields>
-  "output.schema.verbose": ImpulseFormShapeOutputVerbose<TFields>
+  readonly "output.schema": ImpulseFormShapeOutput<TFields>
+  readonly "output.schema.verbose": ImpulseFormShapeOutputVerbose<TFields>
 
-  "flag.setter": ImpulseFormShapeFlagSetter<TFields>
-  "flag.schema": ImpulseFormShapeFlag<TFields>
-  "flag.schema.verbose": ImpulseFormShapeFlagVerbose<TFields>
+  readonly "flag.setter": ImpulseFormShapeFlagSetter<TFields>
+  readonly "flag.schema": ImpulseFormShapeFlag<TFields>
+  readonly "flag.schema.verbose": ImpulseFormShapeFlagVerbose<TFields>
 
-  "validateOn.setter": ImpulseFormShapeValidateOnSetter<TFields>
-  "validateOn.schema": ImpulseFormShapeValidateOn<TFields>
-  "validateOn.schema.verbose": ImpulseFormShapeValidateOnVerbose<TFields>
+  readonly "validateOn.setter": ImpulseFormShapeValidateOnSetter<TFields>
+  readonly "validateOn.schema": ImpulseFormShapeValidateOn<TFields>
+  readonly "validateOn.schema.verbose": ImpulseFormShapeValidateOnVerbose<TFields>
 
-  "error.setter": ImpulseFormShapeErrorSetter<TFields>
-  "error.schema": ImpulseFormShapeError<TFields>
-  "error.schema.verbose": ImpulseFormShapeErrorVerbose<TFields>
+  readonly "error.setter": ImpulseFormShapeErrorSetter<TFields>
+  readonly "error.schema": ImpulseFormShapeError<TFields>
+  readonly "error.schema.verbose": ImpulseFormShapeErrorVerbose<TFields>
 }
