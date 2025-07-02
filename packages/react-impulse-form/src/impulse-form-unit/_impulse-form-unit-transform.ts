@@ -4,8 +4,8 @@ import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer
 import type { ImpulseFormUnitValidator } from "./impulse-form-unit-validator"
 
 export interface ImpulseFormUnitTransform<TInput, TError, TOutput> {
-  _transformer: boolean
-  _validator: ImpulseFormUnitValidator<TInput, TError, TOutput>
+  readonly _transformer: boolean
+  readonly _validator: ImpulseFormUnitValidator<TInput, TError, TOutput>
 }
 
 export function transformFromInput<TInput>(): ImpulseFormUnitTransform<

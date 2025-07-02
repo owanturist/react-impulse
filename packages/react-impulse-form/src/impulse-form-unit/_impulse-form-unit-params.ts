@@ -8,21 +8,21 @@ import type { ImpulseFormUnitValidateOnSetter } from "./impulse-form-unit-valida
 
 export interface ImpulseFormUnitParams<TInput, TError, TOutput>
   extends ImpulseFormParams {
-  "input.setter": ImpulseFormUnitInputSetter<TInput>
-  "input.schema": TInput
+  readonly "input.setter": ImpulseFormUnitInputSetter<TInput>
+  readonly "input.schema": TInput
 
-  "output.schema": TOutput
-  "output.schema.verbose": null | TOutput
+  readonly "output.schema": TOutput
+  readonly "output.schema.verbose": null | TOutput
 
-  "flag.setter": ImpulseFormUnitFlagSetter
-  "flag.schema": boolean
-  "flag.schema.verbose": boolean
+  readonly "flag.setter": ImpulseFormUnitFlagSetter
+  readonly "flag.schema": boolean
+  readonly "flag.schema.verbose": boolean
 
-  "validateOn.setter": ImpulseFormUnitValidateOnSetter
-  "validateOn.schema": ValidateStrategy
-  "validateOn.schema.verbose": ValidateStrategy
+  readonly "validateOn.setter": ImpulseFormUnitValidateOnSetter
+  readonly "validateOn.schema": ValidateStrategy
+  readonly "validateOn.schema.verbose": ValidateStrategy
 
-  "error.setter": ImpulseFormUnitErrorSetter<TError>
-  "error.schema": null | TError
-  "error.schema.verbose": null | TError
+  readonly "error.setter": ImpulseFormUnitErrorSetter<TError>
+  readonly "error.schema": null | TError
+  readonly "error.schema.verbose": null | TError
 }
