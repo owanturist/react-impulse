@@ -1,4 +1,5 @@
 import { isNull } from "~/tools/is-null"
+import type { Lazy } from "~/tools/lazy"
 
 import type { ReadonlyImpulse, Scope } from "../dependencies"
 import { Emitter } from "../emitter"
@@ -14,7 +15,11 @@ export abstract class ImpulseFormState<TParams extends ImpulseFormParams> {
   // I N P U T
 
   public abstract readonly _input: ReadonlyImpulse<TParams["input.schema"]>
-  public abstract _setInput(setter: TParams["input.setter"]): void
+  public abstract _setInput(
+    setter: TParams["input.setter"],
+    input: Lazy<TParams["input.schema"]>,
+    initial: Lazy<TParams["input.schema"]>,
+  ): void
 
   // E R R O R
 
