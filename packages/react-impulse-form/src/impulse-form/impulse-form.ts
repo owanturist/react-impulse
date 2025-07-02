@@ -6,6 +6,7 @@ import { type ReadonlyImpulse, type Scope, batch } from "../dependencies"
 import type { ImpulseFormParams } from "./impulse-form-params"
 import type { ImpulseFormSpec } from "./impulse-form-spec"
 import type { ImpulseFormState } from "./impulse-form-state"
+import { Lazy } from "~/tools/lazy"
 
 function resolveGetter<TValue, TVerbose, TSelected>(
   scope: Scope,
@@ -85,7 +86,13 @@ export abstract class ImpulseForm<
   }
 
   public setInput(setter: TParams["input.setter"]): void {
-    this._state._setInput(setter)
+    batch((scope) => {
+      this._state._setInput(
+        setter,
+        Lazy(() => this.getInput(scope)),
+        Lazy(() => this.getInitial(scope)),
+      )
+    })
   }
 
   public getError(scope: Scope): null | TParams["error.schema"]

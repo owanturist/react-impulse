@@ -1,4 +1,6 @@
+import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
+import type { Lazy } from "~/tools/lazy"
 import { params } from "~/tools/params"
 import { resolveSetter } from "~/tools/setter"
 
@@ -138,20 +140,17 @@ export class ImpulseFormUnitState<
     this._validated.setValue(false)
   }
 
-  public _setInput(setter: ImpulseFormUnitInputSetter<TInput>): void {
-    batch((scope) => {
-      const before = this._input.getValue(scope)
+  public _setInput(
+    setter: ImpulseFormUnitInputSetter<TInput>,
+    input: Lazy<TInput>,
+    initial: Lazy<TInput>,
+  ): void {
+    const next = isFunction(setter)
+      ? setter(input._peek(), initial._peek())
+      : setter
 
-      this._input.setValue(
-        resolveSetter(setter, before, this._initial.getValue(scope)),
-      )
-
-      const after = this._input.getValue(scope)
-
-      if (before !== after) {
-        this._validated.setValue(false)
-      }
-    })
+    this._input.setValue(next)
+    this._validated.setValue(false)
   }
 
   public _setInitial(setter: ImpulseFormUnitInputSetter<TInput>): void {
