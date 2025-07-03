@@ -248,7 +248,13 @@ export abstract class ImpulseForm<
   }
 
   public reset(resetter?: TParams["input.setter"]): void {
-    this._state._reset(resetter)
+    batch((scope) => {
+      this._state._reset(
+        resetter,
+        Lazy(() => this.getInitial(scope)),
+        Lazy(() => this.getInput(scope)),
+      )
+    })
   }
 
   public onFocusWhenInvalid(
