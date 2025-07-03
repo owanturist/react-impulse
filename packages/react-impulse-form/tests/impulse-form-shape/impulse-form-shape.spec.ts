@@ -132,6 +132,64 @@ it("allows to specify none-form fields", ({ scope }) => {
   })
 })
 
+it("refers to the same specs", () => {
+  const shape = ImpulseFormShape({
+    first: ImpulseFormUnit(""),
+    second: ImpulseFormUnit(0),
+    third: ImpulseFormShape({
+      one: ImpulseFormUnit(true),
+      two: ImpulseFormUnit([""]),
+    }),
+  })
+
+  // @ts-expect-error it does not mind to ignore ts in tests
+  expect(shape._spec._fields.first).toBe(shape.fields.first._spec)
+  // @ts-expect-error it does not mind to ignore ts in tests
+  expect(shape._spec._fields.second).toBe(shape.fields.second._spec)
+  // @ts-expect-error it does not mind to ignore ts in tests
+  expect(shape._spec._fields.third).toBe(shape.fields.third._spec)
+
+  // @ts-expect-error it does not mind to ignore ts in tests
+  expect(shape._spec._fields.third._fields.one).toBe(
+    // @ts-expect-error it does not mind to ignore ts in tests
+    shape.fields.third._spec._fields.one,
+  )
+  // @ts-expect-error it does not mind to ignore ts in tests
+  expect(shape._spec._fields.third._fields.two).toBe(
+    // @ts-expect-error it does not mind to ignore ts in tests
+    shape.fields.third._spec._fields.two,
+  )
+})
+
+it("refers to the same states", () => {
+  const shape = ImpulseFormShape({
+    first: ImpulseFormUnit(""),
+    second: ImpulseFormUnit(0),
+    third: ImpulseFormShape({
+      one: ImpulseFormUnit(true),
+      two: ImpulseFormUnit([""]),
+    }),
+  })
+
+  // @ts-expect-error it does not mind to ignore ts in tests
+  expect(shape._state._fields.first).toBe(shape.fields.first._state)
+  // @ts-expect-error it does not mind to ignore ts in tests
+  expect(shape._state._fields.second).toBe(shape.fields.second._state)
+  // @ts-expect-error it does not mind to ignore ts in tests
+  expect(shape._state._fields.third).toBe(shape.fields.third._state)
+
+  // @ts-expect-error it does not mind to ignore ts in tests
+  expect(shape._state._fields.third._fields.one).toBe(
+    // @ts-expect-error it does not mind to ignore ts in tests
+    shape.fields.third._state._fields.one,
+  )
+  // @ts-expect-error it does not mind to ignore ts in tests
+  expect(shape._state._fields.third._fields.two).toBe(
+    // @ts-expect-error it does not mind to ignore ts in tests
+    shape.fields.third._state._fields.two,
+  )
+})
+
 describe("ImpulseFormShapeOptions.touched", () => {
   it("specifies initial touched", ({ scope }) => {
     const shape = ImpulseFormShape(
