@@ -11,9 +11,9 @@ it("assigns default initial", ({ scope }) => {
 })
 
 it("selects custom initial", ({ scope }) => {
-  const value = ImpulseFormUnit("", { initial: "1" })
+  const value = ImpulseFormUnit("2", { initial: "1" })
 
-  expect(value.getInput(scope)).toBe("")
+  expect(value.getInput(scope)).toBe("2")
   expect(value.getInitial(scope)).toBe("1")
 })
 
@@ -30,16 +30,19 @@ it("selects unequal custom input and initial values when isInputEqual is not spe
   expect(form.getInput(scope)).toStrictEqual(form.getInitial(scope))
 })
 
-it("selects equal custom input and initial values when isInputEqual is not specified", ({
+it("selects equal custom input and initial values when isInputEqual is specified", ({
   scope,
 }) => {
-  const input = { count: 0 }
-  const form = ImpulseFormUnit(input, {
-    initial: { count: 0 },
-    isInputEqual: (left, right) => left.count === right.count,
-  })
+  const initial = { count: 0 }
+  const form = ImpulseFormUnit(
+    { count: 0 },
+    {
+      initial,
+      isInputEqual: (left, right) => left.count === right.count,
+    },
+  )
 
-  expect(form.getInitial(scope)).toBe(input)
+  expect(form.getInput(scope)).toBe(initial)
   expect(form.getInput(scope)).toBe(form.getInitial(scope))
   expect(form.getInput(scope)).toStrictEqual(form.getInitial(scope))
 })

@@ -132,7 +132,7 @@ it("allows to specify none-form fields", ({ scope }) => {
   })
 })
 
-it("refers to the same specs", () => {
+it("refers to the same specs", ({ scope }) => {
   const shape = ImpulseFormShape({
     first: ImpulseFormUnit(""),
     second: ImpulseFormUnit(0),
@@ -143,21 +143,31 @@ it("refers to the same specs", () => {
   })
 
   // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._spec._fields.first).toBe(shape.fields.first._spec)
-  // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._spec._fields.second).toBe(shape.fields.second._spec)
-  // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._spec._fields.third).toBe(shape.fields.third._spec)
-
-  // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._spec._fields.third._fields.one).toBe(
-    // @ts-expect-error it does not mind to ignore ts in tests
-    shape.fields.third._spec._fields.one,
+  expect(shape._spec.getValue(scope)._fields.first).toBe(
+    shape.fields.first._spec,
   )
   // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._spec._fields.third._fields.two).toBe(
+  expect(shape._spec.getValue(scope)._fields.second).toBe(
+    shape.fields.second._spec,
+  )
+  // @ts-expect-error it does not mind to ignore ts in tests
+  expect(shape._spec.getValue(scope)._fields.third).toBe(
+    shape.fields.third._spec,
+  )
+
+  expect(
     // @ts-expect-error it does not mind to ignore ts in tests
-    shape.fields.third._spec._fields.two,
+    shape._spec.getValue(scope)._fields.third.getValue(scope)._fields.one,
+  ).toBe(
+    // @ts-expect-error it does not mind to ignore ts in tests
+    shape.fields.third._spec.getValue(scope)._fields.one,
+  )
+  expect(
+    // @ts-expect-error it does not mind to ignore ts in tests
+    shape._spec.getValue(scope)._fields.third.getValue(scope)._fields.two,
+  ).toBe(
+    // @ts-expect-error it does not mind to ignore ts in tests
+    shape.fields.third._spec.getValue(scope)._fields.two,
   )
 })
 

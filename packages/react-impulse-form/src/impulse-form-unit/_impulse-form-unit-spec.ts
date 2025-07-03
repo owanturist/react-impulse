@@ -1,7 +1,7 @@
 import type { Option } from "~/tools/option"
 import { resolveSetter } from "~/tools/setter"
 
-import { type Compare, Impulse, untrack } from "../dependencies"
+import { type Compare, Impulse, type Scope, untrack } from "../dependencies"
 import type {
   ImpulseFormSpec,
   ImpulseFormSpecPatch,
@@ -17,7 +17,7 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
   implements ImpulseFormSpec<ImpulseFormUnitParams<TInput, TError, TOutput>>
 {
   public constructor(
-    public readonly _input: TInput,
+    input: TInput,
     public readonly _initial: TInput,
     private readonly _optionalError: Option<null | TError>,
     private readonly _optionalValidateOn: Option<ValidateStrategy>,
@@ -31,11 +31,35 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
     private readonly _isInputEqual: Compare<TInput>,
     private readonly _isOutputEqual: Compare<null | TOutput>,
     private readonly _isErrorEqual: Compare<null | TError>,
-  ) {}
-
-  public _outputFromVerbose(output: null | TOutput): null | TOutput {
-    return output
+  ) {
+    this._input = untrack((scope) => {
+      return _isInputEqual(_initial, input, scope) ? _initial : input
+    })
   }
+
+  private setInitial(
+    initial: TInput,
+    scope: Scope,
+  ): ImpulseFormUnitSpec<TInput, TError, TOutput> {
+    if (this._isInputEqual(this._initial, initial, scope)) {
+      return this
+    }
+
+    return new ImpulseFormUnitSpec(
+      this._input,
+      initial,
+      this._optionalError,
+      this._optionalValidateOn,
+      this._optionalTouched,
+      this._transform,
+      this._isInputDirty,
+      this._isInputEqual,
+      this._isOutputEqual,
+      this._isErrorEqual,
+    )
+  }
+
+  public readonly _input: TInput
 
   public get _error(): null | TError {
     return this._optionalError._getOrElse(null)
@@ -93,15 +117,16 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
   }
 
   public _create(): ImpulseFormUnit<TInput, TError, TOutput> {
-    const initialOrInput = untrack((scope) => {
-      return this._isInputEqual(this._initial, this._input, scope)
-        ? this._input
-        : this._initial
-    })
+    const spec = Impulse(this as ImpulseFormUnitSpec<TInput, TError, TOutput>)
 
     const state = new ImpulseFormUnitState(
+      Impulse(
+        (scope) => spec.getValue(scope)._initial,
+        (initial) => {
+          spec.setValue((current, scope) => current.setInitial(initial, scope))
+        },
+      ),
       Impulse(this._input, { compare: this._isInputEqual }),
-      Impulse(initialOrInput, { compare: this._isInputEqual }),
       Impulse(this._error, { compare: this._isErrorEqual }),
       Impulse(this._validateOn),
       Impulse(this._touched),
@@ -111,6 +136,6 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
       this._isErrorEqual,
     )
 
-    return new ImpulseFormUnit(this, state)
+    return new ImpulseFormUnit(spec, state)
   }
 }

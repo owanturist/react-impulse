@@ -36,8 +36,8 @@ export class ImpulseFormUnitState<
   TOutput,
 > extends ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>> {
   public constructor(
-    public readonly _input: Impulse<TInput>,
     public readonly _initial: Impulse<TInput>,
+    public readonly _input: Impulse<TInput>,
     public readonly _customError: Impulse<null | TError>,
     public readonly _validateOn: Impulse<ValidateStrategy>,
     public readonly _touched: Impulse<boolean>,
@@ -49,6 +49,13 @@ export class ImpulseFormUnitState<
     isErrorEqual: Compare<null | TError>,
   ) {
     super()
+
+    const _dirty = Impulse((scope) => {
+      const initial = _initial.getValue(scope)
+      const input = _input.getValue(scope)
+
+      return isInputDirty(initial, input, scope)
+    })
 
     // holds the actual validated state
     const validated = Impulse(false)
@@ -78,7 +85,7 @@ export class ImpulseFormUnitState<
             }
 
             case VALIDATE_ON_CHANGE: {
-              return this._dirty.getValue(scope)
+              return _dirty.getValue(scope)
             }
 
             case VALIDATE_ON_SUBMIT: {
@@ -130,12 +137,7 @@ export class ImpulseFormUnitState<
       },
     )
 
-    this._dirty = this._dirtyVerbose = Impulse((scope) => {
-      const initial = _initial.getValue(scope)
-      const input = _input.getValue(scope)
-
-      return isInputDirty(initial, input, scope)
-    })
+    this._dirty = this._dirtyVerbose = _dirty
 
     this._validated.setValue(false)
   }

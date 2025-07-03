@@ -6,6 +6,7 @@ import type { OmitValues } from "~/tools/omit-values"
 import { Option, Some } from "~/tools/option"
 import { resolveSetter } from "~/tools/setter"
 
+import { Impulse, untrack } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type {
   ImpulseFormSpec,
@@ -27,7 +28,7 @@ export type ImpulseFormShapeSpecFields<TFields extends ImpulseFormShapeFields> =
       [TField in keyof TFields]: TFields[TField] extends ImpulseForm<
         infer TParams
       >
-        ? ImpulseFormSpec<TParams>
+        ? Impulse<ImpulseFormSpec<TParams>>
         : never
     },
     never
@@ -46,28 +47,28 @@ export class ImpulseFormShapeSpec<
   ) {}
 
   public readonly _initial = {
-    ...mapValues(this._fields, ({ _initial }) => _initial),
+    ...mapValues(this._fields, (field) => untrack(field)._initial),
     ...this._constants,
   } as ImpulseFormShapeInput<TFields>
 
   public readonly _input = {
-    ...mapValues(this._fields, ({ _input }) => _input),
+    ...mapValues(this._fields, (field) => untrack(field)._input),
     ...this._constants,
   } as ImpulseFormShapeInput<TFields>
 
   public readonly _error = mapValues(
     this._fields,
-    ({ _error }) => _error,
+    (field) => untrack(field)._error,
   ) as ImpulseFormShapeErrorVerbose<TFields>
 
   public readonly _validateOn = mapValues(
     this._fields,
-    ({ _validateOn }) => _validateOn,
+    (field) => untrack(field)._validateOn,
   ) as ImpulseFormShapeValidateOnVerbose<TFields>
 
   public readonly _touched = mapValues(
     this._fields,
-    ({ _touched }) => _touched,
+    (field) => untrack(field)._touched,
   ) as ImpulseFormShapeFlagVerbose<TFields>
 
   public _override({
@@ -100,7 +101,7 @@ export class ImpulseFormShapeSpec<
     })
 
     const fields = mapValues(this._fields, (field, key) => {
-      return field._override({
+      const next = untrack(field)._override({
         _input: input._chain((shape) => {
           return Option(shape[key])
         }),
@@ -133,18 +134,24 @@ export class ImpulseFormShapeSpec<
           return Option(shape[key])
         }),
       })
+
+      return Impulse(next)
     })
 
     return new ImpulseFormShapeSpec(fields, this._constants)
   }
 
   public _create(): ImpulseFormShape<TFields> {
-    const fields = mapValues(this._fields, (field) => field._create())
+    const fields = mapValues(this._fields, (field) => untrack(field)._create())
     const state = new ImpulseFormShapeState(
       mapValues(fields, (field) => field._state),
       this._constants,
     )
+    const spec = new ImpulseFormShapeSpec(
+      mapValues(fields, (field) => field._spec),
+      this._constants,
+    )
 
-    return new ImpulseFormShape(this, state, fields)
+    return new ImpulseFormShape(Impulse(spec), state, fields)
   }
 }

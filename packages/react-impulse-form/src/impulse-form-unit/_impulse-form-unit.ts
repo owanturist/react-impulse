@@ -1,3 +1,4 @@
+import type { Impulse } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
@@ -10,7 +11,7 @@ export class ImpulseFormUnit<
   TOutput = TInput,
 > extends ImpulseForm<ImpulseFormUnitParams<TInput, TError, TOutput>> {
   public constructor(
-    spec: ImpulseFormUnitSpec<TInput, TError, TOutput>,
+    spec: Impulse<ImpulseFormUnitSpec<TInput, TError, TOutput>>,
     state: ImpulseFormUnitState<TInput, TError, TOutput>,
   ) {
     super(spec, state)
