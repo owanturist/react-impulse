@@ -4,8 +4,8 @@ import type { ImpulseForm } from "./impulse-form"
 import type { ImpulseFormParams } from "./impulse-form-params"
 
 export interface ImpulseFormSpecPatch<TParams extends ImpulseFormParams> {
-  readonly _input: Option<TParams["input.setter"]>
   readonly _initial: Option<TParams["input.setter"]>
+  readonly _input: Option<TParams["input.setter"]>
   readonly _error: Option<TParams["error.setter"]>
   readonly _validateOn: Option<TParams["validateOn.setter"]>
   readonly _touched: Option<TParams["flag.setter"]>
