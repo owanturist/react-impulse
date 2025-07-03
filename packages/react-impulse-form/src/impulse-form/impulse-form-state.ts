@@ -114,7 +114,19 @@ export abstract class ImpulseFormState<TParams extends ImpulseFormParams> {
 
   // R E S E T
 
-  public abstract _reset(resetter?: TParams["input.setter"]): void
+  /**
+   * Comparing to _setInitial where the setter is always provided,
+   * this method allows te resetter to be undefined.
+   * This is for cases when the initial value is not changed BUT
+   * the ImpulseForm should perform the rest of reset operations,
+   * in comparison to _setInitial which only sets the initial value AND
+   * not called at all if the setter is not provided.
+   */
+  public abstract _reset(
+    resetter: undefined | TParams["input.setter"],
+    initial: Lazy<TParams["input.schema"]>,
+    input: Lazy<TParams["input.schema"]>,
+  ): void
 
   // C H I L D R E N
 
