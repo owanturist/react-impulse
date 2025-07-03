@@ -1,7 +1,12 @@
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
 
-import { type ReadonlyImpulse, type Scope, batch } from "../dependencies"
+import {
+  type Impulse,
+  type ReadonlyImpulse,
+  type Scope,
+  batch,
+} from "../dependencies"
 
 import type { ImpulseFormParams } from "./impulse-form-params"
 import type { ImpulseFormSpec } from "./impulse-form-spec"
@@ -48,7 +53,7 @@ export abstract class ImpulseForm<
   protected readonly _params?: TParams
 
   protected constructor(
-    public readonly _spec: ImpulseFormSpec<TParams>,
+    public readonly _spec: Impulse<ImpulseFormSpec<TParams>>,
     // TODO make it private/protected AND make it Lazy
     public readonly _state: ImpulseFormState<TParams>,
   ) {}
