@@ -1,21 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export interface ImpulseFormParams {
-  readonly "input.setter": any
-  readonly "input.schema": any
+  readonly "input.setter": unknown
+  readonly "input.schema": unknown
 
-  readonly "output.schema": any
-  readonly "output.schema.verbose": any
+  readonly "output.schema": unknown
+  readonly "output.schema.verbose": unknown
 
-  readonly "flag.setter": any
-  readonly "flag.schema": any
-  readonly "flag.schema.verbose": any
+  readonly "flag.setter": unknown
+  readonly "flag.schema": unknown
+  readonly "flag.schema.verbose": unknown
 
-  readonly "validateOn.setter": any
-  readonly "validateOn.schema": any
-  readonly "validateOn.schema.verbose": any
+  readonly "validateOn.setter": unknown
+  readonly "validateOn.schema": unknown
+  readonly "validateOn.schema.verbose": unknown
 
-  readonly "error.setter": any
-  readonly "error.schema": any
-  readonly "error.schema.verbose": any
+  readonly "error.setter": unknown
+  readonly "error.schema": unknown
+  readonly "error.schema.verbose": unknown
 }
