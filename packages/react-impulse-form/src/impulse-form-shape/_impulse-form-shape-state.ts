@@ -58,6 +58,7 @@ import {
   type ImpulseFormShapeValidateOnVerbose,
   isImpulseFormShapeValidateOnVerboseEqual,
 } from "./impulse-form-shape-validate-on-verbose"
+import { params } from "~/tools/params"
 
 export type ImpulseFormShapeStateFields<
   TFields extends ImpulseFormShapeFields,
@@ -500,15 +501,21 @@ export class ImpulseFormShapeState<
     },
   )
 
-  public _reset(resetter?: ImpulseFormShapeInputSetter<TFields>): void {
-    batch((scope) => {
-      const resetters = isFunction(resetter)
-        ? resetter(this._initial.getValue(scope), this._input.getValue(scope))
-        : resetter
+  public _reset(
+    resetter: undefined | ImpulseFormShapeInputSetter<TFields>,
+    initial: Lazy<ImpulseFormShapeInput<TFields>>,
+    input: Lazy<ImpulseFormShapeInput<TFields>>,
+  ): void {
+    const resetters = isFunction(resetter)
+      ? resetter(initial._peek(), input._peek())
+      : resetter
 
-      forEntries(this._fields, (field, key) => {
-        field._reset(hasProperty(resetters, key) ? resetters[key] : undefined)
-      })
+    forEntries(this._fields, (field, key) => {
+      field._reset(
+        hasProperty(resetters, key) ? resetters[key] : params._first,
+        initial._map((fields) => fields[key]),
+        input._map((fields) => fields[key]),
+      )
     })
   }
 
