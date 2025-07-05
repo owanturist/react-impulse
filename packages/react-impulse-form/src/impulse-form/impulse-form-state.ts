@@ -1,7 +1,7 @@
 import { isNull } from "~/tools/is-null"
 import type { Lazy } from "~/tools/lazy"
 
-import type { ReadonlyImpulse, Scope } from "../dependencies"
+import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
 import { Emitter } from "../emitter"
 
 import type { ImpulseFormParams } from "./impulse-form-params"
@@ -79,6 +79,8 @@ export abstract class ImpulseFormState<TParams extends ImpulseFormParams> {
     TParams["flag.schema.verbose"]
   >
 
+  public abstract _forceValidated(): void
+
   // D I R T Y
 
   public abstract readonly _dirty: ReadonlyImpulse<TParams["flag.schema"]>
@@ -92,8 +94,8 @@ export abstract class ImpulseFormState<TParams extends ImpulseFormParams> {
 
   public _getFocusFirstInvalid(scope: Scope): null | VoidFunction {
     // go deep first and then the current element
-    for (const element of this._getChildren(scope)) {
-      const callback = element._getFocusFirstInvalid(scope)
+    for (const { _state } of this._getChildren(scope)) {
+      const callback = _state._getFocusFirstInvalid(scope)
 
       if (callback) {
         return callback
@@ -110,6 +112,29 @@ export abstract class ImpulseFormState<TParams extends ImpulseFormParams> {
     return () => {
       this._onFocus._emit(error)
     }
+  }
+
+  // S U B M I T
+
+  public readonly _onSubmit = new Emitter<
+    [output: unknown],
+    void | Promise<unknown>
+  >()
+
+  public readonly _submitAttempts = Impulse(0)
+  public readonly _submittingCount = Impulse(0)
+
+  public _submitWith(
+    scope: Scope,
+    output: TParams["output.schema"],
+  ): ReadonlyArray<void | Promise<unknown>> {
+    const promises = this._getChildren(scope).flatMap(
+      ({ _state, _mapOutput }) => {
+        return _state._submitWith(scope, _mapOutput(output))
+      },
+    )
+
+    return [...this._onSubmit._emit(output), ...promises]
   }
 
   // R E S E T
@@ -132,5 +157,10 @@ export abstract class ImpulseFormState<TParams extends ImpulseFormParams> {
 
   public abstract _getChildren(
     scope: Scope,
-  ): ReadonlyArray<ImpulseFormState<ImpulseFormParams>>
+  ): ReadonlyArray<ImpulseFormChild<TParams>>
+}
+
+export interface ImpulseFormChild<TParams extends ImpulseFormParams> {
+  _state: ImpulseFormState<ImpulseFormParams>
+  _mapOutput: (output: TParams["output.schema"]) => unknown
 }
