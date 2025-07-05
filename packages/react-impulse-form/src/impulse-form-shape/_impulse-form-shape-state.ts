@@ -8,12 +8,16 @@ import { isUndefined } from "~/tools/is-undefined"
 import type { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
+import { params } from "~/tools/params"
 import { values } from "~/tools/values"
 
 import { Impulse, batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
-import { ImpulseFormState } from "../impulse-form/impulse-form-state"
+import {
+  ImpulseFormState,
+  type ImpulseFormChild,
+} from "../impulse-form/impulse-form-state"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
 import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"
@@ -58,7 +62,7 @@ import {
   type ImpulseFormShapeValidateOnVerbose,
   isImpulseFormShapeValidateOnVerboseEqual,
 } from "./impulse-form-shape-validate-on-verbose"
-import { params } from "~/tools/params"
+import { entries } from "~/tools/entries"
 
 export type ImpulseFormShapeStateFields<
   TFields extends ImpulseFormShapeFields,
@@ -464,6 +468,14 @@ export class ImpulseFormShapeState<
     },
   )
 
+  public override _forceValidated(): void {
+    batch(() => {
+      forEntries(this._fields, (field) => {
+        field._forceValidated()
+      })
+    })
+  }
+
   public readonly _dirty = Impulse(
     (scope) => {
       const dirty = mapValues(this._fields, ({ _dirty }) => {
@@ -519,7 +531,12 @@ export class ImpulseFormShapeState<
     })
   }
 
-  public _getChildren(): ReadonlyArray<ImpulseFormState<ImpulseFormParams>> {
-    return values(this._fields)
+  public _getChildren(): ReadonlyArray<
+    ImpulseFormChild<ImpulseFormShapeParams<TFields>>
+  > {
+    return entries(this._fields).map(([key, field]) => ({
+      _state: field,
+      _mapOutput: (output) => output[key],
+    }))
   }
 }

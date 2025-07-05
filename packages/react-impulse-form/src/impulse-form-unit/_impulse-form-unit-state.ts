@@ -9,6 +9,7 @@ import {
   Impulse,
   type ReadonlyImpulse,
   batch,
+  untrack,
 } from "../dependencies"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
@@ -57,21 +58,18 @@ export class ImpulseFormUnitState<
       return isInputDirty(initial, input, scope)
     })
 
-    // holds the actual validated state
+    // persist the validated state
     const validated = Impulse(false)
 
+    // derives the validated states
     this._validated = this._validatedVerbose = Impulse<boolean>(
       // mixes the validated and invalid states
       (scope) => validated.getValue(scope) || this._invalid.getValue(scope),
-      // proxies the validated setter where `false` means just "validate if not validated yet"
-      // and `true` means "revalidate even if already validated"
-      (revalidate, scope) => {
-        validated.setValue((_validated) => {
-          if (!revalidate && _validated) {
-            return true
-          }
-
-          if (_transform.getValue(scope)._transformer) {
+      // proxies the validated setter where `false` means revalidate
+      // and `true` sets the validated state to `true`
+      (next, scope) => {
+        validated.setValue(() => {
+          if (next || _transform.getValue(scope)._transformer) {
             return true
           }
 
@@ -152,7 +150,10 @@ export class ImpulseFormUnitState<
       : setter
 
     this._input.setValue(next)
-    this._validated.setValue(false)
+
+    if (!untrack(this._validated)) {
+      this._validated.setValue(false)
+    }
   }
 
   public _setInitial(setter: ImpulseFormUnitInputSetter<TInput>): void {
@@ -165,7 +166,7 @@ export class ImpulseFormUnitState<
 
       const after = this._initial.getValue(scope)
 
-      if (before !== after) {
+      if (before !== after && !this._validated.getValue(scope)) {
         this._validated.setValue(false)
       }
     })
@@ -189,7 +190,7 @@ export class ImpulseFormUnitState<
       const after = this._validateOn.getValue(scope)
 
       if (before !== after) {
-        this._validated.setValue(true)
+        this._validated.setValue(false)
       }
     })
   }
@@ -199,9 +200,11 @@ export class ImpulseFormUnitState<
   public _setTouched(
     setter: ImpulseFormUnitParams<TInput, TError, TOutput>["flag.setter"],
   ): void {
-    batch(() => {
+    batch((scope) => {
       this._touched.setValue((touched) => resolveSetter(setter, touched))
-      this._validated.setValue(false)
+      if (!this._validated.getValue(scope)) {
+        this._validated.setValue(false)
+      }
     })
   }
 
@@ -227,6 +230,10 @@ export class ImpulseFormUnitState<
   public readonly _validated: Impulse<boolean>
   public readonly _validatedVerbose: ReadonlyImpulse<boolean>
 
+  public override _forceValidated(): void {
+    this._validated.setValue(true)
+  }
+
   public readonly _dirty: ReadonlyImpulse<boolean>
   public readonly _dirtyVerbose: ReadonlyImpulse<boolean>
 
@@ -246,7 +253,7 @@ export class ImpulseFormUnitState<
     // TODO test when reset for all below
     this._touched.setValue(false)
     this._customError.setValue(null)
-    this._validated.setValue(true)
+    this._validated.setValue(false)
   }
 
   public _getChildren(): ReadonlyArray<never> {
@@ -256,9 +263,11 @@ export class ImpulseFormUnitState<
   public _setTransform(
     transformer: ImpulseFormUnitTransformer<TInput, TOutput>,
   ): void {
-    batch(() => {
+    batch((scope) => {
       this._transform.setValue(transformFromTransformer(transformer))
-      this._validated.setValue(false)
+      if (!this._validated.getValue(scope)) {
+        this._validated.setValue(false)
+      }
     })
   }
 }

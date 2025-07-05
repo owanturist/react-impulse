@@ -1,17 +1,20 @@
+import { isDefined } from "~/tools/is-defined"
+import { isNull } from "~/tools/is-null"
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
+import { Lazy } from "~/tools/lazy"
 
 import {
   type Impulse,
   type ReadonlyImpulse,
   type Scope,
   batch,
+  untrack,
 } from "../dependencies"
 
 import type { ImpulseFormParams } from "./impulse-form-params"
 import type { ImpulseFormSpec } from "./impulse-form-spec"
 import type { ImpulseFormState } from "./impulse-form-state"
-import { Lazy } from "~/tools/lazy"
 
 function resolveGetter<TValue, TVerbose, TSelected>(
   scope: Scope,
@@ -51,12 +54,16 @@ export abstract class ImpulseForm<
 > {
   // necessary for type inference
   protected readonly _params?: TParams
+  private readonly _root: ImpulseForm
 
   protected constructor(
     public readonly _spec: Impulse<ImpulseFormSpec<TParams>>,
     // TODO make it private/protected AND make it Lazy
     public readonly _state: ImpulseFormState<TParams>,
-  ) {}
+    _root: null | ImpulseForm,
+  ) {
+    this._root = _root ?? this
+  }
 
   public getOutput(scope: Scope): null | TParams["output.schema"]
   public getOutput<TResult>(
@@ -272,5 +279,48 @@ export abstract class ImpulseForm<
     batch((scope) => {
       this._state._getFocusFirstInvalid(scope)?.()
     })
+  }
+
+  public getSubmitCount(scope: Scope): number {
+    return this._root._state._submitAttempts.getValue(scope)
+  }
+
+  public isSubmitting(scope: Scope): boolean {
+    return this._root._state._submittingCount.getValue(scope) > 0
+  }
+
+  public onSubmit(
+    listener: (output: TParams["output.schema"]) => void | Promise<unknown>,
+  ): VoidFunction {
+    return this._root._state._onSubmit._subscribe(listener)
+  }
+
+  public async submit(): Promise<void> {
+    batch(() => {
+      this._root._state._submitAttempts.setValue((count) => count + 1)
+      this._root._state._forceValidated()
+    })
+
+    const promises = untrack((scope) => {
+      const output = this._root.getOutput(scope)
+
+      if (!isNull(output) && this._root.isValid(scope)) {
+        return this._root._state._submitWith(scope, output).filter(isDefined)
+      }
+
+      return undefined
+    })
+
+    if (!promises) {
+      this._root.focusFirstInvalid()
+    } else if (promises.length > 0) {
+      this._root._state._submittingCount.setValue((count) => count + 1)
+
+      await Promise.all(promises)
+
+      this._root._state._submittingCount.setValue((count) => {
+        return Math.max(0, count - 1)
+      })
+    }
   }
 }
