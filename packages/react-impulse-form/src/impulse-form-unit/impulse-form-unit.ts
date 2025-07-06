@@ -210,7 +210,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       ),
     )
 
-    return spec._create()
+    return spec._create(null)
   }
 
   const error = Option(options?.error)
@@ -236,7 +236,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       isErrorEqual,
     )
 
-    return spec._create()
+    return spec._create(null)
   }
 
   if (hasProperty(options, "transform")) {
@@ -256,7 +256,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       isErrorEqual,
     )
 
-    return spec._create()
+    return spec._create(null)
   }
 
   const spec = new ImpulseFormUnitSpec(
@@ -272,5 +272,5 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     isErrorEqual,
   )
 
-  return spec._create()
+  return spec._create(null)
 }

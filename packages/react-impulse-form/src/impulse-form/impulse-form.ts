@@ -54,16 +54,12 @@ export abstract class ImpulseForm<
 > {
   // necessary for type inference
   protected readonly _params?: TParams
-  private readonly _root: ImpulseForm
 
   protected constructor(
+    // TODO make those private/protected
     public readonly _spec: Impulse<ImpulseFormSpec<TParams>>,
-    // TODO make it private/protected AND make it Lazy
-    public readonly _state: ImpulseFormState<TParams>,
-    _root: null | ImpulseForm,
-  ) {
-    this._root = _root ?? this
-  }
+    public readonly _state: Lazy<ImpulseFormState<TParams>>,
+  ) {}
 
   public getOutput(scope: Scope): null | TParams["output.schema"]
   public getOutput<TResult>(
@@ -80,26 +76,26 @@ export abstract class ImpulseForm<
       verbose: TParams["output.schema.verbose"],
     ) => TResult,
   ): null | TParams["output.schema"] | TResult {
-    const { _output, _outputVerbose } = this._state
+    const { _output, _outputVerbose } = this._state._peek()
 
     return resolveGetter(scope, _output, _outputVerbose, select)
   }
 
   public getInitial(scope: Scope): TParams["input.schema"] {
-    return this._state._initial.getValue(scope)
+    return this._state._peek()._initial.getValue(scope)
   }
 
   public setInitial(setter: TParams["input.setter"]): void {
-    this._state._setInitial(setter)
+    this._state._peek()._setInitial(setter)
   }
 
   public getInput(scope: Scope): TParams["input.schema"] {
-    return this._state._input.getValue(scope)
+    return this._state._peek()._input.getValue(scope)
   }
 
   public setInput(setter: TParams["input.setter"]): void {
     batch((scope) => {
-      this._state._setInput(
+      this._state._peek()._setInput(
         setter,
         Lazy(() => this.getInput(scope)),
         Lazy(() => this.getInitial(scope)),
@@ -122,13 +118,13 @@ export abstract class ImpulseForm<
       verbose: TParams["error.schema.verbose"],
     ) => TResult,
   ): null | TParams["error.schema"] | TResult {
-    const { _error, _errorVerbose } = this._state
+    const { _error, _errorVerbose } = this._state._peek()
 
     return resolveGetter(scope, _error, _errorVerbose, select)
   }
 
   public setError(setter: TParams["error.setter"]): void {
-    this._state._setError(setter)
+    this._state._peek()._setError(setter)
   }
 
   public getValidateOn(scope: Scope): TParams["validateOn.schema"]
@@ -146,13 +142,13 @@ export abstract class ImpulseForm<
       verbose: TParams["validateOn.schema.verbose"],
     ) => TResult,
   ): TParams["validateOn.schema"] | TResult {
-    const { _validateOn, _validateOnVerbose } = this._state
+    const { _validateOn, _validateOnVerbose } = this._state._peek()
 
     return resolveGetter(scope, _validateOn, _validateOnVerbose, select)
   }
 
   public setValidateOn(setter: TParams["validateOn.setter"]): void {
-    this._state._setValidateOn(setter)
+    this._state._peek()._setValidateOn(setter)
   }
 
   public isValid(scope: Scope): boolean
@@ -170,7 +166,7 @@ export abstract class ImpulseForm<
       verbose: TParams["flag.schema.verbose"],
     ) => TResult,
   ): boolean | TResult {
-    const { _valid, _validVerbose } = this._state
+    const { _valid, _validVerbose } = this._state._peek()
 
     return resolveGetter(scope, _valid, _validVerbose, select, isTrue)
   }
@@ -190,9 +186,9 @@ export abstract class ImpulseForm<
       verbose: TParams["flag.schema.verbose"],
     ) => TResult,
   ): boolean | TResult {
-    const { _invalid, _invalidVerbose } = this._state
+    const { _invalid, _invalidVerbose } = this._state._peek()
 
-    return resolveGetter(scope, _invalid, _invalidVerbose, select, isTrue)
+    return resolveGetter(scope, _invalid, _invalidVerbose, select, isTruthy)
   }
 
   public isValidated(scope: Scope): boolean
@@ -210,7 +206,7 @@ export abstract class ImpulseForm<
       verbose: TParams["flag.schema.verbose"],
     ) => TResult,
   ): boolean | TResult {
-    const { _validated, _validatedVerbose } = this._state
+    const { _validated, _validatedVerbose } = this._state._peek()
 
     return resolveGetter(scope, _validated, _validatedVerbose, select, isTrue)
   }
@@ -230,7 +226,7 @@ export abstract class ImpulseForm<
       verbose: TParams["flag.schema.verbose"],
     ) => TResult,
   ): boolean | TResult {
-    const { _dirty, _dirtyVerbose } = this._state
+    const { _dirty, _dirtyVerbose } = this._state._peek()
 
     return resolveGetter(scope, _dirty, _dirtyVerbose, select, isTruthy)
   }
@@ -250,18 +246,18 @@ export abstract class ImpulseForm<
       verbose: TParams["flag.schema.verbose"],
     ) => TResult,
   ): boolean | TResult {
-    const { _touched, _touchedVerbose } = this._state
+    const { _touched, _touchedVerbose } = this._state._peek()
 
     return resolveGetter(scope, _touched, _touchedVerbose, select, isTruthy)
   }
 
   public setTouched(setter: TParams["flag.setter"]): void {
-    this._state._setTouched(setter)
+    this._state._peek()._setTouched(setter)
   }
 
   public reset(resetter?: TParams["input.setter"]): void {
     batch((scope) => {
-      this._state._reset(
+      this._state._peek()._reset(
         resetter,
         Lazy(() => this.getInitial(scope)),
         Lazy(() => this.getInput(scope)),
@@ -272,53 +268,58 @@ export abstract class ImpulseForm<
   public onFocusWhenInvalid(
     onFocus: (error: TParams["error.schema.verbose"]) => void,
   ): VoidFunction {
-    return this._state._onFocus._subscribe(onFocus)
+    return this._state._peek()._onFocus._subscribe(onFocus)
   }
 
   public focusFirstInvalid(): void {
     batch((scope) => {
-      this._state._getFocusFirstInvalid(scope)?.()
+      this._state._peek()._getFocusFirstInvalid(scope)?.()
     })
   }
 
   public getSubmitCount(scope: Scope): number {
-    return this._root._state._submitAttempts.getValue(scope)
+    return this._state._peek()._root._submitAttempts.getValue(scope)
   }
 
   public isSubmitting(scope: Scope): boolean {
-    return this._root._state._submittingCount.getValue(scope) > 0
+    return this._state._peek()._root._submittingCount.getValue(scope) > 0
   }
 
   public onSubmit(
     listener: (output: TParams["output.schema"]) => void | Promise<unknown>,
   ): VoidFunction {
-    return this._root._state._onSubmit._subscribe(listener)
+    return this._state._peek()._onSubmit._subscribe(listener)
   }
 
   public async submit(): Promise<void> {
     batch(() => {
-      this._root._state._submitAttempts.setValue((count) => count + 1)
-      this._root._state._forceValidated()
+      this._state._peek()._root._submitAttempts.setValue((count) => count + 1)
+      this._state._peek()._root._forceValidated()
     })
 
     const promises = untrack((scope) => {
-      const output = this._root.getOutput(scope)
+      const output = this._state._peek()._root._output.getValue(scope)
 
-      if (!isNull(output) && this._root.isValid(scope)) {
-        return this._root._state._submitWith(scope, output).filter(isDefined)
+      if (!isNull(output) && this._state._peek()._root._valid.getValue(scope)) {
+        return this._state
+          ._peek()
+          ._root._submitWith(scope, output)
+          .filter(isDefined)
       }
 
       return undefined
     })
 
     if (!promises) {
-      this._root.focusFirstInvalid()
+      batch((scope) => {
+        this._state._peek()._root._getFocusFirstInvalid(scope)?.()
+      })
     } else if (promises.length > 0) {
-      this._root._state._submittingCount.setValue((count) => count + 1)
+      this._state._peek()._root._submittingCount.setValue((count) => count + 1)
 
       await Promise.all(promises)
 
-      this._root._state._submittingCount.setValue((count) => {
+      this._state._peek()._root._submittingCount.setValue((count) => {
         return Math.max(0, count - 1)
       })
     }

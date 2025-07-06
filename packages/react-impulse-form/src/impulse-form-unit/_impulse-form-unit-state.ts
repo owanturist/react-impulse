@@ -11,6 +11,7 @@ import {
   batch,
   untrack,
 } from "../dependencies"
+import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
 import {
@@ -37,6 +38,7 @@ export class ImpulseFormUnitState<
   TOutput,
 > extends ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>> {
   public constructor(
+    parent: null | Lazy<ImpulseFormState<ImpulseFormParams>>,
     public readonly _initial: Impulse<TInput>,
     public readonly _input: Impulse<TInput>,
     public readonly _customError: Impulse<null | TError>,
@@ -49,7 +51,7 @@ export class ImpulseFormUnitState<
     isOutputEqual: Compare<null | TOutput>,
     isErrorEqual: Compare<null | TError>,
   ) {
-    super()
+    super(parent)
 
     const _dirty = Impulse((scope) => {
       const initial = _initial.getValue(scope)
