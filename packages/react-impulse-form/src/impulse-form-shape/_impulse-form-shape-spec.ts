@@ -145,9 +145,9 @@ export class ImpulseFormShapeSpec<
   }
 
   public _create(
-    parent: null | Lazy<ImpulseFormState<ImpulseFormParams>>,
+    parent?: Lazy<ImpulseFormState<ImpulseFormParams>>,
   ): ImpulseFormShape<TFields> {
-    const state = Lazy(() => {
+    const state = Lazy((): ImpulseFormShapeState<TFields> => {
       return new ImpulseFormShapeState(
         parent,
         mapValues(fields, (field) => field._state._peek()),

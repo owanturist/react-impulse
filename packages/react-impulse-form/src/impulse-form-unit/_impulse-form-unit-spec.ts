@@ -120,7 +120,7 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
   }
 
   public _create(
-    parent: null | Lazy<ImpulseFormState<ImpulseFormParams>>,
+    parent?: Lazy<ImpulseFormState<ImpulseFormParams>>,
   ): ImpulseFormUnit<TInput, TError, TOutput> {
     const spec = Impulse(this as ImpulseFormUnitSpec<TInput, TError, TOutput>)
 

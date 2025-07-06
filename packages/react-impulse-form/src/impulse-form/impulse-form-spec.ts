@@ -29,6 +29,6 @@ export interface ImpulseFormSpec<
   _override(patch: ImpulseFormSpecPatch<TParams>): ImpulseFormSpec<TParams>
 
   _create(
-    parent: null | Lazy<ImpulseFormState<ImpulseFormParams>>,
+    parent?: Lazy<ImpulseFormState<ImpulseFormParams>>,
   ): ImpulseForm<TParams>
 }

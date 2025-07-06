@@ -38,7 +38,7 @@ export class ImpulseFormUnitState<
   TOutput,
 > extends ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>> {
   public constructor(
-    parent: null | Lazy<ImpulseFormState<ImpulseFormParams>>,
+    parent: undefined | Lazy<ImpulseFormState<ImpulseFormParams>>,
     public readonly _initial: Impulse<TInput>,
     public readonly _input: Impulse<TInput>,
     public readonly _customError: Impulse<null | TError>,
