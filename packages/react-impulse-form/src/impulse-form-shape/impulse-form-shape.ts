@@ -2,7 +2,6 @@ import { mapValues } from "~/tools/map-values"
 import { Option } from "~/tools/option"
 import { partitionEntries } from "~/tools/partition-entries"
 
-import { untrack } from "../dependencies"
 import { isImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormShape as ImpulseFormShapeImpl } from "./_impulse-form-shape"
@@ -52,5 +51,5 @@ export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
       _touched: Option(touched),
       _validateOn: Option(validateOn),
     })
-    ._create()
+    ._create(null)
 }

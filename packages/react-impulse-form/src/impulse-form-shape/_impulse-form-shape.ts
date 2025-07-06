@@ -1,3 +1,5 @@
+import type { Lazy } from "~/tools/lazy"
+
 import type { Impulse } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 
@@ -11,8 +13,7 @@ export class ImpulseFormShape<
 > extends ImpulseForm<ImpulseFormShapeParams<TFields>> {
   public constructor(
     spec: Impulse<ImpulseFormShapeSpec<TFields>>,
-    state: ImpulseFormShapeState<TFields>,
-    // TODO make it Lazy
+    state: Lazy<ImpulseFormShapeState<TFields>>,
     public readonly fields: TFields,
   ) {
     super(spec, state)

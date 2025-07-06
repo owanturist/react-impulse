@@ -1,3 +1,4 @@
+import { entries } from "~/tools/entries"
 import { forEntries } from "~/tools/for-entries"
 import { hasProperty } from "~/tools/has-property"
 import { isBoolean } from "~/tools/is-boolean"
@@ -15,8 +16,8 @@ import { Impulse, batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import {
-  ImpulseFormState,
   type ImpulseFormChild,
+  ImpulseFormState,
 } from "../impulse-form/impulse-form-state"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
@@ -62,7 +63,6 @@ import {
   type ImpulseFormShapeValidateOnVerbose,
   isImpulseFormShapeValidateOnVerboseEqual,
 } from "./impulse-form-shape-validate-on-verbose"
-import { entries } from "~/tools/entries"
 
 export type ImpulseFormShapeStateFields<
   TFields extends ImpulseFormShapeFields,
@@ -81,13 +81,14 @@ export class ImpulseFormShapeState<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
 > extends ImpulseFormState<ImpulseFormShapeParams<TFields>> {
   public constructor(
+    parent: null | Lazy<ImpulseFormState<ImpulseFormParams>>,
     private readonly _fields: ImpulseFormShapeStateFields<TFields>,
     private readonly _constants: Omit<
       TFields,
       keyof ImpulseFormShapeStateFields<TFields>
     >,
   ) {
-    super()
+    super(parent)
   }
 
   public readonly _initial = Impulse(
