@@ -1,11 +1,14 @@
+import { Lazy } from "~/tools/lazy"
 import type { Option } from "~/tools/option"
 import { resolveSetter } from "~/tools/setter"
 
 import { type Compare, Impulse, type Scope, untrack } from "../dependencies"
+import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import type {
   ImpulseFormSpec,
   ImpulseFormSpecPatch,
 } from "../impulse-form/impulse-form-spec"
+import type { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
 import { ImpulseFormUnit } from "./_impulse-form-unit"
@@ -116,25 +119,32 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
     )
   }
 
-  public _create(): ImpulseFormUnit<TInput, TError, TOutput> {
+  public _create(
+    parent: null | Lazy<ImpulseFormState<ImpulseFormParams>>,
+  ): ImpulseFormUnit<TInput, TError, TOutput> {
     const spec = Impulse(this as ImpulseFormUnitSpec<TInput, TError, TOutput>)
 
-    const state = new ImpulseFormUnitState(
-      Impulse(
-        (scope) => spec.getValue(scope)._initial,
-        (initial) => {
-          spec.setValue((current, scope) => current.setInitial(initial, scope))
-        },
-      ),
-      Impulse(this._input, { compare: this._isInputEqual }),
-      Impulse(this._error, { compare: this._isErrorEqual }),
-      Impulse(this._validateOn),
-      Impulse(this._touched),
-      Impulse(this._transform),
-      this._isInputDirty,
-      this._isOutputEqual,
-      this._isErrorEqual,
-    )
+    const state = Lazy(() => {
+      return new ImpulseFormUnitState(
+        parent,
+        Impulse(
+          (scope) => spec.getValue(scope)._initial,
+          (initial) => {
+            spec.setValue((current, scope) =>
+              current.setInitial(initial, scope),
+            )
+          },
+        ),
+        Impulse(this._input, { compare: this._isInputEqual }),
+        Impulse(this._error, { compare: this._isErrorEqual }),
+        Impulse(this._validateOn),
+        Impulse(this._touched),
+        Impulse(this._transform),
+        this._isInputDirty,
+        this._isOutputEqual,
+        this._isErrorEqual,
+      )
+    })
 
     return new ImpulseFormUnit(spec, state)
   }

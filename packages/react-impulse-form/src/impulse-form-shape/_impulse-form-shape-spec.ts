@@ -1,6 +1,7 @@
 import { isBoolean } from "~/tools/is-boolean"
 import { isNull } from "~/tools/is-null"
 import { isString } from "~/tools/is-string"
+import { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
 import { Option, Some } from "~/tools/option"
@@ -8,10 +9,12 @@ import { resolveSetter } from "~/tools/setter"
 
 import { Impulse, untrack } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import type {
   ImpulseFormSpec,
   ImpulseFormSpecPatch,
 } from "../impulse-form/impulse-form-spec"
+import type { ImpulseFormState } from "../impulse-form/impulse-form-state"
 
 import { ImpulseFormShape } from "./_impulse-form-shape"
 import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"
@@ -141,12 +144,21 @@ export class ImpulseFormShapeSpec<
     return new ImpulseFormShapeSpec(fields, this._constants)
   }
 
-  public _create(): ImpulseFormShape<TFields> {
-    const fields = mapValues(this._fields, (field) => untrack(field)._create())
-    const state = new ImpulseFormShapeState(
-      mapValues(fields, (field) => field._state),
-      this._constants,
-    )
+  public _create(
+    parent: null | Lazy<ImpulseFormState<ImpulseFormParams>>,
+  ): ImpulseFormShape<TFields> {
+    const state = Lazy(() => {
+      return new ImpulseFormShapeState(
+        parent,
+        mapValues(fields, (field) => field._state._peek()),
+        this._constants,
+      )
+    })
+
+    const fields = mapValues(this._fields, (field) => {
+      return untrack(field)._create(state)
+    })
+
     const spec = new ImpulseFormShapeSpec(
       mapValues(fields, (field) => field._spec),
       this._constants,

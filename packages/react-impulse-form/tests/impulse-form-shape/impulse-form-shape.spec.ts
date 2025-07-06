@@ -182,21 +182,27 @@ it("refers to the same states", () => {
   })
 
   // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._state._fields.first).toBe(shape.fields.first._state)
-  // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._state._fields.second).toBe(shape.fields.second._state)
-  // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._state._fields.third).toBe(shape.fields.third._state)
-
-  // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._state._fields.third._fields.one).toBe(
-    // @ts-expect-error it does not mind to ignore ts in tests
-    shape.fields.third._state._fields.one,
+  expect(shape._state._peek()._fields.first).toBe(
+    shape.fields.first._state._peek(),
   )
   // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._state._fields.third._fields.two).toBe(
+  expect(shape._state._peek()._fields.second).toBe(
+    shape.fields.second._state._peek(),
+  )
+  // @ts-expect-error it does not mind to ignore ts in tests
+  expect(shape._state._peek()._fields.third).toBe(
+    shape.fields.third._state._peek(),
+  )
+
+  // @ts-expect-error it does not mind to ignore ts in tests
+  expect(shape._state._peek()._fields.third._fields.one).toBe(
     // @ts-expect-error it does not mind to ignore ts in tests
-    shape.fields.third._state._fields.two,
+    shape.fields.third._state._peek()._fields.one,
+  )
+  // @ts-expect-error it does not mind to ignore ts in tests
+  expect(shape._state._peek()._fields.third._fields.two).toBe(
+    // @ts-expect-error it does not mind to ignore ts in tests
+    shape.fields.third._state._peek()._fields.two,
   )
 })
 
