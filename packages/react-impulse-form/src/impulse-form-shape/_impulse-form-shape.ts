@@ -12,10 +12,10 @@ export class ImpulseFormShape<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
 > extends ImpulseForm<ImpulseFormShapeParams<TFields>> {
   public constructor(
-    spec: Impulse<ImpulseFormShapeSpec<TFields>>,
-    state: Lazy<ImpulseFormShapeState<TFields>>,
+    public readonly _spec: Impulse<ImpulseFormShapeSpec<TFields>>,
+    public readonly _state: Lazy<ImpulseFormShapeState<TFields>>,
     public readonly fields: TFields,
   ) {
-    super(spec, state)
+    super()
   }
 }
