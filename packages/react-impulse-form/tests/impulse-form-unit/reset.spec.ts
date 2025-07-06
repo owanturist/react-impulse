@@ -114,7 +114,7 @@ it("resets isValidated when validateOn=onChange", ({ scope }) => {
   expect(unit.isValidated(scope)).toBe(false)
 })
 
-it.skip('resets isValidated when validateOn="onSubmit"', async ({ scope }) => {
+it('resets isValidated when validateOn="onSubmit"', async ({ scope }) => {
   const unit = ImpulseFormUnit("", {
     validateOn: "onSubmit",
     schema: z.string().min(1),
