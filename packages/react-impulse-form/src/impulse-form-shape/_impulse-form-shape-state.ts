@@ -81,7 +81,7 @@ export class ImpulseFormShapeState<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
 > extends ImpulseFormState<ImpulseFormShapeParams<TFields>> {
   public constructor(
-    parent: null | Lazy<ImpulseFormState<ImpulseFormParams>>,
+    parent: undefined | Lazy<ImpulseFormState<ImpulseFormParams>>,
     private readonly _fields: ImpulseFormShapeStateFields<TFields>,
     private readonly _constants: Omit<
       TFields,
