@@ -8,12 +8,10 @@ import type { ImpulseFormParams } from "./impulse-form-params"
 
 export abstract class ImpulseFormState<TParams extends ImpulseFormParams> {
   public constructor(
-    private readonly _parent: null | Lazy<ImpulseFormState<ImpulseFormParams>>,
+    public readonly _parent:
+      | undefined
+      | Lazy<ImpulseFormState<ImpulseFormParams>>,
   ) {}
-
-  public get _root(): ImpulseFormState<TParams> {
-    return this._parent?._peek()._root ?? this
-  }
 
   // I N I T I A L
 

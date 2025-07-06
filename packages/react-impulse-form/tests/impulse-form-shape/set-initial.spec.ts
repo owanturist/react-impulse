@@ -223,10 +223,10 @@ it("updates initial value in a host's spec", ({ scope }) => {
     first: "2",
   })
 
-  const first_1 = first_0._spec.getValue(scope)._create(null)
+  const first_1 = first_0._spec.getValue(scope)._create()
   expect(first_1.getInitial(scope)).toStrictEqual("2")
 
-  const shape_1 = shape_0._spec.getValue(scope)._create(null)
+  const shape_1 = shape_0._spec.getValue(scope)._create()
   expect(shape_1.getInitial(scope)).toStrictEqual({
     first: "2",
   })
@@ -265,14 +265,14 @@ it("updates initial value in a nested host's spec", ({ scope }) => {
     },
   })
 
-  const first_1 = first_0._spec.getValue(scope)._create(null)
+  const first_1 = first_0._spec.getValue(scope)._create()
   expect(first_1.getInitial(scope)).toStrictEqual({
     second: "3",
   })
-  const second_1 = second_0._spec.getValue(scope)._create(null)
+  const second_1 = second_0._spec.getValue(scope)._create()
   expect(second_1.getInitial(scope)).toBe("3")
 
-  const shape_1 = shape_0._spec.getValue(scope)._create(null)
+  const shape_1 = shape_0._spec.getValue(scope)._create()
   expect(shape_1.getInitial(scope)).toStrictEqual({
     first: {
       second: "3",

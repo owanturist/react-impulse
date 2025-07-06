@@ -51,5 +51,5 @@ export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
       _touched: Option(touched),
       _validateOn: Option(validateOn),
     })
-    ._create(null)
+    ._create()
 }
