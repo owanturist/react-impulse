@@ -55,11 +55,9 @@ export abstract class ImpulseForm<
   // necessary for type inference
   protected readonly _params?: TParams
 
-  protected constructor(
-    // TODO make those private/protected
-    public readonly _spec: Impulse<ImpulseFormSpec<TParams>>,
-    public readonly _state: Lazy<ImpulseFormState<TParams>>,
-  ) {}
+  // TODO make those private/protected
+  public abstract readonly _spec: Impulse<ImpulseFormSpec<TParams>>
+  public abstract readonly _state: Lazy<ImpulseFormState<TParams>>
 
   public getOutput(scope: Scope): null | TParams["output.schema"]
   public getOutput<TResult>(
