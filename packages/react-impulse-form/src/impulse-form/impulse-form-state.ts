@@ -91,7 +91,7 @@ export abstract class ImpulseFormState<
     TParams["flag.schema.verbose"]
   >
 
-  public abstract _forceValidated(): void
+  public abstract _forceValidated(scope: Scope): void
 
   // D I R T Y
 
