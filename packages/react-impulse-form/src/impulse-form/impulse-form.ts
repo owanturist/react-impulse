@@ -108,12 +108,7 @@ export abstract class ImpulseForm<
 
   public setInput(setter: TParams["input.setter"]): void {
     batch((scope) => {
-      this._state._peek()._setInput(
-        scope,
-        setter,
-        Lazy(() => this.getInput(scope)),
-        Lazy(() => this.getInitial(scope)),
-      )
+      this._state._peek()._setInput(scope, setter)
     })
   }
 

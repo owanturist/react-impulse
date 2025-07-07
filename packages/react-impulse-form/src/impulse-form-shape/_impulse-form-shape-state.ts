@@ -141,21 +141,14 @@ export class ImpulseFormShapeState<
   public _setInput(
     scope: Scope,
     setter: ImpulseFormShapeInputSetter<TFields>,
-    input: Lazy<ImpulseFormShapeInput<TFields>>,
-    initial: Lazy<ImpulseFormShapeInput<TFields>>,
   ): void {
     const setters = isFunction(setter)
-      ? setter(input._peek(), initial._peek())
+      ? setter(this._input.getValue(scope), this._initial.getValue(scope))
       : setter
 
     forEntries(this._fields, (field, key) => {
       if (hasProperty(setters, key) && !isUndefined(setters[key])) {
-        field._setInput(
-          scope,
-          setters[key],
-          input._map((fields) => fields[key]),
-          initial._map((fields) => fields[key]),
-        )
+        field._setInput(scope, setters[key])
       }
     })
   }

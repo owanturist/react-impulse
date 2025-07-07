@@ -144,11 +144,9 @@ export class ImpulseFormUnitState<
   public _setInput(
     scope: Scope,
     setter: ImpulseFormUnitInputSetter<TInput>,
-    input: Lazy<TInput>,
-    initial: Lazy<TInput>,
   ): void {
     const next = isFunction(setter)
-      ? setter(input._peek(), initial._peek())
+      ? setter(this._input.getValue(scope), this._initial.getValue(scope))
       : setter
 
     this._input.setValue(next)
