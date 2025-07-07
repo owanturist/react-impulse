@@ -12,7 +12,7 @@ import type { OmitValues } from "~/tools/omit-values"
 import { params } from "~/tools/params"
 import { values } from "~/tools/values"
 
-import { Impulse, type Scope, batch } from "../dependencies"
+import { Impulse, type Scope } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import {
   type ImpulseFormChild,
@@ -465,11 +465,9 @@ export class ImpulseFormShapeState<
     },
   )
 
-  public override _forceValidated(): void {
-    batch(() => {
-      forEntries(this._fields, (field) => {
-        field._forceValidated()
-      })
+  public override _forceValidated(scope: Scope): void {
+    forEntries(this._fields, (field) => {
+      field._forceValidated(scope)
     })
   }
 
