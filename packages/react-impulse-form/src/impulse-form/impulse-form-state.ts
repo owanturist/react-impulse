@@ -56,7 +56,10 @@ export abstract class ImpulseFormState<
   public abstract readonly _touchedVerbose: ReadonlyImpulse<
     TParams["flag.schema.verbose"]
   >
-  public abstract _setTouched(setter: TParams["flag.setter"]): void
+  public abstract _setTouched(
+    scope: Scope,
+    setter: TParams["flag.setter"],
+  ): void
 
   // O U T P U T
 
