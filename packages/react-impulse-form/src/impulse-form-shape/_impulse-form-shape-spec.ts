@@ -146,7 +146,7 @@ export class ImpulseFormShapeSpec<TFields extends ImpulseFormShapeFields>
     const state = Lazy((): ImpulseFormShapeState<TFields> => {
       return new ImpulseFormShapeState(
         parent,
-        mapValues(fields, (field) => field._state._peek()),
+        mapValues(fields, ({ _state }) => _state._peek()),
         this._constants,
       )
     })
@@ -156,7 +156,7 @@ export class ImpulseFormShapeSpec<TFields extends ImpulseFormShapeFields>
     })
 
     const spec = new ImpulseFormShapeSpec(
-      mapValues(fields, (field) => field._spec),
+      mapValues(fields, ({ _spec }) => _spec),
       this._constants,
     )
 

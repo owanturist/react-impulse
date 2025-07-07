@@ -1,10 +1,9 @@
-import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
-import { isUndefined } from "~/tools/is-undefined"
+import { Option } from "~/tools/option"
 
-import { Impulse, batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form"
 
-import { ImpulseFormList as ImpulseFormListImpl } from "./_impulse-form-list"
+import type { ImpulseFormList as ImpulseFormListImpl } from "./_impulse-form-list"
+import { ImpulseFormListSpec } from "./_impulse-form-list-spec"
 import type { ImpulseFormListErrorSetter } from "./impulse-form-list-error-setter"
 import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"
 import type { ImpulseFormListInputSetter } from "./impulse-form-list-input-setter"
@@ -31,33 +30,13 @@ export function ImpulseFormList<TElement extends ImpulseForm>(
     error,
   }: ImpulseFormListOptions<TElement> = {},
 ): ImpulseFormList<TElement> {
-  const list = new ImpulseFormListImpl(
-    null,
-    Impulse(elements, { compare: isShallowArrayEqual }),
-  )
-
-  batch(() => {
-    if (!isUndefined(touched)) {
-      list.setTouched(touched)
-    }
-
-    if (!isUndefined(initial)) {
-      list.setInitial(initial)
-    }
-
-    if (!isUndefined(input)) {
-      list.setInput(input)
-    }
-
-    if (!isUndefined(validateOn)) {
-      list.setValidateOn(validateOn)
-    }
-
-    // TODO add test against null
-    if (!isUndefined(error)) {
-      list.setError(error)
-    }
-  })
-
-  return list
+  return new ImpulseFormListSpec(elements.map(({ _spec }) => _spec))
+    ._override({
+      _input: Option(input),
+      _initial: Option(initial),
+      _error: Option(error),
+      _touched: Option(touched),
+      _validateOn: Option(validateOn),
+    })
+    ._create()
 }
