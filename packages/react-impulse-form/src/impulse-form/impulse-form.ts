@@ -99,7 +99,9 @@ export abstract class ImpulseForm<
   }
 
   public setInitial(setter: TParams["input.setter"]): void {
-    this._state._peek()._setInitial(setter)
+    batch((scope) => {
+      this._state._peek()._setInitial(scope, setter)
+    })
   }
 
   public getInput(scope: Scope): TParams["input.schema"] {

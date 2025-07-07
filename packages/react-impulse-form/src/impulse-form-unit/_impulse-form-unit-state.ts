@@ -145,31 +145,30 @@ export class ImpulseFormUnitState<
     scope: Scope,
     setter: ImpulseFormUnitInputSetter<TInput>,
   ): void {
-    const next = isFunction(setter)
-      ? setter(this._input.getValue(scope), this._initial.getValue(scope))
-      : setter
-
-    this._input.setValue(next)
+    this._input.setValue((input) => {
+      return isFunction(setter)
+        ? setter(input, this._initial.getValue(scope))
+        : setter
+    })
 
     if (!this._validated.getValue(scope)) {
       this._validated.setValue(false)
     }
   }
 
-  public _setInitial(setter: ImpulseFormUnitInputSetter<TInput>): void {
-    batch((scope) => {
-      const before = this._initial.getValue(scope)
-
-      this._initial.setValue(
-        resolveSetter(setter, before, this._input.getValue(scope)),
-      )
-
-      const after = this._initial.getValue(scope)
-
-      if (before !== after && !this._validated.getValue(scope)) {
-        this._validated.setValue(false)
-      }
+  public _setInitial(
+    scope: Scope,
+    setter: ImpulseFormUnitInputSetter<TInput>,
+  ): void {
+    this._initial.setValue((initial) => {
+      return isFunction(setter)
+        ? setter(initial, this._input.getValue(scope))
+        : setter
     })
+
+    if (!this._validated.getValue(scope)) {
+      this._validated.setValue(false)
+    }
   }
 
   public readonly _error: ReadonlyImpulse<null | TError>

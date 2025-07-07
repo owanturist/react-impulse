@@ -107,17 +107,18 @@ export class ImpulseFormShapeState<
     },
   )
 
-  public _setInitial(setter: ImpulseFormShapeInputSetter<TFields>): void {
-    batch((scope) => {
-      const setters = isFunction(setter)
-        ? setter(this._initial.getValue(scope), this._input.getValue(scope))
-        : setter
+  public _setInitial(
+    scope: Scope,
+    setter: ImpulseFormShapeInputSetter<TFields>,
+  ): void {
+    const setters = isFunction(setter)
+      ? setter(this._initial.getValue(scope), this._input.getValue(scope))
+      : setter
 
-      forEntries(this._fields, (field, key) => {
-        if (hasProperty(setters, key) && !isUndefined(setters[key])) {
-          field._setInitial(setters[key])
-        }
-      })
+    forEntries(this._fields, (field, key) => {
+      if (hasProperty(setters, key) && !isUndefined(setters[key])) {
+        field._setInitial(scope, setters[key])
+      }
     })
   }
 
