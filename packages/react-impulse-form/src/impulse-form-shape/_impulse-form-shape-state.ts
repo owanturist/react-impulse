@@ -9,7 +9,6 @@ import { isUndefined } from "~/tools/is-undefined"
 import type { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
-import { params } from "~/tools/params"
 import { values } from "~/tools/values"
 
 import { Impulse, type Scope } from "../dependencies"
@@ -519,7 +518,7 @@ export class ImpulseFormShapeState<
     forEntries(this._fields, (field, key) => {
       field._reset(
         scope,
-        hasProperty(resetters, key) ? resetters[key] : params._first,
+        hasProperty(resetters, key) ? resetters[key] : undefined,
       )
     })
   }
