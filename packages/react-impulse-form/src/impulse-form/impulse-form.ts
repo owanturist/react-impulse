@@ -305,9 +305,9 @@ export abstract class ImpulseForm<
   }
 
   public async submit(): Promise<void> {
-    batch(() => {
+    batch((scope) => {
       this._rootState._peek()._submitAttempts.setValue((count) => count + 1)
-      this._rootState._peek()._forceValidated()
+      this._rootState._peek()._forceValidated(scope)
     })
 
     const promises = untrack((scope) => {
