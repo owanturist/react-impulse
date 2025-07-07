@@ -247,20 +247,19 @@ export class ImpulseFormShapeState<
   )
 
   public _setValidateOn(
+    scope: Scope,
     setter: ImpulseFormShapeValidateOnSetter<TFields>,
   ): void {
-    batch((scope) => {
-      const setters = isFunction(setter)
-        ? setter(this._validateOnVerbose.getValue(scope))
-        : setter
+    const setters = isFunction(setter)
+      ? setter(this._validateOnVerbose.getValue(scope))
+      : setter
 
-      forEntries(this._fields, (field, key) => {
-        if (isString(setters)) {
-          field._setValidateOn(setters)
-        } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
-          field._setValidateOn(setters[key])
-        }
-      })
+    forEntries(this._fields, (field, key) => {
+      if (isString(setters)) {
+        field._setValidateOn(scope, setters)
+      } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
+        field._setValidateOn(scope, setters[key])
+      }
     })
   }
 

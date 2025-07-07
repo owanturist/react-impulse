@@ -161,7 +161,9 @@ export abstract class ImpulseForm<
   }
 
   public setValidateOn(setter: TParams["validateOn.setter"]): void {
-    this._state._peek()._setValidateOn(setter)
+    batch((scope) => {
+      this._state._peek()._setValidateOn(scope, setter)
+    })
   }
 
   public isValid(scope: Scope): boolean
