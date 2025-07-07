@@ -185,19 +185,20 @@ export class ImpulseFormShapeState<
     },
   )
 
-  public _setError(setter: ImpulseFormShapeErrorSetter<TFields>): void {
-    batch((scope) => {
-      const setters = isFunction(setter)
-        ? setter(this._errorVerbose.getValue(scope))
-        : setter
+  public _setError(
+    scope: Scope,
+    setter: ImpulseFormShapeErrorSetter<TFields>,
+  ): void {
+    const setters = isFunction(setter)
+      ? setter(this._errorVerbose.getValue(scope))
+      : setter
 
-      forEntries(this._fields, (field, key) => {
-        if (isNull(setters)) {
-          field._setError(setters)
-        } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
-          field._setError(setters[key])
-        }
-      })
+    forEntries(this._fields, (field, key) => {
+      if (isNull(setters)) {
+        field._setError(scope, setters)
+      } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
+        field._setError(scope, setters[key])
+      }
     })
   }
 

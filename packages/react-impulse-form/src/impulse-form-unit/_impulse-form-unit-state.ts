@@ -174,7 +174,10 @@ export class ImpulseFormUnitState<
   public readonly _error: ReadonlyImpulse<null | TError>
   public readonly _errorVerbose: ReadonlyImpulse<null | TError>
 
-  public _setError(setter: ImpulseFormUnitErrorSetter<TError>): void {
+  public _setError(
+    _scope: Scope,
+    setter: ImpulseFormUnitErrorSetter<TError>,
+  ): void {
     this._customError.setValue((error) => resolveSetter(setter, error))
   }
 

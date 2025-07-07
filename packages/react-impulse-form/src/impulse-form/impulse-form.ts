@@ -135,7 +135,9 @@ export abstract class ImpulseForm<
   }
 
   public setError(setter: TParams["error.setter"]): void {
-    this._state._peek()._setError(setter)
+    batch((scope) => {
+      this._state._peek()._setError(scope, setter)
+    })
   }
 
   public getValidateOn(scope: Scope): TParams["validateOn.schema"]
