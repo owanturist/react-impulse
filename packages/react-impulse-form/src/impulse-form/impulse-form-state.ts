@@ -17,7 +17,10 @@ export abstract class ImpulseFormState<
   // I N I T I A L
 
   public abstract readonly _initial: ReadonlyImpulse<TParams["input.schema"]>
-  public abstract _setInitial(setter: TParams["input.setter"]): void
+  public abstract _setInitial(
+    scope: Scope,
+    setter: TParams["input.setter"],
+  ): void
 
   // I N P U T
 
