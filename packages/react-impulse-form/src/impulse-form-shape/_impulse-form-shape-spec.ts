@@ -36,9 +36,8 @@ export type ImpulseFormShapeSpecFields<TFields extends ImpulseFormShapeFields> =
     never
   >
 
-export class ImpulseFormShapeSpec<
-  TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
-> implements ImpulseFormSpec<ImpulseFormShapeParams<TFields>>
+export class ImpulseFormShapeSpec<TFields extends ImpulseFormShapeFields>
+  implements ImpulseFormSpec<ImpulseFormShapeParams<TFields>>
 {
   public constructor(
     public readonly _fields: ImpulseFormShapeSpecFields<TFields>,
