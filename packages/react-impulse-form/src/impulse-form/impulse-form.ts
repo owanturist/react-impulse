@@ -267,7 +267,9 @@ export abstract class ImpulseForm<
   }
 
   public setTouched(setter: TParams["flag.setter"]): void {
-    this._state._peek()._setTouched(setter)
+    batch((scope) => {
+      this._state._peek()._setTouched(scope, setter)
+    })
   }
 
   public reset(resetter?: TParams["input.setter"]): void {
