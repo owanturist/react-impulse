@@ -151,9 +151,8 @@ export abstract class ImpulseFormState<
    * not called at all if the setter is not provided.
    */
   public abstract _reset(
+    scope: Scope,
     resetter: undefined | TParams["input.setter"],
-    initial: Lazy<TParams["input.schema"]>,
-    input: Lazy<TParams["input.schema"]>,
   ): void
 
   // C H I L D R E N

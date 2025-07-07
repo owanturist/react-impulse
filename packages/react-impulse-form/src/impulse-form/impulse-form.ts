@@ -266,11 +266,7 @@ export abstract class ImpulseForm<
 
   public reset(resetter?: TParams["input.setter"]): void {
     batch((scope) => {
-      this._state._peek()._reset(
-        resetter,
-        Lazy(() => this.getInitial(scope)),
-        Lazy(() => this.getInput(scope)),
-      )
+      this._state._peek()._reset(scope, resetter)
     })
   }
 

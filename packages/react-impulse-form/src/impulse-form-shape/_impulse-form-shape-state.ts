@@ -509,19 +509,17 @@ export class ImpulseFormShapeState<
   )
 
   public _reset(
+    scope: Scope,
     resetter: undefined | ImpulseFormShapeInputSetter<TFields>,
-    initial: Lazy<ImpulseFormShapeInput<TFields>>,
-    input: Lazy<ImpulseFormShapeInput<TFields>>,
   ): void {
     const resetters = isFunction(resetter)
-      ? resetter(initial._peek(), input._peek())
+      ? resetter(this._initial.getValue(scope), this._input.getValue(scope))
       : resetter
 
     forEntries(this._fields, (field, key) => {
       field._reset(
+        scope,
         hasProperty(resetters, key) ? resetters[key] : params._first,
-        initial._map((fields) => fields[key]),
-        input._map((fields) => fields[key]),
       )
     })
   }
