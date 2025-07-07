@@ -45,7 +45,10 @@ export abstract class ImpulseFormState<
   public abstract readonly _validateOnVerbose: ReadonlyImpulse<
     TParams["validateOn.schema.verbose"]
   >
-  public abstract _setValidateOn(setter: TParams["validateOn.setter"]): void
+  public abstract _setValidateOn(
+    scope: Scope,
+    setter: TParams["validateOn.setter"],
+  ): void
 
   // T O U C H E D
 
