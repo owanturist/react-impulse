@@ -12,7 +12,7 @@ import type { OmitValues } from "~/tools/omit-values"
 import { params } from "~/tools/params"
 import { values } from "~/tools/values"
 
-import { Impulse, batch } from "../dependencies"
+import { Impulse, type Scope, batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import {
   type ImpulseFormChild,
@@ -139,6 +139,7 @@ export class ImpulseFormShapeState<
   )
 
   public _setInput(
+    scope: Scope,
     setter: ImpulseFormShapeInputSetter<TFields>,
     input: Lazy<ImpulseFormShapeInput<TFields>>,
     initial: Lazy<ImpulseFormShapeInput<TFields>>,
@@ -150,6 +151,7 @@ export class ImpulseFormShapeState<
     forEntries(this._fields, (field, key) => {
       if (hasProperty(setters, key) && !isUndefined(setters[key])) {
         field._setInput(
+          scope,
           setters[key],
           input._map((fields) => fields[key]),
           initial._map((fields) => fields[key]),

@@ -23,6 +23,7 @@ export abstract class ImpulseFormState<
 
   public abstract readonly _input: ReadonlyImpulse<TParams["input.schema"]>
   public abstract _setInput(
+    scope: Scope,
     setter: TParams["input.setter"],
     input: Lazy<TParams["input.schema"]>,
     initial: Lazy<TParams["input.schema"]>,

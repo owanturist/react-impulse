@@ -8,8 +8,8 @@ import {
   type Compare,
   Impulse,
   type ReadonlyImpulse,
+  type Scope,
   batch,
-  untrack,
 } from "../dependencies"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
@@ -142,6 +142,7 @@ export class ImpulseFormUnitState<
   }
 
   public _setInput(
+    scope: Scope,
     setter: ImpulseFormUnitInputSetter<TInput>,
     input: Lazy<TInput>,
     initial: Lazy<TInput>,
@@ -152,7 +153,7 @@ export class ImpulseFormUnitState<
 
     this._input.setValue(next)
 
-    if (!untrack(this._validated)) {
+    if (!this._validated.getValue(scope)) {
       this._validated.setValue(false)
     }
   }
