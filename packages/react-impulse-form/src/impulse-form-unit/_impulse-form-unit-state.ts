@@ -201,14 +201,14 @@ export class ImpulseFormUnitState<
   public readonly _touchedVerbose = this._touched
 
   public _setTouched(
+    scope: Scope,
     setter: ImpulseFormUnitParams<TInput, TError, TOutput>["flag.setter"],
   ): void {
-    batch((scope) => {
-      this._touched.setValue((touched) => resolveSetter(setter, touched))
-      if (!this._validated.getValue(scope)) {
-        this._validated.setValue(false)
-      }
-    })
+    this._touched.setValue((touched) => resolveSetter(setter, touched))
+
+    if (!this._validated.getValue(scope)) {
+      this._validated.setValue(false)
+    }
   }
 
   public readonly _output: ReadonlyImpulse<null | TOutput>

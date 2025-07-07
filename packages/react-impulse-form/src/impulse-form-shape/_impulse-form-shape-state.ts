@@ -300,19 +300,20 @@ export class ImpulseFormShapeState<
     },
   )
 
-  public _setTouched(setter: ImpulseFormShapeFlagSetter<TFields>): void {
-    batch((scope) => {
-      const setters = isFunction(setter)
-        ? setter(this._touchedVerbose.getValue(scope))
-        : setter
+  public _setTouched(
+    scope: Scope,
+    setter: ImpulseFormShapeFlagSetter<TFields>,
+  ): void {
+    const setters = isFunction(setter)
+      ? setter(this._touchedVerbose.getValue(scope))
+      : setter
 
-      forEntries(this._fields, (field, key) => {
-        if (isBoolean(setters)) {
-          field._setTouched(setters)
-        } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
-          field._setTouched(setters[key])
-        }
-      })
+    forEntries(this._fields, (field, key) => {
+      if (isBoolean(setters)) {
+        field._setTouched(scope, setters)
+      } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
+        field._setTouched(scope, setters[key])
+      }
     })
   }
 
