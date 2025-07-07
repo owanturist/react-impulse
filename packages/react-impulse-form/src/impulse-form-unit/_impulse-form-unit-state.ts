@@ -238,14 +238,13 @@ export class ImpulseFormUnitState<
   public readonly _dirtyVerbose: ReadonlyImpulse<boolean>
 
   public _reset(
+    scope: Scope,
     resetter: undefined | ImpulseFormUnitInputSetter<TInput>,
-    initial: Lazy<TInput>,
-    input: Lazy<TInput>,
   ): void {
     const resetValue = isUndefined(resetter)
-      ? initial._peek()
+      ? this._initial.getValue(scope)
       : isFunction(resetter)
-        ? resetter(initial._peek(), input._peek())
+        ? resetter(this._initial.getValue(scope), this._input.getValue(scope))
         : resetter
 
     this._initial.setValue(resetValue)
