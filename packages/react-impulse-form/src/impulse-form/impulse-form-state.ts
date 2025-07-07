@@ -35,7 +35,7 @@ export abstract class ImpulseFormState<
   public abstract readonly _errorVerbose: ReadonlyImpulse<
     TParams["error.schema.verbose"]
   >
-  public abstract _setError(setter: TParams["error.setter"]): void
+  public abstract _setError(scope: Scope, setter: TParams["error.setter"]): void
 
   // V A L I D A T E   O N
 
