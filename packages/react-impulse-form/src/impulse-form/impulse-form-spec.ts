@@ -14,7 +14,8 @@ export interface ImpulseFormSpecPatch<TParams extends ImpulseFormParams> {
 }
 
 export interface ImpulseFormSpec<
-  TParams extends ImpulseFormParams = ImpulseFormParams,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  TParams extends ImpulseFormParams = any,
 > {
   readonly _initial: TParams["input.schema"]
 
@@ -28,7 +29,5 @@ export interface ImpulseFormSpec<
 
   _override(patch: ImpulseFormSpecPatch<TParams>): ImpulseFormSpec<TParams>
 
-  _create(
-    parent?: Lazy<ImpulseFormState<ImpulseFormParams>>,
-  ): ImpulseForm<TParams>
+  _create(parent?: Lazy<ImpulseFormState>): ImpulseForm<TParams>
 }

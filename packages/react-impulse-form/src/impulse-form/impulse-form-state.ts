@@ -6,11 +6,12 @@ import { Emitter } from "../emitter"
 
 import type { ImpulseFormParams } from "./impulse-form-params"
 
-export abstract class ImpulseFormState<TParams extends ImpulseFormParams> {
+export abstract class ImpulseFormState<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  TParams extends ImpulseFormParams = any,
+> {
   public constructor(
-    public readonly _parent:
-      | undefined
-      | Lazy<ImpulseFormState<ImpulseFormParams>>,
+    public readonly _parent: undefined | Lazy<ImpulseFormState>,
   ) {}
 
   // I N I T I A L
@@ -167,6 +168,6 @@ export abstract class ImpulseFormState<TParams extends ImpulseFormParams> {
 }
 
 export interface ImpulseFormChild<TParams extends ImpulseFormParams> {
-  _state: ImpulseFormState<ImpulseFormParams>
+  _state: ImpulseFormState
   _mapOutput: (output: TParams["output.schema"]) => unknown
 }

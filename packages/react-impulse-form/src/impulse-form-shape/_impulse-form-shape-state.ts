@@ -14,7 +14,6 @@ import { values } from "~/tools/values"
 
 import { Impulse, batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
-import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import {
   type ImpulseFormChild,
   ImpulseFormState,
@@ -81,7 +80,7 @@ export class ImpulseFormShapeState<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
 > extends ImpulseFormState<ImpulseFormShapeParams<TFields>> {
   public constructor(
-    parent: undefined | Lazy<ImpulseFormState<ImpulseFormParams>>,
+    parent: undefined | Lazy<ImpulseFormState>,
     private readonly _fields: ImpulseFormShapeStateFields<TFields>,
     private readonly _constants: Omit<
       TFields,
