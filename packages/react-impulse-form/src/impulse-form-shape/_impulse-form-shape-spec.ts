@@ -9,7 +9,6 @@ import { resolveSetter } from "~/tools/setter"
 
 import { Impulse, untrack } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
-import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import type {
   ImpulseFormSpec,
   ImpulseFormSpecPatch,
@@ -144,9 +143,7 @@ export class ImpulseFormShapeSpec<
     return new ImpulseFormShapeSpec(fields, this._constants)
   }
 
-  public _create(
-    parent?: Lazy<ImpulseFormState<ImpulseFormParams>>,
-  ): ImpulseFormShape<TFields> {
+  public _create(parent?: Lazy<ImpulseFormState>): ImpulseFormShape<TFields> {
     const state = Lazy((): ImpulseFormShapeState<TFields> => {
       return new ImpulseFormShapeState(
         parent,

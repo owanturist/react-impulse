@@ -50,9 +50,10 @@ function resolveGetter<TValue, TVerbose, TSelected, TFallback>(
 }
 
 export abstract class ImpulseForm<
-  TParams extends ImpulseFormParams = ImpulseFormParams,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  TParams extends ImpulseFormParams = any,
 > {
-  // necessary for type inference
+  // TODO check if still necessary for type inference
   protected readonly _params?: TParams
 
   // TODO make those private/protected
@@ -61,8 +62,8 @@ export abstract class ImpulseForm<
 
   private readonly _rootState = Lazy(() => {
     function getRoot(
-      state: ImpulseFormState<ImpulseFormParams> | ImpulseFormState<TParams>,
-    ): ImpulseFormState<ImpulseFormParams> | ImpulseFormState<TParams> {
+      state: ImpulseFormState | ImpulseFormState<TParams>,
+    ): ImpulseFormState | ImpulseFormState<TParams> {
       if (state._parent) {
         return getRoot(state._parent._peek())
       }
