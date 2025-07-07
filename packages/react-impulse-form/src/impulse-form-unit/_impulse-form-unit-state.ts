@@ -1,3 +1,4 @@
+import { identity } from "~/tools/identity"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
 import { isUndefined } from "~/tools/is-undefined"
@@ -9,7 +10,6 @@ import {
   Impulse,
   type ReadonlyImpulse,
   type Scope,
-  batch,
 } from "../dependencies"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
@@ -151,9 +151,7 @@ export class ImpulseFormUnitState<
         : setter
     })
 
-    if (!this._validated.getValue(scope)) {
-      this._validated.setValue(false)
-    }
+    this._validated.setValue(identity)
   }
 
   public _setInitial(
@@ -166,9 +164,7 @@ export class ImpulseFormUnitState<
         : setter
     })
 
-    if (!this._validated.getValue(scope)) {
-      this._validated.setValue(false)
-    }
+    this._validated.setValue(identity)
   }
 
   public readonly _error: ReadonlyImpulse<null | TError>
@@ -201,14 +197,11 @@ export class ImpulseFormUnitState<
   public readonly _touchedVerbose = this._touched
 
   public _setTouched(
-    scope: Scope,
+    _scope: Scope,
     setter: ImpulseFormUnitParams<TInput, TError, TOutput>["flag.setter"],
   ): void {
     this._touched.setValue((touched) => resolveSetter(setter, touched))
-
-    if (!this._validated.getValue(scope)) {
-      this._validated.setValue(false)
-    }
+    this._validated.setValue(identity)
   }
 
   public readonly _output: ReadonlyImpulse<null | TOutput>
@@ -265,11 +258,7 @@ export class ImpulseFormUnitState<
   public _setTransform(
     transformer: ImpulseFormUnitTransformer<TInput, TOutput>,
   ): void {
-    batch((scope) => {
-      this._transform.setValue(transformFromTransformer(transformer))
-      if (!this._validated.getValue(scope)) {
-        this._validated.setValue(false)
-      }
-    })
+    this._transform.setValue(transformFromTransformer(transformer))
+    this._validated.setValue(identity)
   }
 }
