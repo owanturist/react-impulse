@@ -11,7 +11,6 @@ import {
   batch,
   untrack,
 } from "../dependencies"
-import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
 import {
@@ -38,7 +37,7 @@ export class ImpulseFormUnitState<
   TOutput,
 > extends ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>> {
   public constructor(
-    parent: undefined | Lazy<ImpulseFormState<ImpulseFormParams>>,
+    parent: undefined | Lazy<ImpulseFormState>,
     public readonly _initial: Impulse<TInput>,
     public readonly _input: Impulse<TInput>,
     public readonly _customError: Impulse<null | TError>,

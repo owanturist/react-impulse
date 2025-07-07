@@ -3,7 +3,6 @@ import type { Option } from "~/tools/option"
 import { resolveSetter } from "~/tools/setter"
 
 import { type Compare, Impulse, type Scope, untrack } from "../dependencies"
-import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import type {
   ImpulseFormSpec,
   ImpulseFormSpecPatch,
@@ -120,9 +119,9 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
   }
 
   public _create(
-    parent?: Lazy<ImpulseFormState<ImpulseFormParams>>,
+    parent?: Lazy<ImpulseFormState>,
   ): ImpulseFormUnit<TInput, TError, TOutput> {
-    const spec = Impulse(this as ImpulseFormUnitSpec<TInput, TError, TOutput>)
+    const spec = Impulse(this)
 
     const state = Lazy(() => {
       return new ImpulseFormUnitState(
