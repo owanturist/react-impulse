@@ -108,6 +108,7 @@ describe("setValidateOn(..)", () => {
     })
 
     shape.fields.third.setValidateOn({
+      one: undefined,
       two: "onChange",
     })
     expect(shape.getValidateOn(scope)).toStrictEqual({

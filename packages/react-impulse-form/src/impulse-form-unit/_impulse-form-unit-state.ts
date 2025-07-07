@@ -183,18 +183,19 @@ export class ImpulseFormUnitState<
 
   public readonly _validateOnVerbose = this._validateOn
 
-  public _setValidateOn(setter: ImpulseFormUnitValidateOnSetter): void {
-    batch((scope) => {
-      const before = this._validateOn.getValue(scope)
+  public _setValidateOn(
+    scope: Scope,
+    setter: ImpulseFormUnitValidateOnSetter,
+  ): void {
+    const before = this._validateOn.getValue(scope)
 
-      this._validateOn.setValue(resolveSetter(setter, before))
+    this._validateOn.setValue(resolveSetter(setter, before))
 
-      const after = this._validateOn.getValue(scope)
+    const after = this._validateOn.getValue(scope)
 
-      if (before !== after) {
-        this._validated.setValue(false)
-      }
-    })
+    if (before !== after) {
+      this._validated.setValue(false)
+    }
   }
 
   public readonly _touchedVerbose = this._touched
