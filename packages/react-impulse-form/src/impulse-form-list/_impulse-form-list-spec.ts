@@ -121,9 +121,9 @@ export class ImpulseFormListSpec<TElement extends ImpulseForm>
     const state = Lazy((): ImpulseForListState<TElement> => {
       return new ImpulseForListState(
         parent,
-        Impulse((scope) =>
-          elements.getValue(scope).map(({ _state }) => _state._peek()),
-        ),
+        Impulse((scope) => {
+          return elements.getValue(scope).map(({ _state }) => _state._peek())
+        }),
       )
     })
 
@@ -137,6 +137,16 @@ export class ImpulseFormListSpec<TElement extends ImpulseForm>
       untrack(elements).map(({ _spec }) => _spec),
     )
 
-    return new ImpulseFormList(Impulse(spec), state, elements)
+    return new ImpulseFormList(
+      Impulse(spec),
+      state,
+      Impulse(elements, (next, scope) => {
+        const nextElements = next.map((element) => {
+          return element._spec.getValue(scope)._create(state)
+        })
+
+        elements.setValue(nextElements)
+      }),
+    )
   }
 }

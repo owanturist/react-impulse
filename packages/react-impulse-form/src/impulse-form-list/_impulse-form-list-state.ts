@@ -5,7 +5,7 @@ import { isString } from "~/tools/is-string"
 import { isUndefined } from "~/tools/is-undefined"
 import type { Lazy } from "~/tools/lazy"
 
-import { Impulse, type Scope } from "../dependencies"
+import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
 import type { GetImpulseFormParams } from "../impulse-form/get-impulse-form-params"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import {
@@ -58,7 +58,7 @@ export class ImpulseForListState<
 > extends ImpulseFormState<ImpulseFormListParams<TElement>> {
   public constructor(
     parent: undefined | Lazy<ImpulseFormState>,
-    private readonly _elements: Impulse<
+    private readonly _elements: ReadonlyImpulse<
       ReadonlyArray<ImpulseFormState<GetImpulseFormParams<TElement>>>
     >,
   ) {
