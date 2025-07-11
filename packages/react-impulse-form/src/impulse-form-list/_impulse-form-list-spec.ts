@@ -1,5 +1,6 @@
 import { isBoolean } from "~/tools/is-boolean"
 import { isNull } from "~/tools/is-null"
+import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isString } from "~/tools/is-string"
 import { Lazy } from "~/tools/lazy"
 import { Option, Some } from "~/tools/option"
@@ -17,6 +18,10 @@ import type { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import { ImpulseFormList } from "./_impulse-form-list"
 import type { ImpulseFormListParams } from "./_impulse-form-list-params"
 import { ImpulseForListState } from "./_impulse-form-list-state"
+import {
+  isImpulseFormListInputEqual,
+  type ImpulseFormListInput,
+} from "./impulse-form-list-input"
 
 export class ImpulseFormListSpec<TElement extends ImpulseForm>
   implements ImpulseFormSpec<ImpulseFormListParams<TElement>>
@@ -27,8 +32,15 @@ export class ImpulseFormListSpec<TElement extends ImpulseForm>
     >,
   ) {}
 
-  public readonly _initial = this._elements.map(
-    (element) => untrack(element)._initial,
+  public readonly _initial = Impulse(
+    (scope) => {
+      return this._elements.map((element) =>
+        element.getValue(scope)._initial.getValue(scope),
+      )
+    },
+    {
+      compare: isShallowArrayEqual,
+    },
   )
 
   public readonly _input = this._elements.map(
@@ -57,11 +69,11 @@ export class ImpulseFormListSpec<TElement extends ImpulseForm>
     ImpulseFormListParams<TElement>
   >): ImpulseFormListSpec<TElement> {
     const input = _input._map((setter) => {
-      return resolveSetter(setter, this._input, this._initial)
+      return resolveSetter(setter, this._input, untrack(this._initial))
     })
 
     const initial = _initial._map((setter) => {
-      return resolveSetter(setter, this._initial, this._input)
+      return resolveSetter(setter, untrack(this._initial), this._input)
     })
 
     const error = _error._map((setter) => {
@@ -119,8 +131,23 @@ export class ImpulseFormListSpec<TElement extends ImpulseForm>
 
   public _create(parent?: Lazy<ImpulseFormState>): ImpulseFormList<TElement> {
     const state = Lazy((): ImpulseForListState<TElement> => {
+      const initial = Impulse(
+        (scope) => {
+          const values = spec.getValue(scope)._elements.map((element) => {
+            return element.getValue(scope)._initial.getValue(scope)
+          })
+
+          return values as ImpulseFormListInput<TElement>
+        },
+
+        {
+          compare: isImpulseFormListInputEqual,
+        },
+      )
+
       return new ImpulseForListState(
         parent,
+        initial,
         Impulse((scope) => {
           return elements.getValue(scope).map(({ _state }) => _state._peek())
         }),
@@ -133,12 +160,12 @@ export class ImpulseFormListSpec<TElement extends ImpulseForm>
       }),
     )
 
-    const spec = new ImpulseFormListSpec(
-      untrack(elements).map(({ _spec }) => _spec),
+    const spec = Impulse(
+      new ImpulseFormListSpec(untrack(elements).map(({ _spec }) => _spec)),
     )
 
     return new ImpulseFormList(
-      Impulse(spec),
+      spec,
       state,
       Impulse(elements, (next, scope) => {
         const nextElements = next.map((element) => {

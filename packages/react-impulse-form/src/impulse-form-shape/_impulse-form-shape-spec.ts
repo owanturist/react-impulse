@@ -1,5 +1,6 @@
 import { isBoolean } from "~/tools/is-boolean"
 import { isNull } from "~/tools/is-null"
+import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
 import { isString } from "~/tools/is-string"
 import { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
@@ -21,7 +22,10 @@ import { ImpulseFormShapeState } from "./_impulse-form-shape-state"
 import type { ImpulseFormShapeErrorVerbose } from "./impulse-form-shape-error-verbose"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 import type { ImpulseFormShapeFlagVerbose } from "./impulse-form-shape-flag-verbose"
-import type { ImpulseFormShapeInput } from "./impulse-form-shape-input"
+import {
+  isImpulseFormShapeInputEqual,
+  type ImpulseFormShapeInput,
+} from "./impulse-form-shape-input"
 import type { ImpulseFormShapeValidateOnVerbose } from "./impulse-form-shape-validate-on-verbose"
 
 export type ImpulseFormShapeSpecFields<TFields extends ImpulseFormShapeFields> =
@@ -47,10 +51,19 @@ export class ImpulseFormShapeSpec<TFields extends ImpulseFormShapeFields>
     >,
   ) {}
 
-  public readonly _initial = {
-    ...mapValues(this._fields, (field) => untrack(field)._initial),
-    ...this._constants,
-  } as ImpulseFormShapeInput<TFields>
+  public readonly _initial = Impulse(
+    (scope) => {
+      return {
+        ...mapValues(this._fields, (field) =>
+          field.getValue(scope)._initial.getValue(scope),
+        ),
+        ...this._constants,
+      } as ImpulseFormShapeInput<TFields>
+    },
+    {
+      compare: isShallowObjectEqual,
+    },
+  )
 
   public readonly _input = {
     ...mapValues(this._fields, (field) => untrack(field)._input),
@@ -82,11 +95,11 @@ export class ImpulseFormShapeSpec<TFields extends ImpulseFormShapeFields>
     ImpulseFormShapeParams<TFields>
   >): ImpulseFormShapeSpec<TFields> {
     const input = _input._map((setter) => {
-      return resolveSetter(setter, this._input, this._initial)
+      return resolveSetter(setter, this._input, untrack(this._initial))
     })
 
     const initial = _initial._map((setter) => {
-      return resolveSetter(setter, this._initial, this._input)
+      return resolveSetter(setter, untrack(this._initial), this._input)
     })
 
     const error = _error._map((setter) => {
@@ -144,8 +157,26 @@ export class ImpulseFormShapeSpec<TFields extends ImpulseFormShapeFields>
 
   public _create(parent?: Lazy<ImpulseFormState>): ImpulseFormShape<TFields> {
     const state = Lazy((): ImpulseFormShapeState<TFields> => {
+      const initial = Impulse(
+        (scope) => {
+          const values = mapValues(spec.getValue(scope)._fields, (field) => {
+            return field.getValue(scope)._initial.getValue(scope)
+          })
+
+          return {
+            ...values,
+            ...this._constants,
+          } as ImpulseFormShapeInput<TFields>
+        },
+
+        {
+          compare: isImpulseFormShapeInputEqual,
+        },
+      )
+
       return new ImpulseFormShapeState(
         parent,
+        initial,
         mapValues(fields, ({ _state }) => _state._peek()),
         this._constants,
       )
@@ -155,11 +186,13 @@ export class ImpulseFormShapeSpec<TFields extends ImpulseFormShapeFields>
       return untrack(field)._create(state)
     })
 
-    const spec = new ImpulseFormShapeSpec(
-      mapValues(fields, ({ _spec }) => _spec),
-      this._constants,
+    const spec = Impulse(
+      new ImpulseFormShapeSpec(
+        mapValues(fields, ({ _spec }) => _spec),
+        this._constants,
+      ),
     )
 
-    return new ImpulseFormShape(Impulse(spec), state, fields)
+    return new ImpulseFormShape(spec, state, fields)
   }
 }
