@@ -28,7 +28,7 @@ class Uninitialized<T> implements Lazy<T> {
     return new Initialized(transform(this._value))
   }
 }
-
+console.log("TODO map is not used - remove the Initialized")
 class Initialized<T> implements Lazy<T> {
   public constructor(public readonly _value: T) {}
 

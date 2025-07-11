@@ -11,7 +11,7 @@ import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
 import { values } from "~/tools/values"
 
-import { Impulse, type Scope } from "../dependencies"
+import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import {
   type ImpulseFormChild,
@@ -80,6 +80,7 @@ export class ImpulseFormShapeState<
 > extends ImpulseFormState<ImpulseFormShapeParams<TFields>> {
   public constructor(
     parent: undefined | Lazy<ImpulseFormState>,
+    public readonly _initial: ReadonlyImpulse<ImpulseFormShapeInput<TFields>>,
     private readonly _fields: ImpulseFormShapeStateFields<TFields>,
     private readonly _constants: Omit<
       TFields,
@@ -88,23 +89,6 @@ export class ImpulseFormShapeState<
   ) {
     super(parent)
   }
-
-  public readonly _initial = Impulse(
-    (scope) => {
-      const initial = mapValues(this._fields, ({ _initial }) => {
-        return _initial.getValue(scope)
-      })
-
-      return {
-        ...initial,
-        ...this._constants,
-      } as ImpulseFormShapeInput<TFields>
-    },
-
-    {
-      compare: isImpulseFormShapeInputEqual,
-    },
-  )
 
   public _setInitial(
     scope: Scope,

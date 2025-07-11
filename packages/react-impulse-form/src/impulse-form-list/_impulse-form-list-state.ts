@@ -58,26 +58,13 @@ export class ImpulseForListState<
 > extends ImpulseFormState<ImpulseFormListParams<TElement>> {
   public constructor(
     parent: undefined | Lazy<ImpulseFormState>,
+    public readonly _initial: ReadonlyImpulse<ImpulseFormListInput<TElement>>,
     private readonly _elements: ReadonlyImpulse<
       ReadonlyArray<ImpulseFormState<GetImpulseFormParams<TElement>>>
     >,
   ) {
     super(parent)
   }
-
-  public readonly _initial = Impulse(
-    (scope) => {
-      const initial = this._elements.getValue(scope).map(({ _initial }) => {
-        return _initial.getValue(scope)
-      })
-
-      return initial as ImpulseFormListInput<TElement>
-    },
-
-    {
-      compare: isImpulseFormListInputEqual,
-    },
-  )
 
   public _setInitial(
     scope: Scope,
