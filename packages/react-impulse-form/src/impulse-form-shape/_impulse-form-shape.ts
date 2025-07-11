@@ -1,6 +1,5 @@
 import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
-import { isNull } from "~/tools/is-null"
 import { isString } from "~/tools/is-string"
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
@@ -460,7 +459,7 @@ export class ImpulseFormShape<
           verbose,
         }))
 
-        allValid = allValid && !isNull(output.concise)
+        allValid = allValid && field.isValid(scope)
         valueConcise[key] = output.concise
         valueVerbose[key] = output.verbose
       } else {
