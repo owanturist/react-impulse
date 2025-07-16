@@ -713,7 +713,7 @@ describe("ImpulseFormShapeOptions.input", () => {
     })
   })
 
-  it("does not override the initial value", ({ scope }) => {
+  it("overrides the fields' initial values", ({ scope }) => {
     const shape = ImpulseFormShape(
       {
         first: ImpulseFormUnit(""),
@@ -735,10 +735,10 @@ describe("ImpulseFormShapeOptions.input", () => {
     )
 
     expect(shape.getInitial(scope)).toStrictEqual({
-      first: "",
+      first: "1",
       second: 0,
       third: {
-        one: true,
+        one: false,
         two: [""],
       },
       fourth: ["anything"],

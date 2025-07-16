@@ -1,8 +1,6 @@
 import type { Lazy } from "~/tools/lazy"
 import type { Option } from "~/tools/option"
 
-import type { ReadonlyImpulse, Scope } from "../dependencies"
-
 import type { ImpulseForm } from "./impulse-form"
 import type { ImpulseFormParams } from "./impulse-form-params"
 import type { ImpulseFormState } from "./impulse-form-state"
@@ -19,9 +17,7 @@ export interface ImpulseFormSpec<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TParams extends ImpulseFormParams = any,
 > {
-  readonly _initial: ReadonlyImpulse<TParams["input.schema"]>
-
-  _setInitial(scope: Scope, setter: TParams["input.setter"]): void
+  readonly _initial: TParams["input.schema"]
 
   readonly _input: TParams["input.schema"]
 

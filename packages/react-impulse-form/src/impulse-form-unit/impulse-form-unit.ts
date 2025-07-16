@@ -5,7 +5,7 @@ import { isStrictEqual } from "~/tools/is-strict-equal"
 import { None, Option } from "~/tools/option"
 
 import { createUnionCompare } from "../create-union-compare"
-import { type Compare, Impulse } from "../dependencies"
+import type { Compare } from "../dependencies"
 import type { ValidateStrategy } from "../validate-strategy"
 import type { ZodLikeSchema } from "../zod-like-schema"
 
@@ -188,9 +188,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     options?.isInputDirty ??
     ((left, right, scope) => !isInputEqual(left, right, scope))
 
-  const initial = Impulse(options?.initial ?? input, {
-    compare: isInputEqual,
-  })
+  const initial = Option(options?.initial)
   const touched = Option(options?.touched)
 
   if (hasProperty(options, "schema")) {
