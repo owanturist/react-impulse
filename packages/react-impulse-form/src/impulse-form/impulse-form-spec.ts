@@ -1,7 +1,7 @@
 import type { Lazy } from "~/tools/lazy"
 import type { Option } from "~/tools/option"
 
-import type { ReadonlyImpulse } from "../dependencies"
+import type { ReadonlyImpulse, Scope } from "../dependencies"
 
 import type { ImpulseForm } from "./impulse-form"
 import type { ImpulseFormParams } from "./impulse-form-params"
@@ -20,6 +20,8 @@ export interface ImpulseFormSpec<
   TParams extends ImpulseFormParams = any,
 > {
   readonly _initial: ReadonlyImpulse<TParams["input.schema"]>
+
+  _setInitial(scope: Scope, setter: TParams["input.setter"]): void
 
   readonly _input: TParams["input.schema"]
 

@@ -1,3 +1,4 @@
+import { forEntries } from "~/tools/for-entries"
 import { isBoolean } from "~/tools/is-boolean"
 import { isNull } from "~/tools/is-null"
 import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
@@ -8,7 +9,7 @@ import type { OmitValues } from "~/tools/omit-values"
 import { Option, Some } from "~/tools/option"
 import { resolveSetter } from "~/tools/setter"
 
-import { Impulse, untrack } from "../dependencies"
+import { Impulse, type Scope, untrack } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type {
   ImpulseFormSpec,
@@ -23,9 +24,10 @@ import type { ImpulseFormShapeErrorVerbose } from "./impulse-form-shape-error-ve
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 import type { ImpulseFormShapeFlagVerbose } from "./impulse-form-shape-flag-verbose"
 import {
-  isImpulseFormShapeInputEqual,
   type ImpulseFormShapeInput,
+  isImpulseFormShapeInputEqual,
 } from "./impulse-form-shape-input"
+import type { ImpulseFormShapeInputSetter } from "./impulse-form-shape-input-setter"
 import type { ImpulseFormShapeValidateOnVerbose } from "./impulse-form-shape-validate-on-verbose"
 
 export type ImpulseFormShapeSpecFields<TFields extends ImpulseFormShapeFields> =
@@ -64,6 +66,21 @@ export class ImpulseFormShapeSpec<TFields extends ImpulseFormShapeFields>
       compare: isShallowObjectEqual,
     },
   )
+
+  public _setInitial(
+    scope: Scope,
+    setter: ImpulseFormShapeInputSetter<TFields>,
+  ): void {
+    const setters = resolveSetter(
+      setter,
+      this._initial.getValue(scope),
+      this._input,
+    )
+
+    forEntries(this._fields, (field, key) => {
+      field.getValue(scope)._setInitial(scope, setters[key])
+    })
+  }
 
   public readonly _input = {
     ...mapValues(this._fields, (field) => untrack(field)._input),
@@ -176,6 +193,7 @@ export class ImpulseFormShapeSpec<TFields extends ImpulseFormShapeFields>
 
       return new ImpulseFormShapeState(
         parent,
+        spec,
         initial,
         mapValues(fields, ({ _state }) => _state._peek()),
         this._constants,

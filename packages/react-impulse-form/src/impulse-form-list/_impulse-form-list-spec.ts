@@ -6,7 +6,7 @@ import { Lazy } from "~/tools/lazy"
 import { Option, Some } from "~/tools/option"
 import { resolveSetter } from "~/tools/setter"
 
-import { Impulse, untrack } from "../dependencies"
+import { Impulse, untrack, type Scope } from "../dependencies"
 import type { GetImpulseFormParams } from "../impulse-form/get-impulse-form-params"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type {
@@ -19,9 +19,10 @@ import { ImpulseFormList } from "./_impulse-form-list"
 import type { ImpulseFormListParams } from "./_impulse-form-list-params"
 import { ImpulseForListState } from "./_impulse-form-list-state"
 import {
-  isImpulseFormListInputEqual,
   type ImpulseFormListInput,
+  isImpulseFormListInputEqual,
 } from "./impulse-form-list-input"
+import type { ImpulseFormListInputSetter } from "./impulse-form-list-input-setter"
 
 export class ImpulseFormListSpec<TElement extends ImpulseForm>
   implements ImpulseFormSpec<ImpulseFormListParams<TElement>>
@@ -42,6 +43,17 @@ export class ImpulseFormListSpec<TElement extends ImpulseForm>
       compare: isShallowArrayEqual,
     },
   )
+
+  public _setInitial(
+    scope: Scope,
+    setter: ImpulseFormListInputSetter<TElement>,
+  ): void {
+    const setters = resolveSetter(setter, this._input, untrack(this._initial))
+
+    this._elements.forEach((element, index) => {
+      element.getValue(scope)._setInitial(scope, setters.at(index))
+    })
+  }
 
   public readonly _input = this._elements.map(
     (element) => untrack(element)._input,
@@ -147,10 +159,16 @@ export class ImpulseFormListSpec<TElement extends ImpulseForm>
 
       return new ImpulseForListState(
         parent,
+        spec,
         initial,
-        Impulse((scope) => {
-          return elements.getValue(scope).map(({ _state }) => _state._peek())
-        }),
+        Impulse(
+          (scope) => {
+            return elements.getValue(scope).map(({ _state }) => _state._peek())
+          },
+          {
+            compare: isShallowArrayEqual,
+          },
+        ),
       )
     })
 
@@ -158,6 +176,9 @@ export class ImpulseFormListSpec<TElement extends ImpulseForm>
       this._elements.map((element) => {
         return untrack(element)._create(state)
       }),
+      {
+        compare: isShallowArrayEqual,
+      },
     )
 
     const spec = Impulse(

@@ -1,4 +1,5 @@
 import { isBoolean } from "~/tools/is-boolean"
+import { isDefined } from "~/tools/is-defined"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
 import { isString } from "~/tools/is-string"
@@ -8,6 +9,7 @@ import type { Lazy } from "~/tools/lazy"
 import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
 import type { GetImpulseFormParams } from "../impulse-form/get-impulse-form-params"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { ImpulseFormSpec } from "../impulse-form/impulse-form-spec"
 import {
   type ImpulseFormChild,
   ImpulseFormState,
@@ -15,6 +17,7 @@ import {
 import { VALIDATE_ON_TOUCH } from "../validate-strategy"
 
 import type { ImpulseFormListParams } from "./_impulse-form-list-params"
+import { ImpulseFormListSpec } from "./_impulse-form-list-spec"
 import {
   type ImpulseFormListError,
   isImpulseFormListErrorEqual,
@@ -58,8 +61,9 @@ export class ImpulseForListState<
 > extends ImpulseFormState<ImpulseFormListParams<TElement>> {
   public constructor(
     parent: undefined | Lazy<ImpulseFormState>,
+    public readonly _spec: Impulse<ImpulseFormListSpec<TElement>>,
     public readonly _initial: ReadonlyImpulse<ImpulseFormListInput<TElement>>,
-    private readonly _elements: ReadonlyImpulse<
+    private readonly _elements: Impulse<
       ReadonlyArray<ImpulseFormState<GetImpulseFormParams<TElement>>>
     >,
   ) {
@@ -74,12 +78,30 @@ export class ImpulseForListState<
       ? setter(this._initial.getValue(scope), this._input.getValue(scope))
       : setter
 
-    this._elements.getValue(scope).forEach((element, index) => {
-      const initial = setters.at(index)
+    const elements = this._elements.getValue(scope)
 
-      if (!isUndefined(initial)) {
-        element._setInitial(scope, initial)
+    this._spec.setValue((spec) => {
+      const specs: Array<
+        Impulse<ImpulseFormSpec<GetImpulseFormParams<TElement>>>
+      > = []
+
+      for (let index = 0; index < setters.length; index++) {
+        const element = elements.at(index)?._spec ?? spec._elements.at(index)
+
+        if (!element) {
+          return new ImpulseFormListSpec(specs)
+        }
+
+        const elementSetter = setters.at(index)
+
+        if (!isUndefined(elementSetter)) {
+          element.getValue(scope)._setInitial(scope, elementSetter)
+        }
+
+        specs.push(element)
       }
+
+      return new ImpulseFormListSpec(specs)
     })
   }
 

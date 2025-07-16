@@ -62,7 +62,7 @@ it("changes all items", ({ scope }) => {
   ).toStrictEqual([3, 4, 5])
 })
 
-it.skip("adds an added element's initial", ({ scope }) => {
+it("adds an added element's initial", ({ scope }) => {
   const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1)])
 
   form.setElements((elements) => [...elements, ImpulseFormUnit(2)])
@@ -79,7 +79,7 @@ it.skip("adds an added element's initial", ({ scope }) => {
   ).toStrictEqual([3, 4, 5])
 })
 
-it.skip("keeps a removed element's initial", ({ scope }) => {
+it("keeps a removed element's initial", ({ scope }) => {
   const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1)])
 
   form.setElements((elements) => elements.slice(0, 1))
@@ -106,7 +106,7 @@ it("does not add initial when neither initial nor current value exist", ({
   ).toStrictEqual([3, 4])
 })
 
-it.skip("removes initials by shorter list", ({ scope }) => {
+it("removes initials by shorter list", ({ scope }) => {
   const form = ImpulseFormList([
     ImpulseFormUnit(0, { initial: 1 }),
     ImpulseFormUnit(1, { initial: 2 }),
@@ -134,7 +134,7 @@ it('do not remove initials by "undefined" in the list', ({ scope }) => {
   ).toStrictEqual([1, 4, 3])
 })
 
-it.skip("remove all initials by empty list", ({ scope }) => {
+it("remove all initials by empty list", ({ scope }) => {
   const form = ImpulseFormList([
     ImpulseFormUnit(0, { initial: 1 }),
     ImpulseFormUnit(1, { initial: 2 }),
@@ -221,7 +221,7 @@ it("updates list's initial value from an element's setInitial", ({ scope }) => {
 })
 
 describe("adding a new element to the list's beginning", () => {
-  it.skip("keeps initial values for an initial element", ({ scope }) => {
+  it("keeps initial values for an initial element", ({ scope }) => {
     const form = setup([
       setupElement({
         input: { first: 1, second: "1" },
@@ -241,9 +241,7 @@ describe("adding a new element to the list's beginning", () => {
     ])
   })
 
-  it.skip("inherits initial value for a new element by default", ({
-    scope,
-  }) => {
+  it("inherits initial value for a new element by default", ({ scope }) => {
     const form = setup([
       setupElement({
         input: { first: 1, second: "1" },
@@ -268,9 +266,7 @@ describe("adding a new element to the list's beginning", () => {
     ])
   })
 
-  it.skip("overrides initial value for a list by a new element", ({
-    scope,
-  }) => {
+  it("overrides initial value for a list by a new element", ({ scope }) => {
     const form = setup([
       setupElement({
         input: { first: 1, second: "1" },
