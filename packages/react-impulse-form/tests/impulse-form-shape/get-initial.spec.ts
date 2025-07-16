@@ -39,6 +39,7 @@ it("selects initial", ({ scope }) => {
   shape.setInitial({
     first: "12",
   })
+
   const initial_1 = shape.getInitial(scope)
   expect(initial_1).toStrictEqual({
     first: "12",

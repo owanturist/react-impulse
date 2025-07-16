@@ -1,7 +1,5 @@
-import { forEntries } from "~/tools/for-entries"
 import { isBoolean } from "~/tools/is-boolean"
 import { isNull } from "~/tools/is-null"
-import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
 import { isString } from "~/tools/is-string"
 import { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
@@ -9,7 +7,7 @@ import type { OmitValues } from "~/tools/omit-values"
 import { Option, Some } from "~/tools/option"
 import { resolveSetter } from "~/tools/setter"
 
-import { Impulse, type Scope, untrack } from "../dependencies"
+import { Impulse, untrack } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type {
   ImpulseFormSpec,
@@ -27,7 +25,6 @@ import {
   type ImpulseFormShapeInput,
   isImpulseFormShapeInputEqual,
 } from "./impulse-form-shape-input"
-import type { ImpulseFormShapeInputSetter } from "./impulse-form-shape-input-setter"
 import type { ImpulseFormShapeValidateOnVerbose } from "./impulse-form-shape-validate-on-verbose"
 
 export type ImpulseFormShapeSpecFields<TFields extends ImpulseFormShapeFields> =
@@ -53,54 +50,31 @@ export class ImpulseFormShapeSpec<TFields extends ImpulseFormShapeFields>
     >,
   ) {}
 
-  public readonly _initial = Impulse(
-    (scope) => {
-      return {
-        ...mapValues(this._fields, (field) =>
-          field.getValue(scope)._initial.getValue(scope),
-        ),
-        ...this._constants,
-      } as ImpulseFormShapeInput<TFields>
-    },
-    {
-      compare: isShallowObjectEqual,
-    },
-  )
-
-  public _setInitial(
-    scope: Scope,
-    setter: ImpulseFormShapeInputSetter<TFields>,
-  ): void {
-    const setters = resolveSetter(
-      setter,
-      this._initial.getValue(scope),
-      this._input,
-    )
-
-    forEntries(this._fields, (field, key) => {
-      field.getValue(scope)._setInitial(scope, setters[key])
-    })
+  public get _initial(): ImpulseFormShapeInput<TFields> {
+    return {
+      ...mapValues(this._fields, (field) => untrack(field)._initial),
+      ...this._constants,
+    }
   }
 
-  public readonly _input = {
-    ...mapValues(this._fields, (field) => untrack(field)._input),
-    ...this._constants,
-  } as ImpulseFormShapeInput<TFields>
+  public get _input(): ImpulseFormShapeInput<TFields> {
+    return {
+      ...mapValues(this._fields, (field) => untrack(field)._input),
+      ...this._constants,
+    }
+  }
 
-  public readonly _error = mapValues(
-    this._fields,
-    (field) => untrack(field)._error,
-  ) as ImpulseFormShapeErrorVerbose<TFields>
+  public get _error(): ImpulseFormShapeErrorVerbose<TFields> {
+    return mapValues(this._fields, (field) => untrack(field)._error)
+  }
 
-  public readonly _validateOn = mapValues(
-    this._fields,
-    (field) => untrack(field)._validateOn,
-  ) as ImpulseFormShapeValidateOnVerbose<TFields>
+  public get _validateOn(): ImpulseFormShapeValidateOnVerbose<TFields> {
+    return mapValues(this._fields, (field) => untrack(field)._validateOn)
+  }
 
-  public readonly _touched = mapValues(
-    this._fields,
-    (field) => untrack(field)._touched,
-  ) as ImpulseFormShapeFlagVerbose<TFields>
+  public get _touched(): ImpulseFormShapeFlagVerbose<TFields> {
+    return mapValues(this._fields, (field) => untrack(field)._touched)
+  }
 
   public _override({
     _input,
@@ -112,11 +86,11 @@ export class ImpulseFormShapeSpec<TFields extends ImpulseFormShapeFields>
     ImpulseFormShapeParams<TFields>
   >): ImpulseFormShapeSpec<TFields> {
     const input = _input._map((setter) => {
-      return resolveSetter(setter, this._input, untrack(this._initial))
+      return resolveSetter(setter, this._input, this._initial)
     })
 
     const initial = _initial._map((setter) => {
-      return resolveSetter(setter, untrack(this._initial), this._input)
+      return resolveSetter(setter, this._initial, this._input)
     })
 
     const error = _error._map((setter) => {
@@ -177,7 +151,7 @@ export class ImpulseFormShapeSpec<TFields extends ImpulseFormShapeFields>
       const initial = Impulse(
         (scope) => {
           const values = mapValues(spec.getValue(scope)._fields, (field) => {
-            return field.getValue(scope)._initial.getValue(scope)
+            return field.getValue(scope)._initial
           })
 
           return {

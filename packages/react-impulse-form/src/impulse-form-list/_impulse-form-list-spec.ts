@@ -6,7 +6,7 @@ import { Lazy } from "~/tools/lazy"
 import { Option, Some } from "~/tools/option"
 import { resolveSetter } from "~/tools/setter"
 
-import { Impulse, untrack, type Scope } from "../dependencies"
+import { Impulse, type Scope, untrack } from "../dependencies"
 import type { GetImpulseFormParams } from "../impulse-form/get-impulse-form-params"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type {
@@ -33,27 +33,9 @@ export class ImpulseFormListSpec<TElement extends ImpulseForm>
     >,
   ) {}
 
-  public readonly _initial = Impulse(
-    (scope) => {
-      return this._elements.map((element) =>
-        element.getValue(scope)._initial.getValue(scope),
-      )
-    },
-    {
-      compare: isShallowArrayEqual,
-    },
+  public readonly _initial = this._elements.map(
+    (element) => untrack(element)._initial,
   )
-
-  public _setInitial(
-    scope: Scope,
-    setter: ImpulseFormListInputSetter<TElement>,
-  ): void {
-    const setters = resolveSetter(setter, this._input, untrack(this._initial))
-
-    this._elements.forEach((element, index) => {
-      element.getValue(scope)._setInitial(scope, setters.at(index))
-    })
-  }
 
   public readonly _input = this._elements.map(
     (element) => untrack(element)._input,
@@ -81,11 +63,11 @@ export class ImpulseFormListSpec<TElement extends ImpulseForm>
     ImpulseFormListParams<TElement>
   >): ImpulseFormListSpec<TElement> {
     const input = _input._map((setter) => {
-      return resolveSetter(setter, this._input, untrack(this._initial))
+      return resolveSetter(setter, this._input, this._initial)
     })
 
     const initial = _initial._map((setter) => {
-      return resolveSetter(setter, untrack(this._initial), this._input)
+      return resolveSetter(setter, this._initial, this._input)
     })
 
     const error = _error._map((setter) => {
@@ -146,7 +128,7 @@ export class ImpulseFormListSpec<TElement extends ImpulseForm>
       const initial = Impulse(
         (scope) => {
           const values = spec.getValue(scope)._elements.map((element) => {
-            return element.getValue(scope)._initial.getValue(scope)
+            return element.getValue(scope)._initial
           })
 
           return values as ImpulseFormListInput<TElement>
