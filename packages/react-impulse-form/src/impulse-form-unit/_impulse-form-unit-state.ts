@@ -22,6 +22,7 @@ import {
 } from "../validate-strategy"
 
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
+import type { ImpulseFormUnitSpec } from "./_impulse-form-unit-spec"
 import {
   type ImpulseFormUnitTransform,
   transformFromTransformer,
@@ -38,6 +39,10 @@ export class ImpulseFormUnitState<
 > extends ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>> {
   public constructor(
     parent: undefined | Lazy<ImpulseFormState>,
+    public readonly _spec: Impulse<
+      ImpulseFormUnitSpec<TInput, TError, TOutput>
+    >,
+
     public readonly _initial: Impulse<TInput>,
     public readonly _input: Impulse<TInput>,
     public readonly _customError: Impulse<null | TError>,

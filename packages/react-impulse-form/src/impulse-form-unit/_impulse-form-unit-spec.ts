@@ -2,7 +2,7 @@ import { Lazy } from "~/tools/lazy"
 import type { Option } from "~/tools/option"
 import { resolveSetter } from "~/tools/setter"
 
-import { type Compare, Impulse, untrack } from "../dependencies"
+import { type Compare, Impulse, type Scope, untrack } from "../dependencies"
 import type {
   ImpulseFormSpec,
   ImpulseFormSpecPatch,
@@ -14,6 +14,7 @@ import { ImpulseFormUnit } from "./_impulse-form-unit"
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
 import { ImpulseFormUnitState } from "./_impulse-form-unit-state"
 import type { ImpulseFormUnitTransform } from "./_impulse-form-unit-transform"
+import type { ImpulseFormUnitInputSetter } from "./impulse-form-unit-input-setter"
 
 export class ImpulseFormUnitSpec<TInput, TError, TOutput>
   implements ImpulseFormSpec<ImpulseFormUnitParams<TInput, TError, TOutput>>
@@ -38,6 +39,15 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
       const initial = this._initial.getValue(scope)
 
       return _isInputEqual(initial, input, scope) ? initial : input
+    })
+  }
+
+  public _setInitial(
+    _scope: Scope,
+    setter: ImpulseFormUnitInputSetter<TInput>,
+  ): void {
+    this._initial.setValue((initial) => {
+      return resolveSetter(setter, initial, this._input)
     })
   }
 
@@ -111,6 +121,7 @@ export class ImpulseFormUnitSpec<TInput, TError, TOutput>
     const state = Lazy(() => {
       return new ImpulseFormUnitState(
         parent,
+        spec,
         Impulse(
           (scope) => spec.getValue(scope)._initial.getValue(scope),
           (initial, scope) => {

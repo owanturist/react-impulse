@@ -20,6 +20,7 @@ import {
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
 import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"
+import type { ImpulseFormShapeSpec } from "./_impulse-form-shape-spec"
 import {
   type ImpulseFormShapeError,
   isImpulseFormShapeErrorEqual,
@@ -80,6 +81,8 @@ export class ImpulseFormShapeState<
 > extends ImpulseFormState<ImpulseFormShapeParams<TFields>> {
   public constructor(
     parent: undefined | Lazy<ImpulseFormState>,
+    public readonly _spec: Impulse<ImpulseFormShapeSpec<TFields>>,
+
     public readonly _initial: ReadonlyImpulse<ImpulseFormShapeInput<TFields>>,
     private readonly _fields: ImpulseFormShapeStateFields<TFields>,
     private readonly _constants: Omit<
