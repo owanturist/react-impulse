@@ -5,7 +5,6 @@ import { params } from "~/tools/params"
 
 import {
   ImpulseFormUnit,
-  type ImpulseFormUnitOptions,
   type ImpulseFormUnitSchemaOptions,
   type ImpulseFormUnitValidatedOptions,
   type ValidateStrategy,
@@ -139,12 +138,8 @@ describe("when options: ImpulseFormUnitValidatedOptions", () => {
 })
 
 describe("when options: ImpulseFormUnitOptions", () => {
-  function setup(options?: ImpulseFormUnitOptions<string>) {
-    return ImpulseFormUnit("", options)
-  }
-
   it("matches the type signature", () => {
-    const form = setup()
+    const form = ImpulseFormUnit("")
 
     expectTypeOf(form.getValidateOn).toEqualTypeOf<{
       (scope: Scope): ValidateStrategy
@@ -164,17 +159,43 @@ describe("when options: ImpulseFormUnitOptions", () => {
     ["(scope, (_, verbose) => concise)", getValidateOnVerbose],
   ])("getValidateOn%s", (_, getValidateOn) => {
     it("returns ValidateStrategy value", ({ scope }) => {
-      const value = setup()
+      const value = ImpulseFormUnit("")
 
       expectTypeOf(
         getValidateOn(scope, value),
       ).toEqualTypeOf<ValidateStrategy>()
     })
 
-    it("defaults to onTouch", ({ scope }) => {
-      const value = setup()
+    it("defaults to onTouch when schema is defined", ({ scope }) => {
+      const value = ImpulseFormUnit("", {
+        schema: z.string(),
+      })
 
       expect(getValidateOn(scope, value)).toBe("onTouch")
+    })
+
+    it("defaults to onTouch when validate is defined", ({ scope }) => {
+      const value = ImpulseFormUnit("", {
+        validate: (input) => [null, input],
+      })
+
+      expect(getValidateOn(scope, value)).toBe("onTouch")
+    })
+
+    it("defaults to onInit when transform is defined", ({ scope }) => {
+      const value = ImpulseFormUnit("", {
+        transform: (input) => input,
+      })
+
+      expect(getValidateOn(scope, value)).toBe("onInit")
+    })
+
+    it("defaults to onInit when no transform/validation is defined", ({
+      scope,
+    }) => {
+      const value = ImpulseFormUnit("")
+
+      expect(getValidateOn(scope, value)).toBe("onInit")
     })
   })
 })

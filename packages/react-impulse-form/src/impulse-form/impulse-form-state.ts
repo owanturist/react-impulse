@@ -1,24 +1,14 @@
 import { isNull } from "~/tools/is-null"
-import type { Lazy } from "~/tools/lazy"
 
 import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
 import { Emitter } from "../emitter"
 
 import type { ImpulseFormParams } from "./impulse-form-params"
-import type { ImpulseFormSpec } from "./impulse-form-spec"
-
-console.log("TODO figure if _paren can move to ImpulseForm")
 
 export abstract class ImpulseFormState<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TParams extends ImpulseFormParams = any,
 > {
-  public constructor(
-    public readonly _parent: undefined | Lazy<ImpulseFormState>,
-  ) {}
-
-  public abstract readonly _spec: Impulse<ImpulseFormSpec<TParams>>
-
   // I N I T I A L
 
   public abstract readonly _initial: ReadonlyImpulse<TParams["input.schema"]>

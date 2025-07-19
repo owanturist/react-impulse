@@ -20,11 +20,11 @@ function setup(
 ) {
   return ImpulseFormShape(
     {
-      first: ImpulseFormUnit(""),
-      second: ImpulseFormUnit(0),
+      first: ImpulseFormUnit("", { validate: (input) => [null, input] }),
+      second: ImpulseFormUnit(0, { validate: (input) => [null, input] }),
       third: ImpulseFormShape({
-        one: ImpulseFormUnit(true),
-        two: ImpulseFormUnit([""]),
+        one: ImpulseFormUnit(true, { validate: (input) => [null, input] }),
+        two: ImpulseFormUnit([""], { validate: (input) => [null, input] }),
       }),
       fourth: ["anything"],
     },

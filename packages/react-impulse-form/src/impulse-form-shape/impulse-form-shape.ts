@@ -4,7 +4,7 @@ import { partitionEntries } from "~/tools/partition-entries"
 
 import { isImpulseForm } from "../impulse-form"
 
-import type { ImpulseFormShape as ImpulseFormShapeImpl } from "./_impulse-form-shape"
+import { ImpulseFormShape as ImpulseFormShapeImpl } from "./_impulse-form-shape"
 import { ImpulseFormShapeSpec } from "./_impulse-form-shape-spec"
 import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
@@ -40,16 +40,16 @@ export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
     isImpulseForm,
   )
 
-  return new ImpulseFormShapeSpec(
+  const spec = new ImpulseFormShapeSpec(
     mapValues(impulseFields, (field) => field._spec),
     constantFields,
-  )
-    ._override({
-      _input: Option(input),
-      _initial: Option(initial),
-      _error: Option(error),
-      _touched: Option(touched),
-      _validateOn: Option(validateOn),
-    })
-    ._create()
+  )._override({
+    _input: Option(input),
+    _initial: Option(initial),
+    _error: Option(error),
+    _touched: Option(touched),
+    _validateOn: Option(validateOn),
+  })
+
+  return new ImpulseFormShapeImpl(null, spec)
 }

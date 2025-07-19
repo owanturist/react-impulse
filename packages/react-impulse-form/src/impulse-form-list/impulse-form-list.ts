@@ -1,8 +1,10 @@
+import { map } from "~/tools/map"
 import { Option } from "~/tools/option"
 
+import { Impulse } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form"
 
-import type { ImpulseFormList as ImpulseFormListImpl } from "./_impulse-form-list"
+import { ImpulseFormList as ImpulseFormListImpl } from "./_impulse-form-list"
 import { ImpulseFormListSpec } from "./_impulse-form-list-spec"
 import type { ImpulseFormListErrorSetter } from "./impulse-form-list-error-setter"
 import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"
@@ -30,13 +32,15 @@ export function ImpulseFormList<TElement extends ImpulseForm>(
     error,
   }: ImpulseFormListOptions<TElement> = {},
 ): ImpulseFormList<TElement> {
-  return new ImpulseFormListSpec(elements.map(({ _spec }) => _spec))
-    ._override({
-      _input: Option(input),
-      _initial: Option(initial),
-      _error: Option(error),
-      _touched: Option(touched),
-      _validateOn: Option(validateOn),
-    })
-    ._create()
+  const spec = new ImpulseFormListSpec<TElement>(
+    Impulse(map(elements, (element) => element._spec)),
+  )._override({
+    _input: Option(input),
+    _initial: Option(initial),
+    _error: Option(error),
+    _touched: Option(touched),
+    _validateOn: Option(validateOn),
+  })
+
+  return new ImpulseFormListImpl(null, spec)
 }
