@@ -1,9 +1,9 @@
-import type { Lazy } from "~/tools/lazy"
 import type { Option } from "~/tools/option"
+
+import type { Impulse } from "../dependencies"
 
 import type { ImpulseForm } from "./impulse-form"
 import type { ImpulseFormParams } from "./impulse-form-params"
-import type { ImpulseFormState } from "./impulse-form-state"
 
 export interface ImpulseFormSpecPatch<TParams extends ImpulseFormParams> {
   readonly _initial: Option<TParams["input.setter"]>
@@ -17,7 +17,7 @@ export interface ImpulseFormSpec<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TParams extends ImpulseFormParams = any,
 > {
-  readonly _initial: TParams["input.schema"]
+  readonly _initial: Impulse<TParams["input.schema"]>
 
   readonly _input: TParams["input.schema"]
 
@@ -29,5 +29,8 @@ export interface ImpulseFormSpec<
 
   _override(patch: ImpulseFormSpecPatch<TParams>): ImpulseFormSpec<TParams>
 
-  _create(parent?: Lazy<ImpulseFormState>): ImpulseForm<TParams>
+  _childOf(
+    parent: ImpulseForm,
+    initial: Impulse<TParams["input.schema"]>,
+  ): ImpulseForm<TParams>
 }

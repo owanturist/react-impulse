@@ -132,80 +132,6 @@ it("allows to specify none-form fields", ({ scope }) => {
   })
 })
 
-it("refers to the same specs", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormUnit(""),
-    second: ImpulseFormUnit(0),
-    third: ImpulseFormShape({
-      one: ImpulseFormUnit(true),
-      two: ImpulseFormUnit([""]),
-    }),
-  })
-
-  // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._spec.getValue(scope)._fields.first).toBe(
-    shape.fields.first._spec,
-  )
-  // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._spec.getValue(scope)._fields.second).toBe(
-    shape.fields.second._spec,
-  )
-  // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._spec.getValue(scope)._fields.third).toBe(
-    shape.fields.third._spec,
-  )
-
-  expect(
-    // @ts-expect-error it does not mind to ignore ts in tests
-    shape._spec.getValue(scope)._fields.third.getValue(scope)._fields.one,
-  ).toBe(
-    // @ts-expect-error it does not mind to ignore ts in tests
-    shape.fields.third._spec.getValue(scope)._fields.one,
-  )
-  expect(
-    // @ts-expect-error it does not mind to ignore ts in tests
-    shape._spec.getValue(scope)._fields.third.getValue(scope)._fields.two,
-  ).toBe(
-    // @ts-expect-error it does not mind to ignore ts in tests
-    shape.fields.third._spec.getValue(scope)._fields.two,
-  )
-})
-
-it("refers to the same states", () => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormUnit(""),
-    second: ImpulseFormUnit(0),
-    third: ImpulseFormShape({
-      one: ImpulseFormUnit(true),
-      two: ImpulseFormUnit([""]),
-    }),
-  })
-
-  // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._state._peek()._fields.first).toBe(
-    shape.fields.first._state._peek(),
-  )
-  // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._state._peek()._fields.second).toBe(
-    shape.fields.second._state._peek(),
-  )
-  // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._state._peek()._fields.third).toBe(
-    shape.fields.third._state._peek(),
-  )
-
-  // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._state._peek()._fields.third._fields.one).toBe(
-    // @ts-expect-error it does not mind to ignore ts in tests
-    shape.fields.third._state._peek()._fields.one,
-  )
-  // @ts-expect-error it does not mind to ignore ts in tests
-  expect(shape._state._peek()._fields.third._fields.two).toBe(
-    // @ts-expect-error it does not mind to ignore ts in tests
-    shape.fields.third._state._peek()._fields.two,
-  )
-})
-
 describe("ImpulseFormShapeOptions.touched", () => {
   it("specifies initial touched", ({ scope }) => {
     const shape = ImpulseFormShape(
@@ -713,7 +639,7 @@ describe("ImpulseFormShapeOptions.input", () => {
     })
   })
 
-  it("overrides the fields' initial values", ({ scope }) => {
+  it("does not override the initial value", ({ scope }) => {
     const shape = ImpulseFormShape(
       {
         first: ImpulseFormUnit(""),
@@ -735,10 +661,10 @@ describe("ImpulseFormShapeOptions.input", () => {
     )
 
     expect(shape.getInitial(scope)).toStrictEqual({
-      first: "1",
+      first: "",
       second: 0,
       third: {
-        one: false,
+        one: true,
         two: [""],
       },
       fourth: ["anything"],
@@ -751,7 +677,7 @@ describe("ImpulseFormShapeOptions.validateOn", () => {
     const shape = ImpulseFormShape(
       {
         first: ImpulseFormUnit("", { schema: z.string() }),
-        second: ImpulseFormUnit(0),
+        second: ImpulseFormUnit(0, { validate: (input) => [null, input] }),
         third: ImpulseFormShape({
           one: ImpulseFormUnit(true, { error: ["some"] }),
           two: ImpulseFormUnit([""]),

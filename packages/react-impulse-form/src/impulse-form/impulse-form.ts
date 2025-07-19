@@ -2,10 +2,9 @@ import { isDefined } from "~/tools/is-defined"
 import { isNull } from "~/tools/is-null"
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
-import { Lazy } from "~/tools/lazy"
+import type { Lazy } from "~/tools/lazy"
 
 import {
-  type Impulse,
   type ReadonlyImpulse,
   type Scope,
   batch,
@@ -57,22 +56,14 @@ export abstract class ImpulseForm<
   protected readonly _params?: TParams
 
   // TODO make those private/protected
-  public abstract readonly _spec: Impulse<ImpulseFormSpec<TParams>>
+
   public abstract readonly _state: Lazy<ImpulseFormState<TParams>>
+  public abstract readonly _spec: ImpulseFormSpec<TParams>
+  private readonly _root: ImpulseForm
 
-  private readonly _rootState = Lazy(() => {
-    function getRoot(
-      state: ImpulseFormState | ImpulseFormState<TParams>,
-    ): ImpulseFormState | ImpulseFormState<TParams> {
-      if (state._parent) {
-        return getRoot(state._parent._peek())
-      }
-
-      return state
-    }
-
-    return getRoot(this._state._peek())
-  })
+  protected constructor(parent: null | ImpulseForm) {
+    this._root = parent?._root ?? this
+  }
 
   public getOutput(scope: Scope): null | TParams["output.schema"]
   public getOutput<TResult>(
@@ -291,11 +282,11 @@ export abstract class ImpulseForm<
   }
 
   public getSubmitCount(scope: Scope): number {
-    return this._rootState._peek()._submitAttempts.getValue(scope)
+    return this._root._state._peek()._submitAttempts.getValue(scope)
   }
 
   public isSubmitting(scope: Scope): boolean {
-    return this._rootState._peek()._submittingCount.getValue(scope) > 0
+    return this._root._state._peek()._submittingCount.getValue(scope) > 0
   }
 
   public onSubmit(
@@ -306,15 +297,15 @@ export abstract class ImpulseForm<
 
   public async submit(): Promise<void> {
     batch((scope) => {
-      this._rootState._peek()._submitAttempts.setValue((count) => count + 1)
-      this._rootState._peek()._forceValidated(scope)
+      this._root._state._peek()._submitAttempts.setValue((count) => count + 1)
+      this._root._state._peek()._forceValidated(scope)
     })
 
     const promises = untrack((scope) => {
-      const output = this._rootState._peek()._output.getValue(scope)
+      const output = this._root._state._peek()._output.getValue(scope)
 
-      if (!isNull(output) && this._rootState._peek()._valid.getValue(scope)) {
-        return this._rootState
+      if (!isNull(output) && this._root._state._peek()._valid.getValue(scope)) {
+        return this._root._state
           ._peek()
           ._submitWith(scope, output)
           .filter(isDefined)
@@ -325,14 +316,14 @@ export abstract class ImpulseForm<
 
     if (!promises) {
       batch((scope) => {
-        this._rootState._peek()._getFocusFirstInvalid(scope)?.()
+        this._root._state._peek()._getFocusFirstInvalid(scope)?.()
       })
     } else if (promises.length > 0) {
-      this._rootState._peek()._submittingCount.setValue((count) => count + 1)
+      this._root._state._peek()._submittingCount.setValue((count) => count + 1)
 
       await Promise.all(promises)
 
-      this._rootState._peek()._submittingCount.setValue((count) => {
+      this._root._state._peek()._submittingCount.setValue((count) => {
         return Math.max(0, count - 1)
       })
     }

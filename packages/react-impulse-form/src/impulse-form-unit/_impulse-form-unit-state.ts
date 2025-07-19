@@ -2,7 +2,6 @@ import { identity } from "~/tools/identity"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
 import { isUndefined } from "~/tools/is-undefined"
-import type { Lazy } from "~/tools/lazy"
 import { resolveSetter } from "~/tools/setter"
 
 import {
@@ -22,7 +21,6 @@ import {
 } from "../validate-strategy"
 
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
-import type { ImpulseFormUnitSpec } from "./_impulse-form-unit-spec"
 import {
   type ImpulseFormUnitTransform,
   transformFromTransformer,
@@ -38,13 +36,8 @@ export class ImpulseFormUnitState<
   TOutput,
 > extends ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>> {
   public constructor(
-    parent: undefined | Lazy<ImpulseFormState>,
-    public readonly _spec: Impulse<
-      ImpulseFormUnitSpec<TInput, TError, TOutput>
-    >,
-
-    public readonly _initial: Impulse<TInput>,
     public readonly _input: Impulse<TInput>,
+    public readonly _initial: Impulse<TInput>,
     public readonly _customError: Impulse<null | TError>,
     public readonly _validateOn: Impulse<ValidateStrategy>,
     public readonly _touched: Impulse<boolean>,
@@ -55,7 +48,7 @@ export class ImpulseFormUnitState<
     isOutputEqual: Compare<null | TOutput>,
     isErrorEqual: Compare<null | TError>,
   ) {
-    super(parent)
+    super()
 
     const _dirty = Impulse((scope) => {
       const initial = _initial.getValue(scope)
@@ -231,7 +224,7 @@ export class ImpulseFormUnitState<
   public readonly _validated: Impulse<boolean>
   public readonly _validatedVerbose: ReadonlyImpulse<boolean>
 
-  public override _forceValidated(): void {
+  public _forceValidated(): void {
     this._validated.setValue(true)
   }
 

@@ -1,11 +1,11 @@
-import type { Lazy } from "~/tools/lazy"
+import { Lazy } from "~/tools/lazy"
 
-import type { Impulse } from "../dependencies"
+import { Impulse } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
-import type { ImpulseFormSpec } from "../impulse-form/impulse-form-spec"
 
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
-import type { ImpulseFormUnitState } from "./_impulse-form-unit-state"
+import type { ImpulseFormUnitSpec } from "./_impulse-form-unit-spec"
+import { ImpulseFormUnitState } from "./_impulse-form-unit-state"
 import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer"
 
 export class ImpulseFormUnit<
@@ -13,13 +13,27 @@ export class ImpulseFormUnit<
   TError = null,
   TOutput = TInput,
 > extends ImpulseForm<ImpulseFormUnitParams<TInput, TError, TOutput>> {
+  public readonly _state: Lazy<ImpulseFormUnitState<TInput, TError, TOutput>>
+
   public constructor(
-    public readonly _spec: Impulse<
-      ImpulseFormSpec<ImpulseFormUnitParams<TInput, TError, TOutput>>
-    >,
-    public readonly _state: Lazy<ImpulseFormUnitState<TInput, TError, TOutput>>,
+    root: null | ImpulseForm,
+    public readonly _spec: ImpulseFormUnitSpec<TInput, TError, TOutput>,
   ) {
-    super()
+    super(root)
+
+    this._state = Lazy(() => {
+      return new ImpulseFormUnitState(
+        Impulse(_spec._input, { compare: _spec._isInputEqual }),
+        _spec._initial,
+        Impulse(_spec._error, { compare: _spec._isErrorEqual }),
+        Impulse(_spec._validateOn),
+        Impulse(_spec._touched),
+        Impulse(_spec._transform),
+        _spec._isInputDirty,
+        _spec._isOutputEqual,
+        _spec._isErrorEqual,
+      )
+    })
   }
 
   public setTransform(

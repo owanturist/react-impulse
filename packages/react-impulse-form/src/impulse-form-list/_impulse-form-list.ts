@@ -1,25 +1,69 @@
-import type { Lazy } from "~/tools/lazy"
+import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
+import { Lazy } from "~/tools/lazy"
+import { map } from "~/tools/map"
 import { None, Option } from "~/tools/option"
 import { params } from "~/tools/params"
 import { type Setter, resolveSetter } from "~/tools/setter"
 
-import type { Impulse, Scope } from "../dependencies"
+import { Impulse, type Scope, untrack } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormListParams } from "./_impulse-form-list-params"
 import type { ImpulseFormListSpec } from "./_impulse-form-list-spec"
-import type { ImpulseForListState } from "./_impulse-form-list-state"
+import { ImpulseForListState } from "./_impulse-form-list-state"
 
 export class ImpulseFormList<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TElement extends ImpulseForm = any,
 > extends ImpulseForm<ImpulseFormListParams<TElement>> {
+  public readonly _state: Lazy<ImpulseForListState<TElement>>
+  private readonly _elements: Impulse<ReadonlyArray<TElement>>
+
   public constructor(
-    public readonly _spec: Impulse<ImpulseFormListSpec<TElement>>,
-    public readonly _state: Lazy<ImpulseForListState<TElement>>,
-    private readonly _elements: Impulse<ReadonlyArray<TElement>>,
+    root: null | ImpulseForm,
+    public readonly _spec: ImpulseFormListSpec<TElement>,
   ) {
-    super()
+    super(root)
+
+    this._elements = Impulse(
+      map(untrack(_spec._elements), (element, index) => {
+        return element._childOf(
+          this,
+          Impulse(
+            (scope) => _spec._initial.getValue(scope)[index],
+            (initial) => {
+              _spec._initial.setValue((elementsInitial) => {
+                return elementsInitial.map((elementInitial, i) => {
+                  if (i === index) {
+                    return initial
+                  }
+
+                  return elementInitial
+                })
+              })
+            },
+          ),
+        )
+      }),
+      {
+        compare: isShallowArrayEqual,
+      },
+    )
+
+    this._state = Lazy(() => {
+      return new ImpulseForListState(
+        Impulse(
+          (scope) => {
+            return map(this._elements.getValue(scope), ({ _state }) => {
+              return _state._peek()
+            })
+          },
+          {
+            compare: isShallowArrayEqual,
+          },
+        ),
+      )
+    })
   }
 
   public getElements(scope: Scope): ReadonlyArray<TElement>
@@ -40,29 +84,7 @@ export class ImpulseFormList<
     setter: Setter<ReadonlyArray<TElement>, [ReadonlyArray<TElement>, Scope]>,
   ): void {
     this._elements.setValue((elements, scope) => {
-      const spec = this._spec.getValue(scope)
-
-      return resolveSetter(setter, elements, scope).map((element, index) => {
-        if (element._state._peek()._parent) {
-          return element
-        }
-
-        const initial = spec._elements
-          .at(index)
-          ?.getValue(scope)
-          ._initial.getValue(scope)
-
-        return element._spec
-          .getValue(scope)
-          ._override({
-            _initial: Option(initial),
-            _input: None,
-            _error: None,
-            _validateOn: None,
-            _touched: None,
-          })
-          ._create(this._state)
-      })
+      return elements
     })
   }
 }

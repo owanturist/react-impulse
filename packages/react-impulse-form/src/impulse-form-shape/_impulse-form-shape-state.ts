@@ -6,12 +6,11 @@ import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
 import { isString } from "~/tools/is-string"
 import { isUndefined } from "~/tools/is-undefined"
-import type { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
 import { values } from "~/tools/values"
 
-import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
+import { Impulse, type Scope } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import {
   type ImpulseFormChild,
@@ -20,7 +19,6 @@ import {
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
 import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"
-import type { ImpulseFormShapeSpec } from "./_impulse-form-shape-spec"
 import {
   type ImpulseFormShapeError,
   isImpulseFormShapeErrorEqual,
@@ -80,18 +78,31 @@ export class ImpulseFormShapeState<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
 > extends ImpulseFormState<ImpulseFormShapeParams<TFields>> {
   public constructor(
-    parent: undefined | Lazy<ImpulseFormState>,
-    public readonly _spec: Impulse<ImpulseFormShapeSpec<TFields>>,
-
-    public readonly _initial: ReadonlyImpulse<ImpulseFormShapeInput<TFields>>,
     private readonly _fields: ImpulseFormShapeStateFields<TFields>,
     private readonly _constants: Omit<
       TFields,
       keyof ImpulseFormShapeStateFields<TFields>
     >,
   ) {
-    super(parent)
+    super()
   }
+
+  public readonly _initial = Impulse(
+    (scope) => {
+      const initial = mapValues(this._fields, ({ _initial }) => {
+        return _initial.getValue(scope)
+      })
+
+      return {
+        ...initial,
+        ...this._constants,
+      } as ImpulseFormShapeInput<TFields>
+    },
+
+    {
+      compare: isImpulseFormShapeInputEqual,
+    },
+  )
 
   public _setInitial(
     scope: Scope,
@@ -451,7 +462,7 @@ export class ImpulseFormShapeState<
     },
   )
 
-  public override _forceValidated(scope: Scope): void {
+  public _forceValidated(scope: Scope): void {
     forEntries(this._fields, (field) => {
       field._forceValidated(scope)
     })
