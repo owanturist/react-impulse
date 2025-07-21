@@ -1,7 +1,6 @@
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { Lazy } from "~/tools/lazy"
 import { map } from "~/tools/map"
-import { None, Option } from "~/tools/option"
 import { params } from "~/tools/params"
 import { type Setter, resolveSetter } from "~/tools/setter"
 
@@ -84,7 +83,18 @@ export class ImpulseFormList<
     setter: Setter<ReadonlyArray<TElement>, [ReadonlyArray<TElement>, Scope]>,
   ): void {
     this._elements.setValue((elements, scope) => {
-      return elements
+      return resolveSetter(setter, elements, scope).map((element, index) => {
+        if (this._hasSameRootWith(element)) {
+          return element
+        }
+
+        const specElement = this._spec._elements.getValue(scope).at(index)
+
+        return element._spec._childOf(
+          this,
+          specElement ? specElement._initial : element._spec._initial,
+        )
+      })
     })
   }
 }
