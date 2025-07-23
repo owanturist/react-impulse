@@ -148,8 +148,8 @@ export abstract class ImpulseFormState<
     output: TParams["output.schema"],
   ): ReadonlyArray<void | Promise<unknown>> {
     const promises = this._getChildren(scope).flatMap(
-      ({ _state, _mapOutput }) => {
-        return _state._submitWith(scope, _mapOutput(output))
+      ({ _state, _mapToChild }) => {
+        return _state._submitWith(scope, _mapToChild(output))
       },
     )
 
@@ -173,16 +173,18 @@ export abstract class ImpulseFormState<
 
   // C H I L D R E N
 
-  public abstract _getChildren(
+  public abstract _getChildren<TChildParams extends TParams>(
     scope: Scope,
-  ): ReadonlyArray<ImpulseFormChild<TParams>>
+  ): ReadonlyArray<ImpulseFormChild<TChildParams, TParams>>
 }
 
-export interface ImpulseFormChild<TParams extends ImpulseFormParams> {
-  _state: ImpulseFormState
-  _mapOutput: (output: TParams["output.schema"]) => unknown
-}
-
-export function isImpulseFormState(value: unknown): value is ImpulseFormState {
-  return value instanceof ImpulseFormState
+export interface ImpulseFormChild<
+  TChildParams extends ImpulseFormParams,
+  TParams extends ImpulseFormParams,
+> {
+  _state: ImpulseFormState<TChildParams>
+  _mapToChild<TKey extends keyof ImpulseFormParams>(
+    this: void,
+    parentValue: TParams[TKey],
+  ): TChildParams[TKey]
 }
