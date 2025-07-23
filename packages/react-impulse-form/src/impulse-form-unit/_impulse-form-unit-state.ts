@@ -15,6 +15,7 @@ import {
   type ValidateStrategy,
 } from "../validate-strategy"
 
+import { ImpulseFormUnit } from "./_impulse-form-unit"
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
 import {
   type ImpulseFormUnitTransform,
@@ -52,8 +53,8 @@ export class ImpulseFormUnitState<
   public _childOf(
     parent: ImpulseFormState,
     initial: Impulse<TInput>,
-  ): ImpulseFormUnitState<TInput, TError, TOutput> {
-    return new ImpulseFormUnitState(
+  ): ImpulseFormUnit<TInput, TError, TOutput> {
+    const state = new ImpulseFormUnitState(
       parent,
       initial,
       this._input.clone(),
@@ -65,6 +66,8 @@ export class ImpulseFormUnitState<
       this._isOutputEqual,
       this._isErrorEqual,
     )
+
+    return new ImpulseFormUnit(state)
   }
 
   // R E S U L T

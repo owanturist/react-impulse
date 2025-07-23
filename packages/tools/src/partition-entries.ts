@@ -6,9 +6,9 @@ export function partitionEntries<TObject, TResult>(
     value: TObject[typeof key] | TResult,
     key: keyof TObject,
   ) => value is TResult,
-): [Partial<Record<keyof TObject, TResult>>, Partial<TObject>] {
-  const right = {} as Partial<Record<keyof TObject, TResult>>
-  const left = {} as Partial<TObject>
+): [Record<keyof TObject, TResult>, TObject] {
+  const right = {} as Record<keyof TObject, TResult>
+  const left = {} as TObject
 
   forEntries(object, (value, key) => {
     if (predicate(value, key)) {
