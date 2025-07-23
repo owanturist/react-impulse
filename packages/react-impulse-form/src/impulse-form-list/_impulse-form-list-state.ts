@@ -491,7 +491,7 @@ export class ImpulseForListState<
   ): ReadonlyArray<ImpulseFormChild<ImpulseFormListParams<TElement>>> {
     return this._elements.getValue(scope).map((element, index) => ({
       _state: element,
-      _mapOutput: (output) => output.at(index),
+      _mapToChild: (output) => output.at(index),
     }))
   }
 }

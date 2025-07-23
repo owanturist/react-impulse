@@ -13,6 +13,7 @@ import { values } from "~/tools/values"
 
 import { Impulse, type Scope } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import {
   type ImpulseFormChild,
   ImpulseFormState,
@@ -579,12 +580,12 @@ export class ImpulseFormShapeState<
 
   // C H I L D R E N
 
-  public _getChildren(): ReadonlyArray<
-    ImpulseFormChild<ImpulseFormShapeParams<TFields>>
+  public _getChildren<TChildParams extends ImpulseFormParams>(): ReadonlyArray<
+    ImpulseFormChild<TChildParams, ImpulseFormShapeParams<TFields>>
   > {
     return entries(this._states).map(([key, field]) => ({
       _state: field,
-      _mapOutput: (output) => output[key],
+      _mapToChild: (output) => output[key],
     }))
   }
 }
