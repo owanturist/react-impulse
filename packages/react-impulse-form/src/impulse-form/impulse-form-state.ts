@@ -3,6 +3,7 @@ import { isNull } from "~/tools/is-null"
 import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
 import { Emitter } from "../emitter"
 
+import type { ImpulseForm } from "./impulse-form"
 import type { ImpulseFormParams } from "./impulse-form-params"
 
 export abstract class ImpulseFormState<
@@ -18,7 +19,7 @@ export abstract class ImpulseFormState<
   public abstract _childOf(
     parent: ImpulseFormState,
     initial: Impulse<TParams["input.schema"]>,
-  ): ImpulseFormState<TParams>
+  ): ImpulseForm<TParams>
 
   // I N I T I A L
 
@@ -180,4 +181,8 @@ export abstract class ImpulseFormState<
 export interface ImpulseFormChild<TParams extends ImpulseFormParams> {
   _state: ImpulseFormState
   _mapOutput: (output: TParams["output.schema"]) => unknown
+}
+
+export function isImpulseFormState(value: unknown): value is ImpulseFormState {
+  return value instanceof ImpulseFormState
 }

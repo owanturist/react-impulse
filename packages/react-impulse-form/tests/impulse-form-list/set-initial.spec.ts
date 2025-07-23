@@ -305,7 +305,7 @@ describe("adding a new element to the list's beginning", () => {
     ])
   })
 
-  it.skip("updates list's initial value from an element's setInitial", ({
+  it("updates list's initial value from an element's setInitial", ({
     scope,
   }) => {
     const form = setup([
