@@ -4,7 +4,7 @@ import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 
 import { createUnionCompare } from "../create-union-compare"
-import { type Compare, Impulse } from "../dependencies"
+import { type Compare, Impulse, untrack } from "../dependencies"
 import {
   VALIDATE_ON_INIT,
   VALIDATE_ON_TOUCH,
@@ -13,8 +13,9 @@ import {
 import type { ZodLikeSchema } from "../zod-like-schema"
 
 import { ImpulseFormUnit as ImpulseFormUnitImpl } from "./_impulse-form-unit"
-import { ImpulseFormUnitSpec } from "./_impulse-form-unit-spec"
+import { ImpulseFormUnitState } from "./_impulse-form-unit-state"
 import {
+  type ImpulseFormUnitTransform,
   transformFromInput,
   transformFromSchema,
   transformFromTransformer,
@@ -176,7 +177,7 @@ export function ImpulseFormUnit<TInput, TError = null>(
 ): ImpulseFormUnit<TInput, TError, TInput>
 
 export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
-  input: TInput,
+  input_: TInput,
   options?:
     | ImpulseFormUnitOptions<TInput, TError>
     | ImpulseFormUnitTransformedOptions<TInput, TError, TOutput>
@@ -191,92 +192,114 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     options?.isInputDirty ??
     ((left, right, scope) => !isInputEqual(left, right, scope))
 
-  const initial = Impulse(options?.initial ?? input, {
-    compare: isInputEqual,
-  })
-  const touched = options?.touched ?? false
+  const input = Impulse(input_, { compare: isInputEqual })
+
+  const initial = Impulse(
+    untrack((scope) => {
+      const initialOrInput = options?.initial ?? input_
+
+      return isInputEqual(initialOrInput, input_, scope)
+        ? input_
+        : initialOrInput
+    }),
+    {
+      compare: isInputEqual,
+    },
+  )
+  const touched = Impulse(options?.touched ?? false)
 
   if (hasProperty(options, "schema")) {
-    const spec = new ImpulseFormUnitSpec(
-      input,
-      initial,
-      options.error ?? null,
-      options.validateOn ?? VALIDATE_ON_TOUCH,
-      touched,
-      transformFromSchema(options.schema),
-      isInputDirty,
-      isInputEqual,
-      createUnionCompare<null, TOutput>(
-        isNull,
-        options.isOutputEqual ?? isStrictEqual,
-      ),
-      createUnionCompare<null, ReadonlyArray<string>>(
-        isNull,
-        isShallowArrayEqual,
-      ),
+    const transform = transformFromSchema<TInput, TOutput>(options.schema)
+    const isErrorEqual = createUnionCompare(isNull, isShallowArrayEqual)
+    const isOutputEqual = createUnionCompare<null, TOutput>(
+      isNull,
+      options.isOutputEqual ?? isStrictEqual,
     )
 
-    return new ImpulseFormUnitImpl(null, spec)
+    const state = new ImpulseFormUnitState(
+      null,
+      initial,
+      input,
+      Impulse(options.error ?? null, { compare: isErrorEqual }),
+      Impulse(options.validateOn ?? VALIDATE_ON_TOUCH),
+      touched,
+      Impulse(transform),
+      isInputDirty,
+      isOutputEqual,
+      isErrorEqual,
+    )
+
+    return new ImpulseFormUnitImpl(state)
   }
 
-  const error: null | TError = options?.error ?? null
   const isErrorEqual = createUnionCompare<null, TError>(
     isNull,
     options?.isErrorEqual ?? isStrictEqual,
   )
+  const error = Impulse<null | TError>(options?.error ?? null, {
+    compare: isErrorEqual,
+  })
 
   if (hasProperty(options, "validate")) {
-    const spec = new ImpulseFormUnitSpec(
-      input,
+    const transform = transformFromValidator(options.validate)
+    const isOutputEqual = createUnionCompare<null, TOutput>(
+      isNull,
+      options.isOutputEqual ?? isStrictEqual,
+    )
+
+    const state = new ImpulseFormUnitState(
+      null,
       initial,
+      input,
       error,
-      options.validateOn ?? VALIDATE_ON_TOUCH,
+      Impulse(options.validateOn ?? VALIDATE_ON_TOUCH),
       touched,
-      transformFromValidator(options.validate),
+      Impulse(transform),
       isInputDirty,
-      isInputEqual,
-      createUnionCompare<null, TOutput>(
-        isNull,
-        options.isOutputEqual ?? isStrictEqual,
-      ),
+      isOutputEqual,
       isErrorEqual,
     )
 
-    return new ImpulseFormUnitImpl(null, spec)
+    return new ImpulseFormUnitImpl(state)
   }
 
   if (hasProperty(options, "transform")) {
-    const spec = new ImpulseFormUnitSpec(
-      input,
+    const transform = transformFromTransformer(options.transform)
+    const isOutputEqual = createUnionCompare<null, TOutput>(
+      isNull,
+      options.isOutputEqual ?? isStrictEqual,
+    )
+
+    const state = new ImpulseFormUnitState(
+      null,
       initial,
+      input,
       error,
-      VALIDATE_ON_INIT,
+      Impulse<ValidateStrategy>(VALIDATE_ON_INIT),
       touched,
-      transformFromTransformer(options.transform),
+      Impulse(transform as ImpulseFormUnitTransform<TInput, TError, TOutput>),
       isInputDirty,
-      isInputEqual,
-      createUnionCompare<null, TOutput>(
-        isNull,
-        options.isOutputEqual ?? isStrictEqual,
-      ),
+      isOutputEqual,
       isErrorEqual,
     )
 
-    return new ImpulseFormUnitImpl(null, spec)
+    return new ImpulseFormUnitImpl(state)
   }
 
-  const spec = new ImpulseFormUnitSpec(
-    input,
+  const state = new ImpulseFormUnitState(
+    null,
     initial,
+    input,
     error,
-    VALIDATE_ON_INIT,
+    Impulse<ValidateStrategy>(VALIDATE_ON_INIT),
     touched,
-    transformFromInput(),
+    Impulse(
+      transformFromInput as ImpulseFormUnitTransform<TInput, TError, TInput>,
+    ),
     isInputDirty,
-    isInputEqual,
     createUnionCompare(isNull, isInputEqual),
     isErrorEqual,
   )
 
-  return new ImpulseFormUnitImpl(null, spec)
+  return new ImpulseFormUnitImpl(state)
 }
