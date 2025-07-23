@@ -9,6 +9,17 @@ export abstract class ImpulseFormState<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TParams extends ImpulseFormParams = any,
 > {
+  public readonly _root: ImpulseFormState
+
+  public constructor(parent: null | ImpulseFormState) {
+    this._root = parent?._root ?? this
+  }
+
+  public abstract _childOf(
+    parent: ImpulseFormState,
+    initial: Impulse<TParams["input.schema"]>,
+  ): ImpulseFormState<TParams>
+
   // I N I T I A L
 
   public abstract readonly _initial: ReadonlyImpulse<TParams["input.schema"]>
