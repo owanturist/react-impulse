@@ -52,27 +52,19 @@ import {
   isImpulseFormListValidateOnVerboseEqual,
 } from "./impulse-form-list-validate-on-verbose"
 
-export class ImpulseForListState<
+export class ImpulseFormListState<
   TElement extends ImpulseForm = ImpulseForm,
 > extends ImpulseFormState<ImpulseFormListParams<TElement>> {
+  public override readonly _isInputEqual = isImpulseFormListInputEqual
+
   public constructor(
+    public readonly _initial: ReadonlyImpulse<ImpulseFormListInput<TElement>>,
     private readonly _elements: ReadonlyImpulse<
       ReadonlyArray<ImpulseFormState<GetImpulseFormParams<TElement>>>
     >,
   ) {
     super()
   }
-
-  public readonly _initial = Impulse<ImpulseFormListInput<TElement>>(
-    (scope) => {
-      return this._elements
-        .getValue(scope)
-        .map((element) => element._initial.getValue(scope))
-    },
-    {
-      compare: isImpulseFormListInputEqual,
-    },
-  )
 
   public _setInitial(
     scope: Scope,

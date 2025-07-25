@@ -1,7 +1,7 @@
 import { mapValues } from "~/tools/map-values"
 import { partitionEntries } from "~/tools/partition-entries"
 
-import { Impulse } from "../dependencies"
+import { Impulse, type Scope } from "../dependencies"
 import { ImpulseForm, isImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"

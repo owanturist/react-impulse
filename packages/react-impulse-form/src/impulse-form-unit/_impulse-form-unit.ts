@@ -1,4 +1,4 @@
-import type { Impulse } from "../dependencies"
+import type { Impulse, Scope } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
