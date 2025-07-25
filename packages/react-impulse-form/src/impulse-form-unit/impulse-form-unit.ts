@@ -217,7 +217,6 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     )
 
     const state = new ImpulseFormUnitState(
-      null,
       initial,
       input,
       Impulse(options.error ?? null, { compare: isErrorEqual }),
@@ -225,11 +224,12 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       touched,
       Impulse(transform),
       isInputDirty,
+      isInputEqual,
       isOutputEqual,
       isErrorEqual,
     )
 
-    return new ImpulseFormUnitImpl(state)
+    return new ImpulseFormUnitImpl(null, state)
   }
 
   const isErrorEqual = createUnionCompare<null, TError>(
@@ -248,7 +248,6 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     )
 
     const state = new ImpulseFormUnitState(
-      null,
       initial,
       input,
       error,
@@ -256,11 +255,12 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       touched,
       Impulse(transform),
       isInputDirty,
+      isInputEqual,
       isOutputEqual,
       isErrorEqual,
     )
 
-    return new ImpulseFormUnitImpl(state)
+    return new ImpulseFormUnitImpl(null, state)
   }
 
   if (hasProperty(options, "transform")) {
@@ -271,7 +271,6 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     )
 
     const state = new ImpulseFormUnitState(
-      null,
       initial,
       input,
       error,
@@ -279,15 +278,15 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       touched,
       Impulse(transform as ImpulseFormUnitTransform<TInput, TError, TOutput>),
       isInputDirty,
+      isInputEqual,
       isOutputEqual,
       isErrorEqual,
     )
 
-    return new ImpulseFormUnitImpl(state)
+    return new ImpulseFormUnitImpl(null, state)
   }
 
   const state = new ImpulseFormUnitState(
-    null,
     initial,
     input,
     error,
@@ -297,9 +296,10 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       transformFromInput as ImpulseFormUnitTransform<TInput, TError, TInput>,
     ),
     isInputDirty,
+    isInputEqual,
     createUnionCompare(isNull, isInputEqual),
     isErrorEqual,
   )
 
-  return new ImpulseFormUnitImpl(state)
+  return new ImpulseFormUnitImpl(null, state)
 }
