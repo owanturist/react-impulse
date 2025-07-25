@@ -4,6 +4,7 @@ import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
 
 import {
+  type Impulse,
   type ReadonlyImpulse,
   type Scope,
   batch,
@@ -54,8 +55,25 @@ export abstract class ImpulseForm<
   protected readonly _params?: TParams
 
   // TODO make those private/protected
+  private readonly _root: ImpulseForm
 
   public abstract readonly _state: ImpulseFormState<TParams>
+
+  public constructor(parent: null | ImpulseForm) {
+    this._root = parent?._root ?? this
+  }
+
+  protected abstract _childOf(
+    parent: ImpulseForm,
+    initial: Impulse<TParams["input.schema"]>,
+  ): ImpulseForm<TParams>
+
+  protected _parentOf<TChildParams extends ImpulseFormParams>(
+    child: ImpulseForm<TChildParams>,
+    initial: Impulse<TChildParams["input.schema"]>,
+  ): ImpulseForm<TChildParams> {
+    return child._childOf(this, initial)
+  }
 
   public getOutput(scope: Scope): null | TParams["output.schema"]
   public getOutput<TResult>(
@@ -274,11 +292,11 @@ export abstract class ImpulseForm<
   }
 
   public getSubmitCount(scope: Scope): number {
-    return this._state._root._submitAttempts.getValue(scope)
+    return this._root._state._submitAttempts.getValue(scope)
   }
 
   public isSubmitting(scope: Scope): boolean {
-    return this._state._root._submittingCount.getValue(scope) > 0
+    return this._root._state._submittingCount.getValue(scope) > 0
   }
 
   public onSubmit(
@@ -289,15 +307,15 @@ export abstract class ImpulseForm<
 
   public async submit(): Promise<void> {
     batch((scope) => {
-      this._state._root._submitAttempts.setValue((count) => count + 1)
-      this._state._root._forceValidated(scope)
+      this._root._state._submitAttempts.setValue((count) => count + 1)
+      this._root._state._forceValidated(scope)
     })
 
     const promises = untrack((scope) => {
-      const output = this._state._root._output.getValue(scope)
+      const output = this._root._state._output.getValue(scope)
 
-      if (!isNull(output) && this._state._root._valid.getValue(scope)) {
-        return this._state._root._submitWith(scope, output).filter(isDefined)
+      if (!isNull(output) && this._root._state._valid.getValue(scope)) {
+        return this._root._state._submitWith(scope, output).filter(isDefined)
       }
 
       return undefined
@@ -305,14 +323,14 @@ export abstract class ImpulseForm<
 
     if (!promises) {
       batch((scope) => {
-        this._state._root._getFocusFirstInvalid(scope)?.()
+        this._root._state._getFocusFirstInvalid(scope)?.()
       })
     } else if (promises.length > 0) {
-      this._state._root._submittingCount.setValue((count) => count + 1)
+      this._root._state._submittingCount.setValue((count) => count + 1)
 
       await Promise.all(promises)
 
-      this._state._root._submittingCount.setValue((count) => {
+      this._root._state._submittingCount.setValue((count) => {
         return Math.max(0, count - 1)
       })
     }

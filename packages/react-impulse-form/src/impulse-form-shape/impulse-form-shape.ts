@@ -5,7 +5,6 @@ import { Impulse, batch, untrack } from "../dependencies"
 import { isImpulseForm } from "../impulse-form"
 
 import { ImpulseFormShape as ImpulseFormShapeImpl } from "./_impulse-form-shape"
-import { ImpulseFormShapeState } from "./_impulse-form-shape-state"
 import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 import type { ImpulseFormShapeFlagSetter } from "./impulse-form-shape-flag-setter"
@@ -36,41 +35,38 @@ export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
     error,
   }: ImpulseFormShapeOptions<TFields> = {},
 ): ImpulseFormShape<TFields> {
-  const state = new ImpulseFormShapeState(
-    null,
-    Impulse(
-      mapValues(fields, (field) => {
-        return isImpulseForm(field) ? untrack(field._state._initial) : field
-      }),
-
-      {
-        compare: isImpulseFormShapeInputEqual,
-      },
-    ),
-    fields,
+  const fieldsInitials = Impulse(
+    mapValues(fields, (field) => {
+      return isImpulseForm(field) ? untrack(field._state._initial) : field
+    }),
+    {
+      compare: isImpulseFormShapeInputEqual,
+    },
   )
+
+  const shape = new ImpulseFormShapeImpl(null, fieldsInitials, fields)
 
   batch((scope) => {
     if (!isUndefined(input)) {
-      state._setInput(scope, input)
+      shape._state._setInput(scope, input)
     }
 
     if (!isUndefined(initial)) {
-      state._setInitial(scope, initial)
+      shape._state._setInitial(scope, initial)
     }
 
     if (!isUndefined(touched)) {
-      state._setTouched(scope, touched)
+      shape._state._setTouched(scope, touched)
     }
 
     if (!isUndefined(validateOn)) {
-      state._setValidateOn(scope, validateOn)
+      shape._state._setValidateOn(scope, validateOn)
     }
 
     if (!isUndefined(error)) {
-      state._setError(scope, error)
+      shape._state._setError(scope, error)
     }
   })
 
-  return new ImpulseFormShapeImpl(state)
+  return shape
 }

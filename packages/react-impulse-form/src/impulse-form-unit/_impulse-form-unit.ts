@@ -1,3 +1,4 @@
+import type { Impulse } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
@@ -10,9 +11,17 @@ export class ImpulseFormUnit<
   TOutput = TInput,
 > extends ImpulseForm<ImpulseFormUnitParams<TInput, TError, TOutput>> {
   public constructor(
+    parent: null | ImpulseForm,
     public readonly _state: ImpulseFormUnitState<TInput, TError, TOutput>,
   ) {
-    super()
+    super(parent)
+  }
+
+  protected _childOf(
+    parent: ImpulseForm,
+    initial: Impulse<TInput>,
+  ): ImpulseFormUnit<TInput, TError, TOutput> {
+    return new ImpulseFormUnit(parent, this._state._childOf(initial))
   }
 
   public setTransform(

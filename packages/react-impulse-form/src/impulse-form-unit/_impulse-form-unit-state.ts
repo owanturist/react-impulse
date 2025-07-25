@@ -15,7 +15,6 @@ import {
   type ValidateStrategy,
 } from "../validate-strategy"
 
-import { ImpulseFormUnit } from "./_impulse-form-unit"
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
 import {
   type ImpulseFormUnitTransform,
@@ -32,7 +31,6 @@ export class ImpulseFormUnitState<
   TOutput,
 > extends ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>> {
   public constructor(
-    parent: null | ImpulseFormState,
     public readonly _initial: Impulse<TInput>,
     public readonly _input: Impulse<TInput>,
     private readonly _customError: Impulse<null | TError>,
@@ -42,20 +40,19 @@ export class ImpulseFormUnitState<
       ImpulseFormUnitTransform<TInput, TError, TOutput>
     >,
     private readonly _isInputDirty: Compare<TInput>,
+    public readonly _isInputEqual: Compare<TInput>,
     private readonly _isOutputEqual: Compare<null | TOutput>,
     private readonly _isErrorEqual: Compare<null | TError>,
   ) {
-    super(parent)
+    super()
 
     this._validated.setValue(false)
   }
 
   public _childOf(
-    parent: ImpulseFormState,
     initial: Impulse<TInput>,
-  ): ImpulseFormUnit<TInput, TError, TOutput> {
-    const state = new ImpulseFormUnitState(
-      parent,
+  ): ImpulseFormUnitState<TInput, TError, TOutput> {
+    return new ImpulseFormUnitState(
       initial,
       this._input.clone(),
       this._customError.clone(),
@@ -63,11 +60,10 @@ export class ImpulseFormUnitState<
       this._touched.clone(),
       this._transform.clone(),
       this._isInputDirty,
+      this._isInputEqual,
       this._isOutputEqual,
       this._isErrorEqual,
     )
-
-    return new ImpulseFormUnit(state)
   }
 
   // R E S U L T

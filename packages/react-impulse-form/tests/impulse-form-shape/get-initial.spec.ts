@@ -1,3 +1,5 @@
+import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
+
 import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
 
 it("selects initial", ({ scope }) => {
@@ -146,4 +148,42 @@ it("persists unchanged initial fields between changes", ({ scope }) => {
   expect(initial_1).not.toBe(initial_0)
   expect(initial_1.first).toBe(initial_0.first)
   expect(initial_1.second).not.toBe(initial_0.second)
+})
+
+it("selects unequal initial values when isInputEqual is not specified", ({
+  scope,
+}) => {
+  const shape = ImpulseFormShape({
+    field: ImpulseFormUnit([0]),
+  })
+
+  const initial_0 = shape.getInitial(scope)
+
+  shape.setInitial({
+    field: [0],
+  })
+  const initial_1 = shape.getInitial(scope)
+
+  expect(initial_0).not.toBe(initial_1)
+  expect(initial_0).toStrictEqual(initial_1)
+})
+
+it("selects equal initial values when isInputEqual is specified", ({
+  scope,
+}) => {
+  const shape = ImpulseFormShape({
+    field: ImpulseFormUnit([0], {
+      isInputEqual: isShallowArrayEqual,
+    }),
+  })
+
+  const initial_0 = shape.getInitial(scope)
+
+  shape.setInitial({
+    field: [0],
+  })
+  const initial_1 = shape.getInitial(scope)
+
+  expect(initial_0).toBe(initial_1)
+  expect(initial_0).toStrictEqual(initial_1)
 })

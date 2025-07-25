@@ -1,25 +1,20 @@
 import { isNull } from "~/tools/is-null"
 
-import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
+import {
+  type Compare,
+  Impulse,
+  type ReadonlyImpulse,
+  type Scope,
+} from "../dependencies"
 import { Emitter } from "../emitter"
 
-import type { ImpulseForm } from "./impulse-form"
 import type { ImpulseFormParams } from "./impulse-form-params"
 
 export abstract class ImpulseFormState<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TParams extends ImpulseFormParams = any,
 > {
-  public readonly _root: ImpulseFormState
-
-  public constructor(parent: null | ImpulseFormState) {
-    this._root = parent?._root ?? this
-  }
-
-  public abstract _childOf(
-    parent: ImpulseFormState,
-    initial: Impulse<TParams["input.schema"]>,
-  ): ImpulseForm<TParams>
+  public abstract readonly _isInputEqual: Compare<TParams["input.schema"]>
 
   // I N I T I A L
 
