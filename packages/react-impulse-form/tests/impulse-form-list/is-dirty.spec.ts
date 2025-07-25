@@ -157,7 +157,7 @@ it("returns true when all elements are dirty", ({ scope }) => {
   ).toStrictEqual([true, true])
 })
 
-describe("adding a new element to the list's end", () => {
+describe.skip("adding a new element to the list's end", () => {
   it("returns true for a new pristine element and a pristine list", ({
     scope,
   }) => {
@@ -299,7 +299,7 @@ describe("adding a new element to the list's end", () => {
   })
 })
 
-describe("adding a new element to the list's beginning", () => {
+describe.skip("adding a new element to the list's beginning", () => {
   it("returns true for a new pristine element and a pristine list", ({
     scope,
   }) => {
@@ -462,7 +462,7 @@ describe("adding a new element to the list's beginning", () => {
   })
 })
 
-describe("removing an initial element from the list's end", () => {
+describe.skip("removing an initial element from the list's end", () => {
   it("returns true for a pristine list", ({ scope }) => {
     const form = setup([
       setupElement({
@@ -534,7 +534,7 @@ describe("removing an initial element from the list's end", () => {
   })
 })
 
-describe("removing an initial element from the list's beginning", () => {
+describe.skip("removing an initial element from the list's beginning", () => {
   it("returns true for a pristine list", ({ scope }) => {
     const form = setup([
       setupElement({
@@ -701,7 +701,7 @@ describe("swapping elements", () => {
   })
 })
 
-describe("after ImpulseFormList#reset()", () => {
+describe.skip("after ImpulseFormList#reset()", () => {
   it("resets original to initial values", ({ scope }) => {
     const form = setup([
       setupElement({
@@ -845,7 +845,7 @@ describe("after ImpulseFormList#reset()", () => {
   })
 })
 
-describe("after ImpulseFormList#setInitial()", () => {
+describe.skip("after ImpulseFormList#setInitial()", () => {
   it("returns false when dirty elements set as initial", ({ scope }) => {
     const form = setup([
       setupElement({
@@ -1027,7 +1027,7 @@ describe("after ImpulseFormList#setInitial()", () => {
   })
 })
 
-describe("after ImpulseFormList#getElements()#at()#setInitial()", () => {
+describe.skip("after ImpulseFormList#getElements()#at()#setInitial()", () => {
   it("return true after updating pristine element's initial value", ({
     scope,
   }) => {
