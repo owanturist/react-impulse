@@ -1,5 +1,7 @@
-import type { ImpulseForm } from "./impulse-form"
+import type { GetImpulseFormParams } from "./get-impulse-form-params"
 import type { ImpulseFormParams } from "./impulse-form-params"
 
-export type GetImpulseFormParam<TTarget, TKey extends keyof ImpulseFormParams> =
-  TTarget extends ImpulseForm<infer TParams> ? TParams[TKey] : never
+export type GetImpulseFormParam<
+  TTarget,
+  TKey extends keyof ImpulseFormParams,
+> = GetImpulseFormParams<TTarget>[TKey]

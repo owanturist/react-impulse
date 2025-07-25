@@ -68,6 +68,10 @@ it("adds an added element's initial", ({ scope }) => {
   form.setElements((elements) => [...elements, ImpulseFormUnit(2)])
 
   expect(form.getInitial(scope)).toStrictEqual([0, 1])
+  expect(
+    form.getElements(scope).map((element) => element.getInitial(scope)),
+  ).toStrictEqual([0, 1, 2])
+
   form.setInitial([3, 4, 5])
   expect(form.getInitial(scope)).toStrictEqual([3, 4, 5])
   expect(

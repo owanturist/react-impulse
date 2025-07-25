@@ -1,5 +1,5 @@
-import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isUndefined } from "~/tools/is-undefined"
+import { map } from "~/tools/map"
 
 import { Impulse, batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form"
@@ -7,6 +7,7 @@ import type { ImpulseForm } from "../impulse-form"
 import { ImpulseFormList as ImpulseFormListImpl } from "./_impulse-form-list"
 import type { ImpulseFormListErrorSetter } from "./impulse-form-list-error-setter"
 import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"
+import { isImpulseFormListInputEqual } from "./impulse-form-list-input"
 import type { ImpulseFormListInputSetter } from "./impulse-form-list-input-setter"
 import type { ImpulseFormListValidateOnSetter } from "./impulse-form-list-validate-on-setter"
 
@@ -14,11 +15,11 @@ export type ImpulseFormList<TElement extends ImpulseForm> =
   ImpulseFormListImpl<TElement>
 
 export interface ImpulseFormListOptions<TElement extends ImpulseForm> {
-  input?: ImpulseFormListInputSetter<TElement>
-  initial?: ImpulseFormListInputSetter<TElement>
-  touched?: ImpulseFormListFlagSetter<TElement>
-  validateOn?: ImpulseFormListValidateOnSetter<TElement>
-  error?: ImpulseFormListErrorSetter<TElement>
+  readonly input?: ImpulseFormListInputSetter<TElement>
+  readonly initial?: ImpulseFormListInputSetter<TElement>
+  readonly touched?: ImpulseFormListFlagSetter<TElement>
+  readonly validateOn?: ImpulseFormListValidateOnSetter<TElement>
+  readonly error?: ImpulseFormListErrorSetter<TElement>
 }
 
 export function ImpulseFormList<TElement extends ImpulseForm>(
@@ -31,31 +32,34 @@ export function ImpulseFormList<TElement extends ImpulseForm>(
     error,
   }: ImpulseFormListOptions<TElement> = {},
 ): ImpulseFormList<TElement> {
-  const list = new ImpulseFormListImpl(
-    null,
-    Impulse(elements, { compare: isShallowArrayEqual }),
+  const elementsInitials = Impulse(
+    map(elements, (element) => element._state._initial),
+    {
+      compare: isImpulseFormListInputEqual,
+    },
   )
 
-  batch(() => {
-    if (!isUndefined(touched)) {
-      list.setTouched(touched)
+  const list = new ImpulseFormListImpl(null, elementsInitials, elements)
+
+  batch((scope) => {
+    if (!isUndefined(input)) {
+      list._state._setInput(scope, input)
     }
 
     if (!isUndefined(initial)) {
-      list.setInitial(initial)
+      list._state._setInitial(scope, initial)
     }
 
-    if (!isUndefined(input)) {
-      list.setInput(input)
+    if (!isUndefined(touched)) {
+      list._state._setTouched(scope, touched)
     }
 
     if (!isUndefined(validateOn)) {
-      list.setValidateOn(validateOn)
+      list._state._setValidateOn(scope, validateOn)
     }
 
-    // TODO add test against null
     if (!isUndefined(error)) {
-      list.setError(error)
+      list._state._setError(scope, error)
     }
   })
 
