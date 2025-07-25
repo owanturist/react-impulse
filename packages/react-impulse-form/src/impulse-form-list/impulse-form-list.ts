@@ -1,13 +1,13 @@
+import { isUndefined } from "~/tools/is-undefined"
 import { map } from "~/tools/map"
-import { Option } from "~/tools/option"
 
-import { Impulse } from "../dependencies"
+import { Impulse, batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form"
 
 import { ImpulseFormList as ImpulseFormListImpl } from "./_impulse-form-list"
-import { ImpulseFormListSpec } from "./_impulse-form-list-spec"
 import type { ImpulseFormListErrorSetter } from "./impulse-form-list-error-setter"
 import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"
+import { isImpulseFormListInputEqual } from "./impulse-form-list-input"
 import type { ImpulseFormListInputSetter } from "./impulse-form-list-input-setter"
 import type { ImpulseFormListValidateOnSetter } from "./impulse-form-list-validate-on-setter"
 
@@ -32,15 +32,36 @@ export function ImpulseFormList<TElement extends ImpulseForm>(
     error,
   }: ImpulseFormListOptions<TElement> = {},
 ): ImpulseFormList<TElement> {
-  const spec = new ImpulseFormListSpec<TElement>(
-    Impulse(map(elements, (element) => element._spec)),
-  )._override({
-    _input: Option(input),
-    _initial: Option(initial),
-    _error: Option(error),
-    _touched: Option(touched),
-    _validateOn: Option(validateOn),
+  const elementsInitials = Impulse(
+    map(elements, (element) => element._state._initial),
+    {
+      compare: isImpulseFormListInputEqual,
+    },
+  )
+
+  const list = new ImpulseFormListImpl(null, elementsInitials, elements)
+
+  batch((scope) => {
+    if (!isUndefined(input)) {
+      list._state._setInput(scope, input)
+    }
+
+    if (!isUndefined(initial)) {
+      list._state._setInitial(scope, initial)
+    }
+
+    if (!isUndefined(touched)) {
+      list._state._setTouched(scope, touched)
+    }
+
+    if (!isUndefined(validateOn)) {
+      list._state._setValidateOn(scope, validateOn)
+    }
+
+    if (!isUndefined(error)) {
+      list._state._setError(scope, error)
+    }
   })
 
-  return new ImpulseFormListImpl(null, spec)
+  return list
 }

@@ -72,6 +72,11 @@ export abstract class ImpulseForm<
     child: ImpulseForm<TChildParams>,
     initial: Impulse<TChildParams["input.schema"]>,
   ): ImpulseForm<TChildParams> {
+    if (child._root === this._root) {
+      console.log("TODO figure out the optimisation")
+      // return child
+    }
+
     return child._childOf(this, initial)
   }
 
