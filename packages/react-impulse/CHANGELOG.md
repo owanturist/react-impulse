@@ -1,5 +1,20 @@
 # react-impulse
 
+## 3.1.0
+
+### Minor Changes
+
+- [#901](https://github.com/owanturist/react-impulse/pull/901) [`b8b8c99`](https://github.com/owanturist/react-impulse/commit/b8b8c9968d6c7395603fc29b34fe62acc27892b0) Thanks [@owanturist](https://github.com/owanturist)! - Extend `Impulse(getter, options?)` by allowing `getter` to be a `ReadableImpulse<T>`:
+
+  ```dart
+  Impulse<T>(
+    getter: ReadableImpulse<T> | ((scope: Scope) => T),
+    options?: ImpulseOptions<T>,
+  ): ReadonlyImpulse<T>
+  ```
+
+  Resolves [#895](https://github.com/owanturist/react-impulse/issues/895)
+
 ## 3.0.3
 
 ### Patch Changes
@@ -35,23 +50,19 @@
 ### Major Changes
 
 - [#846](https://github.com/owanturist/react-impulse/pull/846) [`03f4967`](https://github.com/owanturist/react-impulse/commit/03f49673a262ec42ed165914c38f75a0a62af07e) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
-
   - The `Impulse.of` static method was removed and replaced with the `Impulse` function providing the same signature.
   - The `Impulse.isImpulse` static method was removed and replaced with the `isImpulse` function providing the same signature.
 
   #### Rationale
 
   The changes aim to simplify and modernize the API of `react-impulse` while improving its usability and consistency:
-
   - **Removal of `Impulse.of`**: By replacing the static `Impulse.of` method with the `Impulse` function, the API becomes more intuitive. This change also reduces redundancy, as the `Impulse` function now serves as the sole entry point for creating impulses and defining types.
   - **Standalone `isImpulse` function**: Moving `isImpulse` from a static method to a standalone function makes it possible to tree shake when unused.
 
   These changes collectively enhance the developer experience, reduce cognitive load, and make the library easier to learn and use.
 
   #### Migration Guide
-
   - Replace `Impulse.of()` calls with `Impulse()`:
-
     - **Creating an impulse without an initial value**:
 
       ```ts
@@ -117,7 +128,6 @@
   This change is purely syntactic - all functionality previously available with `Impulse.transmit` remains fully supported through `Impulse` with identical behavior. Your derived impulses will continue to work exactly as before with the new API.
 
   #### Migration Guide
-
   - For `Impulse.transmit(getter, [setter])`, replace with `Impulse(getter, [setter])`:
 
     ```ts
@@ -159,7 +169,6 @@
   Removing this hook simplifies the API by encouraging direct use of standard React hooks with `Impulse()` factory. This approach provides more explicit control over when Impulses are created and how they're stored in your components, leading to more predictable behavior across renders and better integration with other React patterns.
 
   #### Migration Guide
-
   - Replace `useImpulse` with `useState` or `useRef`:
 
     ```tsx
@@ -174,7 +183,6 @@
     ```
 
 - [#813](https://github.com/owanturist/react-impulse/pull/813) [`0983fb0`](https://github.com/owanturist/react-impulse/commit/0983fb04e4dc99f382c46abca597a8687d491940) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
-
   - Added support for React 19
   - Dropped support for React 16 and React 17
   - Updated minimum peer dependency to React 18.0.0
@@ -192,7 +200,6 @@
   All functionality previously provided by `useTransmittingImpulse` can be achieved through the composition of `Impulse()`, `useEffect`, and `useScopedEffect`. These replacements give you more precise control over dependency tracking and rendering optimization.
 
   #### Migration Guide
-
   - For immutable dependencies (not Impulses), replace with `Impulse(value)` + effects:
 
     ```ts
@@ -279,7 +286,6 @@
   #### Rationale
 
   Replacing the `scoped` HOC with hooks offers several advantages:
-
   1. **Simplified API**: Direct hook usage creates a flatter, more intuitive API compared to higher-order components.
   2. **Better TypeScript integration**: Hooks provide cleaner type inference than HOCs, eliminating the need for special prop types.
 
@@ -288,7 +294,6 @@
   All functionality previously provided by the `scoped` HOC can be achieved through the `useScope()` and `useScoped()` hooks, giving you more direct control over scope handling.
 
   #### Migration Guide
-
   - Replace `scoped` with `useScope()` or `useScoped()`:
 
     ```tsx
@@ -406,7 +411,6 @@
   ```
 
   These interfaces allow more flexible usage patterns and third-party integrations. The following APIs now accept anything that implements these interfaces, not just Impulse instances:
-
   - ```dart
     function useScoped<TValue>(impulse: ReadableImpulse<TValue>): TValue
     ```
@@ -485,7 +489,6 @@
 ### Minor Changes
 
 - [#785](https://github.com/owanturist/react-impulse/pull/785) [`b8561e4`](https://github.com/owanturist/react-impulse/commit/b8561e457a572a153108ad2ac419cc41b02dcf76) Thanks [@owanturist](https://github.com/owanturist)! - Update dependencies:
-
   - `@changesets/changelog-github@0.5.1`
   - `@changesets/cli@2.28.1`
   - `@size-limit/preset-small-lib@11.2.0`
@@ -526,7 +529,6 @@
 ### Major Changes
 
 - d2bf7d0: The `Scope` became an explicit argument for all methods, hooks and functions that read or potentially read an Impulse value. To reflect this change, the following renames were made:
-
   - `useImpulseCallback` -> `useScopedCallback`
     ```ts
     function useScopedCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
@@ -740,7 +742,6 @@
   The effect above depends only on the `count` Impulse. The `useScopedEffect` hook used to trigger the host component's rerender, but now on `count.setValue(2)` the effect runs, and the host component does not re-render.
 
 - 919f387: Introduce transmitting Impulse.
-
   - `Impulse.transmit` static method that creates a new transmitting Impulse. A transmitting Impulse is an Impulse that does not have its own value but reads it from an external source and writes it back to the source when the value changes. An external source is usually another Impulse or other Impulses.
 
     ```dart
