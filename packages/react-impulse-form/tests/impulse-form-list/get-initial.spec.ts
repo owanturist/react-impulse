@@ -35,7 +35,7 @@ it("returns an array of original values", ({ scope }) => {
   expect(form.getInitial(scope)).toStrictEqual([3, 1, 4])
 })
 
-it.only("returns nested list's values", ({ scope }) => {
+it("returns nested list's values", ({ scope }) => {
   const form = ImpulseFormList([
     ImpulseFormList([ImpulseFormUnit(1)]),
     ImpulseFormList([ImpulseFormUnit(2), ImpulseFormUnit(3)]),

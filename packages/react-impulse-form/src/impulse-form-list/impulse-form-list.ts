@@ -1,7 +1,7 @@
 import { isUndefined } from "~/tools/is-undefined"
 import { map } from "~/tools/map"
 
-import { Impulse, batch } from "../dependencies"
+import { Impulse, batch, untrack } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form"
 
 import { ImpulseFormList as ImpulseFormListImpl } from "./_impulse-form-list"
@@ -33,7 +33,7 @@ export function ImpulseFormList<TElement extends ImpulseForm>(
   }: ImpulseFormListOptions<TElement> = {},
 ): ImpulseFormList<TElement> {
   const elementsInitials = Impulse(
-    map(elements, (element) => element._state._initial),
+    map(elements, (element) => untrack(element._state._initial)),
     {
       compare: isImpulseFormListInputEqual,
     },
