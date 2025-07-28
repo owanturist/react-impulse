@@ -42,7 +42,7 @@ export class ImpulseFormUnitState<
       ImpulseFormUnitTransform<TInput, TError, TOutput>
     >,
     private readonly _isInputDirty: Compare<TInput>,
-    public readonly _isInputEqual: Compare<TInput>,
+    private readonly _isInputEqual: Compare<TInput>,
     private readonly _isOutputEqual: Compare<null | TOutput>,
     private readonly _isErrorEqual: Compare<null | TError>,
   ) {

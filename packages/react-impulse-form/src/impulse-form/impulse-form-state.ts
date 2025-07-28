@@ -1,11 +1,6 @@
 import { isNull } from "~/tools/is-null"
 
-import {
-  type Compare,
-  Impulse,
-  type ReadonlyImpulse,
-  type Scope,
-} from "../dependencies"
+import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
 import { Emitter } from "../emitter"
 
 import type { ImpulseForm } from "./impulse-form"
@@ -24,12 +19,10 @@ export abstract class ImpulseFormState<
 
   public abstract _childOf(
     parent: ImpulseFormState,
-    initial: Impulse<TParams["input.schema"]>,
+    initial: TParams["initial"],
   ): ImpulseFormState<TParams>
 
   public abstract _wrap(): ImpulseForm<TParams>
-
-  public abstract readonly _isInputEqual: Compare<TParams["input.schema"]>
 
   // I N I T I A L
 
