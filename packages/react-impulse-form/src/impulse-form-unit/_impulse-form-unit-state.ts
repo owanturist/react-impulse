@@ -15,6 +15,7 @@ import {
   type ValidateStrategy,
 } from "../validate-strategy"
 
+import { ImpulseFormUnit } from "./_impulse-form-unit"
 import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
 import {
   type ImpulseFormUnitTransform,
@@ -31,6 +32,7 @@ export class ImpulseFormUnitState<
   TOutput,
 > extends ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>> {
   public constructor(
+    parent: null | ImpulseFormState,
     public readonly _initial: Impulse<TInput>,
     public readonly _input: Impulse<TInput>,
     private readonly _customError: Impulse<null | TError>,
@@ -44,15 +46,17 @@ export class ImpulseFormUnitState<
     private readonly _isOutputEqual: Compare<null | TOutput>,
     private readonly _isErrorEqual: Compare<null | TError>,
   ) {
-    super()
+    super(parent)
 
     this._validated.setValue(false)
   }
 
   public _childOf(
+    parent: ImpulseFormState,
     initial: Impulse<TInput>,
   ): ImpulseFormUnitState<TInput, TError, TOutput> {
     return new ImpulseFormUnitState(
+      parent,
       initial,
       this._input.clone(),
       this._customError.clone(),
@@ -64,6 +68,10 @@ export class ImpulseFormUnitState<
       this._isOutputEqual,
       this._isErrorEqual,
     )
+  }
+
+  public _wrap(): ImpulseFormUnit<TInput, TError, TOutput> {
+    return new ImpulseFormUnit(this)
   }
 
   // R E S U L T

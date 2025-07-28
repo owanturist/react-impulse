@@ -12,7 +12,7 @@ import {
 } from "../validate-strategy"
 import type { ZodLikeSchema } from "../zod-like-schema"
 
-import { ImpulseFormUnit as ImpulseFormUnitImpl } from "./_impulse-form-unit"
+import type { ImpulseFormUnit as ImpulseFormUnitImpl } from "./_impulse-form-unit"
 import { ImpulseFormUnitState } from "./_impulse-form-unit-state"
 import {
   type ImpulseFormUnitTransform,
@@ -216,7 +216,8 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       options.isOutputEqual ?? isStrictEqual,
     )
 
-    const state = new ImpulseFormUnitState(
+    return new ImpulseFormUnitState(
+      null,
       initial,
       input,
       Impulse(options.error ?? null, { compare: isErrorEqual }),
@@ -227,9 +228,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       isInputEqual,
       isOutputEqual,
       isErrorEqual,
-    )
-
-    return new ImpulseFormUnitImpl(null, state)
+    )._wrap()
   }
 
   const isErrorEqual = createUnionCompare<null, TError>(
@@ -247,7 +246,8 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       options.isOutputEqual ?? isStrictEqual,
     )
 
-    const state = new ImpulseFormUnitState(
+    return new ImpulseFormUnitState(
+      null,
       initial,
       input,
       error,
@@ -258,9 +258,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       isInputEqual,
       isOutputEqual,
       isErrorEqual,
-    )
-
-    return new ImpulseFormUnitImpl(null, state)
+    )._wrap()
   }
 
   if (hasProperty(options, "transform")) {
@@ -270,7 +268,8 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       options.isOutputEqual ?? isStrictEqual,
     )
 
-    const state = new ImpulseFormUnitState(
+    return new ImpulseFormUnitState(
+      null,
       initial,
       input,
       error,
@@ -281,12 +280,11 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       isInputEqual,
       isOutputEqual,
       isErrorEqual,
-    )
-
-    return new ImpulseFormUnitImpl(null, state)
+    )._wrap()
   }
 
-  const state = new ImpulseFormUnitState(
+  return new ImpulseFormUnitState(
+    null,
     initial,
     input,
     error,
@@ -299,7 +297,5 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     isInputEqual,
     createUnionCompare(isNull, isInputEqual),
     isErrorEqual,
-  )
-
-  return new ImpulseFormUnitImpl(null, state)
+  )._wrap()
 }
