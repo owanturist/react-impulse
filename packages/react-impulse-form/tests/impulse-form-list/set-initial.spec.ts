@@ -62,7 +62,7 @@ it("changes all items", ({ scope }) => {
   ).toStrictEqual([3, 4, 5])
 })
 
-it.skip("adds an added element's initial", ({ scope }) => {
+it("adds an added element's initial", ({ scope }) => {
   const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1)])
 
   form.setElements((elements) => [...elements, ImpulseFormUnit(2)])
@@ -79,7 +79,7 @@ it.skip("adds an added element's initial", ({ scope }) => {
   ).toStrictEqual([3, 4, 5])
 })
 
-it.skip("keeps a removed element's initial", ({ scope }) => {
+it("keeps a removed element's initial", ({ scope }) => {
   const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1)])
 
   form.setElements((elements) => elements.slice(0, 1))

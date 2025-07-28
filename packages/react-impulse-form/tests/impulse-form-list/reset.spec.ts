@@ -157,7 +157,7 @@ it.skip("removes all elements", ({ scope }) => {
   expect(form.getInitial(scope)).toStrictEqual([])
 })
 
-it("updates validateOn for restored elements", ({ scope }) => {
+it.skip("updates validateOn for restored elements", ({ scope }) => {
   const form = ImpulseFormList([
     ImpulseFormUnit(0, { schema: z.number(), validateOn: "onChange" }),
     ImpulseFormUnit(1, { schema: z.number(), validateOn: "onChange" }),

@@ -1,4 +1,4 @@
-import { isDefined } from "~/tools/is-defined"
+import { drop } from "~/tools/drop"
 import { isFunction } from "~/tools/is-function"
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { map } from "~/tools/map"
@@ -6,7 +6,6 @@ import { params } from "~/tools/params"
 import { replaceElement } from "~/tools/replace-element"
 import type { Setter } from "~/tools/setter"
 import { take } from "~/tools/take"
-import { takeWhile } from "~/tools/take-while"
 
 import { Impulse, type Scope, batch, untrack } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
@@ -15,36 +14,17 @@ import type { ImpulseFormListParams } from "./_impulse-form-list-params"
 import { ImpulseFormListState } from "./_impulse-form-list-state"
 import type { ImpulseFormListInput } from "./impulse-form-list-input"
 
-class ImpulseFormListElement<TElement extends ImpulseForm> {
-  public constructor(
-    public readonly _element: TElement,
-    public readonly _initialIndex: Impulse<number>,
-  ) {}
-}
-
 export class ImpulseFormList<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TElement extends ImpulseForm = any,
 > extends ImpulseForm<ImpulseFormListParams<TElement>> {
   private readonly _initialsSize: Impulse<number>
 
-  private readonly _listElements: Impulse<
-    ReadonlyArray<ImpulseFormListElement<TElement>>
-  >
+  private readonly _elementToInitial = new WeakMap<TElement, Impulse<number>>()
+
+  private readonly _elements: Impulse<ReadonlyArray<TElement>>
 
   // derive the output elements so they are persistent
-  private readonly _elements = Impulse(
-    (scope) => {
-      const elements = this._listElements
-        .getValue(scope)
-        .map(({ _element }) => _element)
-
-      return takeWhile(elements, isDefined<TElement>)
-    },
-    {
-      compare: isShallowArrayEqual,
-    },
-  )
 
   public readonly _state: ImpulseFormListState<TElement>
 
@@ -57,47 +37,46 @@ export class ImpulseFormList<
 
     this._initialsSize = Impulse(untrack(_initial).length)
 
-    this._listElements = Impulse(
-      map(elements, (element, index) => {
-        const initialIndex = Impulse(index)
+    const _elements: Array<TElement> = []
 
-        const derivedInitial = Impulse(
-          (scope) => {
-            return this._initial
-              .getValue(scope)
-              .at(initialIndex.getValue(scope))!
-          },
+    for (const [index, element] of elements.entries()) {
+      const initialIndex = Impulse(index)
 
-          (next, scope) => {
-            this._initial.setValue((list) => {
-              return replaceElement(
-                list,
-                initialIndex.getValue(scope),
-                (current) => {
-                  if (element._state._isInputEqual(current, next, scope)) {
-                    return current
-                  }
+      const derivedInitial = Impulse(
+        (scope) => {
+          return this._initial.getValue(scope).at(initialIndex.getValue(scope))!
+        },
 
-                  return next
-                },
-              )
-            })
-          },
+        (next, scope) => {
+          this._initial.setValue((list) => {
+            return replaceElement(
+              list,
+              initialIndex.getValue(scope),
+              (current) => {
+                if (element._state._isInputEqual(current, next, scope)) {
+                  return current
+                }
 
-          {
-            compare: element._state._isInputEqual,
-          },
-        )
+                return next
+              },
+            )
+          })
+        },
 
-        return new ImpulseFormListElement(
-          this._parentOf(element, derivedInitial),
-          initialIndex,
-        )
-      }),
-      {
-        compare: isShallowArrayEqual,
-      },
-    )
+        {
+          compare: element._state._isInputEqual,
+        },
+      )
+
+      const child = this._parentOf(element, derivedInitial)
+
+      this._elementToInitial.set(child, initialIndex)
+      _elements.push(child)
+    }
+
+    this._elements = Impulse(_elements, {
+      compare: isShallowArrayEqual,
+    })
 
     this._state = new ImpulseFormListState(
       Impulse(
@@ -114,10 +93,7 @@ export class ImpulseFormList<
 
       Impulse(
         (scope) => {
-          return map(
-            this._listElements.getValue(scope),
-            ({ _element }) => _element._state,
-          )
+          return map(this._elements.getValue(scope), ({ _state }) => _state)
         },
         {
           compare: isShallowArrayEqual,
@@ -155,7 +131,27 @@ export class ImpulseFormList<
         ? setter(this._elements.getValue(scope), scope)
         : setter
 
-      const listElements = map(elements, (element, index) => {
+      this._initial.setValue((initial) => {
+        const newInitials = drop(elements, initial.length).map((element) =>
+          element._state._initial.getValue(scope),
+        )
+
+        if (newInitials.length === 0) {
+          return initial
+        }
+
+        return [...initial, ...newInitials]
+      })
+
+      const nextElements = map(elements, (element, index) => {
+        const existingIndex = this._elementToInitial.get(element)
+
+        if (existingIndex) {
+          existingIndex.setValue(index)
+
+          return element
+        }
+
         const initialIndex = Impulse(index)
 
         const derivedInitial = Impulse(
@@ -167,17 +163,17 @@ export class ImpulseFormList<
 
           (next, scope) => {
             this._initial.setValue((list) => {
-              return replaceElement(
-                list,
-                initialIndex.getValue(scope),
-                (current) => {
-                  if (element._state._isInputEqual(current, next, scope)) {
-                    return current
-                  }
+              const i = initialIndex.getValue(scope)
 
-                  return next
-                },
-              )
+              return replaceElement(list, i, (current) => {
+                this._initialsSize.setValue((x) => Math.max(x, i + 1))
+
+                if (element._state._isInputEqual(current, next, scope)) {
+                  return current
+                }
+
+                return next
+              })
             })
           },
 
@@ -186,13 +182,14 @@ export class ImpulseFormList<
           },
         )
 
-        return new ImpulseFormListElement(
-          this._parentOf(element, derivedInitial),
-          initialIndex,
-        )
+        const child = this._parentOf(element, derivedInitial)
+
+        this._elementToInitial.set(child, initialIndex)
+
+        return this._parentOf(element, derivedInitial)
       })
 
-      this._listElements.setValue(listElements)
+      this._elements.setValue(nextElements)
     })
   }
 }

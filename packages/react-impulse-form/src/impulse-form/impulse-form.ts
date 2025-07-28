@@ -80,6 +80,10 @@ export abstract class ImpulseForm<
     return child._childOf(this, initial)
   }
 
+  // protected _hasSameRootWith(another: ImpulseForm): boolean {
+  //   return this._root === another._root
+  // }
+
   public getOutput(scope: Scope): null | TParams["output.schema"]
   public getOutput<TResult>(
     scope: Scope,
