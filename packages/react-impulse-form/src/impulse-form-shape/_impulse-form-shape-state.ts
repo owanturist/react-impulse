@@ -6,6 +6,7 @@ import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
 import { isString } from "~/tools/is-string"
 import { isUndefined } from "~/tools/is-undefined"
+import { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
 import { values } from "~/tools/values"
@@ -80,6 +81,8 @@ export type ImpulseFormShapeStateFields<
 export class ImpulseFormShapeState<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
 > extends ImpulseFormState<ImpulseFormShapeParams<TFields>> {
+  public readonly _host = Lazy(() => new ImpulseFormShape(this))
+
   public readonly _forms: ImpulseFormShapeStateFields<TFields>
 
   public constructor(
@@ -105,14 +108,10 @@ export class ImpulseFormShapeState<
     return new ImpulseFormShapeState(parent, initial, this._forms, this._meta)
   }
 
-  public _wrap(): ImpulseFormShape<TFields> {
-    return new ImpulseFormShape(this)
-  }
-
   // I N I T I A L
 
-  public _getInitial(): ImpulseFormShapeInitial<TFields> {
-    const initial = mapValues(this._forms, (field) => field._getInitial())
+  public _extractInitial(): ImpulseFormShapeInitial<TFields> {
+    const initial = mapValues(this._forms, (field) => field._extractInitial())
 
     return initial as ImpulseFormShapeInitial<TFields>
   }

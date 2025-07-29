@@ -40,7 +40,7 @@ export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
 
   const state = new ImpulseFormShapeState(
     null,
-    mapValues(forms, ({ _state }) => _state._getInitial()),
+    mapValues(forms, ({ _state }) => _state._extractInitial()),
     mapValues(forms, ({ _state }) => _state),
     meta,
   )
@@ -67,5 +67,5 @@ export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
     }
   })
 
-  return state._wrap()
+  return state._host()
 }

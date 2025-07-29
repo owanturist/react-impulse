@@ -10,6 +10,8 @@ it("matches the type definition", ({ scope }) => {
     }),
   ])
 
+  expect(form.getElements(scope)).toHaveLength(1)
+
   expectTypeOf(form.getInitial).toEqualTypeOf<
     (scope: Scope) => ReadonlyArray<number>
   >()

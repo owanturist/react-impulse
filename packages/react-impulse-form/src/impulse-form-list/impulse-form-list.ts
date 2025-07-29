@@ -1,13 +1,14 @@
+import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isUndefined } from "~/tools/is-undefined"
 import { map } from "~/tools/map"
 
-import { Impulse, batch, untrack } from "../dependencies"
+import { Impulse, batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form"
 
-import { ImpulseFormList as ImpulseFormListImpl } from "./_impulse-form-list"
+import type { ImpulseFormList as ImpulseFormListImpl } from "./_impulse-form-list"
+import { ImpulseFormListState } from "./_impulse-form-list-state"
 import type { ImpulseFormListErrorSetter } from "./impulse-form-list-error-setter"
 import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"
-import { isImpulseFormListInputEqual } from "./impulse-form-list-input"
 import type { ImpulseFormListInputSetter } from "./impulse-form-list-input-setter"
 import type { ImpulseFormListValidateOnSetter } from "./impulse-form-list-validate-on-setter"
 
@@ -32,36 +33,40 @@ export function ImpulseFormList<TElement extends ImpulseForm>(
     error,
   }: ImpulseFormListOptions<TElement> = {},
 ): ImpulseFormList<TElement> {
-  const elementsInitials = Impulse(
-    map(elements, (element) => untrack(element._state._initial)),
-    {
-      compare: isImpulseFormListInputEqual,
-    },
-  )
+  const state = new ImpulseFormListState(
+    null,
 
-  const list = new ImpulseFormListImpl(null, elementsInitials, elements)
+    Impulse(
+      map(elements, ({ _state }) => _state._extractInitial()),
+      {
+        compare: isShallowArrayEqual,
+      },
+    ),
+
+    map(elements, ({ _state }) => _state),
+  )
 
   batch((scope) => {
     if (!isUndefined(input)) {
-      list._state._setInput(scope, input)
+      state._setInput(scope, input)
     }
 
     if (!isUndefined(initial)) {
-      list._state._setInitial(scope, initial)
+      state._setInitial(scope, initial)
     }
 
     if (!isUndefined(touched)) {
-      list._state._setTouched(scope, touched)
+      state._setTouched(scope, touched)
     }
 
     if (!isUndefined(validateOn)) {
-      list._state._setValidateOn(scope, validateOn)
+      state._setValidateOn(scope, validateOn)
     }
 
     if (!isUndefined(error)) {
-      list._state._setError(scope, error)
+      state._setError(scope, error)
     }
   })
 
-  return list
+  return state._host()
 }

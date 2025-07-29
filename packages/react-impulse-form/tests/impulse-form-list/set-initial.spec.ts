@@ -106,7 +106,7 @@ it("does not add initial when neither initial nor current value exist", ({
   ).toStrictEqual([3, 4])
 })
 
-it.skip("removes initials by shorter list", ({ scope }) => {
+it("removes initials by shorter list", ({ scope }) => {
   const form = ImpulseFormList([
     ImpulseFormUnit(0, { initial: 1 }),
     ImpulseFormUnit(1, { initial: 2 }),
@@ -134,7 +134,7 @@ it('do not remove initials by "undefined" in the list', ({ scope }) => {
   ).toStrictEqual([1, 4, 3])
 })
 
-it.skip("remove all initials by empty list", ({ scope }) => {
+it("remove all initials by empty list", ({ scope }) => {
   const form = ImpulseFormList([
     ImpulseFormUnit(0, { initial: 1 }),
     ImpulseFormUnit(1, { initial: 2 }),

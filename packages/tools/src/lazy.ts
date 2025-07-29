@@ -9,3 +9,5 @@ export function Lazy<T>(init: () => T): Lazy<T> {
     return value._current
   }
 }
+
+console.log("TODO verify it is necessary to have Lazy")

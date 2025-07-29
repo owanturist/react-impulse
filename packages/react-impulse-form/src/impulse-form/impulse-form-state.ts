@@ -1,4 +1,5 @@
 import { isNull } from "~/tools/is-null"
+import type { Lazy } from "~/tools/lazy"
 
 import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
 import { Emitter } from "../emitter"
@@ -11,6 +12,8 @@ export abstract class ImpulseFormState<
   TParams extends ImpulseFormParams = any,
 > {
   // TODO make those private/protected
+  public abstract readonly _host: Lazy<ImpulseForm<TParams>>
+
   public readonly _root: ImpulseFormState
 
   public constructor(parent: null | ImpulseFormState) {
@@ -22,11 +25,13 @@ export abstract class ImpulseFormState<
     initial: TParams["initial"],
   ): ImpulseFormState<TParams>
 
-  public abstract _wrap(): ImpulseForm<TParams>
+  public _hasSameRoot(another: ImpulseFormState): boolean {
+    return this._root === another._root
+  }
 
   // I N I T I A L
 
-  public abstract _getInitial(): TParams["initial"]
+  public abstract _extractInitial(): TParams["initial"]
 
   public abstract readonly _initial: ReadonlyImpulse<TParams["input.schema"]>
   public abstract _setInitial(

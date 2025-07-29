@@ -2,6 +2,7 @@ import { identity } from "~/tools/identity"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
 import { isUndefined } from "~/tools/is-undefined"
+import { Lazy } from "~/tools/lazy"
 import { resolveSetter } from "~/tools/setter"
 
 import { type Compare, Impulse, type Scope, batch } from "../dependencies"
@@ -31,6 +32,8 @@ export class ImpulseFormUnitState<
   TError,
   TOutput,
 > extends ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>> {
+  public readonly _host = Lazy(() => new ImpulseFormUnit(this))
+
   public constructor(
     parent: null | ImpulseFormState,
     public readonly _initial: Impulse<TInput>,
@@ -68,10 +71,6 @@ export class ImpulseFormUnitState<
       this._isOutputEqual,
       this._isErrorEqual,
     )
-  }
-
-  public _wrap(): ImpulseFormUnit<TInput, TError, TOutput> {
-    return new ImpulseFormUnit(this)
   }
 
   // R E S U L T
@@ -117,7 +116,7 @@ export class ImpulseFormUnitState<
 
   // I N I T I A L
 
-  public _getInitial(): Impulse<TInput> {
+  public _extractInitial(): Impulse<TInput> {
     return this._initial.clone()
   }
 

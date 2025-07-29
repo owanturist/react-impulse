@@ -69,6 +69,7 @@ it("attach the new elements to the form root", ({ scope }) => {
   void form.submit()
 
   expect(form.getSubmitCount(scope)).toBe(1)
+  expect(form.getElements(scope)).toHaveLength(4)
   expect(form.getElements(scope).at(0)!.getSubmitCount(scope)).toBe(1)
   expect(form.getElements(scope).at(3)!.getSubmitCount(scope)).toBe(1)
 })

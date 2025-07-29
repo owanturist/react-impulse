@@ -228,7 +228,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       isInputEqual,
       isOutputEqual,
       isErrorEqual,
-    )._wrap()
+    )._host()
   }
 
   const isErrorEqual = createUnionCompare<null, TError>(
@@ -258,7 +258,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       isInputEqual,
       isOutputEqual,
       isErrorEqual,
-    )._wrap()
+    )._host()
   }
 
   if (hasProperty(options, "transform")) {
@@ -280,7 +280,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       isInputEqual,
       isOutputEqual,
       isErrorEqual,
-    )._wrap()
+    )._host()
   }
 
   return new ImpulseFormUnitState(
@@ -297,5 +297,5 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     isInputEqual,
     createUnionCompare(isNull, isInputEqual),
     isErrorEqual,
-  )._wrap()
+  )._host()
 }

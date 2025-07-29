@@ -1,18 +1,25 @@
+import { drop } from "~/tools/drop"
 import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
+import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isString } from "~/tools/is-string"
 import { isUndefined } from "~/tools/is-undefined"
+import { Lazy } from "~/tools/lazy"
+import { map } from "~/tools/map"
+import { map2 } from "~/tools/map2"
 
-import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
+import { Impulse, type Scope, untrack } from "../dependencies"
 import type { GetImpulseFormParams } from "../impulse-form/get-impulse-form-params"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import {
   type ImpulseFormChild,
   ImpulseFormState,
 } from "../impulse-form/impulse-form-state"
 import { VALIDATE_ON_TOUCH } from "../validate-strategy"
 
+import { ImpulseFormList } from "./_impulse-form-list"
 import type { ImpulseFormListParams } from "./_impulse-form-list-params"
 import {
   type ImpulseFormListError,
@@ -32,6 +39,10 @@ import {
   type ImpulseFormListFlagVerbose,
   isImpulseFormListFlagVerboseEqual,
 } from "./impulse-form-list-flag-verbose"
+import {
+  type ImpulseFormListInitial,
+  isImpulseFormListInitialEqual,
+} from "./impulse-form-list-initial"
 import {
   type ImpulseFormListInput,
   isImpulseFormListInputEqual,
@@ -55,14 +66,94 @@ import {
 export class ImpulseFormListState<
   TElement extends ImpulseForm = ImpulseForm,
 > extends ImpulseFormState<ImpulseFormListParams<TElement>> {
+  public readonly _host = Lazy(() => new ImpulseFormList(this))
+
+  private readonly _elements: Impulse<
+    ReadonlyArray<ImpulseFormState<GetImpulseFormParams<TElement>>>
+  >
+
+  private readonly _initialElements: Impulse<
+    ReadonlyArray<ImpulseFormState<GetImpulseFormParams<TElement>>>
+  >
+
   public constructor(
-    public readonly _initial: ReadonlyImpulse<ImpulseFormListInput<TElement>>,
-    private readonly _elements: ReadonlyImpulse<
-      ReadonlyArray<ImpulseFormState<GetImpulseFormParams<TElement>>>
-    >,
+    parent: null | ImpulseFormState,
+    initial: ImpulseFormListInitial<TElement>,
+    elements: ReadonlyArray<ImpulseFormState<GetImpulseFormParams<TElement>>>,
   ) {
-    super()
+    super(parent)
+
+    this._elements = Impulse(
+      map2(elements, untrack(initial), (el, elInitial) => {
+        return el._childOf(this, elInitial)
+      }),
+      {
+        compare: isShallowArrayEqual,
+      },
+    )
+
+    this._initialElements = Impulse(
+      map2(elements, untrack(initial), (el, elInitial) => {
+        return el._childOf(null, elInitial)
+      }),
+      {
+        compare: isShallowArrayEqual,
+      },
+    )
   }
+
+  public _childOf(
+    parent: ImpulseFormState,
+    initial: ImpulseFormListInitial<TElement>,
+  ): ImpulseFormListState<TElement> {
+    return new ImpulseFormListState(parent, initial, untrack(this._elements))
+  }
+
+  public _extractInitial(): ImpulseFormListInitial<TElement> {
+    const initialElements = untrack(this._initialElements)
+
+    return Impulse(
+      map(initialElements, (element) => element._extractInitial()),
+      {
+        compare: isImpulseFormListInitialEqual,
+      },
+    )
+  }
+
+  public _getElements(scope: Scope): ReadonlyArray<TElement> {
+    return map(
+      this._elements.getValue(scope),
+      ({ _host }) => _host() as TElement,
+    )
+  }
+
+  public setElements(elements: ReadonlyArray<TElement>): void {
+    const nextElements = map(elements, ({ _state }) => {
+      if (this._hasSameRoot(_state)) {
+        return _state
+      }
+
+      const initial = _state._extractInitial()
+
+      return _state._childOf(this, initial)
+    })
+
+    this._elements.setValue(nextElements)
+  }
+
+  public readonly _initial = Impulse(
+    (scope) => {
+      const initial = this._initialElements
+        .getValue(scope)
+        .map(({ _initial }) => _initial.getValue(scope))
+
+      return initial as ImpulseFormListInput<TElement>
+    },
+
+    {
+      compare: isImpulseFormListInputEqual,
+    },
+  )
 
   public _setInitial(
     scope: Scope,
@@ -72,12 +163,23 @@ export class ImpulseFormListState<
       ? setter(this._initial.getValue(scope), this._input.getValue(scope))
       : setter
 
-    this._elements.getValue(scope).forEach((element, index) => {
-      const initial = setters.at(index)
+    this._initialElements.setValue((initialElements) => {
+      return map2(
+        [
+          ...initialElements,
+          ...drop(this._elements.getValue(scope), initialElements.length),
+        ],
 
-      if (!isUndefined(initial)) {
-        element._setInitial(scope, initial)
-      }
+        setters,
+
+        (element, initial) => {
+          if (!isUndefined(initial)) {
+            element._setInitial(scope, initial)
+          }
+
+          return element
+        },
+      )
     })
   }
 
@@ -476,9 +578,11 @@ export class ImpulseFormListState<
     })
   }
 
-  public _getChildren(
+  public _getChildren<TChildParams extends ImpulseFormParams>(
     scope: Scope,
-  ): ReadonlyArray<ImpulseFormChild<ImpulseFormListParams<TElement>>> {
+  ): ReadonlyArray<
+    ImpulseFormChild<TChildParams, ImpulseFormListParams<TElement>>
+  > {
     return this._elements.getValue(scope).map((element, index) => ({
       _state: element,
       _mapToChild: (output) => output.at(index),

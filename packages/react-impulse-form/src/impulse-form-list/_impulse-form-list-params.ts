@@ -6,6 +6,7 @@ import type { ImpulseFormListErrorVerbose } from "./impulse-form-list-error-verb
 import type { ImpulseFormListFlag } from "./impulse-form-list-flag"
 import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"
 import type { ImpulseFormListFlagVerbose } from "./impulse-form-list-flag-verbose"
+import type { ImpulseFormListInitial } from "./impulse-form-list-initial"
 import type { ImpulseFormListInput } from "./impulse-form-list-input"
 import type { ImpulseFormListInputSetter } from "./impulse-form-list-input-setter"
 import type { ImpulseFormListOutput } from "./impulse-form-list-output"
@@ -17,6 +18,8 @@ import type { ImpulseFormListValidateOnVerbose } from "./impulse-form-list-valid
 export interface ImpulseFormListParams<
   TElement extends ImpulseForm = ImpulseForm,
 > extends ImpulseFormParams {
+  readonly initial: ImpulseFormListInitial<TElement>
+
   "input.schema": ImpulseFormListInput<TElement>
   "input.setter": ImpulseFormListInputSetter<TElement>
 
