@@ -55,8 +55,6 @@ import {
 export class ImpulseFormListState<
   TElement extends ImpulseForm = ImpulseForm,
 > extends ImpulseFormState<ImpulseFormListParams<TElement>> {
-  public override readonly _isInputEqual = isImpulseFormListInputEqual
-
   public constructor(
     public readonly _initial: ReadonlyImpulse<ImpulseFormListInput<TElement>>,
     private readonly _elements: ReadonlyImpulse<

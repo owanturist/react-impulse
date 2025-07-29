@@ -7,6 +7,7 @@ import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 import type { ImpulseFormShapeFlag } from "./impulse-form-shape-flag"
 import type { ImpulseFormShapeFlagSetter } from "./impulse-form-shape-flag-setter"
 import type { ImpulseFormShapeFlagVerbose } from "./impulse-form-shape-flag-verbose"
+import type { ImpulseFormShapeInitial } from "./impulse-form-shape-initial"
 import type { ImpulseFormShapeInput } from "./impulse-form-shape-input"
 import type { ImpulseFormShapeInputSetter } from "./impulse-form-shape-input-setter"
 import type { ImpulseFormShapeOutput } from "./impulse-form-shape-output"
@@ -18,6 +19,8 @@ import type { ImpulseFormShapeValidateOnVerbose } from "./impulse-form-shape-val
 export interface ImpulseFormShapeParams<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
 > extends ImpulseFormParams {
+  readonly initial: ImpulseFormShapeInitial<TFields>
+
   readonly "input.schema": ImpulseFormShapeInput<TFields>
   readonly "input.setter": ImpulseFormShapeInputSetter<TFields>
 

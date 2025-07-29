@@ -117,6 +117,10 @@ export class ImpulseFormUnitState<
 
   // I N I T I A L
 
+  public _getInitial(): Impulse<TInput> {
+    return this._initial.clone()
+  }
+
   public _setInitial(
     scope: Scope,
     setter: ImpulseFormUnitInputSetter<TInput>,
