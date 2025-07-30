@@ -57,10 +57,10 @@ describe("types", () => {
       .toEqualTypeOf<undefined | InitialSetter>()
   })
 
-  it("matches schema type for getInitial(scope)", () => {
-    expectTypeOf(form.getInitial).toEqualTypeOf<
-      (scope: Scope) => InitialSchema
-    >()
+  it("matches schema type for getInitial(scope)", ({ scope }) => {
+    // eslint-disable-next-line vitest/valid-expect
+    expectTypeOf(form.getInitial).parameters.toEqualTypeOf<[Scope]>()
+    expectTypeOf(form.getInitial(scope)).toEqualTypeOf<InitialSchema>()
   })
 
   it("matches setter type for setInitial(setter)", () => {

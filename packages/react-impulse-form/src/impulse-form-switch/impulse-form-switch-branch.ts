@@ -1,4 +1,4 @@
-export interface ImpulseFormSwitchBranch<TKind extends string, TValue> {
+export interface ImpulseFormSwitchBranch<TKind, TValue> {
   kind: TKind
   value: TValue
 }
