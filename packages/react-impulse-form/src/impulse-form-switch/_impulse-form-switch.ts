@@ -1,12 +1,14 @@
 import { forEntries } from "~/tools/for-entries"
 import { isFunction } from "~/tools/is-function"
+import { isNull } from "~/tools/is-null"
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
 import { isUndefined } from "~/tools/is-undefined"
 import { mapValues } from "~/tools/map-values"
 import { params } from "~/tools/params"
+import type { Setter } from "~/tools/setter"
 
-import { type Scope, batch } from "../dependencies"
+import { type Impulse, type Scope, batch } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormSwitchError } from "./_impulse-form-switch-error"
@@ -32,7 +34,7 @@ export class ImpulseFormSwitch<
 
   public constructor(
     root: null | ImpulseForm,
-    active: keyof TBranches,
+    private readonly active: Impulse<keyof TBranches>,
     branches: TBranches,
   ) {
     super(root)
@@ -68,6 +70,14 @@ export class ImpulseFormSwitch<
     ) => TResult,
   ): TResult {}
 
+  public getActive(scope: Scope): keyof TBranches {
+    return this.active.getValue(scope)
+  }
+
+  public setActive(active: Setter<keyof TBranches>): void {
+    this.active.setValue(active)
+  }
+
   public getError(scope: Scope): ImpulseFormSwitchError<TBranches>
   public getError<TResult>(
     scope: Scope,
@@ -85,6 +95,7 @@ export class ImpulseFormSwitch<
   ): TResult {}
 
   public setError(setter: ImpulseFormSwitchErrorSetter<TBranches>): void {}
+
   public isValidated(scope: Scope): boolean
 
   public isValidated<TResult>(
@@ -158,7 +169,24 @@ export class ImpulseFormSwitch<
       concise: null | ImpulseFormSwitchOutput<TBranches>,
       verbose: ImpulseFormSwitchOutputVerbose<TBranches>,
     ) => TResult = params._first as typeof select,
-  ): TResult {}
+  ): TResult {
+    const kind = this.getActive(scope)
+    const [conciseOutput, verboseOutput] = this.branches[kind].getOutput(
+      scope,
+      params,
+    )
+
+    const concise = isNull(conciseOutput)
+      ? null
+      : { kind, value: conciseOutput }
+
+    const verbose = { kind, value: verboseOutput }
+
+    return select(
+      concise as null | ImpulseFormSwitchOutput<TBranches>,
+      verbose as ImpulseFormSwitchOutputVerbose<TBranches>,
+    )
+  }
 
   public getInput(scope: Scope): ImpulseFormSwitchInput<TBranches> {
     const input = mapValues(this.branches, (branch) => branch.getInput(scope))

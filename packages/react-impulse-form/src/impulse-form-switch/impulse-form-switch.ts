@@ -1,6 +1,6 @@
 import { isUndefined } from "~/tools/is-undefined"
 
-import { batch } from "../dependencies"
+import { Impulse, batch } from "../dependencies"
 
 import { ImpulseFormSwitch as ImpulseFormSwitchImpl } from "./_impulse-form-switch"
 import type { ImpulseFormSwitchErrorSetter } from "./_impulse-form-switch-error-setter"
@@ -33,7 +33,7 @@ export function ImpulseFormSwitch<TBranches extends ImpulseFormSwitchBranches>(
     error,
   }: ImpulseFormSwitchOptions<TBranches> = {},
 ): ImpulseFormSwitch<TBranches> {
-  const switcher = new ImpulseFormSwitchImpl(null, active, branches)
+  const switcher = new ImpulseFormSwitchImpl(null, Impulse(active), branches)
 
   batch(() => {
     if (!isUndefined(touched)) {
