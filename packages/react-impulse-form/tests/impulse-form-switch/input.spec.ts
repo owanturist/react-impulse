@@ -57,8 +57,10 @@ describe("types", () => {
       .toEqualTypeOf<undefined | InputSetter>()
   })
 
-  it("matches schema type for getInput(scope)", () => {
-    expectTypeOf(form.getInput).toEqualTypeOf<(scope: Scope) => InputSchema>()
+  it("matches schema type for getInput(scope)", ({ scope }) => {
+    // eslint-disable-next-line vitest/valid-expect
+    expectTypeOf(form.getInput).parameters.toEqualTypeOf<[Scope]>()
+    expectTypeOf(form.getInput(scope)).toEqualTypeOf<InputSchema>()
   })
 
   it("matches setter type for setInput(setter)", () => {

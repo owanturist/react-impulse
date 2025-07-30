@@ -1,6 +1,13 @@
-import type { GetImpulseFormSwitchParam } from "./_get-impulse-form-switch-param"
+import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
+
+import type { ImpulseFormSwitchBranch } from "./impulse-form-switch-branch"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
 export type ImpulseFormSwitchOutputVerbose<
   TBranches extends ImpulseFormSwitchBranches,
-> = GetImpulseFormSwitchParam<TBranches, "output.schema.verbose">
+> = {
+  [TBranch in keyof TBranches]: ImpulseFormSwitchBranch<
+    TBranch,
+    GetImpulseFormParam<TBranches[TBranch], "output.schema.verbose">
+  >
+}[keyof TBranches]
