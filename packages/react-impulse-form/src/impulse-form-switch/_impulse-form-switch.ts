@@ -1,9 +1,12 @@
+import { forEntries } from "~/tools/for-entries"
+import { isFunction } from "~/tools/is-function"
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
+import { isUndefined } from "~/tools/is-undefined"
 import { mapValues } from "~/tools/map-values"
 import { params } from "~/tools/params"
 
-import { batch, type Scope } from "../dependencies"
+import { type Scope, batch } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormSwitchError } from "./_impulse-form-switch-error"
@@ -21,8 +24,6 @@ import type { ImpulseFormSwitchValidateOn } from "./_impulse-form-switch-validat
 import type { ImpulseFormSwitchValidateOnSetter } from "./_impulse-form-switch-validate-on-setter"
 import type { ImpulseFormSwitchValidateOnVerbose } from "./_impulse-form-switch-validate-on-verbose"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
-import { isFunction } from "~/tools/is-function"
-import { forEntries } from "~/tools/for-entries"
 
 export class ImpulseFormSwitch<
   TBranches extends ImpulseFormSwitchBranches = ImpulseFormSwitchBranches,
@@ -171,11 +172,37 @@ export class ImpulseFormSwitch<
         ? setter(this.getInput(scope), this.getInitial(scope))
         : setter
 
-      forEntries(this.branches, (branch, kind) => {})
+      forEntries(this.branches, (branch, kind) => {
+        const branchInput = input[kind]
+
+        if (!isUndefined(branchInput)) {
+          branch.setInput(branchInput)
+        }
+      })
     })
   }
 
-  public getInitial(scope: Scope): ImpulseFormSwitchInput<TBranches> {}
+  public getInitial(scope: Scope): ImpulseFormSwitchInput<TBranches> {
+    const initial = mapValues(this.branches, (branch) =>
+      branch.getInitial(scope),
+    )
 
-  public setInitial(setter: ImpulseFormSwitchInputSetter<TBranches>): void {}
+    return initial as ImpulseFormSwitchInput<TBranches>
+  }
+
+  public setInitial(setter: ImpulseFormSwitchInputSetter<TBranches>): void {
+    batch((scope) => {
+      const initial = isFunction(setter)
+        ? setter(this.getInitial(scope), this.getInput(scope))
+        : setter
+
+      forEntries(this.branches, (branch, kind) => {
+        const branchInitial = initial[kind]
+
+        if (!isUndefined(branchInitial)) {
+          branch.setInitial(branchInitial)
+        }
+      })
+    })
+  }
 }
