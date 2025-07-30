@@ -1,13 +1,13 @@
-import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { ImpulseFormShapeOutputVerbose } from "../impulse-form-shape"
 
-import type { ImpulseFormSwitchBranch } from "./impulse-form-switch-branch"
+import type { ImpulseFormSwitchKindParams } from "./_impulse-form-switch-kind-params"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
 export type ImpulseFormSwitchOutputVerbose<
+  TKind extends ImpulseForm<ImpulseFormSwitchKindParams<keyof TBranches>>,
   TBranches extends ImpulseFormSwitchBranches,
-> = {
-  [TBranch in keyof TBranches]: ImpulseFormSwitchBranch<
-    TBranch,
-    GetImpulseFormParam<TBranches[TBranch], "output.schema.verbose">
-  >
-}[keyof TBranches]
+> = ImpulseFormShapeOutputVerbose<{
+  active: TKind
+  branches: ImpulseFormShapeOutputVerbose<TBranches>
+}>

@@ -1,12 +1,16 @@
-import type { Setter } from "~/tools/setter"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type {
+  ImpulseFormShape,
+  ImpulseFormShapeInputSetter,
+} from "../impulse-form-shape"
 
-import type { GetImpulseFormSwitchParam } from "./_get-impulse-form-switch-param"
-import type { ImpulseFormSwitchInput } from "./_impulse-form-switch-input"
+import type { ImpulseFormSwitchKindParams } from "./_impulse-form-switch-kind-params"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
 export type ImpulseFormSwitchInputSetter<
+  TKind extends ImpulseForm<ImpulseFormSwitchKindParams<keyof TBranches>>,
   TBranches extends ImpulseFormSwitchBranches,
-> = Setter<
-  Partial<GetImpulseFormSwitchParam<TBranches, "input.setter">>,
-  [ImpulseFormSwitchInput<TBranches>, ImpulseFormSwitchInput<TBranches>]
->
+> = ImpulseFormShapeInputSetter<{
+  active: TKind
+  branches: ImpulseFormShape<TBranches>
+}>
