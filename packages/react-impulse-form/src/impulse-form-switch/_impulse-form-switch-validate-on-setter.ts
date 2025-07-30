@@ -4,12 +4,12 @@ import type { ValidateStrategy } from "../validate-strategy"
 
 import type { GetImpulseFormSwitchParam } from "./_get-impulse-form-switch-param"
 import type { ImpulseFormSwitchValidateOnVerbose } from "./_impulse-form-switch-validate-on-verbose"
-import type { ImpulseFormSwitchCases } from "./impulse-form-switch-cases"
+import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
 export type ImpulseFormSwitchValidateOnSetter<
-  TCases extends ImpulseFormSwitchCases,
+  TBranches extends ImpulseFormSwitchBranches,
 > = Setter<
   | ValidateStrategy
-  | Partial<GetImpulseFormSwitchParam<TCases, "validateOn.setter">>,
-  [ImpulseFormSwitchValidateOnVerbose<TCases>]
+  | Partial<GetImpulseFormSwitchParam<TBranches, "validateOn.setter">>,
+  [ImpulseFormSwitchValidateOnVerbose<TBranches>]
 >

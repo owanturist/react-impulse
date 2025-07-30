@@ -13,25 +13,26 @@ import type { ImpulseFormSwitchOutputVerbose } from "./_impulse-form-switch-outp
 import type { ImpulseFormSwitchValidateOn } from "./_impulse-form-switch-validate-on"
 import type { ImpulseFormSwitchValidateOnSetter } from "./_impulse-form-switch-validate-on-setter"
 import type { ImpulseFormSwitchValidateOnVerbose } from "./_impulse-form-switch-validate-on-verbose"
-import type { ImpulseFormSwitchCases } from "./impulse-form-switch-cases"
+import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
-export interface ImpulseFormSwitchParams<TCases extends ImpulseFormSwitchCases>
-  extends ImpulseFormParams {
-  "input.schema": ImpulseFormSwitchInput<TCases>
-  "input.setter": ImpulseFormSwitchInputSetter<TCases>
+export interface ImpulseFormSwitchParams<
+  TBranches extends ImpulseFormSwitchBranches,
+> extends ImpulseFormParams {
+  "input.schema": ImpulseFormSwitchInput<TBranches>
+  "input.setter": ImpulseFormSwitchInputSetter<TBranches>
 
-  "output.schema": ImpulseFormSwitchOutput<TCases>
-  "output.schema.verbose": ImpulseFormSwitchOutputVerbose<TCases>
+  "output.schema": ImpulseFormSwitchOutput<TBranches>
+  "output.schema.verbose": ImpulseFormSwitchOutputVerbose<TBranches>
 
-  "flag.setter": ImpulseFormSwitchFlagSetter<TCases>
-  "flag.schema": ImpulseFormSwitchFlag<TCases>
-  "flag.schema.verbose": ImpulseFormSwitchFlagVerbose<TCases>
+  "flag.setter": ImpulseFormSwitchFlagSetter<TBranches>
+  "flag.schema": ImpulseFormSwitchFlag<TBranches>
+  "flag.schema.verbose": ImpulseFormSwitchFlagVerbose<TBranches>
 
-  "validateOn.setter": ImpulseFormSwitchValidateOnSetter<TCases>
-  "validateOn.schema": ImpulseFormSwitchValidateOn<TCases>
-  "validateOn.schema.verbose": ImpulseFormSwitchValidateOnVerbose<TCases>
+  "validateOn.setter": ImpulseFormSwitchValidateOnSetter<TBranches>
+  "validateOn.schema": ImpulseFormSwitchValidateOn<TBranches>
+  "validateOn.schema.verbose": ImpulseFormSwitchValidateOnVerbose<TBranches>
 
-  "error.setter": ImpulseFormSwitchErrorSetter<TCases>
-  "error.schema": ImpulseFormSwitchError<TCases>
-  "error.schema.verbose": ImpulseFormSwitchErrorVerbose<TCases>
+  "error.setter": ImpulseFormSwitchErrorSetter<TBranches>
+  "error.schema": ImpulseFormSwitchError<TBranches>
+  "error.schema.verbose": ImpulseFormSwitchErrorVerbose<TBranches>
 }

@@ -3,11 +3,14 @@ import type { Compute } from "~/tools/compute"
 import type { ImpulseFormParams } from "../impulse-form"
 import type { GetImpulseFormParam } from "../impulse-form"
 
-import type { ImpulseFormSwitchCases } from "./impulse-form-switch-cases"
+import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
 export type GetImpulseFormSwitchParam<
-  TCases extends ImpulseFormSwitchCases,
+  TBranches extends ImpulseFormSwitchBranches,
   TKey extends keyof ImpulseFormParams,
 > = Compute<{
-  readonly [TCase in keyof TCases]: GetImpulseFormParam<TCases[TCase], TKey>
+  readonly [TBranch in keyof TBranches]: GetImpulseFormParam<
+    TBranches[TBranch],
+    TKey
+  >
 }>

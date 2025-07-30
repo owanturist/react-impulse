@@ -1,6 +1,5 @@
 import type { GetImpulseFormSwitchParam } from "./_get-impulse-form-switch-param"
-import type { ImpulseFormSwitchCases } from "./impulse-form-switch-cases"
+import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
-export type ImpulseFormSwitchFlag<TCases extends ImpulseFormSwitchCases> =
-  | boolean
-  | GetImpulseFormSwitchParam<TCases, "flag.schema">
+export type ImpulseFormSwitchFlag<TBranches extends ImpulseFormSwitchBranches> =
+  boolean | GetImpulseFormSwitchParam<TBranches, "flag.schema">

@@ -1,6 +1,6 @@
 import type { GetImpulseFormSwitchParam } from "./_get-impulse-form-switch-param"
-import type { ImpulseFormSwitchCases } from "./impulse-form-switch-cases"
+import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
 export type ImpulseFormSwitchFlagVerbose<
-  TCases extends ImpulseFormSwitchCases,
-> = GetImpulseFormSwitchParam<TCases, "flag.schema.verbose">
+  TBranches extends ImpulseFormSwitchBranches,
+> = GetImpulseFormSwitchParam<TBranches, "flag.schema.verbose">
