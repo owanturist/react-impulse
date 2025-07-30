@@ -7,10 +7,10 @@ import { isUndefined } from "~/tools/is-undefined"
 import { keys } from "~/tools/keys"
 import { mapValues } from "~/tools/map-values"
 import { params } from "~/tools/params"
-import type { Setter } from "~/tools/setter"
 
-import { type Impulse, type Scope, batch } from "../dependencies"
+import { type Scope, batch } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
+import { ImpulseFormShape } from "../impulse-form-shape"
 
 import type { ImpulseFormSwitchError } from "./_impulse-form-switch-error"
 import type { ImpulseFormSwitchErrorSetter } from "./_impulse-form-switch-error-setter"
@@ -20,6 +20,7 @@ import type { ImpulseFormSwitchFlagSetter } from "./_impulse-form-switch-flag-se
 import type { ImpulseFormSwitchFlagVerbose } from "./_impulse-form-switch-flag-verbose"
 import type { ImpulseFormSwitchInput } from "./_impulse-form-switch-input"
 import type { ImpulseFormSwitchInputSetter } from "./_impulse-form-switch-input-setter"
+import type { ImpulseFormSwitchKindParams } from "./_impulse-form-switch-kind-params"
 import type { ImpulseFormSwitchOutput } from "./_impulse-form-switch-output"
 import type { ImpulseFormSwitchOutputVerbose } from "./_impulse-form-switch-output-verbose"
 import type { ImpulseFormSwitchParams } from "./_impulse-form-switch-params"
@@ -29,19 +30,30 @@ import type { ImpulseFormSwitchValidateOnVerbose } from "./_impulse-form-switch-
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
 export class ImpulseFormSwitch<
+  TKind extends ImpulseForm<ImpulseFormSwitchKindParams<keyof TBranches>>,
   TBranches extends ImpulseFormSwitchBranches = ImpulseFormSwitchBranches,
-> extends ImpulseForm<ImpulseFormSwitchParams<TBranches>> {
-  public readonly branches: Readonly<TBranches>
+> extends ImpulseForm<ImpulseFormSwitchParams<TKind, TBranches>> {
+  public readonly active: TKind
+
+  private readonly _branches: ImpulseFormShape<TBranches>
+
+  public get branches(): Readonly<TBranches> {
+    return this._branches.fields
+  }
 
   public constructor(
     root: null | ImpulseForm,
-    private readonly active: Impulse<keyof TBranches>,
+    active: TKind,
     branches: TBranches,
   ) {
     super(root)
 
-    this.branches = mapValues(branches, (child) =>
-      ImpulseForm._childOf(this, child),
+    this.active = ImpulseForm._childOf(this, active)
+
+    // TODO continue from here do not use ImpulseFormShape here, because it will not work with branches
+    this._branches = ImpulseForm._childOf(
+      this,
+      ImpulseFormShape<TBranches>(branches),
     )
   }
 
@@ -70,7 +82,7 @@ export class ImpulseFormSwitch<
       dirty: ImpulseFormSwitchFlagVerbose<TBranches>,
     ) => TResult,
   ): TResult {
-    const kinds = select ? keys(this.branches) : [this.getActive(scope)]
+    const kinds = select ? keys(this._branches) : [this.active.getValue(scope)]
 
     let isAllDirty = true
     let isNoneDirty = true
@@ -80,7 +92,7 @@ export class ImpulseFormSwitch<
     const isDirtyDirty = {} as Record<keyof TBranches, unknown>
 
     for (const key of kinds) {
-      const field = this.branches[key]
+      const field = this._branches[key]
 
       const [concise, verbose, dirty] = ImpulseForm._isDirty(
         scope,
@@ -108,14 +120,6 @@ export class ImpulseFormSwitch<
       isDirtyVerbose as unknown as ImpulseFormSwitchFlagVerbose<TBranches>,
       isDirtyDirty as unknown as ImpulseFormSwitchFlagVerbose<TBranches>,
     )
-  }
-
-  public getActive(scope: Scope): keyof TBranches {
-    return this.active.getValue(scope)
-  }
-
-  public setActive(active: Setter<keyof TBranches>): void {
-    this.active.setValue(active)
   }
 
   public getError(scope: Scope): ImpulseFormSwitchError<TBranches>
@@ -195,82 +199,89 @@ export class ImpulseFormSwitch<
     resetter: ImpulseFormSwitchInputSetter<TBranches> = params._first as typeof resetter,
   ): void {}
 
-  public getOutput(scope: Scope): null | ImpulseFormSwitchOutput<TBranches>
+  public getOutput(
+    scope: Scope,
+  ): null | ImpulseFormSwitchOutput<TKind, TBranches>
   public getOutput<TResult>(
     scope: Scope,
     select: (
-      concise: null | ImpulseFormSwitchOutput<TBranches>,
-      verbose: ImpulseFormSwitchOutputVerbose<TBranches>,
+      concise: null | ImpulseFormSwitchOutput<TKind, TBranches>,
+      verbose: ImpulseFormSwitchOutputVerbose<TKind, TBranches>,
     ) => TResult,
   ): TResult
-  public getOutput<TResult = null | ImpulseFormSwitchOutput<TBranches>>(
+  public getOutput<TResult = null | ImpulseFormSwitchOutput<TKind, TBranches>>(
     scope: Scope,
     select: (
-      concise: null | ImpulseFormSwitchOutput<TBranches>,
-      verbose: ImpulseFormSwitchOutputVerbose<TBranches>,
+      concise: null | ImpulseFormSwitchOutput<TKind, TBranches>,
+      verbose: ImpulseFormSwitchOutputVerbose<TKind, TBranches>,
     ) => TResult = params._first as typeof select,
   ): TResult {
-    const kind = this.getActive(scope)
-    const [conciseOutput, verboseOutput] = this.branches[kind].getOutput(
+    const kind = this.active.getOutput(scope)
+
+    const [conciseBranches, verboseBranches] = this._branches.getOutput(
       scope,
       params,
     )
 
-    const concise = isNull(conciseOutput)
+    const conciseBranchValue =
+      isNull(kind) || isNull(conciseBranches) ? null : conciseBranches[kind]
+
+    const concise = isNull(conciseBranchValue)
       ? null
-      : { kind, value: conciseOutput }
+      : { kind, value: conciseBranches }
 
-    const verbose = { kind, value: verboseOutput }
+    const verbose = { kind, value: verboseBranches }
 
-    return select(
-      concise as null | ImpulseFormSwitchOutput<TBranches>,
-      verbose as ImpulseFormSwitchOutputVerbose<TBranches>,
-    )
+    return select(concise, verbose)
   }
 
-  public getInput(scope: Scope): ImpulseFormSwitchInput<TBranches> {
-    const input = mapValues(this.branches, (branch) => branch.getInput(scope))
-
-    return input as ImpulseFormSwitchInput<TBranches>
+  public getInput(scope: Scope): ImpulseFormSwitchInput<TKind, TBranches> {
+    return {
+      active: this.active.getInput(scope),
+      branches: this._branches.getInput(scope),
+    }
   }
 
-  public setInput(setter: ImpulseFormSwitchInputSetter<TBranches>): void {
+  public setInput(
+    setter: ImpulseFormSwitchInputSetter<TKind, TBranches>,
+  ): void {
     batch((scope) => {
-      const input = isFunction(setter)
+      const { active, branches } = isFunction(setter)
         ? setter(this.getInput(scope), this.getInitial(scope))
         : setter
 
-      forEntries(this.branches, (branch, kind) => {
-        const branchInput = input[kind]
+      if (!isUndefined(active)) {
+        this.active.setInput(active)
+      }
 
-        if (!isUndefined(branchInput)) {
-          branch.setInput(branchInput)
-        }
-      })
+      if (!isUndefined(branches)) {
+        this._branches.setInput(branches)
+      }
     })
   }
 
-  public getInitial(scope: Scope): ImpulseFormSwitchInput<TBranches> {
-    const initial = mapValues(this.branches, (branch) =>
-      branch.getInitial(scope),
-    )
-
-    return initial as ImpulseFormSwitchInput<TBranches>
+  public getInitial(scope: Scope): ImpulseFormSwitchInput<TKind, TBranches> {
+    return {
+      active: this.active.getInitial(scope),
+      branches: this._branches.getInitial(scope),
+    }
   }
 
-  public setInitial(setter: ImpulseFormSwitchInputSetter<TBranches>): void {
+  public setInitial(
+    setter: ImpulseFormSwitchInputSetter<TKind, TBranches>,
+  ): void {
     batch((scope) => {
-      const initial = isFunction(setter)
+      const { active, branches } = isFunction(setter)
         ? setter(this.getInitial(scope), this.getInput(scope))
         : setter
 
-      forEntries(this.branches, (branch, kind) => {
-        const branchInitial = initial[kind]
+      if (!isUndefined(active)) {
+        this.active.setInitial(active)
+      }
 
-        if (!isUndefined(branchInitial)) {
-          branch.setInitial(branchInitial)
-        }
-      })
+      if (!isUndefined(branches)) {
+        this._branches.setInitial(branches)
+      }
     })
   }
 }
