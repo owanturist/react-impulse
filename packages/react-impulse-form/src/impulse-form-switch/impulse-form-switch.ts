@@ -1,29 +1,37 @@
 import { isUndefined } from "~/tools/is-undefined"
 
-import { Impulse, batch } from "../dependencies"
+import { batch } from "../dependencies"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import { ImpulseFormSwitch as ImpulseFormSwitchImpl } from "./_impulse-form-switch"
 import type { ImpulseFormSwitchErrorSetter } from "./_impulse-form-switch-error-setter"
 import type { ImpulseFormSwitchFlagSetter } from "./_impulse-form-switch-flag-setter"
 import type { ImpulseFormSwitchInputSetter } from "./_impulse-form-switch-input-setter"
+import type { ImpulseFormSwitchKindParams } from "./_impulse-form-switch-kind-params"
 import type { ImpulseFormSwitchValidateOnSetter } from "./_impulse-form-switch-validate-on-setter"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
-export type ImpulseFormSwitch<TBranches extends ImpulseFormSwitchBranches> =
-  ImpulseFormSwitchImpl<TBranches>
+export type ImpulseFormSwitch<
+  TKind extends ImpulseForm<ImpulseFormSwitchKindParams<keyof TBranches>>,
+  TBranches extends ImpulseFormSwitchBranches,
+> = ImpulseFormSwitchImpl<TKind, TBranches>
 
 export interface ImpulseFormSwitchOptions<
+  TKind extends ImpulseForm<ImpulseFormSwitchKindParams<keyof TBranches>>,
   TBranches extends ImpulseFormSwitchBranches,
 > {
-  input?: ImpulseFormSwitchInputSetter<TBranches>
-  initial?: ImpulseFormSwitchInputSetter<TBranches>
+  input?: ImpulseFormSwitchInputSetter<TKind, TBranches>
+  initial?: ImpulseFormSwitchInputSetter<TKind, TBranches>
   touched?: ImpulseFormSwitchFlagSetter<TBranches>
   validateOn?: ImpulseFormSwitchValidateOnSetter<TBranches>
   error?: ImpulseFormSwitchErrorSetter<TBranches>
 }
 
-export function ImpulseFormSwitch<TBranches extends ImpulseFormSwitchBranches>(
-  active: keyof TBranches,
+export function ImpulseFormSwitch<
+  TKind extends ImpulseForm<ImpulseFormSwitchKindParams<keyof TBranches>>,
+  TBranches extends ImpulseFormSwitchBranches,
+>(
+  active: TKind,
   branches: Readonly<TBranches>,
   {
     input,
@@ -31,9 +39,9 @@ export function ImpulseFormSwitch<TBranches extends ImpulseFormSwitchBranches>(
     touched,
     validateOn,
     error,
-  }: ImpulseFormSwitchOptions<TBranches> = {},
-): ImpulseFormSwitch<TBranches> {
-  const switcher = new ImpulseFormSwitchImpl(null, Impulse(active), branches)
+  }: ImpulseFormSwitchOptions<TKind, TBranches> = {},
+): ImpulseFormSwitch<TKind, TBranches> {
+  const switcher = new ImpulseFormSwitchImpl(null, active, branches)
 
   batch(() => {
     if (!isUndefined(touched)) {
@@ -52,7 +60,6 @@ export function ImpulseFormSwitch<TBranches extends ImpulseFormSwitchBranches>(
       switcher.setValidateOn(validateOn)
     }
 
-    // TODO add test against null
     if (!isUndefined(error)) {
       switcher.setError(error)
     }
