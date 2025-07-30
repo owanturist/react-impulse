@@ -4,6 +4,7 @@ import { isNull } from "~/tools/is-null"
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
 import { isUndefined } from "~/tools/is-undefined"
+import { keys } from "~/tools/keys"
 import { mapValues } from "~/tools/map-values"
 import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
@@ -63,12 +64,51 @@ export class ImpulseFormSwitch<
 
   protected _isDirty<TResult>(
     scope: Scope,
-    select: (
+    select?: (
       concise: ImpulseFormSwitchFlag<TBranches>,
       verbose: ImpulseFormSwitchFlagVerbose<TBranches>,
       dirty: ImpulseFormSwitchFlagVerbose<TBranches>,
     ) => TResult,
-  ): TResult {}
+  ): TResult {
+    const kinds = select ? keys(this.branches) : [this.getActive(scope)]
+
+    let isAllDirty = true
+    let isNoneDirty = true
+    // make it easier for TS
+    const isDirtyConcise = {} as Record<keyof TBranches, unknown>
+    const isDirtyVerbose = {} as Record<keyof TBranches, unknown>
+    const isDirtyDirty = {} as Record<keyof TBranches, unknown>
+
+    for (const key of kinds) {
+      const field = this.branches[key]
+
+      const [concise, verbose, dirty] = ImpulseForm._isDirty(
+        scope,
+        field,
+        params,
+      )
+
+      isAllDirty = isAllDirty && concise === true
+      isNoneDirty = isNoneDirty && concise === false
+      isDirtyConcise[key] = concise
+      isDirtyVerbose[key] = verbose
+      isDirtyDirty[key] = dirty
+    }
+
+    if (select == null) {
+      return !isNoneDirty as TResult
+    }
+
+    return select(
+      isNoneDirty
+        ? false
+        : isAllDirty
+          ? true
+          : (isDirtyConcise as unknown as ImpulseFormSwitchFlag<TBranches>),
+      isDirtyVerbose as unknown as ImpulseFormSwitchFlagVerbose<TBranches>,
+      isDirtyDirty as unknown as ImpulseFormSwitchFlagVerbose<TBranches>,
+    )
+  }
 
   public getActive(scope: Scope): keyof TBranches {
     return this.active.getValue(scope)

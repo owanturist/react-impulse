@@ -34,7 +34,7 @@ describe("types", () => {
         }
       >
 
-  type OutputSchemaVerbose =
+  type OutputVerboseSchema =
     | ImpulseFormSwitchBranch<"first", null | string>
     | ImpulseFormSwitchBranch<
         "second",
@@ -44,7 +44,7 @@ describe("types", () => {
         }
       >
 
-  it("matches schema type for getInitial(scope, select?)", ({ scope }) => {
+  it("matches schema type for getOutput(scope, select?)", ({ scope }) => {
     expectTypeOf(form.getOutput(scope)).toEqualTypeOf<null | OutputSchema>()
 
     expectTypeOf(
@@ -53,7 +53,7 @@ describe("types", () => {
 
     expectTypeOf(
       form.getOutput(scope, params._second),
-    ).toEqualTypeOf<OutputSchemaVerbose>()
+    ).toEqualTypeOf<OutputVerboseSchema>()
   })
 
   it("matches schema type for getActive(scope)", ({ scope }) => {
