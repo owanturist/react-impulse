@@ -81,3 +81,195 @@ it("selects value", ({ scope }) => {
     readonly fourth: Array<string>
   }>()
 })
+
+describe("when output is nullable", () => {
+  describe("without validation/transformation", () => {
+    it("returns null for hardcoded fields", ({ scope }) => {
+      const shape = ImpulseFormShape({
+        first: null,
+        second: ImpulseFormUnit("2"),
+      })
+
+      expect(shape.getOutput(scope)).toStrictEqual({
+        first: null,
+        second: "2",
+      })
+    })
+
+    it("returns null for unit", ({ scope }) => {
+      const shape = ImpulseFormShape({
+        first: ImpulseFormUnit(null),
+        second: ImpulseFormUnit("2"),
+      })
+
+      expect(shape.getOutput(scope)).toStrictEqual({
+        first: null,
+        second: "2",
+      })
+    })
+
+    it("returns null after setting input to null", ({ scope }) => {
+      const shape = ImpulseFormShape({
+        first: ImpulseFormUnit("1"),
+        second: ImpulseFormUnit<null | string>("2"),
+      })
+
+      expect(shape.getOutput(scope)).toStrictEqual({
+        first: "1",
+        second: "2",
+      })
+
+      shape.setInput({ second: null })
+      expect(shape.getOutput(scope)).toStrictEqual({
+        first: "1",
+        second: null,
+      })
+    })
+
+    it("returns full output even when all fields are null", ({ scope }) => {
+      const shape = ImpulseFormShape({
+        first: null,
+        second: ImpulseFormUnit(null),
+      })
+
+      expect(shape.getOutput(scope)).toStrictEqual({
+        first: null,
+        second: null,
+      })
+    })
+  })
+
+  describe("with transformation", () => {
+    function setup(first = "1", second: null | string = "2") {
+      return ImpulseFormShape({
+        first: ImpulseFormUnit(first, {
+          transform: (input) => input || null,
+        }),
+        second: ImpulseFormUnit(second),
+      })
+    }
+
+    it("returns nullable output", ({ scope }) => {
+      const shape = setup("")
+
+      expect(shape.getOutput(scope)).toStrictEqual({
+        first: null,
+        second: "2",
+      })
+
+      shape.setInput({ first: "1" })
+      expect(shape.getOutput(scope)).toStrictEqual({
+        first: "1",
+        second: "2",
+      })
+    })
+
+    it("returns nullable output after input update", ({ scope }) => {
+      const shape = setup()
+
+      expect(shape.getOutput(scope)).toStrictEqual({
+        first: "1",
+        second: "2",
+      })
+
+      shape.setInput({ first: "" })
+      expect(shape.getOutput(scope)).toStrictEqual({
+        first: null,
+        second: "2",
+      })
+    })
+
+    it("returns full output even when all fields are null", ({ scope }) => {
+      const shape = setup("", null)
+
+      expect(shape.getOutput(scope)).toStrictEqual({
+        first: null,
+        second: null,
+      })
+    })
+  })
+
+  describe.each([
+    [
+      "validate",
+      function setupWithValidate(first = "1", second: null | string = "2") {
+        return ImpulseFormShape({
+          first: ImpulseFormUnit(first, {
+            validate: (input) =>
+              input
+                ? ["Value is required", null]
+                : [null, input.trim() || null],
+          }),
+          second: ImpulseFormUnit(second),
+        })
+      },
+    ],
+    [
+      "schema",
+      function setupWithValidate(first = "1", second: null | string = "2") {
+        return ImpulseFormShape({
+          first: ImpulseFormUnit(first, {
+            schema: z
+              .string()
+              .min(1)
+              .transform((input) => input.trim() || null),
+          }),
+          second: ImpulseFormUnit(second),
+        })
+      },
+    ],
+  ])("with %s", (_, setup) => {
+    describe("before validation", () => {
+      it.skip("returns nullable on success", ({ scope }) => {
+        const shape = setup(" ")
+
+        expect(shape.getOutput(scope)).toStrictEqual({
+          first: null,
+          second: "2",
+        })
+        expect(shape.getError(scope)).toBeNull()
+      })
+
+      it("returns null before on fail", ({ scope }) => {
+        const shape = setup("")
+
+        expect(shape.getOutput(scope)).toBeNull()
+        expect(shape.getError(scope)).toBeNull()
+      })
+    })
+
+    // TODO it cannot work with the given constraints of the return type of ImpulseForm#getOutput
+    describe.skip("after validation", () => {
+      it("returns nullable on success", ({ scope }) => {
+        const shape = setup("1")
+
+        expect(shape.getOutput(scope)).toStrictEqual({
+          first: "1",
+          second: "2",
+        })
+        expect(shape.getError(scope)).toBeNull()
+
+        shape.setInput({ first: " " })
+        expect(shape.getOutput(scope)).toStrictEqual({
+          first: null,
+          second: "2",
+        })
+        expect(shape.getError(scope)).toBeNull()
+      })
+
+      it("returns null on fail", ({ scope }) => {
+        const shape = setup("1")
+
+        expect(shape.getOutput(scope)).toStrictEqual({
+          first: "1",
+          second: "2",
+        })
+        expect(shape.getError(scope)).toBeNull()
+
+        shape.setInput({ first: "" })
+        expect(shape.getOutput(scope)).toBeNull()
+        expect(shape.getError(scope)).not.toBeNull()
+      })
+    })
+  })
+})
