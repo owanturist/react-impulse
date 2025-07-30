@@ -7,32 +7,33 @@ import type { ImpulseFormSwitchErrorSetter } from "./_impulse-form-switch-error-
 import type { ImpulseFormSwitchFlagSetter } from "./_impulse-form-switch-flag-setter"
 import type { ImpulseFormSwitchInputSetter } from "./_impulse-form-switch-input-setter"
 import type { ImpulseFormSwitchValidateOnSetter } from "./_impulse-form-switch-validate-on-setter"
-import type { ImpulseFormSwitchCases } from "./impulse-form-switch-cases"
+import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
-export type ImpulseFormSwitch<TCases extends ImpulseFormSwitchCases> =
-  ImpulseFormSwitchImpl<TCases>
+export type ImpulseFormSwitch<TBranches extends ImpulseFormSwitchBranches> =
+  ImpulseFormSwitchImpl<TBranches>
 
 export interface ImpulseFormSwitchOptions<
-  TCases extends ImpulseFormSwitchCases,
+  TBranches extends ImpulseFormSwitchBranches,
 > {
-  input?: ImpulseFormSwitchInputSetter<TCases>
-  initial?: ImpulseFormSwitchInputSetter<TCases>
-  touched?: ImpulseFormSwitchFlagSetter<TCases>
-  validateOn?: ImpulseFormSwitchValidateOnSetter<TCases>
-  error?: ImpulseFormSwitchErrorSetter<TCases>
+  input?: ImpulseFormSwitchInputSetter<TBranches>
+  initial?: ImpulseFormSwitchInputSetter<TBranches>
+  touched?: ImpulseFormSwitchFlagSetter<TBranches>
+  validateOn?: ImpulseFormSwitchValidateOnSetter<TBranches>
+  error?: ImpulseFormSwitchErrorSetter<TBranches>
 }
 
-export function ImpulseFormSwitch<TCases extends ImpulseFormSwitchCases>(
-  cases: Readonly<TCases>,
+export function ImpulseFormSwitch<TBranches extends ImpulseFormSwitchBranches>(
+  active: keyof TBranches,
+  branches: Readonly<TBranches>,
   {
     input,
     initial,
     touched,
     validateOn,
     error,
-  }: ImpulseFormSwitchOptions<TCases> = {},
-): ImpulseFormSwitch<TCases> {
-  const switcher = new ImpulseFormSwitchImpl(null, cases)
+  }: ImpulseFormSwitchOptions<TBranches> = {},
+): ImpulseFormSwitch<TBranches> {
+  const switcher = new ImpulseFormSwitchImpl(null, active, branches)
 
   batch(() => {
     if (!isUndefined(touched)) {

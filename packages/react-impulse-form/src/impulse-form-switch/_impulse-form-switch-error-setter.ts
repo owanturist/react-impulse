@@ -2,11 +2,11 @@ import type { Setter } from "~/tools/setter"
 
 import type { GetImpulseFormSwitchParam } from "./_get-impulse-form-switch-param"
 import type { ImpulseFormSwitchErrorVerbose } from "./_impulse-form-switch-error-verbose"
-import type { ImpulseFormSwitchCases } from "./impulse-form-switch-cases"
+import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
 export type ImpulseFormSwitchErrorSetter<
-  TCases extends ImpulseFormSwitchCases,
+  TBranches extends ImpulseFormSwitchBranches,
 > = Setter<
-  null | Partial<GetImpulseFormSwitchParam<TCases, "error.setter">>,
-  [ImpulseFormSwitchErrorVerbose<TCases>]
+  null | Partial<GetImpulseFormSwitchParam<TBranches, "error.setter">>,
+  [ImpulseFormSwitchErrorVerbose<TBranches>]
 >
