@@ -1,8 +1,9 @@
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
+import { mapValues } from "~/tools/map-values"
 import { params } from "~/tools/params"
 
-import type { Scope } from "../dependencies"
+import { batch, type Scope } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormSwitchError } from "./_impulse-form-switch-error"
@@ -19,25 +20,39 @@ import type { ImpulseFormSwitchParams } from "./_impulse-form-switch-params"
 import type { ImpulseFormSwitchValidateOn } from "./_impulse-form-switch-validate-on"
 import type { ImpulseFormSwitchValidateOnSetter } from "./_impulse-form-switch-validate-on-setter"
 import type { ImpulseFormSwitchValidateOnVerbose } from "./_impulse-form-switch-validate-on-verbose"
-import type { ImpulseFormSwitchCases } from "./impulse-form-switch-cases"
+import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
+import { isFunction } from "~/tools/is-function"
+import { forEntries } from "~/tools/for-entries"
 
 export class ImpulseFormSwitch<
-  TCases extends ImpulseFormSwitchCases = ImpulseFormSwitchCases,
-> extends ImpulseForm<ImpulseFormSwitchParams<TCases>> {
-  public constructor(root: null | ImpulseForm, cases: TCases) {
+  TBranches extends ImpulseFormSwitchBranches = ImpulseFormSwitchBranches,
+> extends ImpulseForm<ImpulseFormSwitchParams<TBranches>> {
+  public readonly branches: Readonly<TBranches>
+
+  public constructor(
+    root: null | ImpulseForm,
+    active: keyof TBranches,
+    branches: TBranches,
+  ) {
     super(root)
+
+    this.branches = mapValues(branches, (child) =>
+      ImpulseForm._childOf(this, child),
+    )
   }
 
   protected override _submitWith(
-    output: ImpulseFormSwitchOutput<TCases>,
+    output: ImpulseFormSwitchOutput<TBranches>,
   ): ReadonlyArray<void | Promise<unknown>> {}
 
   protected override _getFocusFirstInvalid(scope: Scope): VoidFunction | null {}
 
-  protected _childOf(parent: null | ImpulseForm): ImpulseFormSwitch<TCases> {}
+  protected _childOf(
+    parent: null | ImpulseForm,
+  ): ImpulseFormSwitch<TBranches> {}
 
   protected _setInitial(
-    initial: undefined | ImpulseFormSwitch<TCases>,
+    initial: undefined | ImpulseFormSwitch<TBranches>,
     isRoot: boolean,
   ): void {}
 
@@ -46,109 +61,121 @@ export class ImpulseFormSwitch<
   protected _isDirty<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormSwitchFlag<TCases>,
-      verbose: ImpulseFormSwitchFlagVerbose<TCases>,
-      dirty: ImpulseFormSwitchFlagVerbose<TCases>,
+      concise: ImpulseFormSwitchFlag<TBranches>,
+      verbose: ImpulseFormSwitchFlagVerbose<TBranches>,
+      dirty: ImpulseFormSwitchFlagVerbose<TBranches>,
     ) => TResult,
   ): TResult {}
 
-  public getError(scope: Scope): ImpulseFormSwitchError<TCases>
+  public getError(scope: Scope): ImpulseFormSwitchError<TBranches>
   public getError<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormSwitchError<TCases>,
-      verbose: ImpulseFormSwitchErrorVerbose<TCases>,
+      concise: ImpulseFormSwitchError<TBranches>,
+      verbose: ImpulseFormSwitchErrorVerbose<TBranches>,
     ) => TResult,
   ): TResult
-  public getError<TResult = ImpulseFormSwitchError<TCases>>(
+  public getError<TResult = ImpulseFormSwitchError<TBranches>>(
     scope: Scope,
     select: (
-      concise: ImpulseFormSwitchError<TCases>,
-      verbose: ImpulseFormSwitchErrorVerbose<TCases>,
+      concise: ImpulseFormSwitchError<TBranches>,
+      verbose: ImpulseFormSwitchErrorVerbose<TBranches>,
     ) => TResult = params._first as typeof select,
   ): TResult {}
 
-  public setError(setter: ImpulseFormSwitchErrorSetter<TCases>): void {}
+  public setError(setter: ImpulseFormSwitchErrorSetter<TBranches>): void {}
   public isValidated(scope: Scope): boolean
 
   public isValidated<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormSwitchFlag<TCases>,
-      verbose: ImpulseFormSwitchFlagVerbose<TCases>,
+      concise: ImpulseFormSwitchFlag<TBranches>,
+      verbose: ImpulseFormSwitchFlagVerbose<TBranches>,
     ) => TResult,
   ): TResult
   public isValidated<TResult = boolean>(
     scope: Scope,
     select: (
-      concise: ImpulseFormSwitchFlag<TCases>,
-      verbose: ImpulseFormSwitchFlagVerbose<TCases>,
+      concise: ImpulseFormSwitchFlag<TBranches>,
+      verbose: ImpulseFormSwitchFlagVerbose<TBranches>,
     ) => TResult = isTrue as unknown as typeof select,
   ): TResult {}
 
-  public getValidateOn(scope: Scope): ImpulseFormSwitchValidateOn<TCases>
+  public getValidateOn(scope: Scope): ImpulseFormSwitchValidateOn<TBranches>
   public getValidateOn<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormSwitchValidateOn<TCases>,
-      verbose: ImpulseFormSwitchValidateOnVerbose<TCases>,
+      concise: ImpulseFormSwitchValidateOn<TBranches>,
+      verbose: ImpulseFormSwitchValidateOnVerbose<TBranches>,
     ) => TResult,
   ): TResult
-  public getValidateOn<TResult = ImpulseFormSwitchValidateOn<TCases>>(
+  public getValidateOn<TResult = ImpulseFormSwitchValidateOn<TBranches>>(
     scope: Scope,
     select: (
-      concise: ImpulseFormSwitchValidateOn<TCases>,
-      verbose: ImpulseFormSwitchValidateOnVerbose<TCases>,
+      concise: ImpulseFormSwitchValidateOn<TBranches>,
+      verbose: ImpulseFormSwitchValidateOnVerbose<TBranches>,
     ) => TResult = params._first as typeof select,
   ): TResult {}
 
   public setValidateOn(
-    validateOn: ImpulseFormSwitchValidateOnSetter<TCases>,
+    validateOn: ImpulseFormSwitchValidateOnSetter<TBranches>,
   ): void {}
 
   public isTouched(scope: Scope): boolean
   public isTouched<TResult>(
     scope: Scope,
     select: (
-      concise: ImpulseFormSwitchFlag<TCases>,
-      verbose: ImpulseFormSwitchFlagVerbose<TCases>,
+      concise: ImpulseFormSwitchFlag<TBranches>,
+      verbose: ImpulseFormSwitchFlagVerbose<TBranches>,
     ) => TResult,
   ): TResult
   public isTouched<TResult = boolean>(
     scope: Scope,
     select: (
-      concise: ImpulseFormSwitchFlag<TCases>,
-      verbose: ImpulseFormSwitchFlagVerbose<TCases>,
+      concise: ImpulseFormSwitchFlag<TBranches>,
+      verbose: ImpulseFormSwitchFlagVerbose<TBranches>,
     ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {}
 
-  public setTouched(touched: ImpulseFormSwitchFlagSetter<TCases>): void {}
+  public setTouched(touched: ImpulseFormSwitchFlagSetter<TBranches>): void {}
 
   public reset(
-    resetter: ImpulseFormSwitchInputSetter<TCases> = params._first as typeof resetter,
+    resetter: ImpulseFormSwitchInputSetter<TBranches> = params._first as typeof resetter,
   ): void {}
 
-  public getOutput(scope: Scope): null | ImpulseFormSwitchOutput<TCases>
+  public getOutput(scope: Scope): null | ImpulseFormSwitchOutput<TBranches>
   public getOutput<TResult>(
     scope: Scope,
     select: (
-      concise: null | ImpulseFormSwitchOutput<TCases>,
-      verbose: ImpulseFormSwitchOutputVerbose<TCases>,
+      concise: null | ImpulseFormSwitchOutput<TBranches>,
+      verbose: ImpulseFormSwitchOutputVerbose<TBranches>,
     ) => TResult,
   ): TResult
-  public getOutput<TResult = null | ImpulseFormSwitchOutput<TCases>>(
+  public getOutput<TResult = null | ImpulseFormSwitchOutput<TBranches>>(
     scope: Scope,
     select: (
-      concise: null | ImpulseFormSwitchOutput<TCases>,
-      verbose: ImpulseFormSwitchOutputVerbose<TCases>,
+      concise: null | ImpulseFormSwitchOutput<TBranches>,
+      verbose: ImpulseFormSwitchOutputVerbose<TBranches>,
     ) => TResult = params._first as typeof select,
   ): TResult {}
 
-  public getInput(scope: Scope): ImpulseFormSwitchInput<TCases> {}
+  public getInput(scope: Scope): ImpulseFormSwitchInput<TBranches> {
+    const input = mapValues(this.branches, (branch) => branch.getInput(scope))
 
-  public setInput(setter: ImpulseFormSwitchInputSetter<TCases>): void {}
+    return input as ImpulseFormSwitchInput<TBranches>
+  }
 
-  public getInitial(scope: Scope): ImpulseFormSwitchInput<TCases> {}
+  public setInput(setter: ImpulseFormSwitchInputSetter<TBranches>): void {
+    batch((scope) => {
+      const input = isFunction(setter)
+        ? setter(this.getInput(scope), this.getInitial(scope))
+        : setter
 
-  public setInitial(setter: ImpulseFormSwitchInputSetter<TCases>): void {}
+      forEntries(this.branches, (branch, kind) => {})
+    })
+  }
+
+  public getInitial(scope: Scope): ImpulseFormSwitchInput<TBranches> {}
+
+  public setInitial(setter: ImpulseFormSwitchInputSetter<TBranches>): void {}
 }

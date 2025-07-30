@@ -1,7 +1,8 @@
 import type { ValidateStrategy } from "../validate-strategy"
 
 import type { GetImpulseFormSwitchParam } from "./_get-impulse-form-switch-param"
-import type { ImpulseFormSwitchCases } from "./impulse-form-switch-cases"
+import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
-export type ImpulseFormSwitchValidateOn<TCases extends ImpulseFormSwitchCases> =
-  ValidateStrategy | GetImpulseFormSwitchParam<TCases, "validateOn.schema">
+export type ImpulseFormSwitchValidateOn<
+  TBranches extends ImpulseFormSwitchBranches,
+> = ValidateStrategy | GetImpulseFormSwitchParam<TBranches, "validateOn.schema">
