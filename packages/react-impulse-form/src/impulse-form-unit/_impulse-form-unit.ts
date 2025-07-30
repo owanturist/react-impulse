@@ -26,6 +26,7 @@ import type { ImpulseFormUnitInputSetter } from "./impulse-form-unit-input-sette
 import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer"
 import type { ImpulseFormUnitValidateOnSetter } from "./impulse-form-unit-validate-on-setter"
 import type { ImpulseFormUnitValidator } from "./impulse-form-unit-validator"
+import { isTruthy } from "~/tools/is-truthy"
 
 export class ImpulseFormUnit<
   TInput,
@@ -175,7 +176,11 @@ export class ImpulseFormUnit<
 
   protected _isDirty<TResult>(
     scope: Scope,
-    select: (concise: boolean, verbose: boolean, dirty: boolean) => TResult,
+    select: (
+      concise: boolean,
+      verbose: boolean,
+      dirty: boolean,
+    ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
     const initial = this.getInitial(scope)
     const input = this.getInput(scope)

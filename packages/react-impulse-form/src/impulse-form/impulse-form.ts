@@ -1,6 +1,5 @@
 import { isDefined } from "~/tools/is-defined"
 import { isNull } from "~/tools/is-null"
-import { isTruthy } from "~/tools/is-truthy"
 
 import { Impulse, type Scope, batch, untrack } from "../dependencies"
 import { Emitter } from "../emitter"
@@ -92,7 +91,7 @@ export abstract class ImpulseForm<
 
   protected abstract _isDirty<TResult>(
     scope: Scope,
-    select: (
+    select?: (
       concise: TParams["flag.schema"],
       verbose: TParams["flag.schema.verbose"],
       dirty: TParams["flag.schema.verbose"],
@@ -193,10 +192,10 @@ export abstract class ImpulseForm<
   ): TResult
   public isDirty(
     scope: Scope,
-    select: (
+    select?: (
       concise: TParams["flag.schema"],
       verbose: TParams["flag.schema.verbose"],
-    ) => boolean = isTruthy,
+    ) => boolean,
   ): boolean {
     return this._isDirty(scope, select)
   }

@@ -141,7 +141,7 @@ export class ImpulseFormList<
       concise: ImpulseFormListFlag<TElement>,
       verbose: ImpulseFormListFlagVerbose<TElement>,
       dirty: ImpulseFormListFlagVerbose<TElement>,
-    ) => TResult,
+    ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
     const elements = this._elements.getValue(scope)
     const initialElements = this._initialElements.getValue(scope)

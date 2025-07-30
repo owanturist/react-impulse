@@ -138,7 +138,7 @@ export class ImpulseFormShape<
       concise: ImpulseFormShapeFlag<TFields>,
       verbose: ImpulseFormShapeFlagVerbose<TFields>,
       dirty: ImpulseFormShapeFlagVerbose<TFields>,
-    ) => TResult,
+    ) => TResult = isTruthy as unknown as typeof select,
   ): TResult {
     const keys = Object.keys(this.fields)
 
