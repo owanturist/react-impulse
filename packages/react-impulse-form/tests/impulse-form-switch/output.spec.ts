@@ -84,8 +84,8 @@ describe("when branch is initially invalid", () => {
     expect(form.getOutput(scope)).toBeNull()
     expect(form.getOutput(scope, params._first)).toBeNull()
     expect(form.getOutput(scope, params._second)).toStrictEqual({
-      kind: null,
-      value: {
+      active: null,
+      branches: {
         first: null,
         second: {
           name: "name",
@@ -116,8 +116,8 @@ describe("when branch is initially invalid", () => {
     expect(form.getOutput(scope)).toBeNull()
     expect(form.getOutput(scope, params._first)).toBeNull()
     expect(form.getOutput(scope, params._second)).toStrictEqual({
-      kind: "first",
-      value: {
+      active: "first",
+      branches: {
         first: null,
         second: {
           name: "name",
@@ -128,9 +128,7 @@ describe("when branch is initially invalid", () => {
     })
   })
 
-  it("returns output after switching from invalid to valid branch", ({
-    scope,
-  }) => {
+  it("returns output after switching to valid branch", ({ scope }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("first", {
         schema: z.enum(["first", "second"]),
@@ -148,22 +146,35 @@ describe("when branch is initially invalid", () => {
 
     form.active.setInput("second")
 
-    const output = {
-      kind: "second",
-      value: {
-        name: "name",
-        age: 18,
-      },
-    }
-
     expect(form.active.getOutput(scope)).toBe("second")
     expect(form.branches.second.getOutput(scope)).toStrictEqual({
       name: "name",
       age: 18,
     })
-    expect(form.getOutput(scope)).toStrictEqual(output)
-    expect(form.getOutput(scope, params._first)).toStrictEqual(output)
-    expect(form.getOutput(scope, params._second)).toStrictEqual(output)
+    expect(form.getOutput(scope)).toStrictEqual({
+      kind: "second",
+      value: {
+        name: "name",
+        age: 18,
+      },
+    })
+    expect(form.getOutput(scope, params._first)).toStrictEqual({
+      kind: "second",
+      value: {
+        name: "name",
+        age: 18,
+      },
+    })
+    expect(form.getOutput(scope, params._second)).toStrictEqual({
+      active: "second",
+      branches: {
+        first: null,
+        second: {
+          name: "name",
+          age: 18,
+        },
+      },
+    })
   })
 })
 
