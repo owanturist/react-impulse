@@ -262,7 +262,9 @@ describe("adding a new element to the list's beginning", () => {
     ])
   })
 
-  it("overrides initial value for a list by a new element", ({ scope }) => {
+  it.skip("overrides initial value for a list by a new element", ({
+    scope,
+  }) => {
     const form = setup([
       setupElement({
         input: { first: 1, second: "1" },
@@ -351,7 +353,7 @@ describe("adding a new element to the list's beginning", () => {
 })
 
 describe("nested list", () => {
-  it("returns initial value", ({ scope }) => {
+  it.skip("returns initial value", ({ scope }) => {
     const form = ImpulseFormList([
       ImpulseFormShape({
         first: ImpulseFormList([

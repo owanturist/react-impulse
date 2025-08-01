@@ -12,6 +12,8 @@ export type * from "./get-impulse-form-flag-setter"
 export type * from "./get-impulse-form-flag"
 export type * from "./get-impulse-form-flag-verbose"
 
+export type * from "./get-impulse-form-initial"
+
 export type * from "./get-impulse-form-input-setter"
 export type * from "./get-impulse-form-input"
 

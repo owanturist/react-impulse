@@ -1,6 +1,8 @@
 import { isUndefined } from "~/tools/is-undefined"
+import { mapValues } from "~/tools/map-values"
 
 import { batch } from "../dependencies"
+import { isImpulseForm } from "../impulse-form"
 
 import { ImpulseFormShape as ImpulseFormShapeImpl } from "./_impulse-form-shape"
 import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"
@@ -32,7 +34,13 @@ export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
     error,
   }: ImpulseFormShapeOptions<TFields> = {},
 ): ImpulseFormShape<TFields> {
-  const shape = new ImpulseFormShapeImpl(null, fields)
+  const shape = new ImpulseFormShapeImpl(
+    null,
+    mapValues(fields, (field) => {
+      return isImpulseForm(field) ? field._getInitial() : null
+    }),
+    fields,
+  )
 
   batch(() => {
     if (!isUndefined(touched)) {

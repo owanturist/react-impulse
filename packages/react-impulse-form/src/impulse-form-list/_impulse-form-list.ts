@@ -3,6 +3,7 @@ import { drop } from "~/tools/drop"
 import { isFalse } from "~/tools/is-false"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
+import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isString } from "~/tools/is-string"
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
@@ -13,7 +14,7 @@ import { take } from "~/tools/take"
 import { uniq } from "~/tools/uniq"
 import { zipMap } from "~/tools/zip-map"
 
-import { type Impulse, type Scope, batch, untrack } from "../dependencies"
+import { Impulse, type Scope, batch, untrack } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
@@ -24,6 +25,7 @@ import type { ImpulseFormListErrorVerbose } from "./impulse-form-list-error-verb
 import type { ImpulseFormListFlag } from "./impulse-form-list-flag"
 import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"
 import type { ImpulseFormListFlagVerbose } from "./impulse-form-list-flag-verbose"
+import type { ImpulseFormListInitial } from "./impulse-form-list-initial"
 import type { ImpulseFormListInput } from "./impulse-form-list-input"
 import type { ImpulseFormListInputSetter } from "./impulse-form-list-input-setter"
 import type { ImpulseFormListOutput } from "./impulse-form-list-output"
@@ -35,6 +37,7 @@ import type { ImpulseFormListValidateOnVerbose } from "./impulse-form-list-valid
 export class ImpulseFormList<
   TElement extends ImpulseForm = ImpulseForm,
 > extends ImpulseForm<{
+  initial: ImpulseFormListInitial<TElement>
   "input.schema": ImpulseFormListInput<TElement>
   "input.setter": ImpulseFormListInputSetter<TElement>
 
@@ -58,29 +61,38 @@ export class ImpulseFormList<
 
   public constructor(
     root: null | ImpulseForm,
-    _elements: Impulse<ReadonlyArray<TElement>>,
-    _initialElements: Impulse<ReadonlyArray<TElement>> = _elements,
+    elements: ReadonlyArray<TElement>,
+    protected readonly _initial: ImpulseFormListInitial<TElement>,
   ) {
     super(root)
 
-    this._initialElements = _initialElements.clone((elements) => {
-      return elements.map((element) => element.clone())
-    })
+    const initial = untrack(this._initial)
 
-    this._elements = _elements.clone((elements) => {
-      const initialElements = untrack(this._initialElements)
+    this._initialElements = Impulse(
+      elements.map((element, index) => {
+        return ImpulseForm._childOf(
+          this,
+          initial.at(index) ?? element._getInitial(),
+          element,
+        )
+      }),
+      {
+        compare: isShallowArrayEqual,
+      },
+    )
 
-      return elements.map((element, index) => {
-        const child = ImpulseForm._childOf(this, element)
-        const initial = initialElements.at(index)
-
-        if (!isUndefined(initial)) {
-          ImpulseForm._setInitial(child, initial)
-        }
-
-        return child
-      })
-    })
+    this._elements = Impulse(
+      elements.map((element, index) => {
+        return ImpulseForm._childOf(
+          this,
+          initial.at(index) ?? element._getInitial(),
+          element,
+        )
+      }),
+      {
+        compare: isShallowArrayEqual,
+      },
+    )
   }
 
   protected override _submitWith(
@@ -105,25 +117,20 @@ export class ImpulseFormList<
     return super._getFocusFirstInvalid(scope)
   }
 
-  protected _childOf(parent: null | ImpulseForm): ImpulseFormList<TElement> {
+  protected _childOf(
+    args: null | [ImpulseForm, ImpulseFormListInitial<TElement>],
+  ): ImpulseFormList<TElement> {
     return new ImpulseFormList(
-      parent,
-      this._elements.clone(),
-      this._initialElements.clone(),
+      args?.[0] ?? null,
+      untrack(this._elements),
+      args?.[1] ?? this._getInitial(),
     )
   }
 
-  protected _setInitial(
-    initial: undefined | ImpulseFormList<TElement>,
-    isRoot: boolean,
-  ): void {
-    const initialElements = untrack(
-      (scope) => initial?._initialElements.getValue(scope) ?? [],
-    )
-
-    for (const [index, element] of untrack(this._elements).entries()) {
-      ImpulseForm._setInitial(element, initialElements.at(index), isRoot)
-    }
+  protected _getInitial(): ImpulseFormListInitial<TElement> {
+    return this._elements.clone((elements) => {
+      return elements.map((element) => element._getInitial())
+    })
   }
 
   protected _setValidated(isValidated: boolean): void {
@@ -197,15 +204,15 @@ export class ImpulseFormList<
     setter: Setter<ReadonlyArray<TElement>, [ReadonlyArray<TElement>, Scope]>,
   ): void {
     this._elements.setValue((elements, scope) => {
-      const initialElements = this._initialElements.getValue(scope)
+      const initial = this._initial.getValue(scope)
       const updatedElements = resolveSetter(setter, elements, scope)
 
-      for (const [index, element] of updatedElements.entries()) {
-        ImpulseForm._setInitial(element, initialElements.at(index))
-      }
-
-      return updatedElements.map((element) => {
-        return ImpulseForm._childOf(this, element)
+      return updatedElements.map((element, index) => {
+        return ImpulseForm._childOf(
+          this,
+          initial.at(index) ?? element._getInitial(),
+          element,
+        )
       })
     })
   }
@@ -473,34 +480,31 @@ export class ImpulseFormList<
           drop(elements, initialElements.length),
         ),
         nextInitial.length,
-      ).map((element) => element.clone())
+      ).map((element) => {
+        return ImpulseForm._childOf(this, element._getInitial(), element)
+      })
 
-      // set list's initial elements
-      this._initialElements.setValue(nextInitialElements)
-
-      for (
-        let index = 0;
-        index < Math.max(elements.length, nextInitialElements.length);
-        index++
-      ) {
+      for (const [index, element] of nextInitialElements.entries()) {
         const initial = nextInitial.at(index)
-        const element = elements.at(index)
-        const initialElement = nextInitialElements.at(index)
 
-        if (element) {
-          // update initial sources for each element
-          ImpulseForm._setInitial(element, initialElement)
-
-          // do not change initial value if it is not defined
-          if (!isUndefined(initial)) {
-            element.setInitial(initial)
-          }
-        } else if (!isUndefined(initial)) {
-          // an initial element might not have an associated element
-          // so it should setInitial separately
-          initialElement?.setInitial(initial)
+        if (!isUndefined(initial)) {
+          element.setInitial(initial)
         }
       }
+
+      this._initialElements.setValue(nextInitialElements)
+      this._initial.setValue(
+        nextInitialElements.map((element) => element._initial),
+      )
+      this._elements.setValue((elements) => {
+        return elements.map((element, index) => {
+          return ImpulseForm._childOf(
+            this,
+            nextInitialElements.at(index)?._initial ?? element._initial,
+            element,
+          )
+        })
+      })
     })
   }
 }

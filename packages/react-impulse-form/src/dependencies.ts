@@ -3,6 +3,7 @@ export {
   type Scope,
   type Compare,
   type ReadonlyImpulse,
+  isImpulse,
   Impulse,
   batch,
   untrack,

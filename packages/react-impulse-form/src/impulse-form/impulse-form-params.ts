@@ -1,4 +1,5 @@
 export interface ImpulseFormParams {
+  initial: unknown
   "input.setter": unknown
   "input.schema": unknown
 

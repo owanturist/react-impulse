@@ -5,6 +5,7 @@ import { isTruthy } from "~/tools/is-truthy"
 import { Impulse, type Scope, batch, untrack } from "../dependencies"
 import { Emitter } from "../emitter"
 
+import type { GetImpulseFormParam } from "./get-impulse-form-param"
 import type { ImpulseFormParams } from "./impulse-form-params"
 
 export abstract class ImpulseForm<
@@ -12,21 +13,14 @@ export abstract class ImpulseForm<
 > {
   protected static _childOf<TChild extends ImpulseForm>(
     parent: ImpulseForm,
+    initial: GetImpulseFormParam<TChild, "initial">,
     child: TChild,
   ): TChild {
-    if (child._root === parent._root) {
+    if (child._root === parent._root && child._initial === initial) {
       return child
     }
 
-    return child._childOf(parent._root) as TChild
-  }
-
-  protected static _setInitial<TForm extends ImpulseForm>(
-    form: TForm,
-    initial: undefined | TForm,
-    isRoot = form._root === form,
-  ): void {
-    form._setInitial(initial, isRoot)
+    return child._childOf([parent._root, initial]) as TChild
   }
 
   protected static _submitWith<TParams extends ImpulseFormParams>(
@@ -65,6 +59,8 @@ export abstract class ImpulseForm<
   // necessary for type inference
   protected readonly _params?: TParams
 
+  protected abstract readonly _initial: TParams["initial"]
+
   private readonly _onFocus = new Emitter<[error: unknown]>()
 
   private readonly _onSubmit = new Emitter<
@@ -81,12 +77,11 @@ export abstract class ImpulseForm<
     this._root = _root ?? this
   }
 
-  protected abstract _childOf(parent: null | ImpulseForm): ImpulseForm<TParams>
+  protected abstract _childOf(
+    args: null | [parent: ImpulseForm, initial: TParams["initial"]],
+  ): ImpulseForm<TParams>
 
-  protected abstract _setInitial(
-    initial: undefined | ImpulseForm<TParams>,
-    isRoot: boolean,
-  ): void
+  protected abstract _getInitial(): TParams["initial"]
 
   protected abstract _setValidated(isValidated: boolean): void
 

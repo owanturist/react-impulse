@@ -3,7 +3,13 @@ import { isNull } from "~/tools/is-null"
 import { params } from "~/tools/params"
 import { resolveSetter } from "~/tools/setter"
 
-import { type Compare, Impulse, type Scope, batch } from "../dependencies"
+import {
+  type Compare,
+  Impulse,
+  type Scope,
+  batch,
+  untrack,
+} from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 import type { Result } from "../result"
 import {
@@ -32,6 +38,7 @@ export class ImpulseFormUnit<
   TError = null,
   TOutput = TInput,
 > extends ImpulseForm<{
+  initial: Impulse<TInput>
   "input.setter": ImpulseFormUnitInputSetter<TInput>
   "input.schema": TInput
 
@@ -62,7 +69,7 @@ export class ImpulseFormUnit<
     private readonly _validateOn: Impulse<ValidateStrategy>,
     private readonly _error: Impulse<null | TError>,
     private readonly _isExplicitInitial: Impulse<boolean>,
-    private readonly _initial: Impulse<TInput>,
+    protected readonly _initial: Impulse<TInput>,
     private readonly _input: Impulse<TInput>,
     private readonly _transform: Impulse<
       undefined | ImpulseFormUnitTransform<TInput, TError, TOutput>
@@ -135,16 +142,20 @@ export class ImpulseFormUnit<
 
   // TODO add tests against _validated when cloning
   protected _childOf(
-    parent: null | ImpulseForm,
+    args: null | [ImpulseForm, Impulse<TInput>],
   ): ImpulseFormUnit<TInput, TError, TOutput> {
+    if (untrack(this._isExplicitInitial)) {
+      // args?.[1].setValue(untrack(this._initial))
+    }
+
     return new ImpulseFormUnit(
-      parent,
+      args?.[0] ?? null,
       this._initialSource.clone(),
       this._touched.clone(),
       this._validateOn.clone(),
       this._error.clone(),
       this._isExplicitInitial.clone(),
-      this._initial.clone(),
+      args?.[1] ?? this._initial.clone(),
       this._input.clone(),
       this._transform.clone(),
       this._isInputEqual,
@@ -152,21 +163,8 @@ export class ImpulseFormUnit<
     )
   }
 
-  protected _setInitial(
-    initial: undefined | ImpulseFormUnit<TInput, TError, TOutput>,
-    isRoot: boolean,
-  ): void {
-    batch((scope) => {
-      this._initialSource.setValue(initial)
-
-      if (
-        initial != null &&
-        isRoot &&
-        this._isExplicitInitial.getValue(scope)
-      ) {
-        initial.setInitial(this._initial.getValue(scope))
-      }
-    })
+  protected _getInitial(): Impulse<TInput> {
+    return this._initial.clone()
   }
 
   protected _setValidated(isValidated: boolean): void {

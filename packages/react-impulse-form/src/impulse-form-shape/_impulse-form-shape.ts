@@ -5,6 +5,7 @@ import { isString } from "~/tools/is-string"
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
 import { isUndefined } from "~/tools/is-undefined"
+import { mapValues } from "~/tools/map-values"
 import { params } from "~/tools/params"
 
 import { type Scope, batch } from "../dependencies"
@@ -18,6 +19,7 @@ import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 import type { ImpulseFormShapeFlag } from "./impulse-form-shape-flag"
 import type { ImpulseFormShapeFlagSetter } from "./impulse-form-shape-flag-setter"
 import type { ImpulseFormShapeFlagVerbose } from "./impulse-form-shape-flag-verbose"
+import type { ImpulseFormShapeInitial } from "./impulse-form-shape-initial"
 import type { ImpulseFormShapeInput } from "./impulse-form-shape-input"
 import type { ImpulseFormShapeInputSetter } from "./impulse-form-shape-input-setter"
 import type { ImpulseFormShapeOutput } from "./impulse-form-shape-output"
@@ -29,6 +31,7 @@ import type { ImpulseFormShapeValidateOnVerbose } from "./impulse-form-shape-val
 export class ImpulseFormShape<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
 > extends ImpulseForm<{
+  initial: ImpulseFormShapeInitial<TFields>
   "input.schema": ImpulseFormShapeInput<TFields>
   "input.setter": ImpulseFormShapeInputSetter<TFields>
 
@@ -49,14 +52,22 @@ export class ImpulseFormShape<
 }> {
   public readonly fields: Readonly<TFields>
 
-  public constructor(root: null | ImpulseForm, fields: Readonly<TFields>) {
+  public constructor(
+    root: null | ImpulseForm,
+    protected readonly _initial: ImpulseFormShapeInitial<TFields>,
+    fields: Readonly<TFields>,
+  ) {
     super(root)
 
     const acc = {} as TFields
 
     for (const [key, field] of Object.entries(fields)) {
       acc[key as keyof TFields] = isImpulseForm(field)
-        ? (ImpulseForm._childOf(this, field) as TFields[keyof TFields])
+        ? (ImpulseForm._childOf(
+            this,
+            _initial[key],
+            field,
+          ) as TFields[keyof TFields])
         : (field as TFields[keyof TFields])
     }
 
@@ -105,23 +116,18 @@ export class ImpulseFormShape<
     return super._getFocusFirstInvalid(scope)
   }
 
-  protected _childOf(parent: null | ImpulseForm): ImpulseFormShape<TFields> {
-    const fields = this._mapFormFields((form) =>
-      ImpulseForm._childOf(this, form),
-    )
+  protected _childOf(
+    args: null | [ImpulseForm, ImpulseFormShapeInitial<TFields>],
+  ): ImpulseFormShape<TFields> {
+    const [root, initial] = args ?? [null, this._getInitial()]
 
-    return new ImpulseFormShape(parent, fields as TFields[keyof TFields])
+    return new ImpulseFormShape(root, initial, this.fields)
   }
 
-  protected _setInitial(
-    initial: undefined | ImpulseFormShape<TFields>,
-    isRoot: boolean,
-  ): void {
-    for (const [key, field] of Object.entries(this.fields)) {
-      if (isImpulseForm(field)) {
-        ImpulseForm._setInitial(field, initial?.fields[key], isRoot)
-      }
-    }
+  protected _getInitial(): ImpulseFormShapeInitial<TFields> {
+    return mapValues(this.fields, (field) => {
+      return isImpulseForm(field) ? field._getInitial() : null
+    })
   }
 
   protected _setValidated(isValidated: boolean): void {

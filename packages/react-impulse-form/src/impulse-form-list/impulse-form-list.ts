@@ -33,7 +33,13 @@ export function ImpulseFormList<TElement extends ImpulseForm>(
 ): ImpulseFormList<TElement> {
   const list = new ImpulseFormListImpl(
     null,
-    Impulse(elements, { compare: isShallowArrayEqual }),
+    elements,
+    Impulse(
+      elements.map((element) => element._initial),
+      {
+        compare: isShallowArrayEqual,
+      },
+    ),
   )
 
   batch(() => {
