@@ -9,7 +9,7 @@ import { mapValues } from "~/tools/map-values"
 import { params } from "~/tools/params"
 
 import { type Scope, batch } from "../dependencies"
-import { ImpulseForm } from "../impulse-form"
+import { ImpulseForm, isImpulseForm } from "../impulse-form"
 import { ImpulseFormShape } from "../impulse-form-shape"
 
 import type { ImpulseFormSwitchError } from "./_impulse-form-switch-error"
@@ -216,21 +216,37 @@ export class ImpulseFormSwitch<
       verbose: ImpulseFormSwitchOutputVerbose<TKind, TBranches>,
     ) => TResult = params._first as typeof select,
   ): TResult {
-    const kind = this.active.getOutput(scope)
+    const active = this.active.getOutput(scope)
 
-    const [conciseBranches, verboseBranches] = this._branches.getOutput(
-      scope,
-      params,
-    )
+    let allValid = true
+    // make it easier for TS
+    const branchesConcise = {} as Record<string, unknown>
+    const branchesVerbose = {} as Record<string, unknown>
+
+    forEntries(this.branches, (branch, kind) => {
+      if (isImpulseForm(branch)) {
+        const output = branch.getOutput(scope, (concise, verbose) => ({
+          concise,
+          verbose,
+        }))
+
+        allValid = allValid && !isNull(output.concise)
+        branchesConcise[kind] = output.concise
+        branchesVerbose[kind] = output.verbose
+      } else {
+        branchesConcise[kind] = branch
+        branchesVerbose[kind] = branch
+      }
+    })
 
     const conciseBranchValue =
-      isNull(kind) || isNull(conciseBranches) ? null : conciseBranches[kind]
+      isNull(active) || isNull(branchesConcise) ? null : branchesConcise[active]
 
     const concise = isNull(conciseBranchValue)
       ? null
-      : { kind, value: conciseBranches }
+      : { kind: active, value: conciseBranchValue }
 
-    const verbose = { kind, value: verboseBranches }
+    const verbose = { active, branches: branchesVerbose }
 
     return select(concise, verbose)
   }
