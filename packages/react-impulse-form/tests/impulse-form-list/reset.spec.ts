@@ -2,7 +2,7 @@ import { z } from "zod"
 
 import type { Setter } from "~/tools/setter"
 
-import { ImpulseFormList, ImpulseFormUnit } from "../../src"
+import { ImpulseFormList, ImpulseFormShape, ImpulseFormUnit } from "../../src"
 import { wait } from "../common"
 
 beforeAll(() => {
@@ -220,4 +220,97 @@ it("updates isSubmitting for restored elements", async ({ scope }) => {
   expect(
     form.getElements(scope).map((element) => element.isSubmitting(scope)),
   ).toStrictEqual([false, false, false])
+})
+
+/**
+ * bugfix: ImpulseFormList.reset() restores not initial values #923
+ * @link https://github.com/owanturist/react-impulse/issues/923
+ */
+
+it("anything 2", ({ scope }) => {
+  const form = ImpulseFormList([
+    ImpulseFormShape({
+      id: 1,
+      name: ImpulseFormUnit("1"),
+    }),
+    ImpulseFormShape({
+      id: 2,
+      name: ImpulseFormUnit("2"),
+    }),
+  ])
+
+  form.setElements(([, second]) => [second!])
+  form.reset()
+
+  expect(form.getInput(scope)).toStrictEqual([
+    { id: 1, name: "1" },
+    { id: 2, name: "2" },
+  ])
+})
+
+it("anything 3", ({ scope }) => {
+  const form = ImpulseFormList([
+    ImpulseFormShape({
+      id: 1,
+      name: ImpulseFormUnit("1"),
+    }),
+    ImpulseFormShape({
+      id: 2,
+      name: ImpulseFormUnit("2"),
+    }),
+  ])
+
+  form.setElements(([first]) => [first!])
+  form.reset()
+
+  expect(form.getInput(scope)).toStrictEqual([
+    { id: 1, name: "1" },
+    { id: 2, name: "2" },
+  ])
+})
+console.log("fix the naming and test cases")
+it("example", ({ scope }) => {
+  const form = ImpulseFormList([ImpulseFormUnit("1"), ImpulseFormUnit("2")])
+
+  expect(form.getInitial(scope)).toStrictEqual(["1", "2"])
+
+  form.setElements((elements) => elements.slice(0, 1))
+  expect(form.getInput(scope)).toStrictEqual(["1"])
+  expect(form.getInitial(scope)).toStrictEqual(["1", "2"])
+
+  form.setElements((elements) => [
+    ...elements,
+    ImpulseFormUnit("2"),
+    ImpulseFormUnit("3"),
+  ])
+  expect(form.getInput(scope)).toStrictEqual(["1", "2", "3"])
+  expect(form.getInitial(scope)).toStrictEqual(["1", "2"])
+
+  form.setInitial(["1", "2", "3"])
+  expect(form.getInitial(scope)).toStrictEqual(["1", "2", "3"])
+  // form initials = [1,2,3]
+
+  form.setElements([
+    ImpulseFormUnit("1"),
+    ImpulseFormUnit("2"),
+    ImpulseFormUnit("3"),
+    ImpulseFormUnit("4"),
+    ImpulseFormUnit("5"),
+  ])
+  expect(form.getInitial(scope)).toStrictEqual(["1", "2", "3"])
+
+  form.reset()
+})
+
+it("kek", ({ scope }) => {
+  const form = ImpulseFormList<ImpulseFormUnit<number>>([])
+
+  form.setInitial([1])
+  expect(form.getInput(scope)).toStrictEqual([])
+
+  form.setElements([ImpulseFormUnit(0)])
+  expect(form.getInput(scope)).toStrictEqual([0])
+
+  form.setInitial([1])
+  form.getElements(scope).at(1)?.setInitial(1)
 })

@@ -1,3 +1,5 @@
+import { concat } from "~/tools/concat"
+import { drop } from "~/tools/drop"
 import { isFalse } from "~/tools/is-false"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
@@ -7,6 +9,7 @@ import { isTruthy } from "~/tools/is-truthy"
 import { isUndefined } from "~/tools/is-undefined"
 import { params } from "~/tools/params"
 import { type Setter, resolveSetter } from "~/tools/setter"
+import { take } from "~/tools/take"
 import { uniq } from "~/tools/uniq"
 import { zipMap } from "~/tools/zip-map"
 
@@ -61,9 +64,7 @@ export class ImpulseFormList<
     super(root)
 
     this._initialElements = _initialElements.clone((elements) => {
-      return elements.map((element) => {
-        return ImpulseForm._childOf(this, element)
-      })
+      return elements.map((element) => element.clone())
     })
 
     this._elements = _elements.clone((elements) => {
@@ -149,7 +150,7 @@ export class ImpulseFormList<
 
     const [concise, verbose, dirty] = zipMap(
       // the result should always include the longer array
-      [...elements, ...initialElements.slice(elements.length)],
+      [...elements, ...drop(initialElements, elements.length)],
       (form, index) => {
         // return actual dirty state as long as iterates over elements
         if (index < minLength) {
@@ -391,7 +392,9 @@ export class ImpulseFormList<
     batch((scope) => {
       this.setInitial(resetter)
 
-      const initialElements = this._initialElements.getValue(scope)
+      const initialElements = this._initialElements
+        .getValue(scope)
+        .map((element) => ImpulseForm._childOf(this, element))
 
       this._elements.setValue(initialElements)
 
@@ -455,33 +458,47 @@ export class ImpulseFormList<
 
   public setInitial(setter: ImpulseFormListInputSetter<TElement>): void {
     batch((scope) => {
+      const elements = this._elements.getValue(scope)
+      const initialElements = this._initialElements.getValue(scope)
+
       // get next initial value from setter (initial, input) -> next
       const nextInitial = isFunction(setter)
         ? setter(this.getInitial(scope), this.getInput(scope))
         : setter
 
-      const elements = this._elements
-        .getValue(scope)
-        .slice(0, nextInitial.length)
-
-      const initialElements = [
-        ...elements,
-        // restore initial elements that were removed from the elements
-        ...this._initialElements
-          .getValue(scope)
-          .slice(elements.length, nextInitial.length),
-      ]
+      const nextInitialElements = take(
+        concat(
+          initialElements,
+          // fallback the initial elements to the current elements' tail
+          drop(elements, initialElements.length),
+        ),
+        nextInitial.length,
+      ).map((element) => element.clone())
 
       // set list's initial elements
-      this._initialElements.setValue(initialElements)
+      this._initialElements.setValue(nextInitialElements)
 
-      // set initial values for each element
-      for (const [index, element] of initialElements.entries()) {
+      for (
+        let index = 0;
+        index < Math.max(elements.length, nextInitialElements.length);
+        index++
+      ) {
         const initial = nextInitial.at(index)
+        const element = elements.at(index)
+        const initialElement = nextInitialElements.at(index)
 
-        // do not change initial value if it is not defined
-        if (!isUndefined(initial)) {
-          element.setInitial(initial)
+        if (element) {
+          // update initial sources for each element
+          ImpulseForm._setInitial(element, initialElement)
+
+          // do not change initial value if it is not defined
+          if (!isUndefined(initial)) {
+            element.setInitial(initial)
+          }
+        } else if (!isUndefined(initial)) {
+          // an initial element might not have an associated element
+          // so it should setInitial separately
+          initialElement?.setInitial(initial)
         }
       }
     })

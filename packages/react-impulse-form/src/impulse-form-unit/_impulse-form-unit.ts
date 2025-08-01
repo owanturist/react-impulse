@@ -370,12 +370,12 @@ export class ImpulseFormUnit<
         : setter
 
       this._initial.setValue(nextInitial)
+      this._initialSource.getValue(scope)?.setInitial(nextInitial)
 
       this._isExplicitInitial.setValue(true)
 
       if (initial !== this._initial.getValue(scope)) {
         this._updateValidated()
-        this._initialSource.getValue(scope)?.setInitial(setter)
       }
     })
   }

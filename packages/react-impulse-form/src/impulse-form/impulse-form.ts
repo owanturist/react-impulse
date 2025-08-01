@@ -171,8 +171,8 @@ export abstract class ImpulseForm<
     })
   }
 
-  public clone(): ImpulseForm<TParams> {
-    return this._childOf(null)
+  public clone(): this {
+    return this._childOf(null) as this
   }
 
   public isValid(scope: Scope): boolean {
