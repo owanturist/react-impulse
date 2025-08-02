@@ -4,6 +4,7 @@ import { hasProperty } from "~/tools/has-property"
 import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
+import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
 import { isString } from "~/tools/is-string"
 import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
@@ -13,6 +14,7 @@ import { values } from "~/tools/values"
 
 import { Impulse, type Scope } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
+import { ImpulseFormInitial } from "../impulse-form/impulse-form-initial"
 import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import {
   type ImpulseFormChild,
@@ -94,7 +96,7 @@ export class ImpulseFormShapeState<
       keyof ImpulseFormShapeStateFields<TFields>
     >,
   ) {
-    super(parent)
+    super(parent, initial)
 
     this._forms = mapValues(fields, (field, key) => {
       return field._childOf(this, initial[key])
@@ -110,35 +112,23 @@ export class ImpulseFormShapeState<
 
   // I N I T I A L
 
-  public _extractInitial(): ImpulseFormShapeInitial<TFields> {
-    const initial = mapValues(this._forms, (field) => field._extractInitial())
+  public _getInitial(scope: Scope): ImpulseFormShapeInput<TFields> {
+    const initial = mapValues(this._forms, (field) => {
+      return field._getInitial(scope)
+    })
 
-    return initial as ImpulseFormShapeInitial<TFields>
+    return {
+      ...initial,
+      ...this._meta,
+    } as ImpulseFormShapeInput<TFields>
   }
-
-  public readonly _initial = Impulse(
-    (scope) => {
-      const initial = mapValues(this._forms, ({ _initial }) => {
-        return _initial.getValue(scope)
-      })
-
-      return {
-        ...initial,
-        ...this._meta,
-      } as ImpulseFormShapeInput<TFields>
-    },
-
-    {
-      compare: isImpulseFormShapeInputEqual,
-    },
-  )
 
   public _setInitial(
     scope: Scope,
     setter: ImpulseFormShapeInputSetter<TFields>,
   ): void {
     const setters = isFunction(setter)
-      ? setter(this._initial.getValue(scope), this._input.getValue(scope))
+      ? setter(this._getInitial(scope), this._input.getValue(scope))
       : setter
 
     forEntries(this._forms, (field, key) => {
@@ -172,7 +162,7 @@ export class ImpulseFormShapeState<
     setter: ImpulseFormShapeInputSetter<TFields>,
   ): void {
     const setters = isFunction(setter)
-      ? setter(this._input.getValue(scope), this._initial.getValue(scope))
+      ? setter(this._input.getValue(scope), this._getInitial(scope))
       : setter
 
     forEntries(this._forms, (field, key) => {
@@ -558,7 +548,7 @@ export class ImpulseFormShapeState<
     resetter: undefined | ImpulseFormShapeInputSetter<TFields>,
   ): void {
     const resetters = isFunction(resetter)
-      ? resetter(this._initial.getValue(scope), this._input.getValue(scope))
+      ? resetter(this._getInitial(scope), this._input.getValue(scope))
       : resetter
 
     forEntries(this._forms, (field, key) => {

@@ -334,6 +334,7 @@ export default tseslint.config([
     },
     rules: {
       ...vitestPlugin.configs.recommended.rules,
+      "vitest/valid-expect": "off", // false positive
       "vitest/valid-describe-callback": "off", // false positive
       "vitest/no-done-callback": "off",
       "vitest/no-deprecated-functions": "off",
