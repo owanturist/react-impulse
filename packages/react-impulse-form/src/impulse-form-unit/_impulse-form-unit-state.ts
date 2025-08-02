@@ -6,6 +6,7 @@ import { Lazy } from "~/tools/lazy"
 import { resolveSetter } from "~/tools/setter"
 
 import { type Compare, Impulse, type Scope, batch } from "../dependencies"
+import type { ImpulseFormInitial } from "../impulse-form/impulse-form-initial"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
 import {
@@ -36,7 +37,7 @@ export class ImpulseFormUnitState<
 
   public constructor(
     parent: null | ImpulseFormState,
-    public readonly _initial: Impulse<TInput>,
+    initial: ImpulseFormInitial<Impulse<TInput>>,
     public readonly _input: Impulse<TInput>,
     private readonly _customError: Impulse<null | TError>,
     public readonly _validateOn: Impulse<ValidateStrategy>,
@@ -49,14 +50,14 @@ export class ImpulseFormUnitState<
     private readonly _isOutputEqual: Compare<null | TOutput>,
     private readonly _isErrorEqual: Compare<null | TError>,
   ) {
-    super(parent)
+    super(parent, initial)
 
     this._validated.setValue(false)
   }
 
   public _childOf(
     parent: ImpulseFormState,
-    initial: Impulse<TInput>,
+    initial: ImpulseFormInitial<Impulse<TInput>>,
   ): ImpulseFormUnitState<TInput, TError, TOutput> {
     return new ImpulseFormUnitState(
       parent,
@@ -107,7 +108,7 @@ export class ImpulseFormUnitState<
   ): void {
     this._input.setValue((input) => {
       return isFunction(setter)
-        ? setter(input, this._initial.getValue(scope))
+        ? setter(input, this._getInitial(scope))
         : setter
     })
 
@@ -116,15 +117,15 @@ export class ImpulseFormUnitState<
 
   // I N I T I A L
 
-  public _extractInitial(): Impulse<TInput> {
-    return this._initial.clone()
+  public _getInitial(scope: Scope): TInput {
+    return this._initial._getCurrent(scope).getValue(scope)
   }
 
   public _setInitial(
     scope: Scope,
     setter: ImpulseFormUnitInputSetter<TInput>,
   ): void {
-    this._initial.setValue((initial) => {
+    this._initial._getCurrent(scope).setValue((initial) => {
       return isFunction(setter)
         ? setter(initial, this._input.getValue(scope))
         : setter
@@ -267,7 +268,7 @@ export class ImpulseFormUnitState<
 
   public readonly _dirty = Impulse((scope) => {
     return this._isInputDirty(
-      this._initial.getValue(scope),
+      this._getInitial(scope),
       this._input.getValue(scope),
       scope,
     )
@@ -282,12 +283,12 @@ export class ImpulseFormUnitState<
     resetter: undefined | ImpulseFormUnitInputSetter<TInput>,
   ): void {
     const resetValue = isUndefined(resetter)
-      ? this._initial.getValue(scope)
+      ? this._getInitial(scope)
       : isFunction(resetter)
-        ? resetter(this._initial.getValue(scope), this._input.getValue(scope))
+        ? resetter(this._getInitial(scope), this._input.getValue(scope))
         : resetter
 
-    this._initial.setValue(resetValue)
+    this._initial._getCurrent(scope).setValue(resetValue)
     this._input.setValue(resetValue)
     // TODO test when reset for all below
     this._touched.setValue(false)

@@ -5,6 +5,7 @@ import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
 import { Emitter } from "../emitter"
 
 import type { ImpulseForm } from "./impulse-form"
+import type { ImpulseFormInitial } from "./impulse-form-initial"
 import type { ImpulseFormParams } from "./impulse-form-params"
 
 export abstract class ImpulseFormState<
@@ -16,24 +17,22 @@ export abstract class ImpulseFormState<
 
   public readonly _root: ImpulseFormState
 
-  public constructor(parent: null | ImpulseFormState) {
+  public constructor(
+    parent: null | ImpulseFormState,
+    public readonly _initial: ImpulseFormInitial<TParams["initial"]>,
+  ) {
     this._root = parent?._root ?? this
   }
 
   public abstract _childOf(
     parent: ImpulseFormState,
-    initial: TParams["initial"],
+    initial: ImpulseFormInitial<TParams["initial"]>,
   ): ImpulseFormState<TParams>
-
-  public _hasSameRoot(another: ImpulseFormState): boolean {
-    return this._root === another._root
-  }
 
   // I N I T I A L
 
-  public abstract _extractInitial(): TParams["initial"]
+  public abstract _getInitial(scope: Scope): TParams["input.schema"]
 
-  public abstract readonly _initial: ReadonlyImpulse<TParams["input.schema"]>
   public abstract _setInitial(
     scope: Scope,
     setter: TParams["input.setter"],

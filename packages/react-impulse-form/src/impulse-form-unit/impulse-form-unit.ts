@@ -5,6 +5,7 @@ import { isStrictEqual } from "~/tools/is-strict-equal"
 
 import { createUnionCompare } from "../create-union-compare"
 import { type Compare, Impulse, untrack } from "../dependencies"
+import { ImpulseFormInitial } from "../impulse-form/impulse-form-initial"
 import {
   VALIDATE_ON_INIT,
   VALIDATE_ON_TOUCH,
@@ -194,17 +195,20 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
 
   const input = Impulse(input_, { compare: isInputEqual })
 
-  const initial = Impulse(
-    untrack((scope) => {
-      const initialOrInput = options?.initial ?? input_
+  const initial = ImpulseFormInitial._of(
+    Impulse(
+      untrack((scope) => {
+        const initialOrInput = options?.initial ?? input_
 
-      return isInputEqual(initialOrInput, input_, scope)
-        ? input_
-        : initialOrInput
-    }),
-    {
-      compare: isInputEqual,
-    },
+        return isInputEqual(initialOrInput, input_, scope)
+          ? input_
+          : initialOrInput
+      }),
+      {
+        compare: isInputEqual,
+      },
+    ),
+    (impulse) => impulse.clone(),
   )
   const touched = Impulse(options?.touched ?? false)
 
