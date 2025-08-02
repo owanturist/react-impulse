@@ -1,11 +1,15 @@
 import { z } from "zod"
 
+import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
+import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
 import { params } from "~/tools/params"
+import type { Setter } from "~/tools/setter"
 
 import {
   ImpulseFormUnit,
   type ImpulseFormUnitSchemaOptions,
   type ImpulseFormUnitValidatedOptions,
+  type Result,
 } from "../../src"
 
 it("selects error", ({ scope }) => {
@@ -50,6 +54,10 @@ describe("when neither schema nor initial error are defined", () => {
 
     value.setError(2)
     expect(value.getError(scope)).toBe(2)
+
+    expectTypeOf(value.setError)
+      .parameter(0)
+      .toEqualTypeOf<Setter<null | number>>()
   })
 
   it("resets to null", ({ scope }) => {
@@ -100,6 +108,39 @@ describe("when initial error is defined", () => {
 
     value.setError((error) => error! + 1)
     expect(value.getError(scope)).toBe(3)
+  })
+
+  it("selects unequal error values when isErrorEqual is not specified", ({
+    scope,
+  }) => {
+    const value = ImpulseFormUnit("1", {
+      error: ["error"],
+    })
+
+    const error_0 = value.getError(scope)
+
+    value.setError(["error"])
+    const error_1 = value.getError(scope)
+
+    expect(error_0).not.toBe(error_1)
+    expect(error_0).toStrictEqual(error_1)
+  })
+
+  it("selects equal error values when isErrorEqual is specified", ({
+    scope,
+  }) => {
+    const value = ImpulseFormUnit("1", {
+      error: ["error"],
+      isErrorEqual: isShallowArrayEqual,
+    })
+
+    const error_0 = value.getError(scope)
+
+    value.setError(["error"])
+    const error_1 = value.getError(scope)
+
+    expect(error_0).toBe(error_1)
+    expect(error_0).toStrictEqual(error_1)
   })
 })
 
@@ -156,6 +197,47 @@ describe("when validator is defined", () => {
     value.setError((error) => (error ?? 1) + 1)
     expect(value.getError(scope)).toBe(2)
   })
+
+  it("selects unequal error values when isErrorEqual is not specified", ({
+    scope,
+  }) => {
+    const value = ImpulseFormUnit(-1, {
+      validateOn: "onInit",
+      validate: (input) => {
+        return input > 0 ? [null, input] : [{ message: "error" }, null]
+      },
+    })
+
+    const error_0 = value.getError(scope)
+
+    value.setInput(-2)
+
+    const error_1 = value.getError(scope)
+
+    expect(error_0).not.toBe(error_1)
+    expect(error_0).toStrictEqual(error_1)
+  })
+
+  it("selects equal error values when isErrorEqual is specified", ({
+    scope,
+  }) => {
+    const value = ImpulseFormUnit(-1, {
+      validateOn: "onInit",
+      validate: (input): Result<{ message: string }, number> => {
+        return input > 0 ? [null, input] : [{ message: "error" }, null]
+      },
+      isErrorEqual: isShallowObjectEqual,
+    })
+
+    const error_0 = value.getError(scope)
+
+    value.setInput(-2)
+
+    const error_1 = value.getError(scope)
+
+    expect(error_0).toBe(error_1)
+    expect(error_0).toStrictEqual(error_1)
+  })
 })
 
 describe("when schema is defined", () => {
@@ -205,6 +287,22 @@ describe("when schema is defined", () => {
     const value = setup()
     value.setError((error) => [...(error ?? ["initial"]), "custom error"])
     expect(value.getError(scope)).toStrictEqual(["initial", "custom error"])
+  })
+
+  it("selects same error value", ({ scope }) => {
+    const value = ImpulseFormUnit(-1, {
+      validateOn: "onInit",
+      schema: z.number().min(0),
+    })
+
+    const error_0 = value.getError(scope)
+
+    value.setInput(-2)
+
+    const error_1 = value.getError(scope)
+
+    expect(error_0).toBe(error_1)
+    expect(error_0).toStrictEqual(error_1)
   })
 })
 

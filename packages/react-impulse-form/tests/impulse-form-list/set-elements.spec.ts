@@ -55,6 +55,13 @@ it("modifies existing elements", ({ scope }) => {
   expect(form.getInput(scope)).toStrictEqual([0, 1, 2, 3])
 })
 
+it("adding new elements", ({ scope }) => {
+  const form = setup([setupElement(0), setupElement(1), setupElement(2)])
+
+  form.setElements((elements) => [...elements, setupElement(3)])
+  expect(form.getInput(scope)).toStrictEqual([0, 1, 2, 3])
+})
+
 it("attach the new elements to the form root", ({ scope }) => {
   const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 
@@ -62,6 +69,7 @@ it("attach the new elements to the form root", ({ scope }) => {
   void form.submit()
 
   expect(form.getSubmitCount(scope)).toBe(1)
+  expect(form.getElements(scope)).toHaveLength(4)
   expect(form.getElements(scope).at(0)!.getSubmitCount(scope)).toBe(1)
   expect(form.getElements(scope).at(3)!.getSubmitCount(scope)).toBe(1)
 })

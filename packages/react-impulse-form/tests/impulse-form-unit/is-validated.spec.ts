@@ -85,7 +85,7 @@ it("returns false on init when schema", ({ scope }) => {
 describe.each([
   ["(scope)", isValidatedDefault],
   ["(scope, (concise) => concise)", isValidatedConcise],
-  ["(scope, (_, verbose) => concise)", isValidatedVerbose],
+  ["(scope, (_, verbose) => verbose)", isValidatedVerbose],
 ])("isValidated%s", (_, isValidated) => {
   it("returns boolean value", ({ scope }) => {
     const value = setup()

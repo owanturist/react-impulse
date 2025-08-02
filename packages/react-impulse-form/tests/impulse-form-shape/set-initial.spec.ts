@@ -205,3 +205,24 @@ it("updates initial value", ({ scope }) => {
     >
   >()
 })
+
+it("fields initial values are independent", ({ scope }) => {
+  const unit = ImpulseFormUnit("0")
+  const shape = ImpulseFormShape({
+    first: unit,
+    second: unit,
+  })
+
+  expect(shape.getInitial(scope)).toStrictEqual({
+    first: "0",
+    second: "0",
+  })
+
+  shape.setInitial({
+    first: "1",
+  })
+  expect(shape.getInitial(scope)).toStrictEqual({
+    first: "1",
+    second: "0",
+  })
+})

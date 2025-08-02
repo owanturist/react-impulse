@@ -334,6 +334,7 @@ export default tseslint.config([
     },
     rules: {
       ...vitestPlugin.configs.recommended.rules,
+      "vitest/valid-expect": "off", // false positive
       "vitest/valid-describe-callback": "off", // false positive
       "vitest/no-done-callback": "off",
       "vitest/no-deprecated-functions": "off",
@@ -359,12 +360,19 @@ export default tseslint.config([
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/unbound-method": "off",
       "@typescript-eslint/no-shadow": "off",
+    },
+  },
+
+  // Only tests for react-impulse* packages
+  {
+    files: ["packages/react-impulse*/tests/**/*.ts?(x)"],
+    rules: {
       "no-restricted-imports": [
         "error",
         {
           patterns: [
             {
-              group: ["../src/*"],
+              group: ["**/src/*"],
               message: "Import only ../src for tests",
             },
           ],

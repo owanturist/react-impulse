@@ -1,8 +1,12 @@
 import { isUndefined } from "~/tools/is-undefined"
+import { mapValues } from "~/tools/map-values"
+import { partitionEntries } from "~/tools/partition-entries"
 
 import { batch } from "../dependencies"
+import { isImpulseForm } from "../impulse-form"
 
-import { ImpulseFormShape as ImpulseFormShapeImpl } from "./_impulse-form-shape"
+import type { ImpulseFormShape as ImpulseFormShapeImpl } from "./_impulse-form-shape"
+import { ImpulseFormShapeState } from "./_impulse-form-shape-state"
 import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 import type { ImpulseFormShapeFlagSetter } from "./impulse-form-shape-flag-setter"
@@ -15,15 +19,15 @@ export type ImpulseFormShape<TFields extends ImpulseFormShapeFields> =
 export interface ImpulseFormShapeOptions<
   TFields extends ImpulseFormShapeFields,
 > {
-  input?: ImpulseFormShapeInputSetter<TFields>
-  initial?: ImpulseFormShapeInputSetter<TFields>
-  touched?: ImpulseFormShapeFlagSetter<TFields>
-  validateOn?: ImpulseFormShapeValidateOnSetter<TFields>
-  error?: ImpulseFormShapeErrorSetter<TFields>
+  readonly input?: ImpulseFormShapeInputSetter<TFields>
+  readonly initial?: ImpulseFormShapeInputSetter<TFields>
+  readonly touched?: ImpulseFormShapeFlagSetter<TFields>
+  readonly validateOn?: ImpulseFormShapeValidateOnSetter<TFields>
+  readonly error?: ImpulseFormShapeErrorSetter<TFields>
 }
 
 export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
-  fields: Readonly<TFields>,
+  fields: TFields,
   {
     input,
     initial,
@@ -32,30 +36,36 @@ export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
     error,
   }: ImpulseFormShapeOptions<TFields> = {},
 ): ImpulseFormShape<TFields> {
-  const shape = new ImpulseFormShapeImpl(null, fields)
+  const [forms, meta] = partitionEntries(fields, isImpulseForm)
 
-  batch(() => {
-    if (!isUndefined(touched)) {
-      shape.setTouched(touched)
+  const state = new ImpulseFormShapeState(
+    null,
+    mapValues(forms, ({ _state }) => _state._initial._clone()),
+    mapValues(forms, ({ _state }) => _state),
+    meta,
+  )
+
+  batch((scope) => {
+    if (!isUndefined(input)) {
+      state._setInput(scope, input)
     }
 
     if (!isUndefined(initial)) {
-      shape.setInitial(initial)
+      state._setInitial(scope, initial)
     }
 
-    if (!isUndefined(input)) {
-      shape.setInput(input)
+    if (!isUndefined(touched)) {
+      state._setTouched(scope, touched)
     }
 
     if (!isUndefined(validateOn)) {
-      shape.setValidateOn(validateOn)
+      state._setValidateOn(scope, validateOn)
     }
 
-    // TODO add test against null
     if (!isUndefined(error)) {
-      shape.setError(error)
+      state._setError(scope, error)
     }
   })
 
-  return shape
+  return state._host()
 }
