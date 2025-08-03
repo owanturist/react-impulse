@@ -195,21 +195,26 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
 
   const input = Impulse(input_, { compare: isInputEqual })
 
-  const initial = ImpulseFormInitial._of(
-    Impulse(
-      untrack((scope) => {
-        const initialOrInput = options?.initial ?? input_
+  const initial = Impulse(
+    new ImpulseFormInitial(
+      Impulse(
+        untrack((scope) => {
+          const initialOrInput = options?.initial ?? input_
 
-        return isInputEqual(initialOrInput, input_, scope)
-          ? input_
-          : initialOrInput
-      }),
-      {
-        compare: isInputEqual,
-      },
+          return isInputEqual(initialOrInput, input_, scope)
+            ? input_
+            : initialOrInput
+        }),
+        {
+          compare: isInputEqual,
+        },
+      ),
     ),
-    (impulse) => impulse.clone(),
+    {
+      compare: ImpulseFormInitial._compare,
+    },
   )
+
   const touched = Impulse(options?.touched ?? false)
 
   if (hasProperty(options, "schema")) {

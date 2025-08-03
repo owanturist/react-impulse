@@ -76,7 +76,7 @@ export abstract class ImpulseForm<
   }
 
   public getInitial(scope: Scope): TParams["input.schema"] {
-    return this._state._getInitial(scope)
+    return this._state._initial.getValue(scope)
   }
 
   public setInitial(setter: TParams["input.setter"]): void {

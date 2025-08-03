@@ -4,7 +4,6 @@ import { hasProperty } from "~/tools/has-property"
 import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
-import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
 import { isString } from "~/tools/is-string"
 import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
@@ -14,7 +13,6 @@ import { values } from "~/tools/values"
 
 import { Impulse, type Scope } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
-import { ImpulseFormInitial } from "../impulse-form/impulse-form-initial"
 import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import {
   type ImpulseFormChild,
@@ -89,38 +87,48 @@ export class ImpulseFormShapeState<
 
   public constructor(
     parent: null | ImpulseFormState,
-    initial: ImpulseFormShapeInitial<TFields>,
-    fields: ImpulseFormShapeStateFields<TFields>,
+    forms: ImpulseFormShapeStateFields<TFields>,
     public readonly _meta: Omit<
       TFields,
       keyof ImpulseFormShapeStateFields<TFields>
     >,
   ) {
-    super(parent, initial)
+    super(parent)
 
-    this._forms = mapValues(fields, (field, key) => {
-      return field._childOf(this, initial[key])
-    })
+    this._forms = mapValues(forms, (field) => field._childOf(this))
   }
 
-  public _childOf(
-    parent: ImpulseFormState,
-    initial: ImpulseFormShapeInitial<TFields>,
-  ): ImpulseFormShapeState<TFields> {
-    return new ImpulseFormShapeState(parent, initial, this._forms, this._meta)
+  public _childOf(parent: ImpulseFormState): ImpulseFormShapeState<TFields> {
+    if (parent._root === this._root) {
+      return this
+    }
+
+    return new ImpulseFormShapeState(parent, this._forms, this._meta)
   }
 
   // I N I T I A L
 
-  public _getInitial(scope: Scope): ImpulseFormShapeInput<TFields> {
-    const initial = mapValues(this._forms, (field) => {
-      return field._getInitial(scope)
-    })
+  public readonly _initial = Impulse(
+    (scope) => {
+      const initial = mapValues(this._forms, ({ _initial }) => {
+        return _initial.getValue(scope)
+      })
 
-    return {
-      ...initial,
-      ...this._meta,
-    } as ImpulseFormShapeInput<TFields>
+      return {
+        ...initial,
+        ...this._meta,
+      } as ImpulseFormShapeInput<TFields>
+    },
+
+    {
+      compare: isImpulseFormShapeInputEqual,
+    },
+  )
+
+  public _replaceInitial(state: ImpulseFormShapeInitial<TFields>): void {
+    forEntries(this._forms, (field, key) => {
+      field._replaceInitial(state[key])
+    })
   }
 
   public _setInitial(
@@ -128,7 +136,7 @@ export class ImpulseFormShapeState<
     setter: ImpulseFormShapeInputSetter<TFields>,
   ): void {
     const setters = isFunction(setter)
-      ? setter(this._getInitial(scope), this._input.getValue(scope))
+      ? setter(this._initial.getValue(scope), this._input.getValue(scope))
       : setter
 
     forEntries(this._forms, (field, key) => {
@@ -162,7 +170,7 @@ export class ImpulseFormShapeState<
     setter: ImpulseFormShapeInputSetter<TFields>,
   ): void {
     const setters = isFunction(setter)
-      ? setter(this._input.getValue(scope), this._getInitial(scope))
+      ? setter(this._input.getValue(scope), this._initial.getValue(scope))
       : setter
 
     forEntries(this._forms, (field, key) => {
@@ -548,7 +556,7 @@ export class ImpulseFormShapeState<
     resetter: undefined | ImpulseFormShapeInputSetter<TFields>,
   ): void {
     const resetters = isFunction(resetter)
-      ? resetter(this._getInitial(scope), this._input.getValue(scope))
+      ? resetter(this._initial.getValue(scope), this._input.getValue(scope))
       : resetter
 
     forEntries(this._forms, (field, key) => {
