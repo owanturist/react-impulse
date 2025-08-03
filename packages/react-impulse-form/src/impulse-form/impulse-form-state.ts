@@ -20,7 +20,19 @@ export abstract class ImpulseFormState<
     this._root = parent?._root ?? this
   }
 
-  public abstract _childOf(parent: ImpulseFormState): ImpulseFormState<TParams>
+  protected abstract _childOf(
+    parent: ImpulseFormState,
+  ): ImpulseFormState<TParams>
+
+  public _parentOf<TChildParams extends ImpulseFormParams>(
+    child: ImpulseFormState<TChildParams>,
+  ): ImpulseFormState<TChildParams> {
+    if (this._root === child._root) {
+      return child
+    }
+
+    return child._childOf(this)
+  }
 
   // I N I T I A L
 

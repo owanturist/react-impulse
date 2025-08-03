@@ -79,7 +79,7 @@ export class ImpulseFormListState<
     super(parent)
 
     this._elements = Impulse(
-      map(elements, (el) => el._childOf(this)),
+      map(elements, (el) => this._parentOf(el)),
       {
         compare: isShallowArrayEqual,
       },
@@ -89,10 +89,6 @@ export class ImpulseFormListState<
   }
 
   public _childOf(parent: ImpulseFormState): ImpulseFormListState<TElement> {
-    if (parent._root === this._root) {
-      return this
-    }
-
     return new ImpulseFormListState(parent, untrack(this._elements))
   }
 
@@ -128,7 +124,7 @@ export class ImpulseFormListState<
       const elements = this._elements.getValue(scope)
       const initialElements = map(
         state._initialElements.getValue(scope),
-        (element) => element._childOf(this),
+        (element) => this._parentOf(element),
       )
 
       state._initialElements.setValue(initialElements)
@@ -156,7 +152,7 @@ export class ImpulseFormListState<
           : elements,
         setters.length,
       ),
-      (element) => element._childOf(this),
+      (element) => this._parentOf(element),
     )
 
     this._initialElements.setValue(nextInitialElements)

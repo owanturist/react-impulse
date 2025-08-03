@@ -48,7 +48,7 @@ export class ImpulseFormList<
           ? setter(this._elements.getValue(scope), scope)
           : setter,
 
-        ({ _state }) => _state._childOf(this._state),
+        ({ _state }) => this._state._parentOf(_state),
       )
 
       const initialElements = this._state._initialElements.getValue(scope)

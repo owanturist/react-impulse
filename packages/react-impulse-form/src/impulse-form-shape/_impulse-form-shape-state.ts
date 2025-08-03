@@ -94,7 +94,7 @@ export class ImpulseFormShapeState<
   ) {
     super(parent)
 
-    this._forms = mapValues(forms, (field) => field._childOf(this))
+    this._forms = mapValues(forms, (field) => this._parentOf(field))
   }
 
   public _childOf(parent: ImpulseFormState): ImpulseFormShapeState<TFields> {
