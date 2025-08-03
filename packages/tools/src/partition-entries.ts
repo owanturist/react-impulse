@@ -1,4 +1,4 @@
-import { forEntries } from "~/tools/for-entries"
+import { forValues } from "~/tools/for-values"
 
 export function partitionEntries<TObject, TResult>(
   object: TObject,
@@ -10,7 +10,7 @@ export function partitionEntries<TObject, TResult>(
   const right = {} as Record<keyof TObject, TResult>
   const left = {} as TObject
 
-  forEntries(object, (value, key) => {
+  forValues(object, (value, key) => {
     if (predicate(value, key)) {
       right[key] = value
     } else {

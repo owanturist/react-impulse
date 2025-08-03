@@ -1,4 +1,4 @@
-import { forEntries } from "~/tools/for-entries"
+import { forValues } from "~/tools/for-values"
 
 export function mapValues<TObject, TResult>(
   object: TObject,
@@ -6,7 +6,7 @@ export function mapValues<TObject, TResult>(
 ): Record<keyof TObject, TResult> {
   const result = {} as Record<keyof TObject, TResult>
 
-  forEntries(object, (value, key) => {
+  forValues(object, (value, key) => {
     result[key] = fn(value, key)
   })
 

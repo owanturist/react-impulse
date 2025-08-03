@@ -1,7 +1,6 @@
 import { entries } from "~/tools/entries"
 
-console.log("TODO rename to forValues")
-export function forEntries<TObject>(
+export function forValues<TObject>(
   object: TObject,
   fn: (value: TObject[typeof key], key: keyof TObject) => void,
 ): void {
