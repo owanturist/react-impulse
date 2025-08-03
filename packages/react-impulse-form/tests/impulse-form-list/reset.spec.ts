@@ -2,7 +2,7 @@ import { z } from "zod"
 
 import type { Setter } from "~/tools/setter"
 
-import { ImpulseFormList, ImpulseFormUnit } from "../../src"
+import { ImpulseFormList, ImpulseFormShape, ImpulseFormUnit } from "../../src"
 import { wait } from "../common"
 
 beforeAll(() => {
@@ -220,4 +220,54 @@ it("updates isSubmitting for restored elements", async ({ scope }) => {
   expect(
     form.getElements(scope).map((element) => element.isSubmitting(scope)),
   ).toStrictEqual([false, false, false])
+})
+
+/**
+ * bugfix: ImpulseFormList.reset() restores not initial values #923
+ * @link https://github.com/owanturist/react-impulse/issues/923
+ */
+describe("when resetting elements with metadata", () => {
+  it("restores after removing leading", ({ scope }) => {
+    const form = ImpulseFormList([
+      ImpulseFormShape({
+        id: 1,
+        name: ImpulseFormUnit("1"),
+      }),
+      ImpulseFormShape({
+        id: 2,
+        name: ImpulseFormUnit("2"),
+      }),
+    ])
+
+    form.setElements(([, second]) => [second!])
+    form.reset()
+
+    expect(form.getInput(scope)).toStrictEqual([
+      { id: 1, name: "1" },
+      { id: 2, name: "2" },
+    ])
+  })
+
+  it("restores after removing trailing", ({ scope }) => {
+    const form = ImpulseFormList([
+      ImpulseFormShape({
+        id: 1,
+        name: ImpulseFormUnit("1"),
+      }),
+      ImpulseFormShape({
+        id: 2,
+        name: ImpulseFormUnit("2"),
+      }),
+    ])
+
+    form.setElements(([first]) => [first!])
+    form.reset()
+
+    expect(form.getInput(scope)).toStrictEqual([
+      { id: 1, name: "1" },
+      { id: 2, name: "2" },
+    ])
+  })
+
+  console.log("TODO add test against meta at the end")
 })
