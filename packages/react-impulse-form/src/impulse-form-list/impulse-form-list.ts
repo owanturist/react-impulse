@@ -1,8 +1,7 @@
-import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isUndefined } from "~/tools/is-undefined"
 import { map } from "~/tools/map"
 
-import { Impulse, batch } from "../dependencies"
+import { batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormList as ImpulseFormListImpl } from "./_impulse-form-list"
@@ -33,16 +32,8 @@ export function ImpulseFormList<TElement extends ImpulseForm>(
     error,
   }: ImpulseFormListOptions<TElement> = {},
 ): ImpulseFormList<TElement> {
-  const state = new ImpulseFormListState(
+  const state = new ImpulseFormListState<TElement>(
     null,
-
-    Impulse(
-      map(elements, ({ _state }) => _state._extractInitial()),
-      {
-        compare: isShallowArrayEqual,
-      },
-    ),
-
     map(elements, ({ _state }) => _state),
   )
 

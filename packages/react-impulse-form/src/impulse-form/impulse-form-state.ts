@@ -26,7 +26,7 @@ export abstract class ImpulseFormState<
 
   public abstract readonly _initial: ReadonlyImpulse<TParams["input.schema"]>
 
-  public abstract _replaceInitial(state: TParams["initial"]): void
+  public abstract _replaceInitial(scope: Scope, state: undefined | this): void
 
   public abstract _setInitial(
     scope: Scope,
@@ -108,6 +108,11 @@ export abstract class ImpulseFormState<
 
   public abstract readonly _dirty: ReadonlyImpulse<TParams["flag.schema"]>
   public abstract readonly _dirtyVerbose: ReadonlyImpulse<
+    TParams["flag.schema.verbose"]
+  >
+
+  public abstract readonly _dirtyOn: ReadonlyImpulse<TParams["flag.schema"]>
+  public abstract readonly _dirtyOnVerbose: ReadonlyImpulse<
     TParams["flag.schema.verbose"]
   >
 

@@ -55,4 +55,4 @@ it("provides values to the listeners", () => {
   expect(listener_3).toHaveBeenCalledExactlyOnceWith(3)
 })
 
-it.skip("deatches the listener when an element is removed")
+it("deatches the listener when an element is removed")

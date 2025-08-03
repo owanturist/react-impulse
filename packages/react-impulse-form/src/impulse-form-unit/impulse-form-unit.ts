@@ -1,11 +1,12 @@
 import { hasProperty } from "~/tools/has-property"
 import { isNull } from "~/tools/is-null"
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
+import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
 import { isStrictEqual } from "~/tools/is-strict-equal"
+import { isUndefined } from "~/tools/is-undefined"
 
 import { createUnionCompare } from "../create-union-compare"
 import { type Compare, Impulse, untrack } from "../dependencies"
-import { ImpulseFormInitial } from "../impulse-form/impulse-form-initial"
 import {
   VALIDATE_ON_INIT,
   VALIDATE_ON_TOUCH,
@@ -196,8 +197,9 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
   const input = Impulse(input_, { compare: isInputEqual })
 
   const initial = Impulse(
-    new ImpulseFormInitial(
-      Impulse(
+    {
+      _explicit: Impulse(!isUndefined(options?.initial)),
+      _current: Impulse(
         untrack((scope) => {
           const initialOrInput = options?.initial ?? input_
 
@@ -209,9 +211,9 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
           compare: isInputEqual,
         },
       ),
-    ),
+    },
     {
-      compare: ImpulseFormInitial._compare,
+      compare: isShallowObjectEqual,
     },
   )
 

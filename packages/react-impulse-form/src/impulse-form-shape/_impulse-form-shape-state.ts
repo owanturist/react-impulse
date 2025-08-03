@@ -41,7 +41,6 @@ import {
   type ImpulseFormShapeFlagVerbose,
   isImpulseFormShapeFlagVerboseEqual,
 } from "./impulse-form-shape-flag-verbose"
-import type { ImpulseFormShapeInitial } from "./impulse-form-shape-initial"
 import {
   type ImpulseFormShapeInput,
   isImpulseFormShapeInputEqual,
@@ -125,9 +124,12 @@ export class ImpulseFormShapeState<
     },
   )
 
-  public _replaceInitial(state: ImpulseFormShapeInitial<TFields>): void {
+  public _replaceInitial(
+    scope: Scope,
+    state: undefined | ImpulseFormShapeState<TFields>,
+  ): void {
     forEntries(this._forms, (field, key) => {
-      field._replaceInitial(state[key])
+      field._replaceInitial(scope, state?._forms[key])
     })
   }
 
@@ -542,6 +544,43 @@ export class ImpulseFormShapeState<
       })
 
       return dirtyVerbose as ImpulseFormShapeFlagVerbose<TFields>
+    },
+
+    {
+      compare: isImpulseFormShapeFlagVerboseEqual,
+    },
+  )
+
+  public readonly _dirtyOn = Impulse(
+    (scope) => {
+      const dirtyOn = mapValues(this._forms, ({ _dirtyOn }) => {
+        return _dirtyOn.getValue(scope)
+      })
+
+      const allDirty = values(dirtyOn)
+      const onlyDirty = allDirty.find(isBoolean) ?? false
+
+      for (const fieldDirty of allDirty) {
+        if (fieldDirty !== onlyDirty) {
+          return dirtyOn as ImpulseFormShapeFlag<TFields>
+        }
+      }
+
+      return onlyDirty
+    },
+
+    {
+      compare: isImpulseFormShapeFlagEqual,
+    },
+  )
+
+  public readonly _dirtyOnVerbose = Impulse(
+    (scope) => {
+      const dirtyOnVerbose = mapValues(this._forms, ({ _dirtyOnVerbose }) => {
+        return _dirtyOnVerbose.getValue(scope)
+      })
+
+      return dirtyOnVerbose as ImpulseFormShapeFlagVerbose<TFields>
     },
 
     {

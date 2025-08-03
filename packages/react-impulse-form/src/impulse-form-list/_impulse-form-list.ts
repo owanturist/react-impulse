@@ -1,6 +1,8 @@
+import { isFunction } from "~/tools/is-function"
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
+import { map } from "~/tools/map"
 import { params } from "~/tools/params"
-import { type Setter, resolveSetter } from "~/tools/setter"
+import type { Setter } from "~/tools/setter"
 
 import { Impulse, type Scope, batch } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
@@ -41,10 +43,21 @@ export class ImpulseFormList<
     setter: Setter<ReadonlyArray<TElement>, [ReadonlyArray<TElement>, Scope]>,
   ): void {
     batch((scope) => {
-      const elements = this._elements.getValue(scope)
-      const nextElements = resolveSetter(setter, elements, scope)
+      const nextElements = map(
+        isFunction(setter)
+          ? setter(this._elements.getValue(scope), scope)
+          : setter,
 
-      this._state.setElements(nextElements)
+        ({ _state }) => _state._childOf(this._state),
+      )
+
+      const initialElements = this._state._initialElements.getValue(scope)
+
+      nextElements.forEach((element, index) => {
+        element._replaceInitial(scope, initialElements.at(index))
+      })
+
+      this._state._elements.setValue(nextElements)
     })
   }
 }

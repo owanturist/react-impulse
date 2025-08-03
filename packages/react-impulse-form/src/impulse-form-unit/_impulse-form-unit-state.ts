@@ -5,8 +5,13 @@ import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
 import { resolveSetter } from "~/tools/setter"
 
-import { type Compare, Impulse, type Scope, batch } from "../dependencies"
-import { ImpulseFormInitial } from "../impulse-form/impulse-form-initial"
+import {
+  type Compare,
+  Impulse,
+  type Scope,
+  batch,
+  untrack,
+} from "../dependencies"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
 import {
@@ -33,11 +38,14 @@ export class ImpulseFormUnitState<
   TError,
   TOutput,
 > extends ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>> {
-  public readonly _host = Lazy(() => new ImpulseFormUnit(this) as never)
+  public readonly _host = Lazy(() => new ImpulseFormUnit(this))
 
   public constructor(
     parent: null | ImpulseFormState,
-    public readonly _initialState: Impulse<ImpulseFormInitial<Impulse<TInput>>>,
+    public readonly _initialState: Impulse<{
+      _explicit: Impulse<boolean>
+      _current: Impulse<TInput>
+    }>,
     public readonly _input: Impulse<TInput>,
     private readonly _customError: Impulse<null | TError>,
     public readonly _validateOn: Impulse<ValidateStrategy>,
@@ -64,9 +72,10 @@ export class ImpulseFormUnitState<
 
     return new ImpulseFormUnitState(
       parent,
-      this._initialState.clone(
-        ({ _current }) => new ImpulseFormInitial(_current.clone()),
-      ),
+      this._initialState.clone(({ _current, _explicit }) => ({
+        _current: _current.clone(),
+        _explicit: _explicit.clone(),
+      })),
       this._input.clone(),
       this._customError.clone(),
       this._validateOn.clone(),
@@ -114,19 +123,42 @@ export class ImpulseFormUnitState<
     },
   )
 
-  public _replaceInitial(state: Impulse<TInput>): void {
-    this._initialState.setValue(new ImpulseFormInitial(state))
+  public _replaceInitial(
+    scope: Scope,
+    state: undefined | ImpulseFormUnitState<TInput, TError, TOutput>,
+  ): void {
+    const { _explicit, _current } = this._initialState.getValue(scope)
+
+    if (state) {
+      const initialState = state._initialState.getValue(scope)
+
+      if (_explicit.getValue(scope)) {
+        initialState._explicit.setValue(true)
+        initialState._current.setValue(_current.getValue(scope))
+      }
+
+      this._initialState.setValue(initialState)
+    } else {
+      this._initialState.setValue({
+        _current: _current.clone(),
+        _explicit: _explicit.clone(),
+      })
+    }
   }
 
   public _setInitial(
     scope: Scope,
     setter: ImpulseFormUnitInputSetter<TInput>,
   ): void {
-    this._initialState.getValue(scope)._current.setValue((initial) => {
+    const { _current, _explicit } = this._initialState.getValue(scope)
+
+    _current.setValue((initial) => {
       return isFunction(setter)
         ? setter(initial, this._input.getValue(scope))
         : setter
     })
+
+    _explicit.setValue(true)
 
     this._validated.setValue(identity)
   }
@@ -287,6 +319,10 @@ export class ImpulseFormUnitState<
   })
 
   public readonly _dirtyVerbose = this._dirty
+
+  public readonly _dirtyOn = Impulse(true)
+
+  public readonly _dirtyOnVerbose = this._dirtyOn
 
   // R E S E T
 

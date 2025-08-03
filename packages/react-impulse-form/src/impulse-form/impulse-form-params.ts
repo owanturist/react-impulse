@@ -1,6 +1,4 @@
 export interface ImpulseFormParams {
-  readonly initial: unknown
-
   readonly "input.setter": unknown
   readonly "input.schema": unknown
 

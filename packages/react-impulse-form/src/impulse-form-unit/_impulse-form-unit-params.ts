@@ -1,4 +1,3 @@
-import type { Impulse } from "../dependencies"
 import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import type { ValidateStrategy } from "../validate-strategy"
 
@@ -9,7 +8,6 @@ import type { ImpulseFormUnitValidateOnSetter } from "./impulse-form-unit-valida
 
 export interface ImpulseFormUnitParams<TInput, TError, TOutput>
   extends ImpulseFormParams {
-  readonly initial: Impulse<TInput>
   readonly "input.setter": ImpulseFormUnitInputSetter<TInput>
   readonly "input.schema": TInput
 
