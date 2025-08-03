@@ -5,13 +5,7 @@ import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
 import { resolveSetter } from "~/tools/setter"
 
-import {
-  type Compare,
-  Impulse,
-  type Scope,
-  batch,
-  untrack,
-} from "../dependencies"
+import { type Compare, Impulse, type Scope, batch } from "../dependencies"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
 import {
@@ -64,12 +58,8 @@ export class ImpulseFormUnitState<
   }
 
   public _childOf(
-    parent: ImpulseFormState,
+    parent: null | ImpulseFormState,
   ): ImpulseFormUnitState<TInput, TError, TOutput> {
-    if (parent._root === this._root) {
-      return this
-    }
-
     return new ImpulseFormUnitState(
       parent,
       this._initialState.clone(({ _current, _explicit }) => ({
@@ -126,13 +116,14 @@ export class ImpulseFormUnitState<
   public _replaceInitial(
     scope: Scope,
     state: undefined | ImpulseFormUnitState<TInput, TError, TOutput>,
+    isMounting: boolean,
   ): void {
     const { _explicit, _current } = this._initialState.getValue(scope)
 
     if (state) {
       const initialState = state._initialState.getValue(scope)
 
-      if (_explicit.getValue(scope)) {
+      if (_explicit.getValue(scope) && isMounting) {
         initialState._explicit.setValue(true)
         initialState._current.setValue(_current.getValue(scope))
       }

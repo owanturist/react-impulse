@@ -68,9 +68,11 @@ export class ImpulseFormListState<
     ReadonlyArray<ImpulseFormState<GetImpulseFormParams<TElement>>>
   >
 
-  public readonly _initialElements: Impulse<
-    ReadonlyArray<ImpulseFormState<GetImpulseFormParams<TElement>>>
-  >
+  public readonly _initialElements: Impulse<{
+    _list: Impulse<
+      ReadonlyArray<ImpulseFormState<GetImpulseFormParams<TElement>>>
+    >
+  }>
 
   public constructor(
     parent: null | ImpulseFormState,
@@ -78,17 +80,33 @@ export class ImpulseFormListState<
   ) {
     super(parent)
 
+    const initialElements = map(elements, (element) => element._clone())
+
+    this._initialElements = Impulse({
+      _list: Impulse(initialElements, {
+        compare: isShallowArrayEqual,
+      }),
+    })
+
     this._elements = Impulse(
-      map(elements, (el) => this._parentOf(el)),
+      untrack((scope) => {
+        return map(elements, (element, index) => {
+          const child = this._parentOf(element)
+
+          child._replaceInitial(scope, initialElements.at(index), true)
+
+          return child
+        })
+      }),
       {
         compare: isShallowArrayEqual,
       },
     )
-
-    this._initialElements = this._elements.clone()
   }
 
-  public _childOf(parent: ImpulseFormState): ImpulseFormListState<TElement> {
+  public _childOf(
+    parent: null | ImpulseFormState,
+  ): ImpulseFormListState<TElement> {
     return new ImpulseFormListState(parent, untrack(this._elements))
   }
 
@@ -104,6 +122,7 @@ export class ImpulseFormListState<
       // TODO replace .map with map
       const initial = this._initialElements
         .getValue(scope)
+        ._list.getValue(scope)
         .map(({ _initial }) => {
           return _initial.getValue(scope)
         })
@@ -119,18 +138,16 @@ export class ImpulseFormListState<
   public _replaceInitial(
     scope: Scope,
     state: undefined | ImpulseFormListState<TElement>,
+    isMounting: boolean,
   ): void {
     if (state) {
       const elements = this._elements.getValue(scope)
-      const initialElements = map(
-        state._initialElements.getValue(scope),
-        (element) => this._parentOf(element),
-      )
+      const initialElements = state._initialElements.getValue(scope)
 
-      state._initialElements.setValue(initialElements)
+      this._initialElements.setValue(initialElements)
 
-      initialElements.forEach((element, index) => {
-        elements.at(index)?._replaceInitial(scope, element)
+      initialElements._list.getValue(scope).forEach((element, index) => {
+        elements.at(index)?._replaceInitial(scope, element, isMounting)
       })
     }
   }
@@ -144,18 +161,19 @@ export class ImpulseFormListState<
       : setter
 
     const elements = this._elements.getValue(scope)
+    const initialElements = this._initialElements.getValue(scope)
 
     const nextInitialElements = map(
       take(
         setters.length > elements.length
-          ? this._initialElements.getValue(scope)
+          ? initialElements._list.getValue(scope)
           : elements,
         setters.length,
       ),
-      (element) => this._parentOf(element),
+      (element) => element._clone(),
     )
 
-    this._initialElements.setValue(nextInitialElements)
+    initialElements._list.setValue(nextInitialElements)
 
     setters.forEach((initial, index) => {
       if (!isUndefined(initial)) {
@@ -163,7 +181,9 @@ export class ImpulseFormListState<
       }
     })
 
-    this._replaceInitial(scope, this)
+    nextInitialElements.forEach((element, index) => {
+      elements.at(index)?._replaceInitial(scope, element, false)
+    })
   }
 
   public readonly _input = Impulse(
@@ -298,13 +318,16 @@ export class ImpulseFormListState<
       ? setter(this._validateOnVerbose.getValue(scope))
       : setter
 
-    this._initialElements.getValue(scope).forEach((element, index) => {
-      const validateOn = isString(setters) ? setters : setters.at(index)
+    this._initialElements
+      .getValue(scope)
+      ._list.getValue(scope)
+      .forEach((element, index) => {
+        const validateOn = isString(setters) ? setters : setters.at(index)
 
-      if (!isUndefined(validateOn)) {
-        element._setValidateOn(scope, validateOn)
-      }
-    })
+        if (!isUndefined(validateOn)) {
+          element._setValidateOn(scope, validateOn)
+        }
+      })
 
     this._elements.getValue(scope).forEach((element, index) => {
       const validateOn = isString(setters) ? setters : setters.at(index)
@@ -521,7 +544,9 @@ export class ImpulseFormListState<
   public readonly _dirty = Impulse(
     (scope) => {
       const elements = this._elements.getValue(scope)
-      const initialElements = this._initialElements.getValue(scope)
+      const initialElements = this._initialElements
+        .getValue(scope)
+        ._list.getValue(scope)
 
       const dirty = [
         ...elements.map(({ _dirty, _dirtyOn }, index) => {
@@ -556,7 +581,9 @@ export class ImpulseFormListState<
   public readonly _dirtyVerbose = Impulse(
     (scope) => {
       const elements = this._elements.getValue(scope)
-      const initialElements = this._initialElements.getValue(scope)
+      const initialElements = this._initialElements
+        .getValue(scope)
+        ._list.getValue(scope)
 
       return [
         ...elements.map(({ _dirtyVerbose, _dirtyOnVerbose }, index) => {
@@ -582,6 +609,7 @@ export class ImpulseFormListState<
     (scope) => {
       const dirtyOn = this._initialElements
         .getValue(scope)
+        ._list.getValue(scope)
         .map(({ _dirtyOn }) => {
           return _dirtyOn.getValue(scope)
         })
@@ -624,13 +652,17 @@ export class ImpulseFormListState<
   ): void {
     this._setInitial(scope, resetter ?? this._initial.getValue(scope))
 
-    const nextElements = this._initialElements.getValue(scope)
+    const nextElements = this._initialElements
+      .getValue(scope)
+      ._list.getValue(scope)
 
     for (const element of nextElements) {
       element._reset(scope, undefined)
     }
 
-    this._elements.setValue(nextElements)
+    this._elements.setValue(
+      map(nextElements, (element) => this._parentOf(element)),
+    )
   }
 
   public _getChildren<TChildParams extends ImpulseFormParams>(

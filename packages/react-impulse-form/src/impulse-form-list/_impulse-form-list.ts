@@ -48,16 +48,26 @@ export class ImpulseFormList<
           ? setter(this._elements.getValue(scope), scope)
           : setter,
 
-        ({ _state }) => this._state._parentOf(_state),
+        ({ _state }) => {
+          const child = this._state._parentOf(_state)
+
+          // assign independent initial state
+          child._replaceInitial(scope, undefined, false)
+
+          return [child, child._root !== _state._root] as const
+        },
       )
 
-      const initialElements = this._state._initialElements.getValue(scope)
+      const initialElements = this._state._initialElements
+        .getValue(scope)
+        ._list.getValue(scope)
 
-      nextElements.forEach((element, index) => {
-        element._replaceInitial(scope, initialElements.at(index))
+      nextElements.forEach(([element, isMounting], index) => {
+        // hook up the initial state from the initial elements
+        element._replaceInitial(scope, initialElements.at(index), isMounting)
       })
 
-      this._state._elements.setValue(nextElements)
+      this._state._elements.setValue(map(nextElements, ([element]) => element))
     })
   }
 }

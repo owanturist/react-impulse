@@ -21,8 +21,12 @@ export abstract class ImpulseFormState<
   }
 
   protected abstract _childOf(
-    parent: ImpulseFormState,
+    parent: null | ImpulseFormState,
   ): ImpulseFormState<TParams>
+
+  public _clone(): ImpulseFormState<TParams> {
+    return this._childOf(null)
+  }
 
   public _parentOf<TChildParams extends ImpulseFormParams>(
     child: ImpulseFormState<TChildParams>,
@@ -38,7 +42,11 @@ export abstract class ImpulseFormState<
 
   public abstract readonly _initial: ReadonlyImpulse<TParams["input.schema"]>
 
-  public abstract _replaceInitial(scope: Scope, state: undefined | this): void
+  public abstract _replaceInitial(
+    scope: Scope,
+    state: undefined | this,
+    isMounting: boolean,
+  ): void
 
   public abstract _setInitial(
     scope: Scope,

@@ -97,11 +97,9 @@ export class ImpulseFormShapeState<
     this._forms = mapValues(forms, (field) => this._parentOf(field))
   }
 
-  public _childOf(parent: ImpulseFormState): ImpulseFormShapeState<TFields> {
-    if (parent._root === this._root) {
-      return this
-    }
-
+  public _childOf(
+    parent: null | ImpulseFormState,
+  ): ImpulseFormShapeState<TFields> {
     return new ImpulseFormShapeState(parent, this._forms, this._meta)
   }
 
@@ -127,9 +125,10 @@ export class ImpulseFormShapeState<
   public _replaceInitial(
     scope: Scope,
     state: undefined | ImpulseFormShapeState<TFields>,
+    isMounting: boolean,
   ): void {
     forEntries(this._forms, (field, key) => {
-      field._replaceInitial(scope, state?._forms[key])
+      field._replaceInitial(scope, state?._forms[key], isMounting)
     })
   }
 
