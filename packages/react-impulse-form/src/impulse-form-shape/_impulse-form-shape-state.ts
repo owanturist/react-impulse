@@ -1,5 +1,5 @@
 import { entries } from "~/tools/entries"
-import { forEntries } from "~/tools/for-entries"
+import { forValues } from "~/tools/for-values"
 import { hasProperty } from "~/tools/has-property"
 import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
@@ -127,7 +127,7 @@ export class ImpulseFormShapeState<
     state: undefined | ImpulseFormShapeState<TFields>,
     isMounting: boolean,
   ): void {
-    forEntries(this._forms, (field, key) => {
+    forValues(this._forms, (field, key) => {
       field._replaceInitial(scope, state?._forms[key], isMounting)
     })
   }
@@ -140,7 +140,7 @@ export class ImpulseFormShapeState<
       ? setter(this._initial.getValue(scope), this._input.getValue(scope))
       : setter
 
-    forEntries(this._forms, (field, key) => {
+    forValues(this._forms, (field, key) => {
       if (hasProperty(setters, key) && !isUndefined(setters[key])) {
         field._setInitial(scope, setters[key])
       }
@@ -174,7 +174,7 @@ export class ImpulseFormShapeState<
       ? setter(this._input.getValue(scope), this._initial.getValue(scope))
       : setter
 
-    forEntries(this._forms, (field, key) => {
+    forValues(this._forms, (field, key) => {
       if (hasProperty(setters, key) && !isUndefined(setters[key])) {
         field._setInput(scope, setters[key])
       }
@@ -222,7 +222,7 @@ export class ImpulseFormShapeState<
       ? setter(this._errorVerbose.getValue(scope))
       : setter
 
-    forEntries(this._forms, (field, key) => {
+    forValues(this._forms, (field, key) => {
       if (isNull(setters)) {
         field._setError(scope, setters)
       } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
@@ -285,7 +285,7 @@ export class ImpulseFormShapeState<
       ? setter(this._validateOnVerbose.getValue(scope))
       : setter
 
-    forEntries(this._forms, (field, key) => {
+    forValues(this._forms, (field, key) => {
       if (isString(setters)) {
         field._setValidateOn(scope, setters)
       } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
@@ -341,7 +341,7 @@ export class ImpulseFormShapeState<
       ? setter(this._touchedVerbose.getValue(scope))
       : setter
 
-    forEntries(this._forms, (field, key) => {
+    forValues(this._forms, (field, key) => {
       if (isBoolean(setters)) {
         field._setTouched(scope, setters)
       } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
@@ -506,7 +506,7 @@ export class ImpulseFormShapeState<
   )
 
   public _forceValidated(scope: Scope): void {
-    forEntries(this._forms, (field) => {
+    forValues(this._forms, (field) => {
       field._forceValidated(scope)
     })
   }
@@ -597,7 +597,7 @@ export class ImpulseFormShapeState<
       ? resetter(this._initial.getValue(scope), this._input.getValue(scope))
       : resetter
 
-    forEntries(this._forms, (field, key) => {
+    forValues(this._forms, (field, key) => {
       field._reset(
         scope,
         hasProperty(resetters, key) ? resetters[key] : undefined,
