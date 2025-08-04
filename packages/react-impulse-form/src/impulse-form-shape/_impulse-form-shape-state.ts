@@ -82,11 +82,11 @@ export class ImpulseFormShapeState<
 > extends ImpulseFormState<ImpulseFormShapeParams<TFields>> {
   public readonly _host = Lazy(() => new ImpulseFormShape(this))
 
-  public readonly _forms: ImpulseFormShapeStateFields<TFields>
+  public readonly _fields: ImpulseFormShapeStateFields<TFields>
 
   public constructor(
     parent: null | ImpulseFormState,
-    forms: ImpulseFormShapeStateFields<TFields>,
+    fields: ImpulseFormShapeStateFields<TFields>,
     public readonly _meta: Omit<
       TFields,
       keyof ImpulseFormShapeStateFields<TFields>
@@ -94,20 +94,20 @@ export class ImpulseFormShapeState<
   ) {
     super(parent)
 
-    this._forms = mapValues(forms, (field) => this._parentOf(field))
+    this._fields = mapValues(fields, (field) => this._parentOf(field))
   }
 
   public _childOf(
     parent: null | ImpulseFormState,
   ): ImpulseFormShapeState<TFields> {
-    return new ImpulseFormShapeState(parent, this._forms, this._meta)
+    return new ImpulseFormShapeState(parent, this._fields, this._meta)
   }
 
   // I N I T I A L
 
   public readonly _initial = Impulse(
     (scope) => {
-      const initial = mapValues(this._forms, ({ _initial }) => {
+      const initial = mapValues(this._fields, ({ _initial }) => {
         return _initial.getValue(scope)
       })
 
@@ -127,8 +127,8 @@ export class ImpulseFormShapeState<
     state: undefined | ImpulseFormShapeState<TFields>,
     isMounting: boolean,
   ): void {
-    forValues(this._forms, (field, key) => {
-      field._replaceInitial(scope, state?._forms[key], isMounting)
+    forValues(this._fields, (field, key) => {
+      field._replaceInitial(scope, state?._fields[key], isMounting)
     })
   }
 
@@ -140,7 +140,7 @@ export class ImpulseFormShapeState<
       ? setter(this._initial.getValue(scope), this._input.getValue(scope))
       : setter
 
-    forValues(this._forms, (field, key) => {
+    forValues(this._fields, (field, key) => {
       if (hasProperty(setters, key) && !isUndefined(setters[key])) {
         field._setInitial(scope, setters[key])
       }
@@ -151,7 +151,7 @@ export class ImpulseFormShapeState<
 
   public readonly _input = Impulse(
     (scope) => {
-      const input = mapValues(this._forms, ({ _input }) => {
+      const input = mapValues(this._fields, ({ _input }) => {
         return _input.getValue(scope)
       })
 
@@ -174,7 +174,7 @@ export class ImpulseFormShapeState<
       ? setter(this._input.getValue(scope), this._initial.getValue(scope))
       : setter
 
-    forValues(this._forms, (field, key) => {
+    forValues(this._fields, (field, key) => {
       if (hasProperty(setters, key) && !isUndefined(setters[key])) {
         field._setInput(scope, setters[key])
       }
@@ -185,7 +185,7 @@ export class ImpulseFormShapeState<
 
   public readonly _error = Impulse(
     (scope) => {
-      const error = mapValues(this._forms, ({ _error }) => {
+      const error = mapValues(this._fields, ({ _error }) => {
         return _error.getValue(scope)
       })
 
@@ -202,7 +202,7 @@ export class ImpulseFormShapeState<
 
   public readonly _errorVerbose = Impulse(
     (scope) => {
-      const errorVerbose = mapValues(this._forms, ({ _errorVerbose }) => {
+      const errorVerbose = mapValues(this._fields, ({ _errorVerbose }) => {
         return _errorVerbose.getValue(scope)
       })
 
@@ -222,7 +222,7 @@ export class ImpulseFormShapeState<
       ? setter(this._errorVerbose.getValue(scope))
       : setter
 
-    forValues(this._forms, (field, key) => {
+    forValues(this._fields, (field, key) => {
       if (isNull(setters)) {
         field._setError(scope, setters)
       } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
@@ -235,7 +235,7 @@ export class ImpulseFormShapeState<
 
   public readonly _validateOn = Impulse(
     (scope) => {
-      const validateOn = mapValues(this._forms, ({ _validateOn }) => {
+      const validateOn = mapValues(this._fields, ({ _validateOn }) => {
         return _validateOn.getValue(scope)
       })
 
@@ -265,7 +265,7 @@ export class ImpulseFormShapeState<
   public readonly _validateOnVerbose = Impulse(
     (scope) => {
       const validateOnVerbose = mapValues(
-        this._forms,
+        this._fields,
         ({ _validateOnVerbose }) => _validateOnVerbose.getValue(scope),
       )
 
@@ -285,7 +285,7 @@ export class ImpulseFormShapeState<
       ? setter(this._validateOnVerbose.getValue(scope))
       : setter
 
-    forValues(this._forms, (field, key) => {
+    forValues(this._fields, (field, key) => {
       if (isString(setters)) {
         field._setValidateOn(scope, setters)
       } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
@@ -298,7 +298,7 @@ export class ImpulseFormShapeState<
 
   public readonly _touched = Impulse(
     (scope) => {
-      const touched = mapValues(this._forms, ({ _touched }) => {
+      const touched = mapValues(this._fields, ({ _touched }) => {
         return _touched.getValue(scope)
       })
 
@@ -321,7 +321,7 @@ export class ImpulseFormShapeState<
 
   public readonly _touchedVerbose = Impulse(
     (scope) => {
-      const touchedVerbose = mapValues(this._forms, ({ _touchedVerbose }) =>
+      const touchedVerbose = mapValues(this._fields, ({ _touchedVerbose }) =>
         _touchedVerbose.getValue(scope),
       )
 
@@ -341,7 +341,7 @@ export class ImpulseFormShapeState<
       ? setter(this._touchedVerbose.getValue(scope))
       : setter
 
-    forValues(this._forms, (field, key) => {
+    forValues(this._fields, (field, key) => {
       if (isBoolean(setters)) {
         field._setTouched(scope, setters)
       } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
@@ -354,7 +354,7 @@ export class ImpulseFormShapeState<
 
   public readonly _output = Impulse(
     (scope) => {
-      const output = mapValues(this._forms, ({ _output }) => {
+      const output = mapValues(this._fields, ({ _output }) => {
         return _output.getValue(scope)
       })
 
@@ -374,7 +374,7 @@ export class ImpulseFormShapeState<
 
   public readonly _outputVerbose = Impulse(
     (scope) => {
-      const outputVerbose = mapValues(this._forms, ({ _outputVerbose }) => {
+      const outputVerbose = mapValues(this._fields, ({ _outputVerbose }) => {
         return _outputVerbose.getValue(scope)
       })
 
@@ -392,7 +392,7 @@ export class ImpulseFormShapeState<
 
   public readonly _valid = Impulse(
     (scope) => {
-      const valid = mapValues(this._forms, ({ _valid }) => {
+      const valid = mapValues(this._fields, ({ _valid }) => {
         return _valid.getValue(scope)
       })
 
@@ -415,7 +415,7 @@ export class ImpulseFormShapeState<
 
   public readonly _validVerbose = Impulse(
     (scope) => {
-      const validVerbose = mapValues(this._forms, ({ _validVerbose }) =>
+      const validVerbose = mapValues(this._fields, ({ _validVerbose }) =>
         _validVerbose.getValue(scope),
       )
 
@@ -431,7 +431,7 @@ export class ImpulseFormShapeState<
 
   public readonly _invalid = Impulse(
     (scope) => {
-      const invalid = mapValues(this._forms, ({ _invalid }) => {
+      const invalid = mapValues(this._fields, ({ _invalid }) => {
         return _invalid.getValue(scope)
       })
 
@@ -454,7 +454,7 @@ export class ImpulseFormShapeState<
 
   public readonly _invalidVerbose = Impulse(
     (scope) => {
-      const invalidVerbose = mapValues(this._forms, ({ _invalidVerbose }) => {
+      const invalidVerbose = mapValues(this._fields, ({ _invalidVerbose }) => {
         return _invalidVerbose.getValue(scope)
       })
 
@@ -470,7 +470,7 @@ export class ImpulseFormShapeState<
 
   public readonly _validated = Impulse(
     (scope) => {
-      const validated = mapValues(this._forms, ({ _validated }) => {
+      const validated = mapValues(this._fields, ({ _validated }) => {
         return _validated.getValue(scope)
       })
 
@@ -493,8 +493,9 @@ export class ImpulseFormShapeState<
 
   public readonly _validatedVerbose = Impulse(
     (scope) => {
-      const validatedVerbose = mapValues(this._forms, ({ _validatedVerbose }) =>
-        _validatedVerbose.getValue(scope),
+      const validatedVerbose = mapValues(
+        this._fields,
+        ({ _validatedVerbose }) => _validatedVerbose.getValue(scope),
       )
 
       return validatedVerbose as ImpulseFormShapeFlagVerbose<TFields>
@@ -506,7 +507,7 @@ export class ImpulseFormShapeState<
   )
 
   public _forceValidated(scope: Scope): void {
-    forValues(this._forms, (field) => {
+    forValues(this._fields, (field) => {
       field._forceValidated(scope)
     })
   }
@@ -515,7 +516,7 @@ export class ImpulseFormShapeState<
 
   public readonly _dirty = Impulse(
     (scope) => {
-      const dirty = mapValues(this._forms, ({ _dirty }) => {
+      const dirty = mapValues(this._fields, ({ _dirty }) => {
         return _dirty.getValue(scope)
       })
 
@@ -538,7 +539,7 @@ export class ImpulseFormShapeState<
 
   public readonly _dirtyVerbose = Impulse(
     (scope) => {
-      const dirtyVerbose = mapValues(this._forms, ({ _dirtyVerbose }) => {
+      const dirtyVerbose = mapValues(this._fields, ({ _dirtyVerbose }) => {
         return _dirtyVerbose.getValue(scope)
       })
 
@@ -552,7 +553,7 @@ export class ImpulseFormShapeState<
 
   public readonly _dirtyOn = Impulse(
     (scope) => {
-      const dirtyOn = mapValues(this._forms, ({ _dirtyOn }) => {
+      const dirtyOn = mapValues(this._fields, ({ _dirtyOn }) => {
         return _dirtyOn.getValue(scope)
       })
 
@@ -575,7 +576,7 @@ export class ImpulseFormShapeState<
 
   public readonly _dirtyOnVerbose = Impulse(
     (scope) => {
-      const dirtyOnVerbose = mapValues(this._forms, ({ _dirtyOnVerbose }) => {
+      const dirtyOnVerbose = mapValues(this._fields, ({ _dirtyOnVerbose }) => {
         return _dirtyOnVerbose.getValue(scope)
       })
 
@@ -597,7 +598,7 @@ export class ImpulseFormShapeState<
       ? resetter(this._initial.getValue(scope), this._input.getValue(scope))
       : resetter
 
-    forValues(this._forms, (field, key) => {
+    forValues(this._fields, (field, key) => {
       field._reset(
         scope,
         hasProperty(resetters, key) ? resetters[key] : undefined,
@@ -610,7 +611,7 @@ export class ImpulseFormShapeState<
   public _getChildren<TChildParams extends ImpulseFormParams>(): ReadonlyArray<
     ImpulseFormChild<TChildParams, ImpulseFormShapeParams<TFields>>
   > {
-    return entries(this._forms).map(([key, field]) => ({
+    return entries(this._fields).map(([key, field]) => ({
       _state: field,
       _mapToChild: (output) => output[key],
     }))

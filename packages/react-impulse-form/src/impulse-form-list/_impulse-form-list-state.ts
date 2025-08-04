@@ -1,3 +1,4 @@
+import { concat } from "~/tools/concat"
 import { drop } from "~/tools/drop"
 import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
@@ -162,12 +163,15 @@ export class ImpulseFormListState<
 
     const elements = this._elements.getValue(scope)
     const initialElements = this._initialElements.getValue(scope)
+    const initialElementsList = initialElements._list.getValue(scope)
 
     const nextInitialElements = map(
       take(
-        setters.length > elements.length
-          ? initialElements._list.getValue(scope)
-          : elements,
+        concat(
+          initialElementsList,
+          // fallback the initial elements to the current elements' tail
+          drop(elements, initialElementsList.length),
+        ),
         setters.length,
       ),
       (element) => element._clone(),

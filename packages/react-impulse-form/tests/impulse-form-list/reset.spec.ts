@@ -240,7 +240,7 @@ describe("when resetting elements with metadata", () => {
     ])
 
     form.setElements(([, second]) => [second!])
-    form.reset()
+    form.reset((initial) => initial)
 
     expect(form.getInput(scope)).toStrictEqual([
       { id: 1, name: "1" },
@@ -261,7 +261,7 @@ describe("when resetting elements with metadata", () => {
     ])
 
     form.setElements(([first]) => [first!])
-    form.reset()
+    form.reset((initial) => initial)
 
     expect(form.getInput(scope)).toStrictEqual([
       { id: 1, name: "1" },
@@ -269,5 +269,65 @@ describe("when resetting elements with metadata", () => {
     ])
   })
 
-  console.log("TODO add test against meta at the end")
+  it("restores after adding leading", ({ scope }) => {
+    const form = ImpulseFormList([
+      ImpulseFormShape({
+        id: 1,
+        name: ImpulseFormUnit("1"),
+      }),
+    ])
+
+    form.setElements((elements) => [
+      ImpulseFormShape({
+        id: 2,
+        name: ImpulseFormUnit("2"),
+      }),
+      ...elements,
+    ])
+
+    expect(form.getInput(scope)).toStrictEqual([
+      { id: 2, name: "2" },
+      { id: 1, name: "1" },
+    ])
+
+    form.reset((initial) => initial)
+
+    expect(form.getInput(scope)).toStrictEqual([{ id: 1, name: "1" }])
+  })
+
+  it("restores after adding leading and setting initial to input", ({
+    scope,
+  }) => {
+    const form = ImpulseFormList([
+      ImpulseFormShape({
+        id: 1,
+        name: ImpulseFormUnit("1"),
+      }),
+    ])
+
+    form.setElements((elements) => [
+      ImpulseFormShape({
+        id: 2,
+        name: ImpulseFormUnit("2"),
+      }),
+      ...elements,
+    ])
+
+    expect(form.getInput(scope)).toStrictEqual([
+      { id: 2, name: "2" },
+      { id: 1, name: "1" },
+    ])
+    expect(form.getInitial(scope)).toStrictEqual([{ id: 1, name: "1" }])
+
+    form.reset((_initial, input) => input)
+
+    expect(form.getInitial(scope)).toStrictEqual([
+      { id: 2, name: "2" },
+      { id: 1, name: "1" },
+    ])
+    expect(form.getInput(scope)).toStrictEqual([
+      { id: 2, name: "2" },
+      { id: 1, name: "1" },
+    ])
+  })
 })

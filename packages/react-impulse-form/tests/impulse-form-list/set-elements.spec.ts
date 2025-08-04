@@ -73,3 +73,24 @@ it("attach the new elements to the form root", ({ scope }) => {
   expect(form.getElements(scope).at(0)!.getSubmitCount(scope)).toBe(1)
   expect(form.getElements(scope).at(3)!.getSubmitCount(scope)).toBe(1)
 })
+
+it("persists elements reference", ({ scope }) => {
+  const form = setup([setupElement(0), setupElement(1)])
+
+  const [first_0, second_0] = form.getElements(scope)
+
+  form.setElements(([first, second]) => [second!, first!])
+
+  const [first_1, second_1] = form.getElements(scope)
+
+  expect(first_1).toBe(second_0)
+  expect(second_1).toBe(first_0)
+
+  const third_0 = setupElement(2)
+  form.setElements((elements) => [...elements, third_0])
+
+  const [first_2, second_2, third_2] = form.getElements(scope)
+  expect(first_2).toBe(second_0)
+  expect(second_2).toBe(first_0)
+  expect(third_2).not.toBe(third_0)
+})

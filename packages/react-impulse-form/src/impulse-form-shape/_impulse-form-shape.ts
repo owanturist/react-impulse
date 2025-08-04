@@ -14,7 +14,7 @@ export class ImpulseFormShape<
   }
 
   public readonly fields = {
-    ...mapValues(this._state._forms, ({ _host: _wrapper }) => _wrapper()),
+    ...mapValues(this._state._fields, ({ _host }) => _host()),
     ...this._state._meta,
   } as Readonly<TFields>
 }
