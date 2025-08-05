@@ -83,8 +83,8 @@ export class ImpulseFormUnitState<
   // persist the validated state
   private readonly _isValidated = Impulse(false)
 
-  private readonly _result = Impulse<Result<null | TError, TOutput>>(
-    (scope) => {
+  private readonly _result = Impulse(
+    (scope): Result<null | TError, TOutput> => {
       const customError_ = this._customError.getValue(scope)
 
       if (!isNull(customError_)) {
@@ -107,7 +107,8 @@ export class ImpulseFormUnitState<
   // I N I T I A L
 
   public _initial = Impulse(
-    (scope) => this._initialState.getValue(scope)._current.getValue(scope),
+    (scope): TInput =>
+      this._initialState.getValue(scope)._current.getValue(scope),
     {
       compare: this._isInputEqual,
     },
@@ -172,7 +173,7 @@ export class ImpulseFormUnitState<
   // E R R O R
 
   public readonly _error = Impulse(
-    (scope) => {
+    (scope): null | TError => {
       const [error] = this._result.getValue(scope)
 
       return error
@@ -225,7 +226,7 @@ export class ImpulseFormUnitState<
   // O U T P U T
 
   public readonly _output = Impulse(
-    (scope) => {
+    (scope): null | TOutput => {
       const [, output] = this._result.getValue(scope)
 
       return output
@@ -238,7 +239,7 @@ export class ImpulseFormUnitState<
 
   // V A L I D
 
-  public readonly _valid = Impulse((scope) => {
+  public readonly _valid = Impulse((scope): boolean => {
     const error = this._error.getValue(scope)
 
     return isNull(error)
@@ -248,7 +249,7 @@ export class ImpulseFormUnitState<
 
   // I N V A L I D
 
-  public readonly _invalid = Impulse((scope) => {
+  public readonly _invalid = Impulse((scope): boolean => {
     const error = this._error.getValue(scope)
 
     return !isNull(error)
@@ -258,9 +259,9 @@ export class ImpulseFormUnitState<
 
   // V A L I D A T E D
 
-  public readonly _validated = Impulse<boolean>(
+  public readonly _validated = Impulse(
     // mixes the validated and invalid states
-    (scope) => {
+    (scope): boolean => {
       return this._isValidated.getValue(scope) || this._invalid.getValue(scope)
     },
 
@@ -301,7 +302,7 @@ export class ImpulseFormUnitState<
 
   // D I R T Y
 
-  public readonly _dirty = Impulse((scope) => {
+  public readonly _dirty = Impulse((scope): boolean => {
     return this._isInputDirty(
       this._initial.getValue(scope),
       this._input.getValue(scope),

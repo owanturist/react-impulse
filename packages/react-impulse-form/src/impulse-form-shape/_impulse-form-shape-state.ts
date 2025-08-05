@@ -118,7 +118,7 @@ export class ImpulseFormShapeState<
   // I N I T I A L
 
   public readonly _initial = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeInput<TFields> => {
       const initial = mapValues(this._fields, ({ _initial }) => {
         return _initial.getValue(scope)
       })
@@ -169,7 +169,7 @@ export class ImpulseFormShapeState<
   // I N P U T
 
   public readonly _input = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeInput<TFields> => {
       const input = mapValues(this._fields, ({ _input }) => {
         return _input.getValue(scope)
       })
@@ -204,7 +204,7 @@ export class ImpulseFormShapeState<
   // E R R O R
 
   public readonly _error = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeError<TFields> => {
       const error = mapValues(this._fields, ({ _error }) => {
         return _error.getValue(scope)
       })
@@ -221,7 +221,7 @@ export class ImpulseFormShapeState<
   )
 
   public readonly _errorVerbose = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeErrorVerbose<TFields> => {
       const errorVerbose = mapValues(this._fields, ({ _errorVerbose }) => {
         return _errorVerbose.getValue(scope)
       })
@@ -254,7 +254,7 @@ export class ImpulseFormShapeState<
   // V A L I D A T E   O N
 
   public readonly _validateOn = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeValidateOn<TFields> => {
       const validateOn = mapValues(this._fields, ({ _validateOn }) => {
         return _validateOn.getValue(scope)
       })
@@ -283,7 +283,7 @@ export class ImpulseFormShapeState<
   )
 
   public readonly _validateOnVerbose = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeValidateOnVerbose<TFields> => {
       const validateOnVerbose = mapValues(
         this._fields,
         ({ _validateOnVerbose }) => _validateOnVerbose.getValue(scope),
@@ -317,7 +317,7 @@ export class ImpulseFormShapeState<
   // T O U C H E D
 
   public readonly _touched = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeFlag<TFields> => {
       const touched = mapValues(this._fields, ({ _touched }) => {
         return _touched.getValue(scope)
       })
@@ -340,7 +340,7 @@ export class ImpulseFormShapeState<
   )
 
   public readonly _touchedVerbose = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeFlagVerbose<TFields> => {
       const touchedVerbose = mapValues(this._fields, ({ _touchedVerbose }) =>
         _touchedVerbose.getValue(scope),
       )
@@ -373,7 +373,7 @@ export class ImpulseFormShapeState<
   // O U T P U T
 
   public readonly _output = Impulse(
-    (scope) => {
+    (scope): null | ImpulseFormShapeOutput<TFields> => {
       const output = mapValues(this._fields, ({ _output }) => {
         return _output.getValue(scope)
       })
@@ -391,7 +391,7 @@ export class ImpulseFormShapeState<
   )
 
   public readonly _outputVerbose = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeOutputVerbose<TFields> => {
       const outputVerbose = mapValues(this._fields, ({ _outputVerbose }) => {
         return _outputVerbose.getValue(scope)
       })
@@ -413,7 +413,7 @@ export class ImpulseFormShapeState<
   // V A L I D
 
   public readonly _valid = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeFlag<TFields> => {
       const valid = mapValues(this._fields, ({ _valid }) => {
         return _valid.getValue(scope)
       })
@@ -436,7 +436,7 @@ export class ImpulseFormShapeState<
   )
 
   public readonly _validVerbose = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeFlagVerbose<TFields> => {
       const validVerbose = mapValues(this._fields, ({ _validVerbose }) =>
         _validVerbose.getValue(scope),
       )
@@ -452,7 +452,7 @@ export class ImpulseFormShapeState<
   // I N V A L I D
 
   public readonly _invalid = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeFlag<TFields> => {
       const invalid = mapValues(this._fields, ({ _invalid }) => {
         return _invalid.getValue(scope)
       })
@@ -475,7 +475,7 @@ export class ImpulseFormShapeState<
   )
 
   public readonly _invalidVerbose = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeFlagVerbose<TFields> => {
       const invalidVerbose = mapValues(this._fields, ({ _invalidVerbose }) => {
         return _invalidVerbose.getValue(scope)
       })
@@ -491,7 +491,7 @@ export class ImpulseFormShapeState<
   // V A L I D A T E D
 
   public readonly _validated = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeFlag<TFields> => {
       const validated = mapValues(this._fields, ({ _validated }) => {
         return _validated.getValue(scope)
       })
@@ -514,7 +514,7 @@ export class ImpulseFormShapeState<
   )
 
   public readonly _validatedVerbose = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeFlagVerbose<TFields> => {
       const validatedVerbose = mapValues(
         this._fields,
         ({ _validatedVerbose }) => _validatedVerbose.getValue(scope),
@@ -537,7 +537,7 @@ export class ImpulseFormShapeState<
   // D I R T Y
 
   public readonly _dirty = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeFlag<TFields> => {
       const dirty = mapValues(this._fields, ({ _dirty }) => {
         return _dirty.getValue(scope)
       })
@@ -560,7 +560,7 @@ export class ImpulseFormShapeState<
   )
 
   public readonly _dirtyVerbose = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeFlagVerbose<TFields> => {
       const dirtyVerbose = mapValues(this._fields, ({ _dirtyVerbose }) => {
         return _dirtyVerbose.getValue(scope)
       })
@@ -574,7 +574,7 @@ export class ImpulseFormShapeState<
   )
 
   public readonly _dirtyOn = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeFlag<TFields> => {
       const dirtyOn = mapValues(this._fields, ({ _dirtyOn }) => {
         return _dirtyOn.getValue(scope)
       })
@@ -597,7 +597,7 @@ export class ImpulseFormShapeState<
   )
 
   public readonly _dirtyOnVerbose = Impulse(
-    (scope) => {
+    (scope): ImpulseFormShapeFlagVerbose<TFields> => {
       const dirtyOnVerbose = mapValues(this._fields, ({ _dirtyOnVerbose }) => {
         return _dirtyOnVerbose.getValue(scope)
       })
