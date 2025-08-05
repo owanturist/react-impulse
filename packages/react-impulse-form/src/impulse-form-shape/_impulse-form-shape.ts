@@ -17,18 +17,22 @@ export class ImpulseFormShape<
 > extends ImpulseForm<ImpulseFormShapeParams<TFields>> {
   public static override _getState = ImpulseForm._getState
 
-  public constructor(public readonly _state: ImpulseFormShapeState<TFields>) {
-    super()
+  public readonly fields: {
+    readonly [TField in keyof TFields]: ImpulseFormShapeField<TFields[TField]>
   }
 
-  public readonly fields = {
-    ...mapValues(this._state._fields, ({ _host }) => _host()),
+  public constructor(public readonly _state: ImpulseFormShapeState<TFields>) {
+    super()
 
-    ...mapValues(
-      this._state._meta,
-      (field) => (scope: Scope) => field.getValue(scope),
-    ),
-  } as {
-    readonly [TField in keyof TFields]: ImpulseFormShapeField<TFields[TField]>
+    this.fields = {
+      ...mapValues(this._state._fields, ({ _host }) => _host()),
+
+      ...mapValues(
+        this._state._meta,
+        (field) => (scope: Scope) => field.getValue(scope),
+      ),
+    } as {
+      readonly [TField in keyof TFields]: ImpulseFormShapeField<TFields[TField]>
+    }
   }
 }

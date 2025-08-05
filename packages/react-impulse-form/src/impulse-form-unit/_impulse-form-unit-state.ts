@@ -5,7 +5,13 @@ import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
 import { resolveSetter } from "~/tools/setter"
 
-import { type Compare, Impulse, type Scope, batch } from "../dependencies"
+import {
+  type Compare,
+  Impulse,
+  type ReadonlyImpulse,
+  type Scope,
+  batch,
+} from "../dependencies"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
 import {
@@ -54,6 +60,116 @@ export class ImpulseFormUnitState<
   ) {
     super(parent)
 
+    const result = Impulse((scope): Result<null | TError, TOutput> => {
+      const customError_ = this._customError.getValue(scope)
+
+      if (!isNull(customError_)) {
+        return [customError_, null]
+      }
+
+      const input_ = this._input.getValue(scope)
+      const transform = this._transform.getValue(scope)
+
+      const [error, output] = transform._validator(input_)
+
+      if (!isNull(output)) {
+        return [null, output]
+      }
+
+      return [isValidated.getValue(scope) ? error : null, null]
+    })
+
+    this._initial = Impulse(
+      (scope): TInput => _initialState.getValue(scope)._current.getValue(scope),
+      {
+        compare: _isInputEqual,
+      },
+    )
+
+    this._error = this._errorVerbose = Impulse(
+      (scope): null | TError => {
+        const [error] = result.getValue(scope)
+
+        return error
+      },
+      {
+        compare: _isErrorEqual,
+      },
+    )
+
+    this._output = this._outputVerbose = Impulse(
+      (scope): null | TOutput => {
+        const [, output] = result.getValue(scope)
+
+        return output
+      },
+      {
+        compare: _isOutputEqual,
+      },
+    )
+
+    this._touchedVerbose = _touched
+
+    this._dirty = this._dirtyVerbose = Impulse((scope): boolean => {
+      return _isInputDirty(
+        this._initial.getValue(scope),
+        this._input.getValue(scope),
+        scope,
+      )
+    })
+
+    this._validateOnVerbose = _validateOn
+
+    this._valid = this._validVerbose = Impulse((scope): boolean => {
+      const error = this._error.getValue(scope)
+
+      return isNull(error)
+    })
+
+    this._invalid = this._invalidVerbose = Impulse((scope): boolean => {
+      const error = this._error.getValue(scope)
+
+      return !isNull(error)
+    })
+
+    // persist the validated state
+    const isValidated = Impulse(false)
+
+    this._validated = this._validatedVerbose = Impulse(
+      // mixes the validated and invalid states
+      (scope): boolean => {
+        return isValidated.getValue(scope) || this._invalid.getValue(scope)
+      },
+
+      // proxies the validated setter where `false` means revalidate
+      // and `true` sets the validated state to `true`
+      (next, scope) => {
+        isValidated.setValue(() => {
+          if (next || this._transform.getValue(scope)._transformer) {
+            return true
+          }
+
+          switch (this._validateOn.getValue(scope)) {
+            case VALIDATE_ON_INIT: {
+              return true
+            }
+
+            case VALIDATE_ON_TOUCH: {
+              return this._touched.getValue(scope)
+            }
+
+            case VALIDATE_ON_CHANGE: {
+              return this._dirty.getValue(scope)
+            }
+
+            case VALIDATE_ON_SUBMIT: {
+              return false
+            }
+          }
+        })
+      },
+    )
+
     this._validated.setValue(false)
   }
 
@@ -78,41 +194,9 @@ export class ImpulseFormUnitState<
     )
   }
 
-  // R E S U L T
-
-  // persist the validated state
-  private readonly _isValidated = Impulse(false)
-
-  private readonly _result = Impulse(
-    (scope): Result<null | TError, TOutput> => {
-      const customError_ = this._customError.getValue(scope)
-
-      if (!isNull(customError_)) {
-        return [customError_, null]
-      }
-
-      const input_ = this._input.getValue(scope)
-      const transform = this._transform.getValue(scope)
-
-      const [error, output] = transform._validator(input_)
-
-      if (!isNull(output)) {
-        return [null, output]
-      }
-
-      return [this._isValidated.getValue(scope) ? error : null, null]
-    },
-  )
-
   // I N I T I A L
 
-  public _initial = Impulse(
-    (scope): TInput =>
-      this._initialState.getValue(scope)._current.getValue(scope),
-    {
-      compare: this._isInputEqual,
-    },
-  )
+  public _initial: ReadonlyImpulse<TInput>
 
   public _replaceInitial(
     scope: Scope,
@@ -172,18 +256,9 @@ export class ImpulseFormUnitState<
 
   // E R R O R
 
-  public readonly _error = Impulse(
-    (scope): null | TError => {
-      const [error] = this._result.getValue(scope)
+  public readonly _error: ReadonlyImpulse<null | TError>
 
-      return error
-    },
-    {
-      compare: this._isErrorEqual,
-    },
-  )
-
-  public readonly _errorVerbose = this._error
+  public readonly _errorVerbose: ReadonlyImpulse<null | TError>
 
   public _setError(
     _scope: Scope,
@@ -194,7 +269,7 @@ export class ImpulseFormUnitState<
 
   // V A L I D A T E   O N
 
-  public readonly _validateOnVerbose = this._validateOn
+  public readonly _validateOnVerbose: ReadonlyImpulse<ValidateStrategy>
 
   public _setValidateOn(
     scope: Scope,
@@ -213,7 +288,7 @@ export class ImpulseFormUnitState<
 
   // T O U C H E D
 
-  public readonly _touchedVerbose = this._touched
+  public readonly _touchedVerbose: ReadonlyImpulse<boolean>
 
   public _setTouched(
     _scope: Scope,
@@ -225,76 +300,23 @@ export class ImpulseFormUnitState<
 
   // O U T P U T
 
-  public readonly _output = Impulse(
-    (scope): null | TOutput => {
-      const [, output] = this._result.getValue(scope)
-
-      return output
-    },
-    {
-      compare: this._isOutputEqual,
-    },
-  )
-  public readonly _outputVerbose = this._output
+  public readonly _output: ReadonlyImpulse<null | TOutput>
+  public readonly _outputVerbose: ReadonlyImpulse<null | TOutput>
 
   // V A L I D
 
-  public readonly _valid = Impulse((scope): boolean => {
-    const error = this._error.getValue(scope)
-
-    return isNull(error)
-  })
-
-  public readonly _validVerbose = this._valid
+  public readonly _valid: ReadonlyImpulse<boolean>
+  public readonly _validVerbose: ReadonlyImpulse<boolean>
 
   // I N V A L I D
 
-  public readonly _invalid = Impulse((scope): boolean => {
-    const error = this._error.getValue(scope)
-
-    return !isNull(error)
-  })
-
-  public readonly _invalidVerbose = this._invalid
+  public readonly _invalid: ReadonlyImpulse<boolean>
+  public readonly _invalidVerbose: ReadonlyImpulse<boolean>
 
   // V A L I D A T E D
 
-  public readonly _validated = Impulse(
-    // mixes the validated and invalid states
-    (scope): boolean => {
-      return this._isValidated.getValue(scope) || this._invalid.getValue(scope)
-    },
-
-    // proxies the validated setter where `false` means revalidate
-    // and `true` sets the validated state to `true`
-    (next, scope) => {
-      this._isValidated.setValue(() => {
-        if (next || this._transform.getValue(scope)._transformer) {
-          return true
-        }
-
-        switch (this._validateOn.getValue(scope)) {
-          case VALIDATE_ON_INIT: {
-            return true
-          }
-
-          case VALIDATE_ON_TOUCH: {
-            return this._touched.getValue(scope)
-          }
-
-          case VALIDATE_ON_CHANGE: {
-            return this._dirty.getValue(scope)
-          }
-
-          case VALIDATE_ON_SUBMIT: {
-            return false
-          }
-        }
-      })
-    },
-  )
-
-  public readonly _validatedVerbose = this._validated
+  public readonly _validated: Impulse<boolean>
+  public readonly _validatedVerbose: ReadonlyImpulse<boolean>
 
   public _forceValidated(): void {
     this._validated.setValue(true)
@@ -302,18 +324,10 @@ export class ImpulseFormUnitState<
 
   // D I R T Y
 
-  public readonly _dirty = Impulse((scope): boolean => {
-    return this._isInputDirty(
-      this._initial.getValue(scope),
-      this._input.getValue(scope),
-      scope,
-    )
-  })
-
-  public readonly _dirtyVerbose = this._dirty
+  public readonly _dirty: ReadonlyImpulse<boolean>
+  public readonly _dirtyVerbose: ReadonlyImpulse<boolean>
 
   public readonly _dirtyOn = Impulse(true)
-
   public readonly _dirtyOnVerbose = this._dirtyOn
 
   // R E S E T
