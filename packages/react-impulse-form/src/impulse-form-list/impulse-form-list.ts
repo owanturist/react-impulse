@@ -1,11 +1,9 @@
 import { isUndefined } from "~/tools/is-undefined"
-import { map } from "~/tools/map"
 
 import { batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form"
 
-import type { ImpulseFormList as ImpulseFormListImpl } from "./_impulse-form-list"
-import { ImpulseFormListState } from "./_impulse-form-list-state"
+import { ImpulseFormList as ImpulseFormListImpl } from "./_impulse-form-list"
 import type { ImpulseFormListErrorSetter } from "./impulse-form-list-error-setter"
 import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"
 import type { ImpulseFormListInputSetter } from "./impulse-form-list-input-setter"
@@ -32,10 +30,7 @@ export function ImpulseFormList<TElement extends ImpulseForm>(
     error,
   }: ImpulseFormListOptions<TElement> = {},
 ): ImpulseFormList<TElement> {
-  const state = new ImpulseFormListState<TElement>(
-    null,
-    map(elements, ({ _state }) => _state),
-  )
+  const state = ImpulseFormListImpl._createState(elements)
 
   batch((scope) => {
     if (!isUndefined(input)) {
