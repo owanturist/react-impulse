@@ -30,9 +30,6 @@ export default tseslint.config([
         sourceType: "module",
       },
     },
-    plugins: {
-      import: importPlugin,
-    },
     rules: {
       "padding-line-between-statements": [
         "error",
@@ -189,7 +186,6 @@ export default tseslint.config([
     },
     plugins: {
       "@typescript-eslint": tseslint.plugin,
-      import: importPlugin,
     },
     rules: {
       "array-callback-return": "off",
