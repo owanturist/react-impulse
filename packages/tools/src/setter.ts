@@ -8,6 +8,6 @@ export type Setter<
 export function resolveSetter<
   TValue,
   TPrevValues extends ReadonlyArray<unknown>,
->(setter: Setter<TValue, TPrevValues>, ...prevValues: TPrevValues): TValue {
-  return isFunction(setter) ? setter(...prevValues) : setter
+>(setter: Setter<TValue, TPrevValues>, ...args: TPrevValues): TValue {
+  return isFunction(setter) ? setter(...args) : setter
 }

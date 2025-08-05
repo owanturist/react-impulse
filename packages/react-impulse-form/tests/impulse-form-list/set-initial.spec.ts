@@ -48,6 +48,41 @@ it("matches the type definition", ({ scope }) => {
   >()
 })
 
+it("matches the nested type definition", ({ scope }) => {
+  const form = ImpulseFormList([ImpulseFormList([ImpulseFormUnit(0)])])
+
+  expectTypeOf(form.setInitial).toEqualTypeOf<
+    (
+      setter: Setter<
+        ReadonlyArray<
+          | undefined
+          | Setter<
+              ReadonlyArray<undefined | Setter<number, [number, number]>>,
+              [ReadonlyArray<number>, ReadonlyArray<number>]
+            >
+        >,
+        [
+          ReadonlyArray<ReadonlyArray<number>>,
+          ReadonlyArray<ReadonlyArray<number>>,
+        ]
+      >,
+    ) => void
+  >()
+
+  expectTypeOf(form.getElements(scope).at(0)!.setInitial).toEqualTypeOf<
+    (
+      setter: Setter<
+        ReadonlyArray<undefined | Setter<number, [number, number]>>,
+        [ReadonlyArray<number>, ReadonlyArray<number>]
+      >,
+    ) => void
+  >()
+
+  expectTypeOf(
+    form.getElements(scope).at(0)!.getElements(scope).at(0)!.setInitial,
+  ).toEqualTypeOf<(setter: Setter<number, [number, number]>) => void>()
+})
+
 it("changes all items", ({ scope }) => {
   const form = ImpulseFormList([
     ImpulseFormUnit(0),
@@ -68,6 +103,10 @@ it("adds an added element's initial", ({ scope }) => {
   form.setElements((elements) => [...elements, ImpulseFormUnit(2)])
 
   expect(form.getInitial(scope)).toStrictEqual([0, 1])
+  expect(
+    form.getElements(scope).map((element) => element.getInitial(scope)),
+  ).toStrictEqual([0, 1, 2])
+
   form.setInitial([3, 4, 5])
   expect(form.getInitial(scope)).toStrictEqual([3, 4, 5])
   expect(
@@ -370,53 +409,65 @@ describe("nested list", () => {
     ])
   })
 
-  it("updates initial value", ({ scope }) => {
-    const form = ImpulseFormList([
-      ImpulseFormShape({
-        first: ImpulseFormList([
-          ImpulseFormShape({
-            one: ImpulseFormUnit("1"),
-            two: ImpulseFormUnit(2),
-          }),
-          ImpulseFormShape({
-            one: ImpulseFormUnit("10"),
-            two: ImpulseFormUnit(20),
-          }),
-        ]),
-      }),
-    ])
-
-    form
-      .getElements(scope)
-      .at(0)
-      ?.fields.first.getElements(scope)
-      .at(0)
-      ?.fields.one.setInitial("10")
-
-    expect(form.getInitial(scope)).toStrictEqual([
-      {
-        first: [
-          { one: "10", two: 2 },
-          { one: "10", two: 20 },
-        ],
-      },
-    ])
-
-    form
-      .getElements(scope)
-      .at(0)
-      ?.fields.first.setInitial([
-        { one: "100", two: 200 },
-        { one: "1000", two: 2000 },
+  describe("when updating initial value from different entry points", () => {
+    it("root level", ({ scope }) => {
+      const form = ImpulseFormList([
+        ImpulseFormList([ImpulseFormUnit(1), ImpulseFormUnit(2)]),
       ])
 
-    expect(form.getInitial(scope)).toStrictEqual([
-      {
-        first: [
-          { one: "100", two: 200 },
-          { one: "1000", two: 2000 },
-        ],
-      },
-    ])
+      form.setInitial([[10, 2]])
+
+      expect(form.getInitial(scope)).toStrictEqual([[10, 2]])
+      expect(
+        form.getElements(scope).map((list) => list.getInitial(scope)),
+      ).toStrictEqual([[10, 2]])
+      expect(
+        form
+          .getElements(scope)
+          .map((list) =>
+            list.getElements(scope).map((unit) => unit.getInitial(scope)),
+          ),
+      ).toStrictEqual([[10, 2]])
+    })
+
+    it("middle level", ({ scope }) => {
+      const form = ImpulseFormList([
+        ImpulseFormList([ImpulseFormUnit(1), ImpulseFormUnit(2)]),
+      ])
+
+      form.getElements(scope).at(0)!.setInitial([10, 2])
+
+      expect(form.getInitial(scope)).toStrictEqual([[10, 2]])
+      expect(
+        form.getElements(scope).map((list) => list.getInitial(scope)),
+      ).toStrictEqual([[10, 2]])
+      expect(
+        form
+          .getElements(scope)
+          .map((list) =>
+            list.getElements(scope).map((unit) => unit.getInitial(scope)),
+          ),
+      ).toStrictEqual([[10, 2]])
+    })
+
+    it("bottom level", ({ scope }) => {
+      const form = ImpulseFormList([
+        ImpulseFormList([ImpulseFormUnit(1), ImpulseFormUnit(2)]),
+      ])
+
+      form.getElements(scope).at(0)!.getElements(scope).at(0)!.setInitial(10)
+
+      expect(form.getInitial(scope)).toStrictEqual([[10, 2]])
+      expect(
+        form.getElements(scope).map((list) => list.getInitial(scope)),
+      ).toStrictEqual([[10, 2]])
+      expect(
+        form
+          .getElements(scope)
+          .map((list) =>
+            list.getElements(scope).map((unit) => unit.getInitial(scope)),
+          ),
+      ).toStrictEqual([[10, 2]])
+    })
   })
 })

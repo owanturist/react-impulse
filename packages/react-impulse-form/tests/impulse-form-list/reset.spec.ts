@@ -2,7 +2,7 @@ import { z } from "zod"
 
 import type { Setter } from "~/tools/setter"
 
-import { ImpulseFormList, ImpulseFormUnit } from "../../src"
+import { ImpulseFormList, ImpulseFormShape, ImpulseFormUnit } from "../../src"
 import { wait } from "../common"
 
 beforeAll(() => {
@@ -220,4 +220,114 @@ it("updates isSubmitting for restored elements", async ({ scope }) => {
   expect(
     form.getElements(scope).map((element) => element.isSubmitting(scope)),
   ).toStrictEqual([false, false, false])
+})
+
+/**
+ * bugfix: ImpulseFormList.reset() restores not initial values #923
+ * @link https://github.com/owanturist/react-impulse/issues/923
+ */
+describe("when resetting elements with metadata", () => {
+  it("restores after removing leading", ({ scope }) => {
+    const form = ImpulseFormList([
+      ImpulseFormShape({
+        id: 1,
+        name: ImpulseFormUnit("1"),
+      }),
+      ImpulseFormShape({
+        id: 2,
+        name: ImpulseFormUnit("2"),
+      }),
+    ])
+
+    form.setElements(([, second]) => [second!])
+    form.reset((initial) => initial)
+
+    expect(form.getInput(scope)).toStrictEqual([
+      { id: 1, name: "1" },
+      { id: 2, name: "2" },
+    ])
+  })
+
+  it("restores after removing trailing", ({ scope }) => {
+    const form = ImpulseFormList([
+      ImpulseFormShape({
+        id: 1,
+        name: ImpulseFormUnit("1"),
+      }),
+      ImpulseFormShape({
+        id: 2,
+        name: ImpulseFormUnit("2"),
+      }),
+    ])
+
+    form.setElements(([first]) => [first!])
+    form.reset((initial) => initial)
+
+    expect(form.getInput(scope)).toStrictEqual([
+      { id: 1, name: "1" },
+      { id: 2, name: "2" },
+    ])
+  })
+
+  it("restores after adding leading", ({ scope }) => {
+    const form = ImpulseFormList([
+      ImpulseFormShape({
+        id: 1,
+        name: ImpulseFormUnit("1"),
+      }),
+    ])
+
+    form.setElements((elements) => [
+      ImpulseFormShape({
+        id: 2,
+        name: ImpulseFormUnit("2"),
+      }),
+      ...elements,
+    ])
+
+    expect(form.getInput(scope)).toStrictEqual([
+      { id: 2, name: "2" },
+      { id: 1, name: "1" },
+    ])
+
+    form.reset((initial) => initial)
+
+    expect(form.getInput(scope)).toStrictEqual([{ id: 1, name: "1" }])
+  })
+
+  it("restores after adding leading and setting initial to input", ({
+    scope,
+  }) => {
+    const form = ImpulseFormList([
+      ImpulseFormShape({
+        id: 1,
+        name: ImpulseFormUnit("1"),
+      }),
+    ])
+
+    form.setElements((elements) => [
+      ImpulseFormShape({
+        id: 2,
+        name: ImpulseFormUnit("2"),
+      }),
+      ...elements,
+    ])
+
+    expect(form.getInput(scope)).toStrictEqual([
+      { id: 2, name: "2" },
+      { id: 1, name: "1" },
+    ])
+    expect(form.getInitial(scope)).toStrictEqual([{ id: 1, name: "1" }])
+
+    form.reset((_initial, input) => input)
+
+    expect(form.getInitial(scope)).toStrictEqual([
+      { id: 2, name: "2" },
+      { id: 1, name: "1" },
+    ])
+    expect(form.getInput(scope)).toStrictEqual([
+      { id: 2, name: "2" },
+      { id: 1, name: "1" },
+    ])
+  })
 })

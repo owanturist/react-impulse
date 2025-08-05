@@ -94,7 +94,7 @@ describe("isDerivedImpulse(scope, check, value)", () => {
     scope: Scope,
     impulse: Impulse<string> | Impulse<number>,
   ) => {
-    if (isDerivedImpulse(scope, isString, impulse)) {
+    if (isDerivedImpulse(scope, isString<string>, impulse)) {
       expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
 
       return true

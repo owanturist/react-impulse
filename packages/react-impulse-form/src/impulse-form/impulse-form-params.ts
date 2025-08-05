@@ -1,19 +1,19 @@
 export interface ImpulseFormParams {
-  "input.setter": unknown
-  "input.schema": unknown
+  readonly "input.setter": unknown
+  readonly "input.schema": unknown
 
-  "output.schema": unknown
-  "output.schema.verbose": unknown
+  readonly "output.schema": unknown
+  readonly "output.schema.verbose": unknown
 
-  "flag.setter": unknown
-  "flag.schema": unknown
-  "flag.schema.verbose": unknown
+  readonly "flag.setter": unknown
+  readonly "flag.schema": unknown
+  readonly "flag.schema.verbose": unknown
 
-  "validateOn.setter": unknown
-  "validateOn.schema": unknown
-  "validateOn.schema.verbose": unknown
+  readonly "validateOn.setter": unknown
+  readonly "validateOn.schema": unknown
+  readonly "validateOn.schema.verbose": unknown
 
-  "error.setter": unknown
-  "error.schema": unknown
-  "error.schema.verbose": unknown
+  readonly "error.setter": unknown
+  readonly "error.schema": unknown
+  readonly "error.schema.verbose": unknown
 }

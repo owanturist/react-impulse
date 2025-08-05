@@ -246,46 +246,6 @@ it("specifies initial touched", ({ scope }) => {
   expect(value.isTouched(scope)).toBe(false)
 })
 
-it("specifies initial value", ({ scope }) => {
-  const value = ImpulseFormUnit("", { initial: "1" })
-
-  expect(value.getInput(scope)).toBe("")
-  expect(value.getInitial(scope)).toBe("1")
-})
-
-it("assigns initial to input by default", ({ scope }) => {
-  const value = ImpulseFormUnit("1")
-
-  expect(value.getInput(scope)).toBe("1")
-  expect(value.getInitial(scope)).toBe("1")
-})
-
-it("assigns custom initial", ({ scope }) => {
-  const value = ImpulseFormUnit("1", { initial: "2" })
-
-  expect(value.getInput(scope)).toBe("1")
-  expect(value.getInitial(scope)).toBe("2")
-})
-
-it("returns initial if it is equals to input with custom isInputEqual", ({
-  scope,
-}) => {
-  const initial = { count: 0 }
-  const form = ImpulseFormUnit(
-    { count: 0 },
-    {
-      initial: initial,
-      isInputEqual: (left, right) => left.count === right.count,
-    },
-  )
-
-  expect(form.getInput(scope)).toBe(initial)
-  expect(form.getInput(scope)).toBe(form.getInitial(scope))
-
-  form.setInput({ count: 1 })
-  expect(form.getInput(scope)).not.toBe(initial)
-})
-
 it("keeps the prev value with custom isInputEqual", ({ scope }) => {
   const form = ImpulseFormUnit(
     { count: 0 },

@@ -1,10 +1,11 @@
-import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isUndefined } from "~/tools/is-undefined"
+import { map } from "~/tools/map"
 
-import { Impulse, batch } from "../dependencies"
+import { batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form"
 
 import { ImpulseFormList as ImpulseFormListImpl } from "./_impulse-form-list"
+import { ImpulseFormListState } from "./_impulse-form-list-state"
 import type { ImpulseFormListErrorSetter } from "./impulse-form-list-error-setter"
 import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"
 import type { ImpulseFormListInputSetter } from "./impulse-form-list-input-setter"
@@ -14,11 +15,11 @@ export type ImpulseFormList<TElement extends ImpulseForm> =
   ImpulseFormListImpl<TElement>
 
 export interface ImpulseFormListOptions<TElement extends ImpulseForm> {
-  input?: ImpulseFormListInputSetter<TElement>
-  initial?: ImpulseFormListInputSetter<TElement>
-  touched?: ImpulseFormListFlagSetter<TElement>
-  validateOn?: ImpulseFormListValidateOnSetter<TElement>
-  error?: ImpulseFormListErrorSetter<TElement>
+  readonly input?: ImpulseFormListInputSetter<TElement>
+  readonly initial?: ImpulseFormListInputSetter<TElement>
+  readonly touched?: ImpulseFormListFlagSetter<TElement>
+  readonly validateOn?: ImpulseFormListValidateOnSetter<TElement>
+  readonly error?: ImpulseFormListErrorSetter<TElement>
 }
 
 export function ImpulseFormList<TElement extends ImpulseForm>(
@@ -31,33 +32,32 @@ export function ImpulseFormList<TElement extends ImpulseForm>(
     error,
   }: ImpulseFormListOptions<TElement> = {},
 ): ImpulseFormList<TElement> {
-  const list = new ImpulseFormListImpl(
+  const state = new ImpulseFormListState<TElement>(
     null,
-    Impulse(elements, { compare: isShallowArrayEqual }),
+    map(elements, ImpulseFormListImpl._getState),
   )
 
-  batch(() => {
-    if (!isUndefined(touched)) {
-      list.setTouched(touched)
+  batch((scope) => {
+    if (!isUndefined(input)) {
+      state._setInput(scope, input)
     }
 
     if (!isUndefined(initial)) {
-      list.setInitial(initial)
+      state._setInitial(scope, initial)
     }
 
-    if (!isUndefined(input)) {
-      list.setInput(input)
+    if (!isUndefined(touched)) {
+      state._setTouched(scope, touched)
     }
 
     if (!isUndefined(validateOn)) {
-      list.setValidateOn(validateOn)
+      state._setValidateOn(scope, validateOn)
     }
 
-    // TODO add test against null
     if (!isUndefined(error)) {
-      list.setError(error)
+      state._setError(scope, error)
     }
   })
 
-  return list
+  return state._host()
 }

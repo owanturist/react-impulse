@@ -652,6 +652,26 @@ describe("swapping elements", () => {
 
     form.setElements(([first, second, third]) => [third!, second!, first!])
 
+    expect(form.getInput(scope)).toStrictEqual([
+      { first: 3, second: "3" },
+      { first: 2, second: "2" },
+      { first: 1, second: "1" },
+    ])
+
+    expect(form.getInitial(scope)).toStrictEqual([
+      { first: 1, second: "1" },
+      { first: 2, second: "2" },
+      { first: 3, second: "3" },
+    ])
+
+    expect(
+      form.getElements(scope).map((element) => element.getInitial(scope)),
+    ).toStrictEqual([
+      { first: 1, second: "1" },
+      { first: 2, second: "2" },
+      { first: 3, second: "3" },
+    ])
+
     expect(form.isDirty(scope)).toBe(true)
     expect(form.isDirty(scope, params._first)).toStrictEqual([
       true,

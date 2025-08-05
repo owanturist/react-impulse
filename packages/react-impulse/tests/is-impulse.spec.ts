@@ -83,7 +83,7 @@ describe("isImpulse(scope, check, value)", () => {
     scope: Scope,
     impulse: Impulse<string> | Impulse<number>,
   ) => {
-    if (isImpulse(scope, isString, impulse)) {
+    if (isImpulse(scope, isString<string>, impulse)) {
       expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
 
       return true

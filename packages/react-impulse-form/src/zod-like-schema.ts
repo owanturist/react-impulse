@@ -2,6 +2,7 @@ import { hasProperty } from "~/tools/has-property"
 import { isArray } from "~/tools/is-array"
 import { isObject } from "~/tools/is-object"
 import { isString } from "~/tools/is-string"
+import { map } from "~/tools/map"
 
 import type { Result } from "./result"
 
@@ -33,7 +34,7 @@ function zodLikeSafeParseResultToResult<TOutput>(
     ? result.error.errors
     : result.error.issues
 
-  return [errors.map(({ message }) => message), null]
+  return [map(errors, ({ message }) => message), null]
 }
 
 function unknownErrors(error: unknown): ReadonlyArray<string> {
@@ -44,10 +45,9 @@ function unknownErrors(error: unknown): ReadonlyArray<string> {
   const errors = error.errors ?? error.issues
 
   if (isArray(errors)) {
-    return errors
-      .filter(isObject)
-      .map(({ message }) => message)
-      .filter(isString)
+    return map(errors.filter(isObject), ({ message }) => message).filter(
+      isString,
+    )
   }
 
   if (error instanceof Error) {

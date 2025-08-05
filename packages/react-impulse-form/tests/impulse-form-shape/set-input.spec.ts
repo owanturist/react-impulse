@@ -135,6 +135,11 @@ it("updates original value", ({ scope }) => {
     readonly fourth: Array<string>
   }>()
 
+  expect(shape.fields.third.getInput(scope)).toStrictEqual({
+    one: false,
+    two: ["two", "three"],
+  })
+
   expectTypeOf(shape.fields.third.getInput(scope)).toEqualTypeOf<{
     readonly one: boolean
     readonly two: Array<string>

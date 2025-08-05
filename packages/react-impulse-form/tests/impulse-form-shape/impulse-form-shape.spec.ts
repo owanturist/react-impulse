@@ -3,7 +3,11 @@ import { z } from "zod"
 import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
-import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
+import {
+  ImpulseFormShape,
+  ImpulseFormUnit,
+  type ValidateStrategy,
+} from "../../src"
 
 it("composes ImpulseFormShape from ImpulseFormUnit", ({ scope }) => {
   const shape = ImpulseFormShape({
@@ -126,6 +130,9 @@ it("allows to specify none-form fields", ({ scope }) => {
     id: 123,
     name: "john",
   })
+
+  expect(shape.fields.id(scope)).toBe(123)
+  expect(shape.fields.name(scope)).toBe("john")
 })
 
 describe("ImpulseFormShapeOptions.touched", () => {
@@ -664,6 +671,136 @@ describe("ImpulseFormShapeOptions.input", () => {
         two: [""],
       },
       fourth: ["anything"],
+    })
+  })
+})
+
+describe("ImpulseFormShapeOptions.validateOn", () => {
+  it("specifies initial validateOn", ({ scope }) => {
+    const shape = ImpulseFormShape(
+      {
+        first: ImpulseFormUnit("", { schema: z.string() }),
+        second: ImpulseFormUnit(0, { validate: (input) => [null, input] }),
+        third: ImpulseFormShape({
+          one: ImpulseFormUnit(true, { error: ["some"] }),
+          two: ImpulseFormUnit([""]),
+        }),
+        fourth: ["anything"],
+      },
+      {
+        validateOn: {
+          first: "onInit",
+          third: "onChange",
+        },
+      },
+    )
+
+    expect(shape.getValidateOn(scope, params._second)).toStrictEqual({
+      first: "onInit",
+      second: "onTouch",
+      third: {
+        one: "onChange",
+        two: "onChange",
+      },
+    })
+  })
+
+  it("gets current validateOn from setters", ({ scope }) => {
+    const shape = ImpulseFormShape(
+      {
+        first: ImpulseFormUnit("", {
+          validateOn: "onChange",
+          schema: z.string(),
+        }),
+        second: ImpulseFormUnit(0, {
+          validate: (input) => {
+            return input > 0 ? [null, input] : ["must be positive", null]
+          },
+        }),
+        third: ImpulseFormShape(
+          {
+            one: ImpulseFormUnit(true, { schema: z.boolean() }),
+            two: ImpulseFormUnit([""], { schema: z.array(z.string()) }),
+          },
+          {
+            validateOn: {
+              one: "onSubmit",
+              two: "onInit",
+            },
+          },
+        ),
+        fourth: ["anything"],
+      },
+      {
+        validateOn: (root) => {
+          expectTypeOf(root).toEqualTypeOf<{
+            readonly first: ValidateStrategy
+            readonly second: ValidateStrategy
+            readonly third: {
+              readonly one: ValidateStrategy
+              readonly two: ValidateStrategy
+            }
+          }>()
+
+          expect(root).toStrictEqual({
+            first: "onChange",
+            second: "onTouch",
+            third: {
+              one: "onSubmit",
+              two: "onInit",
+            },
+          })
+
+          return {
+            first: (first) => {
+              expectTypeOf(first).toEqualTypeOf<ValidateStrategy>()
+              expect(first).toStrictEqual("onChange")
+
+              return "onTouch"
+            },
+            second: (second) => {
+              expectTypeOf(second).toEqualTypeOf<ValidateStrategy>()
+              expect(second).toStrictEqual("onTouch")
+
+              return "onSubmit"
+            },
+            third: (third) => {
+              expectTypeOf(third).toEqualTypeOf<{
+                readonly one: ValidateStrategy
+                readonly two: ValidateStrategy
+              }>()
+              expect(third).toStrictEqual({
+                one: "onSubmit",
+                two: "onInit",
+              })
+
+              return {
+                one: (one) => {
+                  expectTypeOf(one).toEqualTypeOf<ValidateStrategy>()
+                  expect(one).toStrictEqual("onSubmit")
+
+                  return "onInit"
+                },
+                two: (two) => {
+                  expectTypeOf(two).toEqualTypeOf<ValidateStrategy>()
+                  expect(two).toStrictEqual("onInit")
+
+                  return "onChange"
+                },
+              }
+            },
+          }
+        },
+      },
+    )
+
+    expect(shape.getValidateOn(scope, params._second)).toStrictEqual({
+      first: "onTouch",
+      second: "onSubmit",
+      third: {
+        one: "onInit",
+        two: "onChange",
+      },
     })
   })
 })

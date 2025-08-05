@@ -81,3 +81,71 @@ it("selects value", ({ scope }) => {
     readonly fourth: Array<string>
   }>()
 })
+
+it("subsequently selects equal output shapes", ({ scope }) => {
+  const shape = ImpulseFormShape({
+    first: ImpulseFormUnit("1"),
+    second: ImpulseFormUnit(2),
+  })
+
+  expect(shape.getOutput(scope)).toStrictEqual({
+    first: "1",
+    second: 2,
+  })
+  expect(shape.getOutput(scope)).toBe(shape.getOutput(scope))
+  expect(shape.getOutput(scope)).toBe(shape.getOutput(scope))
+  expect(shape.getOutput(scope, params._first)).toBe(
+    shape.getOutput(scope, params._first),
+  )
+  expect(shape.getOutput(scope, params._second)).toBe(
+    shape.getOutput(scope, params._second),
+  )
+})
+
+it("persists unchanged output fields between changes", ({ scope }) => {
+  const shape = ImpulseFormShape({
+    first: ImpulseFormShape({
+      _0: ImpulseFormUnit("1"),
+      _1: ImpulseFormUnit("2"),
+    }),
+    second: ImpulseFormShape({
+      _3: ImpulseFormUnit("3"),
+      _4: ImpulseFormUnit("4"),
+    }),
+  })
+
+  const output_0 = shape.getOutput(scope)
+
+  expect(output_0).toStrictEqual({
+    first: {
+      _0: "1",
+      _1: "2",
+    },
+    second: {
+      _3: "3",
+      _4: "4",
+    },
+  })
+
+  shape.setInput({
+    second: {
+      _3: "third changed",
+    },
+  })
+
+  const output_1 = shape.getOutput(scope)
+
+  expect(output_1).toStrictEqual({
+    first: {
+      _0: "1",
+      _1: "2",
+    },
+    second: {
+      _3: "third changed",
+      _4: "4",
+    },
+  })
+  expect(output_1).not.toBe(output_0)
+  expect(output_1?.first).toBe(output_0?.first)
+  expect(output_1?.second).not.toBe(output_0?.second)
+})
