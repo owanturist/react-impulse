@@ -1,12 +1,10 @@
+import { map } from "~/tools/map"
 import { uniq } from "~/tools/uniq"
 
-export class Emitter<
-  TArgs extends ReadonlyArray<unknown> = [],
-  TResult = void,
-> {
-  private readonly _listeners: Array<(...args: TArgs) => TResult> = []
+export class Emitter<TPayload = unknown, TResult = void> {
+  private readonly _listeners: Array<(payload: TPayload) => TResult> = []
 
-  public _subscribe(listener: (...args: TArgs) => TResult): VoidFunction {
+  public _subscribe(listener: (payload: TPayload) => TResult): VoidFunction {
     this._listeners.push(listener)
 
     return () => {
@@ -14,8 +12,8 @@ export class Emitter<
     }
   }
 
-  public _emit(...args: TArgs): ReadonlyArray<TResult> {
-    return uniq(this._listeners).map((listener) => listener(...args))
+  public _emit(payload: TPayload): ReadonlyArray<TResult> {
+    return map(uniq(this._listeners), (listener) => listener(payload))
   }
 
   public _isEmpty(): boolean {

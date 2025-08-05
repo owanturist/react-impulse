@@ -1,3 +1,4 @@
+import { entries } from "~/tools/entries"
 import { isFunction } from "~/tools/is-function"
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { map } from "~/tools/map"
@@ -11,8 +12,7 @@ import type { ImpulseFormListParams } from "./_impulse-form-list-params"
 import type { ImpulseFormListState } from "./_impulse-form-list-state"
 
 export class ImpulseFormList<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TElement extends ImpulseForm = any,
+  TElement extends ImpulseForm = ImpulseForm,
 > extends ImpulseForm<ImpulseFormListParams<TElement>> {
   private readonly _elements = Impulse(
     (scope) => this._state._getElements(scope),
@@ -58,14 +58,12 @@ export class ImpulseFormList<
         },
       )
 
-      const initialElements = this._state._initialElements
-        .getValue(scope)
-        ._list.getValue(scope)
+      const initialElements = this._state._getInitialElements(scope)
 
-      nextElements.forEach(([element, isMounting], index) => {
+      for (const [index, [element, isMounting]] of entries(nextElements)) {
         // hook up the initial state from the initial elements
         element._replaceInitial(scope, initialElements.at(index), isMounting)
-      })
+      }
 
       this._state._elements.setValue(map(nextElements, ([element]) => element))
     })

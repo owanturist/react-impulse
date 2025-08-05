@@ -21,6 +21,7 @@ export class ImpulseFormShape<
 
   public readonly fields = {
     ...mapValues(this._state._fields, ({ _host }) => _host()),
+
     ...mapValues(
       this._state._meta,
       (field) => (scope: Scope) => field.getValue(scope),

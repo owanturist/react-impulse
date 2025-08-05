@@ -48,6 +48,39 @@ it("matches the type definition", ({ scope }) => {
   >()
 })
 
+it("matches the nested type definition", ({ scope }) => {
+  const form = ImpulseFormList([ImpulseFormList([ImpulseFormUnit(0)])])
+
+  expectTypeOf(form.setInitial).toEqualTypeOf<
+    (
+      setter: Setter<
+        | undefined
+        | Setter<
+            ReadonlyArray<undefined | Setter<number, [number, number]>>,
+            [ReadonlyArray<number>, ReadonlyArray<number>]
+          >,
+        [
+          ReadonlyArray<ReadonlyArray<number>>,
+          ReadonlyArray<ReadonlyArray<number>>,
+        ]
+      >,
+    ) => void
+  >()
+
+  expectTypeOf(form.getElements(scope).at(0)!.setInitial).toEqualTypeOf<
+    (
+      setter: Setter<
+        ReadonlyArray<undefined | Setter<number, [number, number]>>,
+        [ReadonlyArray<number>, ReadonlyArray<number>]
+      >,
+    ) => void
+  >()
+
+  expectTypeOf(
+    form.getElements(scope).at(0)!.getElements(scope).at(0)!.setInitial,
+  ).toEqualTypeOf<(setter: Setter<number, [number, number]>) => void>()
+})
+
 it("changes all items", ({ scope }) => {
   const form = ImpulseFormList([
     ImpulseFormUnit(0),

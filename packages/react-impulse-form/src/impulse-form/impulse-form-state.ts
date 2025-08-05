@@ -28,14 +28,12 @@ export abstract class ImpulseFormState<
     return this._childOf(null)
   }
 
-  public _parentOf<TChildParams extends ImpulseFormParams>(
-    child: ImpulseFormState<TChildParams>,
-  ): ImpulseFormState<TChildParams> {
+  public _parentOf<TChild extends ImpulseFormState>(child: TChild): TChild {
     if (this._root === child._root) {
       return child
     }
 
-    return child._childOf(this)
+    return child._childOf(this) as TChild
   }
 
   // I N I T I A L
@@ -138,7 +136,7 @@ export abstract class ImpulseFormState<
 
   // F O C U S   I N V A L I D
 
-  public readonly _onFocus = new Emitter<[error: unknown]>()
+  public readonly _onFocus = new Emitter()
 
   public _getFocusFirstInvalid(scope: Scope): null | VoidFunction {
     // go deep first and then the current element
@@ -164,10 +162,7 @@ export abstract class ImpulseFormState<
 
   // S U B M I T
 
-  public readonly _onSubmit = new Emitter<
-    [output: unknown],
-    void | Promise<unknown>
-  >()
+  public readonly _onSubmit = new Emitter<unknown, void | Promise<unknown>>()
 
   public readonly _submitAttempts = Impulse(0)
   public readonly _submittingCount = Impulse(0)
@@ -202,7 +197,7 @@ export abstract class ImpulseFormState<
 
   // C H I L D R E N
 
-  public abstract _getChildren<TChildParams extends TParams>(
+  public abstract _getChildren<TChildParams extends ImpulseFormParams>(
     scope: Scope,
   ): ReadonlyArray<ImpulseFormChild<TChildParams, TParams>>
 }
@@ -212,8 +207,8 @@ export interface ImpulseFormChild<
   TParams extends ImpulseFormParams,
 > {
   _state: ImpulseFormState<TChildParams>
-  _mapToChild<TKey extends keyof ImpulseFormParams>(
+  _mapToChild(
     this: void,
-    parentValue: TParams[TKey],
-  ): TChildParams[TKey]
+    parentValue: TParams["output.schema"],
+  ): TChildParams["output.schema"]
 }

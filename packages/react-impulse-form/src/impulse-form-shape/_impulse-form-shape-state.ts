@@ -1,5 +1,4 @@
 import { entries } from "~/tools/entries"
-import { forValues } from "~/tools/for-values"
 import { hasProperty } from "~/tools/has-property"
 import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
@@ -7,6 +6,7 @@ import { isNull } from "~/tools/is-null"
 import { isString } from "~/tools/is-string"
 import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
+import { map } from "~/tools/map"
 import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
 import { values } from "~/tools/values"
@@ -18,7 +18,6 @@ import {
   type ImpulseFormChild,
   ImpulseFormState,
 } from "../impulse-form/impulse-form-state"
-import type { ImpulseFormMeta } from "../impulse-form-meta"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
 import { ImpulseFormShape } from "./_impulse-form-shape"
@@ -65,26 +64,25 @@ import {
   isImpulseFormShapeValidateOnVerboseEqual,
 } from "./impulse-form-shape-validate-on-verbose"
 
-type ImpulseFormShapeStateFields<TFields extends ImpulseFormShapeFields> =
-  OmitValues<
-    {
-      [TField in keyof TFields]: TFields[TField] extends ImpulseForm<
-        infer TParams
-      >
-        ? ImpulseFormState<TParams>
-        : never
-    },
-    never
-  >
+export type ImpulseFormShapeStateFields<
+  TFields extends ImpulseFormShapeFields,
+> = OmitValues<
+  {
+    [TField in keyof TFields]: TFields[TField] extends ImpulseForm<
+      infer TParams
+    >
+      ? ImpulseFormState<TParams>
+      : never
+  },
+  never
+>
 
-type ImpulseFormShapeStateMeta<TFields extends ImpulseFormShapeFields> =
+export type ImpulseFormShapeStateMeta<TFields extends ImpulseFormShapeFields> =
   OmitValues<
     {
-      [TField in keyof TFields]: TFields[TField] extends ImpulseFormMeta<
-        infer TValue
-      >
-        ? Impulse<TValue>
-        : never
+      [TField in keyof TFields]: TFields[TField] extends ImpulseForm
+        ? never
+        : Impulse<TFields[TField]>
     },
     never
   >
@@ -106,7 +104,9 @@ export class ImpulseFormShapeState<
     super(parent)
 
     this._fields = mapValues(fields, (field) => this._parentOf(field))
-    this._meta = mapValues(meta, (field) => field.clone())
+    this._meta = mapValues(meta, (field) => {
+      return field.clone()
+    }) as unknown as ImpulseFormShapeStateMeta<TFields>
   }
 
   public _childOf(
@@ -122,7 +122,10 @@ export class ImpulseFormShapeState<
       const initial = mapValues(this._fields, ({ _initial }) => {
         return _initial.getValue(scope)
       })
-      const meta = mapValues(this._meta, (field) => field.getValue(scope))
+
+      const meta = mapValues(this._meta, (field) => {
+        return field.getValue(scope)
+      })
 
       return { ...initial, ...meta } as ImpulseFormShapeInput<TFields>
     },
@@ -137,9 +140,9 @@ export class ImpulseFormShapeState<
     state: undefined | ImpulseFormShapeState<TFields>,
     isMounting: boolean,
   ): void {
-    forValues(this._fields, (field, key) => {
+    for (const [key, field] of entries(this._fields)) {
       field._replaceInitial(scope, state?._fields[key], isMounting)
-    })
+    }
   }
 
   public _setInitial(
@@ -150,17 +153,17 @@ export class ImpulseFormShapeState<
       ? setter(this._initial.getValue(scope), this._input.getValue(scope))
       : setter
 
-    forValues(this._fields, (field, key) => {
+    for (const [key, field] of entries(this._fields)) {
       if (hasProperty(setters, key) && !isUndefined(setters[key])) {
         field._setInitial(scope, setters[key])
       }
-    })
+    }
 
-    forValues(this._meta, (field, key) => {
+    for (const [key, field] of entries(this._meta)) {
       if (hasProperty(setters, key) && !isUndefined(setters[key])) {
-        field.setValue(setters[key])
+        field.setValue(setters[key] as TFields[typeof key])
       }
-    })
+    }
   }
 
   // I N P U T
@@ -170,7 +173,10 @@ export class ImpulseFormShapeState<
       const input = mapValues(this._fields, ({ _input }) => {
         return _input.getValue(scope)
       })
-      const meta = mapValues(this._meta, (field) => field.getValue(scope))
+
+      const meta = mapValues(this._meta, (field) => {
+        return field.getValue(scope)
+      })
 
       return { ...input, ...meta } as ImpulseFormShapeInput<TFields>
     },
@@ -188,11 +194,11 @@ export class ImpulseFormShapeState<
       ? setter(this._input.getValue(scope), this._initial.getValue(scope))
       : setter
 
-    forValues(this._fields, (field, key) => {
+    for (const [key, field] of entries(this._fields)) {
       if (hasProperty(setters, key) && !isUndefined(setters[key])) {
         field._setInput(scope, setters[key])
       }
-    })
+    }
   }
 
   // E R R O R
@@ -236,13 +242,13 @@ export class ImpulseFormShapeState<
       ? setter(this._errorVerbose.getValue(scope))
       : setter
 
-    forValues(this._fields, (field, key) => {
+    for (const [key, field] of entries(this._fields)) {
       if (isNull(setters)) {
         field._setError(scope, setters)
       } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
         field._setError(scope, setters[key])
       }
-    })
+    }
   }
 
   // V A L I D A T E   O N
@@ -299,13 +305,13 @@ export class ImpulseFormShapeState<
       ? setter(this._validateOnVerbose.getValue(scope))
       : setter
 
-    forValues(this._fields, (field, key) => {
+    for (const [key, field] of entries(this._fields)) {
       if (isString(setters)) {
         field._setValidateOn(scope, setters)
       } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
         field._setValidateOn(scope, setters[key])
       }
-    })
+    }
   }
 
   // T O U C H E D
@@ -355,13 +361,13 @@ export class ImpulseFormShapeState<
       ? setter(this._touchedVerbose.getValue(scope))
       : setter
 
-    forValues(this._fields, (field, key) => {
+    for (const [key, field] of entries(this._fields)) {
       if (isBoolean(setters)) {
         field._setTouched(scope, setters)
       } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
         field._setTouched(scope, setters[key])
       }
-    })
+    }
   }
 
   // O U T P U T
@@ -389,7 +395,10 @@ export class ImpulseFormShapeState<
       const outputVerbose = mapValues(this._fields, ({ _outputVerbose }) => {
         return _outputVerbose.getValue(scope)
       })
-      const meta = mapValues(this._meta, (field) => field.getValue(scope))
+
+      const meta = mapValues(this._meta, (field) => {
+        return field.getValue(scope)
+      })
 
       return {
         ...outputVerbose,
@@ -520,9 +529,9 @@ export class ImpulseFormShapeState<
   )
 
   public _forceValidated(scope: Scope): void {
-    forValues(this._fields, (field) => {
+    for (const field of values(this._fields)) {
       field._forceValidated(scope)
-    })
+    }
   }
 
   // D I R T Y
@@ -611,12 +620,12 @@ export class ImpulseFormShapeState<
       ? resetter(this._initial.getValue(scope), this._input.getValue(scope))
       : resetter
 
-    forValues(this._fields, (field, key) => {
+    for (const [key, field] of entries(this._fields)) {
       field._reset(
         scope,
         hasProperty(resetters, key) ? resetters[key] : undefined,
       )
-    })
+    }
   }
 
   // C H I L D R E N
@@ -624,9 +633,11 @@ export class ImpulseFormShapeState<
   public _getChildren<TChildParams extends ImpulseFormParams>(): ReadonlyArray<
     ImpulseFormChild<TChildParams, ImpulseFormShapeParams<TFields>>
   > {
-    return entries(this._fields).map(([key, field]) => ({
-      _state: field,
-      _mapToChild: (output) => output[key],
+    return map(entries(this._fields), ([key, field]) => ({
+      _state: field as unknown as ImpulseFormState<TChildParams>,
+      _mapToChild: (output) => {
+        return output[key as keyof ImpulseFormShapeOutput<TFields>]
+      },
     }))
   }
 }
