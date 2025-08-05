@@ -1,16 +1,11 @@
 import { mapValues } from "~/tools/map-values"
-import { partitionEntries } from "~/tools/partition-entries"
 
-import { Impulse, type Scope } from "../dependencies"
-import { ImpulseForm, isImpulseForm } from "../impulse-form"
+import type { Scope } from "../dependencies"
+import { ImpulseForm } from "../impulse-form"
 import type { ImpulseFormMeta } from "../impulse-form-meta"
 
 import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"
-import {
-  ImpulseFormShapeState,
-  type ImpulseFormShapeStateFields,
-  type ImpulseFormShapeStateMeta,
-} from "./_impulse-form-shape-state"
+import type { ImpulseFormShapeState } from "./_impulse-form-shape-state"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 
 type ImpulseFormShapeField<TField> = TField extends ImpulseForm
@@ -20,24 +15,7 @@ type ImpulseFormShapeField<TField> = TField extends ImpulseForm
 export class ImpulseFormShape<
   TFields extends ImpulseFormShapeFields,
 > extends ImpulseForm<ImpulseFormShapeParams<TFields>> {
-  public static _createState<TFields extends ImpulseFormShapeFields>(
-    fields: TFields,
-  ): ImpulseFormShapeState<TFields> {
-    const [forms, meta] = partitionEntries(fields, isImpulseForm)
-
-    return new ImpulseFormShapeState(
-      null,
-
-      mapValues(
-        forms,
-        ImpulseForm._getState,
-      ) as unknown as ImpulseFormShapeStateFields<TFields>,
-
-      mapValues(meta, (field) => {
-        return Impulse(field)
-      }) as unknown as ImpulseFormShapeStateMeta<TFields>,
-    )
-  }
+  public static override _getState = ImpulseForm._getState
 
   public constructor(public readonly _state: ImpulseFormShapeState<TFields>) {
     super()

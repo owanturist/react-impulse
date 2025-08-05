@@ -9,19 +9,12 @@ import { Impulse, type Scope, batch } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormListParams } from "./_impulse-form-list-params"
-import { ImpulseFormListState } from "./_impulse-form-list-state"
+import type { ImpulseFormListState } from "./_impulse-form-list-state"
 
 export class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
   ImpulseFormListParams<TElement>
 > {
-  public static _createState<TElement extends ImpulseForm>(
-    elements: ReadonlyArray<TElement>,
-  ): ImpulseFormListState<TElement> {
-    return new ImpulseFormListState<TElement>(
-      null,
-      map(elements, ImpulseForm._getState),
-    )
-  }
+  public static override _getState = ImpulseForm._getState
 
   private readonly _elements = Impulse(
     (scope) => this._state._getElements(scope),

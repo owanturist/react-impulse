@@ -1,8 +1,16 @@
 import { isUndefined } from "~/tools/is-undefined"
+import { mapValues } from "~/tools/map-values"
+import { partitionEntries } from "~/tools/partition-entries"
 
-import { batch } from "../dependencies"
+import { Impulse, batch } from "../dependencies"
+import { isImpulseForm } from "../impulse-form"
 
 import { ImpulseFormShape as ImpulseFormShapeImpl } from "./_impulse-form-shape"
+import {
+  ImpulseFormShapeState,
+  type ImpulseFormShapeStateFields,
+  type ImpulseFormShapeStateMeta,
+} from "./_impulse-form-shape-state"
 import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 import type { ImpulseFormShapeFlagSetter } from "./impulse-form-shape-flag-setter"
@@ -32,7 +40,20 @@ export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
     error,
   }: ImpulseFormShapeOptions<TFields> = {},
 ): ImpulseFormShape<TFields> {
-  const state = ImpulseFormShapeImpl._createState(fields)
+  const [forms, meta] = partitionEntries(fields, isImpulseForm)
+
+  const state = new ImpulseFormShapeState(
+    null,
+
+    mapValues(
+      forms,
+      ImpulseFormShapeImpl._getState,
+    ) as unknown as ImpulseFormShapeStateFields<TFields>,
+
+    mapValues(meta, (field) => {
+      return Impulse(field)
+    }) as unknown as ImpulseFormShapeStateMeta<TFields>,
+  )
 
   batch((scope) => {
     if (!isUndefined(input)) {
