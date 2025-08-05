@@ -11,7 +11,6 @@ export abstract class ImpulseFormState<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TParams extends ImpulseFormParams = any,
 > {
-  // TODO make those private/protected
   public abstract readonly _host: Lazy<ImpulseForm<TParams>>
 
   public readonly _root: ImpulseFormState

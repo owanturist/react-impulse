@@ -50,9 +50,6 @@ export abstract class ImpulseForm<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TParams extends ImpulseFormParams = any,
 > {
-  // TODO check if still necessary for type inference
-  protected readonly _params?: TParams
-
   public abstract readonly _state: ImpulseFormState<TParams>
 
   public getOutput(scope: Scope): null | TParams["output.schema"]
