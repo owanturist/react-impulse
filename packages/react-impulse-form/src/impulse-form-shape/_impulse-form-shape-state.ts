@@ -18,6 +18,7 @@ import {
   type ImpulseFormChild,
   ImpulseFormState,
 } from "../impulse-form/impulse-form-state"
+import type { ImpulseFormMeta } from "../impulse-form-meta"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
 import { ImpulseFormShape } from "./_impulse-form-shape"
@@ -64,18 +65,29 @@ import {
   isImpulseFormShapeValidateOnVerboseEqual,
 } from "./impulse-form-shape-validate-on-verbose"
 
-export type ImpulseFormShapeStateFields<
-  TFields extends ImpulseFormShapeFields,
-> = OmitValues<
-  {
-    [TField in keyof TFields]: TFields[TField] extends ImpulseForm<
-      infer TParams
-    >
-      ? ImpulseFormState<TParams>
-      : never
-  },
-  never
->
+type ImpulseFormShapeStateFields<TFields extends ImpulseFormShapeFields> =
+  OmitValues<
+    {
+      [TField in keyof TFields]: TFields[TField] extends ImpulseForm<
+        infer TParams
+      >
+        ? ImpulseFormState<TParams>
+        : never
+    },
+    never
+  >
+
+type ImpulseFormShapeStateMeta<TFields extends ImpulseFormShapeFields> =
+  OmitValues<
+    {
+      [TField in keyof TFields]: TFields[TField] extends ImpulseFormMeta<
+        infer TValue
+      >
+        ? Impulse<TValue>
+        : never
+    },
+    never
+  >
 
 export class ImpulseFormShapeState<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
@@ -84,17 +96,17 @@ export class ImpulseFormShapeState<
 
   public readonly _fields: ImpulseFormShapeStateFields<TFields>
 
+  public readonly _meta: ImpulseFormShapeStateMeta<TFields>
+
   public constructor(
     parent: null | ImpulseFormState,
     fields: ImpulseFormShapeStateFields<TFields>,
-    public readonly _meta: Omit<
-      TFields,
-      keyof ImpulseFormShapeStateFields<TFields>
-    >,
+    meta: ImpulseFormShapeStateMeta<TFields>,
   ) {
     super(parent)
 
     this._fields = mapValues(fields, (field) => this._parentOf(field))
+    this._meta = mapValues(meta, (field) => field.clone())
   }
 
   public _childOf(
@@ -110,11 +122,9 @@ export class ImpulseFormShapeState<
       const initial = mapValues(this._fields, ({ _initial }) => {
         return _initial.getValue(scope)
       })
+      const meta = mapValues(this._meta, (field) => field.getValue(scope))
 
-      return {
-        ...initial,
-        ...this._meta,
-      } as ImpulseFormShapeInput<TFields>
+      return { ...initial, ...meta } as ImpulseFormShapeInput<TFields>
     },
 
     {
@@ -145,6 +155,12 @@ export class ImpulseFormShapeState<
         field._setInitial(scope, setters[key])
       }
     })
+
+    forValues(this._meta, (field, key) => {
+      if (hasProperty(setters, key) && !isUndefined(setters[key])) {
+        field.setValue(setters[key])
+      }
+    })
   }
 
   // I N P U T
@@ -154,11 +170,9 @@ export class ImpulseFormShapeState<
       const input = mapValues(this._fields, ({ _input }) => {
         return _input.getValue(scope)
       })
+      const meta = mapValues(this._meta, (field) => field.getValue(scope))
 
-      return {
-        ...input,
-        ...this._meta,
-      } as ImpulseFormShapeInput<TFields>
+      return { ...input, ...meta } as ImpulseFormShapeInput<TFields>
     },
 
     {
@@ -357,15 +371,13 @@ export class ImpulseFormShapeState<
       const output = mapValues(this._fields, ({ _output }) => {
         return _output.getValue(scope)
       })
+      const meta = mapValues(this._meta, (field) => field.getValue(scope))
 
       if (values(output).some(isNull)) {
         return null
       }
 
-      return {
-        ...output,
-        ...this._meta,
-      } as ImpulseFormShapeOutput<TFields>
+      return { ...output, ...meta } as ImpulseFormShapeOutput<TFields>
     },
     {
       compare: isImpulseFormShapeOutputEqual,
@@ -377,10 +389,11 @@ export class ImpulseFormShapeState<
       const outputVerbose = mapValues(this._fields, ({ _outputVerbose }) => {
         return _outputVerbose.getValue(scope)
       })
+      const meta = mapValues(this._meta, (field) => field.getValue(scope))
 
       return {
         ...outputVerbose,
-        ...this._meta,
+        ...meta,
       } as ImpulseFormShapeOutputVerbose<TFields>
     },
     {

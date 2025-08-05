@@ -2,7 +2,7 @@ import { isUndefined } from "~/tools/is-undefined"
 import { mapValues } from "~/tools/map-values"
 import { partitionEntries } from "~/tools/partition-entries"
 
-import { batch } from "../dependencies"
+import { batch, Impulse, untrack } from "../dependencies"
 import { isImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormShape as ImpulseFormShapeImpl } from "./_impulse-form-shape"
@@ -41,7 +41,7 @@ export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
   const state = new ImpulseFormShapeState(
     null,
     mapValues(forms, ({ _state }) => _state),
-    meta,
+    mapValues(meta, (field) => Impulse(field)),
   )
 
   batch((scope) => {

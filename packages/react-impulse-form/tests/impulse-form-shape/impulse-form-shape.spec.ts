@@ -130,6 +130,9 @@ it("allows to specify none-form fields", ({ scope }) => {
     id: 123,
     name: "john",
   })
+
+  expect(shape.fields.id(scope)).toBe(123)
+  expect(shape.fields.name(scope)).toBe("john")
 })
 
 describe("ImpulseFormShapeOptions.touched", () => {
