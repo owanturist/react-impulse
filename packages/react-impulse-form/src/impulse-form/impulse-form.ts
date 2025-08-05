@@ -58,6 +58,10 @@ export abstract class ImpulseForm<
 
   protected abstract readonly _state: ImpulseFormState<TParams>
 
+  public clone(): ImpulseForm<TParams> {
+    return this._state._clone()._host()
+  }
+
   public getOutput(scope: Scope): null | TParams["output.schema"]
   public getOutput<TResult>(
     scope: Scope,
