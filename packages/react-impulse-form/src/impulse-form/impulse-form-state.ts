@@ -35,6 +35,10 @@ export abstract class ImpulseFormState<
     return child._childOf(this) as TChild
   }
 
+  public _hasSameRootWith(another: ImpulseFormState): boolean {
+    return this._root === another._root
+  }
+
   // I N I T I A L
 
   public abstract readonly _initial: ReadonlyImpulse<TParams["input.schema"]>

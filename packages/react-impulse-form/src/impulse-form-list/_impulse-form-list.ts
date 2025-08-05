@@ -45,30 +45,35 @@ export class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
     setter: Setter<ReadonlyArray<TElement>, [ReadonlyArray<TElement>, Scope]>,
   ): void {
     batch((scope) => {
-      const nextElements = map(
+      const initialElements = this._state._getInitialElements(scope)
+
+      const elementsStates = map(
         isFunction(setter)
           ? setter(this._elements.getValue(scope), scope)
           : setter,
 
-        (element) => {
-          const _state = ImpulseForm._getState(element)
-          const child = this._state._parentOf(_state)
-
-          // assign independent initial state
-          child._replaceInitial(scope, undefined, false)
-
-          return [child, child._root !== _state._root] as const
-        },
+        ImpulseForm._getState,
       )
 
-      const initialElements = this._state._getInitialElements(scope)
+      const nextStateElements = map(elementsStates, (element) => {
+        return this._state._parentOf(element)
+      })
 
-      for (const [index, [element, isMounting]] of entries(nextElements)) {
-        // hook up the initial state from the initial elements
-        element._replaceInitial(scope, initialElements.at(index), isMounting)
+      // detach all elements from their initial states in one go
+      for (const stateElement of nextStateElements) {
+        stateElement._replaceInitial(scope, undefined, false)
       }
 
-      this._state._elements.setValue(map(nextElements, ([element]) => element))
+      // attach the elements to their updated initial states
+      for (const [index, stateElement] of entries(nextStateElements)) {
+        stateElement._replaceInitial(
+          scope,
+          initialElements.at(index),
+          !elementsStates.at(index)?._hasSameRootWith(stateElement),
+        )
+      }
+
+      this._state._elements.setValue(nextStateElements)
     })
   }
 }
