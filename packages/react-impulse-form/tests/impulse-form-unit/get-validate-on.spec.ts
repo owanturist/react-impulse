@@ -57,7 +57,7 @@ describe("when options: ImpulseFormUnitSchemaOptions", () => {
   describe.each([
     ["(scope)", getValidateOnDefault],
     ["(scope, (concise) => concise)", getValidateOnConcise],
-    ["(scope, (_, verbose) => concise)", getValidateOnVerbose],
+    ["(scope, (_, verbose) => verbose)", getValidateOnVerbose],
   ])("getValidateOn%s", (_, getValidateOn) => {
     it("returns ValidateStrategy value", ({ scope }) => {
       const value = setup()
@@ -111,7 +111,7 @@ describe("when options: ImpulseFormUnitValidatedOptions", () => {
   describe.each([
     ["(scope)", getValidateOnDefault],
     ["(scope, (concise) => concise)", getValidateOnConcise],
-    ["(scope, (_, verbose) => concise)", getValidateOnVerbose],
+    ["(scope, (_, verbose) => verbose)", getValidateOnVerbose],
   ])("getValidateOn%s", (_, getValidateOn) => {
     it("returns ValidateStrategy value", ({ scope }) => {
       const value = setup()
@@ -156,7 +156,7 @@ describe("when options: ImpulseFormUnitOptions", () => {
   describe.each([
     ["(scope)", getValidateOnDefault],
     ["(scope, (concise) => concise)", getValidateOnConcise],
-    ["(scope, (_, verbose) => concise)", getValidateOnVerbose],
+    ["(scope, (_, verbose) => verbose)", getValidateOnVerbose],
   ])("getValidateOn%s", (_, getValidateOn) => {
     it("returns ValidateStrategy value", ({ scope }) => {
       const value = ImpulseFormUnit("")
