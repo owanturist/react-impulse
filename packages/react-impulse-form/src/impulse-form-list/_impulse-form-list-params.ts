@@ -14,9 +14,8 @@ import type { ImpulseFormListValidateOn } from "./impulse-form-list-validate-on"
 import type { ImpulseFormListValidateOnSetter } from "./impulse-form-list-validate-on-setter"
 import type { ImpulseFormListValidateOnVerbose } from "./impulse-form-list-validate-on-verbose"
 
-export interface ImpulseFormListParams<
-  TElement extends ImpulseForm = ImpulseForm,
-> extends ImpulseFormParams {
+export interface ImpulseFormListParams<TElement extends ImpulseForm>
+  extends ImpulseFormParams {
   "input.schema": ImpulseFormListInput<TElement>
   "input.setter": ImpulseFormListInputSetter<TElement>
 
