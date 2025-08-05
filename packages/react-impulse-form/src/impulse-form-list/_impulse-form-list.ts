@@ -11,9 +11,9 @@ import { ImpulseForm } from "../impulse-form"
 import type { ImpulseFormListParams } from "./_impulse-form-list-params"
 import type { ImpulseFormListState } from "./_impulse-form-list-state"
 
-export class ImpulseFormList<
-  TElement extends ImpulseForm = ImpulseForm,
-> extends ImpulseForm<ImpulseFormListParams<TElement>> {
+export class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
+  ImpulseFormListParams<TElement>
+> {
   private readonly _elements = Impulse(
     (scope) => this._state._getElements(scope),
     {

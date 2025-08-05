@@ -54,11 +54,13 @@ it("matches the nested type definition", ({ scope }) => {
   expectTypeOf(form.setInitial).toEqualTypeOf<
     (
       setter: Setter<
-        | undefined
-        | Setter<
-            ReadonlyArray<undefined | Setter<number, [number, number]>>,
-            [ReadonlyArray<number>, ReadonlyArray<number>]
-          >,
+        ReadonlyArray<
+          | undefined
+          | Setter<
+              ReadonlyArray<undefined | Setter<number, [number, number]>>,
+              [ReadonlyArray<number>, ReadonlyArray<number>]
+            >
+        >,
         [
           ReadonlyArray<ReadonlyArray<number>>,
           ReadonlyArray<ReadonlyArray<number>>,

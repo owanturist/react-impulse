@@ -13,7 +13,7 @@ type ImpulseFormShapeField<TField> = TField extends ImpulseForm
   : ImpulseFormMeta<TField>
 
 export class ImpulseFormShape<
-  TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
+  TFields extends ImpulseFormShapeFields,
 > extends ImpulseForm<ImpulseFormShapeParams<TFields>> {
   public constructor(public readonly _state: ImpulseFormShapeState<TFields>) {
     super()
