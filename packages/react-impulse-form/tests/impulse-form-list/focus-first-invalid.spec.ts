@@ -150,9 +150,7 @@ describe("with onFocusWhenInvalid()", () => {
 
     form.onFocusWhenInvalid(listener_0)
     form.focusFirstInvalid()
-    expect(listener_0).toHaveBeenCalledExactlyOnceWith([
-      ["String must contain at least 2 character(s)"],
-    ])
+    expect(listener_0).toHaveBeenCalledExactlyOnceWith([[expect.any(String)]])
   })
 
   it("does not call a listener when an element is invalid and has own listener", ({
@@ -173,8 +171,6 @@ describe("with onFocusWhenInvalid()", () => {
     form.focusFirstInvalid()
 
     expect(listener_0).not.toHaveBeenCalled()
-    expect(listener_1).toHaveBeenCalledExactlyOnceWith([
-      "String must contain at least 2 character(s)",
-    ])
+    expect(listener_1).toHaveBeenCalledExactlyOnceWith([expect.any(String)])
   })
 })

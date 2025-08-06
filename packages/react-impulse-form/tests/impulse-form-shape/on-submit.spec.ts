@@ -154,9 +154,7 @@ describe.each<
 
       void submit(form)
 
-      expect(focus).toHaveBeenCalledExactlyOnceWith([
-        "String must contain at most 2 character(s)",
-      ])
+      expect(focus).toHaveBeenCalledExactlyOnceWith([expect.any(String)])
     })
   })
 

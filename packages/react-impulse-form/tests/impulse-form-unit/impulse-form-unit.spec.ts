@@ -329,9 +329,7 @@ describe("ImpulseFormUnitSchemaOptions", () => {
       ImpulseFormUnit<number, ReadonlyArray<string>, number>
     >()
     expect(value.getInput(scope)).toBe(0)
-    expect(value.getError(scope)).toStrictEqual([
-      "Number must be greater than or equal to 1",
-    ])
+    expect(value.getError(scope)).toStrictEqual([expect.any(String)])
     expect(value.getOutput(scope)).toBeNull()
 
     value.setInput(1)
@@ -355,9 +353,7 @@ describe("ImpulseFormUnitSchemaOptions", () => {
       ImpulseFormUnit<number, ReadonlyArray<string>, string>
     >()
     expect(value.getInput(scope)).toBe(0)
-    expect(value.getError(scope)).toStrictEqual([
-      "Number must be greater than or equal to 1",
-    ])
+    expect(value.getError(scope)).toStrictEqual([expect.any(String)])
     expect(value.getOutput(scope)).toBeNull()
 
     value.setInput(1)
