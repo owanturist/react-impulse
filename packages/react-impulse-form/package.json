@@ -32,7 +32,7 @@
     "build": "tsup --config ../../tsup.config.ts"
   },
   "peerDependencies": {
-    "react-impulse": "^3.0.0"
+    "react-impulse": "^3.0.3"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.4",
