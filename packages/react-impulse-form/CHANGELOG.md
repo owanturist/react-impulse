@@ -1,5 +1,46 @@
 # react-impulse-form
 
+## 0.12.0
+
+### Minor Changes
+
+- [#929](https://github.com/owanturist/react-impulse/pull/929) [`93bdad4`](https://github.com/owanturist/react-impulse/commit/93bdad461d7a361bd2485136fcfb4c17881332da) Thanks [@owanturist](https://github.com/owanturist)! - Bump peer dependency `react-impulse` to `^3.0.3`.
+
+- [#918](https://github.com/owanturist/react-impulse/pull/918) [`79e91fa`](https://github.com/owanturist/react-impulse/commit/79e91fa5a710c35215d403ad6d7206c87a9024a1) Thanks [@owanturist](https://github.com/owanturist)! - Refactor `ImpulseForm` class architecture for better maintainability and type safety
+  - Added overloaded signatures with optional `select` parameter to `isValid()` and `isInvalid()` methods for consistent API with other flag methods
+  - Simplified internal architecture by delegating all operations to `_state: ImpulseFormState<TParams>`
+
+- [#918](https://github.com/owanturist/react-impulse/pull/918) [`79e91fa`](https://github.com/owanturist/react-impulse/commit/79e91fa5a710c35215d403ad6d7206c87a9024a1) Thanks [@owanturist](https://github.com/owanturist)! - Introduce `type ImpulseFormMeta<T>` for reactive static fields in `ImpulseFormShape`:
+
+  ```typescript
+  export type ImpulseFormMeta<T> = (scope: Scope) => T
+  ```
+
+  This change makes non-`ImpulseForm` fields in `ImpulseFormShape` reactive, enabling proper resetting of `ImpulseFormList` elements that include meta fields.
+
+  The way to define meta fields remains unchanged:
+
+  ```typescript
+  const shape = ImpulseFormShape({
+    id: ImpulseFormUnit(0),
+    name: ImpulseFormUnit(""),
+    metaField: "some value", // Now reactive
+  })
+  ```
+
+  However, accessing meta field values now requires a scope:
+
+  ```typescript
+  const value = shape.fields.metaField(scope)
+
+  // instead of
+  const value = shape.fields.metaField
+  ```
+
+  ***
+
+  Resolve #923
+
 ## 0.11.1
 
 ### Patch Changes
@@ -37,7 +78,6 @@
   Rename `ImpulseForm#focusFirstInvalidValue` to `ImpulseForm#focusFirstInvalid`.
 
 - [#862](https://github.com/owanturist/react-impulse/pull/862) [`821639a`](https://github.com/owanturist/react-impulse/commit/821639a2a201898f223306854d48005d61bf7533) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
-
   - Merge `ImpulseFormValue.of` fabric and `ImpulseFormValue` type into a single `ImpulseFormUnit` definition.
   - Merge `ImpulseFormList.of` fabric and `ImpulseFormList` type into a single `ImpulseFormList` definition.
   - Merge `ImpulseFormShape.of` fabric and `ImpulseFormShape` type into a single `ImpulseFormShape` definition.
@@ -47,7 +87,6 @@
   The changes were made to align the `react-impulse` API with the `react-impulse-form` API, which already has a single definition for `Impulse`.
 
 - [#862](https://github.com/owanturist/react-impulse/pull/862) [`821639a`](https://github.com/owanturist/react-impulse/commit/821639a2a201898f223306854d48005d61bf7533) Thanks [@owanturist](https://github.com/owanturist)! - - Introduce new `isImpulseFormUnit` high order function to check if a value is an instance of `ImpulseFormUnit`.
-
   - Introduce new `isImpulseFormList` high order function to check if a value is an instance of `ImpulseFormList`.
   - Introduce new `isImpulseFormShape` high order function to check if a value is an instance of `ImpulseFormShape`.
 
@@ -76,7 +115,6 @@
   This change was made to provide a more flexible and type-safe way to handle errors in the `ImpulseFormValue` class. By allowing users to specify a custom error type, we can better accommodate different use cases and improve the overall usability of the library.
 
   #### Migration Guide
-
   1. Specify the `TError` as `ReadonlyArray<string>` when creating an `ImpulseFormValue` with `schema`:
 
      ```ts
@@ -105,7 +143,6 @@
   This change was made to decouple the library from React, allowing it to be used in any JavaScript environment without being tied to a specific framework.
 
   #### Migration Guide
-
   1. Replace use of `useImpulseForm` by combining `ImpulseFormValue#onSubmit` and `React.useEffect` hook:
 
      ```ts
@@ -160,7 +197,6 @@
 ### Minor Changes
 
 - [#813](https://github.com/owanturist/react-impulse/pull/813) [`0983fb0`](https://github.com/owanturist/react-impulse/commit/0983fb04e4dc99f382c46abca597a8687d491940) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
-
   - Added support for React 19
   - Dropped support for React 16 and React 17
   - Updated minimum peer dependency to React 18.0.0
@@ -186,7 +222,6 @@
 ### Minor Changes
 
 - [#785](https://github.com/owanturist/react-impulse/pull/785) [`b8561e4`](https://github.com/owanturist/react-impulse/commit/b8561e457a572a153108ad2ac419cc41b02dcf76) Thanks [@owanturist](https://github.com/owanturist)! - Update dependencies:
-
   - `@changesets/changelog-github@0.5.1`
   - `@changesets/cli@2.28.1`
   - `@size-limit/preset-small-lib@11.2.0`
@@ -242,17 +277,14 @@
 ### Minor Changes
 
 - [#743](https://github.com/owanturist/react-impulse/pull/743) [`bdbe810`](https://github.com/owanturist/react-impulse/commit/bdbe810e84bddcb4176d1235cd31e45a449b2041) Thanks [@owanturist](https://github.com/owanturist)! - 1. `ImpulseForm#setInitialValue` receives two parameters in the callback:
-
   - initial value
   - current (original) value
-
   1. `ImpulseForm#setOriginalValue` receives two parameters in the callback:
      - current (original) value
      - initial value
   1. `ImpulseFormList#reset` and `ImpulseFormList#isDirty` work correctly for removed/added items (Resolves #694)
 
 - [#748](https://github.com/owanturist/react-impulse/pull/748) [`fae44ab`](https://github.com/owanturist/react-impulse/commit/fae44ab46696fbc6c734d6939a5b917fa1cf82ca) Thanks [@owanturist](https://github.com/owanturist)! - Rename all entries of `value` to `output`, `originalValue` to `input`, and `initialValue` to `initial`
-
   1. `ImpulseForm`:
      1. `ImpulseFormParams['value.schema']` -> `ImpulseFormParams['output.schema']`
      2. `ImpulseFormParams['value.schema.verbose']` -> `ImpulseFormParams['output.schema.verbose']`
@@ -293,7 +325,6 @@
 ### Patch Changes
 
 - [#676](https://github.com/owanturist/react-impulse/pull/676) [`98641bd`](https://github.com/owanturist/react-impulse/commit/98641bd199babca7ab0c7c80720ab9e913c7967a) Thanks [@owanturist](https://github.com/owanturist)! - Fixes:
-
   - `ImpulseForm#isValid` returns true only when `ImpulseForm#isValidated` is true.
   - `ImpulseFormValue#reset` sets `ImpulseFormValue#isTouched` to false.
 
@@ -302,16 +333,13 @@
 ### Minor Changes
 
 - [#671](https://github.com/owanturist/react-impulse/pull/671) [`9cf128c`](https://github.com/owanturist/react-impulse/commit/9cf128c769ac99c14cf4f14dd2abb50a2f632ce3) Thanks [@owanturist](https://github.com/owanturist)! - Breaking change:
-
   - Rename `ImpulseFormValueOptions.compare` to `ImpulseFormValueOptions.isOriginalValueEqual`
   - `ImpulseFormValue#setOriginalValue` does not reset errors on call anymore. Call `ImpulseFormValue#setErrors([])` manually when needed.
 
 - [#674](https://github.com/owanturist/react-impulse/pull/674) [`8f7d9e2`](https://github.com/owanturist/react-impulse/commit/8f7d9e2f3787bf3f7ff1fe49d9ae7711862210f0) Thanks [@owanturist](https://github.com/owanturist)! - Breaking changes:
-
   - `ImpulseFormShape#isValidated`, `ImpulseFormShape#isDirty`, and `ImpulseFormShape#isTouched` return `false` for empty shapes.
 
   Introduced:
-
   - `ImpulseFormList` class.
 
 ## 0.2.0
@@ -319,7 +347,6 @@
 ### Minor Changes
 
 - [#661](https://github.com/owanturist/react-impulse/pull/661) [`01f1f56`](https://github.com/owanturist/react-impulse/commit/01f1f562b759844632d6d7fbd22b0dfb1555470e) Thanks [@owanturist](https://github.com/owanturist)! - Introduce:
-
   - ```ts
     abstract class ImpulseForm {
       isSubmitting(scope: Scope): boolean
@@ -367,14 +394,12 @@
     ```
 
   Extended:
-
   - ```diff
     -ImpulseFormValue#setSchema(schema: Schema): void
     +ImpulseFormValue#setSchema(schema: Schema | null): void
     ```
 
   Breaking changes:
-
   - use `ImpulseForm#submit`, `ImpulseForm#getSubmitCount`, `ImpulseForm#isSubmitting` instead
 
     ```diff
