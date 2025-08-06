@@ -120,7 +120,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [3.0.1]
+        version: [3.0.2]
 
     steps:
       - name: Checkout repository
