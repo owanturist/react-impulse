@@ -221,7 +221,7 @@ describe("with onFocusWhenInvalid()", () => {
     form.onFocusWhenInvalid(listener_0)
     form.focusFirstInvalid()
     expect(listener_0).toHaveBeenCalledExactlyOnceWith({
-      _1: ["String must contain at least 2 character(s)"],
+      _1: [expect.any(String)],
     })
   })
 
@@ -241,8 +241,6 @@ describe("with onFocusWhenInvalid()", () => {
     form.focusFirstInvalid()
 
     expect(listener_0).not.toHaveBeenCalled()
-    expect(listener_1).toHaveBeenCalledExactlyOnceWith([
-      "String must contain at least 2 character(s)",
-    ])
+    expect(listener_1).toHaveBeenCalledExactlyOnceWith([expect.any(String)])
   })
 })

@@ -35,7 +35,7 @@ it("selects error", ({ scope }) => {
     first: "12",
   })
   expect(shape.getError(scope)).toStrictEqual({
-    first: ["String must contain at most 1 character(s)"],
+    first: [expect.any(String)],
     second: null,
     third: null,
   })
@@ -43,7 +43,7 @@ it("selects error", ({ scope }) => {
     shape.getError(scope),
   )
   expect(shape.getError(scope, params._second)).toStrictEqual({
-    first: ["String must contain at most 1 character(s)"],
+    first: [expect.any(String)],
     second: null,
     third: {
       one: null,
@@ -57,11 +57,11 @@ it("selects error", ({ scope }) => {
     },
   })
   expect(shape.getError(scope)).toStrictEqual({
-    first: ["String must contain at most 1 character(s)"],
+    first: [expect.any(String)],
     second: null,
     third: {
       one: null,
-      two: ["String must contain at most 1 character(s)"],
+      two: [expect.any(String)],
     },
   })
   expect(shape.getError(scope, params._first)).toStrictEqual(

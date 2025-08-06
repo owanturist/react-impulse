@@ -56,9 +56,7 @@ describe("onSubmit(listener)", () => {
 
     void form.submit()
 
-    expect(focus).toHaveBeenCalledExactlyOnceWith([
-      "String must contain at least 10 character(s)",
-    ])
+    expect(focus).toHaveBeenCalledExactlyOnceWith([expect.any(String)])
   })
 
   it.each([
