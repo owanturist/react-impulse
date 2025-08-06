@@ -5,7 +5,7 @@ import { params } from "~/tools/params"
 import { ImpulseFormShape, ImpulseFormSwitch, ImpulseFormUnit } from "../../src"
 
 describe("types", () => {
-  const form = ImpulseFormSwitch("first", {
+  const form = ImpulseFormSwitch(ImpulseFormUnit("first"), {
     first: ImpulseFormUnit(true, {
       schema: z
         .boolean()

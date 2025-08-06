@@ -6,7 +6,7 @@ import type { GetImpulseFormParam } from "../impulse-form"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
 export type GetImpulseFormSwitchParam<
-  TBranches extends ImpulseFormSwitchBranches,
+  TBranches extends ImpulseFormSwitchBranches<string>,
   TKey extends keyof ImpulseFormParams,
 > = Compute<{
   readonly [TBranch in keyof TBranches]: GetImpulseFormParam<
