@@ -65,7 +65,6 @@ describe("types", () => {
   })
 
   it("matches schema type for getInput(scope)", ({ scope }) => {
-    // eslint-disable-next-line vitest/valid-expect
     expectTypeOf(form.getInput).parameters.toEqualTypeOf<[Scope]>()
     expectTypeOf(form.getInput(scope)).toEqualTypeOf<InputSchema>()
   })
@@ -74,16 +73,20 @@ describe("types", () => {
     expectTypeOf(form.setInput).toEqualTypeOf<(setter: InputSetter) => void>()
   })
 
-  it("ensures the active type is a union of branch keys", () => {
+  it("ensures the branches type keys following the active output", () => {
     const form_1 = ImpulseFormSwitch(
       ImpulseFormUnit("first" as const),
       branches,
     )
-    // @ts-expect-error - active must be a union of branch keys
-    const form_2 = ImpulseFormSwitch(ImpulseFormUnit("first"), branches)
+    const form_2 = ImpulseFormSwitch(
+      ImpulseFormUnit("unknown" as const),
+      // @ts-expect-error - active must be a union of branch keys
+      branches,
+    )
 
-    expectTypeOf(form_1.active).toEqualTypeOf<ImpulseFormUnit<"first">>()
-    expectTypeOf(form_2.active).not.toEqualTypeOf<ImpulseFormUnit<"first">>()
+    expectTypeOf(form_1.branches).toHaveProperty("first")
+    expectTypeOf(form_2.branches).not.toHaveProperty("first")
+    expectTypeOf(form_2.branches).toHaveProperty("unknown")
   })
 })
 

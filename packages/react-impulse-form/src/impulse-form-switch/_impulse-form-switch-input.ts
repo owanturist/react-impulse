@@ -1,12 +1,13 @@
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type { ImpulseFormShapeInput } from "../impulse-form-shape"
 
-import type { ImpulseFormSwitchKindParams } from "./_impulse-form-switch-kind-params"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
+export { isShallowObjectEqual as isImpulseFormSwitchInputEqual } from "~/tools/is-shallow-object-equal"
+
 export type ImpulseFormSwitchInput<
-  TKind extends ImpulseForm<ImpulseFormSwitchKindParams<keyof TBranches>>,
-  TBranches extends ImpulseFormSwitchBranches,
+  TKind extends ImpulseForm,
+  TBranches extends ImpulseFormSwitchBranches<TKind>,
 > = ImpulseFormShapeInput<{
   active: TKind
   branches: ImpulseFormShapeInput<TBranches>

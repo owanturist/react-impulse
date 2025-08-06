@@ -25,10 +25,10 @@ export class ImpulseFormShape<
     super()
 
     this.fields = {
-      ...mapValues(this._state._fields, ({ _host }) => _host()),
+      ...mapValues(_state._fields, ({ _host }) => _host()),
 
       ...mapValues(
-        this._state._meta,
+        _state._meta,
         (field) => (scope: Scope) => field.getValue(scope),
       ),
     } as {

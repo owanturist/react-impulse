@@ -65,7 +65,6 @@ describe("types", () => {
   })
 
   it("matches schema type for getInitial(scope)", ({ scope }) => {
-    // eslint-disable-next-line vitest/valid-expect
     expectTypeOf(form.getInitial).parameters.toEqualTypeOf<[Scope]>()
     expectTypeOf(form.getInitial(scope)).toEqualTypeOf<InitialSchema>()
   })
