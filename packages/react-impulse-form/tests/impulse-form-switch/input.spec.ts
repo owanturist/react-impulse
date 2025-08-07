@@ -1,6 +1,7 @@
 import type { Scope } from "react-impulse"
 import z from "zod"
 
+import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import type { Setter } from "~/tools/setter"
 
 import {
@@ -676,5 +677,97 @@ describe("using recursive setter", () => {
         },
       })
     })
+  })
+})
+
+describe("stable input value", () => {
+  it("subsequently selects equal input", ({ scope }) => {
+    const form = ImpulseFormSwitch(ImpulseFormUnit("_1" as const), {
+      _1: ImpulseFormUnit(true),
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
+      }),
+      _5: ImpulseFormSwitch(ImpulseFormUnit("_6"), {
+        _6: ImpulseFormUnit(0),
+        _7: ImpulseFormUnit("0"),
+      }),
+    })
+
+    expect(form.getInput(scope)).toBe(form.getInput(scope))
+  })
+
+  it("persists unchanged branches input between changes", ({ scope }) => {
+    const form = ImpulseFormSwitch(ImpulseFormUnit("_1" as const), {
+      _1: ImpulseFormUnit(true),
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
+      }),
+      _5: ImpulseFormSwitch(ImpulseFormUnit("_6"), {
+        _6: ImpulseFormUnit(0),
+        _7: ImpulseFormUnit("0"),
+      }),
+    })
+
+    const input_0 = form.getInput(scope)
+
+    form.setInput({
+      branches: {
+        _2: {
+          _3: "updated",
+        },
+      },
+    })
+
+    const input_1 = form.getInput(scope)
+
+    expect(input_1).not.toBe(input_0)
+    expect(input_1.active).toBe(input_0.active)
+    expect(input_1.branches).not.toBe(input_0.branches)
+    expect(input_1.branches._2).not.toBe(input_0.branches._2)
+    expect(input_1.branches._5).toBe(input_0.branches._5)
+  })
+
+  it("selects unequal input values when isInputEqual is not specified", ({
+    scope,
+  }) => {
+    const form = ImpulseFormSwitch(ImpulseFormUnit(""), {
+      _1: ImpulseFormUnit([0]),
+    })
+
+    const input_0 = form.getInput(scope)
+
+    form.setInput({
+      branches: {
+        _1: [0],
+      },
+    })
+    const input_1 = form.getInput(scope)
+
+    expect(input_0).not.toBe(input_1)
+    expect(input_0).toStrictEqual(input_1)
+  })
+
+  it("selects equal input values when isInputEqual is specified", ({
+    scope,
+  }) => {
+    const form = ImpulseFormSwitch(ImpulseFormUnit(""), {
+      _1: ImpulseFormUnit([0], {
+        isInputEqual: isShallowArrayEqual,
+      }),
+    })
+
+    const input_0 = form.getInput(scope)
+
+    form.setInput({
+      branches: {
+        _1: [0],
+      },
+    })
+    const input_1 = form.getInput(scope)
+
+    expect(input_0).toBe(input_1)
+    expect(input_0).toStrictEqual(input_1)
   })
 })

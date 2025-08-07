@@ -78,7 +78,6 @@ it("subsequently selects equal input shapes", ({ scope }) => {
     second: 2,
   })
   expect(shape.getInput(scope)).toBe(shape.getInput(scope))
-  expect(shape.getInput(scope)).toBe(shape.getInput(scope))
 })
 
 it("persists unchanged input fields between changes", ({ scope }) => {
