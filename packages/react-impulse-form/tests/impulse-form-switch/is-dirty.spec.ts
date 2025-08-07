@@ -17,39 +17,88 @@ describe("types", () => {
     }),
   })
 
-  interface IsDirtySchema {
-    readonly first: boolean
-    readonly second:
-      | boolean
-      | {
-          readonly name: boolean
-          readonly age: boolean
-        }
-  }
+  type IsDirtySchema =
+    | boolean
+    | {
+        readonly active: boolean
+        readonly branches:
+          | boolean
+          | {
+              readonly first: boolean
+              readonly second:
+                | boolean
+                | {
+                    readonly name: boolean
+                    readonly age: boolean
+                  }
+            }
+      }
 
   interface IsDirtyVerboseSchema {
-    readonly first: boolean
-    readonly second: {
-      readonly name: boolean
-      readonly age: boolean
+    readonly active: boolean
+    readonly branches: {
+      readonly first: boolean
+      readonly second: {
+        readonly name: boolean
+        readonly age: boolean
+      }
     }
   }
 
   it("matches schema type for isDirty(scope, select?)", ({ scope }) => {
     expectTypeOf(form.isDirty(scope)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(form.isDirty(scope, params._first)).toEqualTypeOf<
-      boolean | IsDirtySchema
-    >()
+    expectTypeOf(
+      form.isDirty(scope, params._first),
+    ).toEqualTypeOf<IsDirtySchema>()
 
     expectTypeOf(
       form.isDirty(scope, params._second),
     ).toEqualTypeOf<IsDirtyVerboseSchema>()
   })
+
+  describe("nested", () => {
+    const parent = ImpulseFormSwitch(ImpulseFormUnit("_5"), {
+      _6: ImpulseFormUnit(0),
+      _7: form,
+    })
+
+    type ParentIsDirtySchema =
+      | boolean
+      | {
+          readonly active: boolean
+          readonly branches:
+            | boolean
+            | {
+                readonly _6: boolean
+                readonly _7: IsDirtySchema
+              }
+        }
+
+    interface ParentIsDirtyVerboseSchema {
+      readonly active: boolean
+      readonly branches: {
+        readonly _6: boolean
+        readonly _7: IsDirtyVerboseSchema
+      }
+    }
+
+    it("matches schema type for isDirty(scope, select?)", ({ scope }) => {
+      expectTypeOf(parent.isDirty(scope)).toEqualTypeOf<boolean>()
+
+      expectTypeOf(
+        parent.isDirty(scope, params._first),
+      ).toEqualTypeOf<ParentIsDirtySchema>()
+
+      expectTypeOf(
+        parent.isDirty(scope, params._second),
+      ).toEqualTypeOf<ParentIsDirtyVerboseSchema>()
+    })
+  })
 })
 
-it("returns falsy for initially pristine active branch", ({ scope }) => {
-  const form = ImpulseFormSwitch("first", {
+it("returns falsy for initially pristine branch", ({ scope }) => {
+  const form = ImpulseFormSwitch(ImpulseFormUnit("first"), {
     first: ImpulseFormUnit(0),
     second: ImpulseFormShape({
       name: ImpulseFormUnit("name"),
@@ -60,10 +109,44 @@ it("returns falsy for initially pristine active branch", ({ scope }) => {
   expect(form.isDirty(scope)).toBe(false)
   expect(form.isDirty(scope, params._first)).toBe(false)
   expect(form.isDirty(scope, params._second)).toStrictEqual({
-    first: false,
-    second: {
-      name: false,
-      age: false,
+    active: false,
+    branches: {
+      first: false,
+      second: {
+        name: false,
+        age: false,
+      },
+    },
+  })
+})
+
+it("returns truthy for initially dirty active", ({ scope }) => {
+  const form = ImpulseFormSwitch(
+    ImpulseFormUnit("first", {
+      initial: "second",
+    }),
+    {
+      first: ImpulseFormUnit(0),
+      second: ImpulseFormShape({
+        name: ImpulseFormUnit("name"),
+        age: ImpulseFormUnit(18),
+      }),
+    },
+  )
+
+  expect(form.isDirty(scope)).toBe(true)
+  expect(form.isDirty(scope, params._first)).toStrictEqual({
+    active: true,
+    branches: false,
+  })
+  expect(form.isDirty(scope, params._second)).toStrictEqual({
+    active: true,
+    branches: {
+      first: false,
+      second: {
+        name: false,
+        age: false,
+      },
     },
   })
 })
@@ -71,7 +154,7 @@ it("returns falsy for initially pristine active branch", ({ scope }) => {
 it("returns truthy after switching from pristine to dirty branch", ({
   scope,
 }) => {
-  const form = ImpulseFormSwitch("first", {
+  const form = ImpulseFormSwitch(ImpulseFormUnit("first"), {
     first: ImpulseFormUnit(0),
     second: ImpulseFormShape(
       {
@@ -87,26 +170,32 @@ it("returns truthy after switching from pristine to dirty branch", ({
     ),
   })
 
-  form.setActive("second")
+  form.active.setInput("second")
 
   expect(form.isDirty(scope)).toBe(true)
   expect(form.isDirty(scope, params._first)).toStrictEqual({
-    first: false,
-    second: true,
+    active: true,
+    branches: {
+      first: false,
+      second: true,
+    },
   })
   expect(form.isDirty(scope, params._second)).toStrictEqual({
-    first: false,
-    second: {
-      name: true,
-      age: true,
+    active: true,
+    branches: {
+      first: false,
+      second: {
+        name: true,
+        age: true,
+      },
     },
   })
 })
 
-it("returns falsy after switching from dirty to pristine branch", ({
+it("returns truthy after switching from dirty to pristine branch", ({
   scope,
 }) => {
-  const form = ImpulseFormSwitch("second", {
+  const form = ImpulseFormSwitch(ImpulseFormUnit("second"), {
     first: ImpulseFormUnit(0),
     second: ImpulseFormShape(
       {
@@ -122,24 +211,30 @@ it("returns falsy after switching from dirty to pristine branch", ({
     ),
   })
 
-  form.setActive("first")
+  form.active.setInput("first")
 
-  expect(form.isDirty(scope)).toBe(false)
+  expect(form.isDirty(scope)).toBe(true)
   expect(form.isDirty(scope, params._first)).toStrictEqual({
-    first: false,
-    second: true,
+    active: true,
+    branches: {
+      first: false,
+      second: true,
+    },
   })
   expect(form.isDirty(scope, params._second)).toStrictEqual({
-    first: false,
-    second: {
-      name: true,
-      age: true,
+    active: true,
+    branches: {
+      first: false,
+      second: {
+        name: true,
+        age: true,
+      },
     },
   })
 })
 
-it("returns true for initially dirty branch", ({ scope }) => {
-  const form = ImpulseFormSwitch("second", {
+it("returns truthy for initially dirty branch", ({ scope }) => {
+  const form = ImpulseFormSwitch(ImpulseFormUnit("second"), {
     first: ImpulseFormUnit(1),
     second: ImpulseFormShape({
       name: ImpulseFormUnit("name", {
@@ -151,25 +246,29 @@ it("returns true for initially dirty branch", ({ scope }) => {
 
   expect(form.isDirty(scope)).toBe(true)
   expect(form.isDirty(scope, params._first)).toStrictEqual({
-    first: false,
-    second: {
-      name: true,
-      age: false,
+    active: false,
+    branches: {
+      first: false,
+      second: {
+        name: true,
+        age: false,
+      },
     },
   })
   expect(form.isDirty(scope, params._second)).toStrictEqual({
-    first: false,
-    second: {
-      name: true,
-      age: false,
+    active: false,
+    branches: {
+      first: false,
+      second: {
+        name: true,
+        age: false,
+      },
     },
   })
 })
 
-it("ignores dirty inactive branches when no select is provided", ({
-  scope,
-}) => {
-  const form = ImpulseFormSwitch("second", {
+it("returns truthy when an inactive branch is dirty", ({ scope }) => {
+  const form = ImpulseFormSwitch(ImpulseFormUnit("second"), {
     first: ImpulseFormUnit(1, {
       initial: 0,
     }),
@@ -182,18 +281,24 @@ it("ignores dirty inactive branches when no select is provided", ({
     }),
   })
 
-  expect(form.isDirty(scope)).toBe(false)
+  expect(form.isDirty(scope)).toBe(true)
   expect(form.isDirty(scope, params._first)).toStrictEqual({
-    first: true,
-    second: false,
-    third: true,
+    active: false,
+    branches: {
+      first: true,
+      second: false,
+      third: true,
+    },
   })
   expect(form.isDirty(scope, params._second)).toStrictEqual({
-    first: true,
-    second: {
-      name: false,
-      age: false,
+    active: false,
+    branches: {
+      first: true,
+      second: {
+        name: false,
+        age: false,
+      },
+      third: true,
     },
-    third: true,
   })
 })

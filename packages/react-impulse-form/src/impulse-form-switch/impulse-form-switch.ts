@@ -23,7 +23,7 @@ export interface ImpulseFormSwitchOptions<
 > {
   input?: ImpulseFormSwitchInputSetter<TKind, TBranches>
   initial?: ImpulseFormSwitchInputSetter<TKind, TBranches>
-  touched?: ImpulseFormSwitchFlagSetter<TBranches>
+  touched?: ImpulseFormSwitchFlagSetter<TKind, TBranches>
   validateOn?: ImpulseFormSwitchValidateOnSetter<TBranches>
   error?: ImpulseFormSwitchErrorSetter<TBranches>
 }
