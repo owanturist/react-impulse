@@ -19,7 +19,8 @@ import {
   type ImpulseFormChild,
   ImpulseFormState,
 } from "../impulse-form/impulse-form-state"
-import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
+import { toConcise } from "../to-concise"
+import { VALIDATE_ON_TOUCH } from "../validate-strategy"
 
 import { ImpulseFormList } from "./_impulse-form-list"
 import type { ImpulseFormListParams } from "./_impulse-form-list-params"
@@ -278,20 +279,7 @@ export class ImpulseFormListState<
         ({ _validateOn }) => _validateOn.getValue(scope),
       )
 
-      /**
-       * Fallback to onTouch if none string validateOn is present.
-       * When the elements are empty it will use it.
-       * When the elements are not empty and have any value different than it uses the elements.
-       */
-      const onlyValidateOn = validateOn.find(isString) ?? VALIDATE_ON_TOUCH
-
-      for (const fieldValidateOn of validateOn) {
-        if (fieldValidateOn !== onlyValidateOn) {
-          return validateOn
-        }
-      }
-
-      return onlyValidateOn as ValidateStrategy
+      return toConcise(validateOn, isString, VALIDATE_ON_TOUCH)
     },
 
     {
@@ -342,15 +330,7 @@ export class ImpulseFormListState<
         return _touched.getValue(scope)
       })
 
-      const onlyTouched = touched.find(isBoolean) ?? false
-
-      for (const fieldTouched of touched) {
-        if (fieldTouched !== onlyTouched) {
-          return touched
-        }
-      }
-
-      return onlyTouched
+      return toConcise(touched, isBoolean, false)
     },
 
     {
@@ -421,15 +401,7 @@ export class ImpulseFormListState<
         return _valid.getValue(scope)
       })
 
-      const onlyValid = valid.find(isBoolean) ?? false
-
-      for (const fieldValid of valid) {
-        if (fieldValid !== onlyValid) {
-          return valid
-        }
-      }
-
-      return onlyValid
+      return toConcise(valid, isBoolean, false)
     },
 
     {
@@ -455,15 +427,7 @@ export class ImpulseFormListState<
         return _invalid.getValue(scope)
       })
 
-      const onlyInvalid = invalid.find(isBoolean) ?? false
-
-      for (const fieldInvalid of invalid) {
-        if (fieldInvalid !== onlyInvalid) {
-          return invalid
-        }
-      }
-
-      return onlyInvalid
+      return toConcise(invalid, isBoolean, false)
     },
 
     {
@@ -492,15 +456,7 @@ export class ImpulseFormListState<
         },
       )
 
-      const onlyValidated = validated.find(isBoolean) ?? false
-
-      for (const fieldValidated of validated) {
-        if (fieldValidated !== onlyValidated) {
-          return validated
-        }
-      }
-
-      return onlyValidated
+      return toConcise(validated, isBoolean, false)
     },
 
     {
@@ -547,15 +503,7 @@ export class ImpulseFormListState<
         }),
       )
 
-      const onlyDirty = dirty.find(isBoolean) ?? false
-
-      for (const fieldDirty of dirty) {
-        if (fieldDirty !== onlyDirty) {
-          return dirty
-        }
-      }
-
-      return onlyDirty
+      return toConcise(dirty, isBoolean, false)
     },
 
     {
@@ -596,15 +544,7 @@ export class ImpulseFormListState<
         return _dirtyOn.getValue(scope)
       })
 
-      const onlyDirty = dirtyOn.find(isBoolean) ?? false
-
-      for (const fieldDirty of dirtyOn) {
-        if (fieldDirty !== onlyDirty) {
-          return dirtyOn
-        }
-      }
-
-      return onlyDirty
+      return toConcise(dirtyOn, isBoolean, false)
     },
 
     {
