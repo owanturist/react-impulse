@@ -44,6 +44,14 @@ import type { ImpulseFormSwitchValidateOnSetter } from "./_impulse-form-switch-v
 import type { ImpulseFormSwitchValidateOnVerbose } from "./_impulse-form-switch-validate-on-verbose"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
+export type ImpulseFormSwitchStateBranches<
+  TFields extends ImpulseFormShapeFields,
+> = {
+  [TField in keyof TFields]: ImpulseFormState<
+    GetImpulseFormParams<TFields[TField]>
+  >
+}
+
 export class ImpulseFormSwitchState<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
@@ -51,17 +59,17 @@ export class ImpulseFormSwitchState<
   public readonly _host = Lazy(() => new ImpulseFormSwitch(this))
 
   public readonly _active: ImpulseFormState<GetImpulseFormParams<TKind>>
-  public readonly _branches: ImpulseFormShapeState<TBranches>
+  public readonly _branches: ImpulseFormSwitchStateBranches<TBranches>
 
   public constructor(
     parent: null | ImpulseFormState,
     active: ImpulseFormState<GetImpulseFormParams<TKind>>,
-    branches: ImpulseFormShapeState<TBranches>,
+    branches: ImpulseFormSwitchStateBranches<TBranches>,
   ) {
     super(parent)
 
     this._active = this._parentOf(active)
-    this._branches = this._parentOf(branches)
+    this._branches = mapValues(branches, (branch) => this._parentOf(branch))
   }
 
   public _childOf(
@@ -75,7 +83,9 @@ export class ImpulseFormSwitchState<
   public readonly _initial = Impulse(
     (scope): ImpulseFormSwitchInput<TKind, TBranches> => {
       const active = this._active._initial.getValue(scope)
-      const branches = this._branches._initial.getValue(scope)
+      const branches = mapValues(this._branches, (branch) => {
+        return branch._initial.getValue(scope)
+      })
 
       return { active, branches }
     },
@@ -91,22 +101,32 @@ export class ImpulseFormSwitchState<
     isMounting: boolean,
   ): void {
     this._active._replaceInitial(scope, state?._active, isMounting)
-    this._branches._replaceInitial(scope, state?._branches, isMounting)
+
+    for (const [key, branch] of entries(this._branches)) {
+      branch._replaceInitial(scope, state?._branches[key], isMounting)
+    }
   }
 
   public _setInitial(
     scope: Scope,
     setter: ImpulseFormSwitchInputSetter<TKind, TBranches>,
   ): void {
-    const { active, branches } = isFunction(setter)
-      ? setter(this._initial.getValue(scope), this._input.getValue(scope))
+    const initial = Lazy(() => this._initial.getValue(scope))
+    const input = Lazy(() => this._input.getValue(scope))
+
+    const { active, branches: branchesSetter } = isFunction(setter)
+      ? setter(initial(), input())
       : setter
 
     if (!isUndefined(active)) {
       this._active._setInitial(scope, active)
     }
 
-    for (const [key, field] of entries(this._branches._fields)) {
+    const branches = isFunction(branchesSetter)
+      ? branchesSetter(initial().branches, input().branches)
+      : branchesSetter
+
+    for (const [key, field] of entries(this._branches)) {
       if (hasProperty(branches, key) && !isUndefined(branches[key])) {
         field._setInitial(scope, branches[key])
       }
@@ -118,7 +138,9 @@ export class ImpulseFormSwitchState<
   public readonly _input = Impulse(
     (scope): ImpulseFormSwitchInput<TKind, TBranches> => {
       const active = this._active._input.getValue(scope)
-      const branches = this._branches._input.getValue(scope)
+      const branches = mapValues(this._branches, (branch) => {
+        return branch._input.getValue(scope)
+      })
 
       return { active, branches }
     },
@@ -132,15 +154,22 @@ export class ImpulseFormSwitchState<
     scope: Scope,
     setter: ImpulseFormSwitchInputSetter<TKind, TBranches>,
   ): void {
-    const { active, branches } = isFunction(setter)
-      ? setter(this._input.getValue(scope), this._initial.getValue(scope))
+    const initial = Lazy(() => this._initial.getValue(scope))
+    const input = Lazy(() => this._input.getValue(scope))
+
+    const { active, branches: branchesSetter } = isFunction(setter)
+      ? setter(input(), initial())
       : setter
 
     if (!isUndefined(active)) {
       this._active._setInput(scope, active)
     }
 
-    for (const [key, field] of entries(this._branches._fields)) {
+    const branches = isFunction(branchesSetter)
+      ? branchesSetter(input().branches, initial().branches)
+      : branchesSetter
+
+    for (const [key, field] of entries(this._branches)) {
       if (hasProperty(branches, key) && !isUndefined(branches[key])) {
         field._setInput(scope, branches[key])
       }

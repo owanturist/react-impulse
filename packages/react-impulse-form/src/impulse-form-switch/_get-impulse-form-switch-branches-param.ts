@@ -1,12 +1,12 @@
 import type { Compute } from "~/tools/compute"
 
-import type { ImpulseFormParams } from "../impulse-form"
+import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
 import type { GetImpulseFormParam } from "../impulse-form"
 
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
-export type GetImpulseFormSwitchParam<
-  TBranches extends ImpulseFormSwitchBranches<string>,
+export type GetImpulseFormSwitchBranchesParam<
+  TBranches extends ImpulseFormSwitchBranches<ImpulseForm>,
   TKey extends keyof ImpulseFormParams,
 > = Compute<{
   readonly [TBranch in keyof TBranches]: GetImpulseFormParam<

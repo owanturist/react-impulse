@@ -1,6 +1,6 @@
 import type { Setter } from "~/tools/setter"
 
-import type { GetImpulseFormSwitchParam } from "./_get-impulse-form-switch-param"
+import type { GetImpulseFormSwitchParam } from "./_get-impulse-form-switch-branches-param"
 import type { ImpulseFormSwitchErrorVerbose } from "./_impulse-form-switch-error-verbose"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
