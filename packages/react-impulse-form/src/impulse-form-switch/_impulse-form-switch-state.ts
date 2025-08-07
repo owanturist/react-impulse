@@ -512,7 +512,7 @@ export class ImpulseFormSwitchState<
   // D I R T Y
 
   public readonly _dirty = Impulse(
-    (scope): ImpulseFormShapeFlag<TFields> => {
+    (scope): ImpulseFormSwitchFlag<TKind, TBranches> => {
       const dirty = mapValues(this._fields, ({ _dirty }) => {
         return _dirty.getValue(scope)
       })

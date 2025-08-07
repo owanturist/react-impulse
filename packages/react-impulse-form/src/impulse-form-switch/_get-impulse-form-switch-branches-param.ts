@@ -5,7 +5,7 @@ import type { GetImpulseFormParam } from "../impulse-form"
 
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
-export type GetImpulseFormSwitchBranchesParam<
+export type GetImpulseFormSwitchBranchesParams<
   TBranches extends ImpulseFormSwitchBranches<ImpulseForm>,
   TKey extends keyof ImpulseFormParams,
 > = Compute<{
