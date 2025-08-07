@@ -1,6 +1,7 @@
 import type { Scope } from "react-impulse"
 import z from "zod"
 
+import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import type { Setter } from "~/tools/setter"
 
 import {
@@ -651,5 +652,97 @@ describe("using recursive setter", () => {
         },
       })
     })
+  })
+})
+
+describe("stable initial value", () => {
+  it("subsequently selects equal initial", ({ scope }) => {
+    const form = ImpulseFormSwitch(ImpulseFormUnit("_1" as const), {
+      _1: ImpulseFormUnit(true),
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
+      }),
+      _5: ImpulseFormSwitch(ImpulseFormUnit("_6"), {
+        _6: ImpulseFormUnit(0),
+        _7: ImpulseFormUnit("0"),
+      }),
+    })
+
+    expect(form.getInitial(scope)).toBe(form.getInitial(scope))
+  })
+
+  it("persists unchanged branches input between changes", ({ scope }) => {
+    const form = ImpulseFormSwitch(ImpulseFormUnit("_1" as const), {
+      _1: ImpulseFormUnit(true),
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
+      }),
+      _5: ImpulseFormSwitch(ImpulseFormUnit("_6"), {
+        _6: ImpulseFormUnit(0),
+        _7: ImpulseFormUnit("0"),
+      }),
+    })
+
+    const initial_0 = form.getInitial(scope)
+
+    form.setInitial({
+      branches: {
+        _2: {
+          _3: "updated",
+        },
+      },
+    })
+
+    const initial_1 = form.getInitial(scope)
+
+    expect(initial_1).not.toBe(initial_0)
+    expect(initial_1.active).toBe(initial_0.active)
+    expect(initial_1.branches).not.toBe(initial_0.branches)
+    expect(initial_1.branches._2).not.toBe(initial_0.branches._2)
+    expect(initial_1.branches._5).toBe(initial_0.branches._5)
+  })
+
+  it("selects unequal initial values when isInputEqual is not specified", ({
+    scope,
+  }) => {
+    const form = ImpulseFormSwitch(ImpulseFormUnit(""), {
+      _1: ImpulseFormUnit([0]),
+    })
+
+    const initial_0 = form.getInitial(scope)
+
+    form.setInitial({
+      branches: {
+        _1: [0],
+      },
+    })
+    const initial_1 = form.getInitial(scope)
+
+    expect(initial_0).not.toBe(initial_1)
+    expect(initial_0).toStrictEqual(initial_1)
+  })
+
+  it("selects equal initial values when isInputEqual is specified", ({
+    scope,
+  }) => {
+    const form = ImpulseFormSwitch(ImpulseFormUnit(""), {
+      _1: ImpulseFormUnit([0], {
+        isInputEqual: isShallowArrayEqual,
+      }),
+    })
+
+    const initial_0 = form.getInitial(scope)
+
+    form.setInitial({
+      branches: {
+        _1: [0],
+      },
+    })
+    const initial_1 = form.getInitial(scope)
+
+    expect(initial_0).toBe(initial_1)
+    expect(initial_0).toStrictEqual(initial_1)
   })
 })

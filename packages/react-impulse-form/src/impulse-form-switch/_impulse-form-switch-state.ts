@@ -95,18 +95,6 @@ export class ImpulseFormSwitchState<
     },
   )
 
-  public _replaceInitial(
-    scope: Scope,
-    state: undefined | ImpulseFormSwitchState<TKind, TBranches>,
-    isMounting: boolean,
-  ): void {
-    this._active._replaceInitial(scope, state?._active, isMounting)
-
-    for (const [key, branch] of entries(this._branches)) {
-      branch._replaceInitial(scope, state?._branches[key], isMounting)
-    }
-  }
-
   public _setInitial(
     scope: Scope,
     setter: ImpulseFormSwitchInputSetter<TKind, TBranches>,
@@ -130,6 +118,18 @@ export class ImpulseFormSwitchState<
       if (hasProperty(branches, key) && !isUndefined(branches[key])) {
         field._setInitial(scope, branches[key])
       }
+    }
+  }
+
+  public _replaceInitial(
+    scope: Scope,
+    state: undefined | ImpulseFormSwitchState<TKind, TBranches>,
+    isMounting: boolean,
+  ): void {
+    this._active._replaceInitial(scope, state?._active, isMounting)
+
+    for (const [key, branch] of entries(this._branches)) {
+      branch._replaceInitial(scope, state?._branches[key], isMounting)
     }
   }
 
