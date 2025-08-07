@@ -1,5 +1,6 @@
 import { entries } from "~/tools/entries"
 import { hasProperty } from "~/tools/has-property"
+import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
 import { isTrue } from "~/tools/is-true"
@@ -10,6 +11,7 @@ import { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
 import { params } from "~/tools/params"
+import { values } from "~/tools/values"
 
 import { Impulse, type Scope, batch } from "../dependencies"
 import { type ImpulseForm, isImpulseForm } from "../impulse-form"
@@ -18,19 +20,27 @@ import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import {
   ImpulseFormShape,
   type ImpulseFormShapeFields,
+  isImpulseFormShapeFlagVerboseEqual,
 } from "../impulse-form-shape"
 import type {
   ImpulseFormShapeState,
   ImpulseFormShapeStateFields,
 } from "../impulse-form-shape/_impulse-form-shape-state"
+import { toConcise } from "../to-concise"
 
 import { ImpulseFormSwitch } from "./_impulse-form-switch"
 import type { ImpulseFormSwitchError } from "./_impulse-form-switch-error"
 import type { ImpulseFormSwitchErrorSetter } from "./_impulse-form-switch-error-setter"
 import type { ImpulseFormSwitchErrorVerbose } from "./_impulse-form-switch-error-verbose"
-import type { ImpulseFormSwitchFlag } from "./_impulse-form-switch-flag"
+import {
+  type ImpulseFormSwitchFlag,
+  isImpulseFormSwitchFlagEqual,
+} from "./_impulse-form-switch-flag"
 import type { ImpulseFormSwitchFlagSetter } from "./_impulse-form-switch-flag-setter"
-import type { ImpulseFormSwitchFlagVerbose } from "./_impulse-form-switch-flag-verbose"
+import {
+  type ImpulseFormSwitchFlagVerbose,
+  isImpulseFormSwitchFlagVerboseEqual,
+} from "./_impulse-form-switch-flag-verbose"
 import {
   type ImpulseFormSwitchInput,
   isImpulseFormSwitchInputEqual,
@@ -513,38 +523,41 @@ export class ImpulseFormSwitchState<
 
   public readonly _dirty = Impulse(
     (scope): ImpulseFormSwitchFlag<TKind, TBranches> => {
-      const dirty = mapValues(this._fields, ({ _dirty }) => {
+      const active = this._active._dirty.getValue(scope)
+      const branches = mapValues(this._branches, ({ _dirty }) => {
         return _dirty.getValue(scope)
       })
 
-      const allDirty = values(dirty)
-      const onlyDirty = allDirty.find(isBoolean) ?? false
+      const conciseBranches = toConcise(
+        values(branches),
+        isBoolean,
+        false,
+        branches,
+      )
 
-      for (const fieldDirty of allDirty) {
-        if (fieldDirty !== onlyDirty) {
-          return dirty as ImpulseFormShapeFlag<TFields>
-        }
-      }
-
-      return onlyDirty
+      return toConcise([active, conciseBranches], isBoolean, false, {
+        active,
+        branches: conciseBranches,
+      } as ImpulseFormSwitchFlag<TKind, TBranches>)
     },
 
     {
-      // compare: isImpulseFormShapeFlagEqual,
+      compare: isImpulseFormSwitchFlagEqual,
     },
   )
 
   public readonly _dirtyVerbose = Impulse(
-    (scope): ImpulseFormShapeFlagVerbose<TFields> => {
-      const dirtyVerbose = mapValues(this._fields, ({ _dirtyVerbose }) => {
+    (scope): ImpulseFormSwitchFlagVerbose<TKind, TBranches> => {
+      const active = this._active._dirty.getValue(scope)
+      const branches = mapValues(this._branches, ({ _dirtyVerbose }) => {
         return _dirtyVerbose.getValue(scope)
       })
 
-      return dirtyVerbose as ImpulseFormShapeFlagVerbose<TFields>
+      return { active, branches }
     },
 
     {
-      // compare: isImpulseFormShapeFlagVerboseEqual,
+      compare: isImpulseFormSwitchFlagVerboseEqual,
     },
   )
 

@@ -9,7 +9,6 @@ import type { ImpulseFormSwitchFlagSetter } from "./_impulse-form-switch-flag-se
 import type { ImpulseFormSwitchFlagVerbose } from "./_impulse-form-switch-flag-verbose"
 import type { ImpulseFormSwitchInput } from "./_impulse-form-switch-input"
 import type { ImpulseFormSwitchInputSetter } from "./_impulse-form-switch-input-setter"
-import type { ImpulseFormSwitchKindParams } from "./_impulse-form-switch-kind-params"
 import type { ImpulseFormSwitchOutput } from "./_impulse-form-switch-output"
 import type { ImpulseFormSwitchOutputVerbose } from "./_impulse-form-switch-output-verbose"
 import type { ImpulseFormSwitchValidateOn } from "./_impulse-form-switch-validate-on"
@@ -18,8 +17,8 @@ import type { ImpulseFormSwitchValidateOnVerbose } from "./_impulse-form-switch-
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
 export interface ImpulseFormSwitchParams<
-  TKind extends ImpulseForm<ImpulseFormSwitchKindParams<keyof TBranches>>,
-  TBranches extends ImpulseFormSwitchBranches,
+  TKind extends ImpulseForm,
+  TBranches extends ImpulseFormSwitchBranches<TKind>,
 > extends ImpulseFormParams {
   "input.schema": ImpulseFormSwitchInput<TKind, TBranches>
   "input.setter": ImpulseFormSwitchInputSetter<TKind, TBranches>
@@ -27,9 +26,9 @@ export interface ImpulseFormSwitchParams<
   "output.schema": ImpulseFormSwitchOutput<TKind, TBranches>
   "output.schema.verbose": ImpulseFormSwitchOutputVerbose<TKind, TBranches>
 
-  "flag.setter": ImpulseFormSwitchFlagSetter<TBranches>
-  "flag.schema": ImpulseFormSwitchFlag<TBranches>
-  "flag.schema.verbose": ImpulseFormSwitchFlagVerbose<TBranches>
+  "flag.setter": ImpulseFormSwitchFlagSetter<TKind, TBranches>
+  "flag.schema": ImpulseFormSwitchFlag<TKind, TBranches>
+  "flag.schema.verbose": ImpulseFormSwitchFlagVerbose<TKind, TBranches>
 
   "validateOn.setter": ImpulseFormSwitchValidateOnSetter<TBranches>
   "validateOn.schema": ImpulseFormSwitchValidateOn<TBranches>
