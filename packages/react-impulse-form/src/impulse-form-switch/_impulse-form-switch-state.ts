@@ -46,8 +46,14 @@ import {
   isImpulseFormSwitchInputEqual,
 } from "./_impulse-form-switch-input"
 import type { ImpulseFormSwitchInputSetter } from "./_impulse-form-switch-input-setter"
-import type { ImpulseFormSwitchOutput } from "./_impulse-form-switch-output"
-import type { ImpulseFormSwitchOutputVerbose } from "./_impulse-form-switch-output-verbose"
+import {
+  type ImpulseFormSwitchOutput,
+  isImpulseFormSwitchOutputEqual,
+} from "./_impulse-form-switch-output"
+import {
+  type ImpulseFormSwitchOutputVerbose,
+  isImpulseFormSwitchOutputVerboseEqual,
+} from "./_impulse-form-switch-output-verbose"
 import type { ImpulseFormSwitchParams } from "./_impulse-form-switch-params"
 import type { ImpulseFormSwitchValidateOn } from "./_impulse-form-switch-validate-on"
 import type { ImpulseFormSwitchValidateOnSetter } from "./_impulse-form-switch-validate-on-setter"
@@ -358,40 +364,39 @@ export class ImpulseFormSwitchState<
   // O U T P U T
 
   public readonly _output = Impulse(
-    (scope): null | ImpulseFormShapeOutput<TFields> => {
-      const output = mapValues(this._fields, ({ _output }) => {
-        return _output.getValue(scope)
-      })
-      const meta = mapValues(this._meta, (field) => field.getValue(scope))
+    (scope): null | ImpulseFormSwitchOutput<TKind, TBranches> => {
+      const kind = this._active._output.getValue(scope)
 
-      if (values(output).some(isNull)) {
+      const branch = isNull(kind) ? null : this._branches[kind]
+
+      if (!branch) {
         return null
       }
 
-      return { ...output, ...meta } as ImpulseFormShapeOutput<TFields>
+      const value = branch._output.getValue(scope)
+
+      if (isNull(value)) {
+        return null
+      }
+
+      return { kind, value }
     },
     {
-      // compare: isImpulseFormShapeOutputEqual,
+      compare: isImpulseFormSwitchOutputEqual,
     },
   )
 
   public readonly _outputVerbose = Impulse(
-    (scope): ImpulseFormShapeOutputVerbose<TFields> => {
-      const outputVerbose = mapValues(this._fields, ({ _outputVerbose }) => {
+    (scope): ImpulseFormSwitchOutputVerbose<TKind, TBranches> => {
+      const active = this._active._outputVerbose.getValue(scope)
+      const branches = mapValues(this._branches, ({ _outputVerbose }) => {
         return _outputVerbose.getValue(scope)
       })
 
-      const meta = mapValues(this._meta, (field) => {
-        return field.getValue(scope)
-      })
-
-      return {
-        ...outputVerbose,
-        ...meta,
-      } as ImpulseFormShapeOutputVerbose<TFields>
+      return { active, branches }
     },
     {
-      // compare: isImpulseFormShapeOutputVerboseEqual,
+      compare: isImpulseFormSwitchOutputVerboseEqual,
     },
   )
 

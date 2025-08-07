@@ -61,6 +61,8 @@ describe("types", () => {
       form.getOutput(scope, params._second),
     ).toEqualTypeOf<OutputVerboseSchema>()
   })
+
+  describe("nested", () => {})
 })
 
 describe("when branch is initially invalid", () => {
@@ -178,10 +180,10 @@ describe("when branch is initially invalid", () => {
   })
 })
 
-it.skip("returns null after switching from valid to invalid branch", ({
-  scope,
-}) => {
-  const form = ImpulseFormSwitch("second", {
+// TODO continue from here: handle more edge cases
+
+it("returns null after switching from valid to invalid branch", ({ scope }) => {
+  const form = ImpulseFormSwitch(ImpulseFormUnit("second"), {
     first: ImpulseFormUnit(0, {
       schema: z.number().min(1),
     }),
@@ -191,18 +193,24 @@ it.skip("returns null after switching from valid to invalid branch", ({
     }),
   })
 
-  form.setActive("first")
+  form.active.setInput("first")
 
   expect(form.getOutput(scope)).toBeNull()
   expect(form.getOutput(scope, params._first)).toBeNull()
   expect(form.getOutput(scope, params._second)).toStrictEqual({
-    kind: "first",
-    value: null,
+    active: "first",
+    branches: {
+      first: null,
+      second: {
+        name: "name",
+        age: 18,
+      },
+    },
   })
 })
 
-it.skip("returns output for initially valid branch", ({ scope }) => {
-  const form = ImpulseFormSwitch("first", {
+it("returns output for initially valid branch", ({ scope }) => {
+  const form = ImpulseFormSwitch(ImpulseFormUnit("first"), {
     first: ImpulseFormUnit(1, {
       schema: z.number().min(1),
     }),
@@ -212,20 +220,29 @@ it.skip("returns output for initially valid branch", ({ scope }) => {
     }),
   })
 
-  expect(form.getActive(scope)).toBe("first")
+  expect(form.active.getOutput(scope)).toBe("first")
 
-  const output = {
+  const concise = {
     kind: "first",
     value: 1,
   }
 
-  expect(form.getOutput(scope)).toStrictEqual(output)
-  expect(form.getOutput(scope, params._first)).toStrictEqual(output)
-  expect(form.getOutput(scope, params._second)).toStrictEqual(output)
+  expect(form.getOutput(scope)).toStrictEqual(concise)
+  expect(form.getOutput(scope, params._first)).toStrictEqual(concise)
+  expect(form.getOutput(scope, params._second)).toStrictEqual({
+    active: "first",
+    branches: {
+      first: 1,
+      second: {
+        name: "name",
+        age: 18,
+      },
+    },
+  })
 })
 
-it.skip("ignores invalid inactive branches", ({ scope }) => {
-  const form = ImpulseFormSwitch("second", {
+it("ignores invalid inactive branches", ({ scope }) => {
+  const form = ImpulseFormSwitch(ImpulseFormUnit("second"), {
     first: ImpulseFormUnit(0, {
       schema: z.number().min(1),
     }),
@@ -238,9 +255,9 @@ it.skip("ignores invalid inactive branches", ({ scope }) => {
     }),
   })
 
-  expect(form.getActive(scope)).toBe("second")
+  expect(form.active.getOutput(scope)).toBe("second")
 
-  const output = {
+  const concise = {
     kind: "second",
     value: {
       name: "name",
@@ -248,7 +265,17 @@ it.skip("ignores invalid inactive branches", ({ scope }) => {
     },
   }
 
-  expect(form.getOutput(scope)).toStrictEqual(output)
-  expect(form.getOutput(scope, params._first)).toStrictEqual(output)
-  expect(form.getOutput(scope, params._second)).toStrictEqual(output)
+  expect(form.getOutput(scope)).toStrictEqual(concise)
+  expect(form.getOutput(scope, params._first)).toStrictEqual(concise)
+  expect(form.getOutput(scope, params._second)).toStrictEqual({
+    active: "second",
+    branches: {
+      first: null,
+      second: {
+        name: "name",
+        age: 18,
+      },
+      third: null,
+    },
+  })
 })
