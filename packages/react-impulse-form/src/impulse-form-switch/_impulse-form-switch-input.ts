@@ -1,33 +1,11 @@
-import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
-import { isStrictEqual } from "~/tools/is-strict-equal"
-
-import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 
-import type { GetImpulseFormSwitchBranchesParam } from "./_get-impulse-form-switch-branches-param"
+import type { GetImpulseFormSwitchParams } from "./_get-impulse-form-switch-params"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
-export type ImpulseFormSwitchBranchesInput<
-  TBranches extends ImpulseFormSwitchBranches,
-> = GetImpulseFormSwitchBranchesParam<TBranches, "input.schema">
+export { isShallowImpulseFormSwitchSchemaEqual as isImpulseFormSwitchInputEqual } from "./_impulse-form-switch-schema"
 
-export interface ImpulseFormSwitchInput<
+export type ImpulseFormSwitchInput<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
-> {
-  readonly active: GetImpulseFormParam<TKind, "input.schema">
-  readonly branches: ImpulseFormSwitchBranchesInput<TBranches>
-}
-
-export function isImpulseFormSwitchInputEqual<
-  TKind extends ImpulseForm,
-  TBranches extends ImpulseFormSwitchBranches<TKind>,
->(
-  left: ImpulseFormSwitchInput<TKind, TBranches>,
-  right: ImpulseFormSwitchInput<TKind, TBranches>,
-): boolean {
-  return (
-    isStrictEqual(left.active, right.active) &&
-    isShallowObjectEqual(left.branches, right.branches)
-  )
-}
+> = GetImpulseFormSwitchParams<TKind, TBranches, "input.schema">

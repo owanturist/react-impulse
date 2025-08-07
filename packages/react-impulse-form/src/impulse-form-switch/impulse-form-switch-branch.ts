@@ -1,4 +1,4 @@
 export interface ImpulseFormSwitchBranch<TKind, TValue> {
-  kind: TKind
-  value: TValue
+  readonly kind: TKind
+  readonly value: TValue
 }
