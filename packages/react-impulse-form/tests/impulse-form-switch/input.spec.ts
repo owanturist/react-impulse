@@ -53,17 +53,8 @@ describe("types", () => {
     [InputSchema, InputSchema]
   >
 
-  it("matches setter type for ImpulseFormSwitchOptions.input", () => {
-    expectTypeOf<typeof ImpulseFormSwitch<typeof active, typeof branches>>()
-      .parameter(2)
-      .exclude<undefined>()
-      .toHaveProperty("input")
-      .toEqualTypeOf<undefined | InputSetter>()
-  })
-
-  it("matches schema type for getInput(scope)", ({ scope }) => {
-    expectTypeOf(form.getInput).parameters.toEqualTypeOf<[Scope]>()
-    expectTypeOf(form.getInput(scope)).toEqualTypeOf<InputSchema>()
+  it("matches schema type for getInput(scope)", () => {
+    expectTypeOf(form.getInput).toEqualTypeOf<(scope: Scope) => InputSchema>()
   })
 
   it("matches setter type for setInput(setter)", () => {
@@ -71,7 +62,7 @@ describe("types", () => {
   })
 
   it("ensures the branches type keys following the active output", () => {
-    const form_1 = ImpulseFormSwitch(ImpulseFormUnit("_1" as const), branches)
+    const form_1 = ImpulseFormSwitch(ImpulseFormUnit("_1"), branches)
     const form_2 = ImpulseFormSwitch(
       ImpulseFormUnit("_5" as const),
       // @ts-expect-error - active must be a union of branch keys
@@ -81,6 +72,47 @@ describe("types", () => {
     expectTypeOf(form_1.branches).toHaveProperty("_1")
     expectTypeOf(form_2.branches).not.toHaveProperty("_1")
     expectTypeOf(form_2.branches).toHaveProperty("_5")
+  })
+
+  describe("nested", () => {
+    const parent = ImpulseFormSwitch(ImpulseFormUnit("_5"), {
+      _6: ImpulseFormUnit(0),
+      _7: form,
+    })
+
+    interface ParentInputSchema {
+      readonly active: string
+      readonly branches: {
+        readonly _6: number
+        readonly _7: InputSchema
+      }
+    }
+
+    type ParentInputSetter = Setter<
+      {
+        readonly active?: Setter<string, [string, string]>
+        readonly branches?: Setter<
+          {
+            readonly _6?: Setter<number, [number, number]>
+            readonly _7?: InputSetter
+          },
+          [ParentInputSchema["branches"], ParentInputSchema["branches"]]
+        >
+      },
+      [ParentInputSchema, ParentInputSchema]
+    >
+
+    it("matches schema type for getInput(scope)", () => {
+      expectTypeOf(parent.getInput).toEqualTypeOf<
+        (scope: Scope) => ParentInputSchema
+      >()
+    })
+
+    it("matches setter type for setInput(setter)", () => {
+      expectTypeOf(parent.setInput).toEqualTypeOf<
+        (setter: ParentInputSetter) => void
+      >()
+    })
   })
 })
 

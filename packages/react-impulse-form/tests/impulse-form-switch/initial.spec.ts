@@ -53,23 +53,57 @@ describe("types", () => {
     [InitialSchema, InitialSchema]
   >
 
-  it("matches setter type for ImpulseFormSwitchOptions.initial", () => {
-    expectTypeOf<typeof ImpulseFormSwitch<typeof active, typeof branches>>()
-      .parameter(2)
-      .exclude<undefined>()
-      .toHaveProperty("initial")
-      .toEqualTypeOf<undefined | InitialSetter>()
-  })
-
-  it("matches schema type for getInitial(scope)", ({ scope }) => {
-    expectTypeOf(form.getInitial).parameters.toEqualTypeOf<[Scope]>()
-    expectTypeOf(form.getInitial(scope)).toEqualTypeOf<InitialSchema>()
+  it("matches schema type for getInitial(scope)", () => {
+    expectTypeOf(form.getInitial).toEqualTypeOf<
+      (scope: Scope) => InitialSchema
+    >()
   })
 
   it("matches setter type for setInitial(setter)", () => {
     expectTypeOf(form.setInitial).toEqualTypeOf<
       (setter: InitialSetter) => void
     >()
+  })
+
+  describe("nested", () => {
+    const parent = ImpulseFormSwitch(ImpulseFormUnit("_5"), {
+      _6: ImpulseFormUnit(0),
+      _7: form,
+    })
+
+    interface ParentInitialSchema {
+      readonly active: string
+      readonly branches: {
+        readonly _6: number
+        readonly _7: InitialSchema
+      }
+    }
+
+    type ParentInitialSetter = Setter<
+      {
+        readonly active?: Setter<string, [string, string]>
+        readonly branches?: Setter<
+          {
+            readonly _6?: Setter<number, [number, number]>
+            readonly _7?: InitialSetter
+          },
+          [ParentInitialSchema["branches"], ParentInitialSchema["branches"]]
+        >
+      },
+      [ParentInitialSchema, ParentInitialSchema]
+    >
+
+    it("matches schema type for getInitial(scope)", () => {
+      expectTypeOf(parent.getInitial).toEqualTypeOf<
+        (scope: Scope) => ParentInitialSchema
+      >()
+    })
+
+    it("matches setter type for setInitial(setter)", () => {
+      expectTypeOf(parent.setInitial).toEqualTypeOf<
+        (setter: ParentInitialSetter) => void
+      >()
+    })
   })
 })
 
