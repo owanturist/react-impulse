@@ -7,16 +7,16 @@ import { ImpulseFormShape, ImpulseFormSwitch, ImpulseFormUnit } from "../../src"
 
 describe("types", () => {
   const active = ImpulseFormUnit("", {
-    schema: z.enum(["first", "second"]),
+    schema: z.enum(["_1", "_2"]),
   })
 
   const branches = {
-    first: ImpulseFormUnit(true, {
+    _1: ImpulseFormUnit(true, {
       schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
     }),
-    second: ImpulseFormShape({
-      name: ImpulseFormUnit("name"),
-      age: ImpulseFormUnit(18),
+    _2: ImpulseFormShape({
+      _3: ImpulseFormUnit("name"),
+      _4: ImpulseFormUnit(18),
     }),
   }
 
@@ -25,10 +25,10 @@ describe("types", () => {
   interface InitialSchema {
     readonly active: string
     readonly branches: {
-      readonly first: boolean
-      readonly second: {
-        readonly name: string
-        readonly age: number
+      readonly _1: boolean
+      readonly _2: {
+        readonly _3: string
+        readonly _4: number
       }
     }
   }
@@ -38,16 +38,13 @@ describe("types", () => {
       readonly active?: Setter<string, [string, string]>
       readonly branches?: Setter<
         {
-          readonly first?: Setter<boolean, [boolean, boolean]>
-          readonly second?: Setter<
+          readonly _1?: Setter<boolean, [boolean, boolean]>
+          readonly _2?: Setter<
             {
-              readonly name?: Setter<string, [string, string]>
-              readonly age?: Setter<number, [number, number]>
+              readonly _3?: Setter<string, [string, string]>
+              readonly _4?: Setter<number, [number, number]>
             },
-            [
-              InitialSchema["branches"]["second"],
-              InitialSchema["branches"]["second"],
-            ]
+            [InitialSchema["branches"]["_2"], InitialSchema["branches"]["_2"]]
           >
         },
         [InitialSchema["branches"], InitialSchema["branches"]]
@@ -78,17 +75,17 @@ describe("types", () => {
 
 it("initiates with children input", ({ scope }) => {
   const form = ImpulseFormSwitch(
-    ImpulseFormUnit<"first" | "second">("first", {
-      initial: "second",
+    ImpulseFormUnit("_1", {
+      initial: "_2",
     }),
     {
-      first: ImpulseFormUnit(true, {
+      _1: ImpulseFormUnit(true, {
         initial: false,
         schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
       }),
-      second: ImpulseFormShape({
-        name: ImpulseFormUnit("name"),
-        age: ImpulseFormUnit(18, {
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18, {
           initial: 20,
         }),
       }),
@@ -96,12 +93,12 @@ it("initiates with children input", ({ scope }) => {
   )
 
   expect(form.getInitial(scope)).toStrictEqual({
-    active: "second",
+    active: "_2",
     branches: {
-      first: false,
-      second: {
-        name: "name",
-        age: 20,
+      _1: false,
+      _2: {
+        _3: "name",
+        _4: 20,
       },
     },
   })
@@ -110,29 +107,29 @@ it("initiates with children input", ({ scope }) => {
 it("initiates with overridden initial", ({ scope }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("", {
-      initial: "any",
-      schema: z.enum(["first", "second"]),
+      initial: "_5",
+      schema: z.enum(["_1", "_2"]),
     }),
     {
-      first: ImpulseFormUnit(true, {
+      _1: ImpulseFormUnit(true, {
         initial: false,
         schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
       }),
-      second: ImpulseFormShape({
-        name: ImpulseFormUnit("name"),
-        age: ImpulseFormUnit(18, {
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18, {
           initial: 20,
         }),
       }),
     },
     {
       initial: {
-        active: "another",
+        active: "_6",
         branches: {
-          first: true,
-          second: {
-            name: "overridden",
-            age: 100,
+          _1: true,
+          _2: {
+            _3: "overridden",
+            _4: 100,
           },
         },
       },
@@ -140,22 +137,22 @@ it("initiates with overridden initial", ({ scope }) => {
   )
 
   expect(form.getInitial(scope)).toStrictEqual({
-    active: "another",
+    active: "_6",
     branches: {
-      first: true,
-      second: {
-        name: "overridden",
-        age: 100,
+      _1: true,
+      _2: {
+        _3: "overridden",
+        _4: 100,
       },
     },
   })
   expect(form.getInput(scope)).toStrictEqual({
     active: "",
     branches: {
-      first: true,
-      second: {
-        name: "name",
-        age: 18,
+      _1: true,
+      _2: {
+        _3: "name",
+        _4: 18,
       },
     },
   })
@@ -166,24 +163,24 @@ it("passes input and initial to setter", ({ scope }) => {
 
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("", {
-      schema: z.enum(["first", "second"]),
-      initial: "any",
+      schema: z.enum(["_1", "_2"]),
+      initial: "_7",
     }),
     {
-      first: ImpulseFormUnit(true, {
+      _1: ImpulseFormUnit(true, {
         initial: false,
         schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
       }),
-      second: ImpulseFormShape(
+      _2: ImpulseFormShape(
         {
-          name: ImpulseFormUnit("name", {
+          _3: ImpulseFormUnit("name", {
             initial: "initial",
           }),
-          age: ImpulseFormUnit(18),
+          _4: ImpulseFormUnit(18),
         },
         {
           initial: {
-            age: 100,
+            _4: 100,
           },
         },
       ),
@@ -191,79 +188,79 @@ it("passes input and initial to setter", ({ scope }) => {
     {
       initial: (initial, input) => {
         expect(initial).toStrictEqual({
-          active: "any",
+          active: "_7",
           branches: {
-            first: false,
-            second: {
-              name: "initial",
-              age: 100,
+            _1: false,
+            _2: {
+              _3: "initial",
+              _4: 100,
             },
           },
         })
         expect(input).toStrictEqual({
           active: "",
           branches: {
-            first: true,
-            second: {
-              name: "name",
-              age: 18,
+            _1: true,
+            _2: {
+              _3: "name",
+              _4: 18,
             },
           },
         })
 
         return {
-          active: (activeInitial, activeInput) => {
-            expect(activeInitial).toBe("any")
-            expect(activeInput).toBe("")
+          active: (initial_active, input_active) => {
+            expect(initial_active).toBe("_7")
+            expect(input_active).toBe("")
 
-            return "first"
+            return "_1"
           },
 
-          branches: (branchesInitial, branchesInput) => {
-            expect(branchesInitial).toStrictEqual({
-              first: false,
-              second: {
-                name: "initial",
-                age: 100,
+          branches: (initial_branches, input_branches) => {
+            expect(initial_branches).toStrictEqual({
+              _1: false,
+              _2: {
+                _3: "initial",
+                _4: 100,
               },
             })
-            expect(branchesInput).toStrictEqual({
-              first: true,
-              second: {
-                name: "name",
-                age: 18,
+            expect(input_branches).toStrictEqual({
+              _1: true,
+              _2: {
+                _3: "name",
+                _4: 18,
               },
             })
 
             return {
-              first: (firstInitial, firstInput) => {
-                expect(firstInitial).toBe(false)
-                expect(firstInput).toBe(true)
+              _1: (initial_1, input_1) => {
+                expect(initial_1).toBe(false)
+                expect(input_1).toBe(true)
 
                 return true
               },
 
-              second: (secondInitial, secondInput) => {
-                expect(secondInitial).toStrictEqual({
-                  name: "initial",
-                  age: 100,
+              _2: (initial_2, input_2) => {
+                expect(initial_2).toStrictEqual({
+                  _3: "initial",
+                  _4: 100,
                 })
-                expect(secondInput).toStrictEqual({
-                  name: "name",
-                  age: 18,
+                expect(input_2).toStrictEqual({
+                  _3: "name",
+                  _4: 18,
                 })
 
                 return {
-                  name: (nameInitial, nameInput) => {
-                    expect(nameInitial).toBe("initial")
-                    expect(nameInput).toBe("name")
+                  _3: (initial_3, input_3) => {
+                    expect(initial_3).toBe("initial")
+                    expect(input_3).toBe("name")
 
                     return "updated"
                   },
 
-                  age: (ageInitial, ageInput) => {
-                    expect(ageInitial).toBe(100)
-                    expect(ageInput).toBe(18)
+                  _4: (initial_4, input_4) => {
+                    expect(initial_4).toBe(100)
+                    expect(input_4).toBe(18)
 
                     return 30
                   },
@@ -277,22 +274,22 @@ it("passes input and initial to setter", ({ scope }) => {
   )
 
   expect(form.getInitial(scope)).toStrictEqual({
-    active: "first",
+    active: "_1",
     branches: {
-      first: true,
-      second: {
-        name: "updated",
-        age: 30,
+      _1: true,
+      _2: {
+        _3: "updated",
+        _4: 30,
       },
     },
   })
   expect(form.getInput(scope)).toStrictEqual({
     active: "",
     branches: {
-      first: true,
-      second: {
-        name: "name",
-        age: 18,
+      _1: true,
+      _2: {
+        _3: "name",
+        _4: 18,
       },
     },
   })
@@ -301,48 +298,48 @@ it("passes input and initial to setter", ({ scope }) => {
 it("sets initial", ({ scope }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("", {
-      initial: "any",
-      schema: z.enum(["first", "second"]),
+      initial: "_8",
+      schema: z.enum(["_1", "_2"]),
     }),
     {
-      first: ImpulseFormUnit(true, {
+      _1: ImpulseFormUnit(true, {
         schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
       }),
-      second: ImpulseFormShape({
-        name: ImpulseFormUnit("name"),
-        age: ImpulseFormUnit(18),
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
       }),
     },
   )
 
   form.setInitial({
-    active: "something",
+    active: "_9",
     branches: {
-      first: false,
-      second: {
-        name: "updated",
-        age: 25,
+      _1: false,
+      _2: {
+        _3: "updated",
+        _4: 25,
       },
     },
   })
 
   expect(form.getInitial(scope)).toStrictEqual({
-    active: "something",
+    active: "_9",
     branches: {
-      first: false,
-      second: {
-        name: "updated",
-        age: 25,
+      _1: false,
+      _2: {
+        _3: "updated",
+        _4: 25,
       },
     },
   })
   expect(form.getInput(scope)).toStrictEqual({
     active: "",
     branches: {
-      first: true,
-      second: {
-        name: "name",
-        age: 18,
+      _1: true,
+      _2: {
+        _3: "name",
+        _4: 18,
       },
     },
   })
@@ -351,70 +348,70 @@ it("sets initial", ({ scope }) => {
 it("sets partial initial", ({ scope }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("", {
-      initial: "any",
-      schema: z.enum(["first", "second"]),
+      initial: "_10",
+      schema: z.enum(["_1", "_2"]),
     }),
     {
-      first: ImpulseFormUnit(true, {
+      _1: ImpulseFormUnit(true, {
         schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
       }),
-      second: ImpulseFormShape({
-        name: ImpulseFormUnit("name", {
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name", {
           initial: "initial",
         }),
-        age: ImpulseFormUnit(18),
+        _4: ImpulseFormUnit(18),
       }),
     },
   )
 
   form.setInitial({
     branches: {
-      second: {
-        age: 25,
+      _2: {
+        _4: 25,
       },
     },
   })
   expect(form.getInitial(scope)).toStrictEqual({
-    active: "any",
+    active: "_10",
     branches: {
-      first: true,
-      second: {
-        name: "initial",
-        age: 25,
+      _1: true,
+      _2: {
+        _3: "initial",
+        _4: 25,
       },
     },
   })
   expect(form.getInput(scope)).toStrictEqual({
     active: "",
     branches: {
-      first: true,
-      second: {
-        name: "name",
-        age: 18,
+      _1: true,
+      _2: {
+        _3: "name",
+        _4: 18,
       },
     },
   })
 
   form.setInitial({
-    active: "another",
+    active: "_11",
   })
   expect(form.getInitial(scope)).toStrictEqual({
-    active: "another",
+    active: "_11",
     branches: {
-      first: true,
-      second: {
-        name: "initial",
-        age: 25,
+      _1: true,
+      _2: {
+        _3: "initial",
+        _4: 25,
       },
     },
   })
   expect(form.getInput(scope)).toStrictEqual({
     active: "",
     branches: {
-      first: true,
-      second: {
-        name: "name",
-        age: 18,
+      _1: true,
+      _2: {
+        _3: "name",
+        _4: 18,
       },
     },
   })
@@ -425,24 +422,24 @@ it("sets initial with setter", ({ scope }) => {
 
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("", {
-      schema: z.enum(["first", "second"]),
-      initial: "any",
+      schema: z.enum(["_1", "_2"]),
+      initial: "_12",
     }),
     {
-      first: ImpulseFormUnit(true, {
+      _1: ImpulseFormUnit(true, {
         initial: false,
         schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
       }),
-      second: ImpulseFormShape(
+      _2: ImpulseFormShape(
         {
-          name: ImpulseFormUnit("name", {
+          _3: ImpulseFormUnit("name", {
             initial: "initial",
           }),
-          age: ImpulseFormUnit(18),
+          _4: ImpulseFormUnit(18),
         },
         {
           initial: {
-            age: 100,
+            _4: 100,
           },
         },
       ),
@@ -451,79 +448,79 @@ it("sets initial with setter", ({ scope }) => {
 
   form.setInitial((initial, input) => {
     expect(initial).toStrictEqual({
-      active: "any",
+      active: "_12",
       branches: {
-        first: false,
-        second: {
-          name: "initial",
-          age: 100,
+        _1: false,
+        _2: {
+          _3: "initial",
+          _4: 100,
         },
       },
     })
     expect(input).toStrictEqual({
       active: "",
       branches: {
-        first: true,
-        second: {
-          name: "name",
-          age: 18,
+        _1: true,
+        _2: {
+          _3: "name",
+          _4: 18,
         },
       },
     })
 
     return {
-      active: (activeInitial, activeInput) => {
-        expect(activeInitial).toBe("any")
-        expect(activeInput).toBe("")
+      active: (initial_active, input_active) => {
+        expect(initial_active).toBe("_12")
+        expect(input_active).toBe("")
 
-        return "first"
+        return "_1"
       },
 
-      branches: (branchesInitial, branchesInput) => {
-        expect(branchesInitial).toStrictEqual({
-          first: false,
-          second: {
-            name: "initial",
-            age: 100,
+      branches: (initial_branches, input_branches) => {
+        expect(initial_branches).toStrictEqual({
+          _1: false,
+          _2: {
+            _3: "initial",
+            _4: 100,
           },
         })
-        expect(branchesInput).toStrictEqual({
-          first: true,
-          second: {
-            name: "name",
-            age: 18,
+        expect(input_branches).toStrictEqual({
+          _1: true,
+          _2: {
+            _3: "name",
+            _4: 18,
           },
         })
 
         return {
-          first: (firstInitial, firstInput) => {
-            expect(firstInitial).toBe(false)
-            expect(firstInput).toBe(true)
+          _1: (initial_1, input_1) => {
+            expect(initial_1).toBe(false)
+            expect(input_1).toBe(true)
 
             return true
           },
 
-          second: (secondInitial, secondInput) => {
-            expect(secondInitial).toStrictEqual({
-              name: "initial",
-              age: 100,
+          _2: (initial_2, input_2) => {
+            expect(initial_2).toStrictEqual({
+              _3: "initial",
+              _4: 100,
             })
-            expect(secondInput).toStrictEqual({
-              name: "name",
-              age: 18,
+            expect(input_2).toStrictEqual({
+              _3: "name",
+              _4: 18,
             })
 
             return {
-              name: (nameInitial, nameInput) => {
-                expect(nameInitial).toBe("initial")
-                expect(nameInput).toBe("name")
+              _3: (initial_3, input_3) => {
+                expect(initial_3).toBe("initial")
+                expect(input_3).toBe("name")
 
                 return "updated"
               },
 
-              age: (ageInitial, ageInput) => {
-                expect(ageInitial).toBe(100)
-                expect(ageInput).toBe(18)
+              _4: (initial_4, input_4) => {
+                expect(initial_4).toBe(100)
+                expect(input_4).toBe(18)
 
                 return 30
               },
@@ -535,22 +532,22 @@ it("sets initial with setter", ({ scope }) => {
   })
 
   expect(form.getInitial(scope)).toStrictEqual({
-    active: "first",
+    active: "_1",
     branches: {
-      first: true,
-      second: {
-        name: "updated",
-        age: 30,
+      _1: true,
+      _2: {
+        _3: "updated",
+        _4: 30,
       },
     },
   })
   expect(form.getInput(scope)).toStrictEqual({
     active: "",
     branches: {
-      first: true,
-      second: {
-        name: "name",
-        age: 18,
+      _1: true,
+      _2: {
+        _3: "name",
+        _4: 18,
       },
     },
   })
