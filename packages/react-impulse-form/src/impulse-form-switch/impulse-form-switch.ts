@@ -3,7 +3,6 @@ import { mapValues } from "~/tools/map-values"
 
 import { batch } from "../dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
-import { ImpulseFormShapeState } from "../impulse-form-shape/_impulse-form-shape-state"
 
 import { ImpulseFormSwitch as ImpulseFormSwitchImpl } from "./_impulse-form-switch"
 import type { ImpulseFormSwitchErrorSetter } from "./_impulse-form-switch-error-setter"
@@ -43,14 +42,10 @@ export function ImpulseFormSwitch<
     error,
   }: ImpulseFormSwitchOptions<TKind, TBranches> = {},
 ): ImpulseFormSwitch<TKind, TBranches> {
-  const switcher = new ImpulseFormSwitchState(
+  const switcher = new ImpulseFormSwitchState<TKind, TBranches>(
     null,
     ImpulseFormSwitchImpl._getState(active),
-    new ImpulseFormShapeState(
-      null,
-      mapValues(branches, ImpulseFormSwitchImpl._getState),
-      {},
-    ),
+    mapValues(branches, ImpulseFormSwitchImpl._getState),
   )
 
   batch((scope) => {

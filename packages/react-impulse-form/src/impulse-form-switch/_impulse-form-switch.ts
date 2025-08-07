@@ -23,8 +23,8 @@ export class ImpulseFormSwitch<
 
     this.active = _state._active._host()
 
-    this.branches = mapValues(_state._branches._fields, ({ _host }) => {
+    this.branches = mapValues(_state._branches, ({ _host }) => {
       return _host()
-    }) as TBranches
+    })
   }
 }
