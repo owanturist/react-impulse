@@ -33,7 +33,7 @@ export function ImpulseFormSwitch<
   TBranches extends ImpulseFormSwitchBranches<TKind>,
 >(
   active: TKind,
-  branches: Readonly<TBranches>,
+  branches: TBranches,
   {
     input,
     initial,
@@ -45,7 +45,7 @@ export function ImpulseFormSwitch<
   const switcher = new ImpulseFormSwitchState<TKind, TBranches>(
     null,
     ImpulseFormSwitchImpl._getState(active),
-    mapValues(branches, ImpulseFormSwitchImpl._getState),
+    mapValues(branches, (branch) => ImpulseFormSwitchImpl._getState(branch)),
   )
 
   batch((scope) => {

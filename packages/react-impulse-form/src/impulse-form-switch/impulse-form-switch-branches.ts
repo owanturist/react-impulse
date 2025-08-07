@@ -2,4 +2,6 @@ import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 export type ImpulseFormSwitchBranches<TKind extends ImpulseForm = ImpulseForm> =
-  Record<GetImpulseFormParam<TKind, "output.schema">, ImpulseForm>
+  GetImpulseFormParam<TKind, "output.schema"> extends string
+    ? Record<GetImpulseFormParam<TKind, "output.schema">, ImpulseForm>
+    : never
