@@ -7,7 +7,7 @@ import { ImpulseFormShape, ImpulseFormSwitch, ImpulseFormUnit } from "../../src"
 describe("types", () => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("", {
-      schema: z.enum(["_1", "_2"]),
+      schema: z.enum(["_1", "_2", "_5"]),
     }),
     {
       _1: ImpulseFormUnit(true, {
@@ -35,9 +35,13 @@ describe("types", () => {
           readonly _4: number
         }
       }
+    | {
+        readonly kind: "_5"
+        readonly value: string
+      }
 
   interface OutputVerboseSchema {
-    readonly active: null | "_1" | "_2"
+    readonly active: null | "_1" | "_2" | "_5"
     readonly branches: {
       readonly _1: null | string
       readonly _2: {
@@ -109,7 +113,7 @@ describe("when branch is initially invalid", () => {
   it("returns null for initially invalid active", ({ scope }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("", {
-        schema: z.enum(["_1", "_2"]),
+        schema: z.enum(["_1", "_2", "_5"]),
       }),
       {
         _1: ImpulseFormUnit(0, {
@@ -139,21 +143,16 @@ describe("when branch is initially invalid", () => {
   })
 
   it("returns null for initially valid active", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_1", {
-        schema: z.enum(["_1", "_2"]),
+    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2" | "_5">("_1"), {
+      _1: ImpulseFormUnit(0, {
+        schema: z.number().min(1),
       }),
-      {
-        _1: ImpulseFormUnit(0, {
-          schema: z.number().min(1),
-        }),
-        _2: ImpulseFormShape({
-          _3: ImpulseFormUnit("name"),
-          _4: ImpulseFormUnit(18),
-        }),
-        _5: ImpulseFormUnit(false),
-      },
-    )
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
+      }),
+      _5: ImpulseFormUnit(false),
+    })
 
     expect(form.getOutput(scope)).toBeNull()
     expect(form.getOutput(scope, params._first)).toBeNull()
@@ -221,7 +220,7 @@ describe("when branch is initially invalid", () => {
 })
 
 it("returns null after switching from valid to invalid branch", ({ scope }) => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit("_2"), {
+  const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2">("_2"), {
     _1: ImpulseFormUnit(0, {
       schema: z.number().min(1),
     }),
@@ -248,7 +247,7 @@ it("returns null after switching from valid to invalid branch", ({ scope }) => {
 })
 
 it("returns output for initially valid branch", ({ scope }) => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit("_1"), {
+  const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2">("_1"), {
     _1: ImpulseFormUnit(1, {
       schema: z.number().min(1),
     }),
@@ -280,18 +279,23 @@ it("returns output for initially valid branch", ({ scope }) => {
 })
 
 it("ignores invalid inactive branches", ({ scope }) => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit("_2"), {
-    _1: ImpulseFormUnit(0, {
-      schema: z.number().min(1),
+  const form = ImpulseFormSwitch(
+    ImpulseFormUnit("_2", {
+      schema: z.enum(["_1", "_2", "_5"]),
     }),
-    _2: ImpulseFormShape({
-      _3: ImpulseFormUnit("name"),
-      _4: ImpulseFormUnit(18),
-    }),
-    _5: ImpulseFormUnit("", {
-      schema: z.string().min(1),
-    }),
-  })
+    {
+      _1: ImpulseFormUnit(0, {
+        schema: z.number().min(1),
+      }),
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
+      }),
+      _5: ImpulseFormUnit("", {
+        schema: z.string().min(1),
+      }),
+    },
+  )
 
   expect(form.active.getOutput(scope)).toBe("_2")
 

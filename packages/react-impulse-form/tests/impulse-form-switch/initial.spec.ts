@@ -94,13 +94,13 @@ describe("types", () => {
   })
 
   describe("nested", () => {
-    const parent = ImpulseFormSwitch(ImpulseFormUnit("_5"), {
+    const parent = ImpulseFormSwitch(ImpulseFormUnit<"_6" | "_7">("_6"), {
       _6: ImpulseFormUnit(0),
       _7: form,
     })
 
     interface ParentInitialSchema {
-      readonly active: string
+      readonly active: "_6" | "_7"
       readonly branches: {
         readonly _6: number
         readonly _7: InitialSchema
@@ -109,7 +109,7 @@ describe("types", () => {
 
     type ParentInitialSetter = Setter<
       {
-        readonly active?: Setter<string, [string, string]>
+        readonly active?: Setter<"_6" | "_7", ["_6" | "_7", "_6" | "_7"]>
         readonly branches?: Setter<
           {
             readonly _6?: Setter<number, [number, number]>
@@ -139,6 +139,7 @@ it("initiates with children input", ({ scope }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("_1", {
       initial: "_2",
+      schema: z.enum(["_1", "_2", "_5"]),
     }),
     {
       _1: ImpulseFormUnit(true, {
@@ -151,7 +152,7 @@ it("initiates with children input", ({ scope }) => {
           initial: 20,
         }),
       }),
-      _5: ImpulseFormSwitch(ImpulseFormUnit("_6"), {
+      _5: ImpulseFormSwitch(ImpulseFormUnit<"_6" | "_7">("_6"), {
         _6: ImpulseFormUnit(0),
         _7: ImpulseFormUnit("0"),
       }),
@@ -194,7 +195,7 @@ it("initiates with overridden initial", ({ scope }) => {
           initial: 20,
         }),
       }),
-      _5: ImpulseFormSwitch(ImpulseFormUnit("_6"), {
+      _5: ImpulseFormSwitch(ImpulseFormUnit<"_6" | "_7">("_6"), {
         _6: ImpulseFormUnit(0),
         _7: ImpulseFormUnit("0"),
       }),
@@ -380,7 +381,7 @@ it("sets partial initial", ({ scope }) => {
 
 describe("using recursive setter", () => {
   const active = ImpulseFormUnit("", {
-    schema: z.enum(["_1", "_2"]),
+    schema: z.enum(["_1", "_2", "_5"]),
     initial: "_12",
   })
 
@@ -403,7 +404,9 @@ describe("using recursive setter", () => {
       },
     ),
     _5: ImpulseFormSwitch(
-      ImpulseFormUnit("_6"),
+      ImpulseFormUnit("_6", {
+        schema: z.enum(["_6", "_7"]),
+      }),
       {
         _6: ImpulseFormUnit(0, { initial: 1 }),
         _7: ImpulseFormUnit("0"),
@@ -657,32 +660,42 @@ describe("using recursive setter", () => {
 
 describe("stable initial value", () => {
   it("subsequently selects equal initial", ({ scope }) => {
-    const form = ImpulseFormSwitch(ImpulseFormUnit("_1" as const), {
+    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2" | "_5">("_1"), {
       _1: ImpulseFormUnit(true),
       _2: ImpulseFormShape({
         _3: ImpulseFormUnit("name"),
         _4: ImpulseFormUnit(18),
       }),
-      _5: ImpulseFormSwitch(ImpulseFormUnit("_6"), {
-        _6: ImpulseFormUnit(0),
-        _7: ImpulseFormUnit("0"),
-      }),
+      _5: ImpulseFormSwitch(
+        ImpulseFormUnit("_6", {
+          schema: z.enum(["_6", "_7"]),
+        }),
+        {
+          _6: ImpulseFormUnit(0),
+          _7: ImpulseFormUnit("0"),
+        },
+      ),
     })
 
     expect(form.getInitial(scope)).toBe(form.getInitial(scope))
   })
 
   it("persists unchanged branches input between changes", ({ scope }) => {
-    const form = ImpulseFormSwitch(ImpulseFormUnit("_1" as const), {
+    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2" | "_5">("_1"), {
       _1: ImpulseFormUnit(true),
       _2: ImpulseFormShape({
         _3: ImpulseFormUnit("name"),
         _4: ImpulseFormUnit(18),
       }),
-      _5: ImpulseFormSwitch(ImpulseFormUnit("_6"), {
-        _6: ImpulseFormUnit(0),
-        _7: ImpulseFormUnit("0"),
-      }),
+      _5: ImpulseFormSwitch(
+        ImpulseFormUnit("_6", {
+          schema: z.enum(["_6", "_7"]),
+        }),
+        {
+          _6: ImpulseFormUnit(0),
+          _7: ImpulseFormUnit("0"),
+        },
+      ),
     })
 
     const initial_0 = form.getInitial(scope)
@@ -707,7 +720,7 @@ describe("stable initial value", () => {
   it("selects unequal initial values when isInputEqual is not specified", ({
     scope,
   }) => {
-    const form = ImpulseFormSwitch(ImpulseFormUnit(""), {
+    const form = ImpulseFormSwitch(ImpulseFormUnit("_1" as const), {
       _1: ImpulseFormUnit([0]),
     })
 
@@ -727,11 +740,16 @@ describe("stable initial value", () => {
   it("selects equal initial values when isInputEqual is specified", ({
     scope,
   }) => {
-    const form = ImpulseFormSwitch(ImpulseFormUnit(""), {
-      _1: ImpulseFormUnit([0], {
-        isInputEqual: isShallowArrayEqual,
+    const form = ImpulseFormSwitch(
+      ImpulseFormUnit("", {
+        schema: z.enum(["_1"]),
       }),
-    })
+      {
+        _1: ImpulseFormUnit([0], {
+          isInputEqual: isShallowArrayEqual,
+        }),
+      },
+    )
 
     const initial_0 = form.getInitial(scope)
 

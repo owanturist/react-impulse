@@ -1,7 +1,9 @@
+import type { IsEqualType } from "~/tools/is-type-equal"
 import { isUndefined } from "~/tools/is-undefined"
 import { mapValues } from "~/tools/map-values"
 
 import { batch } from "../dependencies"
+import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import { ImpulseFormSwitch as ImpulseFormSwitchImpl } from "./_impulse-form-switch"
@@ -33,7 +35,12 @@ export function ImpulseFormSwitch<
   TBranches extends ImpulseFormSwitchBranches<TKind>,
 >(
   active: TKind,
-  branches: TBranches,
+  branches: IsEqualType<
+    GetImpulseFormParam<TKind, "output.schema">,
+    keyof TBranches
+  > extends true
+    ? TBranches
+    : never,
   {
     input,
     initial,

@@ -14,7 +14,7 @@ import {
 
 describe("bounding active output with branches keys", () => {
   it("ensures the branches type keys following the active output", () => {
-    const form_1 = ImpulseFormSwitch(ImpulseFormUnit("_1"), {
+    const form_1 = ImpulseFormSwitch(ImpulseFormUnit<"_1">("_1"), {
       _1: ImpulseFormUnit(0),
     })
     expectTypeOf(form_1.branches).toHaveProperty("_1")
@@ -25,6 +25,16 @@ describe("bounding active output with branches keys", () => {
     })
     expectTypeOf(form_2.branches).not.toHaveProperty("_0")
     expectTypeOf(form_2.branches).toHaveProperty("_2")
+
+    const form_3 = ImpulseFormSwitch(
+      ImpulseFormUnit("_2"),
+      // @ts-expect-error active is a `string`
+      {
+        _0: ImpulseFormUnit(0),
+      },
+    )
+    expectTypeOf(form_3.branches).toHaveProperty("_0")
+    expectTypeOf(form_3.branches).not.toHaveProperty("_2")
   })
 
   it("ensures the active output is a string", () => {
@@ -74,10 +84,14 @@ describe("bounding active output with branches keys", () => {
     expectTypeOf(form_2.branches).toHaveProperty("_1")
     expectTypeOf(form_2.branches).toHaveProperty("_2")
 
-    const form_3 = ImpulseFormSwitch(ImpulseFormUnit(""), {
-      _1: ImpulseFormUnit(0),
-      _2: ImpulseFormUnit(2),
-    })
+    const form_3 = ImpulseFormSwitch(
+      ImpulseFormUnit(""),
+      // @ts-expect-error missing `string` branches
+      {
+        _1: ImpulseFormUnit(0),
+        _2: ImpulseFormUnit(2),
+      },
+    )
     expectTypeOf(form_3.branches).toHaveProperty("_1")
     expectTypeOf(form_3.branches).toHaveProperty("_2")
   })
@@ -161,13 +175,13 @@ describe("types", () => {
   })
 
   describe("nested", () => {
-    const parent = ImpulseFormSwitch(ImpulseFormUnit("_5"), {
+    const parent = ImpulseFormSwitch(ImpulseFormUnit<"_6" | "_7">("_6"), {
       _6: ImpulseFormUnit(0),
       _7: form,
     })
 
     interface ParentInputSchema {
-      readonly active: string
+      readonly active: "_6" | "_7"
       readonly branches: {
         readonly _6: number
         readonly _7: InputSchema
@@ -176,7 +190,7 @@ describe("types", () => {
 
     type ParentInputSetter = Setter<
       {
-        readonly active?: Setter<string, [string, string]>
+        readonly active?: Setter<"_6" | "_7", ["_6" | "_7", "_6" | "_7"]>
         readonly branches?: Setter<
           {
             readonly _6?: Setter<number, [number, number]>
@@ -203,19 +217,24 @@ describe("types", () => {
 })
 
 it("initiates with children input", ({ scope }) => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit("_1" as const), {
-    _1: ImpulseFormUnit(true, {
-      schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
+  const form = ImpulseFormSwitch(
+    ImpulseFormUnit("_1", {
+      schema: z.enum(["_1", "_2", "_5"]),
     }),
-    _2: ImpulseFormShape({
-      _3: ImpulseFormUnit("name"),
-      _4: ImpulseFormUnit(18),
-    }),
-    _5: ImpulseFormSwitch(ImpulseFormUnit("_6"), {
-      _6: ImpulseFormUnit(0),
-      _7: ImpulseFormUnit("0"),
-    }),
-  })
+    {
+      _1: ImpulseFormUnit(true, {
+        schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
+      }),
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
+      }),
+      _5: ImpulseFormSwitch(ImpulseFormUnit<"_6" | "_7">("_6"), {
+        _6: ImpulseFormUnit(0),
+        _7: ImpulseFormUnit("0"),
+      }),
+    },
+  )
 
   expect(form.getInput(scope)).toStrictEqual({
     active: "_1",
@@ -239,7 +258,7 @@ it("initiates with children input", ({ scope }) => {
 it("initiates with overridden input", ({ scope }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("", {
-      schema: z.enum(["_1", "_2"]),
+      schema: z.enum(["_1", "_2", "_5"]),
     }),
     {
       _1: ImpulseFormUnit(true, {
@@ -249,7 +268,7 @@ it("initiates with overridden input", ({ scope }) => {
         _3: ImpulseFormUnit("name"),
         _4: ImpulseFormUnit(18),
       }),
-      _5: ImpulseFormSwitch(ImpulseFormUnit("_6"), {
+      _5: ImpulseFormSwitch(ImpulseFormUnit<"_6" | "_7">("_6"), {
         _6: ImpulseFormUnit(0),
         _7: ImpulseFormUnit("0"),
       }),
@@ -431,7 +450,7 @@ it("sets partial input", ({ scope }) => {
 
 describe("using recursive setter", () => {
   const active = ImpulseFormUnit("", {
-    schema: z.enum(["_1", "_2"]),
+    schema: z.enum(["_1", "_2", "_5"]),
   })
 
   const branches = {
@@ -442,7 +461,7 @@ describe("using recursive setter", () => {
       _3: ImpulseFormUnit("name"),
       _4: ImpulseFormUnit(18),
     }),
-    _5: ImpulseFormSwitch(ImpulseFormUnit("_6"), {
+    _5: ImpulseFormSwitch(ImpulseFormUnit<"_6" | "_7">("_6"), {
       _6: ImpulseFormUnit(0),
       _7: ImpulseFormUnit("0"),
     }),
@@ -682,32 +701,42 @@ describe("using recursive setter", () => {
 
 describe("stable input value", () => {
   it("subsequently selects equal input", ({ scope }) => {
-    const form = ImpulseFormSwitch(ImpulseFormUnit("_1" as const), {
+    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2" | "_5">("_1"), {
       _1: ImpulseFormUnit(true),
       _2: ImpulseFormShape({
         _3: ImpulseFormUnit("name"),
         _4: ImpulseFormUnit(18),
       }),
-      _5: ImpulseFormSwitch(ImpulseFormUnit("_6"), {
-        _6: ImpulseFormUnit(0),
-        _7: ImpulseFormUnit("0"),
-      }),
+      _5: ImpulseFormSwitch(
+        ImpulseFormUnit("_6", {
+          schema: z.enum(["_6", "_7"]),
+        }),
+        {
+          _6: ImpulseFormUnit(0),
+          _7: ImpulseFormUnit("0"),
+        },
+      ),
     })
 
     expect(form.getInput(scope)).toBe(form.getInput(scope))
   })
 
   it("persists unchanged branches input between changes", ({ scope }) => {
-    const form = ImpulseFormSwitch(ImpulseFormUnit("_1" as const), {
+    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2" | "_5">("_1"), {
       _1: ImpulseFormUnit(true),
       _2: ImpulseFormShape({
         _3: ImpulseFormUnit("name"),
         _4: ImpulseFormUnit(18),
       }),
-      _5: ImpulseFormSwitch(ImpulseFormUnit("_6"), {
-        _6: ImpulseFormUnit(0),
-        _7: ImpulseFormUnit("0"),
-      }),
+      _5: ImpulseFormSwitch(
+        ImpulseFormUnit("_6", {
+          schema: z.enum(["_6", "_7"]),
+        }),
+        {
+          _6: ImpulseFormUnit(0),
+          _7: ImpulseFormUnit("0"),
+        },
+      ),
     })
 
     const input_0 = form.getInput(scope)
@@ -732,7 +761,7 @@ describe("stable input value", () => {
   it("selects unequal input values when isInputEqual is not specified", ({
     scope,
   }) => {
-    const form = ImpulseFormSwitch(ImpulseFormUnit(""), {
+    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1">("_1"), {
       _1: ImpulseFormUnit([0]),
     })
 
@@ -752,11 +781,16 @@ describe("stable input value", () => {
   it("selects equal input values when isInputEqual is specified", ({
     scope,
   }) => {
-    const form = ImpulseFormSwitch(ImpulseFormUnit(""), {
-      _1: ImpulseFormUnit([0], {
-        isInputEqual: isShallowArrayEqual,
+    const form = ImpulseFormSwitch(
+      ImpulseFormUnit("", {
+        schema: z.enum(["_1"]),
       }),
-    })
+      {
+        _1: ImpulseFormUnit([0], {
+          isInputEqual: isShallowArrayEqual,
+        }),
+      },
+    )
 
     const input_0 = form.getInput(scope)
 
