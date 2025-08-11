@@ -2,12 +2,7 @@ import z from "zod"
 
 import { params } from "~/tools/params"
 
-import {
-  ImpulseFormShape,
-  ImpulseFormSwitch,
-  type ImpulseFormSwitchBranch,
-  ImpulseFormUnit,
-} from "../../src"
+import { ImpulseFormShape, ImpulseFormSwitch, ImpulseFormUnit } from "../../src"
 
 describe("types", () => {
   const form = ImpulseFormSwitch(
@@ -29,14 +24,17 @@ describe("types", () => {
   )
 
   type OutputSchema =
-    | ImpulseFormSwitchBranch<"_1", string>
-    | ImpulseFormSwitchBranch<
-        "_2",
-        {
+    | {
+        readonly kind: "_1"
+        readonly value: string
+      }
+    | {
+        readonly kind: "_2"
+        readonly value: {
           readonly _3: string
           readonly _4: number
         }
-      >
+      }
 
   interface OutputVerboseSchema {
     readonly active: null | "_1" | "_2"
@@ -74,8 +72,14 @@ describe("types", () => {
     )
 
     type ParentOutputSchema =
-      | ImpulseFormSwitchBranch<"_1", OutputSchema>
-      | ImpulseFormSwitchBranch<"_2", string>
+      | {
+          readonly kind: "_1"
+          readonly value: OutputSchema
+        }
+      | {
+          readonly kind: "_2"
+          readonly value: string
+        }
 
     interface ParentOutputVerboseSchema {
       readonly active: null | "_1" | "_2"
