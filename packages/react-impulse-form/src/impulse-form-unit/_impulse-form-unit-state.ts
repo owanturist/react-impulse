@@ -61,16 +61,16 @@ export class ImpulseFormUnitState<
     super(parent)
 
     const result = Impulse((scope): Result<null | TError, TOutput> => {
-      const customError_ = this._customError.getValue(scope)
+      const customError = _customError.getValue(scope)
 
-      if (!isNull(customError_)) {
-        return [customError_, null]
+      if (!isNull(customError)) {
+        return [customError, null]
       }
 
-      const input_ = this._input.getValue(scope)
-      const transform = this._transform.getValue(scope)
+      const input = _input.getValue(scope)
+      const transform = _transform.getValue(scope)
 
-      const [error, output] = transform._validator(input_)
+      const [error, output] = transform._validator(input)
 
       if (!isNull(output)) {
         return [null, output]
@@ -113,7 +113,7 @@ export class ImpulseFormUnitState<
     this._dirty = this._dirtyVerbose = Impulse((scope): boolean => {
       return _isInputDirty(
         this._initial.getValue(scope),
-        this._input.getValue(scope),
+        _input.getValue(scope),
         scope,
       )
     })
@@ -145,17 +145,17 @@ export class ImpulseFormUnitState<
       // and `true` sets the validated state to `true`
       (next, scope) => {
         isValidated.setValue(() => {
-          if (next || this._transform.getValue(scope)._transformer) {
+          if (next || _transform.getValue(scope)._transformer) {
             return true
           }
 
-          switch (this._validateOn.getValue(scope)) {
+          switch (_validateOn.getValue(scope)) {
             case VALIDATE_ON_INIT: {
               return true
             }
 
             case VALIDATE_ON_TOUCH: {
-              return this._touched.getValue(scope)
+              return _touched.getValue(scope)
             }
 
             case VALIDATE_ON_CHANGE: {
