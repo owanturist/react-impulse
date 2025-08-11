@@ -61,6 +61,44 @@ describe("types", () => {
       form.getOutput(scope, params._second),
     ).toEqualTypeOf<OutputVerboseSchema>()
   })
+
+  describe("nested", () => {
+    const parent = ImpulseFormSwitch(
+      ImpulseFormUnit("", {
+        schema: z.enum(["_1", "_2"]),
+      }),
+      {
+        _1: form,
+        _2: ImpulseFormUnit("0"),
+      },
+    )
+
+    type ParentOutputSchema =
+      | ImpulseFormSwitchBranch<"_1", OutputSchema>
+      | ImpulseFormSwitchBranch<"_2", string>
+
+    interface ParentOutputVerboseSchema {
+      readonly active: null | "_1" | "_2"
+      readonly branches: {
+        readonly _1: OutputVerboseSchema
+        readonly _2: null | string
+      }
+    }
+
+    it("matches schema type for getOutput(scope, select?)", ({ scope }) => {
+      expectTypeOf(
+        parent.getOutput(scope),
+      ).toEqualTypeOf<null | ParentOutputSchema>()
+
+      expectTypeOf(
+        parent.getOutput(scope, params._first),
+      ).toEqualTypeOf<null | ParentOutputSchema>()
+
+      expectTypeOf(
+        parent.getOutput(scope, params._second),
+      ).toEqualTypeOf<ParentOutputVerboseSchema>()
+    })
+  })
 })
 
 describe("when branch is initially invalid", () => {
