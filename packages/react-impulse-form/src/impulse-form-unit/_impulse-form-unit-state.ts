@@ -121,9 +121,9 @@ export class ImpulseFormUnitState<
     this._validateOnVerbose = _validateOn
 
     this._valid = this._validVerbose = Impulse((scope): boolean => {
-      const error = this._error.getValue(scope)
+      const output = this._output.getValue(scope)
 
-      return isNull(error)
+      return !isNull(output)
     })
 
     this._invalid = this._invalidVerbose = Impulse((scope): boolean => {

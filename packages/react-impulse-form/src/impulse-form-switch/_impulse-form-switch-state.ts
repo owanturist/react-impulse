@@ -403,39 +403,44 @@ export class ImpulseFormSwitchState<
   // V A L I D
 
   public readonly _valid = Impulse(
-    (scope): ImpulseFormShapeFlag<TFields> => {
-      const valid = mapValues(this._fields, ({ _valid }) => {
-        return _valid.getValue(scope)
-      })
+    (scope): ImpulseFormSwitchFlag<TKind, TBranches> => {
+      const kind = this._active._output.getValue(scope)
+      const active = this._active._valid.getValue(scope)
+      const branch = isNull(kind) ? null : this._branches[kind]
 
-      const allValid = values(valid)
-      const onlyValid = allValid.find(isBoolean) ?? false
-
-      for (const fieldValid of allValid) {
-        if (fieldValid !== onlyValid) {
-          return valid as ImpulseFormShapeFlag<TFields>
-        }
+      if (!branch) {
+        return active
       }
 
-      return onlyValid
+      const value = branch._valid.getValue(scope)
+
+      if (value === active) {
+        return active
+      }
+
+      return {
+        active,
+        branch: { kind, value },
+      }
     },
 
     {
-      // compare: isImpulseFormShapeFlagEqual,
+      compare: isImpulseFormSwitchFlagEqual,
     },
   )
 
   public readonly _validVerbose = Impulse(
-    (scope): ImpulseFormShapeFlagVerbose<TFields> => {
-      const validVerbose = mapValues(this._fields, ({ _validVerbose }) =>
-        _validVerbose.getValue(scope),
-      )
+    (scope): ImpulseFormSwitchFlagVerbose<TKind, TBranches> => {
+      const active = this._active._valid.getValue(scope)
+      const branches = mapValues(this._branches, ({ _validVerbose }) => {
+        return _validVerbose.getValue(scope)
+      })
 
-      return validVerbose as ImpulseFormShapeFlagVerbose<TFields>
+      return { active, branches }
     },
 
     {
-      // compare: isImpulseFormShapeFlagVerboseEqual,
+      compare: isImpulseFormSwitchFlagVerboseEqual,
     },
   )
 

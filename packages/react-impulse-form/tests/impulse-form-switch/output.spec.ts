@@ -219,62 +219,128 @@ describe("when branch is initially invalid", () => {
   })
 })
 
-it("returns null after switching from valid to invalid branch", ({ scope }) => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2">("_2"), {
-    _1: ImpulseFormUnit(0, {
-      schema: z.number().min(1),
-    }),
-    _2: ImpulseFormShape({
-      _3: ImpulseFormUnit("name"),
-      _4: ImpulseFormUnit(18),
-    }),
-  })
-
-  form.active.setInput("_1")
-
-  expect(form.getOutput(scope)).toBeNull()
-  expect(form.getOutput(scope, params._first)).toBeNull()
-  expect(form.getOutput(scope, params._second)).toStrictEqual({
-    active: "_1",
-    branches: {
-      _1: null,
-      _2: {
-        _3: "name",
-        _4: 18,
+describe("when branch is initially valid", () => {
+  it("returns null for initially invalid active", ({ scope }) => {
+    const form = ImpulseFormSwitch(
+      ImpulseFormUnit("", {
+        schema: z.enum(["_1", "_2"]),
+      }),
+      {
+        _1: ImpulseFormUnit(1, {
+          schema: z.number().min(1),
+        }),
+        _2: ImpulseFormShape({
+          _3: ImpulseFormUnit("name"),
+          _4: ImpulseFormUnit(18),
+        }),
       },
-    },
-  })
-})
+    )
 
-it("returns output for initially valid branch", ({ scope }) => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2">("_1"), {
-    _1: ImpulseFormUnit(1, {
-      schema: z.number().min(1),
-    }),
-    _2: ImpulseFormShape({
-      _3: ImpulseFormUnit("name"),
-      _4: ImpulseFormUnit(18),
-    }),
-  })
-
-  expect(form.active.getOutput(scope)).toBe("_1")
-
-  const concise = {
-    kind: "_1",
-    value: 1,
-  }
-
-  expect(form.getOutput(scope)).toStrictEqual(concise)
-  expect(form.getOutput(scope, params._first)).toStrictEqual(concise)
-  expect(form.getOutput(scope, params._second)).toStrictEqual({
-    active: "_1",
-    branches: {
-      _1: 1,
-      _2: {
-        _3: "name",
-        _4: 18,
+    expect(form.getOutput(scope)).toBeNull()
+    expect(form.getOutput(scope, params._first)).toBeNull()
+    expect(form.getOutput(scope, params._second)).toStrictEqual({
+      active: null,
+      branches: {
+        _1: 1,
+        _2: {
+          _3: "name",
+          _4: 18,
+        },
       },
-    },
+    })
+  })
+
+  it("returns output for a initially valid active", ({ scope }) => {
+    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2">("_1"), {
+      _1: ImpulseFormUnit(1, {
+        schema: z.number().min(1),
+      }),
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
+      }),
+    })
+
+    expect(form.active.getOutput(scope)).toBe("_1")
+
+    const concise = {
+      kind: "_1",
+      value: 1,
+    }
+
+    expect(form.getOutput(scope)).toStrictEqual(concise)
+    expect(form.getOutput(scope, params._first)).toStrictEqual(concise)
+    expect(form.getOutput(scope, params._second)).toStrictEqual({
+      active: "_1",
+      branches: {
+        _1: 1,
+        _2: {
+          _3: "name",
+          _4: 18,
+        },
+      },
+    })
+  })
+
+  it("returns null after switching to invalid branch", ({ scope }) => {
+    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2">("_2"), {
+      _1: ImpulseFormUnit(0, {
+        schema: z.number().min(1),
+      }),
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
+      }),
+    })
+
+    form.active.setInput("_1")
+
+    expect(form.getOutput(scope)).toBeNull()
+    expect(form.getOutput(scope, params._first)).toBeNull()
+    expect(form.getOutput(scope, params._second)).toStrictEqual({
+      active: "_1",
+      branches: {
+        _1: null,
+        _2: {
+          _3: "name",
+          _4: 18,
+        },
+      },
+    })
+  })
+
+  it("returns null after making active invalid", ({ scope }) => {
+    const form = ImpulseFormSwitch(
+      ImpulseFormUnit("_1", {
+        schema: z.enum(["_1", "_2"]),
+      }),
+      {
+        _1: ImpulseFormUnit(1, {
+          schema: z.number().min(1),
+        }),
+        _2: ImpulseFormShape({
+          _3: ImpulseFormUnit("name"),
+          _4: ImpulseFormUnit(18),
+        }),
+      },
+    )
+
+    form.active.setInput("")
+
+    expect(form.active.getOutput(scope)).toBeNull()
+
+    expect(form.getOutput(scope)).toBeNull()
+    expect(form.getOutput(scope, params._first)).toBeNull()
+    expect(form.getOutput(scope, params._second)).toStrictEqual({
+      active: null,
+      branches: {
+        _1: 1,
+        _2: {
+          _3: "name",
+          _4: 18,
+        },
+      },
+    })
   })
 })
 
