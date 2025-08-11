@@ -5,15 +5,15 @@ import { params } from "~/tools/params"
 import { ImpulseFormShape, ImpulseFormSwitch, ImpulseFormUnit } from "../../src"
 
 describe("types", () => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit("first"), {
-    first: ImpulseFormUnit(true, {
+  const form = ImpulseFormSwitch(ImpulseFormUnit("_1"), {
+    _1: ImpulseFormUnit(true, {
       schema: z
         .boolean()
         .transform((value): string => (value ? "ok" : "not ok")),
     }),
-    second: ImpulseFormShape({
-      name: ImpulseFormUnit("name"),
-      age: ImpulseFormUnit(18),
+    _2: ImpulseFormShape({
+      _3: ImpulseFormUnit("name"),
+      _4: ImpulseFormUnit(18),
     }),
   })
 
@@ -24,12 +24,12 @@ describe("types", () => {
         readonly branches:
           | boolean
           | {
-              readonly first: boolean
-              readonly second:
+              readonly _1: boolean
+              readonly _2:
                 | boolean
                 | {
-                    readonly name: boolean
-                    readonly age: boolean
+                    readonly _3: boolean
+                    readonly _4: boolean
                   }
             }
       }
@@ -37,10 +37,10 @@ describe("types", () => {
   interface IsDirtyVerboseSchema {
     readonly active: boolean
     readonly branches: {
-      readonly first: boolean
-      readonly second: {
-        readonly name: boolean
-        readonly age: boolean
+      readonly _1: boolean
+      readonly _2: {
+        readonly _3: boolean
+        readonly _4: boolean
       }
     }
   }
@@ -98,11 +98,11 @@ describe("types", () => {
 })
 
 it("returns falsy for initially pristine branch", ({ scope }) => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit("first"), {
-    first: ImpulseFormUnit(0),
-    second: ImpulseFormShape({
-      name: ImpulseFormUnit("name"),
-      age: ImpulseFormUnit(18),
+  const form = ImpulseFormSwitch(ImpulseFormUnit("_1"), {
+    _1: ImpulseFormUnit(0),
+    _2: ImpulseFormShape({
+      _3: ImpulseFormUnit("name"),
+      _4: ImpulseFormUnit(18),
     }),
   })
 
@@ -111,10 +111,10 @@ it("returns falsy for initially pristine branch", ({ scope }) => {
   expect(form.isDirty(scope, params._second)).toStrictEqual({
     active: false,
     branches: {
-      first: false,
-      second: {
-        name: false,
-        age: false,
+      _1: false,
+      _2: {
+        _3: false,
+        _4: false,
       },
     },
   })
@@ -122,14 +122,14 @@ it("returns falsy for initially pristine branch", ({ scope }) => {
 
 it("returns truthy for initially dirty active", ({ scope }) => {
   const form = ImpulseFormSwitch(
-    ImpulseFormUnit("first", {
-      initial: "second",
+    ImpulseFormUnit("_1", {
+      initial: "_2",
     }),
     {
-      first: ImpulseFormUnit(0),
-      second: ImpulseFormShape({
-        name: ImpulseFormUnit("name"),
-        age: ImpulseFormUnit(18),
+      _1: ImpulseFormUnit(0),
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
       }),
     },
   )
@@ -142,10 +142,10 @@ it("returns truthy for initially dirty active", ({ scope }) => {
   expect(form.isDirty(scope, params._second)).toStrictEqual({
     active: true,
     branches: {
-      first: false,
-      second: {
-        name: false,
-        age: false,
+      _1: false,
+      _2: {
+        _3: false,
+        _4: false,
       },
     },
   })
@@ -154,39 +154,39 @@ it("returns truthy for initially dirty active", ({ scope }) => {
 it("returns truthy after switching from pristine to dirty branch", ({
   scope,
 }) => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit("first"), {
-    first: ImpulseFormUnit(0),
-    second: ImpulseFormShape(
+  const form = ImpulseFormSwitch(ImpulseFormUnit("_1"), {
+    _1: ImpulseFormUnit(0),
+    _2: ImpulseFormShape(
       {
-        name: ImpulseFormUnit("name"),
-        age: ImpulseFormUnit(18),
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
       },
       {
         initial: {
-          name: "",
-          age: 0,
+          _3: "",
+          _4: 0,
         },
       },
     ),
   })
 
-  form.active.setInput("second")
+  form.active.setInput("_2")
 
   expect(form.isDirty(scope)).toBe(true)
   expect(form.isDirty(scope, params._first)).toStrictEqual({
     active: true,
     branches: {
-      first: false,
-      second: true,
+      _1: false,
+      _2: true,
     },
   })
   expect(form.isDirty(scope, params._second)).toStrictEqual({
     active: true,
     branches: {
-      first: false,
-      second: {
-        name: true,
-        age: true,
+      _1: false,
+      _2: {
+        _3: true,
+        _4: true,
       },
     },
   })
@@ -195,52 +195,52 @@ it("returns truthy after switching from pristine to dirty branch", ({
 it("returns truthy after switching from dirty to pristine branch", ({
   scope,
 }) => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit("second"), {
-    first: ImpulseFormUnit(0),
-    second: ImpulseFormShape(
+  const form = ImpulseFormSwitch(ImpulseFormUnit("_2"), {
+    _1: ImpulseFormUnit(0),
+    _2: ImpulseFormShape(
       {
-        name: ImpulseFormUnit("name"),
-        age: ImpulseFormUnit(18),
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
       },
       {
         initial: {
-          name: "",
-          age: 0,
+          _3: "",
+          _4: 0,
         },
       },
     ),
   })
 
-  form.active.setInput("first")
+  form.active.setInput("_1")
 
   expect(form.isDirty(scope)).toBe(true)
   expect(form.isDirty(scope, params._first)).toStrictEqual({
     active: true,
     branches: {
-      first: false,
-      second: true,
+      _1: false,
+      _2: true,
     },
   })
   expect(form.isDirty(scope, params._second)).toStrictEqual({
     active: true,
     branches: {
-      first: false,
-      second: {
-        name: true,
-        age: true,
+      _1: false,
+      _2: {
+        _3: true,
+        _4: true,
       },
     },
   })
 })
 
 it("returns truthy for initially dirty branch", ({ scope }) => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit("second"), {
-    first: ImpulseFormUnit(1),
-    second: ImpulseFormShape({
-      name: ImpulseFormUnit("name", {
+  const form = ImpulseFormSwitch(ImpulseFormUnit("_2"), {
+    _1: ImpulseFormUnit(1),
+    _2: ImpulseFormShape({
+      _3: ImpulseFormUnit("name", {
         initial: "",
       }),
-      age: ImpulseFormUnit(18),
+      _4: ImpulseFormUnit(18),
     }),
   })
 
@@ -248,35 +248,35 @@ it("returns truthy for initially dirty branch", ({ scope }) => {
   expect(form.isDirty(scope, params._first)).toStrictEqual({
     active: false,
     branches: {
-      first: false,
-      second: {
-        name: true,
-        age: false,
+      _1: false,
+      _2: {
+        _3: true,
+        _4: false,
       },
     },
   })
   expect(form.isDirty(scope, params._second)).toStrictEqual({
     active: false,
     branches: {
-      first: false,
-      second: {
-        name: true,
-        age: false,
+      _1: false,
+      _2: {
+        _3: true,
+        _4: false,
       },
     },
   })
 })
 
 it("returns truthy when an inactive branch is dirty", ({ scope }) => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit("second"), {
-    first: ImpulseFormUnit(1, {
+  const form = ImpulseFormSwitch(ImpulseFormUnit("_2"), {
+    _1: ImpulseFormUnit(1, {
       initial: 0,
     }),
-    second: ImpulseFormShape({
-      name: ImpulseFormUnit("name"),
-      age: ImpulseFormUnit(18),
+    _2: ImpulseFormShape({
+      _3: ImpulseFormUnit("name"),
+      _4: ImpulseFormUnit(18),
     }),
-    third: ImpulseFormUnit("value", {
+    _5: ImpulseFormUnit("value", {
       initial: "",
     }),
   })
@@ -285,20 +285,20 @@ it("returns truthy when an inactive branch is dirty", ({ scope }) => {
   expect(form.isDirty(scope, params._first)).toStrictEqual({
     active: false,
     branches: {
-      first: true,
-      second: false,
-      third: true,
+      _1: true,
+      _2: false,
+      _5: true,
     },
   })
   expect(form.isDirty(scope, params._second)).toStrictEqual({
     active: false,
     branches: {
-      first: true,
-      second: {
-        name: false,
-        age: false,
+      _1: true,
+      _2: {
+        _3: false,
+        _4: false,
       },
-      third: true,
+      _5: true,
     },
   })
 })
