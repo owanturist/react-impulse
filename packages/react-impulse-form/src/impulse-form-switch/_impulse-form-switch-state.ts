@@ -528,22 +528,24 @@ export class ImpulseFormSwitchState<
 
   public readonly _dirty = Impulse(
     (scope): ImpulseFormSwitchFlag<TKind, TBranches> => {
+      const kind = this._active._output.getValue(scope)
       const active = this._active._dirty.getValue(scope)
-      const branches = mapValues(this._branches, ({ _dirty }) => {
-        return _dirty.getValue(scope)
-      })
+      const branch = isNull(kind) ? null : this._branches[kind]
 
-      const conciseBranches = toConcise(
-        values(branches),
-        isBoolean,
-        false,
-        branches,
-      )
+      if (!branch) {
+        return active
+      }
 
-      return toConcise([active, conciseBranches], isBoolean, false, {
+      const value = branch._dirty.getValue(scope)
+
+      if (value === active) {
+        return active
+      }
+
+      return {
         active,
-        branches: conciseBranches,
-      } as ImpulseFormSwitchFlag<TKind, TBranches>)
+        branch: { kind, value },
+      }
     },
 
     {
