@@ -3,16 +3,17 @@ import { hasProperty } from "~/tools/has-property"
 import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
+import { isString } from "~/tools/is-string"
 import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
+import type { Setter } from "~/tools/setter"
 import { values } from "~/tools/values"
 
 import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
 import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
 import type { GetImpulseFormParams } from "../impulse-form/get-impulse-form-params"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
-import type { ImpulseFormShapeFields } from "../impulse-form-shape"
 import type { ValidateStrategy } from "../validate-strategy"
 
 import { ImpulseFormSwitch } from "./_impulse-form-switch"
@@ -43,21 +44,27 @@ import {
   type ImpulseFormSwitchValidateOn,
   isImpulseFormSwitchValidateOnEqual,
 } from "./_impulse-form-switch-validate-on"
+import type { ImpulseFormSwitchValidateOnSetter } from "./_impulse-form-switch-validate-on-setter"
 import {
   type ImpulseFormSwitchValidateOnVerbose,
   isImpulseFormSwitchValidateOnVerboseEqual,
 } from "./_impulse-form-switch-validate-on-verbose"
 import type { ImpulseFormSwitchVerboseParam } from "./_impulse-form-switch-verbose-param"
+import type { ImpulseFormSwitchBranch } from "./impulse-form-switch-branch"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
-import type { ImpulseFormSwitchValidateOnSetter } from "./_impulse-form-switch-validate-on-setter"
 
-export type ImpulseFormSwitchStateBranches<
-  TFields extends ImpulseFormShapeFields,
-> = {
-  [TField in keyof TFields]: ImpulseFormState<
-    GetImpulseFormParams<TFields[TField]>
+console.log("TODO verify it does not import anything from the SHAPE")
+
+type ImpulseFormSwitchStateBranches<TBranches> = {
+  [TBranch in keyof TBranches]: ImpulseFormState<
+    GetImpulseFormParams<TBranches[TBranch]>
   >
 }
+
+type ActiveSwitchBranch<TBranches> = ImpulseFormSwitchBranch<
+  keyof TBranches,
+  ImpulseFormSwitchStateBranches<TBranches>[keyof TBranches]
+>
 
 export class ImpulseFormSwitchState<
   TKind extends ImpulseForm,
@@ -79,20 +86,27 @@ export class ImpulseFormSwitchState<
     this._branches = mapValues(branches, (branch) => this._parentOf(branch))
   }
 
+  private _getActiveBranch(
+    scope: Scope,
+  ): undefined | ActiveSwitchBranch<TBranches> {
+    const kind = this._active._output.getValue(scope)
+    const value = isNull(kind) ? null : this._branches[kind]
+
+    return value ? { kind, value } : undefined
+  }
+
   private _toConcise<TKey extends keyof ImpulseFormParams, TConcise>(
     scope: Scope,
     extract: (form: ImpulseFormState) => ReadonlyImpulse<TConcise>,
   ): ImpulseFormSwitchConciseParam<TKind, TBranches, TKey, TConcise> {
-    const kind = this._active._output.getValue(scope)
-    const branch = isNull(kind) ? null : this._branches[kind]
-
+    const activeBranch = this._getActiveBranch(scope)
     const activeConcise = extract(this._active).getValue(scope)
 
-    if (!branch) {
+    if (!activeBranch) {
       return activeConcise
     }
 
-    const branchConcise = extract(branch).getValue(scope)
+    const branchConcise = extract(activeBranch.value).getValue(scope)
 
     if (branchConcise === activeConcise) {
       return activeConcise
@@ -100,7 +114,10 @@ export class ImpulseFormSwitchState<
 
     return {
       active: activeConcise,
-      branch: { kind, value: branchConcise },
+      branch: {
+        kind: activeBranch.kind,
+        value: branchConcise,
+      },
     }
   }
 
@@ -153,9 +170,9 @@ export class ImpulseFormSwitchState<
       ? branchesSetter(initial().branches, input().branches)
       : branchesSetter
 
-    for (const [key, field] of entries(this._branches)) {
-      if (hasProperty(branches, key) && !isUndefined(branches[key])) {
-        field._setInitial(scope, branches[key])
+    for (const [kind, branch] of entries(this._branches)) {
+      if (hasProperty(branches, kind) && !isUndefined(branches[kind])) {
+        branch._setInitial(scope, branches[kind])
       }
     }
   }
@@ -203,9 +220,9 @@ export class ImpulseFormSwitchState<
       ? branchesSetter(input().branches, initial().branches)
       : branchesSetter
 
-    for (const [key, field] of entries(this._branches)) {
-      if (hasProperty(branches, key) && !isUndefined(branches[key])) {
-        field._setInput(scope, branches[key])
+    for (const [kind, branch] of entries(this._branches)) {
+      if (hasProperty(branches, kind) && !isUndefined(branches[kind])) {
+        branch._setInput(scope, branches[kind])
       }
     }
   }
@@ -279,7 +296,7 @@ export class ImpulseFormSwitchState<
     (scope): ImpulseFormSwitchValidateOnVerbose<TKind, TBranches> => {
       return this._toVerbose<"validateOn.schema.verbose">(
         scope,
-        ({ _validateOn }) => _validateOn,
+        ({ _validateOnVerbose }) => _validateOnVerbose,
       )
     },
 
@@ -292,15 +309,57 @@ export class ImpulseFormSwitchState<
     scope: Scope,
     setter: ImpulseFormSwitchValidateOnSetter<TKind, TBranches>,
   ): void {
-    const setters = isFunction(setter)
-      ? setter(this._validateOnVerbose.getValue(scope))
-      : setter
+    const verbose = Lazy(() => this._validVerbose.getValue(scope))
+    const resolved = isFunction(setter) ? setter(verbose()) : setter
 
-    for (const [key, field] of entries(this._fields)) {
-      if (isString(setters)) {
-        field._setValidateOn(scope, setters)
-      } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
-        field._setValidateOn(scope, setters[key])
+    const activeBranch = this._getActiveBranch(scope)
+
+    const [activeSetter, branchSetter, branchesSetter] = isString(resolved)
+      ? [resolved, resolved, undefined]
+      : [
+          resolved.active,
+
+          hasProperty(resolved, "branch")
+            ? isFunction(resolved.branch)
+              ? activeBranch
+                ? resolved.branch({
+                    kind: activeBranch.kind,
+                    value: activeBranch.value._validateOn.getValue(scope),
+                  })
+                : undefined
+              : resolved.branch
+            : undefined,
+
+          hasProperty(resolved, "branches")
+            ? isFunction(resolved.branches)
+              ? resolved.branches(verbose().branches)
+              : resolved.branches
+            : undefined,
+        ]
+
+    if (!isUndefined(activeSetter)) {
+      this._active._setValidateOn(scope, activeSetter)
+    }
+
+    for (const [kind, branch] of entries(this._branches)) {
+      const resolvedBranchSetter = isString(branchesSetter)
+        ? branchesSetter
+        : hasProperty(branchesSetter, kind)
+          ? branchesSetter[kind]
+          : undefined
+
+      if (!isUndefined(resolvedBranchSetter)) {
+        branch._setValidateOn(scope, resolvedBranchSetter)
+      }
+    }
+
+    if (activeBranch && isString(branchSetter)) {
+      activeBranch.value._setValidateOn(scope, branchSetter)
+    } else if (!isUndefined(branchSetter)) {
+      const targetBranch = this._branches[branchSetter.kind]
+
+      if (targetBranch) {
+        targetBranch._setValidateOn(scope, branchSetter.value)
       }
     }
   }
@@ -365,20 +424,22 @@ export class ImpulseFormSwitchState<
 
   public readonly _output = Impulse(
     (scope): null | ImpulseFormSwitchOutput<TKind, TBranches> => {
-      const kind = this._active._output.getValue(scope)
-      const branch = isNull(kind) ? null : this._branches[kind]
+      const activeBranch = this._getActiveBranch(scope)
 
-      if (!branch) {
+      if (!activeBranch) {
         return null
       }
 
-      const value = branch._output.getValue(scope)
+      const value = activeBranch.value._output.getValue(scope)
 
       if (isNull(value)) {
         return null
       }
 
-      return { kind, value }
+      return {
+        kind: activeBranch.kind,
+        value,
+      }
     },
     {
       compare: isImpulseFormSwitchOutputEqual,
