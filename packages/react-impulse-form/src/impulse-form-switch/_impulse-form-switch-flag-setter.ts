@@ -17,15 +17,9 @@ export type ImpulseFormSwitchFlagSetter<
       GetImpulseFormParam<TKind, "flag.setter">,
       Setter<
         Partial<GetImpulseFormSwitchBranchesParam<TBranches, "flag.setter">>,
-        [
-          ImpulseFormSwitchFlagVerbose<TKind, TBranches>["branches"],
-          ImpulseFormSwitchFlagVerbose<TKind, TBranches>["branches"],
-        ]
+        [GetImpulseFormSwitchBranchesParam<TBranches, "flag.schema.verbose">]
       >
     >
   >,
-  [
-    ImpulseFormSwitchFlagVerbose<TKind, TBranches>,
-    ImpulseFormSwitchFlagVerbose<TKind, TBranches>,
-  ]
+  [ImpulseFormSwitchFlagVerbose<TKind, TBranches>]
 >

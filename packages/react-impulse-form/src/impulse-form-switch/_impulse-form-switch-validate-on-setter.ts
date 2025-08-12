@@ -45,7 +45,12 @@ export type ImpulseFormSwitchValidateOnSetter<
           | Partial<
               GetImpulseFormSwitchBranchesParam<TBranches, "validateOn.setter">
             >,
-          [ImpulseFormSwitchValidateOnVerbose<TKind, TBranches>["branches"]]
+          [
+            GetImpulseFormSwitchBranchesParam<
+              TBranches,
+              "validateOn.schema.verbose"
+            >,
+          ]
         >
       >
     >,

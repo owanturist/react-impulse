@@ -8,10 +8,6 @@ import type { ImpulseFormSwitchInput } from "./_impulse-form-switch-input"
 import type { ImpulseFormSwitchVerboseSchema } from "./_impulse-form-switch-verbose-schema"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
-console.log(
-  'TODO try GetImpulseFormSwitchBranchesParam instead ofImpulseFormSwitchInput<TKind, TBranches>["branches"]',
-)
-
 export type ImpulseFormSwitchInputSetter<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
@@ -22,8 +18,8 @@ export type ImpulseFormSwitchInputSetter<
       Setter<
         Partial<GetImpulseFormSwitchBranchesParam<TBranches, "input.setter">>,
         [
-          ImpulseFormSwitchInput<TKind, TBranches>["branches"],
-          ImpulseFormSwitchInput<TKind, TBranches>["branches"],
+          GetImpulseFormSwitchBranchesParam<TBranches, "input.schema">,
+          GetImpulseFormSwitchBranchesParam<TBranches, "input.schema">,
         ]
       >
     >
