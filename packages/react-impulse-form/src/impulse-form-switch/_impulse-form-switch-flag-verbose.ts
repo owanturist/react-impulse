@@ -2,7 +2,7 @@ import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
 
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 
-import { createImpulseFormSwitchSchemaCompare } from "./_impulse-form-switch-schema"
+import { createImpulseFormSwitchVerboseSchemaCompare } from "./_impulse-form-switch-verbose-schema"
 import type { ImpulseFormSwitchVerboseParam } from "./_impulse-form-switch-verbose-param"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
@@ -12,4 +12,4 @@ export type ImpulseFormSwitchFlagVerbose<
 > = ImpulseFormSwitchVerboseParam<TKind, TBranches, "flag.schema.verbose">
 
 export const isImpulseFormSwitchFlagVerboseEqual =
-  createImpulseFormSwitchSchemaCompare(isShallowObjectEqual)
+  createImpulseFormSwitchVerboseSchemaCompare(isShallowObjectEqual)

@@ -5,15 +5,19 @@ import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import type { GetImpulseFormSwitchBranchesParam } from "./_get-impulse-form-switch-branches-para"
 import type { ImpulseFormSwitchInput } from "./_impulse-form-switch-input"
-import type { ImpulseFormSwitchSchema } from "./_impulse-form-switch-schema"
+import type { ImpulseFormSwitchVerboseSchema } from "./_impulse-form-switch-verbose-schema"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
+
+console.log(
+  'TODO try GetImpulseFormSwitchBranchesParam instead ofImpulseFormSwitchInput<TKind, TBranches>["branches"]',
+)
 
 export type ImpulseFormSwitchInputSetter<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
 > = Setter<
   Partial<
-    ImpulseFormSwitchSchema<
+    ImpulseFormSwitchVerboseSchema<
       GetImpulseFormParam<TKind, "input.setter">,
       Setter<
         Partial<GetImpulseFormSwitchBranchesParam<TBranches, "input.setter">>,

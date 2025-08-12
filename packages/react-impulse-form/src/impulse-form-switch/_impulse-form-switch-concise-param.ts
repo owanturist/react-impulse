@@ -1,6 +1,7 @@
 import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
 
 import type { ImpulseFormSwitchBranchUnion } from "./_impulse-form-switch-branch-union"
+import type { ImpulseFormSwitchConciseSchema } from "./_impulse-form-switch-concise-schema"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
 export type ImpulseFormSwitchConciseParam<
@@ -10,7 +11,7 @@ export type ImpulseFormSwitchConciseParam<
   TConcise,
 > =
   | TConcise
-  | {
-      readonly active: TConcise
-      readonly branch: ImpulseFormSwitchBranchUnion<TKind, TBranches, TKey>
-    }
+  | ImpulseFormSwitchConciseSchema<
+      TConcise,
+      ImpulseFormSwitchBranchUnion<TKind, TBranches, TKey>
+    >

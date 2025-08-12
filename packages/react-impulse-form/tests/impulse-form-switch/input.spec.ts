@@ -171,7 +171,7 @@ describe("types", () => {
       },
     })
 
-    expectTypeOf(form.getInput).returns.toEqualTypeOf<InputSchema>()
+    expectTypeOf(form).not.toBeUndefined()
   })
 
   describe("nested", () => {

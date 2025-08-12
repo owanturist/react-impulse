@@ -3,7 +3,6 @@ import { hasProperty } from "~/tools/has-property"
 import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
-import { isStrictEqual } from "~/tools/is-strict-equal"
 import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
@@ -50,6 +49,7 @@ import {
 } from "./_impulse-form-switch-validate-on-verbose"
 import type { ImpulseFormSwitchVerboseParam } from "./_impulse-form-switch-verbose-param"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
+import type { ImpulseFormSwitchValidateOnSetter } from "./_impulse-form-switch-validate-on-setter"
 
 export type ImpulseFormSwitchStateBranches<
   TFields extends ImpulseFormShapeFields,
@@ -290,7 +290,7 @@ export class ImpulseFormSwitchState<
 
   public _setValidateOn(
     scope: Scope,
-    setter: ImpulseFormShapeValidateOnSetter<TFields>,
+    setter: ImpulseFormSwitchValidateOnSetter<TKind, TBranches>,
   ): void {
     const setters = isFunction(setter)
       ? setter(this._validateOnVerbose.getValue(scope))
