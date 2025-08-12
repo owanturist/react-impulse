@@ -6,7 +6,7 @@ import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 import type { ImpulseFormSwitchBranch } from "./impulse-form-switch-branch"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
-export type MakeImpulseFormSwitchBranch<
+export type ImpulseFormSwitchBranchUnion<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
   TKey extends keyof ImpulseFormParams,

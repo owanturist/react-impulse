@@ -3,13 +3,13 @@ import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import { createImpulseFormSwitchSchemaCompare } from "./_impulse-form-switch-schema"
-import type { MakeImpulseFormSwitchVerboseParam } from "./_make-impulse-form-switch-verbose-param"
+import type { ImpulseFormSwitchVerboseParam } from "./_impulse-form-switch-verbose-param"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
 export type ImpulseFormSwitchOutputVerbose<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
-> = MakeImpulseFormSwitchVerboseParam<TKind, TBranches, "output.schema.verbose">
+> = ImpulseFormSwitchVerboseParam<TKind, TBranches, "output.schema.verbose">
 
 export const isImpulseFormSwitchOutputVerboseEqual =
   createImpulseFormSwitchSchemaCompare(isShallowObjectEqual)

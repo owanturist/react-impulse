@@ -3,40 +3,25 @@ import { hasProperty } from "~/tools/has-property"
 import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
-import { isTrue } from "~/tools/is-true"
-import { isTruthy } from "~/tools/is-truthy"
+import { isStrictEqual } from "~/tools/is-strict-equal"
 import { isUndefined } from "~/tools/is-undefined"
-import { keys } from "~/tools/keys"
 import { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
-import type { OmitValues } from "~/tools/omit-values"
-import { params } from "~/tools/params"
 import { values } from "~/tools/values"
 
-import { Impulse, type Scope, batch } from "../dependencies"
-import { type ImpulseForm, isImpulseForm } from "../impulse-form"
+import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
+import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
 import type { GetImpulseFormParams } from "../impulse-form/get-impulse-form-params"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
-import {
-  ImpulseFormShape,
-  type ImpulseFormShapeFields,
-  isImpulseFormShapeFlagVerboseEqual,
-} from "../impulse-form-shape"
-import type {
-  ImpulseFormShapeState,
-  ImpulseFormShapeStateFields,
-} from "../impulse-form-shape/_impulse-form-shape-state"
-import { toConcise } from "../to-concise"
+import type { ImpulseFormShapeFields } from "../impulse-form-shape"
+import type { ValidateStrategy } from "../validate-strategy"
 
 import { ImpulseFormSwitch } from "./_impulse-form-switch"
-import type { ImpulseFormSwitchError } from "./_impulse-form-switch-error"
-import type { ImpulseFormSwitchErrorSetter } from "./_impulse-form-switch-error-setter"
-import type { ImpulseFormSwitchErrorVerbose } from "./_impulse-form-switch-error-verbose"
+import type { ImpulseFormSwitchConciseParam } from "./_impulse-form-switch-concise-param"
 import {
   type ImpulseFormSwitchFlag,
   isImpulseFormSwitchFlagEqual,
 } from "./_impulse-form-switch-flag"
-import type { ImpulseFormSwitchFlagSetter } from "./_impulse-form-switch-flag-setter"
 import {
   type ImpulseFormSwitchFlagVerbose,
   isImpulseFormSwitchFlagVerboseEqual,
@@ -55,9 +40,15 @@ import {
   isImpulseFormSwitchOutputVerboseEqual,
 } from "./_impulse-form-switch-output-verbose"
 import type { ImpulseFormSwitchParams } from "./_impulse-form-switch-params"
-import type { ImpulseFormSwitchValidateOn } from "./_impulse-form-switch-validate-on"
-import type { ImpulseFormSwitchValidateOnSetter } from "./_impulse-form-switch-validate-on-setter"
-import type { ImpulseFormSwitchValidateOnVerbose } from "./_impulse-form-switch-validate-on-verbose"
+import {
+  type ImpulseFormSwitchValidateOn,
+  isImpulseFormSwitchValidateOnEqual,
+} from "./_impulse-form-switch-validate-on"
+import {
+  type ImpulseFormSwitchValidateOnVerbose,
+  isImpulseFormSwitchValidateOnVerboseEqual,
+} from "./_impulse-form-switch-validate-on-verbose"
+import type { ImpulseFormSwitchVerboseParam } from "./_impulse-form-switch-verbose-param"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
 export type ImpulseFormSwitchStateBranches<
@@ -88,6 +79,43 @@ export class ImpulseFormSwitchState<
     this._branches = mapValues(branches, (branch) => this._parentOf(branch))
   }
 
+  private _toConcise<TKey extends keyof ImpulseFormParams, TConcise>(
+    scope: Scope,
+    extract: (form: ImpulseFormState) => ReadonlyImpulse<TConcise>,
+  ): ImpulseFormSwitchConciseParam<TKind, TBranches, TKey, TConcise> {
+    const kind = this._active._output.getValue(scope)
+    const branch = isNull(kind) ? null : this._branches[kind]
+
+    const activeConcise = extract(this._active).getValue(scope)
+
+    if (!branch) {
+      return activeConcise
+    }
+
+    const branchConcise = extract(branch).getValue(scope)
+
+    if (branchConcise === activeConcise) {
+      return activeConcise
+    }
+
+    return {
+      active: activeConcise,
+      branch: { kind, value: branchConcise },
+    }
+  }
+
+  private _toVerbose<TKey extends keyof ImpulseFormParams>(
+    scope: Scope,
+    extract: (form: ImpulseFormState) => ReadonlyImpulse<unknown>,
+  ): ImpulseFormSwitchVerboseParam<TKind, TBranches, TKey> {
+    const active = extract(this._active).getValue(scope)
+    const branches = mapValues(this._branches, (branch) => {
+      return extract(branch).getValue(scope)
+    })
+
+    return { active, branches }
+  }
+
   public _childOf(
     parent: null | ImpulseFormState,
   ): ImpulseFormSwitchState<TKind, TBranches> {
@@ -98,12 +126,7 @@ export class ImpulseFormSwitchState<
 
   public readonly _initial = Impulse(
     (scope): ImpulseFormSwitchInput<TKind, TBranches> => {
-      const active = this._active._initial.getValue(scope)
-      const branches = mapValues(this._branches, (branch) => {
-        return branch._initial.getValue(scope)
-      })
-
-      return { active, branches }
+      return this._toVerbose<"input.schema">(scope, ({ _initial }) => _initial)
     },
 
     {
@@ -153,12 +176,7 @@ export class ImpulseFormSwitchState<
 
   public readonly _input = Impulse(
     (scope): ImpulseFormSwitchInput<TKind, TBranches> => {
-      const active = this._active._input.getValue(scope)
-      const branches = mapValues(this._branches, (branch) => {
-        return branch._input.getValue(scope)
-      })
-
-      return { active, branches }
+      return this._toVerbose<"input.schema">(scope, ({ _input }) => _input)
     },
 
     {
@@ -245,46 +263,28 @@ export class ImpulseFormSwitchState<
   // V A L I D A T E   O N
 
   public readonly _validateOn = Impulse(
-    (scope): ImpulseFormShapeValidateOn<TFields> => {
-      const validateOn = mapValues(this._fields, ({ _validateOn }) => {
-        return _validateOn.getValue(scope)
-      })
-
-      const allValidateOn = values(validateOn)
-
-      /**
-       * Fallback to onTouch if none string validateOn is present.
-       * When the fields are empty it will use it.
-       * When the fields are not empty and have any value different than it uses the fields.
-       */
-      const onlyValidateOn = allValidateOn.find(isString) ?? VALIDATE_ON_TOUCH
-
-      for (const fieldValidateOn of allValidateOn) {
-        if (fieldValidateOn !== onlyValidateOn) {
-          return validateOn as ImpulseFormShapeValidateOn<TFields>
-        }
-      }
-
-      return onlyValidateOn as ValidateStrategy
+    (scope): ImpulseFormSwitchValidateOn<TKind, TBranches> => {
+      return this._toConcise<"validateOn.schema", ValidateStrategy>(
+        scope,
+        ({ _validateOn }) => _validateOn,
+      )
     },
 
     {
-      // compare: isImpulseFormShapeValidateOnEqual,
+      compare: isImpulseFormSwitchValidateOnEqual,
     },
   )
 
   public readonly _validateOnVerbose = Impulse(
-    (scope): ImpulseFormShapeValidateOnVerbose<TFields> => {
-      const validateOnVerbose = mapValues(
-        this._fields,
-        ({ _validateOnVerbose }) => _validateOnVerbose.getValue(scope),
+    (scope): ImpulseFormSwitchValidateOnVerbose<TKind, TBranches> => {
+      return this._toVerbose<"validateOn.schema.verbose">(
+        scope,
+        ({ _validateOn }) => _validateOn,
       )
-
-      return validateOnVerbose as ImpulseFormShapeValidateOnVerbose<TFields>
     },
 
     {
-      // compare: isImpulseFormShapeValidateOnVerboseEqual,
+      compare: isImpulseFormSwitchValidateOnVerboseEqual,
     },
   )
 
@@ -366,7 +366,6 @@ export class ImpulseFormSwitchState<
   public readonly _output = Impulse(
     (scope): null | ImpulseFormSwitchOutput<TKind, TBranches> => {
       const kind = this._active._output.getValue(scope)
-
       const branch = isNull(kind) ? null : this._branches[kind]
 
       if (!branch) {
@@ -388,12 +387,7 @@ export class ImpulseFormSwitchState<
 
   public readonly _outputVerbose = Impulse(
     (scope): ImpulseFormSwitchOutputVerbose<TKind, TBranches> => {
-      const active = this._active._outputVerbose.getValue(scope)
-      const branches = mapValues(this._branches, ({ _outputVerbose }) => {
-        return _outputVerbose.getValue(scope)
-      })
-
-      return { active, branches }
+      return this._toVerbose(scope, ({ _output }) => _output)
     },
     {
       compare: isImpulseFormSwitchOutputVerboseEqual,
@@ -404,24 +398,10 @@ export class ImpulseFormSwitchState<
 
   public readonly _valid = Impulse(
     (scope): ImpulseFormSwitchFlag<TKind, TBranches> => {
-      const kind = this._active._output.getValue(scope)
-      const active = this._active._valid.getValue(scope)
-      const branch = isNull(kind) ? null : this._branches[kind]
-
-      if (!branch) {
-        return active
-      }
-
-      const value = branch._valid.getValue(scope)
-
-      if (value === active) {
-        return active
-      }
-
-      return {
-        active,
-        branch: { kind, value },
-      }
+      return this._toConcise<"flag.schema", boolean>(
+        scope,
+        ({ _valid }) => _valid,
+      )
     },
 
     {
@@ -431,12 +411,10 @@ export class ImpulseFormSwitchState<
 
   public readonly _validVerbose = Impulse(
     (scope): ImpulseFormSwitchFlagVerbose<TKind, TBranches> => {
-      const active = this._active._valid.getValue(scope)
-      const branches = mapValues(this._branches, ({ _validVerbose }) => {
-        return _validVerbose.getValue(scope)
-      })
-
-      return { active, branches }
+      return this._toVerbose<"flag.schema.verbose">(
+        scope,
+        ({ _validVerbose }) => _validVerbose,
+      )
     },
 
     {
@@ -533,24 +511,10 @@ export class ImpulseFormSwitchState<
 
   public readonly _dirty = Impulse(
     (scope): ImpulseFormSwitchFlag<TKind, TBranches> => {
-      const kind = this._active._output.getValue(scope)
-      const active = this._active._dirty.getValue(scope)
-      const branch = isNull(kind) ? null : this._branches[kind]
-
-      if (!branch) {
-        return active
-      }
-
-      const value = branch._dirty.getValue(scope)
-
-      if (value === active) {
-        return active
-      }
-
-      return {
-        active,
-        branch: { kind, value },
-      }
+      return this._toConcise<"flag.schema", boolean>(
+        scope,
+        ({ _dirty }) => _dirty,
+      )
     },
 
     {
@@ -560,12 +524,10 @@ export class ImpulseFormSwitchState<
 
   public readonly _dirtyVerbose = Impulse(
     (scope): ImpulseFormSwitchFlagVerbose<TKind, TBranches> => {
-      const active = this._active._dirty.getValue(scope)
-      const branches = mapValues(this._branches, ({ _dirtyVerbose }) => {
-        return _dirtyVerbose.getValue(scope)
-      })
-
-      return { active, branches }
+      return this._toVerbose<"flag.schema.verbose">(
+        scope,
+        ({ _dirtyVerbose }) => _dirtyVerbose,
+      )
     },
 
     {

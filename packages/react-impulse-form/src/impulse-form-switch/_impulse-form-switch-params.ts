@@ -30,9 +30,12 @@ export interface ImpulseFormSwitchParams<
   "flag.schema": ImpulseFormSwitchFlag<TKind, TBranches>
   "flag.schema.verbose": ImpulseFormSwitchFlagVerbose<TKind, TBranches>
 
-  "validateOn.setter": ImpulseFormSwitchValidateOnSetter<TBranches>
-  "validateOn.schema": ImpulseFormSwitchValidateOn<TBranches>
-  "validateOn.schema.verbose": ImpulseFormSwitchValidateOnVerbose<TBranches>
+  "validateOn.setter": ImpulseFormSwitchValidateOnSetter<TKind, TBranches>
+  "validateOn.schema": ImpulseFormSwitchValidateOn<TKind, TBranches>
+  "validateOn.schema.verbose": ImpulseFormSwitchValidateOnVerbose<
+    TKind,
+    TBranches
+  >
 
   "error.setter": ImpulseFormSwitchErrorSetter<TBranches>
   "error.schema": ImpulseFormSwitchError<TBranches>
