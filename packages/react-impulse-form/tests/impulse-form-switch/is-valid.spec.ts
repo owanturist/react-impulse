@@ -74,11 +74,11 @@ describe("types", () => {
   describe("nested", () => {
     const parent = ImpulseFormSwitch(
       ImpulseFormUnit("", {
-        schema: z.enum(["_1", "_2"]),
+        schema: z.enum(["_6", "_7"]),
       }),
       {
-        _1: form,
-        _2: ImpulseFormUnit("0"),
+        _6: form,
+        _7: ImpulseFormUnit("0"),
       },
     )
 
@@ -88,11 +88,11 @@ describe("types", () => {
           readonly active: boolean
           readonly branch:
             | {
-                readonly kind: "_1"
+                readonly kind: "_6"
                 readonly value: IsValidSchema
               }
             | {
-                readonly kind: "_2"
+                readonly kind: "_7"
                 readonly value: boolean
               }
         }
@@ -100,8 +100,8 @@ describe("types", () => {
     interface ParentIsValidVerboseSchema {
       readonly active: boolean
       readonly branches: {
-        readonly _1: IsValidVerboseSchema
-        readonly _2: boolean
+        readonly _6: IsValidVerboseSchema
+        readonly _7: boolean
       }
     }
 

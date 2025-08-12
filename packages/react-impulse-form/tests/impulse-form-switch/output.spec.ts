@@ -67,29 +67,29 @@ describe("types", () => {
   describe("nested", () => {
     const parent = ImpulseFormSwitch(
       ImpulseFormUnit("", {
-        schema: z.enum(["_1", "_2"]),
+        schema: z.enum(["_6", "_7"]),
       }),
       {
-        _1: form,
-        _2: ImpulseFormUnit("0"),
+        _6: form,
+        _7: ImpulseFormUnit("0"),
       },
     )
 
     type ParentOutputSchema =
       | {
-          readonly kind: "_1"
+          readonly kind: "_6"
           readonly value: OutputSchema
         }
       | {
-          readonly kind: "_2"
+          readonly kind: "_7"
           readonly value: string
         }
 
     interface ParentOutputVerboseSchema {
-      readonly active: null | "_1" | "_2"
+      readonly active: null | "_6" | "_7"
       readonly branches: {
-        readonly _1: OutputVerboseSchema
-        readonly _2: null | string
+        readonly _6: OutputVerboseSchema
+        readonly _7: null | string
       }
     }
 
