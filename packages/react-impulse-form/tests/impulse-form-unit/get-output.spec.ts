@@ -1,7 +1,6 @@
 import { z } from "zod"
 
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
-import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
 import { params } from "~/tools/params"
 
 import {
@@ -226,9 +225,9 @@ describe("when transform is defined", () => {
   it("selects equal output values when isOutputEqual is specified", ({
     scope,
   }) => {
-    const value = ImpulseFormUnit(1, {
+    const value = ImpulseFormUnit(1 as number, {
       transform: (input) => ({ isPositive: input > 0 }),
-      isOutputEqual: isShallowObjectEqual,
+      isOutputEqual: (left, right) => left.isPositive === right.isPositive,
     })
 
     const output_0 = value.getOutput(scope)
@@ -338,7 +337,7 @@ describe("when validator is defined", () => {
       validate: (input): Result<string, { isPositive: boolean }> => {
         return input > 0 ? [null, { isPositive: true }] : ["error", null]
       },
-      isOutputEqual: isShallowObjectEqual,
+      isOutputEqual: (left, right) => left.isPositive === right.isPositive,
     })
 
     const output_0 = value.getOutput(scope)
@@ -447,7 +446,7 @@ describe("when schema is defined", () => {
         .number()
         .min(2)
         .transform((number) => ({ isPositive: number > 2 })),
-      isOutputEqual: isShallowObjectEqual,
+      isOutputEqual: (left, right) => left.isPositive === right.isPositive,
     })
 
     const output_0 = value.getOutput(scope)

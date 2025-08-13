@@ -32,6 +32,18 @@ it("matches the type definition", () => {
   >()
 })
 
+it("subsequently selects equal elements", ({ scope }) => {
+  const form = setup([setupElement(0), setupElement(1), setupElement(2)])
+
+  const elements = form.getElements(scope)
+
+  expect(elements).toBe(form.getElements(scope))
+
+  form.setElements((current) => current)
+
+  expect(elements).toBe(form.getElements(scope))
+})
+
 it("replaces all elements", ({ scope }) => {
   const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 

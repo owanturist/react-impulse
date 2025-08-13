@@ -1,11 +1,9 @@
 import { hasProperty } from "~/tools/has-property"
 import { isNull } from "~/tools/is-null"
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
-import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 import { isUndefined } from "~/tools/is-undefined"
 
-import { createUnionCompare } from "../create-union-compare"
 import { type Compare, Impulse, untrack } from "../dependencies"
 import {
   VALIDATE_ON_INIT,
@@ -14,6 +12,7 @@ import {
 } from "../validate-strategy"
 import type { ZodLikeSchema } from "../zod-like-schema"
 
+import { createUnionCompare } from "./_create-union-compare"
 import type { ImpulseFormUnit as ImpulseFormUnitImpl } from "./_impulse-form-unit"
 import { ImpulseFormUnitState } from "./_impulse-form-unit-state"
 import {
@@ -196,26 +195,21 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
 
   const input = Impulse(input_, { compare: isInputEqual })
 
-  const initial = Impulse(
-    {
-      _explicit: Impulse(!isUndefined(options?.initial)),
-      _current: Impulse(
-        untrack((scope) => {
-          const initialOrInput = options?.initial ?? input_
+  const initial = Impulse({
+    _explicit: Impulse(!isUndefined(options?.initial)),
+    _current: Impulse(
+      untrack((scope) => {
+        const initialOrInput = options?.initial ?? input_
 
-          return isInputEqual(initialOrInput, input_, scope)
-            ? input_
-            : initialOrInput
-        }),
-        {
-          compare: isInputEqual,
-        },
-      ),
-    },
-    {
-      compare: isShallowObjectEqual,
-    },
-  )
+        return isInputEqual(initialOrInput, input_, scope)
+          ? input_
+          : initialOrInput
+      }),
+      {
+        compare: isInputEqual,
+      },
+    ),
+  })
 
   const touched = Impulse(options?.touched ?? false)
 

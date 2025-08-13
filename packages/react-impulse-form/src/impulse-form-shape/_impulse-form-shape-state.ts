@@ -22,47 +22,20 @@ import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
 import { ImpulseFormShape } from "./_impulse-form-shape"
 import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"
-import {
-  type ImpulseFormShapeError,
-  isImpulseFormShapeErrorEqual,
-} from "./impulse-form-shape-error"
+import type { ImpulseFormShapeError } from "./impulse-form-shape-error"
 import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"
-import {
-  type ImpulseFormShapeErrorVerbose,
-  isImpulseFormShapeErrorVerboseEqual,
-} from "./impulse-form-shape-error-verbose"
+import type { ImpulseFormShapeErrorVerbose } from "./impulse-form-shape-error-verbose"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
-import {
-  type ImpulseFormShapeFlag,
-  isImpulseFormShapeFlagEqual,
-} from "./impulse-form-shape-flag"
+import type { ImpulseFormShapeFlag } from "./impulse-form-shape-flag"
 import type { ImpulseFormShapeFlagSetter } from "./impulse-form-shape-flag-setter"
-import {
-  type ImpulseFormShapeFlagVerbose,
-  isImpulseFormShapeFlagVerboseEqual,
-} from "./impulse-form-shape-flag-verbose"
-import {
-  type ImpulseFormShapeInput,
-  isImpulseFormShapeInputEqual,
-} from "./impulse-form-shape-input"
+import type { ImpulseFormShapeFlagVerbose } from "./impulse-form-shape-flag-verbose"
+import type { ImpulseFormShapeInput } from "./impulse-form-shape-input"
 import type { ImpulseFormShapeInputSetter } from "./impulse-form-shape-input-setter"
-import {
-  type ImpulseFormShapeOutput,
-  isImpulseFormShapeOutputEqual,
-} from "./impulse-form-shape-output"
-import {
-  type ImpulseFormShapeOutputVerbose,
-  isImpulseFormShapeOutputVerboseEqual,
-} from "./impulse-form-shape-output-verbose"
-import {
-  type ImpulseFormShapeValidateOn,
-  isImpulseFormShapeValidateOnEqual,
-} from "./impulse-form-shape-validate-on"
+import type { ImpulseFormShapeOutput } from "./impulse-form-shape-output"
+import type { ImpulseFormShapeOutputVerbose } from "./impulse-form-shape-output-verbose"
+import type { ImpulseFormShapeValidateOn } from "./impulse-form-shape-validate-on"
 import type { ImpulseFormShapeValidateOnSetter } from "./impulse-form-shape-validate-on-setter"
-import {
-  type ImpulseFormShapeValidateOnVerbose,
-  isImpulseFormShapeValidateOnVerboseEqual,
-} from "./impulse-form-shape-validate-on-verbose"
+import type { ImpulseFormShapeValidateOnVerbose } from "./impulse-form-shape-validate-on-verbose"
 
 export type ImpulseFormShapeStateFields<
   TFields extends ImpulseFormShapeFields,
@@ -129,10 +102,6 @@ export class ImpulseFormShapeState<
 
       return { ...initial, ...meta } as ImpulseFormShapeInput<TFields>
     },
-
-    {
-      compare: isImpulseFormShapeInputEqual,
-    },
   )
 
   public _replaceInitial(
@@ -168,23 +137,17 @@ export class ImpulseFormShapeState<
 
   // I N P U T
 
-  public readonly _input = Impulse(
-    (scope): ImpulseFormShapeInput<TFields> => {
-      const input = mapValues(this._fields, ({ _input }) => {
-        return _input.getValue(scope)
-      })
+  public readonly _input = Impulse((scope): ImpulseFormShapeInput<TFields> => {
+    const input = mapValues(this._fields, ({ _input }) => {
+      return _input.getValue(scope)
+    })
 
-      const meta = mapValues(this._meta, (field) => {
-        return field.getValue(scope)
-      })
+    const meta = mapValues(this._meta, (field) => {
+      return field.getValue(scope)
+    })
 
-      return { ...input, ...meta } as ImpulseFormShapeInput<TFields>
-    },
-
-    {
-      compare: isImpulseFormShapeInputEqual,
-    },
-  )
+    return { ...input, ...meta } as ImpulseFormShapeInput<TFields>
+  })
 
   public _setInput(
     scope: Scope,
@@ -203,22 +166,17 @@ export class ImpulseFormShapeState<
 
   // E R R O R
 
-  public readonly _error = Impulse(
-    (scope): ImpulseFormShapeError<TFields> => {
-      const error = mapValues(this._fields, ({ _error }) => {
-        return _error.getValue(scope)
-      })
+  public readonly _error = Impulse((scope): ImpulseFormShapeError<TFields> => {
+    const error = mapValues(this._fields, ({ _error }) => {
+      return _error.getValue(scope)
+    })
 
-      if (values(error).every(isNull)) {
-        return null
-      }
+    if (values(error).every(isNull)) {
+      return null
+    }
 
-      return error as ImpulseFormShapeError<TFields>
-    },
-    {
-      compare: isImpulseFormShapeErrorEqual,
-    },
-  )
+    return error as ImpulseFormShapeError<TFields>
+  })
 
   public readonly _errorVerbose = Impulse(
     (scope): ImpulseFormShapeErrorVerbose<TFields> => {
@@ -227,10 +185,6 @@ export class ImpulseFormShapeState<
       })
 
       return errorVerbose as ImpulseFormShapeErrorVerbose<TFields>
-    },
-
-    {
-      compare: isImpulseFormShapeErrorVerboseEqual,
     },
   )
 
@@ -276,10 +230,6 @@ export class ImpulseFormShapeState<
 
       return onlyValidateOn as ValidateStrategy
     },
-
-    {
-      compare: isImpulseFormShapeValidateOnEqual,
-    },
   )
 
   public readonly _validateOnVerbose = Impulse(
@@ -290,10 +240,6 @@ export class ImpulseFormShapeState<
       )
 
       return validateOnVerbose as ImpulseFormShapeValidateOnVerbose<TFields>
-    },
-
-    {
-      compare: isImpulseFormShapeValidateOnVerboseEqual,
     },
   )
 
@@ -316,28 +262,22 @@ export class ImpulseFormShapeState<
 
   // T O U C H E D
 
-  public readonly _touched = Impulse(
-    (scope): ImpulseFormShapeFlag<TFields> => {
-      const touched = mapValues(this._fields, ({ _touched }) => {
-        return _touched.getValue(scope)
-      })
+  public readonly _touched = Impulse((scope): ImpulseFormShapeFlag<TFields> => {
+    const touched = mapValues(this._fields, ({ _touched }) => {
+      return _touched.getValue(scope)
+    })
 
-      const allTouched = values(touched)
-      const onlyTouched = allTouched.find(isBoolean) ?? false
+    const allTouched = values(touched)
+    const onlyTouched = allTouched.find(isBoolean) ?? false
 
-      for (const fieldTouched of allTouched) {
-        if (fieldTouched !== onlyTouched) {
-          return touched as ImpulseFormShapeFlag<TFields>
-        }
+    for (const fieldTouched of allTouched) {
+      if (fieldTouched !== onlyTouched) {
+        return touched as ImpulseFormShapeFlag<TFields>
       }
+    }
 
-      return onlyTouched
-    },
-
-    {
-      compare: isImpulseFormShapeFlagEqual,
-    },
-  )
+    return onlyTouched
+  })
 
   public readonly _touchedVerbose = Impulse(
     (scope): ImpulseFormShapeFlagVerbose<TFields> => {
@@ -346,10 +286,6 @@ export class ImpulseFormShapeState<
       )
 
       return touchedVerbose as ImpulseFormShapeFlagVerbose<TFields>
-    },
-
-    {
-      compare: isImpulseFormShapeFlagVerboseEqual,
     },
   )
 
@@ -385,9 +321,6 @@ export class ImpulseFormShapeState<
 
       return { ...output, ...meta } as ImpulseFormShapeOutput<TFields>
     },
-    {
-      compare: isImpulseFormShapeOutputEqual,
-    },
   )
 
   public readonly _outputVerbose = Impulse(
@@ -405,35 +338,26 @@ export class ImpulseFormShapeState<
         ...meta,
       } as ImpulseFormShapeOutputVerbose<TFields>
     },
-    {
-      compare: isImpulseFormShapeOutputVerboseEqual,
-    },
   )
 
   // V A L I D
 
-  public readonly _valid = Impulse(
-    (scope): ImpulseFormShapeFlag<TFields> => {
-      const valid = mapValues(this._fields, ({ _valid }) => {
-        return _valid.getValue(scope)
-      })
+  public readonly _valid = Impulse((scope): ImpulseFormShapeFlag<TFields> => {
+    const valid = mapValues(this._fields, ({ _valid }) => {
+      return _valid.getValue(scope)
+    })
 
-      const allValid = values(valid)
-      const onlyValid = allValid.find(isBoolean) ?? false
+    const allValid = values(valid)
+    const onlyValid = allValid.find(isBoolean) ?? false
 
-      for (const fieldValid of allValid) {
-        if (fieldValid !== onlyValid) {
-          return valid as ImpulseFormShapeFlag<TFields>
-        }
+    for (const fieldValid of allValid) {
+      if (fieldValid !== onlyValid) {
+        return valid as ImpulseFormShapeFlag<TFields>
       }
+    }
 
-      return onlyValid
-    },
-
-    {
-      compare: isImpulseFormShapeFlagEqual,
-    },
-  )
+    return onlyValid
+  })
 
   public readonly _validVerbose = Impulse(
     (scope): ImpulseFormShapeFlagVerbose<TFields> => {
@@ -443,36 +367,26 @@ export class ImpulseFormShapeState<
 
       return validVerbose as ImpulseFormShapeFlagVerbose<TFields>
     },
-
-    {
-      compare: isImpulseFormShapeFlagVerboseEqual,
-    },
   )
 
   // I N V A L I D
 
-  public readonly _invalid = Impulse(
-    (scope): ImpulseFormShapeFlag<TFields> => {
-      const invalid = mapValues(this._fields, ({ _invalid }) => {
-        return _invalid.getValue(scope)
-      })
+  public readonly _invalid = Impulse((scope): ImpulseFormShapeFlag<TFields> => {
+    const invalid = mapValues(this._fields, ({ _invalid }) => {
+      return _invalid.getValue(scope)
+    })
 
-      const allInvalid = values(invalid)
-      const onlyInvalid = allInvalid.find(isBoolean) ?? false
+    const allInvalid = values(invalid)
+    const onlyInvalid = allInvalid.find(isBoolean) ?? false
 
-      for (const fieldInvalid of allInvalid) {
-        if (fieldInvalid !== onlyInvalid) {
-          return invalid as ImpulseFormShapeFlag<TFields>
-        }
+    for (const fieldInvalid of allInvalid) {
+      if (fieldInvalid !== onlyInvalid) {
+        return invalid as ImpulseFormShapeFlag<TFields>
       }
+    }
 
-      return onlyInvalid
-    },
-
-    {
-      compare: isImpulseFormShapeFlagEqual,
-    },
-  )
+    return onlyInvalid
+  })
 
   public readonly _invalidVerbose = Impulse(
     (scope): ImpulseFormShapeFlagVerbose<TFields> => {
@@ -481,10 +395,6 @@ export class ImpulseFormShapeState<
       })
 
       return invalidVerbose as ImpulseFormShapeFlagVerbose<TFields>
-    },
-
-    {
-      compare: isImpulseFormShapeFlagVerboseEqual,
     },
   )
 
@@ -507,10 +417,6 @@ export class ImpulseFormShapeState<
 
       return onlyValidated
     },
-
-    {
-      compare: isImpulseFormShapeFlagEqual,
-    },
   )
 
   public readonly _validatedVerbose = Impulse(
@@ -522,10 +428,6 @@ export class ImpulseFormShapeState<
 
       return validatedVerbose as ImpulseFormShapeFlagVerbose<TFields>
     },
-
-    {
-      compare: isImpulseFormShapeFlagVerboseEqual,
-    },
   )
 
   public _forceValidated(scope: Scope): void {
@@ -536,28 +438,22 @@ export class ImpulseFormShapeState<
 
   // D I R T Y
 
-  public readonly _dirty = Impulse(
-    (scope): ImpulseFormShapeFlag<TFields> => {
-      const dirty = mapValues(this._fields, ({ _dirty }) => {
-        return _dirty.getValue(scope)
-      })
+  public readonly _dirty = Impulse((scope): ImpulseFormShapeFlag<TFields> => {
+    const dirty = mapValues(this._fields, ({ _dirty }) => {
+      return _dirty.getValue(scope)
+    })
 
-      const allDirty = values(dirty)
-      const onlyDirty = allDirty.find(isBoolean) ?? false
+    const allDirty = values(dirty)
+    const onlyDirty = allDirty.find(isBoolean) ?? false
 
-      for (const fieldDirty of allDirty) {
-        if (fieldDirty !== onlyDirty) {
-          return dirty as ImpulseFormShapeFlag<TFields>
-        }
+    for (const fieldDirty of allDirty) {
+      if (fieldDirty !== onlyDirty) {
+        return dirty as ImpulseFormShapeFlag<TFields>
       }
+    }
 
-      return onlyDirty
-    },
-
-    {
-      compare: isImpulseFormShapeFlagEqual,
-    },
-  )
+    return onlyDirty
+  })
 
   public readonly _dirtyVerbose = Impulse(
     (scope): ImpulseFormShapeFlagVerbose<TFields> => {
@@ -567,34 +463,24 @@ export class ImpulseFormShapeState<
 
       return dirtyVerbose as ImpulseFormShapeFlagVerbose<TFields>
     },
-
-    {
-      compare: isImpulseFormShapeFlagVerboseEqual,
-    },
   )
 
-  public readonly _dirtyOn = Impulse(
-    (scope): ImpulseFormShapeFlag<TFields> => {
-      const dirtyOn = mapValues(this._fields, ({ _dirtyOn }) => {
-        return _dirtyOn.getValue(scope)
-      })
+  public readonly _dirtyOn = Impulse((scope): ImpulseFormShapeFlag<TFields> => {
+    const dirtyOn = mapValues(this._fields, ({ _dirtyOn }) => {
+      return _dirtyOn.getValue(scope)
+    })
 
-      const allDirty = values(dirtyOn)
-      const onlyDirty = allDirty.find(isBoolean) ?? false
+    const allDirty = values(dirtyOn)
+    const onlyDirty = allDirty.find(isBoolean) ?? false
 
-      for (const fieldDirty of allDirty) {
-        if (fieldDirty !== onlyDirty) {
-          return dirtyOn as ImpulseFormShapeFlag<TFields>
-        }
+    for (const fieldDirty of allDirty) {
+      if (fieldDirty !== onlyDirty) {
+        return dirtyOn as ImpulseFormShapeFlag<TFields>
       }
+    }
 
-      return onlyDirty
-    },
-
-    {
-      compare: isImpulseFormShapeFlagEqual,
-    },
-  )
+    return onlyDirty
+  })
 
   public readonly _dirtyOnVerbose = Impulse(
     (scope): ImpulseFormShapeFlagVerbose<TFields> => {
@@ -603,10 +489,6 @@ export class ImpulseFormShapeState<
       })
 
       return dirtyOnVerbose as ImpulseFormShapeFlagVerbose<TFields>
-    },
-
-    {
-      compare: isImpulseFormShapeFlagVerboseEqual,
     },
   )
 
