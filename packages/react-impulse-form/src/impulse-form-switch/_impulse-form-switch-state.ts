@@ -309,26 +309,15 @@ export class ImpulseFormSwitchState<
     scope: Scope,
     setter: ImpulseFormSwitchValidateOnSetter<TKind, TBranches>,
   ): void {
-    const verbose = Lazy(() => this._validVerbose.getValue(scope))
+    const verbose = Lazy(() => this._validateOnVerbose.getValue(scope))
     const resolved = isFunction(setter) ? setter(verbose()) : setter
-
-    const activeBranch = this._getActiveBranch(scope)
 
     const [activeSetter, branchSetter, branchesSetter] = isString(resolved)
       ? [resolved, resolved, undefined]
       : [
           resolved.active,
 
-          hasProperty(resolved, "branch")
-            ? isFunction(resolved.branch)
-              ? activeBranch
-                ? resolved.branch({
-                    kind: activeBranch.kind,
-                    value: activeBranch.value._validateOn.getValue(scope),
-                  })
-                : undefined
-              : resolved.branch
-            : undefined,
+          hasProperty(resolved, "branch") ? resolved.branch : undefined,
 
           hasProperty(resolved, "branches")
             ? isFunction(resolved.branches)
@@ -353,13 +342,26 @@ export class ImpulseFormSwitchState<
       }
     }
 
-    if (activeBranch && isString(branchSetter)) {
-      activeBranch.value._setValidateOn(scope, branchSetter)
-    } else if (!isUndefined(branchSetter)) {
-      const targetBranch = this._branches[branchSetter.kind]
+    if (!isUndefined(branchSetter)) {
+      const activeBranch = this._getActiveBranch(scope)
 
-      if (targetBranch) {
-        targetBranch._setValidateOn(scope, branchSetter.value)
+      const branchValidateOn = isFunction(branchSetter)
+        ? activeBranch
+          ? branchSetter({
+              kind: activeBranch.kind,
+              value: activeBranch.value._validateOnVerbose.getValue(scope),
+            })
+          : undefined
+        : branchSetter
+
+      if (isString(branchValidateOn)) {
+        activeBranch?.value._setValidateOn(scope, branchValidateOn)
+      } else if (!isUndefined(branchValidateOn)) {
+        const targetBranch = this._branches[branchValidateOn.kind]
+
+        if (targetBranch) {
+          targetBranch._setValidateOn(scope, branchValidateOn.value)
+        }
       }
     }
   }

@@ -428,24 +428,27 @@ describe("using recursive setter", () => {
     return ImpulseFormSwitch(active, branches, options)
   }
 
-  describe.each([
+  describe.each<
+    [
+      string,
+      (
+        input: ImpulseFormSwitchInputSetter<typeof active, typeof branches>,
+      ) => ImpulseFormSwitch<typeof active, typeof branches>,
+    ]
+  >([
     [
       "ImpulseFormSwitchOptions.initial",
-      (
-        initial: ImpulseFormSwitchInputSetter<typeof active, typeof branches>,
-      ) => {
+      (initial) => {
         return setup({ initial })
       },
     ],
 
     [
       "ImpulseFormSwitch.setInitial",
-      (
-        initial: ImpulseFormSwitchInputSetter<typeof active, typeof branches>,
-      ) => {
+      (setter) => {
         const form = setup()
 
-        form.setInitial(initial)
+        form.setInitial(setter)
 
         return form
       },
