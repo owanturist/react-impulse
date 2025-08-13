@@ -1,7 +1,5 @@
 import type { GetImpulseFormShapeParam } from "./get-impulse-form-shape-param"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 
-export { isShallowObjectEqual as isImpulseFormShapeInputEqual } from "~/tools/is-shallow-object-equal"
-
 export type ImpulseFormShapeInput<TFields extends ImpulseFormShapeFields> =
   GetImpulseFormShapeParam<TFields, "input.schema">

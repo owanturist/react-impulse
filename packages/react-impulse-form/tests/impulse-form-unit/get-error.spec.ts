@@ -1,7 +1,6 @@
 import { z } from "zod"
 
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
-import { isShallowObjectEqual } from "~/tools/is-shallow-object-equal"
 import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
@@ -226,7 +225,7 @@ describe("when validator is defined", () => {
       validate: (input): Result<{ message: string }, number> => {
         return input > 0 ? [null, input] : [{ message: "error" }, null]
       },
-      isErrorEqual: isShallowObjectEqual,
+      isErrorEqual: (left, right) => left.message === right.message,
     })
 
     const error_0 = value.getError(scope)

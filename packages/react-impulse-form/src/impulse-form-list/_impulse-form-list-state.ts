@@ -4,7 +4,6 @@ import { entries } from "~/tools/entries"
 import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
-import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isString } from "~/tools/is-string"
 import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
@@ -23,46 +22,19 @@ import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
 import { ImpulseFormList } from "./_impulse-form-list"
 import type { ImpulseFormListParams } from "./_impulse-form-list-params"
-import {
-  type ImpulseFormListError,
-  isImpulseFormListErrorEqual,
-} from "./impulse-form-list-error"
+import type { ImpulseFormListError } from "./impulse-form-list-error"
 import type { ImpulseFormListErrorSetter } from "./impulse-form-list-error-setter"
-import {
-  type ImpulseFormListErrorVerbose,
-  isImpulseFormListErrorVerboseEqual,
-} from "./impulse-form-list-error-verbose"
-import {
-  type ImpulseFormListFlag,
-  isImpulseFormListFlagEqual,
-} from "./impulse-form-list-flag"
+import type { ImpulseFormListErrorVerbose } from "./impulse-form-list-error-verbose"
+import type { ImpulseFormListFlag } from "./impulse-form-list-flag"
 import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"
-import {
-  type ImpulseFormListFlagVerbose,
-  isImpulseFormListFlagVerboseEqual,
-} from "./impulse-form-list-flag-verbose"
-import {
-  type ImpulseFormListInput,
-  isImpulseFormListInputEqual,
-} from "./impulse-form-list-input"
+import type { ImpulseFormListFlagVerbose } from "./impulse-form-list-flag-verbose"
+import type { ImpulseFormListInput } from "./impulse-form-list-input"
 import type { ImpulseFormListInputSetter } from "./impulse-form-list-input-setter"
-import {
-  type ImpulseFormListOutput,
-  isImpulseFormListOutputEqual,
-} from "./impulse-form-list-output"
-import {
-  type ImpulseFormListOutputVerbose,
-  isImpulseFormListOutputVerboseEqual,
-} from "./impulse-form-list-output-verbose"
-import {
-  type ImpulseFormListValidateOn,
-  isImpulseFormListValidateOnEqual,
-} from "./impulse-form-list-validate-on"
+import type { ImpulseFormListOutput } from "./impulse-form-list-output"
+import type { ImpulseFormListOutputVerbose } from "./impulse-form-list-output-verbose"
+import type { ImpulseFormListValidateOn } from "./impulse-form-list-validate-on"
 import type { ImpulseFormListValidateOnSetter } from "./impulse-form-list-validate-on-setter"
-import {
-  type ImpulseFormListValidateOnVerbose,
-  isImpulseFormListValidateOnVerboseEqual,
-} from "./impulse-form-list-validate-on-verbose"
+import type { ImpulseFormListValidateOnVerbose } from "./impulse-form-list-validate-on-verbose"
 
 export class ImpulseFormListState<
   TElement extends ImpulseForm = ImpulseForm,
@@ -88,9 +60,7 @@ export class ImpulseFormListState<
     const initialElements = map(elements, (element) => element._clone())
 
     this._initialElements = Impulse({
-      _list: Impulse(initialElements, {
-        compare: isShallowArrayEqual,
-      }),
+      _list: Impulse(initialElements),
     })
 
     this._elements = Impulse(
@@ -103,9 +73,6 @@ export class ImpulseFormListState<
           return child
         })
       }),
-      {
-        compare: isShallowArrayEqual,
-      },
     )
   }
 
@@ -133,10 +100,6 @@ export class ImpulseFormListState<
       return map(this._getInitialElements(scope), ({ _initial }) => {
         return _initial.getValue(scope)
       })
-    },
-
-    {
-      compare: isImpulseFormListInputEqual,
     },
   )
 
@@ -196,17 +159,11 @@ export class ImpulseFormListState<
     }
   }
 
-  public readonly _input = Impulse(
-    (scope): ImpulseFormListInput<TElement> => {
-      return map(this._elements.getValue(scope), ({ _input }) => {
-        return _input.getValue(scope)
-      })
-    },
-
-    {
-      compare: isImpulseFormListInputEqual,
-    },
-  )
+  public readonly _input = Impulse((scope): ImpulseFormListInput<TElement> => {
+    return map(this._elements.getValue(scope), ({ _input }) => {
+      return _input.getValue(scope)
+    })
+  })
 
   public _setInput(
     scope: Scope,
@@ -225,32 +182,23 @@ export class ImpulseFormListState<
     }
   }
 
-  public readonly _error = Impulse(
-    (scope): ImpulseFormListError<TElement> => {
-      const error = map(this._elements.getValue(scope), ({ _error }) => {
-        return _error.getValue(scope)
-      })
+  public readonly _error = Impulse((scope): ImpulseFormListError<TElement> => {
+    const error = map(this._elements.getValue(scope), ({ _error }) => {
+      return _error.getValue(scope)
+    })
 
-      if (error.every(isNull)) {
-        return null
-      }
+    if (error.every(isNull)) {
+      return null
+    }
 
-      return error
-    },
-    {
-      compare: isImpulseFormListErrorEqual,
-    },
-  )
+    return error
+  })
 
   public readonly _errorVerbose = Impulse(
     (scope): ImpulseFormListErrorVerbose<TElement> => {
       return map(this._elements.getValue(scope), ({ _errorVerbose }) => {
         return _errorVerbose.getValue(scope)
       })
-    },
-
-    {
-      compare: isImpulseFormListErrorVerboseEqual,
     },
   )
 
@@ -293,10 +241,6 @@ export class ImpulseFormListState<
 
       return onlyValidateOn as ValidateStrategy
     },
-
-    {
-      compare: isImpulseFormListValidateOnEqual,
-    },
   )
 
   public readonly _validateOnVerbose = Impulse(
@@ -304,10 +248,6 @@ export class ImpulseFormListState<
       return map(this._elements.getValue(scope), ({ _validateOnVerbose }) => {
         return _validateOnVerbose.getValue(scope)
       })
-    },
-
-    {
-      compare: isImpulseFormListValidateOnVerboseEqual,
     },
   )
 
@@ -336,37 +276,27 @@ export class ImpulseFormListState<
     }
   }
 
-  public readonly _touched = Impulse(
-    (scope): ImpulseFormListFlag<TElement> => {
-      const touched = map(this._elements.getValue(scope), ({ _touched }) => {
-        return _touched.getValue(scope)
-      })
+  public readonly _touched = Impulse((scope): ImpulseFormListFlag<TElement> => {
+    const touched = map(this._elements.getValue(scope), ({ _touched }) => {
+      return _touched.getValue(scope)
+    })
 
-      const onlyTouched = touched.find(isBoolean) ?? false
+    const onlyTouched = touched.find(isBoolean) ?? false
 
-      for (const fieldTouched of touched) {
-        if (fieldTouched !== onlyTouched) {
-          return touched
-        }
+    for (const fieldTouched of touched) {
+      if (fieldTouched !== onlyTouched) {
+        return touched
       }
+    }
 
-      return onlyTouched
-    },
-
-    {
-      compare: isImpulseFormListFlagEqual,
-    },
-  )
+    return onlyTouched
+  })
 
   public readonly _touchedVerbose = Impulse(
     (scope): ImpulseFormListFlagVerbose<TElement> => {
       return map(this._elements.getValue(scope), ({ _touchedVerbose }) => {
         return _touchedVerbose.getValue(scope)
       })
-    },
-
-    {
-      compare: isImpulseFormListFlagVerboseEqual,
     },
   )
 
@@ -399,9 +329,6 @@ export class ImpulseFormListState<
 
       return output
     },
-    {
-      compare: isImpulseFormListOutputEqual,
-    },
   )
 
   public readonly _outputVerbose = Impulse(
@@ -410,32 +337,23 @@ export class ImpulseFormListState<
         return _outputVerbose.getValue(scope)
       })
     },
-    {
-      compare: isImpulseFormListOutputVerboseEqual,
-    },
   )
 
-  public readonly _valid = Impulse(
-    (scope): ImpulseFormListFlag<TElement> => {
-      const valid = map(this._elements.getValue(scope), ({ _valid }) => {
-        return _valid.getValue(scope)
-      })
+  public readonly _valid = Impulse((scope): ImpulseFormListFlag<TElement> => {
+    const valid = map(this._elements.getValue(scope), ({ _valid }) => {
+      return _valid.getValue(scope)
+    })
 
-      const onlyValid = valid.find(isBoolean) ?? false
+    const onlyValid = valid.find(isBoolean) ?? false
 
-      for (const fieldValid of valid) {
-        if (fieldValid !== onlyValid) {
-          return valid
-        }
+    for (const fieldValid of valid) {
+      if (fieldValid !== onlyValid) {
+        return valid
       }
+    }
 
-      return onlyValid
-    },
-
-    {
-      compare: isImpulseFormListFlagEqual,
-    },
-  )
+    return onlyValid
+  })
 
   public readonly _validVerbose = Impulse(
     (scope): ImpulseFormListFlagVerbose<TElement> => {
@@ -443,43 +361,29 @@ export class ImpulseFormListState<
         return _validVerbose.getValue(scope)
       })
     },
-
-    {
-      compare: isImpulseFormListFlagVerboseEqual,
-    },
   )
 
-  public readonly _invalid = Impulse(
-    (scope): ImpulseFormListFlag<TElement> => {
-      const invalid = map(this._elements.getValue(scope), ({ _invalid }) => {
-        return _invalid.getValue(scope)
-      })
+  public readonly _invalid = Impulse((scope): ImpulseFormListFlag<TElement> => {
+    const invalid = map(this._elements.getValue(scope), ({ _invalid }) => {
+      return _invalid.getValue(scope)
+    })
 
-      const onlyInvalid = invalid.find(isBoolean) ?? false
+    const onlyInvalid = invalid.find(isBoolean) ?? false
 
-      for (const fieldInvalid of invalid) {
-        if (fieldInvalid !== onlyInvalid) {
-          return invalid
-        }
+    for (const fieldInvalid of invalid) {
+      if (fieldInvalid !== onlyInvalid) {
+        return invalid
       }
+    }
 
-      return onlyInvalid
-    },
-
-    {
-      compare: isImpulseFormListFlagEqual,
-    },
-  )
+    return onlyInvalid
+  })
 
   public readonly _invalidVerbose = Impulse(
     (scope): ImpulseFormListFlagVerbose<TElement> => {
       return map(this._elements.getValue(scope), ({ _invalidVerbose }) => {
         return _invalidVerbose.getValue(scope)
       })
-    },
-
-    {
-      compare: isImpulseFormListFlagVerboseEqual,
     },
   )
 
@@ -502,10 +406,6 @@ export class ImpulseFormListState<
 
       return onlyValidated
     },
-
-    {
-      compare: isImpulseFormListFlagEqual,
-    },
   )
 
   public readonly _validatedVerbose = Impulse(
@@ -513,10 +413,6 @@ export class ImpulseFormListState<
       return map(this._elements.getValue(scope), ({ _validatedVerbose }) => {
         return _validatedVerbose.getValue(scope)
       })
-    },
-
-    {
-      compare: isImpulseFormListFlagVerboseEqual,
     },
   )
 
@@ -526,42 +422,36 @@ export class ImpulseFormListState<
     }
   }
 
-  public readonly _dirty = Impulse(
-    (scope): ImpulseFormListFlag<TElement> => {
-      const elements = this._elements.getValue(scope)
-      const initialElements = this._getInitialElements(scope)
+  public readonly _dirty = Impulse((scope): ImpulseFormListFlag<TElement> => {
+    const elements = this._elements.getValue(scope)
+    const initialElements = this._getInitialElements(scope)
 
-      const dirty = concat(
-        map(elements, ({ _dirty, _dirtyOn }, index) => {
-          if (index >= initialElements.length) {
-            // added elements are always dirty
-            return _dirtyOn.getValue(scope)
-          }
-
-          return _dirty.getValue(scope)
-        }),
-
-        // removed elements are always dirty
-        map(drop(initialElements, elements.length), ({ _dirtyOn }) => {
+    const dirty = concat(
+      map(elements, ({ _dirty, _dirtyOn }, index) => {
+        if (index >= initialElements.length) {
+          // added elements are always dirty
           return _dirtyOn.getValue(scope)
-        }),
-      )
-
-      const onlyDirty = dirty.find(isBoolean) ?? false
-
-      for (const fieldDirty of dirty) {
-        if (fieldDirty !== onlyDirty) {
-          return dirty
         }
+
+        return _dirty.getValue(scope)
+      }),
+
+      // removed elements are always dirty
+      map(drop(initialElements, elements.length), ({ _dirtyOn }) => {
+        return _dirtyOn.getValue(scope)
+      }),
+    )
+
+    const onlyDirty = dirty.find(isBoolean) ?? false
+
+    for (const fieldDirty of dirty) {
+      if (fieldDirty !== onlyDirty) {
+        return dirty
       }
+    }
 
-      return onlyDirty
-    },
-
-    {
-      compare: isImpulseFormListFlagEqual,
-    },
-  )
+    return onlyDirty
+  })
 
   public readonly _dirtyVerbose = Impulse(
     (scope): ImpulseFormListFlagVerbose<TElement> => {
@@ -584,43 +474,29 @@ export class ImpulseFormListState<
         }),
       )
     },
-
-    {
-      compare: isImpulseFormListFlagVerboseEqual,
-    },
   )
 
-  public readonly _dirtyOn = Impulse(
-    (scope): ImpulseFormListFlag<TElement> => {
-      const dirtyOn = map(this._getInitialElements(scope), ({ _dirtyOn }) => {
-        return _dirtyOn.getValue(scope)
-      })
+  public readonly _dirtyOn = Impulse((scope): ImpulseFormListFlag<TElement> => {
+    const dirtyOn = map(this._getInitialElements(scope), ({ _dirtyOn }) => {
+      return _dirtyOn.getValue(scope)
+    })
 
-      const onlyDirty = dirtyOn.find(isBoolean) ?? false
+    const onlyDirty = dirtyOn.find(isBoolean) ?? false
 
-      for (const fieldDirty of dirtyOn) {
-        if (fieldDirty !== onlyDirty) {
-          return dirtyOn
-        }
+    for (const fieldDirty of dirtyOn) {
+      if (fieldDirty !== onlyDirty) {
+        return dirtyOn
       }
+    }
 
-      return onlyDirty
-    },
-
-    {
-      compare: isImpulseFormListFlagEqual,
-    },
-  )
+    return onlyDirty
+  })
 
   public readonly _dirtyOnVerbose = Impulse(
     (scope): ImpulseFormListFlagVerbose<TElement> => {
       return map(this._getInitialElements(scope), ({ _dirtyOnVerbose }) => {
         return _dirtyOnVerbose.getValue(scope)
       })
-    },
-
-    {
-      compare: isImpulseFormListFlagVerboseEqual,
     },
   )
 
