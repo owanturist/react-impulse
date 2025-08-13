@@ -3,6 +3,7 @@ import { hasProperty } from "~/tools/has-property"
 import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
+import { isStrictEqual } from "~/tools/is-strict-equal"
 import { isString } from "~/tools/is-string"
 import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
@@ -17,6 +18,9 @@ import type { ValidateStrategy } from "../validate-strategy"
 
 import { ImpulseFormSwitch } from "./_impulse-form-switch"
 import type { ImpulseFormSwitchConciseParam } from "./_impulse-form-switch-concise-param"
+import type { ImpulseFormSwitchError } from "./_impulse-form-switch-error"
+import type { ImpulseFormSwitchErrorSetter } from "./_impulse-form-switch-error-setter"
+import type { ImpulseFormSwitchErrorVerbose } from "./_impulse-form-switch-error-verbose"
 import type { ImpulseFormSwitchFlag } from "./_impulse-form-switch-flag"
 import type { ImpulseFormSwitchFlagSetter } from "./_impulse-form-switch-flag-setter"
 import type { ImpulseFormSwitchFlagVerbose } from "./_impulse-form-switch-flag-verbose"
@@ -77,6 +81,7 @@ export class ImpulseFormSwitchState<
   private _toConcise<TKey extends keyof ImpulseFormParams, TConcise>(
     scope: Scope,
     extract: (form: ImpulseFormState) => ReadonlyImpulse<TConcise>,
+    isConcise = isStrictEqual,
   ): ImpulseFormSwitchConciseParam<TKind, TBranches, TKey, TConcise> {
     const activeBranch = this._getActiveBranch(scope)
     const activeConcise = extract(this._active).getValue(scope)
@@ -87,7 +92,7 @@ export class ImpulseFormSwitchState<
 
     const branchConcise = extract(activeBranch.value).getValue(scope)
 
-    if (branchConcise === activeConcise) {
+    if (isConcise(branchConcise, activeConcise)) {
       return activeConcise
     }
 
@@ -200,41 +205,82 @@ export class ImpulseFormSwitchState<
 
   // E R R O R
 
-  public readonly _error = Impulse((scope): ImpulseFormShapeError<TFields> => {
-    const error = mapValues(this._fields, ({ _error }) => {
-      return _error.getValue(scope)
-    })
-
-    if (values(error).every(isNull)) {
-      return null
-    }
-
-    return error as ImpulseFormShapeError<TFields>
-  })
+  public readonly _error = Impulse(
+    (scope): ImpulseFormSwitchError<TKind, TBranches> => {
+      return this._toConcise<"error.schema", null>(
+        scope,
+        ({ _error }) => _error,
+        (left, right) => isNull(left) && isNull(right),
+      )
+    },
+  )
 
   public readonly _errorVerbose = Impulse(
-    (scope): ImpulseFormShapeErrorVerbose<TFields> => {
-      const errorVerbose = mapValues(this._fields, ({ _errorVerbose }) => {
-        return _errorVerbose.getValue(scope)
-      })
-
-      return errorVerbose as ImpulseFormShapeErrorVerbose<TFields>
+    (scope): ImpulseFormSwitchErrorVerbose<TKind, TBranches> => {
+      return this._toVerbose<"error.schema.verbose">(
+        scope,
+        ({ _errorVerbose }) => _errorVerbose,
+      )
     },
   )
 
   public _setError(
     scope: Scope,
-    setter: ImpulseFormShapeErrorSetter<TFields>,
+    setter: ImpulseFormSwitchErrorSetter<TKind, TBranches>,
   ): void {
-    const setters = isFunction(setter)
-      ? setter(this._errorVerbose.getValue(scope))
-      : setter
+    const verbose = Lazy(() => this._errorVerbose.getValue(scope))
+    const resolved = isFunction(setter) ? setter(verbose()) : setter
 
-    for (const [key, field] of entries(this._fields)) {
-      if (isNull(setters)) {
-        field._setError(scope, setters)
-      } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
-        field._setError(scope, setters[key])
+    const [activeSetter, branchSetter, branchesSetter] = isNull(resolved)
+      ? [resolved, resolved, resolved]
+      : [
+          resolved.active,
+
+          hasProperty(resolved, "branch") ? resolved.branch : undefined,
+
+          hasProperty(resolved, "branches")
+            ? isFunction(resolved.branches)
+              ? resolved.branches(verbose().branches)
+              : resolved.branches
+            : undefined,
+        ]
+
+    if (!isUndefined(activeSetter)) {
+      this._active._setError(scope, activeSetter)
+    }
+
+    for (const [kind, branch] of entries(this._branches)) {
+      const resolvedBranchSetter = isNull(branchesSetter)
+        ? branchesSetter
+        : hasProperty(branchesSetter, kind)
+          ? branchesSetter[kind]
+          : undefined
+
+      if (!isUndefined(resolvedBranchSetter)) {
+        branch._setError(scope, resolvedBranchSetter)
+      }
+    }
+
+    if (!isUndefined(branchSetter)) {
+      const activeBranch = this._getActiveBranch(scope)
+
+      const activeBranchSetter = isFunction(branchSetter)
+        ? activeBranch
+          ? branchSetter({
+              kind: activeBranch.kind,
+              value: activeBranch.value._errorVerbose.getValue(scope),
+            })
+          : undefined
+        : branchSetter
+
+      if (isNull(activeBranchSetter)) {
+        activeBranch?.value._setError(scope, activeBranchSetter)
+      } else if (!isUndefined(activeBranchSetter)) {
+        const targetBranch = this._branches[activeBranchSetter.kind]
+
+        if (targetBranch) {
+          targetBranch._setError(scope, activeBranchSetter.value)
+        }
       }
     }
   }
@@ -267,7 +313,7 @@ export class ImpulseFormSwitchState<
     const resolved = isFunction(setter) ? setter(verbose()) : setter
 
     const [activeSetter, branchSetter, branchesSetter] = isString(resolved)
-      ? [resolved, resolved, undefined]
+      ? [resolved, resolved, resolved]
       : [
           resolved.active,
 
@@ -348,7 +394,7 @@ export class ImpulseFormSwitchState<
     const resolved = isFunction(setter) ? setter(verbose()) : setter
 
     const [activeSetter, branchSetter, branchesSetter] = isBoolean(resolved)
-      ? [resolved, resolved, undefined]
+      ? [resolved, resolved, resolved]
       : [
           resolved.active,
 

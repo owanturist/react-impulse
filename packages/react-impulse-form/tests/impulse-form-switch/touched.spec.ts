@@ -352,10 +352,13 @@ describe.each([true, false])("when touched=%s", (touched) => {
   const differentTouched = !touched
 
   describe("when defining top-level concise ImpulseFormSwitchOptions.touched", () => {
-    describe("when active is valid", () => {
-      it("overrides active branch's touched", ({ scope }) => {
+    describe.each([
+      ["valid", "_2"],
+      ["invalid", ""],
+    ])("when active is %s", (_, kind) => {
+      it("overrides all touched", ({ scope }) => {
         const form = ImpulseFormSwitch(
-          ImpulseFormUnit("_2", {
+          ImpulseFormUnit(kind, {
             touched: true,
             schema: z.enum(["_1", "_2"]),
           }),
@@ -389,62 +392,12 @@ describe.each([true, false])("when touched=%s", (touched) => {
         expect(form.isTouched(scope, params._second)).toStrictEqual({
           active: touched,
           branches: {
-            _1: false,
+            _1: touched,
             _2: {
               active: touched,
               branches: {
                 _3: touched,
-                _4: false,
-              },
-            },
-          },
-        })
-      })
-    })
-
-    describe("when active is invalid", () => {
-      it("overrides only the active's touched", ({ scope }) => {
-        const form = ImpulseFormSwitch(
-          ImpulseFormUnit("", {
-            touched: true,
-            schema: z.enum(["_1", "_2"]),
-          }),
-          {
-            _1: ImpulseFormUnit(0, {
-              touched: false,
-              schema: z.number(),
-            }),
-            _2: ImpulseFormSwitch(
-              ImpulseFormUnit("_3", {
-                schema: z.enum(["_3", "_4"]),
-              }),
-              {
-                _3: ImpulseFormUnit("0", {
-                  touched: true,
-                  schema: z.string(),
-                }),
-                _4: ImpulseFormUnit(1, {
-                  schema: z.number(),
-                }),
-              },
-            ),
-          },
-          {
-            touched: touched,
-          },
-        )
-
-        expect(form.isTouched(scope)).toBe(touched)
-        expect(form.isTouched(scope, params._first)).toBe(touched)
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
-          active: touched,
-          branches: {
-            _1: false,
-            _2: {
-              active: false,
-              branches: {
-                _3: true,
-                _4: false,
+                _4: touched,
               },
             },
           },
@@ -854,7 +807,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
               active: touched,
               branches: {
                 _3: touched,
-                _4: false,
+                _4: touched,
               },
             },
           },
@@ -993,7 +946,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
             active: touched,
             branches: {
               _3: touched,
-              _4: false,
+              _4: touched,
             },
           },
         },

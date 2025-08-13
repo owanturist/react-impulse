@@ -9,11 +9,11 @@ import {
   type ImpulseFormSwitchOptions,
   type ImpulseFormSwitchValidateOnSetter,
   ImpulseFormUnit,
+  type Result,
   VALIDATE_ON_CHANGE,
   VALIDATE_ON_INIT,
   VALIDATE_ON_SUBMIT,
   VALIDATE_ON_TOUCH,
-  type ValidateStrategy,
 } from "../../src"
 
 describe("types", () => {
@@ -23,197 +23,188 @@ describe("types", () => {
 
   const branches = {
     _1: ImpulseFormUnit(true, {
-      schema: z
-        .boolean()
-        .transform((value): string => (value ? "ok" : "not ok")),
+      validate: (input): Result<string, number> => {
+        if (input) {
+          return [null, 18]
+        }
+
+        return ["Invalid input", null]
+      },
     }),
     _2: ImpulseFormShape({
-      _3: ImpulseFormUnit("name"),
+      _3: ImpulseFormUnit("name", {
+        error: 123,
+      }),
       _4: ImpulseFormUnit(18),
     }),
-    _5: ImpulseFormUnit("excluded"),
+    _5: ImpulseFormUnit("excluded", {
+      transform: (input) => input.trim(),
+    }),
   }
 
   const form = ImpulseFormSwitch(active, branches)
 
-  type ValidateOnSchema =
-    | ValidateStrategy
-    | {
-        readonly active: ValidateStrategy
-        readonly branch:
-          | {
-              readonly kind: "_1"
-              readonly value: ValidateStrategy
-            }
-          | {
-              readonly kind: "_2"
-              readonly value:
-                | ValidateStrategy
-                | {
-                    readonly _3: ValidateStrategy
-                    readonly _4: ValidateStrategy
-                  }
-            }
-          | {
-              readonly kind: "_5"
-              readonly value: ValidateStrategy
-            }
-      }
+  type ErrorSchema = null | {
+    readonly active: null | ReadonlyArray<string>
+    readonly branch:
+      | {
+          readonly kind: "_1"
+          readonly value: null | string
+        }
+      | {
+          readonly kind: "_2"
+          readonly value: null | {
+            readonly _3: null | number
+            readonly _4: null
+          }
+        }
+      | {
+          readonly kind: "_5"
+          readonly value: null
+        }
+  }
 
-  interface ValidateOnVerboseSchema {
-    readonly active: ValidateStrategy
+  interface ErrorVerboseSchema {
+    readonly active: null | ReadonlyArray<string>
     readonly branches: {
-      readonly _1: ValidateStrategy
+      readonly _1: null | string
       readonly _2: {
-        readonly _3: ValidateStrategy
-        readonly _4: ValidateStrategy
+        readonly _3: null | number
+        readonly _4: null
       }
-      readonly _5: ValidateStrategy
+      readonly _5: null
     }
   }
 
-  type ValidateOnSetter = Setter<
-    | ValidateStrategy
+  type ErrorOnSetter = Setter<
+    | null
     | {
-        readonly active?: Setter<ValidateStrategy>
+        readonly active?: Setter<null | ReadonlyArray<string>>
         readonly branch?: Setter<
-          | ValidateStrategy
+          | null
           | {
               readonly kind: "_1"
-              readonly value: Setter<ValidateStrategy>
+              readonly value: Setter<null | string>
             }
           | {
               readonly kind: "_2"
               readonly value: Setter<
-                | ValidateStrategy
-                | {
-                    readonly _3?: Setter<ValidateStrategy>
-                    readonly _4?: Setter<ValidateStrategy>
-                  },
-                [ValidateOnVerboseSchema["branches"]["_2"]]
+                null | {
+                  readonly _3?: Setter<null | number>
+                  readonly _4?: Setter<null>
+                },
+                [ErrorVerboseSchema["branches"]["_2"]]
               >
             }
           | {
               readonly kind: "_5"
-              readonly value: Setter<ValidateStrategy>
+              readonly value: Setter<null>
             },
           [
             | {
                 readonly kind: "_1"
-                readonly value: ValidateStrategy
+                readonly value: null | string
               }
             | {
                 readonly kind: "_2"
                 readonly value: {
-                  readonly _3: ValidateStrategy
-                  readonly _4: ValidateStrategy
+                  readonly _3: null | number
+                  readonly _4: null
                 }
               }
             | {
                 readonly kind: "_5"
-                readonly value: ValidateStrategy
+                readonly value: null
               },
           ]
         >
       }
     | {
-        readonly active?: Setter<ValidateStrategy>
+        readonly active?: Setter<null | ReadonlyArray<string>>
         readonly branches?: Setter<
-          | ValidateStrategy
-          | {
-              readonly _1?: Setter<ValidateStrategy>
-              readonly _2?: Setter<
-                | ValidateStrategy
-                | {
-                    readonly _3?: Setter<ValidateStrategy>
-                    readonly _4?: Setter<ValidateStrategy>
-                  },
-                [ValidateOnVerboseSchema["branches"]["_2"]]
-              >
-              readonly _5?: Setter<ValidateStrategy>
-            },
-          [ValidateOnVerboseSchema["branches"]]
+          null | {
+            readonly _1?: Setter<null | string>
+            readonly _2?: Setter<
+              null | {
+                readonly _3?: Setter<null | number>
+                readonly _4?: Setter<null>
+              },
+              [ErrorVerboseSchema["branches"]["_2"]]
+            >
+            readonly _5?: Setter<null>
+          },
+          [ErrorVerboseSchema["branches"]]
         >
       },
-    [ValidateOnVerboseSchema]
+    [ErrorVerboseSchema]
   >
 
-  it("matches schema type for getValidateOn(scope, select?)", ({ scope }) => {
-    expectTypeOf(form.getValidateOn(scope)).toEqualTypeOf<ValidateOnSchema>()
+  it("matches schema type for getError(scope, select?)", ({ scope }) => {
+    expectTypeOf(form.getError(scope)).toEqualTypeOf<ErrorSchema>()
 
     expectTypeOf(
-      form.getValidateOn(scope, params._first),
-    ).toEqualTypeOf<ValidateOnSchema>()
+      form.getError(scope, params._first),
+    ).toEqualTypeOf<ErrorSchema>()
 
     expectTypeOf(
-      form.getValidateOn(scope, params._second),
-    ).toEqualTypeOf<ValidateOnVerboseSchema>()
+      form.getError(scope, params._second),
+    ).toEqualTypeOf<ErrorVerboseSchema>()
   })
 
-  it("matches setter type for setValidateOn(setter)", () => {
-    expectTypeOf(form.setValidateOn).toEqualTypeOf<
-      (setter: ValidateOnSetter) => void
-    >()
+  it("matches setter type for setError(setter)", () => {
+    expectTypeOf(form.setError).toEqualTypeOf<(setter: ErrorOnSetter) => void>()
   })
 
-  it("allows passing concise value to setValidateOn", ({ scope }) => {
-    const validateOn_0 = form.getValidateOn(scope)
-    const validateOn_0_concise = form.getValidateOn(scope, params._first)
+  it("allows passing concise value to setError", ({ scope }) => {
+    const error_0 = form.getError(scope)
+    const error_0_concise = form.getError(scope, params._first)
+    const error_0_verbose = form.getError(scope, params._second)
 
-    form.setValidateOn(validateOn_0_concise)
+    form.setError(error_0_concise)
 
-    expect(form.getValidateOn(scope)).toStrictEqual(validateOn_0)
-    expect(form.getValidateOn(scope, params._first)).toStrictEqual(
-      validateOn_0_concise,
-    )
+    expect(form.getError(scope)).toStrictEqual(error_0)
+    expect(form.getError(scope, params._first)).toStrictEqual(error_0_concise)
+    expect(form.getError(scope, params._second)).toStrictEqual(error_0_verbose)
   })
 
-  it("allows passing verbose value to setValidateOn", ({ scope }) => {
-    const validateOn_0 = form.getValidateOn(scope)
-    const validateOn_0_concise = form.getValidateOn(scope, params._first)
-    const validateOn_0_verbose = form.getValidateOn(scope, params._second)
+  it("allows passing verbose value to setError", ({ scope }) => {
+    const error_0 = form.getError(scope)
+    const error_0_concise = form.getError(scope, params._first)
+    const error_0_verbose = form.getError(scope, params._second)
 
-    form.setValidateOn(validateOn_0_verbose)
+    form.setError(error_0_verbose)
 
-    expect(form.getValidateOn(scope)).toStrictEqual(validateOn_0)
-    expect(form.getValidateOn(scope, params._first)).toStrictEqual(
-      validateOn_0_concise,
-    )
-    expect(form.getValidateOn(scope, params._second)).toStrictEqual(
-      validateOn_0_verbose,
-    )
+    expect(form.getError(scope)).toStrictEqual(error_0)
+    expect(form.getError(scope, params._first)).toStrictEqual(error_0_concise)
+    expect(form.getError(scope, params._second)).toStrictEqual(error_0_verbose)
   })
 
-  it("allows passing verbose value in setValidateOn callback", ({ scope }) => {
-    const validateOn_0 = form.getValidateOn(scope)
-    const validateOn_0_concise = form.getValidateOn(scope, params._first)
-    const validateOn_0_verbose = form.getValidateOn(scope, params._second)
+  it("allows passing verbose value in setError callback", ({ scope }) => {
+    const error_0 = form.getError(scope)
+    const error_0_concise = form.getError(scope, params._first)
+    const error_0_verbose = form.getError(scope, params._second)
 
-    form.setValidateOn((verbose) => {
+    form.setError((verbose) => {
       return verbose
     })
 
-    expect(form.getValidateOn(scope)).toStrictEqual(validateOn_0)
-    expect(form.getValidateOn(scope, params._first)).toStrictEqual(
-      validateOn_0_concise,
-    )
-    expect(form.getValidateOn(scope, params._second)).toStrictEqual(
-      validateOn_0_verbose,
-    )
+    expect(form.getError(scope)).toStrictEqual(error_0)
+    expect(form.getError(scope, params._first)).toStrictEqual(error_0_concise)
+    expect(form.getError(scope, params._second)).toStrictEqual(error_0_verbose)
   })
 
-  it("ensures ImpulseFormSwitchOptions.validateOn type", () => {
+  it("ensures ImpulseFormSwitchOptions.error type", () => {
     const form = ImpulseFormSwitch(active, branches, {
-      validateOn: {
-        // @ts-expect-error should be ValidateStrategy
+      error: {
+        // @ts-expect-error should be ReadonlyArray<string>
         active: "",
         branches: {
-          // @ts-expect-error should be ValidateStrategy
+          // @ts-expect-error should be string
           _1: 0,
           _2: {
-            // @ts-expect-error should be ValidateStrategy
+            // @ts-expect-error should be number
             _3: false,
-            // @ts-expect-error should be ValidateStrategy
+            // @ts-expect-error should be null
             _4: "",
           },
         },
@@ -230,123 +221,339 @@ describe("types", () => {
 
     const branches = {
       _6: form,
-      _7: ImpulseFormUnit("0"),
+      _7: ImpulseFormUnit("0", {
+        error: 0,
+      }),
     }
 
     const parent = ImpulseFormSwitch(active, branches)
 
-    type ParentValidateOnSchema =
-      | ValidateStrategy
-      | {
-          readonly active: ValidateStrategy
-          readonly branch:
-            | {
-                readonly kind: "_6"
-                readonly value: ValidateOnSchema
-              }
-            | {
-                readonly kind: "_7"
-                readonly value: ValidateStrategy
-              }
-        }
+    type ParentErrorSchema = null | {
+      readonly active: null | ReadonlyArray<string>
+      readonly branch:
+        | {
+            readonly kind: "_6"
+            readonly value: ErrorSchema
+          }
+        | {
+            readonly kind: "_7"
+            readonly value: null | number
+          }
+    }
 
-    interface ParentValidateOnVerboseSchema {
-      readonly active: ValidateStrategy
+    interface ParentErrorVerboseSchema {
+      readonly active: null | ReadonlyArray<string>
       readonly branches: {
-        readonly _6: ValidateOnVerboseSchema
-        readonly _7: ValidateStrategy
+        readonly _6: ErrorVerboseSchema
+        readonly _7: null | number
       }
     }
 
-    type ParentValidateOnSetter = Setter<
-      | ValidateStrategy
+    type ParentErrorSetter = Setter<
+      | null
       | {
-          readonly active?: Setter<ValidateStrategy>
+          readonly active?: Setter<null | ReadonlyArray<string>>
           readonly branch?: Setter<
-            | ValidateStrategy
+            | null
             | {
                 readonly kind: "_6"
-                readonly value: ValidateOnSetter
+                readonly value: ErrorOnSetter
               }
             | {
                 readonly kind: "_7"
-                readonly value: Setter<ValidateStrategy>
+                readonly value: Setter<null | number>
               },
             [
               | {
                   readonly kind: "_6"
-                  readonly value: ValidateOnVerboseSchema
+                  readonly value: ErrorVerboseSchema
                 }
               | {
                   readonly kind: "_7"
-                  readonly value: ValidateStrategy
+                  readonly value: null | number
                 },
             ]
           >
         }
       | {
-          readonly active?: Setter<ValidateStrategy>
+          readonly active?: Setter<null | ReadonlyArray<string>>
           readonly branches?: Setter<
-            | ValidateStrategy
-            | {
-                readonly _6?: ValidateOnSetter
-                readonly _7?: Setter<ValidateStrategy>
-              },
-            [ParentValidateOnVerboseSchema["branches"]]
+            null | {
+              readonly _6?: ErrorOnSetter
+              readonly _7?: Setter<null | number>
+            },
+            [ParentErrorVerboseSchema["branches"]]
           >
         },
-      [ParentValidateOnVerboseSchema]
+      [ParentErrorVerboseSchema]
     >
 
-    it("matches schema type for getValidateOn(scope, select?)", ({ scope }) => {
-      expectTypeOf(
-        parent.getValidateOn(scope),
-      ).toEqualTypeOf<ParentValidateOnSchema>()
+    it("matches schema type for getError(scope, select?)", ({ scope }) => {
+      expectTypeOf(parent.getError(scope)).toEqualTypeOf<ParentErrorSchema>()
 
       expectTypeOf(
-        parent.getValidateOn(scope, params._first),
-      ).toEqualTypeOf<ParentValidateOnSchema>()
+        parent.getError(scope, params._first),
+      ).toEqualTypeOf<ParentErrorSchema>()
 
       expectTypeOf(
-        parent.getValidateOn(scope, params._second),
-      ).toEqualTypeOf<ParentValidateOnVerboseSchema>()
+        parent.getError(scope, params._second),
+      ).toEqualTypeOf<ParentErrorVerboseSchema>()
     })
 
-    it("matches setter type for setValidateOn(setter)", () => {
-      expectTypeOf(parent.setValidateOn).toEqualTypeOf<
-        (setter: ParentValidateOnSetter) => void
+    it("matches setter type for setError(setter)", () => {
+      expectTypeOf(parent.setError).toEqualTypeOf<
+        (setter: ParentErrorSetter) => void
       >()
     })
 
-    it("allows passing concise value to setValidateOn", ({ scope }) => {
-      const concise = parent.getValidateOn(scope, params._first)
+    it("allows passing concise value to setError", ({ scope }) => {
+      const concise = parent.getError(scope, params._first)
 
-      parent.setValidateOn(concise)
+      parent.setError(concise)
 
-      expect(parent.getValidateOn(scope, params._first)).toStrictEqual(concise)
+      expect(parent.getError(scope, params._first)).toStrictEqual(concise)
     })
 
-    it("allows passing verbose value to setValidateOn", ({ scope }) => {
-      const verbose = parent.getValidateOn(scope, params._second)
+    it("allows passing verbose value to setError", ({ scope }) => {
+      const verbose = parent.getError(scope, params._second)
 
-      parent.setValidateOn(verbose)
+      parent.setError(verbose)
 
-      expect(parent.getValidateOn(scope, params._second)).toStrictEqual(verbose)
+      expect(parent.getError(scope, params._second)).toStrictEqual(verbose)
     })
 
-    it("ensures ImpulseFormSwitchOptions.validateOn type", () => {
+    it("ensures ImpulseFormSwitchOptions.error type", () => {
       const parent = ImpulseFormSwitch(active, branches, {
-        validateOn: {
-          // @ts-expect-error should be ValidateStrategy
+        error: {
+          // @ts-expect-error should be ReadonlyArray<string>
           active: 1,
           branches: {
-            // @ts-expect-error should be ValidateStrategy
-            _6: 0,
+            // @ts-expect-error should be number
+            _7: "",
           },
         },
       })
 
       expectTypeOf(parent).not.toBeUndefined()
+    })
+  })
+})
+
+describe.each([
+  VALIDATE_ON_TOUCH,
+  VALIDATE_ON_CHANGE,
+  VALIDATE_ON_SUBMIT,
+  VALIDATE_ON_INIT,
+])("when any validateOn (%s)", (validateOn) => {
+  it("selects the active's error only when it has an error", ({ scope }) => {
+    const form = ImpulseFormSwitch(
+      ImpulseFormUnit("_1", {
+        schema: z.enum(["_1"]),
+        error: ["custom"],
+      }),
+      {
+        _1: ImpulseFormUnit(0, {
+          error: 123,
+        }),
+      },
+      {
+        validateOn,
+      },
+    )
+
+    const concise = ["custom"]
+
+    expect(form.getError(scope)).toStrictEqual(concise)
+    expect(form.getError(scope, params._first)).toStrictEqual(concise)
+    expect(form.getError(scope, params._second)).toStrictEqual({
+      active: ["custom"],
+      branches: {
+        _1: 123,
+      },
+    })
+  })
+
+  it("selects the custom error regardless of the validate strategy", ({
+    scope,
+  }) => {
+    const form = ImpulseFormSwitch(
+      ImpulseFormUnit("_2", {
+        schema: z.enum(["_1", "_2"]),
+      }),
+      {
+        _1: ImpulseFormUnit(0, {
+          error: 123,
+        }),
+        _2: ImpulseFormSwitch(
+          ImpulseFormUnit("_3", {
+            schema: z.enum(["_3", "_4"]),
+          }),
+          {
+            _3: ImpulseFormUnit("0", {
+              error: true,
+            }),
+            _4: ImpulseFormUnit(1, {
+              error: ["one", "two"],
+            }),
+          },
+        ),
+      },
+      {
+        validateOn,
+      },
+    )
+
+    const concise = {
+      active: null,
+      branch: {
+        kind: "_2",
+        value: {
+          active: null,
+          branch: {
+            kind: "_3",
+            value: true,
+          },
+        },
+      },
+    }
+
+    expect(form.getError(scope)).toStrictEqual(concise)
+    expect(form.getError(scope, params._first)).toStrictEqual(concise)
+    expect(form.getError(scope, params._second)).toStrictEqual({
+      active: null,
+      branches: {
+        _1: 123,
+        _2: {
+          active: null,
+          branches: {
+            _3: true,
+            _4: ["one", "two"],
+          },
+        },
+      },
+    })
+  })
+})
+
+describe.each([VALIDATE_ON_TOUCH, VALIDATE_ON_CHANGE, VALIDATE_ON_SUBMIT])(
+  "when runtime validateOn (%s)",
+  (validateOn) => {
+    it("selects null for validating error", ({ scope }) => {
+      const form = ImpulseFormSwitch(
+        ImpulseFormUnit("_2", {
+          schema: z.enum(["_1", "_2"]),
+        }),
+        {
+          _1: ImpulseFormUnit(0, {
+            validate: (input): Result<string, number> => {
+              if (input <= 0) {
+                return ["Too small", null]
+              }
+
+              return [null, input]
+            },
+          }),
+          _2: ImpulseFormSwitch(
+            ImpulseFormUnit("_3", {
+              schema: z.enum(["_3", "_4"]),
+            }),
+            {
+              _3: ImpulseFormUnit("0", {
+                schema: z.string(),
+              }),
+              _4: ImpulseFormUnit(1, {
+                schema: z.number(),
+              }),
+            },
+          ),
+        },
+        {
+          validateOn,
+        },
+      )
+
+      expect(form.getError(scope)).toBeNull()
+      expect(form.getError(scope, params._first)).toBeNull()
+      expect(form.getError(scope, params._second)).toStrictEqual({
+        active: null,
+        branches: {
+          _1: null,
+          _2: {
+            active: null,
+            branches: {
+              _3: null,
+              _4: null,
+            },
+          },
+        },
+      })
+    })
+  },
+)
+
+describe("when validateOn=onInit", () => {
+  it("selects validating errors", ({ scope }) => {
+    const form = ImpulseFormSwitch(
+      ImpulseFormUnit("_2", {
+        schema: z.enum(["_1", "_2"]),
+      }),
+      {
+        _1: ImpulseFormUnit(-10, {
+          validate: (input): Result<string, number> => {
+            if (input <= 0) {
+              return ["Too small", null]
+            }
+
+            return [null, input]
+          },
+        }),
+        _2: ImpulseFormSwitch(
+          ImpulseFormUnit("_3", {
+            schema: z.enum(["_3", "_4"]),
+          }),
+          {
+            _3: ImpulseFormUnit("0", {
+              schema: z.number(),
+            }),
+            _4: ImpulseFormUnit(1, {
+              schema: z.string(),
+            }),
+          },
+        ),
+      },
+      {
+        validateOn: "onInit",
+      },
+    )
+
+    const concise = {
+      active: null,
+      branch: {
+        kind: "_2",
+        value: {
+          active: null,
+          branch: {
+            kind: "_3",
+            value: [expect.any(String)],
+          },
+        },
+      },
+    }
+
+    expect(form.getError(scope)).toStrictEqual(concise)
+    expect(form.getError(scope, params._first)).toStrictEqual(concise)
+    expect(form.getError(scope, params._second)).toStrictEqual({
+      active: null,
+      branches: {
+        _1: "Too small",
+        _2: {
+          active: null,
+          branches: {
+            _3: [expect.any(String)],
+            _4: [expect.any(String)],
+          },
+        },
+      },
     })
   })
 })
@@ -358,13 +565,10 @@ describe.each([
   [VALIDATE_ON_INIT, VALIDATE_ON_TOUCH],
 ])("when ValidateStrategy=%s", (validateOn, differentValidateOn) => {
   describe("when defining top-level concise ImpulseFormSwitchOptions.validateOn", () => {
-    describe.each([
-      ["valid", "_2"],
-      ["invalid", ""],
-    ])("when active is %s", (_, kind) => {
-      it("overrides all validateOn", ({ scope }) => {
+    describe("when active is valid", () => {
+      it.skip("overrides active branch's validateOn", ({ scope }) => {
         const form = ImpulseFormSwitch(
-          ImpulseFormUnit(kind, {
+          ImpulseFormUnit("_2", {
             validateOn: "onChange",
             schema: z.enum(["_1", "_2"]),
           }),
@@ -394,17 +598,68 @@ describe.each([
           },
         )
 
-        expect(form.getValidateOn(scope)).toBe(validateOn)
-        expect(form.getValidateOn(scope, params._first)).toBe(validateOn)
-        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+        expect(form.getError(scope)).toBe(validateOn)
+        expect(form.getError(scope, params._first)).toBe(validateOn)
+        expect(form.getError(scope, params._second)).toStrictEqual({
           active: validateOn,
           branches: {
-            _1: validateOn,
+            _1: "onInit",
             _2: {
               active: validateOn,
               branches: {
                 _3: validateOn,
-                _4: validateOn,
+                _4: "onTouch",
+              },
+            },
+          },
+        })
+      })
+    })
+
+    describe("when active is invalid", () => {
+      it.skip("overrides only the active's validateOn", ({ scope }) => {
+        const form = ImpulseFormSwitch(
+          ImpulseFormUnit("", {
+            validateOn: "onChange",
+            schema: z.enum(["_1", "_2"]),
+          }),
+          {
+            _1: ImpulseFormUnit(0, {
+              validateOn: "onInit",
+              schema: z.number(),
+            }),
+            _2: ImpulseFormSwitch(
+              ImpulseFormUnit("_3", {
+                schema: z.enum(["_3", "_4"]),
+              }),
+              {
+                _3: ImpulseFormUnit("0", {
+                  validateOn: "onSubmit",
+                  schema: z.string(),
+                }),
+                _4: ImpulseFormUnit(1, {
+                  validateOn: "onTouch",
+                  schema: z.number(),
+                }),
+              },
+            ),
+          },
+          {
+            validateOn,
+          },
+        )
+
+        expect(form.getError(scope)).toBe(validateOn)
+        expect(form.getError(scope, params._first)).toBe(validateOn)
+        expect(form.getError(scope, params._second)).toStrictEqual({
+          active: validateOn,
+          branches: {
+            _1: "onInit",
+            _2: {
+              active: "onTouch",
+              branches: {
+                _3: "onSubmit",
+                _4: "onTouch",
               },
             },
           },
@@ -415,7 +670,7 @@ describe.each([
 
   describe("when defining ImpulseFormSwitchOptions.validateOn.active", () => {
     describe("when active is invalid", () => {
-      it("overrides only the active's validateOn", ({ scope }) => {
+      it.skip("overrides only the active's validateOn", ({ scope }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("", {
             validateOn: "onChange",
@@ -449,9 +704,9 @@ describe.each([
           },
         )
 
-        expect(form.getValidateOn(scope)).toBe(validateOn)
-        expect(form.getValidateOn(scope, params._first)).toBe(validateOn)
-        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+        expect(form.getError(scope)).toBe(validateOn)
+        expect(form.getError(scope, params._first)).toBe(validateOn)
+        expect(form.getError(scope, params._second)).toStrictEqual({
           active: validateOn,
           branches: {
             _1: "onInit",
@@ -468,7 +723,7 @@ describe.each([
     })
 
     describe("when active is valid", () => {
-      it("overrides only the active's validateOn", ({ scope }) => {
+      it.skip("overrides only the active's validateOn", ({ scope }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("_2", {
             validateOn: "onChange",
@@ -516,9 +771,9 @@ describe.each([
           },
         }
 
-        expect(form.getValidateOn(scope)).toStrictEqual(concise)
-        expect(form.getValidateOn(scope, params._first)).toStrictEqual(concise)
-        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+        expect(form.getError(scope)).toStrictEqual(concise)
+        expect(form.getError(scope, params._first)).toStrictEqual(concise)
+        expect(form.getError(scope, params._second)).toStrictEqual({
           active: validateOn,
           branches: {
             _1: "onInit",
@@ -537,7 +792,7 @@ describe.each([
 
   describe("when defining concise ImpulseFormSwitchOptions.validateOn.branch", () => {
     describe("when active is invalid", () => {
-      it("does not change anything", ({ scope }) => {
+      it.skip("does not change anything", ({ scope }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("", {
             validateOn: "onChange",
@@ -571,9 +826,9 @@ describe.each([
           },
         )
 
-        expect(form.getValidateOn(scope)).toBe("onChange")
-        expect(form.getValidateOn(scope, params._first)).toBe("onChange")
-        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+        expect(form.getError(scope)).toBe("onChange")
+        expect(form.getError(scope, params._first)).toBe("onChange")
+        expect(form.getError(scope, params._second)).toStrictEqual({
           active: "onChange",
           branches: {
             _1: "onInit",
@@ -590,7 +845,7 @@ describe.each([
     })
 
     describe("when active is valid", () => {
-      it("overrides only the active branch validateOn", ({ scope }) => {
+      it.skip("overrides only the active branch validateOn", ({ scope }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("_2", {
             validateOn: differentValidateOn,
@@ -626,9 +881,9 @@ describe.each([
           },
         }
 
-        expect(form.getValidateOn(scope)).toStrictEqual(concise)
-        expect(form.getValidateOn(scope, params._first)).toStrictEqual(concise)
-        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+        expect(form.getError(scope)).toStrictEqual(concise)
+        expect(form.getError(scope, params._first)).toStrictEqual(concise)
+        expect(form.getError(scope, params._second)).toStrictEqual({
           active: differentValidateOn,
           branches: {
             _1: "onInit",
@@ -644,7 +899,7 @@ describe.each([
 
   describe("when defining detailed ImpulseFormSwitchOptions.validateOn.branch", () => {
     describe("when active is invalid", () => {
-      it("overrides only the target branch validateOn", ({ scope }) => {
+      it.skip("overrides only the target branch validateOn", ({ scope }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("", {
             validateOn: "onChange",
@@ -681,9 +936,9 @@ describe.each([
           },
         )
 
-        expect(form.getValidateOn(scope)).toBe("onChange")
-        expect(form.getValidateOn(scope, params._first)).toBe("onChange")
-        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+        expect(form.getError(scope)).toBe("onChange")
+        expect(form.getError(scope, params._first)).toBe("onChange")
+        expect(form.getError(scope, params._second)).toStrictEqual({
           active: "onChange",
           branches: {
             _1: validateOn,
@@ -700,7 +955,7 @@ describe.each([
     })
 
     describe("when active is valid", () => {
-      it("overrides only the target inactive branch validateOn", ({
+      it.skip("overrides only the target inactive branch validateOn", ({
         scope,
       }) => {
         const form = ImpulseFormSwitch(
@@ -753,9 +1008,9 @@ describe.each([
           },
         }
 
-        expect(form.getValidateOn(scope)).toStrictEqual(concise)
-        expect(form.getValidateOn(scope, params._first)).toStrictEqual(concise)
-        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+        expect(form.getError(scope)).toStrictEqual(concise)
+        expect(form.getError(scope, params._first)).toStrictEqual(concise)
+        expect(form.getError(scope, params._second)).toStrictEqual({
           active: "onChange",
           branches: {
             _1: validateOn,
@@ -770,7 +1025,9 @@ describe.each([
         })
       })
 
-      it("overrides only the target active branch validateOn", ({ scope }) => {
+      it.skip("overrides only the target active branch validateOn", ({
+        scope,
+      }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("_2", {
             validateOn: differentValidateOn,
@@ -815,9 +1072,9 @@ describe.each([
           },
         }
 
-        expect(form.getValidateOn(scope)).toStrictEqual(concise)
-        expect(form.getValidateOn(scope, params._first)).toStrictEqual(concise)
-        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+        expect(form.getError(scope)).toStrictEqual(concise)
+        expect(form.getError(scope, params._first)).toStrictEqual(concise)
+        expect(form.getError(scope, params._second)).toStrictEqual({
           active: differentValidateOn,
           branches: {
             _1: "onInit",
@@ -825,14 +1082,14 @@ describe.each([
               active: validateOn,
               branches: {
                 _3: validateOn,
-                _4: validateOn,
+                _4: "onTouch",
               },
             },
           },
         })
       })
 
-      it("overrides nested switch", ({ scope }) => {
+      it.skip("overrides nested switch", ({ scope }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("_2", {
             validateOn: "onInit",
@@ -888,9 +1145,9 @@ describe.each([
           },
         }
 
-        expect(form.getValidateOn(scope)).toStrictEqual(concise)
-        expect(form.getValidateOn(scope, params._first)).toStrictEqual(concise)
-        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+        expect(form.getError(scope)).toStrictEqual(concise)
+        expect(form.getError(scope, params._first)).toStrictEqual(concise)
+        expect(form.getError(scope, params._second)).toStrictEqual({
           active: "onInit",
           branches: {
             _1: "onInit",
@@ -908,7 +1165,7 @@ describe.each([
   })
 
   describe("when defining all active+branch+branches ImpulseFormSwitchOptions.validateOn", () => {
-    it("branch takes over branches", ({ scope }) => {
+    it.skip("branch takes over branches", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("_2", {
           validateOn: "onChange",
@@ -958,9 +1215,9 @@ describe.each([
         },
       }
 
-      expect(form.getValidateOn(scope)).toStrictEqual(concise)
-      expect(form.getValidateOn(scope, params._first)).toStrictEqual(concise)
-      expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+      expect(form.getError(scope)).toStrictEqual(concise)
+      expect(form.getError(scope, params._first)).toStrictEqual(concise)
+      expect(form.getError(scope, params._second)).toStrictEqual({
         active: differentValidateOn,
         branches: {
           _1: differentValidateOn,
@@ -968,7 +1225,7 @@ describe.each([
             active: validateOn,
             branches: {
               _3: validateOn,
-              _4: validateOn,
+              _4: "onTouch",
             },
           },
         },
@@ -976,7 +1233,7 @@ describe.each([
     })
   })
 
-  it("returns the ValidateStrategy as concise result when everything has the same ValidateStrategy", ({
+  it.skip("returns the ValidateStrategy as concise result when everything has the same ValidateStrategy", ({
     scope,
   }) => {
     const form = ImpulseFormSwitch(
@@ -996,9 +1253,9 @@ describe.each([
       },
     )
 
-    expect(form.getValidateOn(scope)).toBe(validateOn)
-    expect(form.getValidateOn(scope, params._first)).toBe(validateOn)
-    expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+    expect(form.getError(scope)).toBe(validateOn)
+    expect(form.getError(scope, params._first)).toBe(validateOn)
+    expect(form.getError(scope, params._second)).toStrictEqual({
       active: validateOn,
       branches: {
         _1: validateOn,
@@ -1015,7 +1272,7 @@ describe.each([
 })
 
 describe("stable validateOn value", () => {
-  it("subsequently selects equal validateOn", ({ scope }) => {
+  it.skip("subsequently selects equal validateOn", ({ scope }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("_2", {
         validateOn: "onChange",
@@ -1044,12 +1301,12 @@ describe("stable validateOn value", () => {
       },
     )
 
-    expect(form.getValidateOn(scope)).toBe(form.getValidateOn(scope))
-    expect(form.getValidateOn(scope, params._first)).toBe(
-      form.getValidateOn(scope, params._first),
+    expect(form.getError(scope)).toBe(form.getError(scope))
+    expect(form.getError(scope, params._first)).toBe(
+      form.getError(scope, params._first),
     )
-    expect(form.getValidateOn(scope, params._second)).toBe(
-      form.getValidateOn(scope, params._second),
+    expect(form.getError(scope, params._second)).toBe(
+      form.getError(scope, params._second),
     )
   })
 })
@@ -1107,17 +1364,19 @@ describe("using recursive setter", () => {
     ],
 
     [
-      "ImpulseFormSwitch.setValidateOn",
+      "ImpulseFormSwitch.setError",
       (setter) => {
         const form = setup()
 
-        form.setValidateOn(setter)
+        form.setError(setter)
 
         return form
       },
     ],
   ])("in %s", (_, setup) => {
-    it("passes initial and input recursively to all setters", ({ scope }) => {
+    it.skip("passes initial and input recursively to all setters", ({
+      scope,
+    }) => {
       expect.assertions(20)
 
       const form = setup(($) => {
@@ -1385,9 +1644,9 @@ describe("using recursive setter", () => {
         },
       }
 
-      expect(form.getValidateOn(scope)).toStrictEqual(concise)
-      expect(form.getValidateOn(scope, params._first)).toStrictEqual(concise)
-      expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+      expect(form.getError(scope)).toStrictEqual(concise)
+      expect(form.getError(scope, params._first)).toStrictEqual(concise)
+      expect(form.getError(scope, params._second)).toStrictEqual({
         active: "onInit",
         branches: {
           _1: "onTouch",

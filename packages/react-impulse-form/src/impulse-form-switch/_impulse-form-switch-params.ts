@@ -37,7 +37,7 @@ export interface ImpulseFormSwitchParams<
     TBranches
   >
 
-  "error.setter": ImpulseFormSwitchErrorSetter<TBranches>
-  "error.schema": ImpulseFormSwitchError<TBranches>
-  "error.schema.verbose": ImpulseFormSwitchErrorVerbose<TBranches>
+  "error.setter": ImpulseFormSwitchErrorSetter<TKind, TBranches>
+  "error.schema": ImpulseFormSwitchError<TKind, TBranches>
+  "error.schema.verbose": ImpulseFormSwitchErrorVerbose<TKind, TBranches>
 }
