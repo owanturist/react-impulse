@@ -7,7 +7,6 @@ import { isString } from "~/tools/is-string"
 import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
-import type { Setter } from "~/tools/setter"
 import { values } from "~/tools/values"
 
 import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
@@ -22,6 +21,7 @@ import {
   type ImpulseFormSwitchFlag,
   isImpulseFormSwitchFlagEqual,
 } from "./_impulse-form-switch-flag"
+import type { ImpulseFormSwitchFlagSetter } from "./_impulse-form-switch-flag-setter"
 import {
   type ImpulseFormSwitchFlagVerbose,
   isImpulseFormSwitchFlagVerboseEqual,
@@ -345,7 +345,7 @@ export class ImpulseFormSwitchState<
     if (!isUndefined(branchSetter)) {
       const activeBranch = this._getActiveBranch(scope)
 
-      const branchValidateOn = isFunction(branchSetter)
+      const activeBranchSetter = isFunction(branchSetter)
         ? activeBranch
           ? branchSetter({
               kind: activeBranch.kind,
@@ -354,13 +354,13 @@ export class ImpulseFormSwitchState<
           : undefined
         : branchSetter
 
-      if (isString(branchValidateOn)) {
-        activeBranch?.value._setValidateOn(scope, branchValidateOn)
-      } else if (!isUndefined(branchValidateOn)) {
-        const targetBranch = this._branches[branchValidateOn.kind]
+      if (isString(activeBranchSetter)) {
+        activeBranch?.value._setValidateOn(scope, activeBranchSetter)
+      } else if (!isUndefined(activeBranchSetter)) {
+        const targetBranch = this._branches[activeBranchSetter.kind]
 
         if (targetBranch) {
-          targetBranch._setValidateOn(scope, branchValidateOn.value)
+          targetBranch._setValidateOn(scope, activeBranchSetter.value)
         }
       }
     }
@@ -369,55 +369,88 @@ export class ImpulseFormSwitchState<
   // T O U C H E D
 
   public readonly _touched = Impulse(
-    (scope): ImpulseFormShapeFlag<TFields> => {
-      const touched = mapValues(this._fields, ({ _touched }) => {
-        return _touched.getValue(scope)
-      })
-
-      const allTouched = values(touched)
-      const onlyTouched = allTouched.find(isBoolean) ?? false
-
-      for (const fieldTouched of allTouched) {
-        if (fieldTouched !== onlyTouched) {
-          return touched as ImpulseFormShapeFlag<TFields>
-        }
-      }
-
-      return onlyTouched
+    (scope): ImpulseFormSwitchFlag<TKind, TBranches> => {
+      return this._toConcise<"flag.schema", boolean>(
+        scope,
+        ({ _touched }) => _touched,
+      )
     },
 
     {
-      // compare: isImpulseFormShapeFlagEqual,
+      compare: isImpulseFormSwitchFlagEqual,
     },
   )
 
   public readonly _touchedVerbose = Impulse(
-    (scope): ImpulseFormShapeFlagVerbose<TFields> => {
-      const touchedVerbose = mapValues(this._fields, ({ _touchedVerbose }) =>
-        _touchedVerbose.getValue(scope),
+    (scope): ImpulseFormSwitchFlagVerbose<TKind, TBranches> => {
+      return this._toVerbose<"flag.schema.verbose">(
+        scope,
+        ({ _touchedVerbose }) => _touchedVerbose,
       )
-
-      return touchedVerbose as ImpulseFormShapeFlagVerbose<TFields>
     },
 
     {
-      // compare: isImpulseFormShapeFlagVerboseEqual,
+      compare: isImpulseFormSwitchFlagVerboseEqual,
     },
   )
 
   public _setTouched(
     scope: Scope,
-    setter: ImpulseFormShapeFlagSetter<TFields>,
+    setter: ImpulseFormSwitchFlagSetter<TKind, TBranches>,
   ): void {
-    const setters = isFunction(setter)
-      ? setter(this._touchedVerbose.getValue(scope))
-      : setter
+    const verbose = Lazy(() => this._touchedVerbose.getValue(scope))
+    const resolved = isFunction(setter) ? setter(verbose()) : setter
 
-    for (const [key, field] of entries(this._fields)) {
-      if (isBoolean(setters)) {
-        field._setTouched(scope, setters)
-      } else if (hasProperty(setters, key) && !isUndefined(setters[key])) {
-        field._setTouched(scope, setters[key])
+    const [activeSetter, branchSetter, branchesSetter] = isBoolean(resolved)
+      ? [resolved, resolved, undefined]
+      : [
+          resolved.active,
+
+          hasProperty(resolved, "branch") ? resolved.branch : undefined,
+
+          hasProperty(resolved, "branches")
+            ? isFunction(resolved.branches)
+              ? resolved.branches(verbose().branches)
+              : resolved.branches
+            : undefined,
+        ]
+
+    if (!isUndefined(activeSetter)) {
+      this._active._setTouched(scope, activeSetter)
+    }
+
+    for (const [kind, branch] of entries(this._branches)) {
+      const resolvedBranchSetter = isBoolean(branchesSetter)
+        ? branchesSetter
+        : hasProperty(branchesSetter, kind)
+          ? branchesSetter[kind]
+          : undefined
+
+      if (!isUndefined(resolvedBranchSetter)) {
+        branch._setTouched(scope, resolvedBranchSetter)
+      }
+    }
+
+    if (!isUndefined(branchSetter)) {
+      const activeBranch = this._getActiveBranch(scope)
+
+      const activeBranchSetter = isFunction(branchSetter)
+        ? activeBranch
+          ? branchSetter({
+              kind: activeBranch.kind,
+              value: activeBranch.value._touchedVerbose.getValue(scope),
+            })
+          : undefined
+        : branchSetter
+
+      if (isBoolean(activeBranchSetter)) {
+        activeBranch?.value._setTouched(scope, activeBranchSetter)
+      } else if (!isUndefined(activeBranchSetter)) {
+        const targetBranch = this._branches[activeBranchSetter.kind]
+
+        if (targetBranch) {
+          targetBranch._setTouched(scope, activeBranchSetter.value)
+        }
       }
     }
   }
