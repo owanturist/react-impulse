@@ -581,30 +581,22 @@ export class ImpulseFormSwitchState<
     },
   )
 
-  public readonly _dirtyOn = Impulse((scope): ImpulseFormShapeFlag<TFields> => {
-    const dirtyOn = mapValues(this._fields, ({ _dirtyOn }) => {
-      return _dirtyOn.getValue(scope)
-    })
-
-    const allDirty = values(dirtyOn)
-    const onlyDirty = allDirty.find(isBoolean) ?? false
-
-    for (const fieldDirty of allDirty) {
-      if (fieldDirty !== onlyDirty) {
-        return dirtyOn as ImpulseFormShapeFlag<TFields>
-      }
-    }
-
-    return onlyDirty
-  })
+  public readonly _dirtyOn = Impulse(
+    (scope): ImpulseFormSwitchFlag<TKind, TBranches> => {
+      return this._toConcise<"flag.schema", boolean>(
+        scope,
+        ({ _dirtyOn }) => _dirtyOn,
+        isBoolean,
+      )
+    },
+  )
 
   public readonly _dirtyOnVerbose = Impulse(
-    (scope): ImpulseFormShapeFlagVerbose<TFields> => {
-      const dirtyOnVerbose = mapValues(this._fields, ({ _dirtyOnVerbose }) => {
-        return _dirtyOnVerbose.getValue(scope)
-      })
-
-      return dirtyOnVerbose as ImpulseFormShapeFlagVerbose<TFields>
+    (scope): ImpulseFormSwitchFlagVerbose<TKind, TBranches> => {
+      return this._toVerbose<"flag.schema.verbose">(
+        scope,
+        ({ _dirtyOnVerbose }) => _dirtyOnVerbose,
+      )
     },
   )
 
