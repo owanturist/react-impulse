@@ -164,7 +164,7 @@ it("updates validateOn for restored elements", ({ scope }) => {
     ImpulseFormUnit(2, { schema: z.number(), validateOn: "onChange" }),
   ])
 
-  form.setElements([ImpulseFormUnit(0)])
+  form.setElements([ImpulseFormUnit(0, { schema: z.number() })])
   form.setValidateOn("onInit")
   expect(form.getValidateOn(scope)).toBe("onInit")
 

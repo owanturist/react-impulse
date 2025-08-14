@@ -21,10 +21,10 @@ export class ImpulseFormSwitch<
   ) {
     super()
 
-    this.active = _state._active._host()
+    this.active = _state._active._host() as TKind
 
     this.branches = mapValues(_state._branches, ({ _host }) => {
       return _host()
-    })
+    }) as Readonly<TBranches>
   }
 }

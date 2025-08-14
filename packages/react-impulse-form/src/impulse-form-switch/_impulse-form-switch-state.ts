@@ -38,8 +38,6 @@ import type { ImpulseFormSwitchVerboseParam } from "./_impulse-form-switch-verbo
 import type { ImpulseFormSwitchBranch } from "./impulse-form-switch-branch"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
-console.log("TODO verify it does not import anything from the SHAPE")
-
 type ImpulseFormSwitchStateBranches<TBranches> = {
   [TBranch in keyof TBranches]: ImpulseFormState<
     GetImpulseFormParams<TBranches[TBranch]>
@@ -290,10 +288,17 @@ export class ImpulseFormSwitchState<
       if (isNull(activeBranchSetter)) {
         activeBranch?.value._setError(scope, activeBranchSetter)
       } else if (!isUndefined(activeBranchSetter)) {
-        const targetBranch = this._branches[activeBranchSetter.kind]
+        const { kind, value } = activeBranchSetter as ImpulseFormSwitchBranch<
+          keyof TBranches,
+          unknown
+        >
+
+        const targetBranch = hasProperty(this._branches, kind)
+          ? this._branches[kind]
+          : undefined
 
         if (targetBranch) {
-          targetBranch._setError(scope, activeBranchSetter.value)
+          targetBranch._setError(scope, value)
         }
       }
     }
@@ -372,10 +377,16 @@ export class ImpulseFormSwitchState<
       if (isString(activeBranchSetter)) {
         activeBranch?.value._setValidateOn(scope, activeBranchSetter)
       } else if (!isUndefined(activeBranchSetter)) {
-        const targetBranch = this._branches[activeBranchSetter.kind]
+        const { kind, value } = activeBranchSetter as ImpulseFormSwitchBranch<
+          keyof TBranches,
+          unknown
+        >
+        const targetBranch = hasProperty(this._branches, kind)
+          ? this._branches[kind]
+          : undefined
 
         if (targetBranch) {
-          targetBranch._setValidateOn(scope, activeBranchSetter.value)
+          targetBranch._setValidateOn(scope, value)
         }
       }
     }
@@ -454,10 +465,16 @@ export class ImpulseFormSwitchState<
       if (isBoolean(activeBranchSetter)) {
         activeBranch?.value._setTouched(scope, activeBranchSetter)
       } else if (!isUndefined(activeBranchSetter)) {
-        const targetBranch = this._branches[activeBranchSetter.kind]
+        const { kind, value } = activeBranchSetter as ImpulseFormSwitchBranch<
+          keyof TBranches,
+          unknown
+        >
+        const targetBranch = hasProperty(this._branches, kind)
+          ? this._branches[kind]
+          : undefined
 
         if (targetBranch) {
-          targetBranch._setTouched(scope, activeBranchSetter.value)
+          targetBranch._setTouched(scope, value)
         }
       }
     }
