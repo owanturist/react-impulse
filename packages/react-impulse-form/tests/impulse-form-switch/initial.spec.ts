@@ -680,6 +680,7 @@ describe("stable initial value", () => {
       ),
     })
 
+    expect(form.getInitial(scope)).toBeInstanceOf(Object)
     expect(form.getInitial(scope)).toBe(form.getInitial(scope))
   })
 

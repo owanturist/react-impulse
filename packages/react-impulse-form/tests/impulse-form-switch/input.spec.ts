@@ -725,6 +725,7 @@ describe("stable input value", () => {
       ),
     })
 
+    expect(form.getInput(scope)).toBeInstanceOf(Object)
     expect(form.getInput(scope)).toBe(form.getInput(scope))
   })
 

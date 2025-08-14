@@ -12,7 +12,10 @@ import { values } from "~/tools/values"
 import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
 import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
 import type { GetImpulseFormParams } from "../impulse-form/get-impulse-form-params"
-import { ImpulseFormState } from "../impulse-form/impulse-form-state"
+import {
+  ImpulseFormState,
+  type ImpulseFormChild,
+} from "../impulse-form/impulse-form-state"
 import type { ValidateStrategy } from "../validate-strategy"
 
 import { ImpulseFormSwitch } from "./_impulse-form-switch"
@@ -572,9 +575,8 @@ export class ImpulseFormSwitchState<
   )
 
   public _forceValidated(scope: Scope): void {
-    for (const field of values(this._fields)) {
-      field._forceValidated(scope)
-    }
+    this._active._forceValidated(scope)
+    this._getActiveBranch(scope)?.value._forceValidated(scope)
   }
 
   // D I R T Y
@@ -645,14 +647,31 @@ export class ImpulseFormSwitchState<
 
   // C H I L D R E N
 
-  public _getChildren<TChildParams extends ImpulseFormParams>(): ReadonlyArray<
-    ImpulseFormChild<TChildParams, ImpulseFormShapeParams<TFields>>
+  public _getChildren<TChildParams extends ImpulseFormParams>(
+    scope: Scope,
+  ): ReadonlyArray<
+    ImpulseFormChild<TChildParams, ImpulseFormSwitchParams<TKind, TBranches>>
   > {
-    return map(entries(this._fields), ([key, field]) => ({
-      _state: field as unknown as ImpulseFormState<TChildParams>,
-      _mapToChild: (output) => {
-        return output[key as keyof ImpulseFormShapeOutput<TFields>]
+    const activeChild: ImpulseFormChild<
+      TChildParams,
+      ImpulseFormSwitchParams<TKind, TBranches>
+    > = {
+      _state: this._active as unknown as ImpulseFormState<TChildParams>,
+      _mapToChild: (output) => output.kind,
+    }
+
+    const activeBranch = this._getActiveBranch(scope)
+
+    if (!activeBranch) {
+      return [activeChild]
+    }
+
+    return [
+      activeChild,
+      {
+        _state: activeBranch.value as unknown as ImpulseFormState<TChildParams>,
+        _mapToChild: (output) => output.value,
       },
-    }))
+    ]
   }
 }

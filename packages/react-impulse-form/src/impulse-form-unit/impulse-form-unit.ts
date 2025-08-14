@@ -172,7 +172,12 @@ export function ImpulseFormUnit<TInput, TOutput = TInput>(
   options: ImpulseFormUnitSchemaOptions<TInput, TOutput>,
 ): ImpulseFormUnit<TInput, ReadonlyArray<string>, TOutput>
 
-export function ImpulseFormUnit<TInput, TError = null>(
+export function ImpulseFormUnit<TInput>(
+  input: TInput,
+  options?: ImpulseFormUnitOptions<TInput>,
+): ImpulseFormUnit<TInput, null, TInput>
+
+export function ImpulseFormUnit<TInput, TError>(
   input: TInput,
   options?: ImpulseFormUnitOptions<TInput, TError>,
 ): ImpulseFormUnit<TInput, TError, TInput>

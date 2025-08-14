@@ -690,7 +690,7 @@ describe.each([
     })
   })
 
-  describe("when defining detailed ImpulseFormSwitchOptions.validateOn.branch", () => {
+  describe("when defining detailed ImpulseFormSwitchOptions.validateOn.branch.value", () => {
     describe("when active is invalid", () => {
       it("overrides only the target branch validateOn", ({ scope }) => {
         const form = ImpulseFormSwitch(

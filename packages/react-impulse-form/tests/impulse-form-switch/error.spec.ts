@@ -6,6 +6,7 @@ import type { Setter } from "~/tools/setter"
 import {
   ImpulseFormShape,
   ImpulseFormSwitch,
+  type ImpulseFormSwitchErrorSetter,
   type ImpulseFormSwitchOptions,
   type ImpulseFormSwitchValidateOnSetter,
   ImpulseFormUnit,
@@ -14,6 +15,7 @@ import {
   VALIDATE_ON_INIT,
   VALIDATE_ON_SUBMIT,
   VALIDATE_ON_TOUCH,
+  type ValidateStrategy,
 } from "../../src"
 
 describe("types", () => {
@@ -496,123 +498,54 @@ describe.each([VALIDATE_ON_TOUCH, VALIDATE_ON_CHANGE, VALIDATE_ON_SUBMIT])(
   },
 )
 
-describe("when validateOn=onInit", () => {
-  const validateOn = VALIDATE_ON_INIT
-
-  describe("when active is invalid", () => {
-    it("selects active error", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("", {
+describe("when after trigger", () => {
+  function setup(validateOn: ValidateStrategy) {
+    return ImpulseFormSwitch(
+      ImpulseFormUnit("_2", {
+        validateOn,
+        schema: z.enum(["_1", "_2"]),
+      }),
+      {
+        _1: ImpulseFormUnit(-10, {
           validateOn,
-          schema: z.enum(["_1", "_2"]),
-        }),
-        {
-          _1: ImpulseFormUnit(-10, {
-            validateOn,
-            validate: (input): Result<string, number> => {
-              if (input <= 0) {
-                return ["Too small", null]
-              }
+          validate: (input): Result<string, number> => {
+            if (input <= 0) {
+              return ["Too small", null]
+            }
 
-              return [null, input]
-            },
-          }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("", {
-              validateOn,
-              schema: z.enum(["_3", "_4"]),
-            }),
-            {
-              _3: ImpulseFormUnit("0", {
-                validateOn,
-                schema: z.number(),
-              }),
-              _4: ImpulseFormUnit(1, {
-                validateOn,
-                schema: z.string(),
-              }),
-            },
-          ),
-        },
-      )
-
-      const concise = {
-        active: [expect.any(String)],
-        branch: null,
-      }
-
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
-      expect(form.getError(scope, params._second)).toStrictEqual({
-        active: [expect.any(String)],
-        branches: {
-          _1: "Too small",
-          _2: {
-            active: [expect.any(String)],
-            branches: {
-              _3: [expect.any(String)],
-              _4: [expect.any(String)],
-            },
+            return [null, input]
           },
-        },
-      })
-    })
-  })
-
-  describe("when active is valid", () => {
-    it("selects active's branch validating errors", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("_2", {
-          validateOn,
-          schema: z.enum(["_1", "_2"]),
         }),
-        {
-          _1: ImpulseFormUnit(-10, {
+        _2: ImpulseFormSwitch(
+          ImpulseFormUnit("_3", {
             validateOn,
-            validate: (input): Result<string, number> => {
-              if (input <= 0) {
-                return ["Too small", null]
-              }
-
-              return [null, input]
-            },
+            schema: z.enum(["_3", "_4"]),
           }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("_3", {
+          {
+            _3: ImpulseFormUnit("0", {
               validateOn,
-              schema: z.enum(["_3", "_4"]),
+              schema: z.number(),
             }),
-            {
-              _3: ImpulseFormUnit("0", {
-                validateOn,
-                schema: z.number(),
-              }),
-              _4: ImpulseFormUnit(1, {
-                validateOn,
-                schema: z.string(),
-              }),
-            },
-          ),
-        },
-      )
-
-      const concise = {
-        active: null,
-        branch: {
-          kind: "_2",
-          value: {
-            active: null,
-            branch: {
-              kind: "_3",
-              value: [expect.any(String)],
-            },
+            _4: ImpulseFormUnit(1, {
+              validateOn,
+              schema: z.string(),
+            }),
           },
-        },
-      }
+        ),
+      },
+    )
+  }
 
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
-      expect(form.getError(scope, params._second)).toStrictEqual({
+  describe.each<
+    [
+      ValidateStrategy,
+      verbose: unknown,
+      trigger?: (form: ReturnType<typeof setup>) => void | Promise<void>,
+    ]
+  >([
+    [
+      VALIDATE_ON_INIT,
+      {
         active: null,
         branches: {
           _1: "Too small",
@@ -624,56 +557,170 @@ describe("when validateOn=onInit", () => {
             },
           },
         },
+      },
+    ],
+
+    [
+      VALIDATE_ON_CHANGE,
+      {
+        active: null,
+        branches: {
+          _1: "Too small",
+          _2: {
+            active: null,
+            branches: {
+              _3: [expect.any(String)],
+              _4: null,
+            },
+          },
+        },
+      },
+      (form) => {
+        form.setInput({
+          branches: {
+            _1: -1,
+            _2: {
+              branches: {
+                _3: "123",
+              },
+            },
+          },
+        })
+      },
+    ],
+
+    [
+      VALIDATE_ON_TOUCH,
+      {
+        active: null,
+        branches: {
+          _1: "Too small",
+          _2: {
+            active: null,
+            branches: {
+              _3: [expect.any(String)],
+              _4: null,
+            },
+          },
+        },
+      },
+      (form) => {
+        form.setTouched({
+          branches: {
+            _1: true,
+            _2: {
+              branches: {
+                _3: true,
+              },
+            },
+          },
+        })
+      },
+    ],
+
+    [
+      VALIDATE_ON_SUBMIT,
+      {
+        active: null,
+        branches: {
+          _1: null,
+          _2: {
+            active: null,
+            branches: {
+              _3: [expect.any(String)],
+              _4: null,
+            },
+          },
+        },
+      },
+      async (form) => {
+        await form.submit()
+      },
+    ],
+  ])("when validateOn=%s", (validateOn, verbose, trigger) => {
+    describe("when active is valid", () => {
+      it("selects active's branch validating errors when units become dirty", async ({
+        scope,
+      }) => {
+        const form = setup(validateOn)
+
+        await trigger?.(form)
+
+        const concise = {
+          active: null,
+          branch: {
+            kind: "_2",
+            value: {
+              active: null,
+              branch: {
+                kind: "_3",
+                value: [expect.any(String)],
+              },
+            },
+          },
+        }
+
+        expect(form.getError(scope)).toStrictEqual(concise)
+        expect(form.getError(scope, params._first)).toStrictEqual(concise)
+        expect(form.getError(scope, params._second)).toStrictEqual(verbose)
       })
     })
   })
 })
 
 describe("when defining top-level concise ImpulseFormSwitchOptions.error", () => {
+  const validateOn = VALIDATE_ON_INIT
+
   describe("when active is valid", () => {
-    it.skip("overrides active branch's validateOn", ({ scope }) => {
+    it("overrides active branch's validateOn", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("_2", {
-          validateOn: "onChange",
+          validateOn,
+          error: ["custom"],
           schema: z.enum(["_1", "_2"]),
         }),
         {
           _1: ImpulseFormUnit(0, {
-            validateOn: "onInit",
+            validateOn,
+            error: ["custom_1"],
             schema: z.number(),
           }),
           _2: ImpulseFormSwitch(
             ImpulseFormUnit("_3", {
+              validateOn,
+              error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
               _3: ImpulseFormUnit("0", {
-                validateOn: "onSubmit",
+                validateOn,
+                error: ["custom_3"],
                 schema: z.string(),
               }),
               _4: ImpulseFormUnit(1, {
-                validateOn: "onTouch",
-                schema: z.number(),
+                validateOn,
+                error: ["custom_4"],
+                schema: z.string(),
               }),
             },
           ),
         },
         {
-          validateOn,
+          error: null,
         },
       )
 
-      expect(form.getError(scope)).toBe(validateOn)
-      expect(form.getError(scope, params._first)).toBe(validateOn)
+      expect(form.getError(scope)).toBeNull()
+      expect(form.getError(scope, params._first)).toBeNull()
       expect(form.getError(scope, params._second)).toStrictEqual({
-        active: validateOn,
+        active: null,
         branches: {
-          _1: "onInit",
+          _1: ["custom_1"],
           _2: {
-            active: validateOn,
+            active: null,
             branches: {
-              _3: validateOn,
-              _4: "onTouch",
+              _3: null,
+              _4: ["custom_4"],
             },
           },
         },
@@ -682,49 +729,60 @@ describe("when defining top-level concise ImpulseFormSwitchOptions.error", () =>
   })
 
   describe("when active is invalid", () => {
-    it.skip("overrides only the active's validateOn", ({ scope }) => {
+    it("overrides only the active's validateOn", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("", {
-          validateOn: "onChange",
+          validateOn,
+          error: ["custom"],
           schema: z.enum(["_1", "_2"]),
         }),
         {
           _1: ImpulseFormUnit(0, {
-            validateOn: "onInit",
+            validateOn,
+            error: ["custom_1"],
             schema: z.number(),
           }),
           _2: ImpulseFormSwitch(
             ImpulseFormUnit("_3", {
+              validateOn,
+              error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
               _3: ImpulseFormUnit("0", {
-                validateOn: "onSubmit",
+                validateOn,
+                error: ["custom_3"],
                 schema: z.string(),
               }),
               _4: ImpulseFormUnit(1, {
-                validateOn: "onTouch",
-                schema: z.number(),
+                validateOn,
+                error: ["custom_4"],
+                schema: z.string(),
               }),
             },
           ),
         },
         {
-          validateOn,
+          error: null,
         },
       )
 
-      expect(form.getError(scope)).toBe(validateOn)
-      expect(form.getError(scope, params._first)).toBe(validateOn)
+      const concise = {
+        active: [expect.stringContaining("Invalid option")],
+        branch: null,
+      }
+
+      expect(form.getError(scope)).toStrictEqual(concise)
+      expect(form.getError(scope, params._first)).toStrictEqual(concise)
       expect(form.getError(scope, params._second)).toStrictEqual({
-        active: validateOn,
+        active: [expect.stringContaining("Invalid option")],
         branches: {
-          _1: "onInit",
+          _1: ["custom_1"],
           _2: {
-            active: "onTouch",
+            active: ["custom_2"],
             branches: {
-              _3: "onSubmit",
-              _4: "onTouch",
+              _3: ["custom_3"],
+              _4: ["custom_4"],
             },
           },
         },
@@ -733,53 +791,66 @@ describe("when defining top-level concise ImpulseFormSwitchOptions.error", () =>
   })
 })
 
-describe("when defining ImpulseFormSwitchOptions.validateOn.active", () => {
+describe("when defining ImpulseFormSwitchOptions.error.active", () => {
+  const validateOn = VALIDATE_ON_INIT
+
   describe("when active is invalid", () => {
-    it.skip("overrides only the active's validateOn", ({ scope }) => {
+    it("overrides only the active's error", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("", {
-          validateOn: "onChange",
+          validateOn,
+          error: ["custom"],
           schema: z.enum(["_1", "_2"]),
         }),
         {
           _1: ImpulseFormUnit(0, {
-            validateOn: "onInit",
+            validateOn,
+            error: ["custom_1"],
             schema: z.number(),
           }),
           _2: ImpulseFormSwitch(
             ImpulseFormUnit("_3", {
+              validateOn,
+              error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
               _3: ImpulseFormUnit("0", {
-                validateOn: "onSubmit",
+                validateOn,
+                error: ["custom_3"],
                 schema: z.string(),
               }),
               _4: ImpulseFormUnit(1, {
-                validateOn: "onTouch",
-                schema: z.number(),
+                validateOn,
+                error: ["custom_4"],
+                schema: z.string(),
               }),
             },
           ),
         },
         {
-          validateOn: {
-            active: validateOn,
+          error: {
+            active: null,
           },
         },
       )
 
-      expect(form.getError(scope)).toBe(validateOn)
-      expect(form.getError(scope, params._first)).toBe(validateOn)
+      const concise = {
+        active: [expect.stringContaining("Invalid option")],
+        branch: null,
+      }
+
+      expect(form.getError(scope)).toStrictEqual(concise)
+      expect(form.getError(scope, params._first)).toStrictEqual(concise)
       expect(form.getError(scope, params._second)).toStrictEqual({
-        active: validateOn,
+        active: [expect.stringContaining("Invalid option")],
         branches: {
-          _1: "onInit",
+          _1: ["custom_1"],
           _2: {
-            active: "onTouch",
+            active: ["custom_2"],
             branches: {
-              _3: "onSubmit",
-              _4: "onTouch",
+              _3: ["custom_3"],
+              _4: ["custom_4"],
             },
           },
         },
@@ -788,50 +859,53 @@ describe("when defining ImpulseFormSwitchOptions.validateOn.active", () => {
   })
 
   describe("when active is valid", () => {
-    it.skip("overrides only the active's validateOn", ({ scope }) => {
+    it("overrides only the active's validateOn", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("_2", {
-          validateOn: "onChange",
+          validateOn,
+          error: ["custom"],
           schema: z.enum(["_1", "_2"]),
         }),
         {
           _1: ImpulseFormUnit(0, {
-            validateOn: "onInit",
+            validateOn,
+            error: ["custom_1"],
             schema: z.number(),
           }),
           _2: ImpulseFormSwitch(
             ImpulseFormUnit("_3", {
-              validateOn: "onSubmit",
+              validateOn,
+              error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
               _3: ImpulseFormUnit("0", {
+                validateOn,
+                error: ["custom_3"],
                 schema: z.string(),
               }),
               _4: ImpulseFormUnit(1, {
-                validateOn: "onTouch",
-                schema: z.number(),
+                validateOn,
+                error: ["custom_4"],
+                schema: z.string(),
               }),
             },
           ),
         },
         {
-          validateOn: {
-            active: validateOn,
+          error: {
+            active: null,
           },
         },
       )
 
       const concise = {
-        active: validateOn,
+        active: null,
         branch: {
           kind: "_2",
           value: {
-            active: "onSubmit",
-            branch: {
-              kind: "_3",
-              value: "onTouch",
-            },
+            active: ["custom_2"],
+            branch: null,
           },
         },
       }
@@ -839,14 +913,14 @@ describe("when defining ImpulseFormSwitchOptions.validateOn.active", () => {
       expect(form.getError(scope)).toStrictEqual(concise)
       expect(form.getError(scope, params._first)).toStrictEqual(concise)
       expect(form.getError(scope, params._second)).toStrictEqual({
-        active: validateOn,
+        active: null,
         branches: {
-          _1: "onInit",
+          _1: ["custom_1"],
           _2: {
-            active: "onSubmit",
+            active: ["custom_2"],
             branches: {
-              _3: "onTouch",
-              _4: "onTouch",
+              _3: ["custom_3"],
+              _4: ["custom_4"],
             },
           },
         },
@@ -855,53 +929,66 @@ describe("when defining ImpulseFormSwitchOptions.validateOn.active", () => {
   })
 })
 
-describe("when defining concise ImpulseFormSwitchOptions.validateOn.branch", () => {
+describe("when defining concise ImpulseFormSwitchOptions.error.branch", () => {
+  const validateOn = VALIDATE_ON_INIT
+
   describe("when active is invalid", () => {
-    it.skip("does not change anything", ({ scope }) => {
+    it("does not change anything", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("", {
-          validateOn: "onChange",
+          validateOn,
+          error: ["custom"],
           schema: z.enum(["_1", "_2"]),
         }),
         {
           _1: ImpulseFormUnit(0, {
-            validateOn: "onInit",
+            validateOn,
+            error: ["custom_1"],
             schema: z.number(),
           }),
           _2: ImpulseFormSwitch(
             ImpulseFormUnit("_3", {
+              validateOn,
+              error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
               _3: ImpulseFormUnit("0", {
-                validateOn: "onSubmit",
+                validateOn,
+                error: ["custom_3"],
                 schema: z.string(),
               }),
               _4: ImpulseFormUnit(1, {
-                validateOn: "onTouch",
-                schema: z.number(),
+                validateOn,
+                error: ["custom_4"],
+                schema: z.string(),
               }),
             },
           ),
         },
         {
-          validateOn: {
-            branch: validateOn,
+          error: {
+            branch: null,
           },
         },
       )
 
-      expect(form.getError(scope)).toBe("onChange")
-      expect(form.getError(scope, params._first)).toBe("onChange")
+      const concise = {
+        active: ["custom"],
+        branch: null,
+      }
+
+      expect(form.getError(scope)).toStrictEqual(concise)
+      expect(form.getError(scope, params._first)).toStrictEqual(concise)
       expect(form.getError(scope, params._second)).toStrictEqual({
-        active: "onChange",
+        active: ["custom"],
         branches: {
-          _1: "onInit",
+          _1: ["custom_1"],
           _2: {
-            active: "onTouch",
+            active: ["custom_2"],
             branches: {
-              _3: "onSubmit",
-              _4: "onTouch",
+              _3: ["custom_3"],
+              _4: ["custom_4"],
             },
           },
         },
@@ -910,51 +997,57 @@ describe("when defining concise ImpulseFormSwitchOptions.validateOn.branch", () 
   })
 
   describe("when active is valid", () => {
-    it.skip("overrides only the active branch validateOn", ({ scope }) => {
+    it("overrides only the active branch validateOn", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("_2", {
-          validateOn: differentValidateOn,
+          validateOn,
           schema: z.enum(["_1", "_2"]),
         }),
         {
           _1: ImpulseFormUnit(0, {
-            validateOn: "onInit",
+            validateOn,
+            error: ["custom_1"],
             schema: z.number(),
           }),
-          _2: ImpulseFormShape({
-            _3: ImpulseFormUnit("0", {
-              schema: z.string(),
+          _2: ImpulseFormSwitch(
+            ImpulseFormUnit("_3", {
+              validateOn,
+              error: ["custom_2"],
+              schema: z.enum(["_3", "_4"]),
             }),
-            _4: ImpulseFormUnit(1, {
-              validateOn: "onTouch",
-              schema: z.number(),
-            }),
-          }),
+            {
+              _3: ImpulseFormUnit("0", {
+                validateOn,
+                error: ["custom_3"],
+                schema: z.string(),
+              }),
+              _4: ImpulseFormUnit(1, {
+                validateOn,
+                error: ["custom_4"],
+                schema: z.string(),
+              }),
+            },
+          ),
         },
         {
-          validateOn: {
-            branch: validateOn,
+          error: {
+            branch: null,
           },
         },
       )
 
-      const concise = {
-        active: differentValidateOn,
-        branch: {
-          kind: "_2",
-          value: validateOn,
-        },
-      }
-
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
+      expect(form.getError(scope)).toBeNull()
+      expect(form.getError(scope, params._first)).toBeNull()
       expect(form.getError(scope, params._second)).toStrictEqual({
-        active: differentValidateOn,
+        active: null,
         branches: {
-          _1: "onInit",
+          _1: ["custom_1"],
           _2: {
-            _3: validateOn,
-            _4: validateOn,
+            active: null,
+            branches: {
+              _3: null,
+              _4: ["custom_4"],
+            },
           },
         },
       })
@@ -962,56 +1055,69 @@ describe("when defining concise ImpulseFormSwitchOptions.validateOn.branch", () 
   })
 })
 
-describe("when defining detailed ImpulseFormSwitchOptions.validateOn.branch", () => {
+describe("when defining detailed ImpulseFormSwitchOptions.error.branch", () => {
+  const validateOn = VALIDATE_ON_INIT
+
   describe("when active is invalid", () => {
-    it.skip("overrides only the target branch validateOn", ({ scope }) => {
+    it("overrides only the target branch error", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("", {
-          validateOn: "onChange",
+          validateOn,
+          error: ["custom"],
           schema: z.enum(["_1", "_2"]),
         }),
         {
           _1: ImpulseFormUnit(0, {
-            validateOn: "onInit",
+            validateOn,
+            error: ["custom_1"],
             schema: z.number(),
           }),
           _2: ImpulseFormSwitch(
             ImpulseFormUnit("_3", {
+              validateOn,
+              error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
               _3: ImpulseFormUnit("0", {
-                validateOn: "onSubmit",
+                validateOn,
+                error: ["custom_3"],
                 schema: z.string(),
               }),
               _4: ImpulseFormUnit(1, {
-                validateOn: "onTouch",
-                schema: z.number(),
+                validateOn,
+                error: ["custom_4"],
+                schema: z.string(),
               }),
             },
           ),
         },
         {
-          validateOn: {
+          error: {
             branch: {
               kind: "_1",
-              value: validateOn,
+              value: null,
             },
           },
         },
       )
 
-      expect(form.getError(scope)).toBe("onChange")
-      expect(form.getError(scope, params._first)).toBe("onChange")
+      const concise = {
+        active: ["custom"],
+        branch: null,
+      }
+
+      expect(form.getError(scope)).toStrictEqual(concise)
+      expect(form.getError(scope, params._first)).toStrictEqual(concise)
       expect(form.getError(scope, params._second)).toStrictEqual({
-        active: "onChange",
+        active: ["custom"],
         branches: {
-          _1: validateOn,
+          _1: null,
           _2: {
-            active: "onTouch",
+            active: ["custom_2"],
             branches: {
-              _3: "onSubmit",
-              _4: "onTouch",
+              _3: ["custom_3"],
+              _4: ["custom_4"],
             },
           },
         },
@@ -1020,55 +1126,55 @@ describe("when defining detailed ImpulseFormSwitchOptions.validateOn.branch", ()
   })
 
   describe("when active is valid", () => {
-    it.skip("overrides only the target inactive branch validateOn", ({
-      scope,
-    }) => {
+    it("overrides only the target inactive branch error", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("_2", {
-          validateOn: "onChange",
+          validateOn,
           schema: z.enum(["_1", "_2"]),
         }),
         {
           _1: ImpulseFormUnit(0, {
-            validateOn: "onInit",
+            validateOn,
+            error: ["custom_1"],
             schema: z.number(),
           }),
           _2: ImpulseFormSwitch(
             ImpulseFormUnit("_3", {
+              validateOn,
+              error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
               _3: ImpulseFormUnit("0", {
-                validateOn: "onSubmit",
+                validateOn,
+                error: ["custom_3"],
                 schema: z.string(),
               }),
               _4: ImpulseFormUnit(1, {
-                validateOn: "onTouch",
-                schema: z.number(),
+                validateOn,
+                error: ["custom_4"],
+                schema: z.string(),
               }),
             },
           ),
         },
         {
-          validateOn: {
+          error: {
             branch: {
               kind: "_1",
-              value: validateOn,
+              value: null,
             },
           },
         },
       )
 
       const concise = {
-        active: "onChange",
+        active: null,
         branch: {
           kind: "_2",
           value: {
-            active: "onTouch",
-            branch: {
-              kind: "_3",
-              value: "onSubmit",
-            },
+            active: ["custom_2"],
+            branch: null,
           },
         },
       }
@@ -1076,119 +1182,120 @@ describe("when defining detailed ImpulseFormSwitchOptions.validateOn.branch", ()
       expect(form.getError(scope)).toStrictEqual(concise)
       expect(form.getError(scope, params._first)).toStrictEqual(concise)
       expect(form.getError(scope, params._second)).toStrictEqual({
-        active: "onChange",
+        active: null,
         branches: {
-          _1: validateOn,
+          _1: null,
           _2: {
-            active: "onTouch",
+            active: ["custom_2"],
             branches: {
-              _3: "onSubmit",
-              _4: "onTouch",
+              _3: ["custom_3"],
+              _4: ["custom_4"],
             },
           },
         },
       })
     })
 
-    it.skip("overrides only the target active branch validateOn", ({
-      scope,
-    }) => {
+    it("overrides only the target active branch error", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("_2", {
-          validateOn: differentValidateOn,
+          validateOn,
           schema: z.enum(["_1", "_2"]),
         }),
         {
           _1: ImpulseFormUnit(0, {
-            validateOn: "onInit",
+            validateOn,
+            error: ["custom_1"],
             schema: z.number(),
           }),
           _2: ImpulseFormSwitch(
             ImpulseFormUnit("_3", {
+              validateOn,
+              error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
               _3: ImpulseFormUnit("0", {
-                validateOn: "onSubmit",
+                validateOn,
+                error: ["custom_3"],
                 schema: z.string(),
               }),
               _4: ImpulseFormUnit(1, {
-                validateOn: "onTouch",
-                schema: z.number(),
+                validateOn,
+                error: ["custom_4"],
+                schema: z.string(),
               }),
             },
           ),
         },
         {
-          validateOn: {
+          error: {
             branch: {
               kind: "_2",
-              value: validateOn,
+              value: null,
             },
           },
         },
       )
 
-      const concise = {
-        active: differentValidateOn,
-        branch: {
-          kind: "_2",
-          value: validateOn,
-        },
-      }
-
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
+      expect(form.getError(scope)).toBeNull()
+      expect(form.getError(scope, params._first)).toBeNull()
       expect(form.getError(scope, params._second)).toStrictEqual({
-        active: differentValidateOn,
+        active: null,
         branches: {
-          _1: "onInit",
+          _1: ["custom_1"],
           _2: {
-            active: validateOn,
+            active: null,
             branches: {
-              _3: validateOn,
-              _4: "onTouch",
+              _3: null,
+              _4: ["custom_4"],
             },
           },
         },
       })
     })
 
-    it.skip("overrides nested switch", ({ scope }) => {
+    it("overrides nested switch", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("_2", {
-          validateOn: "onInit",
+          validateOn,
           schema: z.enum(["_1", "_2"]),
         }),
         {
           _1: ImpulseFormUnit(0, {
-            validateOn: "onInit",
+            validateOn,
+            error: ["custom_1"],
             schema: z.number(),
           }),
           _2: ImpulseFormSwitch(
             ImpulseFormUnit("_3", {
+              validateOn,
+              error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
               _3: ImpulseFormUnit("0", {
-                validateOn: "onSubmit",
+                validateOn,
+                error: ["custom_3"],
                 schema: z.string(),
               }),
               _4: ImpulseFormUnit(1, {
-                validateOn: "onTouch",
-                schema: z.number(),
+                validateOn,
+                error: ["custom_4"],
+                schema: z.string(),
               }),
             },
           ),
         },
         {
-          validateOn: {
+          error: {
             branch: {
               kind: "_2",
               value: {
+                active: null,
                 branch: {
                   kind: "_4",
-                  value: validateOn,
+                  value: null,
                 },
               },
             },
@@ -1197,14 +1304,14 @@ describe("when defining detailed ImpulseFormSwitchOptions.validateOn.branch", ()
       )
 
       const concise = {
-        active: "onInit",
+        active: null,
         branch: {
           kind: "_2",
           value: {
-            active: "onTouch",
+            active: null,
             branch: {
               kind: "_3",
-              value: "onSubmit",
+              value: ["custom_3"],
             },
           },
         },
@@ -1213,14 +1320,14 @@ describe("when defining detailed ImpulseFormSwitchOptions.validateOn.branch", ()
       expect(form.getError(scope)).toStrictEqual(concise)
       expect(form.getError(scope, params._first)).toStrictEqual(concise)
       expect(form.getError(scope, params._second)).toStrictEqual({
-        active: "onInit",
+        active: null,
         branches: {
-          _1: "onInit",
+          _1: ["custom_1"],
           _2: {
-            active: "onTouch",
+            active: null,
             branches: {
-              _3: "onSubmit",
-              _4: validateOn,
+              _3: ["custom_3"],
+              _4: [expect.stringContaining("Invalid input")],
             },
           },
         },
@@ -1229,68 +1336,75 @@ describe("when defining detailed ImpulseFormSwitchOptions.validateOn.branch", ()
   })
 })
 
-describe("when defining all active+branch+branches ImpulseFormSwitchOptions.validateOn", () => {
-  it.skip("branch takes over branches", ({ scope }) => {
+describe("when defining all active+branch+branches ImpulseFormSwitchOptions.error", () => {
+  const validateOn = VALIDATE_ON_INIT
+
+  it("branch takes over branches", ({ scope }) => {
     const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_2", {
-        validateOn: "onChange",
+      ImpulseFormUnit("_1", {
+        validateOn,
         schema: z.enum(["_1", "_2"]),
       }),
       {
         _1: ImpulseFormUnit(0, {
-          validateOn: "onInit",
+          validateOn,
+          error: ["custom_1"],
           schema: z.number(),
         }),
         _2: ImpulseFormSwitch(
           ImpulseFormUnit("_3", {
+            validateOn,
+            error: ["custom_2"],
             schema: z.enum(["_3", "_4"]),
           }),
           {
             _3: ImpulseFormUnit("0", {
-              validateOn: "onSubmit",
+              validateOn,
+              error: ["custom_3"],
               schema: z.string(),
             }),
             _4: ImpulseFormUnit(1, {
-              validateOn: "onTouch",
-              schema: z.number(),
+              validateOn,
+              error: ["custom_4"],
+              schema: z.string(),
             }),
           },
         ),
       },
       {
-        validateOn: {
-          active: differentValidateOn,
+        error: {
+          active: null,
           branch: {
-            kind: "_2",
-            value: validateOn,
+            kind: "_1",
+            value: ["new_1"],
           },
           branches: {
-            _1: differentValidateOn,
-            _2: differentValidateOn,
+            _1: null,
+            _2: null,
           },
         },
       },
     )
 
     const concise = {
-      active: differentValidateOn,
+      active: null,
       branch: {
-        kind: "_2",
-        value: validateOn,
+        kind: "_1",
+        value: ["new_1"],
       },
     }
 
     expect(form.getError(scope)).toStrictEqual(concise)
     expect(form.getError(scope, params._first)).toStrictEqual(concise)
     expect(form.getError(scope, params._second)).toStrictEqual({
-      active: differentValidateOn,
+      active: null,
       branches: {
-        _1: differentValidateOn,
+        _1: ["new_1"],
         _2: {
-          active: validateOn,
+          active: null,
           branches: {
-            _3: validateOn,
-            _4: "onTouch",
+            _3: null,
+            _4: ["custom_4"],
           },
         },
       },
@@ -1298,77 +1412,51 @@ describe("when defining all active+branch+branches ImpulseFormSwitchOptions.vali
   })
 })
 
-it.skip("returns the ValidateStrategy as concise result when everything has the same ValidateStrategy", ({
-  scope,
-}) => {
-  const form = ImpulseFormSwitch(
-    ImpulseFormUnit("", { validateOn, schema: z.enum(["_1", "_2"]) }),
-    {
-      _1: ImpulseFormUnit(0, { validateOn, schema: z.number() }),
-      _2: ImpulseFormSwitch(
-        ImpulseFormUnit("", {
-          validateOn,
-          schema: z.enum(["_3", "_4"]),
-        }),
-        {
-          _3: ImpulseFormUnit("0", { validateOn, schema: z.string() }),
-          _4: ImpulseFormUnit(1, { validateOn, schema: z.number() }),
-        },
-      ),
-    },
-  )
+describe("stable error value", () => {
+  const validateOn = VALIDATE_ON_INIT
 
-  expect(form.getError(scope)).toBe(validateOn)
-  expect(form.getError(scope, params._first)).toBe(validateOn)
-  expect(form.getError(scope, params._second)).toStrictEqual({
-    active: validateOn,
-    branches: {
-      _1: validateOn,
-      _2: {
-        active: validateOn,
-        branches: {
-          _3: validateOn,
-          _4: validateOn,
-        },
-      },
-    },
-  })
-})
-
-describe("stable validateOn value", () => {
-  it.skip("subsequently selects equal validateOn", ({ scope }) => {
+  it("subsequently selects equal error", ({ scope }) => {
     const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_2", {
-        validateOn: "onChange",
+      ImpulseFormUnit("_1", {
+        validateOn,
         schema: z.enum(["_1", "_2"]),
       }),
       {
         _1: ImpulseFormUnit(0, {
-          validateOn: "onInit",
+          validateOn,
+          error: ["custom_1"],
           schema: z.number(),
         }),
         _2: ImpulseFormSwitch(
           ImpulseFormUnit("_3", {
+            validateOn,
             schema: z.enum(["_3", "_4"]),
           }),
           {
             _3: ImpulseFormUnit("0", {
-              validateOn: "onSubmit",
+              validateOn,
+              error: ["custom_3"],
               schema: z.string(),
             }),
             _4: ImpulseFormUnit(1, {
-              validateOn: "onTouch",
-              schema: z.number(),
+              validateOn,
+              error: ["custom_4"],
+              schema: z.string(),
             }),
           },
         ),
       },
     )
 
+    expect(form.getError(scope)).toBeInstanceOf(Object)
     expect(form.getError(scope)).toBe(form.getError(scope))
+
+    expect(form.getError(scope, params._first)).toBeInstanceOf(Object)
     expect(form.getError(scope, params._first)).toBe(
       form.getError(scope, params._first),
     )
+
+    expect(form.getError(scope, params._second)).toBeInstanceOf(Object)
     expect(form.getError(scope, params._second)).toBe(
       form.getError(scope, params._second),
     )
@@ -1376,29 +1464,34 @@ describe("stable validateOn value", () => {
 })
 
 describe("using recursive setter", () => {
+  const validateOn = VALIDATE_ON_INIT
+
   const active = ImpulseFormUnit("_2", {
-    validateOn: "onChange",
+    validateOn,
     schema: z.enum(["_1", "_2"]),
   })
 
   const branches = {
     _1: ImpulseFormUnit(0, {
-      validateOn: "onInit",
-      schema: z.number(),
+      validateOn,
+      validate: (input): Result<string, number> => {
+        if (input <= 0) {
+          return ["Too small", null]
+        }
+
+        return [null, input]
+      },
     }),
     _2: ImpulseFormSwitch(
       ImpulseFormUnit("_3", {
+        validateOn,
         schema: z.enum(["_3", "_4"]),
       }),
       {
         _3: ImpulseFormUnit("0", {
-          validateOn: "onSubmit",
-          schema: z.string(),
+          error: true,
         }),
-        _4: ImpulseFormUnit(1, {
-          validateOn: "onTouch",
-          schema: z.number(),
-        }),
+        _4: ImpulseFormUnit<number, number>(1),
       },
     ),
   }
@@ -1413,17 +1506,14 @@ describe("using recursive setter", () => {
     [
       string,
       (
-        input: ImpulseFormSwitchValidateOnSetter<
-          typeof active,
-          typeof branches
-        >,
+        input: ImpulseFormSwitchErrorSetter<typeof active, typeof branches>,
       ) => ImpulseFormSwitch<typeof active, typeof branches>,
     ]
   >([
     [
-      "ImpulseFormSwitchOptions.validateOn",
-      (validateOn) => {
-        return setup({ validateOn })
+      "ImpulseFormSwitchOptions.error",
+      (error) => {
+        return setup({ error })
       },
     ],
 
@@ -1438,35 +1528,33 @@ describe("using recursive setter", () => {
       },
     ],
   ])("in %s", (_, setup) => {
-    it.skip("passes initial and input recursively to all setters", ({
-      scope,
-    }) => {
+    it("passes initial and input recursively to all setters", ({ scope }) => {
       expect.assertions(20)
 
       const form = setup(($) => {
         expectTypeOf($).toEqualTypeOf<{
-          readonly active: ValidateStrategy
+          readonly active: null | ReadonlyArray<string>
           readonly branches: {
-            readonly _1: ValidateStrategy
+            readonly _1: null | string
             readonly _2: {
-              readonly active: ValidateStrategy
+              readonly active: null | ReadonlyArray<string>
               readonly branches: {
-                readonly _3: ValidateStrategy
-                readonly _4: ValidateStrategy
+                readonly _3: null | boolean
+                readonly _4: null | number
               }
             }
           }
         }>()
 
         expect($).toStrictEqual({
-          active: "onChange",
+          active: null,
           branches: {
-            _1: "onInit",
+            _1: "Too small",
             _2: {
-              active: "onTouch",
+              active: null,
               branches: {
-                _3: "onSubmit",
-                _4: "onTouch",
+                _3: true,
+                _4: null,
               },
             },
           },
@@ -1474,57 +1562,57 @@ describe("using recursive setter", () => {
 
         return {
           active: ($_active) => {
-            expectTypeOf($_active).toEqualTypeOf<ValidateStrategy>()
-            expect($_active).toBe("onChange")
+            expectTypeOf($_active).toEqualTypeOf<null | ReadonlyArray<string>>()
+            expect($_active).toBeNull()
 
-            return "onInit"
+            return null
           },
 
           branches: ($_branches) => {
             expectTypeOf($_branches).toEqualTypeOf<{
-              readonly _1: ValidateStrategy
+              readonly _1: null | string
               readonly _2: {
-                readonly active: ValidateStrategy
+                readonly active: null | ReadonlyArray<string>
                 readonly branches: {
-                  readonly _3: ValidateStrategy
-                  readonly _4: ValidateStrategy
+                  readonly _3: null | boolean
+                  readonly _4: null | number
                 }
               }
             }>()
 
             expect($_branches).toStrictEqual({
-              _1: "onInit",
+              _1: "Too small",
               _2: {
-                active: "onTouch",
+                active: null,
                 branches: {
-                  _3: "onSubmit",
-                  _4: "onTouch",
+                  _3: true,
+                  _4: null,
                 },
               },
             })
 
             return {
               _1: ($_branches_1) => {
-                expectTypeOf($_branches_1).toEqualTypeOf<ValidateStrategy>()
-                expect($_branches_1).toBe("onInit")
+                expectTypeOf($_branches_1).toEqualTypeOf<null | string>()
+                expect($_branches_1).toBeNull()
 
-                return "onTouch"
+                return "Too short"
               },
 
               _2: ($_branches_2) => {
                 expectTypeOf($_branches_2).toEqualTypeOf<{
-                  readonly active: ValidateStrategy
+                  readonly active: null | ReadonlyArray<string>
                   readonly branches: {
-                    readonly _3: ValidateStrategy
-                    readonly _4: ValidateStrategy
+                    readonly _3: null | boolean
+                    readonly _4: null | number
                   }
                 }>()
 
                 expect($_branches_2).toStrictEqual({
-                  active: "onTouch",
+                  active: null,
                   branches: {
-                    _3: "onSubmit",
-                    _4: "onTouch",
+                    _3: true,
+                    _4: null,
                   },
                 })
 
@@ -1532,39 +1620,39 @@ describe("using recursive setter", () => {
                   active: ($_branches_2_active) => {
                     expectTypeOf(
                       $_branches_2_active,
-                    ).toEqualTypeOf<ValidateStrategy>()
-                    expect($_branches_2_active).toBe("onTouch")
+                    ).toEqualTypeOf<null | ReadonlyArray<string>>()
+                    expect($_branches_2_active).toBeNull()
 
-                    return "onInit"
+                    return null
                   },
 
                   branches: ($_branches_2_branches) => {
                     expectTypeOf($_branches_2_branches).toEqualTypeOf<{
-                      readonly _3: ValidateStrategy
-                      readonly _4: ValidateStrategy
+                      readonly _3: null | boolean
+                      readonly _4: null | number
                     }>()
 
                     expect($_branches_2_branches).toStrictEqual({
-                      _3: "onSubmit",
-                      _4: "onTouch",
+                      _3: true,
+                      _4: null,
                     })
 
                     return {
                       _3: ($_branches_2_branches_3) => {
-                        expectTypeOf(
-                          $_branches_2_branches_3,
-                        ).toEqualTypeOf<ValidateStrategy>()
-                        expect($_branches_2_branches_3).toBe("onSubmit")
+                        expectTypeOf($_branches_2_branches_3).toEqualTypeOf<
+                          null | boolean
+                        >()
+                        expect($_branches_2_branches_3).toBe(true)
 
-                        return "onTouch"
+                        return false
                       },
                       _4: ($_branches_2_branches_4) => {
-                        expectTypeOf(
-                          $_branches_2_branches_4,
-                        ).toEqualTypeOf<ValidateStrategy>()
-                        expect($_branches_2_branches_4).toBe("onTouch")
+                        expectTypeOf($_branches_2_branches_4).toEqualTypeOf<
+                          null | number
+                        >()
+                        expect($_branches_2_branches_4).toBeNull()
 
-                        return "onChange"
+                        return 0
                       },
                     }
                   },
@@ -1577,15 +1665,15 @@ describe("using recursive setter", () => {
             expectTypeOf($_branch).toEqualTypeOf<
               | {
                   readonly kind: "_1"
-                  readonly value: ValidateStrategy
+                  readonly value: null | string
                 }
               | {
                   readonly kind: "_2"
                   readonly value: {
-                    readonly active: ValidateStrategy
+                    readonly active: null | ReadonlyArray<string>
                     readonly branches: {
-                      readonly _3: ValidateStrategy
-                      readonly _4: ValidateStrategy
+                      readonly _3: null | boolean
+                      readonly _4: null | number
                     }
                   }
                 }
@@ -1594,10 +1682,10 @@ describe("using recursive setter", () => {
             expect($_branch).toStrictEqual({
               kind: "_2",
               value: {
-                active: "onInit",
+                active: null,
                 branches: {
-                  _3: "onTouch",
-                  _4: "onChange",
+                  _3: false, // the value is set in $_branches_2_branches_3 ^
+                  _4: 0, // the value is set in $_branches_2_branches_4 ^
                 },
               },
             })
@@ -1606,19 +1694,18 @@ describe("using recursive setter", () => {
               kind: "_2",
               value: ($_branch_2) => {
                 expectTypeOf($_branch_2).toEqualTypeOf<{
-                  readonly active: ValidateStrategy
+                  readonly active: null | ReadonlyArray<string>
                   readonly branches: {
-                    readonly _3: ValidateStrategy
-                    readonly _4: ValidateStrategy
+                    readonly _3: null | boolean
+                    readonly _4: null | number
                   }
                 }>()
 
-                // the value is set in $_branches_2 ^
                 expect($_branch_2).toStrictEqual({
-                  active: "onInit",
+                  active: null,
                   branches: {
-                    _3: "onTouch",
-                    _4: "onChange",
+                    _3: false,
+                    _4: 0,
                   },
                 })
 
@@ -1626,39 +1713,39 @@ describe("using recursive setter", () => {
                   active: ($_branch_2_active) => {
                     expectTypeOf(
                       $_branch_2_active,
-                    ).toEqualTypeOf<ValidateStrategy>()
-                    expect($_branch_2_active).toBe("onInit")
+                    ).toEqualTypeOf<null | ReadonlyArray<string>>()
+                    expect($_branch_2_active).toBeNull()
 
-                    return "onChange"
+                    return null
                   },
 
                   branches: ($_branch_2_branches) => {
                     expectTypeOf($_branch_2_branches).toEqualTypeOf<{
-                      readonly _3: ValidateStrategy
-                      readonly _4: ValidateStrategy
+                      readonly _3: null | boolean
+                      readonly _4: null | number
                     }>()
 
                     expect($_branch_2_branches).toStrictEqual({
-                      _3: "onTouch",
-                      _4: "onChange",
+                      _3: false,
+                      _4: 0,
                     })
 
                     return {
                       _3: ($_branch_2_branches_3) => {
-                        expectTypeOf(
-                          $_branch_2_branches_3,
-                        ).toEqualTypeOf<ValidateStrategy>()
-                        expect($_branch_2_branches_3).toBe("onTouch")
+                        expectTypeOf($_branch_2_branches_3).toEqualTypeOf<
+                          null | boolean
+                        >()
+                        expect($_branch_2_branches_3).toBe(false)
 
-                        return "onChange"
+                        return true
                       },
                       _4: ($_branch_2_branches_4) => {
-                        expectTypeOf(
-                          $_branch_2_branches_4,
-                        ).toEqualTypeOf<ValidateStrategy>()
-                        expect($_branch_2_branches_4).toBe("onChange")
+                        expectTypeOf($_branch_2_branches_4).toEqualTypeOf<
+                          null | number
+                        >()
+                        expect($_branch_2_branches_4).toBe(0)
 
-                        return "onTouch"
+                        return 1
                       },
                     }
                   },
@@ -1667,29 +1754,28 @@ describe("using recursive setter", () => {
                     expectTypeOf($_branch_2_branch).toEqualTypeOf<
                       | {
                           readonly kind: "_3"
-                          readonly value: ValidateStrategy
+                          readonly value: null | boolean
                         }
                       | {
                           readonly kind: "_4"
-                          readonly value: ValidateStrategy
+                          readonly value: null | number
                         }
                     >()
                     // the value is set in $_branch_2_branches_3 ^
                     expect($_branch_2_branch).toStrictEqual({
                       kind: "_3",
-                      value: "onChange",
+                      value: true,
                     })
 
                     return {
                       kind: "_4",
                       value: ($_branch_2_branch_4) => {
-                        expectTypeOf(
-                          $_branch_2_branch_4,
-                        ).toEqualTypeOf<ValidateStrategy>()
-                        // the value is set in $_branch_2_branches ^
-                        expect($_branch_2_branch_4).toBe("onTouch")
+                        expectTypeOf($_branch_2_branch_4).toEqualTypeOf<
+                          null | number
+                        >()
+                        expect($_branch_2_branch_4).toBe(1) // the value is set in $_branch_2_branches_4 ^
 
-                        return "onInit"
+                        return 3
                       },
                     }
                   },
@@ -1701,24 +1787,30 @@ describe("using recursive setter", () => {
       })
 
       const concise = {
-        active: "onInit",
+        active: null,
         branch: {
           kind: "_2",
-          value: "onChange",
+          value: {
+            active: null,
+            branch: {
+              kind: "_3",
+              value: true,
+            },
+          },
         },
       }
 
       expect(form.getError(scope)).toStrictEqual(concise)
       expect(form.getError(scope, params._first)).toStrictEqual(concise)
       expect(form.getError(scope, params._second)).toStrictEqual({
-        active: "onInit",
+        active: null,
         branches: {
-          _1: "onTouch",
+          _1: "Too short",
           _2: {
-            active: "onChange",
+            active: null,
             branches: {
-              _3: "onChange",
-              _4: "onInit",
+              _3: true,
+              _4: 3,
             },
           },
         },

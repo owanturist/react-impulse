@@ -1059,10 +1059,15 @@ describe("stable touched value", () => {
       },
     )
 
+    expect(form.isTouched(scope)).toBeTypeOf("boolean")
     expect(form.isTouched(scope)).toBe(form.isTouched(scope))
+
+    expect(form.isTouched(scope, params._first)).toBeInstanceOf(Object)
     expect(form.isTouched(scope, params._first)).toBe(
       form.isTouched(scope, params._first),
     )
+
+    expect(form.isTouched(scope, params._second)).toBeInstanceOf(Object)
     expect(form.isTouched(scope, params._second)).toBe(
       form.isTouched(scope, params._second),
     )

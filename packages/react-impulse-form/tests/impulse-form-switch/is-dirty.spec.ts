@@ -366,3 +366,33 @@ it("ignores an inactive dirty branch", ({ scope }) => {
     },
   })
 })
+
+describe("stable dirty value", () => {
+  it("subsequently selects equal dirty", ({ scope }) => {
+    const form = ImpulseFormSwitch(
+      ImpulseFormUnit<"_1" | "_2">("_1", {
+        initial: "_2",
+      }),
+      {
+        _1: ImpulseFormUnit(0),
+        _2: ImpulseFormShape({
+          _3: ImpulseFormUnit("name"),
+          _4: ImpulseFormUnit(18),
+        }),
+      },
+    )
+
+    expect(form.isDirty(scope)).toBeTypeOf("boolean")
+    expect(form.isDirty(scope)).toBe(form.isDirty(scope))
+
+    expect(form.isDirty(scope, params._first)).toBeInstanceOf(Object)
+    expect(form.isDirty(scope, params._first)).toBe(
+      form.isDirty(scope, params._first),
+    )
+
+    expect(form.isDirty(scope, params._second)).toBeInstanceOf(Object)
+    expect(form.isDirty(scope, params._second)).toBe(
+      form.isDirty(scope, params._second),
+    )
+  })
+})

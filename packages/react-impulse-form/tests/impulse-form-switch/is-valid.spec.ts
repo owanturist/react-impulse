@@ -377,3 +377,31 @@ it("ignores invalid inactive branches", ({ scope }) => {
     },
   })
 })
+
+describe("stable valid value", () => {
+  it("subsequently selects equal valid", ({ scope }) => {
+    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2" | "_5">("_1"), {
+      _1: ImpulseFormUnit(0, {
+        schema: z.number().min(1),
+      }),
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
+      }),
+      _5: ImpulseFormUnit(false),
+    })
+
+    expect(form.isValid(scope)).toBeTypeOf("boolean")
+    expect(form.isValid(scope)).toBe(form.isValid(scope))
+
+    expect(form.isValid(scope, params._first)).toBeInstanceOf(Object)
+    expect(form.isValid(scope, params._first)).toBe(
+      form.isValid(scope, params._first),
+    )
+
+    expect(form.isValid(scope, params._second)).toBeInstanceOf(Object)
+    expect(form.isValid(scope, params._second)).toBe(
+      form.isValid(scope, params._second),
+    )
+  })
+})

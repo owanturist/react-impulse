@@ -1,5 +1,6 @@
 import z from "zod"
 
+import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { params } from "~/tools/params"
 
 import { ImpulseFormShape, ImpulseFormSwitch, ImpulseFormUnit } from "../../src"
@@ -385,5 +386,76 @@ it("ignores invalid inactive branches", ({ scope }) => {
       },
       _5: null,
     },
+  })
+})
+
+describe("stable output value", () => {
+  it("subsequently selects equal output", ({ scope }) => {
+    const form = ImpulseFormSwitch(
+      ImpulseFormUnit("_2", {
+        schema: z.enum(["_1", "_2"]),
+      }),
+      {
+        _1: ImpulseFormUnit(1, {
+          schema: z.number().min(1),
+        }),
+        _2: ImpulseFormShape({
+          _3: ImpulseFormUnit("name"),
+          _4: ImpulseFormUnit(18),
+        }),
+      },
+    )
+
+    expect(form.getOutput(scope)).toBeInstanceOf(Object)
+    expect(form.getOutput(scope)).toBe(form.getOutput(scope))
+  })
+
+  it("selects unequal output values when isOutputEqual is not specified", ({
+    scope,
+  }) => {
+    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1">("_1"), {
+      _1: ImpulseFormUnit(1, {
+        transform: (size) => {
+          return Array.from({ length: Math.max(1, size) }, (_, index) => index)
+        },
+      }),
+    })
+
+    const output_0 = form.getOutput(scope)
+
+    form.setInput({
+      branches: {
+        _1: 0,
+      },
+    })
+    const output_1 = form.getOutput(scope)
+
+    expect(output_0).not.toBe(output_1)
+    expect(output_0).toStrictEqual(output_1)
+  })
+
+  it("selects equal output values when isOutputEqual is specified", ({
+    scope,
+  }) => {
+    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1">("_1"), {
+      _1: ImpulseFormUnit(1 as number, {
+        isOutputEqual: isShallowArrayEqual,
+        transform: (size) => {
+          return Array.from({ length: Math.max(1, size) }, (_, index) => index)
+        },
+      }),
+    })
+
+    const output_0 = form.getOutput(scope)
+
+    form.setInput({
+      branches: {
+        _1: 0,
+      },
+    })
+    const output_1 = form.getOutput(scope)
+
+    expect(output_0).toBe(output_1)
+    expect(output_0).toStrictEqual(output_1)
   })
 })
