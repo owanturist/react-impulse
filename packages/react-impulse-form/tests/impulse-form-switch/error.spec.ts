@@ -10,10 +10,6 @@ import {
   type ImpulseFormSwitchOptions,
   ImpulseFormUnit,
   type Result,
-  VALIDATE_ON_CHANGE,
-  VALIDATE_ON_INIT,
-  VALIDATE_ON_SUBMIT,
-  VALIDATE_ON_TOUCH,
   type ValidateStrategy,
 } from "../../src"
 
@@ -341,10 +337,10 @@ describe("types", () => {
 })
 
 describe.each([
-  VALIDATE_ON_TOUCH,
-  VALIDATE_ON_CHANGE,
-  VALIDATE_ON_SUBMIT,
-  VALIDATE_ON_INIT,
+  "onTouch" as const,
+  "onChange" as const,
+  "onSubmit" as const,
+  "onInit" as const,
 ])("when any validateOn (%s)", (validateOn) => {
   it("selects the active's error only when it has an error", ({ scope }) => {
     const form = ImpulseFormSwitch(
@@ -439,7 +435,7 @@ describe.each([
   })
 })
 
-describe.each([VALIDATE_ON_TOUCH, VALIDATE_ON_CHANGE, VALIDATE_ON_SUBMIT])(
+describe.each(["onTouch" as const, "onChange" as const, "onSubmit" as const])(
   "when runtime validateOn (%s)",
   (validateOn) => {
     it("selects null for validating error", ({ scope }) => {
@@ -543,7 +539,7 @@ describe("when after trigger", () => {
     ]
   >([
     [
-      VALIDATE_ON_INIT,
+      "onInit" as const,
       {
         active: null,
         branches: {
@@ -560,7 +556,7 @@ describe("when after trigger", () => {
     ],
 
     [
-      VALIDATE_ON_CHANGE,
+      "onChange" as const,
       {
         active: null,
         branches: {
@@ -589,7 +585,7 @@ describe("when after trigger", () => {
     ],
 
     [
-      VALIDATE_ON_TOUCH,
+      "onTouch" as const,
       {
         active: null,
         branches: {
@@ -618,7 +614,7 @@ describe("when after trigger", () => {
     ],
 
     [
-      VALIDATE_ON_SUBMIT,
+      "onSubmit" as const,
       {
         active: null,
         branches: {
@@ -668,7 +664,7 @@ describe("when after trigger", () => {
 })
 
 describe("when defining top-level concise ImpulseFormSwitchOptions.error", () => {
-  const validateOn = VALIDATE_ON_INIT
+  const validateOn = "onInit" as const
 
   describe("when active is valid", () => {
     it("overrides active branch's validateOn", ({ scope }) => {
@@ -791,7 +787,7 @@ describe("when defining top-level concise ImpulseFormSwitchOptions.error", () =>
 })
 
 describe("when defining ImpulseFormSwitchOptions.error.active", () => {
-  const validateOn = VALIDATE_ON_INIT
+  const validateOn = "onInit" as const
 
   describe("when active is invalid", () => {
     it("overrides only the active's error", ({ scope }) => {
@@ -929,7 +925,7 @@ describe("when defining ImpulseFormSwitchOptions.error.active", () => {
 })
 
 describe("when defining concise ImpulseFormSwitchOptions.error.branch", () => {
-  const validateOn = VALIDATE_ON_INIT
+  const validateOn = "onInit" as const
 
   describe("when active is invalid", () => {
     it("does not change anything", ({ scope }) => {
@@ -1055,7 +1051,7 @@ describe("when defining concise ImpulseFormSwitchOptions.error.branch", () => {
 })
 
 describe("when defining detailed ImpulseFormSwitchOptions.error.branch", () => {
-  const validateOn = VALIDATE_ON_INIT
+  const validateOn = "onInit" as const
 
   describe("when active is invalid", () => {
     it("overrides only the target branch error", ({ scope }) => {
@@ -1336,7 +1332,7 @@ describe("when defining detailed ImpulseFormSwitchOptions.error.branch", () => {
 })
 
 describe("when defining all active+branch+branches ImpulseFormSwitchOptions.error", () => {
-  const validateOn = VALIDATE_ON_INIT
+  const validateOn = "onInit" as const
 
   it("branch takes over branches", ({ scope }) => {
     const form = ImpulseFormSwitch(
@@ -1412,7 +1408,7 @@ describe("when defining all active+branch+branches ImpulseFormSwitchOptions.erro
 })
 
 describe("stable error value", () => {
-  const validateOn = VALIDATE_ON_INIT
+  const validateOn = "onInit" as const
 
   it("subsequently selects equal error", ({ scope }) => {
     const form = ImpulseFormSwitch(
@@ -1463,7 +1459,7 @@ describe("stable error value", () => {
 })
 
 describe("using recursive setter", () => {
-  const validateOn = VALIDATE_ON_INIT
+  const validateOn = "onInit" as const
 
   const active = ImpulseFormUnit("_2", {
     validateOn,

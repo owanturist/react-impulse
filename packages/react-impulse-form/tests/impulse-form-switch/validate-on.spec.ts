@@ -9,10 +9,6 @@ import {
   type ImpulseFormSwitchOptions,
   type ImpulseFormSwitchValidateOnSetter,
   ImpulseFormUnit,
-  VALIDATE_ON_CHANGE,
-  VALIDATE_ON_INIT,
-  VALIDATE_ON_SUBMIT,
-  VALIDATE_ON_TOUCH,
   type ValidateStrategy,
 } from "../../src"
 
@@ -358,10 +354,10 @@ describe("types", () => {
 })
 
 describe.each([
-  [VALIDATE_ON_TOUCH, VALIDATE_ON_CHANGE],
-  [VALIDATE_ON_CHANGE, VALIDATE_ON_SUBMIT],
-  [VALIDATE_ON_SUBMIT, VALIDATE_ON_INIT],
-  [VALIDATE_ON_INIT, VALIDATE_ON_TOUCH],
+  ["onTouch" as const, "onChange" as const],
+  ["onChange" as const, "onSubmit" as const],
+  ["onSubmit" as const, "onInit" as const],
+  ["onInit" as const, "onTouch" as const],
 ])("when ValidateStrategy=%s", (validateOn, differentValidateOn) => {
   describe("when defining top-level concise ImpulseFormSwitchOptions.validateOn", () => {
     describe("when active is valid", () => {
