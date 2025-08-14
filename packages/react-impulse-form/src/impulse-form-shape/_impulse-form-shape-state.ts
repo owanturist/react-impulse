@@ -466,15 +466,12 @@ export class ImpulseFormShapeState<
     scope: Scope,
     resetter: undefined | ImpulseFormShapeInputSetter<TFields>,
   ): void {
-    const resetters = isFunction(resetter)
-      ? resetter(this._initial.getValue(scope), this._input.getValue(scope))
-      : resetter
+    if (!isUndefined(resetter)) {
+      this._setInitial(scope, resetter)
+    }
 
-    for (const [key, field] of entries(this._fields)) {
-      field._reset(
-        scope,
-        hasProperty(resetters, key) ? resetters[key] : undefined,
-      )
+    for (const field of values(this._fields)) {
+      field._reset(scope, undefined)
     }
   }
 

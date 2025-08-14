@@ -612,17 +612,16 @@ export class ImpulseFormSwitchState<
 
   public _reset(
     scope: Scope,
-    resetter: undefined | ImpulseFormShapeInputSetter<TFields>,
+    resetter: undefined | ImpulseFormSwitchInputSetter<TKind, TBranches>,
   ): void {
-    const resetters = isFunction(resetter)
-      ? resetter(this._initial.getValue(scope), this._input.getValue(scope))
-      : resetter
+    if (!isUndefined(resetter)) {
+      this._setInitial(scope, resetter)
+    }
 
-    for (const [key, field] of entries(this._fields)) {
-      field._reset(
-        scope,
-        hasProperty(resetters, key) ? resetters[key] : undefined,
-      )
+    this._active._reset(scope, undefined)
+
+    for (const branch of values(this._branches)) {
+      branch._reset(scope, undefined)
     }
   }
 

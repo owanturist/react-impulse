@@ -444,7 +444,9 @@ export class ImpulseFormListState<
     scope: Scope,
     resetter: undefined | ImpulseFormListInputSetter<TElement>,
   ): void {
-    this._setInitial(scope, resetter ?? this._initial.getValue(scope))
+    if (!isUndefined(resetter)) {
+      this._setInitial(scope, resetter)
+    }
 
     const nextElements = this._getInitialElements(scope)
 
