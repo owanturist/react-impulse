@@ -8,4 +8,4 @@ export * from "./impulse-form-switch"
 
 export type * from "./result"
 export type * from "./zod-like-schema"
-export * from "./validate-strategy"
+export type * from "./validate-strategy"

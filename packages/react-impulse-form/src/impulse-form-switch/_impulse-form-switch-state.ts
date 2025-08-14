@@ -13,8 +13,8 @@ import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
 import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
 import type { GetImpulseFormParams } from "../impulse-form/get-impulse-form-params"
 import {
-  ImpulseFormState,
   type ImpulseFormChild,
+  ImpulseFormState,
 } from "../impulse-form/impulse-form-state"
 import type { ValidateStrategy } from "../validate-strategy"
 
@@ -537,32 +537,21 @@ export class ImpulseFormSwitchState<
   // V A L I D A T E D
 
   public readonly _validated = Impulse(
-    (scope): ImpulseFormShapeFlag<TFields> => {
-      const validated = mapValues(this._fields, ({ _validated }) => {
-        return _validated.getValue(scope)
-      })
-
-      const allValidated = values(validated)
-      const onlyValidated = allValidated.find(isBoolean) ?? false
-
-      for (const fieldValidated of allValidated) {
-        if (fieldValidated !== onlyValidated) {
-          return validated as ImpulseFormShapeFlag<TFields>
-        }
-      }
-
-      return onlyValidated
+    (scope): ImpulseFormSwitchFlag<TKind, TBranches> => {
+      return this._toConcise<"flag.schema", boolean>(
+        scope,
+        ({ _validated }) => _validated,
+        isBoolean,
+      )
     },
   )
 
   public readonly _validatedVerbose = Impulse(
-    (scope): ImpulseFormShapeFlagVerbose<TFields> => {
-      const validatedVerbose = mapValues(
-        this._fields,
-        ({ _validatedVerbose }) => _validatedVerbose.getValue(scope),
+    (scope): ImpulseFormSwitchFlagVerbose<TKind, TBranches> => {
+      return this._toVerbose<"flag.schema.verbose">(
+        scope,
+        ({ _validatedVerbose }) => _validatedVerbose,
       )
-
-      return validatedVerbose as ImpulseFormShapeFlagVerbose<TFields>
     },
   )
 
