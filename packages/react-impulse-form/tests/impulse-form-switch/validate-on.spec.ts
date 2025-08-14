@@ -41,6 +41,7 @@ describe("types", () => {
     | {
         readonly active: ValidateStrategy
         readonly branch:
+          | ValidateStrategy
           | {
               readonly kind: "_1"
               readonly value: ValidateStrategy
@@ -159,12 +160,16 @@ describe("types", () => {
   it("allows passing concise value to setValidateOn", ({ scope }) => {
     const validateOn_0 = form.getValidateOn(scope)
     const validateOn_0_concise = form.getValidateOn(scope, params._first)
+    const validateOn_0_verbose = form.getValidateOn(scope, params._second)
 
     form.setValidateOn(validateOn_0_concise)
 
     expect(form.getValidateOn(scope)).toStrictEqual(validateOn_0)
     expect(form.getValidateOn(scope, params._first)).toStrictEqual(
       validateOn_0_concise,
+    )
+    expect(form.getValidateOn(scope, params._second)).toStrictEqual(
+      validateOn_0_verbose,
     )
   })
 
@@ -240,6 +245,7 @@ describe("types", () => {
       | {
           readonly active: ValidateStrategy
           readonly branch:
+            | ValidateStrategy
             | {
                 readonly kind: "_6"
                 readonly value: ValidateOnSchema
@@ -358,13 +364,10 @@ describe.each([
   [VALIDATE_ON_INIT, VALIDATE_ON_TOUCH],
 ])("when ValidateStrategy=%s", (validateOn, differentValidateOn) => {
   describe("when defining top-level concise ImpulseFormSwitchOptions.validateOn", () => {
-    describe.each([
-      ["valid", "_2"],
-      ["invalid", ""],
-    ])("when active is %s", (_, kind) => {
-      it("overrides all validateOn", ({ scope }) => {
+    describe("when active is valid", () => {
+      it("overrides active branch's validateOn", ({ scope }) => {
         const form = ImpulseFormSwitch(
-          ImpulseFormUnit(kind, {
+          ImpulseFormUnit("_2", {
             validateOn: "onChange",
             schema: z.enum(["_1", "_2"]),
           }),
@@ -399,12 +402,63 @@ describe.each([
         expect(form.getValidateOn(scope, params._second)).toStrictEqual({
           active: validateOn,
           branches: {
-            _1: validateOn,
+            _1: "onInit",
             _2: {
               active: validateOn,
               branches: {
                 _3: validateOn,
-                _4: validateOn,
+                _4: "onTouch",
+              },
+            },
+          },
+        })
+      })
+    })
+
+    describe("when active is invalid", () => {
+      it("overrides only the active's validateOn", ({ scope }) => {
+        const form = ImpulseFormSwitch(
+          ImpulseFormUnit("", {
+            validateOn: "onChange",
+            schema: z.enum(["_1", "_2"]),
+          }),
+          {
+            _1: ImpulseFormUnit(0, {
+              validateOn: "onInit",
+              schema: z.number(),
+            }),
+            _2: ImpulseFormSwitch(
+              ImpulseFormUnit("_3", {
+                schema: z.enum(["_3", "_4"]),
+              }),
+              {
+                _3: ImpulseFormUnit("0", {
+                  validateOn: "onSubmit",
+                  schema: z.string(),
+                }),
+                _4: ImpulseFormUnit(1, {
+                  validateOn: "onTouch",
+                  schema: z.number(),
+                }),
+              },
+            ),
+          },
+          {
+            validateOn,
+          },
+        )
+
+        expect(form.getValidateOn(scope)).toBe(validateOn)
+        expect(form.getValidateOn(scope, params._first)).toBe(validateOn)
+        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+          active: validateOn,
+          branches: {
+            _1: "onInit",
+            _2: {
+              active: "onTouch",
+              branches: {
+                _3: "onSubmit",
+                _4: "onTouch",
               },
             },
           },
@@ -508,10 +562,7 @@ describe.each([
             kind: "_2",
             value: {
               active: "onSubmit",
-              branch: {
-                kind: "_3",
-                value: "onTouch",
-              },
+              branch: "onTouch",
             },
           },
         }
@@ -620,10 +671,7 @@ describe.each([
 
         const concise = {
           active: differentValidateOn,
-          branch: {
-            kind: "_2",
-            value: validateOn,
-          },
+          branch: validateOn,
         }
 
         expect(form.getValidateOn(scope)).toStrictEqual(concise)
@@ -745,10 +793,7 @@ describe.each([
             kind: "_2",
             value: {
               active: "onTouch",
-              branch: {
-                kind: "_3",
-                value: "onSubmit",
-              },
+              branch: "onSubmit",
             },
           },
         }
@@ -809,10 +854,7 @@ describe.each([
 
         const concise = {
           active: differentValidateOn,
-          branch: {
-            kind: "_2",
-            value: validateOn,
-          },
+          branch: validateOn,
         }
 
         expect(form.getValidateOn(scope)).toStrictEqual(concise)
@@ -825,7 +867,7 @@ describe.each([
               active: validateOn,
               branches: {
                 _3: validateOn,
-                _4: validateOn,
+                _4: "onTouch",
               },
             },
           },
@@ -880,10 +922,7 @@ describe.each([
             kind: "_2",
             value: {
               active: "onTouch",
-              branch: {
-                kind: "_3",
-                value: "onSubmit",
-              },
+              branch: "onSubmit",
             },
           },
         }
@@ -952,10 +991,7 @@ describe.each([
 
       const concise = {
         active: differentValidateOn,
-        branch: {
-          kind: "_2",
-          value: validateOn,
-        },
+        branch: validateOn,
       }
 
       expect(form.getValidateOn(scope)).toStrictEqual(concise)
@@ -968,7 +1004,7 @@ describe.each([
             active: validateOn,
             branches: {
               _3: validateOn,
-              _4: validateOn,
+              _4: "onTouch",
             },
           },
         },
@@ -1379,10 +1415,7 @@ describe("using recursive setter", () => {
 
       const concise = {
         active: "onInit",
-        branch: {
-          kind: "_2",
-          value: "onChange",
-        },
+        branch: "onChange",
       }
 
       expect(form.getValidateOn(scope)).toStrictEqual(concise)

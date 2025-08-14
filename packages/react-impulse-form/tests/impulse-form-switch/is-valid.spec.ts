@@ -28,6 +28,7 @@ describe("types", () => {
     | {
         readonly active: boolean
         readonly branch:
+          | boolean
           | {
               readonly kind: "_1"
               readonly value: boolean
@@ -87,6 +88,7 @@ describe("types", () => {
       | {
           readonly active: boolean
           readonly branch:
+            | boolean
             | {
                 readonly kind: "_6"
                 readonly value: IsValidSchema
@@ -167,10 +169,7 @@ describe("when branch is initially invalid", () => {
     expect(form.isValid(scope)).toBe(false)
     expect(form.isValid(scope, params._first)).toStrictEqual({
       active: true,
-      branch: {
-        kind: "_1",
-        value: false,
-      },
+      branch: false,
     })
     expect(form.isValid(scope, params._second)).toStrictEqual({
       active: true,
@@ -294,10 +293,7 @@ describe("when branch is initially valid", () => {
     expect(form.isValid(scope)).toBe(false)
     expect(form.isValid(scope, params._first)).toStrictEqual({
       active: true,
-      branch: {
-        kind: "_1",
-        value: false,
-      },
+      branch: false,
     })
     expect(form.isValid(scope, params._second)).toStrictEqual({
       active: true,

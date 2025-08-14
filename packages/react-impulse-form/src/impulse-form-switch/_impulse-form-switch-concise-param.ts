@@ -17,5 +17,5 @@ export type ImpulseFormSwitchConciseParam<
   | TConcise
   | ImpulseFormSwitchConciseSchema<
       TConcise | GetImpulseFormParam<TKind, TKey>,
-      ImpulseFormSwitchBranchUnion<TKind, TBranches, TKey>
+      TConcise | ImpulseFormSwitchBranchUnion<TKind, TBranches, TKey>
     >

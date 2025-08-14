@@ -27,6 +27,7 @@ describe("types", () => {
     | {
         readonly active: boolean
         readonly branch:
+          | boolean
           | {
               readonly kind: "_1"
               readonly value: boolean
@@ -76,6 +77,7 @@ describe("types", () => {
       | {
           readonly active: boolean
           readonly branch:
+            | boolean
             | {
                 readonly kind: "_6"
                 readonly value: boolean
@@ -205,10 +207,7 @@ it("returns truthy for initially dirty active", ({ scope }) => {
   expect(form.isDirty(scope)).toBe(true)
   expect(form.isDirty(scope, params._first)).toStrictEqual({
     active: true,
-    branch: {
-      kind: "_1",
-      value: false,
-    },
+    branch: false,
   })
   expect(form.isDirty(scope, params._second)).toStrictEqual({
     active: true,
@@ -291,10 +290,7 @@ it("returns truthy after switching from dirty to pristine branch", ({
   expect(form.isDirty(scope)).toBe(true)
   expect(form.isDirty(scope, params._first)).toStrictEqual({
     active: true,
-    branch: {
-      kind: "_1",
-      value: false,
-    },
+    branch: false,
   })
   expect(form.isDirty(scope, params._second)).toStrictEqual({
     active: true,

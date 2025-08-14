@@ -3,7 +3,6 @@ import { hasProperty } from "~/tools/has-property"
 import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
-import { isStrictEqual } from "~/tools/is-strict-equal"
 import { isString } from "~/tools/is-string"
 import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
@@ -81,27 +80,38 @@ export class ImpulseFormSwitchState<
   private _toConcise<TKey extends keyof ImpulseFormParams, TConcise>(
     scope: Scope,
     extract: (form: ImpulseFormState) => ReadonlyImpulse<TConcise>,
-    isConcise = isStrictEqual,
+    isConcise: (value: unknown) => value is TConcise,
+    fallbackInvalid?: (
+      value: unknown,
+    ) => ImpulseFormSwitchConciseParam<TKind, TBranches, TKey, TConcise>,
   ): ImpulseFormSwitchConciseParam<TKind, TBranches, TKey, TConcise> {
     const activeBranch = this._getActiveBranch(scope)
     const activeConcise = extract(this._active).getValue(scope)
 
     if (!activeBranch) {
-      return activeConcise
+      return !isConcise(activeConcise) && fallbackInvalid
+        ? fallbackInvalid(activeConcise)
+        : activeConcise
     }
 
     const branchConcise = extract(activeBranch.value).getValue(scope)
 
-    if (isConcise(branchConcise, activeConcise)) {
+    if (
+      isConcise(branchConcise) &&
+      isConcise(activeConcise) &&
+      branchConcise === activeConcise
+    ) {
       return activeConcise
     }
 
     return {
       active: activeConcise,
-      branch: {
-        kind: activeBranch.kind,
-        value: branchConcise,
-      },
+      branch: isConcise(branchConcise)
+        ? branchConcise
+        : {
+            kind: activeBranch.kind,
+            value: branchConcise,
+          },
     }
   }
 
@@ -210,7 +220,8 @@ export class ImpulseFormSwitchState<
       return this._toConcise<"error.schema", null>(
         scope,
         ({ _error }) => _error,
-        (left, right) => isNull(left) && isNull(right),
+        isNull,
+        (active) => ({ active, branch: null }),
       )
     },
   )
@@ -232,7 +243,7 @@ export class ImpulseFormSwitchState<
     const resolved = isFunction(setter) ? setter(verbose()) : setter
 
     const [activeSetter, branchSetter, branchesSetter] = isNull(resolved)
-      ? [resolved, resolved, resolved]
+      ? [resolved, resolved, undefined]
       : [
           resolved.active,
 
@@ -292,6 +303,7 @@ export class ImpulseFormSwitchState<
       return this._toConcise<"validateOn.schema", ValidateStrategy>(
         scope,
         ({ _validateOn }) => _validateOn,
+        isString as (value: unknown) => value is ValidateStrategy,
       )
     },
   )
@@ -313,7 +325,7 @@ export class ImpulseFormSwitchState<
     const resolved = isFunction(setter) ? setter(verbose()) : setter
 
     const [activeSetter, branchSetter, branchesSetter] = isString(resolved)
-      ? [resolved, resolved, resolved]
+      ? [resolved, resolved, undefined]
       : [
           resolved.active,
 
@@ -373,6 +385,7 @@ export class ImpulseFormSwitchState<
       return this._toConcise<"flag.schema", boolean>(
         scope,
         ({ _touched }) => _touched,
+        isBoolean,
       )
     },
   )
@@ -394,7 +407,7 @@ export class ImpulseFormSwitchState<
     const resolved = isFunction(setter) ? setter(verbose()) : setter
 
     const [activeSetter, branchSetter, branchesSetter] = isBoolean(resolved)
-      ? [resolved, resolved, resolved]
+      ? [resolved, resolved, undefined]
       : [
           resolved.active,
 
@@ -483,6 +496,7 @@ export class ImpulseFormSwitchState<
       return this._toConcise<"flag.schema", boolean>(
         scope,
         ({ _valid }) => _valid,
+        isBoolean,
       )
     },
   )
@@ -570,6 +584,7 @@ export class ImpulseFormSwitchState<
       return this._toConcise<"flag.schema", boolean>(
         scope,
         ({ _dirty }) => _dirty,
+        isBoolean,
       )
     },
   )

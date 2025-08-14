@@ -47,6 +47,7 @@ describe("types", () => {
   type ErrorSchema = null | {
     readonly active: null | ReadonlyArray<string>
     readonly branch:
+      | null
       | {
           readonly kind: "_1"
           readonly value: null | string
@@ -229,6 +230,7 @@ describe("types", () => {
     type ParentErrorSchema = null | {
       readonly active: null | ReadonlyArray<string>
       readonly branch:
+        | null
         | {
             readonly kind: "_6"
             readonly value: ErrorSchema
@@ -359,7 +361,10 @@ describe.each([
       },
     )
 
-    const concise = ["custom"]
+    const concise = {
+      active: ["custom"],
+      branch: null,
+    }
 
     expect(form.getError(scope)).toStrictEqual(concise)
     expect(form.getError(scope, params._first)).toStrictEqual(concise)
@@ -439,10 +444,12 @@ describe.each([VALIDATE_ON_TOUCH, VALIDATE_ON_CHANGE, VALIDATE_ON_SUBMIT])(
     it("selects null for validating error", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("_2", {
+          validateOn,
           schema: z.enum(["_1", "_2"]),
         }),
         {
           _1: ImpulseFormUnit(0, {
+            validateOn,
             validate: (input): Result<string, number> => {
               if (input <= 0) {
                 return ["Too small", null]
@@ -453,20 +460,20 @@ describe.each([VALIDATE_ON_TOUCH, VALIDATE_ON_CHANGE, VALIDATE_ON_SUBMIT])(
           }),
           _2: ImpulseFormSwitch(
             ImpulseFormUnit("_3", {
+              validateOn,
               schema: z.enum(["_3", "_4"]),
             }),
             {
               _3: ImpulseFormUnit("0", {
+                validateOn,
                 schema: z.string(),
               }),
               _4: ImpulseFormUnit(1, {
+                validateOn,
                 schema: z.number(),
               }),
             },
           ),
-        },
-        {
-          validateOn,
         },
       )
 
@@ -490,68 +497,134 @@ describe.each([VALIDATE_ON_TOUCH, VALIDATE_ON_CHANGE, VALIDATE_ON_SUBMIT])(
 )
 
 describe("when validateOn=onInit", () => {
-  it("selects validating errors", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_2", {
-        schema: z.enum(["_1", "_2"]),
-      }),
-      {
-        _1: ImpulseFormUnit(-10, {
-          validate: (input): Result<string, number> => {
-            if (input <= 0) {
-              return ["Too small", null]
-            }
+  const validateOn = VALIDATE_ON_INIT
 
-            return [null, input]
-          },
+  describe("when active is invalid", () => {
+    it("selects active error", ({ scope }) => {
+      const form = ImpulseFormSwitch(
+        ImpulseFormUnit("", {
+          validateOn,
+          schema: z.enum(["_1", "_2"]),
         }),
-        _2: ImpulseFormSwitch(
-          ImpulseFormUnit("_3", {
-            schema: z.enum(["_3", "_4"]),
+        {
+          _1: ImpulseFormUnit(-10, {
+            validateOn,
+            validate: (input): Result<string, number> => {
+              if (input <= 0) {
+                return ["Too small", null]
+              }
+
+              return [null, input]
+            },
           }),
-          {
-            _3: ImpulseFormUnit("0", {
-              schema: z.number(),
+          _2: ImpulseFormSwitch(
+            ImpulseFormUnit("", {
+              validateOn,
+              schema: z.enum(["_3", "_4"]),
             }),
-            _4: ImpulseFormUnit(1, {
-              schema: z.string(),
-            }),
-          },
-        ),
-      },
-      {
-        validateOn: "onInit",
-      },
-    )
+            {
+              _3: ImpulseFormUnit("0", {
+                validateOn,
+                schema: z.number(),
+              }),
+              _4: ImpulseFormUnit(1, {
+                validateOn,
+                schema: z.string(),
+              }),
+            },
+          ),
+        },
+      )
 
-    const concise = {
-      active: null,
-      branch: {
-        kind: "_2",
-        value: {
-          active: null,
-          branch: {
-            kind: "_3",
-            value: [expect.any(String)],
+      const concise = {
+        active: [expect.any(String)],
+        branch: null,
+      }
+
+      expect(form.getError(scope)).toStrictEqual(concise)
+      expect(form.getError(scope, params._first)).toStrictEqual(concise)
+      expect(form.getError(scope, params._second)).toStrictEqual({
+        active: [expect.any(String)],
+        branches: {
+          _1: "Too small",
+          _2: {
+            active: [expect.any(String)],
+            branches: {
+              _3: [expect.any(String)],
+              _4: [expect.any(String)],
+            },
           },
         },
-      },
-    }
+      })
+    })
+  })
 
-    expect(form.getError(scope)).toStrictEqual(concise)
-    expect(form.getError(scope, params._first)).toStrictEqual(concise)
-    expect(form.getError(scope, params._second)).toStrictEqual({
-      active: null,
-      branches: {
-        _1: "Too small",
-        _2: {
-          active: null,
-          branches: {
-            _3: [expect.any(String)],
-            _4: [expect.any(String)],
+  describe("when active is valid", () => {
+    it("selects active's branch validating errors", ({ scope }) => {
+      const form = ImpulseFormSwitch(
+        ImpulseFormUnit("_2", {
+          validateOn,
+          schema: z.enum(["_1", "_2"]),
+        }),
+        {
+          _1: ImpulseFormUnit(-10, {
+            validateOn,
+            validate: (input): Result<string, number> => {
+              if (input <= 0) {
+                return ["Too small", null]
+              }
+
+              return [null, input]
+            },
+          }),
+          _2: ImpulseFormSwitch(
+            ImpulseFormUnit("_3", {
+              validateOn,
+              schema: z.enum(["_3", "_4"]),
+            }),
+            {
+              _3: ImpulseFormUnit("0", {
+                validateOn,
+                schema: z.number(),
+              }),
+              _4: ImpulseFormUnit(1, {
+                validateOn,
+                schema: z.string(),
+              }),
+            },
+          ),
+        },
+      )
+
+      const concise = {
+        active: null,
+        branch: {
+          kind: "_2",
+          value: {
+            active: null,
+            branch: {
+              kind: "_3",
+              value: [expect.any(String)],
+            },
           },
         },
-      },
+      }
+
+      expect(form.getError(scope)).toStrictEqual(concise)
+      expect(form.getError(scope, params._first)).toStrictEqual(concise)
+      expect(form.getError(scope, params._second)).toStrictEqual({
+        active: null,
+        branches: {
+          _1: "Too small",
+          _2: {
+            active: null,
+            branches: {
+              _3: [expect.any(String)],
+              _4: [expect.any(String)],
+            },
+          },
+        },
+      })
     })
   })
 })
