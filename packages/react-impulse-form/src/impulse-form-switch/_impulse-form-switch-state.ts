@@ -515,30 +515,22 @@ export class ImpulseFormSwitchState<
 
   // I N V A L I D
 
-  public readonly _invalid = Impulse((scope): ImpulseFormShapeFlag<TFields> => {
-    const invalid = mapValues(this._fields, ({ _invalid }) => {
-      return _invalid.getValue(scope)
-    })
-
-    const allInvalid = values(invalid)
-    const onlyInvalid = allInvalid.find(isBoolean) ?? false
-
-    for (const fieldInvalid of allInvalid) {
-      if (fieldInvalid !== onlyInvalid) {
-        return invalid as ImpulseFormShapeFlag<TFields>
-      }
-    }
-
-    return onlyInvalid
-  })
+  public readonly _invalid = Impulse(
+    (scope): ImpulseFormSwitchFlag<TKind, TBranches> => {
+      return this._toConcise<"flag.schema", boolean>(
+        scope,
+        ({ _invalid }) => _invalid,
+        isBoolean,
+      )
+    },
+  )
 
   public readonly _invalidVerbose = Impulse(
-    (scope): ImpulseFormShapeFlagVerbose<TFields> => {
-      const invalidVerbose = mapValues(this._fields, ({ _invalidVerbose }) => {
-        return _invalidVerbose.getValue(scope)
-      })
-
-      return invalidVerbose as ImpulseFormShapeFlagVerbose<TFields>
+    (scope): ImpulseFormSwitchFlagVerbose<TKind, TBranches> => {
+      return this._toVerbose<"flag.schema.verbose">(
+        scope,
+        ({ _invalidVerbose }) => _invalidVerbose,
+      )
     },
   )
 

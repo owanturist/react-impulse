@@ -8,7 +8,6 @@ import {
   ImpulseFormSwitch,
   type ImpulseFormSwitchErrorSetter,
   type ImpulseFormSwitchOptions,
-  type ImpulseFormSwitchValidateOnSetter,
   ImpulseFormUnit,
   type Result,
   VALIDATE_ON_CHANGE,
@@ -859,7 +858,7 @@ describe("when defining ImpulseFormSwitchOptions.error.active", () => {
   })
 
   describe("when active is valid", () => {
-    it("overrides only the active's validateOn", ({ scope }) => {
+    it("overrides only the active's error", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("_2", {
           validateOn,
@@ -997,7 +996,7 @@ describe("when defining concise ImpulseFormSwitchOptions.error.branch", () => {
   })
 
   describe("when active is valid", () => {
-    it("overrides only the active branch validateOn", ({ scope }) => {
+    it("overrides only the active branch error", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("_2", {
           validateOn,
