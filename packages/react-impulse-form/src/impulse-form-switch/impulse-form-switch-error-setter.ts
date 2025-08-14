@@ -6,29 +6,28 @@ import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type { GetImpulseFormSwitchBranchesParam } from "./_get-impulse-form-switch-branches-param"
 import type { ImpulseFormSwitchBranchUnion } from "./_impulse-form-switch-branch-union"
 import type { ImpulseFormSwitchConciseSchema } from "./_impulse-form-switch-concise-schema"
-import type { ImpulseFormSwitchFlagVerbose } from "./_impulse-form-switch-flag-verbose"
-import type { ImpulseFormSwitchVerboseSchema } from "./_impulse-form-switch-verbose-schema"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
+import type { ImpulseFormSwitchErrorVerbose } from "./impulse-form-switch-error-verbose"
+import type { ImpulseFormSwitchVerboseSchema } from "./impulse-form-switch-verbose-schema"
 
-export type ImpulseFormSwitchFlagSetter<
+export type ImpulseFormSwitchErrorSetter<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
 > = Setter<
   // concise
-  | boolean
+  | null
 
   // concise details
   | Partial<
       ImpulseFormSwitchConciseSchema<
-        GetImpulseFormParam<TKind, "flag.setter">,
+        GetImpulseFormParam<TKind, "error.setter">,
         Setter<
-          | boolean
-          | ImpulseFormSwitchBranchUnion<TKind, TBranches, "flag.setter">,
+          null | ImpulseFormSwitchBranchUnion<TKind, TBranches, "error.setter">,
           [
             ImpulseFormSwitchBranchUnion<
               TKind,
               TBranches,
-              "flag.schema.verbose"
+              "error.schema.verbose"
             >,
           ]
         >
@@ -38,18 +37,17 @@ export type ImpulseFormSwitchFlagSetter<
   // verbose
   | Partial<
       ImpulseFormSwitchVerboseSchema<
-        GetImpulseFormParam<TKind, "flag.setter">,
+        GetImpulseFormParam<TKind, "error.setter">,
         Setter<
-          | boolean
-          | Partial<
-              GetImpulseFormSwitchBranchesParam<TBranches, "flag.setter">
-            >,
-          [GetImpulseFormSwitchBranchesParam<TBranches, "flag.schema.verbose">]
+          null | Partial<
+            GetImpulseFormSwitchBranchesParam<TBranches, "error.setter">
+          >,
+          [GetImpulseFormSwitchBranchesParam<TBranches, "error.schema.verbose">]
         >
       >
     >,
   [
     // the only argument is the verbose schema
-    ImpulseFormSwitchFlagVerbose<TKind, TBranches>,
+    ImpulseFormSwitchErrorVerbose<TKind, TBranches>,
   ]
 >

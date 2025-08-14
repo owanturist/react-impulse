@@ -7,12 +7,12 @@ import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import { ImpulseFormSwitch as ImpulseFormSwitchImpl } from "./_impulse-form-switch"
-import type { ImpulseFormSwitchErrorSetter } from "./_impulse-form-switch-error-setter"
-import type { ImpulseFormSwitchFlagSetter } from "./_impulse-form-switch-flag-setter"
-import type { ImpulseFormSwitchInputSetter } from "./_impulse-form-switch-input-setter"
 import { ImpulseFormSwitchState } from "./_impulse-form-switch-state"
-import type { ImpulseFormSwitchValidateOnSetter } from "./_impulse-form-switch-validate-on-setter"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
+import type { ImpulseFormSwitchErrorSetter } from "./impulse-form-switch-error-setter"
+import type { ImpulseFormSwitchFlagSetter } from "./impulse-form-switch-flag-setter"
+import type { ImpulseFormSwitchInputSetter } from "./impulse-form-switch-input-setter"
+import type { ImpulseFormSwitchValidateOnSetter } from "./impulse-form-switch-validate-on-setter"
 
 export type ImpulseFormSwitch<
   TKind extends ImpulseForm,

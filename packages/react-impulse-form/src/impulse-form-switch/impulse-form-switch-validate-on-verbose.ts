@@ -1,9 +1,9 @@
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 
-import type { ImpulseFormSwitchVerboseParam } from "./_impulse-form-switch-verbose-param"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
+import type { ImpulseFormSwitchVerboseParam } from "./impulse-form-switch-verbose-param"
 
-export type ImpulseFormSwitchInput<
+export type ImpulseFormSwitchValidateOnVerbose<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
-> = ImpulseFormSwitchVerboseParam<TKind, TBranches, "input.schema">
+> = ImpulseFormSwitchVerboseParam<TKind, TBranches, "validateOn.schema.verbose">

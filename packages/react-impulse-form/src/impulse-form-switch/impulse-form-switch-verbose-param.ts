@@ -4,8 +4,8 @@ import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
 import type { GetImpulseFormParam } from "../impulse-form"
 
 import type { GetImpulseFormSwitchBranchesParam } from "./_get-impulse-form-switch-branches-param"
-import type { ImpulseFormSwitchVerboseSchema } from "./_impulse-form-switch-verbose-schema"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
+import type { ImpulseFormSwitchVerboseSchema } from "./impulse-form-switch-verbose-schema"
 
 export type ImpulseFormSwitchVerboseParam<
   TKind extends ImpulseForm,

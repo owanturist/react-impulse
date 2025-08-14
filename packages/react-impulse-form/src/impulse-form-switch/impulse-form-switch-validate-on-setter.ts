@@ -2,32 +2,34 @@ import type { Setter } from "~/tools/setter"
 
 import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { ValidateStrategy } from "../validate-strategy"
 
 import type { GetImpulseFormSwitchBranchesParam } from "./_get-impulse-form-switch-branches-param"
 import type { ImpulseFormSwitchBranchUnion } from "./_impulse-form-switch-branch-union"
 import type { ImpulseFormSwitchConciseSchema } from "./_impulse-form-switch-concise-schema"
-import type { ImpulseFormSwitchErrorVerbose } from "./_impulse-form-switch-error-verbose"
-import type { ImpulseFormSwitchVerboseSchema } from "./_impulse-form-switch-verbose-schema"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
+import type { ImpulseFormSwitchValidateOnVerbose } from "./impulse-form-switch-validate-on-verbose"
+import type { ImpulseFormSwitchVerboseSchema } from "./impulse-form-switch-verbose-schema"
 
-export type ImpulseFormSwitchErrorSetter<
+export type ImpulseFormSwitchValidateOnSetter<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
 > = Setter<
   // concise
-  | null
+  | ValidateStrategy
 
   // concise details
   | Partial<
       ImpulseFormSwitchConciseSchema<
-        GetImpulseFormParam<TKind, "error.setter">,
+        GetImpulseFormParam<TKind, "validateOn.setter">,
         Setter<
-          null | ImpulseFormSwitchBranchUnion<TKind, TBranches, "error.setter">,
+          | ValidateStrategy
+          | ImpulseFormSwitchBranchUnion<TKind, TBranches, "validateOn.setter">,
           [
             ImpulseFormSwitchBranchUnion<
               TKind,
               TBranches,
-              "error.schema.verbose"
+              "validateOn.schema.verbose"
             >,
           ]
         >
@@ -37,17 +39,23 @@ export type ImpulseFormSwitchErrorSetter<
   // verbose
   | Partial<
       ImpulseFormSwitchVerboseSchema<
-        GetImpulseFormParam<TKind, "error.setter">,
+        GetImpulseFormParam<TKind, "validateOn.setter">,
         Setter<
-          null | Partial<
-            GetImpulseFormSwitchBranchesParam<TBranches, "error.setter">
-          >,
-          [GetImpulseFormSwitchBranchesParam<TBranches, "error.schema.verbose">]
+          | ValidateStrategy
+          | Partial<
+              GetImpulseFormSwitchBranchesParam<TBranches, "validateOn.setter">
+            >,
+          [
+            GetImpulseFormSwitchBranchesParam<
+              TBranches,
+              "validateOn.schema.verbose"
+            >,
+          ]
         >
       >
     >,
   [
     // the only argument is the verbose schema
-    ImpulseFormSwitchErrorVerbose<TKind, TBranches>,
+    ImpulseFormSwitchValidateOnVerbose<TKind, TBranches>,
   ]
 >
