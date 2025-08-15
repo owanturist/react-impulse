@@ -1,4 +1,5 @@
 import type { Scope } from "react-impulse"
+import z from "zod"
 
 import { params } from "~/tools/params"
 
@@ -8,6 +9,7 @@ import {
   type ImpulseFormListOptions,
   ImpulseFormShape,
   type ImpulseFormShapeOptions,
+  ImpulseFormSwitch,
   ImpulseFormUnit,
 } from "../../src"
 
@@ -630,6 +632,89 @@ describe("removing an initial element from the list's beginning", () => {
     expect(
       form.getElements(scope).map((element) => element.isDirty(scope)),
     ).toStrictEqual([false, true])
+  })
+
+  describe("when using ImpulseFormSwitch", () => {
+    function setupElement(count: number) {
+      return ImpulseFormSwitch(
+        ImpulseFormUnit("_1", {
+          schema: z.enum(["_1", "_2"]),
+        }),
+        {
+          _1: ImpulseFormUnit(count),
+          _2: ImpulseFormSwitch(
+            ImpulseFormUnit("_3", {
+              schema: z.enum(["_3", "_4"]),
+            }),
+            {
+              _3: ImpulseFormUnit(count),
+              _4: ImpulseFormUnit(count),
+            },
+          ),
+        },
+      )
+    }
+
+    it("returns true for a removed switch", ({ scope }) => {
+      const form = ImpulseFormList([setupElement(1)])
+
+      form.setElements([])
+
+      expect(form.isDirty(scope)).toBe(true)
+      expect(form.isDirty(scope, params._first)).toBe(true)
+      expect(form.isDirty(scope, params._second)).toStrictEqual([
+        {
+          active: true,
+          branches: {
+            _1: true,
+            _2: {
+              active: true,
+              branches: {
+                _3: true,
+                _4: true,
+              },
+            },
+          },
+        },
+      ])
+    })
+
+    it("returns true for a added switch", ({ scope }) => {
+      const form = ImpulseFormList([setupElement(1)])
+
+      form.setElements((elements) => [...elements, setupElement(2)])
+
+      expect(form.isDirty(scope)).toBe(true)
+      expect(form.isDirty(scope, params._first)).toStrictEqual([false, true])
+      expect(form.isDirty(scope, params._second)).toStrictEqual([
+        {
+          active: false,
+          branches: {
+            _1: false,
+            _2: {
+              active: false,
+              branches: {
+                _3: false,
+                _4: false,
+              },
+            },
+          },
+        },
+        {
+          active: true,
+          branches: {
+            _1: true,
+            _2: {
+              active: true,
+              branches: {
+                _3: true,
+                _4: true,
+              },
+            },
+          },
+        },
+      ])
+    })
   })
 })
 

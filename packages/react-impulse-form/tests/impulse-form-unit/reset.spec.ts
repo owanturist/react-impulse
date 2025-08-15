@@ -134,14 +134,24 @@ it('resets isValidated when validateOn="onSubmit"', async ({ scope }) => {
  * @link https://github.com/owanturist/react-impulse/issues/797
  */
 it("keeps isValidated when validateOn=onInit", ({ scope }) => {
-  const unit = ImpulseFormUnit("", {
+  const unit = ImpulseFormUnit(1, {
+    initial: 0,
     validateOn: "onInit",
-    schema: z.string().min(1),
+    schema: z.number().min(1),
+    error: ["custom error"],
   })
 
   expect(unit.isValidated(scope)).toBe(true)
+  expect(unit.getValidateOn(scope)).toBe("onInit")
+  expect(unit.getOutput(scope)).toBeNull()
+  expect(unit.getError(scope)).toStrictEqual(["custom error"])
 
   unit.reset()
 
   expect(unit.isValidated(scope)).toBe(true)
+  expect(unit.getValidateOn(scope)).toBe("onInit")
+  expect(unit.getOutput(scope)).toBeNull()
+  expect(unit.getError(scope)).toStrictEqual([
+    expect.stringContaining("Too small"),
+  ])
 })

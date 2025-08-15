@@ -7,7 +7,7 @@ export function createUnionCompare<TPrimary, TSecondary>(
   secondary: Compare<TSecondary>,
 ): Compare<TPrimary | TSecondary> {
   // do not bother with primary compare if secondary is strict equal
-  if (secondary === isStrictEqual) {
+  if (secondary === isStrictEqual || secondary === Object.is) {
     return isStrictEqual
   }
 

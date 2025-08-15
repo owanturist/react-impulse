@@ -301,7 +301,7 @@ export abstract class ImpulseForm<
     const promises = untrack((scope) => {
       const output = this._state._root._output.getValue(scope)
 
-      if (!isNull(output) && this._state._root._valid.getValue(scope)) {
+      if (!isNull(output)) {
         return this._state._root._submitWith(scope, output).filter(isDefined)
       }
 
