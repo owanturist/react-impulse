@@ -2,7 +2,7 @@ import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 
-import type { ImpulseFormOptionalVerboseSchema } from "./impulse-form-optional-verbose-schema"
+import type { ImpulseFormOptionalSchema } from "./impulse-form-optional-schema"
 
 export type ImpulseFormOptionalConciseParam<
   TEnabled extends ImpulseForm,
@@ -11,7 +11,7 @@ export type ImpulseFormOptionalConciseParam<
   TConcise,
 > =
   | TConcise
-  | ImpulseFormOptionalVerboseSchema<
+  | ImpulseFormOptionalSchema<
       TConcise | GetImpulseFormParam<TEnabled, TKey>,
       TConcise | GetImpulseFormParam<TElement, TKey>
     >
