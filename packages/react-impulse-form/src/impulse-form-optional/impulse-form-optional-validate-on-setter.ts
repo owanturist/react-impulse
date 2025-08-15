@@ -4,8 +4,8 @@ import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type { ValidateStrategy } from "../validate-strategy"
 
+import type { ImpulseFormOptionalSchema } from "./impulse-form-optional-schema"
 import type { ImpulseFormOptionalValidateOnVerbose } from "./impulse-form-optional-validate-on-verbose"
-import type { ImpulseFormOptionalVerboseSchema } from "./impulse-form-optional-verbose-schema"
 
 export type ImpulseFormOptionalValidateOnSetter<
   TEnabled extends ImpulseForm,
@@ -13,7 +13,7 @@ export type ImpulseFormOptionalValidateOnSetter<
 > = Setter<
   | ValidateStrategy
   | Partial<
-      ImpulseFormOptionalVerboseSchema<
+      ImpulseFormOptionalSchema<
         GetImpulseFormParam<TEnabled, "validateOn.setter">,
         GetImpulseFormParam<TElement, "validateOn.setter">
       >

@@ -4,14 +4,14 @@ import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import type { ImpulseFormOptionalErrorVerbose } from "./impulse-form-optional-error-verbose"
-import type { ImpulseFormOptionalVerboseSchema } from "./impulse-form-optional-verbose-schema"
+import type { ImpulseFormOptionalSchema } from "./impulse-form-optional-schema"
 
 export type ImpulseFormOptionalErrorSetter<
   TEnabled extends ImpulseForm,
   TElement extends ImpulseForm,
 > = Setter<
   null | Partial<
-    ImpulseFormOptionalVerboseSchema<
+    ImpulseFormOptionalSchema<
       GetImpulseFormParam<TEnabled, "error.setter">,
       GetImpulseFormParam<TElement, "error.setter">
     >
