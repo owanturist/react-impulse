@@ -44,7 +44,7 @@ type ImpulseFormSwitchStateBranches<TBranches> = {
   >
 }
 
-type ActiveSwitchBranch<TBranches> = ImpulseFormSwitchBranch<
+type ActiveSwitchStateBranch<TBranches> = ImpulseFormSwitchBranch<
   keyof TBranches,
   ImpulseFormSwitchStateBranches<TBranches>[keyof TBranches]
 >
@@ -69,9 +69,9 @@ export class ImpulseFormSwitchState<
     this._branches = mapValues(branches, (branch) => this._parentOf(branch))
   }
 
-  private _getActiveBranch(
+  public _getActiveBranch(
     scope: Scope,
-  ): undefined | ActiveSwitchBranch<TBranches> {
+  ): undefined | ActiveSwitchStateBranch<TBranches> {
     const kind = this._active._output.getValue(scope)
     const value = isNull(kind) ? null : this._branches[kind]
 
