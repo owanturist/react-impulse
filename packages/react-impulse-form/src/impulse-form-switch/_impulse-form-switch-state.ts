@@ -82,16 +82,14 @@ export class ImpulseFormSwitchState<
     scope: Scope,
     extract: (form: ImpulseFormState) => ReadonlyImpulse<TConcise>,
     isConcise: (value: unknown) => value is TConcise,
-    fallbackInvalid?: (
-      value: unknown,
-    ) => ImpulseFormSwitchConciseParam<TKind, TBranches, TKey, TConcise>,
+    fallbackInvalid?: TConcise,
   ): ImpulseFormSwitchConciseParam<TKind, TBranches, TKey, TConcise> {
     const activeBranch = this._getActiveBranch(scope)
     const activeConcise = extract(this._active).getValue(scope)
 
     if (!activeBranch) {
-      return !isConcise(activeConcise) && fallbackInvalid
-        ? fallbackInvalid(activeConcise)
+      return !isConcise(activeConcise) && !isUndefined(fallbackInvalid)
+        ? { active: activeConcise, branch: fallbackInvalid }
         : activeConcise
     }
 
@@ -222,7 +220,7 @@ export class ImpulseFormSwitchState<
         scope,
         ({ _error }) => _error,
         isNull,
-        (active) => ({ active, branch: null }),
+        null,
       )
     },
   )

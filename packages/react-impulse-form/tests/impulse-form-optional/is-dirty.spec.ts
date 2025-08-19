@@ -12,7 +12,10 @@ describe("types", () => {
 
   type FlagSchema =
     | boolean
-    | { readonly enabled: boolean; readonly element: boolean }
+    | {
+        readonly enabled: boolean
+        readonly element: boolean
+      }
 
   interface FlagVerboseSchema {
     readonly enabled: boolean

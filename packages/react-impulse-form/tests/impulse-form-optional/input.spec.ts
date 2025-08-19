@@ -8,13 +8,11 @@ import {
   type ImpulseFormOptionalInputSetter,
   type ImpulseFormOptionalOptions,
   ImpulseFormUnit,
+  type Result,
 } from "../../src"
 
 describe("types", () => {
-  const form = ImpulseFormOptional(
-    ImpulseFormUnit(true, { schema: z.boolean() }),
-    ImpulseFormUnit(0, { schema: z.number() }),
-  )
+  const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit(0))
 
   interface InputSchema {
     readonly enabled: boolean
@@ -39,8 +37,8 @@ describe("types", () => {
 
   it("ensures ImpulseFormOptionalOptions.input type", () => {
     const form = ImpulseFormOptional(
-      ImpulseFormUnit(true, { schema: z.boolean() }),
-      ImpulseFormUnit(0, { schema: z.number() }),
+      ImpulseFormUnit(true),
+      ImpulseFormUnit(0),
       {
         input: {
           // @ts-expect-error should be boolean
@@ -55,10 +53,7 @@ describe("types", () => {
   })
 
   describe("nested", () => {
-    const parent = ImpulseFormOptional(
-      ImpulseFormUnit(true, { schema: z.boolean() }),
-      form,
-    )
+    const parent = ImpulseFormOptional(ImpulseFormUnit(true), form)
 
     interface ParentInputSchema {
       readonly enabled: boolean
@@ -85,13 +80,61 @@ describe("types", () => {
       >()
     })
   })
+
+  it("ensures the enabled output is a boolean", ({ scope }) => {
+    const form_1 = ImpulseFormOptional(
+      ImpulseFormUnit(false),
+      ImpulseFormUnit(0),
+    )
+    expectTypeOf(form_1.enabled.getOutput(scope)).toEqualTypeOf<
+      null | boolean
+    >()
+
+    const form_2 = ImpulseFormOptional(
+      ImpulseFormUnit(1, {
+        transform: (input) => input > 0,
+      }),
+      ImpulseFormUnit(0),
+    )
+    expectTypeOf(form_2.enabled.getOutput(scope)).toEqualTypeOf<
+      null | boolean
+    >()
+
+    const form_3 = ImpulseFormOptional(
+      ImpulseFormUnit(1, {
+        validate: (input): Result<string, boolean> => {
+          return input > 0 ? [null, true] : ["Negative", null]
+        },
+      }),
+      ImpulseFormUnit(0),
+    )
+    expectTypeOf(form_3.enabled.getOutput(scope)).toEqualTypeOf<
+      null | boolean
+    >()
+
+    const form_4 = ImpulseFormOptional(
+      ImpulseFormUnit(1, {
+        schema: z.number().transform((input) => input > 0),
+      }),
+      ImpulseFormUnit(0),
+    )
+    expectTypeOf(form_4.enabled.getOutput(scope)).toEqualTypeOf<
+      null | boolean
+    >()
+
+    const form_5 = ImpulseFormOptional(
+      // @ts-expect-error should output boolean
+      ImpulseFormUnit(1, {
+        schema: z.number(),
+      }),
+      ImpulseFormUnit(0),
+    )
+    expectTypeOf(form_5.enabled.getOutput(scope)).toEqualTypeOf<null | number>()
+  })
 })
 
-it("initiates with children input", ({ scope }) => {
-  const form = ImpulseFormOptional(
-    ImpulseFormUnit(true, { schema: z.boolean() }),
-    ImpulseFormUnit(1, { schema: z.number() }),
-  )
+it("initiates with element input", ({ scope }) => {
+  const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit(1))
 
   expect(form.getInput(scope)).toStrictEqual({
     enabled: true,
@@ -100,16 +143,12 @@ it("initiates with children input", ({ scope }) => {
 })
 
 it("initiates with overridden input", ({ scope }) => {
-  const form = ImpulseFormOptional(
-    ImpulseFormUnit(true, { schema: z.boolean() }),
-    ImpulseFormUnit(1, { schema: z.number() }),
-    {
-      input: {
-        enabled: false,
-        element: 2,
-      },
+  const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit(1), {
+    input: {
+      enabled: false,
+      element: 2,
     },
-  )
+  })
 
   expect(form.getInput(scope)).toStrictEqual({
     enabled: false,
@@ -118,10 +157,7 @@ it("initiates with overridden input", ({ scope }) => {
 })
 
 it("sets input", ({ scope }) => {
-  const form = ImpulseFormOptional(
-    ImpulseFormUnit(true, { schema: z.boolean() }),
-    ImpulseFormUnit(1, { schema: z.number() }),
-  )
+  const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit(1))
 
   form.setInput({
     enabled: false,
@@ -135,21 +171,28 @@ it("sets input", ({ scope }) => {
 })
 
 it("sets partial input", ({ scope }) => {
-  const form = ImpulseFormOptional(
-    ImpulseFormUnit(true, { schema: z.boolean() }),
-    ImpulseFormUnit(1, { schema: z.number() }),
-  )
+  const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit(1))
 
-  form.setInput({ element: 10 })
-  expect(form.getInput(scope)).toStrictEqual({ enabled: true, element: 10 })
+  form.setInput({
+    element: 10,
+  })
+  expect(form.getInput(scope)).toStrictEqual({
+    enabled: true,
+    element: 10,
+  })
 
-  form.setInput({ enabled: false })
-  expect(form.getInput(scope)).toStrictEqual({ enabled: false, element: 10 })
+  form.setInput({
+    enabled: false,
+  })
+  expect(form.getInput(scope)).toStrictEqual({
+    enabled: false,
+    element: 10,
+  })
 })
 
 describe("using recursive setter", () => {
-  const enabled = ImpulseFormUnit(true, { schema: z.boolean() })
-  const element = ImpulseFormUnit(1, { schema: z.number() })
+  const enabled = ImpulseFormUnit(true)
+  const element = ImpulseFormUnit(1)
 
   function setup(
     options?: ImpulseFormOptionalOptions<typeof enabled, typeof element>,
@@ -178,31 +221,38 @@ describe("using recursive setter", () => {
       },
     ],
   ])("in %s", (_, run) => {
-    it("passes initial and input recursively to all setters", ({ scope }) => {
-      expect.assertions(7)
+    it("passes input and initial recursively to all setters", ({ scope }) => {
+      expect.assertions(8)
 
       const form = run((input, initial) => {
         expect(input).toStrictEqual({ enabled: true, element: 1 })
         expect(initial).toStrictEqual({ enabled: true, element: 1 })
 
         return {
-          enabled: (i, init) => {
-            expect(i).toBe(true)
-            expect(init).toBe(true)
+          enabled: (input_enabled, initial_enabled) => {
+            expect(input_enabled).toBe(true)
+            expect(initial_enabled).toBe(true)
 
             return false
           },
 
-          element: (i, init) => {
-            expect(i).toBe(1)
-            expect(init).toBe(1)
+          element: (input_element, initial_element) => {
+            expect(input_element).toBe(1)
+            expect(initial_element).toBe(1)
 
             return 2
           },
         }
       })
 
-      expect(form.getInput(scope)).toStrictEqual({ enabled: false, element: 2 })
+      expect(form.getInput(scope)).toStrictEqual({
+        enabled: false,
+        element: 2,
+      })
+      expect(form.getInitial(scope)).toStrictEqual({
+        enabled: true,
+        element: 1,
+      })
     })
   })
 })

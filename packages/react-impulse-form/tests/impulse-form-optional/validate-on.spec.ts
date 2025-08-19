@@ -6,13 +6,14 @@ import type { Setter } from "~/tools/setter"
 import {
   ImpulseFormOptional,
   type ImpulseFormOptionalOptions,
+  type ImpulseFormOptionalValidateOnSetter,
   ImpulseFormUnit,
   type ValidateStrategy,
 } from "../../src"
 
 describe("types", () => {
-  const enabled = ImpulseFormUnit(true, { schema: z.boolean() })
-  const element = ImpulseFormUnit(0, { schema: z.number() })
+  const enabled = ImpulseFormUnit(true)
+  const element = ImpulseFormUnit(0)
 
   const form = ImpulseFormOptional(enabled, element)
 
@@ -119,10 +120,7 @@ describe("types", () => {
   })
 
   describe("nested", () => {
-    const parent = ImpulseFormOptional(
-      ImpulseFormUnit(true, { schema: z.boolean() }),
-      form,
-    )
+    const parent = ImpulseFormOptional(ImpulseFormUnit(true), form)
 
     type ParentValidateOnSchema =
       | ValidateStrategy
@@ -193,11 +191,11 @@ describe.each([
     it("overrides both validateOn", ({ scope }) => {
       const form = ImpulseFormOptional(
         ImpulseFormUnit(true, {
-          validateOn: differentValidateOn,
+          validateOn: "onChange",
           schema: z.boolean(),
         }),
         ImpulseFormUnit(1, {
-          validateOn: differentValidateOn,
+          validateOn: "onSubmit",
           schema: z.number(),
         }),
         {
@@ -218,10 +216,13 @@ describe.each([
     it("overrides only enabled", ({ scope }) => {
       const form = ImpulseFormOptional(
         ImpulseFormUnit(true, {
-          validateOn: differentValidateOn,
+          validateOn: "onChange",
           schema: z.boolean(),
         }),
-        ImpulseFormUnit(1, { validateOn: "onInit", schema: z.number() }),
+        ImpulseFormUnit(1, {
+          validateOn: differentValidateOn,
+          schema: z.number(),
+        }),
         {
           validateOn: {
             enabled: validateOn,
@@ -231,11 +232,11 @@ describe.each([
 
       expect(form.getValidateOn(scope)).toStrictEqual({
         enabled: validateOn,
-        element: "onInit",
+        element: differentValidateOn,
       })
       expect(form.getValidateOn(scope, params._second)).toStrictEqual({
         enabled: validateOn,
-        element: "onInit",
+        element: differentValidateOn,
       })
     })
   })
@@ -243,9 +244,12 @@ describe.each([
   describe("when defining ImpulseFormOptionalOptions.validateOn.element", () => {
     it("overrides only element", ({ scope }) => {
       const form = ImpulseFormOptional(
-        ImpulseFormUnit(true, { validateOn: "onInit", schema: z.boolean() }),
-        ImpulseFormUnit(1, {
+        ImpulseFormUnit(true, {
           validateOn: differentValidateOn,
+          schema: z.boolean(),
+        }),
+        ImpulseFormUnit(1, {
+          validateOn: "onSubmit",
           schema: z.number(),
         }),
         {
@@ -256,11 +260,11 @@ describe.each([
       )
 
       expect(form.getValidateOn(scope)).toStrictEqual({
-        enabled: "onInit",
+        enabled: differentValidateOn,
         element: validateOn,
       })
       expect(form.getValidateOn(scope, params._second)).toStrictEqual({
-        enabled: "onInit",
+        enabled: differentValidateOn,
         element: validateOn,
       })
     })
@@ -270,8 +274,14 @@ describe.each([
     scope,
   }) => {
     const form = ImpulseFormOptional(
-      ImpulseFormUnit(true, { validateOn, schema: z.boolean() }),
-      ImpulseFormUnit(1, { validateOn, schema: z.number() }),
+      ImpulseFormUnit(true, {
+        validateOn,
+        schema: z.boolean(),
+      }),
+      ImpulseFormUnit(1, {
+        validateOn,
+        schema: z.number(),
+      }),
     )
 
     expect(form.getValidateOn(scope)).toBe(validateOn)
@@ -286,8 +296,11 @@ describe.each([
 describe("stable validateOn value", () => {
   it("subsequently selects equal validateOn", ({ scope }) => {
     const form = ImpulseFormOptional(
-      ImpulseFormUnit(true, { schema: z.boolean() }),
-      ImpulseFormUnit(1, { validateOn: "onTouch", schema: z.number() }),
+      ImpulseFormUnit(true),
+      ImpulseFormUnit(1, {
+        validateOn: "onTouch",
+        schema: z.number(),
+      }),
     )
 
     expect(form.getValidateOn(scope)).toBe(form.getValidateOn(scope))
@@ -297,5 +310,80 @@ describe("stable validateOn value", () => {
     expect(form.getValidateOn(scope, params._second)).toBe(
       form.getValidateOn(scope, params._second),
     )
+  })
+})
+
+describe("using recursive setter", () => {
+  const enabled = ImpulseFormUnit(true, {
+    schema: z.boolean(),
+    validateOn: "onInit",
+  })
+  const element = ImpulseFormUnit(1, {
+    schema: z.number(),
+    validateOn: "onSubmit",
+  })
+
+  function setup(
+    options?: ImpulseFormOptionalOptions<typeof enabled, typeof element>,
+  ) {
+    return ImpulseFormOptional(enabled, element, options)
+  }
+
+  describe.each<
+    [
+      string,
+      (
+        validateOn: ImpulseFormOptionalValidateOnSetter<
+          typeof enabled,
+          typeof element
+        >,
+      ) => ReturnType<typeof setup>,
+    ]
+  >([
+    [
+      "ImpulseFormOptionalOptions.validateOn",
+      (validateOn) => setup({ validateOn }),
+    ],
+
+    [
+      "ImpulseFormOptional.setValidateOn",
+      (setter) => {
+        const form = setup()
+
+        form.setValidateOn(setter)
+
+        return form
+      },
+    ],
+  ])("in %s", (_, run) => {
+    it("passes validateOn recursively to all setters", ({ scope }) => {
+      expect.assertions(4)
+
+      const form = run((validateOn) => {
+        expect(validateOn).toStrictEqual({
+          enabled: "onInit",
+          element: "onSubmit",
+        })
+
+        return {
+          enabled: (validateOn_enabled) => {
+            expect(validateOn_enabled).toBe("onInit")
+
+            return "onChange"
+          },
+
+          element: (validateOn_element) => {
+            expect(validateOn_element).toBe("onSubmit")
+
+            return "onTouch"
+          },
+        }
+      })
+
+      expect(form.getValidateOn(scope)).toStrictEqual({
+        enabled: "onChange",
+        element: "onTouch",
+      })
+    })
   })
 })
