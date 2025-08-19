@@ -1,9 +1,11 @@
 import { mapValues } from "~/tools/map-values"
 
+import type { Scope } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormSwitchParams } from "./_impulse-form-switch-params"
 import type { ImpulseFormSwitchState } from "./_impulse-form-switch-state"
+import type { ImpulseFormSwitchActiveBranch } from "./impulse-form-switch-active-branch"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 
 export class ImpulseFormSwitch<
@@ -26,5 +28,20 @@ export class ImpulseFormSwitch<
     this.branches = mapValues(_state._branches, ({ _host }) => {
       return _host()
     }) as Readonly<TBranches>
+  }
+
+  public getActiveBranch(
+    scope: Scope,
+  ): undefined | ImpulseFormSwitchActiveBranch<TBranches> {
+    const result = this._state._getActiveBranch(scope)
+
+    if (!result) {
+      return undefined
+    }
+
+    return {
+      kind: result.kind,
+      value: result.value._host(),
+    } as ImpulseFormSwitchActiveBranch<TBranches>
   }
 }
