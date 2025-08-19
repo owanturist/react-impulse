@@ -1,5 +1,17 @@
 # react-impulse-form
 
+## 0.13.0
+
+### Minor Changes
+
+- [#943](https://github.com/owanturist/react-impulse/pull/943) [`1a64333`](https://github.com/owanturist/react-impulse/commit/1a64333471a41df486668a307468f44a892f995a) Thanks [@owanturist](https://github.com/owanturist)! - Add `ImpulseFormSwitch.getActiveBranch()` method:
+
+  ```dart
+  public getActiveBranch(
+    scope: Scope,
+  ): undefined | ActiveSwitchBranch<TBranches>
+  ```
+
 ## 0.12.0
 
 ### Minor Changes
