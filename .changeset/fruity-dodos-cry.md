@@ -1,5 +1,5 @@
 ---
-"react-impulse-form": patch
+"react-impulse-form": minor
 ---
 
 Add `ImpulseFormSwitch.getActiveBranch()` method:
