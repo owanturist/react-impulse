@@ -232,7 +232,7 @@ export class ImpulseFormOptionalState<
       : setter
 
     const [enabledSetter, elementSetter] = isString(resolved)
-      ? [resolved, resolved]
+      ? [resolved, this._isEnabled(scope) ? resolved : undefined]
       : [resolved.enabled, resolved.element]
 
     if (!isUndefined(enabledSetter)) {
@@ -240,7 +240,7 @@ export class ImpulseFormOptionalState<
     }
 
     if (!isUndefined(elementSetter)) {
-      this._getEnabledElement(scope)?._setValidateOn(scope, elementSetter)
+      this._element._setValidateOn(scope, elementSetter)
     }
   }
 

@@ -188,84 +188,179 @@ describe.each([
   ["onInit" as const, "onTouch" as const],
 ])("when ValidateStrategy=%s", (validateOn, differentValidateOn) => {
   describe("when defining top-level concise ImpulseFormOptionalOptions.validateOn", () => {
-    it("overrides both validateOn", ({ scope }) => {
-      const form = ImpulseFormOptional(
-        ImpulseFormUnit(true, {
-          validateOn: "onChange",
-          schema: z.boolean(),
-        }),
-        ImpulseFormUnit(1, {
-          validateOn: "onSubmit",
-          schema: z.number(),
-        }),
-        {
-          validateOn,
-        },
-      )
+    describe("when enabled", () => {
+      it("overrides both validateOn", ({ scope }) => {
+        const form = ImpulseFormOptional(
+          ImpulseFormUnit(true, {
+            validateOn: "onChange",
+            schema: z.boolean(),
+          }),
+          ImpulseFormUnit(1, {
+            validateOn: "onSubmit",
+            schema: z.number(),
+          }),
+          {
+            validateOn,
+          },
+        )
 
-      expect(form.getValidateOn(scope)).toBe(validateOn)
-      expect(form.getValidateOn(scope, params._first)).toBe(validateOn)
-      expect(form.getValidateOn(scope, params._second)).toStrictEqual({
-        enabled: validateOn,
-        element: validateOn,
+        expect(form.getValidateOn(scope)).toBe(validateOn)
+        expect(form.getValidateOn(scope, params._first)).toBe(validateOn)
+        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+          enabled: validateOn,
+          element: validateOn,
+        })
+      })
+    })
+
+    describe("when disabled", () => {
+      it("overrides only enabled", ({ scope }) => {
+        const form = ImpulseFormOptional(
+          ImpulseFormUnit(false, {
+            validateOn: "onChange",
+            schema: z.boolean(),
+          }),
+          ImpulseFormUnit(1, {
+            validateOn: "onSubmit",
+            schema: z.number(),
+          }),
+          {
+            validateOn,
+          },
+        )
+
+        expect(form.getValidateOn(scope)).toBe(validateOn)
+        expect(form.getValidateOn(scope, params._first)).toBe(validateOn)
+        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+          enabled: validateOn,
+          element: "onSubmit",
+        })
       })
     })
   })
 
   describe("when defining ImpulseFormOptionalOptions.validateOn.enabled", () => {
-    it("overrides only enabled", ({ scope }) => {
-      const form = ImpulseFormOptional(
-        ImpulseFormUnit(true, {
-          validateOn: "onChange",
-          schema: z.boolean(),
-        }),
-        ImpulseFormUnit(1, {
-          validateOn: differentValidateOn,
-          schema: z.number(),
-        }),
-        {
-          validateOn: {
-            enabled: validateOn,
+    describe("when enabled", () => {
+      it("overrides only enabled", ({ scope }) => {
+        const form = ImpulseFormOptional(
+          ImpulseFormUnit(true, {
+            validateOn: "onChange",
+            schema: z.boolean(),
+          }),
+          ImpulseFormUnit(1, {
+            validateOn: differentValidateOn,
+            schema: z.number(),
+          }),
+          {
+            validateOn: {
+              enabled: validateOn,
+            },
           },
-        },
-      )
+        )
 
-      expect(form.getValidateOn(scope)).toStrictEqual({
-        enabled: validateOn,
-        element: differentValidateOn,
+        expect(form.getValidateOn(scope)).toStrictEqual({
+          enabled: validateOn,
+          element: differentValidateOn,
+        })
+        expect(form.getValidateOn(scope, params._first)).toStrictEqual({
+          enabled: validateOn,
+          element: differentValidateOn,
+        })
+        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+          enabled: validateOn,
+          element: differentValidateOn,
+        })
       })
-      expect(form.getValidateOn(scope, params._second)).toStrictEqual({
-        enabled: validateOn,
-        element: differentValidateOn,
+    })
+
+    describe("when disabled", () => {
+      it("overrides only enabled", ({ scope }) => {
+        const form = ImpulseFormOptional(
+          ImpulseFormUnit(false, {
+            validateOn: "onChange",
+            schema: z.boolean(),
+          }),
+          ImpulseFormUnit(1, {
+            validateOn: differentValidateOn,
+            schema: z.number(),
+          }),
+          {
+            validateOn: {
+              enabled: validateOn,
+            },
+          },
+        )
+
+        expect(form.getValidateOn(scope)).toBe(validateOn)
+        expect(form.getValidateOn(scope, params._first)).toBe(validateOn)
+        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+          enabled: validateOn,
+          element: differentValidateOn,
+        })
       })
     })
   })
 
   describe("when defining ImpulseFormOptionalOptions.validateOn.element", () => {
-    it("overrides only element", ({ scope }) => {
-      const form = ImpulseFormOptional(
-        ImpulseFormUnit(true, {
-          validateOn: differentValidateOn,
-          schema: z.boolean(),
-        }),
-        ImpulseFormUnit(1, {
-          validateOn: "onSubmit",
-          schema: z.number(),
-        }),
-        {
-          validateOn: {
-            element: validateOn,
+    describe("when enabled", () => {
+      it("overrides only element", ({ scope }) => {
+        const form = ImpulseFormOptional(
+          ImpulseFormUnit(true, {
+            validateOn: differentValidateOn,
+            schema: z.boolean(),
+          }),
+          ImpulseFormUnit(1, {
+            validateOn: "onSubmit",
+            schema: z.number(),
+          }),
+          {
+            validateOn: {
+              element: validateOn,
+            },
           },
-        },
-      )
+        )
 
-      expect(form.getValidateOn(scope)).toStrictEqual({
-        enabled: differentValidateOn,
-        element: validateOn,
+        expect(form.getValidateOn(scope)).toStrictEqual({
+          enabled: differentValidateOn,
+          element: validateOn,
+        })
+        expect(form.getValidateOn(scope, params._first)).toStrictEqual({
+          enabled: differentValidateOn,
+          element: validateOn,
+        })
+        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+          enabled: differentValidateOn,
+          element: validateOn,
+        })
       })
-      expect(form.getValidateOn(scope, params._second)).toStrictEqual({
-        enabled: differentValidateOn,
-        element: validateOn,
+    })
+
+    describe("when disabled", () => {
+      it("overrides only element", ({ scope }) => {
+        const form = ImpulseFormOptional(
+          ImpulseFormUnit(false, {
+            validateOn: differentValidateOn,
+            schema: z.boolean(),
+          }),
+          ImpulseFormUnit(1, {
+            validateOn: "onSubmit",
+            schema: z.number(),
+          }),
+          {
+            validateOn: {
+              element: validateOn,
+            },
+          },
+        )
+
+        expect(form.getValidateOn(scope)).toBe(differentValidateOn)
+        expect(form.getValidateOn(scope, params._first)).toBe(
+          differentValidateOn,
+        )
+        expect(form.getValidateOn(scope, params._second)).toStrictEqual({
+          enabled: differentValidateOn,
+          element: validateOn,
+        })
       })
     })
   })
