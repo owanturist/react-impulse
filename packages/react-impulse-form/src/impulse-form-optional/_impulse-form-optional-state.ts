@@ -2,6 +2,7 @@ import { isBoolean } from "~/tools/is-boolean"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
 import { isString } from "~/tools/is-string"
+import { isTrue } from "~/tools/is-true"
 import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
 
@@ -52,7 +53,7 @@ export class ImpulseFormOptionalState<
   }
 
   private _isEnabled(scope: Scope): boolean {
-    return this._enabled._output.getValue(scope) === true
+    return isTrue(this._enabled._output.getValue(scope))
   }
 
   private _getEnabledElement(
@@ -189,16 +190,20 @@ export class ImpulseFormOptionalState<
       ? setter(this._errorVerbose.getValue(scope))
       : setter
 
-    const [enabledSetter, elementSetter] = isNull(resolved)
-      ? [null, null]
-      : [resolved.enabled, resolved.element]
+    const enabledSetter = isNull(resolved) ? resolved : resolved.enabled
 
     if (!isUndefined(enabledSetter)) {
       this._enabled._setError(scope, enabledSetter)
     }
 
+    const elementSetter = isNull(resolved)
+      ? this._isEnabled(scope)
+        ? resolved
+        : undefined
+      : resolved.element
+
     if (!isUndefined(elementSetter)) {
-      this._getEnabledElement(scope)?._setError(scope, elementSetter)
+      this._element._setError(scope, elementSetter)
     }
   }
 

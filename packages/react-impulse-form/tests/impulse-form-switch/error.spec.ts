@@ -342,7 +342,7 @@ describe.each([
   "onSubmit" as const,
   "onInit" as const,
 ])("when any validateOn (%s)", (validateOn) => {
-  it("selects the active's error only when it has an error", ({ scope }) => {
+  it("selects only the active's error when it has an error", ({ scope }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("_1", {
         schema: z.enum(["_1"]),
@@ -667,7 +667,7 @@ describe("when defining top-level concise ImpulseFormSwitchOptions.error", () =>
   const validateOn = "onInit" as const
 
   describe("when active is valid", () => {
-    it("overrides active branch's validateOn", ({ scope }) => {
+    it("overrides active branch's error", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("_2", {
           validateOn,
@@ -724,7 +724,7 @@ describe("when defining top-level concise ImpulseFormSwitchOptions.error", () =>
   })
 
   describe("when active is invalid", () => {
-    it("overrides only the active's validateOn", ({ scope }) => {
+    it("overrides only the active's error", ({ scope }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("", {
           validateOn,
