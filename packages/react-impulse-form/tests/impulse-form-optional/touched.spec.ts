@@ -204,7 +204,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
 
     describe("when disabled", () => {
-      it("overrides both touched", ({ scope }) => {
+      it("overrides only enabled", ({ scope }) => {
         const form = ImpulseFormOptional(
           ImpulseFormUnit(false, {
             touched: true,
@@ -312,7 +312,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
 
     describe("when disabled", () => {
-      it("does not change anything", ({ scope }) => {
+      it("overrides only element", ({ scope }) => {
         const form = ImpulseFormOptional(
           ImpulseFormUnit(false, {
             touched: differentTouched,
@@ -331,7 +331,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
         expect(form.isTouched(scope, params._first)).toBe(differentTouched)
         expect(form.isTouched(scope, params._second)).toStrictEqual({
           enabled: differentTouched,
-          element: true,
+          element: touched,
         })
       })
     })

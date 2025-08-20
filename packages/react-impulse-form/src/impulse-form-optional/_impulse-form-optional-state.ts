@@ -51,10 +51,14 @@ export class ImpulseFormOptionalState<
     this._element = this._parentOf(element)
   }
 
+  private _isEnabled(scope: Scope): boolean {
+    return this._enabled._output.getValue(scope) === true
+  }
+
   private _getEnabledElement(
     scope: Scope,
   ): undefined | ImpulseFormState<GetImpulseFormParams<TElement>> {
-    return this._enabled._output.getValue(scope) ? this._element : undefined
+    return this._isEnabled(scope) ? this._element : undefined
   }
 
   public _childOf(
@@ -108,11 +112,8 @@ export class ImpulseFormOptionalState<
     scope: Scope,
     setter: ImpulseFormOptionalInputSetter<TEnabled, TElement>,
   ): void {
-    const initial = this._initial.getValue(scope)
-    const input = this._input.getValue(scope)
-
     const { enabled, element } = isFunction(setter)
-      ? setter(initial, input)
+      ? setter(this._initial.getValue(scope), this._input.getValue(scope))
       : setter
 
     if (!isUndefined(enabled)) {
@@ -145,11 +146,8 @@ export class ImpulseFormOptionalState<
     scope: Scope,
     setter: ImpulseFormOptionalInputSetter<TEnabled, TElement>,
   ): void {
-    const initial = this._initial.getValue(scope)
-    const input = this._input.getValue(scope)
-
     const { enabled, element } = isFunction(setter)
-      ? setter(input, initial)
+      ? setter(this._input.getValue(scope), this._initial.getValue(scope))
       : setter
 
     if (!isUndefined(enabled)) {
@@ -187,8 +185,9 @@ export class ImpulseFormOptionalState<
     scope: Scope,
     setter: ImpulseFormOptionalErrorSetter<TEnabled, TElement>,
   ): void {
-    const verbose = this._errorVerbose.getValue(scope)
-    const resolved = isFunction(setter) ? setter(verbose) : setter
+    const resolved = isFunction(setter)
+      ? setter(this._errorVerbose.getValue(scope))
+      : setter
 
     const [enabledSetter, elementSetter] = isNull(resolved)
       ? [null, null]
@@ -228,8 +227,9 @@ export class ImpulseFormOptionalState<
     scope: Scope,
     setter: ImpulseFormOptionalValidateOnSetter<TEnabled, TElement>,
   ): void {
-    const verbose = this._validateOnVerbose.getValue(scope)
-    const resolved = isFunction(setter) ? setter(verbose) : setter
+    const resolved = isFunction(setter)
+      ? setter(this._validateOnVerbose.getValue(scope))
+      : setter
 
     const [enabledSetter, elementSetter] = isString(resolved)
       ? [resolved, resolved]
@@ -269,11 +269,12 @@ export class ImpulseFormOptionalState<
     scope: Scope,
     setter: ImpulseFormOptionalFlagSetter<TEnabled, TElement>,
   ): void {
-    const verbose = this._touchedVerbose.getValue(scope)
-    const resolved = isFunction(setter) ? setter(verbose) : setter
+    const resolved = isFunction(setter)
+      ? setter(this._touchedVerbose.getValue(scope))
+      : setter
 
     const [enabledSetter, elementSetter] = isBoolean(resolved)
-      ? [resolved, resolved]
+      ? [resolved, this._isEnabled(scope) ? resolved : undefined]
       : [resolved.enabled, resolved.element]
 
     if (!isUndefined(enabledSetter)) {
@@ -281,7 +282,7 @@ export class ImpulseFormOptionalState<
     }
 
     if (!isUndefined(elementSetter)) {
-      this._getEnabledElement(scope)?._setTouched(scope, elementSetter)
+      this._element._setTouched(scope, elementSetter)
     }
   }
 
