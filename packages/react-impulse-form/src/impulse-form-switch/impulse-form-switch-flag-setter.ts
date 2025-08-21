@@ -5,8 +5,8 @@ import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import type { GetImpulseFormSwitchBranchesParam } from "./_get-impulse-form-switch-branches-param"
 import type { ImpulseFormSwitchBranchUnion } from "./_impulse-form-switch-branch-union"
-import type { ImpulseFormSwitchConciseSchema } from "./_impulse-form-switch-concise-schema"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
+import type { ImpulseFormSwitchConciseSchema } from "./impulse-form-switch-concise-schema"
 import type { ImpulseFormSwitchFlagVerbose } from "./impulse-form-switch-flag-verbose"
 import type { ImpulseFormSwitchVerboseSchema } from "./impulse-form-switch-verbose-schema"
 

@@ -3,6 +3,8 @@ export * from "./is-impulse-form-switch"
 export type * from "./impulse-form-switch-branch"
 export type * from "./impulse-form-switch-branches"
 export type * from "./impulse-form-switch-active-branch"
+export type * from "./impulse-form-switch-verbose-schema"
+export type * from "./impulse-form-switch-concise-schema"
 
 export type * from "./impulse-form-switch-error-setter"
 export type * from "./impulse-form-switch-error-verbose"

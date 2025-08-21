@@ -5,8 +5,8 @@ import type {
 } from "../impulse-form"
 
 import type { ImpulseFormSwitchBranchUnion } from "./_impulse-form-switch-branch-union"
-import type { ImpulseFormSwitchConciseSchema } from "./_impulse-form-switch-concise-schema"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
+import type { ImpulseFormSwitchConciseSchema } from "./impulse-form-switch-concise-schema"
 
 export type ImpulseFormSwitchConciseParam<
   TKind extends ImpulseForm,

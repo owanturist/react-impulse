@@ -21,6 +21,7 @@ import type { ValidateStrategy } from "../validate-strategy"
 import { ImpulseFormSwitch } from "./_impulse-form-switch"
 import type { ImpulseFormSwitchConciseParam } from "./_impulse-form-switch-concise-param"
 import type { ImpulseFormSwitchParams } from "./_impulse-form-switch-params"
+import type { ImpulseFormSwitchVerboseParam } from "./_impulse-form-switch-verbose-param"
 import type { ImpulseFormSwitchBranch } from "./impulse-form-switch-branch"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 import type { ImpulseFormSwitchError } from "./impulse-form-switch-error"
@@ -36,7 +37,6 @@ import type { ImpulseFormSwitchOutputVerbose } from "./impulse-form-switch-outpu
 import type { ImpulseFormSwitchValidateOn } from "./impulse-form-switch-validate-on"
 import type { ImpulseFormSwitchValidateOnSetter } from "./impulse-form-switch-validate-on-setter"
 import type { ImpulseFormSwitchValidateOnVerbose } from "./impulse-form-switch-validate-on-verbose"
-import type { ImpulseFormSwitchVerboseParam } from "./impulse-form-switch-verbose-param"
 
 type ImpulseFormSwitchStateBranches<TBranches> = {
   [TBranch in keyof TBranches]: ImpulseFormState<
@@ -82,16 +82,14 @@ export class ImpulseFormSwitchState<
     scope: Scope,
     extract: (form: ImpulseFormState) => ReadonlyImpulse<TConcise>,
     isConcise: (value: unknown) => value is TConcise,
-    fallbackInvalid?: (
-      value: unknown,
-    ) => ImpulseFormSwitchConciseParam<TKind, TBranches, TKey, TConcise>,
+    fallbackInvalid?: TConcise,
   ): ImpulseFormSwitchConciseParam<TKind, TBranches, TKey, TConcise> {
     const activeBranch = this._getActiveBranch(scope)
     const activeConcise = extract(this._active).getValue(scope)
 
     if (!activeBranch) {
-      return !isConcise(activeConcise) && fallbackInvalid
-        ? fallbackInvalid(activeConcise)
+      return !isConcise(activeConcise) && !isUndefined(fallbackInvalid)
+        ? { active: activeConcise, branch: fallbackInvalid }
         : activeConcise
     }
 
@@ -222,7 +220,7 @@ export class ImpulseFormSwitchState<
         scope,
         ({ _error }) => _error,
         isNull,
-        (active) => ({ active, branch: null }),
+        null,
       )
     },
   )
