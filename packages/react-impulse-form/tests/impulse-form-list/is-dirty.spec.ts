@@ -7,6 +7,7 @@ import {
   type ImpulseForm,
   ImpulseFormList,
   type ImpulseFormListOptions,
+  ImpulseFormOptional,
   ImpulseFormShape,
   type ImpulseFormShapeOptions,
   ImpulseFormSwitch,
@@ -711,6 +712,58 @@ describe("removing an initial element from the list's beginning", () => {
                 _4: true,
               },
             },
+          },
+        },
+      ])
+    })
+  })
+
+  describe("when using ImpulseFormOptional", () => {
+    function setupElement(count: number) {
+      return ImpulseFormOptional(
+        ImpulseFormUnit(true),
+        ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit(count)),
+      )
+    }
+
+    it("returns true for a removed optional", ({ scope }) => {
+      const form = ImpulseFormList([setupElement(1)])
+
+      form.setElements([])
+
+      expect(form.isDirty(scope)).toBe(true)
+      expect(form.isDirty(scope, params._first)).toBe(true)
+      expect(form.isDirty(scope, params._second)).toStrictEqual([
+        {
+          enabled: true,
+          element: {
+            enabled: true,
+            element: true,
+          },
+        },
+      ])
+    })
+
+    it("returns true for a added switch", ({ scope }) => {
+      const form = ImpulseFormList([setupElement(1)])
+
+      form.setElements((elements) => [...elements, setupElement(2)])
+
+      expect(form.isDirty(scope)).toBe(true)
+      expect(form.isDirty(scope, params._first)).toStrictEqual([false, true])
+      expect(form.isDirty(scope, params._second)).toStrictEqual([
+        {
+          enabled: false,
+          element: {
+            enabled: false,
+            element: false,
+          },
+        },
+        {
+          enabled: true,
+          element: {
+            enabled: true,
+            element: true,
           },
         },
       ])
