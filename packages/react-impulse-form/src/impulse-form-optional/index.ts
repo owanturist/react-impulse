@@ -1,5 +1,6 @@
 export * from "./impulse-form-optional"
 export * from "./is-impulse-form-optional"
+export type * from "./impulse-form-optional-schema"
 
 export type * from "./impulse-form-optional-error-setter"
 export type * from "./impulse-form-optional-error-verbose"

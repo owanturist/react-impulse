@@ -1,8 +1,8 @@
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 
-import type { ImpulseFormOptionalVerboseParam } from "./impulse-form-optional-verbose-param"
+import type { ImpulseFormOptionalParam } from "./impulse-form-optional-param"
 
 export type ImpulseFormOptionalErrorVerbose<
   TEnabled extends ImpulseForm,
   TElement extends ImpulseForm,
-> = ImpulseFormOptionalVerboseParam<TEnabled, TElement, "error.schema.verbose">
+> = ImpulseFormOptionalParam<TEnabled, TElement, "error.schema.verbose">
