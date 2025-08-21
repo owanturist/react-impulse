@@ -296,7 +296,7 @@ describe("when element is initially valid", () => {
     ["enabled", true],
     ["disabled", false],
   ])("when initially %s", (_, enabled) => {
-    it("returns true for a initially enabled", ({ scope }) => {
+    it("returns true", ({ scope }) => {
       const form = ImpulseFormOptional(
         ImpulseFormUnit(enabled),
         ImpulseFormOptional(
@@ -380,6 +380,39 @@ describe("when element is initially valid", () => {
       enabled: true,
       element: {
         enabled: false,
+        element: {
+          _1: true,
+          _2: true,
+        },
+      },
+    })
+  })
+
+  it("returns false after making active invalid", ({ scope }) => {
+    const form = ImpulseFormOptional(
+      ImpulseFormUnit("true", {
+        validateOn: "onInit",
+        schema: z.string().nonempty().pipe(z.coerce.boolean()),
+      }),
+      ImpulseFormOptional(
+        ImpulseFormUnit(true),
+        ImpulseFormShape({
+          _1: ImpulseFormUnit("name"),
+          _2: ImpulseFormUnit(18),
+        }),
+      ),
+    )
+
+    expect(form.isValid(scope)).toBe(true)
+
+    form.enabled.setInput("")
+
+    expect(form.isValid(scope)).toBe(false)
+    expect(form.isValid(scope, params._first)).toBe(false)
+    expect(form.isValid(scope, params._second)).toStrictEqual({
+      enabled: false,
+      element: {
+        enabled: true,
         element: {
           _1: true,
           _2: true,
