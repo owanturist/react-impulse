@@ -14,6 +14,12 @@ import type { ImpulseFormSwitchFlagSetter } from "./impulse-form-switch-flag-set
 import type { ImpulseFormSwitchInputSetter } from "./impulse-form-switch-input-setter"
 import type { ImpulseFormSwitchValidateOnSetter } from "./impulse-form-switch-validate-on-setter"
 
+/**
+ * ImpulseFormFork
+ * .control
+ * .branches
+ */
+
 export type ImpulseFormSwitch<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
