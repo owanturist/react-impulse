@@ -1,5 +1,13 @@
 # react-impulse
 
+## 3.1.1
+
+### Patch Changes
+
+- [#947](https://github.com/owanturist/react-impulse/pull/947) [`a027bbd`](https://github.com/owanturist/react-impulse/commit/a027bbdb7bad18b7b25c2a4c173baaf1d4fb89b0) Thanks [@owanturist](https://github.com/owanturist)! - Bump typescript from 5.8.3 to 5.9.2
+
+- [#947](https://github.com/owanturist/react-impulse/pull/947) [`a027bbd`](https://github.com/owanturist/react-impulse/commit/a027bbdb7bad18b7b25c2a4c173baaf1d4fb89b0) Thanks [@owanturist](https://github.com/owanturist)! - Bump @types/react from 19.1.9 to 19.1.10
+
 ## 3.1.0
 
 ### Minor Changes
