@@ -225,6 +225,23 @@ describe("getOutput after enabling/disabling", () => {
   })
 })
 
+it("gets disabled nested output", ({ scope }) => {
+  const form = ImpulseFormOptional(
+    ImpulseFormUnit(true, { schema: z.boolean() }),
+    ImpulseFormOptional(ImpulseFormUnit(false), ImpulseFormUnit(0)),
+  )
+
+  expect(form.getOutput(scope)).toBeUndefined()
+  expect(form.getOutput(scope, params._first)).toBeUndefined()
+  expect(form.getOutput(scope, params._second)).toStrictEqual({
+    enabled: true,
+    element: {
+      enabled: false,
+      element: 0,
+    },
+  })
+})
+
 describe("stable output value", () => {
   it("subsequently selects equal output", ({ scope }) => {
     const form = ImpulseFormOptional(

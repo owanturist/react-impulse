@@ -317,7 +317,7 @@ export class ImpulseFormOptionalState<
 
   public readonly _outputVerbose = Impulse(
     (scope): ImpulseFormOptionalOutputVerbose<TEnabled, TElement> => {
-      return this._toVerbose(scope, ({ _output }) => _output)
+      return this._toVerbose(scope, ({ _outputVerbose }) => _outputVerbose)
     },
   )
 
