@@ -1,5 +1,13 @@
 # react-impulse-form
 
+## 0.13.1
+
+### Patch Changes
+
+- [#941](https://github.com/owanturist/react-impulse/pull/941) [`91057fb`](https://github.com/owanturist/react-impulse/commit/91057fb67dcc0ec9231d990d3d6073de938f1a89) Thanks [@dependabot](https://github.com/apps/dependabot)! - Bump typescript from 5.8.3 to 5.9.2
+
+- [#939](https://github.com/owanturist/react-impulse/pull/939) [`f0c7884`](https://github.com/owanturist/react-impulse/commit/f0c788434a696f87e54e1b91e268ba5a82170ae6) Thanks [@dependabot](https://github.com/apps/dependabot)! - Bump @types/react from 19.1.9 to 19.1.10
+
 ## 0.13.0
 
 ### Minor Changes
