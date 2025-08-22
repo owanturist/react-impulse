@@ -1,3 +1,4 @@
+import type { Scope } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormOptionalParams } from "./_impulse-form-optional-params"
@@ -19,5 +20,11 @@ export class ImpulseFormOptional<
 
     this.enabled = _state._enabled._host() as TEnabled
     this.element = _state._element._host() as TElement
+  }
+
+  public getEnabledElement(scope: Scope): undefined | TElement {
+    return this._state._getEnabledElement(scope)?._host() as
+      | undefined
+      | TElement
   }
 }
