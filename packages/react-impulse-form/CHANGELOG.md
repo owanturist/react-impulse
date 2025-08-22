@@ -1,5 +1,15 @@
 # react-impulse-form
 
+## 0.15.0
+
+### Minor Changes
+
+- [#949](https://github.com/owanturist/react-impulse/pull/949) [`1ad24b6`](https://github.com/owanturist/react-impulse/commit/1ad24b6b5559129f1453b8cf11adc0588d857e9f) Thanks [@owanturist](https://github.com/owanturist)! - Add `ImpulseFormOptional.getEnabledElement()` method:
+
+  ```dart
+  public getEnabledElement(scope: Scope): undefined | TElement
+  ```
+
 ## 0.14.0
 
 ### Minor Changes
