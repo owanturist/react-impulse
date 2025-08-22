@@ -56,7 +56,7 @@ export class ImpulseFormOptionalState<
     return isTrue(this._enabled._output.getValue(scope))
   }
 
-  private _getEnabledElement(
+  public _getEnabledElement(
     scope: Scope,
   ): undefined | ImpulseFormState<GetImpulseFormParams<TElement>> {
     return this._isEnabled(scope) ? this._element : undefined

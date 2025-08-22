@@ -3,21 +3,20 @@ import z from "zod"
 import { ImpulseFormShape, ImpulseFormSwitch, ImpulseFormUnit } from "../../src"
 
 describe("types", () => {
-  const active = ImpulseFormUnit("", {
-    schema: z.enum(["_1", "_2"]),
-  })
-
-  const branches = {
-    _1: ImpulseFormUnit(true, {
-      schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
+  const form = ImpulseFormSwitch(
+    ImpulseFormUnit("", {
+      schema: z.enum(["_1", "_2"]),
     }),
-    _2: ImpulseFormShape({
-      _3: ImpulseFormUnit("name"),
-      _4: ImpulseFormUnit(18),
-    }),
-  }
-
-  const form = ImpulseFormSwitch(active, branches)
+    {
+      _1: ImpulseFormUnit(true, {
+        schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
+      }),
+      _2: ImpulseFormShape({
+        _3: ImpulseFormUnit("name"),
+        _4: ImpulseFormUnit(18),
+      }),
+    },
+  )
 
   type ActiveBranch =
     | {
