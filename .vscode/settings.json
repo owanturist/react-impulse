@@ -10,6 +10,16 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "prettier.configPath": ".prettierrc.json",
   "cSpell.enabled": true,
-  "vitest.commandLine": "pnpm vitest",
-  "eslint.useFlatConfig": true
+  "eslint.useFlatConfig": true,
+
+  // Ensure knowledgebase files are always indexed and searchable
+  "files.watcherExclude": {
+    "**/knowledgebase/**": false
+  },
+
+  // File explorer settings
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*.md": "${capture}.schema.json,${capture}.template.md"
+  }
 }
