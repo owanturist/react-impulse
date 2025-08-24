@@ -1,5 +1,11 @@
 # react-impulse
 
+## 3.1.2
+
+### Patch Changes
+
+- [#953](https://github.com/owanturist/react-impulse/pull/953) [`b4ad2ce`](https://github.com/owanturist/react-impulse/commit/b4ad2ce26eab37fdffd4b457d6439fb4a28e3e68) Thanks [@dependabot](https://github.com/apps/dependabot)! - Bump @types/react from 19.1.10 to 19.1.11
+
 ## 3.1.1
 
 ### Patch Changes
