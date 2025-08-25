@@ -5,7 +5,7 @@ Purpose: a single source of truth that powers AI-assisted development, autogener
 ## How to use
 
 - Add or update entries under `knowledgebase/entries/**` using the templates in `knowledgebase/templates/`.
-- Entry types: `feature`, `bugfix`, `concept`, `decision`, `test-spec`, `doc-snippet`.
+- Entry types: `feature`, `bugfix`, `concept`, `decision`, `test-spec`, `doc-snippet`, `implementation-brief`.
 - Each change to code must start with a KB entry (feature/bugfix/decision). Write acceptance-criteria and a test-plan.
 - Ask your AI agent to implement the change based on the KB, then review and refine the KB if needed.
 - Generate docs from the KB; don’t hand-edit generated docs.

@@ -79,7 +79,7 @@ Body content regions (headings) to standardize:
 - Test scenarios (happy path + edge cases)
 - Documentation notes (callouts, diagrams, interactive ideas)
 
-These will be linted with a [JSON Schema][json-schema] and simple textual checks in CI. Frontmatter keys use kebab-case. For `type`: `test-spec`, `relates-to` must include at least one existing entry `id`.
+These will be linted with a Zod schema ([Zod][zod]) and simple textual checks in CI. Frontmatter keys use kebab-case. For `type`: `test-spec`, `relates-to` must include at least one existing entry `id`.
 
 ## Folder structure
 
@@ -88,7 +88,7 @@ In this repo:
 - knowledgebase/
   - PLAN.md (this file)
   - README.md (how to contribute, quickstart)
-  - schema/ (JSON Schema and lint rules)
+  - schema/ (Zod schema and lint rules)
   - entries/
     - features/…
     - bugfixes/…
@@ -163,6 +163,7 @@ PR validation:
 
 - Lint KB frontmatter against schema (type, packages, status, etc.)
 - Check for mandatory body sections based on type
+- Use Zod error formatting (e.g., `z.prettifyError`) for readable diagnostics in CI logs
 - Build docs generator (dry run) and ensure no broken links
 - Build [Astro][astro] site (preview) and upload artifact / deploy preview
 
@@ -224,14 +225,14 @@ Phase 0 — Bootstrap
 
 Phase 1 — KB structure and validation
 
-- [ ] Add schema/ with JSON Schema for frontmatter
-- [ ] Add templates/ (feature, bugfix, decision, test-spec, doc-snippet, implementation-brief)
+- [x] Add schema/ with Zod frontmatter schema
+- [x] Add templates/ (feature, bugfix, decision, test-spec, doc-snippet, implementation-brief)
 - [ ] Add a couple of seed entries for existing, stable APIs
-- [ ] CI job: schema lint + minimal content checks
+- [x] CI job: schema lint + minimal content checks
 
 Definition of Done (Phase 1):
 
-- `knowledgebase/schema/frontmatter.schema.json` exists and validates required fields and types.
+- `knowledgebase/schema/frontmatter-schema.mjs` exists and validates required fields and types (Zod). The KB linter imports and uses it.
 - `knowledgebase/templates/*` provides authoring scaffolds (feature, bugfix, decision, test-spec, doc-snippet, implementation-brief).
 - `knowledgebase/entries/*` contains at least two seed entries with valid frontmatter and required sections.
 - A repository script is available to run lint locally (e.g., `pnpm kb:lint`).
@@ -255,7 +256,7 @@ Phase 3 — Versioned docs (branch-based) + release integration
 - [ ] CI: deploy default branch to `latest` routes per package
 - [ ] CI: deploy maintenance branches to branch-based routes (e.g., `/<pkg>/1.x.x` or `/<pkg>/1.1.x`)
 - [ ] CI: validate branch range vs package.json versions (guardrail)
-- [ ] CI: continuously deploy docs on merges affecting docs/\*\*, knowledgebase/\*\*, or generator sources
+- [ ] CI: continuously deploy docs on merges affecting docs/**, knowledgebase/**, or generator sources
 
 Definition of Done (Phase 3):
 
@@ -308,5 +309,5 @@ Definition of Done (Phase 5):
 [gha]: https://docs.github.com/en/actions
 [node]: https://nodejs.org/
 [typescript]: https://www.typescriptlang.org/
-[json-schema]: https://json-schema.org/
+[zod]: https://zod.dev/
 [react]: https://react.dev/
