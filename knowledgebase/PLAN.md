@@ -19,6 +19,16 @@ This plan bootstraps a single source of truth (the knowledgebase) that powers:
 
 Status: this document specifies how each item will be implemented, with concrete, staged deliverables.
 
+## Scope adjustment (2025-08-25)
+
+We will focus only on the react-impulse package for the initial implementation:
+
+- Phases 1–3 (KB, generator + docs site, versioned docs) apply to react-impulse only.
+- react-impulse-form is deferred and will be tackled after react-impulse reaches Phase 3 DoD; its work will be scheduled as follow-up sub-phases (e.g., “Phase 2b/3b — react-impulse-form”).
+- KB entries should target `packages: [react-impulse]` for scope/DoD; entries for `react-impulse-form` are optional and won’t block.
+- Docs generation and deployment will initially produce only `/react-impulse/**` routes; `/react-impulse-form/**` routes will be added later.
+- The initial MCP server may expose only react-impulse entries; react-impulse-form support will follow.
+
 ## TL;DR architecture
 
 - KB is the source of truth: curated, structured Markdown with strict frontmatter.
@@ -108,7 +118,7 @@ Generator and tooling:
 
 - packages/knowledgebase-tools/ (new package) — parsers, schema checks, doc generator
 - packages/knowledgebase-mcp/ (new package) — MCP server exposing KB
-- docs/ (Astro site; uses generated Diátaxis content)
+- docs/ (Astro site; uses generated Diátaxis content; initial scope: react-impulse only)
 
 ## KB-first end-to-end workflow
 
@@ -223,56 +233,56 @@ Phase 0 — Bootstrap
 - [x] knowledgebase/ folder with PLAN.md and README.md
 - [x] Agree on KB schema fields and templates (tracked below)
 
-Phase 1 — KB structure and validation
+Phase 1 — KB structure and validation (react-impulse only)
 
 - [x] Add schema/ with Zod frontmatter schema
 - [x] Add templates/ (feature, bugfix, decision, test-spec, doc-snippet, implementation-brief)
-- [ ] Add a couple of seed entries for existing, stable APIs
+- [ ] Add at least two seed entries for existing, stable react-impulse APIs (react-impulse-form entries are optional)
 - [x] CI job: schema lint + minimal content checks
 
 Definition of Done (Phase 1):
 
 - `knowledgebase/schema/frontmatter-schema.mjs` exists and validates required fields and types (Zod). The KB linter imports and uses it.
 - `knowledgebase/templates/*` provides authoring scaffolds (feature, bugfix, decision, test-spec, doc-snippet, implementation-brief).
-- `knowledgebase/entries/*` contains at least two seed entries with valid frontmatter and required sections.
+- `knowledgebase/entries/*` contains at least two seed entries for react-impulse with valid frontmatter and required sections (react-impulse-form entries may be added later but are not required for DoD).
 - A repository script is available to run lint locally (e.g., `pnpm kb:lint`).
 
-Phase 2 — Doc generator + Astro site
+Phase 2 — Doc generator + Astro site (initially react-impulse only)
 
 - [ ] Create packages/knowledgebase-tools: parser + generator (KB → Diátaxis MD/MDX)
 - [ ] Create docs/ Astro site ([Starlight][starlight] recommended for structure + MDX + islands)
-- [ ] Wire generator output into docs/
+- [ ] Wire generator output into docs/ (initially generate `/react-impulse/**` only)
 - [ ] CI: build and preview docs on PRs
 
 Definition of Done (Phase 2):
 
-- A generator converts KB entries into Diátaxis-aligned MD/MDX under `docs/`.
+- A generator converts react-impulse KB entries into Diátaxis-aligned MD/MDX under `docs/`.
 - Astro site builds locally and in CI; broken links and missing pages fail the build.
-- At least one interactive island example is rendered via MDX for a documented API.
+- At least one interactive island example is rendered via MDX for a documented react-impulse API.
 
-Phase 3 — Versioned docs (branch-based) + release integration
+Phase 3 — Versioned docs (branch-based) + release integration (react-impulse first)
 
-- [ ] Establish protected maintenance branches (e.g., `1.x.x`, `1.1.x`) per package stream policy
-- [ ] CI: deploy default branch to `latest` routes per package
-- [ ] CI: deploy maintenance branches to branch-based routes (e.g., `/<pkg>/1.x.x` or `/<pkg>/1.1.x`)
-- [ ] CI: validate branch range vs package.json versions (guardrail)
+- [ ] Establish protected maintenance branches for react-impulse (e.g., `1.x.x`, `1.1.x`) per stream policy
+- [ ] CI: deploy default branch to `/react-impulse` latest route
+- [ ] CI: deploy maintenance branches to branch-based routes (e.g., `/react-impulse/1.x.x` or `/react-impulse/1.1.x`)
+- [ ] CI: validate branch range vs react-impulse package.json version (guardrail)
 - [ ] CI: continuously deploy docs on merges affecting docs/**, knowledgebase/**, or generator sources
 
 Definition of Done (Phase 3):
 
-- Protected maintenance branches established per package stream policy.
-- Default branch deploys `latest`; maintenance branches deploy under branch-based routes.
-- CI guardrails validate branch version ranges against package.json versions.
+- Protected maintenance branches established for react-impulse per stream policy.
+- Default branch deploys `/react-impulse` latest; maintenance branches deploy under `/react-impulse/<branch-label>`.
+- CI guardrails validate branch version ranges against the react-impulse package.json version.
 
-Phase 4 — MCP server
+Phase 4 — MCP server (react-impulse first)
 
-- [ ] Create packages/knowledgebase-mcp with search/get/tools endpoints
+- [ ] Create packages/knowledgebase-mcp with search/get/tools endpoints (initially serving react-impulse entries)
 - [ ] Docs for configuring clients
 - [ ] Optional: small web UI to browse KB (could be part of docs site)
 
 Definition of Done (Phase 4):
 
-- `packages/knowledgebase-mcp` exposes kb.get, kb.search, kb.brief.pick per the JSON contracts.
+- `packages/knowledgebase-mcp` exposes kb.get, kb.search, kb.brief.pick per the JSON contracts (at minimum for react-impulse entries).
 - Read-only FS access to `knowledgebase/entries` with frontmatter parsing.
 - Minimal client configuration examples included in docs.
 
