@@ -33,11 +33,11 @@ Define the core idea of an `Impulse` in react-impulse. An `Impulse` is a small, 
 
 ### What is an Impulse
 
-An `Impulse` is a small value container with predictable read/write semantics that uses compare semantics to notify dependents only on effective change. It’s similar to a signal/atom, but differs by explicit Scopes for dependency tracking and lifecycles and a framework‑agnostic core with thin adapters (e.g., React hooks). The Impulse itself doesn’t manage lifecycles or dependency tracking — that belongs to a `Scope`.
+An `Impulse` is a small value container with predictable read/write semantics that uses compare semantics to notify dependents only on effective change. It’s similar to a signal/atom, but differs by explicit Scopes for dependency tracking and lifecycles and a framework‑agnostic core with thin adapters (e.g., React hooks). The Impulse owns its subscriber list, while a `Scope` attaches/detaches those subscriptions and drives lifecycles.
 
 ## What is a Scope
 
-A Scope is a tiny lifecycle container you pass to reads so dependencies can be tracked and cleaned up deterministically. When you call `impulse.getValue(scope)`, the scope records that read; when the impulse changes, the scope receives the update and forwards it to the hosting environment: React hooks enqueue a component re-render, while vanilla `subscribe` simply re-runs the listener. Disposing a scope removes all of its subscriptions at once, preventing leaks and keeping lifecycles isolated.
+A `Scope` is a tiny lifecycle container you pass to reads so dependencies can be tracked and cleaned up deterministically. When you call `impulse.getValue(scope)`, the scope records that read; when the impulse changes, the scope receives the update and forwards it to the hosting environment: React hooks enqueue a component re-render, while vanilla `subscribe` simply re-runs the listener. Disposing a scope removes all of its subscriptions at once, preventing leaks and keeping lifecycles isolated.
 
 ### Principles (small surface, opt-in power)
 
@@ -49,11 +49,11 @@ A Scope is a tiny lifecycle container you pass to reads so dependencies can be t
 
 ### How it works (at a glance)
 
-- Implicit subscription: reads require a `Scope` (enforced by TypeScript) and are tracked by default.
+- Tracked reads: reads require a `Scope` (enforced by TypeScript); dependencies are tracked automatically, and React hooks/helpers pass the appropriate `Scope` for you.
 - Compare-guided updates: writes trigger notifications only if the value changes by compare semantics to avoid redundant work.
 - Dependency tracking: when a scoped computation reads an Impulse, a dependency edge is recorded.
 - Batching: multiple writes within a batch coalesce into a single notification cycle, improving performance.
-- Scopes: effects are tied to lifecycles via scopes; subscriptions are managed internally and cleaned up deterministically.
+- Scopes: effects are tied to lifecycles via scopes; subscriptions are attached/detached by scopes and cleaned up deterministically.
 
 ### Granularity and lifecycles
 
@@ -66,7 +66,7 @@ A Scope is a tiny lifecycle container you pass to reads so dependencies can be t
 
 - Prefer immutable values: an `Impulse` works best when its value is immutable. This keeps equality checks predictable and React-friendly.
 - Compare function: use `ImpulseOptions.compare` to define “effective change.” When not provided, the default behaves like `Object.is`.
-- Mutable values caveat: mutable values can be stored with `compare: () => true` to always emit on set attempts, but this is discouraged—React will not play well with such values in practice.
+- Mutable values caveat: if you must force an update on every `setValue`, use a comparer that always reports “not equal,” e.g. `() => false`. This is generally discouraged — React will not play well with such values in practice.
 
 ### Mutability of the Impulse object (and why it’s fine with React)
 
@@ -74,30 +74,32 @@ A Scope is a tiny lifecycle container you pass to reads so dependencies can be t
 - Fast write path is constant-time: compare → swap value → bump version → enqueue. Notifications run later and scale with dependents (O(k)).
 - React integration (like `useRef` at the boundary): the container is mutable; the value is consumed immutably. Reads are pure; writes are scheduled and batched; adapters request updates only on effective change, so it plays well with Strict Mode and concurrent rendering.
 
-### Contract
+### API contract
 
 Type names: `Impulse<T>`, `ImpulseOptions<T>`, `Scope`.
 
-- Create:
+- Factory overloads:
+  - `Impulse<T>() => Impulse<undefined | T>`
   - `Impulse<T>(initialValue: T, options?: ImpulseOptions<T>) => Impulse<T>`
 
 - Read/write:
-  - `impulse.getValue(scope: Scope): T` — tracked read; requires a `Scope`
-  - `impulse.setValue(nextOrTransform): void` — changes value; accepts a value or a setter function `(current: T, scope: Scope) => next`
+  - `impulse.getValue(scope: Scope): T` — tracked read; requires a `Scope`.
+  - `impulse.setValue(nextOrTransform): void` — accepts a value `T` or a setter function `(current: T, scope: Scope) => next`.
 
 - Clone:
   - `impulse.clone(options?: ImpulseOptions<T>): Impulse<T>`
   - `impulse.clone((value: T, scope: Scope) => transformed, options?): Impulse<T>`
 
 - Compare:
-  - `ImpulseOptions<T>['compare']?: (left: T, right: T) => boolean` (defaults to `Object.is` when not provided)
+  - `ImpulseOptions<T>['compare']?: (left: T, right: T, scope: Scope) => boolean`
+  - Not provided ⇒ uses strict `Object.is` equality; explicitly pass `null` to force the default strict equality even when cloning from a custom comparer.
 
 ### Why clone exists
 
 Using one Impulse across many scopes and lifecycles is fully supported. Clone is for when you want a separate container: it creates an independent Impulse starting from the current value, with its own identity and bookkeeping, in a single, scope-free step.
 
 - Fresh identity, no shared bookkeeping: the clone has no subscribers/dependencies, preventing cross-talk and keeping graphs precise.
-- Carry or change compare: by default it carries the source compare; pass `options.compare`, or `null` to use `Object.is`.
+- Carry or change compare: by default it carries the source compare; pass `options.compare`, or `null` to use strict `Object.is` equality.
 - Optional transform: the transform overload lets you tweak the value on the way out (useful to ensure a new reference for nested mutables).
 - Not a deep copy: the stored value reference is preserved unless you transform.
 
@@ -113,12 +115,3 @@ Using one Impulse across many scopes and lifecycles is fully supported. Clone is
 - Adapters (React integration): thin hooks that bridge the core to React lifecycles.
 - Contract boundary: the core emits deterministic notifications when effective values change; adapters translate those into React updates without leaking React internals back into the core.
 - Benefits: portability (works in Node/workers/tests), stability (less surface impacted by React changes), predictability (updates follow core semantics, not render heuristics).
-
-## TODO
-
-- [x] mention the mutable nature of the Impulse, why it is necessary and briefly how it manages to work fine with React
-- [x] as a consequence of previous point it would make sense to explain why .clone method is necessary
-- [x] explain the scope in more details: "What is a Scope? Why it matters?"
-- [x] mention Granularity vs. performance trade-offs: This avoids the cascading re-renders typical of global stores, at the cost of slightly more bookkeeping per dependency.
-- [x] Terminology alignment: Some readers may conflate Impulse with Signal or Atom. A line acknowledging that (“An Impulse is similar to a signal/atom, but with explicit Scopes and layering…”) can reduce friction.
-- [ ] add: A Scope is a container object that groups reactive reads together. It doesn’t execute code; you pass it into reads so that dependencies can be tracked and cleaned up deterministically.
