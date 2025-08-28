@@ -33,7 +33,7 @@ Define the core idea of an `Impulse` in react-impulse. An `Impulse` is a small, 
 
 ### What is an Impulse
 
-An `Impulse` is a small container that holds a value and offers predictable read/write semantics. It uses compare semantics to determine whether a write is an effective change and, if so, notifies dependents/subscribers. It does not manage lifecycles or dependency tracking itself — those concerns belong to a `Scope`.
+An `Impulse` is a small value container with predictable read/write semantics that uses compare semantics to notify dependents only on effective change. It’s similar to a signal/atom, but differs by explicit Scopes for dependency tracking and lifecycles and a framework‑agnostic core with thin adapters (e.g., React hooks). The Impulse itself doesn’t manage lifecycles or dependency tracking — that belongs to a `Scope`.
 
 ## What is a Scope
 
@@ -120,5 +120,5 @@ Using one Impulse across many scopes and lifecycles is fully supported. Clone is
 - [x] as a consequence of previous point it would make sense to explain why .clone method is necessary
 - [x] explain the scope in more details: "What is a Scope? Why it matters?"
 - [x] mention Granularity vs. performance trade-offs: This avoids the cascading re-renders typical of global stores, at the cost of slightly more bookkeeping per dependency.
-- [ ] Terminology alignment: Some readers may conflate Impulse with Signal or Atom. A line acknowledging that (“An Impulse is similar to a signal/atom, but with explicit Scopes and layering…”) can reduce friction.
+- [x] Terminology alignment: Some readers may conflate Impulse with Signal or Atom. A line acknowledging that (“An Impulse is similar to a signal/atom, but with explicit Scopes and layering…”) can reduce friction.
 - [ ] add: A Scope is a container object that groups reactive reads together. It doesn’t execute code; you pass it into reads so that dependencies can be tracked and cleaned up deterministically.
