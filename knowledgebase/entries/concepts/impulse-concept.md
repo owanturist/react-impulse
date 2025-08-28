@@ -60,6 +60,7 @@ A Scope is a tiny lifecycle container you pass to reads so dependencies can be t
 - Per-Impulse lifecycle: each `Impulse` is its own tiny store with its own lifecycle.
 - Render granularity: an update enqueues re-renders only in places where that specific `Impulse` was read within a `Scope`. Unread impulses don’t cause work even if they change.
 - No global broadcasts: there is no single global store that emits on any change. There’s nothing to “filter out” as irrelevant—if an `Impulse` was read, it is relevant by definition of the dependency graph.
+- Trade-off: fine-grained tracking avoids cascading re-renders typical of global stores, at the cost of a bit more per-dependency bookkeeping (edges and scope cleanup). Keep reads precise and use batching to minimize overhead.
 
 ### Values and compare semantics
 
@@ -118,6 +119,6 @@ Using one Impulse across many scopes and lifecycles is fully supported. Clone is
 - [x] mention the mutable nature of the Impulse, why it is necessary and briefly how it manages to work fine with React
 - [x] as a consequence of previous point it would make sense to explain why .clone method is necessary
 - [x] explain the scope in more details: "What is a Scope? Why it matters?"
-- [ ] mention Granularity vs. performance trade-offs: This avoids the cascading re-renders typical of global stores, at the cost of slightly more bookkeeping per dependency.
+- [x] mention Granularity vs. performance trade-offs: This avoids the cascading re-renders typical of global stores, at the cost of slightly more bookkeeping per dependency.
 - [ ] Terminology alignment: Some readers may conflate Impulse with Signal or Atom. A line acknowledging that (“An Impulse is similar to a signal/atom, but with explicit Scopes and layering…”) can reduce friction.
 - [ ] add: A Scope is a container object that groups reactive reads together. It doesn’t execute code; you pass it into reads so that dependencies can be tracked and cleaned up deterministically.
