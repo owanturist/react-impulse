@@ -37,7 +37,7 @@ An `Impulse` is a small value container with predictable read/write semantics th
 
 ## What is a Scope
 
-A `Scope` is a tiny lifecycle container you pass to reads so dependencies can be tracked and cleaned up deterministically. When you call `impulse.getValue(scope)`, the scope records that read; when the impulse changes, the scope receives the update and forwards it to the hosting environment: React hooks enqueue a component re-render, while vanilla `subscribe` simply re-runs the listener. Disposing a scope removes all of its subscriptions at once, preventing leaks and keeping lifecycles isolated.
+A `Scope` is a tiny lifecycle container passed to reads so dependencies can be tracked and cleaned up deterministically. Calling `impulse.getValue(scope)` records that read; when the impulse changes, the scope receives the update and forwards it to the hosting environment: React hooks enqueue a component re-render, while vanilla `subscribe` re-runs the listener. Disposing a scope removes all subscriptions at once, preventing leaks and keeping lifecycles isolated.
 
 ### Principles (small surface, opt-in power)
 
@@ -49,7 +49,7 @@ A `Scope` is a tiny lifecycle container you pass to reads so dependencies can be
 
 ### How it works (at a glance)
 
-- Tracked reads: reads require a `Scope` (enforced by TypeScript); dependencies are tracked automatically, and React hooks/helpers pass the appropriate `Scope` for you.
+- Tracked reads: reads require a `Scope` (enforced by TypeScript); dependencies are tracked automatically, and React hooks/helpers pass the appropriate `Scope`.
 - Compare-guided updates: writes trigger notifications only if the value changes by compare semantics to avoid redundant work.
 - Dependency tracking: when a scoped computation reads an Impulse, a dependency edge is recorded.
 - Batching: multiple writes within a batch coalesce into a single notification cycle, improving performance.
@@ -66,7 +66,7 @@ A `Scope` is a tiny lifecycle container you pass to reads so dependencies can be
 
 - Prefer immutable values: an `Impulse` works best when its value is immutable. This keeps equality checks predictable and React-friendly.
 - Compare function: use `ImpulseOptions.compare` to define “effective change.” When not provided, the default behaves like `Object.is`.
-- Mutable values caveat: if you must force an update on every `setValue`, use a comparer that always reports “not equal,” e.g. `() => false`. This is generally discouraged — React will not play well with such values in practice.
+- Mutable values caveat: to force the update on every `setValue`, use a comparer that always reports “not equal,” e.g. `() => false`. This is generally discouraged — React will not play well with such values in practice.
 
 ### Mutability of the Impulse object (and why it’s fine with React)
 
@@ -96,12 +96,12 @@ Type names: `Impulse<T>`, `ImpulseOptions<T>`, `Scope`.
 
 ### Why clone exists
 
-Using one Impulse across many scopes and lifecycles is fully supported. Clone is for when you want a separate container: it creates an independent Impulse starting from the current value, with its own identity and bookkeeping, in a single, scope-free step.
+Using one Impulse across many scopes and lifecycles is fully supported. Clone is useful when a separate container is desired: it creates an independent Impulse starting from the current value, with its own identity and bookkeeping, in a single, scope-free step.
 
 - Fresh identity, no shared bookkeeping: the clone has no subscribers/dependencies, preventing cross-talk and keeping graphs precise.
 - Carry or change compare: by default it carries the source compare; pass `options.compare`, or `null` to use strict `Object.is` equality.
-- Optional transform: the transform overload lets you tweak the value on the way out (useful to ensure a new reference for nested mutables).
-- Not a deep copy: the stored value reference is preserved unless you transform.
+- Optional transform: the transform overload allows tweaking the value on the way out (useful to ensure a new reference for nested mutables).
+- Not a deep copy: the stored value reference is preserved unless transformed.
 
 ## Why it exists
 
