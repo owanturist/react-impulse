@@ -64,6 +64,12 @@ Define the core idea of an `Impulse` in react-impulse. An `Impulse` is a small, 
 - Compare function: use `ImpulseOptions.compare` to define “effective change.” When not provided, the default behaves like `Object.is`.
 - Mutable values caveat: mutable values can be stored with `compare: () => true` to always emit on set attempts, but this is discouraged—React will not play well with such values in practice.
 
+### Mutability of the Impulse object (and why it’s fine with React)
+
+- Mutable shell with a stable identity: the `Impulse` holds the current value and subscriptions and mutates those internals on `setValue`. React sees a change only when the stored value’s reference effectively changes (by compare; default `Object.is`). Equal/no-op writes don’t re-render.
+- Fast write path is constant-time: compare → swap value → bump version → enqueue. Notifications run later and scale with dependents (O(k)).
+- React integration (like `useRef` at the boundary): the container is mutable; the value is consumed immutably. Reads are pure; writes are scheduled and batched; adapters request updates only on effective change, so it plays well with Strict Mode and concurrent rendering.
+
 ### Contract
 
 Type names: `Impulse<T>`, `ImpulseOptions<T>`, `Scope`.
@@ -97,7 +103,7 @@ Type names: `Impulse<T>`, `ImpulseOptions<T>`, `Scope`.
 
 ## TODO
 
-- [ ] mention the mutable nature of the Impulse, why it is necessary and briefly how it manages to work fine with React
+- [x] mention the mutable nature of the Impulse, why it is necessary and briefly how it manages to work fine with React
 - [ ] as a consequence of previous point it would make sense to explain by .clone method is necessary
 - [ ] explain the scope in more details: "What is a Scope? Why it matters?"
 - [ ] mention Granularity vs. performance trade-offs: This avoids the cascading re-renders typical of global stores, at the cost of slightly more bookkeeping per dependency.
