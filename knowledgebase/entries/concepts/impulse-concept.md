@@ -6,7 +6,7 @@ packages:
   - react-impulse
 status: accepted
 owner: owanturist
-last-reviewed: 2025-08-27
+last-reviewed: 2025-08-28
 tags:
   - impulse
   - reactivity
@@ -31,10 +31,13 @@ Define the core idea of an `Impulse` in react-impulse. An `Impulse` is a small, 
 
 ## Design and rationale
 
-### What it is
+### What is an Impulse
 
-- An `Impulse` is a value-holding unit with read/write operations; change propagation is implicit when values are read within a `Scope` (no explicit subscribe on `Impulse`).
-- It remembers which computations read it and makes them update when it changes.
+An `Impulse` is a small container that holds a value and offers predictable read/write semantics. It uses compare semantics to determine whether a write is an effective change and, if so, notifies dependents/subscribers. It does not manage lifecycles or dependency tracking itself — those concerns belong to a `Scope`.
+
+## What is a Scope
+
+A Scope is a tiny lifecycle container you pass to reads so dependencies can be tracked and cleaned up deterministically. When you call `impulse.getValue(scope)`, the scope records that read; when the impulse changes, the scope receives the update and forwards it to the hosting environment: React hooks enqueue a component re-render, while vanilla `subscribe` simply re-runs the listener. Disposing a scope removes all of its subscriptions at once, preventing leaks and keeping lifecycles isolated.
 
 ### Principles (small surface, opt-in power)
 
@@ -114,7 +117,7 @@ Using one Impulse across many scopes and lifecycles is fully supported. Clone is
 
 - [x] mention the mutable nature of the Impulse, why it is necessary and briefly how it manages to work fine with React
 - [x] as a consequence of previous point it would make sense to explain why .clone method is necessary
-- [ ] explain the scope in more details: "What is a Scope? Why it matters?"
+- [x] explain the scope in more details: "What is a Scope? Why it matters?"
 - [ ] mention Granularity vs. performance trade-offs: This avoids the cascading re-renders typical of global stores, at the cost of slightly more bookkeeping per dependency.
 - [ ] Terminology alignment: Some readers may conflate Impulse with Signal or Atom. A line acknowledging that (“An Impulse is similar to a signal/atom, but with explicit Scopes and layering…”) can reduce friction.
 - [ ] add: A Scope is a container object that groups reactive reads together. It doesn’t execute code; you pass it into reads so that dependencies can be tracked and cleaned up deterministically.
