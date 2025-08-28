@@ -17,7 +17,7 @@ diataxis: explanation
 
 ## Context and goals
 
-Define the core idea of an `Impulse` in react-impulse. An `Impulse` is a small, focused reactive cell that holds a value and coordinates change propagation to dependents and subscribers.
+Define the core idea of an `Impulse` in react-impulse. An `Impulse` is a small, reactive cell that holds a value and coordinates change propagation to dependents and subscribers.
 
 ### Goals:
 
@@ -88,6 +88,15 @@ Type names: `Impulse<T>`, `ImpulseOptions<T>`, `Scope`.
 - Compare:
   - `ImpulseOptions<T>['compare']?: (left: T, right: T) => boolean` (defaults to `Object.is` when not provided)
 
+### Why clone exists
+
+Using one Impulse across many scopes and lifecycles is fully supported. Clone is for when you want a separate container: it creates an independent Impulse starting from the current value, with its own identity and bookkeeping, in a single, scope-free step.
+
+- Fresh identity, no shared bookkeeping: the clone has no subscribers/dependencies, preventing cross-talk and keeping graphs precise.
+- Carry or change compare: by default it carries the source compare; pass `options.compare`, or `null` to use `Object.is`.
+- Optional transform: the transform overload lets you tweak the value on the way out (useful to ensure a new reference for nested mutables).
+- Not a deep copy: the stored value reference is preserved unless you transform.
+
 ## Why it exists
 
 - Precision: fine-grained invalidation beats coarse global state updates for performance and clarity.
@@ -104,7 +113,7 @@ Type names: `Impulse<T>`, `ImpulseOptions<T>`, `Scope`.
 ## TODO
 
 - [x] mention the mutable nature of the Impulse, why it is necessary and briefly how it manages to work fine with React
-- [ ] as a consequence of previous point it would make sense to explain by .clone method is necessary
+- [x] as a consequence of previous point it would make sense to explain why .clone method is necessary
 - [ ] explain the scope in more details: "What is a Scope? Why it matters?"
 - [ ] mention Granularity vs. performance trade-offs: This avoids the cascading re-renders typical of global stores, at the cost of slightly more bookkeeping per dependency.
 - [ ] Terminology alignment: Some readers may conflate Impulse with Signal or Atom. A line acknowledging that (“An Impulse is similar to a signal/atom, but with explicit Scopes and layering…”) can reduce friction.
