@@ -6,7 +6,7 @@ packages:
   - react-impulse
 status: accepted
 owner: owanturist
-last-reviewed: 2025-08-29
+last-reviewed: 2025-09-14
 versions: []
 tags:
   - scope

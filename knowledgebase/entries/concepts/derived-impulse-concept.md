@@ -4,7 +4,7 @@ title: DerivedImpulse — design, lifecycle, and memory safety
 packages:
   - react-impulse
 type: concept
-status: draft
+status: accepted
 owner: owanturist
 last-reviewed: 2025-09-14
 versions: []
