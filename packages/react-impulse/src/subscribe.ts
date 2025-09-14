@@ -25,7 +25,7 @@ export function subscribe(
     })
   }
 
-  const emitter = ScopeEmitter._init(emit)
+  const emitter = new ScopeEmitter(emit)
 
   emit()
 

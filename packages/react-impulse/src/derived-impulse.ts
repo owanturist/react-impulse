@@ -7,7 +7,7 @@ import { ScopeEmitter } from "./scope-emitter"
 export class DerivedImpulse<T> extends BaseImpulse<T> {
   // the inner scope proxies the setters to the outer scope
   private readonly _scope = {
-    [EMITTER_KEY]: ScopeEmitter._init(() => {
+    [EMITTER_KEY]: new ScopeEmitter(() => {
       if (
         this._compare(this._value, this._getValue(STATIC_SCOPE), STATIC_SCOPE)
       ) {

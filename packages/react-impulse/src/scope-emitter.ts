@@ -52,16 +52,6 @@ export class ScopeEmitterQueue {
 export class ScopeEmitter {
   private static _queue: null | ScopeEmitterQueue = null
 
-  /**
-   * Initializes and returns a new instance of the `ScopeEmitter` class.
-   *
-   * @param emit - A callback function to be invoked when the scope emits.
-   * @param skipBatching - opt-out from emit batching. Necessary for derived impulses.
-   */
-  public static _init(emit: VoidFunction, skipBatching = false): ScopeEmitter {
-    return new ScopeEmitter(emit, skipBatching)
-  }
-
   public static _schedule<TResult>(
     execute: (queue: ScopeEmitterQueue) => TResult,
   ): TResult {
@@ -92,9 +82,15 @@ export class ScopeEmitter {
 
   private _version = 0
 
-  private constructor(
+  /**
+   * Initializes and returns a new instance of the `ScopeEmitter` class.
+   *
+   * @param emit - A callback function to be invoked when the scope emits.
+   * @param skipBatching - opt-out from emit batching. Necessary for derived impulses.
+   */
+  public constructor(
     public readonly _emit: VoidFunction,
-    public readonly _skipBatching: boolean,
+    public readonly _skipBatching = false,
   ) {}
 
   public _detachFromAll(): void {
