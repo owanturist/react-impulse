@@ -6,7 +6,7 @@ packages:
   - react-impulse
 status: accepted
 owner: owanturist
-last-reviewed: 2025-08-28
+last-reviewed: 2025-09-14
 tags:
   - impulse
   - reactivity
