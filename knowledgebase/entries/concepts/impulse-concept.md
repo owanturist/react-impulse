@@ -12,20 +12,23 @@ tags:
   - reactivity
   - state
   - core
+  - scope
+relates-to:
+  - scope-concept
 diataxis: explanation
 ---
 
 ## Context and goals
 
-Define the core idea of an `Impulse` in react-impulse. An `Impulse` is a small, reactive cell that holds a value and coordinates change propagation to dependents and subscribers.
+Define the core idea of an `Impulse` in react-impulse.
 
-### Goals:
+### Goals
 
 - Provide a minimal, predictable abstraction for state with clear update semantics.
 - Enable fine-grained reactivity: only recompute and notify when values effectively change.
 - Compose into higher-level constructs without coupling to React internals.
 
-### Non-goals:
+### Non-goals
 
 - Replace every state management pattern.
 
@@ -33,13 +36,15 @@ Define the core idea of an `Impulse` in react-impulse. An `Impulse` is a small, 
 
 ### What is an Impulse
 
-An `Impulse` is a small value container with predictable read/write semantics that uses compare semantics to notify dependents only on effective change. It’s similar to a signal/atom, but differs by explicit Scopes for dependency tracking and lifecycles and a framework‑agnostic core with thin adapters (e.g., React hooks). The Impulse owns its subscriber list, while a `Scope` attaches/detaches those subscriptions and drives lifecycles.
+An `Impulse` is a small value container with predictable read/write semantics that uses compare semantics to notify dependents only on effective change. It’s similar to a signal/atom, but differs by explicit Scopes for dependency tracking and lifecycles and a framework‑agnostic core with thin adapters (e.g., React hooks). The Impulse owns its subscriber list, while a [`Scope`](./scope-concept.md) attaches/detaches those subscriptions and drives lifecycles.
 
-### What is a Scope
+### Why it exists
 
-A `Scope` is a tiny lifecycle container passed to reads so dependencies can be tracked and cleaned up deterministically. Calling `impulse.getValue(scope)` records that read; when the impulse changes, the scope receives the update and forwards it to the hosting environment: React hooks enqueue a component re-render, while vanilla `subscribe` re-runs the listener. Disposing a scope removes all subscriptions at once, preventing leaks and keeping lifecycles isolated.
+- Precision: fine-grained invalidation beats coarse global state updates for performance and clarity.
+- Composability: impulses can be combined and nested to compose complex fine-grained reactive states.
+- Predictability: deterministic notification rules and explicit dependencies reduce incidental rerenders.
 
-### Principles (small surface, opt-in power)
+### Principles
 
 - Keep the API tiny: create, read, write. Avoid piling features into `Impulse` itself; push conveniences to helpers/adapters.
 - No feature creep: new capabilities should layer on top (derived computations, React hooks) rather than expand the core.
@@ -54,12 +59,6 @@ A `Scope` is a tiny lifecycle container passed to reads so dependencies can be t
 - Dependency tracking: when a scoped computation reads an Impulse, a dependency edge is recorded.
 - Batching: multiple writes within a batch coalesce into a single notification cycle, improving performance.
 - Scopes: effects are tied to lifecycles via scopes; subscriptions are attached/detached by scopes and cleaned up deterministically.
-
-### Why it exists
-
-- Precision: fine-grained invalidation beats coarse global state updates for performance and clarity.
-- Composability: impulses can be combined and nested to compose complex fine-grained reactive states.
-- Predictability: deterministic notification rules and explicit dependencies reduce incidental rerenders.
 
 ### Granularity and lifecycles
 
@@ -89,23 +88,40 @@ A `Scope` is a tiny lifecycle container passed to reads so dependencies can be t
 
 ## API contract
 
-Type names: `Impulse<T>`, `ImpulseOptions<T>`, `Scope`.
+### Factory
 
-- Factory overloads:
-  - `Impulse<T>() => Impulse<undefined | T>`
-  - `Impulse<T>(initialValue: T, options?: ImpulseOptions<T>) => Impulse<T>`
+```ts
+Impulse<T>(): Impulse<undefined | T>
+Impulse<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
+```
 
-- Read/write:
-  - `impulse.getValue(scope: Scope): T` — tracked read; requires a `Scope`.
-  - `impulse.setValue(nextOrTransform): void` — accepts a value `T` or a setter function `(current: T, scope: Scope) => next`.
+Creates a new impulse. The value is tracked for changes and notifies dependents only on effective change.
 
-- Clone:
-  - `impulse.clone(options?: ImpulseOptions<T>): Impulse<T>`
-  - `impulse.clone((value: T, scope: Scope) => transformed, options?): Impulse<T>`
+### Read/write
 
-- Compare:
-  - `ImpulseOptions<T>['compare']?: (left: T, right: T, scope: Scope) => boolean`
-  - Not provided ⇒ uses strict `Object.is` equality; explicitly pass `null` to force the default strict equality even when cloning from a custom comparer.
+```ts
+impulse.getValue(scope: Scope): T
+impulse.setValue(nextOrTransform: T | ((current: T, scope: Scope) => T)): void
+```
+
+`getValue` is a tracked read (requires a scope, see [scope-factories](./scope-factories.md)). `setValue` accepts a value or a setter function.
+
+### Clone
+
+```ts
+impulse.clone(options?: ImpulseOptions<T>): Impulse<T>
+impulse.clone(transform: (value: T, scope: Scope) => T, options?): Impulse<T>
+```
+
+Creates a new, independent impulse with the current value (optionally transformed). The clone has no shared bookkeeping or dependencies.
+
+### Compare
+
+```ts
+ImpulseOptions<T>['compare']?: (left: T, right: T, scope: Scope) => boolean
+```
+
+Defines effective change. If not provided, uses strict `Object.is` equality. Pass `null` to force default equality even when cloning from a custom comparer.
 
 ### Why clone exists
 
