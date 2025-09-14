@@ -1,4 +1,4 @@
-import { STATIC_SCOPE, type Scope } from "./scope"
+import { UNTRACKED_SCOPE, type Scope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 
 /**
@@ -10,6 +10,6 @@ import { ScopeEmitter } from "./scope-emitter"
  */
 export function batch(execute: (scope: Scope) => void): void {
   ScopeEmitter._schedule(() => {
-    execute(STATIC_SCOPE)
+    execute(UNTRACKED_SCOPE)
   })
 }

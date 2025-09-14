@@ -1,7 +1,7 @@
 import { isFunction } from "~/tools/is-function"
 
 import type { ReadableImpulse } from "./readable-impulse"
-import { STATIC_SCOPE, type Scope } from "./scope"
+import { type Scope, UNTRACKED_SCOPE } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 
 /**
@@ -32,9 +32,9 @@ export function untrack<T>(
 ): T {
   return ScopeEmitter._schedule(() => {
     if (isFunction(factoryOrReadableImpulse)) {
-      return factoryOrReadableImpulse(STATIC_SCOPE)
+      return factoryOrReadableImpulse(UNTRACKED_SCOPE)
     }
 
-    return factoryOrReadableImpulse.getValue(STATIC_SCOPE)
+    return factoryOrReadableImpulse.getValue(UNTRACKED_SCOPE)
   })
 }
