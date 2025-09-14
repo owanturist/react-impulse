@@ -5,7 +5,7 @@ import type { Compare } from "./compare"
 import type { Impulse } from "./impulse"
 import type { ImpulseOptions } from "./impulse-options"
 import type { ReadableImpulse } from "./readable-impulse"
-import { EMITTER_KEY, STATIC_SCOPE, type Scope, extractScope } from "./scope"
+import { EMITTER_KEY, type Scope, UNTRACKED_SCOPE, extractScope } from "./scope"
 import { ScopeEmitter, type ScopeEmitterQueue } from "./scope-emitter"
 import type { WritableImpulse } from "./writable-impulse"
 
@@ -76,7 +76,7 @@ export abstract class BaseImpulse<T>
   ): void {
     ScopeEmitter._schedule((queue) => {
       const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(this._getter(), STATIC_SCOPE)
+        ? valueOrTransform(this._getter(), UNTRACKED_SCOPE)
         : valueOrTransform
 
       this._setter(nextValue, queue)
@@ -116,7 +116,7 @@ export abstract class BaseImpulse<T>
     const [clonedValue, { compare = this._compare } = {}] = isFunction(
       transformOrOptions,
     )
-      ? [transformOrOptions(value, STATIC_SCOPE), maybeOptions]
+      ? [transformOrOptions(value, UNTRACKED_SCOPE), maybeOptions]
       : [value, transformOrOptions]
 
     return this._clone(clonedValue, compare ?? isStrictEqual)

@@ -32,7 +32,7 @@ Define the mental model of `Scope` in react-impulse, invariants, and how Scopes 
 - Define what a Scope is and isn’t (no global scheduler, no implicit React coupling).
 - Detail how reads are tracked, how updates are scheduled, and how cleanup works.
 - Explain the role of `Scope` and the `ScopeEmitter`, including `WeakRef`-based edges.
-- Cover tracked vs non-tracked scopes.
+- Cover tracked vs non-tracking scopes.
 
 ### Non-goals
 
@@ -57,7 +57,7 @@ Scope solves these by automatically tracking only what is read, flushing and reb
 
 Originally, react-impulse managed the current scope implicitly: scope factories would ensure a scope was injected, but this was handled behind the scenes, and `getValue()` took no arguments. The API looked clean and ergonomic, as users never had to think about scopes directly.
 
-However, this implicitness led to real-world issues. Impulses are often used to power internal state within custom data structures, which may expose a semantic API that eventually calls `.getValue()`. Because the presence of impulses was hidden, it became difficult to know whether a given call site was within a scope or not. This led to subtle bugs: if a reactive scope was not injected, the static scope fallback was used, and the UI would silently stop reacting to impulse updates. Conversely, if a custom data structure replaced impulses with something else, unnecessary scope injection could occur, leading to wasted work.
+However, this implicitness led to real-world issues. Impulses are often used to power internal state within custom data structures, which may expose a semantic API that eventually calls `.getValue()`. Because the presence of impulses was hidden, it became difficult to know whether a given call site was within a scope or not. This led to subtle bugs: if a reactive scope was not injected, the non-tracking scope fallback was used, and the UI would silently stop reacting to impulse updates. Conversely, if a custom data structure replaced impulses with something else, unnecessary scope injection could occur, leading to wasted work.
 
 The only reliable way to enforce correct injection was to make scope passing explicit. This is why `getValue` now takes the scope as an argument. By making the scope explicit at the API boundary, TypeScript ensures that a scope is always provided.
 
@@ -69,7 +69,7 @@ This shift to explicit scope passing solved both correctness and ergonomics issu
 - Do not retain dependencies across runs: flush and rebuild edges each run.
 - Do not broadcast: only notify scopes that previously read an affected impulse.
 - Support any-to-many edges: an impulse can be read by many scopes, and a scope can read many impulses.
-- User facing API does not distinguish between reactive and static scopes.
+- User facing API does not distinguish between tracked and non-tracking scopes.
 
 ### How it works
 
@@ -77,7 +77,7 @@ Scope addresses stale dependency issues from conditional reads by rebuilding the
 
 **Invariants:**
 
-- Tracking occurs only when a scope is tracking (not a non-tracking/static scope) and is passed to `getValue(scope)`.
+- Tracking occurs only when a scope is tracking (not the non-tracking scope) and is passed to `getValue(scope)`.
 - Flushing a scope clears all prior dependency edges; the next run recomputes them from scratch.
 - The version increments on flush, enabling memoized selectors to detect that “the world changed.” The version is per-emitter, not global.
 
@@ -104,18 +104,18 @@ Flushing before emitting ensures that if a derived computation momentarily resub
 - `cat.setValue` schedules this emitter. On schedule, it flushes (detach and version++).
 - Re-run reads only `mouse` (branch change) → emitter attaches only to `mouse` now; changes in `cat` no longer re-run this scope.
 
-### Motivation and use cases for non-tracking (static) scopes
+### Motivation and use cases for non-tracking scopes
 
 The primary purpose of a Scope is to provide reactivity to read operations: when a value is read within a reactive Scope, future changes to that value will trigger the appropriate reactions (such as re-renders or effect executions). However, there are many scenarios where reactivity is not needed — where only the current value is required, and future updates are irrelevant.
 
-A non-tracking (static) scope is designed for these cases. It allows reading impulse values without establishing any dependency or subscription. This is useful for:
+A non-tracking scope is designed for these cases. It allows reading impulse values without establishing any dependency or subscription. This is useful for:
 
 - **User interactions:** Click handlers, keyboard/mouse events, or other UI interactions that only need the value at the moment of the event.
 - **Async operations:** Reading a value to initiate an asynchronous process (e.g., sending a network request), where future changes are irrelevant to the operation.
 - **Initialization:** Extracting a value once to initialize state or compute a payload, with no need to react to subsequent updates.
 - **One-off computations:** Any logic that needs a snapshot of the current value but does not require ongoing reactivity.
 
-Using a static scope in these situations avoids unnecessary dependency tracking and resource usage. Even if a regular (reactive) scope is used in these cases, the application will still function correctly — there will simply be some redundant tracking, but no impact on business logic or correctness.
+Using a non-tracking scope in these situations avoids unnecessary dependency tracking and resource usage. Even if a regular (reactive) scope is used in these cases, the application will still function correctly — there will simply be some redundant tracking, but no impact on business logic or correctness.
 
 ### Edge representation
 
@@ -141,9 +141,9 @@ Batching addresses the “many writes cause many updates” challenge by coalesc
 
 The following APIs are internal and not intended for use by library consumers. They exist solely to support scenarios where a scope cannot be passed explicitly as an argument, such as in `Impulse.toString()` or `Impulse.toJSON()`. These are not for general use:
 
-- `injectScope(fn, scope)`: Temporarily sets the current scope for the duration of `fn`, allowing reads within to be tracked or not tracked as needed.
+- `injectScope(fn, scope)`: Temporarily sets the current scope for the duration of `fn`, allowing reads within to be tracked or non-tracking as needed.
 - `extractScope()`: Retrieves the currently injected scope.
-- `STATIC_SCOPE`: The internal non-tracking scope, surfaced only via certain factories and never referenced directly by consumers.
+- `UNTRACKED_SCOPE`: The internal non-tracking scope, surfaced only via certain factories and never referenced directly by consumers.
 
 ### Performance notes
 

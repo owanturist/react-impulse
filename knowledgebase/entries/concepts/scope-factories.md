@@ -42,7 +42,7 @@ List the available ways to create and use a `Scope` when working with impulses, 
 
 Scope factories are utility functions and React hooks that create and manage `Scope` instances for reading and reacting to impulse values. They provide either:
 
-- static scopes that do not track dependencies: `batch`, `untrack`, and `tap`.
+- non-tracking scopes that do not track dependencies: `batch`, `untrack`, and `tap`.
 - reactive scopes that track dependencies and manage lifecycles: the rest.
 
 ### Why they exist
@@ -60,9 +60,9 @@ Scope factories are utility functions and React hooks that create and manage `Sc
 
 ### How they work
 
-#### Static (non-tracking) scopes factories
+#### Non-tracking scopes factories
 
-All of the static scope factories pass the `STATIC_SCOPE` "dummy" scope to their callbacks, ensuring that any impulse reads do not establish dependencies. All those factories batch notifications to avoid intermediate updates.
+All of the non-tracking scope factories pass the `UNTRACKED_SCOPE` "dummy" scope to their callbacks, ensuring that any impulse reads do not establish dependencies. All those factories batch notifications to avoid intermediate updates.
 
 #### Reactive (tracking) scopes factories
 
@@ -90,7 +90,7 @@ Batches all impulse updates and notifications within `fn`. Provides a non-tracki
 tap<T>(fn: (scope: Scope) => void): void
 ```
 
-Runs `fn` with a non-tracking (static) scope. Reads do not establish dependencies. Batches notifications within the effect.
+Runs `fn` with a non-tracking scope. Reads do not establish dependencies. Batches notifications within the effect.
 
 #### untrack
 
@@ -98,7 +98,7 @@ Runs `fn` with a non-tracking (static) scope. Reads do not establish dependencie
 untrack<T>(fn: (scope: Scope) => T): T
 ```
 
-Runs `fn` with a non-tracking (static) scope and returns the result. Reads do not establish dependencies. Batches notifications within the effect.
+Runs `fn` with a non-tracking scope and returns the result. Reads do not establish dependencies. Batches notifications within the effect.
 
 #### subscribe
 
