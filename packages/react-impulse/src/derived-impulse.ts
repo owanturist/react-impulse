@@ -1,7 +1,7 @@
 import { BaseImpulse } from "./base-impulse"
 import type { Compare } from "./compare"
 import { DirectImpulse } from "./direct-impulse"
-import { EMITTER_KEY, STATIC_SCOPE, type Scope } from "./scope"
+import { EMITTER_KEY, type Scope, UNTRACKED_SCOPE } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 
 export class DerivedImpulse<T> extends BaseImpulse<T> {
@@ -9,7 +9,11 @@ export class DerivedImpulse<T> extends BaseImpulse<T> {
   private readonly _scope = {
     [EMITTER_KEY]: new ScopeEmitter(() => {
       if (
-        this._compare(this._value, this._getValue(STATIC_SCOPE), STATIC_SCOPE)
+        this._compare(
+          this._value,
+          this._getValue(UNTRACKED_SCOPE),
+          UNTRACKED_SCOPE,
+        )
       ) {
         // subscribe back to the dependencies
         this._getValue(this._scope)
@@ -48,7 +52,7 @@ export class DerivedImpulse<T> extends BaseImpulse<T> {
   }
 
   protected _setter(value: T): void {
-    this._setValue(value, STATIC_SCOPE)
+    this._setValue(value, UNTRACKED_SCOPE)
   }
 
   protected _clone(value: T, compare: Compare<T>): DirectImpulse<T> {
