@@ -1792,3 +1792,56 @@ describe.each([
     })
   })
 })
+
+/**
+ * bugfix: ImpulseForm.reset() does not run subscribers #969
+ *
+ * It is a MRE of the reported bug.
+ *
+ * @link https://github.com/owanturist/react-impulse/issues/969
+ */
+describe("when an source impulse is updated during subscribe based on the derived value", () => {
+  it("runs the subscribe listeners for every derived update", ({ scope }) => {
+    const spy = vi.fn()
+    const source_1 = Impulse(1)
+    const source_2 = Impulse<string>()
+    const derived = Impulse(
+      (scope) => source_2.getValue(scope) ?? source_1.getValue(scope) > 0,
+    )
+
+    subscribe((scope) => {
+      const output = derived.getValue(scope)
+
+      spy(output)
+
+      if (output === false) {
+        source_2.setValue("error")
+      }
+    })
+
+    // initial run
+    expect(spy).toHaveBeenCalledExactlyOnceWith(true)
+    expect(derived.getValue(scope)).toBe(true)
+    spy.mockClear()
+
+    // cause the source_2 update
+    source_1.setValue(-1)
+    expect(spy).toHaveBeenCalledTimes(2)
+    // source_1 update causes the listener run
+    expect(spy).toHaveBeenNthCalledWith(1, false)
+    // the source_2 inside the listener causes the listener run again
+    expect(spy).toHaveBeenNthCalledWith(2, "error")
+    expect(derived.getValue(scope)).toBe("error")
+    spy.mockClear()
+
+    // source_1 is not relevant to the current derived value, so it does not cause the listener run
+    source_1.setValue(1)
+    expect(spy).not.toHaveBeenCalled()
+    expect(derived.getValue(scope)).toBe("error")
+
+    // enable the source_1 to derive the derived value again
+    source_2.setValue(undefined)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(true)
+    expect(derived.getValue(scope)).toBe(true)
+  })
+})

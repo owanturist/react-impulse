@@ -1,3 +1,4 @@
+import { subscribe } from "packages/react-impulse/dist"
 import { z } from "zod"
 
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
@@ -732,5 +733,66 @@ describe("when ZodLikeSchema is used", () => {
       value.setInput(-1)
       expect(value.getOutput(scope)).toBeNull()
     })
+  })
+})
+
+/**
+ * bugfix: ImpulseForm.reset() does not run subscribers #969
+ *
+ * It is a narrowed case of the reported bug.
+ *
+ * @link https://github.com/owanturist/react-impulse/issues/969
+ */
+describe("when deriving error from output in subscribe", () => {
+  it("assigns error for the first element, resets it, and assigns again", ({
+    scope,
+  }) => {
+    const spy = vi.fn()
+    const form = ImpulseFormUnit<number, string, boolean>(1, {
+      transform: (x) => x > 0,
+    })
+
+    subscribe((scope) => {
+      const output = form.getOutput(scope)
+
+      spy(output)
+
+      if (output === false) {
+        form.setError("error")
+      }
+    })
+
+    // initially valid
+    expect(spy).toHaveBeenCalledExactlyOnceWith(true)
+    expect(form.getError(scope)).toBeNull()
+    expect(form.getOutput(scope)).toBe(true)
+    spy.mockClear()
+
+    // set invalid value
+    form.setInput(-1)
+    expect(spy).toHaveBeenCalledTimes(2)
+    expect(spy).toHaveBeenNthCalledWith(1, false)
+    expect(spy).toHaveBeenNthCalledWith(2, null)
+    expect(form.getError(scope)).toBe("error")
+    expect(form.getOutput(scope)).toBeNull()
+    spy.mockClear()
+
+    // set valid value, but error remains so the output has not changed
+    form.setInput(1)
+    expect(spy).not.toHaveBeenCalled()
+    expect(form.getError(scope)).toBe("error")
+    expect(form.getOutput(scope)).toBeNull()
+    spy.mockClear()
+
+    // reset error
+    form.setError(null)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(true)
+    expect(form.getError(scope)).toBeNull()
+    spy.mockClear()
+
+    // set valid value again, which should assign the error again
+    form.setInput(1)
+    expect(spy).not.toHaveBeenCalled()
+    expect(form.getError(scope)).toBe("error")
   })
 })
