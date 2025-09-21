@@ -790,9 +790,12 @@ describe("when deriving error from output in subscribe", () => {
     expect(form.getError(scope)).toBeNull()
     spy.mockClear()
 
-    // set valid value again, which should assign the error again
-    form.setInput(1)
-    expect(spy).not.toHaveBeenCalled()
+    // set invalid value again, which should assign the error again
+    form.setInput(-1)
+    expect(spy).toHaveBeenCalledTimes(2)
+    expect(spy).toHaveBeenNthCalledWith(1, false)
+    expect(spy).toHaveBeenNthCalledWith(2, null)
     expect(form.getError(scope)).toBe("error")
+    expect(form.getOutput(scope)).toBeNull()
   })
 })
