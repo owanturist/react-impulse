@@ -1,4 +1,4 @@
-import { subscribe } from "packages/react-impulse/dist"
+import { subscribe } from "react-impulse"
 import { z } from "zod"
 
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
