@@ -1,5 +1,6 @@
-import { ImpulseFormUnit } from "packages/react-impulse-form/src"
 import z from "zod"
+
+import { ImpulseFormUnit } from "../../src"
 
 it("sets the transformer", ({ scope }) => {
   const unit = ImpulseFormUnit("hi")
