@@ -1,7 +1,7 @@
-import { ImpulseFormUnit } from "packages/react-impulse-form/src"
-
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import type { Setter } from "~/tools/setter"
+
+import { ImpulseFormUnit } from "../../src"
 
 it("selects input", ({ scope }) => {
   const value = ImpulseFormUnit("1")

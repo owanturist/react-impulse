@@ -60,18 +60,25 @@ export class ScopeEmitter {
       return execute(ScopeEmitter._queue)
     }
 
+    const queue = new ScopeEmitterQueue()
+
     // Initialize the queue and start the execution sequence.
-    ScopeEmitter._queue = new ScopeEmitterQueue()
+    ScopeEmitter._queue = queue
 
     /**
      * The execution might lead to other `_schedule` calls,
      * so they all will collect the emitters in the same queue
      * ensuring that an emitter is emitted only once.
      */
-    const result = execute(ScopeEmitter._queue)
+    const result = execute(queue)
 
-    ScopeEmitter._queue._process()
+    /**
+     * Drop the global queue before processing to allow nested scheduling,
+     * when .emit() enqueues new emitters for the next tick.
+     */
     ScopeEmitter._queue = null
+
+    queue._process()
 
     return result
   }
