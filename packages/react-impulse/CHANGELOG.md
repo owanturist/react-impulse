@@ -1,5 +1,17 @@
 # react-impulse
 
+## 3.1.2
+
+### Patch Changes
+
+- [#953](https://github.com/owanturist/react-impulse/pull/953) [`b4ad2ce`](https://github.com/owanturist/react-impulse/commit/b4ad2ce26eab37fdffd4b457d6439fb4a28e3e68) Thanks [@dependabot](https://github.com/apps/dependabot)! - Bump @types/react from 19.1.10 to 19.1.11
+
+- [#968](https://github.com/owanturist/react-impulse/pull/968) [`f21564d`](https://github.com/owanturist/react-impulse/commit/f21564d9e74af44d13d303e8ff237ec8dd7dc2b0) Thanks [@owanturist](https://github.com/owanturist)! - Utilize a single hook to store `ScopeEmitter` in internal `useCreateScope` hook.
+
+- [#960](https://github.com/owanturist/react-impulse/pull/960) [`d91c757`](https://github.com/owanturist/react-impulse/commit/d91c75747461ff9d83539eb05778193d4cec82da) Thanks [@dependabot](https://github.com/apps/dependabot)! - Bump @types/react from 19.1.11 to 19.1.12
+
+- [#971](https://github.com/owanturist/react-impulse/pull/971) [`29efba5`](https://github.com/owanturist/react-impulse/commit/29efba5af997fa957f32b8afe209c5c624a23a2b) Thanks [@owanturist](https://github.com/owanturist)! - Fix scheduler so nested emissions are not dropped. The scheduler now clears the global queue before processing, allowing emitters enqueued during emit to be processed reliably. This ensures subscribers (created with `subscribe`, `useScopedEffect`, or other scope factories) run when updates are triggered inside subscriber/derived computations (e.g., during `ImpulseForm.reset()`), addressing issue #969.
+
 ## 3.1.1
 
 ### Patch Changes
