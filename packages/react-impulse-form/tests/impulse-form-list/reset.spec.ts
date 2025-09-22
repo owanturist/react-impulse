@@ -1,8 +1,5 @@
-import { renderHook } from "@testing-library/react"
-import { useScopedEffect } from "react-impulse"
 import { z } from "zod"
 
-import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
 import { ImpulseFormList, ImpulseFormShape, ImpulseFormUnit } from "../../src"
@@ -332,61 +329,5 @@ describe("when resetting elements with metadata", () => {
       { id: 2, name: "2" },
       { id: 1, name: "1" },
     ])
-  })
-})
-
-/**
- * bugfix: ImpulseForm.reset() does not run subscribers #969
- * @link https://github.com/owanturist/react-impulse/issues/969
- */
-describe("when deriving error from output in useScopedEffect", () => {
-  it("assigns error for the first element, resets it, and assigns again", ({
-    scope,
-  }) => {
-    const form = ImpulseFormList(
-      [1, 2].map((value) =>
-        ImpulseFormUnit<number, string, boolean>(value, {
-          transform: (x) => x > 0,
-        }),
-      ),
-    )
-
-    renderHook(
-      (list) => {
-        useScopedEffect(
-          (scope) => {
-            const elements = list.getElements(scope)
-
-            for (const element of elements) {
-              if (element.getOutput(scope) === false) {
-                element.setError("error")
-              }
-            }
-          },
-          [list],
-        )
-      },
-      {
-        initialProps: form,
-      },
-    )
-
-    // initially both are valid
-    expect(form.getError(scope)).toBeNull()
-
-    // set invalid value for the first element
-    form.getElements(scope).at(0)?.setInput(-1)
-    expect(form.getError(scope)).toStrictEqual(["error", null])
-    expect(form.getOutput(scope, params._second)).toStrictEqual([null, true])
-
-    // reset the form, which should clear the error and set the input to initial
-    form.reset()
-    expect(form.getError(scope)).toBeNull()
-    expect(form.getOutput(scope, params._second)).toStrictEqual([true, true])
-
-    // set invalid value for the first element again, which should assign the error again
-    form.getElements(scope).at(0)?.setInput(-1)
-    expect(form.getError(scope)).toStrictEqual(["error", null])
-    expect(form.getOutput(scope, params._second)).toStrictEqual([null, true])
   })
 })

@@ -3,7 +3,6 @@ export {
   type DependencyList,
   type EffectCallback,
   useRef,
-  useState,
   useMemo,
   useCallback,
   useEffect,
