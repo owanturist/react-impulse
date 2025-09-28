@@ -1,0 +1,23 @@
+# GitHub Copilot specific ignore patterns
+# (Copilot already respects .gitignore by default)
+
+# Ignore large binary files for performance
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.svg
+*.ico
+*.woff
+*.woff2
+*.ttf
+*.eot
+
+# Ignore lock files (too noisy for AI context)
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Explicitly include knowledgebase content (in case .gitignore excludes it)
+!knowledgebase/
+!knowledgebase/**

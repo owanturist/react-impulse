@@ -7,11 +7,11 @@ export interface Scope {
   readonly version?: number
 }
 
-export const STATIC_SCOPE: Scope = {
+export const UNTRACKED_SCOPE: Scope = {
   [EMITTER_KEY]: null,
 }
 
-let currentScope = STATIC_SCOPE
+let currentScope = UNTRACKED_SCOPE
 
 export function injectScope<TResult>(
   execute: (scope: Scope) => TResult,

@@ -1,0 +1,72 @@
+[
+  {
+    "slug": "impulse-overview",
+    "title": "Understanding Impulses",
+    "diataxis": "explanation",
+    "kbSources": ["impulse-concept"],
+    "purpose": "Introduce the core concept of impulses - what they are, why they exist, and how they work",
+    "keySections": [
+      "Overview",
+      "Mental model",
+      "Key concepts",
+      "Trade-offs",
+      "See also"
+    ]
+  },
+  {
+    "slug": "reactivity-system",
+    "title": "Reactivity and Scope System",
+    "diataxis": "explanation",
+    "kbSources": ["scope-concept", "scope-factories"],
+    "purpose": "Explain the scope-based reactivity system and how dependency tracking works",
+    "keySections": [
+      "Overview",
+      "Mental model",
+      "Key concepts",
+      "Trade-offs",
+      "See also"
+    ]
+  },
+  {
+    "slug": "derived-computations",
+    "title": "Derived Computations",
+    "diataxis": "explanation",
+    "kbSources": ["derived-impulse-concept"],
+    "purpose": "Explain derived impulses, their lifecycle, and memory safety considerations",
+    "keySections": [
+      "Overview",
+      "Mental model",
+      "Key concepts",
+      "Trade-offs",
+      "See also"
+    ]
+  },
+  {
+    "slug": "impulse-api",
+    "title": "Impulse API Reference",
+    "diataxis": "reference",
+    "kbSources": ["impulse-concept"],
+    "purpose": "Complete API reference for creating, reading, and writing impulse values",
+    "keySections": [
+      "Overview",
+      "API surface",
+      "Guarantees",
+      "Edge cases",
+      "See also"
+    ]
+  },
+  {
+    "slug": "scope-api",
+    "title": "Scope and Factory API Reference",
+    "diataxis": "reference",
+    "kbSources": ["scope-concept", "scope-factories"],
+    "purpose": "Complete API reference for scope factories and reactive hooks",
+    "keySections": [
+      "Overview",
+      "API surface",
+      "Guarantees",
+      "Edge cases",
+      "See also"
+    ]
+  }
+]

@@ -160,6 +160,7 @@ export default tseslint.config([
             "./*.{js,ts,mjs,cjs}",
             "./packages/*/*.{js,ts}",
             "./packages/*/tests/**/*.{ts,tsx}",
+            "./docs/**/*.{ts,tsx,js,jsx,mjs,cjs,astro}",
           ],
         },
       ],
@@ -179,7 +180,11 @@ export default tseslint.config([
       sourceType: "module",
       parser: tseslint.parser,
       parserOptions: {
-        project: ["./tsconfig.json", "./packages/*/tsconfig.json"],
+        project: [
+          "./tsconfig.json",
+          "./packages/*/tsconfig.json",
+          "./docs/tsconfig.json",
+        ],
         ecmaVersion: 2018,
         sourceType: "module",
       },
@@ -268,7 +273,7 @@ export default tseslint.config([
 
   // Config files overrides
   {
-    files: ["*.{ts,mjs}", "packages/*/*.ts"],
+    files: ["*.{ts,mjs}", "packages/*/*.ts", "docs/astro.config.mjs"],
     rules: {
       "import/no-default-export": "off",
     },

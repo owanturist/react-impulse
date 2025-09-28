@@ -4,7 +4,7 @@ import { isStrictEqual } from "~/tools/is-strict-equal"
 import type { Compare } from "./compare"
 import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
 import type { ReadableImpulse } from "./readable-impulse"
-import { STATIC_SCOPE, type Scope } from "./scope"
+import { type Scope, UNTRACKED_SCOPE } from "./scope"
 import { useCreateScope } from "./use-create-scope"
 import { useHandler } from "./use-handler"
 
@@ -69,7 +69,7 @@ export function useScoped<TResult>(
     useHandler((prev, next) => {
       const compare = options?.compare ?? isStrictEqual
 
-      return compare(prev, next, STATIC_SCOPE)
+      return compare(prev, next, UNTRACKED_SCOPE)
     }),
   )
 
