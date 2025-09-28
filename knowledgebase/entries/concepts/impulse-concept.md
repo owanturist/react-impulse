@@ -44,12 +44,38 @@ An `Impulse` is a small value container with predictable read/write semantics th
 - Composability: impulses can be combined and nested to compose complex fine-grained reactive states.
 - Predictability: deterministic notification rules and explicit dependencies reduce incidental rerenders.
 
+### Fine-grained vs coarse-grained reactivity
+
+Traditional state management broadcasts all changes to all consumers, requiring filtering at consumption time. Impulses invert this: dependency graphs are precise, and notifications target only actual dependents.
+
+- **Coarse-grained**: global state container notifies all subscribers on any change; consumers filter for relevance.
+- **Fine-grained**: individual `Impulse` containers notify only direct dependents; no filtering required.
+
+Example granularity difference:
+
+```ts
+// Coarse: single container, broadcast on any field change
+const state = Impulse({
+  name: "Alice",
+  age: 30,
+})
+
+// Fine: separate containers, targeted notifications per field
+const user = {
+  name: Impulse("Alice"),
+  age: Impulse(30),
+}
+```
+
+In the fine-grained case, updating `user.age` notifies only scopes that read `user.age`, not those reading `user.name`.
+
 ### Principles
 
 - Keep the API tiny: create, read, write. Avoid piling features into `Impulse` itself; push conveniences to helpers/adapters.
 - No feature creep: new capabilities should layer on top (derived computations, React hooks) rather than expand the core.
 - Opt-in implicit subscriptions: reading within a `Scope` records a dependency automatically.
 - Explicit `Scope` passing gives control over lifetimes and cleanup; nothing subscribes by accident.
+- Fine-grained structure like `{ name: Impulse("Alice"), age: Impulse(30) }` enables precise updates where only affected properties trigger re-renders.
 - Nested impulses are encouraged: an `Impulse` can store other `Impulse`s (and combinations). This creates reactive containers of reactive data and maximizes granularity.
 
 ### How it works

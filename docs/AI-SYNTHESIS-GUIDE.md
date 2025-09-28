@@ -47,9 +47,10 @@ Using the approved PLAN.json and the full knowledgebase, generate documentation 
 For each page in the plan:
 1. Read all referenced kbSources entries
 2. Synthesize content following the Diátaxis type requirements
-3. Include required frontmatter with provenance
+3. Include required frontmatter with generation metadata
 4. Write in clear, audience-appropriate language
-5. Add cross-references to related pages where helpful
+5. Format all code examples with max 80-character line length
+6. Add cross-references to related pages where helpful
 
 Generate page: [SPECIFIC_SLUG_FROM_PLAN]
 
@@ -105,7 +106,9 @@ type DocumentPlan = {
 - Each page must follow section requirements for its Diátaxis type
 - No verbatim copying from KB entries
 - Cross-references should use relative links: `[text](../category/page-slug)`
-- Code examples should be practical and runnable
+- Code examples should be practical, runnable, and use valid TypeScript/JavaScript syntax
+- **Code formatting**: All code lines must be ≤80 characters for optimal Starlight UI display
+- **No syntax placeholders**: Avoid `{...}`, `// ...`, or other invalid syntax that prevents Prettier formatting
 - Interactive elements noted with `<!-- TODO: Interactive example -->` comments
 
 ## Quality Standards
@@ -116,6 +119,30 @@ type DocumentPlan = {
 - Active voice preferred
 - Consistent terminology (maintain a glossary if needed)
 - Examples should be realistic, not contrived
+
+### Code Formatting Standards
+
+- **Line length**: Maximum 80 characters per line in code blocks
+- **Valid syntax**: All code examples must use valid TypeScript/JavaScript syntax for proper Prettier formatting
+- **No placeholders**: Avoid `{...}`, `// ...`, or other invalid syntax - use realistic complete examples
+- **Breaking long lines**: Use appropriate line breaks for method chaining, function parameters
+- **Readability first**: Prioritize clarity over brevity when breaking lines
+- **Consistent style**: Apply formatting consistently across all code examples
+
+**Good example:**
+
+```typescript
+const fullName = Impulse(
+  (scope) => `${firstName.getValue(scope)} ${lastName.getValue(scope)}`,
+)
+```
+
+**Avoid:**
+
+```typescript
+// prettier-ignore
+const fullName = Impulse((scope) => `${firstName.getValue(scope)} ${lastName.getValue(scope)}`)
+```
 
 ### Information Architecture
 
