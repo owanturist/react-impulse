@@ -23,6 +23,13 @@ This project uses a knowledgebase-driven development approach. When working with
 - Use @workspace for full project context
 - Reference `knowledgebase/entries/[type]/[id].md` when implementing
 
+## Package Management
+
+- **Use pnpm consistently** - This is a pnpm workspace project
+- **Install from root** - Use `pnpm add -D package` or `pnpm add package` from project root
+- **Workspace commands** - Use `pnpm --filter package-name command` for package-specific operations
+- **No npm/yarn** - Only use pnpm to maintain lockfile consistency
+
 ## Project Structure
 
 - `packages/react-impulse/` - Core reactive state library
