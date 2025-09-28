@@ -1,4 +1,12 @@
 {
   "trailingComma": "all",
-  "semi": false
+  "semi": false,
+  "overrides": [
+    {
+      "files": "*.md",
+      "options": {
+        "printWidth": 80
+      }
+    }
+  ]
 }

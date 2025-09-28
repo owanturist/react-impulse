@@ -180,7 +180,11 @@ export default tseslint.config([
       sourceType: "module",
       parser: tseslint.parser,
       parserOptions: {
-        project: ["./tsconfig.json", "./packages/*/tsconfig.json"],
+        project: [
+          "./tsconfig.json",
+          "./packages/*/tsconfig.json",
+          "./docs/tsconfig.json",
+        ],
         ecmaVersion: 2018,
         sourceType: "module",
       },
