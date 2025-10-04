@@ -93,12 +93,14 @@ Body content regions (headings) to standardize:
 
 - Context and goals (required)
 - Design and rationale (required)
-- API contract (optional: inputs/outputs, error modes, examples)
+- API contract (optional: high-level purpose, key inputs/outputs, constraints only; detailed signatures, parameter descriptions, and examples belong in TSDoc)
 - Implementation notes (optional: edge cases, perf, concurrency)
 - Test scenarios (optional: happy path + edge cases)
 - Documentation notes (optional: callouts, diagrams, interactive ideas)
 
 The first two sections are required for all concept entries. Additional sections are recommended where applicable but not mandatory. These will be linted with a Zod schema ([Zod][zod]) and simple textual checks in CI (starting Phase 2.6). Frontmatter keys use kebab-case.
+
+**Important**: The "API contract" section in KB entries should provide only high-level conceptual information (what the API does, its purpose, key constraints). Detailed API documentation (full type signatures, parameter descriptions, return types, comprehensive examples) belongs in TSDoc comments in the source code and will be rendered in the API reference section of the documentation site.
 
 ## Folder structure
 
@@ -283,13 +285,12 @@ Definition of Done (Phase 1):
 
 Phase 2 — AI doc synthesis + Astro site (react-impulse only)
 
-- [ ] Scaffold `docs/` with Diátaxis folder structure (empty initially): `src/content/docs/{explanation,how-to,tutorials}`
-- [ ] Add `docs/AI-SYNTHESIS-GUIDE.md` (prompts, required structure, section checklists for explanation/how-to/tutorial).
-- [ ] Add initial AI PLAN prompt & store first accepted PLAN as `docs/PLAN.yml` (excluding reference pages).
-- [ ] Run first synthesis: produce at least 2 explanation pages from existing KB concepts.
-- [ ] Add minimal frontmatter (title, description) to synthesized pages; all metadata stays in PLAN.yml.
-- [ ] Astro site (Starlight or minimal) builds displaying generated pages.
-- [ ] CI: build docs site.
+- [x] Scaffold `docs/` with Diátaxis folder structure (empty initially): `src/content/docs/{explanation,how-to,tutorials}`
+- [x] Add `docs/AI-SYNTHESIS-GUIDE.md` (prompts, required structure, section checklists for explanation/how-to/tutorial).
+- [x] Add initial AI PLAN prompt & store first accepted PLAN as `docs/PLAN.yml` (excluding reference pages).
+- [x] Run first synthesis: produce at least 2 explanation pages from existing KB concepts.
+- [x] Add minimal frontmatter (title, description) to synthesized pages; all metadata stays in PLAN.yml.
+- [x] Astro site (Starlight or minimal) builds displaying generated pages.
 
 Definition of Done (Phase 2):
 
@@ -298,7 +299,7 @@ Definition of Done (Phase 2):
 - All structural metadata (sources, diataxis, purpose, sections) is stored in PLAN.yml, not in page frontmatter.
 - The `sections` field defines required H2 headings for each page, enabling flexible structure.
 - `AI-SYNTHESIS-GUIDE.md` defines the canonical prompt & transformation rules for non-reference documentation.
-- Astro site builds locally and in CI without 404 for synthesized slugs.
+- Astro site builds locally without 404 for synthesized slugs.
 
 Phase 2.5 — API reference documentation (react-impulse only)
 
@@ -326,6 +327,7 @@ Phase 2.6 — Documentation validation and linting
 - [ ] **Add PLAN.yml ↔ docs content validator** (ensure PLAN.yml slugs match actual doc files in `docs/src/content/docs/`)
 - [ ] **Add orphan docs detector** (ensure every doc file in `docs/src/content/docs/` is referenced in PLAN.yml)
 - [ ] **Add KB source validator** (ensure PLAN.yml sources reference existing KB entry IDs)
+- [ ] **Simplify API contract sections in KB entries** (reduce to high-level definitions; detailed signatures/examples move to TSDoc in source code)
 - [ ] **Enable all validation in CI** with clear error messages
 - [ ] Add npm scripts: `pnpm kb:lint`, `pnpm docs:validate`
 
@@ -338,6 +340,8 @@ Definition of Done (Phase 2.6):
   1. Every PLAN.yml slug has a corresponding file in `docs/src/content/docs/{diataxis}/{slug}.md`
   2. Every file in `docs/src/content/docs/{explanation,how-to,tutorials}/**/*.md` is referenced in PLAN.yml
   3. Every source filename (without .md) in PLAN.yml exists in `knowledgebase/entries/`
+- API contract sections in KB entries are simplified to high-level overviews (purpose, key inputs/outputs, constraints), not detailed signatures or exhaustive examples.
+- Detailed API documentation (full signatures, parameter descriptions, return types, code examples) lives in TSDoc comments in source code.
 - CI runs `pnpm kb:lint` and `pnpm docs:validate` and fails on any validation error.
 - All validation errors use Zod's pretty error formatting for readability.
 
