@@ -43,11 +43,11 @@ This is the minimal flow the agent will follow (evolutionary, multi-step) once P
 
 1. Create or update a KB entry under `knowledgebase/entries/**` using a template.
 2. Run KB lint to validate frontmatter and required sections.
-3. Implement code and tests to satisfy acceptance-criteria + test-plan.
+3. Implement code and tests to satisfy the requirements documented in the KB entry.
 4. When docs need updating, run the AI Doc Synthesis Prompt (defined in Phase 2) to:
    - Read ALL KB entries.
-   - Produce / update a docs PLAN (JSON) describing intended pages (slug, title, diataxis, kb-sources[], purpose).
-   - On approval, generate / refresh the actual MD/MDX pages under `docs/content/**` (never editing KB content directly).
+   - Produce / update a docs PLAN (YAML) describing intended pages (slug, title, diataxis, sources[], purpose, sections[]).
+   - On approval, generate / refresh the actual MD/MDX pages under `docs/src/content/docs/**` (never editing KB content directly).
 5. Review diff. If wording is off or data missing, refine the KB (NOT the docs) and repeat the synthesis pass.
 6. Open a PR referencing the impacted KB entry IDs; CI validates KB + builds docs.
 
@@ -91,14 +91,14 @@ relates-to:
 
 Body content regions (headings) to standardize:
 
-- Context and goals
-- Design and rationale
-- API contract (inputs/outputs, error modes, examples)
-- Implementation notes (edge cases, perf, concurrency)
-- Test scenarios (happy path + edge cases)
-- Documentation notes (callouts, diagrams, interactive ideas)
+- Context and goals (required)
+- Design and rationale (required)
+- API contract (optional: inputs/outputs, error modes, examples)
+- Implementation notes (optional: edge cases, perf, concurrency)
+- Test scenarios (optional: happy path + edge cases)
+- Documentation notes (optional: callouts, diagrams, interactive ideas)
 
-These will be linted with a Zod schema ([Zod][zod]) and simple textual checks in CI (starting Phase 2.5). Frontmatter keys use kebab-case.
+The first two sections are required for all concept entries. Additional sections are recommended where applicable but not mandatory. These will be linted with a Zod schema ([Zod][zod]) and simple textual checks in CI (starting Phase 2.6). Frontmatter keys use kebab-case.
 
 ## Folder structure
 
@@ -121,10 +121,10 @@ Generator and tooling:
 ## KB-first end-to-end workflow
 
 1. Ideate a new feature, bugfix, or docs adjustment.
-2. Update the knowledgebase (KB) first: add or revise an entry with context, acceptance-criteria, and test-plan. Commit.
+2. Update the knowledgebase (KB) first: add or revise an entry with context, design rationale, and (for features/bugfixes) test scenarios. Commit.
 3. Ask the AI agent to implement based on the KB: update code and add/adjust tests. Commit.
 4. Review the changes. If the implementation diverges from the intended design, refine the KB (not the code) to clarify requirements. Commit.
-5. Iterate steps 3–4 until the implementation satisfies the KB acceptance-criteria and test-plan.
+5. Iterate steps 3–4 until the implementation satisfies the requirements documented in the KB entry.
 6. Ask the AI agent to generate/update documentation from the KB (Markdown/MDX or templates). Commit.
 7. Review docs. If they don’t reflect the idea well, refine the KB documentation notes while keeping code/tests unchanged; ensure KB stays compatible with the current implementation. Commit.
 8. Iterate steps 6–7 until the docs match the intended outcome. Commit.
@@ -172,10 +172,10 @@ Stages (manual AI-driven for Phase 2):
    Note: PLAN does NOT include "reference" type pages - those are handled by the API documentation generation workflow.
 2. REVIEW: Human approves / edits the PLAN (add / remove / rename pages) — stored as `docs/PLAN.yml`.
 3. GENERATE: AI produces / updates MDX files for each PLAN item inside structured directories:
-   - `docs/content/explanation/**`
-   - `docs/content/how-to/**`
-   - `docs/content/tutorials/**`
-     (NOT `docs/content/reference/**` - that's populated by TypeDoc/similar tools)
+   - `docs/src/content/docs/explanation/**`
+   - `docs/src/content/docs/how-to/**`
+   - `docs/src/content/docs/tutorials/**`
+     (NOT `docs/src/content/docs/reference/**` - that's populated by TypeDoc/similar tools)
 
    Each page contains minimal frontmatter (title, description) and content. All structural metadata stays in PLAN.yml.
 
@@ -195,8 +195,8 @@ Versioned docs (branch-based, no snapshots):
 
 ## AI agent guardrails
 
-- Never change public API without updating api-changes + migration in KB.
-- Tests must cover acceptance-criteria and edge cases listed in KB.
+- Never change public API without documenting the change rationale and migration path in the KB entry.
+- Tests must cover acceptance criteria and edge cases documented in the KB entry's body sections.
 
 ## CI/CD
 
@@ -283,7 +283,7 @@ Definition of Done (Phase 1):
 
 Phase 2 — AI doc synthesis + Astro site (react-impulse only)
 
-- [ ] Scaffold `docs/` with Diátaxis folder structure (empty initially): `content/{explanation,how-to,tutorials}`
+- [ ] Scaffold `docs/` with Diátaxis folder structure (empty initially): `src/content/docs/{explanation,how-to,tutorials}`
 - [ ] Add `docs/AI-SYNTHESIS-GUIDE.md` (prompts, required structure, section checklists for explanation/how-to/tutorial).
 - [ ] Add initial AI PLAN prompt & store first accepted PLAN as `docs/PLAN.yml` (excluding reference pages).
 - [ ] Run first synthesis: produce at least 2 explanation pages from existing KB concepts.
@@ -304,7 +304,7 @@ Phase 2.5 — API reference documentation (react-impulse only)
 
 - [ ] Add comprehensive JSDoc/TSDoc comments to all public APIs in `packages/react-impulse/src`
 - [ ] Set up TypeDoc (or similar tool) to generate API reference markdown
-- [ ] Configure output to `docs/content/reference/**`
+- [ ] Configure output to `docs/src/content/docs/reference/**`
 - [ ] Add npm script (e.g., `pnpm docs:api`) to regenerate API docs from source
 - [ ] CI: regenerate API docs on source code changes and validate output
 - [ ] Integrate API reference pages into Astro site navigation
@@ -312,7 +312,7 @@ Phase 2.5 — API reference documentation (react-impulse only)
 Definition of Done (Phase 2.5):
 
 - All public APIs in `packages/react-impulse/src` have complete JSDoc/TSDoc documentation (params, returns, examples).
-- TypeDoc (or similar) configured and generates markdown to `docs/content/reference/**`.
+- TypeDoc (or similar) configured and generates markdown to `docs/src/content/docs/reference/**`.
 - `pnpm docs:api` script successfully regenerates API documentation.
 - CI runs API doc generation and fails if output is malformed.
 - API reference pages visible and navigable in the Astro site.
@@ -323,8 +323,8 @@ Phase 2.6 — Documentation validation and linting
 - [ ] **Add KB schema validation** (Zod frontmatter schema in `knowledgebase/schema/`)
 - [ ] **Add KB lint script** (`kb-lint.mjs`) to validate KB entries against schema and required sections
 - [ ] **Add PLAN.yml schema validation** (validate structure: slug, title, diataxis, sources, purpose, sections)
-- [ ] **Add PLAN.yml ↔ docs content validator** (ensure PLAN.yml slugs match actual doc files in `docs/content/`)
-- [ ] **Add orphan docs detector** (ensure every doc file in `docs/content/` is referenced in PLAN.yml)
+- [ ] **Add PLAN.yml ↔ docs content validator** (ensure PLAN.yml slugs match actual doc files in `docs/src/content/docs/`)
+- [ ] **Add orphan docs detector** (ensure every doc file in `docs/src/content/docs/` is referenced in PLAN.yml)
 - [ ] **Add KB source validator** (ensure PLAN.yml sources reference existing KB entry IDs)
 - [ ] **Enable all validation in CI** with clear error messages
 - [ ] Add npm scripts: `pnpm kb:lint`, `pnpm docs:validate`
@@ -335,8 +335,8 @@ Definition of Done (Phase 2.6):
 - `knowledgebase/kb-lint.mjs` validates KB entries have required sections (Context and goals, Design and rationale).
 - `docs/schema/plan-schema.mjs` validates PLAN.yml structure (array of entries with required fields).
 - `docs/validate-plan.mjs` performs cross-checks:
-  1. Every PLAN.yml slug has a corresponding file in `docs/content/{diataxis}/{slug}.md`
-  2. Every file in `docs/content/{explanation,how-to,tutorials}/**/*.md` is referenced in PLAN.yml
+  1. Every PLAN.yml slug has a corresponding file in `docs/src/content/docs/{diataxis}/{slug}.md`
+  2. Every file in `docs/src/content/docs/{explanation,how-to,tutorials}/**/*.md` is referenced in PLAN.yml
   3. Every source filename (without .md) in PLAN.yml exists in `knowledgebase/entries/`
 - CI runs `pnpm kb:lint` and `pnpm docs:validate` and fails on any validation error.
 - All validation errors use Zod's pretty error formatting for readability.
@@ -379,8 +379,8 @@ Definition of Done (Phase 5):
 
 ## Conventions and success criteria
 
-- Every user-visible change must have a KB entry (feature/bugfix/decision) with acceptance-criteria and test-plan.
-- No API change without api-changes + migration.
+- Every user-visible change must have a KB entry (feature/bugfix/decision). For features and bugfixes, document acceptance criteria and test scenarios in the appropriate body sections.
+- No API change without documenting the change rationale and migration path in the KB entry.
 - Docs live in `docs/src/content/docs/<diataxis>/<slug>.md` and contain minimal frontmatter (title, description).
 - PLAN.yml contains all structural metadata (sources, diataxis, purpose, sections); doc pages contain only title, description, and content.
 - The `sections` array defines the required H2 headings for each page in order. This allows each page to have its own structure rather than following rigid Diátaxis type conventions.

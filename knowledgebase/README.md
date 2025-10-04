@@ -8,7 +8,7 @@ Purpose: a single source of truth that powers AI-assisted development and autoge
 - Each concept documents architectural decisions, design patterns, and key mental models.
 - **Entry identification**: KB entries are referenced by their filename (without `.md` extension). For example, `impulse-concept.md` is referenced as `impulse-concept`.
 - Ask your AI agent to implement changes based on KB concepts, then review and refine the KB if needed.
-- Generate docs from the KB; don't hand-edit generated docs.
+- Generate docs from the KB using AI synthesis; generated docs can be manually refined for better examples and prose, but use the validation checklist (see AI-SYNTHESIS-GUIDE.md) to determine if the KB should be updated first.
 
 ## Creating a New Concept Entry
 
@@ -22,7 +22,7 @@ Purpose: a single source of truth that powers AI-assisted development and autoge
 
 ## Conventions
 
-- Frontmatter keys use kebab-case (e.g., `last-reviewed`, `relates-to`).
+- Frontmatter keys use kebab-case (e.g., `relates-to`).
 
 ## Status
 
