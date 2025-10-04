@@ -1,26 +1,11 @@
 ---
-id: scope-concept
 title: Scope — lifecycle, tracking, and scheduling in depth
 type: concept
 packages:
   - react-impulse
-status: accepted
-owner: owanturist
-last-reviewed: 2025-09-14
-versions: []
-tags:
-  - scope
-  - reactivity
-  - lifecycle
-  - dependency-tracking
-  - batching
-  - react
-  - core
 relates-to:
   - impulse-concept
   - scope-factories
-diataxis: explanation
-references: []
 ---
 
 ## Context and goals

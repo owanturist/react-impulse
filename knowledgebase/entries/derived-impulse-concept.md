@@ -1,25 +1,11 @@
 ---
-id: derived-impulse-concept
-title: DerivedImpulse — design, lifecycle, and memory safety
+title: Derived Impulse
+type: concept
 packages:
   - react-impulse
-type: concept
-status: accepted
-owner: owanturist
-last-reviewed: 2025-09-14
-versions: []
-tags:
-  - derived
-  - impulse
-  - reactivity
-  - memory-safety
-  - weakref
-  - core
 relates-to:
   - impulse-concept
   - scope-concept
-diataxis: explanation
-references: []
 ---
 
 ## Context and goals

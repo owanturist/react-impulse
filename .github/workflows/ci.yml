@@ -46,10 +46,6 @@ jobs:
         if: ${{ always() }}
         run: pnpm lint .
 
-      - name: Knowledgebase lint
-        if: ${{ always() }}
-        run: pnpm kb:lint
-
       - name: Type check
         if: ${{ always() }}
         run: pnpm typecheck

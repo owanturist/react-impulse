@@ -65,24 +65,29 @@ Users connect their MCP-capable clients to this server and get first-class, up-t
 
 ## Content model (KB schema)
 
-Each KB entry is a Markdown file with YAML frontmatter enforcing:
+Each KB entry is a Markdown file with YAML frontmatter. KB entries are referenced by their filename (without `.md` extension). For example, `impulse-concept.md` is referenced as `impulse-concept` in `relates-to` arrays and PLAN.yml `sources`.
 
-- `id`: unique slug
-- `title`: human-friendly title
-- `type`: feature | bugfix | concept | decision | test-spec | doc-snippet
-- `packages`: `[react-impulse, react-impulse-form]` (one or both)
-- `status`: proposed | accepted | implemented | deprecated
-- `versions`: optional semver range or array (e.g., `">=1.3.0"` or `["2.0.0"]`)
-- `owner`: GitHub handle
-- `last-reviewed`: `YYYY-MM-DD`
-- `tags`: `[strings]`
-- `relates-to`: `[entry-id, …]` links to related entries; required for `type`: `test-spec` (min 1)
-- `diataxis`: reference | how-to | tutorial | explanation (primary landing doc target)
-- `acceptance-criteria`: list
-- `api-changes`: summary of public API deltas (if any)
-- `migration`: guidance (if API changes)
-- `test-plan`: brief + links to test-spec entries
-- `references`: links to PRs, issues, external resources
+### Frontmatter Fields
+
+```yaml
+---
+title: Human-Readable Title
+type: concept
+packages:
+  - react-impulse
+  - react-impulse-form
+relates-to:
+  - other-concept-filename
+  - another-concept-filename
+---
+```
+
+**Field Descriptions:**
+
+- `title` (string, required): Human-readable title for the concept
+- `type` (string, required): Always "concept"
+- `packages` (array, required): List of packages this concept applies to (use YAML list syntax with `-`)
+- `relates-to` (array, optional): Filenames of related KB entries without `.md` extension (use YAML list syntax with `-`)
 
 Body content regions (headings) to standardize:
 
@@ -93,7 +98,7 @@ Body content regions (headings) to standardize:
 - Test scenarios (happy path + edge cases)
 - Documentation notes (callouts, diagrams, interactive ideas)
 
-These will be linted with a Zod schema ([Zod][zod]) and simple textual checks in CI. Frontmatter keys use kebab-case. For `type`: `test-spec`, `relates-to` must include at least one existing entry `id`.
+These will be linted with a Zod schema ([Zod][zod]) and simple textual checks in CI (starting Phase 2.5). Frontmatter keys use kebab-case.
 
 ## Folder structure
 
@@ -102,21 +107,10 @@ In this repo:
 - knowledgebase/
   - PLAN.md (this file)
   - README.md (how to contribute, quickstart)
-  - schema/ (Zod schema and lint rules)
   - entries/
-    - features/…
-    - bugfixes/…
-    - concepts/…
-    - decisions/ (ADRs)
-    - test-specs/…
-    - doc-snippets/…
+    - \*.md
   - templates/
-    - feature.md
-    - bugfix.md
-    - decision.md
-    - test-spec.md
-    - doc-snippet.md
-    - implementation-brief.md
+    - concept.md
 
 Generator and tooling:
 
@@ -208,8 +202,10 @@ Versioned docs (branch-based, no snapshots):
 
 PR validation:
 
-- Lint KB frontmatter against schema (type, packages, status, etc.)
-- Check for mandatory body sections based on type
+- **KB linting** (enforced starting in Phase 2.6): Lint KB frontmatter against schema (type, packages, status, etc.)
+- **KB linting** (enforced starting in Phase 2.6): Check for mandatory body sections based on type
+- **PLAN.yml validation** (enforced starting in Phase 2.6): Validate PLAN.yml structure and cross-references
+- **Docs validation** (enforced starting in Phase 2.6): Ensure PLAN.yml ↔ docs content consistency
 - Use Zod error formatting (e.g., `z.prettifyError`) for readable diagnostics in CI logs
 - If `docs/PLAN.yml` changed: validate JSON schema (pages have unique slugs, valid diataxis, non-empty sources)
 - Validate that each PLAN.yml slug has a corresponding doc file
@@ -274,18 +270,16 @@ Phase 0 — Bootstrap
 - [x] knowledgebase/ folder with PLAN.md and README.md
 - [x] Agree on KB schema fields and templates (tracked below)
 
-Phase 1 — KB structure and validation (react-impulse only)
+Phase 1 — KB structure (react-impulse only)
 
-- [x] Add schema/ with Zod frontmatter schema
-- [x] Add templates/ (feature, bugfix, decision, test-spec, doc-snippet, implementation-brief)
-- [x] CI job: schema lint + minimal content checks
+- [x] Add templates/ (concept only)
+- [x] Seed entries with concept documentation
 
 Definition of Done (Phase 1):
 
-- `knowledgebase/schema/frontmatter-schema.mjs` exists and validates required fields and types (Zod). The KB linter imports and uses it.
-- `knowledgebase/templates/*` provides authoring scaffolds (feature, bugfix, decision, test-spec, doc-snippet, implementation-brief).
-- `knowledgebase/entries/*` contains at least two seed entries for react-impulse with valid frontmatter and required sections (react-impulse-form entries may be added later but are not required for DoD).
-- A repository script is available to run lint locally (e.g., `pnpm kb:lint`).
+- `knowledgebase/templates/concept.md` provides authoring scaffold.
+- `knowledgebase/entries/` contains at least two seed concept entries for react-impulse.
+- Note: Schema and validation will be added in Phase 2.6 after the full documentation workflow is established.
 
 Phase 2 — AI doc synthesis + Astro site (react-impulse only)
 
@@ -295,7 +289,7 @@ Phase 2 — AI doc synthesis + Astro site (react-impulse only)
 - [ ] Run first synthesis: produce at least 2 explanation pages from existing KB concepts.
 - [ ] Add minimal frontmatter (title, description) to synthesized pages; all metadata stays in PLAN.yml.
 - [ ] Astro site (Starlight or minimal) builds displaying generated pages.
-- [ ] CI: lint KB + build docs + validate PLAN.yml structure.
+- [ ] CI: build docs site.
 
 Definition of Done (Phase 2):
 
@@ -323,6 +317,29 @@ Definition of Done (Phase 2.5):
 - CI runs API doc generation and fails if output is malformed.
 - API reference pages visible and navigable in the Astro site.
 - API docs reflect current source code (no manual editing required).
+
+Phase 2.6 — Documentation validation and linting
+
+- [ ] **Add KB schema validation** (Zod frontmatter schema in `knowledgebase/schema/`)
+- [ ] **Add KB lint script** (`kb-lint.mjs`) to validate KB entries against schema and required sections
+- [ ] **Add PLAN.yml schema validation** (validate structure: slug, title, diataxis, sources, purpose, sections)
+- [ ] **Add PLAN.yml ↔ docs content validator** (ensure PLAN.yml slugs match actual doc files in `docs/content/`)
+- [ ] **Add orphan docs detector** (ensure every doc file in `docs/content/` is referenced in PLAN.yml)
+- [ ] **Add KB source validator** (ensure PLAN.yml sources reference existing KB entry IDs)
+- [ ] **Enable all validation in CI** with clear error messages
+- [ ] Add npm scripts: `pnpm kb:lint`, `pnpm docs:validate`
+
+Definition of Done (Phase 2.6):
+
+- `knowledgebase/schema/frontmatter-schema.mjs` validates KB entry frontmatter (type, packages, status, owner, etc.).
+- `knowledgebase/kb-lint.mjs` validates KB entries have required sections (Context and goals, Design and rationale).
+- `docs/schema/plan-schema.mjs` validates PLAN.yml structure (array of entries with required fields).
+- `docs/validate-plan.mjs` performs cross-checks:
+  1. Every PLAN.yml slug has a corresponding file in `docs/content/{diataxis}/{slug}.md`
+  2. Every file in `docs/content/{explanation,how-to,tutorials}/**/*.md` is referenced in PLAN.yml
+  3. Every source filename (without .md) in PLAN.yml exists in `knowledgebase/entries/`
+- CI runs `pnpm kb:lint` and `pnpm docs:validate` and fails on any validation error.
+- All validation errors use Zod's pretty error formatting for readability.
 
 Phase 3 — Versioned docs (branch-based) + release integration (react-impulse first)
 

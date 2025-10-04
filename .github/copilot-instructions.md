@@ -6,22 +6,20 @@ This project uses a knowledgebase-driven development approach. When working with
 
 - `knowledgebase/PLAN.md` - Complete implementation plan and phases
 - `knowledgebase/README.md` - How to use the knowledgebase
-- `knowledgebase/entries/**/*.md` - Feature, bugfix, and concept entries
+- `knowledgebase/entries/*.md` - Concept entries documenting architectural decisions and design patterns
 
 ## Development Workflow
 
-1. All changes start with a knowledgebase entry
-2. Implement code based on KB acceptance-criteria
+1. Document architectural concepts in the knowledgebase
+2. Implement code based on KB concepts
 3. Generate documentation from KB entries
 4. Never edit generated docs directly
 
 ## AI Agent Guidelines
 
-- Always reference KB entry IDs in commits
-- Follow acceptance-criteria exactly
-- Create comprehensive tests per test-plan
+- Always reference KB entry IDs in commits when implementing concepts
 - Use @workspace for full project context
-- Reference `knowledgebase/entries/[type]/[id].md` when implementing
+- Reference `knowledgebase/entries/<concept-id>.md` when implementing
 
 ## Package Management
 
@@ -39,21 +37,38 @@ This project uses a knowledgebase-driven development approach. When working with
 
 ## Entry Types
 
-- **feature** - New functionality with acceptance-criteria and test-plan
-- **bugfix** - Bug fixes with root cause analysis and regression tests
-- **concept** - Architectural decisions and design patterns
-- **decision** - ADRs (Architecture Decision Records)
-- **test-spec** - Detailed test specifications
-- **doc-snippet** - Documentation fragments
+- **concept** - Architectural decisions, design patterns, and key mental models
+
+## YAML Formatting
+
+**Always use YAML list syntax for arrays** - whenever working with YAML files in this project:
+
+```yaml
+# ✅ Correct - YAML list syntax
+packages:
+  - react-impulse
+  - react-impulse-form
+relates-to:
+  - concept-1
+  - concept-2
+
+# ❌ Avoid - JSON bracket syntax
+packages: [react-impulse, react-impulse-form]
+relates-to: [concept-1, concept-2]
+```
+
+This applies to:
+
+- KB entry frontmatter (`knowledgebase/entries/*.md`)
+- Documentation PLAN (`docs/PLAN.yml`)
+- Any other YAML configuration files
 
 ## Natural Language Understanding
 
-When you mention implementing features, fixing bugs, or creating documentation, I should:
+When you mention implementing features or creating documentation, I should:
 
-- Look for relevant knowledgebase entries first
-- Follow the acceptance-criteria if they exist
-- Create comprehensive tests covering the test-plan
-- Reference entry IDs in commits
-- Ask about creating a KB entry if none exists
+- Look for relevant knowledgebase concept entries first
+- Reference concept entry IDs in commits
+- Ask about creating a KB concept entry if none exists for new architectural patterns
 
 When GitHub Copilot suggests code, it should consider this knowledgebase-first approach and the structured entry format defined in PLAN.md.

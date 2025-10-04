@@ -1,25 +1,9 @@
 ---
-id: scope-factories
-title: Scope factories — framework-agnostic and React-specific
+title: Scope Factories
 type: concept
 packages:
   - react-impulse
-status: accepted
-owner: owanturist
-last-reviewed: 2025-09-14
-tags:
-  - scope
-  - reactivity
-  - core
-  - vanilla
-  - subscribe
-  - batch
-  - untrack
-  - tap
-  - hooks
-diataxis: explanation
 relates-to:
-  - impulse-concept
   - scope-concept
 ---
 

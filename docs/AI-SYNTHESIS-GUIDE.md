@@ -18,6 +18,7 @@ This guide defines the canonical process for transforming the react-impulse know
 5. **Docs can be manually refined**: Generated documentation can be manually edited for better code examples, content ordering, prose polish, and user experience.
 6. **Bidirectional validation**: When manually editing docs, verify if the source KB entries need updating to stay synchronized.
 7. **Reference docs are code-generated**: API reference documentation is generated directly from in-code documentation (JSDoc/TSDoc) using automated tools, ensuring accuracy and staying in sync with implementation.
+8. **KB entry identification**: KB entries are referenced by their filename (without `.md` extension). For example, `impulse-concept.md` is referenced as `impulse-concept` in PLAN.yml sources and relates-to fields.
 
 ## Two-Step Synthesis Process
 
@@ -39,7 +40,7 @@ For each proposed page, specify:
 - diataxis: explanation|how-to|tutorial
 - slug: URL-friendly identifier
 - title: Human-readable title
-- sources: Array of KB entry IDs that contribute content
+- sources: Array of KB entry filenames (without .md extension) that contribute content
 - purpose: One-sentence description of page goal
 - sections: Array of required H2 section headings that define the page structure
 
@@ -193,16 +194,16 @@ Each documentation page entry in PLAN.yml follows this structure:
 - diataxis: explanation # Type: explanation | how-to | tutorial (reference excluded)
   slug: page-slug # Unique, URL-safe identifier
   title: Page Title # Human-readable title
-  sources: # KB entry IDs that contribute content
-    - kb-entry-id-1
-    - kb-entry-id-2
+  sources: # KB entry filenames (without .md extension)
+    - impulse-concept
+    - scope-concept
   purpose: One-sentence description of page goal
   sections: # Required H2 headings in order
     - Section One
     - Section Two
 ```
 
-Note: PLAN.yml is the single source of truth for all documentation metadata. Doc pages themselves contain only title, description, and content.
+Note: PLAN.yml is the single source of truth for all documentation metadata. Doc pages themselves contain only title, description, and content. KB entries are referenced by their filename without the `.md` extension.
 
 Minimal frontmatter for AI-synthesized pages:
 
@@ -300,10 +301,10 @@ const fullName = Impulse((scope) => `${firstName.getValue(scope)} ${lastName.get
 
 ### Example Synthesis from impulse-concept.md
 
-The `impulse-concept.md` KB entry generates:
+The `impulse-concept.md` KB entry (referenced as `impulse-concept` in PLAN.yml) generates:
 
 - **explanation/impulse-overview.md**: "What is an impulse?" - concept introduction, mental models, design philosophy
 - **how-to/create-impulse.md**: "How do I create and use an impulse?" - practical guide with common patterns
 - **tutorial/first-impulse.md**: "Build your first reactive component" - step-by-step walkthrough
 
-Each page is listed in `PLAN.yml` with `sources: ["impulse-concept"]` but presents information differently for its intended use case. The page files themselves contain only title, description, and content.
+Each page is listed in `PLAN.yml` with `sources: ["impulse-concept"]` (filename without .md extension) but presents information differently for its intended use case. The page files themselves contain only title, description, and content.

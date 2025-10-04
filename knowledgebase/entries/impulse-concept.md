@@ -1,21 +1,10 @@
 ---
-id: impulse-concept
 title: Impulse — what, how, and why
 type: concept
 packages:
   - react-impulse
-status: accepted
-owner: owanturist
-last-reviewed: 2025-09-14
-tags:
-  - impulse
-  - reactivity
-  - state
-  - core
-  - scope
 relates-to:
   - scope-concept
-diataxis: explanation
 ---
 
 ## Context and goals
