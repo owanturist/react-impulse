@@ -40,33 +40,5 @@
       "Trade-offs",
       "See also"
     ]
-  },
-  {
-    "slug": "impulse-api",
-    "title": "Impulse API Reference",
-    "diataxis": "reference",
-    "kbSources": ["impulse-concept"],
-    "purpose": "Complete API reference for creating, reading, and writing impulse values",
-    "keySections": [
-      "Overview",
-      "API surface",
-      "Guarantees",
-      "Edge cases",
-      "See also"
-    ]
-  },
-  {
-    "slug": "scope-api",
-    "title": "Scope and Factory API Reference",
-    "diataxis": "reference",
-    "kbSources": ["scope-concept", "scope-factories"],
-    "purpose": "Complete API reference for scope factories and reactive hooks",
-    "keySections": [
-      "Overview",
-      "API surface",
-      "Guarantees",
-      "Edge cases",
-      "See also"
-    ]
   }
 ]

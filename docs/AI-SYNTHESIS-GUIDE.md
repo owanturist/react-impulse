@@ -2,6 +2,8 @@
 
 This guide defines the canonical process for transforming the react-impulse knowledgebase into human-friendly Diátaxis documentation, and how to maintain consistency between KB and docs.
 
+**Scope**: This guide covers **explanation**, **how-to**, and **tutorial** documentation. **Reference** documentation is generated directly from source code via automated tools (TypeDoc, TSDoc, etc.) and is not part of the AI synthesis process.
+
 ## Core Principles
 
 1. **Many-to-many mapping**: One KB entry can generate multiple doc pages; one doc page can synthesize multiple KB entries.
@@ -10,6 +12,7 @@ This guide defines the canonical process for transforming the react-impulse know
 4. **KB is authoritative for concepts**: Knowledgebase entries are the technical source of truth for core concepts, API contracts, design rationale, and architecture.
 5. **Docs can be manually refined**: Generated documentation can be manually edited for better code examples, content ordering, prose polish, and user experience.
 6. **Bidirectional validation**: When manually editing docs, verify if the source KB entries need updating to stay synchronized.
+7. **Reference docs are code-generated**: API reference documentation is generated directly from in-code documentation (JSDoc/TSDoc) using automated tools, ensuring accuracy and staying in sync with implementation.
 
 ## Two-Step Synthesis Process
 
@@ -22,19 +25,20 @@ Read the entire knowledgebase at `knowledgebase/entries/**/*.md` and analyze all
 
 Create a comprehensive documentation plan as JSON that maps KB knowledge to Diátaxis categories:
 - explanation: High-level concepts, mental models, "why" questions
-- reference: Precise API documentation, "what" questions
 - how-to: Goal-oriented guides, "how" questions
 - tutorial: Learning-oriented walkthroughs, step-by-step
+
+Note: Do NOT include "reference" type pages - API reference documentation is generated directly from source code.
 
 For each proposed page, specify:
 - slug: URL-friendly identifier
 - title: Human-readable title
-- diataxis: explanation|reference|how-to|tutorial
+- diataxis: explanation|how-to|tutorial
 - kbSources: Array of KB entry IDs that contribute content
 - purpose: One-sentence description of page goal
 - keySections: Array of expected section headings
 
-Output only valid JSON array. Prioritize explanation and reference pages first.
+Output only valid JSON array. Prioritize explanation pages first.
 ```
 
 **Expected Output:** `docs/PLAN.json`
@@ -75,7 +79,6 @@ generated:
 Content requirements by Diátaxis type:
 
 - explanation: Overview, Mental model, Key concepts, Trade-offs, See also
-- reference: Overview, API surface (grouped), Guarantees, Edge cases, See also
 - how-to: Goal, Prerequisites, Steps (ordered), Validation, Pitfalls, Next steps
 - tutorial: Introduction, Prerequisites, Step-by-step (numbered), Checkpoint(s), Wrap-up, Further reading
 
@@ -182,7 +185,7 @@ Scenario: Clarifying what "compare semantics" means
 interface DocumentPlan {
   slug: string // unique, URL-safe
   title: string // human-readable
-  diataxis: "explanation" | "reference" | "how-to" | "tutorial"
+  diataxis: "explanation" | "how-to" | "tutorial" // reference excluded
   kbSources: string[] // must reference existing KB entry IDs
   purpose: string // one-sentence goal
   keySections: string[] // expected headings
@@ -195,7 +198,7 @@ interface DocumentPlan {
 - `title`: Must match PLAN entry
 - `description`: Clear summary of page content
 - `generated.from`: Must be non-empty array of existing KB entry IDs
-- `generated.type`: Must be valid Diátaxis type (explanation|reference|how-to|tutorial)
+- `generated.type`: Must be valid Diátaxis type (explanation|how-to|tutorial)
 - `generated.date`: Must be current date in YYYY-MM-DD format
 - `generated.status`: Must be "draft" or "published"
 
@@ -282,7 +285,6 @@ const fullName = Impulse((scope) => `${firstName.getValue(scope)} ${lastName.get
 → **Generated Pages**:
 
 - `explanation/impulse-overview.md` (high-level, "why impulse?")
-- `reference/impulse-api.md` (precise API details)
 - `how-to/create-impulse.md` (practical usage)
 
 Each page includes `generated.from: ["impulse-concept"]` but presents information differently for its intended use case.

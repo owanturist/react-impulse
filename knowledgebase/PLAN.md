@@ -45,11 +45,9 @@ This is the minimal flow the agent will follow (evolutionary, multi-step) once P
 2. Run KB lint to validate frontmatter and required sections.
 3. Implement code and tests to satisfy acceptance-criteria + test-plan.
 4. When docs need updating, run the AI Doc Synthesis Prompt (defined in Phase 2) to:
-
-- Read ALL KB entries.
-- Produce / update a docs PLAN (JSON) describing intended pages (slug, title, diataxis, kb-sources[], purpose).
-- On approval, generate / refresh the actual MD/MDX pages under `docs/content/**` (never editing KB content directly).
-
+   - Read ALL KB entries.
+   - Produce / update a docs PLAN (JSON) describing intended pages (slug, title, diataxis, kb-sources[], purpose).
+   - On approval, generate / refresh the actual MD/MDX pages under `docs/content/**` (never editing KB content directly).
 5. Review diff. If wording is off or data missing, refine the KB (NOT the docs) and repeat the synthesis pass.
 6. Open a PR referencing the impacted KB entry IDs; CI validates KB + builds docs.
 
@@ -150,13 +148,16 @@ Generator and tooling:
 
 Goal: convert dense, atomic KB knowledge into approachable, audience-oriented docs without a brittle 1:1 mapping.
 
+**Scope**: This synthesis process covers **explanation**, **how-to**, and **tutorial** documentation only. **Reference** (API) documentation is generated directly from TypeScript source code documentation (JSDoc/TSDoc) using automated tools.
+
 Core principles:
 
 - Many-to-many mapping: one KB entry can power multiple docs (e.g., explanation + how-to); one doc can aggregate multiple KB entries.
-- KB remains the ONLY canonical source of truth; docs are disposable derivatives regenerated on demand.
+- KB remains the ONLY canonical source of truth for conceptual content; docs are disposable derivatives regenerated on demand.
 - No verbatim bulk copying; the AI must compress, rephrase, categorize.
 - Each generated doc page records provenance (all contributing `kb-sources`) + `last-synced` date.
 - Divergence resolution always flows: Desired change → Update KB → Re-synthesize docs.
+- API reference docs are generated from in-code documentation (JSDoc/TSDoc), not from KB entries.
 
 Stages (manual AI-driven for Phase 2):
 
@@ -173,35 +174,15 @@ Stages (manual AI-driven for Phase 2):
      },
    ]
    ```
+   Note: PLAN does NOT include "reference" type pages - those are handled by the API documentation generation workflow.
 2. REVIEW: Human approves / edits the PLAN (add / remove / rename pages) — stored as `docs/PLAN.json`.
 3. GENERATE: AI produces / updates MDX files for each PLAN item inside structured directories:
    - `docs/content/explanation/**`
-   - `docs/content/reference/**`
    - `docs/content/how-to/**`
    - `docs/content/tutorials/**`
+     (NOT `docs/content/reference/**` - that's populated by TypeDoc/similar tools)
 4. VALIDATE: Automated checks (future): ensure every page lists real `kb-sources`; required section checklist per Diátaxis type; broken link scan.
 5. MERGE: Commit docs + updated PLAN. Re-run synthesis only when KB changes materially.
-
-Doc frontmatter schema (Phase 2 target):
-
-```yaml
-title: <string>
-slug: <string>
-diataxis: explanation|reference|how-to|tutorial
-kb-sources: [ids]
-last-synced: YYYY-MM-DD
-status: draft|published
-version-note: optional
-```
-
-Required section heuristics:
-
-- explanation: Overview, Mental model, Key concepts, Trade-offs, See also
-- reference: Overview, API surface (grouped), Guarantees, Edge cases, See also
-- how-to: Goal, Prerequisites, Steps (ordered), Validation, Pitfalls, Next steps
-- tutorial: Introduction, Prerequisites, Step-by-step (numbered), Checkpoint(s), Wrap-up, Further reading
-
-Interactive islands (after baseline content exists) plugged where a page’s “Documentation notes” in KB suggested interactivity.
 
 Versioned docs (branch-based, no snapshots):
 
@@ -292,7 +273,6 @@ Phase 1 — KB structure and validation (react-impulse only)
 
 - [x] Add schema/ with Zod frontmatter schema
 - [x] Add templates/ (feature, bugfix, decision, test-spec, doc-snippet, implementation-brief)
-- [ ] Add at least two seed entries for existing, stable react-impulse APIs (react-impulse-form entries are optional)
 - [x] CI job: schema lint + minimal content checks
 
 Definition of Done (Phase 1):
@@ -304,21 +284,39 @@ Definition of Done (Phase 1):
 
 Phase 2 — AI doc synthesis + Astro site (react-impulse only)
 
-- [ ] Scaffold `docs/` with Diátaxis folder structure (empty initially): `content/{explanation,reference,how-to,tutorials}`
-- [ ] Add `docs/AI-SYNTHESIS-GUIDE.md` (prompts, required structure, section checklists).
-- [ ] Add initial AI PLAN prompt & store first accepted PLAN as `docs/PLAN.json`.
-- [ ] Run first synthesis: produce at least 2 explanation pages + 1 reference page from existing KB concepts.
-- [ ] Add provenance frontmatter (`kb-sources`, `last-synced`).
+- [ ] Scaffold `docs/` with Diátaxis folder structure (empty initially): `content/{explanation,how-to,tutorials}`
+- [ ] Add `docs/AI-SYNTHESIS-GUIDE.md` (prompts, required structure, section checklists for explanation/how-to/tutorial).
+- [ ] Add initial AI PLAN prompt & store first accepted PLAN as `docs/PLAN.json` (excluding reference pages).
+- [ ] Run first synthesis: produce at least 2 explanation pages from existing KB concepts.
+- [ ] Add provenance frontmatter (`kb-sources`, `last-synced`) to synthesized pages.
 - [ ] Astro site (Starlight or minimal) builds displaying generated pages.
-- [ ] CI: lint KB + build docs (fail on missing `kb-sources` or malformed frontmatter).
+- [ ] CI: lint KB + build docs (fail on missing `kb-sources` or malformed frontmatter for AI-synthesized pages).
 
 Definition of Done (Phase 2):
 
-- `docs/PLAN.json` exists describing the current published doc set.
-- At least three synthesized pages (multi-source where appropriate) with correct frontmatter fields.
-- `AI-SYNTHESIS-GUIDE.md` defines the canonical prompt & transformation rules.
+- `docs/PLAN.json` exists describing the current published doc set (explanation, how-to, tutorial types only).
+- At least two synthesized explanation pages (multi-source where appropriate) with correct frontmatter fields.
+- `AI-SYNTHESIS-GUIDE.md` defines the canonical prompt & transformation rules for non-reference documentation.
 - Astro site builds locally and in CI without 404 for synthesized slugs.
-- Provenance badge (kb-sources + last-synced) visible on each page (can be placeholder markup initially).
+- Provenance badge (kb-sources + last-synced) visible on each AI-synthesized page (can be placeholder markup initially).
+
+Phase 2.5 — API reference documentation (react-impulse only)
+
+- [ ] Add comprehensive JSDoc/TSDoc comments to all public APIs in `packages/react-impulse/src`
+- [ ] Set up TypeDoc (or similar tool) to generate API reference markdown
+- [ ] Configure output to `docs/content/reference/**`
+- [ ] Add npm script (e.g., `pnpm docs:api`) to regenerate API docs from source
+- [ ] CI: regenerate API docs on source code changes and validate output
+- [ ] Integrate API reference pages into Astro site navigation
+
+Definition of Done (Phase 2.5):
+
+- All public APIs in `packages/react-impulse/src` have complete JSDoc/TSDoc documentation (params, returns, examples).
+- TypeDoc (or similar) configured and generates markdown to `docs/content/reference/**`.
+- `pnpm docs:api` script successfully regenerates API documentation.
+- CI runs API doc generation and fails if output is malformed.
+- API reference pages visible and navigable in the Astro site.
+- API docs reflect current source code (no manual editing required).
 
 Phase 3 — Versioned docs (branch-based) + release integration (react-impulse first)
 
@@ -360,9 +358,10 @@ Definition of Done (Phase 5):
 
 - Every user-visible change must have a KB entry (feature/bugfix/decision) with acceptance-criteria and test-plan.
 - No API change without api-changes + migration.
-- Docs are always generated _from_ the KB via the synthesis workflow; **do not** hand-edit substantive content directly—edit KB, then re-synthesize. (Minor editorial fixes allowed but should trigger a KB improvement ticket if semantic.)
-- Every doc page must reference at least one `kb-sources` id; aggregated pages list all contributing IDs.
-- If a doc needs content absent in KB, add/extend a KB entry first (AI should emit a TODO noting the gap).
+- AI-synthesized docs (explanation, how-to, tutorial) are generated from the KB but can be manually refined for better examples, ordering, and prose. When manually editing docs, use the validation checklist (see AI-SYNTHESIS-GUIDE.md) to determine if the source KB entries need updating.
+- API reference docs are generated from TypeScript source code (JSDoc/TSDoc) and should not be manually edited.
+- Every AI-synthesized doc page must reference at least one `kb-sources` id; aggregated pages list all contributing IDs.
+- If a doc needs conceptual content absent in KB, add/extend a KB entry first (AI should emit a TODO noting the gap).
 - MCP stays in sync by reading the KB at runtime (or on build, if caching is used).
 
 ## Collaboration model (curator + AI)
