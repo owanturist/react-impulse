@@ -155,8 +155,8 @@ Core principles:
 - Many-to-many mapping: one KB entry can power multiple docs (e.g., explanation + how-to); one doc can aggregate multiple KB entries.
 - KB remains the ONLY canonical source of truth for conceptual content; docs are disposable derivatives regenerated on demand.
 - No verbatim bulk copying; the AI must compress, rephrase, categorize.
-- PLAN.json contains all structural metadata (sources, diataxis, purpose, sections); doc pages contain only title, description, and content.
-- The `sections` array in PLAN.json defines the required H2 headings for each page, allowing flexible structure per page rather than enforcing conventions per Diátaxis type.
+- PLAN.yml contains all structural metadata (sources, diataxis, purpose, sections); doc pages contain only title, description, and content.
+- The `sections` array in PLAN.yml defines the required H2 headings for each page, allowing flexible structure per page rather than enforcing conventions per Diátaxis type.
 - Divergence resolution always flows: Desired change → Update KB → Re-synthesize docs.
 - API reference docs are generated from in-code documentation (JSDoc/TSDoc), not from KB entries.
 
@@ -176,17 +176,17 @@ Stages (manual AI-driven for Phase 2):
    ]
    ```
    Note: PLAN does NOT include "reference" type pages - those are handled by the API documentation generation workflow.
-2. REVIEW: Human approves / edits the PLAN (add / remove / rename pages) — stored as `docs/PLAN.json`.
+2. REVIEW: Human approves / edits the PLAN (add / remove / rename pages) — stored as `docs/PLAN.yml`.
 3. GENERATE: AI produces / updates MDX files for each PLAN item inside structured directories:
    - `docs/content/explanation/**`
    - `docs/content/how-to/**`
    - `docs/content/tutorials/**`
      (NOT `docs/content/reference/**` - that's populated by TypeDoc/similar tools)
 
-   Each page contains minimal frontmatter (title, description) and content. All structural metadata stays in PLAN.json.
+   Each page contains minimal frontmatter (title, description) and content. All structural metadata stays in PLAN.yml.
 
-4. VALIDATE: Automated checks (future): ensure PLAN.json entries reference real KB sources; validate page slugs match PLAN; required section checklist per Diátaxis type; broken link scan.
-5. MERGE: Commit docs + updated PLAN.json. Re-run synthesis only when KB changes materially.
+4. VALIDATE: Automated checks (future): ensure PLAN.yml entries reference real KB sources; validate page slugs match PLAN; required section checklist per Diátaxis type; broken link scan.
+5. MERGE: Commit docs + updated PLAN.yml. Re-run synthesis only when KB changes materially.
 
 Versioned docs (branch-based, no snapshots):
 
@@ -211,9 +211,9 @@ PR validation:
 - Lint KB frontmatter against schema (type, packages, status, etc.)
 - Check for mandatory body sections based on type
 - Use Zod error formatting (e.g., `z.prettifyError`) for readable diagnostics in CI logs
-- If `docs/PLAN.json` changed: validate JSON schema (pages have unique slugs, valid diataxis, non-empty sources)
-- Validate that each PLAN.json slug has a corresponding doc file
-- **Section validation**: For each doc page, verify H2 headings match the `sections` array in PLAN.json exactly (order and names)
+- If `docs/PLAN.yml` changed: validate JSON schema (pages have unique slugs, valid diataxis, non-empty sources)
+- Validate that each PLAN.yml slug has a corresponding doc file
+- **Section validation**: For each doc page, verify H2 headings match the `sections` array in PLAN.yml exactly (order and names)
 - Link scan (internal anchors + relative imports) over changed docs
 - Build [Astro][astro] site (preview) and upload artifact / deploy preview
 
@@ -225,7 +225,7 @@ Release:
 Docs deployment (per-branch, independent of package releases):
 
 - On merge to the default branch, if changes touch any of:
-  - docs/\*\* (PLAN.json, site sources, themes, MDX, components)
+  - docs/\*\* (PLAN.yml, site sources, themes, MDX, components)
   - knowledgebase/\*\* (KB entries that may require re-synthesis)
   - packages/knowledgebase-tools/\*\* (synthesis helper logic)
   - packages/knowledgebase-mcp/docs/\*\* (if MCP usage docs are hosted within the site)
@@ -291,17 +291,17 @@ Phase 2 — AI doc synthesis + Astro site (react-impulse only)
 
 - [ ] Scaffold `docs/` with Diátaxis folder structure (empty initially): `content/{explanation,how-to,tutorials}`
 - [ ] Add `docs/AI-SYNTHESIS-GUIDE.md` (prompts, required structure, section checklists for explanation/how-to/tutorial).
-- [ ] Add initial AI PLAN prompt & store first accepted PLAN as `docs/PLAN.json` (excluding reference pages).
+- [ ] Add initial AI PLAN prompt & store first accepted PLAN as `docs/PLAN.yml` (excluding reference pages).
 - [ ] Run first synthesis: produce at least 2 explanation pages from existing KB concepts.
-- [ ] Add minimal frontmatter (title, description) to synthesized pages; all metadata stays in PLAN.json.
+- [ ] Add minimal frontmatter (title, description) to synthesized pages; all metadata stays in PLAN.yml.
 - [ ] Astro site (Starlight or minimal) builds displaying generated pages.
-- [ ] CI: lint KB + build docs + validate PLAN.json structure.
+- [ ] CI: lint KB + build docs + validate PLAN.yml structure.
 
 Definition of Done (Phase 2):
 
-- `docs/PLAN.json` exists describing the current published doc set (explanation, how-to, tutorial types only).
+- `docs/PLAN.yml` exists describing the current published doc set (explanation, how-to, tutorial types only).
 - At least two synthesized explanation pages with minimal frontmatter (title, description).
-- All structural metadata (sources, diataxis, purpose, sections) is stored in PLAN.json, not in page frontmatter.
+- All structural metadata (sources, diataxis, purpose, sections) is stored in PLAN.yml, not in page frontmatter.
 - The `sections` field defines required H2 headings for each page, enabling flexible structure.
 - `AI-SYNTHESIS-GUIDE.md` defines the canonical prompt & transformation rules for non-reference documentation.
 - Astro site builds locally and in CI without 404 for synthesized slugs.
@@ -365,7 +365,7 @@ Definition of Done (Phase 5):
 - Every user-visible change must have a KB entry (feature/bugfix/decision) with acceptance-criteria and test-plan.
 - No API change without api-changes + migration.
 - Docs live in `docs/src/content/docs/<diataxis>/<slug>.md` and contain minimal frontmatter (title, description).
-- PLAN.json contains all structural metadata (sources, diataxis, purpose, sections); doc pages contain only title, description, and content.
+- PLAN.yml contains all structural metadata (sources, diataxis, purpose, sections); doc pages contain only title, description, and content.
 - The `sections` array defines the required H2 headings for each page in order. This allows each page to have its own structure rather than following rigid Diátaxis type conventions.
 - AI-synthesized docs (explanation, how-to, tutorial) are generated from the KB but can be manually refined for better examples, ordering, and prose. When manually editing docs, use the validation checklist (see AI-SYNTHESIS-GUIDE.md) to determine if the source KB entries need updating.
 - API reference docs are generated from TypeScript source code (JSDoc/TSDoc) and should not be manually edited.
@@ -377,7 +377,7 @@ Definition of Done (Phase 5):
 - Curator: curates & evolves KB entries (dense + complete).
 - AI: implements code/tests (feature & bugfix) AND performs doc synthesis (PLAN + generation passes).
 - Reviewers: evaluate synthesized docs for clarity; request KB improvements (never “doc only” rewrites) when substance is wrong or missing.
-- Drift control: `docs/PLAN.json` + page frontmatter `last-synced` used to spot stale pages after KB edits.
+- Drift control: `docs/PLAN.yml` + page frontmatter `last-synced` used to spot stale pages after KB edits.
 - CI: (future) optional drift detector comparing KB `last-reviewed` dates vs doc `last-synced` to suggest regeneration.
 
 [diataxis]: https://diataxis.fr/

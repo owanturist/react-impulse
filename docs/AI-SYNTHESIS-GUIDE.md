@@ -8,11 +8,11 @@ This guide defines the canonical process for transforming the react-impulse know
 
 1. **Many-to-many mapping**: One KB entry can generate multiple doc pages; one doc page can synthesize multiple KB entries.
 2. **No verbatim copying**: Always rephrase, compress, and reorganize for the target audience.
-3. **PLAN.json is the metadata source**: All structural metadata (sources, diataxis type, purpose, sections) is maintained in PLAN.json, not in page frontmatter.
+3. **PLAN.yml is the metadata source**: All structural metadata (sources, diataxis type, purpose, sections) is maintained in PLAN.yml, not in page frontmatter.
    **Page structure:**
-   - The `sections` array in PLAN.json defines the **required H2 headings** for each page
+   - The `sections` array in PLAN.yml defines the **required H2 headings** for each page
    - AI must generate content for each section in the specified order
-   - Manual edits can add subsections (H3, H4, etc.) but H2 structure must match PLAN.json
+   - Manual edits can add subsections (H3, H4, etc.) but H2 structure must match PLAN.yml
    - This approach allows each page to have its own unique structure, not bound by Diátaxis type conventions
 4. **KB is authoritative for concepts**: Knowledgebase entries are the technical source of truth for core concepts, API contracts, design rationale, and architecture.
 5. **Docs can be manually refined**: Generated documentation can be manually edited for better code examples, content ordering, prose polish, and user experience.
@@ -28,7 +28,7 @@ This guide defines the canonical process for transforming the react-impulse know
 ```
 Read the entire knowledgebase at `knowledgebase/entries/**/*.md` and analyze all entries.
 
-Create a comprehensive documentation plan as JSON that maps KB knowledge to Diátaxis categories:
+Create a comprehensive documentation plan as YAML that maps KB knowledge to Diátaxis categories:
 - explanation: High-level concepts, mental models, "why" questions
 - how-to: Goal-oriented guides, "how" questions
 - tutorial: Learning-oriented walkthroughs, step-by-step
@@ -36,26 +36,26 @@ Create a comprehensive documentation plan as JSON that maps KB knowledge to Diá
 Note: Do NOT include "reference" type pages - API reference documentation is generated directly from source code.
 
 For each proposed page, specify:
+- diataxis: explanation|how-to|tutorial
 - slug: URL-friendly identifier
 - title: Human-readable title
-- diataxis: explanation|how-to|tutorial
 - sources: Array of KB entry IDs that contribute content
 - purpose: One-sentence description of page goal
 - sections: Array of required H2 section headings that define the page structure
 
-Output only valid JSON array. Prioritize explanation pages first.
+Output valid YAML. Prioritize explanation pages first. Add comments to organize sections.
 ```
 
-**Expected Output:** `docs/PLAN.json`
+**Expected Output:** `docs/PLAN.yml`
 
 ### Step 2: Generation Phase
 
 **Prompt Template:**
 
 ```md
-Using the approved PLAN.json and the full knowledgebase, generate documentation pages.
+Using the approved PLAN.yml and the full knowledgebase, generate documentation pages.
 
-For each page in PLAN.json:
+For each page in PLAN.yml:
 
 1. Read all referenced sources entries
 2. Synthesize content appropriate to the Diátaxis category
@@ -76,7 +76,7 @@ description: [descriptive summary]
 ---
 ```
 
-For each page, generate content with H2 sections matching the `sections` array from PLAN.json exactly.
+For each page, generate content with H2 sections matching the `sections` array from PLAN.yml exactly.
 
 Common section patterns by Diátaxis type (not enforced, but useful as starting templates):
 
@@ -134,8 +134,8 @@ When manually editing generated documentation, ask:
    - Consider if example reveals need for KB clarification
 
 5. **Section structure check**: Are you adding, removing, or reordering H2 sections?
-   - ✅ If yes → Update the `sections` array in PLAN.json to match
-   - ❌ If only adding subsections (H3, H4) → No PLAN.json update needed
+   - ✅ If yes → Update the `sections` array in PLAN.yml to match
+   - ❌ If only adding subsections (H3, H4) → No PLAN.yml update needed
 
 ### Workflow Example
 
@@ -184,31 +184,36 @@ Scenario: Clarifying what "compare semantics" means
 
 ## Validation Rules
 
-### PLAN.json Schema
+### PLAN.yml Schema
 
-```ts
-interface DocumentPlan {
-  slug: string // unique, URL-safe
-  title: string // human-readable
-  diataxis: "explanation" | "how-to" | "tutorial" // reference excluded
-  sources: string[] // must reference existing KB entry IDs
-  purpose: string // one-sentence goal
-  sections: string[] // required H2 headings in order
-}
+Each documentation page entry in PLAN.yml follows this structure:
+
+```yaml
+# Example entry
+- diataxis: explanation # Type: explanation | how-to | tutorial (reference excluded)
+  slug: page-slug # Unique, URL-safe identifier
+  title: Page Title # Human-readable title
+  sources: # KB entry IDs that contribute content
+    - kb-entry-id-1
+    - kb-entry-id-2
+  purpose: One-sentence description of page goal
+  sections: # Required H2 headings in order
+    - Section One
+    - Section Two
 ```
 
-Note: PLAN.json is the single source of truth for all documentation metadata. Doc pages themselves contain only title, description, and content.
+Note: PLAN.yml is the single source of truth for all documentation metadata. Doc pages themselves contain only title, description, and content.
 
 Minimal frontmatter for AI-synthesized pages:
 
-- `title`: Must match PLAN.json entry
+- `title`: Must match PLAN.yml entry
 - `description`: Clear summary of page content
 
-All other metadata (sources, diataxis type, purpose, sections) is stored in PLAN.json.
+All other metadata (sources, diataxis type, purpose, sections) is stored in PLAN.yml.
 
 ### Content Requirements
 
-- Each page must have H2 sections matching the `sections` array in PLAN.json exactly, in the specified order
+- Each page must have H2 sections matching the `sections` array in PLAN.yml exactly, in the specified order
 - Subsections (H3, H4, etc.) can be added as needed for content organization
 - No verbatim copying from KB entries
 - Cross-references should use relative links: `[text](../category/page-slug)`
@@ -260,10 +265,10 @@ const fullName = Impulse((scope) => `${firstName.getValue(scope)} ${lastName.get
 ### Maintenance
 
 - Re-run synthesis when KB entries are substantially updated
-- Check PLAN.json to identify which pages are affected by KB changes (via sources mapping)
-- Use PLAN.json to audit coverage of KB content
+- Check PLAN.yml to identify which pages are affected by KB changes (via sources mapping)
+- Use PLAN.yml to audit coverage of KB content
 - Flag missing KB content as TODOs rather than inventing information
-- PLAN.json serves as the single source of truth for documentation structure and metadata
+- PLAN.yml serves as the single source of truth for documentation structure and metadata
 
 ## Common Anti-Patterns to Avoid
 
@@ -271,7 +276,7 @@ const fullName = Impulse((scope) => `${firstName.getValue(scope)} ${lastName.get
 ✅ **Do**: Rephrase and reorganize for the target audience
 
 ❌ **Don't**: Create docs without listing KB sources
-✅ **Do**: Always track KB sources in PLAN.json (not in page frontmatter)
+✅ **Do**: Always track KB sources in PLAN.yml (not in page frontmatter)
 
 ❌ **Don't**: Make conceptual changes to docs without checking if KB needs updates
 ✅ **Do**: Use the validation checklist to determine if KB should be updated first
@@ -301,4 +306,4 @@ The `impulse-concept.md` KB entry generates:
 - **how-to/create-impulse.md**: "How do I create and use an impulse?" - practical guide with common patterns
 - **tutorial/first-impulse.md**: "Build your first reactive component" - step-by-step walkthrough
 
-Each page is listed in `PLAN.json` with `sources: ["impulse-concept"]` but presents information differently for its intended use case. The page files themselves contain only title, description, and content.
+Each page is listed in `PLAN.yml` with `sources: ["impulse-concept"]` but presents information differently for its intended use case. The page files themselves contain only title, description, and content.

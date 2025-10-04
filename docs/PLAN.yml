@@ -1,0 +1,53 @@
+# Documentation Plan
+
+# This file defines the structure and metadata for all AI-synthesized documentation pages.
+# Each entry maps knowledgebase sources to a documentation page with specific Diátaxis type.
+
+# Explanation Pages
+# High-level concepts, mental models, and "why" questions
+
+# How-To Guides
+# Goal-oriented guides and "how" questions
+
+# Tutorials
+# Learning-oriented walkthroughs and step-by-step guides
+
+- diataxis: explanation
+  slug: impulse-overview
+  title: Understanding Impulses
+  sources:
+    - impulse-concept
+  purpose: Introduce the core concept of impulses - what they are, why they exist, and how they work
+  sections:
+    - Overview
+    - Mental model
+    - Key concepts
+    - Trade-offs
+    - See also
+
+- diataxis: explanation
+  slug: reactivity-system
+  title: Reactivity and Scope System
+  sources:
+    - scope-concept
+    - scope-factories
+  purpose: Explain the scope-based reactivity system and how dependency tracking works
+  sections:
+    - Overview
+    - Mental model
+    - Key concepts
+    - Trade-offs
+    - See also
+
+- diataxis: explanation
+  slug: derived-computations
+  title: Derived Computations
+  sources:
+    - derived-impulse-concept
+  purpose: Explain derived impulses, their lifecycle, and memory safety considerations
+  sections:
+    - Overview
+    - Mental model
+    - Key concepts
+    - Trade-offs
+    - See also
