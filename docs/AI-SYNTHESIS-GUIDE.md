@@ -1,13 +1,15 @@
 # AI Documentation Synthesis Guide
 
-This guide defines the canonical process for transforming the react-impulse knowledgebase into human-friendly Diátaxis documentation.
+This guide defines the canonical process for transforming the react-impulse knowledgebase into human-friendly Diátaxis documentation, and how to maintain consistency between KB and docs.
 
 ## Core Principles
 
 1. **Many-to-many mapping**: One KB entry can generate multiple doc pages; one doc page can synthesize multiple KB entries.
 2. **No verbatim copying**: Always rephrase, compress, and reorganize for the target audience.
 3. **Generation tracking**: Every doc page must include `generated` metadata in frontmatter with sources and sync date.
-4. **KB is authoritative**: Never edit docs directly - always update KB first, then re-synthesize.
+4. **KB is authoritative for concepts**: Knowledgebase entries are the technical source of truth for core concepts, API contracts, design rationale, and architecture.
+5. **Docs can be manually refined**: Generated documentation can be manually edited for better code examples, content ordering, prose polish, and user experience.
+6. **Bidirectional validation**: When manually editing docs, verify if the source KB entries need updating to stay synchronized.
 
 ## Two-Step Synthesis Process
 
@@ -41,10 +43,11 @@ Output only valid JSON array. Prioritize explanation and reference pages first.
 
 **Prompt Template:**
 
-````
+````md
 Using the approved PLAN.json and the full knowledgebase, generate documentation pages.
 
 For each page in the plan:
+
 1. Read all referenced kbSources entries
 2. Synthesize content following the Diátaxis type requirements
 3. Include required frontmatter with generation metadata
@@ -55,6 +58,7 @@ For each page in the plan:
 Generate page: [SPECIFIC_SLUG_FROM_PLAN]
 
 Required frontmatter:
+
 ```yaml
 ---
 title: [from plan]
@@ -65,6 +69,7 @@ generated:
   date: [current date YYYY-MM-DD]
   status: published
 ---
+```
 ````
 
 Content requirements by Diátaxis type:
@@ -76,20 +81,113 @@ Content requirements by Diátaxis type:
 
 Write complete MDX content for the page.
 
-````
+Note: Generated content provides a solid foundation but can be manually refined afterward for better examples, flow, and user experience.
+
+````md
+## Manual Refinement Workflow
+
+After initial generation, documentation can be manually edited to improve quality. However, maintain bidirectional consistency between KB and docs.
+
+### What Can Be Freely Edited in Docs
+
+**Safe to change without KB updates:**
+
+- Code example implementations and scenarios
+- Content ordering and section flow
+- Prose polish, tone, and readability improvements
+- Additional clarifying details for user understanding
+- Cross-references and navigation structure
+- Formatting and presentation choices
+
+### When to Update Knowledgebase
+
+**Requires KB update when:**
+
+- Core concept definitions change
+- API contracts or guarantees are modified
+- Design rationale or architectural decisions evolve
+- Technical specifications need correction
+- Principles or trade-offs are revised
+
+### Validation Checklist
+
+When manually editing generated documentation, ask:
+
+1. **Concept drift check**: Does this change how we define or explain a core concept?
+   - ✅ If yes → Update the source KB entry first
+   - ❌ If no → Docs-only change is fine
+
+2. **API contract check**: Does this change method signatures, guarantees, or behavior?
+   - ✅ If yes → Update the source KB entry first
+   - ❌ If no → Docs-only change is fine
+
+3. **Technical accuracy check**: Does this contradict what's documented in the KB?
+   - ✅ If yes → Decide which is correct and update accordingly
+   - ❌ If no → Docs-only change is fine
+
+4. **Example improvement**: Is this just a better way to demonstrate existing concepts?
+   - ❌ No KB update needed
+   - Consider if example reveals need for KB clarification
+
+### Workflow Example
+
+```
+Scenario: Improving code examples in impulse-overview.md
+
+1. Original generated example uses simple counter
+2. You want to show a more realistic cart example
+3. Validation:
+   - Concept drift? No - still explaining fine-grained reactivity
+   - API contract? No - same methods, just different scenario
+   - Technical accuracy? No contradiction
+   - Example improvement? Yes
+
+4. Decision: Update docs directly, no KB change needed
+```
+
+```
+Scenario: Reordering "Key Concepts" section
+
+1. Original order: Compare-Based → Explicit Scope → Immutable → Nestable
+2. You want better learning flow: Explicit Scope → Compare-Based → Immutable → Nestable
+3. Validation:
+   - Concept drift? No - same concepts, better ordering
+   - This ordering may benefit KB documentation too
+
+4. Decision:
+   - Update docs for better UX
+   - Consider updating KB Principles section for consistency
+```
+
+```
+Scenario: Clarifying what "compare semantics" means
+
+1. User feedback says "compare semantics" is confusing
+2. You add detailed explanation of Object.is() behavior
+3. Validation:
+   - Concept drift? Potentially - this is core technical detail
+   - Technical accuracy? Need to verify against implementation
+
+4. Decision:
+   - First check KB entry for existing details
+   - If KB is incomplete, update KB first
+   - Then update docs with user-friendly explanation
+```
 
 ## Validation Rules
 
 ### PLAN.json Schema
+
 ```typescript
-type DocumentPlan = {
-  slug: string;           // unique, URL-safe
-  title: string;          // human-readable
-  diataxis: 'explanation' | 'reference' | 'how-to' | 'tutorial';
-  kbSources: string[];    // must reference existing KB entry IDs
-  purpose: string;        // one-sentence goal
-  keySections: string[];  // expected headings
-}[]
+interface DocumentPlan {
+  slug: string // unique, URL-safe
+  title: string // human-readable
+  diataxis: "explanation" | "reference" | "how-to" | "tutorial"
+  kbSources: string[] // must reference existing KB entry IDs
+  purpose: string // one-sentence goal
+  keySections: string[] // expected headings
+}
+```
 ````
 
 ### Page Frontmatter Requirements
@@ -166,14 +264,17 @@ const fullName = Impulse((scope) => `${firstName.getValue(scope)} ${lastName.get
 ❌ **Don't**: Create docs without listing KB sources  
 ✅ **Do**: Always track generation metadata in frontmatter
 
-❌ **Don't**: Edit generated docs directly for content fixes
-✅ **Do**: Update the relevant KB entries and re-synthesize
+❌ **Don't**: Make conceptual changes to docs without checking if KB needs updates
+✅ **Do**: Use the validation checklist to determine if KB should be updated first
 
 ❌ **Don't**: Create single-purpose pages for every KB entry
 ✅ **Do**: Combine related concepts into cohesive explanations
 
 ❌ **Don't**: Use internal jargon without explanation
 ✅ **Do**: Define terms clearly for external developers
+
+❌ **Don't**: Let docs and KB drift apart over time
+✅ **Do**: Periodically review docs against KB to ensure technical accuracy
 
 ## Example Synthesis
 
