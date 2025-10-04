@@ -1,13 +1,6 @@
 ---
 title: Reactivity and Scope System
 description: Explain the scope-based reactivity system and how dependency tracking works
-generated:
-  from:
-    - scope-concept
-    - scope-factories
-  type: explanation
-  date: 2025-09-24
-  status: published
 ---
 
 The reactivity system in react-impulse is built around the concept of **Scopes** - objects that manage the lifecycle of reactive computations and automatically track dependencies. Unlike many reactive systems that use global scheduling or implicit dependency tracking, react-impulse uses explicit scope passing to ensure predictable, memory-safe reactivity.

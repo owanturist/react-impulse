@@ -1,12 +1,6 @@
 ---
 title: Derived Computations
 description: Explain how reactive computations work, including memory management and efficiency considerations
-generated:
-  from:
-    - derived-impulse-concept
-  type: explanation
-  date: 2025-09-24
-  status: published
 ---
 
 Derived computations in react-impulse allow you to create reactive values that automatically update when their source impulses change. Think of them as "computed properties" that maintain themselves - they cache their results for efficiency but automatically recalculate when any of their inputs change.

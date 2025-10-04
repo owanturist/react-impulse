@@ -155,7 +155,8 @@ Core principles:
 - Many-to-many mapping: one KB entry can power multiple docs (e.g., explanation + how-to); one doc can aggregate multiple KB entries.
 - KB remains the ONLY canonical source of truth for conceptual content; docs are disposable derivatives regenerated on demand.
 - No verbatim bulk copying; the AI must compress, rephrase, categorize.
-- Each generated doc page records provenance (all contributing `kb-sources`) + `last-synced` date.
+- PLAN.json contains all structural metadata (sources, diataxis, purpose, sections); doc pages contain only title, description, and content.
+- The `sections` array in PLAN.json defines the required H2 headings for each page, allowing flexible structure per page rather than enforcing conventions per Diátaxis type.
 - Divergence resolution always flows: Desired change → Update KB → Re-synthesize docs.
 - API reference docs are generated from in-code documentation (JSDoc/TSDoc), not from KB entries.
 
@@ -168,9 +169,9 @@ Stages (manual AI-driven for Phase 2):
        "slug": "impulse-overview",
        "title": "Impulse Overview",
        "diataxis": "explanation",
-       "kbSources": ["impulse-concept", "scope-concept"],
+       "sources": ["impulse-concept", "scope-concept"],
        "purpose": "High-level mental model & motivations",
-       "keySections": ["Overview", "Mental model", "Key concepts", "See also"],
+       "sections": ["Overview", "Mental model", "Key concepts", "See also"],
      },
    ]
    ```
@@ -181,8 +182,11 @@ Stages (manual AI-driven for Phase 2):
    - `docs/content/how-to/**`
    - `docs/content/tutorials/**`
      (NOT `docs/content/reference/**` - that's populated by TypeDoc/similar tools)
-4. VALIDATE: Automated checks (future): ensure every page lists real `kb-sources`; required section checklist per Diátaxis type; broken link scan.
-5. MERGE: Commit docs + updated PLAN. Re-run synthesis only when KB changes materially.
+
+   Each page contains minimal frontmatter (title, description) and content. All structural metadata stays in PLAN.json.
+
+4. VALIDATE: Automated checks (future): ensure PLAN.json entries reference real KB sources; validate page slugs match PLAN; required section checklist per Diátaxis type; broken link scan.
+5. MERGE: Commit docs + updated PLAN.json. Re-run synthesis only when KB changes materially.
 
 Versioned docs (branch-based, no snapshots):
 
@@ -207,8 +211,9 @@ PR validation:
 - Lint KB frontmatter against schema (type, packages, status, etc.)
 - Check for mandatory body sections based on type
 - Use Zod error formatting (e.g., `z.prettifyError`) for readable diagnostics in CI logs
-- If `docs/PLAN.json` changed: validate JSON schema (pages have unique slugs, valid diataxis, non-empty kb-sources)
-- Validate each changed doc page frontmatter (required fields, kb-sources exist, last-synced present)
+- If `docs/PLAN.json` changed: validate JSON schema (pages have unique slugs, valid diataxis, non-empty sources)
+- Validate that each PLAN.json slug has a corresponding doc file
+- **Section validation**: For each doc page, verify H2 headings match the `sections` array in PLAN.json exactly (order and names)
 - Link scan (internal anchors + relative imports) over changed docs
 - Build [Astro][astro] site (preview) and upload artifact / deploy preview
 
@@ -288,17 +293,18 @@ Phase 2 — AI doc synthesis + Astro site (react-impulse only)
 - [ ] Add `docs/AI-SYNTHESIS-GUIDE.md` (prompts, required structure, section checklists for explanation/how-to/tutorial).
 - [ ] Add initial AI PLAN prompt & store first accepted PLAN as `docs/PLAN.json` (excluding reference pages).
 - [ ] Run first synthesis: produce at least 2 explanation pages from existing KB concepts.
-- [ ] Add provenance frontmatter (`kb-sources`, `last-synced`) to synthesized pages.
+- [ ] Add minimal frontmatter (title, description) to synthesized pages; all metadata stays in PLAN.json.
 - [ ] Astro site (Starlight or minimal) builds displaying generated pages.
-- [ ] CI: lint KB + build docs (fail on missing `kb-sources` or malformed frontmatter for AI-synthesized pages).
+- [ ] CI: lint KB + build docs + validate PLAN.json structure.
 
 Definition of Done (Phase 2):
 
 - `docs/PLAN.json` exists describing the current published doc set (explanation, how-to, tutorial types only).
-- At least two synthesized explanation pages (multi-source where appropriate) with correct frontmatter fields.
+- At least two synthesized explanation pages with minimal frontmatter (title, description).
+- All structural metadata (sources, diataxis, purpose, sections) is stored in PLAN.json, not in page frontmatter.
+- The `sections` field defines required H2 headings for each page, enabling flexible structure.
 - `AI-SYNTHESIS-GUIDE.md` defines the canonical prompt & transformation rules for non-reference documentation.
 - Astro site builds locally and in CI without 404 for synthesized slugs.
-- Provenance badge (kb-sources + last-synced) visible on each AI-synthesized page (can be placeholder markup initially).
 
 Phase 2.5 — API reference documentation (react-impulse only)
 
@@ -358,9 +364,11 @@ Definition of Done (Phase 5):
 
 - Every user-visible change must have a KB entry (feature/bugfix/decision) with acceptance-criteria and test-plan.
 - No API change without api-changes + migration.
+- Docs live in `docs/src/content/docs/<diataxis>/<slug>.md` and contain minimal frontmatter (title, description).
+- PLAN.json contains all structural metadata (sources, diataxis, purpose, sections); doc pages contain only title, description, and content.
+- The `sections` array defines the required H2 headings for each page in order. This allows each page to have its own structure rather than following rigid Diátaxis type conventions.
 - AI-synthesized docs (explanation, how-to, tutorial) are generated from the KB but can be manually refined for better examples, ordering, and prose. When manually editing docs, use the validation checklist (see AI-SYNTHESIS-GUIDE.md) to determine if the source KB entries need updating.
 - API reference docs are generated from TypeScript source code (JSDoc/TSDoc) and should not be manually edited.
-- Every AI-synthesized doc page must reference at least one `kb-sources` id; aggregated pages list all contributing IDs.
 - If a doc needs conceptual content absent in KB, add/extend a KB entry first (AI should emit a TODO noting the gap).
 - MCP stays in sync by reading the KB at runtime (or on build, if caching is used).
 

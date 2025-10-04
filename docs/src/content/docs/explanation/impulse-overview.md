@@ -1,12 +1,6 @@
 ---
 title: Understanding Impulses
 description: Introduce the core concept of impulses - what they are, why they exist, and how they work
-generated:
-  from:
-    - impulse-concept
-  type: explanation
-  date: 2025-09-24
-  status: published
 ---
 
 Impulses are the foundational building blocks of react-impulse, providing a minimal yet powerful abstraction for reactive state management. Think of an impulse as a smart container that not only holds a value but also knows when that value changes and can notify interested parties about those changes.

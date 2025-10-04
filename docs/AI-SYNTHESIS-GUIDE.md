@@ -8,7 +8,12 @@ This guide defines the canonical process for transforming the react-impulse know
 
 1. **Many-to-many mapping**: One KB entry can generate multiple doc pages; one doc page can synthesize multiple KB entries.
 2. **No verbatim copying**: Always rephrase, compress, and reorganize for the target audience.
-3. **Generation tracking**: Every doc page must include `generated` metadata in frontmatter with sources and sync date.
+3. **PLAN.json is the metadata source**: All structural metadata (sources, diataxis type, purpose, sections) is maintained in PLAN.json, not in page frontmatter.
+   **Page structure:**
+   - The `sections` array in PLAN.json defines the **required H2 headings** for each page
+   - AI must generate content for each section in the specified order
+   - Manual edits can add subsections (H3, H4, etc.) but H2 structure must match PLAN.json
+   - This approach allows each page to have its own unique structure, not bound by Diátaxis type conventions
 4. **KB is authoritative for concepts**: Knowledgebase entries are the technical source of truth for core concepts, API contracts, design rationale, and architecture.
 5. **Docs can be manually refined**: Generated documentation can be manually edited for better code examples, content ordering, prose polish, and user experience.
 6. **Bidirectional validation**: When manually editing docs, verify if the source KB entries need updating to stay synchronized.
@@ -34,9 +39,9 @@ For each proposed page, specify:
 - slug: URL-friendly identifier
 - title: Human-readable title
 - diataxis: explanation|how-to|tutorial
-- kbSources: Array of KB entry IDs that contribute content
+- sources: Array of KB entry IDs that contribute content
 - purpose: One-sentence description of page goal
-- keySections: Array of expected section headings
+- sections: Array of required H2 section headings that define the page structure
 
 Output only valid JSON array. Prioritize explanation pages first.
 ```
@@ -47,36 +52,33 @@ Output only valid JSON array. Prioritize explanation pages first.
 
 **Prompt Template:**
 
-````md
+```md
 Using the approved PLAN.json and the full knowledgebase, generate documentation pages.
 
-For each page in the plan:
+For each page in PLAN.json:
 
-1. Read all referenced kbSources entries
-2. Synthesize content following the Diátaxis type requirements
-3. Include required frontmatter with generation metadata
+1. Read all referenced sources entries
+2. Synthesize content appropriate to the Diátaxis category
+3. Include minimal frontmatter (title and description only)
 4. Write in clear, audience-appropriate language
 5. Format all code examples with max 80-character line length
 6. Add cross-references to related pages where helpful
 
 Generate page: [SPECIFIC_SLUG_FROM_PLAN]
+```
 
-Required frontmatter:
+Required frontmatter (minimal):
 
-```yaml
+```yml
 ---
 title: [from plan]
 description: [descriptive summary]
-generated:
-  from: [array of KB entry IDs]
-  type: [diataxis type]
-  date: [current date YYYY-MM-DD]
-  status: published
 ---
 ```
-````
 
-Content requirements by Diátaxis type:
+For each page, generate content with H2 sections matching the `sections` array from PLAN.json exactly.
+
+Common section patterns by Diátaxis type (not enforced, but useful as starting templates):
 
 - explanation: Overview, Mental model, Key concepts, Trade-offs, See also
 - how-to: Goal, Prerequisites, Steps (ordered), Validation, Pitfalls, Next steps
@@ -86,7 +88,6 @@ Write complete MDX content for the page.
 
 Note: Generated content provides a solid foundation but can be manually refined afterward for better examples, flow, and user experience.
 
-````md
 ## Manual Refinement Workflow
 
 After initial generation, documentation can be manually edited to improve quality. However, maintain bidirectional consistency between KB and docs.
@@ -131,6 +132,10 @@ When manually editing generated documentation, ask:
 4. **Example improvement**: Is this just a better way to demonstrate existing concepts?
    - ❌ No KB update needed
    - Consider if example reveals need for KB clarification
+
+5. **Section structure check**: Are you adding, removing, or reordering H2 sections?
+   - ✅ If yes → Update the `sections` array in PLAN.json to match
+   - ❌ If only adding subsections (H3, H4) → No PLAN.json update needed
 
 ### Workflow Example
 
@@ -181,30 +186,30 @@ Scenario: Clarifying what "compare semantics" means
 
 ### PLAN.json Schema
 
-```typescript
+```ts
 interface DocumentPlan {
   slug: string // unique, URL-safe
   title: string // human-readable
   diataxis: "explanation" | "how-to" | "tutorial" // reference excluded
-  kbSources: string[] // must reference existing KB entry IDs
+  sources: string[] // must reference existing KB entry IDs
   purpose: string // one-sentence goal
-  keySections: string[] // expected headings
+  sections: string[] // required H2 headings in order
 }
 ```
-````
 
-### Page Frontmatter Requirements
+Note: PLAN.json is the single source of truth for all documentation metadata. Doc pages themselves contain only title, description, and content.
 
-- `title`: Must match PLAN entry
+Minimal frontmatter for AI-synthesized pages:
+
+- `title`: Must match PLAN.json entry
 - `description`: Clear summary of page content
-- `generated.from`: Must be non-empty array of existing KB entry IDs
-- `generated.type`: Must be valid Diátaxis type (explanation|how-to|tutorial)
-- `generated.date`: Must be current date in YYYY-MM-DD format
-- `generated.status`: Must be "draft" or "published"
+
+All other metadata (sources, diataxis type, purpose, sections) is stored in PLAN.json.
 
 ### Content Requirements
 
-- Each page must follow section requirements for its Diátaxis type
+- Each page must have H2 sections matching the `sections` array in PLAN.json exactly, in the specified order
+- Subsections (H3, H4, etc.) can be added as needed for content organization
 - No verbatim copying from KB entries
 - Cross-references should use relative links: `[text](../category/page-slug)`
 - Code examples should be practical, runnable, and use valid TypeScript/JavaScript syntax
@@ -232,7 +237,7 @@ interface DocumentPlan {
 
 **Good example:**
 
-```typescript
+```ts
 const fullName = Impulse(
   (scope) => `${firstName.getValue(scope)} ${lastName.getValue(scope)}`,
 )
@@ -240,7 +245,7 @@ const fullName = Impulse(
 
 **Avoid:**
 
-```typescript
+```ts
 // prettier-ignore
 const fullName = Impulse((scope) => `${firstName.getValue(scope)} ${lastName.getValue(scope)}`)
 ```
@@ -255,17 +260,18 @@ const fullName = Impulse((scope) => `${firstName.getValue(scope)} ${lastName.get
 ### Maintenance
 
 - Re-run synthesis when KB entries are substantially updated
-- Update `last-synced` dates to track freshness
+- Check PLAN.json to identify which pages are affected by KB changes (via sources mapping)
 - Use PLAN.json to audit coverage of KB content
 - Flag missing KB content as TODOs rather than inventing information
+- PLAN.json serves as the single source of truth for documentation structure and metadata
 
 ## Common Anti-Patterns to Avoid
 
 ❌ **Don't**: Copy KB markdown directly into doc pages
 ✅ **Do**: Rephrase and reorganize for the target audience
 
-❌ **Don't**: Create docs without listing KB sources  
-✅ **Do**: Always track generation metadata in frontmatter
+❌ **Don't**: Create docs without listing KB sources
+✅ **Do**: Always track KB sources in PLAN.json (not in page frontmatter)
 
 ❌ **Don't**: Make conceptual changes to docs without checking if KB needs updates
 ✅ **Do**: Use the validation checklist to determine if KB should be updated first
@@ -287,4 +293,12 @@ const fullName = Impulse((scope) => `${firstName.getValue(scope)} ${lastName.get
 - `explanation/impulse-overview.md` (high-level, "why impulse?")
 - `how-to/create-impulse.md` (practical usage)
 
-Each page includes `generated.from: ["impulse-concept"]` but presents information differently for its intended use case.
+### Example Synthesis from impulse-concept.md
+
+The `impulse-concept.md` KB entry generates:
+
+- **explanation/impulse-overview.md**: "What is an impulse?" - concept introduction, mental models, design philosophy
+- **how-to/create-impulse.md**: "How do I create and use an impulse?" - practical guide with common patterns
+- **tutorial/first-impulse.md**: "Build your first reactive component" - step-by-step walkthrough
+
+Each page is listed in `PLAN.json` with `sources: ["impulse-concept"]` but presents information differently for its intended use case. The page files themselves contain only title, description, and content.
