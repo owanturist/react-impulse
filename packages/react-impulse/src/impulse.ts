@@ -9,12 +9,12 @@ import type { ReadableImpulse } from "./readable-impulse"
 import type { Scope } from "./scope"
 import type { WritableImpulse } from "./writable-impulse"
 
+/**
+ * @category Core
+ */
 export interface ReadonlyImpulse<T> extends ReadableImpulse<T> {
   /**
    * Creates a new Impulse instance out of the current one with the same value.
-   *
-   * @param options optional `ImpulseOptions`.
-   * @param options.compare when not defined it uses the `compare` function from the origin Impulse, When `null` the `Object.is` function applies to compare the values.
    *
    * @since 2.0.0
    */
@@ -24,8 +24,6 @@ export interface ReadonlyImpulse<T> extends ReadableImpulse<T> {
    * Creates a new Impulse instance out of the current one with the transformed value. Transforming might be handy when cloning mutable values (such as an Impulse).
    *
    * @param transform an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
-   * @param options optional `ImpulseOptions`.
-   * @param options.compare when not defined it uses the `compare` function from the origin Impulse, When `null` the `Object.is` function applies to compare the values.
    *
    * @since 1.0.0
    */
@@ -35,6 +33,9 @@ export interface ReadonlyImpulse<T> extends ReadableImpulse<T> {
   ): Impulse<T>
 }
 
+/**
+ * @category Core
+ */
 export interface Impulse<T> extends ReadonlyImpulse<T>, WritableImpulse<T> {
   /**
    * Updates the value.
@@ -64,8 +65,6 @@ export function Impulse<T = undefined>(): Impulse<undefined | T>
  * A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes.
  *
  * @param getter either anything that implements the `ReadableImpulse` interface or a function to read the derived value from the source.
- * @param options optional `ImpulseOptions`.
- * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
  *
  * @since 3.0.0
  */
@@ -80,8 +79,6 @@ export function Impulse<T>(
  *
  * @param getter either anything that implements the `ReadableImpulse` interface or a function to read the derived value from the source.
  * @param setter either anything that implements the `WritableImpulse` interface or a function to write the derived value back to the source.
- * @param options optional `ImpulseOptions`.
- * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
  *
  * @since 3.0.0
  */
@@ -95,8 +92,6 @@ export function Impulse<T>(
  * Creates a new Impulse.
  *
  * @param initialValue the initial value.
- * @param options optional `ImpulseOptions`.
- * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
  *
  * @since 3.0.0
  */
@@ -105,6 +100,9 @@ export function Impulse<T>(
   options?: ImpulseOptions<T>,
 ): Impulse<T>
 
+/**
+ * @category Impulse Factory
+ */
 export function Impulse<T>(
   initialValueOrReadableImpulse?:
     | T

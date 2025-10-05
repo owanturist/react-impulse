@@ -1,3 +1,6 @@
+/**
+ * @category Core
+ */
 export interface WritableImpulse<T> {
   /**
    * Updates the value.

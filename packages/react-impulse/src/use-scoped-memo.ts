@@ -8,6 +8,8 @@ import { useCreateScope } from "./use-create-scope"
  * @param factory a function that provides `Scope` as the first argument and calculates a value `T` whenever any of the `dependencies`' values change.
  * @param dependencies an array of values used in the `factory` function.
  *
+ * @category Scope Factories
+ * @group React Hooks
  * @since 1.0.0
  */
 export function useScopedMemo<TResult>(

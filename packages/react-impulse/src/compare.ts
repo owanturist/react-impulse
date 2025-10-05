@@ -5,6 +5,8 @@ import type { Scope } from "./scope"
  * Depending on the type of the values it might be reasonable to use
  * a custom compare function such as shallow-equal or deep-equal.
  *
+ * @inline
+ * @hidden
  * @since 1.0.0
  */
 export type Compare<T> = (left: T, right: T, scope: Scope) => boolean

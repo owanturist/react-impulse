@@ -3,6 +3,10 @@ import type { Impulse, ReadonlyImpulse } from "./impulse"
 import { isImpulseFactory } from "./is-impulse-factory"
 import type { Scope } from "./scope"
 
+/**
+ * @category Type Guards
+ * @group Type Guards
+ */
 export const isImpulse = isImpulseFactory(
   (input) => input instanceof BaseImpulse,
 ) as {

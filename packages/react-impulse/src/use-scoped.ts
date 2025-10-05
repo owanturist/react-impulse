@@ -8,6 +8,10 @@ import { type Scope, UNTRACKED_SCOPE } from "./scope"
 import { useCreateScope } from "./use-create-scope"
 import { useHandler } from "./use-handler"
 
+/**
+ * @inline
+ * @hidden
+ */
 export interface UseScopedOptions<T> {
   /**
    * The compare function determines whether or not the factory result is different.
@@ -35,7 +39,6 @@ export function useScoped<TValue>(impulse: ReadableImpulse<TValue>): TValue
  *
  * @param factory a function that provides Scope as the first argument and subscribes to all Impulses calling the `Impulse#getValue` method inside the function.
  * @param dependencies optional array of dependencies of the `factory` function. If not defined, the `factory` function is called on every render.
- * @param options optional `UseScopedOptions`.
  *
  * @since 1.0.0
  */
@@ -45,6 +48,10 @@ export function useScoped<TResult>(
   options?: UseScopedOptions<TResult>,
 ): TResult
 
+/**
+ * @category Scope Factories
+ * @group React Hooks
+ */
 export function useScoped<TResult>(
   factoryOrReadableImpulse:
     | ((scope: Scope) => TResult)
