@@ -319,6 +319,30 @@ Definition of Done (Phase 2.5):
 - API reference pages visible and navigable in the Astro site.
 - API docs reflect current source code (no manual editing required).
 
+Phase 2.5.1 — TypeDoc spec compliance and enhanced documentation
+
+- [x] **Create `tsdoc.json`** configuration file for custom tag definitions if needed
+- [x] **Replace `@version` with `@since`** in all source files (TypeDoc spec compliance)
+- [ ] **Add `@remarks`** blocks for complex APIs that need additional explanation beyond the summary
+- [ ] **Add `@see`** cross-references to link related APIs and concepts
+- [ ] **Add `@throws`** documentation for error conditions where applicable
+- [ ] **Add `@example`** blocks to major public APIs (at minimum: `Impulse` overloads, `useScoped`, `subscribe`, `batch`)
+- [ ] **Use `{@link}` inline tags** for TypeScript symbol references instead of plain markdown links
+- [ ] **Add `@deprecated`** tags with migration guidance for any deprecated APIs
+- [ ] **Consider `@group`** or `@category`\*\* tags to organize API reference by logical groupings
+- [ ] **Add `@defaultValue`** tags where parameters have default values
+
+Definition of Done (Phase 2.5.1):
+
+- All `@version` tags replaced with `@since` throughout `packages/react-impulse/src`.
+- Complex APIs include `@remarks` sections with additional implementation details or usage notes.
+- Related APIs cross-reference each other using `@see` tags.
+- Error-throwing functions document conditions with `@throws` tags.
+- At least 5 major public APIs have comprehensive `@example` blocks showing real-world usage.
+- Internal TypeScript references use `{@link}` inline tags for proper type-aware linking.
+- Documentation follows TypeDoc tag specification: https://typedoc.org/documents/Tags.html
+- Generated API reference shows improved organization and cross-linking.
+
 Phase 2.6 — Documentation validation and linting
 
 - [ ] **Add KB schema validation** (Zod frontmatter schema in `knowledgebase/schema/`)

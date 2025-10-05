@@ -27,5 +27,8 @@
   "parametersFormat": "table",
   "interfacePropertiesFormat": "table",
   "classPropertiesFormat": "table",
-  "enumMembersFormat": "table"
+  "enumMembersFormat": "table",
+  // https://typedoc-plugin-markdown.org/docs/options/utility
+  "formatWithPrettier": true,
+  "prettierConfigFile": "../.prettierrc.json"
 }

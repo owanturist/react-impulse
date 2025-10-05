@@ -15,6 +15,13 @@ export { useScopedMemo } from "./use-scoped-memo"
 export { useScopedCallback } from "./use-scoped-callback"
 export { useScopedEffect } from "./use-scoped-effect"
 export { useScopedLayoutEffect } from "./use-scoped-layout-effect"
-export type { DependencyList } from "./dependencies"
-export type { Destructor } from "./destructor"
 export type { Compare } from "./compare"
+
+/**
+ * @hidden no need to document the React definitions
+ */
+export type { DependencyList } from "./dependencies"
+/**
+ * @hidden no need to document the React definitions
+ */
+export type { Destructor } from "./destructor"

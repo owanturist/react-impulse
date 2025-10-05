@@ -9,14 +9,14 @@ export const isImpulse = isImpulseFactory(
   /**
    * A function to check whether or not the input is an Impulse.
    *
-   * @version 3.0.0
+   * @since 3.0.0
    */
   <T, Unknown = unknown>(input: Unknown | Impulse<T>): input is Impulse<T>
 
   /**
    * A function to check whether or not the input is an Impulse.
    *
-   * @version 3.0.0
+   * @since 3.0.0
    */
   <T, Unknown = unknown>(
     input: Unknown | ReadonlyImpulse<T>,
@@ -25,7 +25,7 @@ export const isImpulse = isImpulseFactory(
   /**
    * A function to check whether or not an Impulse value passes the `check`.
    *
-   * @version 3.0.0
+   * @since 3.0.0
    */
   <T, Unknown = unknown>(
     scope: Scope,
@@ -36,7 +36,7 @@ export const isImpulse = isImpulseFactory(
   /**
    * A function to check whether or not an Impulse value passes the `check`.
    *
-   * @version 3.0.0
+   * @since 3.0.0
    */
   <T, Unknown = unknown>(
     scope: Scope,

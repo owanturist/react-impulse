@@ -25,7 +25,7 @@ export interface UseScopedOptions<T> {
  *
  * @param impulse anything that implements the `ReadableImpulse` interface.
  *
- * @version 2.0.0
+ * @since 2.0.0
  */
 export function useScoped<TValue>(impulse: ReadableImpulse<TValue>): TValue
 
@@ -37,7 +37,7 @@ export function useScoped<TValue>(impulse: ReadableImpulse<TValue>): TValue
  * @param dependencies optional array of dependencies of the `factory` function. If not defined, the `factory` function is called on every render.
  * @param options optional `UseScopedOptions`.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 export function useScoped<TResult>(
   factory: (scope: Scope) => TResult,

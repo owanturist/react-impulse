@@ -9,7 +9,7 @@ import { useScopedMemo } from "./use-scoped-memo"
  * @param callback a function to memoize, the memoized function injects Scope as the first argument and updates whenever any of the `dependencies` values change.
  * @param dependencies an array of values used in the `callback` function.
  *
- * @version 1.3.0
+ * @since 1.3.0
  */
 
 export function useScopedCallback<

@@ -12,7 +12,7 @@ import { ScopeEmitter } from "./scope-emitter"
  *
  * @returns the `factory` function result.
  *
- * @version 2.0.0
+ * @since 2.0.0
  */
 export function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
 
@@ -23,7 +23,7 @@ export function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
  *
  * @returns the `impulse` value.
  *
- * @version 2.0.0
+ * @since 2.0.0
  */
 export function untrack<TValue>(impulse: ReadableImpulse<TValue>): TValue
 

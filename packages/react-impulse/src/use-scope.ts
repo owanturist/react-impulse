@@ -7,7 +7,7 @@ import { useCreateScope } from "./use-create-scope"
 /**
  * A hook that returns a Scope.
  *
- * @version 3.0.0
+ * @since 3.0.0
  */
 export function useScope(): Scope {
   return useCreateScope(identity, isStrictEqual)

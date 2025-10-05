@@ -2,7 +2,6 @@ import { hasProperty } from "~/tools/has-property"
 import { isFunction } from "~/tools/is-function"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 
-import type { BaseImpulse } from "./base-impulse"
 import { DerivedImpulse } from "./derived-impulse"
 import { DirectImpulse } from "./direct-impulse"
 import type { ImpulseOptions } from "./impulse-options"
@@ -10,14 +9,49 @@ import type { ReadableImpulse } from "./readable-impulse"
 import type { Scope } from "./scope"
 import type { WritableImpulse } from "./writable-impulse"
 
-export type Impulse<T> = BaseImpulse<T>
+export interface ReadonlyImpulse<T> extends ReadableImpulse<T> {
+  /**
+   * Creates a new Impulse instance out of the current one with the same value.
+   *
+   * @param options optional `ImpulseOptions`.
+   * @param options.compare when not defined it uses the `compare` function from the origin Impulse, When `null` the `Object.is` function applies to compare the values.
+   *
+   * @since 2.0.0
+   */
+  clone(options?: ImpulseOptions<T>): Impulse<T>
 
-export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
+  /**
+   * Creates a new Impulse instance out of the current one with the transformed value. Transforming might be handy when cloning mutable values (such as an Impulse).
+   *
+   * @param transform an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
+   * @param options optional `ImpulseOptions`.
+   * @param options.compare when not defined it uses the `compare` function from the origin Impulse, When `null` the `Object.is` function applies to compare the values.
+   *
+   * @since 1.0.0
+   */
+  clone(
+    transform: (value: T, scope: Scope) => T,
+    options?: ImpulseOptions<T>,
+  ): Impulse<T>
+}
+
+export interface Impulse<T> extends ReadonlyImpulse<T>, WritableImpulse<T> {
+  /**
+   * Updates the value.
+   *
+   * @param valueOrTransform either the new value or a function that transforms the current value.
+   *
+   * @returns `void` to emphasize that Impulses are mutable.
+   *
+   * @since 1.0.0
+   */
+  setValue(valueOrTransform: T | ((currentValue: T, scope: Scope) => T)): void
+}
 
 /**
  * Creates a new Impulse without an initial value.
  *
- * @version 3.0.0
+ * @since 3.0.0
  *
  * @example
  * const impulse = Impulse<string>()
@@ -33,7 +67,7 @@ export function Impulse<T = undefined>(): Impulse<undefined | T>
  * @param options optional `ImpulseOptions`.
  * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
  *
- * @version 3.0.0
+ * @since 3.0.0
  */
 export function Impulse<T>(
   getter: ReadableImpulse<T> | ((scope: Scope) => T),
@@ -49,7 +83,7 @@ export function Impulse<T>(
  * @param options optional `ImpulseOptions`.
  * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
  *
- * @version 3.0.0
+ * @since 3.0.0
  */
 export function Impulse<T>(
   getter: ReadableImpulse<T> | ((scope: Scope) => T),
@@ -64,7 +98,7 @@ export function Impulse<T>(
  * @param options optional `ImpulseOptions`.
  * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
  *
- * @version 3.0.0
+ * @since 3.0.0
  */
 export function Impulse<T>(
   initialValue: T,
