@@ -1,0 +1,31 @@
+{
+  "$schema": "https://typedoc-plugin-markdown.org/schema.json",
+  // https://typedoc.org/documents/Options.Configuration.html
+  "tsconfig": "../packages/react-impulse/tsconfig.json",
+  "plugin": [
+    "typedoc-plugin-markdown",
+    "typedoc-plugin-frontmatter",
+    "./plugin-custom-markdown.mjs"
+  ],
+  // https://typedoc.org/documents/Options.Input.html
+  "entryPoints": ["../packages/react-impulse/src/index.ts"],
+  "gitRevision": "master",
+  "readme": "none",
+  // https://typedoc.org/documents/Options.Output.html
+  "out": "src/content/docs/reference",
+  "cleanOutputDir": true,
+  "hideGenerator": true,
+  // https://typedoc.org/documents/Options.Other.html
+  "skipErrorChecking": true,
+  // https://typedoc-plugin-markdown.org/docs/options/file
+  "entryFileName": "index.md",
+  // https://typedoc-plugin-markdown.org/docs/options/display
+  "hidePageTitle": true,
+  "hidePageHeader": true,
+  "hideBreadcrumbs": true,
+  "useCodeBlocks": true,
+  "parametersFormat": "table",
+  "interfacePropertiesFormat": "table",
+  "classPropertiesFormat": "table",
+  "enumMembersFormat": "table"
+}

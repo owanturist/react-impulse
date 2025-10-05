@@ -13,6 +13,9 @@ coverage
 dist
 changeset-status.json
 
+# generated docs
+docs/src/content/docs/reference
+
 # misc
 .DS_Store
 .env*.local

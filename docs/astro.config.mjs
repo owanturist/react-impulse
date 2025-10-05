@@ -6,11 +6,16 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "React Impulse",
-      description: "Fine-grained reactivity for React with minimal re-renders",
+      description: "Fine-grained reactivity for React",
       sidebar: [
         {
           label: "Getting Started",
-          items: [{ label: "Introduction", link: "/" }],
+          items: [
+            {
+              label: "Introduction",
+              link: "/",
+            },
+          ],
         },
         {
           label: "Core Concepts",
@@ -30,8 +35,9 @@ export default defineConfig({
           ],
         },
         {
-          label: "Reference",
-          items: [{ label: "API Reference", link: "/reference/impulse-api/" }],
+          label: "API Reference",
+          collapsed: true,
+          autogenerate: { directory: "reference", collapsed: false },
         },
       ],
     }),

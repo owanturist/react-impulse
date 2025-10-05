@@ -303,12 +303,12 @@ Definition of Done (Phase 2):
 
 Phase 2.5 — API reference documentation (react-impulse only)
 
-- [ ] Add comprehensive JSDoc/TSDoc comments to all public APIs in `packages/react-impulse/src`
-- [ ] Set up TypeDoc (or similar tool) to generate API reference markdown
-- [ ] Configure output to `docs/src/content/docs/reference/**`
-- [ ] Add npm script (e.g., `pnpm docs:api`) to regenerate API docs from source
-- [ ] CI: regenerate API docs on source code changes and validate output
-- [ ] Integrate API reference pages into Astro site navigation
+- [x] Add comprehensive JSDoc/TSDoc comments to all public APIs in `packages/react-impulse/src`
+- [x] Set up TypeDoc (or similar tool) to generate API reference markdown
+- [x] Configure output to `docs/src/content/docs/reference/**`
+- [x] Add npm script (e.g., `pnpm docs:api`) to regenerate API docs from source
+- [x] CI: regenerate API docs on source code changes and validate output
+- [x] Integrate API reference pages into Astro site navigation
 
 Definition of Done (Phase 2.5):
 
