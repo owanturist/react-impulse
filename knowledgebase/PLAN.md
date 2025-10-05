@@ -323,14 +323,14 @@ Phase 2.5.1 — TypeDoc spec compliance and enhanced documentation
 
 - [x] **Create `tsdoc.json`** configuration file for custom tag definitions if needed
 - [x] **Replace `@version` with `@since`** in all source files (TypeDoc spec compliance)
-- [ ] **Add `@remarks`** blocks for complex APIs that need additional explanation beyond the summary
-- [ ] **Add `@see`** cross-references to link related APIs and concepts
-- [ ] **Add `@throws`** documentation for error conditions where applicable
-- [ ] **Add `@example`** blocks to major public APIs (at minimum: `Impulse` overloads, `useScoped`, `subscribe`, `batch`)
-- [ ] **Use `{@link}` inline tags** for TypeScript symbol references instead of plain markdown links
-- [ ] **Add `@deprecated`** tags with migration guidance for any deprecated APIs
-- [ ] **Consider `@group`** or `@category`\*\* tags to organize API reference by logical groupings
-- [ ] **Add `@defaultValue`** tags where parameters have default values
+- ~~[ ] **Add `@remarks`** blocks for complex APIs that need additional explanation beyond the summary~~
+- ~~[ ] **Add `@see`** cross-references to link related APIs and concepts~~
+- ~~[ ] **Add `@throws`** documentation for error conditions where applicable~~
+- ~~[ ] **Add `@example`** blocks to major public APIs (at minimum: `Impulse` overloads, `useScoped`, `subscribe`, `batch`)~~
+- ~~[ ] **Use `{@link}` inline tags** for TypeScript symbol references instead of plain markdown links~~
+- ~~[ ] **Add `@deprecated`** tags with migration guidance for any deprecated APIs~~
+- ~~[ ] **Consider `@group`** or `@category`\*\* tags to organize API reference by logical groupings~~
+- ~~[ ] **Add `@defaultValue`** tags where parameters have default values~~
 
 Definition of Done (Phase 2.5.1):
 
