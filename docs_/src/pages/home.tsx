@@ -1,0 +1,24 @@
+import { Link } from "@tanstack/react-router"
+import { HomeLayout } from "fumadocs-ui/layouts/home"
+
+import { COMMON_LAYOUT_PROPS } from "./_common-layout-props"
+
+export function Home() {
+  return (
+    <HomeLayout
+      {...COMMON_LAYOUT_PROPS}
+      className="text-center py-32 justify-center"
+    >
+      <h1 className="font-medium text-xl mb-4">Fumadocs on Tanstack Start.</h1>
+      <Link
+        to="/docs/$"
+        params={{
+          _splat: "",
+        }}
+        className="px-3 py-2 rounded-lg bg-fd-primary text-fd-primary-foreground font-medium text-sm mx-auto"
+      >
+        Open Docs
+      </Link>
+    </HomeLayout>
+  )
+}

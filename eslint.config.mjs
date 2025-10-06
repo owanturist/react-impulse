@@ -7,7 +7,13 @@ import vitestPlugin from "eslint-plugin-vitest"
 import tseslint from "typescript-eslint"
 
 export default tseslint.config([
-  globalIgnores(["**/node_modules/**", "**/dist/**/*", "**/*.d.ts", "**/*.md"]),
+  globalIgnores([
+    "**/node_modules/**",
+    "**/dist/**/*",
+    "**/*.d.ts",
+    "**/*.md",
+    "**/*.generated.*",
+  ]),
 
   // Base configuration for all files
   {
@@ -161,6 +167,7 @@ export default tseslint.config([
             "./packages/*/*.{js,ts}",
             "./packages/*/tests/**/*.{ts,tsx}",
             "./docs/**/*.{ts,tsx,js,jsx,mjs,cjs,astro}",
+            "./docs_/*.ts",
           ],
         },
       ],
@@ -184,6 +191,7 @@ export default tseslint.config([
           "./tsconfig.json",
           "./packages/*/tsconfig.json",
           "./docs/tsconfig.json",
+          "./docs_/tsconfig.json",
         ],
         ecmaVersion: 2018,
         sourceType: "module",
@@ -273,9 +281,21 @@ export default tseslint.config([
 
   // Config files overrides
   {
-    files: ["*.{ts,mjs}", "packages/*/*.ts", "docs/astro.config.mjs"],
+    files: [
+      "*.{ts,mjs}",
+      "packages/*/*.ts",
+      "docs/astro.config.mjs",
+      "docs_/*.ts",
+    ],
     rules: {
       "import/no-default-export": "off",
+    },
+  },
+
+  {
+    files: ["docs_/**/*.{ts,tsx,js,jsx,mjs,cjs}"],
+    rules: {
+      "@typescript-eslint/explicit-function-return-type": "off",
     },
   },
 
