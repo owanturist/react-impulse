@@ -21,7 +21,6 @@ docs/src/content/docs/reference
 .env*.local
 .cache
 .parcel-cache
-.astro
 
 npm-debug.log*
 yarn-debug.log*

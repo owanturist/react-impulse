@@ -10,7 +10,7 @@ This plan bootstraps a single source of truth (the knowledgebase) that powers:
 
 - Create and maintain a knowledgebase (KB) for AI to implement features, fixes, and tests.
 - Derive human-facing documentation from the KB using the [Diátaxis][diataxis] framework via an AI synthesis pass (not a mechanical copy).
-- Use [Astro][astro] for the docs site; allow interactive [React][react] “islands” (see [Astro Islands Architecture][astro-islands]).
+- Use [Fumadocs][fumadocs] for the docs site; allow interactive [React][react] components.
 - Provide versioned docs per package using branch-based semver ranges (no copies), e.g., `/react-impulse/1.x.x` or `/react-impulse/1.1.x`; latest remains the default route.
 - Integrate with [Changesets][changesets] and existing release flows.
 - Expose the KB via [MCP][mcp] so users can connect their AI agents to it.
@@ -252,14 +252,14 @@ Docs deployment (per-branch, independent of package releases):
   - knowledgebase/\*\* (KB entries that may require re-synthesis)
   - packages/knowledgebase-tools/\*\* (synthesis helper logic)
   - packages/knowledgebase-mcp/docs/\*\* (if MCP usage docs are hosted within the site)
-- Then: (a) optionally re-run AI synthesis if KB changed and PLAN/pages are stale, (b) validate PLAN/pages, (c) build with [Astro][astro] → deploy `latest` routes.
+- Then: (a) optionally re-run AI synthesis if KB changed and PLAN/pages are stale, (b) validate PLAN/pages, (c) build with [Fumadocs][fumadocs] → deploy `latest` routes.
 - This redeploys the latest docs without creating a new package version.
 
 - On merge to a maintenance branch (e.g., `1.x.x` or `1.1.x`):
   - Determine each package’s semver from packages/\*/package.json.
   - Compute the branch label (e.g., `1.x.x` or `1.1.x`) and verify versions fall within the branch’s declared range; fail CI if not.
   - Validate PLAN/pages (same rules as default branch).
-  - Build with [Astro][astro] and deploy under branch-based routes per package:
+  - Build with [Fumadocs][fumadocs] and deploy under branch-based routes per package:
     - `/react-impulse/1.x.x` or `/react-impulse/1.1.x`
     - `/react-impulse-form/2.x.x` or `/react-impulse-form/2.0.x`
   - Keep the header “version switcher” compatible across branches by reading a shared versions manifest (see below).
@@ -431,9 +431,6 @@ Definition of Done (Phase 5):
 
 [diataxis]: https://diataxis.fr/
 [fumadocs]: https://fumadocs.dev/
-[astro]: https://astro.build/
-[starlight]: https://starlight.astro.build/
-[astro-islands]: https://docs.astro.build/en/concepts/islands/
 [changesets]: https://github.com/changesets/changesets
 [mcp]: https://modelcontextprotocol.io/
 [mdx]: https://mdxjs.com/
