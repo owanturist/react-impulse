@@ -1,0 +1,39 @@
+---
+title: subscribe
+description: API documentation for the subscribe function
+---
+
+## Overview
+
+The `subscribe` function creates a reactive subscription that automatically re-runs when tracked impulses change.
+
+## Function Signature
+
+```typescript
+function subscribe(listener: (scope: Scope) => Destructor): VoidFunction
+```
+
+## Parameters
+
+- `listener`: A function that receives a `Scope` and can return a cleanup function (`Destructor`).
+
+## Returns
+
+A cleanup function that unsubscribes the listener and stops reactivity.
+
+## Description
+
+`subscribe` establishes a reactive context where impulse reads within the `listener` function automatically track dependencies. When any of those impulses change, the listener is re-executed. The listener runs once immediately and then again whenever dependencies change.
+
+## Examples
+
+```typescript
+const impulse = Impulse(0)
+
+const unsubscribe = subscribe((scope) => {
+  console.log("Value changed:", impulse.getValue(scope))
+  return () => console.log("Cleaning up")
+})
+
+// Later: unsubscribe() to stop listening
+```

@@ -1,0 +1,37 @@
+---
+title: useScope
+description: API documentation for the useScope React hook
+---
+
+## Overview
+
+The `useScope` hook returns a reactive scope tied to the component lifecycle.
+
+## Function Signature
+
+```typescript
+function useScope(): Scope
+```
+
+## Returns
+
+A `Scope` instance that triggers component re-renders when read impulses change.
+
+## Description
+
+`useScope` provides a scope that enables reactive impulse reads within React components. When impulses are read within this scope, the component automatically re-renders when those impulses change.
+
+## Examples
+
+```typescript
+function Counter() {
+  const scope = useScope()
+  const impulse = Impulse(0)
+
+  return (
+    <div>
+      Count: {impulse.getValue(scope)}
+    </div>
+  )
+}
+```

@@ -1,0 +1,59 @@
+---
+title: Impulse
+description: Complete API documentation for the Impulse interface and factory function
+---
+
+## Overview
+
+The `Impulse` interface represents a reactive value container that tracks changes and notifies dependents. It provides both readable and writable access to its value.
+
+## Factory Function
+
+```typescript
+function Impulse<T>(): Impulse<undefined | T>
+function Impulse<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
+function Impulse<T>(
+  getter: ReadableImpulse<T> | ((scope: Scope) => T),
+  options?: ImpulseOptions<T>,
+): ReadonlyImpulse<T>
+function Impulse<T>(
+  getter: ReadableImpulse<T> | ((scope: Scope) => T),
+  setter: WritableImpulse<T> | ((value: T, scope: Scope) => void),
+  options?: ImpulseOptions<T>,
+): Impulse<T>
+```
+
+Creates a new Impulse instance. The overloads support direct values, derived computations, and writable derived impulses.
+
+### Parameters
+
+- `initialValue`: The initial value for the impulse
+- `getter`: A function or ReadableImpulse that computes the derived value
+- `setter`: A function or WritableImpulse that handles value updates for derived impulses
+- `options`: Configuration options including compare function
+
+### Returns
+
+An Impulse instance with the appropriate read/write capabilities.
+
+## Interface
+
+{/* <AutoTypeTable path="../packages/react-impulse/src/impulse.ts" name="Impulse" /> */}
+
+## Examples
+
+### Basic Usage
+
+```typescript
+const counter = Impulse(0)
+counter.setValue(1)
+console.log(counter.getValue(scope)) // 1
+```
+
+### Derived Impulse
+
+```typescript
+const source = Impulse(10)
+const doubled = Impulse((scope) => source.getValue(scope) * 2)
+console.log(doubled.getValue(scope)) // 20
+```

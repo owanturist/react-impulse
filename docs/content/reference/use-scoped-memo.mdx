@@ -1,0 +1,39 @@
+---
+title: useScopedMemo
+description: API documentation for the useScopedMemo React hook
+---
+
+## Overview
+
+The `useScopedMemo` hook memoizes computations that depend on impulses, similar to `React.useMemo` but with reactive scope support.
+
+## Function Signature
+
+```typescript
+function useScopedMemo<T>(
+  factory: (scope: Scope) => T,
+  dependencies: DependencyList,
+): T
+```
+
+## Parameters
+
+- `factory`: A function that receives a `Scope` and computes the memoized value
+- `dependencies`: An array of dependencies that control when the memoization is invalidated
+
+## Returns
+
+The memoized value of type `T`.
+
+## Description
+
+`useScopedMemo` combines impulse reactivity with React's memoization. The factory function is re-executed when either the dependencies change or when any impulses read within the scope change.
+
+## Examples
+
+```typescript
+const memoizedValue = useScopedMemo(
+  (scope) => expensiveComputation(impulse.getValue(scope)),
+  [someDependency],
+)
+```

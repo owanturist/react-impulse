@@ -1,0 +1,187 @@
+# Documentation Plan
+
+# This file defines the structure and metadata for all AI-synthesized documentation pages.
+# Each entry maps knowledgebase sources to a documentation page with specific Diátaxis type.
+
+# Slug naming convention: All slugs must use dash-notation (e.g., `use-scoped`, `impulse-api`)
+# instead of camelCase (e.g., `useScoped`, `impulseApi`).
+
+# Explanation Pages
+# High-level concepts, mental models, and "why" questions
+
+# How-To Guides
+# Goal-oriented guides and "how" questions
+
+# Tutorials
+# Learning-oriented walkthroughs and step-by-step guides
+
+# Reference Pages
+# API documentation with detailed type information and examples
+
+- diataxis: explanation
+  slug: impulse-overview
+  title: Understanding Impulses
+  sources:
+    - impulse-concept
+  purpose: Introduce the core concept of impulses - what they are, why they exist, and how they work
+  sections:
+    - Mental model
+    - Key concepts
+    - Trade-offs
+
+- diataxis: explanation
+  slug: reactivity-system
+  title: Reactivity and Scope System
+  sources:
+    - scope-concept
+    - scope-factories
+  purpose: Explain the scope-based reactivity system and how dependency tracking works
+  sections:
+    - Mental model
+    - Key concepts
+    - Trade-offs
+
+- diataxis: explanation
+  slug: derived-computations
+  title: Derived Computations
+  sources:
+    - derived-impulse-concept
+  purpose: Explain derived impulses, their lifecycle, and memory safety considerations
+  sections:
+    - Mental model
+    - Key concepts
+    - Trade-offs
+
+- diataxis: reference
+  slug: impulse
+  title: Impulse API Reference
+  sources:
+    - impulse-concept
+  purpose: Complete API documentation for Impulse interface and factory function
+  sections:
+    - Overview
+    - Factory Function
+    - Interface
+    - Examples
+
+- diataxis: reference
+  slug: batch
+  title: batch
+  sources:
+    - scope-factories
+  purpose: API documentation for the batch function
+  sections:
+    - Overview
+    - Function Signature
+    - Parameters
+    - Description
+    - Examples
+
+- diataxis: reference
+  slug: untrack
+  title: untrack
+  sources:
+    - scope-factories
+  purpose: API documentation for the untrack function
+  sections:
+    - Overview
+    - Function Signature
+    - Parameters
+    - Returns
+    - Description
+    - Examples
+
+- diataxis: reference
+  slug: subscribe
+  title: subscribe
+  sources:
+    - scope-factories
+  purpose: API documentation for the subscribe function
+  sections:
+    - Overview
+    - Function Signature
+    - Parameters
+    - Returns
+    - Description
+    - Examples
+
+- diataxis: reference
+  slug: use-scope
+  title: useScope
+  sources:
+    - scope-factories
+  purpose: API documentation for the useScope React hook
+  sections:
+    - Overview
+    - Function Signature
+    - Returns
+    - Description
+    - Examples
+
+- diataxis: reference
+  slug: use-scoped
+  title: useScoped
+  sources:
+    - scope-factories
+  purpose: API documentation for the useScoped React hook
+  sections:
+    - Overview
+    - Function Signatures
+    - Parameters
+    - Returns
+    - Description
+    - Examples
+
+- diataxis: reference
+  slug: use-scoped-memo
+  title: useScopedMemo
+  sources:
+    - scope-factories
+  purpose: API documentation for the useScopedMemo React hook
+  sections:
+    - Overview
+    - Function Signature
+    - Parameters
+    - Returns
+    - Description
+    - Examples
+
+- diataxis: reference
+  slug: use-scoped-callback
+  title: useScopedCallback
+  sources:
+    - scope-factories
+  purpose: API documentation for the useScopedCallback React hook
+  sections:
+    - Overview
+    - Function Signature
+    - Parameters
+    - Returns
+    - Description
+    - Examples
+
+- diataxis: reference
+  slug: use-scoped-effect
+  title: useScopedEffect
+  sources:
+    - scope-factories
+  purpose: API documentation for the useScopedEffect React hook
+  sections:
+    - Overview
+    - Function Signature
+    - Parameters
+    - Description
+    - Examples
+
+- diataxis: reference
+  slug: use-scoped-layout-effect
+  title: useScopedLayoutEffect
+  sources:
+    - scope-factories
+  purpose: API documentation for the useScopedLayoutEffect React hook
+  sections:
+    - Overview
+    - Function Signature
+    - Parameters
+    - Description
+    - Examples

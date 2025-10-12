@@ -24,6 +24,8 @@ export function Page({
   lastModified,
   children,
 }: PageProps) {
+  const lastModifiedTime = getTime(lastModified)
+
   return (
     <DocsPage
       toc={toc}
@@ -31,7 +33,11 @@ export function Page({
         // Animate the TOC with nice floating indication
         style: "clerk",
       }}
-      lastUpdate={getTime(lastModified)}
+      lastUpdate={
+        !lastModifiedTime || isNaN(lastModifiedTime)
+          ? undefined
+          : lastModifiedTime
+      }
     >
       <DocsTitle>{title}</DocsTitle>
       <DocsDescription>{description}</DocsDescription>

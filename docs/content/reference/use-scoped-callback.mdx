@@ -1,0 +1,42 @@
+---
+title: useScopedCallback
+description: API documentation for the useScopedCallback React hook
+---
+
+## Overview
+
+The `useScopedCallback` hook memoizes callbacks that receive a reactive scope, similar to `React.useCallback` but with impulse support.
+
+## Function Signature
+
+```typescript
+function useScopedCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
+  callback: (scope: Scope, ...args: TArgs) => TResult,
+  dependencies: DependencyList
+): (...args: TArgs) => TResult
+```
+
+## Parameters
+
+- `callback`: The callback function that receives a `Scope` as the first parameter
+- `dependencies`: Dependencies that control when the callback is re-created
+
+## Returns
+
+A memoized callback function.
+
+## Description
+
+`useScopedCallback` ensures the callback is stable across re-renders unless dependencies change. The callback receives a reactive scope, allowing it to read impulses reactively.
+
+## Examples
+
+```typescript
+const handleClick = useScopedCallback(
+  (scope) => {
+    const value = impulse.getValue(scope)
+    console.log('Current value:', value)
+  },
+  []
+)
+```

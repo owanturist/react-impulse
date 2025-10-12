@@ -1,0 +1,35 @@
+---
+title: untrack
+description: API documentation for the untrack function
+---
+
+## Overview
+
+The `untrack` function executes code without establishing dependency tracking, similar to `batch` but returns a value.
+
+## Function Signature
+
+```typescript
+function untrack<T>(factory: (scope: Scope) => T): T
+```
+
+## Parameters
+
+- `factory`: A function that receives a non-tracking `Scope` and returns a value of type `T`.
+
+## Returns
+
+The result of executing the `factory` function.
+
+## Description
+
+Use `untrack` when you need to read impulse values without triggering reactivity. This is useful for one-off reads or when you want to access current values without establishing dependencies.
+
+## Examples
+
+```typescript
+const impulse = Impulse(42)
+
+const currentValue = untrack((scope) => impulse.getValue(scope))
+// currentValue is 42, but no dependency was tracked
+```

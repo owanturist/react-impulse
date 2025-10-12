@@ -1,0 +1,44 @@
+---
+title: useScoped
+description: API documentation for the useScoped React hook
+---
+
+## Overview
+
+The `useScoped` hook reads impulse values or computes derived values, automatically re-rendering the component when they change.
+
+## Function Signatures
+
+```typescript
+function useScoped<T>(impulse: ReadableImpulse<T>): T
+function useScoped<T>(
+  factory: (scope: Scope) => T,
+  dependencies?: DependencyList,
+  options?: UseScopedOptions<T>
+): T
+```
+
+## Parameters
+
+- `impulse`: A `ReadableImpulse` to read from
+- `factory`: A function that receives a `Scope` and computes a derived value
+- `dependencies`: Optional dependency array controlling when the factory is re-created
+- `options`: Configuration options including compare function
+
+## Returns
+
+The current value of the impulse or the result of the factory function.
+
+## Description
+
+`useScoped` is the primary way to read impulse values in React components. It automatically subscribes to changes and triggers re-renders when the value changes according to the compare function.
+
+## Examples
+
+```typescript
+// Reading an impulse
+const value = useScoped(impulse)
+
+// Computing a derived value
+const doubled = useScoped((scope) => impulse.getValue(scope) * 2)
+```

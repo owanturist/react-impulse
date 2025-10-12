@@ -328,9 +328,8 @@ Definition of Done (Phase 2):
 
 Phase 2.5 — API reference documentation (react-impulse only)
 
-- [ ] Document detailed API contracts in KB entries (type signatures, parameters, return types, examples)
-- [ ] Generate reference pages from KB entries with minimal frontmatter
-- [ ] Use `AutoTypeTable` component in reference pages to display interface properties from source code
+- [ ] Document the source code so the reference pages can use `AutoTypeTable` to display interface properties
+- [ ] Generate reference pages from KB entries
 - [ ] Integrate API reference pages into Fumadocs site navigation
 
 Definition of Done (Phase 2.5):

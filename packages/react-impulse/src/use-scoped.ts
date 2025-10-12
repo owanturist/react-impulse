@@ -9,8 +9,11 @@ import { useCreateScope } from "./use-create-scope"
 import { useHandler } from "./use-handler"
 
 /**
- * @inline
- * @hidden
+ * Options for the `useScoped` hook.
+ *
+ * @category Scope Factories
+ * @group React Hooks
+ * @since 1.0.0
  */
 export interface UseScopedOptions<T> {
   /**

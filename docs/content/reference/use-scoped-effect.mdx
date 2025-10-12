@@ -1,0 +1,40 @@
+---
+title: useScopedEffect
+description: API documentation for the useScopedEffect React hook
+---
+
+## Overview
+
+The `useScopedEffect` hook runs side effects when impulses change, similar to `React.useEffect` but with reactive scope support.
+
+## Function Signature
+
+```typescript
+function useScopedEffect(
+  effect: (scope: Scope) => Destructor,
+  dependencies?: DependencyList
+): void
+```
+
+## Parameters
+
+- `effect`: A function that receives a `Scope` and can return a cleanup function
+- `dependencies`: Optional dependencies that control when the effect re-runs
+
+## Description
+
+`useScopedEffect` runs the effect function when the component mounts and whenever impulses read within the scope change. If dependencies are provided, it also re-runs when those dependencies change.
+
+## Examples
+
+```typescript
+useScopedEffect(
+  (scope) => {
+    const value = impulse.getValue(scope)
+    console.log('Effect running with value:', value)
+
+    return () => console.log('Cleanup')
+  },
+  [] // Optional dependencies
+)
+```

@@ -1,0 +1,35 @@
+---
+title: batch
+description: API documentation for the batch function
+---
+
+## Overview
+
+The `batch` function optimizes multiple Impulse updates by coalescing them into a single notification cycle.
+
+## Function Signature
+
+```typescript
+function batch(execute: (scope: Scope) => void): void
+```
+
+## Parameters
+
+- `execute`: A function that performs multiple `Impulse#setValue` calls. It receives a non-tracking `Scope` for synchronous reads.
+
+## Description
+
+Batching improves performance by preventing intermediate re-renders or notifications when multiple impulses are updated in sequence. All updates within the `execute` function are collected and notified as a single batch.
+
+## Examples
+
+```typescript
+const counter1 = Impulse(0)
+const counter2 = Impulse(0)
+
+batch((scope) => {
+  counter1.setValue(1)
+  counter2.setValue(2)
+  // Only one notification cycle occurs here
+})
+```
