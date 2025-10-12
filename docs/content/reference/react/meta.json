@@ -1,0 +1,10 @@
+{
+  "pages": [
+    "use-scope",
+    "use-scoped",
+    "use-scoped-memo",
+    "use-scoped-callback",
+    "use-scoped-effect",
+    "use-scoped-layout-effect"
+  ]
+}

@@ -1,14 +1,14 @@
 {
   "title": "API Reference",
+  "defaultOpen": true,
   "pages": [
     "impulse",
     "subscribe",
     "untrack",
     "batch",
     "tap",
-    "---React Hooks---",
-    "use-scope",
-    "use-scoped",
-    "..."
+    "...",
+    "---React---",
+    "...react"
   ]
 }
