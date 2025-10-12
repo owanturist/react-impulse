@@ -1,5 +1,4 @@
 packages:
   - "packages/*"
   - "knowledgebase"
-  - "docs_"
   - "docs"
