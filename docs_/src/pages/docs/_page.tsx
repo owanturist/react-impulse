@@ -7,11 +7,13 @@ import {
 } from "fumadocs-ui/page"
 import type { ReactNode } from "react"
 
+import { type Time, getTime } from "~/tools/time"
+
 export interface PageProps {
   toc: TableOfContents
   title: string
   description: undefined | string
-  lastModified: undefined | Date
+  lastModified: undefined | Time
   children: ReactNode
 }
 
@@ -29,11 +31,7 @@ export function Page({
         // Animate the TOC with nice floating indication
         style: "clerk",
       }}
-      lastUpdate={
-        lastModified && isFinite(lastModified.getTime())
-          ? lastModified
-          : undefined
-      }
+      lastUpdate={getTime(lastModified)}
     >
       <DocsTitle>{title}</DocsTitle>
       <DocsDescription>{description}</DocsDescription>
