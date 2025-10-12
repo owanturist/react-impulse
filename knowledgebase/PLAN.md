@@ -33,7 +33,7 @@ We will focus only on the react-impulse package for the initial implementation:
 
 - KB is the source of truth: curated, structured Markdown with strict frontmatter.
 - AI agents read KB → implement code/tests → update KB if needed.
-- An AI synthesis workflow transforms the full KB corpus → planned doc set (plan file) → curated [Diátaxis][diataxis] docs (Markdown/[MDX][mdx]) → [Astro][astro] site. A lightweight helper script (optional) may assist orchestration later, but initial Phase 2 relies on explicit prompts and manual review.
+- An AI synthesis workflow transforms the full KB corpus → planned doc set (plan file) → curated [Diátaxis][diataxis] docs (Markdown/[MDX][mdx]) → [Fumadocs][fumadocs] site. A lightweight helper script (optional) may assist orchestration later, but initial Phase 2 relies on explicit prompts and manual review.
 - [GitHub Actions][gha] validate KB, generate docs previews, and publish on release.
 - An MCP server exposes KB search/get/tasks to AI clients.
 
@@ -47,7 +47,7 @@ This is the minimal flow the agent will follow (evolutionary, multi-step) once P
 4. When docs need updating, run the AI Doc Synthesis Prompt (defined in Phase 2) to:
    - Read ALL KB entries.
    - Produce / update a docs PLAN (YAML) describing intended pages (slug, title, diataxis, sources[], purpose, sections[]).
-   - On approval, generate / refresh the actual MD/MDX pages under `docs/src/content/docs/**` (never editing KB content directly).
+   - On approval, generate / refresh the actual MD/MDX pages under `docs/content/**`.
 5. Review diff. If wording is off or data missing, refine the KB (NOT the docs) and repeat the synthesis pass.
 6. Open a PR referencing the impacted KB entry IDs; CI validates KB + builds docs.
 
@@ -93,7 +93,7 @@ Body content regions (headings) to standardize:
 
 - Context and goals (required)
 - Design and rationale (required)
-- API contract (optional: high-level purpose, key inputs/outputs, constraints only; detailed signatures, parameter descriptions, and examples belong in TSDoc)
+- API contract (optional: high-level purpose, key inputs/outputs, constraints; detailed signatures and examples for reference documentation)
 - Implementation notes (optional: edge cases, perf, concurrency)
 - Test scenarios (optional: happy path + edge cases)
 - Documentation notes (optional: callouts, diagrams, interactive ideas)
@@ -118,7 +118,7 @@ Generator and tooling:
 
 - packages/knowledgebase-tools/ (future package) — parsers, schema checks, optional AI orchestration helpers (NO mechanical 1:1 copier)
 - packages/knowledgebase-mcp/ (new package) — MCP server exposing KB
-- docs/ (Astro site; uses AI-synthesized Diátaxis content; initial scope: react-impulse only)
+- docs/ (Fumadocs site; uses AI-synthesized Diátaxis content; initial scope: react-impulse only)
 
 ## KB-first end-to-end workflow
 
@@ -144,17 +144,17 @@ Generator and tooling:
 
 Goal: convert dense, atomic KB knowledge into approachable, audience-oriented docs without a brittle 1:1 mapping.
 
-**Scope**: This synthesis process covers **explanation**, **how-to**, and **tutorial** documentation only. **Reference** (API) documentation is generated directly from TypeScript source code documentation (JSDoc/TSDoc) using automated tools.
+**Scope**: This synthesis process covers **all Diátaxis documentation types**: **explanation**, **how-to**, **tutorial**, and **reference** (API).
 
 Core principles:
 
-- Many-to-many mapping: one KB entry can power multiple docs (e.g., explanation + how-to); one doc can aggregate multiple KB entries.
+- Many-to-many mapping: one KB entry can power multiple docs (e.g., explanation + how-to + reference); one doc can aggregate multiple KB entries.
 - KB remains the ONLY canonical source of truth for conceptual content; docs are disposable derivatives regenerated on demand.
 - No verbatim bulk copying; the AI must compress, rephrase, categorize.
 - PLAN.yml contains all structural metadata (sources, diataxis, purpose, sections); doc pages contain only title, description, and content.
 - The `sections` array in PLAN.yml defines the required H2 headings for each page, allowing flexible structure per page rather than enforcing conventions per Diátaxis type.
 - Divergence resolution always flows: Desired change → Update KB → Re-synthesize docs.
-- API reference docs are generated from in-code documentation (JSDoc/TSDoc), not from KB entries.
+- Reference docs are synthesized from KB entries and enhanced with `AutoTypeTable` components that extract interface properties from source code.
 
 Stages (manual AI-driven for Phase 2):
 
@@ -169,17 +169,42 @@ Stages (manual AI-driven for Phase 2):
        "purpose": "High-level mental model & motivations",
        "sections": ["Overview", "Mental model", "Key concepts", "See also"],
      },
+     {
+       "slug": "impulse-api",
+       "title": "Impulse API Reference",
+       "diataxis": "reference",
+       "sources": ["impulse-concept"],
+       "purpose": "Complete API documentation for Impulse interface",
+       "sections": [
+         "Overview",
+         "Type signature",
+         "Properties",
+         "Methods",
+         "Examples",
+       ],
+     },
    ]
    ```
-   Note: PLAN does NOT include "reference" type pages - those are handled by the API documentation generation workflow.
+   Note: PLAN includes all Diátaxis types including "reference" for API documentation pages.
 2. REVIEW: Human approves / edits the PLAN (add / remove / rename pages) — stored as `docs/PLAN.yml`.
 3. GENERATE: AI produces / updates MDX files for each PLAN item inside structured directories:
-   - `docs/src/content/docs/explanation/**`
-   - `docs/src/content/docs/how-to/**`
-   - `docs/src/content/docs/tutorials/**`
-     (NOT `docs/src/content/docs/reference/**` - that's populated by TypeDoc/similar tools)
+   - `docs/content/explanation/**`
+   - `docs/content/how-to/**`
+   - `docs/content/tutorials/**`
+   - `docs/content/reference/**`
 
    Each page contains minimal frontmatter (title, description) and content. All structural metadata stays in PLAN.yml.
+
+   For reference pages, use the `AutoTypeTable` component to display interface properties:
+
+   ```mdx
+   ## Properties
+
+   <AutoTypeTable
+     path="../../packages/react-impulse/src/impulse.ts"
+     name="Impulse"
+   />
+   ```
 
 4. VALIDATE: Automated checks (future): ensure PLAN.yml entries reference real KB sources; validate page slugs match PLAN; required section checklist per Diátaxis type; broken link scan.
 5. MERGE: Commit docs + updated PLAN.yml. Re-run synthesis only when KB changes materially.
@@ -213,12 +238,12 @@ PR validation:
 - Validate that each PLAN.yml slug has a corresponding doc file
 - **Section validation**: For each doc page, verify H2 headings match the `sections` array in PLAN.yml exactly (order and names)
 - Link scan (internal anchors + relative imports) over changed docs
-- Build [Astro][astro] site (preview) and upload artifact / deploy preview
+- Build Fumadocs site (preview) and upload artifact / deploy preview
 
 Release:
 
 - After [Changesets][changesets] releases packages, a job can validate that maintenance branches reflect the intended version ranges (optional guardrails).
-- [Astro][astro] build → deploy to owanturist.me; default branch updates `latest` routes.
+- Fumadocs build → deploy to owanturist.me; default branch updates `latest` routes.
 
 Docs deployment (per-branch, independent of package releases):
 
@@ -283,75 +308,54 @@ Definition of Done (Phase 1):
 - `knowledgebase/entries/` contains at least two seed concept entries for react-impulse.
 - Note: Schema and validation will be added in Phase 2.6 after the full documentation workflow is established.
 
-Phase 2 — AI doc synthesis + Astro site (react-impulse only)
+Phase 2 — AI doc synthesis + Fumadocs site (react-impulse only)
 
-- [x] Scaffold `docs/` with Diátaxis folder structure (empty initially): `src/content/docs/{explanation,how-to,tutorials}`
-- [x] Add `docs/AI-SYNTHESIS-GUIDE.md` (prompts, required structure, section checklists for explanation/how-to/tutorial).
-- [x] Add initial AI PLAN prompt & store first accepted PLAN as `docs/PLAN.yml` (excluding reference pages).
+- [x] Scaffold `docs/` with Diátaxis folder structure: `content/{explanation,how-to,tutorials,reference}`
+- [x] Add `docs/AI-SYNTHESIS-GUIDE.md` (prompts, required structure, section checklists for all Diátaxis types including reference).
+- [x] Add initial AI PLAN prompt & store first accepted PLAN as `docs/PLAN.yml` (including reference pages).
 - [x] Run first synthesis: produce at least 2 explanation pages from existing KB concepts.
 - [x] Add minimal frontmatter (title, description) to synthesized pages; all metadata stays in PLAN.yml.
-- [x] Astro site (Starlight or minimal) builds displaying generated pages.
+- [x] Fumadocs site builds displaying generated pages.
 
 Definition of Done (Phase 2):
 
-- `docs/PLAN.yml` exists describing the current published doc set (explanation, how-to, tutorial types only).
+- `docs/PLAN.yml` exists describing the current published doc set (explanation, how-to, tutorial, and reference types).
 - At least two synthesized explanation pages with minimal frontmatter (title, description).
 - All structural metadata (sources, diataxis, purpose, sections) is stored in PLAN.yml, not in page frontmatter.
 - The `sections` field defines required H2 headings for each page, enabling flexible structure.
-- `AI-SYNTHESIS-GUIDE.md` defines the canonical prompt & transformation rules for non-reference documentation.
-- Astro site builds locally without 404 for synthesized slugs.
+- `AI-SYNTHESIS-GUIDE.md` defines the canonical prompt & transformation rules for all documentation types.
+- Fumadocs site builds locally without 404 for synthesized slugs.
 
 Phase 2.5 — API reference documentation (react-impulse only)
 
-- [x] Add comprehensive JSDoc/TSDoc comments to all public APIs in `packages/react-impulse/src`
-- [x] Set up TypeDoc (or similar tool) to generate API reference markdown
-- [x] Configure output to `docs/src/content/docs/reference/**`
-- [x] Add npm script (e.g., `pnpm docs:api`) to regenerate API docs from source
-- [x] CI: regenerate API docs on source code changes and validate output
-- [x] Integrate API reference pages into Astro site navigation
+- [ ] Document detailed API contracts in KB entries (type signatures, parameters, return types, examples)
+- [ ] Generate reference pages from KB entries with minimal frontmatter
+- [ ] Use `AutoTypeTable` component in reference pages to display interface properties from source code
+- [ ] Integrate API reference pages into Fumadocs site navigation
 
 Definition of Done (Phase 2.5):
 
-- All public APIs in `packages/react-impulse/src` have complete JSDoc/TSDoc documentation (params, returns, examples).
-- TypeDoc (or similar) configured and generates markdown to `docs/src/content/docs/reference/**`.
-- `pnpm docs:api` script successfully regenerates API documentation.
-- CI runs API doc generation and fails if output is malformed.
-- API reference pages visible and navigable in the Astro site.
-- API docs reflect current source code (no manual editing required).
-
-Phase 2.5.1 — TypeDoc spec compliance and enhanced documentation
-
-- [x] **Create `tsdoc.json`** configuration file for custom tag definitions if needed
-- [x] **Replace `@version` with `@since`** in all source files (TypeDoc spec compliance)
-- ~~[ ] **Add `@remarks`** blocks for complex APIs that need additional explanation beyond the summary~~
-- ~~[ ] **Add `@see`** cross-references to link related APIs and concepts~~
-- ~~[ ] **Add `@throws`** documentation for error conditions where applicable~~
-- ~~[ ] **Add `@example`** blocks to major public APIs (at minimum: `Impulse` overloads, `useScoped`, `subscribe`, `batch`)~~
-- ~~[ ] **Use `{@link}` inline tags** for TypeScript symbol references instead of plain markdown links~~
-- ~~[ ] **Add `@deprecated`** tags with migration guidance for any deprecated APIs~~
-- ~~[ ] **Consider `@group`** or `@category`\*\* tags to organize API reference by logical groupings~~
-- ~~[ ] **Add `@defaultValue`** tags where parameters have default values~~
-
-Definition of Done (Phase 2.5.1):
-
-- All `@version` tags replaced with `@since` throughout `packages/react-impulse/src`.
-- Complex APIs include `@remarks` sections with additional implementation details or usage notes.
-- Related APIs cross-reference each other using `@see` tags.
-- Error-throwing functions document conditions with `@throws` tags.
-- At least 5 major public APIs have comprehensive `@example` blocks showing real-world usage.
-- Internal TypeScript references use `{@link}` inline tags for proper type-aware linking.
-- Documentation follows TypeDoc tag specification: https://typedoc.org/documents/Tags.html
-- Generated API reference shows improved organization and cross-linking.
+- KB entries include comprehensive API contract sections with type signatures, parameter descriptions, return types, and examples.
+- Reference pages in `docs/content/reference/` are generated from KB entries.
+- Reference pages use `AutoTypeTable` component to display interface properties:
+  ```mdx
+  <AutoTypeTable
+    path="../../packages/react-impulse/src/impulse.ts"
+    name="Impulse"
+  />
+  ```
+- API reference pages visible and navigable in the Fumadocs site.
+- Reference docs can be manually refined like other doc types but follow KB-driven workflow.
 
 Phase 2.6 — Documentation validation and linting
 
 - [ ] **Add KB schema validation** (Zod frontmatter schema in `knowledgebase/schema/`)
 - [ ] **Add KB lint script** (`kb-lint.mjs`) to validate KB entries against schema and required sections
 - [ ] **Add PLAN.yml schema validation** (validate structure: slug, title, diataxis, sources, purpose, sections)
-- [ ] **Add PLAN.yml ↔ docs content validator** (ensure PLAN.yml slugs match actual doc files in `docs/src/content/docs/`)
-- [ ] **Add orphan docs detector** (ensure every doc file in `docs/src/content/docs/` is referenced in PLAN.yml)
+- [ ] **Add PLAN.yml ↔ docs content validator** (ensure PLAN.yml slugs match actual doc files in `docs/content/`)
+- [ ] **Add orphan docs detector** (ensure every doc file in `docs/content/` is referenced in PLAN.yml)
 - [ ] **Add KB source validator** (ensure PLAN.yml sources reference existing KB entry IDs)
-- [ ] **Simplify API contract sections in KB entries** (reduce to high-level definitions; detailed signatures/examples move to TSDoc in source code)
+- [ ] **Ensure API contract sections in KB entries** are comprehensive with type signatures, parameters, examples
 - [ ] **Enable all validation in CI** with clear error messages
 - [ ] Add npm scripts: `pnpm kb:lint`, `pnpm docs:validate`
 
@@ -361,11 +365,11 @@ Definition of Done (Phase 2.6):
 - `knowledgebase/kb-lint.mjs` validates KB entries have required sections (Context and goals, Design and rationale).
 - `docs/schema/plan-schema.mjs` validates PLAN.yml structure (array of entries with required fields).
 - `docs/validate-plan.mjs` performs cross-checks:
-  1. Every PLAN.yml slug has a corresponding file in `docs/src/content/docs/{diataxis}/{slug}.md`
-  2. Every file in `docs/src/content/docs/{explanation,how-to,tutorials}/**/*.md` is referenced in PLAN.yml
+  1. Every PLAN.yml slug has a corresponding file in `docs/content/{diataxis}/{slug}.md`
+  2. Every file in `docs/content/{explanation,how-to,tutorials,reference}/**/*.md` is referenced in PLAN.yml
   3. Every source filename (without .md) in PLAN.yml exists in `knowledgebase/entries/`
-- API contract sections in KB entries are simplified to high-level overviews (purpose, key inputs/outputs, constraints), not detailed signatures or exhaustive examples.
-- Detailed API documentation (full signatures, parameter descriptions, return types, code examples) lives in TSDoc comments in source code.
+- API contract sections in KB entries include comprehensive details (type signatures, parameters, return types, examples) for generating reference documentation.
+- Reference documentation is generated from KB entries and enhanced with `AutoTypeTable` components.
 - CI runs `pnpm kb:lint` and `pnpm docs:validate` and fails on any validation error.
 - All validation errors use Zod's pretty error formatting for readability.
 
@@ -409,11 +413,11 @@ Definition of Done (Phase 5):
 
 - Every user-visible change must have a KB entry (feature/bugfix/decision). For features and bugfixes, document acceptance criteria and test scenarios in the appropriate body sections.
 - No API change without documenting the change rationale and migration path in the KB entry.
-- Docs live in `docs/src/content/docs/<diataxis>/<slug>.md` and contain minimal frontmatter (title, description).
+- Docs live in `docs/content/<diataxis>/<slug>.md` and contain minimal frontmatter (title, description).
 - PLAN.yml contains all structural metadata (sources, diataxis, purpose, sections); doc pages contain only title, description, and content.
 - The `sections` array defines the required H2 headings for each page in order. This allows each page to have its own structure rather than following rigid Diátaxis type conventions.
-- AI-synthesized docs (explanation, how-to, tutorial) are generated from the KB but can be manually refined for better examples, ordering, and prose. When manually editing docs, use the validation checklist (see AI-SYNTHESIS-GUIDE.md) to determine if the source KB entries need updating.
-- API reference docs are generated from TypeScript source code (JSDoc/TSDoc) and should not be manually edited.
+- AI-synthesized docs (all types: explanation, how-to, tutorial, reference) are generated from the KB but can be manually refined for better examples, ordering, and prose. When manually editing docs, use the validation checklist (see AI-SYNTHESIS-GUIDE.md) to determine if the source KB entries need updating.
+- Reference documentation uses the `AutoTypeTable` component to display interface properties from TypeScript source code, combining manual curation with automated type information.
 - If a doc needs conceptual content absent in KB, add/extend a KB entry first (AI should emit a TODO noting the gap).
 - MCP stays in sync by reading the KB at runtime (or on build, if caching is used).
 
@@ -426,6 +430,7 @@ Definition of Done (Phase 5):
 - CI: (future) optional drift detector comparing KB `last-reviewed` dates vs doc `last-synced` to suggest regeneration.
 
 [diataxis]: https://diataxis.fr/
+[fumadocs]: https://fumadocs.dev/
 [astro]: https://astro.build/
 [starlight]: https://starlight.astro.build/
 [astro-islands]: https://docs.astro.build/en/concepts/islands/

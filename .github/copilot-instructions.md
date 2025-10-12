@@ -13,7 +13,6 @@ This project uses a knowledgebase-driven development approach. When working with
 1. Document architectural concepts in the knowledgebase
 2. Implement code based on KB concepts
 3. Generate documentation from KB entries
-4. Never edit generated docs directly
 
 ## AI Agent Guidelines
 

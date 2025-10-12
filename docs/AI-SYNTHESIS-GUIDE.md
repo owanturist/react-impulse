@@ -2,7 +2,7 @@
 
 This guide defines the canonical process for transforming the react-impulse knowledgebase into human-friendly Diátaxis documentation, and how to maintain consistency between KB and docs.
 
-**Scope**: This guide covers **explanation**, **how-to**, and **tutorial** documentation. **Reference** documentation is generated directly from source code via automated tools (TypeDoc, TSDoc, etc.) and is not part of the AI synthesis process.
+**Scope**: This guide covers **all documentation types** including **explanation**, **how-to**, **tutorial**, and **reference** (API) documentation.
 
 ## Core Principles
 
@@ -17,7 +17,7 @@ This guide defines the canonical process for transforming the react-impulse know
 4. **KB is authoritative for concepts**: Knowledgebase entries are the technical source of truth for core concepts, API contracts, design rationale, and architecture.
 5. **Docs can be manually refined**: Generated documentation can be manually edited for better code examples, content ordering, prose polish, and user experience.
 6. **Bidirectional validation**: When manually editing docs, verify if the source KB entries need updating to stay synchronized.
-7. **Reference docs are code-generated**: API reference documentation is generated directly from in-code documentation (JSDoc/TSDoc) using automated tools, ensuring accuracy and staying in sync with implementation.
+7. **Reference docs are KB-driven with component-enhanced tables**: API reference documentation is manually synthesized from KB entries (like other doc types) but leverages the `AutoTypeTable` component from Fumadocs to automatically generate property tables for TypeScript interfaces. This combines manual curation with automated type information display.
 8. **KB entry identification**: KB entries are referenced by their filename (without `.md` extension). For example, `impulse-concept.md` is referenced as `impulse-concept` in PLAN.yml sources and relates-to fields.
 
 ## Two-Step Synthesis Process
@@ -33,16 +33,17 @@ Create a comprehensive documentation plan as YAML that maps KB knowledge to Diá
 - explanation: High-level concepts, mental models, "why" questions
 - how-to: Goal-oriented guides, "how" questions
 - tutorial: Learning-oriented walkthroughs, step-by-step
-
-Note: Do NOT include "reference" type pages - API reference documentation is generated directly from source code.
+- reference: API documentation pages for types, interfaces, functions, and components
 
 For each proposed page, specify:
-- diataxis: explanation|how-to|tutorial
+- diataxis: explanation|how-to|tutorial|reference
 - slug: URL-friendly identifier
 - title: Human-readable title
 - sources: Array of KB entry filenames (without .md extension) that contribute content
 - purpose: One-sentence description of page goal
 - sections: Array of required H2 section headings that define the page structure
+
+For reference pages, include sections that will use AutoTypeTable components to display interface properties.
 
 Output valid YAML. Prioritize explanation pages first. Add comments to organize sections.
 ```
@@ -84,6 +85,38 @@ Common section patterns by Diátaxis type (not enforced, but useful as starting 
 - explanation: Overview, Mental model, Key concepts, Trade-offs, See also
 - how-to: Goal, Prerequisites, Steps (ordered), Validation, Pitfalls, Next steps
 - tutorial: Introduction, Prerequisites, Step-by-step (numbered), Checkpoint(s), Wrap-up, Further reading
+- reference: Overview, Type signature, Properties (with AutoTypeTable), Methods (with AutoTypeTable if applicable), Examples, See also
+
+### Using AutoTypeTable in Reference Pages
+
+For reference pages documenting TypeScript interfaces, types, or classes, use the `AutoTypeTable` component from Fumadocs to automatically generate property tables from source code:
+
+```mdx
+<AutoTypeTable
+  path="../../packages/react-impulse/src/impulse.ts"
+  name="Impulse"
+/>
+```
+
+**When to use AutoTypeTable:**
+
+- Interfaces with multiple properties
+- Type definitions with documented fields
+- Class properties and methods
+- Function parameter types
+
+**Component props:**
+
+- `path`: Relative path from the doc file to the TypeScript source file
+- `name`: The exported type/interface/class name to document
+
+The component reads TypeScript source code and JSDoc comments to generate formatted tables showing:
+
+- Property names
+- Types
+- Descriptions from JSDoc comments
+- Optional/required status
+- Default values
 
 Write complete MDX content for the page.
 
@@ -191,7 +224,7 @@ Each documentation page entry in PLAN.yml follows this structure:
 
 ```yaml
 # Example entry
-- diataxis: explanation # Type: explanation | how-to | tutorial (reference excluded)
+- diataxis: explanation # Type: explanation | how-to | tutorial | reference
   slug: page-slug # Unique, URL-safe identifier
   title: Page Title # Human-readable title
   sources: # KB entry filenames (without .md extension)
@@ -204,6 +237,8 @@ Each documentation page entry in PLAN.yml follows this structure:
 ```
 
 Note: PLAN.yml is the single source of truth for all documentation metadata. Doc pages themselves contain only title, description, and content. KB entries are referenced by their filename without the `.md` extension.
+
+For **reference** pages, the structure is the same but typically includes sections where `AutoTypeTable` components will be used to display interface properties.
 
 Minimal frontmatter for AI-synthesized pages:
 
@@ -306,5 +341,6 @@ The `impulse-concept.md` KB entry (referenced as `impulse-concept` in PLAN.yml) 
 - **explanation/impulse-overview.md**: "What is an impulse?" - concept introduction, mental models, design philosophy
 - **how-to/create-impulse.md**: "How do I create and use an impulse?" - practical guide with common patterns
 - **tutorial/first-impulse.md**: "Build your first reactive component" - step-by-step walkthrough
+- **reference/impulse.mdx**: "Impulse API Reference" - detailed API documentation with `AutoTypeTable` for interface properties
 
-Each page is listed in `PLAN.yml` with `sources: ["impulse-concept"]` (filename without .md extension) but presents information differently for its intended use case. The page files themselves contain only title, description, and content.
+Each page is listed in `PLAN.yml` with `sources: ["impulse-concept"]` (filename without .md extension) but presents information differently for its intended use case. Reference pages use the `AutoTypeTable` component to display interface properties extracted from the source code. The page files themselves contain only title, description, and content.
