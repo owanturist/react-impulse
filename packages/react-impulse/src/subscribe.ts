@@ -9,7 +9,6 @@ import { ScopeEmitter } from "./scope-emitter"
  * @param listener function that will be called on each `Impulse` change, involved in the `listener` execution. Calls first time synchronously when `subscribe` is called. If `listener` returns a function then it will be called before the next `listener` call.
  * @returns cleanup function that unsubscribes the `listener`
  *
- * @category Scope Factories
  * @since 1.0.0
  */
 export function subscribe(

@@ -9,9 +9,6 @@ import type { ReadableImpulse } from "./readable-impulse"
 import type { Scope } from "./scope"
 import type { WritableImpulse } from "./writable-impulse"
 
-/**
- * @category Core
- */
 export interface ReadonlyImpulse<T> extends ReadableImpulse<T> {
   /**
    * Creates a new Impulse instance out of the current one with the same value.
@@ -33,9 +30,6 @@ export interface ReadonlyImpulse<T> extends ReadableImpulse<T> {
   ): Impulse<T>
 }
 
-/**
- * @category Core
- */
 export interface Impulse<T> extends ReadonlyImpulse<T>, WritableImpulse<T> {
   /**
    * Updates the value.
@@ -100,9 +94,6 @@ export function Impulse<T>(
   options?: ImpulseOptions<T>,
 ): Impulse<T>
 
-/**
- * @category Impulse Factory
- */
 export function Impulse<T>(
   initialValueOrReadableImpulse?:
     | T

@@ -3,7 +3,6 @@ import type { Compare } from "./compare"
 /**
  * Options for creating an Impulse.
  *
- * @category Core
  * @since 1.0.0
  */
 export interface ImpulseOptions<T> {

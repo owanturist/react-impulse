@@ -1,8 +1,5 @@
 import type { Scope } from "./scope"
 
-/**
- * @category Core
- */
 export interface ReadableImpulse<T> {
   /**
    * Returns the impulse value.

@@ -27,9 +27,6 @@ export function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
  */
 export function untrack<TValue>(impulse: ReadableImpulse<TValue>): TValue
 
-/**
- * @category Scope Factories
- */
 export function untrack<T>(
   factoryOrReadableImpulse: ((scope: Scope) => T) | ReadableImpulse<T>,
 ): T {

@@ -11,8 +11,6 @@ import { useHandler } from "./use-handler"
 /**
  * Options for the `useScoped` hook.
  *
- * @category Scope Factories
- * @group React Hooks
  * @since 1.0.0
  */
 export interface UseScopedOptions<T> {
@@ -51,10 +49,6 @@ export function useScoped<TResult>(
   options?: UseScopedOptions<TResult>,
 ): TResult
 
-/**
- * @category Scope Factories
- * @group React Hooks
- */
 export function useScoped<TResult>(
   factoryOrReadableImpulse:
     | ((scope: Scope) => TResult)

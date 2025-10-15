@@ -2,13 +2,7 @@ import type { ScopeEmitter } from "./scope-emitter"
 
 export const EMITTER_KEY = Symbol("scope")
 
-/**
- * @category Core
- */
 export interface Scope {
-  /**
-   * @hidden the emitter should not be accessible from outside.
-   */
   readonly [EMITTER_KEY]: null | ScopeEmitter
   readonly version?: number
 }
