@@ -1,4 +1,5 @@
-export { type ReadonlyImpulse, Impulse } from "./impulse"
+export { Impulse } from "./impulse"
+export type { ReadonlyImpulse } from "./readonly-impulse"
 export type { ReadableImpulse } from "./readable-impulse"
 export type { WritableImpulse } from "./writable-impulse"
 export type { ImpulseOptions } from "./impulse-options"

@@ -4,31 +4,12 @@ import { isStrictEqual } from "~/tools/is-strict-equal"
 
 import { DerivedImpulse } from "./derived-impulse"
 import { DirectImpulse } from "./direct-impulse"
+import type { ImpulseFactory } from "./impulse-factory"
 import type { ImpulseOptions } from "./impulse-options"
 import type { ReadableImpulse } from "./readable-impulse"
+import type { ReadonlyImpulse } from "./readonly-impulse"
 import type { Scope } from "./scope"
 import type { WritableImpulse } from "./writable-impulse"
-
-export interface ReadonlyImpulse<T> extends ReadableImpulse<T> {
-  /**
-   * Creates a new Impulse instance out of the current one with the same value.
-   *
-   * @since 2.0.0
-   */
-  clone(options?: ImpulseOptions<T>): Impulse<T>
-
-  /**
-   * Creates a new Impulse instance out of the current one with the transformed value. Transforming might be handy when cloning mutable values (such as an Impulse).
-   *
-   * @param transform an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
-   *
-   * @since 1.0.0
-   */
-  clone(
-    transform: (value: T, scope: Scope) => T,
-    options?: ImpulseOptions<T>,
-  ): Impulse<T>
-}
 
 export interface Impulse<T> extends ReadonlyImpulse<T>, WritableImpulse<T> {
   /**
@@ -43,58 +24,7 @@ export interface Impulse<T> extends ReadonlyImpulse<T>, WritableImpulse<T> {
   setValue(valueOrTransform: T | ((currentValue: T, scope: Scope) => T)): void
 }
 
-/**
- * Creates a new Impulse without an initial value.
- *
- * @since 3.0.0
- *
- * @example
- * const impulse = Impulse<string>()
- * const initiallyUndefined = impulse.getValue(scope) === undefined
- */
-export function Impulse<T = undefined>(): Impulse<undefined | T>
-
-/**
- * Creates a new derived ReadonlyImpulse.
- * A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes.
- *
- * @param getter either anything that implements the `ReadableImpulse` interface or a function to read the derived value from the source.
- *
- * @since 3.0.0
- */
-export function Impulse<T>(
-  getter: ReadableImpulse<T> | ((scope: Scope) => T),
-  options?: ImpulseOptions<T>,
-): ReadonlyImpulse<T>
-
-/**
- * Creates a new derived Impulse.
- * A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes.
- *
- * @param getter either anything that implements the `ReadableImpulse` interface or a function to read the derived value from the source.
- * @param setter either anything that implements the `WritableImpulse` interface or a function to write the derived value back to the source.
- *
- * @since 3.0.0
- */
-export function Impulse<T>(
-  getter: ReadableImpulse<T> | ((scope: Scope) => T),
-  setter: WritableImpulse<T> | ((value: T, scope: Scope) => void),
-  options?: ImpulseOptions<T>,
-): Impulse<T>
-
-/**
- * Creates a new Impulse.
- *
- * @param initialValue the initial value.
- *
- * @since 3.0.0
- */
-export function Impulse<T>(
-  initialValue: T,
-  options?: ImpulseOptions<T>,
-): Impulse<T>
-
-export function Impulse<T>(
+export const Impulse: ImpulseFactory = <T>(
   initialValueOrReadableImpulse?:
     | T
     | ReadableImpulse<T>
@@ -104,7 +34,7 @@ export function Impulse<T>(
     | WritableImpulse<T>
     | ((value: T, scope: Scope) => void),
   optionsOrNothing?: ImpulseOptions<T>,
-): Impulse<undefined | T> | Impulse<T> {
+): Impulse<undefined | T> | Impulse<T> => {
   const isGetterFunction = isFunction(initialValueOrReadableImpulse)
 
   if (
