@@ -100,7 +100,7 @@ Body content regions (headings) to standardize:
 
 The first two sections are required for all concept entries. Additional sections are recommended where applicable but not mandatory. These will be linted with a Zod schema ([Zod][zod]) and simple textual checks in CI (starting Phase 2.6). Frontmatter keys use kebab-case.
 
-**Important**: The "API contract" section in KB entries should provide only high-level conceptual information (what the API does, its purpose, key constraints). Detailed API documentation (full type signatures, parameter descriptions, return types, comprehensive examples) belongs in TSDoc comments in the source code and will be rendered in the API reference section of the documentation site.
+**Important**: The "API contract" section in KB entries should provide comprehensive API documentation including full type signatures, parameter descriptions, return types, and examples. This detailed information is used to generate reference documentation pages.
 
 ## Folder structure
 
@@ -154,7 +154,6 @@ Core principles:
 - PLAN.yml contains all structural metadata (sources, diataxis, purpose, sections); doc pages contain only title, description, and content.
 - The `sections` array in PLAN.yml defines the required H2 headings for each page, allowing flexible structure per page rather than enforcing conventions per Diátaxis type.
 - Divergence resolution always flows: Desired change → Update KB → Re-synthesize docs.
-- Reference docs are synthesized from KB entries and enhanced with `AutoTypeTable` components that extract interface properties from source code.
 
 Stages (manual AI-driven for Phase 2):
 
@@ -194,17 +193,6 @@ Stages (manual AI-driven for Phase 2):
    - `docs/content/reference/**`
 
    Each page contains minimal frontmatter (title, description) and content. All structural metadata stays in PLAN.yml.
-
-   For reference pages, use the `AutoTypeTable` component to display interface properties:
-
-   ```mdx
-   ## Properties
-
-   <AutoTypeTable
-     path="../../packages/react-impulse/src/impulse.ts"
-     name="Impulse"
-   />
-   ```
 
 4. VALIDATE: Automated checks (future): ensure PLAN.yml entries reference real KB sources; validate page slugs match PLAN; required section checklist per Diátaxis type; broken link scan.
 5. MERGE: Commit docs + updated PLAN.yml. Re-run synthesis only when KB changes materially.
@@ -328,7 +316,6 @@ Definition of Done (Phase 2):
 
 Phase 2.5 — API reference documentation (react-impulse only)
 
-- [ ] Document the source code so the reference pages can use `AutoTypeTable` to display interface properties
 - [ ] Generate reference pages from KB entries
 - [ ] Integrate API reference pages into Fumadocs site navigation
 
@@ -336,13 +323,6 @@ Definition of Done (Phase 2.5):
 
 - KB entries include comprehensive API contract sections with type signatures, parameter descriptions, return types, and examples.
 - Reference pages in `docs/content/reference/` are generated from KB entries.
-- Reference pages use `AutoTypeTable` component to display interface properties:
-  ```mdx
-  <AutoTypeTable
-    path="../../packages/react-impulse/src/impulse.ts"
-    name="Impulse"
-  />
-  ```
 - API reference pages visible and navigable in the Fumadocs site.
 - Reference docs can be manually refined like other doc types but follow KB-driven workflow.
 
@@ -368,7 +348,7 @@ Definition of Done (Phase 2.6):
   2. Every file in `docs/content/{explanation,how-to,tutorials,reference}/**/*.md` is referenced in PLAN.yml
   3. Every source filename (without .md) in PLAN.yml exists in `knowledgebase/entries/`
 - API contract sections in KB entries include comprehensive details (type signatures, parameters, return types, examples) for generating reference documentation.
-- Reference documentation is generated from KB entries and enhanced with `AutoTypeTable` components.
+- Reference documentation is generated from KB entries.
 - CI runs `pnpm kb:lint` and `pnpm docs:validate` and fails on any validation error.
 - All validation errors use Zod's pretty error formatting for readability.
 
@@ -416,7 +396,6 @@ Definition of Done (Phase 5):
 - PLAN.yml contains all structural metadata (sources, diataxis, purpose, sections); doc pages contain only title, description, and content.
 - The `sections` array defines the required H2 headings for each page in order. This allows each page to have its own structure rather than following rigid Diátaxis type conventions.
 - AI-synthesized docs (all types: explanation, how-to, tutorial, reference) are generated from the KB but can be manually refined for better examples, ordering, and prose. When manually editing docs, use the validation checklist (see AI-SYNTHESIS-GUIDE.md) to determine if the source KB entries need updating.
-- Reference documentation uses the `AutoTypeTable` component to display interface properties from TypeScript source code, combining manual curation with automated type information.
 - If a doc needs conceptual content absent in KB, add/extend a KB entry first (AI should emit a TODO noting the gap).
 - MCP stays in sync by reading the KB at runtime (or on build, if caching is used).
 

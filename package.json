@@ -17,9 +17,9 @@
     "build": "pnpm --recursive build",
     "build:minified": "pnpm build --env.NODE_ENV=production --minify=terser",
     "publish": "pnpm build:minified && pnpm cs publish",
-    "docs:dev": "pnpm --filter react-impulse-docs dev",
-    "docs:build": "pnpm --filter react-impulse-docs build",
-    "docs:preview": "pnpm --filter react-impulse-docs preview"
+    "docs:dev": "pnpm --filter docs dev",
+    "docs:build": "pnpm --filter docs build",
+    "docs:preview": "pnpm --filter docs preview"
   },
   "engines": {
     "node": ">=22.14.0"

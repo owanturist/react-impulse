@@ -43,7 +43,7 @@ For each proposed page, specify:
 - purpose: One-sentence description of page goal
 - sections: Array of required H2 section headings that define the page structure
 
-For reference pages, include sections that will use AutoTypeTable components to display interface properties.
+For reference pages, include sections that will display interface properties and methods.
 
 Output valid YAML. Prioritize explanation pages first. Add comments to organize sections.
 ```
@@ -85,18 +85,7 @@ Common section patterns by Diátaxis type (not enforced, but useful as starting 
 - explanation: Overview, Mental model, Key concepts, Trade-offs, See also
 - how-to: Goal, Prerequisites, Steps (ordered), Validation, Pitfalls, Next steps
 - tutorial: Introduction, Prerequisites, Step-by-step (numbered), Checkpoint(s), Wrap-up, Further reading
-- reference: Overview, Type signature, Properties (with AutoTypeTable), Methods (with AutoTypeTable if applicable), Examples, See also
-
-### Using Custom Structure in Reference Pages
-
-For reference pages documenting TypeScript interfaces, types, or classes, curate the API documentation with custom structure:
-
-- Organize sections based on PLAN.yml requirements
-- Include type signatures, parameters, return types, and descriptions
-- Add practical examples and usage patterns
-- Structure information for developer usability rather than mirroring code structure
-
-Write complete MDX content for the page, synthesizing from KB entries while allowing creative organization.
+- reference: Overview, Type signature, Properties, Methods, Examples, See also
 
 Note: Generated content provides a solid foundation but can be manually refined afterward for better examples, flow, and user experience.
 
@@ -216,7 +205,7 @@ Each documentation page entry in PLAN.yml follows this structure:
 
 Note: PLAN.yml is the single source of truth for all documentation metadata. Doc pages themselves contain only title, description, and content. KB entries are referenced by their filename without the `.md` extension.
 
-For **reference** pages, the structure is the same but typically includes sections where `AutoTypeTable` components will be used to display interface properties.
+For **reference** pages, the structure is the same but typically includes sections for displaying interface properties and methods.
 
 Minimal frontmatter for AI-synthesized pages:
 
@@ -319,6 +308,6 @@ The `impulse-concept.md` KB entry (referenced as `impulse-concept` in PLAN.yml) 
 - **explanation/impulse-overview.md**: "What is an impulse?" - concept introduction, mental models, design philosophy
 - **how-to/create-impulse.md**: "How do I create and use an impulse?" - practical guide with common patterns
 - **tutorial/first-impulse.md**: "Build your first reactive component" - step-by-step walkthrough
-- **reference/impulse.mdx**: "Impulse API Reference" - detailed API documentation with manually curated structure showing interface properties, methods, and examples
+- **reference/impulse.mdx**: "Impulse API Reference" - detailed API documentation with structure showing interface properties, methods, and examples
 
 Each page is listed in `PLAN.yml` with `sources: ["impulse-concept"]` (filename without .md extension) but presents information differently for its intended use case. The page files themselves contain only title, description, and content.

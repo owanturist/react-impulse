@@ -4,5 +4,4 @@ import defaultComponents from "fumadocs-ui/mdx"
 export const MDXComponents = {
   ...defaultComponents,
   TypeTable,
-  AutoTypeTable: TypeTable,
 }
