@@ -100,7 +100,7 @@ Body content regions (headings) to standardize:
 
 The first two sections are required for all concept entries. Additional sections are recommended where applicable but not mandatory. These will be linted with a Zod schema ([Zod][zod]) and simple textual checks in CI (starting Phase 2.6). Frontmatter keys use kebab-case.
 
-**Important**: The "API contract" section in KB entries should provide comprehensive API documentation including full type signatures, parameter descriptions, return types, and examples. This detailed information is used to generate reference documentation pages.
+**Important**: The "API contract" section in KB entries should provide comprehensive API documentation including full type signatures, parameter descriptions, return types, and examples. This detailed information is used to generate reference documentation pages. Existing JSDoc comments in the codebase will be used as a source to populate KB entries during the initial migration but will be removed afterward. KB entries take priority as the single source of truth for API documentation.
 
 ## Folder structure
 
@@ -318,6 +318,7 @@ Phase 2.5 — API reference documentation (react-impulse only)
 
 - [ ] Generate reference pages from KB entries
 - [ ] Integrate API reference pages into Fumadocs site navigation
+- [ ] Migrate existing JSDoc comments to KB API contract sections and remove JSDoc from code
 
 Definition of Done (Phase 2.5):
 
@@ -325,6 +326,7 @@ Definition of Done (Phase 2.5):
 - Reference pages in `docs/content/reference/` are generated from KB entries.
 - API reference pages visible and navigable in the Fumadocs site.
 - Reference docs can be manually refined like other doc types but follow KB-driven workflow.
+- JSDoc comments have been migrated to KB and removed from the codebase; KB entries are the authoritative source for API documentation.
 
 Phase 2.6 — Documentation validation and linting
 
