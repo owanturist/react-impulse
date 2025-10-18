@@ -6,6 +6,7 @@ packages:
 relates-to:
   - impulse-concept
   - scope-concept
+  - compare-concept
 ---
 
 ## Context and goals
@@ -48,6 +49,7 @@ A `DerivedImpulse` is a reactive computation that derives its value from one or 
 - The internal scope is attached as an emitter to each source impulse it reads.
 - When a source impulse changes, it schedules the internal scope to flush and recompute the derived value.
 - If the derived impulse becomes unreachable, its internal scope may remain referenced by dependencies, potentially causing a memory leak unless handled by GC.
+- The `options.compare` function is called to check if the newly computed value differs from the cached value. If equal, dependencies are re-subscribed without triggering updates; if different, notifications are scheduled.
 
 #### Why WeakRef is necessary for memory safety
 
