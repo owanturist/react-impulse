@@ -37,7 +37,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-vitest": "^0.5.4",
-    "happy-dom": "^18.0.1",
+    "happy-dom": "^20.0.5",
     "prettier": "^3.6.2",
     "size-limit": "^11.2.0",
     "terser": "^5.44.0",
