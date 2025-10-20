@@ -44,11 +44,13 @@ A Compare function takes two values of type `T` and the **untracked** `Scope`, r
 type Compare<T> = (left: T, right: T, scope: Scope) => boolean
 ```
 
-- **`left`** (`T`): The first value to compare.
-- **`right`** (`T`): The second value to compare.
-- **`scope`** (`Scope`): The **untracked** scope.
+**Parameters:**
 
-Returns `true` if the values are equal, `false` otherwise.
+- **`left`**: The first value to compare.
+- **`right`**: The second value to compare.
+- **`scope`**: The **untracked** scope.
+
+**Returns:** `true` if the values are equal, `false` otherwise.
 
 ### Examples
 
