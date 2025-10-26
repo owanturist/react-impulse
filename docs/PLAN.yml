@@ -57,12 +57,10 @@
   title: Impulse API Reference
   sources:
     - impulse-concept
-  purpose: Complete API documentation for Impulse interface and factory function
+  purpose: Complete API documentation for Impulse interface and factory function with practical examples
   sections:
-    - Overview
-    - Factory Function
-    - Interface
-    - Examples
+    - Overview [toc]
+    - Factory
 
 - diataxis: reference
   slug: batch

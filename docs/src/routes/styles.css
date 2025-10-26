@@ -4,3 +4,9 @@
 @import "fumadocs-twoslash/twoslash.css";
 
 @source "../node_modules/fumadocs-ui/dist/**/*.js";
+
+.twoslash {
+  .line:last-child:empty {
+    @apply hidden;
+  }
+}

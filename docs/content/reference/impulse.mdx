@@ -1,57 +1,115 @@
 ---
 title: Impulse
-description: Complete API documentation for the Impulse interface and factory function
+description: Interface and Factory to create Impulse instances
 ---
 
-## Overview
+## Overview [toc] [#overview]
 
-The `Impulse` interface represents a reactive value container that tracks changes and notifies dependents. It provides both readable and writable access to its value.
+<p id="overview" className="-mb-5 scroll-mt-100" />
 
-## Factory Function
+`Impulse` is a reactive value container that holds and tracks changes to data.
 
-```typescript
-function Impulse<T>(): Impulse<undefined | T>
+<Callout>
+  Thanks to TypeScript's [Declaration
+  Merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html),
+  both the `Impulse` interface and the factory function share the same
+  name.
+
+```ts
+import { Impulse } from "react-impulse"
+
+interface State {
+  query: Impulse<string>
+}
+
+const state: State = {
+  query: Impulse("What is Declaration Merging?"),
+}
+```
+
+</Callout>
+
+## Factory
+
+### `Impulse(initialValue, options?){:ts}` [toc] [#impulse-with-initial-value]
+
+<p id="impulse-with-initial-value" />
+
+```ts
 function Impulse<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
-function Impulse<T>(
-  getter: ReadableImpulse<T> | ((scope: Scope) => T),
-  options?: ImpulseOptions<T>,
-): ReadonlyImpulse<T>
-function Impulse<T>(
-  getter: ReadableImpulse<T> | ((scope: Scope) => T),
-  setter: WritableImpulse<T> | ((value: T, scope: Scope) => void),
-  options?: ImpulseOptions<T>,
-): Impulse<T>
 ```
 
-Creates a new Impulse instance. The overloads support direct values, derived computations, and writable derived impulses.
+Creates a new `Impulse` with the provided initial value:
 
-### Parameters
+#### `initialValue: T{:ts}`
 
-- `initialValue`: The initial value for the impulse
-- `getter`: A function or ReadableImpulse that computes the derived value
-- `setter`: A function or WritableImpulse that handles value updates for derived impulses
-- `options`: Configuration options including compare function
+The starting value for the `Impulse`. Immutable values and other `Impulse`s work seamlessly.
 
-### Returns
+```ts twoslash tab="Primitive"
+import { Impulse } from "react-impulse"
 
-An Impulse instance with the appropriate read/write capabilities.
-
-## Interface
-
-## Examples
-
-### Basic Usage
-
-```typescript
-const counter = Impulse(0)
-counter.setValue(1)
-console.log(counter.getValue(scope)) // 1
+// ---cut---
+const count = Impulse(0)
+//    ^?
 ```
 
-### Derived Impulse
+```ts twoslash tab="Object"
+import { Impulse } from "react-impulse"
 
-```typescript
-const source = Impulse(10)
-const doubled = Impulse((scope) => source.getValue(scope) * 2)
-console.log(doubled.getValue(scope)) // 20
+// ---cut---
+const user = Impulse({ id: 1, name: "Alice" })
+//    ^?
+```
+
+```ts twoslash tab="Nested Impulses"
+import { Impulse } from "react-impulse"
+
+// ---cut---
+const cart = Impulse([
+  //  ^?
+  { slug: "cake", price: 39.99, amount: Impulse(1) },
+  { slug: "candle", price: 0.19, amount: Impulse(12) },
+])
+```
+
+<Callout type="warn">
+  Mutable values might be used but be aware of [implications in React](/TODO).
+</Callout>
+
+#### `options: ImpulseOptions<T>{:ts}`
+
+```ts
+interface ImpulseOptions<T> {
+  compare?: null | Compare<T>
+}
+```
+
+The `compare` function determines when the `Impulse` considers values different.
+When not provided or set to `null{:ts}`, it defaults to `Object.is(left, right){:ts}`.
+
+```ts
+type Compare<T> = (left: T, right: T, scope: Scope) => boolean
+```
+
+- `left: T{:ts}` - The current value of the `Impulse`.
+- `right: T{:ts}` - The new value to compare against the current value.
+- `scope: Scope{:ts}` - The [untracked `Scope`](/TODO).
+
+When it returns `true{:ts}`, the values are considered equal. The `Impulse` keeps the current value and consumers are not notified.
+When it returns `false{:ts}`, the new value replaces the current one and consumers are notified.
+
+```ts tab="Default compare"
+const updatedAt = Impulse(new Date(1922, 11, 30))
+
+updatedAt.setValue(new Date(1991, 11, 26)) // 📬 new value - notify consumers
+updatedAt.setValue(new Date(1991, 11, 26)) // 📬 new (but similar) value - notify consumers
+```
+
+```ts tab="Custom compare"
+const updatedAt = Impulse(new Date(1922, 11, 30), {
+  compare: (left, right) => left.getTime() === right.getTime(), // [!code ++]
+})
+
+updatedAt.setValue(new Date(1991, 11, 26)) // 📬 new value - notify consumers
+updatedAt.setValue(new Date(1991, 11, 26)) // 📭 same value - do not notify consumers // [!code highlight]
 ```
