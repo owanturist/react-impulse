@@ -9,12 +9,6 @@ description: Interface and Factory to create Impulse instances
 
 `Impulse` is a reactive value container that holds and tracks changes to data.
 
-<Callout>
-  Thanks to TypeScript's [Declaration
-  Merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html),
-  both the `Impulse` interface and the factory function share the same
-  name.
-
 ```ts
 import { Impulse } from "react-impulse"
 
@@ -27,6 +21,10 @@ const state: State = {
 }
 ```
 
+<Callout>
+  Thanks to TypeScript's [Declaration
+  Merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html),
+  both the `Impulse` interface and the factory function share the same name.
 </Callout>
 
 ## Factory
@@ -61,6 +59,13 @@ const user = Impulse({ id: 1, name: "Alice" })
 //    ^?
 ```
 
+```ts twoslash tab="Function"
+import { Impulse } from "react-impulse"
+// ---cut---
+const transformer = Impulse({ fn: (input: string) => input.trim() })
+//    ^?
+```
+
 ```ts twoslash tab="Nested Impulses"
 import { Impulse } from "react-impulse"
 
@@ -72,11 +77,18 @@ const cart = Impulse([
 ])
 ```
 
+<Callout>
+  Functions as `initialValue` create [Derived Impulses](/TODO). Store functions
+  as values by wrapping them in an object.
+</Callout>
+
 <Callout type="warn">
   Mutable values might be used but be aware of [implications in React](/TODO).
 </Callout>
 
 #### `options: ImpulseOptions<T>{:ts}`
+
+The configuration object for the `Impulse`.
 
 ```ts
 interface ImpulseOptions<T> {
@@ -84,8 +96,8 @@ interface ImpulseOptions<T> {
 }
 ```
 
-The `compare` function determines when the `Impulse` considers values different.
-When not provided or set to `null{:ts}`, it defaults to `Object.is(left, right){:ts}`.
+The `compare` function determines when the `Impulse` considers values different.<br/>
+When not provided or set to `null{:ts}`, it defaults to `Object.is{:ts}`.
 
 ```ts
 type Compare<T> = (left: T, right: T, scope: Scope) => boolean
