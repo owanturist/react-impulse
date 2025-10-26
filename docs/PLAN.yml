@@ -64,6 +64,13 @@
     - Factory
 
 - diataxis: reference
+  slug: scope
+  title: Scope
+  sources:
+    - scope-concept
+  purpose: API documentation for the scope
+
+- diataxis: reference
   slug: compare
   title: Compare
   sources:

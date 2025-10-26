@@ -1,0 +1,61 @@
+---
+title: Scope
+description: Interface for managing reactive scopes and dependency tracking
+---
+
+## Overview [toc] [#overview]
+
+<p id="overview" className="-mb-5 scroll-mt-100" />
+
+`Scope` is an opaque object that manages dependency tracking and lifecycle for reactive computations in react-impulse. It enables automatic tracking of impulse reads, deterministic scheduling of updates, and memory-safe cleanup.
+
+Scopes are created using factory functions and hooks, never directly by consumers. They come in two types:
+
+- **Tracking scopes**: Automatically track impulse reads and trigger reactions when dependencies change.
+- **Non-tracking scopes**: Allow reading impulse values without establishing dependencies.
+
+```ts
+import { useScope, untrack } from "react-impulse"
+
+// Tracking scope in React
+const scope = useScope()
+
+// Non-tracking scope
+untrack((scope) => {
+  const value = impulse.getValue(scope)
+  // No dependency tracking here
+})
+```
+
+---
+
+## `interface Scope{:ts}` [#scope-interface]
+
+```ts
+interface Scope {
+  readonly version?: number
+}
+```
+
+An opaque object representing a reactive scope. The `version` property is for debugging and diagnostics only and should not be relied upon in application code.
+
+Scopes are always obtained through factory functions or hooks, never constructed directly.
+
+### Obtaining Scopes [#obtaining-scopes]
+
+Scopes are created through various factory functions and React hooks:
+
+**Framework-agnostic factories:**
+
+- [`batch`](/docs/reference/batch) - Batches updates with a non-tracking scope
+- [`untrack`](/docs/reference/untrack) - Runs code with a non-tracking scope
+- [`subscribe`](/docs/reference/subscribe) - Creates a reactive subscription
+
+**React hooks:**
+
+- [`useScope`](/docs/reference/react/use-scope) - Creates a component-level tracking scope
+- [`useScoped`](/docs/reference/react/use-scoped) - Reads impulses reactively in components
+- [`useScopedMemo`](/docs/reference/react/use-scoped-memo) - Memoizes reactive computations
+- [`useScopedCallback`](/docs/reference/react/use-scoped-callback) - Memoizes reactive callbacks
+- [`useScopedEffect`](/docs/reference/react/use-scoped-effect) - Runs reactive effects
+- [`useScopedLayoutEffect`](/docs/reference/react/use-scoped-layout-effect) - Runs reactive layout effects

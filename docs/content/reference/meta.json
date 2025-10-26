@@ -2,6 +2,7 @@
   "title": "API Reference",
   "pages": [
     "impulse",
+    "scope",
     "subscribe",
     "untrack",
     "batch",
