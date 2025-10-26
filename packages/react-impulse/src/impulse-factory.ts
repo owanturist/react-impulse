@@ -15,7 +15,7 @@ export interface ImpulseFactory {
    * const impulse = Impulse<string>()
    * const initiallyUndefined = impulse.getValue(scope) === undefined
    */
-  <T = undefined>(): Impulse<undefined | T>
+  <T>(): Impulse<undefined | T>
 
   /**
    * Creates a new derived ReadonlyImpulse.

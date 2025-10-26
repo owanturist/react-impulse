@@ -31,15 +31,15 @@ const state: State = {
 
 ## Factory
 
-### `Impulse(initialValue, options?){:ts}` [toc] [#impulse-with-initial-value]
+### `Impulse(initialValue, options?){:ts}` [toc] [#impulse-factory]
 
-<p id="impulse-with-initial-value" />
+<p id="impulse-factory" />
 
 ```ts
 function Impulse<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
 ```
 
-Creates a new `Impulse` with the provided initial value:
+Creates a new `Impulse<T>{:ts}` with the provided initial value:
 
 #### `initialValue: T{:ts}`
 
@@ -112,4 +112,24 @@ const updatedAt = Impulse(new Date(1922, 11, 30), {
 
 updatedAt.setValue(new Date(1991, 11, 26)) // 📬 new value - notify consumers
 updatedAt.setValue(new Date(1991, 11, 26)) // 📭 same value - do not notify consumers // [!code highlight]
+```
+
+---
+
+### `Impulse(){:ts}` [toc] [#impulse-factory-optional]
+
+<p id="impulse-factory-optional" />
+
+```ts
+function Impulse<T>(): Impulse<undefined | T>
+```
+
+A shortcut to create a new `Impulse<undefined | T>{:ts}` with an initial value of `undefined{:ts}`.
+
+```ts twoslash
+import { Impulse } from "react-impulse"
+
+// ---cut---
+const value = Impulse<number>()
+//    ^?
 ```
