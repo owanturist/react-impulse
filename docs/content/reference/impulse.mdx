@@ -7,7 +7,7 @@ description: Interface and Factory to create Impulse instances
 
 <p id="overview" className="-mb-5 scroll-mt-100" />
 
-`Impulse` is a reactive value container that holds and tracks changes to data.
+`Impulse` is a reactive value container that stores and tracks changes to data.
 
 ```ts
 import { Impulse } from "react-impulse"
@@ -27,19 +27,59 @@ const state: State = {
   both the `Impulse` interface and the factory function share the same name.
 </Callout>
 
-## Factory
+---
 
-### `Impulse(initialValue, options?){:ts}` [toc] [#impulse-factory]
+## `interface Impulse<T>{:ts}` [#impulse-interface]
 
-<p id="impulse-factory" />
+```ts
+interface Impulse<T> {
+  getValue(scope: Scope): T
+
+  setValue(value: T): void
+  setValue(transform: (currentValue: T, scope: Scope) => T): void
+
+  clone(options?: ImpulseOptions<T>): Impulse<T>
+  clone(
+    transform: (value: T, scope: Scope) => T,
+    options?: ImpulseOptions<T>,
+  ): Impulse<T>
+}
+```
+
+### `getValue(scope){:ts}` [#impulse-get-value]
+
+### `setValue(value){:ts}` [#impulse-set-value]
+
+### `setValue(transform){:ts}` [#impulse-set-value-transform]
+
+### `clone(options?){:ts}` [#impulse-clone]
+
+### `clone(transform, options?){:ts}` [#impulse-clone-transform]
+
+---
+
+## `interface ImpulseOptions<T>{:ts}` [#impulse-options-interface]
+
+```ts
+interface ImpulseOptions<T> {
+  compare?: null | Compare<T>
+}
+```
+
+The [`ImpulseOptions.compare{:ts}`](/docs/reference/compare) function determines when the `Impulse` considers values equal.<br />
+When set to `null{:ts}`, it defaults to `Object.is{:ts}`.
+
+---
+
+## `Impulse(initialValue, options?){:ts}` [#impulse-factory]
 
 ```ts
 function Impulse<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
 ```
 
-Creates a new `Impulse<T>{:ts}` with the provided initial value:
+Creates a new `Impulse<T>{:ts}` with the provided initial value.
 
-#### `initialValue: T{:ts}`
+### `initialValue: T{:ts}`
 
 The starting value for the `Impulse`. Immutable values and other `Impulse`s work seamlessly.
 
@@ -86,29 +126,10 @@ const cart = Impulse([
   Mutable values might be used but be aware of [implications in React](/TODO).
 </Callout>
 
-#### `options: ImpulseOptions<T>{:ts}`
+### `options: ImpulseOptions<T>{:ts}`
 
-The configuration object for the `Impulse`.
-
-```ts
-interface ImpulseOptions<T> {
-  compare?: null | Compare<T>
-}
-```
-
-The `compare` function determines when the `Impulse` considers values different.<br/>
-When not provided or set to `null{:ts}`, it defaults to `Object.is{:ts}`.
-
-```ts
-type Compare<T> = (left: T, right: T, scope: Scope) => boolean
-```
-
-- `left: T{:ts}` - The current value of the `Impulse`.
-- `right: T{:ts}` - The new value to compare against the current value.
-- `scope: Scope{:ts}` - The [untracked `Scope`](/TODO).
-
-When it returns `true{:ts}`, the values are considered equal. The `Impulse` keeps the current value and consumers are not notified.
-When it returns `false{:ts}`, the new value replaces the current one and consumers are notified.
+The [configuration object](#impulse-options-interface) for creating an `Impulse`.
+The `options.compare` value defaults to `Object.is{:ts}`.
 
 ```ts tab="Default compare"
 const updatedAt = Impulse(new Date(1922, 11, 30))
@@ -128,9 +149,7 @@ updatedAt.setValue(new Date(1991, 11, 26)) // 📭 same value - do not notify co
 
 ---
 
-### `Impulse(){:ts}` [toc] [#impulse-factory-optional]
-
-<p id="impulse-factory-optional" />
+## `Impulse(){:ts}` [#impulse-factory-optional]
 
 ```ts
 function Impulse<T>(): Impulse<undefined | T>

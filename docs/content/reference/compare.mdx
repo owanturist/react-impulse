@@ -1,0 +1,41 @@
+---
+title: Compare
+---
+
+The `compare` function determines equality of the `left` and `right` values.
+
+```ts
+type Compare<T> = (left: T, right: T, scope: Scope) => boolean
+```
+
+- `left: T{:ts}` - The current value.
+- `right: T{:ts}` - The new value to compare against the current value.
+- `scope: Scope{:ts}` - The [untracked `Scope`](/TODO).
+
+Returns `true{:ts}` when the values are considered equal, otherwise `false{:ts}`.
+
+```ts tab="Creating Impulse"
+const updatedAt = Impulse(new Date(1922, 11, 30), {
+  compare: (left, right) => left.getTime() === right.getTime(), // [!code highlight]
+})
+```
+
+```ts tab="Cloning Impulse"
+const tags = Impulse(["best", "react", "state"])
+
+const clone = tags.clone({
+  compare: isShallowEqual, // [!code highlight]
+})
+```
+
+```ts tab="useScoped"
+const thresholds = Impulse([5, 3, 8, 4, 6])
+
+const sortedThresholds = useScoped(
+  (scope) => sort(thresholds.getValue(scope)),
+  [thresholds],
+  {
+    compare: isShallowEqual, // [!code highlight]
+  },
+)
+```

@@ -60,7 +60,15 @@
   purpose: Complete API documentation for Impulse interface and factory function with practical examples
   sections:
     - Overview [toc]
+    - Interface
     - Factory
+
+- diataxis: reference
+  slug: compare
+  title: Compare
+  sources:
+    - impulse-concept
+  purpose: API documentation for the compare function
 
 - diataxis: reference
   slug: batch
