@@ -48,13 +48,25 @@ interface Impulse<T> {
 
 ### `getValue(scope){:ts}` [#impulse-get-value]
 
+#### `scope: Scope{:ts}` [#impulse-get-value-scope]
+
 ### `setValue(value){:ts}` [#impulse-set-value]
+
+#### `value: T{:ts}` [#impulse-set-value-value]
 
 ### `setValue(transform){:ts}` [#impulse-set-value-transform]
 
+#### `transform: Transform<T>{:ts}` [#impulse-set-value-transform]
+
 ### `clone(options?){:ts}` [#impulse-clone]
 
+#### `options?: ImpulseOptions<T>{:ts}` [#impulse-clone-options]
+
 ### `clone(transform, options?){:ts}` [#impulse-clone-transform]
+
+#### `transform: Transform<T>{:ts}` [#impulse-clone-transform-transform]
+
+#### `options?: ImpulseOptions<T>{:ts}` [#impulse-clone-transform-options]
 
 ---
 
@@ -65,6 +77,8 @@ interface ImpulseOptions<T> {
   compare?: null | Compare<T>
 }
 ```
+
+### `compare?: null | Compare<T>{:ts}` [#impulse-options-compare]
 
 The [`ImpulseOptions.compare{:ts}`](/docs/reference/compare) function determines when the `Impulse` considers values equal.<br />
 When set to `null{:ts}`, it defaults to `Object.is{:ts}`.
@@ -126,7 +140,7 @@ const cart = Impulse([
   Mutable values might be used but be aware of [implications in React](/TODO).
 </Callout>
 
-### `options: ImpulseOptions<T>{:ts}`
+### `options?: ImpulseOptions<T>{:ts}`
 
 The [configuration object](#impulse-options-interface) for creating an `Impulse`.
 The `options.compare` value defaults to `Object.is{:ts}`.
