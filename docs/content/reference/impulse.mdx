@@ -29,30 +29,93 @@ const state: State = {
 
 ---
 
-## `interface Impulse{:ts}` [#impulse-interface]
+## `interface Impulse{:ts}` [toc] [#impulse-interface]
 
-```ts
-interface Impulse<T> {
-  getValue(scope: Scope): T
+## `interface Impulse<T>{:ts}` [!toc] [#impulse-interface]
 
-  setValue(value: T): void
-  setValue(transform: (currentValue: T, scope: Scope) => T): void
+### `getValue(scope){:ts}` [toc] [#impulse-get-value]
 
-  clone(options?: ImpulseOptions<T>): Impulse<T>
-  clone(
-    transform: (value: T, scope: Scope) => T,
-    options?: ImpulseOptions<T>,
-  ): Impulse<T>
+### `getValue(scope): T{:ts}` [!toc] [#impulse-get-value]
+
+Returns the current value `T{:ts}` from the `Impulse`.
+
+- `scope: Scope{:ts}` - The [`Scope{:ts}`](/docs/reference/scope) for dependency tracking.
+
+<Callout>
+  Reads within a [tracking `Scope`](/docs/reference/scope#TODO-tracking)
+  establish dependencies, while reads within a [non-tracking
+  `Scope`](/docs/reference/scope#TODO-non-tracking) do not.
+</Callout>
+
+```ts tab="subscribe()"
+import { Impulse, subscribe } from "react-impulse"
+
+const counter = Impulse(0)
+
+/**
+ * Logs every time when counter changes.
+ */
+const unsubscribe = subscribe((scope) => {
+  const count = counter.getValue(scope) // [!code highlight]
+
+  console.log("Count updated: ", count)
+})
+```
+
+```tsx tab="useScoped()"
+import { type Impulse, useScope } from "react-impulse"
+
+/**
+ * Re-renders every time when diff between bears and bulls changes.
+ */
+const Market = ({
+  bears,
+  bulls,
+}: {
+  bears: Impulse<number>
+  bulls: Impulse<number>
+}) => {
+  const diff = useScoped(
+    (scope) => bears.getValue(scope) - bulls.getValue(scope), // [!code highlight]
+  )
+
+  return <div>Diff: {diff}</div>
 }
 ```
 
-### `getValue(scope){:ts}` [#impulse-get-value]
+```tsx tab="batch()"
+import { type Impulse, batch, useScoped } from "react-impulse"
 
-Reads the current value from the impulse. The `scope` determines dependency tracking behavior.
+const numerator = Impulse(10)
+const denominator = Impulse(1)
 
-- `scope: Scope{:ts}` - The scope for dependency tracking.
+/**
+ * Re-renders every time when numerator or denominator change.
+ */
+const Fraction = () => {
+  const scope = useScope()
+  const fraction = numerator.getValue(scope) - denominator.getValue(scope) // [!code highlight]
 
-Returns the current value of type `T`.
+  return <div>Fraction: {fraction}</div>
+}
+
+/**
+ * Re-renders are never caused by numerator or denominator changes.
+ */
+const Tick = () => (
+  <button
+    onClick={() => {
+      batch((scope) => {
+        // [!code highlight:2]
+        numerator.setValue(numerator.getValue(scope) - 1)
+        denominator.setValue(denominator.getValue(scope) + 1)
+      })
+    }}
+  >
+    Next
+  </button>
+)
+```
 
 ### `setValue(value){:ts}` [#impulse-set-value]
 
@@ -139,7 +202,7 @@ Returns a new `Impulse<T>{:ts}` with the provided initial value.
   </Callout>
 
 - `options?: ImpulseOptions<T>{:ts}` - Configuration options for the `Impulse`.
-- `options?.compare?: null |{:ts}`[`Compare<T>{:ts}`](/docs/reference/compare) - The `compare` function determines when the `Impulse` considers values equal.
+- `options?.compare?: null | Compare{:ts}` - The [`Compare<T>{:ts}`](/docs/reference/compare) function determines when the `Impulse` considers values equal.
   When not provided or set to `null{:ts}`, it defaults to `Object.is{:ts}`.
 
   ```ts tab="Default compare"
