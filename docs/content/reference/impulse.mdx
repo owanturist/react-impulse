@@ -29,7 +29,7 @@ const state: State = {
 
 ---
 
-## `interface Impulse<T>{:ts}` [#impulse-interface]
+## `interface Impulse{:ts}` [#impulse-interface]
 
 ```ts
 interface Impulse<T> {
@@ -48,40 +48,40 @@ interface Impulse<T> {
 
 ### `getValue(scope){:ts}` [#impulse-get-value]
 
-#### `scope: Scope{:ts}` [#impulse-get-value-scope]
+Reads the current value from the impulse. The `scope` determines dependency tracking behavior.
+
+- `scope: Scope{:ts}` - The scope for dependency tracking.
+
+Returns the current value of type `T`.
 
 ### `setValue(value){:ts}` [#impulse-set-value]
 
-#### `value: T{:ts}` [#impulse-set-value-value]
+Updates the impulse with a new value. Consumers are notified only if the new value differs according to the compare function.
+
+- `value: T{:ts}` - The new value to set.
 
 ### `setValue(transform){:ts}` [#impulse-set-value-transform]
 
-#### `transform: Transform<T>{:ts}` [#impulse-set-value-transform]
+Updates the impulse using a transform function that receives the current value.
+
+- `transform: (currentValue: T, scope: Scope) => T{:ts}` - Function that transforms the current value. The scope is untracked.
 
 ### `clone(options?){:ts}` [#impulse-clone]
 
-#### `options?: ImpulseOptions<T>{:ts}` [#impulse-clone-options]
+Creates an independent copy of the impulse with the same value but separate identity and dependencies.
+
+- `options?: ImpulseOptions<T>{:ts}` - Configuration for the cloned impulse. Inherits the original's compare function if not specified.
+
+Returns a new `Impulse<T>` instance.
 
 ### `clone(transform, options?){:ts}` [#impulse-clone-transform]
 
-#### `transform: Transform<T>{:ts}` [#impulse-clone-transform-transform]
+Creates an independent copy of the impulse with a transformed value.
 
-#### `options?: ImpulseOptions<T>{:ts}` [#impulse-clone-transform-options]
+- `transform: (value: T, scope: Scope) => T{:ts}` - Function to transform the value during cloning. The scope is untracked.
+- `options?: ImpulseOptions<T>{:ts}` - Configuration for the cloned impulse.
 
----
-
-## `interface ImpulseOptions<T>{:ts}` [#impulse-options-interface]
-
-```ts
-interface ImpulseOptions<T> {
-  compare?: null | Compare<T>
-}
-```
-
-### `compare?: null | Compare<T>{:ts}` [#impulse-options-compare]
-
-The [`ImpulseOptions.compare{:ts}`](/docs/reference/compare) function determines when the `Impulse` considers values equal.<br />
-When set to `null{:ts}`, it defaults to `Object.is{:ts}`.
+Returns a new `Impulse<T>` instance with the transformed value.
 
 ---
 
@@ -91,75 +91,72 @@ When set to `null{:ts}`, it defaults to `Object.is{:ts}`.
 function Impulse<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
 ```
 
-Creates a new `Impulse<T>{:ts}` with the provided initial value.
+Returns a new `Impulse<T>{:ts}` with the provided initial value.
 
-### `initialValue: T{:ts}`
+- `initialValue: T{:ts}` - The starting value for the `Impulse`. Immutable values and other `Impulse`s work seamlessly.
 
-The starting value for the `Impulse`. Immutable values and other `Impulse`s work seamlessly.
+  ```ts twoslash tab="Primitive"
+  import { Impulse } from "react-impulse"
 
-```ts twoslash tab="Primitive"
-import { Impulse } from "react-impulse"
+  // ---cut---
+  const count = Impulse(0)
+  //    ^?
+  ```
 
-// ---cut---
-const count = Impulse(0)
-//    ^?
-```
+  ```ts twoslash tab="Object"
+  import { Impulse } from "react-impulse"
 
-```ts twoslash tab="Object"
-import { Impulse } from "react-impulse"
+  // ---cut---
+  const user = Impulse({ id: 1, name: "Alice" })
+  //    ^?
+  ```
 
-// ---cut---
-const user = Impulse({ id: 1, name: "Alice" })
-//    ^?
-```
+  ```ts twoslash tab="Function"
+  import { Impulse } from "react-impulse"
+  // ---cut---
+  const transformer = Impulse({ fn: (input: string) => input.trim() })
+  //    ^?
+  ```
 
-```ts twoslash tab="Function"
-import { Impulse } from "react-impulse"
-// ---cut---
-const transformer = Impulse({ fn: (input: string) => input.trim() })
-//    ^?
-```
+  ```ts twoslash tab="Nested Impulses"
+  import { Impulse } from "react-impulse"
 
-```ts twoslash tab="Nested Impulses"
-import { Impulse } from "react-impulse"
+  // ---cut---
+  const cart = Impulse([
+    //  ^?
+    { slug: "cake", price: 39.99, amount: Impulse(1) },
+    { slug: "candle", price: 0.19, amount: Impulse(12) },
+  ])
+  ```
 
-// ---cut---
-const cart = Impulse([
-  //  ^?
-  { slug: "cake", price: 39.99, amount: Impulse(1) },
-  { slug: "candle", price: 0.19, amount: Impulse(12) },
-])
-```
+  <Callout>
+    Functions as `initialValue` create [Derived Impulses](/TODO). Store
+    functions as values by wrapping them in an object.
+  </Callout>
 
-<Callout>
-  Functions as `initialValue` create [Derived Impulses](/TODO). Store functions
-  as values by wrapping them in an object.
-</Callout>
+  <Callout type="warn">
+    Mutable values might be used but be aware of [implications in React](/TODO).
+  </Callout>
 
-<Callout type="warn">
-  Mutable values might be used but be aware of [implications in React](/TODO).
-</Callout>
+- `options?: ImpulseOptions<T>{:ts}` - Configuration options for the `Impulse`.
+- `options?.compare?: null |{:ts}`[`Compare<T>{:ts}`](/docs/reference/compare) - The `compare` function determines when the `Impulse` considers values equal.
+  When not provided or set to `null{:ts}`, it defaults to `Object.is{:ts}`.
 
-### `options?: ImpulseOptions<T>{:ts}`
+  ```ts tab="Default compare"
+  const updatedAt = Impulse(new Date(1922, 11, 30))
 
-The [configuration object](#impulse-options-interface) for creating an `Impulse`.
-The `options.compare` value defaults to `Object.is{:ts}`.
+  updatedAt.setValue(new Date(1991, 11, 26)) // 📬 new value - notify consumers
+  updatedAt.setValue(new Date(1991, 11, 26)) // 📬 new (but similar) value - notify consumers
+  ```
 
-```ts tab="Default compare"
-const updatedAt = Impulse(new Date(1922, 11, 30))
+  ```ts tab="Custom compare"
+  const updatedAt = Impulse(new Date(1922, 11, 30), {
+    compare: (left, right) => left.getTime() === right.getTime(), // [!code ++]
+  })
 
-updatedAt.setValue(new Date(1991, 11, 26)) // 📬 new value - notify consumers
-updatedAt.setValue(new Date(1991, 11, 26)) // 📬 new (but similar) value - notify consumers
-```
-
-```ts tab="Custom compare"
-const updatedAt = Impulse(new Date(1922, 11, 30), {
-  compare: (left, right) => left.getTime() === right.getTime(), // [!code ++]
-})
-
-updatedAt.setValue(new Date(1991, 11, 26)) // 📬 new value - notify consumers
-updatedAt.setValue(new Date(1991, 11, 26)) // 📭 same value - do not notify consumers // [!code highlight]
-```
+  updatedAt.setValue(new Date(1991, 11, 26)) // 📬 new value - notify consumers
+  updatedAt.setValue(new Date(1991, 11, 26)) // 📭 same value - do not notify consumers // [!code highlight]
+  ```
 
 ---
 
@@ -169,7 +166,7 @@ updatedAt.setValue(new Date(1991, 11, 26)) // 📭 same value - do not notify co
 function Impulse<T>(): Impulse<undefined | T>
 ```
 
-A shortcut to create a new `Impulse<undefined | T>{:ts}` with an initial value of `undefined{:ts}`.
+Returns a new `Impulse<undefined | T>{:ts}` with an initial value of `undefined{:ts}`.
 
 ```ts twoslash
 import { Impulse } from "react-impulse"
@@ -178,3 +175,7 @@ import { Impulse } from "react-impulse"
 const value = Impulse<number>()
 //    ^?
 ```
+
+<Callout>
+  This is a shortcut for `Impulse<undefined | T>(undefined){:ts}`.
+</Callout>

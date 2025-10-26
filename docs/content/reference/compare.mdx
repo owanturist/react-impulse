@@ -8,11 +8,11 @@ The `compare` function determines equality of the `left` and `right` values.
 type Compare<T> = (left: T, right: T, scope: Scope) => boolean
 ```
 
+Returns `true{:ts}` when the values are considered equal, otherwise `false{:ts}`.
+
 - `left: T{:ts}` - The current value.
 - `right: T{:ts}` - The new value to compare against the current value.
 - `scope: Scope{:ts}` - The [untracked `Scope`](/TODO).
-
-Returns `true{:ts}` when the values are considered equal, otherwise `false{:ts}`.
 
 ```ts tab="Creating Impulse"
 const updatedAt = Impulse(new Date(1922, 11, 30), {
