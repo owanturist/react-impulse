@@ -29,23 +29,34 @@ const state: State = {
 
 ---
 
-## `interface Impulse{:ts}` [toc] [#impulse-interface]
+## `interface Impulse{:dart}` [toc] [#impulse-interface]
 
-## `interface Impulse<T>{:ts}` [!toc] [#impulse-interface]
+## `interface Impulse<T>{:dart}` [!toc] [#impulse-interface]
 
-### `getValue(scope){:ts}` [toc] [#impulse-get-value]
+<section className="typedef">
 
-### `getValue(scope): T{:ts}` [!toc] [#impulse-get-value]
+- `@template T{:dart}` The type of value stored in the `Impulse`.
 
-Returns the current value `T{:ts}` from the `Impulse`.
+</section>
 
-- `scope: Scope{:ts}` - The [`Scope{:ts}`](/docs/reference/scope) for dependency tracking.
+### `getValue(scope){:dart}` [toc] [#impulse-get-value]
 
-<Callout>
-  Reads within a [tracking `Scope`](/docs/reference/scope#TODO-tracking)
-  establish dependencies, while reads within a [non-tracking
-  `Scope`](/docs/reference/scope#TODO-non-tracking) do not.
-</Callout>
+### `getValue(scope: Scope): T{:dart}` [!toc] [#impulse-get-value]
+
+The method retrieves the current value of the `Impulse`.
+
+The impulse binds to the provided `Scope` during the read,
+so that the next time the value changes, the `Scope` notifies the hosting environment about the update.
+
+<section className="typedef">
+
+- `@param scope: Scope{:dart}` The [`Scope{:ts}`](/docs/reference/scope) for binding to impulse updates.
+
+---
+
+- `@returns T{:dart}` The current value from the `Impulse`.
+
+</section>
 
 ```ts tab="subscribe()"
 import { Impulse, subscribe } from "react-impulse"
@@ -63,7 +74,7 @@ const unsubscribe = subscribe((scope) => {
 ```
 
 ```tsx tab="useScoped()"
-import { type Impulse, useScope } from "react-impulse"
+import { type Impulse, useScoped } from "react-impulse"
 
 /**
  * Re-renders every time when diff between bears and bulls changes.
@@ -117,6 +128,14 @@ const Tick = () => (
 )
 ```
 
+<Callout title="Good to know">
+
+- A single `Impulse` can bind to multiple different `Scope`s independently.
+- Multiple reads with the same `Scope` bind only once.
+- Use a [non-tracking `Scope`](/docs/reference/scope#TODO-non-tracking) to avoid binding.
+
+</Callout>
+
 ### `setValue(value){:ts}` [#impulse-set-value]
 
 Updates the impulse with a new value. Consumers are notified only if the new value differs according to the compare function.
@@ -127,7 +146,7 @@ Updates the impulse with a new value. Consumers are notified only if the new val
 
 Updates the impulse using a transform function that receives the current value.
 
-- `transform: (currentValue: T, scope: Scope) => T{:ts}` - Function that transforms the current value. The scope is untracked.
+- `transform: (currentValue: T, scope: Scope) => T{:ts}` - Function that transforms the current value. The scope is non-tracking.
 
 ### `clone(options?){:ts}` [#impulse-clone]
 
@@ -141,22 +160,24 @@ Returns a new `Impulse<T>` instance.
 
 Creates an independent copy of the impulse with a transformed value.
 
-- `transform: (value: T, scope: Scope) => T{:ts}` - Function to transform the value during cloning. The scope is untracked.
+- `transform: (value: T, scope: Scope) => T{:ts}` - Function to transform the value during cloning. The scope is non-tracking.
 - `options?: ImpulseOptions<T>{:ts}` - Configuration for the cloned impulse.
 
 Returns a new `Impulse<T>` instance with the transformed value.
 
 ---
 
-## `Impulse(initialValue, options?){:ts}` [#impulse-factory]
+## `Impulse(initialValue, options?){:dart}` [#impulse-factory]
 
 ```ts
 function Impulse<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
 ```
 
-Returns a new `Impulse<T>{:ts}` with the provided initial value.
+The factory function creates a new `Impulse<T>{:ts}` with the provided initial value.
 
-- `initialValue: T{:ts}` - The starting value for the `Impulse`. Immutable values and other `Impulse`s work seamlessly.
+<section className="typedef">
+
+- `@param initialValue: T{:dart}` The starting value for the `Impulse`. Immutable values and other `Impulse`s work seamlessly.
 
   ```ts twoslash tab="Primitive"
   import { Impulse } from "react-impulse"
@@ -201,8 +222,8 @@ Returns a new `Impulse<T>{:ts}` with the provided initial value.
     Mutable values might be used but be aware of [implications in React](/TODO).
   </Callout>
 
-- `options?: ImpulseOptions<T>{:ts}` - Configuration options for the `Impulse`.
-- `options?.compare?: null | Compare{:ts}` - The [`Compare<T>{:ts}`](/docs/reference/compare) function determines when the `Impulse` considers values equal.
+- `@param options?: ImpulseOptions<T>{:dart}` Configuration options for the `Impulse`.
+- `@param options?.compare?: null | Compare{:dart}` The [`Compare<T>{:ts}`](/docs/reference/compare) function determines when the `Impulse` considers values equal.
   When not provided or set to `null{:ts}`, it defaults to `Object.is{:ts}`.
 
   ```ts tab="Default compare"
@@ -223,13 +244,25 @@ Returns a new `Impulse<T>{:ts}` with the provided initial value.
 
 ---
 
-## `Impulse(){:ts}` [#impulse-factory-optional]
+- `@returns Impulse<T>{:dart}` A new `Impulse` instance containing the initial value.
+
+</section>
+
+---
+
+## `Impulse(){:dart}` [#impulse-factory-optional]
 
 ```ts
 function Impulse<T>(): Impulse<undefined | T>
 ```
 
-Returns a new `Impulse<undefined | T>{:ts}` with an initial value of `undefined{:ts}`.
+The factory function creates a new `Impulse<undefined | T>{:ts}` with an initial value of `undefined{:ts}`.
+
+<section className="typedef">
+
+- `@returns Impulse<undefined | T>{:dart}` A new `Impulse` with an initial value of `undefined{:ts}`.
+
+</section>
 
 ```ts twoslash
 import { Impulse } from "react-impulse"

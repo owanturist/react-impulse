@@ -2,17 +2,23 @@
 title: Compare
 ---
 
-The `compare` function determines equality of the `left` and `right` values.
-
 ```ts
 type Compare<T> = (left: T, right: T, scope: Scope) => boolean
 ```
 
-Returns `true{:ts}` when the values are considered equal, otherwise `false{:ts}`.
+The `Compare` function determines equality of the `left` and `right` values.
 
-- `left: T{:ts}` - The current value.
-- `right: T{:ts}` - The new value to compare against the current value.
-- `scope: Scope{:ts}` - The [untracked `Scope{:ts}`](/docs/reference/scope#TODO-untracked).
+<section className="typedef">
+
+- `@param left: T{:dart}` The current value.
+- `@param right: T{:dart}` The new value to compare against the current value.
+- `@param scope: Scope{:dart}` The [non-tracking `Scope{:ts}`](/docs/reference/scope#TODO-untracked).
+
+---
+
+- `@returns boolean{:dart}` When `true{:ts}`, the values are considered equal, otherwise `false{:ts}`.
+
+</section>
 
 ```ts tab="Creating Impulse"
 const updatedAt = Impulse(new Date(1922, 11, 30), {
