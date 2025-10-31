@@ -1,12 +1,21 @@
 # GitHub Copilot Context
 
-This project uses a knowledgebase-driven development approach. When working with this codebase:
+This project uses a knowledgebase-driven (KB) development approach.
+
+## Project Structure
+
+- [`docs/`](../docs/) - Documentation site source files
+- [`docs/knowledgebase/`](../docs/knowledgebase/) - Single source of truth for features/bugs/concepts
+- [`packages/signal-core/`](../packages/signal-core/) - Core reactive state library
+- [`packages/signal-react/`](../packages/signal-react/) - React bindings for reactive state
+- [`packages/signal-form/`](../packages/signal-form/) - Form validation library
+- [`packages/tools/`](../packages/tools/) - Utility functions shared across packages but not published
 
 ## Key Context Files
 
 - `knowledgebase/PLAN.md` - Complete implementation plan and phases
 - `knowledgebase/README.md` - How to use the knowledgebase
-- `knowledgebase/entries/*.md` - Concept entries documenting architectural decisions and design patterns
+- `knowledgebase/*.md` - Concept entries documenting architectural decisions and design patterns
 
 ## Development Workflow
 
@@ -17,8 +26,8 @@ This project uses a knowledgebase-driven development approach. When working with
 ## AI Agent Guidelines
 
 - Always reference KB entry IDs in commits when implementing concepts
-- Use @workspace for full project context
-- Reference `knowledgebase/entries/<concept-id>.md` when implementing
+- Use `@workspace` for full project context
+- Reference `knowledgebase/<concept-id>.md` when implementing
 
 ## Package Management
 
@@ -26,17 +35,6 @@ This project uses a knowledgebase-driven development approach. When working with
 - **Install from root** - Use `pnpm add -D package` or `pnpm add package` from project root
 - **Workspace commands** - Use `pnpm --filter package-name command` for package-specific operations
 - **No npm/yarn** - Only use pnpm to maintain lockfile consistency
-
-## Project Structure
-
-- `packages/react-signal/` - Core reactive state library
-- `packages/react-signal-form/` - Form validation library
-- `packages/tools/` - Utility functions
-- `knowledgebase/` - Single source of truth for features/bugs/concepts
-
-## Entry Types
-
-- **concept** - Architectural decisions, design patterns, and key mental models
 
 ## YAML Formatting
 
@@ -58,7 +56,7 @@ relates-to: [concept-1, concept-2]
 
 This applies to:
 
-- KB entry frontmatter (`knowledgebase/entries/*.md`)
+- KB entry frontmatter (`knowledgebase/*.md`)
 - Documentation PLAN (`docs/PLAN.yml`)
 - Any other YAML configuration files
 
