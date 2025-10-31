@@ -13,9 +13,9 @@ This project uses a knowledgebase-driven (KB) development approach.
 
 ## Key Context Files
 
-- `knowledgebase/PLAN.md` - Complete implementation plan and phases
-- `knowledgebase/README.md` - How to use the knowledgebase
-- `knowledgebase/*.md` - Concept entries documenting architectural decisions and design patterns
+- [`knowledgebase/PLAN.md`](../docs/knowledgebase/PLAN.md) - Complete implementation plan and phases
+- [`knowledgebase/README.md`](../docs/knowledgebase/README.md) - How to use the knowledgebase
+- [`knowledgebase/*.md`](../docs/knowledgebase/) - Concept entries documenting architectural decisions and design patterns
 
 ## Development Workflow
 
@@ -56,8 +56,8 @@ relates-to: [concept-1, concept-2]
 
 This applies to:
 
-- KB entry frontmatter (`knowledgebase/*.md`)
-- Documentation PLAN (`docs/PLAN.yml`)
+- KB entry frontmatter in [`knowledgebase/*.md`](../docs/knowledgebase/)
+- Documentation in [`docs/PLAN.yml`](../docs/PLAN.yml)
 - Any other YAML configuration files
 
 ## Natural Language Understanding
