@@ -6,7 +6,7 @@ Purpose: a single source of truth that powers AI-assisted development and autoge
 
 - Add or update concept entries under `knowledgebase/entries/` using the template in `knowledgebase/templates/concept.md`.
 - Each concept documents architectural decisions, design patterns, and key mental models.
-- **Entry identification**: KB entries are referenced by their filename (without `.md` extension). For example, `impulse-concept.md` is referenced as `impulse-concept`.
+- **Entry identification**: KB entries are referenced by their filename (without `.md` extension). For example, `signal-concept.md` is referenced as `signal-concept`.
 - Ask your AI agent to implement changes based on KB concepts, then review and refine the KB if needed.
 - Generate docs from the KB using AI synthesis; generated docs can be manually refined for better examples and prose, but use the validation checklist (see AI-SYNTHESIS-GUIDE.md) to determine if the KB should be updated first.
 

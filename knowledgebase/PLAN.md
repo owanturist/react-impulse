@@ -11,7 +11,7 @@ This plan bootstraps a single source of truth (the knowledgebase) that powers:
 - Create and maintain a knowledgebase (KB) for AI to implement features, fixes, and tests.
 - Derive human-facing documentation from the KB using the [Diátaxis][diataxis] framework via an AI synthesis pass (not a mechanical copy).
 - Use [Fumadocs][fumadocs] for the docs site; allow interactive [React][react] components.
-- Provide versioned docs per package using branch-based semver ranges (no copies), e.g., `/react-impulse/1.x.x` or `/react-impulse/1.1.x`; latest remains the default route.
+- Provide versioned docs per package using branch-based semver ranges (no copies), e.g., `/react-signal/1.x.x` or `/react-signal/1.1.x`; latest remains the default route.
 - Integrate with [Changesets][changesets] and existing release flows.
 - Expose the KB via [MCP][mcp] so users can connect their AI agents to it.
 - Define and automate a KB-first workflow (see “KB-first end-to-end workflow”).
@@ -21,13 +21,13 @@ Status: this document specifies how each item will be implemented, with concrete
 
 ## Scope adjustment (2025-08-25)
 
-We will focus only on the react-impulse package for the initial implementation:
+We will focus only on the react-signal package for the initial implementation:
 
-- Phases 1–3 (KB, generator + docs site, versioned docs) apply to react-impulse only.
-- react-impulse-form is deferred and will be tackled after react-impulse reaches Phase 3 DoD; its work will be scheduled as follow-up sub-phases (e.g., “Phase 2b/3b — react-impulse-form”).
-- KB entries should target `packages: [react-impulse]` for scope/DoD; entries for `react-impulse-form` are optional and won’t block.
-- Docs generation and deployment will initially produce only `/react-impulse/**` routes; `/react-impulse-form/**` routes will be added later.
-- The initial MCP server may expose only react-impulse entries; react-impulse-form support will follow.
+- Phases 1–3 (KB, generator + docs site, versioned docs) apply to react-signal only.
+- react-signal-form is deferred and will be tackled after react-signal reaches Phase 3 DoD; its work will be scheduled as follow-up sub-phases (e.g., “Phase 2b/3b — react-signal-form”).
+- KB entries should target `packages: [react-signal]` for scope/DoD; entries for `react-signal-form` are optional and won’t block.
+- Docs generation and deployment will initially produce only `/react-signal/**` routes; `/react-signal-form/**` routes will be added later.
+- The initial MCP server may expose only react-signal entries; react-signal-form support will follow.
 
 ## TL;DR architecture
 
@@ -65,7 +65,7 @@ Users connect their MCP-capable clients to this server and get first-class, up-t
 
 ## Content model (KB schema)
 
-Each KB entry is a Markdown file with YAML frontmatter. KB entries are referenced by their filename (without `.md` extension). For example, `impulse-concept.md` is referenced as `impulse-concept` in `relates-to` arrays and PLAN.yml `sources`.
+Each KB entry is a Markdown file with YAML frontmatter. KB entries are referenced by their filename (without `.md` extension). For example, `signal-concept.md` is referenced as `signal-concept` in `relates-to` arrays and PLAN.yml `sources`.
 
 ### Frontmatter Fields
 
@@ -74,8 +74,8 @@ Each KB entry is a Markdown file with YAML frontmatter. KB entries are reference
 title: Human-Readable Title
 type: concept
 packages:
-  - react-impulse
-  - react-impulse-form
+  - react-signal
+  - react-signal-form
 relates-to:
   - other-concept-filename
   - another-concept-filename
@@ -118,7 +118,7 @@ Generator and tooling:
 
 - packages/knowledgebase-tools/ (future package) — parsers, schema checks, optional AI orchestration helpers (NO mechanical 1:1 copier)
 - packages/knowledgebase-mcp/ (new package) — MCP server exposing KB
-- docs/ (Fumadocs site; uses AI-synthesized Diátaxis content; initial scope: react-impulse only)
+- docs/ (Fumadocs site; uses AI-synthesized Diátaxis content; initial scope: react-signal only)
 
 ## KB-first end-to-end workflow
 
@@ -161,19 +161,19 @@ Stages (manual AI-driven for Phase 2):
    ```jsonc
    [
      {
-       "slug": "impulse-overview",
-       "title": "Impulse Overview",
+       "slug": "signal-overview",
+       "title": "Signal Overview",
        "diataxis": "explanation",
-       "sources": ["impulse-concept", "scope-concept"],
+       "sources": ["signal-concept", "monitor-concept"],
        "purpose": "High-level mental model & motivations",
        "sections": ["Overview", "Mental model", "Key concepts", "See also"],
      },
      {
-       "slug": "impulse-api",
-       "title": "Impulse API Reference",
+       "slug": "signal-api",
+       "title": "Signal API Reference",
        "diataxis": "reference",
-       "sources": ["impulse-concept"],
-       "purpose": "Complete API documentation for Impulse interface",
+       "sources": ["signal-concept"],
+       "purpose": "Complete API documentation for Signal interface",
        "sections": [
          "Overview",
          "Type signature",
@@ -201,11 +201,11 @@ Versioned docs (branch-based, no snapshots):
 
 - Documentation versions are represented by protected branches that correspond to maintenance ranges (e.g., `1.x.x` ⇒ `>=1.0.0 <2.0.0`; `1.1.x` ⇒ `>=1.1.0 <1.2.0`).
 - Each branch builds the docs site once and deploys routes for all packages present in the branch based on the version in each package’s package.json:
-  - `/react-impulse/1.x.x` or `/react-impulse/1.1.x`
-  - `/react-impulse-form/2.x.x` or `/react-impulse-form/2.0.x`
+  - `/react-signal/1.x.x` or `/react-signal/1.1.x`
+  - `/react-signal-form/2.x.x` or `/react-signal-form/2.0.x`
 - The default branch deploys the latest routes:
-  - `/react-impulse` (latest)
-  - `/react-impulse-form` (latest)
+  - `/react-signal` (latest)
+  - `/react-signal-form` (latest)
 - No copy/paste or freezing of content into per-version directories; the branch is the version. A change merged into a maintenance branch updates the corresponding versioned docs route(s).
 
 ## AI agent guardrails
@@ -248,8 +248,8 @@ Docs deployment (per-branch, independent of package releases):
   - Compute the branch label (e.g., `1.x.x` or `1.1.x`) and verify versions fall within the branch’s declared range; fail CI if not.
   - Validate PLAN/pages (same rules as default branch).
   - Build with [Fumadocs][fumadocs] and deploy under branch-based routes per package:
-    - `/react-impulse/1.x.x` or `/react-impulse/1.1.x`
-    - `/react-impulse-form/2.x.x` or `/react-impulse-form/2.0.x`
+    - `/react-signal/1.x.x` or `/react-signal/1.1.x`
+    - `/react-signal-form/2.x.x` or `/react-signal-form/2.0.x`
   - Keep the header “version switcher” compatible across branches by reading a shared versions manifest (see below).
 
 Versions manifest for switcher:
@@ -285,7 +285,7 @@ Phase 0 — Bootstrap
 - [x] knowledgebase/ folder with PLAN.md and README.md
 - [x] Agree on KB schema fields and templates (tracked below)
 
-Phase 1 — KB structure (react-impulse only)
+Phase 1 — KB structure (react-signal only)
 
 - [x] Add templates/ (concept only)
 - [x] Seed entries with concept documentation
@@ -293,10 +293,10 @@ Phase 1 — KB structure (react-impulse only)
 Definition of Done (Phase 1):
 
 - `knowledgebase/templates/concept.md` provides authoring scaffold.
-- `knowledgebase/entries/` contains at least two seed concept entries for react-impulse.
+- `knowledgebase/entries/` contains at least two seed concept entries for react-signal.
 - Note: Schema and validation will be added in Phase 2.6 after the full documentation workflow is established.
 
-Phase 2 — AI doc synthesis + Fumadocs site (react-impulse only)
+Phase 2 — AI doc synthesis + Fumadocs site (react-signal only)
 
 - [x] Scaffold `docs/` with Diátaxis folder structure: `content/{explanation,how-to,tutorials,reference}`
 - [x] Add `docs/AI-SYNTHESIS-GUIDE.md` (prompts, required structure, section checklists for all Diátaxis types including reference).
@@ -314,7 +314,7 @@ Definition of Done (Phase 2):
 - `AI-SYNTHESIS-GUIDE.md` defines the canonical prompt & transformation rules for all documentation types.
 - Fumadocs site builds locally without 404 for synthesized slugs.
 
-Phase 2.5 — API reference documentation (react-impulse only)
+Phase 2.5 — API reference documentation (react-signal only)
 
 - [ ] Generate reference pages from KB entries
 - [ ] Integrate API reference pages into Fumadocs site navigation
@@ -354,29 +354,29 @@ Definition of Done (Phase 2.6):
 - CI runs `pnpm kb:lint` and `pnpm docs:validate` and fails on any validation error.
 - All validation errors use Zod's pretty error formatting for readability.
 
-Phase 3 — Versioned docs (branch-based) + release integration (react-impulse first)
+Phase 3 — Versioned docs (branch-based) + release integration (react-signal first)
 
-- [ ] Establish protected maintenance branches for react-impulse (e.g., `1.x.x`, `1.1.x`) per stream policy
-- [ ] CI: deploy default branch to `/react-impulse` latest route
-- [ ] CI: deploy maintenance branches to branch-based routes (e.g., `/react-impulse/1.x.x` or `/react-impulse/1.1.x`)
-- [ ] CI: validate branch range vs react-impulse package.json version (guardrail)
+- [ ] Establish protected maintenance branches for react-signal (e.g., `1.x.x`, `1.1.x`) per stream policy
+- [ ] CI: deploy default branch to `/react-signal` latest route
+- [ ] CI: deploy maintenance branches to branch-based routes (e.g., `/react-signal/1.x.x` or `/react-signal/1.1.x`)
+- [ ] CI: validate branch range vs react-signal package.json version (guardrail)
 - [ ] CI: continuously deploy docs on merges affecting docs/**, knowledgebase/**, or generator sources
 
 Definition of Done (Phase 3):
 
-- Protected maintenance branches established for react-impulse per stream policy.
-- Default branch deploys `/react-impulse` latest; maintenance branches deploy under `/react-impulse/<branch-label>`.
-- CI guardrails validate branch version ranges against the react-impulse package.json version.
+- Protected maintenance branches established for react-signal per stream policy.
+- Default branch deploys `/react-signal` latest; maintenance branches deploy under `/react-signal/<branch-label>`.
+- CI guardrails validate branch version ranges against the react-signal package.json version.
 
-Phase 4 — MCP server (react-impulse first)
+Phase 4 — MCP server (react-signal first)
 
-- [ ] Create packages/knowledgebase-mcp with search/get/tools endpoints (initially serving react-impulse entries)
+- [ ] Create packages/knowledgebase-mcp with search/get/tools endpoints (initially serving react-signal entries)
 - [ ] Docs for configuring clients
 - [ ] Optional: small web UI to browse KB (could be part of docs site)
 
 Definition of Done (Phase 4):
 
-- `packages/knowledgebase-mcp` exposes kb.get, kb.search, kb.brief.pick per the JSON contracts (at minimum for react-impulse entries).
+- `packages/knowledgebase-mcp` exposes kb.get, kb.search, kb.brief.pick per the JSON contracts (at minimum for react-signal entries).
 - Read-only FS access to `knowledgebase/entries` with frontmatter parsing.
 - Minimal client configuration examples included in docs.
 

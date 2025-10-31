@@ -29,8 +29,8 @@ This project uses a knowledgebase-driven development approach. When working with
 
 ## Project Structure
 
-- `packages/react-impulse/` - Core reactive state library
-- `packages/react-impulse-form/` - Form validation library
+- `packages/react-signal/` - Core reactive state library
+- `packages/react-signal-form/` - Form validation library
 - `packages/tools/` - Utility functions
 - `knowledgebase/` - Single source of truth for features/bugs/concepts
 
@@ -45,14 +45,14 @@ This project uses a knowledgebase-driven development approach. When working with
 ```yaml
 # ✅ Correct - YAML list syntax
 packages:
-  - react-impulse
-  - react-impulse-form
+  - react-signal
+  - react-signal-form
 relates-to:
   - concept-1
   - concept-2
 
 # ❌ Avoid - JSON bracket syntax
-packages: [react-impulse, react-impulse-form]
+packages: [react-signal, react-signal-form]
 relates-to: [concept-1, concept-2]
 ```
 
