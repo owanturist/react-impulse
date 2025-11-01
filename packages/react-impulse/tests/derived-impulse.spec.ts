@@ -1,4 +1,4 @@
-import { act, configure, renderHook, waitFor } from "@testing-library/react"
+import { act, renderHook } from "@testing-library/react"
 import { useState } from "react"
 
 import {
@@ -15,10 +15,6 @@ import {
 } from "../src"
 
 import { Counter } from "./common"
-
-configure({
-  asyncUtilTimeout: 10000,
-})
 
 describe.each<{
   name: string
@@ -802,209 +798,186 @@ describe.each<{
   })
 })
 
-describe.skipIf(process.env.CI).concurrent(
-  "Impulse(getter) garbage collection",
-  {
-    timeout: 10000,
-    retry: 2,
-  },
-  () => {
-    it("cleanups immediately when source.setValue is called with the different value", ({
-      scope,
-    }) => {
-      const source = Impulse(0)
+describe.concurrent("Impulse(getter) garbage collection", () => {
+  it("cleanups immediately when source.setValue is called with the different value", ({
+    scope,
+  }) => {
+    const source = Impulse(0)
 
-      ;(() => {
-        const derived = Impulse((scope) => ({
-          count: source.getValue(scope),
-        }))
+    ;(() => {
+      const derived = Impulse((scope) => ({
+        count: source.getValue(scope),
+      }))
 
-        expect(source).toHaveEmittersSize(0)
-
-        expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
-        expect(source).toHaveEmittersSize(1)
-        expect(derived).toHaveEmittersSize(0)
-      })()
-
-      expect(source).toHaveEmittersSize(1)
-
-      source.setValue(1)
       expect(source).toHaveEmittersSize(0)
-    })
 
-    it("cleanups the WeakRef when source.setValue is called with the same value", async ({
-      scope,
-    }) => {
-      const source = Impulse(0)
-
-      ;(() => {
-        const derived = Impulse((scope) => ({
-          count: source.getValue(scope),
-        }))
-
-        expect(source).toHaveEmittersSize(0)
-
-        expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
-        expect(source).toHaveEmittersSize(1)
-        expect(derived).toHaveEmittersSize(0)
-      })()
-
+      expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
       expect(source).toHaveEmittersSize(1)
+      expect(derived).toHaveEmittersSize(0)
+    })()
 
-      source.setValue(0)
+    expect(source).toHaveEmittersSize(1)
+
+    source.setValue(1)
+    expect(source).toHaveEmittersSize(0)
+  })
+
+  it("cleanups the WeakRef when source.setValue is called with the same value", async ({
+    scope,
+  }) => {
+    const source = Impulse(0)
+
+    ;(() => {
+      const derived = Impulse((scope) => ({
+        count: source.getValue(scope),
+      }))
+
+      expect(source).toHaveEmittersSize(0)
+
+      expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
       expect(source).toHaveEmittersSize(1)
+      expect(derived).toHaveEmittersSize(0)
+    })()
 
-      await waitFor(() => {
-        expect(source).toHaveEmittersSize(0)
-      })
-    })
+    expect(source).toHaveEmittersSize(1)
 
-    it("cleanups the WeakRef", async ({ scope }) => {
-      const source = Impulse(0)
-      let derived: null | ReadonlyImpulse<Counter> = Impulse((scope) => ({
+    source.setValue(0)
+    expect(source).toHaveEmittersSize(1)
+
+    await global.gc?.({ execution: "async" })
+    expect(source).toHaveEmittersSize(0)
+  })
+
+  it("cleanups the WeakRef", async ({ scope }) => {
+    const source = Impulse(0)
+    let derived: null | ReadonlyImpulse<Counter> = Impulse((scope) => ({
+      count: source.getValue(scope),
+    }))
+
+    expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
+    expect(source).toHaveEmittersSize(1)
+    expect(derived).toHaveEmittersSize(0)
+
+    derived = null
+
+    await global.gc?.({ execution: "async" })
+    expect(source).toHaveEmittersSize(0)
+  })
+
+  it("cleanups the WeakRef from clojure", async ({ scope }) => {
+    const source = Impulse(0)
+
+    ;(() => {
+      const derived = Impulse((scope) => ({
         count: source.getValue(scope),
       }))
 
       expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
       expect(source).toHaveEmittersSize(1)
       expect(derived).toHaveEmittersSize(0)
+    })()
 
-      derived = null
+    await global.gc?.({ execution: "async" })
+    expect(source).toHaveEmittersSize(0)
+  })
 
-      expect(source).toHaveEmittersSize(1)
+  it("cleanups the WeakRef from subscribe", async () => {
+    const source = Impulse(0)
 
-      await waitFor(() => {
-        expect(source).toHaveEmittersSize(0)
-      })
-    })
-
-    it("cleanups the WeakRef from clojure", async ({ scope }) => {
-      const source = Impulse(0)
-
-      ;(() => {
-        const derived = Impulse((scope) => ({
-          count: source.getValue(scope),
-        }))
-
-        expect(derived.getValue(scope)).toStrictEqual({ count: 0 })
-        expect(source).toHaveEmittersSize(1)
-        expect(derived).toHaveEmittersSize(0)
-      })()
-
-      expect(source).toHaveEmittersSize(1)
-
-      await waitFor(() => {
-        expect(source).toHaveEmittersSize(0)
-      })
-    })
-
-    it("cleanups the WeakRef from subscribe", async () => {
-      const source = Impulse(0)
-
-      ;(() => {
-        const derived = Impulse((scope) => ({
-          count: source.getValue(scope),
-        }))
-
-        const spy = vi.fn()
-
-        const cleanup = subscribe((scope) => {
-          spy(derived.getValue(scope))
-        })
-
-        expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 0 })
-
-        expect(source).toHaveEmittersSize(1)
-        expect(derived).toHaveEmittersSize(1)
-
-        cleanup()
-        expect(source).toHaveEmittersSize(1)
-        expect(derived).toHaveEmittersSize(0)
-      })()
-
-      expect(source).toHaveEmittersSize(1)
-
-      await waitFor(() => {
-        expect(source).toHaveEmittersSize(0)
-      })
-    })
-
-    it("cleanups the WeakRef from untrack", async () => {
-      const source = Impulse(0)
-
-      ;(() => {
-        const derived = Impulse((scope) => ({
-          count: source.getValue(scope),
-        }))
-
-        expect(untrack(derived)).toStrictEqual({ count: 0 })
-        expect(source).toHaveEmittersSize(1)
-        expect(derived).toHaveEmittersSize(0)
-      })()
-      expect(source).toHaveEmittersSize(1)
-
-      await waitFor(() => {
-        expect(source).toHaveEmittersSize(0)
-      })
-    })
-
-    it("cleanups the WeakRef from a hook", async () => {
-      const source = Impulse(0)
-
-      const { result, unmount } = renderHook(() => {
-        const derived = Impulse((scope) => ({
-          count: source.getValue(scope),
-        }))
-
-        return useScoped(derived)
-      })
-
-      expect(result.current).toStrictEqual({ count: 0 })
-      expect(source).toHaveEmittersSize(1)
-
-      unmount()
-      expect(source).toHaveEmittersSize(1)
-
-      await waitFor(() => {
-        expect(source).toHaveEmittersSize(0)
-      })
-    })
-
-    it("cleanups only unreachable dependencies", async ({ scope }) => {
-      const source = Impulse(0)
-      const derived_1 = Impulse((scope) => ({
+    ;(() => {
+      const derived = Impulse((scope) => ({
         count: source.getValue(scope),
       }))
 
-      expect(derived_1.getValue(scope)).toStrictEqual({ count: 0 })
-      expect(source).toHaveEmittersSize(1)
-      ;(() => {
-        const derived_2 = Impulse((scope) => ({
-          count: source.getValue(scope),
-        }))
+      const spy = vi.fn()
 
-        expect(derived_2.getValue(scope)).toStrictEqual({ count: 0 })
-        expect(source).toHaveEmittersSize(2)
-        expect(derived_2).toHaveEmittersSize(0)
-      })()
-      ;(() => {
-        const derived_3 = Impulse((scope) => ({
-          count: source.getValue(scope),
-        }))
-
-        expect(derived_3.getValue(scope)).toStrictEqual({ count: 0 })
-        expect(source).toHaveEmittersSize(3)
-        expect(derived_3).toHaveEmittersSize(0)
-      })()
-
-      expect(source).toHaveEmittersSize(3)
-
-      await waitFor(() => {
-        expect(source).toHaveEmittersSize(1)
+      const cleanup = subscribe((scope) => {
+        spy(derived.getValue(scope))
       })
+
+      expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 0 })
+
+      expect(source).toHaveEmittersSize(1)
+      expect(derived).toHaveEmittersSize(1)
+
+      cleanup()
+      expect(source).toHaveEmittersSize(1)
+      expect(derived).toHaveEmittersSize(0)
+    })()
+
+    await global.gc?.({ execution: "async" })
+    expect(source).toHaveEmittersSize(0)
+  })
+
+  it("cleanups the WeakRef from untrack", async () => {
+    const source = Impulse(0)
+
+    ;(() => {
+      const derived = Impulse((scope) => ({
+        count: source.getValue(scope),
+      }))
+
+      expect(untrack(derived)).toStrictEqual({ count: 0 })
+      expect(source).toHaveEmittersSize(1)
+      expect(derived).toHaveEmittersSize(0)
+    })()
+
+    await global.gc?.({ execution: "async" })
+    expect(source).toHaveEmittersSize(0)
+  })
+
+  it("cleanups the WeakRef from a hook", async () => {
+    const source = Impulse(0)
+
+    const { result, unmount } = renderHook(() => {
+      const derived = Impulse((scope) => ({
+        count: source.getValue(scope),
+      }))
+
+      return useScoped(derived)
     })
-  },
-)
+
+    expect(result.current).toStrictEqual({ count: 0 })
+    expect(source).toHaveEmittersSize(1)
+
+    unmount()
+    expect(source).toHaveEmittersSize(1)
+
+    await global.gc?.({ execution: "async" })
+    expect(source).toHaveEmittersSize(0)
+  })
+
+  it("cleanups only unreachable dependencies", async ({ scope }) => {
+    const source = Impulse(0)
+    const derived_1 = Impulse((scope) => ({
+      count: source.getValue(scope),
+    }))
+
+    expect(derived_1.getValue(scope)).toStrictEqual({ count: 0 })
+    expect(source).toHaveEmittersSize(1)
+    ;(() => {
+      const derived_2 = Impulse((scope) => ({
+        count: source.getValue(scope),
+      }))
+
+      expect(derived_2.getValue(scope)).toStrictEqual({ count: 0 })
+      expect(source).toHaveEmittersSize(2)
+      expect(derived_2).toHaveEmittersSize(0)
+    })()
+    ;(() => {
+      const derived_3 = Impulse((scope) => ({
+        count: source.getValue(scope),
+      }))
+
+      expect(derived_3.getValue(scope)).toStrictEqual({ count: 0 })
+      expect(source).toHaveEmittersSize(3)
+      expect(derived_3).toHaveEmittersSize(0)
+    })()
+
+    await global.gc?.({ execution: "async" })
+    expect(source).toHaveEmittersSize(1)
+  })
+})
 
 describe("Impulse(source)", () => {
   it("creates an Impulse from a source", () => {

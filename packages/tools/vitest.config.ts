@@ -7,10 +7,6 @@ export default defineProject({
 
   test: {
     globals: true,
-    poolOptions: {
-      threads: {
-        singleThread: true,
-      },
-    },
+    isolate: false,
   } satisfies ProjectConfig,
 })

@@ -11,11 +11,8 @@ export default defineProject({
 
   test: {
     globals: true,
-    poolOptions: {
-      threads: {
-        singleThread: true,
-      },
-    },
+    isolate: true,
+    execArgv: ["--expose-gc"],
     environment: "happy-dom",
     setupFiles: "./setup-tests.ts",
   } satisfies ProjectConfig,
