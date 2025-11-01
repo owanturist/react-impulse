@@ -48,9 +48,9 @@ This naming aligns with:
 
 - **Ecosystem familiarity**: "Signal" is widely recognized in reactive programming
 - **Clear semantics**: Broadcasting (Signal) vs observing (Monitor) is intuitive
-- **API consolidation**: Single `useMonitor` hook reduces cognitive load
+- **API clarity**: `useMonitor()` handles imperative access while `useComputed*` covers derived values and effects
 - **Functional flexibility**: Both `signal.read(monitor)` and `monitor(signal)` work
-- **Better discoverability**: Hook names like `useMonitorEffect` are self-explanatory
+- **Better discoverability**: Hook names like `useComputedEffect` are self-explanatory
 
 ### API transformation
 
@@ -78,20 +78,35 @@ const value2 = monitor(signal)       // Pass signal to monitor
 const scope = useScope()
 const value = useScoped((scope) => impulse.getValue(scope))
 
-// Proposed (consolidated, two equivalent ways)
+// Proposed
 const monitor = useMonitor()
-const value1 = useMonitor((monitor) => signal.read(monitor)) // Pass monitor to signal
-const value2 = useMonitor((monitor) => monitor(signal)) // Pass signal to monitor
+const value = useComputed((monitor) => signal.read(monitor))
 ```
 
 #### Complete hook family
 
 ```ts
 // Current
-useScopedCallback → useMonitorCallback
-useScopedEffect → useMonitorEffect
-useScopedLayoutEffect → useMonitorLayoutEffect
-useScopedMemo → useMonitorMemo
+useScopedCallback → useComputedCallback
+useScopedEffect → useComputedEffect
+useScopedLayoutEffect → useComputedLayoutEffect
+useScopedMemo → useComputedMemo
+```
+
+#### Reactive utilities
+
+```ts
+// Current
+const unsubscribe = subscribe((scope) => {
+  console.log(impulse.getValue(scope))
+  return () => console.log("Cleaning up")
+})
+
+// Proposed
+const stop = effect((monitor) => {
+  console.log(signal.read(monitor))
+  return () => console.log("Cleaning up")
+})
 ```
 
 ### Trade-offs
@@ -106,9 +121,10 @@ However, these costs are justified by significantly improved long-term developer
 
 1. **Core rename**: `Impulse` → `Signal`, `Scope` → `Monitor`
 2. **Method rename**: `getValue(scope)` → `read(monitor)`
-3. **Hook consolidation**: Merge `useScope` + `useScoped` → `useMonitor`
-4. **Hook family rename**: `useScoped*` → `useMonitor*`
-5. **Migration path**: Provide codemods and migration guides
+3. **Hook consolidation**: Split responsibilities into `useMonitor()` for imperative access and `useComputed()` for derived values
+4. **Hook family rename**: `useScoped*` → `useComputed*`
+5. **Effect rename**: `subscribe` → `effect`, aligning with reactive ecosystem terminology
+6. **Migration path**: Provide codemods and migration guides
 
 ### Mental model alignment
 
@@ -157,64 +173,77 @@ interface Monitor {
 
 A Monitor is a dependency tracking context that observes signal changes.
 
-### Consolidated useMonitor hook
+### useMonitor hook
 
 ```ts
-// Create monitor
 function useMonitor(): Monitor
-
-// Reactive computation
-function useMonitor<T>(
-  computation: (monitor: Monitor) => T,
-  deps?: React.DependencyList,
-  options?: UseMonitoredOptions<T>,
-): T
 ```
 
-### Monitor hook family
+Returns a shared monitor instance tied to the component lifecycle for imperative reads and interop with imperative helpers.
+
+### Computed React helpers
 
 ```ts
-function useMonitorCallback<T extends (...args: any[]) => any>(
-  callback: (monitor: Monitor) => T,
-  deps: React.DependencyList,
+function useComputed<T>(
+  compute: (monitor: Monitor) => T,
+  deps?: React.DependencyList,
+  options?: UseComputedOptions<T>,
 ): T
 
-function useMonitorEffect(
-  effect: (monitor: Monitor) => void | (() => void),
-  deps?: React.DependencyList,
-): void
-
-function useMonitorLayoutEffect(
-  effect: (monitor: Monitor) => void | (() => void),
-  deps?: React.DependencyList,
-): void
-
-function useMonitorMemo<T>(
+function useComputedMemo<T>(
   factory: (monitor: Monitor) => T,
   deps: React.DependencyList,
 ): T
+
+function useComputedCallback<T extends (...args: any[]) => any>(
+  factory: (monitor: Monitor) => T,
+  deps: React.DependencyList,
+): T
+
+function useComputedEffect(
+  effect: (monitor: Monitor) => void | (() => void),
+  deps?: React.DependencyList,
+): void
+
+function useComputedLayoutEffect(
+  effect: (monitor: Monitor) => void | (() => void),
+  deps?: React.DependencyList,
+): void
 ```
+
+### Effect (renamed from subscribe)
+
+```ts
+function effect(listener: (monitor: Monitor) => Destructor): VoidFunction
+```
+
+Creates a reactive effect that re-runs the listener whenever any accessed signal changes and returns an unsubscribe function.
 
 ### Example usage
 
 ```tsx
-import { Signal, useMonitor, useMonitorEffect } from "react-impulse"
+import {
+  Signal,
+  useMonitor,
+  useComputed,
+  useComputedEffect,
+} from "react-impulse"
 
 const count = Signal(0)
 const doubled = Signal(0)
 
 function Counter() {
-  // Both of these are equivalent:
-  const countValue = useMonitor((monitor) => count.read(monitor)) // Method style
-  const doubledValue = useMonitor((monitor) => monitor(doubled)) // Function style
+  const monitor = useMonitor()
 
-  // Reactive effect (can use either style)
-  useMonitorEffect(
+  const countValue = useComputed((monitor) => count.read(monitor))
+  const doubledValue = useComputed((monitor) => monitor(doubled))
+
+  useComputedEffect(
     (monitor) => {
       const value = monitor(count) // Using function style
       doubled.update(value * 2)
     },
-    [count],
+    [count, doubled],
   )
 
   return (
