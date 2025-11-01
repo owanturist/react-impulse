@@ -41,7 +41,7 @@
     "react": "^19.2.0",
     "react-dom": "19.2.0",
     "react-impulse": "workspace:*",
-    "vite-tsconfig-paths": "^5.1.4",
+    "vite-tsconfig-paths": "6.0.0-beta.4",
     "zod": "^4.1.12"
   }
 }
