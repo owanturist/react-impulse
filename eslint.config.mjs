@@ -218,6 +218,7 @@ export default tseslint.config([
         "error",
         { argsIgnorePattern: "^_" },
       ],
+      "@typescript-eslint/unified-signatures": "off", // throws `typeParameters.params is not iterable`
       "@typescript-eslint/explicit-member-accessibility": "error",
       "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/no-confusing-non-null-assertion": "error",
