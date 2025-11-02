@@ -138,7 +138,12 @@ describe("single impulse", () => {
         <Component onMemo={onMemo} value={value_2} />
       </React.Profiler>,
     )
-    expect(value_1).toHaveEmittersSize(0)
+
+    /**
+     * Not 0 because a scope cannot cleanup on every rerender,
+     * otherwise memo/effect hooks with the scope dependency will lose subscriptions too eagerly.
+     */
+    expect(value_1).toHaveEmittersSize(1)
     expect(value_2).toHaveEmittersSize(1)
 
     vi.clearAllMocks()
@@ -147,8 +152,8 @@ describe("single impulse", () => {
       value_1.setValue(10)
     })
 
-    expect(onMemo).not.toHaveBeenCalled()
-    expect(onRender).not.toHaveBeenCalled()
+    expect(onMemo).toHaveBeenCalledOnce()
+    expect(onRender).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     act(() => {
