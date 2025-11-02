@@ -31,12 +31,12 @@ it("does not change scope value unless scoped impulse changes", () => {
   expect(spy).toHaveBeenCalledTimes(2)
 })
 
-export const Component: React.FC<{
+const Component: React.FC<{
   value: Impulse<number>
 }> = ({ value }) => {
   const scope = useScope()
 
-  return value.getValue(scope)
+  return <>{value.getValue(scope)}</>
 }
 
 it("cannot unsubscribe when swapped", () => {
