@@ -1,6 +1,6 @@
 import { type DependencyList, useMemo } from "./dependencies"
 import type { Scope } from "./scope"
-import { useCreateScope } from "./use-create-scope"
+import { useScope } from "./use-scope"
 
 /**
  * The hook is an `Impulse` version of the `React.useMemo` hook.
@@ -14,8 +14,8 @@ export function useScopedMemo<TResult>(
   factory: (scope: Scope) => TResult,
   dependencies: DependencyList,
 ): TResult {
-  const getScope = useCreateScope()
+  const scope = useScope()
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(() => factory(getScope()), [...dependencies, getScope])
+  return useMemo(() => factory(scope), [...dependencies, scope])
 }

@@ -1,0 +1,82 @@
+import { act, render, renderHook } from "@testing-library/react"
+import { useEffect } from "react"
+import React from "react"
+
+import { Impulse, useScope } from "../src"
+
+it("does not change scope value unless scoped impulse changes", () => {
+  const spy = vi.fn()
+  const impulse = Impulse(1)
+  const { result, rerender } = renderHook(() => {
+    const scope = useScope()
+
+    useEffect(() => {
+      spy(scope)
+    }, [scope])
+
+    return impulse.getValue(scope)
+  })
+
+  expect(result.current).toBe(1)
+  expect(spy).toHaveBeenCalledTimes(1)
+
+  rerender()
+  expect(result.current).toBe(1)
+  expect(spy).toHaveBeenCalledTimes(1)
+
+  act(() => {
+    impulse.setValue(2)
+  })
+  expect(result.current).toBe(2)
+  expect(spy).toHaveBeenCalledTimes(2)
+})
+
+const Component: React.FC<{
+  value: Impulse<number>
+}> = ({ value }) => {
+  const scope = useScope()
+
+  return <>{value.getValue(scope)}</>
+}
+
+it("cannot unsubscribe when swapped", () => {
+  const value_1 = Impulse(1)
+  const value_2 = Impulse(3)
+  const onRender = vi.fn()
+
+  const { rerender } = render(<Component value={value_1} />, {
+    wrapper: ({ children }) => (
+      <React.Profiler id="test" onRender={onRender}>
+        {children}
+      </React.Profiler>
+    ),
+  })
+
+  expect(value_1).toHaveEmittersSize(1)
+  expect(value_2).toHaveEmittersSize(0)
+
+  rerender(<Component value={value_2} />)
+  /**
+   * Not 0 because a scope cannot cleanup on every rerender,
+   * otherwise memo/effect hooks with the scope dependency will lose subscriptions too eagerly.
+   */
+  expect(value_1).toHaveEmittersSize(1)
+  expect(value_2).toHaveEmittersSize(1)
+
+  vi.clearAllMocks()
+
+  act(() => {
+    value_1.setValue(10)
+  })
+
+  expect(onRender).toHaveBeenCalledOnce()
+  vi.clearAllMocks()
+
+  act(() => {
+    value_2.setValue(5)
+  })
+  expect(onRender).toHaveBeenCalledOnce()
+
+  expect(value_1).toHaveEmittersSize(0)
+  expect(value_2).toHaveEmittersSize(1)
+})

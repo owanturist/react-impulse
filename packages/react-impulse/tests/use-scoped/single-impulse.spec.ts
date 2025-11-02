@@ -123,6 +123,35 @@ describe("single factory", () => {
       expect(result.current).toStrictEqual({ count: 4 })
     })
 
+    it("unsubscribes when swapped", () => {
+      const counter_1 = Impulse({ count: 1 })
+      const counter_2 = Impulse({ count: 3 })
+
+      const { rerender } = renderHook(useCounter, {
+        initialProps: { impulse: counter_1 },
+      })
+
+      expect(counter_1).toHaveEmittersSize(1)
+      expect(counter_2).toHaveEmittersSize(0)
+
+      rerender({ impulse: counter_2 })
+      expect(counter_1).toHaveEmittersSize(0)
+      expect(counter_2).toHaveEmittersSize(1)
+
+      act(() => {
+        counter_1.setValue({ count: 10 })
+      })
+      expect(counter_1).toHaveEmittersSize(0)
+      expect(counter_2).toHaveEmittersSize(1)
+
+      act(() => {
+        counter_2.setValue({ count: 5 })
+      })
+
+      expect(counter_1).toHaveEmittersSize(0)
+      expect(counter_2).toHaveEmittersSize(1)
+    })
+
     describe("watches the replaced impulse changes", () => {
       const setup = () => {
         const impulse_1 = Impulse({ count: 1 })
