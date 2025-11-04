@@ -15,7 +15,7 @@ export function subscribe(
   let cleanup: Destructor = undefined
 
   const emit = (): void => {
-    batch(() => {
+    ScopeEmitter._schedule(() => {
       cleanup?.()
 
       cleanup = injectScope(listener, {
