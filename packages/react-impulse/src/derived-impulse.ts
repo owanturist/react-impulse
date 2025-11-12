@@ -1,31 +1,28 @@
 import { BaseImpulse } from "./base-impulse"
 import type { Compare } from "./compare"
 import { DirectImpulse } from "./direct-impulse"
-import { EMITTER_KEY, STATIC_SCOPE, type Scope } from "./scope"
+import { STATIC_SCOPE, type Scope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 
 export class DerivedImpulse<T> extends BaseImpulse<T> {
   // the inner scope proxies the setters to the outer scope
-  private readonly _scope = {
-    [EMITTER_KEY]: new ScopeEmitter(() => {
-      if (
-        this._compare(this._value, this._getValue(STATIC_SCOPE), STATIC_SCOPE)
-      ) {
-        // subscribe back to the dependencies
-        this._getValue(this._scope)
-        // adjust the version since the value didn't change
-        this._version = this._scope[EMITTER_KEY]._getVersion()
-      } else {
-        ScopeEmitter._schedule((queue) => {
-          queue._push(this._emitters)
-        })
-      }
-    }, true),
-  } satisfies Scope
+  private readonly _scope = new ScopeEmitter(() => {
+    if (
+      this._compare(this._value, this._getValue(STATIC_SCOPE), STATIC_SCOPE)
+    ) {
+      // subscribe back to the dependencies
+      this._getValue(this._scope)
+    } else {
+      this._stale = true
+      ScopeEmitter._schedule((queue) => {
+        queue._push(this._emitters)
+      })
+    }
+  }, true)._spawn()
 
   // the value is never null because it assigns the value from the _getValue on the first _getter call
   private _value: T = null as never
-  private _version?: number
+  private _stale = true
 
   public constructor(
     private readonly _getValue: (scope: Scope) => T,
@@ -37,11 +34,10 @@ export class DerivedImpulse<T> extends BaseImpulse<T> {
 
   protected _getter(): T {
     const value = this._getValue(this._scope)
-    const version = this._scope[EMITTER_KEY]._getVersion()
 
-    if (this._version !== version) {
+    if (this._stale) {
       this._value = value
-      this._version = version
+      this._stale = false
     }
 
     return this._value

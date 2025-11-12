@@ -1,12 +1,12 @@
 import { noop } from "~/tools/noop"
 
 import { useCallback, useSyncExternalStoreWithSelector } from "./dependencies"
-import { EMITTER_KEY, type Scope } from "./scope"
+import type { Scope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 import { usePermanent } from "./use-permanent"
 
 function useInitScopeEmitter(): [
-  emitter: ScopeEmitter,
+  getSpawn: () => () => Scope,
   subscribe: (emit: VoidFunction) => VoidFunction,
 ] {
   return usePermanent(() => {
@@ -14,7 +14,7 @@ function useInitScopeEmitter(): [
     const emitter = new ScopeEmitter(() => onStoreChange())
 
     return [
-      emitter,
+      () => emitter._spawn,
 
       (emit) => {
         onStoreChange = emit
@@ -31,24 +31,17 @@ export function useCreateScope<T>(
   transform: (scope: Scope) => T,
   compare?: (left: T, right: T) => boolean,
 ): T {
-  const [emitter, subscribe] = useInitScopeEmitter()
+  const [getSpawn, subscribe] = useInitScopeEmitter()
 
   const select = useCallback(
-    (version: number) => {
-      emitter._detachFromAll()
-
-      return transform({
-        [EMITTER_KEY]: emitter,
-        version,
-      })
-    },
-    [emitter, transform],
+    (spawn: () => Scope) => transform(spawn()),
+    [transform],
   )
 
   return useSyncExternalStoreWithSelector(
     subscribe,
-    emitter._getVersion,
-    emitter._getVersion,
+    getSpawn,
+    getSpawn,
     select,
     compare,
   )

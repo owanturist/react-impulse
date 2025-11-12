@@ -1,6 +1,6 @@
 import { batch } from "./batch"
 import type { Destructor } from "./destructor"
-import { EMITTER_KEY, type Scope, injectScope } from "./scope"
+import { type Scope, injectScope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 
 /**
@@ -18,10 +18,7 @@ export function subscribe(
     ScopeEmitter._schedule(() => {
       cleanup?.()
 
-      cleanup = injectScope(listener, {
-        [EMITTER_KEY]: emitter,
-        version: emitter._getVersion(),
-      })
+      cleanup = injectScope(listener, emitter._spawn())
     })
   }
 

@@ -1,3 +1,5 @@
+import { EMITTER_KEY, type Scope } from "./scope"
+
 export class ScopeEmitterQueue {
   private readonly _queue = new Set<ScopeEmitter>()
 
@@ -87,7 +89,13 @@ export class ScopeEmitter {
 
   private readonly _ref = new WeakRef(this)
 
-  private _version = 0
+  public _spawn = (): Scope => {
+    this._detachFromAll()
+
+    return {
+      [EMITTER_KEY]: this,
+    }
+  }
 
   /**
    * Initializes and returns a new instance of the `ScopeEmitter` class.
@@ -100,7 +108,7 @@ export class ScopeEmitter {
     public readonly _skipBatching = false,
   ) {}
 
-  public _detachFromAll(): void {
+  private _detachFromAll(): void {
     for (const emitters of this._attachedTo) {
       emitters.delete(this._ref)
     }
@@ -114,11 +122,13 @@ export class ScopeEmitter {
   }
 
   public _flush(): void {
-    this._version = (this._version + 1) % 10e9
-    this._detachFromAll()
-  }
+    this._spawn = () => {
+      this._detachFromAll()
 
-  public readonly _getVersion = (): number => {
-    return this._version
+      return {
+        [EMITTER_KEY]: this,
+      }
+    }
+    this._detachFromAll()
   }
 }

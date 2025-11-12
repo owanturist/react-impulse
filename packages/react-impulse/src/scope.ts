@@ -4,7 +4,6 @@ export const EMITTER_KEY = Symbol("scope")
 
 export interface Scope {
   readonly [EMITTER_KEY]: null | ScopeEmitter
-  readonly version?: number
 }
 
 export const STATIC_SCOPE: Scope = {
