@@ -40,7 +40,7 @@
     "happy-dom": "^20.0.10",
     "prettier": "^3.6.2",
     "size-limit": "^11.2.0",
-    "terser": "^5.44.0",
+    "terser": "^5.44.1",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.4",
