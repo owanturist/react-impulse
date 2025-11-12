@@ -1,27 +1,27 @@
 import { BaseImpulse } from "./base-impulse"
 import type { Compare } from "./compare"
 import { DirectImpulse } from "./direct-impulse"
-import { STATIC_SCOPE, type Scope } from "./scope"
+import { EMITTER_KEY, STATIC_SCOPE, type Scope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 
 export class DerivedImpulse<T> extends BaseImpulse<T> {
   // the inner scope proxies the setters to the outer scope
-  private readonly _scope = new ScopeEmitter(() => {
-    if (
-      this._compare(this._value, this._getValue(STATIC_SCOPE), STATIC_SCOPE)
-    ) {
-      // subscribe back to the dependencies
-      this._getValue(this._scope)
-    } else {
-      this._stale = true
-      ScopeEmitter._schedule((queue) => {
+  private readonly _scope = {
+    [EMITTER_KEY]: new ScopeEmitter((_, queue) => {
+      if (
+        this._compare(this._value, this._getValue(STATIC_SCOPE), STATIC_SCOPE)
+      ) {
+        // subscribe back to the dependencies
+        this._getValue(this._scope)
+      } else {
+        this._stale = true
         queue._push(this._emitters)
-      })
-    }
-  }, true)._spawn()
+      }
+    }, true),
+  }
 
   // the value is never null because it assigns the value from the _getValue on the first _getter call
-  private _value: T = null as never
+  private _value: T = null!
   private _stale = true
 
   public constructor(

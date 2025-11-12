@@ -5,18 +5,19 @@ import type { Scope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 import { usePermanent } from "./use-permanent"
 
-function useInitScopeEmitter(): [
-  getSpawn: () => () => Scope,
-  subscribe: (emit: VoidFunction) => VoidFunction,
-] {
-  return usePermanent(() => {
+export function useCreateScope<T>(
+  transform: (scope: Scope) => T,
+  compare?: (left: T, right: T) => boolean,
+): T {
+  const [getSpawn, sub] = usePermanent(() => {
     let onStoreChange = noop
+
     const emitter = new ScopeEmitter(() => onStoreChange())
 
     return [
       () => emitter._spawn,
 
-      (emit) => {
+      (emit: VoidFunction) => {
         onStoreChange = emit
 
         return () => {
@@ -25,24 +26,12 @@ function useInitScopeEmitter(): [
       },
     ]
   })
-}
-
-export function useCreateScope<T>(
-  transform: (scope: Scope) => T,
-  compare?: (left: T, right: T) => boolean,
-): T {
-  const [getSpawn, subscribe] = useInitScopeEmitter()
-
-  const select = useCallback(
-    (spawn: () => Scope) => transform(spawn()),
-    [transform],
-  )
 
   return useSyncExternalStoreWithSelector(
-    subscribe,
+    sub,
     getSpawn,
     getSpawn,
-    select,
+    useCallback((getScope) => transform(getScope()), [transform]),
     compare,
   )
 }

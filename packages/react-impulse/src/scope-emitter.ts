@@ -1,4 +1,4 @@
-import { EMITTER_KEY, type Scope } from "./scope"
+import { EMITTER_KEY, type Scope, injectScope } from "./scope"
 
 export class ScopeEmitterQueue {
   private readonly _queue = new Set<ScopeEmitter>()
@@ -22,11 +22,11 @@ export class ScopeEmitterQueue {
          */
         emitter._flush()
 
-        if (emitter._skipBatching) {
+        if (emitter._deferred) {
           /**
            * Emit immediately so `DerivedImpulse` utilizes the compare function to either:
-           * 1. NOT CHANGED: resubscribe to sources and set its._version = emitter._version
-           * 2. CHANGED: _push'es its._emitters so they end up here either emitting (DerivedImpulse) or scheduling (DirectImpulse).
+           * 1. NOT CHANGED: resubscribe to sources
+           * 2. CHANGED: marks as stale and _push'es its._emitters so they end up here either emitting (DerivedImpulse) or scheduling (DirectImpulse).
            */
           emitter._emit()
         } else {
@@ -97,16 +97,29 @@ export class ScopeEmitter {
     }
   }
 
+  public readonly _emit: VoidFunction
+
   /**
    * Initializes and returns a new instance of the `ScopeEmitter` class.
    *
    * @param emit - A callback function to be invoked when the scope emits.
-   * @param skipBatching - opt-out from emit batching. Necessary for derived impulses.
+   * @param deferred - Indicates whether the emission should be deferred.
+   *                   Used in `DerivedImpulse` so that it subscribes only after the first value read.
    */
   public constructor(
-    public readonly _emit: VoidFunction,
-    public readonly _skipBatching = false,
-  ) {}
+    emit: (scope: Scope, queue: ScopeEmitterQueue) => void,
+    public readonly _deferred = false,
+  ) {
+    this._emit = () => {
+      ScopeEmitter._schedule((queue) => {
+        injectScope(emit, this._spawn(), queue)
+      })
+    }
+
+    if (!_deferred) {
+      this._emit()
+    }
+  }
 
   private _detachFromAll(): void {
     for (const emitters of this._attachedTo) {
@@ -129,6 +142,7 @@ export class ScopeEmitter {
         [EMITTER_KEY]: this,
       }
     }
+
     this._detachFromAll()
   }
 }
