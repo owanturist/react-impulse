@@ -1,7 +1,7 @@
 import { batch } from "./batch"
 import type { Destructor } from "./destructor"
-import { EMITTER_KEY, type Scope, injectScope } from "./scope"
-import { ScopeEmitter } from "./scope-emitter"
+import { type Scope, injectScope } from "./scope"
+import { ScopeFactory } from "./scope-emitter"
 
 /**
  * A function that provides `Scope` as the first argument subscribes to changes of all `Impulse` instances that call the `Impulse#getValue` method inside the `listener`.
@@ -14,24 +14,20 @@ export function subscribe(
 ): VoidFunction {
   let cleanup: Destructor = undefined
 
-  const emit = (): void => {
-    batch(() => {
-      cleanup?.()
+  const factory = new ScopeFactory()
 
-      cleanup = injectScope(listener, {
-        [EMITTER_KEY]: emitter,
-        version: emitter._getVersion(),
-      })
-    })
+  const emit = (): void => {
+    cleanup?.()
+    cleanup = injectScope(listener, factory.create())
   }
 
-  const emitter = new ScopeEmitter(emit)
+  const disconnect = factory.connect(emit)
 
   emit()
 
   return () => {
     batch(() => {
-      emitter._flush()
+      disconnect()
       cleanup?.()
     })
   }

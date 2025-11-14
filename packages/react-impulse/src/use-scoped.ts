@@ -64,14 +64,13 @@ export function useScoped<TResult>(
     dependencies ?? [factoryOrReadableImpulse],
   )
 
-  const value = useCreateScope(
-    transform,
-    useHandler((prev, next) => {
-      const compare = options?.compare ?? isStrictEqual
+  const compare = useHandler((prev: TResult, next: TResult) => {
+    const fn = options?.compare ?? isStrictEqual
 
-      return compare(prev, next, STATIC_SCOPE)
-    }),
-  )
+    return fn(prev, next, STATIC_SCOPE)
+  })
+
+  const value = useCreateScope(transform, compare)
 
   useDebugValue(value)
 

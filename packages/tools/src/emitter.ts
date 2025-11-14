@@ -1,5 +1,4 @@
 import { map } from "~/tools/map"
-import { uniq } from "~/tools/uniq"
 
 export class Emitter<TPayload = unknown, TResult = void> {
   private readonly _listeners: Array<(payload: TPayload) => TResult> = []
@@ -13,7 +12,7 @@ export class Emitter<TPayload = unknown, TResult = void> {
   }
 
   public _emit(payload: TPayload): ReadonlyArray<TResult> {
-    return map(uniq(this._listeners), (listener) => listener(payload))
+    return map(new Set(this._listeners), (listener) => listener(payload))
   }
 
   public _isEmpty(): boolean {

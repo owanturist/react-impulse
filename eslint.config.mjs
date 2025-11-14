@@ -216,11 +216,20 @@ export default tseslint.config([
       ],
       "@typescript-eslint/no-unused-vars": [
         "error",
-        { argsIgnorePattern: "^_" },
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
       ],
       "@typescript-eslint/unified-signatures": "off", // throws `typeParameters.params is not iterable`
       "@typescript-eslint/explicit-member-accessibility": "error",
       "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-empty-function": [
+        "error",
+        {
+          allow: ["protected-constructors", "private-constructors"],
+        },
+      ],
       "@typescript-eslint/no-confusing-non-null-assertion": "error",
       "@typescript-eslint/no-confusing-void-expression": [
         "error",
