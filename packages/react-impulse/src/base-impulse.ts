@@ -6,7 +6,7 @@ import type { Impulse } from "./impulse"
 import type { ImpulseOptions } from "./impulse-options"
 import type { ReadableImpulse } from "./readable-impulse"
 import { EMITTER_KEY, STATIC_SCOPE, type Scope, extractScope } from "./scope"
-import { type ScopeEmitQueue, ScopeEmitter } from "./scope-emitter"
+import { ScopeEmitQueue, type ScopeEmitter } from "./scope-emitter"
 import type { WritableImpulse } from "./writable-impulse"
 
 export abstract class BaseImpulse<T>
@@ -74,7 +74,7 @@ export abstract class BaseImpulse<T>
   public setValue(
     valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
   ): void {
-    ScopeEmitter._schedule((queue) => {
+    ScopeEmitQueue._enqueue((queue) => {
       const nextValue = isFunction(valueOrTransform)
         ? valueOrTransform(this._getter(), STATIC_SCOPE)
         : valueOrTransform

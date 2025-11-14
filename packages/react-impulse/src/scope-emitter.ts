@@ -1,16 +1,51 @@
 import { EMITTER_KEY, type Scope } from "./scope"
 
 export class ScopeEmitQueue {
-  private readonly _queue = new Set<ScopeEmitter>()
+  private static _queue: null | ScopeEmitQueue = null
 
-  public _enqueue(emitters: ReadonlySet<WeakRef<ScopeEmitter>>): void {
+  public static _enqueue<TResult>(
+    execute: (queue: ScopeEmitQueue) => TResult,
+  ): TResult {
+    // Continue the execution if the queue is already initialized.
+    if (ScopeEmitQueue._queue) {
+      return execute(ScopeEmitQueue._queue)
+    }
+
+    const queue = new ScopeEmitQueue()
+
+    // Initialize the queue and start the execution sequence.
+    ScopeEmitQueue._queue = queue
+
+    /**
+     * The execution might lead to other `_schedule` calls,
+     * so they all will collect the emitters in the same queue
+     * ensuring that an emitter is emitted only once.
+     */
+    const result = execute(queue)
+
+    /**
+     * Drop the global queue before processing to allow nested scheduling,
+     * when .emit() enqueues new emitters for the next tick.
+     */
+    ScopeEmitQueue._queue = null
+
+    queue._process()
+
+    return result
+  }
+
+  private readonly _emitters = new Set<ScopeEmitter>()
+
+  private constructor() {}
+
+  public _push(emitters: ReadonlySet<WeakRef<ScopeEmitter>>): void {
     /**
      * Calling the `_emit` might cause the same Impulse (host of the `emitters`)
      * to be scheduled again for the same scope (DerivedImpulse when source sets the comparably equal value).
      * It causes infinite loop, where the `emitter._invalidate()` first unsubscribes from the source Impulse but
      * the DerivedImpulse's `emitter._emit()` subscribes it back.
      *
-     * To prevent this, the _enqueue should only iterate over the emitters present at the moment of the call.
+     * To prevent this, the _push should only iterate over the emitters present at the moment of the call.
      */
     for (const ref of Array.from(emitters)) {
       const emitter = ref.deref()
@@ -26,19 +61,19 @@ export class ScopeEmitQueue {
           /**
            * Emit immediately so `DerivedImpulse` utilizes the compare function to either:
            * 1. NOT CHANGED: resubscribe to sources
-           * 2. CHANGED: marks as stale and _enqueue's its._emitters so they end up here either emitting (DerivedImpulse) or scheduling (DirectImpulse).
+           * 2. CHANGED: marks as stale and _push's its._emitters so they end up here either emitting (DerivedImpulse) or scheduling (DirectImpulse).
            */
           emitter._emit()
         } else {
           // Schedule the emit when all the emitters are collected.
-          this._queue.add(emitter)
+          this._emitters.add(emitter)
         }
       }
     }
   }
 
   public _process(): void {
-    for (const emitter of this._queue) {
+    for (const emitter of this._emitters) {
       emitter._emit()
     }
   }
@@ -52,39 +87,6 @@ export class ScopeEmitQueue {
  * @private
  */
 export class ScopeEmitter {
-  private static _queue: null | ScopeEmitQueue = null
-
-  public static _schedule<TResult>(
-    execute: (queue: ScopeEmitQueue) => TResult,
-  ): TResult {
-    // Continue the execution if the queue is already initialized.
-    if (ScopeEmitter._queue) {
-      return execute(ScopeEmitter._queue)
-    }
-
-    const queue = new ScopeEmitQueue()
-
-    // Initialize the queue and start the execution sequence.
-    ScopeEmitter._queue = queue
-
-    /**
-     * The execution might lead to other `_schedule` calls,
-     * so they all will collect the emitters in the same queue
-     * ensuring that an emitter is emitted only once.
-     */
-    const result = execute(queue)
-
-    /**
-     * Drop the global queue before processing to allow nested scheduling,
-     * when .emit() enqueues new emitters for the next tick.
-     */
-    ScopeEmitter._queue = null
-
-    queue._process()
-
-    return result
-  }
-
   private readonly _attachedTo = new Set<Set<WeakRef<ScopeEmitter>>>()
 
   private readonly _ref = new WeakRef(this)
@@ -111,7 +113,7 @@ export class ScopeEmitter {
     public readonly _derived = false,
   ) {
     this._emit = () => {
-      ScopeEmitter._schedule(emit)
+      ScopeEmitQueue._enqueue(emit)
     }
   }
 

@@ -18,7 +18,7 @@ export class DirectImpulse<T> extends BaseImpulse<T> {
   protected _setter(value: T, queue: ScopeEmitQueue): void {
     if (!this._compare(this._value, value, STATIC_SCOPE)) {
       this._value = value
-      queue._enqueue(this._emitters)
+      queue._push(this._emitters)
     }
   }
 
