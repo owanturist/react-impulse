@@ -1,41 +1,31 @@
-import { noop } from "~/tools/noop"
-
 import { useCallback, useSyncExternalStoreWithSelector } from "./dependencies"
 import type { Scope } from "./scope"
-import { ScopeEmitter } from "./scope-emitter"
+import { ScopeFactory } from "./scope-emitter"
 import { usePermanent } from "./use-permanent"
 
 export function useCreateScope<T>(
   transform: (scope: Scope) => T,
   compare?: (left: T, right: T) => boolean,
 ): T {
-  const [getFactory, sub] = usePermanent(() => {
-    let onStoreChange = noop
-
-    const emitter = new ScopeEmitter(() => onStoreChange())
+  const [selectCreate, connect] = usePermanent(() => {
+    const factory = new ScopeFactory()
 
     return [
-      () => emitter._factory,
-
-      (emit: VoidFunction) => {
-        onStoreChange = emit
-
-        return () => {
-          emitter._invalidate()
-        }
-      },
+      //
+      () => factory.create,
+      (emit: VoidFunction) => factory.connect(emit),
     ]
   })
 
   const select = useCallback(
-    (factory: () => Scope) => transform(factory()),
+    (create: () => Scope) => transform(create()),
     [transform],
   )
 
   return useSyncExternalStoreWithSelector(
-    sub,
-    getFactory,
-    getFactory,
+    connect,
+    selectCreate,
+    selectCreate,
     select,
     compare,
   )
