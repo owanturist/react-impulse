@@ -1,5 +1,5 @@
 import { STATIC_SCOPE, type Scope } from "./scope"
-import { ScopeEmitQueue } from "./scope-emitter"
+import { enqueue } from "./scope-emitter"
 
 /**
  * A helper to optimize multiple Impulse updates.
@@ -9,7 +9,7 @@ import { ScopeEmitQueue } from "./scope-emitter"
  * @version 1.0.0
  */
 export function batch(execute: (scope: Scope) => void): void {
-  ScopeEmitQueue._enqueue(() => {
+  enqueue(() => {
     execute(STATIC_SCOPE)
   })
 }

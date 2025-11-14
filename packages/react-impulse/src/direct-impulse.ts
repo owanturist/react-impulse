@@ -1,7 +1,6 @@
 import { BaseImpulse } from "./base-impulse"
 import type { Compare } from "./compare"
 import { STATIC_SCOPE } from "./scope"
-import type { ScopeEmitQueue } from "./scope-emitter"
 
 export class DirectImpulse<T> extends BaseImpulse<T> {
   public constructor(
@@ -15,10 +14,11 @@ export class DirectImpulse<T> extends BaseImpulse<T> {
     return this._value
   }
 
-  protected _setter(value: T, queue: ScopeEmitQueue): void {
+  protected _setter(value: T): void | true {
     if (!this._compare(this._value, value, STATIC_SCOPE)) {
       this._value = value
-      queue._push(this._emitters)
+
+      return true
     }
   }
 

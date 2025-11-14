@@ -1,42 +1,7 @@
 import { EMITTER_KEY, type Scope } from "./scope"
 
-export class ScopeEmitQueue {
-  private static _queue: null | ScopeEmitQueue = null
-
-  public static _enqueue<TResult>(
-    execute: (queue: ScopeEmitQueue) => TResult,
-  ): TResult {
-    // Continue the execution if the queue is already initialized.
-    if (ScopeEmitQueue._queue) {
-      return execute(ScopeEmitQueue._queue)
-    }
-
-    const queue = new ScopeEmitQueue()
-
-    // Initialize the queue and start the execution sequence.
-    ScopeEmitQueue._queue = queue
-
-    /**
-     * The execution might lead to other `_schedule` calls,
-     * so they all will collect the emitters in the same queue
-     * ensuring that an emitter is emitted only once.
-     */
-    const result = execute(queue)
-
-    /**
-     * Drop the global queue before processing to allow nested scheduling,
-     * when .emit() enqueues new emitters for the next tick.
-     */
-    ScopeEmitQueue._queue = null
-
-    queue._process()
-
-    return result
-  }
-
+class ScopeEmitQueue {
   private readonly _emitters = new Set<ScopeEmitter>()
-
-  private constructor() {}
 
   public _push(emitters: ReadonlySet<WeakRef<ScopeEmitter>>): void {
     /**
@@ -79,6 +44,37 @@ export class ScopeEmitQueue {
   }
 }
 
+let QUEUE: null | ScopeEmitQueue = null
+
+export function enqueue<TResult>(
+  execute: (queue: ScopeEmitQueue) => TResult,
+): TResult {
+  // Continue the execution if the queue is already initialized.
+  if (QUEUE) {
+    return execute(QUEUE)
+  }
+
+  // Initialize the queue and start the execution sequence.
+  const queue = (QUEUE = new ScopeEmitQueue())
+
+  /**
+   * The execution might lead to other `_schedule` calls,
+   * so they all will collect the emitters in the same queue
+   * ensuring that an emitter is emitted only once.
+   */
+  const result = execute(queue)
+
+  /**
+   * Drop the global queue before processing to allow nested scheduling,
+   * when .emit() enqueues new emitters for the next tick.
+   */
+  QUEUE = null
+
+  queue._process()
+
+  return result
+}
+
 /**
  * A context to track Impulse#getValue usage inside the factory function.
  * The tracked calls will subscribe related stores to updates,
@@ -113,7 +109,7 @@ export class ScopeEmitter {
     public readonly _derived = false,
   ) {
     this._emit = () => {
-      ScopeEmitQueue._enqueue(emit)
+      enqueue(emit)
     }
   }
 
