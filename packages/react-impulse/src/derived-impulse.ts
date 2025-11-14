@@ -1,21 +1,21 @@
 import { BaseImpulse } from "./base-impulse"
 import type { Compare } from "./compare"
 import { DirectImpulse } from "./direct-impulse"
-import { EMITTER_KEY, STATIC_SCOPE, type Scope } from "./scope"
+import { EMITTER_KEY, STATIC_SCOPE, type Scope, injectScope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 
 export class DerivedImpulse<T> extends BaseImpulse<T> {
   // the inner scope proxies the setters to the outer scope
   private readonly _scope = {
-    [EMITTER_KEY]: new ScopeEmitter((_, queue) => {
+    [EMITTER_KEY]: new ScopeEmitter((queue) => {
       if (
         this._compare(this._value, this._getValue(STATIC_SCOPE), STATIC_SCOPE)
       ) {
         // subscribe back to the dependencies
-        this._getValue(this._scope)
+        injectScope(this._getValue, this._scope)
       } else {
         this._stale = true
-        queue._push(this._emitters)
+        queue._enqueue(this._emitters)
       }
     }, true),
   }

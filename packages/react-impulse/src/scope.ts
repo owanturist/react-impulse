@@ -12,14 +12,14 @@ export const STATIC_SCOPE: Scope = {
 
 let currentScope = STATIC_SCOPE
 
-export function injectScope<
-  TResult,
-  TArgs extends [Scope, ...ReadonlyArray<unknown>],
->(execute: (...args: TArgs) => TResult, ...args: TArgs): TResult {
+export function injectScope<TResult>(
+  execute: (scope: Scope) => TResult,
+  scope: Scope,
+): TResult {
   const prevScope = currentScope
 
-  currentScope = args[0]
-  const result = execute(...args)
+  currentScope = scope
+  const result = execute(scope)
   currentScope = prevScope
 
   return result

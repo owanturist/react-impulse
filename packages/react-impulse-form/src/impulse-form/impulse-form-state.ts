@@ -1,8 +1,8 @@
+import { Emitter } from "~/tools/emitter"
 import { isNull } from "~/tools/is-null"
 import type { Lazy } from "~/tools/lazy"
 
 import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
-import { Emitter } from "../emitter"
 
 import type { ImpulseForm } from "./impulse-form"
 import type { ImpulseFormParams } from "./impulse-form-params"

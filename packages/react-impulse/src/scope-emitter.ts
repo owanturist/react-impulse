@@ -1,32 +1,32 @@
-import { EMITTER_KEY, type Scope, injectScope } from "./scope"
+import { EMITTER_KEY, type Scope } from "./scope"
 
-export class ScopeEmitterQueue {
+export class ScopeEmitQueue {
   private readonly _queue = new Set<ScopeEmitter>()
 
-  public _push(emitters: ReadonlySet<WeakRef<ScopeEmitter>>): void {
+  public _enqueue(emitters: ReadonlySet<WeakRef<ScopeEmitter>>): void {
     /**
      * Calling the `_emit` might cause the same Impulse (host of the `emitters`)
      * to be scheduled again for the same scope (DerivedImpulse when source sets the comparably equal value).
-     * It causes infinite loop, where the `emitter._flush()` first unsubscribes from the source Impulse but
+     * It causes infinite loop, where the `emitter._invalidate()` first unsubscribes from the source Impulse but
      * the DerivedImpulse's `emitter._emit()` subscribes it back.
      *
-     * To prevent this, the _push should only iterate over the emitters present at the moment of the call.
+     * To prevent this, the _enqueue should only iterate over the emitters present at the moment of the call.
      */
     for (const ref of Array.from(emitters)) {
       const emitter = ref.deref()
 
       if (emitter) {
         /**
-         * Flush the emitter as soon as it is scheduled
+         * Invalidate the emitter as soon as it is scheduled
          * so the derived impulses can read a fresh value due to version increment.
          */
-        emitter._flush()
+        emitter._invalidate()
 
-        if (emitter._deferred) {
+        if (emitter._derived) {
           /**
            * Emit immediately so `DerivedImpulse` utilizes the compare function to either:
            * 1. NOT CHANGED: resubscribe to sources
-           * 2. CHANGED: marks as stale and _push'es its._emitters so they end up here either emitting (DerivedImpulse) or scheduling (DirectImpulse).
+           * 2. CHANGED: marks as stale and _enqueue's its._emitters so they end up here either emitting (DerivedImpulse) or scheduling (DirectImpulse).
            */
           emitter._emit()
         } else {
@@ -52,17 +52,17 @@ export class ScopeEmitterQueue {
  * @private
  */
 export class ScopeEmitter {
-  private static _queue: null | ScopeEmitterQueue = null
+  private static _queue: null | ScopeEmitQueue = null
 
   public static _schedule<TResult>(
-    execute: (queue: ScopeEmitterQueue) => TResult,
+    execute: (queue: ScopeEmitQueue) => TResult,
   ): TResult {
     // Continue the execution if the queue is already initialized.
     if (ScopeEmitter._queue) {
       return execute(ScopeEmitter._queue)
     }
 
-    const queue = new ScopeEmitterQueue()
+    const queue = new ScopeEmitQueue()
 
     // Initialize the queue and start the execution sequence.
     ScopeEmitter._queue = queue
@@ -89,7 +89,9 @@ export class ScopeEmitter {
 
   private readonly _ref = new WeakRef(this)
 
-  public _spawn = (): Scope => {
+  public readonly _emit: VoidFunction
+
+  public _factory = (): Scope => {
     this._detachFromAll()
 
     return {
@@ -97,27 +99,19 @@ export class ScopeEmitter {
     }
   }
 
-  public readonly _emit: VoidFunction
-
   /**
    * Initializes and returns a new instance of the `ScopeEmitter` class.
    *
    * @param emit - A callback function to be invoked when the scope emits.
-   * @param deferred - Indicates whether the emission should be deferred.
+   * @param _derived - Indicates whether the emission should be derived.
    *                   Used in `DerivedImpulse` so that it subscribes only after the first value read.
    */
   public constructor(
-    emit: (scope: Scope, queue: ScopeEmitterQueue) => void,
-    public readonly _deferred = false,
+    emit: (queue: ScopeEmitQueue) => void,
+    public readonly _derived = false,
   ) {
     this._emit = () => {
-      ScopeEmitter._schedule((queue) => {
-        injectScope(emit, this._spawn(), queue)
-      })
-    }
-
-    if (!_deferred) {
-      this._emit()
+      ScopeEmitter._schedule(emit)
     }
   }
 
@@ -134,8 +128,8 @@ export class ScopeEmitter {
     this._attachedTo.add(emitters)
   }
 
-  public _flush(): void {
-    this._spawn = () => {
+  public _invalidate(): void {
+    this._factory = () => {
       this._detachFromAll()
 
       return {

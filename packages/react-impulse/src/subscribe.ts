@@ -1,6 +1,6 @@
 import { batch } from "./batch"
 import type { Destructor } from "./destructor"
-import type { Scope } from "./scope"
+import { type Scope, injectScope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 
 /**
@@ -14,14 +14,18 @@ export function subscribe(
 ): VoidFunction {
   let cleanup: Destructor = undefined
 
-  const emitter = new ScopeEmitter((scope) => {
+  const emit = (): void => {
     cleanup?.()
-    cleanup = listener(scope)
-  })
+    cleanup = injectScope(listener, emitter._factory())
+  }
+
+  const emitter = new ScopeEmitter(emit)
+
+  emit()
 
   return () => {
     batch(() => {
-      emitter._flush()
+      emitter._invalidate()
       cleanup?.()
     })
   }

@@ -9,29 +9,34 @@ export function useCreateScope<T>(
   transform: (scope: Scope) => T,
   compare?: (left: T, right: T) => boolean,
 ): T {
-  const [getSpawn, sub] = usePermanent(() => {
+  const [getFactory, sub] = usePermanent(() => {
     let onStoreChange = noop
 
     const emitter = new ScopeEmitter(() => onStoreChange())
 
     return [
-      () => emitter._spawn,
+      () => emitter._factory,
 
       (emit: VoidFunction) => {
         onStoreChange = emit
 
         return () => {
-          emitter._flush()
+          emitter._invalidate()
         }
       },
     ]
   })
 
+  const select = useCallback(
+    (factory: () => Scope) => transform(factory()),
+    [transform],
+  )
+
   return useSyncExternalStoreWithSelector(
     sub,
-    getSpawn,
-    getSpawn,
-    useCallback((getScope) => transform(getScope()), [transform]),
+    getFactory,
+    getFactory,
+    select,
     compare,
   )
 }
