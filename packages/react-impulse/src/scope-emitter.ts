@@ -127,24 +127,15 @@ export class ScopeEmitter {
   private readonly _ref = new WeakRef(this)
 
   /**
-   * Invokes the scope’s emission routine to notify all registered listeners.
-   */
-  public readonly _emit: VoidFunction
-
-  /**
    * Initializes and returns a new instance of the `ScopeEmitter` class.
    *
-   * @param emit - Callback invoked via the internal queue whenever the scope needs to broadcast an update.
+   * @param _emit - Callback invoked via the internal queue whenever the scope needs to broadcast an update.
    * @param _derived - Indicates whether the emitter originates from a derived impulse, deferring subscription until first access.
    */
   public constructor(
-    emit: (queue: ScopeEmitQueue) => void,
+    public readonly _emit: VoidFunction,
     public readonly _derived = false,
-  ) {
-    this._emit = () => {
-      enqueue(emit)
-    }
-  }
+  ) {}
 
   /**
    * Detaches the current scope reference from every emitter it is attached to
@@ -212,7 +203,9 @@ export class ScopeEmitter {
 export class ScopeFactory {
   private _emit = noop
 
-  private readonly _emitter = new ScopeEmitter(() => this._emit())
+  private readonly _emitter = new ScopeEmitter(() => {
+    enqueue(this._emit)
+  })
 
   /**
    * Registers an emission callback for the scope emitter and returns a disposer.
