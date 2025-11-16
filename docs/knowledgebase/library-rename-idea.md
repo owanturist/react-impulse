@@ -166,7 +166,7 @@ interface Monitor {
 }
 ```
 
-A Monitor is a dependency tracking context that observes signal changes.
+A Monitor is a dependency tracking context that observes signal changes. The `MONITOR` symbol is used for internal identification, inspired by [Angular's Signal](https://angular.dev/api/core/Signal).
 
 ### useMonitor hook
 
