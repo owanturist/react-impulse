@@ -16,7 +16,7 @@ export class DerivedImpulse<T> extends BaseImpulse<T> {
         injectScope(this._getValue, this._scope)
       } else {
         this._stale = true
-        enqueue((queue) => queue._push(this._emitters))
+        enqueue((push) => push(this._emitters))
       }
     }, true),
   }

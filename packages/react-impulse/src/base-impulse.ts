@@ -75,13 +75,13 @@ export abstract class BaseImpulse<T>
   public setValue(
     valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
   ): void {
-    enqueue((queue) => {
+    enqueue((push) => {
       const nextValue = isFunction(valueOrTransform)
         ? valueOrTransform(this._getter(), STATIC_SCOPE)
         : valueOrTransform
 
       if (this._setter(nextValue)) {
-        queue._push(this._emitters)
+        push(this._emitters)
       }
     })
   }

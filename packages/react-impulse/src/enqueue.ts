@@ -20,7 +20,9 @@ class ScopeEmitQueue {
    *
    * @param emitters - The captured set of weak references to scope emitters awaiting processing.
    */
-  public _push(emitters: ReadonlySet<WeakRef<ScopeEmitter>>): void {
+  public readonly _push = (
+    emitters: ReadonlySet<WeakRef<ScopeEmitter>>,
+  ): void => {
     /**
      * Calling the {@link ScopeEmitter._emit} might cause the same Impulse (host of the `emitters`)
      * to be scheduled again for the same scope (DerivedImpulse when source sets the comparably equal value).
@@ -75,11 +77,13 @@ let QUEUE: null | ScopeEmitQueue = null
  */
 
 export function enqueue<TResult>(
-  execute: (queue: ScopeEmitQueue) => TResult,
+  execute: (
+    push: (emitters: ReadonlySet<WeakRef<ScopeEmitter>>) => void,
+  ) => TResult,
 ): TResult {
   // Continue the execution if the queue is already initialized.
   if (QUEUE) {
-    return execute(QUEUE)
+    return execute(QUEUE._push)
   }
 
   // Initialize the queue and start the execution sequence.
@@ -90,7 +94,7 @@ export function enqueue<TResult>(
    * so they all will collect the emitters in the same queue
    * ensuring that an emitter is emitted only once.
    */
-  const result = execute(queue)
+  const result = execute(queue._push)
 
   /**
    * Drop the global queue before processing to allow nested scheduling,
