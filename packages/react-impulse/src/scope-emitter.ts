@@ -134,7 +134,7 @@ export class ScopeEmitter {
    */
   public constructor(
     public readonly _emit: VoidFunction,
-    public readonly _derived = false,
+    public readonly _derived: boolean,
   ) {}
 
   /**
@@ -205,7 +205,7 @@ export class ScopeFactory {
 
   private readonly _emitter = new ScopeEmitter(() => {
     enqueue(this._emit)
-  })
+  }, false)
 
   /**
    * Registers an emission callback for the scope emitter and returns a disposer.
