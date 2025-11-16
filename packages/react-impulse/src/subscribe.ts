@@ -1,7 +1,7 @@
 import { batch } from "./batch"
 import type { Destructor } from "./destructor"
 import { type Scope, injectScope } from "./scope"
-import { ScopeFactory } from "./scope-emitter"
+import { ScopeFactory } from "./scope-factory"
 
 /**
  * A function that provides `Scope` as the first argument subscribes to changes of all `Impulse` instances that call the `Impulse#getValue` method inside the `listener`.
