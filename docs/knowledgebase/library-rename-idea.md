@@ -15,6 +15,8 @@ The current `Impulse` and `Scope` naming in react-impulse, while functional, lac
 - Align with established reactive programming terminology
 - Maintain all existing functionality while improving ergonomics
 - Consolidate related hooks into a cleaner API surface
+- Remove react hooks aliases, enabling better composability and reducing choice fatigue
+- Remove `tap` in favor of `untracked` for consistency and reducing cognitive load
 
 ### Non-goals
 
@@ -48,7 +50,7 @@ This naming aligns with:
 
 - **Ecosystem familiarity**: "Signal" is widely recognized in reactive programming
 - **Clear semantics**: Broadcasting (Signal) vs observing (Monitor) is intuitive
-- **API clarity**: `useMonitor()` handles imperative access while `useComputed*` covers derived values and effects
+- **API clarity**: `useMonitor()` handles imperative access while `useComputed()` covers derived values and effects
 - **Functional flexibility**: Both `signal.read(monitor)` and `monitor(signal)` work
 - **Better discoverability**: Hook names like `useComputedEffect` are self-explanatory
 
@@ -83,16 +85,6 @@ const monitor = useMonitor()
 const value = useComputed((monitor) => signal.read(monitor))
 ```
 
-#### Complete hook family
-
-```ts
-// Current
-useScopedCallback → useComputedCallback
-useScopedEffect → useComputedEffect
-useScopedLayoutEffect → useComputedLayoutEffect
-useScopedMemo → useComputedMemo
-```
-
 #### Reactive utilities
 
 ```ts
@@ -103,7 +95,7 @@ const unsubscribe = subscribe((scope) => {
 })
 
 // Proposed
-const stop = effect((monitor) => {
+const dispose = effect((monitor) => {
   console.log(signal.read(monitor))
   return () => console.log("Cleaning up")
 })
@@ -122,9 +114,12 @@ However, these costs are justified by significantly improved long-term developer
 1. **Core rename**: `Impulse` → `Signal`, `Scope` → `Monitor`
 2. **Method rename**: `getValue(scope)` → `read(monitor)`
 3. **Hook consolidation**: Split responsibilities into `useMonitor()` for imperative access and `useComputed()` for derived values
-4. **Hook family rename**: `useScoped*` → `useComputed*`
-5. **Effect rename**: `subscribe` → `effect`, aligning with reactive ecosystem terminology
-6. **Migration path**: Provide codemods and migration guides
+4. **Hook family rename**: `useScoped` → `useComputed`
+5. **Hook removal**: Eliminate `useScoped.+` aliases
+6. **Effect rename**: `subscribe` → `effect`, aligning with reactive ecosystem terminology
+7. **Untrack rename**: `untrack` → `untracked` to follow similar naming with [Angular `untracked`](https://angular.dev/guide/signals#reading-without-tracking-dependencies) and [Preact `untracked`](https://preactjs.com/guide/v10/signals/#reading-signals-without-subscribing-to-them)
+8. **Remove tap**: Eliminate `tap` alias for `batch`
+9. **Migration path**: Provide migration guides
 
 ### Mental model alignment
 
@@ -167,7 +162,7 @@ function Signal<T>(): Signal<undefined | T>
 ```ts
 interface Monitor {
   <T>(signal: Signal<T>): T
-  version?: number
+  [MONITOR]: unknown
 }
 ```
 
@@ -181,7 +176,7 @@ function useMonitor(): Monitor
 
 Returns a shared monitor instance tied to the component lifecycle for imperative reads and interop with imperative helpers.
 
-### Computed React helpers
+### useComputed hook
 
 ```ts
 function useComputed<T>(
@@ -189,26 +184,6 @@ function useComputed<T>(
   deps?: React.DependencyList,
   options?: UseComputedOptions<T>,
 ): T
-
-function useComputedMemo<T>(
-  factory: (monitor: Monitor) => T,
-  deps: React.DependencyList,
-): T
-
-function useComputedCallback<T extends (...args: any[]) => any>(
-  factory: (monitor: Monitor) => T,
-  deps: React.DependencyList,
-): T
-
-function useComputedEffect(
-  effect: (monitor: Monitor) => void | (() => void),
-  deps?: React.DependencyList,
-): void
-
-function useComputedLayoutEffect(
-  effect: (monitor: Monitor) => void | (() => void),
-  deps?: React.DependencyList,
-): void
 ```
 
 ### Effect (renamed from subscribe)
@@ -217,17 +192,12 @@ function useComputedLayoutEffect(
 function effect(listener: (monitor: Monitor) => Destructor): VoidFunction
 ```
 
-Creates a reactive effect that re-runs the listener whenever any accessed signal changes and returns an unsubscribe function.
+Creates a reactive effect that re-runs the listener whenever any accessed signal changes and returns an `dispose` function (inspired by [preact's `effect`](https://preactjs.com/guide/v10/signals/#reacting-to-signals-outside-of-components)).
 
 ### Example usage
 
 ```tsx
-import {
-  Signal,
-  useMonitor,
-  useComputed,
-  useComputedEffect,
-} from "react-impulse"
+import { Signal, useMonitor, useComputed } from "react-impulse"
 
 const count = Signal(0)
 const doubled = Signal(0)
@@ -238,13 +208,12 @@ function Counter() {
   const countValue = useComputed((monitor) => count.read(monitor))
   const doubledValue = useComputed((monitor) => monitor(doubled))
 
-  useComputedEffect(
-    (monitor) => {
+  useEffect(() => {
+    return effect((monitor) => {
       const value = monitor(count) // Using function style
       doubled.update(value * 2)
-    },
-    [count, doubled],
-  )
+    })
+  }, [count, doubled])
 
   return (
     <div>
