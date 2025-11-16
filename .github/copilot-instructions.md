@@ -43,14 +43,14 @@ This project uses a knowledgebase-driven (KB) development approach.
 ```yaml
 # ✅ Correct - YAML list syntax
 packages:
-  - react-signal
-  - react-signal-form
+  - @owanturist/signal
+  - @owanturist/signal-react
 relates-to:
   - concept-1
   - concept-2
 
 # ❌ Avoid - JSON bracket syntax
-packages: [react-signal, react-signal-form]
+packages: [@owanturist/signal, @owanturist/signal-react]
 relates-to: [concept-1, concept-2]
 ```
 

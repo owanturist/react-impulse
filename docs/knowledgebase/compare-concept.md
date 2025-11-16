@@ -4,8 +4,8 @@ type: concept
 packages:
   - react-impulse
 relates-to:
-  - impulse-concept
-  - scope-concept
+  - signal-concept
+  - monitor-concept
 ---
 
 ## Context and goals

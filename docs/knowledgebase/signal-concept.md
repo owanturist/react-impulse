@@ -4,7 +4,7 @@ type: concept
 packages:
   - react-impulse
 relates-to:
-  - scope-concept
+  - monitor-concept
   - compare-concept
 ---
 
@@ -26,7 +26,7 @@ Define the core idea of an `Impulse` in react-impulse.
 
 ### What is an Impulse
 
-An `Impulse` is a small value container with predictable read/write semantics that uses compare semantics to notify dependents only on effective change. It’s similar to a signal/atom, but differs by explicit Scopes for dependency tracking and lifecycles and a framework‑agnostic core with thin adapters (e.g., React hooks). The Impulse owns its subscriber list, while a [`Scope`](./scope-concept.md) attaches/detaches those subscriptions and drives lifecycles.
+An `Impulse` is a small value container with predictable read/write semantics that uses compare semantics to notify dependents only on effective change. It’s similar to a signal/atom, but differs by explicit Scopes for dependency tracking and lifecycles and a framework‑agnostic core with thin adapters (e.g., React hooks). The Impulse owns its subscriber list, while a [`Scope`](./monitor-concept.md) attaches/detaches those subscriptions and drives lifecycles.
 
 ### Why it exists
 

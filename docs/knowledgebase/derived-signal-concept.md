@@ -4,8 +4,8 @@ type: concept
 packages:
   - react-impulse
 relates-to:
-  - impulse-concept
-  - scope-concept
+  - signal-concept
+  - monitor-concept
   - compare-concept
 ---
 
@@ -22,13 +22,13 @@ Define the idea of a `DerivedImpulse` in react-impulse, focusing on its design, 
 
 ### Non-goals
 
-- Repeating the full [`Impulse`](./impulse-concept.md) or [`Scope`](./scope-concept.md) concepts
+- Repeating the full [`Impulse`](./signal-concept.md) or [`Scope`](./monitor-concept.md) concepts
 
 ## Design and rationale
 
 ### What is a DerivedImpulse
 
-A `DerivedImpulse` is a reactive computation that derives its value from one or more source impulses. Unlike a regular `Impulse`, a derived impulse does not store a user-assigned value, but caches the most recently computed derived value. This value is only recomputed when dependencies change and triggers a flush; repeated `.getValue(scope)` calls return the cached value as long as dependencies are unchanged. The Derived Impulse owns its subscriber list, while a [`Scope`](./scope-concept.md) attaches/detaches those subscriptions and drives lifecycles. Internal dependency tracking is managed via an internal `Scope`.
+A `DerivedImpulse` is a reactive computation that derives its value from one or more source impulses. Unlike a regular `Impulse`, a derived impulse does not store a user-assigned value, but caches the most recently computed derived value. This value is only recomputed when dependencies change and triggers a flush; repeated `.getValue(scope)` calls return the cached value as long as dependencies are unchanged. The Derived Impulse owns its subscriber list, while a [`Scope`](./monitor-concept.md) attaches/detaches those subscriptions and drives lifecycles. Internal dependency tracking is managed via an internal `Scope`.
 
 ### Why it exists
 
@@ -53,7 +53,7 @@ A `DerivedImpulse` is a reactive computation that derives its value from one or 
 
 #### Why WeakRef is necessary for memory safety
 
-Unlike scopes created by [scope factories](./scope-factories.md), which provide explicit or automatic cleanup tied to a well-defined lifecycle, the internal scope of a derived impulse has no such lifecycle hook or cleanup API. When a derived impulse becomes unreachable, its internal scope may remain referenced by dependencies, becoming a "dead scope." There is no reliable way to auto-flush or clean up this scope at the exact moment the derived impulse is collected, because JavaScript provides no hook for object finalization. Exposing a `.destroy()` or similar method would break API symmetry with regular impulses, so the design relies on `WeakRef` to allow garbage collection to eventually clean up these dead scopes safely.
+Unlike scopes created by [scope factories](./monitor-factories.md), which provide explicit or automatic cleanup tied to a well-defined lifecycle, the internal scope of a derived impulse has no such lifecycle hook or cleanup API. When a derived impulse becomes unreachable, its internal scope may remain referenced by dependencies, becoming a "dead scope." There is no reliable way to auto-flush or clean up this scope at the exact moment the derived impulse is collected, because JavaScript provides no hook for object finalization. Exposing a `.destroy()` or similar method would break API symmetry with regular impulses, so the design relies on `WeakRef` to allow garbage collection to eventually clean up these dead scopes safely.
 
 In practice, if a derived impulse becomes unreachable while its internal scope is still tracked by a source, the dead scope could remain attached until the next source update, which will flush all tracked scopes (including dead ones). If the source is not updated for a long time, the dead scope could persist, but `WeakRef` ensures it can be collected by the GC when possible.
 

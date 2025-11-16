@@ -1,6 +1,6 @@
 # AI Documentation Synthesis Guide
 
-This guide defines the canonical process for transforming the react-impulse knowledgebase into human-friendly Diátaxis documentation, and how to maintain consistency between KB and docs.
+This guide defines the canonical process for transforming the [knowledgebase](./knowledgebase) into human-friendly Diátaxis documentation, and how to maintain consistency between KB and docs.
 
 **Scope**: This guide covers **all documentation types** including **explanation**, **how-to**, **tutorial**, and **reference** (API) documentation.
 
@@ -18,7 +18,7 @@ This guide defines the canonical process for transforming the react-impulse know
 5. **Docs can be manually refined**: Generated documentation can be manually edited for better code examples, content ordering, prose polish, and user experience.
 6. **Bidirectional validation**: When manually editing docs, verify if the source KB entries need updating to stay synchronized.
 7. **KB is authoritative for concepts**: Knowledgebase entries are the technical source of truth for core concepts, API contracts, design rationale, and architecture.
-8. **KB entry identification**: KB entries are referenced by their filename (without `.md` extension). For example, `impulse-concept.md` is referenced as `impulse-concept` in PLAN.yml sources and relates-to fields.
+8. **KB entry identification**: KB entries are referenced by their filename (without `.md` extension). For example, `signal-concept.md` is referenced as `signal-concept` in PLAN.yml sources and relates-to fields.
 
 ## Two-Step Synthesis Process
 
@@ -195,8 +195,8 @@ Each documentation page entry in PLAN.yml follows this structure:
   slug: page-slug # Unique, URL-safe identifier
   title: Page Title # Human-readable title
   sources: # KB entry filenames (without .md extension)
-    - impulse-concept
-    - scope-concept
+    - signal-concept
+    - monitor-concept
   purpose: One-sentence description of page goal
   sections: # Required H2 headings in order
     - Section One
@@ -295,19 +295,19 @@ const fullName = Impulse((scope) => `${firstName.getValue(scope)} ${lastName.get
 
 ## Example Synthesis
 
-**KB Entry**: `impulse-concept.md` (technical, internal)
+**KB Entry**: `signal-concept.md` (technical, internal)
 → **Generated Pages**:
 
 - `explanation/impulse-overview.md` (high-level, "why impulse?")
 - `how-to/create-impulse.md` (practical usage)
 
-### Example Synthesis from impulse-concept.md
+### Example Synthesis from signal-concept.md
 
-The `impulse-concept.md` KB entry (referenced as `impulse-concept` in PLAN.yml) generates:
+The `signal-concept.md` KB entry (referenced as `signal-concept` in PLAN.yml) generates:
 
 - **explanation/impulse-overview.md**: "What is an impulse?" - concept introduction, mental models, design philosophy
 - **how-to/create-impulse.md**: "How do I create and use an impulse?" - practical guide with common patterns
 - **tutorial/first-impulse.md**: "Build your first reactive component" - step-by-step walkthrough
 - **reference/impulse.mdx**: "Impulse API Reference" - detailed API documentation with structure showing interface properties, methods, and examples
 
-Each page is listed in `PLAN.yml` with `sources: ["impulse-concept"]` (filename without .md extension) but presents information differently for its intended use case. The page files themselves contain only title, description, and content.
+Each page is listed in `PLAN.yml` with `sources: ["signal-concept"]` (filename without .md extension) but presents information differently for its intended use case. The page files themselves contain only title, description, and content.

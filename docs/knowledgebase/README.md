@@ -26,8 +26,8 @@ Each entry should follow the structure below and include the following frontmatt
 interface Frontmatter {
   title: string;              // Human-readable title of the concept
   type: 'concept'             // Only 'concept' for now
-  packages: string[];         // Related packages in kebab-case (e.g., ['react-signal'])
-  relates-to?: string[];      // IDs of related KB entries (filenames without .md)
+  packages: Array<'signal' | 'signal-react' | 'signal-form'>;         // Related packages in kebab-case (e.g., ['signal'])
+  relates-to?: Array<string>;      // IDs of related KB entries (filenames without .md)
 }
 ```
 
@@ -38,7 +38,7 @@ Example frontmatter:
 title: Human-Readable Title
 type: concept
 packages:
-  - react-signal
+  - signal
 relates-to:
   - other-concept-id
 ---

@@ -4,7 +4,7 @@ type: concept
 packages:
   - react-impulse
 relates-to:
-  - scope-concept
+  - monitor-concept
 ---
 
 ## Context and goals
@@ -18,7 +18,7 @@ List the available ways to create and use a `Scope` when working with impulses, 
 
 ### Non-goals
 
-- Deep dive into lifecycle, dependency tracking, batching, and scheduling semantics (see [scope-concept](./scope-concept.md) for that).
+- Deep dive into lifecycle, dependency tracking, batching, and scheduling semantics (see [monitor-concept](./monitor-concept.md) for that).
 
 ## Design and rationale
 

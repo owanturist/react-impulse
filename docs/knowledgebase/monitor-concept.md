@@ -4,8 +4,8 @@ type: concept
 packages:
   - react-impulse
 relates-to:
-  - impulse-concept
-  - scope-factories
+  - signal-concept
+  - monitor-factories
 ---
 
 ## Context and goals
@@ -21,8 +21,8 @@ Define the mental model of `Scope` in react-impulse, invariants, and how Scopes 
 
 ### Non-goals
 
-- Re-describing Impulse in depth (see [impulse-concept](./impulse-concept.md)).
-- Providing creation recipes (see [scope-factories](./scope-factories.md)).
+- Re-describing Impulse in depth (see [signal-concept](./signal-concept.md)).
+- Providing creation recipes (see [monitor-factories](./monitor-factories.md)).
 
 ## Design and rationale
 
@@ -104,7 +104,7 @@ Using a non-tracking scope in these situations avoids unnecessary dependency tra
 
 ### Edge representation
 
-Each impulse tracks its subscribers as a `Set<WeakRef<ScopeEmitter>>`. On `getValue(scope)`, the impulse adds a weak reference to the scope's emitter. This use of `WeakRef` ensures that unused scopes — specifically, the internal scopes of unreachable [derived impulses](./derived-impulse-concept.md) — can be garbage collected, preventing memory leaks without manual cleanup.
+Each impulse tracks its subscribers as a `Set<WeakRef<ScopeEmitter>>`. On `getValue(scope)`, the impulse adds a weak reference to the scope's emitter. This use of `WeakRef` ensures that unused scopes — specifically, the internal scopes of unreachable [derived impulses](./derived-signal-concept.md) — can be garbage collected, preventing memory leaks without manual cleanup.
 
 ### Scheduling and batching
 
@@ -156,7 +156,7 @@ interface Scope {
 }
 ```
 
-Scope is an opaque object, always obtained via a factory (see [scope-factories](./scope-factories.md))
+Scope is an opaque object, always obtained via a factory (see [monitor-factories](./monitor-factories.md))
 Never constructed directly by consumers. Used to track reads and manage lifecycles. The `version` property is for debugging/diagnostics only.
 
 ### ScopeEmitter (internal)
@@ -178,4 +178,4 @@ ScopeEmitter._schedule<TResult>(execute: (queue: ScopeEmitterQueue) => TResult):
 // Schedules a batch of emitter notifications, ensuring all emitters are processed in a single global queue for the current frame
 ```
 
-All ScopeEmitter methods are internal and not exposed to consumers. All instances contribute to a single global queue for batching, ensuring deterministic, coalesced notifications. The only interaction point for library users is via the factories and hooks described in [scope-factories](./scope-factories.md).
+All ScopeEmitter methods are internal and not exposed to consumers. All instances contribute to a single global queue for batching, ensuring deterministic, coalesced notifications. The only interaction point for library users is via the factories and hooks described in [monitor-factories](./monitor-factories.md).

@@ -22,7 +22,7 @@
   slug: impulse-overview
   title: Understanding Impulses
   sources:
-    - impulse-concept
+    - signal-concept
   purpose: Introduce the core concept of impulses - what they are, why they exist, and how they work
   sections:
     - Mental model
@@ -33,8 +33,8 @@
   slug: reactivity-system
   title: Reactivity and Scope System
   sources:
-    - scope-concept
-    - scope-factories
+    - monitor-concept
+    - monitor-factories
   purpose: Explain the scope-based reactivity system and how dependency tracking works
   sections:
     - Mental model
@@ -45,7 +45,7 @@
   slug: derived-computations
   title: Derived Computations
   sources:
-    - derived-impulse-concept
+    - derived-signal-concept
   purpose: Explain derived impulses, their lifecycle, and memory safety considerations
   sections:
     - Mental model
@@ -56,7 +56,7 @@
   slug: impulse
   title: Impulse API Reference
   sources:
-    - impulse-concept
+    - signal-concept
   purpose: Complete API documentation for Impulse interface and factory function with practical examples
   sections:
     - Overview [toc]
@@ -67,21 +67,21 @@
   slug: scope
   title: Scope
   sources:
-    - scope-concept
+    - monitor-concept
   purpose: API documentation for the scope
 
 - diataxis: reference
   slug: compare
   title: Compare
   sources:
-    - impulse-concept
+    - signal-concept
   purpose: API documentation for the compare function
 
 - diataxis: reference
   slug: batch
   title: batch
   sources:
-    - scope-factories
+    - monitor-factories
   purpose: API documentation for the batch function
   sections:
     - Overview
@@ -94,7 +94,7 @@
   slug: untrack
   title: untrack
   sources:
-    - scope-factories
+    - monitor-factories
   purpose: API documentation for the untrack function
   sections:
     - Overview
@@ -108,7 +108,7 @@
   slug: subscribe
   title: subscribe
   sources:
-    - scope-factories
+    - monitor-factories
   purpose: API documentation for the subscribe function
   sections:
     - Overview
@@ -122,7 +122,7 @@
   slug: react/use-scope
   title: useScope
   sources:
-    - scope-factories
+    - monitor-factories
   purpose: API documentation for the useScope React hook
   sections:
     - Overview
@@ -135,7 +135,7 @@
   slug: react/use-scoped
   title: useScoped
   sources:
-    - scope-factories
+    - monitor-factories
   purpose: API documentation for the useScoped React hook
   sections:
     - Overview
@@ -149,7 +149,7 @@
   slug: react/use-scoped-memo
   title: useScopedMemo
   sources:
-    - scope-factories
+    - monitor-factories
   purpose: API documentation for the useScopedMemo React hook
   sections:
     - Overview
@@ -163,7 +163,7 @@
   slug: react/use-scoped-callback
   title: useScopedCallback
   sources:
-    - scope-factories
+    - monitor-factories
   purpose: API documentation for the useScopedCallback React hook
   sections:
     - Overview
@@ -177,7 +177,7 @@
   slug: react/use-scoped-effect
   title: useScopedEffect
   sources:
-    - scope-factories
+    - monitor-factories
   purpose: API documentation for the useScopedEffect React hook
   sections:
     - Overview
@@ -190,7 +190,7 @@
   slug: react/use-scoped-layout-effect
   title: useScopedLayoutEffect
   sources:
-    - scope-factories
+    - monitor-factories
   purpose: API documentation for the useScopedLayoutEffect React hook
   sections:
     - Overview
