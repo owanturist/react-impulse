@@ -1,7 +1,8 @@
 import { noop } from "~/tools/noop"
 
+import { enqueue } from "./enqueue"
 import type { Scope } from "./scope"
-import { ScopeEmitter, enqueue } from "./scope-emitter"
+import { ScopeEmitter } from "./scope-emitter"
 
 /**
  * Factory responsible for creating and managing {@link Scope} instances through a shared

@@ -1,6 +1,6 @@
 import type { DependencyList } from "./dependencies"
+import { enqueue } from "./enqueue"
 import type { Scope } from "./scope"
-import { enqueue } from "./scope-emitter"
 import { useScopedMemo } from "./use-scoped-memo"
 
 /**
