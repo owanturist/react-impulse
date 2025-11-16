@@ -1,6 +1,6 @@
 import { useCallback, useSyncExternalStoreWithSelector } from "./dependencies"
 import type { Scope } from "./scope"
-import { ScopeFactory } from "./scope-emitter"
+import { ScopeFactory } from "./scope-factory"
 import { usePermanent } from "./use-permanent"
 
 export function useCreateScope<T>(

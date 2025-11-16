@@ -1,8 +1,8 @@
 import { isFunction } from "~/tools/is-function"
 
+import { enqueue } from "./enqueue"
 import type { ReadableImpulse } from "./readable-impulse"
 import { STATIC_SCOPE, type Scope } from "./scope"
-import { enqueue } from "./scope-emitter"
 
 /**
  * Ignores tracking any of the impulses attached to the provided Scope.
