@@ -268,7 +268,7 @@
               "options": {
                 "patterns": [
                   {
-                    "group": ["react", "react-impulse", "use-sync-external-store/**/*"],
+                    "group": ["react", "@owanturist/*", "use-sync-external-store/**/*"],
                     "message": "Import dependencies from dependencies.ts. It makes the imported deps appear only ones in the bundle."
                   }
                 ]

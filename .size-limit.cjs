@@ -2,12 +2,12 @@
 
 module.exports = [
   {
-    name: "react-impulse",
+    name: "@owanturist/signal",
     ignore: ["use-sync-external-store"],
   },
   {
-    name: "react-impulse-form",
-    ignore: ["react-impulse"],
+    name: "@owanturist/signal-form",
+    ignore: ["@owanturist/signal"],
   },
 ]
   .flatMap((config) => [".js", ".cjs"].map((ext) => ({ ...config, ext })))
