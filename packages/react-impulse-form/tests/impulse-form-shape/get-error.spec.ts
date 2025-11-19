@@ -39,9 +39,7 @@ it("selects error", ({ scope }) => {
     second: null,
     third: null,
   })
-  expect(shape.getError(scope, params._first)).toStrictEqual(
-    shape.getError(scope),
-  )
+  expect(shape.getError(scope, params._first)).toStrictEqual(shape.getError(scope))
   expect(shape.getError(scope, params._second)).toStrictEqual({
     first: [expect.any(String)],
     second: null,
@@ -64,12 +62,8 @@ it("selects error", ({ scope }) => {
       two: [expect.any(String)],
     },
   })
-  expect(shape.getError(scope, params._first)).toStrictEqual(
-    shape.getError(scope),
-  )
-  expect(shape.getError(scope, params._second)).toStrictEqual(
-    shape.getError(scope),
-  )
+  expect(shape.getError(scope, params._first)).toStrictEqual(shape.getError(scope))
+  expect(shape.getError(scope, params._second)).toStrictEqual(shape.getError(scope))
 
   const error = shape.getError(scope)
 
@@ -105,12 +99,8 @@ it("subsequently selects equal error shapes", ({ scope }) => {
   })
   expect(shape.getError(scope)).toBe(shape.getError(scope))
   expect(shape.getError(scope)).toBe(shape.getError(scope))
-  expect(shape.getError(scope, params._first)).toBe(
-    shape.getError(scope, params._first),
-  )
-  expect(shape.getError(scope, params._second)).toBe(
-    shape.getError(scope, params._second),
-  )
+  expect(shape.getError(scope, params._first)).toBe(shape.getError(scope, params._first))
+  expect(shape.getError(scope, params._second)).toBe(shape.getError(scope, params._second))
 })
 
 it("persists unchanged error fields between changes", ({ scope }) => {
@@ -125,9 +115,9 @@ it("persists unchanged error fields between changes", ({ scope }) => {
     }),
   })
 
-  const error_0 = shape.getError(scope)
+  const error0 = shape.getError(scope)
 
-  expect(error_0).toStrictEqual({
+  expect(error0).toStrictEqual({
     first: {
       _0: "first",
       _1: "second",
@@ -144,9 +134,9 @@ it("persists unchanged error fields between changes", ({ scope }) => {
     },
   })
 
-  const error_1 = shape.getError(scope)
+  const error1 = shape.getError(scope)
 
-  expect(error_1).toStrictEqual({
+  expect(error1).toStrictEqual({
     first: {
       _0: "first",
       _1: "second",
@@ -156,7 +146,7 @@ it("persists unchanged error fields between changes", ({ scope }) => {
       _4: "fourth",
     },
   })
-  expect(error_1).not.toBe(error_0)
-  expect(error_1?.first).toBe(error_0?.first)
-  expect(error_1?.second).not.toBe(error_0?.second)
+  expect(error1).not.toBe(error0)
+  expect(error1?.first).toBe(error0?.first)
+  expect(error1?.second).not.toBe(error0?.second)
 })

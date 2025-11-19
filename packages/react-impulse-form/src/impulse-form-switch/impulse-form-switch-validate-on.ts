@@ -7,9 +7,4 @@ import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 export type ImpulseFormSwitchValidateOn<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
-> = ImpulseFormSwitchConciseParam<
-  TKind,
-  TBranches,
-  "validateOn.schema",
-  ValidateStrategy
->
+> = ImpulseFormSwitchConciseParam<TKind, TBranches, "validateOn.schema", ValidateStrategy>

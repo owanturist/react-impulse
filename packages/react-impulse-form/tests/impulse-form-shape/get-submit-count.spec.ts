@@ -47,9 +47,7 @@ it("matches the type signature", () => {
 
   expectTypeOf(form.getSubmitCount).toEqualTypeOf<(scope: Scope) => number>()
 
-  expectTypeOf(form.fields._3.getSubmitCount).toEqualTypeOf<
-    (scope: Scope) => number
-  >()
+  expectTypeOf(form.fields._3.getSubmitCount).toEqualTypeOf<(scope: Scope) => number>()
 })
 
 describe.each([
@@ -133,9 +131,7 @@ describe.each([
     }),
   ],
 ])("getSubmitCount(scope) %s", (_, setup) => {
-  describe.each<
-    [string, (form: ImpulseFormShape<ShapeFields>) => Promise<unknown>]
-  >([
+  describe.each<[string, (form: ImpulseFormShape<ShapeFields>) => Promise<unknown>]>([
     ["root", (form) => form.submit()],
     ["root.fields.<ImpulseFormUnit>", (form) => form.fields._1.submit()],
     ["root.fields.<ImpulseFormShape>", (form) => form.fields._3.submit()],
@@ -149,10 +145,10 @@ describe.each([
 
       expect(form.getSubmitCount(scope)).toBe(0)
 
-      void submit(form)
+      submit(form)
       expect(form.getSubmitCount(scope)).toBe(1)
 
-      void submit(form)
+      submit(form)
       expect(form.getSubmitCount(scope)).toBe(2)
     })
 
@@ -161,7 +157,7 @@ describe.each([
 
       expect(form.isInvalid(scope)).toBe(false)
 
-      void submit(form)
+      submit(form)
       expect(form.isInvalid(scope)).toBe(true)
       expect(form.getSubmitCount(scope)).toBe(1)
     })
@@ -169,17 +165,19 @@ describe.each([
     it("keeps the count after async is done", async ({ scope }) => {
       const form = setup()
 
-      const all_done = vi.fn()
+      const allDone = vi.fn()
 
       const submits = Promise.all([submit(form), submit(form), submit(form)])
 
       expect(form.getSubmitCount(scope)).toBe(3)
-      void submits.then(all_done)
-      expect(all_done).not.toHaveBeenCalled()
+      const whenDone = submits.then(allDone)
+      expect(allDone).not.toHaveBeenCalled()
 
       await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
-      expect(all_done).toHaveBeenCalledOnce()
+      expect(allDone).toHaveBeenCalledOnce()
       expect(form.getSubmitCount(scope)).toBe(3)
+
+      await whenDone
     })
   })
 })

@@ -61,15 +61,11 @@ describe("types", () => {
   >
 
   it("matches schema type for getInitial(scope)", () => {
-    expectTypeOf(form.getInitial).toEqualTypeOf<
-      (scope: Scope) => InitialSchema
-    >()
+    expectTypeOf(form.getInitial).toEqualTypeOf<(scope: Scope) => InitialSchema>()
   })
 
   it("matches setter type for setInitial(setter)", () => {
-    expectTypeOf(form.setInitial).toEqualTypeOf<
-      (setter: InitialSetter) => void
-    >()
+    expectTypeOf(form.setInitial).toEqualTypeOf<(setter: InitialSetter) => void>()
   })
 
   it("ensures ImpulseFormSwitchOptions.initial type", () => {
@@ -122,15 +118,11 @@ describe("types", () => {
     >
 
     it("matches schema type for getInitial(scope)", () => {
-      expectTypeOf(parent.getInitial).toEqualTypeOf<
-        (scope: Scope) => ParentInitialSchema
-      >()
+      expectTypeOf(parent.getInitial).toEqualTypeOf<(scope: Scope) => ParentInitialSchema>()
     })
 
     it("matches setter type for setInitial(setter)", () => {
-      expectTypeOf(parent.setInitial).toEqualTypeOf<
-        (setter: ParentInitialSetter) => void
-      >()
+      expectTypeOf(parent.setInitial).toEqualTypeOf<(setter: ParentInitialSetter) => void>()
     })
   })
 })
@@ -422,9 +414,7 @@ describe("using recursive setter", () => {
     ),
   }
 
-  function setup(
-    options?: ImpulseFormSwitchOptions<typeof active, typeof branches>,
-  ) {
+  function setup(options?: ImpulseFormSwitchOptions<typeof active, typeof branches>) {
     return ImpulseFormSwitch(active, branches, options)
   }
 
@@ -436,12 +426,7 @@ describe("using recursive setter", () => {
       ) => ImpulseFormSwitch<typeof active, typeof branches>,
     ]
   >([
-    [
-      "ImpulseFormSwitchOptions.initial",
-      (initial) => {
-        return setup({ initial })
-      },
-    ],
+    ["ImpulseFormSwitchOptions.initial", (initial) => setup({ initial })],
 
     [
       "ImpulseFormSwitch.setInitial",
@@ -494,15 +479,15 @@ describe("using recursive setter", () => {
         })
 
         return {
-          active: (initial_active, input_active) => {
-            expect(initial_active).toBe("_12")
-            expect(input_active).toBe("")
+          active: (initialActive, inputActive) => {
+            expect(initialActive).toBe("_12")
+            expect(inputActive).toBe("")
 
             return "_1"
           },
 
-          branches: (initial_branches, input_branches) => {
-            expect(initial_branches).toStrictEqual({
+          branches: (initialBranches, inputBranches) => {
+            expect(initialBranches).toStrictEqual({
               _1: false,
               _2: {
                 _3: "initial",
@@ -516,7 +501,7 @@ describe("using recursive setter", () => {
                 },
               },
             })
-            expect(input_branches).toStrictEqual({
+            expect(inputBranches).toStrictEqual({
               _1: true,
               _2: {
                 _3: "name",
@@ -532,49 +517,49 @@ describe("using recursive setter", () => {
             })
 
             return {
-              _1: (initial_1, input_1) => {
-                expect(initial_1).toBe(false)
-                expect(input_1).toBe(true)
+              _1: (initial1, input1) => {
+                expect(initial1).toBe(false)
+                expect(input1).toBe(true)
 
                 return true
               },
 
-              _2: (initial_2, input_2) => {
-                expect(initial_2).toStrictEqual({
+              _2: (initial2, input2) => {
+                expect(initial2).toStrictEqual({
                   _3: "initial",
                   _4: 100,
                 })
-                expect(input_2).toStrictEqual({
+                expect(input2).toStrictEqual({
                   _3: "name",
                   _4: 18,
                 })
 
                 return {
-                  _3: (initial_3, input_3) => {
-                    expect(initial_3).toBe("initial")
-                    expect(input_3).toBe("name")
+                  _3: (initial3, input3) => {
+                    expect(initial3).toBe("initial")
+                    expect(input3).toBe("name")
 
                     return "updated"
                   },
 
-                  _4: (initial_4, input_4) => {
-                    expect(initial_4).toBe(100)
-                    expect(input_4).toBe(18)
+                  _4: (initial4, input4) => {
+                    expect(initial4).toBe(100)
+                    expect(input4).toBe(18)
 
                     return 30
                   },
                 }
               },
 
-              _5: (initial_5, input_5) => {
-                expect(initial_5).toStrictEqual({
+              _5: (initial5, input5) => {
+                expect(initial5).toStrictEqual({
                   active: "_7",
                   branches: {
                     _6: 2,
                     _7: "0",
                   },
                 })
-                expect(input_5).toStrictEqual({
+                expect(input5).toStrictEqual({
                   active: "_6",
                   branches: {
                     _6: 0,
@@ -583,34 +568,34 @@ describe("using recursive setter", () => {
                 })
 
                 return {
-                  active: (initial_active, input_active) => {
-                    expect(initial_active).toBe("_7")
-                    expect(input_active).toBe("_6")
+                  active: (initialActive, inputActive) => {
+                    expect(initialActive).toBe("_7")
+                    expect(inputActive).toBe("_6")
 
                     return "_5"
                   },
 
-                  branches: (initial_branches, input_branches) => {
-                    expect(initial_branches).toStrictEqual({
+                  branches: (initialBranches, inputBranches) => {
+                    expect(initialBranches).toStrictEqual({
                       _6: 2,
                       _7: "0",
                     })
-                    expect(input_branches).toStrictEqual({
+                    expect(inputBranches).toStrictEqual({
                       _6: 0,
                       _7: "0",
                     })
 
                     return {
-                      _6: (initial_6, input_6) => {
-                        expect(initial_6).toBe(2)
-                        expect(input_6).toBe(0)
+                      _6: (initial6, input6) => {
+                        expect(initial6).toBe(2)
+                        expect(input6).toBe(0)
 
                         return 3
                       },
 
-                      _7: (initial_7, input_7) => {
-                        expect(initial_7).toBe("0")
-                        expect(input_7).toBe("0")
+                      _7: (initial7, input7) => {
+                        expect(initial7).toBe("0")
+                        expect(input7).toBe("0")
 
                         return "3"
                       },
@@ -702,7 +687,7 @@ describe("stable initial value", () => {
       ),
     })
 
-    const initial_0 = form.getInitial(scope)
+    const initial0 = form.getInitial(scope)
 
     form.setInitial({
       branches: {
@@ -712,38 +697,34 @@ describe("stable initial value", () => {
       },
     })
 
-    const initial_1 = form.getInitial(scope)
+    const initial1 = form.getInitial(scope)
 
-    expect(initial_1).not.toBe(initial_0)
-    expect(initial_1.active).toBe(initial_0.active)
-    expect(initial_1.branches).not.toBe(initial_0.branches)
-    expect(initial_1.branches._2).not.toBe(initial_0.branches._2)
-    expect(initial_1.branches._5).toBe(initial_0.branches._5)
+    expect(initial1).not.toBe(initial0)
+    expect(initial1.active).toBe(initial0.active)
+    expect(initial1.branches).not.toBe(initial0.branches)
+    expect(initial1.branches._2).not.toBe(initial0.branches._2)
+    expect(initial1.branches._5).toBe(initial0.branches._5)
   })
 
-  it("selects unequal initial values when isInputEqual is not specified", ({
-    scope,
-  }) => {
+  it("selects unequal initial values when isInputEqual is not specified", ({ scope }) => {
     const form = ImpulseFormSwitch(ImpulseFormUnit("_1" as const), {
       _1: ImpulseFormUnit([0]),
     })
 
-    const initial_0 = form.getInitial(scope)
+    const initial0 = form.getInitial(scope)
 
     form.setInitial({
       branches: {
         _1: [0],
       },
     })
-    const initial_1 = form.getInitial(scope)
+    const initial1 = form.getInitial(scope)
 
-    expect(initial_0).not.toBe(initial_1)
-    expect(initial_0).toStrictEqual(initial_1)
+    expect(initial0).not.toBe(initial1)
+    expect(initial0).toStrictEqual(initial1)
   })
 
-  it("selects equal initial values when isInputEqual is specified", ({
-    scope,
-  }) => {
+  it("selects equal initial values when isInputEqual is specified", ({ scope }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("", {
         schema: z.enum(["_1"]),
@@ -755,16 +736,16 @@ describe("stable initial value", () => {
       },
     )
 
-    const initial_0 = form.getInitial(scope)
+    const initial0 = form.getInitial(scope)
 
     form.setInitial({
       branches: {
         _1: [0],
       },
     })
-    const initial_1 = form.getInitial(scope)
+    const initial1 = form.getInitial(scope)
 
-    expect(initial_0).toBe(initial_1)
-    expect(initial_0).toStrictEqual(initial_1)
+    expect(initial0).toBe(initial1)
+    expect(initial0).toStrictEqual(initial1)
   })
 })

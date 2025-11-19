@@ -6,9 +6,7 @@ import { wait } from "../common"
 
 const SLOWEST_ASYNC_MS = 1000
 
-function setupValue(
-  enchant?: (form: ImpulseFormUnit<string, ReadonlyArray<string>>) => void,
-) {
+function setupValue(enchant?: (form: ImpulseFormUnit<string, ReadonlyArray<string>>) => void) {
   return (initial = "") => {
     const form = ImpulseFormUnit(initial, {
       schema: z.string().max(2),
@@ -51,7 +49,7 @@ describe.each([
   it("returns false when submitting starts", ({ scope }) => {
     const form = setup()
 
-    void form.submit()
+    form.submit()
     expect(form.isSubmitting(scope)).toBe(false)
   })
 
@@ -85,55 +83,55 @@ describe.each([
     const form = setup()
 
     expect(form.isSubmitting(scope)).toBe(false)
-    void form.submit()
+    form.submit()
     expect(form.isSubmitting(scope)).toBe(true)
   })
 
   it("returns false when submitting finishes", async ({ scope }) => {
     const form = setup()
 
-    const all_done = vi.fn()
+    const allDone = vi.fn()
 
-    void form.submit().then(all_done)
+    form.submit().then(allDone)
 
-    expect(all_done).not.toHaveBeenCalled()
+    expect(allDone).not.toHaveBeenCalled()
     expect(form.isSubmitting(scope)).toBe(true)
 
     await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS - 1)
-    expect(all_done).not.toHaveBeenCalled()
+    expect(allDone).not.toHaveBeenCalled()
     expect(form.isSubmitting(scope)).toBe(true)
 
     await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
-    expect(all_done).toHaveBeenCalledOnce()
+    expect(allDone).toHaveBeenCalledOnce()
     expect(form.isSubmitting(scope)).toBe(false)
   })
 
   it("returns false when all submitting finish", async ({ scope }) => {
     const form = setup()
 
-    const first_done = vi.fn()
-    const second_done = vi.fn()
+    const firstDone = vi.fn()
+    const secondDone = vi.fn()
 
-    void form.submit().then(first_done)
+    form.submit().then(firstDone)
 
     form.onSubmit(() => wait(2 * SLOWEST_ASYNC_MS))
 
-    void form.submit().then(second_done)
+    form.submit().then(secondDone)
 
-    expect(first_done).not.toHaveBeenCalled()
-    expect(second_done).not.toHaveBeenCalled()
+    expect(firstDone).not.toHaveBeenCalled()
+    expect(secondDone).not.toHaveBeenCalled()
     expect(form.isSubmitting(scope)).toBe(true)
 
     await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
 
-    expect(first_done).toHaveBeenCalledOnce()
-    expect(second_done).not.toHaveBeenCalled()
+    expect(firstDone).toHaveBeenCalledOnce()
+    expect(secondDone).not.toHaveBeenCalled()
     expect(form.isSubmitting(scope)).toBe(true)
 
     await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
 
-    expect(first_done).toHaveBeenCalledOnce()
-    expect(second_done).toHaveBeenCalledOnce()
+    expect(firstDone).toHaveBeenCalledOnce()
+    expect(secondDone).toHaveBeenCalledOnce()
     expect(form.isSubmitting(scope)).toBe(false)
   })
 
@@ -142,7 +140,7 @@ describe.each([
 
     expect(form.isInvalid(scope)).toBe(false)
 
-    void form.submit()
+    form.submit()
     expect(form.isInvalid(scope)).toBe(true)
     expect(form.isSubmitting(scope)).toBe(false)
   })

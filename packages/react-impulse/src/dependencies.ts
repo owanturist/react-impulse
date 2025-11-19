@@ -2,11 +2,11 @@
 export {
   type DependencyList,
   type EffectCallback,
-  useRef,
-  useMemo,
   useCallback,
+  useDebugValue,
   useEffect,
   useLayoutEffect,
-  useDebugValue,
+  useMemo,
+  useRef,
 } from "react"
 export { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector"

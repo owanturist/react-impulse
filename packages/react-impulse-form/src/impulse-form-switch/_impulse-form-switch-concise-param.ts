@@ -1,8 +1,4 @@
-import type {
-  GetImpulseFormParam,
-  ImpulseForm,
-  ImpulseFormParams,
-} from "../impulse-form"
+import type { GetImpulseFormParam, ImpulseForm, ImpulseFormParams } from "../impulse-form"
 
 import type { ImpulseFormSwitchBranchUnion } from "./_impulse-form-switch-branch-union"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"

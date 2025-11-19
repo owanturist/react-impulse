@@ -3,26 +3,24 @@ import React from "react"
 
 import { type Impulse, useScoped } from "../../src"
 
-export const withinNth = (testId: string, position: number) => {
+function withinNth(testId: string, position: number) {
   return within(screen.getAllByTestId(testId)[position]!)
 }
 
-export const expectCounts = (expecting: ReadonlyArray<number>): void => {
+function expectCounts(expecting: ReadonlyArray<number>): void {
   const counters = screen.queryAllByTestId("counter")
 
   expect(counters).toHaveLength(expecting.length)
 
   for (let i = 0; i < expecting.length; i++) {
-    expect(within(counters[i]!).getByTestId("count")).toHaveTextContent(
-      expecting[i]!.toString(),
-    )
+    expect(within(counters[i]!).getByTestId("count")).toHaveTextContent(expecting[i]!.toString())
   }
 }
 
-export const CounterComponent: React.FC<{
+const CounterComponent = React.memo<{
   count: Impulse<number>
   onRender: VoidFunction
-}> = React.memo(
+}>(
   ({ count: countImpulse, onRender }) => {
     const count = useScoped((scope) => countImpulse.getValue(scope))
 
@@ -41,3 +39,5 @@ export const CounterComponent: React.FC<{
   },
   (prevProps, nextProps) => prevProps.count === nextProps.count,
 )
+
+export { withinNth, expectCounts, CounterComponent }

@@ -1,14 +1,8 @@
 import { entries } from "~/tools/entries"
 
-export function partitionEntries<
-  TObject extends Record<string, unknown>,
-  TResult,
->(
+export function partitionEntries<TObject extends Record<string, unknown>, TResult>(
   object: TObject,
-  predicate: (
-    value: TObject[typeof key] | TResult,
-    key: keyof TObject,
-  ) => value is TResult,
+  predicate: (value: TObject[typeof key] | TResult, key: keyof TObject) => value is TResult,
 ): [Record<keyof TObject, TResult>, TObject] {
   const right = {} as Record<keyof TObject, TResult>
   const left = {} as TObject

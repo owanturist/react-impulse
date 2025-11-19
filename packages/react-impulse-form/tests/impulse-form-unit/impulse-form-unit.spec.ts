@@ -92,12 +92,8 @@ it("creates ImpulseFormUnit with same type schema", ({ scope }) => {
     validateOn: "onInit",
   })
 
-  expectTypeOf(value).toEqualTypeOf<
-    ImpulseFormUnit<string, ReadonlyArray<string>>
-  >()
-  expectTypeOf(value).toEqualTypeOf<
-    ImpulseFormUnit<string, ReadonlyArray<string>, string>
-  >()
+  expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<string, ReadonlyArray<string>>>()
+  expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<string, ReadonlyArray<string>, string>>()
 
   expect(value.getInput(scope)).toBe("")
   expect(value.getOutput(scope)).toBeNull()
@@ -113,9 +109,7 @@ it("creates ImpulseFormUnit with converting type schema", ({ scope }) => {
     validateOn: "onInit",
   })
 
-  expectTypeOf(value).toEqualTypeOf<
-    ImpulseFormUnit<string, ReadonlyArray<string>, number>
-  >()
+  expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<string, ReadonlyArray<string>, number>>()
 
   expect(value.getInput(scope)).toBe("")
   expect(value.getOutput(scope)).toBeNull()
@@ -156,9 +150,7 @@ it("creates ImpulseFormUnit with nullable output", ({ scope }) => {
     schema: z.string().nullable(),
   })
 
-  expectTypeOf(unit).toEqualTypeOf<
-    ImpulseFormUnit<string, ReadonlyArray<string>, null | string>
-  >()
+  expectTypeOf(unit).toEqualTypeOf<ImpulseFormUnit<string, ReadonlyArray<string>, null | string>>()
   expect(unit.getOutput(scope)).toBe("")
 
   // @ts-expect-error test the schema
@@ -211,9 +203,7 @@ it("creates ImpulseFormUnit with complex value", ({ scope }) => {
   })
 })
 
-it("does not allow to specify schema TOutput different from TInput", ({
-  scope,
-}) => {
+it("does not allow to specify schema TOutput different from TInput", ({ scope }) => {
   const value = ImpulseFormUnit<string>("1", {
     // @ts-expect-error schema Input is not string
     schema: z.coerce.number(),
@@ -224,9 +214,7 @@ it("does not allow to specify schema TOutput different from TInput", ({
   expect(value.getOutput(scope)).toBe(1)
 })
 
-it("does not allow to specify schema Output different from TValue", ({
-  scope,
-}) => {
+it("does not allow to specify schema Output different from TValue", ({ scope }) => {
   const value = ImpulseFormUnit<number, string>(0, {
     // @ts-expect-error schema Output is not string
     schema: z.number(),
@@ -278,9 +266,8 @@ describe("ImpulseFormUnitValidatedOptions", () => {
   it("defines impulse with validate as validator", ({ scope }) => {
     const value = ImpulseFormUnit(0, {
       validateOn: "onInit",
-      validate: (input): Result<string, number> => {
-        return input > 0 ? [null, input] : ["should be positive", null]
-      },
+      validate: (input): Result<string, number> =>
+        input > 0 ? [null, input] : ["should be positive", null],
     })
 
     expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<number, string, number>>()
@@ -294,16 +281,11 @@ describe("ImpulseFormUnitValidatedOptions", () => {
     expect(value.getOutput(scope)).toBe(1)
   })
 
-  it("defines impulse with validate as validator and transformer", ({
-    scope,
-  }) => {
+  it("defines impulse with validate as validator and transformer", ({ scope }) => {
     const value = ImpulseFormUnit(0, {
       validateOn: "onInit",
-      validate: (input): Result<string, string> => {
-        return input > 0
-          ? [null, input.toFixed(2)]
-          : ["should be positive", null]
-      },
+      validate: (input): Result<string, string> =>
+        input > 0 ? [null, input.toFixed(2)] : ["should be positive", null],
     })
 
     expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<number, string, string>>()
@@ -325,9 +307,7 @@ describe("ImpulseFormUnitSchemaOptions", () => {
       schema: z.number().min(1),
     })
 
-    expectTypeOf(value).toEqualTypeOf<
-      ImpulseFormUnit<number, ReadonlyArray<string>, number>
-    >()
+    expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<number, ReadonlyArray<string>, number>>()
     expect(value.getInput(scope)).toBe(0)
     expect(value.getError(scope)).toStrictEqual([expect.any(String)])
     expect(value.getOutput(scope)).toBeNull()
@@ -338,9 +318,7 @@ describe("ImpulseFormUnitSchemaOptions", () => {
     expect(value.getOutput(scope)).toBe(1)
   })
 
-  it("defines impulse with schema as validator and transformer", ({
-    scope,
-  }) => {
+  it("defines impulse with schema as validator and transformer", ({ scope }) => {
     const value = ImpulseFormUnit(0, {
       validateOn: "onInit",
       schema: z
@@ -349,9 +327,7 @@ describe("ImpulseFormUnitSchemaOptions", () => {
         .transform((input) => input.toFixed(2)),
     })
 
-    expectTypeOf(value).toEqualTypeOf<
-      ImpulseFormUnit<number, ReadonlyArray<string>, string>
-    >()
+    expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<number, ReadonlyArray<string>, string>>()
     expect(value.getInput(scope)).toBe(0)
     expect(value.getError(scope)).toStrictEqual([expect.any(String)])
     expect(value.getOutput(scope)).toBeNull()

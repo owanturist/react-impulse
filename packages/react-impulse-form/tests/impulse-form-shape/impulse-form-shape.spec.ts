@@ -3,11 +3,7 @@ import { z } from "zod"
 import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
-import {
-  ImpulseFormShape,
-  ImpulseFormUnit,
-  type ValidateStrategy,
-} from "../../src"
+import { ImpulseFormShape, ImpulseFormUnit, type ValidateStrategy } from "../../src"
 
 it("composes ImpulseFormShape from ImpulseFormUnit", ({ scope }) => {
   const shape = ImpulseFormShape({
@@ -51,9 +47,7 @@ it("composes ImpulseFormShape from ImpulseFormUnit", ({ scope }) => {
   })
 })
 
-it("composes ImpulseFormShape from ImpulseFormUnit with schema", ({
-  scope,
-}) => {
+it("composes ImpulseFormShape from ImpulseFormUnit with schema", ({ scope }) => {
   const shape = ImpulseFormShape({
     first: ImpulseFormUnit("", {
       schema: z.string().min(1).pipe(z.coerce.boolean()),
@@ -290,8 +284,7 @@ describe("ImpulseFormShapeOptions.error", () => {
       {
         first: ImpulseFormUnit("", { error: 1 }),
         second: ImpulseFormUnit(0, {
-          validate: (input) =>
-            input > 0 ? [null, input] : ["must be positive", null],
+          validate: (input) => (input > 0 ? [null, input] : ["must be positive", null]),
         }),
         third: ImpulseFormShape(
           {
@@ -352,17 +345,13 @@ describe("ImpulseFormShapeOptions.error", () => {
 
               return {
                 one: (one) => {
-                  expectTypeOf(
-                    one,
-                  ).toEqualTypeOf<null | ReadonlyArray<string>>()
+                  expectTypeOf(one).toEqualTypeOf<null | ReadonlyArray<string>>()
                   expect(one).toStrictEqual(["one"])
 
                   return [...one!, "1"]
                 },
                 two: (two) => {
-                  expectTypeOf(
-                    two,
-                  ).toEqualTypeOf<null | ReadonlyArray<string>>()
+                  expectTypeOf(two).toEqualTypeOf<null | ReadonlyArray<string>>()
                   expect(two).toStrictEqual(["two"])
 
                   return [...two!, "2"]
@@ -464,7 +453,7 @@ describe("ImpulseFormShapeOptions.initial", () => {
               expectTypeOf(first).toEqualTypeOf<string>()
               expect(first).toBe("1")
 
-              return first + "-first"
+              return `${first}-first`
             },
             second: (second) => {
               expectTypeOf(second).toEqualTypeOf<number>()
@@ -593,7 +582,7 @@ describe("ImpulseFormShapeOptions.input", () => {
               expectTypeOf(first).toEqualTypeOf<string>()
               expect(first).toBe("1")
 
-              return first + "-first"
+              return `${first}-first`
             },
             second: (second) => {
               expectTypeOf(second).toEqualTypeOf<number>()
@@ -713,9 +702,7 @@ describe("ImpulseFormShapeOptions.validateOn", () => {
           schema: z.string(),
         }),
         second: ImpulseFormUnit(0, {
-          validate: (input) => {
-            return input > 0 ? [null, input] : ["must be positive", null]
-          },
+          validate: (input) => (input > 0 ? [null, input] : ["must be positive", null]),
         }),
         third: ImpulseFormShape(
           {
@@ -859,10 +846,7 @@ it("follows the options type", () => {
               readonly third?: Setter<
                 {
                   readonly one?: Setter<boolean, [boolean, boolean]>
-                  readonly two?: Setter<
-                    Array<string>,
-                    [Array<string>, Array<string>]
-                  >
+                  readonly two?: Setter<Array<string>, [Array<string>, Array<string>]>
                 },
                 [
                   {
@@ -905,10 +889,7 @@ it("follows the options type", () => {
               readonly third?: Setter<
                 {
                   readonly one?: Setter<boolean, [boolean, boolean]>
-                  readonly two?: Setter<
-                    Array<string>,
-                    [Array<string>, Array<string>]
-                  >
+                  readonly two?: Setter<Array<string>, [Array<string>, Array<string>]>
                 },
                 [
                   {

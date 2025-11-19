@@ -2,11 +2,7 @@ import z from "zod"
 
 import { params } from "~/tools/params"
 
-import {
-  ImpulseFormOptional,
-  ImpulseFormShape,
-  ImpulseFormUnit,
-} from "../../src"
+import { ImpulseFormOptional, ImpulseFormShape, ImpulseFormUnit } from "../../src"
 
 describe("types", () => {
   const enabled = ImpulseFormUnit(true)
@@ -29,13 +25,9 @@ describe("types", () => {
   it("matches schema type for isInvalid(scope, select?)", ({ scope }) => {
     expectTypeOf(form.isInvalid(scope)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(
-      form.isInvalid(scope, params._first),
-    ).toEqualTypeOf<IsInvalidSchema>()
+    expectTypeOf(form.isInvalid(scope, params._first)).toEqualTypeOf<IsInvalidSchema>()
 
-    expectTypeOf(
-      form.isInvalid(scope, params._second),
-    ).toEqualTypeOf<IsInvalidVerboseSchema>()
+    expectTypeOf(form.isInvalid(scope, params._second)).toEqualTypeOf<IsInvalidVerboseSchema>()
   })
 
   describe("nested", () => {
@@ -56,9 +48,7 @@ describe("types", () => {
     it("matches schema type for isInvalid(scope, select?)", ({ scope }) => {
       expectTypeOf(parent.isInvalid(scope)).toEqualTypeOf<boolean>()
 
-      expectTypeOf(
-        parent.isInvalid(scope, params._first),
-      ).toEqualTypeOf<ParentIsInvalidSchema>()
+      expectTypeOf(parent.isInvalid(scope, params._first)).toEqualTypeOf<ParentIsInvalidSchema>()
 
       expectTypeOf(
         parent.isInvalid(scope, params._second),
@@ -68,9 +58,7 @@ describe("types", () => {
 })
 
 describe("when element is initially invalid", () => {
-  it("returns false for initially invalid but not validated enabled", ({
-    scope,
-  }) => {
+  it("returns false for initially invalid but not validated enabled", ({ scope }) => {
     const form = ImpulseFormOptional(
       ImpulseFormUnit("", {
         schema: z.boolean(),
@@ -131,9 +119,7 @@ describe("when element is initially invalid", () => {
     })
   })
 
-  it("returns false for initially valid but not validated enabled", ({
-    scope,
-  }) => {
+  it("returns false for initially valid but not validated enabled", ({ scope }) => {
     const form = ImpulseFormOptional(
       ImpulseFormUnit(true, {
         schema: z.boolean(),
@@ -198,9 +184,7 @@ describe("when element is initially invalid", () => {
     })
   })
 
-  it("returns false after disabling initially valid validated enabled", ({
-    scope,
-  }) => {
+  it("returns false after disabling initially valid validated enabled", ({ scope }) => {
     const form = ImpulseFormOptional(
       ImpulseFormUnit(true, {
         validateOn: "onInit",
@@ -234,9 +218,7 @@ describe("when element is initially invalid", () => {
     })
   })
 
-  it("returns true after enabling initially valid validated enabled", ({
-    scope,
-  }) => {
+  it("returns true after enabling initially valid validated enabled", ({ scope }) => {
     const form = ImpulseFormOptional(
       ImpulseFormUnit(false, {
         validateOn: "onInit",
@@ -310,9 +292,7 @@ describe("when element is initially invalid", () => {
 })
 
 describe("when element is initially valid", () => {
-  it("returns false for initially invalid but not validated enabled", ({
-    scope,
-  }) => {
+  it("returns false for initially invalid but not validated enabled", ({ scope }) => {
     const form = ImpulseFormOptional(
       ImpulseFormUnit("", {
         schema: z.boolean(),
@@ -495,13 +475,9 @@ describe("stable invalid value", () => {
     expect(form.isInvalid(scope)).toBe(form.isInvalid(scope))
 
     expect(form.isInvalid(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.isInvalid(scope, params._first)).toBe(
-      form.isInvalid(scope, params._first),
-    )
+    expect(form.isInvalid(scope, params._first)).toBe(form.isInvalid(scope, params._first))
 
     expect(form.isInvalid(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.isInvalid(scope, params._second)).toBe(
-      form.isInvalid(scope, params._second),
-    )
+    expect(form.isInvalid(scope, params._second)).toBe(form.isInvalid(scope, params._second))
   })
 })

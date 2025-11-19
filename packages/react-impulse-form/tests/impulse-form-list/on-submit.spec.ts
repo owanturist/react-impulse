@@ -1,10 +1,6 @@
 import { untrack } from "react-impulse"
 
-import {
-  ImpulseFormList,
-  type ImpulseFormListOptions,
-  ImpulseFormUnit,
-} from "../../src"
+import { ImpulseFormList, type ImpulseFormListOptions, ImpulseFormUnit } from "../../src"
 
 function setup(options?: ImpulseFormListOptions<ImpulseFormUnit<number>>) {
   const form = ImpulseFormList(
@@ -12,45 +8,45 @@ function setup(options?: ImpulseFormListOptions<ImpulseFormUnit<number>>) {
     options,
   )
 
-  const listener_0 = vi.fn()
-  const listener_1 = vi.fn()
-  const listener_2 = vi.fn()
-  const listener_3 = vi.fn()
+  const listener0 = vi.fn()
+  const listener1 = vi.fn()
+  const listener2 = vi.fn()
+  const listener3 = vi.fn()
 
   const elements = untrack((scope) => form.getElements(scope))
 
-  form.onSubmit(listener_0)
-  elements.at(0)?.onSubmit(listener_1)
-  elements.at(1)?.onSubmit(listener_2)
-  elements.at(2)?.onSubmit(listener_3)
+  form.onSubmit(listener0)
+  elements.at(0)?.onSubmit(listener1)
+  elements.at(1)?.onSubmit(listener2)
+  elements.at(2)?.onSubmit(listener3)
 
   return [
     form,
     {
-      listener_0,
-      listener_1,
-      listener_2,
-      listener_3,
+      listener0,
+      listener1,
+      listener2,
+      listener3,
     },
   ] as const
 }
 
 it("does not call the listeners on init", () => {
-  const [, { listener_0, listener_1, listener_2, listener_3 }] = setup()
+  const [, { listener0, listener1, listener2, listener3 }] = setup()
 
-  expect(listener_0).not.toHaveBeenCalled()
-  expect(listener_1).not.toHaveBeenCalled()
-  expect(listener_2).not.toHaveBeenCalled()
-  expect(listener_3).not.toHaveBeenCalled()
+  expect(listener0).not.toHaveBeenCalled()
+  expect(listener1).not.toHaveBeenCalled()
+  expect(listener2).not.toHaveBeenCalled()
+  expect(listener3).not.toHaveBeenCalled()
 })
 
 it("provides values to the listeners", () => {
-  const [form, { listener_0, listener_1, listener_2, listener_3 }] = setup()
+  const [form, { listener0, listener1, listener2, listener3 }] = setup()
 
-  void form.submit()
+  form.submit()
 
-  expect(listener_0).toHaveBeenCalledExactlyOnceWith([1, 2, 3])
-  expect(listener_1).toHaveBeenCalledExactlyOnceWith(1)
-  expect(listener_2).toHaveBeenCalledExactlyOnceWith(2)
-  expect(listener_3).toHaveBeenCalledExactlyOnceWith(3)
+  expect(listener0).toHaveBeenCalledExactlyOnceWith([1, 2, 3])
+  expect(listener1).toHaveBeenCalledExactlyOnceWith(1)
+  expect(listener2).toHaveBeenCalledExactlyOnceWith(2)
+  expect(listener3).toHaveBeenCalledExactlyOnceWith(3)
 })

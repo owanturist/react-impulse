@@ -5,7 +5,7 @@ import { map } from "~/tools/map"
 import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
-import { Impulse, type Scope, batch } from "../dependencies"
+import { batch, Impulse, type Scope } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormListParams } from "./_impulse-form-list-params"
@@ -16,12 +16,9 @@ export class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
 > {
   public static override _getState = ImpulseForm._getState
 
-  private readonly _elements = Impulse(
-    (scope) => this._state._getElements(scope),
-    {
-      compare: isShallowArrayEqual,
-    },
-  )
+  private readonly _elements = Impulse((scope) => this._state._getElements(scope), {
+    compare: isShallowArrayEqual,
+  })
 
   public constructor(public readonly _state: ImpulseFormListState<TElement>) {
     super()
@@ -34,9 +31,7 @@ export class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
   ): TResult
   public getElements<TResult>(
     scope: Scope,
-    select: (
-      elements: ReadonlyArray<TElement>,
-    ) => TResult = params._first as typeof select,
+    select: (elements: ReadonlyArray<TElement>) => TResult = params._first as typeof select,
   ): TResult {
     return select(this._elements.getValue(scope))
   }
@@ -48,16 +43,12 @@ export class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
       const initialElements = this._state._getInitialElements(scope)
 
       const elementsStates = map(
-        isFunction(setter)
-          ? setter(this._elements.getValue(scope), scope)
-          : setter,
+        isFunction(setter) ? setter(this._elements.getValue(scope), scope) : setter,
 
         ImpulseForm._getState,
       )
 
-      const nextStateElements = map(elementsStates, (element) => {
-        return this._state._parentOf(element)
-      })
+      const nextStateElements = map(elementsStates, (element) => this._state._parentOf(element))
 
       // detach all elements from their initial states in one go
       for (const stateElement of nextStateElements) {

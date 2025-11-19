@@ -97,9 +97,7 @@ it("selects touched", ({ scope }) => {
     },
   })
 
-  expectTypeOf(
-    shape.fields.third.fields.one.isDirty(scope, params._first),
-  ).toEqualTypeOf<boolean>()
+  expectTypeOf(shape.fields.third.fields.one.isDirty(scope, params._first)).toEqualTypeOf<boolean>()
   expectTypeOf(
     shape.fields.third.fields.one.isDirty(scope, params._second),
   ).toEqualTypeOf<boolean>()
@@ -111,9 +109,7 @@ it("selects touched", ({ scope }) => {
         readonly two: boolean
       }
   >()
-  expectTypeOf(
-    shape.fields.third.isDirty(scope, params._second),
-  ).toEqualTypeOf<{
+  expectTypeOf(shape.fields.third.isDirty(scope, params._second)).toEqualTypeOf<{
     readonly one: boolean
     readonly two: boolean
   }>()
@@ -141,9 +137,7 @@ it("selects touched", ({ scope }) => {
   }>()
 })
 
-it("does not allow to specify isDirty custom type without selector", ({
-  scope,
-}) => {
+it("does not allow to specify isDirty custom type without selector", ({ scope }) => {
   const shape = ImpulseFormShape({
     first: ImpulseFormUnit(""),
     second: ImpulseFormUnit(0),

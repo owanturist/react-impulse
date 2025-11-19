@@ -6,9 +6,4 @@ import type { ImpulseFormOptionalParam } from "./impulse-form-optional-param"
 export type ImpulseFormOptionalValidateOn<
   TEnabled extends ImpulseForm,
   TElement extends ImpulseForm,
-> = ImpulseFormOptionalParam<
-  TEnabled,
-  TElement,
-  "validateOn.schema",
-  ValidateStrategy
->
+> = ImpulseFormOptionalParam<TEnabled, TElement, "validateOn.schema", ValidateStrategy>

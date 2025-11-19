@@ -1,10 +1,10 @@
 import "@testing-library/jest-dom/vitest"
 import { untrack } from "react-impulse"
 
-const spy_Object$is = vi.spyOn(Object, "is")
+const spy__object_is = vi.spyOn(Object, "is")
 
 beforeEach((context) => {
-  spy_Object$is.mockClear()
+  spy__object_is.mockClear()
 
   context.scope = untrack((scope) => scope)
 })

@@ -14,10 +14,7 @@ import { Impulse, type Scope, untrack } from "../dependencies"
 import type { GetImpulseFormParams } from "../impulse-form/get-impulse-form-params"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
-import {
-  type ImpulseFormChild,
-  ImpulseFormState,
-} from "../impulse-form/impulse-form-state"
+import { type ImpulseFormChild, ImpulseFormState } from "../impulse-form/impulse-form-state"
 import { toConcise } from "../to-concise"
 import { VALIDATE_ON_TOUCH } from "../validate-strategy"
 
@@ -47,9 +44,7 @@ export class ImpulseFormListState<
   >
 
   private readonly _initialElements: Impulse<{
-    _list: Impulse<
-      ReadonlyArray<ImpulseFormState<GetImpulseFormParams<TElement>>>
-    >
+    _list: Impulse<ReadonlyArray<ImpulseFormState<GetImpulseFormParams<TElement>>>>
   }>
 
   public constructor(
@@ -65,29 +60,24 @@ export class ImpulseFormListState<
     })
 
     this._elements = Impulse(
-      untrack((scope) => {
-        return map(elements, (element, index) => {
+      untrack((scope) =>
+        map(elements, (element, index) => {
           const child = this._parentOf(element)
 
           child._replaceInitial(scope, initialElements.at(index), true)
 
           return child
-        })
-      }),
+        }),
+      ),
     )
   }
 
-  public _childOf(
-    parent: null | ImpulseFormState,
-  ): ImpulseFormListState<TElement> {
+  public _childOf(parent: null | ImpulseFormState): ImpulseFormListState<TElement> {
     return new ImpulseFormListState(parent, untrack(this._elements))
   }
 
   public _getElements(scope: Scope): ReadonlyArray<TElement> {
-    return map(
-      this._elements.getValue(scope),
-      ({ _host }) => _host() as TElement,
-    )
+    return map(this._elements.getValue(scope), ({ _host }) => _host() as TElement)
   }
 
   public _getInitialElements(
@@ -97,11 +87,8 @@ export class ImpulseFormListState<
   }
 
   public readonly _initial = Impulse(
-    (scope): ImpulseFormListInput<TElement> => {
-      return map(this._getInitialElements(scope), ({ _initial }) => {
-        return _initial.getValue(scope)
-      })
-    },
+    (scope): ImpulseFormListInput<TElement> =>
+      map(this._getInitialElements(scope), ({ _initial }) => _initial.getValue(scope)),
   )
 
   public _replaceInitial(
@@ -115,18 +102,13 @@ export class ImpulseFormListState<
 
       this._initialElements.setValue(initialElements)
 
-      for (const [index, element] of entries(
-        initialElements._list.getValue(scope),
-      )) {
+      for (const [index, element] of entries(initialElements._list.getValue(scope))) {
         elements.at(index)?._replaceInitial(scope, element, isMounting)
       }
     }
   }
 
-  public _setInitial(
-    scope: Scope,
-    setter: ImpulseFormListInputSetter<TElement>,
-  ): void {
+  public _setInitial(scope: Scope, setter: ImpulseFormListInputSetter<TElement>): void {
     const setters = isFunction(setter)
       ? setter(this._initial.getValue(scope), this._input.getValue(scope))
       : setter
@@ -160,16 +142,12 @@ export class ImpulseFormListState<
     }
   }
 
-  public readonly _input = Impulse((scope): ImpulseFormListInput<TElement> => {
-    return map(this._elements.getValue(scope), ({ _input }) => {
-      return _input.getValue(scope)
-    })
-  })
+  public readonly _input = Impulse(
+    (scope): ImpulseFormListInput<TElement> =>
+      map(this._elements.getValue(scope), ({ _input }) => _input.getValue(scope)),
+  )
 
-  public _setInput(
-    scope: Scope,
-    setter: ImpulseFormListInputSetter<TElement>,
-  ): void {
+  public _setInput(scope: Scope, setter: ImpulseFormListInputSetter<TElement>): void {
     const setters = isFunction(setter)
       ? setter(this._input.getValue(scope), this._initial.getValue(scope))
       : setter
@@ -184,9 +162,7 @@ export class ImpulseFormListState<
   }
 
   public readonly _error = Impulse((scope): ImpulseFormListError<TElement> => {
-    const error = map(this._elements.getValue(scope), ({ _error }) => {
-      return _error.getValue(scope)
-    })
+    const error = map(this._elements.getValue(scope), ({ _error }) => _error.getValue(scope))
 
     if (error.every(isNull)) {
       return null
@@ -196,20 +172,12 @@ export class ImpulseFormListState<
   })
 
   public readonly _errorVerbose = Impulse(
-    (scope): ImpulseFormListErrorVerbose<TElement> => {
-      return map(this._elements.getValue(scope), ({ _errorVerbose }) => {
-        return _errorVerbose.getValue(scope)
-      })
-    },
+    (scope): ImpulseFormListErrorVerbose<TElement> =>
+      map(this._elements.getValue(scope), ({ _errorVerbose }) => _errorVerbose.getValue(scope)),
   )
 
-  public _setError(
-    scope: Scope,
-    setter: ImpulseFormListErrorSetter<TElement>,
-  ): void {
-    const setters = isFunction(setter)
-      ? setter(this._errorVerbose.getValue(scope))
-      : setter
+  public _setError(scope: Scope, setter: ImpulseFormListErrorSetter<TElement>): void {
+    const setters = isFunction(setter) ? setter(this._errorVerbose.getValue(scope)) : setter
 
     for (const [index, element] of entries(this._elements.getValue(scope))) {
       const error = isNull(setters) ? setters : setters.at(index)
@@ -220,32 +188,23 @@ export class ImpulseFormListState<
     }
   }
 
-  public readonly _validateOn = Impulse(
-    (scope): ImpulseFormListValidateOn<TElement> => {
-      const validateOn = map(
-        this._elements.getValue(scope),
-        ({ _validateOn }) => _validateOn.getValue(scope),
-      )
+  public readonly _validateOn = Impulse((scope): ImpulseFormListValidateOn<TElement> => {
+    const validateOn = map(this._elements.getValue(scope), ({ _validateOn }) =>
+      _validateOn.getValue(scope),
+    )
 
-      return toConcise(validateOn, isString, VALIDATE_ON_TOUCH)
-    },
-  )
+    return toConcise(validateOn, isString, VALIDATE_ON_TOUCH)
+  })
 
   public readonly _validateOnVerbose = Impulse(
-    (scope): ImpulseFormListValidateOnVerbose<TElement> => {
-      return map(this._elements.getValue(scope), ({ _validateOnVerbose }) => {
-        return _validateOnVerbose.getValue(scope)
-      })
-    },
+    (scope): ImpulseFormListValidateOnVerbose<TElement> =>
+      map(this._elements.getValue(scope), ({ _validateOnVerbose }) =>
+        _validateOnVerbose.getValue(scope),
+      ),
   )
 
-  public _setValidateOn(
-    scope: Scope,
-    setter: ImpulseFormListValidateOnSetter<TElement>,
-  ): void {
-    const setters = isFunction(setter)
-      ? setter(this._validateOnVerbose.getValue(scope))
-      : setter
+  public _setValidateOn(scope: Scope, setter: ImpulseFormListValidateOnSetter<TElement>): void {
+    const setters = isFunction(setter) ? setter(this._validateOnVerbose.getValue(scope)) : setter
 
     for (const [index, element] of entries(this._getInitialElements(scope))) {
       const validateOn = isString(setters) ? setters : setters.at(index)
@@ -265,28 +224,18 @@ export class ImpulseFormListState<
   }
 
   public readonly _touched = Impulse((scope): ImpulseFormListFlag<TElement> => {
-    const touched = map(this._elements.getValue(scope), ({ _touched }) => {
-      return _touched.getValue(scope)
-    })
+    const touched = map(this._elements.getValue(scope), ({ _touched }) => _touched.getValue(scope))
 
     return toConcise(touched, isBoolean, false)
   })
 
   public readonly _touchedVerbose = Impulse(
-    (scope): ImpulseFormListFlagVerbose<TElement> => {
-      return map(this._elements.getValue(scope), ({ _touchedVerbose }) => {
-        return _touchedVerbose.getValue(scope)
-      })
-    },
+    (scope): ImpulseFormListFlagVerbose<TElement> =>
+      map(this._elements.getValue(scope), ({ _touchedVerbose }) => _touchedVerbose.getValue(scope)),
   )
 
-  public _setTouched(
-    scope: Scope,
-    setter: ImpulseFormListFlagSetter<TElement>,
-  ): void {
-    const setters = isFunction(setter)
-      ? setter(this._touchedVerbose.getValue(scope))
-      : setter
+  public _setTouched(scope: Scope, setter: ImpulseFormListFlagSetter<TElement>): void {
+    const setters = isFunction(setter) ? setter(this._touchedVerbose.getValue(scope)) : setter
 
     for (const [index, element] of entries(this._elements.getValue(scope))) {
       const touched = isBoolean(setters) ? setters : setters.at(index)
@@ -297,79 +246,56 @@ export class ImpulseFormListState<
     }
   }
 
-  public readonly _output = Impulse(
-    (scope): null | ImpulseFormListOutput<TElement> => {
-      const output = map(this._elements.getValue(scope), ({ _output }) => {
-        return _output.getValue(scope)
-      })
+  public readonly _output = Impulse((scope): null | ImpulseFormListOutput<TElement> => {
+    const output = map(this._elements.getValue(scope), ({ _output }) => _output.getValue(scope))
 
-      if (output.some(isNull)) {
-        return null
-      }
+    if (output.some(isNull)) {
+      return null
+    }
 
-      return output
-    },
-  )
+    return output
+  })
 
   public readonly _outputVerbose = Impulse(
-    (scope): ImpulseFormListOutputVerbose<TElement> => {
-      return map(this._elements.getValue(scope), ({ _outputVerbose }) => {
-        return _outputVerbose.getValue(scope)
-      })
-    },
+    (scope): ImpulseFormListOutputVerbose<TElement> =>
+      map(this._elements.getValue(scope), ({ _outputVerbose }) => _outputVerbose.getValue(scope)),
   )
 
   public readonly _valid = Impulse((scope): ImpulseFormListFlag<TElement> => {
-    const valid = map(this._elements.getValue(scope), ({ _valid }) => {
-      return _valid.getValue(scope)
-    })
+    const valid = map(this._elements.getValue(scope), ({ _valid }) => _valid.getValue(scope))
 
     return toConcise(valid, isBoolean, false)
   })
 
   public readonly _validVerbose = Impulse(
-    (scope): ImpulseFormListFlagVerbose<TElement> => {
-      return map(this._elements.getValue(scope), ({ _validVerbose }) => {
-        return _validVerbose.getValue(scope)
-      })
-    },
+    (scope): ImpulseFormListFlagVerbose<TElement> =>
+      map(this._elements.getValue(scope), ({ _validVerbose }) => _validVerbose.getValue(scope)),
   )
 
   public readonly _invalid = Impulse((scope): ImpulseFormListFlag<TElement> => {
-    const invalid = map(this._elements.getValue(scope), ({ _invalid }) => {
-      return _invalid.getValue(scope)
-    })
+    const invalid = map(this._elements.getValue(scope), ({ _invalid }) => _invalid.getValue(scope))
 
     return toConcise(invalid, isBoolean, false)
   })
 
   public readonly _invalidVerbose = Impulse(
-    (scope): ImpulseFormListFlagVerbose<TElement> => {
-      return map(this._elements.getValue(scope), ({ _invalidVerbose }) => {
-        return _invalidVerbose.getValue(scope)
-      })
-    },
+    (scope): ImpulseFormListFlagVerbose<TElement> =>
+      map(this._elements.getValue(scope), ({ _invalidVerbose }) => _invalidVerbose.getValue(scope)),
   )
 
-  public readonly _validated = Impulse(
-    (scope): ImpulseFormListFlag<TElement> => {
-      const validated = map(
-        this._elements.getValue(scope),
-        ({ _validated }) => {
-          return _validated.getValue(scope)
-        },
-      )
+  public readonly _validated = Impulse((scope): ImpulseFormListFlag<TElement> => {
+    const validated = map(this._elements.getValue(scope), ({ _validated }) =>
+      _validated.getValue(scope),
+    )
 
-      return toConcise(validated, isBoolean, false)
-    },
-  )
+    return toConcise(validated, isBoolean, false)
+  })
 
   public readonly _validatedVerbose = Impulse(
-    (scope): ImpulseFormListFlagVerbose<TElement> => {
-      return map(this._elements.getValue(scope), ({ _validatedVerbose }) => {
-        return _validatedVerbose.getValue(scope)
-      })
-    },
+    (scope): ImpulseFormListFlagVerbose<TElement> =>
+      map(this._elements.getValue(scope), ({ _validatedVerbose }) =>
+        _validatedVerbose.getValue(scope),
+      ),
   )
 
   public _forceValidated(scope: Scope): void {
@@ -393,57 +319,47 @@ export class ImpulseFormListState<
       }),
 
       // removed elements are always dirty
-      map(drop(initialElements, elements.length), ({ _dirtyOn }) => {
-        return _dirtyOn.getValue(scope)
-      }),
+      map(drop(initialElements, elements.length), ({ _dirtyOn }) => _dirtyOn.getValue(scope)),
     )
 
     return toConcise(dirty, isBoolean, false)
   })
 
-  public readonly _dirtyVerbose = Impulse(
-    (scope): ImpulseFormListFlagVerbose<TElement> => {
-      const elements = this._elements.getValue(scope)
-      const initialElements = this._getInitialElements(scope)
+  public readonly _dirtyVerbose = Impulse((scope): ImpulseFormListFlagVerbose<TElement> => {
+    const elements = this._elements.getValue(scope)
+    const initialElements = this._getInitialElements(scope)
 
-      return concat(
-        map(elements, ({ _dirtyVerbose, _dirtyOnVerbose }, index) => {
-          if (index >= initialElements.length) {
-            // added elements are always dirty
-            return _dirtyOnVerbose.getValue(scope)
-          }
-
-          return _dirtyVerbose.getValue(scope)
-        }),
-
-        // removed elements are always dirty
-        map(drop(initialElements, elements.length), ({ _dirtyOnVerbose }) => {
+    return concat(
+      map(elements, ({ _dirtyVerbose, _dirtyOnVerbose }, index) => {
+        if (index >= initialElements.length) {
+          // added elements are always dirty
           return _dirtyOnVerbose.getValue(scope)
-        }),
-      )
-    },
-  )
+        }
+
+        return _dirtyVerbose.getValue(scope)
+      }),
+
+      // removed elements are always dirty
+      map(drop(initialElements, elements.length), ({ _dirtyOnVerbose }) =>
+        _dirtyOnVerbose.getValue(scope),
+      ),
+    )
+  })
 
   public readonly _dirtyOn = Impulse((scope): ImpulseFormListFlag<TElement> => {
-    const dirtyOn = map(this._getInitialElements(scope), ({ _dirtyOn }) => {
-      return _dirtyOn.getValue(scope)
-    })
+    const dirtyOn = map(this._getInitialElements(scope), ({ _dirtyOn }) => _dirtyOn.getValue(scope))
 
     return toConcise(dirtyOn, isBoolean, false)
   })
 
   public readonly _dirtyOnVerbose = Impulse(
-    (scope): ImpulseFormListFlagVerbose<TElement> => {
-      return map(this._getInitialElements(scope), ({ _dirtyOnVerbose }) => {
-        return _dirtyOnVerbose.getValue(scope)
-      })
-    },
+    (scope): ImpulseFormListFlagVerbose<TElement> =>
+      map(this._getInitialElements(scope), ({ _dirtyOnVerbose }) =>
+        _dirtyOnVerbose.getValue(scope),
+      ),
   )
 
-  public _reset(
-    scope: Scope,
-    resetter: undefined | ImpulseFormListInputSetter<TElement>,
-  ): void {
+  public _reset(scope: Scope, resetter: undefined | ImpulseFormListInputSetter<TElement>): void {
     if (!isUndefined(resetter)) {
       this._setInitial(scope, resetter)
     }
@@ -454,16 +370,12 @@ export class ImpulseFormListState<
       element._reset(scope, undefined)
     }
 
-    this._elements.setValue(
-      map(nextElements, (element) => this._parentOf(element)),
-    )
+    this._elements.setValue(map(nextElements, (element) => this._parentOf(element)))
   }
 
   public _getChildren<TChildParams extends ImpulseFormParams>(
     scope: Scope,
-  ): ReadonlyArray<
-    ImpulseFormChild<TChildParams, ImpulseFormListParams<TElement>>
-  > {
+  ): ReadonlyArray<ImpulseFormChild<TChildParams, ImpulseFormListParams<TElement>>> {
     return map(this._elements.getValue(scope), (element, index) => ({
       _state: element as unknown as ImpulseFormState<TChildParams>,
       _mapToChild: (output) => output.at(index),

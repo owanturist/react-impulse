@@ -20,11 +20,7 @@ it("matches the type definition", ({ scope }) => {
 })
 
 it("changes all items", ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormUnit(0),
-    ImpulseFormUnit(1),
-    ImpulseFormUnit(2),
-  ])
+  const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1), ImpulseFormUnit(2)])
 
   form.setInput([3, 4, 5])
   expect(form.getInput(scope)).toStrictEqual([3, 4, 5])
@@ -45,11 +41,7 @@ it("keeps the list empty", ({ scope }) => {
 })
 
 it("changes only defined items", ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormUnit(0),
-    ImpulseFormUnit(1),
-    ImpulseFormUnit(2),
-  ])
+  const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1), ImpulseFormUnit(2)])
 
   form.setInput([3])
   expect(form.getInput(scope)).toStrictEqual([3, 1, 2])
@@ -59,44 +51,28 @@ it("changes only defined items", ({ scope }) => {
 })
 
 it("does not extend existing list", ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormUnit(0),
-    ImpulseFormUnit(1),
-    ImpulseFormUnit(2),
-  ])
+  const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1), ImpulseFormUnit(2)])
 
   form.setInput([3, 4, 5, 6])
   expect(form.getInput(scope)).toStrictEqual([3, 4, 5])
 })
 
 it("passes the list in the transform function", ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormUnit(0),
-    ImpulseFormUnit(1),
-    ImpulseFormUnit(2),
-  ])
+  const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1), ImpulseFormUnit(2)])
 
   form.setInput((elements) => elements.map((x) => x + 1))
   expect(form.getInput(scope)).toStrictEqual([1, 2, 3])
 })
 
 it("passes an element in the transform function", ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormUnit(0),
-    ImpulseFormUnit(1),
-    ImpulseFormUnit(2),
-  ])
+  const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1), ImpulseFormUnit(2)])
 
   form.setInput([undefined, (x) => x + 3])
   expect(form.getInput(scope)).toStrictEqual([0, 4, 2])
 })
 
 it("passes an element in the list transform function", ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormUnit(0),
-    ImpulseFormUnit(1),
-    ImpulseFormUnit(2),
-  ])
+  const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1), ImpulseFormUnit(2)])
 
   form.setInput((elements) => elements.map(() => (x) => x + 1))
   expect(form.getInput(scope)).toStrictEqual([1, 2, 3])

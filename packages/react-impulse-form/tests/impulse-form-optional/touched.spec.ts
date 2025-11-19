@@ -38,69 +38,49 @@ describe("types", () => {
   it("matches schema type for isTouched(scope, select?)", ({ scope }) => {
     expectTypeOf(form.isTouched(scope)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(
-      form.isTouched(scope, params._first),
-    ).toEqualTypeOf<TouchedSchema>()
+    expectTypeOf(form.isTouched(scope, params._first)).toEqualTypeOf<TouchedSchema>()
 
-    expectTypeOf(
-      form.isTouched(scope, params._second),
-    ).toEqualTypeOf<TouchedVerboseSchema>()
+    expectTypeOf(form.isTouched(scope, params._second)).toEqualTypeOf<TouchedVerboseSchema>()
   })
 
   it("matches setter type for setTouched(setter)", () => {
-    expectTypeOf(form.setTouched).toEqualTypeOf<
-      (setter: TouchedSetter) => void
-    >()
+    expectTypeOf(form.setTouched).toEqualTypeOf<(setter: TouchedSetter) => void>()
   })
 
   it("allows passing concise value to setTouched", ({ scope }) => {
-    const touched_0 = form.isTouched(scope)
-    const touched_0_concise = form.isTouched(scope, params._first)
-    const touched_0_verbose = form.isTouched(scope, params._second)
+    const touched0 = form.isTouched(scope)
+    const touched0Concise = form.isTouched(scope, params._first)
+    const touched0Verbose = form.isTouched(scope, params._second)
 
-    form.setTouched(touched_0_concise)
+    form.setTouched(touched0Concise)
 
-    expect(form.isTouched(scope)).toStrictEqual(touched_0)
-    expect(form.isTouched(scope, params._first)).toStrictEqual(
-      touched_0_concise,
-    )
-    expect(form.isTouched(scope, params._second)).toStrictEqual(
-      touched_0_verbose,
-    )
+    expect(form.isTouched(scope)).toStrictEqual(touched0)
+    expect(form.isTouched(scope, params._first)).toStrictEqual(touched0Concise)
+    expect(form.isTouched(scope, params._second)).toStrictEqual(touched0Verbose)
   })
 
   it("allows passing verbose value to setTouched", ({ scope }) => {
-    const touched_0 = form.isTouched(scope)
-    const touched_0_concise = form.isTouched(scope, params._first)
-    const touched_0_verbose = form.isTouched(scope, params._second)
+    const touched0 = form.isTouched(scope)
+    const touched0Concise = form.isTouched(scope, params._first)
+    const touched0Verbose = form.isTouched(scope, params._second)
 
-    form.setTouched(touched_0_verbose)
+    form.setTouched(touched0Verbose)
 
-    expect(form.isTouched(scope)).toStrictEqual(touched_0)
-    expect(form.isTouched(scope, params._first)).toStrictEqual(
-      touched_0_concise,
-    )
-    expect(form.isTouched(scope, params._second)).toStrictEqual(
-      touched_0_verbose,
-    )
+    expect(form.isTouched(scope)).toStrictEqual(touched0)
+    expect(form.isTouched(scope, params._first)).toStrictEqual(touched0Concise)
+    expect(form.isTouched(scope, params._second)).toStrictEqual(touched0Verbose)
   })
 
   it("allows passing verbose value in setTouched callback", ({ scope }) => {
-    const touched_0 = form.isTouched(scope)
-    const touched_0_concise = form.isTouched(scope, params._first)
-    const touched_0_verbose = form.isTouched(scope, params._second)
+    const touched0 = form.isTouched(scope)
+    const touched0Concise = form.isTouched(scope, params._first)
+    const touched0Verbose = form.isTouched(scope, params._second)
 
-    form.setTouched((verbose) => {
-      return verbose
-    })
+    form.setTouched((verbose) => verbose)
 
-    expect(form.isTouched(scope)).toStrictEqual(touched_0)
-    expect(form.isTouched(scope, params._first)).toStrictEqual(
-      touched_0_concise,
-    )
-    expect(form.isTouched(scope, params._second)).toStrictEqual(
-      touched_0_verbose,
-    )
+    expect(form.isTouched(scope)).toStrictEqual(touched0)
+    expect(form.isTouched(scope, params._first)).toStrictEqual(touched0Concise)
+    expect(form.isTouched(scope, params._second)).toStrictEqual(touched0Verbose)
   })
 
   it("ensures ImpulseFormOptionalOptions.touched type", () => {
@@ -143,9 +123,7 @@ describe("types", () => {
     it("matches schema type for isTouched(scope, select?)", ({ scope }) => {
       expectTypeOf(parent.isTouched(scope)).toEqualTypeOf<boolean>()
 
-      expectTypeOf(
-        parent.isTouched(scope, params._first),
-      ).toEqualTypeOf<ParentTouchedSchema>()
+      expectTypeOf(parent.isTouched(scope, params._first)).toEqualTypeOf<ParentTouchedSchema>()
 
       expectTypeOf(
         parent.isTouched(scope, params._second),
@@ -153,9 +131,7 @@ describe("types", () => {
     })
 
     it("matches setter type for setTouched(setter)", () => {
-      expectTypeOf(parent.setTouched).toEqualTypeOf<
-        (setter: ParentTouchedSetter) => void
-      >()
+      expectTypeOf(parent.setTouched).toEqualTypeOf<(setter: ParentTouchedSetter) => void>()
     })
 
     it("allows passing concise value to setTouched", ({ scope }) => {
@@ -337,9 +313,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
   })
 
-  it("returns the touched as concise result when both have the same touched", ({
-    scope,
-  }) => {
+  it("returns the touched as concise result when both have the same touched", ({ scope }) => {
     const form = ImpulseFormOptional(
       ImpulseFormUnit(true, {
         touched,
@@ -370,12 +344,8 @@ describe("stable touched value", () => {
     )
 
     expect(form.isTouched(scope)).toBe(form.isTouched(scope))
-    expect(form.isTouched(scope, params._first)).toBe(
-      form.isTouched(scope, params._first),
-    )
-    expect(form.isTouched(scope, params._second)).toBe(
-      form.isTouched(scope, params._second),
-    )
+    expect(form.isTouched(scope, params._first)).toBe(form.isTouched(scope, params._first))
+    expect(form.isTouched(scope, params._second)).toBe(form.isTouched(scope, params._second))
   })
 })
 
@@ -387,9 +357,7 @@ describe("using recursive setter", () => {
     touched: false,
   })
 
-  function setup(
-    options?: ImpulseFormOptionalOptions<typeof enabled, typeof element>,
-  ) {
+  function setup(options?: ImpulseFormOptionalOptions<typeof enabled, typeof element>) {
     return ImpulseFormOptional(enabled, element, options)
   }
 
@@ -424,14 +392,14 @@ describe("using recursive setter", () => {
         })
 
         return {
-          enabled: (touched_enabled) => {
-            expect(touched_enabled).toBe(true)
+          enabled: (touchedEnabled) => {
+            expect(touchedEnabled).toBe(true)
 
             return false
           },
 
-          element: (touched_element) => {
-            expect(touched_element).toBe(false)
+          element: (touchedElement) => {
+            expect(touchedElement).toBe(false)
 
             return true
           },

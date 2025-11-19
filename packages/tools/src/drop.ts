@@ -1,7 +1,4 @@
-export function drop<T>(
-  arr: ReadonlyArray<T>,
-  count: number,
-): ReadonlyArray<T> {
+export function drop<T>(arr: ReadonlyArray<T>, count: number): ReadonlyArray<T> {
   if (count <= 0) {
     return arr
   }

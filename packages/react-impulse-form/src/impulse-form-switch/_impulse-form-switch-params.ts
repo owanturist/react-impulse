@@ -32,10 +32,7 @@ export interface ImpulseFormSwitchParams<
 
   "validateOn.setter": ImpulseFormSwitchValidateOnSetter<TKind, TBranches>
   "validateOn.schema": ImpulseFormSwitchValidateOn<TKind, TBranches>
-  "validateOn.schema.verbose": ImpulseFormSwitchValidateOnVerbose<
-    TKind,
-    TBranches
-  >
+  "validateOn.schema.verbose": ImpulseFormSwitchValidateOnVerbose<TKind, TBranches>
 
   "error.setter": ImpulseFormSwitchErrorSetter<TKind, TBranches>
   "error.schema": ImpulseFormSwitchError<TKind, TBranches>

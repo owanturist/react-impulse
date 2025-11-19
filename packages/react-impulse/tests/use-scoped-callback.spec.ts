@@ -9,19 +9,14 @@ beforeEach(() => {
 })
 
 describe("single Impulse", () => {
-  const setup = (impulse: Impulse<number>) => {
-    return renderHook(
-      (count: Impulse<number>) => {
-        return useScopedCallback(
-          (scope) => onCallback(count.getValue(scope) * 2),
-          [count],
-        )
-      },
+  const setup = (impulse: Impulse<number>) =>
+    renderHook(
+      (count: Impulse<number>) =>
+        useScopedCallback((scope) => onCallback(count.getValue(scope) * 2), [count]),
       {
         initialProps: impulse,
       },
     )
-  }
 
   it("does not run a callback on init", () => {
     const count = Impulse(1)
@@ -119,16 +114,16 @@ describe("single Impulse", () => {
   })
 
   it("changes resulting function by a new Impulse when re-renders", () => {
-    const count_1 = Impulse(1)
-    const { result, rerender } = setup(count_1)
+    const count1 = Impulse(1)
+    const { result, rerender } = setup(count1)
     const initial = result.current
 
-    const count_2 = Impulse(2)
-    rerender(count_2)
+    const count2 = Impulse(2)
+    rerender(count2)
 
     expect(result.current).not.toBe(initial)
-    expect(count_1).toHaveEmittersSize(0)
-    expect(count_2).toHaveEmittersSize(0)
+    expect(count1).toHaveEmittersSize(0)
+    expect(count2).toHaveEmittersSize(0)
   })
 
   it("keeps attached Impulse when re-renders", () => {
@@ -144,10 +139,10 @@ describe("single Impulse", () => {
 })
 
 describe("conditional Impulse", () => {
-  const setup = (impulse: Impulse<number>) => {
-    return renderHook(
-      (count: Impulse<number>) => {
-        return useScopedCallback(
+  const setup = (impulse: Impulse<number>) =>
+    renderHook(
+      (count: Impulse<number>) =>
+        useScopedCallback(
           (scope, isActive: boolean) => {
             if (isActive) {
               return count.getValue(scope) * 2
@@ -156,13 +151,11 @@ describe("conditional Impulse", () => {
             return -1
           },
           [count],
-        )
-      },
+        ),
       {
         initialProps: impulse,
       },
     )
-  }
 
   it("the resulting function returns a fallback when not active", () => {
     const count = Impulse(1)
@@ -233,14 +226,10 @@ describe("conditional Impulse", () => {
 })
 
 describe("argument Impulse", () => {
-  const setup = () => {
-    return renderHook(() => {
-      return useScopedCallback(
-        (scope, count: Impulse<number>) => count.getValue(scope) * 2,
-        [],
-      )
-    })
-  }
+  const setup = () =>
+    renderHook(() =>
+      useScopedCallback((scope, count: Impulse<number>) => count.getValue(scope) * 2, []),
+    )
 
   it("attaches an Impulse when the resulting function calls", () => {
     const count = Impulse(1)
@@ -262,58 +251,54 @@ describe("argument Impulse", () => {
   })
 
   it("attaches multiple Impulses", () => {
-    const count_1 = Impulse(1)
-    const count_2 = Impulse(2)
+    const count1 = Impulse(1)
+    const count2 = Impulse(2)
     const { result } = setup()
 
-    expect(result.current(count_1)).toBe(2)
-    expect(result.current(count_2)).toBe(4)
+    expect(result.current(count1)).toBe(2)
+    expect(result.current(count2)).toBe(4)
 
-    expect(count_1).toHaveEmittersSize(1)
-    expect(count_2).toHaveEmittersSize(1)
+    expect(count1).toHaveEmittersSize(1)
+    expect(count2).toHaveEmittersSize(1)
   })
 
   it("detaches all Impulses when any of the attached Impulse value changes", () => {
-    const count_1 = Impulse(1)
-    const count_2 = Impulse(2)
+    const count1 = Impulse(1)
+    const count2 = Impulse(2)
     const { result } = setup()
 
-    result.current(count_1)
-    result.current(count_2)
+    result.current(count1)
+    result.current(count2)
 
     act(() => {
-      count_1.setValue(3)
+      count1.setValue(3)
     })
 
-    expect(count_1).toHaveEmittersSize(0)
-    expect(count_2).toHaveEmittersSize(0)
+    expect(count1).toHaveEmittersSize(0)
+    expect(count2).toHaveEmittersSize(0)
   })
 })
 
 it("batches the callback", () => {
-  const impulse_1 = Impulse(1)
-  const impulse_2 = Impulse(2)
-  const impulse_3 = Impulse(3)
-  const { result: callback } = renderHook(() => {
-    return useScopedCallback((scope, diff: number) => {
-      impulse_1.setValue(impulse_1.getValue(scope) + diff)
-      impulse_2.setValue(impulse_2.getValue(scope) + diff)
-      impulse_3.setValue(impulse_3.getValue(scope) + diff)
-    }, [])
-  })
+  const impulse1 = Impulse(1)
+  const impulse2 = Impulse(2)
+  const impulse3 = Impulse(3)
+  const { result: callback } = renderHook(() =>
+    useScopedCallback((scope, diff: number) => {
+      impulse1.setValue(impulse1.getValue(scope) + diff)
+      impulse2.setValue(impulse2.getValue(scope) + diff)
+      impulse3.setValue(impulse3.getValue(scope) + diff)
+    }, []),
+  )
   const spy = vi.fn()
 
-  const { result } = renderHook(() => {
-    return useScoped((scope) => {
+  const { result } = renderHook(() =>
+    useScoped((scope) => {
       spy()
 
-      return (
-        impulse_1.getValue(scope) +
-        impulse_2.getValue(scope) +
-        impulse_3.getValue(scope)
-      )
-    }, [])
-  })
+      return impulse1.getValue(scope) + impulse2.getValue(scope) + impulse3.getValue(scope)
+    }, []),
+  )
 
   expect(result.current).toBe(6)
   expect(spy).toHaveBeenCalledOnce()

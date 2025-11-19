@@ -2,11 +2,7 @@ import z from "zod"
 
 import { params } from "~/tools/params"
 
-import {
-  ImpulseFormOptional,
-  ImpulseFormShape,
-  ImpulseFormUnit,
-} from "../../src"
+import { ImpulseFormOptional, ImpulseFormShape, ImpulseFormUnit } from "../../src"
 
 describe("types", () => {
   const enabled = ImpulseFormUnit(true)
@@ -29,13 +25,9 @@ describe("types", () => {
   it("matches schema type for isValid(scope, select?)", ({ scope }) => {
     expectTypeOf(form.isValid(scope)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(
-      form.isValid(scope, params._first),
-    ).toEqualTypeOf<IsValidSchema>()
+    expectTypeOf(form.isValid(scope, params._first)).toEqualTypeOf<IsValidSchema>()
 
-    expectTypeOf(
-      form.isValid(scope, params._second),
-    ).toEqualTypeOf<IsValidVerboseSchema>()
+    expectTypeOf(form.isValid(scope, params._second)).toEqualTypeOf<IsValidVerboseSchema>()
   })
 
   describe("nested", () => {
@@ -56,9 +48,7 @@ describe("types", () => {
     it("matches schema type for isValid(scope, select?)", ({ scope }) => {
       expectTypeOf(parent.isValid(scope)).toEqualTypeOf<boolean>()
 
-      expectTypeOf(
-        parent.isValid(scope, params._first),
-      ).toEqualTypeOf<ParentIsValidSchema>()
+      expectTypeOf(parent.isValid(scope, params._first)).toEqualTypeOf<ParentIsValidSchema>()
 
       expectTypeOf(
         parent.isValid(scope, params._second),
@@ -442,13 +432,9 @@ describe("stable valid value", () => {
     expect(form.isValid(scope)).toBe(form.isValid(scope))
 
     expect(form.isValid(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.isValid(scope, params._first)).toBe(
-      form.isValid(scope, params._first),
-    )
+    expect(form.isValid(scope, params._first)).toBe(form.isValid(scope, params._first))
 
     expect(form.isValid(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.isValid(scope, params._second)).toBe(
-      form.isValid(scope, params._second),
-    )
+    expect(form.isValid(scope, params._second)).toBe(form.isValid(scope, params._second))
   })
 })

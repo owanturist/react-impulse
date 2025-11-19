@@ -101,9 +101,10 @@ it("returns false for pristine list", ({ scope }) => {
     { first: false, second: false },
   ])
 
-  expect(
-    form.getElements(scope).map((element) => element.isDirty(scope)),
-  ).toStrictEqual([false, false])
+  expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+    false,
+    false,
+  ])
 })
 
 it("returns true when at least one element is dirty", ({ scope }) => {
@@ -117,18 +118,16 @@ it("returns true when at least one element is dirty", ({ scope }) => {
   ])
 
   expect(form.isDirty(scope)).toBe(true)
-  expect(form.isDirty(scope, params._first)).toStrictEqual([
-    { first: true, second: false },
-    false,
-  ])
+  expect(form.isDirty(scope, params._first)).toStrictEqual([{ first: true, second: false }, false])
   expect(form.isDirty(scope, params._second)).toStrictEqual([
     { first: true, second: false },
     { first: false, second: false },
   ])
 
-  expect(
-    form.getElements(scope).map((element) => element.isDirty(scope)),
-  ).toStrictEqual([true, false])
+  expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+    true,
+    false,
+  ])
 })
 
 it("returns true when all elements are dirty", ({ scope }) => {
@@ -155,15 +154,14 @@ it("returns true when all elements are dirty", ({ scope }) => {
     { first: false, second: true },
   ])
 
-  expect(
-    form.getElements(scope).map((element) => element.isDirty(scope)),
-  ).toStrictEqual([true, true])
+  expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+    true,
+    true,
+  ])
 })
 
 describe("adding a new element to the list's end", () => {
-  it("returns true for a new pristine element and a pristine list", ({
-    scope,
-  }) => {
+  it("returns true for a new pristine element and a pristine list", ({ scope }) => {
     const form = setup([
       setupElement({
         input: { first: 1, second: "1" },
@@ -178,25 +176,21 @@ describe("adding a new element to the list's end", () => {
     form.setElements((elements) => [...elements, setupElement()])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, params._first)).toStrictEqual([
-      false,
-      false,
-      true,
-    ])
+    expect(form.isDirty(scope, params._first)).toStrictEqual([false, false, true])
     expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+      false,
+    ])
   })
 
-  it("returns true for a new pristine element and a dirty list", ({
-    scope,
-  }) => {
+  it("returns true for a new pristine element and a dirty list", ({ scope }) => {
     const form = setup([
       setupElement({
         input: { first: 1, second: "1" },
@@ -222,14 +216,14 @@ describe("adding a new element to the list's end", () => {
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, true, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      true,
+      false,
+    ])
   })
 
-  it("returns true for a new dirty element and a pristine list", ({
-    scope,
-  }) => {
+  it("returns true for a new dirty element and a pristine list", ({ scope }) => {
     const form = setup([
       setupElement({
         input: { first: 1, second: "1" },
@@ -249,20 +243,18 @@ describe("adding a new element to the list's end", () => {
     ])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, params._first)).toStrictEqual([
-      false,
-      false,
-      true,
-    ])
+    expect(form.isDirty(scope, params._first)).toStrictEqual([false, false, true])
     expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false, true])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+      true,
+    ])
   })
 
   it("returns true for a new dirty element and a dirty list", ({ scope }) => {
@@ -296,16 +288,16 @@ describe("adding a new element to the list's end", () => {
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([true, false, true])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      true,
+      false,
+      true,
+    ])
   })
 })
 
 describe("adding a new element to the list's beginning", () => {
-  it("returns true for a new pristine element and a pristine list", ({
-    scope,
-  }) => {
+  it("returns true for a new pristine element and a pristine list", ({ scope }) => {
     const form = setup([
       setupElement({
         input: { first: 1, second: "1" },
@@ -327,14 +319,14 @@ describe("adding a new element to the list's beginning", () => {
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([true, true, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      true,
+      true,
+      false,
+    ])
   })
 
-  it("returns true for a new pristine element and a dirty list", ({
-    scope,
-  }) => {
+  it("returns true for a new pristine element and a dirty list", ({ scope }) => {
     const form = setup([
       setupElement({
         input: { first: 1, second: "1" },
@@ -356,14 +348,14 @@ describe("adding a new element to the list's beginning", () => {
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([true, true, true])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      true,
+      true,
+      true,
+    ])
   })
 
-  it("returns true for a new dirty element and a pristine list", ({
-    scope,
-  }) => {
+  it("returns true for a new dirty element and a pristine list", ({ scope }) => {
     const form = setup([
       setupElement({
         input: { first: 1, second: "1" },
@@ -390,9 +382,11 @@ describe("adding a new element to the list's beginning", () => {
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([true, true, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      true,
+      true,
+      false,
+    ])
   })
 
   it("returns true for a new dirty element and a dirty list", ({ scope }) => {
@@ -422,9 +416,11 @@ describe("adding a new element to the list's beginning", () => {
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([true, true, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      true,
+      true,
+      false,
+    ])
   })
 
   it("returns true for a new same element and a pristine list", ({ scope }) => {
@@ -448,20 +444,18 @@ describe("adding a new element to the list's beginning", () => {
     ])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, params._first)).toStrictEqual([
-      false,
-      true,
-      true,
-    ])
+    expect(form.isDirty(scope, params._first)).toStrictEqual([false, true, true])
     expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: true, second: true },
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, true, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      true,
+      false,
+    ])
   })
 })
 
@@ -485,20 +479,17 @@ describe("removing an initial element from the list's end", () => {
     form.setElements((elements) => elements.slice(0, 2))
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, params._first)).toStrictEqual([
-      false,
-      false,
-      true,
-    ])
+    expect(form.isDirty(scope, params._first)).toStrictEqual([false, false, true])
     expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+    ])
   })
 
   it("returns true a dirty list", ({ scope }) => {
@@ -531,9 +522,10 @@ describe("removing an initial element from the list's end", () => {
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, true])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      true,
+    ])
   })
 })
 
@@ -564,9 +556,10 @@ describe("removing an initial element from the list's beginning", () => {
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([true, true])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      true,
+      true,
+    ])
   })
 
   it("returns true for a dirty list", ({ scope }) => {
@@ -595,9 +588,10 @@ describe("removing an initial element from the list's beginning", () => {
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([true, true])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      true,
+      true,
+    ])
   })
 
   it("returns true for a deleting the same element", ({ scope }) => {
@@ -619,20 +613,17 @@ describe("removing an initial element from the list's beginning", () => {
     form.setElements((elements) => elements.slice(1))
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, params._first)).toStrictEqual([
-      false,
-      true,
-      true,
-    ])
+    expect(form.isDirty(scope, params._first)).toStrictEqual([false, true, true])
     expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: true, second: true },
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, true])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      true,
+    ])
   })
 
   describe("when using ImpulseFormSwitch", () => {
@@ -802,29 +793,25 @@ describe("swapping elements", () => {
       { first: 3, second: "3" },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.getInitial(scope)),
-    ).toStrictEqual([
+    expect(form.getElements(scope).map((element) => element.getInitial(scope))).toStrictEqual([
       { first: 1, second: "1" },
       { first: 2, second: "2" },
       { first: 3, second: "3" },
     ])
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, params._first)).toStrictEqual([
-      true,
-      false,
-      true,
-    ])
+    expect(form.isDirty(scope, params._first)).toStrictEqual([true, false, true])
     expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: true, second: true },
       { first: false, second: false },
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([true, false, true])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      true,
+      false,
+      true,
+    ])
   })
 
   it("returns false for two pristine equal elements", ({ scope }) => {
@@ -853,9 +840,11 @@ describe("swapping elements", () => {
       { first: false, second: false },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+      false,
+    ])
   })
 })
 
@@ -883,9 +872,11 @@ describe("after ImpulseFormList#reset()", () => {
       { first: false, second: false },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+      false,
+    ])
   })
 
   it("restores a removed element", ({ scope }) => {
@@ -916,9 +907,11 @@ describe("after ImpulseFormList#reset()", () => {
       { first: false, second: false },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+      false,
+    ])
   })
 
   it("restores all removed elements", ({ scope }) => {
@@ -949,9 +942,11 @@ describe("after ImpulseFormList#reset()", () => {
       { first: false, second: false },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+      false,
+    ])
   })
 
   it("removes new elements", ({ scope }) => {
@@ -966,11 +961,7 @@ describe("after ImpulseFormList#reset()", () => {
       }),
     ])
 
-    form.setElements((elements) => [
-      setupElement(),
-      ...elements,
-      setupElement(),
-    ])
+    form.setElements((elements) => [setupElement(), ...elements, setupElement()])
 
     form.reset()
 
@@ -981,9 +972,10 @@ describe("after ImpulseFormList#reset()", () => {
       { first: false, second: false },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+    ])
   })
 
   it("removes all elements for an empty initial list", ({ scope }) => {
@@ -997,9 +989,7 @@ describe("after ImpulseFormList#reset()", () => {
     expect(form.isDirty(scope, params._first)).toBe(false)
     expect(form.isDirty(scope, params._second)).toStrictEqual([])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([])
   })
 })
 
@@ -1025,9 +1015,10 @@ describe("after ImpulseFormList#setInitial()", () => {
       { first: false, second: false },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+    ])
   })
 
   it("returns true when pristine elements change initial", ({ scope }) => {
@@ -1054,9 +1045,10 @@ describe("after ImpulseFormList#setInitial()", () => {
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([true, true])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      true,
+      true,
+    ])
   })
 
   it("returns false when initial elements are assigned from the new elements' original values", ({
@@ -1095,9 +1087,12 @@ describe("after ImpulseFormList#setInitial()", () => {
       { first: false, second: false },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false, false, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+      false,
+      false,
+    ])
   })
 
   it("returns false when initial elements are extended by the new elements' initial values", ({
@@ -1146,14 +1141,15 @@ describe("after ImpulseFormList#setInitial()", () => {
       { first: false, second: false },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false, false, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+      false,
+      false,
+    ])
   })
 
-  it("returns false when removes initial value of deleted element", ({
-    scope,
-  }) => {
+  it("returns false when removes initial value of deleted element", ({ scope }) => {
     const form = setup([
       setupElement({
         input: { first: 1, second: "1" },
@@ -1179,16 +1175,15 @@ describe("after ImpulseFormList#setInitial()", () => {
       { first: false, second: false },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+    ])
   })
 })
 
 describe("after ImpulseFormList#getElements()#at()#setInitial()", () => {
-  it("return true after updating pristine element's initial value", ({
-    scope,
-  }) => {
+  it("return true after updating pristine element's initial value", ({ scope }) => {
     const form = setup([
       setupElement({
         initial: { first: 1, second: "1" },
@@ -1212,14 +1207,13 @@ describe("after ImpulseFormList#getElements()#at()#setInitial()", () => {
       { first: false, second: false },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([true, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      true,
+      false,
+    ])
   })
 
-  it("return false after updating dirty element's initial value", ({
-    scope,
-  }) => {
+  it("return false after updating dirty element's initial value", ({ scope }) => {
     const form = setup([
       setupElement({
         initial: { first: 2, second: "1" },
@@ -1240,14 +1234,13 @@ describe("after ImpulseFormList#getElements()#at()#setInitial()", () => {
       { first: false, second: false },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+    ])
   })
 
-  it("ignores setting initial value for a new dirty element at the end", ({
-    scope,
-  }) => {
+  it("ignores setting initial value for a new dirty element at the end", ({ scope }) => {
     const form = setup([
       setupElement({
         initial: { first: 1, second: "1" },
@@ -1269,25 +1262,21 @@ describe("after ImpulseFormList#getElements()#at()#setInitial()", () => {
     form.getElements(scope).at(2)!.setInitial({ first: 3, second: "3" })
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, params._first)).toStrictEqual([
-      false,
-      false,
-      true,
-    ])
+    expect(form.isDirty(scope, params._first)).toStrictEqual([false, false, true])
     expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: false, second: false },
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+      false,
+    ])
   })
 
-  it("updates list element initial value for a new dirty element in the beginning", ({
-    scope,
-  }) => {
+  it("updates list element initial value for a new dirty element in the beginning", ({ scope }) => {
     const form = setup([
       setupElement({
         initial: { first: 1, second: "1" },
@@ -1309,20 +1298,18 @@ describe("after ImpulseFormList#getElements()#at()#setInitial()", () => {
     form.getElements(scope).at(0)!.setInitial({ first: 3, second: "3" })
 
     expect(form.isDirty(scope)).toBe(true)
-    expect(form.isDirty(scope, params._first)).toStrictEqual([
-      false,
-      true,
-      true,
-    ])
+    expect(form.isDirty(scope, params._first)).toStrictEqual([false, true, true])
     expect(form.isDirty(scope, params._second)).toStrictEqual([
       { first: false, second: false },
       { first: true, second: true },
       { first: true, second: true },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, true, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      true,
+      false,
+    ])
   })
 
   it("keeps the updated initial value after adding one more element to the beginning", ({
@@ -1362,8 +1349,9 @@ describe("after ImpulseFormList#getElements()#at()#setInitial()", () => {
       { first: 2, second: "2" },
     ])
 
-    expect(
-      form.getElements(scope).map((element) => element.isDirty(scope)),
-    ).toStrictEqual([false, false])
+    expect(form.getElements(scope).map((element) => element.isDirty(scope))).toStrictEqual([
+      false,
+      false,
+    ])
   })
 })

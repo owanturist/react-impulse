@@ -65,9 +65,7 @@ it("matches the type signature", () => {
     ]
   >
 
-  expectTypeOf(form.setValidateOn).toEqualTypeOf<
-    (setter: RootValidateOnSetter) => void
-  >()
+  expectTypeOf(form.setValidateOn).toEqualTypeOf<(setter: RootValidateOnSetter) => void>()
 
   expectTypeOf(form.fields.third.setValidateOn).toEqualTypeOf<
     (setter: ThirdValidateOnSetter) => void

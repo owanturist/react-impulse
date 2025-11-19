@@ -28,9 +28,7 @@ describe.each([
   })
 })
 
-it("resets to initial value by consuming current original value with resetter", ({
-  scope,
-}) => {
+it("resets to initial value by consuming current original value with resetter", ({ scope }) => {
   const unit = ImpulseFormUnit("2", { initial: "1" })
 
   unit.reset((_, current) => current)
@@ -151,7 +149,5 @@ it("keeps isValidated when validateOn=onInit", ({ scope }) => {
   expect(unit.isValidated(scope)).toBe(true)
   expect(unit.getValidateOn(scope)).toBe("onInit")
   expect(unit.getOutput(scope)).toBeNull()
-  expect(unit.getError(scope)).toStrictEqual([
-    expect.stringContaining("Too small"),
-  ])
+  expect(unit.getError(scope)).toStrictEqual([expect.stringContaining("Too small")])
 })

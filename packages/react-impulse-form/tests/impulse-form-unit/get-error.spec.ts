@@ -17,17 +17,17 @@ it("selects error", ({ scope }) => {
     validate: (input) => (input.length > 1 ? [1, null] : [null, input]),
   })
 
-  const error_default = value.getError(scope)
-  expect(error_default).toBeNull()
-  expectTypeOf(error_default).toEqualTypeOf<null | number>()
+  const errorDefault = value.getError(scope)
+  expect(errorDefault).toBeNull()
+  expectTypeOf(errorDefault).toEqualTypeOf<null | number>()
 
-  const error_concise = value.getError(scope, params._first)
-  expect(error_concise).toBeNull()
-  expectTypeOf(error_concise).toEqualTypeOf<null | number>()
+  const errorConcise = value.getError(scope, params._first)
+  expect(errorConcise).toBeNull()
+  expectTypeOf(errorConcise).toEqualTypeOf<null | number>()
 
-  const error_verbose = value.getError(scope, params._second)
-  expect(error_verbose).toBeNull()
-  expectTypeOf(error_verbose).toEqualTypeOf<null | number>()
+  const errorVerbose = value.getError(scope, params._second)
+  expect(errorVerbose).toBeNull()
+  expectTypeOf(errorVerbose).toEqualTypeOf<null | number>()
 
   value.setInput("12")
   expect(value.getError(scope)).toBe(1)
@@ -54,9 +54,7 @@ describe("when neither schema nor initial error are defined", () => {
     value.setError(2)
     expect(value.getError(scope)).toBe(2)
 
-    expectTypeOf(value.setError)
-      .parameter(0)
-      .toEqualTypeOf<Setter<null | number>>()
+    expectTypeOf(value.setError).parameter(0).toEqualTypeOf<Setter<null | number>>()
   })
 
   it("resets to null", ({ scope }) => {
@@ -109,44 +107,38 @@ describe("when initial error is defined", () => {
     expect(value.getError(scope)).toBe(3)
   })
 
-  it("selects unequal error values when isErrorEqual is not specified", ({
-    scope,
-  }) => {
+  it("selects unequal error values when isErrorEqual is not specified", ({ scope }) => {
     const value = ImpulseFormUnit("1", {
       error: ["error"],
     })
 
-    const error_0 = value.getError(scope)
+    const error0 = value.getError(scope)
 
     value.setError(["error"])
-    const error_1 = value.getError(scope)
+    const error1 = value.getError(scope)
 
-    expect(error_0).not.toBe(error_1)
-    expect(error_0).toStrictEqual(error_1)
+    expect(error0).not.toBe(error1)
+    expect(error0).toStrictEqual(error1)
   })
 
-  it("selects equal error values when isErrorEqual is specified", ({
-    scope,
-  }) => {
+  it("selects equal error values when isErrorEqual is specified", ({ scope }) => {
     const value = ImpulseFormUnit("1", {
       error: ["error"],
       isErrorEqual: isShallowArrayEqual,
     })
 
-    const error_0 = value.getError(scope)
+    const error0 = value.getError(scope)
 
     value.setError(["error"])
-    const error_1 = value.getError(scope)
+    const error1 = value.getError(scope)
 
-    expect(error_0).toBe(error_1)
-    expect(error_0).toStrictEqual(error_1)
+    expect(error0).toBe(error1)
+    expect(error0).toStrictEqual(error1)
   })
 })
 
 describe("when validator is defined", () => {
-  function setup(
-    options?: Partial<ImpulseFormUnitValidatedOptions<string, number>>,
-  ) {
+  function setup(options?: Partial<ImpulseFormUnitValidatedOptions<string, number>>) {
     return ImpulseFormUnit("", {
       validate: (input) => (input.length > 0 ? [null, input] : [1, null]),
       ...options,
@@ -171,24 +163,24 @@ describe("when validator is defined", () => {
   it("prioritizes initial error over validation error", ({ scope }) => {
     const value = setup({ validateOn: "onInit", error: 2 })
 
-    const error_0 = value.getError(scope)
-    expect(error_0).toBe(2)
+    const error0 = value.getError(scope)
+    expect(error0).toBe(2)
 
     value.setError(null)
-    const error_1 = value.getError(scope)
-    expect(error_1).toBe(1)
+    const error1 = value.getError(scope)
+    expect(error1).toBe(1)
   })
 
   it("prioritizes custom error over validation error", ({ scope }) => {
     const value = setup({ validateOn: "onInit" })
 
     value.setError(4)
-    const error_0 = value.getError(scope)
-    expect(error_0).toBe(4)
+    const error0 = value.getError(scope)
+    expect(error0).toBe(4)
 
     value.setError(null)
-    const error_1 = value.getError(scope)
-    expect(error_1).toBe(1)
+    const error1 = value.getError(scope)
+    expect(error1).toBe(1)
   })
 
   it("uses setter value", ({ scope }) => {
@@ -197,45 +189,38 @@ describe("when validator is defined", () => {
     expect(value.getError(scope)).toBe(2)
   })
 
-  it("selects unequal error values when isErrorEqual is not specified", ({
-    scope,
-  }) => {
+  it("selects unequal error values when isErrorEqual is not specified", ({ scope }) => {
     const value = ImpulseFormUnit(-1, {
       validateOn: "onInit",
-      validate: (input) => {
-        return input > 0 ? [null, input] : [{ message: "error" }, null]
-      },
+      validate: (input) => (input > 0 ? [null, input] : [{ message: "error" }, null]),
     })
 
-    const error_0 = value.getError(scope)
+    const error0 = value.getError(scope)
 
     value.setInput(-2)
 
-    const error_1 = value.getError(scope)
+    const error1 = value.getError(scope)
 
-    expect(error_0).not.toBe(error_1)
-    expect(error_0).toStrictEqual(error_1)
+    expect(error0).not.toBe(error1)
+    expect(error0).toStrictEqual(error1)
   })
 
-  it("selects equal error values when isErrorEqual is specified", ({
-    scope,
-  }) => {
+  it("selects equal error values when isErrorEqual is specified", ({ scope }) => {
     const value = ImpulseFormUnit(-1, {
       validateOn: "onInit",
-      validate: (input): Result<{ message: string }, number> => {
-        return input > 0 ? [null, input] : [{ message: "error" }, null]
-      },
+      validate: (input): Result<{ message: string }, number> =>
+        input > 0 ? [null, input] : [{ message: "error" }, null],
       isErrorEqual: (left, right) => left.message === right.message,
     })
 
-    const error_0 = value.getError(scope)
+    const error0 = value.getError(scope)
 
     value.setInput(-2)
 
-    const error_1 = value.getError(scope)
+    const error1 = value.getError(scope)
 
-    expect(error_0).toBe(error_1)
-    expect(error_0).toStrictEqual(error_1)
+    expect(error0).toBe(error1)
+    expect(error0).toStrictEqual(error1)
   })
 })
 
@@ -262,24 +247,24 @@ describe("when schema is defined", () => {
   it("prioritizes initial error over validation error", ({ scope }) => {
     const value = setup({ validateOn: "onInit", error: ["custom error"] })
 
-    const error_0 = value.getError(scope)
-    expect(error_0).toStrictEqual(["custom error"])
+    const error0 = value.getError(scope)
+    expect(error0).toStrictEqual(["custom error"])
 
     value.setError(null)
-    const error_1 = value.getError(scope)
-    expect(error_1).toStrictEqual([expect.any(String)])
+    const error1 = value.getError(scope)
+    expect(error1).toStrictEqual([expect.any(String)])
   })
 
   it("prioritizes custom error over validation error", ({ scope }) => {
     const value = setup({ validateOn: "onInit" })
 
     value.setError(["custom error"])
-    const error_0 = value.getError(scope)
-    expect(error_0).toStrictEqual(["custom error"])
+    const error0 = value.getError(scope)
+    expect(error0).toStrictEqual(["custom error"])
 
     value.setError(null)
-    const error_1 = value.getError(scope)
-    expect(error_1).toStrictEqual([expect.any(String)])
+    const error1 = value.getError(scope)
+    expect(error1).toStrictEqual([expect.any(String)])
   })
 
   it("uses setter value", ({ scope }) => {
@@ -294,14 +279,14 @@ describe("when schema is defined", () => {
       schema: z.number().min(0),
     })
 
-    const error_0 = value.getError(scope)
+    const error0 = value.getError(scope)
 
     value.setInput(-2)
 
-    const error_1 = value.getError(scope)
+    const error1 = value.getError(scope)
 
-    expect(error_0).toBe(error_1)
-    expect(error_0).toStrictEqual(error_1)
+    expect(error0).toBe(error1)
+    expect(error0).toStrictEqual(error1)
   })
 })
 
@@ -311,51 +296,36 @@ describe("when ZodLikeSchema is used", () => {
       "get errors()",
       {
         get errors() {
-          return [
-            { message: "error message #1" },
-            { message: "error message #2" },
-          ]
+          return [{ message: "error message #1" }, { message: "error message #2" }]
         },
       },
     ],
     [
       "errors",
       {
-        errors: [
-          { message: "error message #1" },
-          { message: "error message #2" },
-        ],
+        errors: [{ message: "error message #1" }, { message: "error message #2" }],
       },
     ],
     [
       "issues",
       {
-        issues: [
-          { message: "error message #1" },
-          { message: "error message #2" },
-        ],
+        issues: [{ message: "error message #1" }, { message: "error message #2" }],
       },
     ],
-  ])(
-    "when using ZodLikeSchema#safeParse() with ZodLikeError#%s",
-    (_, error) => {
-      it("returns messages", ({ scope }) => {
-        const value = ImpulseFormUnit(1, {
-          touched: true,
-          schema: {
-            safeParse() {
-              return { success: false, error }
-            },
+  ])("when using ZodLikeSchema#safeParse() with ZodLikeError#%s", (_, error) => {
+    it("returns messages", ({ scope }) => {
+      const value = ImpulseFormUnit(1, {
+        touched: true,
+        schema: {
+          safeParse() {
+            return { success: false, error }
           },
-        })
-
-        expect(value.getError(scope)).toStrictEqual([
-          "error message #1",
-          "error message #2",
-        ])
+        },
       })
-    },
-  )
+
+      expect(value.getError(scope)).toStrictEqual(["error message #1", "error message #2"])
+    })
+  })
 
   describe("when using ZodLikeSchema#parse()", () => {
     it("returns Error.message", ({ scope }) => {
@@ -376,29 +346,20 @@ describe("when ZodLikeSchema is used", () => {
         "get errors()",
         {
           get errors() {
-            return [
-              { message: "error message #1" },
-              { message: "error message #2" },
-            ]
+            return [{ message: "error message #1" }, { message: "error message #2" }]
           },
         },
       ],
       [
         "errors",
         {
-          errors: [
-            { message: "error message #1" },
-            { message: "error message #2" },
-          ],
+          errors: [{ message: "error message #1" }, { message: "error message #2" }],
         },
       ],
       [
         "issues",
         {
-          issues: [
-            { message: "error message #1" },
-            { message: "error message #2" },
-          ],
+          issues: [{ message: "error message #1" }, { message: "error message #2" }],
         },
       ],
     ])("when messages are in ZodLikeError#%s", (_, error) => {
@@ -412,20 +373,16 @@ describe("when ZodLikeSchema is used", () => {
           },
         })
 
-        expect(value.getError(scope)).toStrictEqual([
-          "error message #1",
-          "error message #2",
-        ])
+        expect(value.getError(scope)).toStrictEqual(["error message #1", "error message #2"])
       })
     })
 
-    it("ignores ZodLikeIssue without the message: string property", ({
-      scope,
-    }) => {
+    it("ignores ZodLikeIssue without the message: string property", ({ scope }) => {
       const value = ImpulseFormUnit(1, {
         touched: true,
         schema: {
           parse() {
+            // biome-ignore lint/style/useThrowOnlyError: for testing purposes
             throw {
               issues: [
                 { message: "error message #1" },
@@ -441,10 +398,7 @@ describe("when ZodLikeSchema is used", () => {
         },
       })
 
-      expect(value.getError(scope)).toStrictEqual([
-        "error message #1",
-        "error message #2",
-      ])
+      expect(value.getError(scope)).toStrictEqual(["error message #1", "error message #2"])
     })
 
     it("returns empty array if ZodLikeError does not have errors|issues properties", ({
@@ -454,6 +408,7 @@ describe("when ZodLikeSchema is used", () => {
         touched: true,
         schema: {
           parse() {
+            // biome-ignore lint/style/useThrowOnlyError: for testing purposes
             throw { anything: [] }
           },
         },
@@ -467,6 +422,7 @@ describe("when ZodLikeSchema is used", () => {
         touched: true,
         schema: {
           parse() {
+            // biome-ignore lint/style/useThrowOnlyError: for testing purposes
             throw "error"
           },
         },

@@ -23,11 +23,7 @@ describe("single impulse", () => {
     return (
       <>
         <span data-testid="value">{result}</span>
-        <button
-          type="button"
-          data-testid="increment"
-          onClick={() => setMultiplier((x) => x + 1)}
-        />
+        <button type="button" data-testid="increment" onClick={() => setMultiplier((x) => x + 1)} />
       </>
     )
   }
@@ -96,21 +92,21 @@ describe("single impulse", () => {
   })
 
   it("should call useMemo factory when dep Impulse changes", () => {
-    const value_1 = Impulse(1)
-    const value_2 = Impulse(3)
+    const value1 = Impulse(1)
+    const value2 = Impulse(3)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
     const { rerender } = render(
       <React.Profiler id="test" onRender={onRender}>
-        <Component onMemo={onMemo} value={value_1} />
+        <Component onMemo={onMemo} value={value1} />
       </React.Profiler>,
     )
     vi.clearAllMocks()
 
     rerender(
       <React.Profiler id="test" onRender={onRender}>
-        <Component onMemo={onMemo} value={value_2} />
+        <Component onMemo={onMemo} value={value2} />
       </React.Profiler>,
     )
 
@@ -119,23 +115,23 @@ describe("single impulse", () => {
   })
 
   it("should unsubscribe Impulse from useMemo when swapped", () => {
-    const value_1 = Impulse(1)
-    const value_2 = Impulse(3)
+    const value1 = Impulse(1)
+    const value2 = Impulse(3)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
     const { rerender } = render(
       <React.Profiler id="test" onRender={onRender}>
-        <Component onMemo={onMemo} value={value_1} />
+        <Component onMemo={onMemo} value={value1} />
       </React.Profiler>,
     )
 
-    expect(value_1).toHaveEmittersSize(1)
-    expect(value_2).toHaveEmittersSize(0)
+    expect(value1).toHaveEmittersSize(1)
+    expect(value2).toHaveEmittersSize(0)
 
     rerender(
       <React.Profiler id="test" onRender={onRender}>
-        <Component onMemo={onMemo} value={value_2} />
+        <Component onMemo={onMemo} value={value2} />
       </React.Profiler>,
     )
 
@@ -143,13 +139,13 @@ describe("single impulse", () => {
      * Not 0 because a scope cannot cleanup on every rerender,
      * otherwise memo/effect hooks with the scope dependency will lose subscriptions too eagerly.
      */
-    expect(value_1).toHaveEmittersSize(1)
-    expect(value_2).toHaveEmittersSize(1)
+    expect(value1).toHaveEmittersSize(1)
+    expect(value2).toHaveEmittersSize(1)
 
     vi.clearAllMocks()
 
     act(() => {
-      value_1.setValue(10)
+      value1.setValue(10)
     })
 
     expect(onMemo).toHaveBeenCalledOnce()
@@ -157,13 +153,13 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value_2.setValue(5)
+      value2.setValue(5)
     })
     expect(onMemo).toHaveBeenCalledExactlyOnceWith(10)
     expect(onRender).toHaveBeenCalledOnce()
 
-    expect(value_1).toHaveEmittersSize(0)
-    expect(value_2).toHaveEmittersSize(1)
+    expect(value1).toHaveEmittersSize(0)
+    expect(value2).toHaveEmittersSize(1)
   })
 
   it("should call useMemo factory when none-Impulse dep changes", () => {
@@ -201,20 +197,14 @@ describe("multiple impulses", () => {
   }> = ({ first, second }) => {
     const [multiplier, setMultiplier] = React.useState(2)
     const result = useScopedMemo(
-      (scope) => {
-        return (first.getValue(scope) + second.getValue(scope)) * multiplier
-      },
+      (scope) => (first.getValue(scope) + second.getValue(scope)) * multiplier,
       [first, second, multiplier],
     )
 
     return (
       <>
         <span data-testid="value">{result}</span>
-        <button
-          type="button"
-          data-testid="increment"
-          onClick={() => setMultiplier((x) => x + 1)}
-        />
+        <button type="button" data-testid="increment" onClick={() => setMultiplier((x) => x + 1)} />
       </>
     )
   }
@@ -267,48 +257,44 @@ describe("nested impulses", () => {
     return (
       <>
         <span data-testid="value">{result}</span>
-        <button
-          type="button"
-          data-testid="increment"
-          onClick={() => setMultiplier((x) => x + 1)}
-        />
+        <button type="button" data-testid="increment" onClick={() => setMultiplier((x) => x + 1)} />
       </>
     )
   }
 
   it("can watch after all impulses", () => {
-    const _0 = Impulse(2)
-    const _1 = Impulse(3)
-    const _2 = Impulse(4)
-    const list = Impulse([_0, _1])
+    const count0 = Impulse(2)
+    const count1 = Impulse(3)
+    const count2 = Impulse(4)
+    const list = Impulse([count0, count1])
 
     render(<Component list={list} />)
 
     expect(list).toHaveEmittersSize(1)
-    expect(_0).toHaveEmittersSize(1)
-    expect(_1).toHaveEmittersSize(1)
-    expect(_2).toHaveEmittersSize(0)
+    expect(count0).toHaveEmittersSize(1)
+    expect(count1).toHaveEmittersSize(1)
+    expect(count2).toHaveEmittersSize(0)
 
     const node = screen.getByTestId("value")
 
     expect(node).toHaveTextContent("10")
 
     act(() => {
-      _0.setValue(4)
+      count0.setValue(4)
     })
     expect(node).toHaveTextContent("14")
 
     act(() => {
-      _1.setValue(5)
+      count1.setValue(5)
     })
     expect(node).toHaveTextContent("18")
 
     act(() => {
-      list.setValue((items) => [...items, _2])
+      list.setValue((items) => [...items, count2])
     })
     expect(node).toHaveTextContent("26")
 
-    expect(_2).toHaveEmittersSize(1)
+    expect(count2).toHaveEmittersSize(1)
 
     act(() => {
       list.setValue((items) => items.slice(1))
@@ -316,8 +302,8 @@ describe("nested impulses", () => {
     expect(node).toHaveTextContent("18")
 
     expect(list).toHaveEmittersSize(1)
-    expect(_0).toHaveEmittersSize(0)
-    expect(_1).toHaveEmittersSize(1)
-    expect(_2).toHaveEmittersSize(1)
+    expect(count0).toHaveEmittersSize(0)
+    expect(count1).toHaveEmittersSize(1)
+    expect(count2).toHaveEmittersSize(1)
   })
 })

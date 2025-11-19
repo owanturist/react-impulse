@@ -66,16 +66,10 @@ export function Impulse<T>(
  *
  * @version 3.0.0
  */
-export function Impulse<T>(
-  initialValue: T,
-  options?: ImpulseOptions<T>,
-): Impulse<T>
+export function Impulse<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
 
 export function Impulse<T>(
-  initialValueOrReadableImpulse?:
-    | T
-    | ReadableImpulse<T>
-    | ((scope: Scope) => T),
+  initialValueOrReadableImpulse?: T | ReadableImpulse<T> | ((scope: Scope) => T),
   optionsOrWritableImpulse?:
     | ImpulseOptions<T>
     | WritableImpulse<T>
@@ -84,23 +78,14 @@ export function Impulse<T>(
 ): Impulse<undefined | T> | Impulse<T> {
   const isGetterFunction = isFunction(initialValueOrReadableImpulse)
 
-  if (
-    !isGetterFunction &&
-    !hasProperty(initialValueOrReadableImpulse, "getValue")
-  ) {
-    const options = optionsOrWritableImpulse as
-      | undefined
-      | ImpulseOptions<undefined | T>
+  if (!(isGetterFunction || hasProperty(initialValueOrReadableImpulse, "getValue"))) {
+    const directOptions = optionsOrWritableImpulse as undefined | ImpulseOptions<undefined | T>
 
-    return new DirectImpulse(
-      initialValueOrReadableImpulse,
-      options?.compare ?? isStrictEqual,
-    )
+    return new DirectImpulse(initialValueOrReadableImpulse, directOptions?.compare ?? isStrictEqual)
   }
 
-  const [setter, options] =
-    isFunction(optionsOrWritableImpulse) ||
-    hasProperty(optionsOrWritableImpulse, "setValue")
+  const [setter, derivedOptions] =
+    isFunction(optionsOrWritableImpulse) || hasProperty(optionsOrWritableImpulse, "setValue")
       ? [optionsOrWritableImpulse, optionsOrNothing]
       : [undefined, optionsOrWritableImpulse]
 
@@ -109,6 +94,6 @@ export function Impulse<T>(
       ? initialValueOrReadableImpulse
       : (scope) => initialValueOrReadableImpulse.getValue(scope),
     isFunction(setter) ? setter : (value) => setter?.setValue(value),
-    options?.compare ?? isStrictEqual,
+    derivedOptions?.compare ?? isStrictEqual,
   )
 }

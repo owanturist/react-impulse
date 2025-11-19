@@ -2,20 +2,13 @@ import type { Scope } from "react-impulse"
 
 import type { Setter } from "~/tools/setter"
 
-import {
-  ImpulseFormList,
-  ImpulseFormUnit,
-  type ImpulseFormUnitOptions,
-} from "../../src"
+import { ImpulseFormList, ImpulseFormUnit, type ImpulseFormUnitOptions } from "../../src"
 
 function setup(elements: ReadonlyArray<ImpulseFormUnit<number>>) {
   return ImpulseFormList(elements)
 }
 
-function setupElement(
-  initial: number,
-  options?: ImpulseFormUnitOptions<number>,
-) {
+function setupElement(initial: number, options?: ImpulseFormUnitOptions<number>) {
   return ImpulseFormUnit(initial, options)
 }
 
@@ -54,9 +47,7 @@ it("replaces all elements", ({ scope }) => {
 it("filters some elements", ({ scope }) => {
   const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 
-  form.setElements((elements, scope) => {
-    return elements.filter((element) => element.getInput(scope) > 1)
-  })
+  form.setElements((elements, scope) => elements.filter((element) => element.getInput(scope) > 1))
   expect(form.getInput(scope)).toStrictEqual([2])
 })
 
@@ -78,7 +69,7 @@ it("attach the new elements to the form root", ({ scope }) => {
   const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 
   form.setElements((current) => [...current, setupElement(3)])
-  void form.submit()
+  form.submit()
 
   expect(form.getSubmitCount(scope)).toBe(1)
   expect(form.getElements(scope)).toHaveLength(4)
@@ -89,20 +80,20 @@ it("attach the new elements to the form root", ({ scope }) => {
 it("persists elements reference", ({ scope }) => {
   const form = setup([setupElement(0), setupElement(1)])
 
-  const [first_0, second_0] = form.getElements(scope)
+  const [first0, second0] = form.getElements(scope)
 
   form.setElements(([first, second]) => [second!, first!])
 
-  const [first_1, second_1] = form.getElements(scope)
+  const [first1, second1] = form.getElements(scope)
 
-  expect(first_1).toBe(second_0)
-  expect(second_1).toBe(first_0)
+  expect(first1).toBe(second0)
+  expect(second1).toBe(first0)
 
-  const third_0 = setupElement(2)
-  form.setElements((elements) => [...elements, third_0])
+  const third0 = setupElement(2)
+  form.setElements((elements) => [...elements, third0])
 
-  const [first_2, second_2, third_2] = form.getElements(scope)
-  expect(first_2).toBe(second_0)
-  expect(second_2).toBe(first_0)
-  expect(third_2).not.toBe(third_0)
+  const [first2, second2, third2] = form.getElements(scope)
+  expect(first2).toBe(second0)
+  expect(second2).toBe(first0)
+  expect(third2).not.toBe(third0)
 })

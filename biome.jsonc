@@ -1,0 +1,328 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "master"
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": ["**/*", "!pnpm-lock.yaml", "!CHANGELOG.md", "!eslint.config.mjs"]
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 80,
+    "attributePosition": "auto"
+  },
+  "linter": {
+    "enabled": true,
+    // enable "all" rules by default and override as needed in "overrides"
+    "rules": {
+      "a11y": "error",
+      "complexity": "error",
+      "correctness": "error",
+      "performance": "error",
+      "nursery": "error",
+      "style": "error",
+      "security": "error",
+      "suspicious": "error"
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "enabled": true,
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingCommas": "all",
+      "semicolons": "asNeeded",
+      "arrowParentheses": "always",
+      "bracketSpacing": true,
+      "bracketSameLine": false,
+      "quoteStyle": "double",
+      "lineWidth": 100
+    },
+    "assist": {
+      "enabled": true
+    },
+    "linter": {
+      "enabled": true
+    }
+  },
+  "json": {
+    "formatter": {
+      "enabled": true,
+      "lineWidth": 100,
+      "trailingCommas": "none"
+    },
+    "assist": {
+      "enabled": true
+    },
+    "parser": {
+      "allowComments": true,
+      "allowTrailingCommas": true
+    },
+    "linter": {
+      "enabled": true
+    }
+  },
+  "css": {
+    "formatter": {
+      "enabled": true,
+      "quoteStyle": "double"
+    },
+    "assist": {
+      "enabled": true
+    },
+    "linter": {
+      "enabled": true
+    },
+    "parser": {
+      "tailwindDirectives": true,
+      "cssModules": false
+    }
+  },
+  "html": {
+    "formatter": {
+      "enabled": true
+    },
+    "assist": {
+      "enabled": true
+    },
+    "linter": {
+      "enabled": true
+    }
+  },
+
+  "overrides": [
+    // override for "all" lint rules
+    {
+      "includes": ["**/*"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noExcessiveLinesPerFunction": "warn", // it should indicate potential for refactoring, but not too strict
+            "noExcessiveCognitiveComplexity": "warn", // it should indicate potential for refactoring, but not too strict
+            "noVoid": "warn" // using void is sometimes useful, e.g. in void Promise
+          },
+
+          "a11y": {},
+
+          "security": {},
+
+          "style": {
+            "noParameterProperties": "off", // parameter properties are encouraged in this codebase
+            "noNestedTernary": "off", // sometimes nested ternary improves code conciseness and readability
+            "useDefaultSwitchClause": "off", // having default clause prevents TS exhaustiveness checks
+            "useConsistentCurlyBraces": {
+              "fix": "safe", // allow autofix
+              "level": "warn"
+            },
+            "useTemplate": {
+              "fix": "safe", // allow autofix
+              "level": "warn"
+            },
+            "useExplicitLengthCheck": {
+              "fix": "safe", // allow autofix
+              "level": "warn"
+            },
+            "useNamingConvention": {
+              "level": "warn",
+              "fix": "unsafe",
+              "options": {
+                "strictCase": false // it complains about built in method name like "toJSON"
+              }
+            },
+            "useConsistentArrayType": {
+              // prefer Array<T> over T[]
+              "level": "warn",
+              "fix": "safe",
+              "options": {
+                "syntax": "generic"
+              }
+            },
+            "useConsistentMemberAccessibility": {
+              // enforce explicit accessibility modifiers for class members
+              "level": "warn",
+              "options": {
+                "accessibility": "explicit"
+              }
+            }
+          },
+
+          "correctness": {
+            "useQwikClasslist": "off", // irrelevant
+            "noSolidDestructuredProps": "off", // irrelevant
+
+            "useImportExtensions": "off", // irrelevant,
+            "noUnusedImports": "off", // handled by TS
+            "noUndeclaredVariables": "off", // handled by TS
+            "useUniqueElementIds": {
+              "level": "warn",
+              "options": {
+                "excludedComponents": ["Profiler"]
+              }
+            }
+          },
+
+          "performance": {
+            "useSolidForComponent": "off", // irrelevant
+
+            "noBarrelFile": "off", // barrel files are used in this codebase
+            "noReExportAll": "off" // re-export all is used in this codebase
+          },
+
+          "suspicious": {
+            "noReactSpecificProps": "off", // react is used in this codebase
+            "noRedeclare": "off" // encouraged in this codebase (e.g. function overloads, type + fabric definitions)
+          },
+
+          "nursery": {
+            "useQwikMethodUsage": "off", // irrelevant
+            "useQwikValidLexicalScope": "off", // irrelevant
+            "useVueMultiWordComponentNames": "off", // irrelevant
+            "useVueDefineMacrosOrder": "off", // irrelevant
+            "noVueReservedProps": "off", // irrelevant
+            "noVueReservedKeys": "off", // irrelevant
+            "noVueDuplicateKeys": "off", // irrelevant
+            "noVueDataObjectDeclaration": "off", // irrelevant
+
+            "noUnresolvedImports": "off", // handled by TS
+            "noUselessUndefined": "off", // it is better to be explicit about undefined values
+            "useExplicitType": "off", // it is too much noise to enforce explicit types everywhere, even none module-public exports
+            "useMaxParams": "off" // common...
+          }
+        }
+      }
+    },
+
+    // source code setup
+    {
+      "includes": ["**/src/**/*", "!**/__tests__/**/*"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "vi": "Use vitest only in test files"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    // dev env setup
+    {
+      "includes": ["./*.{js,ts}", "./packages/*/*.{js,ts}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNamingConvention": "off", // devtools might use different naming conventions
+            "noDefaultExport": "off" // devtools might use default exports
+          },
+          "suspicious": {
+            "noConsole": "off" // devtools often use console
+          }
+        }
+      }
+    },
+
+    // d.ts files
+    {
+      "includes": ["**/*.d.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useExportsLast": "off" // declaration files often have exports throughout the file
+          },
+          "nursery": {
+            "noShadow": "off" // shadowing is common in declaration files
+          }
+        }
+      }
+    },
+
+    // test env setup
+    {
+      "includes": ["**/tests/**/*.{ts,tsx}", "./packages/*/setup-tests.{ts,tsx}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noMagicNumbers": "off", // magic numbers are fine in tests
+            "noNonNullAssertion": "off",
+            "noDoneCallback": "off", // false-positive for context in hooks like "beforeAll(context => { context.thing = 42 })"
+            "useComponentExportOnlyModules": "off" // tests might export non-component modules
+            // "useNamingConvention": {
+            //   "level": "warn",
+            //   "fix": "unsafe",
+            //   "options": {
+            //     "strictCase": false,
+            //     "conventions": [
+            //       {
+            //         "selector": {
+            //           "kind": "variable",
+            //           "scope": "global"
+            //         },
+            //         "formats": ["CONSTANT_CASE"]
+            //       },
+            //       {
+            //         "selector": {
+            //           "kind": "variable"
+            //         },
+            //         "formats": ["snake_case", "PascalCase", "camelCase"],
+            //         "match": "[a-zA-Z0-9_]+"
+            //       },
+            //       {
+            //         "selector": {
+            //           "kind": "objectLiteralMember"
+            //         },
+            //         "formats": ["snake_case", "PascalCase", "camelCase"],
+            //         "match": "[a-zA-Z0-9_]+"
+            //       },
+            //       {
+            //         "selector": {
+            //           "kind": "functionParameter"
+            //         },
+            //         "formats": ["snake_case", "camelCase", "PascalCase"]
+            //       }
+            //     ]
+            //   }
+            // }
+          },
+          "complexity": {
+            "noExcessiveLinesPerFunction": "off" // test `describe/it` blocks can be long
+          },
+          "suspicious": {
+            "noArrayIndexKey": "off", // array index keys are fine in tests
+            "noConfusingVoidType": "off", // void is often used to follow source signatures
+            "noMisplacedAssertion": "off" // false-positives when abstracting expect assertions in helper functions
+          },
+          "security": {
+            "noSecrets": "off" // too much false-positives in tests
+          },
+          "nursery": {
+            "noJsxLiterals": "off", // jsx literals are fine in tests
+            "noShadow": "off", // shadowing is fine in tests
+            "noIncrementDecrement": "off" // increment/decrement is fine in tests
+          }
+        }
+      }
+    }
+  ]
+}

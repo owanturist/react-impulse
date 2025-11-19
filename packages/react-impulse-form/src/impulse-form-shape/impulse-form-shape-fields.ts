@@ -1,5 +1,5 @@
 export type ImpulseFormShapeFields = Record<
   string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: any is the only working type here
   any
 >

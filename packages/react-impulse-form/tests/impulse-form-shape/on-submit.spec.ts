@@ -1,10 +1,6 @@
 import { z } from "zod"
 
-import {
-  ImpulseFormShape,
-  type ImpulseFormShapeOptions,
-  ImpulseFormUnit,
-} from "../../src"
+import { ImpulseFormShape, type ImpulseFormShapeOptions, ImpulseFormUnit } from "../../src"
 import { wait } from "../common"
 
 const SLOWEST_ASYNC_MS = 3000
@@ -68,15 +64,11 @@ it("matches the type signature", () => {
   const form = setup()
 
   expectTypeOf(form.onSubmit).toEqualTypeOf<
-    (
-      listener: (value: RootValueVerbose) => void | Promise<unknown>,
-    ) => VoidFunction
+    (listener: (value: RootValueVerbose) => void | Promise<unknown>) => VoidFunction
   >()
 
   expectTypeOf(form.fields._3.onSubmit).toEqualTypeOf<
-    (
-      listener: (value: ThirdValueVerbose) => void | Promise<unknown>,
-    ) => VoidFunction
+    (listener: (value: ThirdValueVerbose) => void | Promise<unknown>) => VoidFunction
   >()
 })
 
@@ -84,9 +76,7 @@ describe.each<
   [
     string,
     (
-      form:
-        | ImpulseFormShape<ValidatedShapeFields>
-        | ImpulseFormShape<ShapeFields>,
+      form: ImpulseFormShape<ValidatedShapeFields> | ImpulseFormShape<ShapeFields>,
     ) => Promise<unknown>,
   ]
 >([
@@ -136,7 +126,7 @@ describe.each<
 
       form.onSubmit(listener)
 
-      void submit(form)
+      submit(form)
 
       expect(form.isInvalid(scope)).toBe(true)
       expect(listener).not.toHaveBeenCalled()
@@ -152,7 +142,7 @@ describe.each<
 
       expect(focus).not.toHaveBeenCalled()
 
-      void submit(form)
+      submit(form)
 
       expect(focus).toHaveBeenCalledExactlyOnceWith([expect.any(String)])
     })
@@ -170,8 +160,8 @@ describe.each<
         },
         _4: ["anything"],
       },
-      () => {
-        return ImpulseFormShape({
+      () =>
+        ImpulseFormShape({
           _1: ImpulseFormUnit("value"),
           _2: ImpulseFormUnit(0),
           _3: ImpulseFormShape({
@@ -179,8 +169,7 @@ describe.each<
             _2: ImpulseFormUnit(["value"]),
           }),
           _4: ["anything"],
-        })
-      },
+        }),
     ],
     [
       "schema is defined and value is valid",
@@ -214,7 +203,7 @@ describe.each<
 
     expect(listener).not.toHaveBeenCalled()
 
-    void submit(form)
+    submit(form)
 
     expect(listener).toHaveBeenCalledExactlyOnceWith(value)
   })
@@ -222,16 +211,16 @@ describe.each<
   it("calls all listeners", () => {
     const form = setup()
 
-    const listener_1 = vi.fn()
-    const listener_2 = vi.fn()
+    const listener1 = vi.fn()
+    const listener2 = vi.fn()
 
-    form.onSubmit(listener_1)
-    form.onSubmit(listener_2)
+    form.onSubmit(listener1)
+    form.onSubmit(listener2)
 
-    void submit(form)
+    submit(form)
 
-    expect(listener_1).toHaveBeenCalledTimes(1)
-    expect(listener_2).toHaveBeenCalledTimes(1)
+    expect(listener1).toHaveBeenCalledTimes(1)
+    expect(listener2).toHaveBeenCalledTimes(1)
   })
 
   it("subscribes the same listener only once", () => {
@@ -242,7 +231,7 @@ describe.each<
     form.onSubmit(listener)
     form.onSubmit(listener)
 
-    void submit(form)
+    submit(form)
 
     expect(listener).toHaveBeenCalledTimes(1)
   })
@@ -254,11 +243,11 @@ describe.each<
 
     form.onSubmit(listener)
 
-    void submit(form)
-    void form.submit()
-    void form.fields._1.submit()
-    void form.fields._3.submit()
-    void form.fields._3.fields._1.submit()
+    submit(form)
+    form.submit()
+    form.fields._1.submit()
+    form.fields._3.submit()
+    form.fields._3.fields._1.submit()
 
     expect(listener).toHaveBeenCalledTimes(5)
   })
@@ -270,14 +259,14 @@ describe.each<
 
     const unsubscribe = form.onSubmit(listener)
 
-    void submit(form)
+    submit(form)
 
     expect(listener).toHaveBeenCalledTimes(1)
     listener.mockClear()
 
     unsubscribe()
 
-    void submit(form)
+    submit(form)
 
     expect(listener).not.toHaveBeenCalled()
   })
@@ -287,62 +276,62 @@ describe.each<
 
     const listener = vi.fn()
 
-    const unsubscribe_1 = form.onSubmit(listener)
-    const unsubscribe_2 = form.onSubmit(listener)
-    const unsubscribe_3 = form.onSubmit(listener)
+    const unsubscribe1 = form.onSubmit(listener)
+    const unsubscribe2 = form.onSubmit(listener)
+    const unsubscribe3 = form.onSubmit(listener)
 
-    void submit(form)
+    submit(form)
     expect(listener).toHaveBeenCalled()
     listener.mockClear()
-    unsubscribe_1()
+    unsubscribe1()
 
-    void submit(form)
+    submit(form)
     expect(listener).toHaveBeenCalled()
     listener.mockClear()
-    unsubscribe_2()
+    unsubscribe2()
 
-    void submit(form)
+    submit(form)
     expect(listener).toHaveBeenCalled()
     listener.mockClear()
-    unsubscribe_3()
+    unsubscribe3()
 
-    void submit(form)
+    submit(form)
     expect(listener).not.toHaveBeenCalled()
   })
 
   it("waits the slowest listener", async ({ scope }) => {
     const form = setup()
 
-    const done_1 = vi.fn()
-    const done_2 = vi.fn()
-    const done_3 = vi.fn()
-    const all_done = vi.fn()
+    const done1 = vi.fn()
+    const done2 = vi.fn()
+    const done3 = vi.fn()
+    const allDone = vi.fn()
 
-    form.onSubmit(() => wait(0.25 * SLOWEST_ASYNC_MS).then(done_1))
-    form.onSubmit(() => wait(0.5 * SLOWEST_ASYNC_MS).then(done_2))
-    form.onSubmit(() => wait(SLOWEST_ASYNC_MS).then(done_3))
+    form.onSubmit(() => wait(0.25 * SLOWEST_ASYNC_MS).then(done1))
+    form.onSubmit(() => wait(0.5 * SLOWEST_ASYNC_MS).then(done2))
+    form.onSubmit(() => wait(SLOWEST_ASYNC_MS).then(done3))
 
-    void submit(form).then(all_done)
+    submit(form).then(allDone)
 
     await vi.advanceTimersByTimeAsync(0.25 * SLOWEST_ASYNC_MS)
-    expect(done_1).toHaveBeenCalledOnce()
-    expect(done_2).not.toHaveBeenCalled()
-    expect(done_3).not.toHaveBeenCalled()
-    expect(all_done).not.toHaveBeenCalled()
+    expect(done1).toHaveBeenCalledOnce()
+    expect(done2).not.toHaveBeenCalled()
+    expect(done3).not.toHaveBeenCalled()
+    expect(allDone).not.toHaveBeenCalled()
     expect(form.isSubmitting(scope)).toBe(true)
 
     await vi.advanceTimersByTimeAsync(0.25 * SLOWEST_ASYNC_MS)
-    expect(done_1).toHaveBeenCalledOnce()
-    expect(done_2).toHaveBeenCalledOnce()
-    expect(done_3).not.toHaveBeenCalled()
-    expect(all_done).not.toHaveBeenCalled()
+    expect(done1).toHaveBeenCalledOnce()
+    expect(done2).toHaveBeenCalledOnce()
+    expect(done3).not.toHaveBeenCalled()
+    expect(allDone).not.toHaveBeenCalled()
     expect(form.isSubmitting(scope)).toBe(true)
 
     await vi.advanceTimersByTimeAsync(0.5 * SLOWEST_ASYNC_MS)
-    expect(done_1).toHaveBeenCalledOnce()
-    expect(done_2).toHaveBeenCalledOnce()
-    expect(done_3).toHaveBeenCalledOnce()
-    expect(all_done).toHaveBeenCalledOnce()
+    expect(done1).toHaveBeenCalledOnce()
+    expect(done2).toHaveBeenCalledOnce()
+    expect(done3).toHaveBeenCalledOnce()
+    expect(allDone).toHaveBeenCalledOnce()
     expect(form.isSubmitting(scope)).toBe(false)
   })
 
@@ -358,27 +347,27 @@ describe.each<
       },
     })
 
-    const listener_1 = vi.fn()
-    const listener_2 = vi.fn()
-    const listener_3 = vi.fn()
-    const listener_3_1 = vi.fn()
-    const listener_3_2 = vi.fn()
+    const listener1 = vi.fn()
+    const listener2 = vi.fn()
+    const listener3 = vi.fn()
+    const listener31 = vi.fn()
+    const listener32 = vi.fn()
 
-    form.fields._1.onSubmit(listener_1)
-    form.fields._2.onSubmit(listener_2)
-    form.fields._3.onSubmit(listener_3)
-    form.fields._3.fields._1.onSubmit(listener_3_1)
-    form.fields._3.fields._2.onSubmit(listener_3_2)
+    form.fields._1.onSubmit(listener1)
+    form.fields._2.onSubmit(listener2)
+    form.fields._3.onSubmit(listener3)
+    form.fields._3.fields._1.onSubmit(listener31)
+    form.fields._3.fields._2.onSubmit(listener32)
 
-    void submit(form)
+    submit(form)
 
-    expect(listener_1).toHaveBeenCalledExactlyOnceWith("x")
-    expect(listener_2).toHaveBeenCalledExactlyOnceWith(567)
-    expect(listener_3).toHaveBeenCalledExactlyOnceWith({
+    expect(listener1).toHaveBeenCalledExactlyOnceWith("x")
+    expect(listener2).toHaveBeenCalledExactlyOnceWith(567)
+    expect(listener3).toHaveBeenCalledExactlyOnceWith({
       _1: false,
       _2: ["y"],
     })
-    expect(listener_3_1).toHaveBeenCalledExactlyOnceWith(false)
-    expect(listener_3_2).toHaveBeenCalledExactlyOnceWith(["y"])
+    expect(listener31).toHaveBeenCalledExactlyOnceWith(false)
+    expect(listener32).toHaveBeenCalledExactlyOnceWith(["y"])
   })
 })

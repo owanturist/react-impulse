@@ -31,30 +31,22 @@ describe("types", () => {
   >
 
   it("matches schema type for getInitial(scope)", () => {
-    expectTypeOf(form.getInitial).toEqualTypeOf<
-      (scope: Scope) => InitialSchema
-    >()
+    expectTypeOf(form.getInitial).toEqualTypeOf<(scope: Scope) => InitialSchema>()
   })
 
   it("matches setter type for setInitial(setter)", () => {
-    expectTypeOf(form.setInitial).toEqualTypeOf<
-      (setter: InitialSetter) => void
-    >()
+    expectTypeOf(form.setInitial).toEqualTypeOf<(setter: InitialSetter) => void>()
   })
 
   it("ensures ImpulseFormOptionalOptions.initial type", () => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit(true),
-      ImpulseFormUnit(0),
-      {
-        initial: {
-          // @ts-expect-error should be boolean
-          enabled: 1,
-          // @ts-expect-error should be number
-          element: "0",
-        },
+    const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit(0), {
+      initial: {
+        // @ts-expect-error should be boolean
+        enabled: 1,
+        // @ts-expect-error should be number
+        element: "0",
       },
-    )
+    })
 
     expectTypeOf(form).not.toBeUndefined()
   })
@@ -76,15 +68,11 @@ describe("types", () => {
     >
 
     it("matches schema type for getInitial(scope)", () => {
-      expectTypeOf(parent.getInitial).toEqualTypeOf<
-        (scope: Scope) => ParentInitialSchema
-      >()
+      expectTypeOf(parent.getInitial).toEqualTypeOf<(scope: Scope) => ParentInitialSchema>()
     })
 
     it("matches setter type for setInitial(setter)", () => {
-      expectTypeOf(parent.setInitial).toEqualTypeOf<
-        (setter: ParentInitialSetter) => void
-      >()
+      expectTypeOf(parent.setInitial).toEqualTypeOf<(setter: ParentInitialSetter) => void>()
     })
   })
 })
@@ -148,9 +136,7 @@ describe("using recursive setter", () => {
   const enabled = ImpulseFormUnit(true, { initial: false })
   const element = ImpulseFormUnit(0, { initial: 1 })
 
-  function setup(
-    options?: ImpulseFormOptionalOptions<typeof enabled, typeof element>,
-  ) {
+  function setup(options?: ImpulseFormOptionalOptions<typeof enabled, typeof element>) {
     return ImpulseFormOptional(enabled, element, options)
   }
 
@@ -183,16 +169,16 @@ describe("using recursive setter", () => {
         expect(initial).toStrictEqual({ enabled: false, element: 1 })
 
         return {
-          enabled: (initial_enabled, input_enabled) => {
-            expect(initial_enabled).toBe(false)
-            expect(input_enabled).toBe(true)
+          enabled: (initialEnabled, inputEnabled) => {
+            expect(initialEnabled).toBe(false)
+            expect(inputEnabled).toBe(true)
 
             return false
           },
 
-          element: (initial_element, input_element) => {
-            expect(initial_element).toBe(1)
-            expect(input_element).toBe(0)
+          element: (initialElement, inputElement) => {
+            expect(initialElement).toBe(1)
+            expect(inputElement).toBe(0)
 
             return 2
           },
@@ -213,42 +199,32 @@ describe("using recursive setter", () => {
 
 describe("stable input value", () => {
   it("subsequently selects equal input", ({ scope }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit(true),
-      ImpulseFormUnit({ a: 1 }),
-    )
+    const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit({ a: 1 }))
 
-    const input_0 = form.getInitial(scope)
+    const input0 = form.getInitial(scope)
 
     form.setInitial({ element: { a: 1 } })
-    const input_1 = form.getInitial(scope)
+    const input1 = form.getInitial(scope)
 
-    expect(input_0).not.toBe(input_1)
-    expect(input_0).toStrictEqual(input_1)
+    expect(input0).not.toBe(input1)
+    expect(input0).toStrictEqual(input1)
   })
 
-  it("selects unequal initial values when isInputEqual is not specified", ({
-    scope,
-  }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit(true),
-      ImpulseFormUnit([0]),
-    )
+  it("selects unequal initial values when isInputEqual is not specified", ({ scope }) => {
+    const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit([0]))
 
-    const initial_0 = form.getInitial(scope)
+    const initial0 = form.getInitial(scope)
 
     form.setInitial({
       element: [0],
     })
-    const initial_1 = form.getInitial(scope)
+    const initial1 = form.getInitial(scope)
 
-    expect(initial_0).not.toBe(initial_1)
-    expect(initial_0).toStrictEqual(initial_1)
+    expect(initial0).not.toBe(initial1)
+    expect(initial0).toStrictEqual(initial1)
   })
 
-  it("selects equal initial values when isInputEqual is specified", ({
-    scope,
-  }) => {
+  it("selects equal initial values when isInputEqual is specified", ({ scope }) => {
     const form = ImpulseFormOptional(
       ImpulseFormUnit(false),
       ImpulseFormUnit([0], {
@@ -256,14 +232,14 @@ describe("stable input value", () => {
       }),
     )
 
-    const initial_0 = form.getInitial(scope)
+    const initial0 = form.getInitial(scope)
 
     form.setInitial({
       element: [0],
     })
-    const initial_1 = form.getInitial(scope)
+    const initial1 = form.getInitial(scope)
 
-    expect(initial_0).toBe(initial_1)
-    expect(initial_0).toStrictEqual(initial_1)
+    expect(initial0).toBe(initial1)
+    expect(initial0).toStrictEqual(initial1)
   })
 })

@@ -1,9 +1,9 @@
 /* eslint-disable no-restricted-imports */
 export {
-  type Scope,
-  type Compare,
-  type ReadonlyImpulse,
-  Impulse,
   batch,
+  type Compare,
+  Impulse,
+  type ReadonlyImpulse,
+  type Scope,
   untrack,
 } from "react-impulse"

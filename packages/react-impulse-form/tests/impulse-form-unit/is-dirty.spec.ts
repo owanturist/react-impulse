@@ -28,15 +28,12 @@ it("dirty when original value is different from initial value", ({ scope }) => {
   expect(value.isDirty(scope)).toBe(true)
 })
 
-it("clean when complex value comparably equal to initial value", ({
-  scope,
-}) => {
+it("clean when complex value comparably equal to initial value", ({ scope }) => {
   const value = ImpulseFormUnit(
     { type: "zero", value: 0 },
     {
       initial: { type: "zero", value: 0 },
-      isInputEqual: (left, right) =>
-        left.type === right.type && left.value === right.value,
+      isInputEqual: (left, right) => left.type === right.type && left.value === right.value,
     },
   )
   expect(value.isDirty(scope)).toBe(false)
@@ -48,14 +45,9 @@ it("clean when complex value comparably equal to initial value", ({
   expect(value.isDirty(scope)).toBe(false)
 })
 
-it("dirty when complex value comparably unequal to initial value", ({
-  scope,
-}) => {
+it("dirty when complex value comparably unequal to initial value", ({ scope }) => {
   const initial = { type: "zero", value: 0 }
-  const value = ImpulseFormUnit(
-    { type: "zero", value: 0 },
-    { initial: initial },
-  )
+  const value = ImpulseFormUnit({ type: "zero", value: 0 }, { initial })
   expect(value.isDirty(scope)).toBe(true)
 
   value.setInput({ type: "one", value: 1 })

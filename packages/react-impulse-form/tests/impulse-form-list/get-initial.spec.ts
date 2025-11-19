@@ -6,26 +6,22 @@ import { ImpulseFormList, ImpulseFormUnit } from "../../src"
 it("matches the type definition", ({ scope }) => {
   const form = ImpulseFormList([
     ImpulseFormUnit(0, {
-      schema: z.number().transform((x) => x.toFixed()),
+      schema: z.number().transform((x) => x.toFixed(0)),
     }),
   ])
 
   expect(form.getElements(scope)).toHaveLength(1)
 
-  expectTypeOf(form.getInitial).toEqualTypeOf<
-    (scope: Scope) => ReadonlyArray<number>
-  >()
+  expectTypeOf(form.getInitial).toEqualTypeOf<(scope: Scope) => ReadonlyArray<number>>()
 
-  expectTypeOf(form.getElements(scope).at(0)!.getInitial).toEqualTypeOf<
-    (scope: Scope) => number
-  >()
+  expectTypeOf(form.getElements(scope).at(0)!.getInitial).toEqualTypeOf<(scope: Scope) => number>()
 })
 
 it("matches the nested type definition", ({ scope }) => {
   const form = ImpulseFormList([
     ImpulseFormList<ImpulseFormUnit<number, ReadonlyArray<string>, string>>([
       ImpulseFormUnit(0, {
-        schema: z.number().transform((x) => x.toFixed()),
+        schema: z.number().transform((x) => x.toFixed(0)),
       }),
     ]),
   ])
@@ -40,9 +36,9 @@ it("matches the nested type definition", ({ scope }) => {
     (scope: Scope) => ReadonlyArray<number>
   >()
 
-  expectTypeOf(
-    form.getElements(scope).at(0)!.getElements(scope).at(0)!.getInitial,
-  ).toEqualTypeOf<(scope: Scope) => number>()
+  expectTypeOf(form.getElements(scope).at(0)!.getElements(scope).at(0)!.getInitial).toEqualTypeOf<
+    (scope: Scope) => number
+  >()
 })
 
 it("returns empty array for empty list", ({ scope }) => {

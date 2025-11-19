@@ -15,9 +15,7 @@ import {
 
 describe("types", () => {
   const enabled = ImpulseFormUnit(0, {
-    validate: (input): Result<number, boolean> => {
-      return input > 0 ? [null, input % 2 === 0] : [0, null]
-    },
+    validate: (input): Result<number, boolean> => (input > 0 ? [null, input % 2 === 0] : [0, null]),
   })
   const element = ImpulseFormShape({
     _0: ImpulseFormUnit(0, {
@@ -73,13 +71,9 @@ describe("types", () => {
   it("matches schema type for getError(scope, select?)", ({ scope }) => {
     expectTypeOf(form.getError(scope)).toEqualTypeOf<ErrorSchema>()
 
-    expectTypeOf(
-      form.getError(scope, params._first),
-    ).toEqualTypeOf<ErrorSchema>()
+    expectTypeOf(form.getError(scope, params._first)).toEqualTypeOf<ErrorSchema>()
 
-    expectTypeOf(
-      form.getError(scope, params._second),
-    ).toEqualTypeOf<ErrorVerboseSchema>()
+    expectTypeOf(form.getError(scope, params._second)).toEqualTypeOf<ErrorVerboseSchema>()
   })
 
   it("matches setter type for setError(setter)", () => {
@@ -87,41 +81,39 @@ describe("types", () => {
   })
 
   it("allows passing concise value to setError", ({ scope }) => {
-    const error_0 = form.getError(scope)
-    const error_0_concise = form.getError(scope, params._first)
-    const error_0_verbose = form.getError(scope, params._second)
+    const error0 = form.getError(scope)
+    const error0Concise = form.getError(scope, params._first)
+    const error0Verbose = form.getError(scope, params._second)
 
-    form.setError(error_0_concise)
+    form.setError(error0Concise)
 
-    expect(form.getError(scope)).toStrictEqual(error_0)
-    expect(form.getError(scope, params._first)).toStrictEqual(error_0_concise)
-    expect(form.getError(scope, params._second)).toStrictEqual(error_0_verbose)
+    expect(form.getError(scope)).toStrictEqual(error0)
+    expect(form.getError(scope, params._first)).toStrictEqual(error0Concise)
+    expect(form.getError(scope, params._second)).toStrictEqual(error0Verbose)
   })
 
   it("allows passing verbose value to setError", ({ scope }) => {
-    const error_0 = form.getError(scope)
-    const error_0_concise = form.getError(scope, params._first)
-    const error_0_verbose = form.getError(scope, params._second)
+    const error0 = form.getError(scope)
+    const error0Concise = form.getError(scope, params._first)
+    const error0Verbose = form.getError(scope, params._second)
 
-    form.setError(error_0_verbose)
+    form.setError(error0Verbose)
 
-    expect(form.getError(scope)).toStrictEqual(error_0)
-    expect(form.getError(scope, params._first)).toStrictEqual(error_0_concise)
-    expect(form.getError(scope, params._second)).toStrictEqual(error_0_verbose)
+    expect(form.getError(scope)).toStrictEqual(error0)
+    expect(form.getError(scope, params._first)).toStrictEqual(error0Concise)
+    expect(form.getError(scope, params._second)).toStrictEqual(error0Verbose)
   })
 
   it("allows passing verbose value in setError callback", ({ scope }) => {
-    const error_0 = form.getError(scope)
-    const error_0_concise = form.getError(scope, params._first)
-    const error_0_verbose = form.getError(scope, params._second)
+    const error0 = form.getError(scope)
+    const error0Concise = form.getError(scope, params._first)
+    const error0Verbose = form.getError(scope, params._second)
 
-    form.setError((verbose) => {
-      return verbose
-    })
+    form.setError((verbose) => verbose)
 
-    expect(form.getError(scope)).toStrictEqual(error_0)
-    expect(form.getError(scope, params._first)).toStrictEqual(error_0_concise)
-    expect(form.getError(scope, params._second)).toStrictEqual(error_0_verbose)
+    expect(form.getError(scope)).toStrictEqual(error0)
+    expect(form.getError(scope, params._first)).toStrictEqual(error0Concise)
+    expect(form.getError(scope, params._second)).toStrictEqual(error0Verbose)
   })
 
   it("ensures ImpulseFormOptionalOptions.error type", () => {
@@ -170,19 +162,13 @@ describe("types", () => {
     it("matches schema type for getError(scope, select?)", ({ scope }) => {
       expectTypeOf(parent.getError(scope)).toEqualTypeOf<ParentErrorSchema>()
 
-      expectTypeOf(
-        parent.getError(scope, params._first),
-      ).toEqualTypeOf<ParentErrorSchema>()
+      expectTypeOf(parent.getError(scope, params._first)).toEqualTypeOf<ParentErrorSchema>()
 
-      expectTypeOf(
-        parent.getError(scope, params._second),
-      ).toEqualTypeOf<ParentErrorVerboseSchema>()
+      expectTypeOf(parent.getError(scope, params._second)).toEqualTypeOf<ParentErrorVerboseSchema>()
     })
 
     it("matches setter type for setError(setter)", () => {
-      expectTypeOf(parent.setError).toEqualTypeOf<
-        (setter: ParentErrorSetter) => void
-      >()
+      expectTypeOf(parent.setError).toEqualTypeOf<(setter: ParentErrorSetter) => void>()
     })
 
     it("allows passing concise value to setError", ({ scope }) => {
@@ -203,72 +189,68 @@ describe("types", () => {
   })
 })
 
-describe.each([
-  "onTouch" as const,
-  "onChange" as const,
-  "onSubmit" as const,
-  "onInit" as const,
-])("when any validateOn (%s)", (validateOn) => {
-  it("selects only the enables's error when it has an error", ({ scope }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit(true, {
-        schema: z.boolean(),
-        error: ["custom"],
-      }),
-      ImpulseFormUnit(0, {
-        error: 123,
-      }),
-      {
-        validateOn,
-      },
-    )
+describe.each(["onTouch" as const, "onChange" as const, "onSubmit" as const, "onInit" as const])(
+  "when any validateOn (%s)",
+  (validateOn) => {
+    it("selects only the enables's error when it has an error", ({ scope }) => {
+      const form = ImpulseFormOptional(
+        ImpulseFormUnit(true, {
+          schema: z.boolean(),
+          error: ["custom"],
+        }),
+        ImpulseFormUnit(0, {
+          error: 123,
+        }),
+        {
+          validateOn,
+        },
+      )
 
-    const concise = {
-      enabled: ["custom"],
-      element: null,
-    }
+      const concise = {
+        enabled: ["custom"],
+        element: null,
+      }
 
-    expect(form.getError(scope)).toStrictEqual(concise)
-    expect(form.getError(scope, params._first)).toStrictEqual(concise)
-    expect(form.getError(scope, params._second)).toStrictEqual({
-      enabled: ["custom"],
-      element: 123,
+      expect(form.getError(scope)).toStrictEqual(concise)
+      expect(form.getError(scope, params._first)).toStrictEqual(concise)
+      expect(form.getError(scope, params._second)).toStrictEqual({
+        enabled: ["custom"],
+        element: 123,
+      })
     })
-  })
 
-  it("selects the custom error regardless of the validate strategy", ({
-    scope,
-  }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit(true, {
-        schema: z.boolean(),
-      }),
-      ImpulseFormOptional(
+    it("selects the custom error regardless of the validate strategy", ({ scope }) => {
+      const form = ImpulseFormOptional(
         ImpulseFormUnit(true, {
           schema: z.boolean(),
         }),
-        ImpulseFormUnit("0", {
-          error: true,
-        }),
-      ),
-      {
-        validateOn,
-      },
-    )
+        ImpulseFormOptional(
+          ImpulseFormUnit(true, {
+            schema: z.boolean(),
+          }),
+          ImpulseFormUnit("0", {
+            error: true,
+          }),
+        ),
+        {
+          validateOn,
+        },
+      )
 
-    const error = {
-      enabled: null,
-      element: {
+      const error = {
         enabled: null,
-        element: true,
-      },
-    }
+        element: {
+          enabled: null,
+          element: true,
+        },
+      }
 
-    expect(form.getError(scope)).toStrictEqual(error)
-    expect(form.getError(scope, params._first)).toStrictEqual(error)
-    expect(form.getError(scope, params._second)).toStrictEqual(error)
-  })
-})
+      expect(form.getError(scope)).toStrictEqual(error)
+      expect(form.getError(scope, params._first)).toStrictEqual(error)
+      expect(form.getError(scope, params._second)).toStrictEqual(error)
+    })
+  },
+)
 
 describe.each(["onTouch" as const, "onChange" as const, "onSubmit" as const])(
   "when runtime validateOn (%s)",
@@ -325,10 +307,7 @@ describe("when after trigger", () => {
   }
 
   describe.each<
-    [
-      ValidateStrategy,
-      trigger?: (form: ReturnType<typeof setup>) => void | Promise<void>,
-    ]
+    [ValidateStrategy, trigger?: (form: ReturnType<typeof setup>) => void | Promise<void>]
   >([
     ["onInit" as const],
 
@@ -362,9 +341,7 @@ describe("when after trigger", () => {
     ],
   ])("when validateOn=%s", (validateOn, trigger) => {
     describe("when enabled", () => {
-      it("selects element's validating errors when units become dirty", async ({
-        scope,
-      }) => {
+      it("selects element's validating errors when units become dirty", async ({ scope }) => {
         const form = setup(validateOn)
 
         await trigger?.(form)
@@ -917,14 +894,10 @@ describe("stable error value", () => {
     expect(form.getError(scope)).toBe(form.getError(scope))
 
     expect(form.getError(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.getError(scope, params._first)).toBe(
-      form.getError(scope, params._first),
-    )
+    expect(form.getError(scope, params._first)).toBe(form.getError(scope, params._first))
 
     expect(form.getError(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.getError(scope, params._second)).toBe(
-      form.getError(scope, params._second),
-    )
+    expect(form.getError(scope, params._second)).toBe(form.getError(scope, params._second))
   })
 })
 
@@ -952,9 +925,7 @@ describe("using recursive setter", () => {
     }),
   )
 
-  function setup(
-    options?: ImpulseFormOptionalOptions<typeof enabled, typeof element>,
-  ) {
+  function setup(options?: ImpulseFormOptionalOptions<typeof enabled, typeof element>) {
     return ImpulseFormOptional(enabled, element, options)
   }
 
@@ -966,12 +937,7 @@ describe("using recursive setter", () => {
       ) => ImpulseFormOptional<typeof enabled, typeof element>,
     ]
   >([
-    [
-      "ImpulseFormOptionalOptions.error",
-      (error) => {
-        return setup({ error })
-      },
-    ],
+    ["ImpulseFormOptionalOptions.error", (error) => setup({ error })],
 
     [
       "ImpulseFormOptional.setError",
@@ -1024,18 +990,16 @@ describe("using recursive setter", () => {
             })
 
             return {
-              enabled: ($_element_enabled) => {
-                expectTypeOf(
-                  $_element_enabled,
-                ).toEqualTypeOf<null | ReadonlyArray<string>>()
-                expect($_element_enabled).toBeNull()
+              enabled: ($_elementEnabled) => {
+                expectTypeOf($_elementEnabled).toEqualTypeOf<null | ReadonlyArray<string>>()
+                expect($_elementEnabled).toBeNull()
 
                 return ["custom", "error"]
               },
 
-              element: ($_element_element) => {
-                expectTypeOf($_element_element).toEqualTypeOf<null | boolean>()
-                expect($_element_element).toBe(true)
+              element: ($_elementElement) => {
+                expectTypeOf($_elementElement).toEqualTypeOf<null | boolean>()
+                expect($_elementElement).toBe(true)
 
                 return false
               },

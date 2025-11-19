@@ -1,18 +1,7 @@
-import {
-  act,
-  fireEvent,
-  render,
-  renderHook,
-  screen,
-} from "@testing-library/react"
+import { act, fireEvent, render, renderHook, screen } from "@testing-library/react"
 import React from "react"
 
-import {
-  Impulse,
-  useScope,
-  useScopedEffect,
-  useScopedLayoutEffect,
-} from "../src"
+import { Impulse, useScope, useScopedEffect, useScopedLayoutEffect } from "../src"
 
 describe.each([
   ["useScopedEffect", useScopedEffect],
@@ -36,25 +25,15 @@ describe.each([
       )
 
       return (
-        <button
-          type="button"
-          data-testid="increment"
-          onClick={() => setMultiplier((x) => x + 1)}
-        />
+        <button type="button" data-testid="increment" onClick={() => setMultiplier((x) => x + 1)} />
       )
     }
 
-    it(`runs an effect when Impulse-dependency updates`, () => {
+    it("runs an effect when Impulse-dependency updates", () => {
       const value = Impulse(3)
       const onEffect = vi.fn()
 
-      render(
-        <Component
-          onEffect={onEffect}
-          useEffect={useCustomScopedEffect}
-          value={value}
-        />,
-      )
+      render(<Component onEffect={onEffect} useEffect={useCustomScopedEffect} value={value} />)
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(6)
       vi.clearAllMocks()
@@ -73,11 +52,7 @@ describe.each([
 
       const { rerender } = render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component
-            useEffect={useCustomScopedEffect}
-            onEffect={onEffect}
-            value={value}
-          />
+          <Component useEffect={useCustomScopedEffect} onEffect={onEffect} value={value} />
         </React.Profiler>,
       )
 
@@ -87,11 +62,7 @@ describe.each([
 
       rerender(
         <React.Profiler id="test" onRender={onRender}>
-          <Component
-            useEffect={useCustomScopedEffect}
-            onEffect={onEffect}
-            value={value}
-          />
+          <Component useEffect={useCustomScopedEffect} onEffect={onEffect} value={value} />
         </React.Profiler>,
       )
 
@@ -109,29 +80,21 @@ describe.each([
     })
 
     it("should call useEffect factory when dep Impulse changes", () => {
-      const value_1 = Impulse(1)
-      const value_2 = Impulse(3)
+      const value1 = Impulse(1)
+      const value2 = Impulse(3)
       const onEffect = vi.fn()
       const onRender = vi.fn()
 
       const { rerender } = render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component
-            useEffect={useCustomScopedEffect}
-            onEffect={onEffect}
-            value={value_1}
-          />
+          <Component useEffect={useCustomScopedEffect} onEffect={onEffect} value={value1} />
         </React.Profiler>,
       )
       vi.clearAllMocks()
 
       rerender(
         <React.Profiler id="test" onRender={onRender}>
-          <Component
-            useEffect={useCustomScopedEffect}
-            onEffect={onEffect}
-            value={value_2}
-          />
+          <Component useEffect={useCustomScopedEffect} onEffect={onEffect} value={value2} />
         </React.Profiler>,
       )
 
@@ -140,43 +103,35 @@ describe.each([
     })
 
     it("should unsubscribe Impulse from useEffect when swapped", () => {
-      const value_1 = Impulse(1)
-      const value_2 = Impulse(3)
+      const value1 = Impulse(1)
+      const value2 = Impulse(3)
       const onEffect = vi.fn()
       const onRender = vi.fn()
 
       const { rerender } = render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component
-            useEffect={useCustomScopedEffect}
-            onEffect={onEffect}
-            value={value_1}
-          />
+          <Component useEffect={useCustomScopedEffect} onEffect={onEffect} value={value1} />
         </React.Profiler>,
       )
-      expect(value_1).toHaveEmittersSize(1)
-      expect(value_2).toHaveEmittersSize(0)
+      expect(value1).toHaveEmittersSize(1)
+      expect(value2).toHaveEmittersSize(0)
 
       vi.clearAllMocks()
 
       rerender(
         <React.Profiler id="test" onRender={onRender}>
-          <Component
-            useEffect={useCustomScopedEffect}
-            onEffect={onEffect}
-            value={value_2}
-          />
+          <Component useEffect={useCustomScopedEffect} onEffect={onEffect} value={value2} />
         </React.Profiler>,
       )
-      expect(value_1).toHaveEmittersSize(0)
-      expect(value_2).toHaveEmittersSize(1)
+      expect(value1).toHaveEmittersSize(0)
+      expect(value2).toHaveEmittersSize(1)
 
       expect(onEffect).toHaveBeenCalledOnce()
       expect(onRender).toHaveBeenCalledOnce()
       vi.clearAllMocks()
 
       act(() => {
-        value_1.setValue(10)
+        value1.setValue(10)
       })
 
       expect(onEffect).not.toHaveBeenCalled()
@@ -184,12 +139,12 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value_2.setValue(5)
+        value2.setValue(5)
       })
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(10)
       expect(onRender).not.toHaveBeenCalled()
-      expect(value_1).toHaveEmittersSize(0)
-      expect(value_2).toHaveEmittersSize(1)
+      expect(value1).toHaveEmittersSize(0)
+      expect(value2).toHaveEmittersSize(1)
     })
 
     it("should call useEffect factory when non Impulse dep changes", () => {
@@ -199,11 +154,7 @@ describe.each([
 
       render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component
-            useEffect={useCustomScopedEffect}
-            onEffect={onEffect}
-            value={value}
-          />
+          <Component useEffect={useCustomScopedEffect} onEffect={onEffect} value={value} />
         </React.Profiler>,
       )
       vi.clearAllMocks()
@@ -233,8 +184,7 @@ describe.each([
       const [multiplier, setMultiplier] = React.useState(2)
       useCustomScopedEffect(
         (scope) => {
-          const x =
-            (first.getValue(scope) + second.getValue(scope)) * multiplier
+          const x = (first.getValue(scope) + second.getValue(scope)) * multiplier
 
           onEffect(x)
         },
@@ -242,11 +192,7 @@ describe.each([
       )
 
       return (
-        <button
-          type="button"
-          data-testid="increment"
-          onClick={() => setMultiplier((x) => x + 1)}
-        />
+        <button type="button" data-testid="increment" onClick={() => setMultiplier((x) => x + 1)} />
       )
     }
 
@@ -300,11 +246,7 @@ describe.each([
       )
 
       return (
-        <button
-          type="button"
-          data-testid="increment"
-          onClick={() => setMultiplier((x) => x + 1)}
-        />
+        <button type="button" data-testid="increment" onClick={() => setMultiplier((x) => x + 1)} />
       )
     }
 
@@ -372,11 +314,7 @@ describe.each([
       })
 
       return (
-        <button
-          type="button"
-          data-testid="increment"
-          onClick={() => setMultiplier((x) => x + 1)}
-        />
+        <button type="button" data-testid="increment" onClick={() => setMultiplier((x) => x + 1)} />
       )
     }
 
@@ -384,9 +322,7 @@ describe.each([
       const value = Impulse(3)
       const onEffect = vi.fn()
 
-      const { rerender } = render(
-        <Component value={value} onEffect={onEffect} />,
-      )
+      const { rerender } = render(<Component value={value} onEffect={onEffect} />)
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(6)
       vi.clearAllMocks()
@@ -437,11 +373,7 @@ describe.each([
       const scope = useScope()
 
       return (
-        <button
-          type="button"
-          data-testid="count"
-          onClick={() => count.setValue((x) => x + 1)}
-        >
+        <button type="button" data-testid="count" onClick={() => count.setValue((x) => x + 1)}>
           {count.getValue(scope)}
         </button>
       )
@@ -462,11 +394,7 @@ describe.each([
 
       return (
         <>
-          <button
-            type="button"
-            data-testid="visibility"
-            onClick={() => setIsVisible((x) => !x)}
-          />
+          <button type="button" data-testid="visibility" onClick={() => setIsVisible((x) => !x)} />
           {isVisible && <Counter count={count} />}
         </>
       )

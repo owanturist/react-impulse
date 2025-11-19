@@ -2,10 +2,7 @@ import { z } from "zod"
 
 import { ImpulseFormUnit, type ImpulseFormUnitSchemaOptions } from "../../src"
 
-function setup(
-  input?: string,
-  options?: Partial<ImpulseFormUnitSchemaOptions<string>>,
-) {
+function setup(input?: string, options?: Partial<ImpulseFormUnitSchemaOptions<string>>) {
   return ImpulseFormUnit(input ?? "", {
     touched: true,
     schema: z.string().min(2),
@@ -72,15 +69,15 @@ describe("focusFirstInvalid() when validated", () => {
 
   it("calls all listeners", () => {
     const form = setup()
-    const listener_1 = vi.fn()
-    const listener_2 = vi.fn()
+    const listener1 = vi.fn()
+    const listener2 = vi.fn()
 
-    form.onFocusWhenInvalid(listener_1)
-    form.onFocusWhenInvalid(listener_2)
+    form.onFocusWhenInvalid(listener1)
+    form.onFocusWhenInvalid(listener2)
 
     form.focusFirstInvalid()
-    expect(listener_1).toHaveBeenCalledOnce()
-    expect(listener_2).toHaveBeenCalledOnce()
+    expect(listener1).toHaveBeenCalledOnce()
+    expect(listener2).toHaveBeenCalledOnce()
   })
 
   it("calls a listener per each focusFirstInvalid()", () => {
@@ -125,25 +122,25 @@ describe("focusFirstInvalid() when validated", () => {
     const form = setup()
     const listener = vi.fn()
 
-    const unsubscribe_1 = form.onFocusWhenInvalid(listener)
-    const unsubscribe_2 = form.onFocusWhenInvalid(listener)
-    const unsubscribe_3 = form.onFocusWhenInvalid(listener)
+    const unsubscribe1 = form.onFocusWhenInvalid(listener)
+    const unsubscribe2 = form.onFocusWhenInvalid(listener)
+    const unsubscribe3 = form.onFocusWhenInvalid(listener)
 
     form.focusFirstInvalid()
     expect(listener).toHaveBeenCalled()
     listener.mockClear()
 
-    unsubscribe_1()
+    unsubscribe1()
     form.focusFirstInvalid()
     expect(listener).toHaveBeenCalled()
     listener.mockClear()
 
-    unsubscribe_2()
+    unsubscribe2()
     form.focusFirstInvalid()
     expect(listener).toHaveBeenCalled()
     listener.mockClear()
 
-    unsubscribe_3()
+    unsubscribe3()
     form.focusFirstInvalid()
     expect(listener).not.toHaveBeenCalled()
   })

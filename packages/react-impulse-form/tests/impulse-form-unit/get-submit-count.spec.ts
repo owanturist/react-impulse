@@ -6,9 +6,7 @@ import { wait } from "../common"
 
 const SLOWEST_ASYNC_MS = 3000
 
-function setupValue(
-  enchant?: (form: ImpulseFormUnit<string, ReadonlyArray<string>>) => void,
-) {
+function setupValue(enchant?: (form: ImpulseFormUnit<string, ReadonlyArray<string>>) => void) {
   return () => {
     const form = ImpulseFormUnit("abc", {
       schema: z.string().max(2),
@@ -64,10 +62,10 @@ describe.each([
 
     expect(form.getSubmitCount(scope)).toBe(0)
 
-    void form.submit()
+    form.submit()
     expect(form.getSubmitCount(scope)).toBe(1)
 
-    void form.submit()
+    form.submit()
     expect(form.getSubmitCount(scope)).toBe(2)
   })
 
@@ -77,7 +75,7 @@ describe.each([
     expect(form.getError(scope)).toBe(null)
     expect(form.isInvalid(scope)).toBe(false)
 
-    void form.submit()
+    form.submit()
     expect(form.isInvalid(scope)).toBe(true)
     expect(form.getSubmitCount(scope)).toBe(1)
   })
@@ -85,16 +83,18 @@ describe.each([
   it("keeps the count after async is done", async ({ scope }) => {
     const form = setup()
 
-    const all_done = vi.fn()
+    const allDone = vi.fn()
 
     const submits = Promise.all([form.submit(), form.submit(), form.submit()])
 
     expect(form.getSubmitCount(scope)).toBe(3)
-    void submits.then(all_done)
-    expect(all_done).not.toHaveBeenCalled()
+    const whenDone = submits.then(allDone)
+    expect(allDone).not.toHaveBeenCalled()
 
     await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
-    expect(all_done).toHaveBeenCalledOnce()
+    expect(allDone).toHaveBeenCalledOnce()
     expect(form.getSubmitCount(scope)).toBe(3)
+
+    await whenDone
   })
 })

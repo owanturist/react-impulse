@@ -44,31 +44,21 @@ describe("Impulse(value, options?)", () => {
     const impulse = Impulse({ count: 0 })
 
     impulse.setValue({ count: 1 })
-    expect(Object.is).toHaveBeenCalledExactlyOnceWith(
-      { count: 0 },
-      { count: 1 },
-    )
+    expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
   it("assigns Object.is by `null` as compare", () => {
     const impulse = Impulse({ count: 0 }, { compare: null })
 
     impulse.setValue({ count: 1 })
-    expect(Object.is).toHaveBeenCalledExactlyOnceWith(
-      { count: 0 },
-      { count: 1 },
-    )
+    expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
   it("assigns custom function as compare", ({ scope }) => {
     const impulse = Impulse({ count: 0 }, { compare: Counter.compare })
 
     impulse.setValue({ count: 1 })
-    expect(Counter.compare).toHaveBeenCalledExactlyOnceWith(
-      { count: 0 },
-      { count: 1 },
-      scope,
-    )
+    expect(Counter.compare).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 }, scope)
   })
 
   it("carries the function value wrapped in an object", ({ scope }) => {

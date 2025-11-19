@@ -14,40 +14,40 @@ import {
 
 describe("bounding active output with branches keys", () => {
   it("ensures the branches type keys following the active output", () => {
-    const form_1 = ImpulseFormSwitch(ImpulseFormUnit<"_1">("_1"), {
+    const form1 = ImpulseFormSwitch(ImpulseFormUnit<"_1">("_1"), {
       _1: ImpulseFormUnit(0),
     })
-    expectTypeOf(form_1.branches).toHaveProperty("_1")
+    expectTypeOf(form1.branches).toHaveProperty("_1")
 
-    const form_2 = ImpulseFormSwitch(ImpulseFormUnit("_2" as const), {
+    const form2 = ImpulseFormSwitch(ImpulseFormUnit("_2" as const), {
       // @ts-expect-error - active must be a union of branch keys
       _0: ImpulseFormUnit(0),
     })
-    expectTypeOf(form_2.branches).not.toHaveProperty("_0")
-    expectTypeOf(form_2.branches).toHaveProperty("_2")
+    expectTypeOf(form2.branches).not.toHaveProperty("_0")
+    expectTypeOf(form2.branches).toHaveProperty("_2")
 
-    const form_3 = ImpulseFormSwitch(
+    const form3 = ImpulseFormSwitch(
       ImpulseFormUnit("_2"),
       // @ts-expect-error active is a `string`
       {
         _0: ImpulseFormUnit(0),
       },
     )
-    expectTypeOf(form_3.branches).toHaveProperty("_0")
-    expectTypeOf(form_3.branches).not.toHaveProperty("_2")
+    expectTypeOf(form3.branches).toHaveProperty("_0")
+    expectTypeOf(form3.branches).not.toHaveProperty("_2")
   })
 
   it("ensures the active output is a string", () => {
-    const form_1 = ImpulseFormSwitch(
+    const form1 = ImpulseFormSwitch(
       ImpulseFormUnit(1),
       // @ts-expect-error should be never
       {
         _1: ImpulseFormUnit(0),
       },
     )
-    expectTypeOf(form_1.branches).toBeNever()
+    expectTypeOf(form1.branches).toBeNever()
 
-    const form_2 = ImpulseFormSwitch(
+    const form2 = ImpulseFormSwitch(
       ImpulseFormUnit("", {
         schema: z.number(),
       }),
@@ -56,11 +56,11 @@ describe("bounding active output with branches keys", () => {
         _1: ImpulseFormUnit(0),
       },
     )
-    expectTypeOf(form_2.branches).toBeNever()
+    expectTypeOf(form2.branches).toBeNever()
   })
 
   it("ensures all output variants are present in branches", () => {
-    const form_1 = ImpulseFormSwitch(
+    const form1 = ImpulseFormSwitch(
       ImpulseFormUnit("", {
         schema: z.enum(["_1", "_2"]),
       }),
@@ -69,10 +69,10 @@ describe("bounding active output with branches keys", () => {
         _2: ImpulseFormUnit(1),
       },
     )
-    expectTypeOf(form_1.branches).toHaveProperty("_1")
-    expectTypeOf(form_1.branches).toHaveProperty("_2")
+    expectTypeOf(form1.branches).toHaveProperty("_1")
+    expectTypeOf(form1.branches).toHaveProperty("_2")
 
-    const form_2 = ImpulseFormSwitch(
+    const form2 = ImpulseFormSwitch(
       ImpulseFormUnit("", {
         schema: z.enum(["_1", "_2"]),
       }),
@@ -81,10 +81,10 @@ describe("bounding active output with branches keys", () => {
         _1: ImpulseFormUnit(0),
       },
     )
-    expectTypeOf(form_2.branches).toHaveProperty("_1")
-    expectTypeOf(form_2.branches).toHaveProperty("_2")
+    expectTypeOf(form2.branches).toHaveProperty("_1")
+    expectTypeOf(form2.branches).toHaveProperty("_2")
 
-    const form_3 = ImpulseFormSwitch(
+    const form3 = ImpulseFormSwitch(
       ImpulseFormUnit(""),
       // @ts-expect-error missing `string` branches
       {
@@ -92,8 +92,8 @@ describe("bounding active output with branches keys", () => {
         _2: ImpulseFormUnit(2),
       },
     )
-    expectTypeOf(form_3.branches).toHaveProperty("_1")
-    expectTypeOf(form_3.branches).toHaveProperty("_2")
+    expectTypeOf(form3.branches).toHaveProperty("_1")
+    expectTypeOf(form3.branches).toHaveProperty("_2")
   })
 })
 
@@ -203,15 +203,11 @@ describe("types", () => {
     >
 
     it("matches schema type for getInput(scope)", () => {
-      expectTypeOf(parent.getInput).toEqualTypeOf<
-        (scope: Scope) => ParentInputSchema
-      >()
+      expectTypeOf(parent.getInput).toEqualTypeOf<(scope: Scope) => ParentInputSchema>()
     })
 
     it("matches setter type for setInput(setter)", () => {
-      expectTypeOf(parent.setInput).toEqualTypeOf<
-        (setter: ParentInputSetter) => void
-      >()
+      expectTypeOf(parent.setInput).toEqualTypeOf<(setter: ParentInputSetter) => void>()
     })
   })
 })
@@ -467,9 +463,7 @@ describe("using recursive setter", () => {
     }),
   }
 
-  function setup(
-    options?: ImpulseFormSwitchOptions<typeof active, typeof branches>,
-  ) {
+  function setup(options?: ImpulseFormSwitchOptions<typeof active, typeof branches>) {
     return ImpulseFormSwitch(active, branches, options)
   }
 
@@ -481,12 +475,7 @@ describe("using recursive setter", () => {
       ) => ImpulseFormSwitch<typeof active, typeof branches>,
     ]
   >([
-    [
-      "ImpulseFormSwitchOptions.input",
-      (input) => {
-        return setup({ input })
-      },
-    ],
+    ["ImpulseFormSwitchOptions.input", (input) => setup({ input })],
 
     [
       "ImpulseFormSwitch.setInput",
@@ -539,15 +528,15 @@ describe("using recursive setter", () => {
         })
 
         return {
-          active: (input_active, initial_active) => {
-            expect(input_active).toBe("")
-            expect(initial_active).toBe("")
+          active: (inputActive, initialActive) => {
+            expect(inputActive).toBe("")
+            expect(initialActive).toBe("")
 
             return "_1"
           },
 
-          branches: (input_branches, initial_branches) => {
-            expect(input_branches).toStrictEqual({
+          branches: (inputBranches, initialBranches) => {
+            expect(inputBranches).toStrictEqual({
               _1: true,
               _2: {
                 _3: "name",
@@ -561,7 +550,7 @@ describe("using recursive setter", () => {
                 },
               },
             })
-            expect(initial_branches).toStrictEqual({
+            expect(initialBranches).toStrictEqual({
               _1: true,
               _2: {
                 _3: "name",
@@ -577,49 +566,49 @@ describe("using recursive setter", () => {
             })
 
             return {
-              _1: (input_1, initial_1) => {
-                expect(input_1).toBe(true)
-                expect(initial_1).toBe(true)
+              _1: (input1, initial1) => {
+                expect(input1).toBe(true)
+                expect(initial1).toBe(true)
 
                 return false
               },
 
-              _2: (input_2, initial_2) => {
-                expect(input_2).toStrictEqual({
+              _2: (input2, initial2) => {
+                expect(input2).toStrictEqual({
                   _3: "name",
                   _4: 18,
                 })
-                expect(initial_2).toStrictEqual({
+                expect(initial2).toStrictEqual({
                   _3: "name",
                   _4: 18,
                 })
 
                 return {
-                  _3: (input_3, initial_3) => {
-                    expect(input_3).toBe("name")
-                    expect(initial_3).toBe("name")
+                  _3: (input3, initial3) => {
+                    expect(input3).toBe("name")
+                    expect(initial3).toBe("name")
 
                     return "updated"
                   },
 
-                  _4: (input_4, initial_4) => {
-                    expect(input_4).toBe(18)
-                    expect(initial_4).toBe(18)
+                  _4: (input4, initial4) => {
+                    expect(input4).toBe(18)
+                    expect(initial4).toBe(18)
 
                     return 30
                   },
                 }
               },
 
-              _5: (input_5, initial_5) => {
-                expect(input_5).toStrictEqual({
+              _5: (input5, initial5) => {
+                expect(input5).toStrictEqual({
                   active: "_6",
                   branches: {
                     _6: 0,
                     _7: "0",
                   },
                 })
-                expect(initial_5).toStrictEqual({
+                expect(initial5).toStrictEqual({
                   active: "_6",
                   branches: {
                     _6: 0,
@@ -628,34 +617,34 @@ describe("using recursive setter", () => {
                 })
 
                 return {
-                  active: (input_active, initial_active) => {
-                    expect(input_active).toBe("_6")
-                    expect(initial_active).toBe("_6")
+                  active: (inputActive, initialActive) => {
+                    expect(inputActive).toBe("_6")
+                    expect(initialActive).toBe("_6")
 
                     return "_7"
                   },
 
-                  branches: (input_branches, initial_branches) => {
-                    expect(input_branches).toStrictEqual({
+                  branches: (inputBranches, initialBranches) => {
+                    expect(inputBranches).toStrictEqual({
                       _6: 0,
                       _7: "0",
                     })
-                    expect(initial_branches).toStrictEqual({
+                    expect(initialBranches).toStrictEqual({
                       _6: 0,
                       _7: "0",
                     })
 
                     return {
-                      _6: (input_6, initial_6) => {
-                        expect(input_6).toBe(0)
-                        expect(initial_6).toBe(0)
+                      _6: (input6, initial6) => {
+                        expect(input6).toBe(0)
+                        expect(initial6).toBe(0)
 
                         return 3
                       },
 
-                      _7: (input_7, initial_7) => {
-                        expect(input_7).toBe("0")
-                        expect(initial_7).toBe("0")
+                      _7: (input7, initial7) => {
+                        expect(input7).toBe("0")
+                        expect(initial7).toBe("0")
 
                         return "3"
                       },
@@ -747,7 +736,7 @@ describe("stable input value", () => {
       ),
     })
 
-    const input_0 = form.getInput(scope)
+    const input0 = form.getInput(scope)
 
     form.setInput({
       branches: {
@@ -757,38 +746,34 @@ describe("stable input value", () => {
       },
     })
 
-    const input_1 = form.getInput(scope)
+    const input1 = form.getInput(scope)
 
-    expect(input_1).not.toBe(input_0)
-    expect(input_1.active).toBe(input_0.active)
-    expect(input_1.branches).not.toBe(input_0.branches)
-    expect(input_1.branches._2).not.toBe(input_0.branches._2)
-    expect(input_1.branches._5).toBe(input_0.branches._5)
+    expect(input1).not.toBe(input0)
+    expect(input1.active).toBe(input0.active)
+    expect(input1.branches).not.toBe(input0.branches)
+    expect(input1.branches._2).not.toBe(input0.branches._2)
+    expect(input1.branches._5).toBe(input0.branches._5)
   })
 
-  it("selects unequal input values when isInputEqual is not specified", ({
-    scope,
-  }) => {
+  it("selects unequal input values when isInputEqual is not specified", ({ scope }) => {
     const form = ImpulseFormSwitch(ImpulseFormUnit<"_1">("_1"), {
       _1: ImpulseFormUnit([0]),
     })
 
-    const input_0 = form.getInput(scope)
+    const input0 = form.getInput(scope)
 
     form.setInput({
       branches: {
         _1: [0],
       },
     })
-    const input_1 = form.getInput(scope)
+    const input1 = form.getInput(scope)
 
-    expect(input_0).not.toBe(input_1)
-    expect(input_0).toStrictEqual(input_1)
+    expect(input0).not.toBe(input1)
+    expect(input0).toStrictEqual(input1)
   })
 
-  it("selects equal input values when isInputEqual is specified", ({
-    scope,
-  }) => {
+  it("selects equal input values when isInputEqual is specified", ({ scope }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("", {
         schema: z.enum(["_1"]),
@@ -800,16 +785,16 @@ describe("stable input value", () => {
       },
     )
 
-    const input_0 = form.getInput(scope)
+    const input0 = form.getInput(scope)
 
     form.setInput({
       branches: {
         _1: [0],
       },
     })
-    const input_1 = form.getInput(scope)
+    const input1 = form.getInput(scope)
 
-    expect(input_0).toBe(input_1)
-    expect(input_0).toStrictEqual(input_1)
+    expect(input0).toBe(input1)
+    expect(input0).toStrictEqual(input1)
   })
 })

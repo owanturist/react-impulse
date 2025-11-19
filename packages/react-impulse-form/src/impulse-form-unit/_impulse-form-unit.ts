@@ -7,15 +7,11 @@ import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer
 export class ImpulseFormUnit<TInput, TError, TOutput> extends ImpulseForm<
   ImpulseFormUnitParams<TInput, TError, TOutput>
 > {
-  public constructor(
-    public readonly _state: ImpulseFormUnitState<TInput, TError, TOutput>,
-  ) {
+  public constructor(public readonly _state: ImpulseFormUnitState<TInput, TError, TOutput>) {
     super()
   }
 
-  public setTransform(
-    transformer: ImpulseFormUnitTransformer<TInput, TOutput>,
-  ): void {
+  public setTransform(transformer: ImpulseFormUnitTransformer<TInput, TOutput>): void {
     this._state._setTransform(transformer)
   }
 }

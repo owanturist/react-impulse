@@ -17,8 +17,7 @@ describe("factory no impulses", () => {
     ["inline", ({ value }: { value: number }) => useScoped(() => 2 * value)],
     [
       "memoized",
-      ({ value }: { value: number }) =>
-        useScoped(useCallback(() => 2 * value, [value])),
+      ({ value }: { value: number }) => useScoped(useCallback(() => 2 * value, [value])),
     ],
   ])("returns %s factory result from clojure", (_, useHook) => {
     const { result, rerender } = renderHook(useHook, {

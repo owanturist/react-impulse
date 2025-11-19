@@ -6,20 +6,18 @@ import { enqueue } from "./enqueue"
 import type { Impulse } from "./impulse"
 import type { ImpulseOptions } from "./impulse-options"
 import type { ReadableImpulse } from "./readable-impulse"
-import { EMITTER_KEY, STATIC_SCOPE, type Scope, extractScope } from "./scope"
+import { EMITTER_KEY, extractScope, type Scope, STATIC_SCOPE } from "./scope"
 import type { ScopeEmitter } from "./scope-emitter"
 import type { WritableImpulse } from "./writable-impulse"
 
-export abstract class BaseImpulse<T>
-  implements ReadableImpulse<T>, WritableImpulse<T>
-{
+export abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> {
   protected readonly _emitters = new Set<WeakRef<ScopeEmitter>>()
 
   protected constructor(protected readonly _compare: Compare<T>) {}
 
   protected abstract _getter(): T
 
-  protected abstract _setter(value: T): void | true
+  protected abstract _setter(value: T): boolean
 
   protected abstract _clone(value: T, compare: Compare<T>): Impulse<T>
 
@@ -72,9 +70,7 @@ export abstract class BaseImpulse<T>
    *
    * @version 1.0.0
    */
-  public setValue(
-    valueOrTransform: T | ((currentValue: T, scope: Scope) => T),
-  ): void {
+  public setValue(valueOrTransform: T | ((currentValue: T, scope: Scope) => T)): void {
     enqueue((push) => {
       const nextValue = isFunction(valueOrTransform)
         ? valueOrTransform(this._getter(), STATIC_SCOPE)
@@ -105,10 +101,7 @@ export abstract class BaseImpulse<T>
    *
    * @version 1.0.0
    */
-  public clone(
-    transform: (value: T, scope: Scope) => T,
-    options?: ImpulseOptions<T>,
-  ): Impulse<T>
+  public clone(transform: (value: T, scope: Scope) => T, options?: ImpulseOptions<T>): Impulse<T>
 
   public clone(
     transformOrOptions?: ((value: T, scope: Scope) => T) | ImpulseOptions<T>,
@@ -116,9 +109,7 @@ export abstract class BaseImpulse<T>
   ): Impulse<T> {
     const value = this._getter()
 
-    const [clonedValue, { compare = this._compare } = {}] = isFunction(
-      transformOrOptions,
-    )
+    const [clonedValue, { compare = this._compare } = {}] = isFunction(transformOrOptions)
       ? [transformOrOptions(value, STATIC_SCOPE), maybeOptions]
       : [value, transformOrOptions]
 

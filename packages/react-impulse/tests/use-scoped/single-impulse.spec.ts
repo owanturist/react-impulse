@@ -1,12 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
-import {
-  type Compare,
-  Impulse,
-  type ReadableImpulse,
-  type Scope,
-  useScoped,
-} from "../../src"
+import { type Compare, Impulse, type ReadableImpulse, type Scope, useScoped } from "../../src"
 import { Counter, type WithImpulse, type WithSpy } from "../common"
 
 describe("impulse shortcut", () => {
@@ -64,43 +58,31 @@ describe("impulse shortcut", () => {
 })
 
 describe("single factory", () => {
-  const factory = (scope: Scope, { impulse }: WithImpulse) =>
-    impulse.getValue(scope)
+  const factory = (scope: Scope, { impulse }: WithImpulse) => impulse.getValue(scope)
 
   describe.each([
-    [
-      "impulse shortcut",
-      ({ impulse }: WithImpulse) => {
-        return useScoped(impulse)
-      },
-    ],
+    ["impulse shortcut", ({ impulse }: WithImpulse) => useScoped(impulse)],
     [
       "without deps",
-      ({ impulse }: WithImpulse) => {
-        return useScoped((scope) => factory(scope, { impulse }))
-      },
+      ({ impulse }: WithImpulse) => useScoped((scope) => factory(scope, { impulse })),
     ],
     [
       "without comparator",
-      ({ impulse }: WithImpulse) => {
-        return useScoped((scope) => factory(scope, { impulse }), [impulse])
-      },
+      ({ impulse }: WithImpulse) => useScoped((scope) => factory(scope, { impulse }), [impulse]),
     ],
     [
       "with inline comparator",
-      ({ impulse }: WithImpulse) => {
-        return useScoped((scope) => factory(scope, { impulse }), [impulse], {
+      ({ impulse }: WithImpulse) =>
+        useScoped((scope) => factory(scope, { impulse }), [impulse], {
           compare: (prev, next) => Counter.compare(prev, next),
-        })
-      },
+        }),
     ],
     [
       "with memoized comparator",
-      ({ impulse }: WithImpulse) => {
-        return useScoped((scope) => factory(scope, { impulse }), [impulse], {
+      ({ impulse }: WithImpulse) =>
+        useScoped((scope) => factory(scope, { impulse }), [impulse], {
           compare: Counter.compare,
-        })
-      },
+        }),
     ],
   ])("%s", (_, useCounter) => {
     it("watches the Impulse's changes", () => {
@@ -124,44 +106,44 @@ describe("single factory", () => {
     })
 
     it("unsubscribes when swapped", () => {
-      const counter_1 = Impulse({ count: 1 })
-      const counter_2 = Impulse({ count: 3 })
+      const counter1 = Impulse({ count: 1 })
+      const counter2 = Impulse({ count: 3 })
 
       const { rerender } = renderHook(useCounter, {
-        initialProps: { impulse: counter_1 },
+        initialProps: { impulse: counter1 },
       })
 
-      expect(counter_1).toHaveEmittersSize(1)
-      expect(counter_2).toHaveEmittersSize(0)
+      expect(counter1).toHaveEmittersSize(1)
+      expect(counter2).toHaveEmittersSize(0)
 
-      rerender({ impulse: counter_2 })
-      expect(counter_1).toHaveEmittersSize(0)
-      expect(counter_2).toHaveEmittersSize(1)
+      rerender({ impulse: counter2 })
+      expect(counter1).toHaveEmittersSize(0)
+      expect(counter2).toHaveEmittersSize(1)
 
       act(() => {
-        counter_1.setValue({ count: 10 })
+        counter1.setValue({ count: 10 })
       })
-      expect(counter_1).toHaveEmittersSize(0)
-      expect(counter_2).toHaveEmittersSize(1)
+      expect(counter1).toHaveEmittersSize(0)
+      expect(counter2).toHaveEmittersSize(1)
 
       act(() => {
-        counter_2.setValue({ count: 5 })
+        counter2.setValue({ count: 5 })
       })
 
-      expect(counter_1).toHaveEmittersSize(0)
-      expect(counter_2).toHaveEmittersSize(1)
+      expect(counter1).toHaveEmittersSize(0)
+      expect(counter2).toHaveEmittersSize(1)
     })
 
     describe("watches the replaced impulse changes", () => {
       const setup = () => {
-        const impulse_1 = Impulse({ count: 1 })
-        const impulse_2 = Impulse({ count: 10 })
+        const impulse1 = Impulse({ count: 1 })
+        const impulse2 = Impulse({ count: 10 })
 
         const { result, rerender } = renderHook(useCounter, {
-          initialProps: { impulse: impulse_1 },
+          initialProps: { impulse: impulse1 },
         })
 
-        return { impulse_1, impulse_2, result, rerender }
+        return { impulse1, impulse2, result, rerender }
       }
 
       it("initiates with correct result", () => {
@@ -170,68 +152,64 @@ describe("single factory", () => {
         expect(result.current).toStrictEqual({ count: 1 })
       })
 
-      it("replaces initial impulse_1 with impulse_2", () => {
-        const { impulse_2, result, rerender } = setup()
+      it("replaces initial impulse1 with impulse2", () => {
+        const { impulse2, result, rerender } = setup()
 
-        rerender({ impulse: impulse_2 })
+        rerender({ impulse: impulse2 })
         expect(result.current).toStrictEqual({ count: 10 })
       })
 
-      it("stops watching impulse_1 changes after replacement with impulse_2", ({
-        scope,
-      }) => {
-        const { impulse_1, impulse_2, result, rerender } = setup()
-        expect(impulse_1).toHaveEmittersSize(1)
+      it("stops watching impulse1 changes after replacement with impulse2", ({ scope }) => {
+        const { impulse1, impulse2, result, rerender } = setup()
+        expect(impulse1).toHaveEmittersSize(1)
 
-        rerender({ impulse: impulse_2 })
-        expect(impulse_1).toHaveEmittersSize(0)
+        rerender({ impulse: impulse2 })
+        expect(impulse1).toHaveEmittersSize(0)
 
         act(() => {
-          impulse_1.setValue(Counter.inc)
+          impulse1.setValue(Counter.inc)
         })
 
-        expect(impulse_1.getValue(scope)).toStrictEqual({ count: 2 })
+        expect(impulse1.getValue(scope)).toStrictEqual({ count: 2 })
         expect(result.current).toStrictEqual({ count: 10 })
-        expect(impulse_1).toHaveEmittersSize(0)
+        expect(impulse1).toHaveEmittersSize(0)
       })
 
-      it("starts watching impulse_2 changes after replacement of impulse_1", ({
-        scope,
-      }) => {
-        const { impulse_1, impulse_2, result, rerender } = setup()
-        expect(impulse_2).toHaveEmittersSize(0)
+      it("starts watching impulse2 changes after replacement of impulse1", ({ scope }) => {
+        const { impulse1, impulse2, result, rerender } = setup()
+        expect(impulse2).toHaveEmittersSize(0)
 
-        rerender({ impulse: impulse_2 })
-        expect(impulse_2).toHaveEmittersSize(1)
+        rerender({ impulse: impulse2 })
+        expect(impulse2).toHaveEmittersSize(1)
 
         act(() => {
-          impulse_2.setValue(Counter.inc)
+          impulse2.setValue(Counter.inc)
         })
 
-        expect(impulse_1.getValue(scope)).toStrictEqual({ count: 1 })
+        expect(impulse1.getValue(scope)).toStrictEqual({ count: 1 })
         expect(result.current).toStrictEqual({ count: 11 })
-        expect(impulse_2).toHaveEmittersSize(1)
+        expect(impulse2).toHaveEmittersSize(1)
       })
 
-      it("replaces impulse_1 back", () => {
-        const { impulse_1, impulse_2, result, rerender } = setup()
+      it("replaces impulse1 back", () => {
+        const { impulse1, impulse2, result, rerender } = setup()
 
-        rerender({ impulse: impulse_2 })
-        rerender({ impulse: impulse_1 })
+        rerender({ impulse: impulse2 })
+        rerender({ impulse: impulse1 })
 
         expect(result.current).toStrictEqual({ count: 1 })
       })
 
-      it("stops watching impulse_2 after replacement back impulse_1", () => {
-        const { impulse_1, impulse_2, result, rerender } = setup()
+      it("stops watching impulse2 after replacement back impulse1", () => {
+        const { impulse1, impulse2, result, rerender } = setup()
 
-        rerender({ impulse: impulse_2 })
-        rerender({ impulse: impulse_1 })
-        expect(impulse_1).toHaveEmittersSize(1)
-        expect(impulse_2).toHaveEmittersSize(0)
+        rerender({ impulse: impulse2 })
+        rerender({ impulse: impulse1 })
+        expect(impulse1).toHaveEmittersSize(1)
+        expect(impulse2).toHaveEmittersSize(0)
 
         act(() => {
-          impulse_2.setValue(Counter.inc)
+          impulse2.setValue(Counter.inc)
         })
 
         expect(result.current).toStrictEqual({ count: 1 })
@@ -241,110 +219,88 @@ describe("single factory", () => {
 })
 
 describe("transform scoped Impulse's", () => {
-  const toTuple = ({ count }: Counter): [boolean, boolean] => {
-    return [count > 2, count < 5]
-  }
+  const toTuple = ({ count }: Counter): [boolean, boolean] => [count > 2, count < 5]
 
   const compareTuple: Compare<[boolean, boolean]> = (
     [prevLeft, prevRight],
     [nextLeft, nextRight],
-  ) => {
-    return prevLeft === nextLeft && prevRight === nextRight
-  }
+  ) => prevLeft === nextLeft && prevRight === nextRight
 
-  const factoryTuple = (scope: Scope, { impulse }: WithImpulse) => {
-    return toTuple(impulse.getValue(scope))
-  }
+  const factoryTuple = (scope: Scope, { impulse }: WithImpulse) => toTuple(impulse.getValue(scope))
 
   it.each([
     [
       "inline comparator",
-      ({ impulse }: WithImpulse) => {
-        return useScoped(
-          (scope) => factoryTuple(scope, { impulse }),
-          [impulse],
-          {
-            compare: (prev, next, scope) => compareTuple(prev, next, scope),
-          },
-        )
-      },
+      ({ impulse }: WithImpulse) =>
+        useScoped((scope) => factoryTuple(scope, { impulse }), [impulse], {
+          compare: (prev, next, scope) => compareTuple(prev, next, scope),
+        }),
     ],
     [
       "memoized comparator",
-      ({ impulse }: WithImpulse) => {
-        return useScoped(
-          (scope) => factoryTuple(scope, { impulse }),
-          [impulse],
-          {
-            compare: compareTuple,
-          },
-        )
-      },
+      ({ impulse }: WithImpulse) =>
+        useScoped((scope) => factoryTuple(scope, { impulse }), [impulse], {
+          compare: compareTuple,
+        }),
     ],
-  ])(
-    "keeps the old value when it is comparably equal when %s",
-    (_, useCounter) => {
-      const impulse = Impulse({ count: 1 })
+  ])("keeps the old value when it is comparably equal when %s", (_, useCounter) => {
+    const impulse = Impulse({ count: 1 })
 
-      const { result, rerender } = renderHook(useCounter, {
-        initialProps: { impulse },
-      })
+    const { result, rerender } = renderHook(useCounter, {
+      initialProps: { impulse },
+    })
 
-      let prev = result.current
+    let prev = result.current
 
-      // produces initial result
-      expect(result.current).toStrictEqual([false, true])
+    // produces initial result
+    expect(result.current).toStrictEqual([false, true])
 
-      // increments 1 -> 2
-      prev = result.current
-      act(() => {
-        impulse.setValue(Counter.inc)
-      })
-      expect(result.current).toBe(prev)
-      expect(result.current).toStrictEqual([false, true])
+    // increments 1 -> 2
+    prev = result.current
+    act(() => {
+      impulse.setValue(Counter.inc)
+    })
+    expect(result.current).toBe(prev)
+    expect(result.current).toStrictEqual([false, true])
 
-      // increments 2 -> 3
-      prev = result.current
-      act(() => {
-        impulse.setValue({ count: 3 })
-      })
-      expect(result.current).not.toBe(prev)
-      expect(result.current).toStrictEqual([true, true])
+    // increments 2 -> 3
+    prev = result.current
+    act(() => {
+      impulse.setValue({ count: 3 })
+    })
+    expect(result.current).not.toBe(prev)
+    expect(result.current).toStrictEqual([true, true])
 
-      // rerender
-      rerender({ impulse })
-      expect(result.current).toStrictEqual([true, true])
+    // rerender
+    rerender({ impulse })
+    expect(result.current).toStrictEqual([true, true])
 
-      // increments 3 -> 4
-      prev = result.current
-      act(() => {
-        impulse.setValue({ count: 4 })
-      })
-      expect(result.current).toBe(prev)
-      expect(result.current).toStrictEqual([true, true])
+    // increments 3 -> 4
+    prev = result.current
+    act(() => {
+      impulse.setValue({ count: 4 })
+    })
+    expect(result.current).toBe(prev)
+    expect(result.current).toStrictEqual([true, true])
 
-      // increments 4 -> 5
-      prev = result.current
-      act(() => {
-        impulse.setValue(Counter.inc)
-      })
-      expect(result.current).not.toBe(prev)
-      expect(result.current).toStrictEqual([true, false])
-    },
-  )
+    // increments 4 -> 5
+    prev = result.current
+    act(() => {
+      impulse.setValue(Counter.inc)
+    })
+    expect(result.current).not.toBe(prev)
+    expect(result.current).toStrictEqual([true, false])
+  })
 
   it.each([
     [
       "without deps",
-      ({ impulse }: WithImpulse) => {
-        return useScoped((scope) => factoryTuple(scope, { impulse }))
-      },
+      ({ impulse }: WithImpulse) => useScoped((scope) => factoryTuple(scope, { impulse })),
     ],
     [
       "without compare",
-      ({ impulse }: WithImpulse) => {
-        return useScoped((scope) => factoryTuple(scope, { impulse }), [impulse])
-      },
+      ({ impulse }: WithImpulse) =>
+        useScoped((scope) => factoryTuple(scope, { impulse }), [impulse]),
     ],
   ])("produces new value on each Impulse's update %s", (_, useCounter) => {
     const impulse = Impulse({ count: 1 })
@@ -396,37 +352,34 @@ describe("transform scoped Impulse's", () => {
   })
 
   describe("when Impulse's changes under factory are comparably equal with", () => {
-    const factory = (scope: Scope, { impulse }: WithImpulse) =>
-      impulse.getValue(scope)
+    const factory = (scope: Scope, { impulse }: WithImpulse) => impulse.getValue(scope)
 
     it.each([
       [
         "without deps",
-        ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useScoped((scope) => {
+        ({ impulse, spy }: WithImpulse & WithSpy) =>
+          useScoped((scope) => {
             spy()
 
             return factory(scope, { impulse })
-          })
-        },
+          }),
       ],
       [
         "without comparator",
-        ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useScoped(
+        ({ impulse, spy }: WithImpulse & WithSpy) =>
+          useScoped(
             (scope) => {
               spy()
 
               return factory(scope, { impulse })
             },
             [impulse, spy],
-          )
-        },
+          ),
       ],
       [
         "with inline comparator",
-        ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useScoped(
+        ({ impulse, spy }: WithImpulse & WithSpy) =>
+          useScoped(
             (scope) => {
               spy()
 
@@ -436,13 +389,12 @@ describe("transform scoped Impulse's", () => {
             {
               compare: (prev, next) => Counter.compare(prev, next),
             },
-          )
-        },
+          ),
       ],
       [
         "with memoized comparator",
-        ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useScoped(
+        ({ impulse, spy }: WithImpulse & WithSpy) =>
+          useScoped(
             (scope) => {
               spy()
 
@@ -452,8 +404,7 @@ describe("transform scoped Impulse's", () => {
             {
               compare: Counter.compare,
             },
-          )
-        },
+          ),
       ],
     ])("should not trigger the factory %s", (_, useCounter) => {
       const impulse = Impulse({ count: 1 }, { compare: Counter.compare })
@@ -476,18 +427,12 @@ describe("transform scoped Impulse's", () => {
 })
 
 describe("multiple Impulse#getValue(scope) calls", () => {
-  const factorySingle = (
-    scope: Scope,
-    { impulse, spy }: WithImpulse & WithSpy,
-  ) => {
+  const factorySingle = (scope: Scope, { impulse, spy }: WithImpulse & WithSpy) => {
     spy()
 
     return impulse.getValue(scope)
   }
-  const factoryDouble = (
-    scope: Scope,
-    { impulse, spy }: WithImpulse & WithSpy,
-  ) => {
+  const factoryDouble = (scope: Scope, { impulse, spy }: WithImpulse & WithSpy) => {
     spy()
 
     return Counter.merge(impulse.getValue(scope), impulse.getValue(scope))
@@ -497,65 +442,39 @@ describe("multiple Impulse#getValue(scope) calls", () => {
     describe.each([
       [
         "without deps",
-        ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useScoped((scope) => factorySingle(scope, { impulse, spy }))
-        },
-        ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useScoped((scope) => factoryDouble(scope, { impulse, spy }))
-        },
+        ({ impulse, spy }: WithImpulse & WithSpy) =>
+          useScoped((scope) => factorySingle(scope, { impulse, spy })),
+        ({ impulse, spy }: WithImpulse & WithSpy) =>
+          useScoped((scope) => factoryDouble(scope, { impulse, spy })),
       ],
       [
         "without comparator",
-        ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useScoped(
-            (scope) => factorySingle(scope, { impulse, spy }),
-            [impulse, spy],
-          )
-        },
-        ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useScoped(
-            (scope) => factoryDouble(scope, { impulse, spy }),
-            [impulse, spy],
-          )
-        },
+        ({ impulse, spy }: WithImpulse & WithSpy) =>
+          useScoped((scope) => factorySingle(scope, { impulse, spy }), [impulse, spy]),
+        ({ impulse, spy }: WithImpulse & WithSpy) =>
+          useScoped((scope) => factoryDouble(scope, { impulse, spy }), [impulse, spy]),
       ],
       [
         "with inline comparator",
-        ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useScoped(
-            (scope) => factorySingle(scope, { impulse, spy }),
-            [impulse, spy],
-            {
-              compare: (prev, next) => Counter.compare(prev, next),
-            },
-          )
-        },
-        ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useScoped(
-            (scope) => factoryDouble(scope, { impulse, spy }),
-            [impulse, spy],
-            {
-              compare: (prev, next) => Counter.compare(prev, next),
-            },
-          )
-        },
+        ({ impulse, spy }: WithImpulse & WithSpy) =>
+          useScoped((scope) => factorySingle(scope, { impulse, spy }), [impulse, spy], {
+            compare: (prev, next) => Counter.compare(prev, next),
+          }),
+        ({ impulse, spy }: WithImpulse & WithSpy) =>
+          useScoped((scope) => factoryDouble(scope, { impulse, spy }), [impulse, spy], {
+            compare: (prev, next) => Counter.compare(prev, next),
+          }),
       ],
       [
         "with memoized comparator",
-        ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useScoped(
-            (scope) => factorySingle(scope, { impulse, spy }),
-            [impulse, spy],
-            { compare: Counter.compare },
-          )
-        },
-        ({ impulse, spy }: WithImpulse & WithSpy) => {
-          return useScoped(
-            (scope) => factoryDouble(scope, { impulse, spy }),
-            [impulse, spy],
-            { compare: Counter.compare },
-          )
-        },
+        ({ impulse, spy }: WithImpulse & WithSpy) =>
+          useScoped((scope) => factorySingle(scope, { impulse, spy }), [impulse, spy], {
+            compare: Counter.compare,
+          }),
+        ({ impulse, spy }: WithImpulse & WithSpy) =>
+          useScoped((scope) => factoryDouble(scope, { impulse, spy }), [impulse, spy], {
+            compare: Counter.compare,
+          }),
       ],
     ])("%s", (_, useSingleHook, useDoubleHook) => {
       const setup = () => {
@@ -570,7 +489,13 @@ describe("multiple Impulse#getValue(scope) calls", () => {
           initialProps: { spy: spyDouble, impulse },
         })
 
-        return { impulse, spySingle, spyDouble, resultSingle, resultDouble }
+        return {
+          impulse,
+          spySingle,
+          spyDouble,
+          resultSingle,
+          resultDouble,
+        }
       }
 
       it("initiates with expected results", () => {
@@ -582,8 +507,7 @@ describe("multiple Impulse#getValue(scope) calls", () => {
       })
 
       it("increments %s", () => {
-        const { impulse, spySingle, spyDouble, resultSingle, resultDouble } =
-          setup()
+        const { impulse, spySingle, spyDouble, resultSingle, resultDouble } = setup()
 
         act(() => {
           impulse.setValue(Counter.inc)
@@ -595,8 +519,7 @@ describe("multiple Impulse#getValue(scope) calls", () => {
       })
 
       it("clones %s", () => {
-        const { impulse, spySingle, spyDouble, resultSingle, resultDouble } =
-          setup()
+        const { impulse, spySingle, spyDouble, resultSingle, resultDouble } = setup()
 
         act(() => {
           impulse.setValue(Counter.clone)

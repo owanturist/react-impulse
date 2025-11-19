@@ -9,10 +9,7 @@ import { Lazy } from "~/tools/lazy"
 import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
 import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
 import type { GetImpulseFormParams } from "../impulse-form/get-impulse-form-params"
-import {
-  type ImpulseFormChild,
-  ImpulseFormState,
-} from "../impulse-form/impulse-form-state"
+import { type ImpulseFormChild, ImpulseFormState } from "../impulse-form/impulse-form-state"
 import { toConcise } from "../to-concise"
 import type { ValidateStrategy } from "../validate-strategy"
 
@@ -62,9 +59,7 @@ export class ImpulseFormOptionalState<
     return this._isEnabled(scope) ? this._element : undefined
   }
 
-  public _childOf(
-    parent: null | ImpulseFormState,
-  ): ImpulseFormOptionalState<TEnabled, TElement> {
+  public _childOf(parent: null | ImpulseFormState): ImpulseFormOptionalState<TEnabled, TElement> {
     return new ImpulseFormOptionalState(parent, this._enabled, this._element)
   }
 
@@ -78,9 +73,9 @@ export class ImpulseFormOptionalState<
     const enabledElement = this._getEnabledElement(scope)
 
     if (!enabledElement) {
-      return !isConcise(enabled) && !isUndefined(fallbackDisabled)
-        ? { enabled, element: fallbackDisabled }
-        : enabled
+      return isConcise(enabled) || isUndefined(fallbackDisabled)
+        ? enabled
+        : { enabled, element: fallbackDisabled }
     }
 
     const element = extract(enabledElement).getValue(scope)
@@ -104,9 +99,8 @@ export class ImpulseFormOptionalState<
   // I N I T I A L
 
   public readonly _initial = Impulse(
-    (scope): ImpulseFormOptionalInput<TEnabled, TElement> => {
-      return this._toVerbose(scope, ({ _initial }) => _initial)
-    },
+    (scope): ImpulseFormOptionalInput<TEnabled, TElement> =>
+      this._toVerbose(scope, ({ _initial }) => _initial),
   )
 
   public _setInitial(
@@ -138,15 +132,11 @@ export class ImpulseFormOptionalState<
   // I N P U T
 
   public readonly _input = Impulse(
-    (scope): ImpulseFormOptionalInput<TEnabled, TElement> => {
-      return this._toVerbose(scope, ({ _input }) => _input)
-    },
+    (scope): ImpulseFormOptionalInput<TEnabled, TElement> =>
+      this._toVerbose(scope, ({ _input }) => _input),
   )
 
-  public _setInput(
-    scope: Scope,
-    setter: ImpulseFormOptionalInputSetter<TEnabled, TElement>,
-  ): void {
+  public _setInput(scope: Scope, setter: ImpulseFormOptionalInputSetter<TEnabled, TElement>): void {
     const { enabled, element } = isFunction(setter)
       ? setter(this._input.getValue(scope), this._initial.getValue(scope))
       : setter
@@ -163,32 +153,25 @@ export class ImpulseFormOptionalState<
   // E R R O R
 
   public readonly _error = Impulse(
-    (scope): ImpulseFormOptionalError<TEnabled, TElement> => {
-      return this._toConcise<null>(
+    (scope): ImpulseFormOptionalError<TEnabled, TElement> =>
+      this._toConcise<null>(
         scope,
         ({ _error }) => _error,
         isNull,
         null,
-      ) as ImpulseFormOptionalError<TEnabled, TElement>
-    },
+      ) as ImpulseFormOptionalError<TEnabled, TElement>,
   )
 
   public readonly _errorVerbose = Impulse(
-    (scope): ImpulseFormOptionalErrorVerbose<TEnabled, TElement> => {
-      return this._toVerbose(
+    (scope): ImpulseFormOptionalErrorVerbose<TEnabled, TElement> =>
+      this._toVerbose(
         scope,
         ({ _errorVerbose }) => _errorVerbose,
-      ) as ImpulseFormOptionalErrorVerbose<TEnabled, TElement>
-    },
+      ) as ImpulseFormOptionalErrorVerbose<TEnabled, TElement>,
   )
 
-  public _setError(
-    scope: Scope,
-    setter: ImpulseFormOptionalErrorSetter<TEnabled, TElement>,
-  ): void {
-    const resolved = isFunction(setter)
-      ? setter(this._errorVerbose.getValue(scope))
-      : setter
+  public _setError(scope: Scope, setter: ImpulseFormOptionalErrorSetter<TEnabled, TElement>): void {
+    const resolved = isFunction(setter) ? setter(this._errorVerbose.getValue(scope)) : setter
 
     const enabledSetter = isNull(resolved) ? resolved : resolved.enabled
 
@@ -210,31 +193,27 @@ export class ImpulseFormOptionalState<
   // V A L I D A T E   O N
 
   public readonly _validateOn = Impulse(
-    (scope): ImpulseFormOptionalValidateOn<TEnabled, TElement> => {
-      return this._toConcise<ValidateStrategy>(
+    (scope): ImpulseFormOptionalValidateOn<TEnabled, TElement> =>
+      this._toConcise<ValidateStrategy>(
         scope,
         ({ _validateOn }) => _validateOn,
         isString as (value: unknown) => value is ValidateStrategy,
-      ) as ImpulseFormOptionalValidateOn<TEnabled, TElement>
-    },
+      ) as ImpulseFormOptionalValidateOn<TEnabled, TElement>,
   )
 
   public readonly _validateOnVerbose = Impulse(
-    (scope): ImpulseFormOptionalValidateOnVerbose<TEnabled, TElement> => {
-      return this._toVerbose(
+    (scope): ImpulseFormOptionalValidateOnVerbose<TEnabled, TElement> =>
+      this._toVerbose(
         scope,
         ({ _validateOnVerbose }) => _validateOnVerbose,
-      ) as ImpulseFormOptionalValidateOnVerbose<TEnabled, TElement>
-    },
+      ) as ImpulseFormOptionalValidateOnVerbose<TEnabled, TElement>,
   )
 
   public _setValidateOn(
     scope: Scope,
     setter: ImpulseFormOptionalValidateOnSetter<TEnabled, TElement>,
   ): void {
-    const resolved = isFunction(setter)
-      ? setter(this._validateOnVerbose.getValue(scope))
-      : setter
+    const resolved = isFunction(setter) ? setter(this._validateOnVerbose.getValue(scope)) : setter
 
     const [enabledSetter, elementSetter] = isString(resolved)
       ? [resolved, this._isEnabled(scope) ? resolved : undefined]
@@ -252,31 +231,27 @@ export class ImpulseFormOptionalState<
   // T O U C H E D
 
   public readonly _touched = Impulse(
-    (scope): ImpulseFormOptionalFlag<TEnabled, TElement> => {
-      return this._toConcise<boolean>(
+    (scope): ImpulseFormOptionalFlag<TEnabled, TElement> =>
+      this._toConcise<boolean>(
         scope,
         ({ _touched }) => _touched,
         isBoolean,
-      ) as ImpulseFormOptionalFlag<TEnabled, TElement>
-    },
+      ) as ImpulseFormOptionalFlag<TEnabled, TElement>,
   )
 
   public readonly _touchedVerbose = Impulse(
-    (scope): ImpulseFormOptionalFlagVerbose<TEnabled, TElement> => {
-      return this._toVerbose(
+    (scope): ImpulseFormOptionalFlagVerbose<TEnabled, TElement> =>
+      this._toVerbose(
         scope,
         ({ _touchedVerbose }) => _touchedVerbose,
-      ) as ImpulseFormOptionalFlagVerbose<TEnabled, TElement>
-    },
+      ) as ImpulseFormOptionalFlagVerbose<TEnabled, TElement>,
   )
 
   public _setTouched(
     scope: Scope,
     setter: ImpulseFormOptionalFlagSetter<TEnabled, TElement>,
   ): void {
-    const resolved = isFunction(setter)
-      ? setter(this._touchedVerbose.getValue(scope))
-      : setter
+    const resolved = isFunction(setter) ? setter(this._touchedVerbose.getValue(scope)) : setter
 
     const [enabledSetter, elementSetter] = isBoolean(resolved)
       ? [resolved, this._isEnabled(scope) ? resolved : undefined]
@@ -293,95 +268,85 @@ export class ImpulseFormOptionalState<
 
   // O U T P U T
 
-  public readonly _output = Impulse(
-    (scope): null | ImpulseFormOptionalOutput<TElement> => {
-      const enabled = this._enabled._output.getValue(scope)
+  public readonly _output = Impulse((scope): null | ImpulseFormOptionalOutput<TElement> => {
+    const enabled = this._enabled._output.getValue(scope)
 
-      if (enabled === false) {
-        return undefined
-      }
+    if (enabled === false) {
+      return undefined
+    }
 
-      if (isNull(enabled)) {
-        return null
-      }
+    if (isNull(enabled)) {
+      return null
+    }
 
-      const value = this._element._output.getValue(scope)
+    const value = this._element._output.getValue(scope)
 
-      if (isNull(value)) {
-        return null
-      }
+    if (isNull(value)) {
+      return null
+    }
 
-      return value
-    },
-  )
+    return value
+  })
 
   public readonly _outputVerbose = Impulse(
-    (scope): ImpulseFormOptionalOutputVerbose<TEnabled, TElement> => {
-      return this._toVerbose(scope, ({ _outputVerbose }) => _outputVerbose)
-    },
+    (scope): ImpulseFormOptionalOutputVerbose<TEnabled, TElement> =>
+      this._toVerbose(scope, ({ _outputVerbose }) => _outputVerbose),
   )
 
   // V A L I D
 
   public readonly _valid = Impulse(
-    (scope): ImpulseFormOptionalFlag<TEnabled, TElement> => {
-      return this._toConcise<boolean>(
-        scope,
-        ({ _valid }) => _valid,
-        isBoolean,
-      ) as ImpulseFormOptionalFlag<TEnabled, TElement>
-    },
+    (scope): ImpulseFormOptionalFlag<TEnabled, TElement> =>
+      this._toConcise<boolean>(scope, ({ _valid }) => _valid, isBoolean) as ImpulseFormOptionalFlag<
+        TEnabled,
+        TElement
+      >,
   )
 
   public readonly _validVerbose = Impulse(
-    (scope): ImpulseFormOptionalFlagVerbose<TEnabled, TElement> => {
-      return this._toVerbose(
+    (scope): ImpulseFormOptionalFlagVerbose<TEnabled, TElement> =>
+      this._toVerbose(
         scope,
         ({ _validVerbose }) => _validVerbose,
-      ) as ImpulseFormOptionalFlagVerbose<TEnabled, TElement>
-    },
+      ) as ImpulseFormOptionalFlagVerbose<TEnabled, TElement>,
   )
 
   // I N V A L I D
 
   public readonly _invalid = Impulse(
-    (scope): ImpulseFormOptionalFlag<TEnabled, TElement> => {
-      return this._toConcise<boolean>(
+    (scope): ImpulseFormOptionalFlag<TEnabled, TElement> =>
+      this._toConcise<boolean>(
         scope,
         ({ _invalid }) => _invalid,
         isBoolean,
-      ) as ImpulseFormOptionalFlag<TEnabled, TElement>
-    },
+      ) as ImpulseFormOptionalFlag<TEnabled, TElement>,
   )
 
   public readonly _invalidVerbose = Impulse(
-    (scope): ImpulseFormOptionalFlagVerbose<TEnabled, TElement> => {
-      return this._toVerbose(
+    (scope): ImpulseFormOptionalFlagVerbose<TEnabled, TElement> =>
+      this._toVerbose(
         scope,
         ({ _invalidVerbose }) => _invalidVerbose,
-      ) as ImpulseFormOptionalFlagVerbose<TEnabled, TElement>
-    },
+      ) as ImpulseFormOptionalFlagVerbose<TEnabled, TElement>,
   )
 
   // V A L I D A T E D
 
   public readonly _validated = Impulse(
-    (scope): ImpulseFormOptionalFlag<TEnabled, TElement> => {
-      return this._toConcise<boolean>(
+    (scope): ImpulseFormOptionalFlag<TEnabled, TElement> =>
+      this._toConcise<boolean>(
         scope,
         ({ _validated }) => _validated,
         isBoolean,
-      ) as ImpulseFormOptionalFlag<TEnabled, TElement>
-    },
+      ) as ImpulseFormOptionalFlag<TEnabled, TElement>,
   )
 
   public readonly _validatedVerbose = Impulse(
-    (scope): ImpulseFormOptionalFlagVerbose<TEnabled, TElement> => {
-      return this._toVerbose(
+    (scope): ImpulseFormOptionalFlagVerbose<TEnabled, TElement> =>
+      this._toVerbose(
         scope,
         ({ _validatedVerbose }) => _validatedVerbose,
-      ) as ImpulseFormOptionalFlagVerbose<TEnabled, TElement>
-    },
+      ) as ImpulseFormOptionalFlagVerbose<TEnabled, TElement>,
   )
 
   public _forceValidated(scope: Scope): void {
@@ -392,41 +357,36 @@ export class ImpulseFormOptionalState<
   // D I R T Y
 
   public readonly _dirty = Impulse(
-    (scope): ImpulseFormOptionalFlag<TEnabled, TElement> => {
-      return this._toConcise<boolean>(
-        scope,
-        ({ _dirty }) => _dirty,
-        isBoolean,
-      ) as ImpulseFormOptionalFlag<TEnabled, TElement>
-    },
+    (scope): ImpulseFormOptionalFlag<TEnabled, TElement> =>
+      this._toConcise<boolean>(scope, ({ _dirty }) => _dirty, isBoolean) as ImpulseFormOptionalFlag<
+        TEnabled,
+        TElement
+      >,
   )
 
   public readonly _dirtyVerbose = Impulse(
-    (scope): ImpulseFormOptionalFlagVerbose<TEnabled, TElement> => {
-      return this._toVerbose(
+    (scope): ImpulseFormOptionalFlagVerbose<TEnabled, TElement> =>
+      this._toVerbose(
         scope,
         ({ _dirtyVerbose }) => _dirtyVerbose,
-      ) as ImpulseFormOptionalFlagVerbose<TEnabled, TElement>
-    },
+      ) as ImpulseFormOptionalFlagVerbose<TEnabled, TElement>,
   )
 
   public readonly _dirtyOn = Impulse(
-    (scope): ImpulseFormOptionalFlag<TEnabled, TElement> => {
-      return this._toConcise<boolean>(
+    (scope): ImpulseFormOptionalFlag<TEnabled, TElement> =>
+      this._toConcise<boolean>(
         scope,
         ({ _dirtyOn }) => _dirtyOn,
         isBoolean,
-      ) as ImpulseFormOptionalFlag<TEnabled, TElement>
-    },
+      ) as ImpulseFormOptionalFlag<TEnabled, TElement>,
   )
 
   public readonly _dirtyOnVerbose = Impulse(
-    (scope): ImpulseFormOptionalFlagVerbose<TEnabled, TElement> => {
-      return this._toVerbose(
+    (scope): ImpulseFormOptionalFlagVerbose<TEnabled, TElement> =>
+      this._toVerbose(
         scope,
         ({ _dirtyOnVerbose }) => _dirtyOnVerbose,
-      ) as ImpulseFormOptionalFlagVerbose<TEnabled, TElement>
-    },
+      ) as ImpulseFormOptionalFlagVerbose<TEnabled, TElement>,
   )
 
   // R E S E T
@@ -447,12 +407,7 @@ export class ImpulseFormOptionalState<
 
   public _getChildren<TChildParams extends ImpulseFormParams>(
     scope: Scope,
-  ): ReadonlyArray<
-    ImpulseFormChild<
-      TChildParams,
-      ImpulseFormOptionalParams<TEnabled, TElement>
-    >
-  > {
+  ): ReadonlyArray<ImpulseFormChild<TChildParams, ImpulseFormOptionalParams<TEnabled, TElement>>> {
     const enabledValue = this._enabled._output.getValue(scope)
 
     const enabledChild: ImpulseFormChild<
@@ -460,8 +415,7 @@ export class ImpulseFormOptionalState<
       ImpulseFormOptionalParams<TEnabled, TElement>
     > = {
       _state: this._enabled as unknown as ImpulseFormState<TChildParams>,
-      _mapToChild: () =>
-        enabledValue as unknown as TChildParams["output.schema"],
+      _mapToChild: () => enabledValue as unknown as TChildParams["output.schema"],
     }
 
     if (enabledValue !== true) {

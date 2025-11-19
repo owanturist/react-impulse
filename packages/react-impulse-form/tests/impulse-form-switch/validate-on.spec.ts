@@ -19,9 +19,7 @@ describe("types", () => {
 
   const branches = {
     _1: ImpulseFormUnit(true, {
-      schema: z
-        .boolean()
-        .transform((value): string => (value ? "ok" : "not ok")),
+      schema: z.boolean().transform((value): string => (value ? "ok" : "not ok")),
     }),
     _2: ImpulseFormShape({
       _3: ImpulseFormUnit("name"),
@@ -138,69 +136,49 @@ describe("types", () => {
   it("matches schema type for getValidateOn(scope, select?)", ({ scope }) => {
     expectTypeOf(form.getValidateOn(scope)).toEqualTypeOf<ValidateOnSchema>()
 
-    expectTypeOf(
-      form.getValidateOn(scope, params._first),
-    ).toEqualTypeOf<ValidateOnSchema>()
+    expectTypeOf(form.getValidateOn(scope, params._first)).toEqualTypeOf<ValidateOnSchema>()
 
-    expectTypeOf(
-      form.getValidateOn(scope, params._second),
-    ).toEqualTypeOf<ValidateOnVerboseSchema>()
+    expectTypeOf(form.getValidateOn(scope, params._second)).toEqualTypeOf<ValidateOnVerboseSchema>()
   })
 
   it("matches setter type for setValidateOn(setter)", () => {
-    expectTypeOf(form.setValidateOn).toEqualTypeOf<
-      (setter: ValidateOnSetter) => void
-    >()
+    expectTypeOf(form.setValidateOn).toEqualTypeOf<(setter: ValidateOnSetter) => void>()
   })
 
   it("allows passing concise value to setValidateOn", ({ scope }) => {
-    const validateOn_0 = form.getValidateOn(scope)
-    const validateOn_0_concise = form.getValidateOn(scope, params._first)
-    const validateOn_0_verbose = form.getValidateOn(scope, params._second)
+    const validateOn0 = form.getValidateOn(scope)
+    const validateOn0Concise = form.getValidateOn(scope, params._first)
+    const validateOn0Verbose = form.getValidateOn(scope, params._second)
 
-    form.setValidateOn(validateOn_0_concise)
+    form.setValidateOn(validateOn0Concise)
 
-    expect(form.getValidateOn(scope)).toStrictEqual(validateOn_0)
-    expect(form.getValidateOn(scope, params._first)).toStrictEqual(
-      validateOn_0_concise,
-    )
-    expect(form.getValidateOn(scope, params._second)).toStrictEqual(
-      validateOn_0_verbose,
-    )
+    expect(form.getValidateOn(scope)).toStrictEqual(validateOn0)
+    expect(form.getValidateOn(scope, params._first)).toStrictEqual(validateOn0Concise)
+    expect(form.getValidateOn(scope, params._second)).toStrictEqual(validateOn0Verbose)
   })
 
   it("allows passing verbose value to setValidateOn", ({ scope }) => {
-    const validateOn_0 = form.getValidateOn(scope)
-    const validateOn_0_concise = form.getValidateOn(scope, params._first)
-    const validateOn_0_verbose = form.getValidateOn(scope, params._second)
+    const validateOn0 = form.getValidateOn(scope)
+    const validateOn0Concise = form.getValidateOn(scope, params._first)
+    const validateOn0Verbose = form.getValidateOn(scope, params._second)
 
-    form.setValidateOn(validateOn_0_verbose)
+    form.setValidateOn(validateOn0Verbose)
 
-    expect(form.getValidateOn(scope)).toStrictEqual(validateOn_0)
-    expect(form.getValidateOn(scope, params._first)).toStrictEqual(
-      validateOn_0_concise,
-    )
-    expect(form.getValidateOn(scope, params._second)).toStrictEqual(
-      validateOn_0_verbose,
-    )
+    expect(form.getValidateOn(scope)).toStrictEqual(validateOn0)
+    expect(form.getValidateOn(scope, params._first)).toStrictEqual(validateOn0Concise)
+    expect(form.getValidateOn(scope, params._second)).toStrictEqual(validateOn0Verbose)
   })
 
   it("allows passing verbose value in setValidateOn callback", ({ scope }) => {
-    const validateOn_0 = form.getValidateOn(scope)
-    const validateOn_0_concise = form.getValidateOn(scope, params._first)
-    const validateOn_0_verbose = form.getValidateOn(scope, params._second)
+    const validateOn0 = form.getValidateOn(scope)
+    const validateOn0Concise = form.getValidateOn(scope, params._first)
+    const validateOn0Verbose = form.getValidateOn(scope, params._second)
 
-    form.setValidateOn((verbose) => {
-      return verbose
-    })
+    form.setValidateOn((verbose) => verbose)
 
-    expect(form.getValidateOn(scope)).toStrictEqual(validateOn_0)
-    expect(form.getValidateOn(scope, params._first)).toStrictEqual(
-      validateOn_0_concise,
-    )
-    expect(form.getValidateOn(scope, params._second)).toStrictEqual(
-      validateOn_0_verbose,
-    )
+    expect(form.getValidateOn(scope)).toStrictEqual(validateOn0)
+    expect(form.getValidateOn(scope, params._first)).toStrictEqual(validateOn0Concise)
+    expect(form.getValidateOn(scope, params._second)).toStrictEqual(validateOn0Verbose)
   })
 
   it("ensures ImpulseFormSwitchOptions.validateOn type", () => {
@@ -301,9 +279,7 @@ describe("types", () => {
     >
 
     it("matches schema type for getValidateOn(scope, select?)", ({ scope }) => {
-      expectTypeOf(
-        parent.getValidateOn(scope),
-      ).toEqualTypeOf<ParentValidateOnSchema>()
+      expectTypeOf(parent.getValidateOn(scope)).toEqualTypeOf<ParentValidateOnSchema>()
 
       expectTypeOf(
         parent.getValidateOn(scope, params._first),
@@ -315,9 +291,7 @@ describe("types", () => {
     })
 
     it("matches setter type for setValidateOn(setter)", () => {
-      expectTypeOf(parent.setValidateOn).toEqualTypeOf<
-        (setter: ParentValidateOnSetter) => void
-      >()
+      expectTypeOf(parent.setValidateOn).toEqualTypeOf<(setter: ParentValidateOnSetter) => void>()
     })
 
     it("allows passing concise value to setValidateOn", ({ scope }) => {
@@ -744,9 +718,7 @@ describe.each([
     })
 
     describe("when active is valid", () => {
-      it("overrides only the target inactive branch validateOn", ({
-        scope,
-      }) => {
+      it("overrides only the target inactive branch validateOn", ({ scope }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("_2", {
             validateOn: "onChange",
@@ -1077,9 +1049,7 @@ describe("stable validateOn value", () => {
     )
 
     expect(form.getValidateOn(scope)).toBe(form.getValidateOn(scope))
-    expect(form.getValidateOn(scope, params._first)).toBe(
-      form.getValidateOn(scope, params._first),
-    )
+    expect(form.getValidateOn(scope, params._first)).toBe(form.getValidateOn(scope, params._first))
     expect(form.getValidateOn(scope, params._second)).toBe(
       form.getValidateOn(scope, params._second),
     )
@@ -1114,9 +1084,7 @@ describe("using recursive setter", () => {
     ),
   }
 
-  function setup(
-    options?: ImpulseFormSwitchOptions<typeof active, typeof branches>,
-  ) {
+  function setup(options?: ImpulseFormSwitchOptions<typeof active, typeof branches>) {
     return ImpulseFormSwitch(active, branches, options)
   }
 
@@ -1124,19 +1092,11 @@ describe("using recursive setter", () => {
     [
       string,
       (
-        input: ImpulseFormSwitchValidateOnSetter<
-          typeof active,
-          typeof branches
-        >,
+        input: ImpulseFormSwitchValidateOnSetter<typeof active, typeof branches>,
       ) => ImpulseFormSwitch<typeof active, typeof branches>,
     ]
   >([
-    [
-      "ImpulseFormSwitchOptions.validateOn",
-      (validateOn) => {
-        return setup({ validateOn })
-      },
-    ],
+    ["ImpulseFormSwitchOptions.validateOn", (validateOn) => setup({ validateOn })],
 
     [
       "ImpulseFormSwitch.setValidateOn",
@@ -1213,15 +1173,15 @@ describe("using recursive setter", () => {
             })
 
             return {
-              _1: ($_branches_1) => {
-                expectTypeOf($_branches_1).toEqualTypeOf<ValidateStrategy>()
-                expect($_branches_1).toBe("onInit")
+              _1: ($_branches1) => {
+                expectTypeOf($_branches1).toEqualTypeOf<ValidateStrategy>()
+                expect($_branches1).toBe("onInit")
 
                 return "onTouch"
               },
 
-              _2: ($_branches_2) => {
-                expectTypeOf($_branches_2).toEqualTypeOf<{
+              _2: ($_branches2) => {
+                expectTypeOf($_branches2).toEqualTypeOf<{
                   readonly active: ValidateStrategy
                   readonly branches: {
                     readonly _3: ValidateStrategy
@@ -1229,7 +1189,7 @@ describe("using recursive setter", () => {
                   }
                 }>()
 
-                expect($_branches_2).toStrictEqual({
+                expect($_branches2).toStrictEqual({
                   active: "onTouch",
                   branches: {
                     _3: "onSubmit",
@@ -1238,40 +1198,34 @@ describe("using recursive setter", () => {
                 })
 
                 return {
-                  active: ($_branches_2_active) => {
-                    expectTypeOf(
-                      $_branches_2_active,
-                    ).toEqualTypeOf<ValidateStrategy>()
-                    expect($_branches_2_active).toBe("onTouch")
+                  active: ($_branches2Active) => {
+                    expectTypeOf($_branches2Active).toEqualTypeOf<ValidateStrategy>()
+                    expect($_branches2Active).toBe("onTouch")
 
                     return "onInit"
                   },
 
-                  branches: ($_branches_2_branches) => {
-                    expectTypeOf($_branches_2_branches).toEqualTypeOf<{
+                  branches: ($_branches2Branches) => {
+                    expectTypeOf($_branches2Branches).toEqualTypeOf<{
                       readonly _3: ValidateStrategy
                       readonly _4: ValidateStrategy
                     }>()
 
-                    expect($_branches_2_branches).toStrictEqual({
+                    expect($_branches2Branches).toStrictEqual({
                       _3: "onSubmit",
                       _4: "onTouch",
                     })
 
                     return {
-                      _3: ($_branches_2_branches_3) => {
-                        expectTypeOf(
-                          $_branches_2_branches_3,
-                        ).toEqualTypeOf<ValidateStrategy>()
-                        expect($_branches_2_branches_3).toBe("onSubmit")
+                      _3: ($_branches2Branches3) => {
+                        expectTypeOf($_branches2Branches3).toEqualTypeOf<ValidateStrategy>()
+                        expect($_branches2Branches3).toBe("onSubmit")
 
                         return "onTouch"
                       },
-                      _4: ($_branches_2_branches_4) => {
-                        expectTypeOf(
-                          $_branches_2_branches_4,
-                        ).toEqualTypeOf<ValidateStrategy>()
-                        expect($_branches_2_branches_4).toBe("onTouch")
+                      _4: ($_branches2Branches4) => {
+                        expectTypeOf($_branches2Branches4).toEqualTypeOf<ValidateStrategy>()
+                        expect($_branches2Branches4).toBe("onTouch")
 
                         return "onChange"
                       },
@@ -1313,8 +1267,8 @@ describe("using recursive setter", () => {
 
             return {
               kind: "_2",
-              value: ($_branch_2) => {
-                expectTypeOf($_branch_2).toEqualTypeOf<{
+              value: ($_branch2) => {
+                expectTypeOf($_branch2).toEqualTypeOf<{
                   readonly active: ValidateStrategy
                   readonly branches: {
                     readonly _3: ValidateStrategy
@@ -1323,7 +1277,7 @@ describe("using recursive setter", () => {
                 }>()
 
                 // the value is set in $_branches_2 ^
-                expect($_branch_2).toStrictEqual({
+                expect($_branch2).toStrictEqual({
                   active: "onInit",
                   branches: {
                     _3: "onTouch",
@@ -1332,48 +1286,42 @@ describe("using recursive setter", () => {
                 })
 
                 return {
-                  active: ($_branch_2_active) => {
-                    expectTypeOf(
-                      $_branch_2_active,
-                    ).toEqualTypeOf<ValidateStrategy>()
-                    expect($_branch_2_active).toBe("onInit")
+                  active: ($_branch2Active) => {
+                    expectTypeOf($_branch2Active).toEqualTypeOf<ValidateStrategy>()
+                    expect($_branch2Active).toBe("onInit")
 
                     return "onChange"
                   },
 
-                  branches: ($_branch_2_branches) => {
-                    expectTypeOf($_branch_2_branches).toEqualTypeOf<{
+                  branches: ($_branch2Branches) => {
+                    expectTypeOf($_branch2Branches).toEqualTypeOf<{
                       readonly _3: ValidateStrategy
                       readonly _4: ValidateStrategy
                     }>()
 
-                    expect($_branch_2_branches).toStrictEqual({
+                    expect($_branch2Branches).toStrictEqual({
                       _3: "onTouch",
                       _4: "onChange",
                     })
 
                     return {
-                      _3: ($_branch_2_branches_3) => {
-                        expectTypeOf(
-                          $_branch_2_branches_3,
-                        ).toEqualTypeOf<ValidateStrategy>()
-                        expect($_branch_2_branches_3).toBe("onTouch")
+                      _3: ($_branch2Branches3) => {
+                        expectTypeOf($_branch2Branches3).toEqualTypeOf<ValidateStrategy>()
+                        expect($_branch2Branches3).toBe("onTouch")
 
                         return "onChange"
                       },
-                      _4: ($_branch_2_branches_4) => {
-                        expectTypeOf(
-                          $_branch_2_branches_4,
-                        ).toEqualTypeOf<ValidateStrategy>()
-                        expect($_branch_2_branches_4).toBe("onChange")
+                      _4: ($_branch2Branches4) => {
+                        expectTypeOf($_branch2Branches4).toEqualTypeOf<ValidateStrategy>()
+                        expect($_branch2Branches4).toBe("onChange")
 
                         return "onTouch"
                       },
                     }
                   },
 
-                  branch: ($_branch_2_branch) => {
-                    expectTypeOf($_branch_2_branch).toEqualTypeOf<
+                  branch: ($_branch2Branch) => {
+                    expectTypeOf($_branch2Branch).toEqualTypeOf<
                       | {
                           readonly kind: "_3"
                           readonly value: ValidateStrategy
@@ -1384,19 +1332,17 @@ describe("using recursive setter", () => {
                         }
                     >()
                     // the value is set in $_branch_2_branches_3 ^
-                    expect($_branch_2_branch).toStrictEqual({
+                    expect($_branch2Branch).toStrictEqual({
                       kind: "_3",
                       value: "onChange",
                     })
 
                     return {
                       kind: "_4",
-                      value: ($_branch_2_branch_4) => {
-                        expectTypeOf(
-                          $_branch_2_branch_4,
-                        ).toEqualTypeOf<ValidateStrategy>()
+                      value: ($_branch2Branch4) => {
+                        expectTypeOf($_branch2Branch4).toEqualTypeOf<ValidateStrategy>()
                         // the value is set in $_branch_2_branches ^
-                        expect($_branch_2_branch_4).toBe("onTouch")
+                        expect($_branch2Branch4).toBe("onTouch")
 
                         return "onInit"
                       },

@@ -7,9 +7,7 @@ import {
   type ValidateStrategy,
 } from "../../src"
 
-function setup(
-  options?: Partial<ImpulseFormUnitSchemaOptions<string, number>>,
-) {
+function setup(options?: Partial<ImpulseFormUnitSchemaOptions<string, number>>) {
   return ImpulseFormUnit("y", {
     schema: z.string().min(1).pipe(z.coerce.number()),
     ...options,
@@ -43,16 +41,11 @@ it("matches the type signature", () => {
   expectTypeOf(form.isValidated).toEqualTypeOf<{
     (scope: Scope): boolean
 
-    <TResult>(
-      scope: Scope,
-      select: (concise: boolean, verbose: boolean) => TResult,
-    ): TResult
+    <TResult>(scope: Scope, select: (concise: boolean, verbose: boolean) => TResult): TResult
   }>()
 })
 
-it("returns true on init without transform, validate, or schema", ({
-  scope,
-}) => {
+it("returns true on init without transform, validate, or schema", ({ scope }) => {
   const unit = ImpulseFormUnit("y")
 
   expect(unit.isValidated(scope)).toBe(true)
@@ -232,47 +225,46 @@ describe.each([
     })
   })
 
-  describe.each([
-    "onTouch",
-    "onChange",
-    "onSubmit",
-  ] satisfies Array<ValidateStrategy>)("when %s", (validateOn) => {
-    it("does not mark as validated on init", ({ scope }) => {
-      const value = setup({ validateOn })
+  describe.each(["onTouch", "onChange", "onSubmit"] satisfies Array<ValidateStrategy>)(
+    "when %s",
+    (validateOn) => {
+      it("does not mark as validated on init", ({ scope }) => {
+        const value = setup({ validateOn })
 
-      expect(isValidated(scope, value)).toBe(false)
-      expect(value.getError(scope)).toBeNull()
-    })
+        expect(isValidated(scope, value)).toBe(false)
+        expect(value.getError(scope)).toBeNull()
+      })
 
-    it("marks as validated on submit", async ({ scope }) => {
-      const value = setup({ validateOn })
+      it("marks as validated on submit", async ({ scope }) => {
+        const value = setup({ validateOn })
 
-      await value.submit()
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual([expect.any(String)])
-    })
+        await value.submit()
+        expect(isValidated(scope, value)).toBe(true)
+        expect(value.getError(scope)).toStrictEqual([expect.any(String)])
+      })
 
-    it("marks as validated when initialized with custom error", ({ scope }) => {
-      const value = setup({ validateOn, error: ["error"] })
+      it("marks as validated when initialized with custom error", ({ scope }) => {
+        const value = setup({ validateOn, error: ["error"] })
 
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual(["error"])
-    })
+        expect(isValidated(scope, value)).toBe(true)
+        expect(value.getError(scope)).toStrictEqual(["error"])
+      })
 
-    it("marks as validated when custom error set", ({ scope }) => {
-      const value = setup({ validateOn })
+      it("marks as validated when custom error set", ({ scope }) => {
+        const value = setup({ validateOn })
 
-      value.setError(["error"])
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual(["error"])
-    })
+        value.setError(["error"])
+        expect(isValidated(scope, value)).toBe(true)
+        expect(value.getError(scope)).toStrictEqual(["error"])
+      })
 
-    it("unmarks as validated when custom error is removed", ({ scope }) => {
-      const value = setup({ validateOn, error: ["error"] })
+      it("unmarks as validated when custom error is removed", ({ scope }) => {
+        const value = setup({ validateOn, error: ["error"] })
 
-      value.setError(null)
-      expect(isValidated(scope, value)).toBe(false)
-      expect(value.getError(scope)).toBeNull()
-    })
-  })
+        value.setError(null)
+        expect(isValidated(scope, value)).toBe(false)
+        expect(value.getError(scope)).toBeNull()
+      })
+    },
+  )
 })

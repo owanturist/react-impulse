@@ -26,9 +26,7 @@ describe("types", () => {
     expectTypeOf(form.isDirty(scope)).toEqualTypeOf<boolean>()
 
     expectTypeOf(form.isDirty(scope, params._first)).toEqualTypeOf<FlagSchema>()
-    expectTypeOf(
-      form.isDirty(scope, params._second),
-    ).toEqualTypeOf<FlagVerboseSchema>()
+    expectTypeOf(form.isDirty(scope, params._second)).toEqualTypeOf<FlagVerboseSchema>()
   })
 })
 

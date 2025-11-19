@@ -17,16 +17,7 @@ export function useCreateScope<T>(
     ]
   })
 
-  const select = useCallback(
-    (create: () => Scope) => transform(create()),
-    [transform],
-  )
+  const select = useCallback((create: () => Scope) => transform(create()), [transform])
 
-  return useSyncExternalStoreWithSelector(
-    connect,
-    selectCreate,
-    selectCreate,
-    select,
-    compare,
-  )
+  return useSyncExternalStoreWithSelector(connect, selectCreate, selectCreate, select, compare)
 }

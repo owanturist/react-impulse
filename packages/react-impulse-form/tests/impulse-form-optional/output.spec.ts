@@ -20,20 +20,13 @@ describe("types", () => {
   it("matches schema type for getOutput(scope, select?)", ({ scope }) => {
     expectTypeOf(form.getOutput(scope)).toEqualTypeOf<null | OutputSchema>()
 
-    expectTypeOf(
-      form.getOutput(scope, params._first),
-    ).toEqualTypeOf<null | OutputSchema>()
+    expectTypeOf(form.getOutput(scope, params._first)).toEqualTypeOf<null | OutputSchema>()
 
-    expectTypeOf(
-      form.getOutput(scope, params._second),
-    ).toEqualTypeOf<OutputVerboseSchema>()
+    expectTypeOf(form.getOutput(scope, params._second)).toEqualTypeOf<OutputVerboseSchema>()
   })
 
   describe("nested", () => {
-    const parent = ImpulseFormOptional(
-      ImpulseFormUnit(true, { schema: z.boolean() }),
-      form,
-    )
+    const parent = ImpulseFormOptional(ImpulseFormUnit(true, { schema: z.boolean() }), form)
 
     type ParentOutputSchema = undefined | number
 
@@ -46,9 +39,7 @@ describe("types", () => {
     }
 
     it("matches schema type for getOutput(scope, select?)", ({ scope }) => {
-      expectTypeOf(
-        parent.getOutput(scope),
-      ).toEqualTypeOf<null | ParentOutputSchema>()
+      expectTypeOf(parent.getOutput(scope)).toEqualTypeOf<null | ParentOutputSchema>()
 
       expectTypeOf(
         parent.getOutput(scope, params._first),
@@ -183,9 +174,7 @@ describe("getOutput after enabling/disabling", () => {
     })
   })
 
-  it("returns undefined after disabling when element is invalid", ({
-    scope,
-  }) => {
+  it("returns undefined after disabling when element is invalid", ({ scope }) => {
     const form = ImpulseFormOptional(
       ImpulseFormUnit(true, { schema: z.boolean() }),
       ImpulseFormUnit(0, { schema: z.number().min(1) }),
@@ -202,9 +191,7 @@ describe("getOutput after enabling/disabling", () => {
     })
   })
 
-  it("returns output after making element valid while enabled is true", ({
-    scope,
-  }) => {
+  it("returns output after making element valid while enabled is true", ({ scope }) => {
     const form = ImpulseFormOptional(
       ImpulseFormUnit(true, { schema: z.boolean() }),
       ImpulseFormUnit(0, { schema: z.number().min(1) }),
@@ -247,18 +234,16 @@ describe("stable output value", () => {
     const form = ImpulseFormOptional(
       ImpulseFormUnit(true, { schema: z.boolean() }),
       ImpulseFormUnit(1 as number, {
-        transform: (size) => {
-          return Array.from({ length: Math.max(1, size) }, (_, index) => index)
-        },
+        transform: (size) => Array.from({ length: Math.max(1, size) }, (_, index) => index),
       }),
     )
 
-    const output_0 = form.getOutput(scope)
+    const output0 = form.getOutput(scope)
 
     form.element.setInput(0)
-    const output_1 = form.getOutput(scope)
+    const output1 = form.getOutput(scope)
 
-    expect(output_0).not.toBe(output_1)
-    expect(output_0).toStrictEqual(output_1)
+    expect(output0).not.toBe(output1)
+    expect(output0).toStrictEqual(output1)
   })
 })

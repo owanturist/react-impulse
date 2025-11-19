@@ -12,9 +12,7 @@ describe("types", () => {
     }),
     {
       _1: ImpulseFormUnit(true, {
-        schema: z
-          .boolean()
-          .transform((value): string => (value ? "ok" : "not ok")),
+        schema: z.boolean().transform((value): string => (value ? "ok" : "not ok")),
       }),
       _2: ImpulseFormShape({
         _3: ImpulseFormUnit("name"),
@@ -56,13 +54,9 @@ describe("types", () => {
   it("matches schema type for getOutput(scope, select?)", ({ scope }) => {
     expectTypeOf(form.getOutput(scope)).toEqualTypeOf<null | OutputSchema>()
 
-    expectTypeOf(
-      form.getOutput(scope, params._first),
-    ).toEqualTypeOf<null | OutputSchema>()
+    expectTypeOf(form.getOutput(scope, params._first)).toEqualTypeOf<null | OutputSchema>()
 
-    expectTypeOf(
-      form.getOutput(scope, params._second),
-    ).toEqualTypeOf<OutputVerboseSchema>()
+    expectTypeOf(form.getOutput(scope, params._second)).toEqualTypeOf<OutputVerboseSchema>()
   })
 
   describe("nested", () => {
@@ -95,9 +89,7 @@ describe("types", () => {
     }
 
     it("matches schema type for getOutput(scope, select?)", ({ scope }) => {
-      expectTypeOf(
-        parent.getOutput(scope),
-      ).toEqualTypeOf<null | ParentOutputSchema>()
+      expectTypeOf(parent.getOutput(scope)).toEqualTypeOf<null | ParentOutputSchema>()
 
       expectTypeOf(
         parent.getOutput(scope, params._first),
@@ -410,52 +402,44 @@ describe("stable output value", () => {
     expect(form.getOutput(scope)).toBe(form.getOutput(scope))
   })
 
-  it("selects unequal output values when isOutputEqual is not specified", ({
-    scope,
-  }) => {
+  it("selects unequal output values when isOutputEqual is not specified", ({ scope }) => {
     const form = ImpulseFormSwitch(ImpulseFormUnit<"_1">("_1"), {
       _1: ImpulseFormUnit(1, {
-        transform: (size) => {
-          return Array.from({ length: Math.max(1, size) }, (_, index) => index)
-        },
+        transform: (size) => Array.from({ length: Math.max(1, size) }, (_, index) => index),
       }),
     })
 
-    const output_0 = form.getOutput(scope)
+    const output0 = form.getOutput(scope)
 
     form.setInput({
       branches: {
         _1: 0,
       },
     })
-    const output_1 = form.getOutput(scope)
+    const output1 = form.getOutput(scope)
 
-    expect(output_0).not.toBe(output_1)
-    expect(output_0).toStrictEqual(output_1)
+    expect(output0).not.toBe(output1)
+    expect(output0).toStrictEqual(output1)
   })
 
-  it("selects equal output values when isOutputEqual is specified", ({
-    scope,
-  }) => {
+  it("selects equal output values when isOutputEqual is specified", ({ scope }) => {
     const form = ImpulseFormSwitch(ImpulseFormUnit<"_1">("_1"), {
       _1: ImpulseFormUnit(1 as number, {
         isOutputEqual: isShallowArrayEqual,
-        transform: (size) => {
-          return Array.from({ length: Math.max(1, size) }, (_, index) => index)
-        },
+        transform: (size) => Array.from({ length: Math.max(1, size) }, (_, index) => index),
       }),
     })
 
-    const output_0 = form.getOutput(scope)
+    const output0 = form.getOutput(scope)
 
     form.setInput({
       branches: {
         _1: 0,
       },
     })
-    const output_1 = form.getOutput(scope)
+    const output1 = form.getOutput(scope)
 
-    expect(output_0).toBe(output_1)
-    expect(output_0).toStrictEqual(output_1)
+    expect(output0).toBe(output1)
+    expect(output0).toStrictEqual(output1)
   })
 })

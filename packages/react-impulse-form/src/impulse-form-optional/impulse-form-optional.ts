@@ -28,14 +28,8 @@ export interface ImpulseFormOptionalOptions<
   error?: ImpulseFormOptionalErrorSetter<TEnabled, TElement>
 }
 
-export function ImpulseFormOptional<
-  TEnabled extends ImpulseForm,
-  TElement extends ImpulseForm,
->(
-  enabled: IsEqualType<
-    GetImpulseFormParam<TEnabled, "output.schema">,
-    boolean
-  > extends true
+export function ImpulseFormOptional<TEnabled extends ImpulseForm, TElement extends ImpulseForm>(
+  enabled: IsEqualType<GetImpulseFormParam<TEnabled, "output.schema">, boolean> extends true
     ? TEnabled
     : never,
   element: TElement,

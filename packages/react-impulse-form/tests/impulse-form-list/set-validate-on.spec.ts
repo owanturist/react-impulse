@@ -1,10 +1,6 @@
 import type { Setter } from "~/tools/setter"
 
-import {
-  ImpulseFormList,
-  ImpulseFormUnit,
-  type ValidateStrategy,
-} from "../../src"
+import { ImpulseFormList, ImpulseFormUnit, type ValidateStrategy } from "../../src"
 
 it("matches the type definition", ({ scope }) => {
   const form = ImpulseFormList([ImpulseFormUnit(0)])
@@ -24,11 +20,7 @@ it("matches the type definition", ({ scope }) => {
 })
 
 it("changes all items", ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormUnit(0),
-    ImpulseFormUnit(1),
-    ImpulseFormUnit(2),
-  ])
+  const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1), ImpulseFormUnit(2)])
 
   form.setValidateOn("onInit")
   expect(form.getValidateOn(scope)).toBe("onInit")

@@ -23,15 +23,8 @@ export type ImpulseFormSwitchValidateOnSetter<
       ImpulseFormSwitchConciseSchema<
         GetImpulseFormParam<TKind, "validateOn.setter">,
         Setter<
-          | ValidateStrategy
-          | ImpulseFormSwitchBranchUnion<TKind, TBranches, "validateOn.setter">,
-          [
-            ImpulseFormSwitchBranchUnion<
-              TKind,
-              TBranches,
-              "validateOn.schema.verbose"
-            >,
-          ]
+          ValidateStrategy | ImpulseFormSwitchBranchUnion<TKind, TBranches, "validateOn.setter">,
+          [ImpulseFormSwitchBranchUnion<TKind, TBranches, "validateOn.schema.verbose">]
         >
       >
     >
@@ -42,15 +35,8 @@ export type ImpulseFormSwitchValidateOnSetter<
         GetImpulseFormParam<TKind, "validateOn.setter">,
         Setter<
           | ValidateStrategy
-          | Partial<
-              GetImpulseFormSwitchBranchesParam<TBranches, "validateOn.setter">
-            >,
-          [
-            GetImpulseFormSwitchBranchesParam<
-              TBranches,
-              "validateOn.schema.verbose"
-            >,
-          ]
+          | Partial<GetImpulseFormSwitchBranchesParam<TBranches, "validateOn.setter">>,
+          [GetImpulseFormSwitchBranchesParam<TBranches, "validateOn.schema.verbose">]
         >
       >
     >,

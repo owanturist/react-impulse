@@ -4,9 +4,7 @@ import type { GetImpulseFormShapeParam } from "./get-impulse-form-shape-param"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 import type { ImpulseFormShapeInput } from "./impulse-form-shape-input"
 
-export type ImpulseFormShapeInputSetter<
-  TFields extends ImpulseFormShapeFields,
-> = Setter<
+export type ImpulseFormShapeInputSetter<TFields extends ImpulseFormShapeFields> = Setter<
   Partial<GetImpulseFormShapeParam<TFields, "input.setter">>,
   [ImpulseFormShapeInput<TFields>, ImpulseFormShapeInput<TFields>]
 >

@@ -20,9 +20,7 @@ it("sets input", ({ scope }) => {
   value.setInput("2")
   expect(value.getInput(scope)).toBe("2")
 
-  expectTypeOf(value.setInput)
-    .parameter(0)
-    .toEqualTypeOf<Setter<string, [string, string]>>()
+  expectTypeOf(value.setInput).parameter(0).toEqualTypeOf<Setter<string, [string, string]>>()
 })
 
 it("updates input", ({ scope }) => {
@@ -32,18 +30,16 @@ it("updates input", ({ scope }) => {
   expect(value.getInput(scope)).toBe(2)
 })
 
-it("selects unequal input values when isInputEqual is not specified", ({
-  scope,
-}) => {
+it("selects unequal input values when isInputEqual is not specified", ({ scope }) => {
   const value = ImpulseFormUnit([0])
 
-  const input_0 = value.getInput(scope)
+  const input0 = value.getInput(scope)
 
   value.setInput([0])
-  const input_1 = value.getInput(scope)
+  const input1 = value.getInput(scope)
 
-  expect(input_0).not.toBe(input_1)
-  expect(input_0).toStrictEqual(input_1)
+  expect(input0).not.toBe(input1)
+  expect(input0).toStrictEqual(input1)
 })
 
 it("selects equal input values when isInputEqual is specified", ({ scope }) => {
@@ -51,11 +47,11 @@ it("selects equal input values when isInputEqual is specified", ({ scope }) => {
     isInputEqual: isShallowArrayEqual,
   })
 
-  const input_0 = value.getInput(scope)
+  const input0 = value.getInput(scope)
 
   value.setInput([0])
-  const input_1 = value.getInput(scope)
+  const input1 = value.getInput(scope)
 
-  expect(input_0).toBe(input_1)
-  expect(input_0).toStrictEqual(input_1)
+  expect(input0).toBe(input1)
+  expect(input0).toStrictEqual(input1)
 })

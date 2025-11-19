@@ -3,7 +3,7 @@ import { act, renderHook } from "@testing-library/react"
 import { Impulse, type Scope, useScoped } from "../../src"
 import { Counter, type WithImpulse, type WithSpy } from "../common"
 
-const factory = (scope: Scope, { impulse, spy }: WithImpulse & WithSpy) => {
+function factory(scope: Scope, { impulse, spy }: WithImpulse & WithSpy) {
   const value = impulse.getValue(scope)
 
   spy(value)
@@ -16,12 +16,9 @@ describe("factory without deps", () => {
     const spy = vi.fn()
     const impulse = Impulse({ count: 1 })
 
-    const { rerender } = renderHook(
-      (props) => useScoped((scope) => factory(scope, props)),
-      {
-        initialProps: { impulse, spy },
-      },
-    )
+    const { rerender } = renderHook((props) => useScoped((scope) => factory(scope, props)), {
+      initialProps: { impulse, spy },
+    })
 
     return { spy, impulse, rerender }
   }
@@ -62,8 +59,8 @@ describe("factory without deps", () => {
 describe.each([
   [
     "without",
-    ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useScoped(
+    ({ impulse, spy }: WithImpulse & WithSpy) =>
+      useScoped(
         (scope) => {
           const value = impulse.getValue(scope)
 
@@ -72,13 +69,12 @@ describe.each([
           return value
         },
         [impulse, spy],
-      )
-    },
+      ),
   ],
   [
     "with inline",
-    ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useScoped(
+    ({ impulse, spy }: WithImpulse & WithSpy) =>
+      useScoped(
         (scope) => {
           const value = impulse.getValue(scope)
 
@@ -90,13 +86,12 @@ describe.each([
         {
           compare: (prev, next) => Counter.compare(prev, next),
         },
-      )
-    },
+      ),
   ],
   [
     "with memoized",
-    ({ impulse, spy }: WithImpulse & WithSpy) => {
-      return useScoped(
+    ({ impulse, spy }: WithImpulse & WithSpy) =>
+      useScoped(
         (scope) => {
           const value = impulse.getValue(scope)
 
@@ -106,8 +101,7 @@ describe.each([
         },
         [impulse, spy],
         { compare: Counter.compare },
-      )
-    },
+      ),
   ],
 ])("factory with deps and %s comparator", (_, useCounter) => {
   const setup = () => {

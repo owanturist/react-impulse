@@ -104,18 +104,14 @@ it("selects touched", ({ scope }) => {
     shape.fields.third.fields.one.isTouched(scope, params._second),
   ).toEqualTypeOf<boolean>()
 
-  expectTypeOf(
-    shape.fields.third.isTouched(scope, params._first),
-  ).toEqualTypeOf<
+  expectTypeOf(shape.fields.third.isTouched(scope, params._first)).toEqualTypeOf<
     | boolean
     | {
         readonly one: boolean
         readonly two: boolean
       }
   >()
-  expectTypeOf(
-    shape.fields.third.isTouched(scope, params._second),
-  ).toEqualTypeOf<{
+  expectTypeOf(shape.fields.third.isTouched(scope, params._second)).toEqualTypeOf<{
     readonly one: boolean
     readonly two: boolean
   }>()
@@ -143,9 +139,7 @@ it("selects touched", ({ scope }) => {
   }>()
 })
 
-it("does not allow to specify isTouched custom type without selector", ({
-  scope,
-}) => {
+it("does not allow to specify isTouched custom type without selector", ({ scope }) => {
   const shape = ImpulseFormShape({
     first: ImpulseFormUnit(""),
     second: ImpulseFormUnit(0),

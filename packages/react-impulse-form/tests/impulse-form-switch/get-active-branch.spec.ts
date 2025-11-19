@@ -21,11 +21,7 @@ describe("types", () => {
   type ActiveBranch =
     | {
         readonly kind: "_1"
-        readonly value: ImpulseFormUnit<
-          boolean,
-          ReadonlyArray<string>,
-          "ok" | "not ok"
-        >
+        readonly value: ImpulseFormUnit<boolean, ReadonlyArray<string>, "ok" | "not ok">
       }
     | {
         readonly kind: "_2"
@@ -36,8 +32,6 @@ describe("types", () => {
       }
 
   it("matches schema type for getActiveBranch(scope)", () => {
-    expectTypeOf(form.getActiveBranch).returns.toEqualTypeOf<
-      undefined | ActiveBranch
-    >()
+    expectTypeOf(form.getActiveBranch).returns.toEqualTypeOf<undefined | ActiveBranch>()
   })
 })

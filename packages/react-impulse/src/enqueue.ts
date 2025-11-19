@@ -20,9 +20,7 @@ class ScopeEmitQueue {
    *
    * @param emitters - The captured set of weak references to scope emitters awaiting processing.
    */
-  public readonly _push = (
-    emitters: ReadonlySet<WeakRef<ScopeEmitter>>,
-  ): void => {
+  public readonly _push = (emitters: ReadonlySet<WeakRef<ScopeEmitter>>): void => {
     /**
      * Calling the {@link ScopeEmitter._emit} might cause the same Impulse (host of the `emitters`)
      * to be scheduled again for the same scope (DerivedImpulse when source sets the comparably equal value).
@@ -65,7 +63,7 @@ class ScopeEmitQueue {
     }
   }
 }
-let QUEUE: null | ScopeEmitQueue = null
+let Queue: null | ScopeEmitQueue = null
 /**
  * Runs a queue-backed execution block, ensuring that nested enqueue calls share
  * the same scope emit queue and that queued emitters are processed exactly once.
@@ -77,32 +75,32 @@ let QUEUE: null | ScopeEmitQueue = null
  */
 
 export function enqueue<TResult>(
-  execute: (
-    push: (emitters: ReadonlySet<WeakRef<ScopeEmitter>>) => void,
-  ) => TResult,
+  execute: (push: (emitters: ReadonlySet<WeakRef<ScopeEmitter>>) => void) => TResult,
 ): TResult {
   // Continue the execution if the queue is already initialized.
-  if (QUEUE) {
-    return execute(QUEUE._push)
+  if (Queue) {
+    return execute(Queue._push)
   }
 
   // Initialize the queue and start the execution sequence.
-  const queue = (QUEUE = new ScopeEmitQueue())
+  Queue = new ScopeEmitQueue()
 
   /**
    * The execution might lead to other {@link enqueue} calls,
    * so they all will collect the emitters in the same queue
    * ensuring that an emitter is emitted only once.
    */
-  const result = execute(queue._push)
+  const result = execute(Queue._push)
+
+  const tmp = Queue
 
   /**
    * Drop the global queue before processing to allow nested scheduling,
    * when {@link ScopeEmitter._emit} enqueues new emitters for the next tick.
    */
-  QUEUE = null
+  Queue = null
 
-  queue._process()
+  tmp._process()
 
   return result
 }
