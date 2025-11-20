@@ -11,9 +11,7 @@ describe("types", () => {
     }),
     {
       _1: ImpulseFormUnit(true, {
-        schema: z
-          .boolean()
-          .transform((value): string => (value ? "ok" : "not ok")),
+        schema: z.boolean().transform((value): string => (value ? "ok" : "not ok")),
       }),
       _2: ImpulseFormShape({
         _3: ImpulseFormUnit("name"),
@@ -57,13 +55,9 @@ describe("types", () => {
   it("matches schema type for isDirty(scope, select?)", ({ scope }) => {
     expectTypeOf(form.isDirty(scope)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(
-      form.isDirty(scope, params._first),
-    ).toEqualTypeOf<IsDirtySchema>()
+    expectTypeOf(form.isDirty(scope, params._first)).toEqualTypeOf<IsDirtySchema>()
 
-    expectTypeOf(
-      form.isDirty(scope, params._second),
-    ).toEqualTypeOf<IsDirtyVerboseSchema>()
+    expectTypeOf(form.isDirty(scope, params._second)).toEqualTypeOf<IsDirtyVerboseSchema>()
   })
 
   describe("nested", () => {
@@ -99,9 +93,7 @@ describe("types", () => {
     it("matches schema type for isDirty(scope, select?)", ({ scope }) => {
       expectTypeOf(parent.isDirty(scope)).toEqualTypeOf<boolean>()
 
-      expectTypeOf(
-        parent.isDirty(scope, params._first),
-      ).toEqualTypeOf<ParentIsDirtySchema>()
+      expectTypeOf(parent.isDirty(scope, params._first)).toEqualTypeOf<ParentIsDirtySchema>()
 
       expectTypeOf(
         parent.isDirty(scope, params._second),
@@ -221,9 +213,7 @@ it("returns truthy for initially dirty active", ({ scope }) => {
   })
 })
 
-it("returns true after switching from pristine to dirty branch", ({
-  scope,
-}) => {
+it("returns true after switching from pristine to dirty branch", ({ scope }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("_1", {
       schema: z.enum(["_1", "_2"]),
@@ -261,9 +251,7 @@ it("returns true after switching from pristine to dirty branch", ({
   })
 })
 
-it("returns truthy after switching from dirty to pristine branch", ({
-  scope,
-}) => {
+it("returns truthy after switching from dirty to pristine branch", ({ scope }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("_2", {
       schema: z.enum(["_1", "_2"]),
@@ -386,13 +374,9 @@ describe("stable dirty value", () => {
     expect(form.isDirty(scope)).toBe(form.isDirty(scope))
 
     expect(form.isDirty(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.isDirty(scope, params._first)).toBe(
-      form.isDirty(scope, params._first),
-    )
+    expect(form.isDirty(scope, params._first)).toBe(form.isDirty(scope, params._first))
 
     expect(form.isDirty(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.isDirty(scope, params._second)).toBe(
-      form.isDirty(scope, params._second),
-    )
+    expect(form.isDirty(scope, params._second)).toBe(form.isDirty(scope, params._second))
   })
 })

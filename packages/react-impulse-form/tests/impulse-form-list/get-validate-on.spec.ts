@@ -18,10 +18,7 @@ function setup<TError>(
   return ImpulseFormList(elements, options)
 }
 
-function setupElement(
-  initial: number,
-  options?: Partial<ImpulseFormUnitSchemaOptions<number>>,
-) {
+function setupElement(initial: number, options?: Partial<ImpulseFormUnitSchemaOptions<number>>) {
   return ImpulseFormUnit(initial, {
     schema: z.number(),
     ...options,
@@ -61,9 +58,7 @@ it("returns 'onTouch' for empty list", ({ scope }) => {
   expect(form.getValidateOn(scope, params._second)).toStrictEqual([])
 })
 
-it("returns verbose when elements use more than a single strategy", ({
-  scope,
-}) => {
+it("returns verbose when elements use more than a single strategy", ({ scope }) => {
   const form = setup([
     setupElement(0, { validateOn: "onInit" }),
     setupElement(1),

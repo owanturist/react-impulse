@@ -18,21 +18,15 @@ export class ImpulseFormSwitch<
 
   public readonly branches: Readonly<TBranches>
 
-  public constructor(
-    public readonly _state: ImpulseFormSwitchState<TKind, TBranches>,
-  ) {
+  public constructor(public readonly _state: ImpulseFormSwitchState<TKind, TBranches>) {
     super()
 
     this.active = _state._active._host() as TKind
 
-    this.branches = mapValues(_state._branches, ({ _host }) => {
-      return _host()
-    }) as Readonly<TBranches>
+    this.branches = mapValues(_state._branches, ({ _host }) => _host()) as Readonly<TBranches>
   }
 
-  public getActiveBranch(
-    scope: Scope,
-  ): undefined | ImpulseFormSwitchActiveBranch<TBranches> {
+  public getActiveBranch(scope: Scope): undefined | ImpulseFormSwitchActiveBranch<TBranches> {
     const result = this._state._getActiveBranch(scope)
 
     if (!result) {

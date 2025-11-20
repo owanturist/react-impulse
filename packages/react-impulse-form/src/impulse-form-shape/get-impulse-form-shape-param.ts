@@ -1,15 +1,12 @@
 import type { OmitValues } from "~/tools/omit-values"
 
-import type { ImpulseFormParams } from "../impulse-form"
-import type { GetImpulseFormParam } from "../impulse-form"
+import type { GetImpulseFormParam, ImpulseFormParams } from "../impulse-form"
 
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 
-type FallbackParamWhenNever<
-  TKey extends keyof ImpulseFormParams,
-  TFallback,
+type FallbackParamWhenNever<TKey extends keyof ImpulseFormParams, TFallback, TParam> = [
   TParam,
-> = [TParam] extends [never]
+] extends [never]
   ? TKey extends "input.schema" | "output.schema" | "output.schema.verbose"
     ? TFallback
     : never

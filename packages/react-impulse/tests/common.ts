@@ -7,19 +7,11 @@ afterEach(() => {
 export abstract class Counter {
   public abstract readonly count: number
 
-  public static compare = vi.fn((prev: Counter, next: Counter) => {
-    return prev.count === next.count
-  })
+  public static compare = vi.fn((prev: Counter, next: Counter) => prev.count === next.count)
 
-  public static merge(
-    left: Counter,
-    right: Counter,
-    ...rest: Array<Counter>
-  ): Counter {
+  public static merge(left: Counter, right: Counter, ...rest: Array<Counter>): Counter {
     return {
-      count: [left, right, ...rest]
-        .map(Counter.getCount)
-        .reduce((acc, x) => acc + x, 0),
+      count: [left, right, ...rest].map(Counter.getCount).reduce((acc, x) => acc + x, 0),
     }
   }
 

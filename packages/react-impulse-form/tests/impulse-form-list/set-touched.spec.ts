@@ -20,11 +20,7 @@ it("matches the type definition", ({ scope }) => {
 })
 
 it("touches all items", ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormUnit(0),
-    ImpulseFormUnit(1),
-    ImpulseFormUnit(2),
-  ])
+  const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1), ImpulseFormUnit(2)])
 
   form.setTouched(true)
   expect(form.isTouched(scope)).toBe(true)

@@ -13,8 +13,8 @@ it("selects initial", ({ scope }) => {
     fourth: ["anything"],
   })
 
-  const initial_0 = shape.getInitial(scope)
-  expect(initial_0).toStrictEqual({
+  const initial0 = shape.getInitial(scope)
+  expect(initial0).toStrictEqual({
     first: "2",
     second: 0,
     third: {
@@ -24,7 +24,7 @@ it("selects initial", ({ scope }) => {
     fourth: ["anything"],
   })
 
-  expectTypeOf(initial_0).toEqualTypeOf<{
+  expectTypeOf(initial0).toEqualTypeOf<{
     readonly first: string
     readonly second: number
     readonly third: {
@@ -42,8 +42,8 @@ it("selects initial", ({ scope }) => {
     first: "12",
   })
 
-  const initial_1 = shape.getInitial(scope)
-  expect(initial_1).toStrictEqual({
+  const initial1 = shape.getInitial(scope)
+  expect(initial1).toStrictEqual({
     first: "12",
     second: 0,
     third: {
@@ -58,8 +58,8 @@ it("selects initial", ({ scope }) => {
       two: ["1", "12"],
     },
   })
-  const initial_2 = shape.getInitial(scope)
-  expect(initial_2).toStrictEqual({
+  const initial2 = shape.getInitial(scope)
+  expect(initial2).toStrictEqual({
     first: "12",
     second: 0,
     third: {
@@ -116,8 +116,8 @@ it("persists unchanged initial fields between changes", ({ scope }) => {
     },
   )
 
-  const initial_0 = shape.getInitial(scope)
-  expect(initial_0).toStrictEqual({
+  const initial0 = shape.getInitial(scope)
+  expect(initial0).toStrictEqual({
     first: {
       _1: "1_1",
       _2: "2",
@@ -134,8 +134,8 @@ it("persists unchanged initial fields between changes", ({ scope }) => {
     },
   })
 
-  const initial_1 = shape.getInitial(scope)
-  expect(initial_1).toStrictEqual({
+  const initial1 = shape.getInitial(scope)
+  expect(initial1).toStrictEqual({
     first: {
       _1: "1_1",
       _2: "2",
@@ -145,45 +145,41 @@ it("persists unchanged initial fields between changes", ({ scope }) => {
       _4: "4",
     },
   })
-  expect(initial_1).not.toBe(initial_0)
-  expect(initial_1.first).toBe(initial_0.first)
-  expect(initial_1.second).not.toBe(initial_0.second)
+  expect(initial1).not.toBe(initial0)
+  expect(initial1.first).toBe(initial0.first)
+  expect(initial1.second).not.toBe(initial0.second)
 })
 
-it("selects unequal initial values when isInputEqual is not specified", ({
-  scope,
-}) => {
+it("selects unequal initial values when isInputEqual is not specified", ({ scope }) => {
   const shape = ImpulseFormShape({
     field: ImpulseFormUnit([0]),
   })
 
-  const initial_0 = shape.getInitial(scope)
+  const initial0 = shape.getInitial(scope)
 
   shape.setInitial({
     field: [0],
   })
-  const initial_1 = shape.getInitial(scope)
+  const initial1 = shape.getInitial(scope)
 
-  expect(initial_0).not.toBe(initial_1)
-  expect(initial_0).toStrictEqual(initial_1)
+  expect(initial0).not.toBe(initial1)
+  expect(initial0).toStrictEqual(initial1)
 })
 
-it("selects equal initial values when isInputEqual is specified", ({
-  scope,
-}) => {
+it("selects equal initial values when isInputEqual is specified", ({ scope }) => {
   const shape = ImpulseFormShape({
     field: ImpulseFormUnit([0], {
       isInputEqual: isShallowArrayEqual,
     }),
   })
 
-  const initial_0 = shape.getInitial(scope)
+  const initial0 = shape.getInitial(scope)
 
   shape.setInitial({
     field: [0],
   })
-  const initial_1 = shape.getInitial(scope)
+  const initial1 = shape.getInitial(scope)
 
-  expect(initial_0).toBe(initial_1)
-  expect(initial_0).toStrictEqual(initial_1)
+  expect(initial0).toBe(initial1)
+  expect(initial0).toStrictEqual(initial1)
 })

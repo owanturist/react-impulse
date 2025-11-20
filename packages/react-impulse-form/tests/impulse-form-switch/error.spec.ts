@@ -140,13 +140,9 @@ describe("types", () => {
   it("matches schema type for getError(scope, select?)", ({ scope }) => {
     expectTypeOf(form.getError(scope)).toEqualTypeOf<ErrorSchema>()
 
-    expectTypeOf(
-      form.getError(scope, params._first),
-    ).toEqualTypeOf<ErrorSchema>()
+    expectTypeOf(form.getError(scope, params._first)).toEqualTypeOf<ErrorSchema>()
 
-    expectTypeOf(
-      form.getError(scope, params._second),
-    ).toEqualTypeOf<ErrorVerboseSchema>()
+    expectTypeOf(form.getError(scope, params._second)).toEqualTypeOf<ErrorVerboseSchema>()
   })
 
   it("matches setter type for setError(setter)", () => {
@@ -154,39 +150,37 @@ describe("types", () => {
   })
 
   it("allows passing concise value to setError", ({ scope }) => {
-    const error_0 = form.getError(scope)
-    const error_0_concise = form.getError(scope, params._first)
+    const error0 = form.getError(scope)
+    const error0Concise = form.getError(scope, params._first)
 
-    form.setError(error_0_concise)
+    form.setError(error0Concise)
 
-    expect(form.getError(scope)).toStrictEqual(error_0)
-    expect(form.getError(scope, params._first)).toStrictEqual(error_0_concise)
+    expect(form.getError(scope)).toStrictEqual(error0)
+    expect(form.getError(scope, params._first)).toStrictEqual(error0Concise)
   })
 
   it("allows passing verbose value to setError", ({ scope }) => {
-    const error_0 = form.getError(scope)
-    const error_0_concise = form.getError(scope, params._first)
-    const error_0_verbose = form.getError(scope, params._second)
+    const error0 = form.getError(scope)
+    const error0Concise = form.getError(scope, params._first)
+    const error0Verbose = form.getError(scope, params._second)
 
-    form.setError(error_0_verbose)
+    form.setError(error0Verbose)
 
-    expect(form.getError(scope)).toStrictEqual(error_0)
-    expect(form.getError(scope, params._first)).toStrictEqual(error_0_concise)
-    expect(form.getError(scope, params._second)).toStrictEqual(error_0_verbose)
+    expect(form.getError(scope)).toStrictEqual(error0)
+    expect(form.getError(scope, params._first)).toStrictEqual(error0Concise)
+    expect(form.getError(scope, params._second)).toStrictEqual(error0Verbose)
   })
 
   it("allows passing verbose value in setError callback", ({ scope }) => {
-    const error_0 = form.getError(scope)
-    const error_0_concise = form.getError(scope, params._first)
-    const error_0_verbose = form.getError(scope, params._second)
+    const error0 = form.getError(scope)
+    const error0Concise = form.getError(scope, params._first)
+    const error0Verbose = form.getError(scope, params._second)
 
-    form.setError((verbose) => {
-      return verbose
-    })
+    form.setError((verbose) => verbose)
 
-    expect(form.getError(scope)).toStrictEqual(error_0)
-    expect(form.getError(scope, params._first)).toStrictEqual(error_0_concise)
-    expect(form.getError(scope, params._second)).toStrictEqual(error_0_verbose)
+    expect(form.getError(scope)).toStrictEqual(error0)
+    expect(form.getError(scope, params._first)).toStrictEqual(error0Concise)
+    expect(form.getError(scope, params._second)).toStrictEqual(error0Verbose)
   })
 
   it("ensures ImpulseFormSwitchOptions.error type", () => {
@@ -288,19 +282,13 @@ describe("types", () => {
     it("matches schema type for getError(scope, select?)", ({ scope }) => {
       expectTypeOf(parent.getError(scope)).toEqualTypeOf<ParentErrorSchema>()
 
-      expectTypeOf(
-        parent.getError(scope, params._first),
-      ).toEqualTypeOf<ParentErrorSchema>()
+      expectTypeOf(parent.getError(scope, params._first)).toEqualTypeOf<ParentErrorSchema>()
 
-      expectTypeOf(
-        parent.getError(scope, params._second),
-      ).toEqualTypeOf<ParentErrorVerboseSchema>()
+      expectTypeOf(parent.getError(scope, params._second)).toEqualTypeOf<ParentErrorVerboseSchema>()
     })
 
     it("matches setter type for setError(setter)", () => {
-      expectTypeOf(parent.setError).toEqualTypeOf<
-        (setter: ParentErrorSetter) => void
-      >()
+      expectTypeOf(parent.setError).toEqualTypeOf<(setter: ParentErrorSetter) => void>()
     })
 
     it("allows passing concise value to setError", ({ scope }) => {
@@ -336,104 +324,100 @@ describe("types", () => {
   })
 })
 
-describe.each([
-  "onTouch" as const,
-  "onChange" as const,
-  "onSubmit" as const,
-  "onInit" as const,
-])("when any validateOn (%s)", (validateOn) => {
-  it("selects only the active's error when it has an error", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_1", {
-        schema: z.enum(["_1"]),
-        error: ["custom"],
-      }),
-      {
-        _1: ImpulseFormUnit(0, {
-          error: 123,
+describe.each(["onTouch" as const, "onChange" as const, "onSubmit" as const, "onInit" as const])(
+  "when any validateOn (%s)",
+  (validateOn) => {
+    it("selects only the active's error when it has an error", ({ scope }) => {
+      const form = ImpulseFormSwitch(
+        ImpulseFormUnit("_1", {
+          schema: z.enum(["_1"]),
+          error: ["custom"],
         }),
-      },
-      {
-        validateOn,
-      },
-    )
-
-    const concise = {
-      active: ["custom"],
-      branch: null,
-    }
-
-    expect(form.getError(scope)).toStrictEqual(concise)
-    expect(form.getError(scope, params._first)).toStrictEqual(concise)
-    expect(form.getError(scope, params._second)).toStrictEqual({
-      active: ["custom"],
-      branches: {
-        _1: 123,
-      },
-    })
-  })
-
-  it("selects the custom error regardless of the validate strategy", ({
-    scope,
-  }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_2", {
-        schema: z.enum(["_1", "_2"]),
-      }),
-      {
-        _1: ImpulseFormUnit(0, {
-          error: 123,
-        }),
-        _2: ImpulseFormSwitch(
-          ImpulseFormUnit("_3", {
-            schema: z.enum(["_3", "_4"]),
+        {
+          _1: ImpulseFormUnit(0, {
+            error: 123,
           }),
-          {
-            _3: ImpulseFormUnit("0", {
-              error: true,
-            }),
-            _4: ImpulseFormUnit(1, {
-              error: ["one", "two"],
-            }),
-          },
-        ),
-      },
-      {
-        validateOn,
-      },
-    )
-
-    const concise = {
-      active: null,
-      branch: {
-        kind: "_2",
-        value: {
-          active: null,
-          branch: {
-            kind: "_3",
-            value: true,
-          },
         },
-      },
-    }
-
-    expect(form.getError(scope)).toStrictEqual(concise)
-    expect(form.getError(scope, params._first)).toStrictEqual(concise)
-    expect(form.getError(scope, params._second)).toStrictEqual({
-      active: null,
-      branches: {
-        _1: 123,
-        _2: {
-          active: null,
-          branches: {
-            _3: true,
-            _4: ["one", "two"],
-          },
+        {
+          validateOn,
         },
-      },
+      )
+
+      const concise = {
+        active: ["custom"],
+        branch: null,
+      }
+
+      expect(form.getError(scope)).toStrictEqual(concise)
+      expect(form.getError(scope, params._first)).toStrictEqual(concise)
+      expect(form.getError(scope, params._second)).toStrictEqual({
+        active: ["custom"],
+        branches: {
+          _1: 123,
+        },
+      })
     })
-  })
-})
+
+    it("selects the custom error regardless of the validate strategy", ({ scope }) => {
+      const form = ImpulseFormSwitch(
+        ImpulseFormUnit("_2", {
+          schema: z.enum(["_1", "_2"]),
+        }),
+        {
+          _1: ImpulseFormUnit(0, {
+            error: 123,
+          }),
+          _2: ImpulseFormSwitch(
+            ImpulseFormUnit("_3", {
+              schema: z.enum(["_3", "_4"]),
+            }),
+            {
+              _3: ImpulseFormUnit("0", {
+                error: true,
+              }),
+              _4: ImpulseFormUnit(1, {
+                error: ["one", "two"],
+              }),
+            },
+          ),
+        },
+        {
+          validateOn,
+        },
+      )
+
+      const concise = {
+        active: null,
+        branch: {
+          kind: "_2",
+          value: {
+            active: null,
+            branch: {
+              kind: "_3",
+              value: true,
+            },
+          },
+        },
+      }
+
+      expect(form.getError(scope)).toStrictEqual(concise)
+      expect(form.getError(scope, params._first)).toStrictEqual(concise)
+      expect(form.getError(scope, params._second)).toStrictEqual({
+        active: null,
+        branches: {
+          _1: 123,
+          _2: {
+            active: null,
+            branches: {
+              _3: true,
+              _4: ["one", "two"],
+            },
+          },
+        },
+      })
+    })
+  },
+)
 
 describe.each(["onTouch" as const, "onChange" as const, "onSubmit" as const])(
   "when runtime validateOn (%s)",
@@ -634,9 +618,7 @@ describe("when after trigger", () => {
     ],
   ])("when validateOn=%s", (validateOn, verbose, trigger) => {
     describe("when active is valid", () => {
-      it("selects active's branch validating errors when units become dirty", async ({
-        scope,
-      }) => {
+      it("selects active's branch validating errors when units become dirty", async ({ scope }) => {
         const form = setup(validateOn)
 
         await trigger?.(form)
@@ -1447,14 +1429,10 @@ describe("stable error value", () => {
     expect(form.getError(scope)).toBe(form.getError(scope))
 
     expect(form.getError(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.getError(scope, params._first)).toBe(
-      form.getError(scope, params._first),
-    )
+    expect(form.getError(scope, params._first)).toBe(form.getError(scope, params._first))
 
     expect(form.getError(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.getError(scope, params._second)).toBe(
-      form.getError(scope, params._second),
-    )
+    expect(form.getError(scope, params._second)).toBe(form.getError(scope, params._second))
   })
 })
 
@@ -1491,9 +1469,7 @@ describe("using recursive setter", () => {
     ),
   }
 
-  function setup(
-    options?: ImpulseFormSwitchOptions<typeof active, typeof branches>,
-  ) {
+  function setup(options?: ImpulseFormSwitchOptions<typeof active, typeof branches>) {
     return ImpulseFormSwitch(active, branches, options)
   }
 
@@ -1505,12 +1481,7 @@ describe("using recursive setter", () => {
       ) => ImpulseFormSwitch<typeof active, typeof branches>,
     ]
   >([
-    [
-      "ImpulseFormSwitchOptions.error",
-      (error) => {
-        return setup({ error })
-      },
-    ],
+    ["ImpulseFormSwitchOptions.error", (error) => setup({ error })],
 
     [
       "ImpulseFormSwitch.setError",
@@ -1587,15 +1558,15 @@ describe("using recursive setter", () => {
             })
 
             return {
-              _1: ($_branches_1) => {
-                expectTypeOf($_branches_1).toEqualTypeOf<null | string>()
-                expect($_branches_1).toBeNull()
+              _1: ($_branches1) => {
+                expectTypeOf($_branches1).toEqualTypeOf<null | string>()
+                expect($_branches1).toBeNull()
 
                 return "Too short"
               },
 
-              _2: ($_branches_2) => {
-                expectTypeOf($_branches_2).toEqualTypeOf<{
+              _2: ($_branches2) => {
+                expectTypeOf($_branches2).toEqualTypeOf<{
                   readonly active: null | ReadonlyArray<string>
                   readonly branches: {
                     readonly _3: null | boolean
@@ -1603,7 +1574,7 @@ describe("using recursive setter", () => {
                   }
                 }>()
 
-                expect($_branches_2).toStrictEqual({
+                expect($_branches2).toStrictEqual({
                   active: null,
                   branches: {
                     _3: true,
@@ -1612,40 +1583,34 @@ describe("using recursive setter", () => {
                 })
 
                 return {
-                  active: ($_branches_2_active) => {
-                    expectTypeOf(
-                      $_branches_2_active,
-                    ).toEqualTypeOf<null | ReadonlyArray<string>>()
-                    expect($_branches_2_active).toBeNull()
+                  active: ($_branches2Active) => {
+                    expectTypeOf($_branches2Active).toEqualTypeOf<null | ReadonlyArray<string>>()
+                    expect($_branches2Active).toBeNull()
 
                     return null
                   },
 
-                  branches: ($_branches_2_branches) => {
-                    expectTypeOf($_branches_2_branches).toEqualTypeOf<{
+                  branches: ($_branches2Branches) => {
+                    expectTypeOf($_branches2Branches).toEqualTypeOf<{
                       readonly _3: null | boolean
                       readonly _4: null | number
                     }>()
 
-                    expect($_branches_2_branches).toStrictEqual({
+                    expect($_branches2Branches).toStrictEqual({
                       _3: true,
                       _4: null,
                     })
 
                     return {
-                      _3: ($_branches_2_branches_3) => {
-                        expectTypeOf($_branches_2_branches_3).toEqualTypeOf<
-                          null | boolean
-                        >()
-                        expect($_branches_2_branches_3).toBe(true)
+                      _3: ($_branches2Branches3) => {
+                        expectTypeOf($_branches2Branches3).toEqualTypeOf<null | boolean>()
+                        expect($_branches2Branches3).toBe(true)
 
                         return false
                       },
-                      _4: ($_branches_2_branches_4) => {
-                        expectTypeOf($_branches_2_branches_4).toEqualTypeOf<
-                          null | number
-                        >()
-                        expect($_branches_2_branches_4).toBeNull()
+                      _4: ($_branches2Branches4) => {
+                        expectTypeOf($_branches2Branches4).toEqualTypeOf<null | number>()
+                        expect($_branches2Branches4).toBeNull()
 
                         return 0
                       },
@@ -1687,8 +1652,8 @@ describe("using recursive setter", () => {
 
             return {
               kind: "_2",
-              value: ($_branch_2) => {
-                expectTypeOf($_branch_2).toEqualTypeOf<{
+              value: ($_branch2) => {
+                expectTypeOf($_branch2).toEqualTypeOf<{
                   readonly active: null | ReadonlyArray<string>
                   readonly branches: {
                     readonly _3: null | boolean
@@ -1696,7 +1661,7 @@ describe("using recursive setter", () => {
                   }
                 }>()
 
-                expect($_branch_2).toStrictEqual({
+                expect($_branch2).toStrictEqual({
                   active: null,
                   branches: {
                     _3: false,
@@ -1705,48 +1670,42 @@ describe("using recursive setter", () => {
                 })
 
                 return {
-                  active: ($_branch_2_active) => {
-                    expectTypeOf(
-                      $_branch_2_active,
-                    ).toEqualTypeOf<null | ReadonlyArray<string>>()
-                    expect($_branch_2_active).toBeNull()
+                  active: ($_branch2Active) => {
+                    expectTypeOf($_branch2Active).toEqualTypeOf<null | ReadonlyArray<string>>()
+                    expect($_branch2Active).toBeNull()
 
                     return null
                   },
 
-                  branches: ($_branch_2_branches) => {
-                    expectTypeOf($_branch_2_branches).toEqualTypeOf<{
+                  branches: ($_branch2Branches) => {
+                    expectTypeOf($_branch2Branches).toEqualTypeOf<{
                       readonly _3: null | boolean
                       readonly _4: null | number
                     }>()
 
-                    expect($_branch_2_branches).toStrictEqual({
+                    expect($_branch2Branches).toStrictEqual({
                       _3: false,
                       _4: 0,
                     })
 
                     return {
-                      _3: ($_branch_2_branches_3) => {
-                        expectTypeOf($_branch_2_branches_3).toEqualTypeOf<
-                          null | boolean
-                        >()
-                        expect($_branch_2_branches_3).toBe(false)
+                      _3: ($_branch2Branches3) => {
+                        expectTypeOf($_branch2Branches3).toEqualTypeOf<null | boolean>()
+                        expect($_branch2Branches3).toBe(false)
 
                         return true
                       },
-                      _4: ($_branch_2_branches_4) => {
-                        expectTypeOf($_branch_2_branches_4).toEqualTypeOf<
-                          null | number
-                        >()
-                        expect($_branch_2_branches_4).toBe(0)
+                      _4: ($_branch2Branches4) => {
+                        expectTypeOf($_branch2Branches4).toEqualTypeOf<null | number>()
+                        expect($_branch2Branches4).toBe(0)
 
                         return 1
                       },
                     }
                   },
 
-                  branch: ($_branch_2_branch) => {
-                    expectTypeOf($_branch_2_branch).toEqualTypeOf<
+                  branch: ($_branch2Branch) => {
+                    expectTypeOf($_branch2Branch).toEqualTypeOf<
                       | {
                           readonly kind: "_3"
                           readonly value: null | boolean
@@ -1757,18 +1716,16 @@ describe("using recursive setter", () => {
                         }
                     >()
                     // the value is set in $_branch_2_branches_3 ^
-                    expect($_branch_2_branch).toStrictEqual({
+                    expect($_branch2Branch).toStrictEqual({
                       kind: "_3",
                       value: true,
                     })
 
                     return {
                       kind: "_4",
-                      value: ($_branch_2_branch_4) => {
-                        expectTypeOf($_branch_2_branch_4).toEqualTypeOf<
-                          null | number
-                        >()
-                        expect($_branch_2_branch_4).toBe(1) // the value is set in $_branch_2_branches_4 ^
+                      value: ($_branch2Branch4) => {
+                        expectTypeOf($_branch2Branch4).toEqualTypeOf<null | number>()
+                        expect($_branch2Branch4).toBe(1) // the value is set in $_branch_2_branches_4 ^
 
                         return 3
                       },

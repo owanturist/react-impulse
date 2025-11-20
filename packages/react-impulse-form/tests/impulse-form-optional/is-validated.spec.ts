@@ -30,13 +30,9 @@ describe("types", () => {
   it("matches schema type for isValidated(scope, select?)", ({ scope }) => {
     expectTypeOf(form.isValidated(scope)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(
-      form.isValidated(scope, params._first),
-    ).toEqualTypeOf<IsValidatedSchema>()
+    expectTypeOf(form.isValidated(scope, params._first)).toEqualTypeOf<IsValidatedSchema>()
 
-    expectTypeOf(
-      form.isValidated(scope, params._second),
-    ).toEqualTypeOf<IsValidatedVerboseSchema>()
+    expectTypeOf(form.isValidated(scope, params._second)).toEqualTypeOf<IsValidatedVerboseSchema>()
   })
 
   describe("nested", () => {
@@ -85,9 +81,7 @@ describe("when element is initially not validated", () => {
     )
   }
 
-  it("returns false for initially invalid but not validated enabled", ({
-    scope,
-  }) => {
+  it("returns false for initially invalid but not validated enabled", ({ scope }) => {
     const form = setup("")
 
     expect(form.isValidated(scope)).toBe(false)
@@ -121,9 +115,7 @@ describe("when element is initially not validated", () => {
     })
   })
 
-  it("returns false for initially valid but not validated enabled", ({
-    scope,
-  }) => {
+  it("returns false for initially valid but not validated enabled", ({ scope }) => {
     const form = setup("true")
 
     expect(form.isValidated(scope)).toBe(false)
@@ -202,9 +194,7 @@ describe("when element is initially validated", () => {
     )
   }
 
-  it("returns false for initially invalid but not validated enabled", ({
-    scope,
-  }) => {
+  it("returns false for initially invalid but not validated enabled", ({ scope }) => {
     const form = setup("")
 
     expect(form.isValidated(scope)).toBe(false)
@@ -238,9 +228,7 @@ describe("when element is initially validated", () => {
     })
   })
 
-  it("returns false for a initially valid but not validated enabled", ({
-    scope,
-  }) => {
+  it("returns false for a initially valid but not validated enabled", ({ scope }) => {
     const form = setup("true")
 
     expect(form.isValidated(scope)).toBe(false)
@@ -319,13 +307,9 @@ describe("stable validated value", () => {
     expect(form.isValidated(scope)).toBe(form.isValidated(scope))
 
     expect(form.isValidated(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.isValidated(scope, params._first)).toBe(
-      form.isValidated(scope, params._first),
-    )
+    expect(form.isValidated(scope, params._first)).toBe(form.isValidated(scope, params._first))
 
     expect(form.isValidated(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.isValidated(scope, params._second)).toBe(
-      form.isValidated(scope, params._second),
-    )
+    expect(form.isValidated(scope, params._second)).toBe(form.isValidated(scope, params._second))
   })
 })

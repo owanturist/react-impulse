@@ -3,7 +3,7 @@ import { isString } from "~/tools/is-string"
 import { Impulse, type ReadonlyImpulse, type Scope, isImpulse } from "../src"
 
 describe("isImpulse(input)", () => {
-  const known_check = (input: number | Impulse<number>) => {
+  const knownCheck = (input: number | Impulse<number>) => {
     if (isImpulse(input)) {
       expectTypeOf(input).toEqualTypeOf<Impulse<number>>()
 
@@ -15,7 +15,7 @@ describe("isImpulse(input)", () => {
     return false
   }
 
-  const readonly_check = (input: number | ReadonlyImpulse<number>) => {
+  const readonlyCheck = (input: number | ReadonlyImpulse<number>) => {
     if (isImpulse(input)) {
       expectTypeOf(input).toEqualTypeOf<ReadonlyImpulse<number>>()
 
@@ -27,7 +27,7 @@ describe("isImpulse(input)", () => {
     return false
   }
 
-  const unknown_check = (input: unknown) => {
+  const unknownCheck = (input: unknown) => {
     if (isImpulse(input)) {
       expectTypeOf(input).toEqualTypeOf<Impulse<unknown>>()
 
@@ -43,13 +43,13 @@ describe("isImpulse(input)", () => {
     const impulse = Impulse(0)
     const readonly = Impulse(() => 1)
 
-    expect(known_check(impulse)).toBe(true)
+    expect(knownCheck(impulse)).toBe(true)
     // @ts-expect-error should be Impulse<number>
-    expect(known_check(readonly)).toBe(true)
-    expect(readonly_check(impulse)).toBe(true)
-    expect(readonly_check(readonly)).toBe(true)
-    expect(unknown_check(impulse)).toBe(true)
-    expect(unknown_check(readonly)).toBe(true)
+    expect(knownCheck(readonly)).toBe(true)
+    expect(readonlyCheck(impulse)).toBe(true)
+    expect(readonlyCheck(readonly)).toBe(true)
+    expect(unknownCheck(impulse)).toBe(true)
+    expect(unknownCheck(readonly)).toBe(true)
   })
 
   it.each([
@@ -61,13 +61,13 @@ describe("isImpulse(input)", () => {
     ["object", { count: 0 }],
   ])("returns false for %s", (_, value: unknown) => {
     // @ts-expect-error should be Impulse<number>
-    expect(known_check(value)).toBe(false)
-    expect(unknown_check(value)).toBe(false)
+    expect(knownCheck(value)).toBe(false)
+    expect(unknownCheck(value)).toBe(false)
   })
 })
 
 describe("isImpulse(scope, check, value)", () => {
-  const known_check = (scope: Scope, impulse: string | Impulse<string>) => {
+  const knownCheck = (scope: Scope, impulse: string | Impulse<string>) => {
     if (isImpulse(scope, isString, impulse)) {
       expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
 
@@ -79,10 +79,7 @@ describe("isImpulse(scope, check, value)", () => {
     return false
   }
 
-  const union_check = (
-    scope: Scope,
-    impulse: Impulse<string> | Impulse<number>,
-  ) => {
+  const unionCheck = (scope: Scope, impulse: Impulse<string> | Impulse<number>) => {
     if (isImpulse(scope, isString<string>, impulse)) {
       expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
 
@@ -94,10 +91,7 @@ describe("isImpulse(scope, check, value)", () => {
     return false
   }
 
-  const union_value_check = (
-    scope: Scope,
-    impulse: Impulse<number | string>,
-  ) => {
+  const unionValueCheck = (scope: Scope, impulse: Impulse<number | string>) => {
     if (isImpulse(scope, isString, impulse)) {
       expectTypeOf(impulse).toEqualTypeOf<Impulse<number | string>>()
 
@@ -109,10 +103,7 @@ describe("isImpulse(scope, check, value)", () => {
     return false
   }
 
-  const readonly_check = (
-    scope: Scope,
-    impulse: string | ReadonlyImpulse<string>,
-  ) => {
+  const readonlyCheck = (scope: Scope, impulse: string | ReadonlyImpulse<string>) => {
     if (isImpulse(scope, isString, impulse)) {
       expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<string>>()
 
@@ -124,7 +115,7 @@ describe("isImpulse(scope, check, value)", () => {
     return false
   }
 
-  const unknown_check = (scope: Scope, impulse: unknown) => {
+  const unknownCheck = (scope: Scope, impulse: unknown) => {
     if (isImpulse(scope, isString, impulse)) {
       expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
 
@@ -141,23 +132,23 @@ describe("isImpulse(scope, check, value)", () => {
     const readonly = Impulse(() => "")
     const union = Impulse<string | number>("")
 
-    expect(known_check(scope, impulse)).toBe(true)
-    expect(union_check(scope, impulse)).toBe(true)
-    expect(union_value_check(scope, union)).toBe(true)
+    expect(knownCheck(scope, impulse)).toBe(true)
+    expect(unionCheck(scope, impulse)).toBe(true)
+    expect(unionValueCheck(scope, union)).toBe(true)
     // @ts-expect-error should be Impulse<string>
-    expect(known_check(scope, readonly)).toBe(true)
-    expect(readonly_check(scope, impulse)).toBe(true)
-    expect(readonly_check(scope, readonly)).toBe(true)
-    expect(unknown_check(scope, impulse)).toBe(true)
-    expect(unknown_check(scope, readonly)).toBe(true)
+    expect(knownCheck(scope, readonly)).toBe(true)
+    expect(readonlyCheck(scope, impulse)).toBe(true)
+    expect(readonlyCheck(scope, readonly)).toBe(true)
+    expect(unknownCheck(scope, impulse)).toBe(true)
+    expect(unknownCheck(scope, readonly)).toBe(true)
   })
 
   it("returns false for Impulse with failed check", ({ scope }) => {
     const impulse = Impulse(0)
 
     // @ts-expect-error should be Impulse<string>
-    expect(known_check(scope, impulse)).toBe(false)
-    expect(unknown_check(scope, impulse)).toBe(false)
+    expect(knownCheck(scope, impulse)).toBe(false)
+    expect(unknownCheck(scope, impulse)).toBe(false)
   })
 
   describe.each([
@@ -170,8 +161,8 @@ describe("isImpulse(scope, check, value)", () => {
   ])("when input is %s", (_, value) => {
     it("returns false", ({ scope }) => {
       // @ts-expect-error should be Impulse<string>
-      expect(known_check(scope, value)).toBe(false)
-      expect(unknown_check(scope, value)).toBe(false)
+      expect(knownCheck(scope, value)).toBe(false)
+      expect(unknownCheck(scope, value)).toBe(false)
     })
   })
 })

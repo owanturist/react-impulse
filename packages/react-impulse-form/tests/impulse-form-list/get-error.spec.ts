@@ -3,22 +3,13 @@ import { z } from "zod"
 
 import { params } from "~/tools/params"
 
-import {
-  ImpulseFormList,
-  ImpulseFormUnit,
-  type ImpulseFormUnitSchemaOptions,
-} from "../../src"
+import { ImpulseFormList, ImpulseFormUnit, type ImpulseFormUnitSchemaOptions } from "../../src"
 
-function setup<TError>(
-  elements: ReadonlyArray<ImpulseFormUnit<number, TError>>,
-) {
+function setup<TError>(elements: ReadonlyArray<ImpulseFormUnit<number, TError>>) {
   return ImpulseFormList(elements)
 }
 
-function setupElement(
-  initial: number,
-  options?: Partial<ImpulseFormUnitSchemaOptions<number>>,
-) {
+function setupElement(initial: number, options?: Partial<ImpulseFormUnitSchemaOptions<number>>) {
   return ImpulseFormUnit(initial, {
     schema: z.number(),
     ...options,
@@ -70,11 +61,7 @@ it("returns null when none of the elements have errors", ({ scope }) => {
 })
 
 it("returns concise when at least one element has errors", ({ scope }) => {
-  const form = setup([
-    setupElement(0),
-    setupElement(1),
-    setupElement(2, { error: ["err"] }),
-  ])
+  const form = setup([setupElement(0), setupElement(1), setupElement(2, { error: ["err"] })])
 
   const expected = [null, null, ["err"]]
 

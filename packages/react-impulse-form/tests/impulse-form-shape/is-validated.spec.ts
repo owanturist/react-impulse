@@ -93,10 +93,7 @@ it("matches the type signature", () => {
 
     <TResult>(
       scope: Scope,
-      select: (
-        concise: RootIsValidatedConcise,
-        verbose: RootIsValidatedVerbose,
-      ) => TResult,
+      select: (concise: RootIsValidatedConcise, verbose: RootIsValidatedVerbose) => TResult,
     ): TResult
   }>()
 
@@ -105,10 +102,7 @@ it("matches the type signature", () => {
 
     <TResult>(
       scope: Scope,
-      select: (
-        concise: ThirdIsValidatedConcise,
-        verbose: ThirdIsValidatedVerbose,
-      ) => TResult,
+      select: (concise: ThirdIsValidatedConcise, verbose: ThirdIsValidatedVerbose) => TResult,
     ): TResult
   }>()
 })
@@ -164,13 +158,9 @@ describe("isValidated(scope, (concise) => concise)", () => {
   it("selects concise value", ({ scope }) => {
     const shape = setup()
 
-    expectTypeOf(
-      isValidated(scope, shape),
-    ).toEqualTypeOf<RootIsValidatedConcise>()
+    expectTypeOf(isValidated(scope, shape)).toEqualTypeOf<RootIsValidatedConcise>()
 
-    expectTypeOf(
-      isValidated(scope, shape.fields.third),
-    ).toEqualTypeOf<ThirdIsValidatedConcise>()
+    expectTypeOf(isValidated(scope, shape.fields.third)).toEqualTypeOf<ThirdIsValidatedConcise>()
   })
 
   it("returns false when NONE are validated", ({ scope }) => {
@@ -224,13 +214,9 @@ describe("isValidated(scope, (_, verbose) => verbose)", () => {
   it("selects verbose value", ({ scope }) => {
     const shape = setup()
 
-    expectTypeOf(
-      isValidated(scope, shape),
-    ).toEqualTypeOf<RootIsValidatedVerbose>()
+    expectTypeOf(isValidated(scope, shape)).toEqualTypeOf<RootIsValidatedVerbose>()
 
-    expectTypeOf(
-      isValidated(scope, shape.fields.third),
-    ).toEqualTypeOf<ThirdIsValidatedVerbose>()
+    expectTypeOf(isValidated(scope, shape.fields.third)).toEqualTypeOf<ThirdIsValidatedVerbose>()
   })
 
   it("returns verbose object when NONE are validated", ({ scope }) => {

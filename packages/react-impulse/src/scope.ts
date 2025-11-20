@@ -1,19 +1,19 @@
 import type { ScopeEmitter } from "./scope-emitter"
 
-export const EMITTER_KEY = Symbol("scope")
+const EMITTER_KEY = Symbol("scope")
 
-export interface Scope {
+interface Scope {
   readonly [EMITTER_KEY]: null | ScopeEmitter
 }
 
-export const STATIC_SCOPE: Scope = {
+const STATIC_SCOPE: Scope = {
   [EMITTER_KEY]: null,
 }
 
 let currentScope = STATIC_SCOPE
 
 export function injectScope<TResult>(
-  execute: (scope: Scope) => TResult,
+  execute: (passedScope: Scope) => TResult,
   scope: Scope,
 ): TResult {
   const prevScope = currentScope
@@ -28,3 +28,5 @@ export function injectScope<TResult>(
 export function extractScope(): Scope {
   return currentScope
 }
+
+export { type Scope, EMITTER_KEY, STATIC_SCOPE }

@@ -2,11 +2,7 @@ import z from "zod"
 
 import { params } from "~/tools/params"
 
-import {
-  ImpulseFormOptional,
-  ImpulseFormShape,
-  ImpulseFormUnit,
-} from "../../src"
+import { ImpulseFormOptional, ImpulseFormShape, ImpulseFormUnit } from "../../src"
 
 describe.each([
   ["disabled", false],
@@ -47,7 +43,7 @@ describe.each([
     expect(form.getInput(scope)).toStrictEqual({
       enabled: true,
       element: {
-        enabled: enabled,
+        enabled,
         element: {
           _1: "name",
           _2: 18,
@@ -62,7 +58,7 @@ describe.each([
     expect(form.getInput(scope)).toStrictEqual({
       enabled: false,
       element: {
-        enabled: enabled,
+        enabled,
         element: {
           _1: "name",
           _2: 20,
@@ -89,7 +85,7 @@ describe.each([
     expect(form.getInput(scope)).toStrictEqual({
       enabled: true,
       element: {
-        enabled: enabled,
+        enabled,
         element: {
           _1: "another",
           _2: 100,
@@ -253,15 +249,15 @@ it("using recursive resetter", ({ scope }) => {
     })
 
     return {
-      enabled: (initial_enabled, input_enabled) => {
-        expect(initial_enabled).toBe(true)
-        expect(input_enabled).toBe(true)
+      enabled: (initialEnabled, inputEnabled) => {
+        expect(initialEnabled).toBe(true)
+        expect(inputEnabled).toBe(true)
 
         return false
       },
 
-      element: (initial_element, input_element) => {
-        expect(initial_element).toStrictEqual({
+      element: (initialElement, inputElement) => {
+        expect(initialElement).toStrictEqual({
           enabled: false,
           element: {
             _1: 2,
@@ -269,7 +265,7 @@ it("using recursive resetter", ({ scope }) => {
             _3: false,
           },
         })
-        expect(input_element).toStrictEqual({
+        expect(inputElement).toStrictEqual({
           enabled: true,
           element: {
             _1: 0,
@@ -279,43 +275,43 @@ it("using recursive resetter", ({ scope }) => {
         })
 
         return {
-          enabled: (initial_element_enabled, input_element_enabled) => {
-            expect(initial_element_enabled).toBe(false)
-            expect(input_element_enabled).toBe(true)
+          enabled: (initialElementEnabled, inputElementEnabled) => {
+            expect(initialElementEnabled).toBe(false)
+            expect(inputElementEnabled).toBe(true)
 
             return true
           },
 
-          element: (initial_element_element, input_element_element) => {
-            expect(initial_element_element).toStrictEqual({
+          element: (initialElementElement, inputElementElement) => {
+            expect(initialElementElement).toStrictEqual({
               _1: 2,
               _2: "0",
               _3: false,
             })
-            expect(input_element_element).toStrictEqual({
+            expect(inputElementElement).toStrictEqual({
               _1: 0,
               _2: "0",
               _3: true,
             })
 
             return {
-              _1: (initial_element__1, input_element__1) => {
-                expect(initial_element__1).toBe(2)
-                expect(input_element__1).toBe(0)
+              _1: (initialElement1, inputElement1) => {
+                expect(initialElement1).toBe(2)
+                expect(inputElement1).toBe(0)
 
                 return 10
               },
 
-              _2: (initial_element__2, input_element__2) => {
-                expect(initial_element__2).toBe("0")
-                expect(input_element__2).toBe("0")
+              _2: (initialElement2, inputElement2) => {
+                expect(initialElement2).toBe("0")
+                expect(inputElement2).toBe("0")
 
                 return "updated"
               },
 
-              _3: (initial_element__3, input_element__3) => {
-                expect(initial_element__3).toBe(false)
-                expect(input_element__3).toBe(true)
+              _3: (initialElement3, inputElement3) => {
+                expect(initialElement3).toBe(false)
+                expect(inputElement3).toBe(true)
 
                 return true
               },

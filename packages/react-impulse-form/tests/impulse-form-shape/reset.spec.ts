@@ -28,10 +28,7 @@ function setup() {
 
 describe.each([
   ["without arguments", (form: ImpulseForm) => form.reset()],
-  [
-    "with resetter=params._first",
-    (form: ImpulseForm) => form.reset(params._first),
-  ],
+  ["with resetter=params._first", (form: ImpulseForm) => form.reset(params._first)],
 ])("%s", (_, reset) => {
   it("resets the shape", ({ scope }) => {
     const shape = setup()
@@ -52,9 +49,7 @@ describe.each([
   })
 })
 
-it("resets to initial value by consuming current original value with resetter", ({
-  scope,
-}) => {
+it("resets to initial value by consuming current original value with resetter", ({ scope }) => {
   const shape = setup()
 
   shape.reset((_, current) => current)

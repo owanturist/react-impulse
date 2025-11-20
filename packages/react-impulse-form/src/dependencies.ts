@@ -1,9 +1,9 @@
-/* eslint-disable no-restricted-imports */
+/** biome-ignore-all lint/style/noRestrictedImports: re-export */
 export {
-  type Scope,
   type Compare,
-  type ReadonlyImpulse,
   Impulse,
+  type ReadonlyImpulse,
+  type Scope,
   batch,
   untrack,
 } from "react-impulse"

@@ -24,8 +24,5 @@ export type ImpulseFormSwitchInputSetter<
       >
     >
   >,
-  [
-    ImpulseFormSwitchInput<TKind, TBranches>,
-    ImpulseFormSwitchInput<TKind, TBranches>,
-  ]
+  [ImpulseFormSwitchInput<TKind, TBranches>, ImpulseFormSwitchInput<TKind, TBranches>]
 >

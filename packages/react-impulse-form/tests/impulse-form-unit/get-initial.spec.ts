@@ -30,9 +30,7 @@ it("selects unequal custom input and initial values when isInputEqual is not spe
   expect(form.getInput(scope)).toStrictEqual(form.getInitial(scope))
 })
 
-it("selects equal custom input and initial values when isInputEqual is specified", ({
-  scope,
-}) => {
+it("selects equal custom input and initial values when isInputEqual is specified", ({ scope }) => {
   const input = { count: 0 }
   const form = ImpulseFormUnit(input, {
     initial: { count: 0 },
@@ -51,9 +49,7 @@ it("sets initial", ({ scope }) => {
   expect(value.getInput(scope)).toBe("1")
   expect(value.getInitial(scope)).toBe("2")
 
-  expectTypeOf(value.setInitial)
-    .parameter(0)
-    .toEqualTypeOf<Setter<string, [string, string]>>()
+  expectTypeOf(value.setInitial).parameter(0).toEqualTypeOf<Setter<string, [string, string]>>()
 })
 
 it("updates initial", ({ scope }) => {
@@ -64,32 +60,28 @@ it("updates initial", ({ scope }) => {
   expect(value.getInitial(scope)).toBe(2)
 })
 
-it("selects unequal initial values when isInputEqual is not specified", ({
-  scope,
-}) => {
+it("selects unequal initial values when isInputEqual is not specified", ({ scope }) => {
   const value = ImpulseFormUnit([0])
 
-  const initial_0 = value.getInitial(scope)
+  const initial0 = value.getInitial(scope)
 
   value.setInitial([0])
-  const initial_1 = value.getInitial(scope)
+  const initial1 = value.getInitial(scope)
 
-  expect(initial_0).not.toBe(initial_1)
-  expect(initial_0).toStrictEqual(initial_1)
+  expect(initial0).not.toBe(initial1)
+  expect(initial0).toStrictEqual(initial1)
 })
 
-it("selects equal initial values when isInputEqual is specified", ({
-  scope,
-}) => {
+it("selects equal initial values when isInputEqual is specified", ({ scope }) => {
   const value = ImpulseFormUnit([0], {
     isInputEqual: isShallowArrayEqual,
   })
 
-  const initial_0 = value.getInitial(scope)
+  const initial0 = value.getInitial(scope)
 
   value.setInitial([0])
-  const initial_1 = value.getInitial(scope)
+  const initial1 = value.getInitial(scope)
 
-  expect(initial_0).toBe(initial_1)
-  expect(initial_0).toStrictEqual(initial_1)
+  expect(initial0).toBe(initial1)
+  expect(initial0).toStrictEqual(initial1)
 })

@@ -35,7 +35,9 @@ describe("nested impulses", () => {
             data-testid="reset-counters"
             onClick={() => {
               state.setValue((current) => {
-                current.counts.forEach((count) => count.setValue(0))
+                for (const count of current.counts) {
+                  count.setValue(0)
+                }
 
                 return current
               })
@@ -44,11 +46,7 @@ describe("nested impulses", () => {
         </React.Profiler>
 
         {counts.map((count, index) => (
-          <CounterComponent
-            key={index}
-            count={count}
-            onRender={() => onCounterRender(index)}
-          />
+          <CounterComponent key={index} count={count} onRender={() => onCounterRender(index)} />
         ))}
       </>
     )
@@ -59,13 +57,7 @@ describe("nested impulses", () => {
     const onRender = vi.fn()
     const onCounterRender = vi.fn()
 
-    render(
-      <App
-        state={impulse}
-        onRender={onRender}
-        onCounterRender={onCounterRender}
-      />,
-    )
+    render(<App state={impulse} onRender={onRender} onCounterRender={onCounterRender} />)
 
     expect(onRender).toHaveBeenCalledOnce()
     expect(onCounterRender).not.toHaveBeenCalled()
@@ -141,9 +133,9 @@ describe("nested impulses", () => {
 
     // increment all from the outside
     act(() => {
-      impulse
-        .getValue(scope)
-        .counts.forEach((count) => count.setValue((x) => x + 1))
+      for (const count of impulse.getValue(scope).counts) {
+        count.setValue((x) => x + 1)
+      }
     })
     expect(onRender).not.toHaveBeenCalled()
     expect(onCounterRender).toHaveBeenCalledTimes(3)

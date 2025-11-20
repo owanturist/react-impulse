@@ -38,13 +38,9 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Check all files formatting
+      - name: Check all files
         if: ${{ always() }}
-        run: pnpm format:check .
-
-      - name: Lint all files
-        if: ${{ always() }}
-        run: pnpm lint .
+        run: pnpm check .
 
       - name: Type check
         if: ${{ always() }}

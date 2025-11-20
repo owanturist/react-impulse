@@ -1,10 +1,6 @@
 import z from "zod"
 
-import {
-  ImpulseFormOptional,
-  ImpulseFormShape,
-  ImpulseFormUnit,
-} from "../../src"
+import { ImpulseFormOptional, ImpulseFormShape, ImpulseFormUnit } from "../../src"
 
 describe("types", () => {
   const form = ImpulseFormOptional(
@@ -25,8 +21,6 @@ describe("types", () => {
   }>
 
   it("matches schema type for getEnabledElement(scope)", () => {
-    expectTypeOf(form.getEnabledElement).returns.toEqualTypeOf<
-      undefined | EnabledElement
-    >()
+    expectTypeOf(form.getEnabledElement).returns.toEqualTypeOf<undefined | EnabledElement>()
   })
 })

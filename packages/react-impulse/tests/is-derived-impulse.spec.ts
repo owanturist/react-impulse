@@ -1,14 +1,9 @@
 import { isString } from "~/tools/is-string"
 
-import {
-  Impulse,
-  type ReadonlyImpulse,
-  type Scope,
-  isDerivedImpulse,
-} from "../src"
+import { Impulse, type ReadonlyImpulse, type Scope, isDerivedImpulse } from "../src"
 
 describe("isDerivedImpulse(input)", () => {
-  const known_check = (input: number | Impulse<number>) => {
+  const knownCheck = (input: number | Impulse<number>) => {
     if (isDerivedImpulse(input)) {
       expectTypeOf(input).toEqualTypeOf<Impulse<number>>()
 
@@ -20,7 +15,7 @@ describe("isDerivedImpulse(input)", () => {
     return false
   }
 
-  const readonly_check = (input: number | ReadonlyImpulse<number>) => {
+  const readonlyCheck = (input: number | ReadonlyImpulse<number>) => {
     if (isDerivedImpulse(input)) {
       expectTypeOf(input).toEqualTypeOf<ReadonlyImpulse<number>>()
 
@@ -32,7 +27,7 @@ describe("isDerivedImpulse(input)", () => {
     return false
   }
 
-  const unknown_check = (input: unknown) => {
+  const unknownCheck = (input: unknown) => {
     if (isDerivedImpulse(input)) {
       expectTypeOf(input).toEqualTypeOf<Impulse<unknown>>()
 
@@ -53,13 +48,13 @@ describe("isDerivedImpulse(input)", () => {
     )
     const readonly = Impulse(() => 1)
 
-    expect(known_check(derived)).toBe(true)
+    expect(knownCheck(derived)).toBe(true)
     // @ts-expect-error should be Impulse<number>
-    expect(known_check(readonly)).toBe(true)
-    expect(readonly_check(derived)).toBe(true)
-    expect(readonly_check(readonly)).toBe(true)
-    expect(unknown_check(derived)).toBe(true)
-    expect(unknown_check(readonly)).toBe(true)
+    expect(knownCheck(readonly)).toBe(true)
+    expect(readonlyCheck(derived)).toBe(true)
+    expect(readonlyCheck(readonly)).toBe(true)
+    expect(unknownCheck(derived)).toBe(true)
+    expect(unknownCheck(readonly)).toBe(true)
   })
 
   it.each([
@@ -72,13 +67,13 @@ describe("isDerivedImpulse(input)", () => {
     ["direct impulse", Impulse(0)],
   ])("returns false for %s", (_, value: unknown) => {
     // @ts-expect-error should be Impulse<number>
-    expect(known_check(value)).toBe(false)
-    expect(unknown_check(value)).toBe(false)
+    expect(knownCheck(value)).toBe(false)
+    expect(unknownCheck(value)).toBe(false)
   })
 })
 
 describe("isDerivedImpulse(scope, check, value)", () => {
-  const known_check = (scope: Scope, impulse: string | Impulse<string>) => {
+  const knownCheck = (scope: Scope, impulse: string | Impulse<string>) => {
     if (isDerivedImpulse(scope, isString, impulse)) {
       expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
 
@@ -90,10 +85,7 @@ describe("isDerivedImpulse(scope, check, value)", () => {
     return false
   }
 
-  const union_check = (
-    scope: Scope,
-    impulse: Impulse<string> | Impulse<number>,
-  ) => {
+  const unionCheck = (scope: Scope, impulse: Impulse<string> | Impulse<number>) => {
     if (isDerivedImpulse(scope, isString<string>, impulse)) {
       expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
 
@@ -105,10 +97,7 @@ describe("isDerivedImpulse(scope, check, value)", () => {
     return false
   }
 
-  const union_value_check = (
-    scope: Scope,
-    impulse: Impulse<number | string>,
-  ) => {
+  const unionValueCheck = (scope: Scope, impulse: Impulse<number | string>) => {
     if (isDerivedImpulse(scope, isString, impulse)) {
       expectTypeOf(impulse).toEqualTypeOf<Impulse<number | string>>()
 
@@ -120,10 +109,7 @@ describe("isDerivedImpulse(scope, check, value)", () => {
     return false
   }
 
-  const readonly_check = (
-    scope: Scope,
-    impulse: string | ReadonlyImpulse<string>,
-  ) => {
+  const readonlyCheck = (scope: Scope, impulse: string | ReadonlyImpulse<string>) => {
     if (isDerivedImpulse(scope, isString, impulse)) {
       expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<string>>()
 
@@ -135,7 +121,7 @@ describe("isDerivedImpulse(scope, check, value)", () => {
     return false
   }
 
-  const unknown_check = (scope: Scope, impulse: unknown) => {
+  const unknownCheck = (scope: Scope, impulse: unknown) => {
     if (isDerivedImpulse(scope, isString, impulse)) {
       expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
 
@@ -162,23 +148,23 @@ describe("isDerivedImpulse(scope, check, value)", () => {
       },
     )
 
-    expect(known_check(scope, derived)).toBe(true)
-    expect(union_check(scope, derived)).toBe(true)
-    expect(union_value_check(scope, union)).toBe(true)
+    expect(knownCheck(scope, derived)).toBe(true)
+    expect(unionCheck(scope, derived)).toBe(true)
+    expect(unionValueCheck(scope, union)).toBe(true)
     // @ts-expect-error should be Impulse<string>
-    expect(known_check(scope, readonly)).toBe(true)
-    expect(readonly_check(scope, derived)).toBe(true)
-    expect(readonly_check(scope, readonly)).toBe(true)
-    expect(unknown_check(scope, derived)).toBe(true)
-    expect(unknown_check(scope, readonly)).toBe(true)
+    expect(knownCheck(scope, readonly)).toBe(true)
+    expect(readonlyCheck(scope, derived)).toBe(true)
+    expect(readonlyCheck(scope, readonly)).toBe(true)
+    expect(unknownCheck(scope, derived)).toBe(true)
+    expect(unknownCheck(scope, readonly)).toBe(true)
   })
 
   it("returns false for Impulse with failed check", ({ scope }) => {
     const impulse = Impulse(0)
 
     // @ts-expect-error should be Impulse<string>
-    expect(known_check(scope, impulse)).toBe(false)
-    expect(unknown_check(scope, impulse)).toBe(false)
+    expect(knownCheck(scope, impulse)).toBe(false)
+    expect(unknownCheck(scope, impulse)).toBe(false)
   })
 
   describe.each([
@@ -192,8 +178,8 @@ describe("isDerivedImpulse(scope, check, value)", () => {
   ])("when input is %s", (_, value) => {
     it("returns false", ({ scope }) => {
       // @ts-expect-error should be Impulse<string>
-      expect(known_check(scope, value)).toBe(false)
-      expect(unknown_check(scope, value)).toBe(false)
+      expect(knownCheck(scope, value)).toBe(false)
+      expect(unknownCheck(scope, value)).toBe(false)
     })
   })
 })

@@ -46,9 +46,7 @@ export function useScoped<TResult>(
 ): TResult
 
 export function useScoped<TResult>(
-  factoryOrReadableImpulse:
-    | ((scope: Scope) => TResult)
-    | ReadableImpulse<TResult>,
+  factoryOrReadableImpulse: ((scope: Scope) => TResult) | ReadableImpulse<TResult>,
   dependencies?: DependencyList,
   options?: UseScopedOptions<TResult>,
 ): TResult {
@@ -60,7 +58,7 @@ export function useScoped<TResult>(
 
       return factoryOrReadableImpulse.getValue(scope)
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // biome-ignore lint/correctness/useExhaustiveDependencies: pass dependencies as is or factory is the only dependency
     dependencies ?? [factoryOrReadableImpulse],
   )
 

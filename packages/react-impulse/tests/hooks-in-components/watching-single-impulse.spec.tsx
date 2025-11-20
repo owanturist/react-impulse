@@ -39,83 +39,43 @@ describe("scoping single impulse", () => {
     return x < 4
   }
 
-  const compare = (
-    [left1, right1]: [boolean, boolean],
-    [left2, right2]: [boolean, boolean],
-  ) => {
-    return left1 === left2 && right1 === right2
-  }
+  const compare = ([left1, right1]: [boolean, boolean], [left2, right2]: [boolean, boolean]) =>
+    left1 === left2 && right1 === right2
 
   const SingleScopeApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useScoped(
-      (scope) => [
-        factoryLeft(scope, props.count),
-        factoryRight(scope, props.count),
-      ],
+      (scope) => [factoryLeft(scope, props.count), factoryRight(scope, props.count)],
       [props.count],
       {
         compare: (left, right) => compare(left, right),
       },
     )
 
-    return (
-      <GenericApp
-        moreThanOne={moreThanOne}
-        lessThanFour={lessThanFour}
-        {...props}
-      />
-    )
+    return <GenericApp moreThanOne={moreThanOne} lessThanFour={lessThanFour} {...props} />
   }
 
   const SingleMemoizedScopeApp: React.FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useScoped<[boolean, boolean]>(
-      (scope) => [
-        factoryLeft(scope, props.count),
-        factoryRight(scope, props.count),
-      ],
+      (scope) => [factoryLeft(scope, props.count), factoryRight(scope, props.count)],
       [props.count],
       { compare },
     )
 
-    return (
-      <GenericApp
-        moreThanOne={moreThanOne}
-        lessThanFour={lessThanFour}
-        {...props}
-      />
-    )
+    return <GenericApp moreThanOne={moreThanOne} lessThanFour={lessThanFour} {...props} />
   }
 
   const MultipleScopesApp: React.FC<AppProps> = (props) => {
     const moreThanOne = useScoped((scope) => factoryLeft(scope, props.count))
     const lessThanFour = useScoped((scope) => factoryRight(scope, props.count))
 
-    return (
-      <GenericApp
-        moreThanOne={moreThanOne}
-        lessThanFour={lessThanFour}
-        {...props}
-      />
-    )
+    return <GenericApp moreThanOne={moreThanOne} lessThanFour={lessThanFour} {...props} />
   }
 
   const MultipleMemoizedScopesApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useScoped(
-      (scope) => factoryLeft(scope, props.count),
-      [props.count],
-    )
-    const lessThanFour = useScoped(
-      (scope) => factoryRight(scope, props.count),
-      [props.count],
-    )
+    const moreThanOne = useScoped((scope) => factoryLeft(scope, props.count), [props.count])
+    const lessThanFour = useScoped((scope) => factoryRight(scope, props.count), [props.count])
 
-    return (
-      <GenericApp
-        moreThanOne={moreThanOne}
-        lessThanFour={lessThanFour}
-        {...props}
-      />
-    )
+    return <GenericApp moreThanOne={moreThanOne} lessThanFour={lessThanFour} {...props} />
   }
 
   const ScopedApp: React.FC<AppProps> = (props) => {
@@ -123,13 +83,7 @@ describe("scoping single impulse", () => {
     const moreThanOne = factoryLeft(scope, props.count)
     const lessThanFour = factoryRight(scope, props.count)
 
-    return (
-      <GenericApp
-        moreThanOne={moreThanOne}
-        lessThanFour={lessThanFour}
-        {...props}
-      />
-    )
+    return <GenericApp moreThanOne={moreThanOne} lessThanFour={lessThanFour} {...props} />
   }
 
   it.each([
@@ -143,13 +97,7 @@ describe("scoping single impulse", () => {
     const onCounterRender = vi.fn()
     const onRender = vi.fn()
 
-    render(
-      <App
-        count={count}
-        onCounterRender={onCounterRender}
-        onRender={onRender}
-      />,
-    )
+    render(<App count={count} onCounterRender={onCounterRender} onRender={onRender} />)
 
     // initial render
     expect(onRender).toHaveBeenCalledOnce()
@@ -206,7 +154,7 @@ describe("when drilling an Impulse", () => {
       onCounterRender: VoidFunction
     }> = ({ count, onRender, onCounterRender }) => (
       <>
-        <React.Profiler id="host" onRender={onRender} />
+        <React.Profiler id="test" onRender={onRender} />
         <CounterComponent count={count} onRender={onCounterRender} />
       </>
     )
@@ -215,13 +163,7 @@ describe("when drilling an Impulse", () => {
     const onRender = vi.fn()
     const onCounterRender = vi.fn()
 
-    render(
-      <Host
-        count={count}
-        onRender={onRender}
-        onCounterRender={onCounterRender}
-      />,
-    )
+    render(<Host count={count} onRender={onRender} onCounterRender={onCounterRender} />)
 
     expect(screen.getByTestId("count")).toHaveTextContent("5")
     expect(onRender).toHaveBeenCalledOnce()

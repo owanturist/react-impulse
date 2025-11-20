@@ -15,7 +15,7 @@ describe("default impulse", () => {
 
       return (
         <input
-          role="search"
+          type="search"
           value={value}
           onChange={(event) => impulse.setValue(event.target.value)}
         />
@@ -24,7 +24,7 @@ describe("default impulse", () => {
 
     const { rerender, unmount } = render(<SearchBar />)
 
-    const input = screen.getByRole("search")
+    const input = screen.getByRole("searchbox")
 
     expect(input).toHaveValue("search for me")
 
@@ -54,6 +54,6 @@ describe("default impulse", () => {
 
     unmount()
     render(<SearchBar value={val} />)
-    expect(screen.getByRole("search")).toHaveValue("but now")
+    expect(screen.getByRole("searchbox")).toHaveValue("but now")
   })
 })

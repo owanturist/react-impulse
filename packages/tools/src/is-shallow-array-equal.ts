@@ -1,9 +1,6 @@
 import { isStrictEqual } from "~/tools/is-strict-equal"
 
-export function isShallowArrayEqual<T>(
-  left: ReadonlyArray<T>,
-  right: ReadonlyArray<T>,
-): boolean {
+export function isShallowArrayEqual<T>(left: ReadonlyArray<T>, right: ReadonlyArray<T>): boolean {
   if (isStrictEqual(left, right)) {
     return true
   }
@@ -12,5 +9,8 @@ export function isShallowArrayEqual<T>(
     return false
   }
 
-  return left.every((value, index) => isStrictEqual(value, right[index]!))
+  return left.every(
+    // biome-ignore lint/style/noNonNullAssertion: the lengths are equal
+    (value, index) => isStrictEqual(value, right[index]!),
+  )
 }

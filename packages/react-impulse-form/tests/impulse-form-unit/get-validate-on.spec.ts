@@ -46,10 +46,7 @@ describe("when options: ImpulseFormUnitSchemaOptions", () => {
       (scope: Scope): ValidateStrategy
       <TResult>(
         scope: Scope,
-        select: (
-          concise: ValidateStrategy,
-          verbose: ValidateStrategy,
-        ) => TResult,
+        select: (concise: ValidateStrategy, verbose: ValidateStrategy) => TResult,
       ): TResult
     }>()
   })
@@ -62,9 +59,7 @@ describe("when options: ImpulseFormUnitSchemaOptions", () => {
     it("returns ValidateStrategy value", ({ scope }) => {
       const value = setup()
 
-      expectTypeOf(
-        getValidateOn(scope, value),
-      ).toEqualTypeOf<ValidateStrategy>()
+      expectTypeOf(getValidateOn(scope, value)).toEqualTypeOf<ValidateStrategy>()
     })
 
     it("defaults to onTouch", ({ scope }) => {
@@ -84,9 +79,7 @@ describe("when options: ImpulseFormUnitSchemaOptions", () => {
 })
 
 describe("when options: ImpulseFormUnitValidatedOptions", () => {
-  function setup(
-    options?: Partial<ImpulseFormUnitValidatedOptions<string, number>>,
-  ) {
+  function setup(options?: Partial<ImpulseFormUnitValidatedOptions<string, number>>) {
     return ImpulseFormUnit("", {
       ...options,
       validate: (input) => (input.length > 0 ? [null, input] : [1, null]),
@@ -100,10 +93,7 @@ describe("when options: ImpulseFormUnitValidatedOptions", () => {
       (scope: Scope): ValidateStrategy
       <TResult>(
         scope: Scope,
-        select: (
-          concise: ValidateStrategy,
-          verbose: ValidateStrategy,
-        ) => TResult,
+        select: (concise: ValidateStrategy, verbose: ValidateStrategy) => TResult,
       ): TResult
     }>()
   })
@@ -116,9 +106,7 @@ describe("when options: ImpulseFormUnitValidatedOptions", () => {
     it("returns ValidateStrategy value", ({ scope }) => {
       const value = setup()
 
-      expectTypeOf(
-        getValidateOn(scope, value),
-      ).toEqualTypeOf<ValidateStrategy>()
+      expectTypeOf(getValidateOn(scope, value)).toEqualTypeOf<ValidateStrategy>()
     })
 
     it("defaults to onTouch", ({ scope }) => {
@@ -145,10 +133,7 @@ describe("when options: ImpulseFormUnitOptions", () => {
       (scope: Scope): ValidateStrategy
       <TResult>(
         scope: Scope,
-        select: (
-          concise: ValidateStrategy,
-          verbose: ValidateStrategy,
-        ) => TResult,
+        select: (concise: ValidateStrategy, verbose: ValidateStrategy) => TResult,
       ): TResult
     }>()
   })
@@ -161,9 +146,7 @@ describe("when options: ImpulseFormUnitOptions", () => {
     it("returns ValidateStrategy value", ({ scope }) => {
       const value = ImpulseFormUnit("")
 
-      expectTypeOf(
-        getValidateOn(scope, value),
-      ).toEqualTypeOf<ValidateStrategy>()
+      expectTypeOf(getValidateOn(scope, value)).toEqualTypeOf<ValidateStrategy>()
     })
 
     it("defaults to onTouch when schema is defined", ({ scope }) => {
@@ -190,9 +173,7 @@ describe("when options: ImpulseFormUnitOptions", () => {
       expect(getValidateOn(scope, value)).toBe("onInit")
     })
 
-    it("defaults to onInit when no transform/validation is defined", ({
-      scope,
-    }) => {
+    it("defaults to onInit when no transform/validation is defined", ({ scope }) => {
       const value = ImpulseFormUnit("")
 
       expect(getValidateOn(scope, value)).toBe("onInit")

@@ -6,8 +6,5 @@ import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 export type ImpulseFormSwitchActiveBranch<
   TBranches extends ImpulseFormSwitchBranches<ImpulseForm>,
 > = {
-  [TBranch in keyof TBranches]: ImpulseFormSwitchBranch<
-    TBranch,
-    TBranches[TBranch]
-  >
+  [TBranch in keyof TBranches]: ImpulseFormSwitchBranch<TBranch, TBranches[TBranch]>
 }[keyof TBranches]

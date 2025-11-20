@@ -18,9 +18,7 @@ describe("types", () => {
 
   const branches = {
     _1: ImpulseFormUnit(true, {
-      schema: z
-        .boolean()
-        .transform((value): string => (value ? "ok" : "not ok")),
+      schema: z.boolean().transform((value): string => (value ? "ok" : "not ok")),
     }),
     _2: ImpulseFormShape({
       _3: ImpulseFormUnit("name"),
@@ -137,69 +135,49 @@ describe("types", () => {
   it("matches schema type for isTouched(scope, select?)", ({ scope }) => {
     expectTypeOf(form.isTouched(scope)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(
-      form.isTouched(scope, params._first),
-    ).toEqualTypeOf<TouchedSchema>()
+    expectTypeOf(form.isTouched(scope, params._first)).toEqualTypeOf<TouchedSchema>()
 
-    expectTypeOf(
-      form.isTouched(scope, params._second),
-    ).toEqualTypeOf<TouchedVerboseSchema>()
+    expectTypeOf(form.isTouched(scope, params._second)).toEqualTypeOf<TouchedVerboseSchema>()
   })
 
   it("matches setter type for setTouched(setter)", () => {
-    expectTypeOf(form.setTouched).toEqualTypeOf<
-      (setter: TouchedSetter) => void
-    >()
+    expectTypeOf(form.setTouched).toEqualTypeOf<(setter: TouchedSetter) => void>()
   })
 
   it("allows passing concise value to setTouched", ({ scope }) => {
-    const touched_0 = form.isTouched(scope)
-    const touched_0_concise = form.isTouched(scope, params._first)
-    const touched_0_verbose = form.isTouched(scope, params._second)
+    const touched0 = form.isTouched(scope)
+    const touched0Concise = form.isTouched(scope, params._first)
+    const touched0Verbose = form.isTouched(scope, params._second)
 
-    form.setTouched(touched_0_concise)
+    form.setTouched(touched0Concise)
 
-    expect(form.isTouched(scope)).toStrictEqual(touched_0)
-    expect(form.isTouched(scope, params._first)).toStrictEqual(
-      touched_0_concise,
-    )
-    expect(form.isTouched(scope, params._second)).toStrictEqual(
-      touched_0_verbose,
-    )
+    expect(form.isTouched(scope)).toStrictEqual(touched0)
+    expect(form.isTouched(scope, params._first)).toStrictEqual(touched0Concise)
+    expect(form.isTouched(scope, params._second)).toStrictEqual(touched0Verbose)
   })
 
   it("allows passing verbose value to setTouched", ({ scope }) => {
-    const touched_0 = form.isTouched(scope)
-    const touched_0_concise = form.isTouched(scope, params._first)
-    const touched_0_verbose = form.isTouched(scope, params._second)
+    const touched0 = form.isTouched(scope)
+    const touched0Concise = form.isTouched(scope, params._first)
+    const touched0Verbose = form.isTouched(scope, params._second)
 
-    form.setTouched(touched_0_verbose)
+    form.setTouched(touched0Verbose)
 
-    expect(form.isTouched(scope)).toStrictEqual(touched_0)
-    expect(form.isTouched(scope, params._first)).toStrictEqual(
-      touched_0_concise,
-    )
-    expect(form.isTouched(scope, params._second)).toStrictEqual(
-      touched_0_verbose,
-    )
+    expect(form.isTouched(scope)).toStrictEqual(touched0)
+    expect(form.isTouched(scope, params._first)).toStrictEqual(touched0Concise)
+    expect(form.isTouched(scope, params._second)).toStrictEqual(touched0Verbose)
   })
 
   it("allows passing verbose value in setTouched callback", ({ scope }) => {
-    const touched_0 = form.isTouched(scope)
-    const touched_0_concise = form.isTouched(scope, params._first)
-    const touched_0_verbose = form.isTouched(scope, params._second)
+    const touched0 = form.isTouched(scope)
+    const touched0Concise = form.isTouched(scope, params._first)
+    const touched0Verbose = form.isTouched(scope, params._second)
 
-    form.setTouched((verbose) => {
-      return verbose
-    })
+    form.setTouched((verbose) => verbose)
 
-    expect(form.isTouched(scope)).toStrictEqual(touched_0)
-    expect(form.isTouched(scope, params._first)).toStrictEqual(
-      touched_0_concise,
-    )
-    expect(form.isTouched(scope, params._second)).toStrictEqual(
-      touched_0_verbose,
-    )
+    expect(form.isTouched(scope)).toStrictEqual(touched0)
+    expect(form.isTouched(scope, params._first)).toStrictEqual(touched0Concise)
+    expect(form.isTouched(scope, params._second)).toStrictEqual(touched0Verbose)
   })
 
   it("ensures ImpulseFormSwitchOptions.touched type", () => {
@@ -302,9 +280,7 @@ describe("types", () => {
     it("matches schema type for isTouched(scope, select?)", ({ scope }) => {
       expectTypeOf(parent.isTouched(scope)).toEqualTypeOf<boolean>()
 
-      expectTypeOf(
-        parent.isTouched(scope, params._first),
-      ).toEqualTypeOf<ParentTouchedSchema>()
+      expectTypeOf(parent.isTouched(scope, params._first)).toEqualTypeOf<ParentTouchedSchema>()
 
       expectTypeOf(
         parent.isTouched(scope, params._second),
@@ -312,9 +288,7 @@ describe("types", () => {
     })
 
     it("matches setter type for setTouched(setter)", () => {
-      expectTypeOf(parent.setTouched).toEqualTypeOf<
-        (setter: ParentTouchedSetter) => void
-      >()
+      expectTypeOf(parent.setTouched).toEqualTypeOf<(setter: ParentTouchedSetter) => void>()
     })
 
     it("allows passing concise value to setTouched", ({ scope }) => {
@@ -432,7 +406,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
             ),
           },
           {
-            touched: touched,
+            touched,
           },
         )
 
@@ -985,27 +959,25 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
   })
 
-  it("returns the boolean as concise result when everything has the same boolean", ({
-    scope,
-  }) => {
+  it("returns the boolean as concise result when everything has the same boolean", ({ scope }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("", {
-        touched: touched,
+        touched,
         schema: z.enum(["_1", "_2"]),
       }),
       {
-        _1: ImpulseFormUnit(0, { touched: touched, schema: z.number() }),
+        _1: ImpulseFormUnit(0, { touched, schema: z.number() }),
         _2: ImpulseFormSwitch(
           ImpulseFormUnit("", {
-            touched: touched,
+            touched,
             schema: z.enum(["_3", "_4"]),
           }),
           {
             _3: ImpulseFormUnit("0", {
-              touched: touched,
+              touched,
               schema: z.string(),
             }),
-            _4: ImpulseFormUnit(1, { touched: touched, schema: z.number() }),
+            _4: ImpulseFormUnit(1, { touched, schema: z.number() }),
           },
         ),
       },
@@ -1063,14 +1035,10 @@ describe("stable touched value", () => {
     expect(form.isTouched(scope)).toBe(form.isTouched(scope))
 
     expect(form.isTouched(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.isTouched(scope, params._first)).toBe(
-      form.isTouched(scope, params._first),
-    )
+    expect(form.isTouched(scope, params._first)).toBe(form.isTouched(scope, params._first))
 
     expect(form.isTouched(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.isTouched(scope, params._second)).toBe(
-      form.isTouched(scope, params._second),
-    )
+    expect(form.isTouched(scope, params._second)).toBe(form.isTouched(scope, params._second))
   })
 })
 
@@ -1102,9 +1070,7 @@ describe("using recursive setter", () => {
     ),
   }
 
-  function setup(
-    options?: ImpulseFormSwitchOptions<typeof active, typeof branches>,
-  ) {
+  function setup(options?: ImpulseFormSwitchOptions<typeof active, typeof branches>) {
     return ImpulseFormSwitch(active, branches, options)
   }
 
@@ -1116,12 +1082,7 @@ describe("using recursive setter", () => {
       ) => ImpulseFormSwitch<typeof active, typeof branches>,
     ]
   >([
-    [
-      "ImpulseFormSwitchOptions.touched",
-      (touched) => {
-        return setup({ touched })
-      },
-    ],
+    ["ImpulseFormSwitchOptions.touched", (touched) => setup({ touched })],
 
     [
       "ImpulseFormSwitch.setTouched",
@@ -1198,15 +1159,15 @@ describe("using recursive setter", () => {
             })
 
             return {
-              _1: ($_branches_1) => {
-                expectTypeOf($_branches_1).toEqualTypeOf<boolean>()
-                expect($_branches_1).toBe(false)
+              _1: ($_branches1) => {
+                expectTypeOf($_branches1).toEqualTypeOf<boolean>()
+                expect($_branches1).toBe(false)
 
                 return true
               },
 
-              _2: ($_branches_2) => {
-                expectTypeOf($_branches_2).toEqualTypeOf<{
+              _2: ($_branches2) => {
+                expectTypeOf($_branches2).toEqualTypeOf<{
                   readonly active: boolean
                   readonly branches: {
                     readonly _3: boolean
@@ -1214,7 +1175,7 @@ describe("using recursive setter", () => {
                   }
                 }>()
 
-                expect($_branches_2).toStrictEqual({
+                expect($_branches2).toStrictEqual({
                   active: false,
                   branches: {
                     _3: true,
@@ -1223,38 +1184,34 @@ describe("using recursive setter", () => {
                 })
 
                 return {
-                  active: ($_branches_2_active) => {
-                    expectTypeOf($_branches_2_active).toEqualTypeOf<boolean>()
-                    expect($_branches_2_active).toBe(false)
+                  active: ($_branches2Active) => {
+                    expectTypeOf($_branches2Active).toEqualTypeOf<boolean>()
+                    expect($_branches2Active).toBe(false)
 
                     return true
                   },
 
-                  branches: ($_branches_2_branches) => {
-                    expectTypeOf($_branches_2_branches).toEqualTypeOf<{
+                  branches: ($_branches2Branches) => {
+                    expectTypeOf($_branches2Branches).toEqualTypeOf<{
                       readonly _3: boolean
                       readonly _4: boolean
                     }>()
 
-                    expect($_branches_2_branches).toStrictEqual({
+                    expect($_branches2Branches).toStrictEqual({
                       _3: true,
                       _4: false,
                     })
 
                     return {
-                      _3: ($_branches_2_branches_3) => {
-                        expectTypeOf(
-                          $_branches_2_branches_3,
-                        ).toEqualTypeOf<boolean>()
-                        expect($_branches_2_branches_3).toBe(true)
+                      _3: ($_branches2Branches3) => {
+                        expectTypeOf($_branches2Branches3).toEqualTypeOf<boolean>()
+                        expect($_branches2Branches3).toBe(true)
 
                         return false
                       },
-                      _4: ($_branches_2_branches_4) => {
-                        expectTypeOf(
-                          $_branches_2_branches_4,
-                        ).toEqualTypeOf<boolean>()
-                        expect($_branches_2_branches_4).toBe(false)
+                      _4: ($_branches2Branches4) => {
+                        expectTypeOf($_branches2Branches4).toEqualTypeOf<boolean>()
+                        expect($_branches2Branches4).toBe(false)
 
                         return true
                       },
@@ -1297,8 +1254,8 @@ describe("using recursive setter", () => {
 
             return {
               kind: "_2",
-              value: ($_branch_2) => {
-                expectTypeOf($_branch_2).toEqualTypeOf<{
+              value: ($_branch2) => {
+                expectTypeOf($_branch2).toEqualTypeOf<{
                   readonly active: boolean
                   readonly branches: {
                     readonly _3: boolean
@@ -1307,7 +1264,7 @@ describe("using recursive setter", () => {
                 }>()
 
                 // the value is set in $_branches_2 ^
-                expect($_branch_2).toStrictEqual({
+                expect($_branch2).toStrictEqual({
                   active: true,
                   branches: {
                     _3: false,
@@ -1316,46 +1273,42 @@ describe("using recursive setter", () => {
                 })
 
                 return {
-                  active: ($_branch_2_active) => {
-                    expectTypeOf($_branch_2_active).toEqualTypeOf<boolean>()
-                    expect($_branch_2_active).toBe(true)
+                  active: ($_branch2Active) => {
+                    expectTypeOf($_branch2Active).toEqualTypeOf<boolean>()
+                    expect($_branch2Active).toBe(true)
 
                     return false
                   },
 
-                  branches: ($_branch_2_branches) => {
-                    expectTypeOf($_branch_2_branches).toEqualTypeOf<{
+                  branches: ($_branch2Branches) => {
+                    expectTypeOf($_branch2Branches).toEqualTypeOf<{
                       readonly _3: boolean
                       readonly _4: boolean
                     }>()
 
-                    expect($_branch_2_branches).toStrictEqual({
+                    expect($_branch2Branches).toStrictEqual({
                       _3: false,
                       _4: true,
                     })
 
                     return {
-                      _3: ($_branch_2_branches_3) => {
-                        expectTypeOf(
-                          $_branch_2_branches_3,
-                        ).toEqualTypeOf<boolean>()
-                        expect($_branch_2_branches_3).toBe(false)
+                      _3: ($_branch2Branches3) => {
+                        expectTypeOf($_branch2Branches3).toEqualTypeOf<boolean>()
+                        expect($_branch2Branches3).toBe(false)
 
                         return true
                       },
-                      _4: ($_branch_2_branches_4) => {
-                        expectTypeOf(
-                          $_branch_2_branches_4,
-                        ).toEqualTypeOf<boolean>()
-                        expect($_branch_2_branches_4).toBe(true)
+                      _4: ($_branch2Branches4) => {
+                        expectTypeOf($_branch2Branches4).toEqualTypeOf<boolean>()
+                        expect($_branch2Branches4).toBe(true)
 
                         return false
                       },
                     }
                   },
 
-                  branch: ($_branch_2_branch) => {
-                    expectTypeOf($_branch_2_branch).toEqualTypeOf<
+                  branch: ($_branch2Branch) => {
+                    expectTypeOf($_branch2Branch).toEqualTypeOf<
                       | {
                           readonly kind: "_3"
                           readonly value: boolean
@@ -1366,19 +1319,17 @@ describe("using recursive setter", () => {
                         }
                     >()
                     // the value is set in $_branch_2_branches_3 ^
-                    expect($_branch_2_branch).toStrictEqual({
+                    expect($_branch2Branch).toStrictEqual({
                       kind: "_3",
                       value: true,
                     })
 
                     return {
                       kind: "_4",
-                      value: ($_branch_2_branch_4) => {
-                        expectTypeOf(
-                          $_branch_2_branch_4,
-                        ).toEqualTypeOf<boolean>()
+                      value: ($_branch2Branch4) => {
+                        expectTypeOf($_branch2Branch4).toEqualTypeOf<boolean>()
                         // the value is set in $_branch_2_branches ^
-                        expect($_branch_2_branch_4).toBe(false)
+                        expect($_branch2Branch4).toBe(false)
 
                         return true
                       },

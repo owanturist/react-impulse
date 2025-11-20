@@ -5,11 +5,7 @@ import { isStrictEqual } from "~/tools/is-strict-equal"
 import { isUndefined } from "~/tools/is-undefined"
 
 import { type Compare, Impulse, untrack } from "../dependencies"
-import {
-  VALIDATE_ON_INIT,
-  VALIDATE_ON_TOUCH,
-  type ValidateStrategy,
-} from "../validate-strategy"
+import { VALIDATE_ON_INIT, VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 import type { ZodLikeSchema } from "../zod-like-schema"
 
 import { createUnionCompare } from "./_create-union-compare"
@@ -25,11 +21,11 @@ import {
 import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer"
 import type { ImpulseFormUnitValidator } from "./impulse-form-unit-validator"
 
-export type ImpulseFormUnit<
+export type ImpulseFormUnit<TInput, TError = null, TOutput = TInput> = ImpulseFormUnitImpl<
   TInput,
-  TError = null,
-  TOutput = TInput,
-> = ImpulseFormUnitImpl<TInput, TError, TOutput>
+  TError,
+  TOutput
+>
 
 export interface ImpulseFormUnitOptions<TInput, TError = null> {
   /**
@@ -110,11 +106,8 @@ export interface ImpulseFormUnitOptions<TInput, TError = null> {
   readonly initial?: TInput
 }
 
-export interface ImpulseFormUnitTransformedOptions<
-  TInput,
-  TError = null,
-  TOutput = TInput,
-> extends Omit<ImpulseFormUnitOptions<TInput, TError>, "isOutputEqual"> {
+export interface ImpulseFormUnitTransformedOptions<TInput, TError = null, TOutput = TInput>
+  extends Omit<ImpulseFormUnitOptions<TInput, TError>, "isOutputEqual"> {
   readonly transform: ImpulseFormUnitTransformer<TInput, TOutput>
 
   /**
@@ -144,14 +137,8 @@ export interface ImpulseFormUnitSchemaOptions<TInput, TOutput = TInput>
   readonly schema: ZodLikeSchema<TOutput>
 }
 
-export interface ImpulseFormUnitValidatedOptions<
-  TInput,
-  TError = null,
-  TOutput = TInput,
-> extends Omit<
-    ImpulseFormUnitTransformedOptions<TInput, TError, TOutput>,
-    "transform"
-  > {
+export interface ImpulseFormUnitValidatedOptions<TInput, TError = null, TOutput = TInput>
+  extends Omit<ImpulseFormUnitTransformedOptions<TInput, TError, TOutput>, "transform"> {
   /**
    * @default "onTouch"
    */
@@ -195,8 +182,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
   | ImpulseFormUnit<TInput, TError, TOutput> /* enforce syntax highlight */ {
   const isInputEqual = options?.isInputEqual ?? isStrictEqual
   const isInputDirty =
-    options?.isInputDirty ??
-    ((left, right, scope) => !isInputEqual(left, right, scope))
+    options?.isInputDirty ?? ((left, right, scope) => !isInputEqual(left, right, scope))
 
   const input = Impulse(input_, { compare: isInputEqual })
 
@@ -206,9 +192,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       untrack((scope) => {
         const initialOrInput = options?.initial ?? input_
 
-        return isInputEqual(initialOrInput, input_, scope)
-          ? input_
-          : initialOrInput
+        return isInputEqual(initialOrInput, input_, scope) ? input_ : initialOrInput
       }),
       {
         compare: isInputEqual,
@@ -300,9 +284,7 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     error,
     Impulse<ValidateStrategy>(VALIDATE_ON_INIT),
     touched,
-    Impulse(
-      transformFromInput as ImpulseFormUnitTransform<TInput, TError, TInput>,
-    ),
+    Impulse(transformFromInput as ImpulseFormUnitTransform<TInput, TError, TInput>),
     isInputDirty,
     isInputEqual,
     createUnionCompare(isNull, isInputEqual),

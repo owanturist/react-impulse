@@ -11,9 +11,7 @@ describe("types", () => {
     }),
     {
       _1: ImpulseFormUnit(true, {
-        schema: z
-          .boolean()
-          .transform((value): string => (value ? "ok" : "not ok")),
+        schema: z.boolean().transform((value): string => (value ? "ok" : "not ok")),
       }),
       _2: ImpulseFormShape({
         _3: ImpulseFormUnit("name"),
@@ -63,13 +61,9 @@ describe("types", () => {
   it("matches schema type for isValidated(scope, select?)", ({ scope }) => {
     expectTypeOf(form.isValidated(scope)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(
-      form.isValidated(scope, params._first),
-    ).toEqualTypeOf<IsValidatedSchema>()
+    expectTypeOf(form.isValidated(scope, params._first)).toEqualTypeOf<IsValidatedSchema>()
 
-    expectTypeOf(
-      form.isInvalid(scope, params._second),
-    ).toEqualTypeOf<IsValidatedVerboseSchema>()
+    expectTypeOf(form.isInvalid(scope, params._second)).toEqualTypeOf<IsValidatedVerboseSchema>()
   })
 
   describe("nested", () => {
@@ -122,9 +116,7 @@ describe("types", () => {
 })
 
 describe("when branch is initially invalid", () => {
-  it("returns false for initially invalid but not validated active", ({
-    scope,
-  }) => {
+  it("returns false for initially invalid but not validated active", ({ scope }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("", {
         schema: z.enum(["_1", "_2", "_5"]),
@@ -193,9 +185,7 @@ describe("when branch is initially invalid", () => {
     })
   })
 
-  it("returns false for initially valid but not validated active", ({
-    scope,
-  }) => {
+  it("returns false for initially valid but not validated active", ({ scope }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("_1", {
         schema: z.enum(["_1", "_2", "_5"]),
@@ -267,9 +257,7 @@ describe("when branch is initially invalid", () => {
     })
   })
 
-  it("returns false after switching to valid not validated branch", ({
-    scope,
-  }) => {
+  it("returns false after switching to valid not validated branch", ({ scope }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("_2", {
         schema: z.enum(["_1", "_2"]),
@@ -318,9 +306,7 @@ describe("when branch is initially invalid", () => {
 })
 
 describe("when branch is initially valid", () => {
-  it("returns false for initially invalid but not validated active", ({
-    scope,
-  }) => {
+  it("returns false for initially invalid but not validated active", ({ scope }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("", {
         schema: z.enum(["_1", "_2"]),
@@ -385,9 +371,7 @@ describe("when branch is initially valid", () => {
     })
   })
 
-  it("returns false for a initially valid but not validated active", ({
-    scope,
-  }) => {
+  it("returns false for a initially valid but not validated active", ({ scope }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("_1", {
         schema: z.enum(["_1", "_2"]),
@@ -569,13 +553,9 @@ describe("stable validated value", () => {
     expect(form.isValidated(scope)).toBe(form.isValidated(scope))
 
     expect(form.isValidated(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.isValidated(scope, params._first)).toBe(
-      form.isValidated(scope, params._first),
-    )
+    expect(form.isValidated(scope, params._first)).toBe(form.isValidated(scope, params._first))
 
     expect(form.isValidated(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.isValidated(scope, params._second)).toBe(
-      form.isValidated(scope, params._second),
-    )
+    expect(form.isValidated(scope, params._second)).toBe(form.isValidated(scope, params._second))
   })
 })

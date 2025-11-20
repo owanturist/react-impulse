@@ -53,9 +53,5 @@ it("changes some errors", ({ scope }) => {
   ])
 
   form.setError([(x) => [...x!, "x"], undefined, (x) => [...x!, "x"]])
-  expect(form.getError(scope)).toStrictEqual([
-    ["err0", "x"],
-    ["err1"],
-    ["err2", "x"],
-  ])
+  expect(form.getError(scope)).toStrictEqual([["err0", "x"], ["err1"], ["err2", "x"]])
 })

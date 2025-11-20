@@ -3,9 +3,7 @@ import type { Impulse, ReadonlyImpulse } from "./impulse"
 import { isImpulseFactory } from "./is-impulse-factory"
 import type { Scope } from "./scope"
 
-export const isDerivedImpulse = isImpulseFactory(
-  (input) => input instanceof DerivedImpulse,
-) as {
+export const isDerivedImpulse = isImpulseFactory((input) => input instanceof DerivedImpulse) as {
   /**
    * A function to check whether or not the input is an Impulse.
    *
@@ -18,9 +16,7 @@ export const isDerivedImpulse = isImpulseFactory(
    *
    * @version 3.0.0
    */
-  <T, Unknown = unknown>(
-    input: Unknown | ReadonlyImpulse<T>,
-  ): input is ReadonlyImpulse<T>
+  <T, Unknown = unknown>(input: Unknown | ReadonlyImpulse<T>): input is ReadonlyImpulse<T>
 
   /**
    * A function to check whether or not an Impulse value passes the `check`.

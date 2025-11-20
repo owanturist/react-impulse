@@ -1,12 +1,12 @@
-/* eslint-disable no-restricted-imports */
+/** biome-ignore-all lint/style/noRestrictedImports: re-export */
 export {
   type DependencyList,
   type EffectCallback,
-  useRef,
-  useMemo,
   useCallback,
+  useDebugValue,
   useEffect,
   useLayoutEffect,
-  useDebugValue,
+  useMemo,
+  useRef,
 } from "react"
 export { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector"

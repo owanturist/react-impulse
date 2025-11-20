@@ -6,20 +6,20 @@ import { map } from "~/tools/map"
 
 import type { Result } from "./result"
 
-export interface ZodLikeIssue {
+interface ZodLikeIssue {
   message: string
 }
 
-export type ZodLikeError =
+type ZodLikeError =
   | { get errors(): ReadonlyArray<ZodLikeIssue> }
   | { errors: ReadonlyArray<ZodLikeIssue> }
   | { issues: ReadonlyArray<ZodLikeIssue> }
 
-export type ZodLikeSafeParseResult<TOutput> =
+type ZodLikeSafeParseResult<TOutput> =
   | { success: false; error: ZodLikeError }
   | { success: true; data: TOutput }
 
-export type ZodLikeSchema<TOutput> =
+type ZodLikeSchema<TOutput> =
   | { parse(input: unknown): TOutput }
   | { safeParse(input: unknown): ZodLikeSafeParseResult<TOutput> }
 
@@ -30,9 +30,7 @@ function zodLikeSafeParseResultToResult<TOutput>(
     return [null, result.data]
   }
 
-  const errors = hasProperty(result.error, "errors")
-    ? result.error.errors
-    : result.error.issues
+  const errors = hasProperty(result.error, "errors") ? result.error.errors : result.error.issues
 
   return [map(errors, ({ message }) => message), null]
 }
@@ -45,9 +43,7 @@ function unknownErrors(error: unknown): ReadonlyArray<string> {
   const errors = error.errors ?? error.issues
 
   if (isArray(errors)) {
-    return map(errors.filter(isObject), ({ message }) => message).filter(
-      isString,
-    )
+    return map(errors.filter(isObject), ({ message }) => message).filter(isString)
   }
 
   if (error instanceof Error) {
@@ -57,7 +53,7 @@ function unknownErrors(error: unknown): ReadonlyArray<string> {
   return []
 }
 
-export function zodLikeParse<TOutput>(
+function zodLikeParse<TOutput>(
   schema: ZodLikeSchema<TOutput>,
   input: unknown,
 ): Result<ReadonlyArray<string>, TOutput> {
@@ -70,4 +66,12 @@ export function zodLikeParse<TOutput>(
   } catch (error) {
     return [unknownErrors(error), null]
   }
+}
+
+export {
+  type ZodLikeIssue,
+  type ZodLikeError,
+  type ZodLikeSafeParseResult,
+  type ZodLikeSchema,
+  zodLikeParse,
 }

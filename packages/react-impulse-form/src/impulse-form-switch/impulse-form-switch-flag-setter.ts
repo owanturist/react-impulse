@@ -22,15 +22,8 @@ export type ImpulseFormSwitchFlagSetter<
       ImpulseFormSwitchConciseSchema<
         GetImpulseFormParam<TKind, "flag.setter">,
         Setter<
-          | boolean
-          | ImpulseFormSwitchBranchUnion<TKind, TBranches, "flag.setter">,
-          [
-            ImpulseFormSwitchBranchUnion<
-              TKind,
-              TBranches,
-              "flag.schema.verbose"
-            >,
-          ]
+          boolean | ImpulseFormSwitchBranchUnion<TKind, TBranches, "flag.setter">,
+          [ImpulseFormSwitchBranchUnion<TKind, TBranches, "flag.schema.verbose">]
         >
       >
     >
@@ -40,10 +33,7 @@ export type ImpulseFormSwitchFlagSetter<
       ImpulseFormSwitchVerboseSchema<
         GetImpulseFormParam<TKind, "flag.setter">,
         Setter<
-          | boolean
-          | Partial<
-              GetImpulseFormSwitchBranchesParam<TBranches, "flag.setter">
-            >,
+          boolean | Partial<GetImpulseFormSwitchBranchesParam<TBranches, "flag.setter">>,
           [GetImpulseFormSwitchBranchesParam<TBranches, "flag.schema.verbose">]
         >
       >

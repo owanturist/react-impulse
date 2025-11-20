@@ -11,8 +11,8 @@ it("selects input", ({ scope }) => {
     fourth: ["anything"],
   })
 
-  const input_0 = shape.getInput(scope)
-  expect(input_0).toStrictEqual({
+  const input0 = shape.getInput(scope)
+  expect(input0).toStrictEqual({
     first: "1",
     second: 0,
     third: {
@@ -22,7 +22,7 @@ it("selects input", ({ scope }) => {
     fourth: ["anything"],
   })
 
-  expectTypeOf(input_0).toEqualTypeOf<{
+  expectTypeOf(input0).toEqualTypeOf<{
     readonly first: string
     readonly second: number
     readonly third: {
@@ -39,8 +39,8 @@ it("selects input", ({ scope }) => {
   shape.setInput({
     first: "12",
   })
-  const input_1 = shape.getInput(scope)
-  expect(input_1).toStrictEqual({
+  const input1 = shape.getInput(scope)
+  expect(input1).toStrictEqual({
     first: "12",
     second: 0,
     third: {
@@ -55,8 +55,8 @@ it("selects input", ({ scope }) => {
       two: ["1", "12"],
     },
   })
-  const input_2 = shape.getInput(scope)
-  expect(input_2).toStrictEqual({
+  const input2 = shape.getInput(scope)
+  expect(input2).toStrictEqual({
     first: "12",
     second: 0,
     third: {
@@ -92,8 +92,8 @@ it("persists unchanged input fields between changes", ({ scope }) => {
     }),
   })
 
-  const input_0 = shape.getInput(scope)
-  expect(input_0).toStrictEqual({
+  const input0 = shape.getInput(scope)
+  expect(input0).toStrictEqual({
     first: {
       _1: "1",
       _2: "2",
@@ -110,8 +110,8 @@ it("persists unchanged input fields between changes", ({ scope }) => {
     },
   })
 
-  const input_1 = shape.getInput(scope)
-  expect(input_1).toStrictEqual({
+  const input1 = shape.getInput(scope)
+  expect(input1).toStrictEqual({
     first: {
       _1: "1",
       _2: "2",
@@ -121,7 +121,7 @@ it("persists unchanged input fields between changes", ({ scope }) => {
       _4: "4",
     },
   })
-  expect(input_1).not.toBe(input_0)
-  expect(input_1.first).toBe(input_0.first)
-  expect(input_1.second).not.toBe(input_0.second)
+  expect(input1).not.toBe(input0)
+  expect(input1.first).toBe(input0.first)
+  expect(input1.second).not.toBe(input0.second)
 })

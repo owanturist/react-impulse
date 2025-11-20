@@ -16,8 +16,5 @@ export type ImpulseFormOptionalInputSetter<
       GetImpulseFormParam<TElement, "input.setter">
     >
   >,
-  [
-    ImpulseFormOptionalInput<TEnabled, TElement>,
-    ImpulseFormOptionalInput<TEnabled, TElement>,
-  ]
+  [ImpulseFormOptionalInput<TEnabled, TElement>, ImpulseFormOptionalInput<TEnabled, TElement>]
 >

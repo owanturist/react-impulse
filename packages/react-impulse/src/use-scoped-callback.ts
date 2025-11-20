@@ -12,17 +12,12 @@ import { useScopedMemo } from "./use-scoped-memo"
  * @version 1.3.0
  */
 
-export function useScopedCallback<
-  TArgs extends ReadonlyArray<unknown>,
-  TResult,
->(
+export function useScopedCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
   callback: (scope: Scope, ...args: TArgs) => TResult,
   dependencies: DependencyList,
 ): (...args: TArgs) => TResult {
   return useScopedMemo((scope) => {
-    return (...args) => {
-      return enqueue(() => callback(scope, ...args))
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return (...args) => enqueue(() => callback(scope, ...args))
+    // biome-ignore lint/correctness/useExhaustiveDependencies: pass dependencies as is
   }, dependencies)
 }

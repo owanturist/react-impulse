@@ -31,10 +31,7 @@ export interface ImpulseFormOptionalParams<
 
   "validateOn.setter": ImpulseFormOptionalValidateOnSetter<TEnabled, TElement>
   "validateOn.schema": ImpulseFormOptionalValidateOn<TEnabled, TElement>
-  "validateOn.schema.verbose": ImpulseFormOptionalValidateOnVerbose<
-    TEnabled,
-    TElement
-  >
+  "validateOn.schema.verbose": ImpulseFormOptionalValidateOnVerbose<TEnabled, TElement>
 
   "error.setter": ImpulseFormOptionalErrorSetter<TEnabled, TElement>
   "error.schema": ImpulseFormOptionalError<TEnabled, TElement>

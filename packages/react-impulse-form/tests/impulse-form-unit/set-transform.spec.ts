@@ -7,21 +7,21 @@ it("sets the transformer", ({ scope }) => {
 
   expect(unit.getOutput(scope)).toBe("hi")
 
-  unit.setTransform((input) => input + ".")
+  unit.setTransform((input) => `${input}.`)
   expect(unit.getOutput(scope)).toBe("hi.")
 })
 
 it("overrides a transformer", ({ scope }) => {
   const unit = ImpulseFormUnit("hi", {
-    transform: (input) => input + ".",
+    transform: (input) => `${input}.`,
   })
 
   expect(unit.getOutput(scope)).toBe("hi.")
 
-  unit.setTransform((input) => input + "!")
+  unit.setTransform((input) => `${input}!`)
   expect(unit.getOutput(scope)).toBe("hi!")
 
-  unit.setTransform((input) => input + "?")
+  unit.setTransform((input) => `${input}?`)
   expect(unit.getOutput(scope)).toBe("hi?")
 })
 
@@ -39,7 +39,7 @@ it("overrides schema", ({ scope }) => {
 it("overrides validate", ({ scope }) => {
   const unit = ImpulseFormUnit<string, string, number>("hi", {
     validate: (input) => {
-      if (input.length < 1) {
+      if (input.length === 0) {
         return ["Input is too short", null]
       }
 

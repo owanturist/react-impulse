@@ -25,13 +25,7 @@ describe("scoping nested impulses", () => {
       moreThanTen: boolean
       lessThanTwenty: boolean
     } & AppProps
-  > = ({
-    moreThanTen,
-    lessThanTwenty,
-    state: appState,
-    onRender,
-    onCounterRender,
-  }) => {
+  > = ({ moreThanTen, lessThanTwenty, state: appState, onRender, onCounterRender }) => {
     const state = useScoped(appState)
 
     return (
@@ -55,11 +49,9 @@ describe("scoping nested impulses", () => {
             type="button"
             data-testid="reset-counters"
             onClick={() => {
-              state.counts.forEach((count) => {
+              for (const count of state.counts) {
                 count.setValue(0)
-
-                return count
-              })
+              }
             }}
           />
 
@@ -68,11 +60,9 @@ describe("scoping nested impulses", () => {
             data-testid="increment-all"
             onClick={() => {
               appState.setValue((current) => {
-                current.counts.forEach((count) => {
+                for (const count of current.counts) {
                   count.setValue((x) => x + 1)
-
-                  return count
-                })
+                }
 
                 return current
               })
@@ -81,11 +71,7 @@ describe("scoping nested impulses", () => {
         </React.Profiler>
 
         {state.counts.map((count, index) => (
-          <CounterComponent
-            key={index}
-            count={count}
-            onRender={() => onCounterRender(index)}
-          />
+          <CounterComponent key={index} count={count} onRender={() => onCounterRender(index)} />
         ))}
       </>
     )
@@ -102,85 +88,43 @@ describe("scoping nested impulses", () => {
     return total < 20
   }
 
-  const compare = (
-    [left1, right1]: [boolean, boolean],
-    [left2, right2]: [boolean, boolean],
-  ) => {
-    return left1 === left2 && right1 === right2
-  }
+  const compare = ([left1, right1]: [boolean, boolean], [left2, right2]: [boolean, boolean]) =>
+    left1 === left2 && right1 === right2
 
   const SingleScopeApp: React.FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useScoped(
-      (scope) => [
-        factoryLeft(scope, props.state),
-        factoryRight(scope, props.state),
-      ],
+      (scope) => [factoryLeft(scope, props.state), factoryRight(scope, props.state)],
       [props.state],
       {
         compare: (left, right) => compare(left, right),
       },
     )
 
-    return (
-      <GenericApp
-        moreThanTen={moreThanTen}
-        lessThanTwenty={lessThanTwenty}
-        {...props}
-      />
-    )
+    return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />
   }
 
   const SingleMemoizedScopeApp: React.FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useScoped<[boolean, boolean]>(
-      (scope) => [
-        factoryLeft(scope, props.state),
-        factoryRight(scope, props.state),
-      ],
+      (scope) => [factoryLeft(scope, props.state), factoryRight(scope, props.state)],
       [props.state],
       { compare },
     )
 
-    return (
-      <GenericApp
-        moreThanTen={moreThanTen}
-        lessThanTwenty={lessThanTwenty}
-        {...props}
-      />
-    )
+    return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />
   }
 
   const MultipleScopesApp: React.FC<AppProps> = (props) => {
     const moreThanTen = useScoped((scope) => factoryLeft(scope, props.state))
-    const lessThanTwenty = useScoped((scope) =>
-      factoryRight(scope, props.state),
-    )
+    const lessThanTwenty = useScoped((scope) => factoryRight(scope, props.state))
 
-    return (
-      <GenericApp
-        moreThanTen={moreThanTen}
-        lessThanTwenty={lessThanTwenty}
-        {...props}
-      />
-    )
+    return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />
   }
 
   const MultipleMemoizedScopesApp: React.FC<AppProps> = (props) => {
-    const moreThanTen = useScoped(
-      (scope) => factoryLeft(scope, props.state),
-      [props.state],
-    )
-    const lessThanTwenty = useScoped(
-      (scope) => factoryRight(scope, props.state),
-      [props.state],
-    )
+    const moreThanTen = useScoped((scope) => factoryLeft(scope, props.state), [props.state])
+    const lessThanTwenty = useScoped((scope) => factoryRight(scope, props.state), [props.state])
 
-    return (
-      <GenericApp
-        moreThanTen={moreThanTen}
-        lessThanTwenty={lessThanTwenty}
-        {...props}
-      />
-    )
+    return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />
   }
 
   const ScopedApp: React.FC<AppProps> = (props) => {
@@ -188,13 +132,7 @@ describe("scoping nested impulses", () => {
     const moreThanTen = factoryLeft(scope, props.state)
     const lessThanTwenty = factoryRight(scope, props.state)
 
-    return (
-      <GenericApp
-        moreThanTen={moreThanTen}
-        lessThanTwenty={lessThanTwenty}
-        {...props}
-      />
-    )
+    return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />
   }
 
   it.each([
@@ -210,13 +148,7 @@ describe("scoping nested impulses", () => {
     const onRender = vi.fn()
     const onCounterRender = vi.fn()
 
-    render(
-      <App
-        state={state}
-        onRender={onRender}
-        onCounterRender={onCounterRender}
-      />,
-    )
+    render(<App state={state} onRender={onRender} onCounterRender={onCounterRender} />)
 
     // initial render
     expect(onRender).toHaveBeenCalledOnce()

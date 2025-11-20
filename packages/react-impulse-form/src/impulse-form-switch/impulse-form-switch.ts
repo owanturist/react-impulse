@@ -35,19 +35,10 @@ export function ImpulseFormSwitch<
   TBranches extends ImpulseFormSwitchBranches<TKind>,
 >(
   active: TKind,
-  branches: IsEqualType<
-    GetImpulseFormParam<TKind, "output.schema">,
-    keyof TBranches
-  > extends true
+  branches: IsEqualType<GetImpulseFormParam<TKind, "output.schema">, keyof TBranches> extends true
     ? TBranches
     : never,
-  {
-    input,
-    initial,
-    touched,
-    validateOn,
-    error,
-  }: ImpulseFormSwitchOptions<TKind, TBranches> = {},
+  { input, initial, touched, validateOn, error }: ImpulseFormSwitchOptions<TKind, TBranches> = {},
 ): ImpulseFormSwitch<TKind, TBranches> {
   const switcher = new ImpulseFormSwitchState<TKind, TBranches>(
     null,

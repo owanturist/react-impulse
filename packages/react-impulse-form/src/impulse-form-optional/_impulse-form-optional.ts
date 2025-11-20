@@ -13,9 +13,7 @@ export class ImpulseFormOptional<
   public readonly enabled: TEnabled
   public readonly element: TElement
 
-  public constructor(
-    public readonly _state: ImpulseFormOptionalState<TEnabled, TElement>,
-  ) {
+  public constructor(public readonly _state: ImpulseFormOptionalState<TEnabled, TElement>) {
     super()
 
     this.enabled = _state._enabled._host() as TEnabled
@@ -23,8 +21,6 @@ export class ImpulseFormOptional<
   }
 
   public getEnabledElement(scope: Scope): undefined | TElement {
-    return this._state._getEnabledElement(scope)?._host() as
-      | undefined
-      | TElement
+    return this._state._getEnabledElement(scope)?._host() as undefined | TElement
   }
 }

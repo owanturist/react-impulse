@@ -11,8 +11,7 @@ import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"
 import type { ImpulseFormListInputSetter } from "./impulse-form-list-input-setter"
 import type { ImpulseFormListValidateOnSetter } from "./impulse-form-list-validate-on-setter"
 
-export type ImpulseFormList<TElement extends ImpulseForm> =
-  ImpulseFormListImpl<TElement>
+export type ImpulseFormList<TElement extends ImpulseForm> = ImpulseFormListImpl<TElement>
 
 export interface ImpulseFormListOptions<TElement extends ImpulseForm> {
   readonly input?: ImpulseFormListInputSetter<TElement>
@@ -24,13 +23,7 @@ export interface ImpulseFormListOptions<TElement extends ImpulseForm> {
 
 export function ImpulseFormList<TElement extends ImpulseForm>(
   elements: ReadonlyArray<TElement>,
-  {
-    input,
-    initial,
-    touched,
-    validateOn,
-    error,
-  }: ImpulseFormListOptions<TElement> = {},
+  { input, initial, touched, validateOn, error }: ImpulseFormListOptions<TElement> = {},
 ): ImpulseFormList<TElement> {
   const state = new ImpulseFormListState<TElement>(
     null,

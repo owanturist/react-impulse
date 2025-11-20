@@ -3,12 +3,7 @@ import { isNull } from "~/tools/is-null"
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
 
-import {
-  type ReadonlyImpulse,
-  type Scope,
-  batch,
-  untrack,
-} from "../dependencies"
+import { type ReadonlyImpulse, type Scope, batch, untrack } from "../dependencies"
 
 import type { ImpulseFormParams } from "./impulse-form-params"
 import type { ImpulseFormState } from "./impulse-form-state"
@@ -17,21 +12,21 @@ function resolveGetter<TValue, TVerbose, TSelected>(
   scope: Scope,
   value: ReadonlyImpulse<TValue>,
   verbose: ReadonlyImpulse<TVerbose>,
-  select: undefined | ((value: TValue, verbose: TVerbose) => TSelected),
+  select: undefined | ((val: TValue, ver: TVerbose) => TSelected),
 ): TSelected | TValue
 function resolveGetter<TValue, TVerbose, TSelected, TFallback>(
   scope: Scope,
   value: ReadonlyImpulse<TValue>,
   verbose: ReadonlyImpulse<TVerbose>,
-  select: undefined | ((value: TValue, verbose: TVerbose) => TSelected),
-  fallback: (value: TValue) => TFallback,
+  select: undefined | ((val: TValue, ver: TVerbose) => TSelected),
+  fallback: (val: TValue) => TFallback,
 ): TSelected | TFallback
 function resolveGetter<TValue, TVerbose, TSelected, TFallback>(
   scope: Scope,
   value: ReadonlyImpulse<TValue>,
   verbose: ReadonlyImpulse<TVerbose>,
-  select: undefined | ((value: TValue, verbose: TVerbose) => TSelected),
-  fallback?: (value: TValue) => TFallback,
+  select: undefined | ((val: TValue, ver: TVerbose) => TSelected),
+  fallback?: (val: TValue) => TFallback,
 ): TSelected | TFallback | TValue {
   const value_ = value.getValue(scope)
 
@@ -39,7 +34,7 @@ function resolveGetter<TValue, TVerbose, TSelected, TFallback>(
     return select(value_, verbose.getValue(scope))
   }
 
-  if (fallback) {
+  if (fallback != null) {
     return fallback(value_)
   }
 
@@ -47,12 +42,12 @@ function resolveGetter<TValue, TVerbose, TSelected, TFallback>(
 }
 
 export abstract class ImpulseForm<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: any is the only reasonable default
   TParams extends ImpulseFormParams = any,
 > {
-  protected static _getState<TParams extends ImpulseFormParams>({
+  protected static _getState<TFormParams extends ImpulseFormParams>({
     _state,
-  }: ImpulseForm<TParams>): ImpulseFormState<TParams> {
+  }: ImpulseForm<TFormParams>): ImpulseFormState<TFormParams> {
     return _state
   }
 
@@ -157,17 +152,11 @@ export abstract class ImpulseForm<
   public isValid(scope: Scope): boolean
   public isValid<TResult>(
     scope: Scope,
-    select: (
-      concise: TParams["flag.schema"],
-      verbose: TParams["flag.schema.verbose"],
-    ) => TResult,
+    select: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): TResult
   public isValid<TResult>(
     scope: Scope,
-    select?: (
-      concise: TParams["flag.schema"],
-      verbose: TParams["flag.schema.verbose"],
-    ) => TResult,
+    select?: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): boolean | TResult {
     const { _valid, _validVerbose } = this._state
 
@@ -177,17 +166,11 @@ export abstract class ImpulseForm<
   public isInvalid(scope: Scope): boolean
   public isInvalid<TResult>(
     scope: Scope,
-    select: (
-      concise: TParams["flag.schema"],
-      verbose: TParams["flag.schema.verbose"],
-    ) => TResult,
+    select: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): TResult
   public isInvalid<TResult>(
     scope: Scope,
-    select?: (
-      concise: TParams["flag.schema"],
-      verbose: TParams["flag.schema.verbose"],
-    ) => TResult,
+    select?: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): boolean | TResult {
     const { _invalid, _invalidVerbose } = this._state
 
@@ -197,17 +180,11 @@ export abstract class ImpulseForm<
   public isValidated(scope: Scope): boolean
   public isValidated<TResult>(
     scope: Scope,
-    select: (
-      concise: TParams["flag.schema"],
-      verbose: TParams["flag.schema.verbose"],
-    ) => TResult,
+    select: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): TResult
   public isValidated<TResult>(
     scope: Scope,
-    select?: (
-      concise: TParams["flag.schema"],
-      verbose: TParams["flag.schema.verbose"],
-    ) => TResult,
+    select?: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): boolean | TResult {
     const { _validated, _validatedVerbose } = this._state
 
@@ -217,17 +194,11 @@ export abstract class ImpulseForm<
   public isDirty(scope: Scope): boolean
   public isDirty<TResult>(
     scope: Scope,
-    select: (
-      concise: TParams["flag.schema"],
-      verbose: TParams["flag.schema.verbose"],
-    ) => TResult,
+    select: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): TResult
   public isDirty<TResult>(
     scope: Scope,
-    select?: (
-      concise: TParams["flag.schema"],
-      verbose: TParams["flag.schema.verbose"],
-    ) => TResult,
+    select?: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): boolean | TResult {
     const { _dirty, _dirtyVerbose } = this._state
 
@@ -237,17 +208,11 @@ export abstract class ImpulseForm<
   public isTouched(scope: Scope): boolean
   public isTouched<TResult>(
     scope: Scope,
-    select: (
-      concise: TParams["flag.schema"],
-      verbose: TParams["flag.schema.verbose"],
-    ) => TResult,
+    select: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): TResult
   public isTouched<TResult>(
     scope: Scope,
-    select?: (
-      concise: TParams["flag.schema"],
-      verbose: TParams["flag.schema.verbose"],
-    ) => TResult,
+    select?: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): boolean | TResult {
     const { _touched, _touchedVerbose } = this._state
 
@@ -287,6 +252,7 @@ export abstract class ImpulseForm<
   }
 
   public onSubmit(
+    // biome-ignore lint/suspicious/noConfusingVoidType: it wants using void, not undefined
     listener: (output: TParams["output.schema"]) => void | Promise<unknown>,
   ): VoidFunction {
     return this._state._onSubmit._subscribe(listener)
@@ -317,9 +283,7 @@ export abstract class ImpulseForm<
 
       await Promise.all(promises)
 
-      this._state._root._submittingCount.setValue((count) => {
-        return Math.max(0, count - 1)
-      })
+      this._state._root._submittingCount.setValue((count) => Math.max(0, count - 1))
     }
   }
 }

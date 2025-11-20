@@ -21,9 +21,7 @@ interface RootValidateStrategyVerbose {
   readonly third: ThirdValidateStrategyVerbose
 }
 
-type ThirdValidateStrategyConcise =
-  | ValidateStrategy
-  | ThirdValidateStrategyVerbose
+type ThirdValidateStrategyConcise = ValidateStrategy | ThirdValidateStrategyVerbose
 
 type RootValidateStrategyConcise =
   | ValidateStrategy
@@ -114,18 +112,14 @@ describe.each([
   it("returns concise value", ({ scope }) => {
     const shape = setup()
 
-    expectTypeOf(
-      getValidateOn(scope, shape),
-    ).toEqualTypeOf<RootValidateStrategyConcise>()
+    expectTypeOf(getValidateOn(scope, shape)).toEqualTypeOf<RootValidateStrategyConcise>()
 
     expectTypeOf(
       getValidateOn(scope, shape.fields.third),
     ).toEqualTypeOf<ThirdValidateStrategyConcise>()
   })
 
-  it("returns ValidateStrategy when ALL fields have the SAME validateOn", ({
-    scope,
-  }) => {
+  it("returns ValidateStrategy when ALL fields have the SAME validateOn", ({ scope }) => {
     const shape = setup({
       validateOn: "onSubmit",
     })
@@ -134,9 +128,7 @@ describe.each([
     expect(getValidateOn(scope, shape.fields.third)).toBe("onSubmit")
   })
 
-  it("returns concise object when SOME fields have DIFFERENT validateOn", ({
-    scope,
-  }) => {
+  it("returns concise object when SOME fields have DIFFERENT validateOn", ({ scope }) => {
     const shape = setup({
       validateOn: {
         first: (x) => (x === "onTouch" ? "onSubmit" : "onChange"),
@@ -171,18 +163,14 @@ describe("getValidateOn(scope, (_, verbose) => verbose)", () => {
   it("returns verbose value", ({ scope }) => {
     const shape = setup()
 
-    expectTypeOf(
-      getValidateOn(scope, shape),
-    ).toEqualTypeOf<RootValidateStrategyVerbose>()
+    expectTypeOf(getValidateOn(scope, shape)).toEqualTypeOf<RootValidateStrategyVerbose>()
 
     expectTypeOf(
       getValidateOn(scope, shape.fields.third),
     ).toEqualTypeOf<ThirdValidateStrategyVerbose>()
   })
 
-  it("returns verbose object when ALL fields have the SAME validateOn", ({
-    scope,
-  }) => {
+  it("returns verbose object when ALL fields have the SAME validateOn", ({ scope }) => {
     const shape = setup({
       validateOn: "onSubmit",
     })
@@ -201,9 +189,7 @@ describe("getValidateOn(scope, (_, verbose) => verbose)", () => {
     })
   })
 
-  it("returns verbose object when SOME fields have DIFFERENT validateOn", ({
-    scope,
-  }) => {
+  it("returns verbose object when SOME fields have DIFFERENT validateOn", ({ scope }) => {
     const shape = setup({
       validateOn: {
         first: (x) => (x === "onTouch" ? "onSubmit" : "onChange"),

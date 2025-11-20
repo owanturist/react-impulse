@@ -41,69 +41,49 @@ describe("types", () => {
   it("matches schema type for getValidateOn(scope, select?)", ({ scope }) => {
     expectTypeOf(form.getValidateOn(scope)).toEqualTypeOf<ValidateOnSchema>()
 
-    expectTypeOf(
-      form.getValidateOn(scope, params._first),
-    ).toEqualTypeOf<ValidateOnSchema>()
+    expectTypeOf(form.getValidateOn(scope, params._first)).toEqualTypeOf<ValidateOnSchema>()
 
-    expectTypeOf(
-      form.getValidateOn(scope, params._second),
-    ).toEqualTypeOf<ValidateOnVerboseSchema>()
+    expectTypeOf(form.getValidateOn(scope, params._second)).toEqualTypeOf<ValidateOnVerboseSchema>()
   })
 
   it("matches setter type for setValidateOn(setter)", () => {
-    expectTypeOf(form.setValidateOn).toEqualTypeOf<
-      (setter: ValidateOnSetter) => void
-    >()
+    expectTypeOf(form.setValidateOn).toEqualTypeOf<(setter: ValidateOnSetter) => void>()
   })
 
   it("allows passing concise value to setValidateOn", ({ scope }) => {
-    const validateOn_0 = form.getValidateOn(scope)
-    const validateOn_0_concise = form.getValidateOn(scope, params._first)
-    const validateOn_0_verbose = form.getValidateOn(scope, params._second)
+    const validateOn0 = form.getValidateOn(scope)
+    const validateOn0Concise = form.getValidateOn(scope, params._first)
+    const validateOn0Verbose = form.getValidateOn(scope, params._second)
 
-    form.setValidateOn(validateOn_0_concise)
+    form.setValidateOn(validateOn0Concise)
 
-    expect(form.getValidateOn(scope)).toStrictEqual(validateOn_0)
-    expect(form.getValidateOn(scope, params._first)).toStrictEqual(
-      validateOn_0_concise,
-    )
-    expect(form.getValidateOn(scope, params._second)).toStrictEqual(
-      validateOn_0_verbose,
-    )
+    expect(form.getValidateOn(scope)).toStrictEqual(validateOn0)
+    expect(form.getValidateOn(scope, params._first)).toStrictEqual(validateOn0Concise)
+    expect(form.getValidateOn(scope, params._second)).toStrictEqual(validateOn0Verbose)
   })
 
   it("allows passing verbose value to setValidateOn", ({ scope }) => {
-    const validateOn_0 = form.getValidateOn(scope)
-    const validateOn_0_concise = form.getValidateOn(scope, params._first)
-    const validateOn_0_verbose = form.getValidateOn(scope, params._second)
+    const validateOn0 = form.getValidateOn(scope)
+    const validateOn0Concise = form.getValidateOn(scope, params._first)
+    const validateOn0Verbose = form.getValidateOn(scope, params._second)
 
-    form.setValidateOn(validateOn_0_verbose)
+    form.setValidateOn(validateOn0Verbose)
 
-    expect(form.getValidateOn(scope)).toStrictEqual(validateOn_0)
-    expect(form.getValidateOn(scope, params._first)).toStrictEqual(
-      validateOn_0_concise,
-    )
-    expect(form.getValidateOn(scope, params._second)).toStrictEqual(
-      validateOn_0_verbose,
-    )
+    expect(form.getValidateOn(scope)).toStrictEqual(validateOn0)
+    expect(form.getValidateOn(scope, params._first)).toStrictEqual(validateOn0Concise)
+    expect(form.getValidateOn(scope, params._second)).toStrictEqual(validateOn0Verbose)
   })
 
   it("allows passing verbose value in setValidateOn callback", ({ scope }) => {
-    const validateOn_0 = form.getValidateOn(scope)
-    const validateOn_0_concise = form.getValidateOn(scope, params._first)
-    const validateOn_0_verbose = form.getValidateOn(scope, params._second)
+    const validateOn0 = form.getValidateOn(scope)
+    const validateOn0Concise = form.getValidateOn(scope, params._first)
+    const validateOn0Verbose = form.getValidateOn(scope, params._second)
 
-    form.setValidateOn((verbose) => {
-      return verbose
-    })
+    form.setValidateOn((verbose) => verbose)
 
-    expect(form.getValidateOn(scope)).toStrictEqual(validateOn_0)
-    expect(form.getValidateOn(scope, params._first)).toStrictEqual(
-      validateOn_0_concise,
-    )
-    expect(form.getValidateOn(scope, params._second)).toStrictEqual(
-      validateOn_0_verbose,
-    )
+    expect(form.getValidateOn(scope)).toStrictEqual(validateOn0)
+    expect(form.getValidateOn(scope, params._first)).toStrictEqual(validateOn0Concise)
+    expect(form.getValidateOn(scope, params._second)).toStrictEqual(validateOn0Verbose)
   })
 
   it("ensures ImpulseFormOptionalOptions.validateOn type", () => {
@@ -144,9 +124,7 @@ describe("types", () => {
     >
 
     it("matches schema type for getValidateOn(scope, select?)", ({ scope }) => {
-      expectTypeOf(
-        parent.getValidateOn(scope),
-      ).toEqualTypeOf<ParentValidateOnSchema>()
+      expectTypeOf(parent.getValidateOn(scope)).toEqualTypeOf<ParentValidateOnSchema>()
 
       expectTypeOf(
         parent.getValidateOn(scope, params._first),
@@ -158,9 +136,7 @@ describe("types", () => {
     })
 
     it("matches setter type for setValidateOn(setter)", () => {
-      expectTypeOf(parent.setValidateOn).toEqualTypeOf<
-        (setter: ParentValidateOnSetter) => void
-      >()
+      expectTypeOf(parent.setValidateOn).toEqualTypeOf<(setter: ParentValidateOnSetter) => void>()
     })
 
     it("allows passing concise value to setValidateOn", ({ scope }) => {
@@ -354,9 +330,7 @@ describe.each([
         )
 
         expect(form.getValidateOn(scope)).toBe(differentValidateOn)
-        expect(form.getValidateOn(scope, params._first)).toBe(
-          differentValidateOn,
-        )
+        expect(form.getValidateOn(scope, params._first)).toBe(differentValidateOn)
         expect(form.getValidateOn(scope, params._second)).toStrictEqual({
           enabled: differentValidateOn,
           element: validateOn,
@@ -399,9 +373,7 @@ describe("stable validateOn value", () => {
     )
 
     expect(form.getValidateOn(scope)).toBe(form.getValidateOn(scope))
-    expect(form.getValidateOn(scope, params._first)).toBe(
-      form.getValidateOn(scope, params._first),
-    )
+    expect(form.getValidateOn(scope, params._first)).toBe(form.getValidateOn(scope, params._first))
     expect(form.getValidateOn(scope, params._second)).toBe(
       form.getValidateOn(scope, params._second),
     )
@@ -418,9 +390,7 @@ describe("using recursive setter", () => {
     validateOn: "onSubmit",
   })
 
-  function setup(
-    options?: ImpulseFormOptionalOptions<typeof enabled, typeof element>,
-  ) {
+  function setup(options?: ImpulseFormOptionalOptions<typeof enabled, typeof element>) {
     return ImpulseFormOptional(enabled, element, options)
   }
 
@@ -428,17 +398,11 @@ describe("using recursive setter", () => {
     [
       string,
       (
-        validateOn: ImpulseFormOptionalValidateOnSetter<
-          typeof enabled,
-          typeof element
-        >,
+        validateOn: ImpulseFormOptionalValidateOnSetter<typeof enabled, typeof element>,
       ) => ReturnType<typeof setup>,
     ]
   >([
-    [
-      "ImpulseFormOptionalOptions.validateOn",
-      (validateOn) => setup({ validateOn }),
-    ],
+    ["ImpulseFormOptionalOptions.validateOn", (validateOn) => setup({ validateOn })],
 
     [
       "ImpulseFormOptional.setValidateOn",
@@ -461,14 +425,14 @@ describe("using recursive setter", () => {
         })
 
         return {
-          enabled: (validateOn_enabled) => {
-            expect(validateOn_enabled).toBe("onInit")
+          enabled: (validateOnEnabled) => {
+            expect(validateOnEnabled).toBe("onInit")
 
             return "onChange"
           },
 
-          element: (validateOn_element) => {
-            expect(validateOn_element).toBe("onSubmit")
+          element: (validateOnElement) => {
+            expect(validateOnElement).toBe("onSubmit")
 
             return "onTouch"
           },

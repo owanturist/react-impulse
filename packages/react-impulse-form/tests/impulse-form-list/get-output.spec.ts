@@ -5,9 +5,7 @@ import { params } from "~/tools/params"
 
 import { ImpulseFormList, ImpulseFormUnit } from "../../src"
 
-function setup<TError>(
-  elements: ReadonlyArray<ImpulseFormUnit<number, TError, string>>,
-) {
+function setup<TError>(elements: ReadonlyArray<ImpulseFormUnit<number, TError, string>>) {
   return ImpulseFormList(elements, {
     validateOn: "onInit",
   })
@@ -18,7 +16,7 @@ function setupElement(initial: number) {
     schema: z
       .number()
       .min(1)
-      .transform((x) => x.toFixed()),
+      .transform((x) => x.toFixed(0)),
   })
 }
 

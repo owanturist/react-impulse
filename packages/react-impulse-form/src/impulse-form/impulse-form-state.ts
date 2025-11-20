@@ -8,7 +8,7 @@ import type { ImpulseForm } from "./impulse-form"
 import type { ImpulseFormParams } from "./impulse-form-params"
 
 export abstract class ImpulseFormState<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: any is the only reasonable default
   TParams extends ImpulseFormParams = any,
 > {
   public abstract readonly _host: Lazy<ImpulseForm<TParams>>
@@ -19,9 +19,7 @@ export abstract class ImpulseFormState<
     this._root = parent?._root ?? this
   }
 
-  protected abstract _childOf(
-    parent: null | ImpulseFormState,
-  ): ImpulseFormState<TParams>
+  protected abstract _childOf(parent: null | ImpulseFormState): ImpulseFormState<TParams>
 
   public _clone(): ImpulseFormState<TParams> {
     return this._childOf(null)
@@ -43,16 +41,9 @@ export abstract class ImpulseFormState<
 
   public abstract readonly _initial: ReadonlyImpulse<TParams["input.schema"]>
 
-  public abstract _replaceInitial(
-    scope: Scope,
-    state: undefined | this,
-    isMounting: boolean,
-  ): void
+  public abstract _replaceInitial(scope: Scope, state: undefined | this, isMounting: boolean): void
 
-  public abstract _setInitial(
-    scope: Scope,
-    setter: TParams["input.setter"],
-  ): void
+  public abstract _setInitial(scope: Scope, setter: TParams["input.setter"]): void
 
   // I N P U T
 
@@ -61,81 +52,51 @@ export abstract class ImpulseFormState<
 
   // E R R O R
 
-  public abstract readonly _error: ReadonlyImpulse<
-    null | TParams["error.schema"]
-  >
-  public abstract readonly _errorVerbose: ReadonlyImpulse<
-    TParams["error.schema.verbose"]
-  >
+  public abstract readonly _error: ReadonlyImpulse<null | TParams["error.schema"]>
+  public abstract readonly _errorVerbose: ReadonlyImpulse<TParams["error.schema.verbose"]>
   public abstract _setError(scope: Scope, setter: TParams["error.setter"]): void
 
   // V A L I D A T E   O N
 
-  public abstract readonly _validateOn: ReadonlyImpulse<
-    TParams["validateOn.schema"]
-  >
-  public abstract readonly _validateOnVerbose: ReadonlyImpulse<
-    TParams["validateOn.schema.verbose"]
-  >
-  public abstract _setValidateOn(
-    scope: Scope,
-    setter: TParams["validateOn.setter"],
-  ): void
+  public abstract readonly _validateOn: ReadonlyImpulse<TParams["validateOn.schema"]>
+  public abstract readonly _validateOnVerbose: ReadonlyImpulse<TParams["validateOn.schema.verbose"]>
+  public abstract _setValidateOn(scope: Scope, setter: TParams["validateOn.setter"]): void
 
   // T O U C H E D
 
   public abstract readonly _touched: ReadonlyImpulse<TParams["flag.schema"]>
-  public abstract readonly _touchedVerbose: ReadonlyImpulse<
-    TParams["flag.schema.verbose"]
-  >
-  public abstract _setTouched(
-    scope: Scope,
-    setter: TParams["flag.setter"],
-  ): void
+  public abstract readonly _touchedVerbose: ReadonlyImpulse<TParams["flag.schema.verbose"]>
+  public abstract _setTouched(scope: Scope, setter: TParams["flag.setter"]): void
 
   // O U T P U T
 
-  public abstract readonly _output: ReadonlyImpulse<
-    null | TParams["output.schema"]
-  >
-  public abstract readonly _outputVerbose: ReadonlyImpulse<
-    TParams["output.schema.verbose"]
-  >
+  public abstract readonly _output: ReadonlyImpulse<null | TParams["output.schema"]>
+  public abstract readonly _outputVerbose: ReadonlyImpulse<TParams["output.schema.verbose"]>
 
   // V A L I D
 
   public abstract readonly _valid: ReadonlyImpulse<TParams["flag.schema"]>
-  public abstract readonly _validVerbose: ReadonlyImpulse<
-    TParams["flag.schema.verbose"]
-  >
+  public abstract readonly _validVerbose: ReadonlyImpulse<TParams["flag.schema.verbose"]>
 
   // I N V A L I D
 
   public abstract readonly _invalid: ReadonlyImpulse<TParams["flag.schema"]>
-  public abstract readonly _invalidVerbose: ReadonlyImpulse<
-    TParams["flag.schema.verbose"]
-  >
+  public abstract readonly _invalidVerbose: ReadonlyImpulse<TParams["flag.schema.verbose"]>
 
   // V A L I D A T E D
 
   public abstract readonly _validated: ReadonlyImpulse<TParams["flag.schema"]>
-  public abstract readonly _validatedVerbose: ReadonlyImpulse<
-    TParams["flag.schema.verbose"]
-  >
+  public abstract readonly _validatedVerbose: ReadonlyImpulse<TParams["flag.schema.verbose"]>
 
   public abstract _forceValidated(scope: Scope): void
 
   // D I R T Y
 
   public abstract readonly _dirty: ReadonlyImpulse<TParams["flag.schema"]>
-  public abstract readonly _dirtyVerbose: ReadonlyImpulse<
-    TParams["flag.schema.verbose"]
-  >
+  public abstract readonly _dirtyVerbose: ReadonlyImpulse<TParams["flag.schema.verbose"]>
 
   public abstract readonly _dirtyOn: ReadonlyImpulse<TParams["flag.schema"]>
-  public abstract readonly _dirtyOnVerbose: ReadonlyImpulse<
-    TParams["flag.schema.verbose"]
-  >
+  public abstract readonly _dirtyOnVerbose: ReadonlyImpulse<TParams["flag.schema.verbose"]>
 
   // F O C U S   I N V A L I D
 
@@ -165,6 +126,7 @@ export abstract class ImpulseFormState<
 
   // S U B M I T
 
+  // biome-ignore lint/suspicious/noConfusingVoidType: it wants using void, not undefined
   public readonly _onSubmit = new Emitter<unknown, void | Promise<unknown>>()
 
   public readonly _submitAttempts = Impulse(0)
@@ -173,11 +135,10 @@ export abstract class ImpulseFormState<
   public _submitWith(
     scope: Scope,
     output: TParams["output.schema"],
+    // biome-ignore lint/suspicious/noConfusingVoidType: it wants using void, not undefined
   ): ReadonlyArray<void | Promise<unknown>> {
-    const promises = this._getChildren(scope).flatMap(
-      ({ _state, _mapToChild }) => {
-        return _state._submitWith(scope, _mapToChild(output))
-      },
+    const promises = this._getChildren(scope).flatMap(({ _state, _mapToChild }) =>
+      _state._submitWith(scope, _mapToChild(output)),
     )
 
     return [...this._onSubmit._emit(output), ...promises]
@@ -193,10 +154,7 @@ export abstract class ImpulseFormState<
    * in comparison to _setInitial which only sets the initial value AND
    * not called at all if the setter is not provided.
    */
-  public abstract _reset(
-    scope: Scope,
-    resetter: undefined | TParams["input.setter"],
-  ): void
+  public abstract _reset(scope: Scope, resetter: undefined | TParams["input.setter"]): void
 
   // C H I L D R E N
 
@@ -210,8 +168,5 @@ export interface ImpulseFormChild<
   TParams extends ImpulseFormParams,
 > {
   _state: ImpulseFormState<TChildParams>
-  _mapToChild(
-    this: void,
-    parentValue: TParams["output.schema"],
-  ): TChildParams["output.schema"]
+  _mapToChild(this: void, parentValue: TParams["output.schema"]): TChildParams["output.schema"]
 }

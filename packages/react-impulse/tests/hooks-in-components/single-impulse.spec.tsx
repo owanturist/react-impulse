@@ -31,11 +31,7 @@ describe("single impulse", () => {
           data-testid="increment"
           onClick={() => counter.setValue(Counter.inc)}
         />
-        <button
-          type="button"
-          data-testid="reset"
-          onClick={() => counter.setValue({ count: 0 })}
-        />
+        <button type="button" data-testid="reset" onClick={() => counter.setValue({ count: 0 })} />
       </div>
     </React.Profiler>
   )

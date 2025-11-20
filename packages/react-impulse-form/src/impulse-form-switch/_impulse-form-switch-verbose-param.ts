@@ -1,7 +1,6 @@
 import type { Compute } from "~/tools/compute"
 
-import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
-import type { GetImpulseFormParam } from "../impulse-form"
+import type { GetImpulseFormParam, ImpulseForm, ImpulseFormParams } from "../impulse-form"
 
 import type { GetImpulseFormSwitchBranchesParam } from "./_get-impulse-form-switch-branches-param"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"

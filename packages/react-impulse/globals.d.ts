@@ -1,4 +1,4 @@
-import type { TestAPI, Assertion, AsymmetricMatchersContaining } from "vitest"
+import type { Assertion, AsymmetricMatchersContaining, TestAPI } from "vitest"
 import type { Scope } from "./src"
 
 interface CustomMatchers<R> {
@@ -6,6 +6,7 @@ interface CustomMatchers<R> {
 }
 
 declare module "vitest" {
+  // biome-ignore lint/suspicious/noExplicitAny: follows vitest types
   interface Assertion<T = any> extends CustomMatchers<T> {}
   interface AsymmetricMatchersContaining extends CustomMatchers {}
 

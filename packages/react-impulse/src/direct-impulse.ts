@@ -14,12 +14,14 @@ export class DirectImpulse<T> extends BaseImpulse<T> {
     return this._value
   }
 
-  protected _setter(value: T): void | true {
+  protected _setter(value: T): boolean {
     if (!this._compare(this._value, value, STATIC_SCOPE)) {
       this._value = value
 
       return true
     }
+
+    return false
   }
 
   protected _clone(value: T, compare: Compare<T>): DirectImpulse<T> {

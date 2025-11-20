@@ -5,13 +5,7 @@ import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
 import { resolveSetter } from "~/tools/setter"
 
-import {
-  type Compare,
-  Impulse,
-  type ReadonlyImpulse,
-  type Scope,
-  batch,
-} from "../dependencies"
+import { type Compare, Impulse, type ReadonlyImpulse, type Scope, batch } from "../dependencies"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
 import {
@@ -33,11 +27,9 @@ import type { ImpulseFormUnitInputSetter } from "./impulse-form-unit-input-sette
 import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer"
 import type { ImpulseFormUnitValidateOnSetter } from "./impulse-form-unit-validate-on-setter"
 
-export class ImpulseFormUnitState<
-  TInput,
-  TError,
-  TOutput,
-> extends ImpulseFormState<ImpulseFormUnitParams<TInput, TError, TOutput>> {
+export class ImpulseFormUnitState<TInput, TError, TOutput> extends ImpulseFormState<
+  ImpulseFormUnitParams<TInput, TError, TOutput>
+> {
   public readonly _host = Lazy(() => new ImpulseFormUnit(this))
 
   public constructor(
@@ -50,9 +42,7 @@ export class ImpulseFormUnitState<
     private readonly _customError: Impulse<null | TError>,
     public readonly _validateOn: Impulse<ValidateStrategy>,
     public readonly _touched: Impulse<boolean>,
-    private readonly _transform: Impulse<
-      ImpulseFormUnitTransform<TInput, TError, TOutput>
-    >,
+    private readonly _transform: Impulse<ImpulseFormUnitTransform<TInput, TError, TOutput>>,
     private readonly _isInputDirty: Compare<TInput>,
     private readonly _isInputEqual: Compare<TInput>,
     private readonly _isOutputEqual: Compare<null | TOutput>,
@@ -110,13 +100,9 @@ export class ImpulseFormUnitState<
 
     this._touchedVerbose = _touched
 
-    this._dirty = this._dirtyVerbose = Impulse((scope): boolean => {
-      return _isInputDirty(
-        this._initial.getValue(scope),
-        _input.getValue(scope),
-        scope,
-      )
-    })
+    this._dirty = this._dirtyVerbose = Impulse((scope): boolean =>
+      _isInputDirty(this._initial.getValue(scope), _input.getValue(scope), scope),
+    )
 
     this._validateOnVerbose = _validateOn
 
@@ -137,9 +123,7 @@ export class ImpulseFormUnitState<
 
     this._validated = this._validatedVerbose = Impulse(
       // mixes the validated and invalid states
-      (scope): boolean => {
-        return isValidated.getValue(scope) || this._invalid.getValue(scope)
-      },
+      (scope): boolean => isValidated.getValue(scope) || this._invalid.getValue(scope),
 
       // proxies the validated setter where `false` means revalidate
       // and `true` sets the validated state to `true`
@@ -173,9 +157,7 @@ export class ImpulseFormUnitState<
     this._validated.setValue(false)
   }
 
-  public _childOf(
-    parent: null | ImpulseFormState,
-  ): ImpulseFormUnitState<TInput, TError, TOutput> {
+  public _childOf(parent: null | ImpulseFormState): ImpulseFormUnitState<TInput, TError, TOutput> {
     return new ImpulseFormUnitState(
       parent,
       this._initialState.clone(({ _current, _explicit }) => ({
@@ -222,17 +204,12 @@ export class ImpulseFormUnitState<
     }
   }
 
-  public _setInitial(
-    scope: Scope,
-    setter: ImpulseFormUnitInputSetter<TInput>,
-  ): void {
+  public _setInitial(scope: Scope, setter: ImpulseFormUnitInputSetter<TInput>): void {
     const { _current, _explicit } = this._initialState.getValue(scope)
 
-    _current.setValue((initial) => {
-      return isFunction(setter)
-        ? setter(initial, this._input.getValue(scope))
-        : setter
-    })
+    _current.setValue((initial) =>
+      isFunction(setter) ? setter(initial, this._input.getValue(scope)) : setter,
+    )
 
     _explicit.setValue(true)
 
@@ -241,15 +218,10 @@ export class ImpulseFormUnitState<
 
   // I N P U T
 
-  public _setInput(
-    scope: Scope,
-    setter: ImpulseFormUnitInputSetter<TInput>,
-  ): void {
-    this._input.setValue((input) => {
-      return isFunction(setter)
-        ? setter(input, this._initial.getValue(scope))
-        : setter
-    })
+  public _setInput(scope: Scope, setter: ImpulseFormUnitInputSetter<TInput>): void {
+    this._input.setValue((input) =>
+      isFunction(setter) ? setter(input, this._initial.getValue(scope)) : setter,
+    )
 
     this._validated.setValue(identity)
   }
@@ -260,10 +232,7 @@ export class ImpulseFormUnitState<
 
   public readonly _errorVerbose: ReadonlyImpulse<null | TError>
 
-  public _setError(
-    _scope: Scope,
-    setter: ImpulseFormUnitErrorSetter<TError>,
-  ): void {
+  public _setError(_scope: Scope, setter: ImpulseFormUnitErrorSetter<TError>): void {
     this._customError.setValue((error) => resolveSetter(setter, error))
   }
 
@@ -271,10 +240,7 @@ export class ImpulseFormUnitState<
 
   public readonly _validateOnVerbose: ReadonlyImpulse<ValidateStrategy>
 
-  public _setValidateOn(
-    scope: Scope,
-    setter: ImpulseFormUnitValidateOnSetter,
-  ): void {
+  public _setValidateOn(scope: Scope, setter: ImpulseFormUnitValidateOnSetter): void {
     const before = this._validateOn.getValue(scope)
 
     this._validateOn.setValue(resolveSetter(setter, before))
@@ -332,10 +298,7 @@ export class ImpulseFormUnitState<
 
   // R E S E T
 
-  public _reset(
-    scope: Scope,
-    resetter: undefined | ImpulseFormUnitInputSetter<TInput>,
-  ): void {
+  public _reset(scope: Scope, resetter: undefined | ImpulseFormUnitInputSetter<TInput>): void {
     const resetValue = isUndefined(resetter)
       ? this._initial.getValue(scope)
       : isFunction(resetter)
@@ -358,9 +321,7 @@ export class ImpulseFormUnitState<
 
   // C U S T O M
 
-  public _setTransform(
-    transformer: ImpulseFormUnitTransformer<TInput, TOutput>,
-  ): void {
+  public _setTransform(transformer: ImpulseFormUnitTransformer<TInput, TOutput>): void {
     batch(() => {
       this._transform.setValue(transformFromTransformer(transformer))
       this._validated.setValue(identity)

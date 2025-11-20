@@ -94,12 +94,8 @@ it("subsequently selects equal output shapes", ({ scope }) => {
   })
   expect(shape.getOutput(scope)).toBe(shape.getOutput(scope))
   expect(shape.getOutput(scope)).toBe(shape.getOutput(scope))
-  expect(shape.getOutput(scope, params._first)).toBe(
-    shape.getOutput(scope, params._first),
-  )
-  expect(shape.getOutput(scope, params._second)).toBe(
-    shape.getOutput(scope, params._second),
-  )
+  expect(shape.getOutput(scope, params._first)).toBe(shape.getOutput(scope, params._first))
+  expect(shape.getOutput(scope, params._second)).toBe(shape.getOutput(scope, params._second))
 })
 
 it("persists unchanged output fields between changes", ({ scope }) => {
@@ -114,9 +110,9 @@ it("persists unchanged output fields between changes", ({ scope }) => {
     }),
   })
 
-  const output_0 = shape.getOutput(scope)
+  const output0 = shape.getOutput(scope)
 
-  expect(output_0).toStrictEqual({
+  expect(output0).toStrictEqual({
     first: {
       _0: "1",
       _1: "2",
@@ -133,9 +129,9 @@ it("persists unchanged output fields between changes", ({ scope }) => {
     },
   })
 
-  const output_1 = shape.getOutput(scope)
+  const output1 = shape.getOutput(scope)
 
-  expect(output_1).toStrictEqual({
+  expect(output1).toStrictEqual({
     first: {
       _0: "1",
       _1: "2",
@@ -145,7 +141,7 @@ it("persists unchanged output fields between changes", ({ scope }) => {
       _4: "4",
     },
   })
-  expect(output_1).not.toBe(output_0)
-  expect(output_1?.first).toBe(output_0?.first)
-  expect(output_1?.second).not.toBe(output_0?.second)
+  expect(output1).not.toBe(output0)
+  expect(output1?.first).toBe(output0?.first)
+  expect(output1?.second).not.toBe(output0?.second)
 })

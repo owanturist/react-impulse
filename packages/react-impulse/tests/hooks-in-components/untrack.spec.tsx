@@ -23,9 +23,7 @@ it("returns the `factory` function result without tracking impulses", () => {
   }
 
   const { rerender } = render(<Component multiplier={1} />, {
-    wrapper: (props) => (
-      <React.Profiler id="test" onRender={onRender} {...props} />
-    ),
+    wrapper: (props) => <React.Profiler id="test" onRender={onRender} {...props} />,
   })
 
   expect(screen.getByRole("button")).toHaveTextContent("3")

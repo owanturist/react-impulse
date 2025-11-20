@@ -3,8 +3,9 @@ import { act, renderHook } from "@testing-library/react"
 import { Impulse, type Scope, useScoped } from "../../src"
 import { Counter, type WithCompare, type WithImpulse } from "../common"
 
-const factory = (scope: Scope, { impulse }: WithImpulse) =>
-  impulse.getValue(scope)
+function factory(scope: Scope, { impulse }: WithImpulse) {
+  return impulse.getValue(scope)
+}
 
 describe.each([
   [
@@ -19,23 +20,19 @@ describe.each([
   ],
   [
     "memoized",
-    ({ impulse, compare }: WithImpulse & WithCompare) => {
-      return useScoped((scope) => factory(scope, { impulse }), [impulse], {
+    ({ impulse, compare }: WithImpulse & WithCompare) =>
+      useScoped((scope) => factory(scope, { impulse }), [impulse], {
         compare: compare ?? Counter.compare,
-      })
-    },
+      }),
   ],
 ])("factory with %s comparator", (_, useHook) => {
   it("swapping compare", () => {
     const initial = { count: 0 }
     const impulse = Impulse(initial)
 
-    const { result, rerender } = renderHook<Counter, WithImpulse & WithCompare>(
-      useHook,
-      {
-        initialProps: { impulse },
-      },
-    )
+    const { result, rerender } = renderHook<Counter, WithImpulse & WithCompare>(useHook, {
+      initialProps: { impulse },
+    })
     expect(result.current).toBe(initial)
 
     act(() => {

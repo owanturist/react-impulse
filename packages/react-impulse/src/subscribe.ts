@@ -9,10 +9,8 @@ import { ScopeFactory } from "./scope-factory"
  * @param listener function that will be called on each `Impulse` change, involved in the `listener` execution. Calls first time synchronously when `subscribe` is called. If `listener` returns a function then it will be called before the next `listener` call.
  * @returns cleanup function that unsubscribes the `listener`
  */
-export function subscribe(
-  listener: (scope: Scope) => Destructor,
-): VoidFunction {
-  let cleanup: Destructor = undefined
+export function subscribe(listener: (scope: Scope) => Destructor): VoidFunction {
+  let cleanup: Destructor
 
   const factory = new ScopeFactory()
 

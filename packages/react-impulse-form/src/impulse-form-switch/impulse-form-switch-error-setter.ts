@@ -23,13 +23,7 @@ export type ImpulseFormSwitchErrorSetter<
         GetImpulseFormParam<TKind, "error.setter">,
         Setter<
           null | ImpulseFormSwitchBranchUnion<TKind, TBranches, "error.setter">,
-          [
-            ImpulseFormSwitchBranchUnion<
-              TKind,
-              TBranches,
-              "error.schema.verbose"
-            >,
-          ]
+          [ImpulseFormSwitchBranchUnion<TKind, TBranches, "error.schema.verbose">]
         >
       >
     >
@@ -39,9 +33,7 @@ export type ImpulseFormSwitchErrorSetter<
       ImpulseFormSwitchVerboseSchema<
         GetImpulseFormParam<TKind, "error.setter">,
         Setter<
-          null | Partial<
-            GetImpulseFormSwitchBranchesParam<TBranches, "error.setter">
-          >,
+          null | Partial<GetImpulseFormSwitchBranchesParam<TBranches, "error.setter">>,
           [GetImpulseFormSwitchBranchesParam<TBranches, "error.schema.verbose">]
         >
       >

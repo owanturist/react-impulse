@@ -12,7 +12,7 @@ beforeAll(() => {
 it("matches the type definition", ({ scope }) => {
   const form = ImpulseFormList([
     ImpulseFormUnit(0, {
-      schema: z.number().transform((x) => x.toFixed()),
+      schema: z.number().transform((x) => x.toFixed(0)),
     }),
   ])
 
@@ -66,9 +66,7 @@ it("resets isValidated state", ({ scope }) => {
   expect(form.isValidated(scope)).toBe(false)
 })
 
-it("provides the initial value to the element resetter 1st argument", ({
-  scope,
-}) => {
+it("provides the initial value to the element resetter 1st argument", ({ scope }) => {
   const form = ImpulseFormList([
     ImpulseFormUnit(0, { initial: 1 }),
     ImpulseFormUnit(1, { initial: 2 }),
@@ -129,10 +127,7 @@ it("removes added element", ({ scope }) => {
     ImpulseFormUnit(2, { initial: 3 }),
   ])
 
-  form.setElements((elements) => [
-    ...elements,
-    ImpulseFormUnit(3, { initial: 4 }),
-  ])
+  form.setElements((elements) => [...elements, ImpulseFormUnit(3, { initial: 4 })])
   expect(form.getInput(scope)).toStrictEqual([0, 1, 2, 3])
   expect(form.getInitial(scope)).toStrictEqual([1, 2, 3])
 
@@ -173,53 +168,47 @@ it("updates validateOn for restored elements", ({ scope }) => {
 })
 
 it("updates submit count for restored elements", ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormUnit(0),
-    ImpulseFormUnit(1),
-    ImpulseFormUnit(2),
-  ])
+  const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1), ImpulseFormUnit(2)])
 
   form.setElements([ImpulseFormUnit(0)])
-  void form.submit()
+  form.submit()
   expect(form.getSubmitCount(scope)).toBe(1)
-  expect(
-    form.getElements(scope).map((element) => element.getSubmitCount(scope)),
-  ).toStrictEqual([1])
+  expect(form.getElements(scope).map((element) => element.getSubmitCount(scope))).toStrictEqual([1])
 
   form.reset()
   expect(form.getSubmitCount(scope)).toBe(1)
-  expect(
-    form.getElements(scope).map((element) => element.getSubmitCount(scope)),
-  ).toStrictEqual([1, 1, 1])
+  expect(form.getElements(scope).map((element) => element.getSubmitCount(scope))).toStrictEqual([
+    1, 1, 1,
+  ])
 })
 
 it("updates isSubmitting for restored elements", async ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormUnit(0),
-    ImpulseFormUnit(1),
-    ImpulseFormUnit(2),
-  ])
+  const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1), ImpulseFormUnit(2)])
 
   form.onSubmit(() => wait(1000))
 
   form.setElements([ImpulseFormUnit(0)])
-  void form.submit()
+  form.submit()
   expect(form.isSubmitting(scope)).toBe(true)
-  expect(
-    form.getElements(scope).map((element) => element.isSubmitting(scope)),
-  ).toStrictEqual([true])
+  expect(form.getElements(scope).map((element) => element.isSubmitting(scope))).toStrictEqual([
+    true,
+  ])
 
   form.reset()
   expect(form.isSubmitting(scope)).toBe(true)
-  expect(
-    form.getElements(scope).map((element) => element.isSubmitting(scope)),
-  ).toStrictEqual([true, true, true])
+  expect(form.getElements(scope).map((element) => element.isSubmitting(scope))).toStrictEqual([
+    true,
+    true,
+    true,
+  ])
 
   await vi.advanceTimersByTimeAsync(1000)
   expect(form.isSubmitting(scope)).toBe(false)
-  expect(
-    form.getElements(scope).map((element) => element.isSubmitting(scope)),
-  ).toStrictEqual([false, false, false])
+  expect(form.getElements(scope).map((element) => element.isSubmitting(scope))).toStrictEqual([
+    false,
+    false,
+    false,
+  ])
 })
 
 /**
@@ -295,9 +284,7 @@ describe("when resetting elements with metadata", () => {
     expect(form.getInput(scope)).toStrictEqual([{ id: 1, name: "1" }])
   })
 
-  it("restores after adding leading and setting initial to input", ({
-    scope,
-  }) => {
+  it("restores after adding leading and setting initial to input", ({ scope }) => {
     const form = ImpulseFormList([
       ImpulseFormShape({
         id: 1,

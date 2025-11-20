@@ -1,10 +1,4 @@
-import {
-  act,
-  fireEvent,
-  render,
-  renderHook,
-  screen,
-} from "@testing-library/react"
+import { act, fireEvent, render, renderHook, screen } from "@testing-library/react"
 import React from "react"
 
 import { Impulse, subscribe, useScope, useScoped } from "../src"
@@ -58,17 +52,13 @@ describe("watching misses when defined after useEffect #140", () => {
     )
   }
 
-  const useScopedInline = (impulse: Impulse<number>) => {
-    return useScoped((scope) => impulse.getValue(scope))
-  }
+  const useScopedInline = (impulse: Impulse<number>) =>
+    useScoped((scope) => impulse.getValue(scope))
 
-  const useScopedMemoized = (impulse: Impulse<number>) => {
-    return useScoped((scope) => impulse.getValue(scope), [impulse])
-  }
+  const useScopedMemoized = (impulse: Impulse<number>) =>
+    useScoped((scope) => impulse.getValue(scope), [impulse])
 
-  const useScopedShortcut = (impulse: Impulse<number>) => {
-    return useScoped(impulse)
-  }
+  const useScopedShortcut = (impulse: Impulse<number>) => useScoped(impulse)
 
   describe.each([
     ["before", ComponentScopedBeforeEffect],
@@ -135,11 +125,13 @@ describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321
     }> = ({ count }) => {
       const [value, setValue] = React.useState(() => convert(count))
 
-      React.useEffect(() => {
-        return subscribe(() => {
-          setValue(convert(count))
-        })
-      }, [count])
+      React.useEffect(
+        () =>
+          subscribe(() => {
+            setValue(convert(count))
+          }),
+        [count, convert],
+      )
 
       return <span data-testid="result">{value}</span>
     }
@@ -178,7 +170,7 @@ describe("return the same component type from watch #322", () => {
     )
   }
 
-  const Input = Object.assign(StatefulInput, { Stateless: StatelessInput })
+  const Input = Object.assign(StatefulInput, { stateless: StatelessInput })
 
   it("scopes the StatefulInput", () => {
     const text = Impulse("hello")
@@ -243,9 +235,7 @@ describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a n
       },
     )
 
-    const { result } = renderHook(() => {
-      return useScoped(impulse)
-    })
+    const { result } = renderHook(() => useScoped(impulse))
 
     expect(result.current).toBe(0)
 
@@ -260,11 +250,9 @@ describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a n
 describe("ImpulseForm.reset() does not run subscribers #969", () => {
   it("runs the subscribe listeners for every derived update", ({ scope }) => {
     const spy = vi.fn()
-    const source_1 = Impulse(1)
-    const source_2 = Impulse<string>()
-    const derived = Impulse(
-      (scope) => source_2.getValue(scope) ?? source_1.getValue(scope) > 0,
-    )
+    const source1 = Impulse(1)
+    const source2 = Impulse<string>()
+    const derived = Impulse((scope) => source2.getValue(scope) ?? source1.getValue(scope) > 0)
 
     subscribe((scope) => {
       const output = derived.getValue(scope)
@@ -272,7 +260,7 @@ describe("ImpulseForm.reset() does not run subscribers #969", () => {
       spy(output)
 
       if (output === false) {
-        source_2.setValue("error")
+        source2.setValue("error")
       }
     })
 
@@ -282,7 +270,7 @@ describe("ImpulseForm.reset() does not run subscribers #969", () => {
     spy.mockClear()
 
     // cause the source_2 update
-    source_1.setValue(-1)
+    source1.setValue(-1)
     expect(spy).toHaveBeenCalledTimes(2)
     // source_1 update causes the listener run
     expect(spy).toHaveBeenNthCalledWith(1, false)
@@ -292,12 +280,12 @@ describe("ImpulseForm.reset() does not run subscribers #969", () => {
     spy.mockClear()
 
     // source_1 is not relevant to the current derived value, so it does not cause the listener run
-    source_1.setValue(1)
+    source1.setValue(1)
     expect(spy).not.toHaveBeenCalled()
     expect(derived.getValue(scope)).toBe("error")
 
     // enable the source_1 to derive the derived value again
-    source_2.setValue(undefined)
+    source2.setValue(undefined)
     expect(spy).toHaveBeenCalledExactlyOnceWith(true)
     expect(derived.getValue(scope)).toBe(true)
   })

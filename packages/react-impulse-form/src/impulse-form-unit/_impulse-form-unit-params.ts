@@ -6,8 +6,7 @@ import type { ImpulseFormUnitFlagSetter } from "./impulse-form-unit-flag-setter"
 import type { ImpulseFormUnitInputSetter } from "./impulse-form-unit-input-setter"
 import type { ImpulseFormUnitValidateOnSetter } from "./impulse-form-unit-validate-on-setter"
 
-export interface ImpulseFormUnitParams<TInput, TError, TOutput>
-  extends ImpulseFormParams {
+export interface ImpulseFormUnitParams<TInput, TError, TOutput> extends ImpulseFormParams {
   readonly "input.setter": ImpulseFormUnitInputSetter<TInput>
   readonly "input.schema": TInput
 
