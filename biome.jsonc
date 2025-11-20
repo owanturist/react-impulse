@@ -8,7 +8,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**/*", "!pnpm-lock.yaml", "!CHANGELOG.md", "!eslint.config.mjs"]
+    "includes": ["**/*", "!pnpm-lock.yaml", "!CHANGELOG.md"]
   },
   "assist": {
     "enabled": true,
