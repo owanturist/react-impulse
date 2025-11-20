@@ -15,9 +15,6 @@ export function useScopedLayoutEffect(
   effect: (scope: Scope) => Destructor,
   dependencies?: DependencyList,
 ): void {
-  useLayoutEffect(
-    () => subscribe(effect),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    dependencies,
-  )
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pass dependencies as is
+  useLayoutEffect(() => subscribe(effect), dependencies)
 }

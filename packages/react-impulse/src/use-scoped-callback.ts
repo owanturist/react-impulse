@@ -18,6 +18,6 @@ export function useScopedCallback<TArgs extends ReadonlyArray<unknown>, TResult>
 ): (...args: TArgs) => TResult {
   return useScopedMemo((scope) => {
     return (...args) => enqueue(() => callback(scope, ...args))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // biome-ignore lint/correctness/useExhaustiveDependencies: pass dependencies as is
   }, dependencies)
 }

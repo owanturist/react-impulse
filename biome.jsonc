@@ -195,6 +195,25 @@
               "options": {
                 "excludedComponents": ["Profiler"]
               }
+            },
+            "useExhaustiveDependencies": {
+              "level": "error",
+              "options": {
+                "reportUnnecessaryDependencies": true,
+                "hooks": [
+                  { "name": "useEffect", "closureIndex": 0, "dependenciesIndex": 1 },
+                  { "name": "useLayoutEffect", "closureIndex": 0, "dependenciesIndex": 1 },
+                  { "name": "useInsertionEffect", "closureIndex": 0, "dependenciesIndex": 1 },
+                  { "name": "useCallback", "closureIndex": 0, "dependenciesIndex": 1 },
+                  { "name": "useMemo", "closureIndex": 0, "dependenciesIndex": 1 },
+
+                  { "name": "useScoped", "closureIndex": 0, "dependenciesIndex": 1 },
+                  { "name": "useScopedEffect", "closureIndex": 0, "dependenciesIndex": 1 },
+                  { "name": "useScopedLayoutEffect", "closureIndex": 0, "dependenciesIndex": 1 },
+                  { "name": "useScopedCallback", "closureIndex": 0, "dependenciesIndex": 1 },
+                  { "name": "useScopedMemo", "closureIndex": 0, "dependenciesIndex": 1 }
+                ]
+              }
             }
           },
 

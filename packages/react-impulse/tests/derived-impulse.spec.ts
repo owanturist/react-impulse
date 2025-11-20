@@ -403,7 +403,7 @@ describe.each<{
       const [count, setCount] = useState(2)
 
       return {
-        scoped: useScoped((scope) => getValue(derived, scope) + count, [count]),
+        scoped: useScoped((scope) => getValue(derived, scope) + count, [count, getValue]),
         setCount,
       }
     })

@@ -16,6 +16,6 @@ export function useScopedMemo<TResult>(
 ): TResult {
   const scope = useScope()
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pass dependencies + scope
   return useMemo(() => factory(scope), [...dependencies, scope])
 }

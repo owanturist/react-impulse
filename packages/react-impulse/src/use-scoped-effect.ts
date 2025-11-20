@@ -15,9 +15,6 @@ export function useScopedEffect(
   effect: (scope: Scope) => Destructor,
   dependencies?: DependencyList,
 ): void {
-  useEffect(
-    () => subscribe(effect),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    dependencies,
-  )
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pass dependencies as is
+  useEffect(() => subscribe(effect), dependencies)
 }

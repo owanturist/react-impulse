@@ -6,7 +6,6 @@ it("creates ImpulseFormUnit without validation", ({ scope }) => {
   const value = ImpulseFormUnit(1)
 
   expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<number>>()
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
   expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<number, null>>()
   expectTypeOf(value).toEqualTypeOf<ImpulseFormUnit<number, null, number>>()
 
