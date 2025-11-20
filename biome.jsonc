@@ -339,6 +339,28 @@
           }
         }
       }
+    },
+
+    // public packages test env setup
+    {
+      "includes": ["packages/react-*/tests/**/*.{ts,tsx}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/src/*"],
+                    "message": "Import only ../src for tests to ensure production-like imports."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }
