@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-imports */
+/** biome-ignore-all lint/style/noRestrictedImports: re-export */
 export {
   type Compare,
   Impulse,

@@ -242,6 +242,18 @@
                   "vi": "Use vitest only in test files"
                 }
               }
+            },
+
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["react", "react-impulse", "use-sync-external-store/**/*"],
+                    "message": "Import dependencies from dependencies.ts. It makes the imported deps appear only ones in the bundle."
+                  }
+                ]
+              }
             }
           }
         }
@@ -289,42 +301,6 @@
             "noNonNullAssertion": "off",
             "noDoneCallback": "off", // false-positive for context in hooks like "beforeAll(context => { context.thing = 42 })"
             "useComponentExportOnlyModules": "off" // tests might export non-component modules
-            // "useNamingConvention": {
-            //   "level": "warn",
-            //   "fix": "unsafe",
-            //   "options": {
-            //     "strictCase": false,
-            //     "conventions": [
-            //       {
-            //         "selector": {
-            //           "kind": "variable",
-            //           "scope": "global"
-            //         },
-            //         "formats": ["CONSTANT_CASE"]
-            //       },
-            //       {
-            //         "selector": {
-            //           "kind": "variable"
-            //         },
-            //         "formats": ["snake_case", "PascalCase", "camelCase"],
-            //         "match": "[a-zA-Z0-9_]+"
-            //       },
-            //       {
-            //         "selector": {
-            //           "kind": "objectLiteralMember"
-            //         },
-            //         "formats": ["snake_case", "PascalCase", "camelCase"],
-            //         "match": "[a-zA-Z0-9_]+"
-            //       },
-            //       {
-            //         "selector": {
-            //           "kind": "functionParameter"
-            //         },
-            //         "formats": ["snake_case", "camelCase", "PascalCase"]
-            //       }
-            //     ]
-            //   }
-            // }
           },
           "complexity": {
             "noExcessiveLinesPerFunction": "off" // test `describe/it` blocks can be long
