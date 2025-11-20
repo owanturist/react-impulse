@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { batch, Impulse, type Scope, subscribe, useScoped } from "../../src"
+import { Impulse, type Scope, batch, subscribe, useScoped } from "../../src"
 import { Counter } from "../common"
 
 describe.each([

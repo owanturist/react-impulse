@@ -5,7 +5,7 @@ import { map } from "~/tools/map"
 import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
-import { batch, Impulse, type Scope } from "../dependencies"
+import { Impulse, type Scope, batch } from "../dependencies"
 import { ImpulseForm } from "../impulse-form"
 
 import type { ImpulseFormListParams } from "./_impulse-form-list-params"

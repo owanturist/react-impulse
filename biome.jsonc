@@ -14,7 +14,22 @@
     "enabled": true,
     "actions": {
       "source": {
-        "organizeImports": "on"
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "identifierOrder": "lexicographic",
+            "groups": [
+              ":NODE:",
+              ":PACKAGE:",
+              ":BLANK_LINE:",
+              ":ALIAS:",
+              ":BLANK_LINE:",
+              "../**/*",
+              ":BLANK_LINE:",
+              "./*"
+            ]
+          }
+        }
       }
     }
   },
@@ -158,6 +173,12 @@
               "level": "warn",
               "options": {
                 "accessibility": "explicit"
+              }
+            },
+            "useImportType": {
+              "level": "warn",
+              "options": {
+                "style": "auto"
               }
             }
           },

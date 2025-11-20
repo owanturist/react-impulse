@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { batch, Impulse, subscribe, useScoped } from "../src"
+import { Impulse, batch, subscribe, useScoped } from "../src"
 
 import { Counter } from "./common"
 

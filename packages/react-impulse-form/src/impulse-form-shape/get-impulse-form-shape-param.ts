@@ -1,4 +1,5 @@
 import type { OmitValues } from "~/tools/omit-values"
+
 import type { GetImpulseFormParam, ImpulseFormParams } from "../impulse-form"
 
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"

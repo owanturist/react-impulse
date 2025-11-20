@@ -5,7 +5,6 @@ export * from "./impulse-form-optional"
 export * from "./impulse-form-shape"
 export * from "./impulse-form-switch"
 export * from "./impulse-form-unit"
-
 export type * from "./result"
 export type { ValidateStrategy } from "./validate-strategy"
 export type * from "./zod-like-schema"

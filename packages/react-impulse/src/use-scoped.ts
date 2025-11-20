@@ -4,7 +4,7 @@ import { isStrictEqual } from "~/tools/is-strict-equal"
 import type { Compare } from "./compare"
 import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
 import type { ReadableImpulse } from "./readable-impulse"
-import { type Scope, STATIC_SCOPE } from "./scope"
+import { STATIC_SCOPE, type Scope } from "./scope"
 import { useCreateScope } from "./use-create-scope"
 import { useHandler } from "./use-handler"
 

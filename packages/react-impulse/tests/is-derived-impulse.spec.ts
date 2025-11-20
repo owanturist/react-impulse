@@ -1,6 +1,6 @@
 import { isString } from "~/tools/is-string"
 
-import { Impulse, isDerivedImpulse, type ReadonlyImpulse, type Scope } from "../src"
+import { Impulse, type ReadonlyImpulse, type Scope, isDerivedImpulse } from "../src"
 
 describe("isDerivedImpulse(input)", () => {
   const knownCheck = (input: number | Impulse<number>) => {

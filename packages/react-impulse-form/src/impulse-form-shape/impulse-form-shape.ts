@@ -2,7 +2,7 @@ import { isUndefined } from "~/tools/is-undefined"
 import { mapValues } from "~/tools/map-values"
 import { partitionEntries } from "~/tools/partition-entries"
 
-import { batch, Impulse } from "../dependencies"
+import { Impulse, batch } from "../dependencies"
 import { isImpulseForm } from "../impulse-form"
 
 import { ImpulseFormShape as ImpulseFormShapeImpl } from "./_impulse-form-shape"

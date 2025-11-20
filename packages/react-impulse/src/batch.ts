@@ -1,5 +1,5 @@
 import { enqueue } from "./enqueue"
-import { type Scope, STATIC_SCOPE } from "./scope"
+import { STATIC_SCOPE, type Scope } from "./scope"
 
 /**
  * A helper to optimize multiple Impulse updates.

@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { batch, Impulse, type Scope, useScoped } from "../../src"
+import { Impulse, type Scope, batch, useScoped } from "../../src"
 import {
   Counter,
   type WithFirst,

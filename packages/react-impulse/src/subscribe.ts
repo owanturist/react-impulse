@@ -1,6 +1,6 @@
 import { batch } from "./batch"
 import type { Destructor } from "./destructor"
-import { injectScope, type Scope } from "./scope"
+import { type Scope, injectScope } from "./scope"
 import { ScopeFactory } from "./scope-factory"
 
 /**

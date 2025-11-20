@@ -5,7 +5,7 @@ import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
 import { resolveSetter } from "~/tools/setter"
 
-import { batch, type Compare, Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
+import { type Compare, Impulse, type ReadonlyImpulse, type Scope, batch } from "../dependencies"
 import { ImpulseFormState } from "../impulse-form/impulse-form-state"
 import type { Result } from "../result"
 import {

@@ -11,7 +11,6 @@ export type * from "./impulse-form-optional-output"
 export type * from "./impulse-form-optional-output-verbose"
 export type * from "./impulse-form-optional-schema"
 export type * from "./impulse-form-optional-validate-on"
-
 export type * from "./impulse-form-optional-validate-on-setter"
 export type * from "./impulse-form-optional-validate-on-verbose"
 export * from "./is-impulse-form-optional"

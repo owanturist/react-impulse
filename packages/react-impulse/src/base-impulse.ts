@@ -6,7 +6,7 @@ import { enqueue } from "./enqueue"
 import type { Impulse } from "./impulse"
 import type { ImpulseOptions } from "./impulse-options"
 import type { ReadableImpulse } from "./readable-impulse"
-import { EMITTER_KEY, extractScope, type Scope, STATIC_SCOPE } from "./scope"
+import { EMITTER_KEY, STATIC_SCOPE, type Scope, extractScope } from "./scope"
 import type { ScopeEmitter } from "./scope-emitter"
 import type { WritableImpulse } from "./writable-impulse"
 

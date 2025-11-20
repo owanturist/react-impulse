@@ -3,7 +3,7 @@ import { isNull } from "~/tools/is-null"
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
 
-import { batch, type ReadonlyImpulse, type Scope, untrack } from "../dependencies"
+import { type ReadonlyImpulse, type Scope, batch, untrack } from "../dependencies"
 
 import type { ImpulseFormParams } from "./impulse-form-params"
 import type { ImpulseFormState } from "./impulse-form-state"

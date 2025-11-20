@@ -2,7 +2,7 @@ import { BaseImpulse } from "./base-impulse"
 import type { Compare } from "./compare"
 import { DirectImpulse } from "./direct-impulse"
 import { enqueue } from "./enqueue"
-import { EMITTER_KEY, injectScope, type Scope, STATIC_SCOPE } from "./scope"
+import { EMITTER_KEY, STATIC_SCOPE, type Scope, injectScope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 
 export class DerivedImpulse<T> extends BaseImpulse<T> {
