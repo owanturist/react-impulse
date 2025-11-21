@@ -207,11 +207,7 @@
                   { "name": "useCallback", "closureIndex": 0, "dependenciesIndex": 1 },
                   { "name": "useMemo", "closureIndex": 0, "dependenciesIndex": 1 },
 
-                  { "name": "useScoped", "closureIndex": 0, "dependenciesIndex": 1 },
-                  { "name": "useScopedEffect", "closureIndex": 0, "dependenciesIndex": 1 },
-                  { "name": "useScopedLayoutEffect", "closureIndex": 0, "dependenciesIndex": 1 },
-                  { "name": "useScopedCallback", "closureIndex": 0, "dependenciesIndex": 1 },
-                  { "name": "useScopedMemo", "closureIndex": 0, "dependenciesIndex": 1 }
+                  { "name": "useScoped", "closureIndex": 0, "dependenciesIndex": 1 }
                 ]
               }
             }
@@ -268,7 +264,7 @@
               "options": {
                 "patterns": [
                   {
-                    "group": ["react", "react-impulse", "use-sync-external-store/**/*"],
+                    "group": ["react", "@owanturist/*", "use-sync-external-store/**/*"],
                     "message": "Import dependencies from dependencies.ts. It makes the imported deps appear only ones in the bundle."
                   }
                 ]
