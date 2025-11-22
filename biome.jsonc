@@ -7,8 +7,7 @@
     "defaultBranch": "master"
   },
   "files": {
-    "ignoreUnknown": false,
-    "includes": ["**/*", "!pnpm-lock.yaml", "!CHANGELOG.md"]
+    "ignoreUnknown": true
   },
   "assist": {
     "enabled": true,

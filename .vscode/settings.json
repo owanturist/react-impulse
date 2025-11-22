@@ -14,7 +14,8 @@
     "*.css": "tailwindcss"
   },
   "files.readonlyInclude": {
-    "pnpm-lock.yaml": true
+    "pnpm-lock.yaml": true,
+    "**/*.snap": true
   },
   "tailwindCSS.experimental.configFile": null,
   "tailwindCSS.experimental.classRegex": [

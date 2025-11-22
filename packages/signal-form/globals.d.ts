@@ -1,5 +1,5 @@
-import type { TestAPI } from "vitest"
 import type { Scope } from "@owanturist/signal"
+import type { TestAPI } from "vitest"
 
 declare module "vitest" {
   export interface TestContext {
