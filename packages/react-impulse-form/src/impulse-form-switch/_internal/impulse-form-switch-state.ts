@@ -10,12 +10,13 @@ import { mapValues } from "~/tools/map-values"
 import { values } from "~/tools/values"
 
 import { Impulse, type ReadonlyImpulse, type Scope } from "../../_internal/dependencies"
-import type { ImpulseForm, ImpulseFormParams } from "../../impulse-form"
 import type { GetImpulseFormParams } from "../../impulse-form/_internal/get-impulse-form-params"
 import {
   type ImpulseFormChild,
   ImpulseFormState,
 } from "../../impulse-form/_internal/impulse-form-state"
+import type { ImpulseForm } from "../../impulse-form/impulse-form"
+import type { ImpulseFormParams } from "../../impulse-form/impulse-form-params"
 import type { ValidateStrategy } from "../../validate-strategy"
 import type { ImpulseFormSwitchBranch } from "../impulse-form-switch-branch"
 import type { ImpulseFormSwitchBranches } from "../impulse-form-switch-branches"

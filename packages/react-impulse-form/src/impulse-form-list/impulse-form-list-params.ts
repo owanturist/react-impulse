@@ -1,4 +1,5 @@
-import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 
 import type { ImpulseFormListError } from "./impulse-form-list-error"
 import type { ImpulseFormListErrorSetter } from "./impulse-form-list-error-setter"

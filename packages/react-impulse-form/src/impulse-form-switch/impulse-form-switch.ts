@@ -3,7 +3,8 @@ import { isUndefined } from "~/tools/is-undefined"
 import { mapValues } from "~/tools/map-values"
 
 import { batch } from "../_internal/dependencies"
-import type { GetImpulseFormParam, ImpulseForm } from "../impulse-form"
+import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 import type { ImpulseFormSwitchErrorSetter } from "./impulse-form-switch-error-setter"

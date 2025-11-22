@@ -2,7 +2,8 @@ import type { IsEqualType } from "~/tools/is-type-equal"
 import { isUndefined } from "~/tools/is-undefined"
 
 import { batch } from "../_internal/dependencies"
-import type { GetImpulseFormParam, ImpulseForm } from "../impulse-form/"
+import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import type { ImpulseFormOptionalErrorSetter } from "./impulse-form-optional-error-setter"
 import type { ImpulseFormOptionalFlagSetter } from "./impulse-form-optional-flag-setter"

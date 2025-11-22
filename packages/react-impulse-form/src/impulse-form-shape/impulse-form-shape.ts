@@ -3,7 +3,7 @@ import { mapValues } from "~/tools/map-values"
 import { partitionEntries } from "~/tools/partition-entries"
 
 import { Impulse, batch } from "../_internal/dependencies"
-import { isImpulseForm } from "../impulse-form"
+import { isImpulseForm } from "../impulse-form/is-impulse-form"
 
 import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"

@@ -224,7 +224,6 @@
           "performance": {
             "useSolidForComponent": "off", // irrelevant
 
-            "noBarrelFile": "off", // barrel files are used in this codebase
             "noReExportAll": "off" // re-export all is used in this codebase
           },
 
@@ -278,6 +277,18 @@
                 ]
               }
             }
+          }
+        }
+      }
+    },
+
+    // packages entrypoints
+    {
+      "includes": ["packages/*/src/index.ts"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noBarrelFile": "off" // allow re-exporting from barrel files in package entrypoints
           }
         }
       }

@@ -13,11 +13,12 @@ import { values } from "~/tools/values"
 
 import { Impulse, type Scope } from "../../_internal/dependencies"
 import { toConcise } from "../../_internal/to-concise"
-import type { ImpulseForm, ImpulseFormParams } from "../../impulse-form"
 import {
   type ImpulseFormChild,
   ImpulseFormState,
 } from "../../impulse-form/_internal/impulse-form-state"
+import type { ImpulseForm } from "../../impulse-form/impulse-form"
+import type { ImpulseFormParams } from "../../impulse-form/impulse-form-params"
 import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../../validate-strategy"
 import type { ImpulseFormShapeError } from "../impulse-form-shape-error"
 import type { ImpulseFormShapeErrorSetter } from "../impulse-form-shape-error-setter"

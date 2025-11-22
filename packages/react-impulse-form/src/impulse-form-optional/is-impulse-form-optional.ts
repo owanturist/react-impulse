@@ -1,4 +1,4 @@
-import type { ImpulseForm } from "../impulse-form"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import { ImpulseFormOptional } from "./_internal/impulse-form-optional"
 

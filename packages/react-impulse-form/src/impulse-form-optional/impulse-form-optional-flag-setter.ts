@@ -1,6 +1,7 @@
 import type { Setter } from "~/tools/setter"
 
-import type { GetImpulseFormParam, ImpulseForm } from "../impulse-form"
+import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import type { ImpulseFormOptionalFlagVerbose } from "./impulse-form-optional-flag-verbose"
 import type { ImpulseFormOptionalSchema } from "./impulse-form-optional-schema"

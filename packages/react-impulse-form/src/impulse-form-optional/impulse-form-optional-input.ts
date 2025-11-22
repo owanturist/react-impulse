@@ -1,4 +1,5 @@
-import type { GetImpulseFormParam, ImpulseForm } from "../impulse-form"
+import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import type { ImpulseFormOptionalSchema } from "./impulse-form-optional-schema"
 

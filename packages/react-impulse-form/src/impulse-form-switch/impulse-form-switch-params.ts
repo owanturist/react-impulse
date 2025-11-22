@@ -1,4 +1,5 @@
-import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
 
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 import type { ImpulseFormSwitchError } from "./impulse-form-switch-error"

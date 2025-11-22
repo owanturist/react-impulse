@@ -2,7 +2,7 @@ import { isUndefined } from "~/tools/is-undefined"
 import { map } from "~/tools/map"
 
 import { batch } from "../_internal/dependencies"
-import type { ImpulseForm } from "../impulse-form"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import type { ImpulseFormListErrorSetter } from "./impulse-form-list-error-setter"
 import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"

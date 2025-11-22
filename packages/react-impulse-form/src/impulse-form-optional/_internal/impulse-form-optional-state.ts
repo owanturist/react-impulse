@@ -8,12 +8,13 @@ import { Lazy } from "~/tools/lazy"
 
 import { Impulse, type ReadonlyImpulse, type Scope } from "../../_internal/dependencies"
 import { toConcise } from "../../_internal/to-concise"
-import type { ImpulseForm, ImpulseFormParams } from "../../impulse-form"
 import type { GetImpulseFormParams } from "../../impulse-form/_internal/get-impulse-form-params"
 import {
   type ImpulseFormChild,
   ImpulseFormState,
 } from "../../impulse-form/_internal/impulse-form-state"
+import type { ImpulseForm } from "../../impulse-form/impulse-form"
+import type { ImpulseFormParams } from "../../impulse-form/impulse-form-params"
 import type { ValidateStrategy } from "../../validate-strategy"
 import type { ImpulseFormOptionalError } from "../impulse-form-optional-error"
 import type { ImpulseFormOptionalErrorSetter } from "../impulse-form-optional-error-setter"

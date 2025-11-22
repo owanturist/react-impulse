@@ -12,12 +12,13 @@ import { take } from "~/tools/take"
 
 import { Impulse, type Scope, untrack } from "../../_internal/dependencies"
 import { toConcise } from "../../_internal/to-concise"
-import type { ImpulseForm, ImpulseFormParams } from "../../impulse-form"
 import type { GetImpulseFormParams } from "../../impulse-form/_internal/get-impulse-form-params"
 import {
   type ImpulseFormChild,
   ImpulseFormState,
 } from "../../impulse-form/_internal/impulse-form-state"
+import type { ImpulseForm } from "../../impulse-form/impulse-form"
+import type { ImpulseFormParams } from "../../impulse-form/impulse-form-params"
 import { VALIDATE_ON_TOUCH } from "../../validate-strategy"
 import type { ImpulseFormListError } from "../impulse-form-list-error"
 import type { ImpulseFormListErrorSetter } from "../impulse-form-list-error-setter"

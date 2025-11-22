@@ -1,6 +1,7 @@
 import type { Setter } from "~/tools/setter"
 
-import type { GetImpulseFormFlagSetter, ImpulseForm } from "../impulse-form"
+import type { GetImpulseFormFlagSetter } from "../impulse-form/get-impulse-form-flag-setter"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import type { ImpulseFormListFlagVerbose } from "./impulse-form-list-flag-verbose"
 

@@ -1,4 +1,4 @@
-import type { ImpulseForm } from "../impulse-form"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 import type { ImpulseFormSwitchBranchUnion } from "./_internal/impulse-form-switch-branch-union"

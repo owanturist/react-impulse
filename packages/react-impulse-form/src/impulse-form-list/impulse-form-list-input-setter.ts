@@ -1,6 +1,7 @@
 import type { Setter } from "~/tools/setter"
 
-import type { GetImpulseFormInputSetter, ImpulseForm } from "../impulse-form"
+import type { GetImpulseFormInputSetter } from "../impulse-form/get-impulse-form-input-setter"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import type { ImpulseFormListInput } from "./impulse-form-list-input"
 
