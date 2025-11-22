@@ -5,13 +5,13 @@ import { map } from "~/tools/map"
 import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
-import { Impulse, type Scope, batch } from "../dependencies"
-import { ImpulseForm } from "../impulse-form"
+import { Impulse, type Scope, batch } from "../../_internal/dependencies"
+import { ImpulseForm } from "../../impulse-form/_internal/impulse-form"
+import type { ImpulseFormListParams } from "../impulse-form-list-params"
 
-import type { ImpulseFormListParams } from "./_impulse-form-list-params"
-import type { ImpulseFormListState } from "./_impulse-form-list-state"
+import type { ImpulseFormListState } from "./impulse-form-list-state"
 
-export class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
+class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
   ImpulseFormListParams<TElement>
 > {
   public static override _getState = ImpulseForm._getState
@@ -68,3 +68,5 @@ export class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
     })
   }
 }
+
+export { ImpulseFormList }

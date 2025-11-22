@@ -1,6 +1,7 @@
-import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetImpulseFormParam, ImpulseForm } from "../impulse-form"
 
-export type ImpulseFormOptionalOutput<TElement extends ImpulseForm> =
+type ImpulseFormOptionalOutput<TElement extends ImpulseForm> =
   | undefined
   | GetImpulseFormParam<TElement, "output.schema">
+
+export type { ImpulseFormOptionalOutput }

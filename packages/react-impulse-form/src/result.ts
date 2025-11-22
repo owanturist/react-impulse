@@ -1,1 +1,3 @@
-export type Result<TError, TData> = [TError, null] | [null, TData]
+type Result<TError, TData> = [TError, null] | [null, TData]
+
+export type { Result }

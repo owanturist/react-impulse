@@ -1,10 +1,10 @@
-import type { Scope } from "../dependencies"
-import { ImpulseForm } from "../impulse-form"
+import type { Scope } from "../../_internal/dependencies"
+import { ImpulseForm } from "../../impulse-form/_internal/impulse-form"
+import type { ImpulseFormOptionalParams } from "../impulse-form-optional-params"
 
-import type { ImpulseFormOptionalParams } from "./_impulse-form-optional-params"
-import type { ImpulseFormOptionalState } from "./_impulse-form-optional-state"
+import type { ImpulseFormOptionalState } from "./impulse-form-optional-state"
 
-export class ImpulseFormOptional<
+class ImpulseFormOptional<
   TEnabled extends ImpulseForm,
   TElement extends ImpulseForm,
 > extends ImpulseForm<ImpulseFormOptionalParams<TEnabled, TElement>> {
@@ -24,3 +24,5 @@ export class ImpulseFormOptional<
     return this._state._getEnabledElement(scope)?._host() as undefined | TElement
   }
 }
+
+export { ImpulseFormOptional }

@@ -1,5 +1,7 @@
 import type { GetImpulseFormFlagVerbose, ImpulseForm } from "../impulse-form"
 
-export type ImpulseFormListFlagVerbose<TElement extends ImpulseForm> = ReadonlyArray<
+type ImpulseFormListFlagVerbose<TElement extends ImpulseForm> = ReadonlyArray<
   GetImpulseFormFlagVerbose<TElement>
 >
+
+export type { ImpulseFormListFlagVerbose }

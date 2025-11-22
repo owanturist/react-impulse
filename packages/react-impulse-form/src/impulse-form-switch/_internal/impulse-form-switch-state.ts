@@ -9,31 +9,34 @@ import { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
 import { values } from "~/tools/values"
 
-import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
-import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
-import type { GetImpulseFormParams } from "../impulse-form/get-impulse-form-params"
-import { type ImpulseFormChild, ImpulseFormState } from "../impulse-form/impulse-form-state"
-import type { ValidateStrategy } from "../validate-strategy"
+import { Impulse, type ReadonlyImpulse, type Scope } from "../../_internal/dependencies"
+import type { ImpulseForm, ImpulseFormParams } from "../../impulse-form"
+import type { GetImpulseFormParams } from "../../impulse-form/_internal/get-impulse-form-params"
+import {
+  type ImpulseFormChild,
+  ImpulseFormState,
+} from "../../impulse-form/_internal/impulse-form-state"
+import type { ValidateStrategy } from "../../validate-strategy"
+import type { ImpulseFormSwitchBranch } from "../impulse-form-switch-branch"
+import type { ImpulseFormSwitchBranches } from "../impulse-form-switch-branches"
+import type { ImpulseFormSwitchError } from "../impulse-form-switch-error"
+import type { ImpulseFormSwitchErrorSetter } from "../impulse-form-switch-error-setter"
+import type { ImpulseFormSwitchErrorVerbose } from "../impulse-form-switch-error-verbose"
+import type { ImpulseFormSwitchFlag } from "../impulse-form-switch-flag"
+import type { ImpulseFormSwitchFlagSetter } from "../impulse-form-switch-flag-setter"
+import type { ImpulseFormSwitchFlagVerbose } from "../impulse-form-switch-flag-verbose"
+import type { ImpulseFormSwitchInput } from "../impulse-form-switch-input"
+import type { ImpulseFormSwitchInputSetter } from "../impulse-form-switch-input-setter"
+import type { ImpulseFormSwitchOutput } from "../impulse-form-switch-output"
+import type { ImpulseFormSwitchOutputVerbose } from "../impulse-form-switch-output-verbose"
+import type { ImpulseFormSwitchParams } from "../impulse-form-switch-params"
+import type { ImpulseFormSwitchValidateOn } from "../impulse-form-switch-validate-on"
+import type { ImpulseFormSwitchValidateOnSetter } from "../impulse-form-switch-validate-on-setter"
+import type { ImpulseFormSwitchValidateOnVerbose } from "../impulse-form-switch-validate-on-verbose"
 
-import { ImpulseFormSwitch } from "./_impulse-form-switch"
-import type { ImpulseFormSwitchConciseParam } from "./_impulse-form-switch-concise-param"
-import type { ImpulseFormSwitchParams } from "./_impulse-form-switch-params"
-import type { ImpulseFormSwitchVerboseParam } from "./_impulse-form-switch-verbose-param"
-import type { ImpulseFormSwitchBranch } from "./impulse-form-switch-branch"
-import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
-import type { ImpulseFormSwitchError } from "./impulse-form-switch-error"
-import type { ImpulseFormSwitchErrorSetter } from "./impulse-form-switch-error-setter"
-import type { ImpulseFormSwitchErrorVerbose } from "./impulse-form-switch-error-verbose"
-import type { ImpulseFormSwitchFlag } from "./impulse-form-switch-flag"
-import type { ImpulseFormSwitchFlagSetter } from "./impulse-form-switch-flag-setter"
-import type { ImpulseFormSwitchFlagVerbose } from "./impulse-form-switch-flag-verbose"
-import type { ImpulseFormSwitchInput } from "./impulse-form-switch-input"
-import type { ImpulseFormSwitchInputSetter } from "./impulse-form-switch-input-setter"
-import type { ImpulseFormSwitchOutput } from "./impulse-form-switch-output"
-import type { ImpulseFormSwitchOutputVerbose } from "./impulse-form-switch-output-verbose"
-import type { ImpulseFormSwitchValidateOn } from "./impulse-form-switch-validate-on"
-import type { ImpulseFormSwitchValidateOnSetter } from "./impulse-form-switch-validate-on-setter"
-import type { ImpulseFormSwitchValidateOnVerbose } from "./impulse-form-switch-validate-on-verbose"
+import { ImpulseFormSwitch } from "./impulse-form-switch"
+import type { ImpulseFormSwitchConciseParam } from "./impulse-form-switch-concise-param"
+import type { ImpulseFormSwitchVerboseParam } from "./impulse-form-switch-verbose-param"
 
 type ImpulseFormSwitchStateBranches<TBranches> = {
   [TBranch in keyof TBranches]: ImpulseFormState<GetImpulseFormParams<TBranches[TBranch]>>
@@ -44,7 +47,7 @@ type ActiveSwitchStateBranch<TBranches> = ImpulseFormSwitchBranch<
   ImpulseFormSwitchStateBranches<TBranches>[keyof TBranches]
 >
 
-export class ImpulseFormSwitchState<
+class ImpulseFormSwitchState<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
 > extends ImpulseFormState<ImpulseFormSwitchParams<TKind, TBranches>> {
@@ -553,3 +556,5 @@ export class ImpulseFormSwitchState<
     ]
   }
 }
+
+export { ImpulseFormSwitchState }

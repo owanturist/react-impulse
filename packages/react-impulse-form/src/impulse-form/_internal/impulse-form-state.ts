@@ -2,12 +2,12 @@ import { Emitter } from "~/tools/emitter"
 import { isNull } from "~/tools/is-null"
 import type { Lazy } from "~/tools/lazy"
 
-import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
+import { Impulse, type ReadonlyImpulse, type Scope } from "../../_internal/dependencies"
+import type { ImpulseFormParams } from "../impulse-form-params"
 
 import type { ImpulseForm } from "./impulse-form"
-import type { ImpulseFormParams } from "./impulse-form-params"
 
-export abstract class ImpulseFormState<
+abstract class ImpulseFormState<
   // biome-ignore lint/suspicious/noExplicitAny: any is the only reasonable default
   TParams extends ImpulseFormParams = any,
 > {
@@ -163,10 +163,13 @@ export abstract class ImpulseFormState<
   ): ReadonlyArray<ImpulseFormChild<TChildParams, TParams>>
 }
 
-export interface ImpulseFormChild<
+interface ImpulseFormChild<
   TChildParams extends ImpulseFormParams,
   TParams extends ImpulseFormParams,
 > {
   _state: ImpulseFormState<TChildParams>
   _mapToChild(this: void, parentValue: TParams["output.schema"]): TChildParams["output.schema"]
 }
+
+export type { ImpulseFormChild }
+export { ImpulseFormState }

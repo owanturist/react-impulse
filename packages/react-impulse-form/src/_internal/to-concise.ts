@@ -1,17 +1,17 @@
-export function toConcise<TEntry, TConcise>(
+function toConcise<TEntry, TConcise>(
   entries: ReadonlyArray<TEntry | TConcise>,
   isConcise: (entry: TEntry | TConcise) => entry is TConcise,
   fallback: TConcise,
 ): TConcise | ReadonlyArray<TEntry | TConcise>
 
-export function toConcise<TEntry, TConcise, TVerbose>(
+function toConcise<TEntry, TConcise, TVerbose>(
   entries: ReadonlyArray<TEntry | TConcise>,
   isConcise: (entry: TEntry | TConcise) => entry is TConcise,
   fallback: TConcise,
   verbose: TVerbose,
 ): TConcise | TVerbose
 
-export function toConcise<TEntry, TConcise, TVerbose>(
+function toConcise<TEntry, TConcise, TVerbose>(
   entries: ReadonlyArray<TEntry | TConcise>,
   isConcise: (entry: TEntry | TConcise) => entry is TConcise,
   fallback: TConcise,
@@ -27,3 +27,5 @@ export function toConcise<TEntry, TConcise, TVerbose>(
 
   return concise
 }
+
+export { toConcise }

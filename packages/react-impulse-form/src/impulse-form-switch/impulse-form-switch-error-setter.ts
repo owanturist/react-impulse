@@ -1,16 +1,15 @@
 import type { Setter } from "~/tools/setter"
 
-import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetImpulseFormParam, ImpulseForm } from "../impulse-form"
 
-import type { GetImpulseFormSwitchBranchesParam } from "./_get-impulse-form-switch-branches-param"
-import type { ImpulseFormSwitchBranchUnion } from "./_impulse-form-switch-branch-union"
+import type { GetImpulseFormSwitchBranchesParam } from "./get-impulse-form-switch-branches-param"
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 import type { ImpulseFormSwitchConciseSchema } from "./impulse-form-switch-concise-schema"
 import type { ImpulseFormSwitchErrorVerbose } from "./impulse-form-switch-error-verbose"
 import type { ImpulseFormSwitchVerboseSchema } from "./impulse-form-switch-verbose-schema"
+import type { ImpulseFormSwitchBranchUnion } from "./_internal/impulse-form-switch-branch-union"
 
-export type ImpulseFormSwitchErrorSetter<
+type ImpulseFormSwitchErrorSetter<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
 > = Setter<
@@ -43,3 +42,4 @@ export type ImpulseFormSwitchErrorSetter<
     ImpulseFormSwitchErrorVerbose<TKind, TBranches>,
   ]
 >
+export type { ImpulseFormSwitchErrorSetter }

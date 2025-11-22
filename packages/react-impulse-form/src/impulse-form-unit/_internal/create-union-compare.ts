@@ -1,8 +1,8 @@
 import { isStrictEqual } from "~/tools/is-strict-equal"
 
-import type { Compare } from "../dependencies"
+import type { Compare } from "../../_internal/dependencies"
 
-export function createUnionCompare<TPrimary, TSecondary>(
+function createUnionCompare<TPrimary, TSecondary>(
   primary: (value: unknown) => value is TPrimary,
   secondary: Compare<TSecondary>,
 ): Compare<TPrimary | TSecondary> {
@@ -19,3 +19,5 @@ export function createUnionCompare<TPrimary, TSecondary>(
     return secondary(left, right, scope)
   }
 }
+
+export { createUnionCompare }

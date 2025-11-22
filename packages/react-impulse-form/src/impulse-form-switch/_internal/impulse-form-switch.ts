@@ -1,14 +1,14 @@
 import { mapValues } from "~/tools/map-values"
 
-import type { Scope } from "../dependencies"
-import { ImpulseForm } from "../impulse-form"
+import type { Scope } from "../../_internal/dependencies"
+import { ImpulseForm } from "../../impulse-form/_internal/impulse-form"
+import type { ImpulseFormSwitchActiveBranch } from "../impulse-form-switch-active-branch"
+import type { ImpulseFormSwitchBranches } from "../impulse-form-switch-branches"
+import type { ImpulseFormSwitchParams } from "../impulse-form-switch-params"
 
-import type { ImpulseFormSwitchParams } from "./_impulse-form-switch-params"
-import type { ImpulseFormSwitchState } from "./_impulse-form-switch-state"
-import type { ImpulseFormSwitchActiveBranch } from "./impulse-form-switch-active-branch"
-import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
+import type { ImpulseFormSwitchState } from "./impulse-form-switch-state"
 
-export class ImpulseFormSwitch<
+class ImpulseFormSwitch<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
 > extends ImpulseForm<ImpulseFormSwitchParams<TKind, TBranches>> {
@@ -39,3 +39,5 @@ export class ImpulseFormSwitch<
     } as ImpulseFormSwitchActiveBranch<TBranches>
   }
 }
+
+export { ImpulseFormSwitch }

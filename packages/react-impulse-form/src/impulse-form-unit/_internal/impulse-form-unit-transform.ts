@@ -1,19 +1,19 @@
-import { type ZodLikeSchema, zodLikeParse } from "../zod-like-schema"
+import type { ImpulseFormUnitTransformer } from "../impulse-form-unit-transformer"
+import type { ImpulseFormUnitValidator } from "../impulse-form-unit-validator"
 
-import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer"
-import type { ImpulseFormUnitValidator } from "./impulse-form-unit-validator"
+import { type ZodLikeSchema, zodLikeParse } from "./zod-like-schema"
 
-export interface ImpulseFormUnitTransform<TInput, TError, TOutput> {
+interface ImpulseFormUnitTransform<TInput, TError, TOutput> {
   readonly _transformer: boolean
   readonly _validator: ImpulseFormUnitValidator<TInput, TError, TOutput>
 }
 
-export const transformFromInput = {
+const transformFromInput = {
   _transformer: true,
   _validator: (input) => [null, input],
 } satisfies ImpulseFormUnitTransform<unknown, never, unknown>
 
-export function transformFromTransformer<TInput, TOutput>(
+function transformFromTransformer<TInput, TOutput>(
   transformer: ImpulseFormUnitTransformer<TInput, TOutput>,
 ): ImpulseFormUnitTransform<TInput, never, TOutput> {
   return {
@@ -22,7 +22,7 @@ export function transformFromTransformer<TInput, TOutput>(
   }
 }
 
-export function transformFromValidator<TInput, TError, TOutput>(
+function transformFromValidator<TInput, TError, TOutput>(
   validator: ImpulseFormUnitValidator<TInput, TError, TOutput>,
 ): ImpulseFormUnitTransform<TInput, TError, TOutput> {
   return {
@@ -31,7 +31,7 @@ export function transformFromValidator<TInput, TError, TOutput>(
   }
 }
 
-export function transformFromSchema<TInput, TOutput>(
+function transformFromSchema<TInput, TOutput>(
   schema: ZodLikeSchema<TOutput>,
 ): ImpulseFormUnitTransform<TInput, ReadonlyArray<string>, TOutput> {
   return {
@@ -39,3 +39,7 @@ export function transformFromSchema<TInput, TOutput>(
     _validator: (input) => zodLikeParse(schema, input),
   }
 }
+
+export type { ImpulseFormUnitTransform }
+
+export { transformFromInput, transformFromTransformer, transformFromValidator, transformFromSchema }

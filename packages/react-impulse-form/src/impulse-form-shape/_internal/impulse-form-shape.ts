@@ -1,16 +1,16 @@
 import { mapValues } from "~/tools/map-values"
 
-import type { Scope } from "../dependencies"
-import { ImpulseForm } from "../impulse-form"
-import type { ImpulseFormMeta } from "../impulse-form-meta"
+import type { Scope } from "../../_internal/dependencies"
+import { ImpulseForm } from "../../impulse-form/_internal/impulse-form"
+import type { ImpulseFormMeta } from "../../impulse-form-meta"
+import type { ImpulseFormShapeFields } from "../impulse-form-shape-fields"
+import type { ImpulseFormShapeParams } from "../impulse-form-shape-params"
 
-import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"
-import type { ImpulseFormShapeState } from "./_impulse-form-shape-state"
-import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
+import type { ImpulseFormShapeState } from "./impulse-form-shape-state"
 
 type ImpulseFormShapeField<TField> = TField extends ImpulseForm ? TField : ImpulseFormMeta<TField>
 
-export class ImpulseFormShape<TFields extends ImpulseFormShapeFields> extends ImpulseForm<
+class ImpulseFormShape<TFields extends ImpulseFormShapeFields> extends ImpulseForm<
   ImpulseFormShapeParams<TFields>
 > {
   public static override _getState = ImpulseForm._getState
@@ -31,3 +31,5 @@ export class ImpulseFormShape<TFields extends ImpulseFormShapeFields> extends Im
     }
   }
 }
+
+export { ImpulseFormShape }

@@ -11,31 +11,33 @@ import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
 import { values } from "~/tools/values"
 
-import { Impulse, type Scope } from "../dependencies"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
-import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
-import { type ImpulseFormChild, ImpulseFormState } from "../impulse-form/impulse-form-state"
-import { toConcise } from "../to-concise"
-import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
+import { Impulse, type Scope } from "../../_internal/dependencies"
+import { toConcise } from "../../_internal/to-concise"
+import type { ImpulseForm, ImpulseFormParams } from "../../impulse-form"
+import {
+  type ImpulseFormChild,
+  ImpulseFormState,
+} from "../../impulse-form/_internal/impulse-form-state"
+import { VALIDATE_ON_TOUCH, type ValidateStrategy } from "../../validate-strategy"
+import type { ImpulseFormShapeError } from "../impulse-form-shape-error"
+import type { ImpulseFormShapeErrorSetter } from "../impulse-form-shape-error-setter"
+import type { ImpulseFormShapeErrorVerbose } from "../impulse-form-shape-error-verbose"
+import type { ImpulseFormShapeFields } from "../impulse-form-shape-fields"
+import type { ImpulseFormShapeFlag } from "../impulse-form-shape-flag"
+import type { ImpulseFormShapeFlagSetter } from "../impulse-form-shape-flag-setter"
+import type { ImpulseFormShapeFlagVerbose } from "../impulse-form-shape-flag-verbose"
+import type { ImpulseFormShapeInput } from "../impulse-form-shape-input"
+import type { ImpulseFormShapeInputSetter } from "../impulse-form-shape-input-setter"
+import type { ImpulseFormShapeOutput } from "../impulse-form-shape-output"
+import type { ImpulseFormShapeOutputVerbose } from "../impulse-form-shape-output-verbose"
+import type { ImpulseFormShapeParams } from "../impulse-form-shape-params"
+import type { ImpulseFormShapeValidateOn } from "../impulse-form-shape-validate-on"
+import type { ImpulseFormShapeValidateOnSetter } from "../impulse-form-shape-validate-on-setter"
+import type { ImpulseFormShapeValidateOnVerbose } from "../impulse-form-shape-validate-on-verbose"
 
-import { ImpulseFormShape } from "./_impulse-form-shape"
-import type { ImpulseFormShapeParams } from "./_impulse-form-shape-params"
-import type { ImpulseFormShapeError } from "./impulse-form-shape-error"
-import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"
-import type { ImpulseFormShapeErrorVerbose } from "./impulse-form-shape-error-verbose"
-import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
-import type { ImpulseFormShapeFlag } from "./impulse-form-shape-flag"
-import type { ImpulseFormShapeFlagSetter } from "./impulse-form-shape-flag-setter"
-import type { ImpulseFormShapeFlagVerbose } from "./impulse-form-shape-flag-verbose"
-import type { ImpulseFormShapeInput } from "./impulse-form-shape-input"
-import type { ImpulseFormShapeInputSetter } from "./impulse-form-shape-input-setter"
-import type { ImpulseFormShapeOutput } from "./impulse-form-shape-output"
-import type { ImpulseFormShapeOutputVerbose } from "./impulse-form-shape-output-verbose"
-import type { ImpulseFormShapeValidateOn } from "./impulse-form-shape-validate-on"
-import type { ImpulseFormShapeValidateOnSetter } from "./impulse-form-shape-validate-on-setter"
-import type { ImpulseFormShapeValidateOnVerbose } from "./impulse-form-shape-validate-on-verbose"
+import { ImpulseFormShape } from "./impulse-form-shape"
 
-export type ImpulseFormShapeStateFields<TFields extends ImpulseFormShapeFields> = OmitValues<
+type ImpulseFormShapeStateFields<TFields extends ImpulseFormShapeFields> = OmitValues<
   {
     [TField in keyof TFields]: TFields[TField] extends ImpulseForm<infer TParams>
       ? ImpulseFormState<TParams>
@@ -44,7 +46,7 @@ export type ImpulseFormShapeStateFields<TFields extends ImpulseFormShapeFields> 
   never
 >
 
-export type ImpulseFormShapeStateMeta<TFields extends ImpulseFormShapeFields> = OmitValues<
+type ImpulseFormShapeStateMeta<TFields extends ImpulseFormShapeFields> = OmitValues<
   {
     [TField in keyof TFields]: TFields[TField] extends ImpulseForm
       ? never
@@ -53,7 +55,7 @@ export type ImpulseFormShapeStateMeta<TFields extends ImpulseFormShapeFields> = 
   never
 >
 
-export class ImpulseFormShapeState<
+class ImpulseFormShapeState<
   TFields extends ImpulseFormShapeFields = ImpulseFormShapeFields,
 > extends ImpulseFormState<ImpulseFormShapeParams<TFields>> {
   public readonly _host = Lazy(() => new ImpulseFormShape(this))
@@ -373,3 +375,6 @@ export class ImpulseFormShapeState<
     }))
   }
 }
+
+export type { ImpulseFormShapeStateFields, ImpulseFormShapeStateMeta }
+export { ImpulseFormShapeState }

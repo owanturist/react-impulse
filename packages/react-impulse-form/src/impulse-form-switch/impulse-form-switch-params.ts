@@ -1,5 +1,4 @@
-import type { ImpulseForm } from "../impulse-form/impulse-form"
-import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
+import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
 
 import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
 import type { ImpulseFormSwitchError } from "./impulse-form-switch-error"
@@ -16,7 +15,7 @@ import type { ImpulseFormSwitchValidateOn } from "./impulse-form-switch-validate
 import type { ImpulseFormSwitchValidateOnSetter } from "./impulse-form-switch-validate-on-setter"
 import type { ImpulseFormSwitchValidateOnVerbose } from "./impulse-form-switch-validate-on-verbose"
 
-export interface ImpulseFormSwitchParams<
+interface ImpulseFormSwitchParams<
   TKind extends ImpulseForm,
   TBranches extends ImpulseFormSwitchBranches<TKind>,
 > extends ImpulseFormParams {
@@ -38,3 +37,5 @@ export interface ImpulseFormSwitchParams<
   "error.schema": ImpulseFormSwitchError<TKind, TBranches>
   "error.schema.verbose": ImpulseFormSwitchErrorVerbose<TKind, TBranches>
 }
+
+export type { ImpulseFormSwitchParams }

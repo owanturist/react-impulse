@@ -15,8 +15,7 @@ import type { ImpulseFormShapeValidateOn } from "./impulse-form-shape-validate-o
 import type { ImpulseFormShapeValidateOnSetter } from "./impulse-form-shape-validate-on-setter"
 import type { ImpulseFormShapeValidateOnVerbose } from "./impulse-form-shape-validate-on-verbose"
 
-export interface ImpulseFormShapeParams<TFields extends ImpulseFormShapeFields>
-  extends ImpulseFormParams {
+interface ImpulseFormShapeParams<TFields extends ImpulseFormShapeFields> extends ImpulseFormParams {
   readonly "input.schema": ImpulseFormShapeInput<TFields>
   readonly "input.setter": ImpulseFormShapeInputSetter<TFields>
 
@@ -35,3 +34,5 @@ export interface ImpulseFormShapeParams<TFields extends ImpulseFormShapeFields>
   readonly "error.schema": ImpulseFormShapeError<TFields>
   readonly "error.schema.verbose": ImpulseFormShapeErrorVerbose<TFields>
 }
+
+export type { ImpulseFormShapeParams }

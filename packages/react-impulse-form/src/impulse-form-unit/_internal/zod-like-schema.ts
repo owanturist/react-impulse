@@ -4,7 +4,7 @@ import { isObject } from "~/tools/is-object"
 import { isString } from "~/tools/is-string"
 import { map } from "~/tools/map"
 
-import type { Result } from "./result"
+import type { Result } from "../../result"
 
 interface ZodLikeIssue {
   message: string
@@ -68,10 +68,5 @@ function zodLikeParse<TOutput>(
   }
 }
 
-export {
-  type ZodLikeIssue,
-  type ZodLikeError,
-  type ZodLikeSafeParseResult,
-  type ZodLikeSchema,
-  zodLikeParse,
-}
+export type { ZodLikeIssue, ZodLikeError, ZodLikeSafeParseResult, ZodLikeSchema }
+export { zodLikeParse }

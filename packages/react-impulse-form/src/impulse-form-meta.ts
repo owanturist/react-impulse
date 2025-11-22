@@ -1,3 +1,5 @@
-import type { Scope } from "./dependencies"
+import type { Scope } from "./_internal/dependencies"
 
-export type ImpulseFormMeta<TValue> = (scope: Scope) => TValue
+type ImpulseFormMeta<TValue> = (scope: Scope) => TValue
+
+export type { ImpulseFormMeta }

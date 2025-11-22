@@ -12,7 +12,7 @@ type FallbackParamWhenNever<TKey extends keyof ImpulseFormParams, TFallback, TPa
     : never
   : TParam
 
-export type GetImpulseFormShapeParam<
+type GetImpulseFormShapeParam<
   TFields extends ImpulseFormShapeFields,
   TKey extends keyof ImpulseFormParams,
 > = OmitValues<
@@ -25,3 +25,5 @@ export type GetImpulseFormShapeParam<
   },
   never
 >
+
+export type { GetImpulseFormShapeParam }

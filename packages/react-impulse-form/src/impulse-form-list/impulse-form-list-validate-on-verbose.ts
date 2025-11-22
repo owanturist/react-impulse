@@ -1,5 +1,7 @@
 import type { GetImpulseFormValidateOnVerbose, ImpulseForm } from "../impulse-form"
 
-export type ImpulseFormListValidateOnVerbose<TElement extends ImpulseForm> = ReadonlyArray<
+type ImpulseFormListValidateOnVerbose<TElement extends ImpulseForm> = ReadonlyArray<
   GetImpulseFormValidateOnVerbose<TElement>
 >
+
+export type { ImpulseFormListValidateOnVerbose }

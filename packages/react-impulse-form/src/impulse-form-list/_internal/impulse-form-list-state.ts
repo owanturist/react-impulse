@@ -10,33 +10,35 @@ import { Lazy } from "~/tools/lazy"
 import { map } from "~/tools/map"
 import { take } from "~/tools/take"
 
-import { Impulse, type Scope, untrack } from "../dependencies"
-import type { GetImpulseFormParams } from "../impulse-form/get-impulse-form-params"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
-import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
-import { type ImpulseFormChild, ImpulseFormState } from "../impulse-form/impulse-form-state"
-import { toConcise } from "../to-concise"
-import { VALIDATE_ON_TOUCH } from "../validate-strategy"
+import { Impulse, type Scope, untrack } from "../../_internal/dependencies"
+import { toConcise } from "../../_internal/to-concise"
+import type { ImpulseForm, ImpulseFormParams } from "../../impulse-form"
+import type { GetImpulseFormParams } from "../../impulse-form/_internal/get-impulse-form-params"
+import {
+  type ImpulseFormChild,
+  ImpulseFormState,
+} from "../../impulse-form/_internal/impulse-form-state"
+import { VALIDATE_ON_TOUCH } from "../../validate-strategy"
+import type { ImpulseFormListError } from "../impulse-form-list-error"
+import type { ImpulseFormListErrorSetter } from "../impulse-form-list-error-setter"
+import type { ImpulseFormListErrorVerbose } from "../impulse-form-list-error-verbose"
+import type { ImpulseFormListFlag } from "../impulse-form-list-flag"
+import type { ImpulseFormListFlagSetter } from "../impulse-form-list-flag-setter"
+import type { ImpulseFormListFlagVerbose } from "../impulse-form-list-flag-verbose"
+import type { ImpulseFormListInput } from "../impulse-form-list-input"
+import type { ImpulseFormListInputSetter } from "../impulse-form-list-input-setter"
+import type { ImpulseFormListOutput } from "../impulse-form-list-output"
+import type { ImpulseFormListOutputVerbose } from "../impulse-form-list-output-verbose"
+import type { ImpulseFormListParams } from "../impulse-form-list-params"
+import type { ImpulseFormListValidateOn } from "../impulse-form-list-validate-on"
+import type { ImpulseFormListValidateOnSetter } from "../impulse-form-list-validate-on-setter"
+import type { ImpulseFormListValidateOnVerbose } from "../impulse-form-list-validate-on-verbose"
 
-import { ImpulseFormList } from "./_impulse-form-list"
-import type { ImpulseFormListParams } from "./_impulse-form-list-params"
-import type { ImpulseFormListError } from "./impulse-form-list-error"
-import type { ImpulseFormListErrorSetter } from "./impulse-form-list-error-setter"
-import type { ImpulseFormListErrorVerbose } from "./impulse-form-list-error-verbose"
-import type { ImpulseFormListFlag } from "./impulse-form-list-flag"
-import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"
-import type { ImpulseFormListFlagVerbose } from "./impulse-form-list-flag-verbose"
-import type { ImpulseFormListInput } from "./impulse-form-list-input"
-import type { ImpulseFormListInputSetter } from "./impulse-form-list-input-setter"
-import type { ImpulseFormListOutput } from "./impulse-form-list-output"
-import type { ImpulseFormListOutputVerbose } from "./impulse-form-list-output-verbose"
-import type { ImpulseFormListValidateOn } from "./impulse-form-list-validate-on"
-import type { ImpulseFormListValidateOnSetter } from "./impulse-form-list-validate-on-setter"
-import type { ImpulseFormListValidateOnVerbose } from "./impulse-form-list-validate-on-verbose"
+import { ImpulseFormList } from "./impulse-form-list"
 
-export class ImpulseFormListState<
-  TElement extends ImpulseForm = ImpulseForm,
-> extends ImpulseFormState<ImpulseFormListParams<TElement>> {
+class ImpulseFormListState<TElement extends ImpulseForm = ImpulseForm> extends ImpulseFormState<
+  ImpulseFormListParams<TElement>
+> {
   public readonly _host = Lazy(() => new ImpulseFormList(this))
 
   public readonly _elements: Impulse<
@@ -382,3 +384,5 @@ export class ImpulseFormListState<
     }))
   }
 }
+
+export { ImpulseFormListState }

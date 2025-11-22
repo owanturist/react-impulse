@@ -6,30 +6,33 @@ import { isTrue } from "~/tools/is-true"
 import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
 
-import { Impulse, type ReadonlyImpulse, type Scope } from "../dependencies"
-import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
-import type { GetImpulseFormParams } from "../impulse-form/get-impulse-form-params"
-import { type ImpulseFormChild, ImpulseFormState } from "../impulse-form/impulse-form-state"
-import { toConcise } from "../to-concise"
-import type { ValidateStrategy } from "../validate-strategy"
+import { Impulse, type ReadonlyImpulse, type Scope } from "../../_internal/dependencies"
+import { toConcise } from "../../_internal/to-concise"
+import type { ImpulseForm, ImpulseFormParams } from "../../impulse-form"
+import type { GetImpulseFormParams } from "../../impulse-form/_internal/get-impulse-form-params"
+import {
+  type ImpulseFormChild,
+  ImpulseFormState,
+} from "../../impulse-form/_internal/impulse-form-state"
+import type { ValidateStrategy } from "../../validate-strategy"
+import type { ImpulseFormOptionalError } from "../impulse-form-optional-error"
+import type { ImpulseFormOptionalErrorSetter } from "../impulse-form-optional-error-setter"
+import type { ImpulseFormOptionalErrorVerbose } from "../impulse-form-optional-error-verbose"
+import type { ImpulseFormOptionalFlag } from "../impulse-form-optional-flag"
+import type { ImpulseFormOptionalFlagSetter } from "../impulse-form-optional-flag-setter"
+import type { ImpulseFormOptionalFlagVerbose } from "../impulse-form-optional-flag-verbose"
+import type { ImpulseFormOptionalInput } from "../impulse-form-optional-input"
+import type { ImpulseFormOptionalInputSetter } from "../impulse-form-optional-input-setter"
+import type { ImpulseFormOptionalOutput } from "../impulse-form-optional-output"
+import type { ImpulseFormOptionalOutputVerbose } from "../impulse-form-optional-output-verbose"
+import type { ImpulseFormOptionalParams } from "../impulse-form-optional-params"
+import type { ImpulseFormOptionalValidateOn } from "../impulse-form-optional-validate-on"
+import type { ImpulseFormOptionalValidateOnSetter } from "../impulse-form-optional-validate-on-setter"
+import type { ImpulseFormOptionalValidateOnVerbose } from "../impulse-form-optional-validate-on-verbose"
 
-import { ImpulseFormOptional } from "./_impulse-form-optional"
-import type { ImpulseFormOptionalParams } from "./_impulse-form-optional-params"
-import type { ImpulseFormOptionalError } from "./impulse-form-optional-error"
-import type { ImpulseFormOptionalErrorSetter } from "./impulse-form-optional-error-setter"
-import type { ImpulseFormOptionalErrorVerbose } from "./impulse-form-optional-error-verbose"
-import type { ImpulseFormOptionalFlag } from "./impulse-form-optional-flag"
-import type { ImpulseFormOptionalFlagSetter } from "./impulse-form-optional-flag-setter"
-import type { ImpulseFormOptionalFlagVerbose } from "./impulse-form-optional-flag-verbose"
-import type { ImpulseFormOptionalInput } from "./impulse-form-optional-input"
-import type { ImpulseFormOptionalInputSetter } from "./impulse-form-optional-input-setter"
-import type { ImpulseFormOptionalOutput } from "./impulse-form-optional-output"
-import type { ImpulseFormOptionalOutputVerbose } from "./impulse-form-optional-output-verbose"
-import type { ImpulseFormOptionalValidateOn } from "./impulse-form-optional-validate-on"
-import type { ImpulseFormOptionalValidateOnSetter } from "./impulse-form-optional-validate-on-setter"
-import type { ImpulseFormOptionalValidateOnVerbose } from "./impulse-form-optional-validate-on-verbose"
+import { ImpulseFormOptional } from "./impulse-form-optional"
 
-export class ImpulseFormOptionalState<
+class ImpulseFormOptionalState<
   TEnabled extends ImpulseForm,
   TElement extends ImpulseForm,
 > extends ImpulseFormState<ImpulseFormOptionalParams<TEnabled, TElement>> {
@@ -431,3 +434,5 @@ export class ImpulseFormOptionalState<
     ]
   }
 }
+
+export { ImpulseFormOptionalState }

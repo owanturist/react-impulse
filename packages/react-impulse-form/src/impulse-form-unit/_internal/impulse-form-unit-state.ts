@@ -5,29 +5,35 @@ import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
 import { resolveSetter } from "~/tools/setter"
 
-import { type Compare, Impulse, type ReadonlyImpulse, type Scope, batch } from "../dependencies"
-import { ImpulseFormState } from "../impulse-form/impulse-form-state"
-import type { Result } from "../result"
+import {
+  type Compare,
+  Impulse,
+  type ReadonlyImpulse,
+  type Scope,
+  batch,
+} from "../../_internal/dependencies"
+import { ImpulseFormState } from "../../impulse-form/_internal/impulse-form-state"
+import type { Result } from "../../result"
 import {
   VALIDATE_ON_CHANGE,
   VALIDATE_ON_INIT,
   VALIDATE_ON_SUBMIT,
   VALIDATE_ON_TOUCH,
   type ValidateStrategy,
-} from "../validate-strategy"
+} from "../../validate-strategy"
+import type { ImpulseFormUnitErrorSetter } from "../impulse-form-unit-error-setter"
+import type { ImpulseFormUnitInputSetter } from "../impulse-form-unit-input-setter"
+import type { ImpulseFormUnitParams } from "../impulse-form-unit-params"
+import type { ImpulseFormUnitTransformer } from "../impulse-form-unit-transformer"
+import type { ImpulseFormUnitValidateOnSetter } from "../impulse-form-unit-validate-on-setter"
 
-import { ImpulseFormUnit } from "./_impulse-form-unit"
-import type { ImpulseFormUnitParams } from "./_impulse-form-unit-params"
+import { ImpulseFormUnit } from "./impulse-form-unit"
 import {
   type ImpulseFormUnitTransform,
   transformFromTransformer,
-} from "./_impulse-form-unit-transform"
-import type { ImpulseFormUnitErrorSetter } from "./impulse-form-unit-error-setter"
-import type { ImpulseFormUnitInputSetter } from "./impulse-form-unit-input-setter"
-import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer"
-import type { ImpulseFormUnitValidateOnSetter } from "./impulse-form-unit-validate-on-setter"
+} from "./impulse-form-unit-transform"
 
-export class ImpulseFormUnitState<TInput, TError, TOutput> extends ImpulseFormState<
+class ImpulseFormUnitState<TInput, TError, TOutput> extends ImpulseFormState<
   ImpulseFormUnitParams<TInput, TError, TOutput>
 > {
   public readonly _host = Lazy(() => new ImpulseFormUnit(this))
@@ -328,3 +334,5 @@ export class ImpulseFormUnitState<TInput, TError, TOutput> extends ImpulseFormSt
     })
   }
 }
+
+export { ImpulseFormUnitState }

@@ -1,5 +1,4 @@
-import type { ImpulseForm } from "../impulse-form/impulse-form"
-import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
+import type { ImpulseForm, ImpulseFormParams } from "../impulse-form"
 
 import type { ImpulseFormOptionalError } from "./impulse-form-optional-error"
 import type { ImpulseFormOptionalErrorSetter } from "./impulse-form-optional-error-setter"
@@ -15,10 +14,8 @@ import type { ImpulseFormOptionalValidateOn } from "./impulse-form-optional-vali
 import type { ImpulseFormOptionalValidateOnSetter } from "./impulse-form-optional-validate-on-setter"
 import type { ImpulseFormOptionalValidateOnVerbose } from "./impulse-form-optional-validate-on-verbose"
 
-export interface ImpulseFormOptionalParams<
-  TEnabled extends ImpulseForm,
-  TElement extends ImpulseForm,
-> extends ImpulseFormParams {
+interface ImpulseFormOptionalParams<TEnabled extends ImpulseForm, TElement extends ImpulseForm>
+  extends ImpulseFormParams {
   "input.schema": ImpulseFormOptionalInput<TEnabled, TElement>
   "input.setter": ImpulseFormOptionalInputSetter<TEnabled, TElement>
 
@@ -37,3 +34,5 @@ export interface ImpulseFormOptionalParams<
   "error.schema": ImpulseFormOptionalError<TEnabled, TElement>
   "error.schema.verbose": ImpulseFormOptionalErrorVerbose<TEnabled, TElement>
 }
+
+export type { ImpulseFormOptionalParams }
