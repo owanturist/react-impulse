@@ -3,4 +3,4 @@
 Below are links to the various packages in this monorepo:
 
 - [`@owanturist/signal`](./packages/signal/README.md)
-- [`react-impulse-form`](./packages/react-impulse-form/README.md)
+- [`@owanturist/signal-form`](./packages/signal-form/README.md)
