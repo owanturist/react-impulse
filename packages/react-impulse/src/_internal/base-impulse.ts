@@ -8,7 +8,7 @@ import type { ReadableImpulse } from "../readable-impulse"
 import type { WritableImpulse } from "../writable-impulse"
 
 import { enqueue } from "./enqueue"
-import { EMITTER_KEY, STATIC_SCOPE, type Scope, extractScope } from "./scope"
+import { STATIC_SCOPE, type Scope, attachToScope, extractScope } from "./scope"
 import type { ScopeEmitter } from "./scope-emitter"
 
 abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> {
@@ -57,7 +57,7 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
    * @version 1.0.0
    */
   public getValue(scope: Scope): T {
-    scope[EMITTER_KEY]?._attachTo(this._emitters)
+    attachToScope(scope, this._emitters)
 
     return this._getter()
   }

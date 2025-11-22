@@ -1,30 +1,40 @@
 import type { ScopeEmitter } from "./scope-emitter"
 
-const EMITTER_KEY = Symbol("scope")
+const SCOPE_KEY = Symbol("scope")
 
 interface Scope {
-  readonly [EMITTER_KEY]: null | ScopeEmitter
+  readonly [SCOPE_KEY]: null | ScopeEmitter
 }
 
-const STATIC_SCOPE: Scope = {
-  [EMITTER_KEY]: null,
+const STATIC_SCOPE = {
+  [SCOPE_KEY]: null,
+} satisfies Scope
+
+function createScope(emitter: ScopeEmitter): Scope {
+  return {
+    [SCOPE_KEY]: emitter,
+  }
 }
 
-let currentScope = STATIC_SCOPE
+function attachToScope(scope: Scope, emitters: Set<WeakRef<ScopeEmitter>>): void {
+  scope[SCOPE_KEY]?._attachTo(emitters)
+}
+
+let implicitScope: Scope = STATIC_SCOPE
 
 function injectScope<TResult>(execute: (passedScope: Scope) => TResult, scope: Scope): TResult {
-  const prevScope = currentScope
+  const prevScope = implicitScope
 
-  currentScope = scope
+  implicitScope = scope
   const result = execute(scope)
-  currentScope = prevScope
+  implicitScope = prevScope
 
   return result
 }
 
 function extractScope(): Scope {
-  return currentScope
+  return implicitScope
 }
 
 export type { Scope }
-export { EMITTER_KEY, STATIC_SCOPE, injectScope, extractScope }
+export { STATIC_SCOPE, createScope, attachToScope, injectScope, extractScope }

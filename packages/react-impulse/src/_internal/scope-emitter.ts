@@ -1,4 +1,4 @@
-import { EMITTER_KEY, type Scope } from "./scope"
+import { type Scope, createScope } from "./scope"
 
 /**
  * Manages the lifecycle of scope emitters, providing creation, attachment, and invalidation
@@ -50,14 +50,12 @@ class ScopeEmitter {
    * @remarks
    * A {@link Scope} is always created on a new reading cycle, so all previous subscriptions must be cleared.
    *
-   * @returns The newly created scope that references this emitter via {@link EMITTER_KEY}.
+   * @returns The newly created scope that references this emitter.
    */
   private _renew(): Scope {
     this._detachFromAll()
 
-    return {
-      [EMITTER_KEY]: this,
-    }
+    return createScope(this)
   }
 
   /**

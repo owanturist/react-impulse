@@ -63,7 +63,9 @@ class ScopeEmitQueue {
     }
   }
 }
+
 let Queue: null | ScopeEmitQueue = null
+
 /**
  * Runs a queue-backed execution block, ensuring that nested enqueue calls share
  * the same scope emit queue and that queued emitters are processed exactly once.
@@ -73,7 +75,6 @@ let Queue: null | ScopeEmitQueue = null
  *
  * @returns The value produced by the provided execution block.
  */
-
 function enqueue<TResult>(
   execute: (push: (emitters: ReadonlySet<WeakRef<ScopeEmitter>>) => void) => TResult,
 ): TResult {

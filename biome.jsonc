@@ -188,8 +188,12 @@
             "noSolidDestructuredProps": "off", // irrelevant
 
             "useImportExtensions": "off", // irrelevant,
-            "noUnusedImports": "off", // handled by TS
             "noUndeclaredVariables": "off", // handled by TS
+            "noUnusedImports": {
+              // enable autofix
+              "level": "warn",
+              "fix": "safe"
+            },
             "useUniqueElementIds": {
               "level": "warn",
               "options": {
