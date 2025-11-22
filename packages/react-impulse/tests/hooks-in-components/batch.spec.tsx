@@ -230,224 +230,226 @@ describe.each([
     useCount: (factory: (scope: Scope) => number) =>
       useScoped(React.useCallback((scope: Scope) => factory(scope), [factory])),
   },
-])(
-  "when $name",
-  ({ expectedFactoryCallsForMultiple, expectedFactoryCallsForNested, execute, useCount }) => {
-    describe("for multiple impulses", () => {
-      const setup = () => {
-        const spy = vi.fn()
-        const onRender = vi.fn()
-        const first = Impulse({ count: 1 })
-        const second = Impulse({ count: 2 })
-        const factory = (scope: Scope) => {
-          spy()
+])("when $name", ({
+  expectedFactoryCallsForMultiple,
+  expectedFactoryCallsForNested,
+  execute,
+  useCount,
+}) => {
+  describe("for multiple impulses", () => {
+    const setup = () => {
+      const spy = vi.fn()
+      const onRender = vi.fn()
+      const first = Impulse({ count: 1 })
+      const second = Impulse({ count: 2 })
+      const factory = (scope: Scope) => {
+        spy()
 
-          return Counter.getCount(first.getValue(scope)) + Counter.getCount(second.getValue(scope))
-        }
-
-        return { spy, onRender, first, second, factory }
+        return Counter.getCount(first.getValue(scope)) + Counter.getCount(second.getValue(scope))
       }
 
-      it(`calls the factory ${expectedFactoryCallsForMultiple} times by Impulse#setValue calls`, () => {
-        const { spy, onRender, first, second, factory } = setup()
+      return { spy, onRender, first, second, factory }
+    }
 
-        const Component: React.FC = () => {
-          const count = useCount(factory)
+    it(`calls the factory ${expectedFactoryCallsForMultiple} times by Impulse#setValue calls`, () => {
+      const { spy, onRender, first, second, factory } = setup()
 
-          return (
-            <React.Profiler id="test" onRender={onRender}>
-              <span data-testid="count">{count}</span>
-            </React.Profiler>
-          )
-        }
+      const Component: React.FC = () => {
+        const count = useCount(factory)
 
-        render(<Component />)
+        return (
+          <React.Profiler id="test" onRender={onRender}>
+            <span data-testid="count">{count}</span>
+          </React.Profiler>
+        )
+      }
 
-        expect(screen.getByTestId("count")).toHaveTextContent("3")
-        expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledOnce()
+      render(<Component />)
 
-        vi.clearAllMocks()
+      expect(screen.getByTestId("count")).toHaveTextContent("3")
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(spy).toHaveBeenCalledOnce()
 
-        act(() => {
-          execute(() => {
-            first.setValue(Counter.inc)
-            second.setValue(Counter.inc)
-          })
+      vi.clearAllMocks()
+
+      act(() => {
+        execute(() => {
+          first.setValue(Counter.inc)
+          second.setValue(Counter.inc)
         })
-        expect(screen.getByTestId("count")).toHaveTextContent("5")
-        expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForMultiple)
       })
-
-      it(`calls the factory ${expectedFactoryCallsForMultiple} times by Impulse#setValue calls`, () => {
-        const { spy, onRender, first, second, factory } = setup()
-
-        const Component: React.FC = () => {
-          const count = useCount(factory)
-
-          return (
-            <React.Profiler id="test" onRender={onRender}>
-              <button
-                type="button"
-                data-testid="inc"
-                onClick={() => {
-                  execute(() => {
-                    first.setValue(Counter.inc)
-                    second.setValue(Counter.inc)
-                  })
-                }}
-              />
-              <span data-testid="count">{count}</span>
-            </React.Profiler>
-          )
-        }
-
-        render(<Component />)
-
-        expect(screen.getByTestId("count")).toHaveTextContent("3")
-        expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledOnce()
-        vi.clearAllMocks()
-
-        fireEvent.click(screen.getByTestId("inc"))
-        expect(screen.getByTestId("count")).toHaveTextContent("5")
-        expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForMultiple)
-      })
+      expect(screen.getByTestId("count")).toHaveTextContent("5")
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForMultiple)
     })
 
-    describe("for nested impulses", () => {
-      const setup = () => {
-        const spy = vi.fn()
-        const onRender = vi.fn()
-        const impulse = Impulse({
-          first: Impulse({ count: 1 }),
-          second: Impulse({ count: 2 }),
-        })
-        const factory = (scope: Scope) => {
-          spy()
+    it(`calls the factory ${expectedFactoryCallsForMultiple} times by Impulse#setValue calls`, () => {
+      const { spy, onRender, first, second, factory } = setup()
 
-          const { first, second } = impulse.getValue(scope)
+      const Component: React.FC = () => {
+        const count = useCount(factory)
 
-          return Counter.getCount(first.getValue(scope)) + Counter.getCount(second.getValue(scope))
-        }
-
-        return { spy, onRender, impulse, factory }
+        return (
+          <React.Profiler id="test" onRender={onRender}>
+            <button
+              type="button"
+              data-testid="inc"
+              onClick={() => {
+                execute(() => {
+                  first.setValue(Counter.inc)
+                  second.setValue(Counter.inc)
+                })
+              }}
+            />
+            <span data-testid="count">{count}</span>
+          </React.Profiler>
+        )
       }
 
-      it(`calls the factory ${expectedFactoryCallsForNested} times by Impulse#setValue calls`, () => {
-        const { spy, onRender, impulse, factory } = setup()
+      render(<Component />)
 
-        const Component: React.FC = () => {
-          const count = useCount(factory)
+      expect(screen.getByTestId("count")).toHaveTextContent("3")
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(spy).toHaveBeenCalledOnce()
+      vi.clearAllMocks()
 
-          return (
-            <React.Profiler id="test" onRender={onRender}>
-              <span data-testid="count">{count}</span>
-            </React.Profiler>
-          )
-        }
+      fireEvent.click(screen.getByTestId("inc"))
+      expect(screen.getByTestId("count")).toHaveTextContent("5")
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForMultiple)
+    })
+  })
 
-        render(<Component />)
+  describe("for nested impulses", () => {
+    const setup = () => {
+      const spy = vi.fn()
+      const onRender = vi.fn()
+      const impulse = Impulse({
+        first: Impulse({ count: 1 }),
+        second: Impulse({ count: 2 }),
+      })
+      const factory = (scope: Scope) => {
+        spy()
 
-        expect(screen.getByTestId("count")).toHaveTextContent("3")
-        expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledOnce()
-        vi.clearAllMocks()
+        const { first, second } = impulse.getValue(scope)
 
-        act(() => {
-          execute(() => {
-            impulse.setValue((value) => {
-              value.first.setValue(Counter.inc)
-              value.second.setValue(Counter.inc)
+        return Counter.getCount(first.getValue(scope)) + Counter.getCount(second.getValue(scope))
+      }
 
-              return value
-            })
-          })
-        })
-        expect(screen.getByTestId("count")).toHaveTextContent("5")
-        expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
-        vi.clearAllMocks()
+      return { spy, onRender, impulse, factory }
+    }
 
-        act(() => {
+    it(`calls the factory ${expectedFactoryCallsForNested} times by Impulse#setValue calls`, () => {
+      const { spy, onRender, impulse, factory } = setup()
+
+      const Component: React.FC = () => {
+        const count = useCount(factory)
+
+        return (
+          <React.Profiler id="test" onRender={onRender}>
+            <span data-testid="count">{count}</span>
+          </React.Profiler>
+        )
+      }
+
+      render(<Component />)
+
+      expect(screen.getByTestId("count")).toHaveTextContent("3")
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(spy).toHaveBeenCalledOnce()
+      vi.clearAllMocks()
+
+      act(() => {
+        execute(() => {
           impulse.setValue((value) => {
-            execute(() => {
-              value.first.setValue(Counter.inc)
-              value.second.setValue(Counter.inc)
-            })
+            value.first.setValue(Counter.inc)
+            value.second.setValue(Counter.inc)
 
             return value
           })
         })
-        expect(screen.getByTestId("count")).toHaveTextContent("7")
-        expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
       })
+      expect(screen.getByTestId("count")).toHaveTextContent("5")
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
+      vi.clearAllMocks()
 
-      it(`calls the factory ${expectedFactoryCallsForNested} times by Impulse#setValue calls`, () => {
-        const { spy, onRender, impulse, factory } = setup()
+      act(() => {
+        impulse.setValue((value) => {
+          execute(() => {
+            value.first.setValue(Counter.inc)
+            value.second.setValue(Counter.inc)
+          })
 
-        const Component: React.FC = () => {
-          const count = useCount(factory)
+          return value
+        })
+      })
+      expect(screen.getByTestId("count")).toHaveTextContent("7")
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
+    })
 
-          return (
-            <React.Profiler id="test" onRender={onRender}>
-              <button
-                type="button"
-                data-testid="inc-1"
-                onClick={() => {
-                  execute(() => {
-                    impulse.setValue((value) => {
-                      value.first.setValue(Counter.inc)
-                      value.second.setValue(Counter.inc)
+    it(`calls the factory ${expectedFactoryCallsForNested} times by Impulse#setValue calls`, () => {
+      const { spy, onRender, impulse, factory } = setup()
 
-                      return value
-                    })
-                  })
-                }}
-              />
-              <button
-                type="button"
-                data-testid="inc-2"
-                onClick={() => {
+      const Component: React.FC = () => {
+        const count = useCount(factory)
+
+        return (
+          <React.Profiler id="test" onRender={onRender}>
+            <button
+              type="button"
+              data-testid="inc-1"
+              onClick={() => {
+                execute(() => {
                   impulse.setValue((value) => {
-                    execute(() => {
-                      value.first.setValue(Counter.inc)
-                      value.second.setValue(Counter.inc)
-                    })
+                    value.first.setValue(Counter.inc)
+                    value.second.setValue(Counter.inc)
 
                     return value
                   })
-                }}
-              />
-              <span data-testid="count">{count}</span>
-            </React.Profiler>
-          )
-        }
+                })
+              }}
+            />
+            <button
+              type="button"
+              data-testid="inc-2"
+              onClick={() => {
+                impulse.setValue((value) => {
+                  execute(() => {
+                    value.first.setValue(Counter.inc)
+                    value.second.setValue(Counter.inc)
+                  })
 
-        render(<Component />)
+                  return value
+                })
+              }}
+            />
+            <span data-testid="count">{count}</span>
+          </React.Profiler>
+        )
+      }
 
-        expect(screen.getByTestId("count")).toHaveTextContent("3")
-        expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledOnce()
-        vi.clearAllMocks()
+      render(<Component />)
 
-        fireEvent.click(screen.getByTestId("inc-1"))
-        expect(screen.getByTestId("count")).toHaveTextContent("5")
-        expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
-        vi.clearAllMocks()
+      expect(screen.getByTestId("count")).toHaveTextContent("3")
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(spy).toHaveBeenCalledOnce()
+      vi.clearAllMocks()
 
-        fireEvent.click(screen.getByTestId("inc-2"))
-        expect(screen.getByTestId("count")).toHaveTextContent("7")
-        expect(onRender).toHaveBeenCalledOnce()
-        expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
-      })
+      fireEvent.click(screen.getByTestId("inc-1"))
+      expect(screen.getByTestId("count")).toHaveTextContent("5")
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
+      vi.clearAllMocks()
+
+      fireEvent.click(screen.getByTestId("inc-2"))
+      expect(screen.getByTestId("count")).toHaveTextContent("7")
+      expect(onRender).toHaveBeenCalledOnce()
+      expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
     })
-  },
-)
+  })
+})
 
 describe("when reading value during batching", () => {
   it("returns new value right after update", ({ scope }) => {
