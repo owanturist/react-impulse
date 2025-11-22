@@ -1,6 +1,8 @@
-import { type DependencyList, useMemo } from "./dependencies"
-import type { Scope } from "./scope"
+import { useMemo } from "react"
+
+import type { DependencyList } from "./dependency-list"
 import { useScope } from "./use-scope"
+import type { Scope } from "./_internal/scope"
 
 /**
  * The hook is an `Impulse` version of the `React.useMemo` hook.
@@ -10,7 +12,7 @@ import { useScope } from "./use-scope"
  *
  * @version 1.0.0
  */
-export function useScopedMemo<TResult>(
+function useScopedMemo<TResult>(
   factory: (scope: Scope) => TResult,
   dependencies: DependencyList,
 ): TResult {
@@ -19,3 +21,5 @@ export function useScopedMemo<TResult>(
   // biome-ignore lint/correctness/useExhaustiveDependencies: pass dependencies + scope
   return useMemo(() => factory(scope), [...dependencies, scope])
 }
+
+export { useScopedMemo }

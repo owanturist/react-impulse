@@ -1,9 +1,11 @@
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 
-import { ImpulseFormOptional } from "./_impulse-form-optional"
+import { ImpulseFormOptional } from "./_internal/impulse-form-optional"
 
-export function isImpulseFormOptional(
+function isImpulseFormOptional(
   anything: unknown,
 ): anything is ImpulseFormOptional<ImpulseForm, ImpulseForm> {
   return anything instanceof ImpulseFormOptional
 }
+
+export { isImpulseFormOptional }

@@ -1,6 +1,6 @@
 import { entries } from "~/tools/entries"
 
-export function partitionEntries<TObject extends Record<string, unknown>, TResult>(
+function partitionEntries<TObject extends Record<string, unknown>, TResult>(
   object: TObject,
   predicate: (value: TObject[typeof key] | TResult, key: keyof TObject) => value is TResult,
 ): [Record<keyof TObject, TResult>, TObject] {
@@ -17,3 +17,5 @@ export function partitionEntries<TObject extends Record<string, unknown>, TResul
 
   return [right, left]
 }
+
+export { partitionEntries }

@@ -1,6 +1,6 @@
 import { isArray } from "./is-array"
 
-export function map<T, R>(
+function map<T, R>(
   iterable: ReadonlyArray<T> | Iterable<T>,
   transform: (value: T, index: number) => R,
 ): ReadonlyArray<R> {
@@ -8,3 +8,5 @@ export function map<T, R>(
 
   return arr.map((value, index) => transform(value, index))
 }
+
+export { map }

@@ -1,6 +1,9 @@
-import type { GetImpulseFormValidateOn, ImpulseForm } from "../impulse-form"
+import type { GetImpulseFormValidateOn } from "../impulse-form/get-impulse-form-validate-on"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type { ValidateStrategy } from "../validate-strategy"
 
-export type ImpulseFormListValidateOn<TElement extends ImpulseForm> =
+type ImpulseFormListValidateOn<TElement extends ImpulseForm> =
   | ValidateStrategy
   | ReadonlyArray<GetImpulseFormValidateOn<TElement>>
+
+export type { ImpulseFormListValidateOn }

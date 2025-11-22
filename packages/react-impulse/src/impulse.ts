@@ -2,17 +2,17 @@ import { hasProperty } from "~/tools/has-property"
 import { isFunction } from "~/tools/is-function"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 
-import type { BaseImpulse } from "./base-impulse"
-import { DerivedImpulse } from "./derived-impulse"
-import { DirectImpulse } from "./direct-impulse"
 import type { ImpulseOptions } from "./impulse-options"
 import type { ReadableImpulse } from "./readable-impulse"
-import type { Scope } from "./scope"
 import type { WritableImpulse } from "./writable-impulse"
+import type { BaseImpulse } from "./_internal/base-impulse"
+import { DerivedImpulse } from "./_internal/derived-impulse"
+import { Impulse as ImpulseImpl } from "./_internal/impulse"
+import type { Scope } from "./_internal/scope"
 
-export type Impulse<T> = BaseImpulse<T>
+type Impulse<T> = BaseImpulse<T>
 
-export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
+type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
 
 /**
  * Creates a new Impulse without an initial value.
@@ -23,7 +23,7 @@ export type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
  * const impulse = Impulse<string>()
  * const initiallyUndefined = impulse.getValue(scope) === undefined
  */
-export function Impulse<T = undefined>(): Impulse<undefined | T>
+function Impulse<T = undefined>(): Impulse<undefined | T>
 
 /**
  * Creates a new derived ReadonlyImpulse.
@@ -35,7 +35,7 @@ export function Impulse<T = undefined>(): Impulse<undefined | T>
  *
  * @version 3.0.0
  */
-export function Impulse<T>(
+function Impulse<T>(
   getter: ReadableImpulse<T> | ((scope: Scope) => T),
   options?: ImpulseOptions<T>,
 ): ReadonlyImpulse<T>
@@ -51,7 +51,7 @@ export function Impulse<T>(
  *
  * @version 3.0.0
  */
-export function Impulse<T>(
+function Impulse<T>(
   getter: ReadableImpulse<T> | ((scope: Scope) => T),
   setter: WritableImpulse<T> | ((value: T, scope: Scope) => void),
   options?: ImpulseOptions<T>,
@@ -66,9 +66,9 @@ export function Impulse<T>(
  *
  * @version 3.0.0
  */
-export function Impulse<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
+function Impulse<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
 
-export function Impulse<T>(
+function Impulse<T>(
   initialValueOrReadableImpulse?: T | ReadableImpulse<T> | ((scope: Scope) => T),
   optionsOrWritableImpulse?:
     | ImpulseOptions<T>
@@ -81,7 +81,7 @@ export function Impulse<T>(
   if (!(isGetterFunction || hasProperty(initialValueOrReadableImpulse, "getValue"))) {
     const directOptions = optionsOrWritableImpulse as undefined | ImpulseOptions<undefined | T>
 
-    return new DirectImpulse(initialValueOrReadableImpulse, directOptions?.compare ?? isStrictEqual)
+    return new ImpulseImpl(initialValueOrReadableImpulse, directOptions?.compare ?? isStrictEqual)
   }
 
   const [setter, derivedOptions] =
@@ -97,3 +97,6 @@ export function Impulse<T>(
     derivedOptions?.compare ?? isStrictEqual,
   )
 }
+
+export type { ReadonlyImpulse }
+export { Impulse }

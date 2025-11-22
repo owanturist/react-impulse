@@ -1,5 +1,7 @@
-import type { Scope } from "./scope"
+import type { Scope } from "./_internal/scope"
 
-export interface ReadableImpulse<T> {
+interface ReadableImpulse<T> {
   getValue(scope: Scope): T
 }
+
+export type { ReadableImpulse }

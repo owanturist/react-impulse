@@ -6,7 +6,7 @@ import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type { ImpulseFormOptionalErrorVerbose } from "./impulse-form-optional-error-verbose"
 import type { ImpulseFormOptionalSchema } from "./impulse-form-optional-schema"
 
-export type ImpulseFormOptionalErrorSetter<
+type ImpulseFormOptionalErrorSetter<
   TEnabled extends ImpulseForm,
   TElement extends ImpulseForm,
 > = Setter<
@@ -18,3 +18,5 @@ export type ImpulseFormOptionalErrorSetter<
   >,
   [ImpulseFormOptionalErrorVerbose<TEnabled, TElement>]
 >
+
+export type { ImpulseFormOptionalErrorSetter }

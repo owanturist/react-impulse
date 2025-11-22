@@ -5,7 +5,9 @@ import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import type { ImpulseFormListErrorVerbose } from "./impulse-form-list-error-verbose"
 
-export type ImpulseFormListErrorSetter<TElement extends ImpulseForm> = Setter<
+type ImpulseFormListErrorSetter<TElement extends ImpulseForm> = Setter<
   null | ReadonlyArray<undefined | GetImpulseFormErrorSetter<TElement>>,
   [ImpulseFormListErrorVerbose<TElement>]
 >
+
+export type { ImpulseFormListErrorSetter }

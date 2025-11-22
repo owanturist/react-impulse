@@ -1,5 +1,5 @@
-import { enqueue } from "./enqueue"
-import { STATIC_SCOPE, type Scope } from "./scope"
+import { enqueue } from "./_internal/enqueue"
+import { STATIC_SCOPE, type Scope } from "./_internal/scope"
 
 /**
  * A helper to optimize multiple Impulse updates.
@@ -8,8 +8,10 @@ import { STATIC_SCOPE, type Scope } from "./scope"
  *
  * @version 1.0.0
  */
-export function batch(execute: (scope: Scope) => void): void {
+function batch(execute: (scope: Scope) => void): void {
   enqueue(() => {
     execute(STATIC_SCOPE)
   })
 }
+
+export { batch }

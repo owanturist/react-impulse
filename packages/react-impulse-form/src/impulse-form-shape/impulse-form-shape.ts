@@ -1,25 +1,26 @@
+import { Impulse, batch } from "react-impulse"
+
 import { isUndefined } from "~/tools/is-undefined"
 import { mapValues } from "~/tools/map-values"
 import { partitionEntries } from "~/tools/partition-entries"
 
-import { Impulse, batch } from "../dependencies"
-import { isImpulseForm } from "../impulse-form"
+import { isImpulseForm } from "../impulse-form/is-impulse-form"
 
-import { ImpulseFormShape as ImpulseFormShapeImpl } from "./_impulse-form-shape"
-import {
-  ImpulseFormShapeState,
-  type ImpulseFormShapeStateFields,
-  type ImpulseFormShapeStateMeta,
-} from "./_impulse-form-shape-state"
 import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"
 import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
 import type { ImpulseFormShapeFlagSetter } from "./impulse-form-shape-flag-setter"
 import type { ImpulseFormShapeInputSetter } from "./impulse-form-shape-input-setter"
 import type { ImpulseFormShapeValidateOnSetter } from "./impulse-form-shape-validate-on-setter"
+import { ImpulseFormShape as ImpulseFormShapeImpl } from "./_internal/impulse-form-shape"
+import {
+  ImpulseFormShapeState,
+  type ImpulseFormShapeStateFields,
+  type ImpulseFormShapeStateMeta,
+} from "./_internal/impulse-form-shape-state"
 
-export type ImpulseFormShape<TFields extends ImpulseFormShapeFields> = ImpulseFormShapeImpl<TFields>
+type ImpulseFormShape<TFields extends ImpulseFormShapeFields> = ImpulseFormShapeImpl<TFields>
 
-export interface ImpulseFormShapeOptions<TFields extends ImpulseFormShapeFields> {
+interface ImpulseFormShapeOptions<TFields extends ImpulseFormShapeFields> {
   readonly input?: ImpulseFormShapeInputSetter<TFields>
   readonly initial?: ImpulseFormShapeInputSetter<TFields>
   readonly touched?: ImpulseFormShapeFlagSetter<TFields>
@@ -27,7 +28,7 @@ export interface ImpulseFormShapeOptions<TFields extends ImpulseFormShapeFields>
   readonly error?: ImpulseFormShapeErrorSetter<TFields>
 }
 
-export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
+function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
   fields: TFields,
   { input, initial, touched, validateOn, error }: ImpulseFormShapeOptions<TFields> = {},
 ): ImpulseFormShape<TFields> {
@@ -68,3 +69,6 @@ export function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
 
   return state._host()
 }
+
+export type { ImpulseFormShapeOptions }
+export { ImpulseFormShape }

@@ -1,4 +1,6 @@
-export interface ImpulseFormSwitchConciseSchema<TActive, TBranch> {
+interface ImpulseFormSwitchConciseSchema<TActive, TBranch> {
   readonly active: TActive
   readonly branch: TBranch
 }
+
+export type { ImpulseFormSwitchConciseSchema }

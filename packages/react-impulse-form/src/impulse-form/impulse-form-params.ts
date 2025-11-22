@@ -1,4 +1,4 @@
-export interface ImpulseFormParams {
+interface ImpulseFormParams {
   readonly "input.setter": unknown
   readonly "input.schema": unknown
 
@@ -17,3 +17,5 @@ export interface ImpulseFormParams {
   readonly "error.schema": unknown
   readonly "error.schema.verbose": unknown
 }
+
+export type { ImpulseFormParams }

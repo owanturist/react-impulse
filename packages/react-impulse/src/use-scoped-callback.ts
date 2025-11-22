@@ -1,7 +1,7 @@
-import type { DependencyList } from "./dependencies"
-import { enqueue } from "./enqueue"
-import type { Scope } from "./scope"
+import type { DependencyList } from "./dependency-list"
 import { useScopedMemo } from "./use-scoped-memo"
+import { enqueue } from "./_internal/enqueue"
+import type { Scope } from "./_internal/scope"
 
 /**
  * The hook is an `Impulse` version of the `React.useCallback` hook.
@@ -12,7 +12,7 @@ import { useScopedMemo } from "./use-scoped-memo"
  * @version 1.3.0
  */
 
-export function useScopedCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
+function useScopedCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
   callback: (scope: Scope, ...args: TArgs) => TResult,
   dependencies: DependencyList,
 ): (...args: TArgs) => TResult {
@@ -21,3 +21,5 @@ export function useScopedCallback<TArgs extends ReadonlyArray<unknown>, TResult>
     // biome-ignore lint/correctness/useExhaustiveDependencies: pass dependencies as is
   }, dependencies)
 }
+
+export { useScopedCallback }

@@ -1,9 +1,9 @@
-import { DerivedImpulse } from "./derived-impulse"
 import type { Impulse, ReadonlyImpulse } from "./impulse"
-import { isImpulseFactory } from "./is-impulse-factory"
-import type { Scope } from "./scope"
+import { createIsImpulse } from "./_internal/create-is-impulse"
+import { DerivedImpulse } from "./_internal/derived-impulse"
+import type { Scope } from "./_internal/scope"
 
-export const isDerivedImpulse = isImpulseFactory((input) => input instanceof DerivedImpulse) as {
+const isDerivedImpulse = createIsImpulse((input) => input instanceof DerivedImpulse) as {
   /**
    * A function to check whether or not the input is an Impulse.
    *
@@ -40,3 +40,5 @@ export const isDerivedImpulse = isImpulseFactory((input) => input instanceof Der
     input: Unknown | ReadonlyImpulse<T>,
   ): input is ReadonlyImpulse<T>
 }
+
+export { isDerivedImpulse }

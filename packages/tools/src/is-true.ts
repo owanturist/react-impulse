@@ -1,3 +1,5 @@
-export function isTrue(value: unknown): value is true {
+function isTrue(value: unknown): value is true {
   return value === true
 }
+
+export { isTrue }

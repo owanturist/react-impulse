@@ -188,8 +188,12 @@
             "noSolidDestructuredProps": "off", // irrelevant
 
             "useImportExtensions": "off", // irrelevant,
-            "noUnusedImports": "off", // handled by TS
             "noUndeclaredVariables": "off", // handled by TS
+            "noUnusedImports": {
+              // enable autofix
+              "level": "warn",
+              "fix": "safe"
+            },
             "useUniqueElementIds": {
               "level": "warn",
               "options": {
@@ -220,7 +224,6 @@
           "performance": {
             "useSolidForComponent": "off", // irrelevant
 
-            "noBarrelFile": "off", // barrel files are used in this codebase
             "noReExportAll": "off" // re-export all is used in this codebase
           },
 
@@ -261,19 +264,32 @@
                   "vi": "Use vitest only in test files"
                 }
               }
-            },
+            }
+          }
+        }
+      }
+    },
 
+    // packages entrypoints
+    {
+      "includes": ["packages/*/src/index.ts"],
+      "linter": {
+        "rules": {
+          "style": {
             "noRestrictedImports": {
               "level": "error",
               "options": {
                 "patterns": [
                   {
-                    "group": ["react", "react-impulse", "use-sync-external-store/**/*"],
-                    "message": "Import dependencies from dependencies.ts. It makes the imported deps appear only ones in the bundle."
+                    "group": ["**/_internal/**/*"],
+                    "message": "Importing from _internal is not allowed in package entrypoints."
                   }
                 ]
               }
             }
+          },
+          "performance": {
+            "noBarrelFile": "off" // allow re-exporting from barrel files in package entrypoints
           }
         }
       }
@@ -302,6 +318,9 @@
         "rules": {
           "style": {
             "useExportsLast": "off" // declaration files often have exports throughout the file
+          },
+          "correctness": {
+            "noUnusedImports": "off" // declaration files often have unused imports
           },
           "nursery": {
             "noShadow": "off" // shadowing is common in declaration files

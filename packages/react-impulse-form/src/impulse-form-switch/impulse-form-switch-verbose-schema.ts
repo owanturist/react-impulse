@@ -1,4 +1,6 @@
-export interface ImpulseFormSwitchVerboseSchema<TActive, TBranches> {
+interface ImpulseFormSwitchVerboseSchema<TActive, TBranches> {
   readonly active: TActive
   readonly branches: TBranches
 }
+
+export type { ImpulseFormSwitchVerboseSchema }

@@ -1,26 +1,24 @@
+import { batch } from "react-impulse"
+
 import type { IsEqualType } from "~/tools/is-type-equal"
 import { isUndefined } from "~/tools/is-undefined"
 
-import { batch } from "../dependencies"
 import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 
-import { ImpulseFormOptional as ImpulseFormOptionalImpl } from "./_impulse-form-optional"
-import { ImpulseFormOptionalState } from "./_impulse-form-optional-state"
 import type { ImpulseFormOptionalErrorSetter } from "./impulse-form-optional-error-setter"
 import type { ImpulseFormOptionalFlagSetter } from "./impulse-form-optional-flag-setter"
 import type { ImpulseFormOptionalInputSetter } from "./impulse-form-optional-input-setter"
 import type { ImpulseFormOptionalValidateOnSetter } from "./impulse-form-optional-validate-on-setter"
+import { ImpulseFormOptional as ImpulseFormOptionalImpl } from "./_internal/impulse-form-optional"
+import { ImpulseFormOptionalState } from "./_internal/impulse-form-optional-state"
 
-export type ImpulseFormOptional<
+type ImpulseFormOptional<
   TEnabled extends ImpulseForm,
   TElement extends ImpulseForm,
 > = ImpulseFormOptionalImpl<TEnabled, TElement>
 
-export interface ImpulseFormOptionalOptions<
-  TEnabled extends ImpulseForm,
-  TElement extends ImpulseForm,
-> {
+interface ImpulseFormOptionalOptions<TEnabled extends ImpulseForm, TElement extends ImpulseForm> {
   input?: ImpulseFormOptionalInputSetter<TEnabled, TElement>
   initial?: ImpulseFormOptionalInputSetter<TEnabled, TElement>
   touched?: ImpulseFormOptionalFlagSetter<TEnabled, TElement>
@@ -28,7 +26,7 @@ export interface ImpulseFormOptionalOptions<
   error?: ImpulseFormOptionalErrorSetter<TEnabled, TElement>
 }
 
-export function ImpulseFormOptional<TEnabled extends ImpulseForm, TElement extends ImpulseForm>(
+function ImpulseFormOptional<TEnabled extends ImpulseForm, TElement extends ImpulseForm>(
   enabled: IsEqualType<GetImpulseFormParam<TEnabled, "output.schema">, boolean> extends true
     ? TEnabled
     : never,
@@ -71,3 +69,6 @@ export function ImpulseFormOptional<TEnabled extends ImpulseForm, TElement exten
 
   return optional._host() as ImpulseFormOptional<TEnabled, TElement>
 }
+
+export type { ImpulseFormOptionalOptions }
+export { ImpulseFormOptional }

@@ -1,13 +1,15 @@
 import { identity } from "~/tools/identity"
 
-import type { Scope } from "./scope"
-import { useCreateScope } from "./use-create-scope"
+import type { Scope } from "./_internal/scope"
+import { useCreateScope } from "./_internal/use-create-scope"
 
 /**
  * A hook that returns a Scope.
  *
  * @version 3.0.0
  */
-export function useScope(): Scope {
+function useScope(): Scope {
   return useCreateScope(identity)
 }
+
+export { useScope }

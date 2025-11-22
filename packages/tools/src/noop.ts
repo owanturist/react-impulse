@@ -1,3 +1,5 @@
-export function noop(): void {
+function noop(): void {
   // no operation
 }
+
+export { noop }

@@ -7,7 +7,7 @@ import type { ValidateStrategy } from "../validate-strategy"
 import type { ImpulseFormOptionalSchema } from "./impulse-form-optional-schema"
 import type { ImpulseFormOptionalValidateOnVerbose } from "./impulse-form-optional-validate-on-verbose"
 
-export type ImpulseFormOptionalValidateOnSetter<
+type ImpulseFormOptionalValidateOnSetter<
   TEnabled extends ImpulseForm,
   TElement extends ImpulseForm,
 > = Setter<
@@ -20,3 +20,5 @@ export type ImpulseFormOptionalValidateOnSetter<
     >,
   [ImpulseFormOptionalValidateOnVerbose<TEnabled, TElement>]
 >
+
+export type { ImpulseFormOptionalValidateOnSetter }

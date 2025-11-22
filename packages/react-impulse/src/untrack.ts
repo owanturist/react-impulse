@@ -1,8 +1,8 @@
 import { isFunction } from "~/tools/is-function"
 
-import { enqueue } from "./enqueue"
 import type { ReadableImpulse } from "./readable-impulse"
-import { STATIC_SCOPE, type Scope } from "./scope"
+import { enqueue } from "./_internal/enqueue"
+import { STATIC_SCOPE, type Scope } from "./_internal/scope"
 
 /**
  * Ignores tracking any of the impulses attached to the provided Scope.
@@ -14,7 +14,7 @@ import { STATIC_SCOPE, type Scope } from "./scope"
  *
  * @version 2.0.0
  */
-export function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
+function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
 
 /**
  * Extracts the value from the provided `impulse` without tracking it.
@@ -25,11 +25,9 @@ export function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
  *
  * @version 2.0.0
  */
-export function untrack<TValue>(impulse: ReadableImpulse<TValue>): TValue
+function untrack<TValue>(impulse: ReadableImpulse<TValue>): TValue
 
-export function untrack<T>(
-  factoryOrReadableImpulse: ((scope: Scope) => T) | ReadableImpulse<T>,
-): T {
+function untrack<T>(factoryOrReadableImpulse: ((scope: Scope) => T) | ReadableImpulse<T>): T {
   return enqueue(() => {
     if (isFunction(factoryOrReadableImpulse)) {
       return factoryOrReadableImpulse(STATIC_SCOPE)
@@ -38,3 +36,5 @@ export function untrack<T>(
     return factoryOrReadableImpulse.getValue(STATIC_SCOPE)
   })
 }
+
+export { untrack }

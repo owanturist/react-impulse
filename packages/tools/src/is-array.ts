@@ -1,2 +1,3 @@
-export const isArray: <T>(data: ArrayLike<unknown> | T) => data is ReadonlyArray<unknown> =
-  Array.isArray
+const isArray: <T>(data: ArrayLike<unknown> | T) => data is ReadonlyArray<unknown> = Array.isArray
+
+export { isArray }

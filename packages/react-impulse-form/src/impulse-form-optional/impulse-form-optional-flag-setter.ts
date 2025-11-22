@@ -6,7 +6,7 @@ import type { ImpulseForm } from "../impulse-form/impulse-form"
 import type { ImpulseFormOptionalFlagVerbose } from "./impulse-form-optional-flag-verbose"
 import type { ImpulseFormOptionalSchema } from "./impulse-form-optional-schema"
 
-export type ImpulseFormOptionalFlagSetter<
+type ImpulseFormOptionalFlagSetter<
   TEnabled extends ImpulseForm,
   TElement extends ImpulseForm,
 > = Setter<
@@ -19,3 +19,5 @@ export type ImpulseFormOptionalFlagSetter<
     >,
   [ImpulseFormOptionalFlagVerbose<TEnabled, TElement>]
 >
+
+export type { ImpulseFormOptionalFlagSetter }

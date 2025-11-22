@@ -1,5 +1,8 @@
-import type { GetImpulseFormFlag, ImpulseForm } from "../impulse-form"
+import type { GetImpulseFormFlag } from "../impulse-form/get-impulse-form-flag"
+import type { ImpulseForm } from "../impulse-form/impulse-form"
 
-export type ImpulseFormListFlag<TElement extends ImpulseForm> =
+type ImpulseFormListFlag<TElement extends ImpulseForm> =
   | boolean
   | ReadonlyArray<GetImpulseFormFlag<TElement>>
+
+export type { ImpulseFormListFlag }

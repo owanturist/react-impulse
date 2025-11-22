@@ -1,33 +1,34 @@
+import { type Compare, Impulse, untrack } from "react-impulse"
+
 import { hasProperty } from "~/tools/has-property"
 import { isNull } from "~/tools/is-null"
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 import { isUndefined } from "~/tools/is-undefined"
 
-import { type Compare, Impulse, untrack } from "../dependencies"
 import { VALIDATE_ON_INIT, VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
-import type { ZodLikeSchema } from "../zod-like-schema"
 
-import { createUnionCompare } from "./_create-union-compare"
-import type { ImpulseFormUnit as ImpulseFormUnitImpl } from "./_impulse-form-unit"
-import { ImpulseFormUnitState } from "./_impulse-form-unit-state"
+import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer"
+import type { ImpulseFormUnitValidator } from "./impulse-form-unit-validator"
+import { createUnionCompare } from "./_internal/create-union-compare"
+import type { ImpulseFormUnit as ImpulseFormUnitImpl } from "./_internal/impulse-form-unit"
+import { ImpulseFormUnitState } from "./_internal/impulse-form-unit-state"
 import {
   type ImpulseFormUnitTransform,
   transformFromInput,
   transformFromSchema,
   transformFromTransformer,
   transformFromValidator,
-} from "./_impulse-form-unit-transform"
-import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer"
-import type { ImpulseFormUnitValidator } from "./impulse-form-unit-validator"
+} from "./_internal/impulse-form-unit-transform"
+import type { ZodLikeSchema } from "./_internal/zod-like-schema"
 
-export type ImpulseFormUnit<TInput, TError = null, TOutput = TInput> = ImpulseFormUnitImpl<
+type ImpulseFormUnit<TInput, TError = null, TOutput = TInput> = ImpulseFormUnitImpl<
   TInput,
   TError,
   TOutput
 >
 
-export interface ImpulseFormUnitOptions<TInput, TError = null> {
+interface ImpulseFormUnitOptions<TInput, TError = null> {
   /**
    * The initial or custom error associated with the form value.
    * This can be used to set an error state manually.
@@ -106,7 +107,7 @@ export interface ImpulseFormUnitOptions<TInput, TError = null> {
   readonly initial?: TInput
 }
 
-export interface ImpulseFormUnitTransformedOptions<TInput, TError = null, TOutput = TInput>
+interface ImpulseFormUnitTransformedOptions<TInput, TError = null, TOutput = TInput>
   extends Omit<ImpulseFormUnitOptions<TInput, TError>, "isOutputEqual"> {
   readonly transform: ImpulseFormUnitTransformer<TInput, TOutput>
 
@@ -124,7 +125,7 @@ export interface ImpulseFormUnitTransformedOptions<TInput, TError = null, TOutpu
   readonly isOutputEqual?: Compare<TOutput>
 }
 
-export interface ImpulseFormUnitSchemaOptions<TInput, TOutput = TInput>
+interface ImpulseFormUnitSchemaOptions<TInput, TOutput = TInput>
   extends Omit<
     ImpulseFormUnitTransformedOptions<TInput, ReadonlyArray<string>, TOutput>,
     "transform" | "isErrorEqual"
@@ -137,7 +138,7 @@ export interface ImpulseFormUnitSchemaOptions<TInput, TOutput = TInput>
   readonly schema: ZodLikeSchema<TOutput>
 }
 
-export interface ImpulseFormUnitValidatedOptions<TInput, TError = null, TOutput = TInput>
+interface ImpulseFormUnitValidatedOptions<TInput, TError = null, TOutput = TInput>
   extends Omit<ImpulseFormUnitTransformedOptions<TInput, TError, TOutput>, "transform"> {
   /**
    * @default "onTouch"
@@ -147,29 +148,29 @@ export interface ImpulseFormUnitValidatedOptions<TInput, TError = null, TOutput 
   readonly validate: ImpulseFormUnitValidator<TInput, TError, TOutput>
 }
 
-export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
+function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
   input: TInput,
   options:
     | ImpulseFormUnitValidatedOptions<TInput, TError, TOutput>
     | ImpulseFormUnitTransformedOptions<TInput, TError, TOutput>,
 ): ImpulseFormUnit<TInput, TError, TOutput>
 
-export function ImpulseFormUnit<TInput, TOutput = TInput>(
+function ImpulseFormUnit<TInput, TOutput = TInput>(
   input: TInput,
   options: ImpulseFormUnitSchemaOptions<TInput, TOutput>,
 ): ImpulseFormUnit<TInput, ReadonlyArray<string>, TOutput>
 
-export function ImpulseFormUnit<TInput>(
+function ImpulseFormUnit<TInput>(
   input: TInput,
   options?: ImpulseFormUnitOptions<TInput>,
 ): ImpulseFormUnit<TInput, null, TInput>
 
-export function ImpulseFormUnit<TInput, TError>(
+function ImpulseFormUnit<TInput, TError>(
   input: TInput,
   options?: ImpulseFormUnitOptions<TInput, TError>,
 ): ImpulseFormUnit<TInput, TError, TInput>
 
-export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
+function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
   input_: TInput,
   options?:
     | ImpulseFormUnitOptions<TInput, TError>
@@ -291,3 +292,11 @@ export function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     isErrorEqual,
   )._host()
 }
+
+export type {
+  ImpulseFormUnitOptions,
+  ImpulseFormUnitTransformedOptions,
+  ImpulseFormUnitSchemaOptions,
+  ImpulseFormUnitValidatedOptions,
+}
+export { ImpulseFormUnit }

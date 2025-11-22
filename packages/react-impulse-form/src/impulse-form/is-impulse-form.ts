@@ -1,5 +1,7 @@
-import { ImpulseForm } from "./impulse-form"
+import { ImpulseForm } from "./_internal/impulse-form"
 
-export function isImpulseForm(value: unknown): value is ImpulseForm {
+function isImpulseForm(value: unknown): value is ImpulseForm {
   return value instanceof ImpulseForm
 }
+
+export { isImpulseForm }
