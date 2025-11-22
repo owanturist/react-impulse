@@ -42,7 +42,7 @@ importers:
         specifier: ^4.0.15
         version: 4.0.15(@types/node@20.19.25)(happy-dom@20.0.11)(jiti@2.6.1)(terser@5.44.1)
 
-  packages/react-impulse:
+  packages/signal:
     dependencies:
       use-sync-external-store:
         specifier: ^1.6.0

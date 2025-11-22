@@ -14,7 +14,7 @@ export default defineConfig({
       keep_fnames: false,
       properties: {
         regex: /^_[^_]\w+[^_]$/,
-        // @ts-expect-error undocumented, but it specifies how to mangle Impulse's properties
+        // @ts-expect-error undocumented, but it specifies how to mangle properties
         cache: {
           props: {
             $_value: "_",

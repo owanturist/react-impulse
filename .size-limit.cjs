@@ -2,7 +2,7 @@
 
 module.exports = [
   {
-    name: "react-impulse",
+    name: "signal",
     ignore: ["use-sync-external-store"],
   },
   {
