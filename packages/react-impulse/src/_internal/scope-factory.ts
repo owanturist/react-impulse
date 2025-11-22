@@ -10,7 +10,7 @@ import { ScopeEmitter } from "./scope-emitter"
  * new scopes, and {@link ScopeFactory.connect} to subscribe an invalidation callback that
  * will be invoked when the factory requests an emission.
  */
-export class ScopeFactory {
+class ScopeFactory {
   private _emit = noop
 
   private readonly _emitter = new ScopeEmitter(() => {
@@ -42,3 +42,5 @@ export class ScopeFactory {
     return this._emitter._create
   }
 }
+
+export { ScopeFactory }

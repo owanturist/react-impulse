@@ -1,4 +1,4 @@
-import type { Scope } from "./scope"
+import type { Scope } from "./_internal/scope"
 
 /**
  * A function that compares two values and returns `true` if they are equal.
@@ -7,4 +7,6 @@ import type { Scope } from "./scope"
  *
  * @version 1.0.0
  */
-export type Compare<T> = (left: T, right: T, scope: Scope) => boolean
+type Compare<T> = (left: T, right: T, scope: Scope) => boolean
+
+export type { Compare }

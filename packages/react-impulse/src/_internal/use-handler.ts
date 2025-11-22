@@ -1,6 +1,6 @@
-import { useRef } from "./dependencies"
+import { useRef } from "../_dependencies"
 
-export function useHandler<TArgs extends ReadonlyArray<unknown>, TResult>(
+function useHandler<TArgs extends ReadonlyArray<unknown>, TResult>(
   handler: (...args: TArgs) => TResult,
 ): (...args: TArgs) => TResult {
   /**
@@ -29,3 +29,5 @@ export function useHandler<TArgs extends ReadonlyArray<unknown>, TResult>(
 
   return ref.current._getter
 }
+
+export { useHandler }

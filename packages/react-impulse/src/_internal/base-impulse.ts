@@ -1,16 +1,17 @@
 import { isFunction } from "~/tools/is-function"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 
-import type { Compare } from "./compare"
+import type { Compare } from "../compare"
+import type { Impulse } from "../impulse"
+import type { ImpulseOptions } from "../impulse-options"
+import type { ReadableImpulse } from "../readable-impulse"
+import type { WritableImpulse } from "../writable-impulse"
+
 import { enqueue } from "./enqueue"
-import type { Impulse } from "./impulse"
-import type { ImpulseOptions } from "./impulse-options"
-import type { ReadableImpulse } from "./readable-impulse"
 import { EMITTER_KEY, STATIC_SCOPE, type Scope, extractScope } from "./scope"
 import type { ScopeEmitter } from "./scope-emitter"
-import type { WritableImpulse } from "./writable-impulse"
 
-export abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> {
+abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> {
   protected readonly _emitters = new Set<WeakRef<ScopeEmitter>>()
 
   protected constructor(protected readonly _compare: Compare<T>) {}
@@ -116,3 +117,5 @@ export abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpu
     return this._clone(clonedValue, compare ?? isStrictEqual)
   }
 }
+
+export { BaseImpulse }

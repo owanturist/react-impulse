@@ -1,11 +1,12 @@
+import type { Compare } from "../compare"
+
 import { BaseImpulse } from "./base-impulse"
-import type { Compare } from "./compare"
-import { DirectImpulse } from "./direct-impulse"
 import { enqueue } from "./enqueue"
+import { Impulse } from "./impulse"
 import { EMITTER_KEY, STATIC_SCOPE, type Scope, injectScope } from "./scope"
 import { ScopeEmitter } from "./scope-emitter"
 
-export class DerivedImpulse<T> extends BaseImpulse<T> {
+class DerivedImpulse<T> extends BaseImpulse<T> {
   // the inner scope proxies the setters to the outer scope
   private readonly _scope = {
     [EMITTER_KEY]: new ScopeEmitter(() => {
@@ -48,7 +49,9 @@ export class DerivedImpulse<T> extends BaseImpulse<T> {
     return false
   }
 
-  protected _clone(value: T, compare: Compare<T>): DirectImpulse<T> {
-    return new DirectImpulse(value, compare)
+  protected _clone(value: T, compare: Compare<T>): Impulse<T> {
+    return new Impulse(value, compare)
   }
 }
+
+export { DerivedImpulse }

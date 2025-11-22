@@ -74,7 +74,7 @@ let Queue: null | ScopeEmitQueue = null
  * @returns The value produced by the provided execution block.
  */
 
-export function enqueue<TResult>(
+function enqueue<TResult>(
   execute: (push: (emitters: ReadonlySet<WeakRef<ScopeEmitter>>) => void) => TResult,
 ): TResult {
   // Continue the execution if the queue is already initialized.
@@ -104,3 +104,5 @@ export function enqueue<TResult>(
 
   return result
 }
+
+export { enqueue }

@@ -8,7 +8,7 @@ import { EMITTER_KEY, type Scope } from "./scope"
  * Each instance maintains weak references to all emitters it is attached to, ensuring proper
  * teardown when scopes are recreated or invalidated to avoid leaking subscriptions.
  */
-export class ScopeEmitter {
+class ScopeEmitter {
   /**
    * Maintains the collections of scope emitters this instance has been attached to, using nested
    * sets of weak references so that attachments can be tracked without preventing garbage collection.
@@ -87,3 +87,5 @@ export class ScopeEmitter {
     this._detachFromAll()
   }
 }
+
+export { ScopeEmitter }

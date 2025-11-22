@@ -1,14 +1,14 @@
 import { isFunction } from "~/tools/is-function"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 
+import { type DependencyList, useCallback, useDebugValue } from "./_dependencies"
 import type { Compare } from "./compare"
-import { type DependencyList, useCallback, useDebugValue } from "./dependencies"
 import type { ReadableImpulse } from "./readable-impulse"
-import { STATIC_SCOPE, type Scope } from "./scope"
-import { useCreateScope } from "./use-create-scope"
-import { useHandler } from "./use-handler"
+import { STATIC_SCOPE, type Scope } from "./_internal/scope"
+import { useCreateScope } from "./_internal/use-create-scope"
+import { useHandler } from "./_internal/use-handler"
 
-export interface UseScopedOptions<T> {
+interface UseScopedOptions<T> {
   /**
    * The compare function determines whether or not the factory result is different.
    * If the factory result is different, a host component re-renders.
@@ -27,7 +27,7 @@ export interface UseScopedOptions<T> {
  *
  * @version 2.0.0
  */
-export function useScoped<TValue>(impulse: ReadableImpulse<TValue>): TValue
+function useScoped<TValue>(impulse: ReadableImpulse<TValue>): TValue
 
 /**
  * A hook that executes the `factory` function whenever any of the involved Impulses' values update
@@ -39,13 +39,13 @@ export function useScoped<TValue>(impulse: ReadableImpulse<TValue>): TValue
  *
  * @version 1.0.0
  */
-export function useScoped<TResult>(
+function useScoped<TResult>(
   factory: (scope: Scope) => TResult,
   dependencies?: DependencyList,
   options?: UseScopedOptions<TResult>,
 ): TResult
 
-export function useScoped<TResult>(
+function useScoped<TResult>(
   factoryOrReadableImpulse: ((scope: Scope) => TResult) | ReadableImpulse<TResult>,
   dependencies?: DependencyList,
   options?: UseScopedOptions<TResult>,
@@ -74,3 +74,6 @@ export function useScoped<TResult>(
 
   return value
 }
+
+export type { UseScopedOptions }
+export { useScoped }

@@ -1,6 +1,6 @@
-import { useRef } from "./dependencies"
+import { useRef } from "../_dependencies"
 
-export function usePermanent<TValue>(init: () => TValue): TValue {
+function usePermanent<TValue>(init: () => TValue): TValue {
   /**
    * According to the official React documentation
    * it is ok to write to the ref object during initialization.
@@ -17,3 +17,5 @@ export function usePermanent<TValue>(init: () => TValue): TValue {
 
   return ref.current._value
 }
+
+export { usePermanent }

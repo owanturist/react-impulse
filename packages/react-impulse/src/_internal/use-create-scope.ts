@@ -1,9 +1,10 @@
-import { useCallback, useSyncExternalStoreWithSelector } from "./dependencies"
+import { useCallback, useSyncExternalStoreWithSelector } from "../_dependencies"
+
 import type { Scope } from "./scope"
 import { ScopeFactory } from "./scope-factory"
 import { usePermanent } from "./use-permanent"
 
-export function useCreateScope<T>(
+function useCreateScope<T>(
   transform: (scope: Scope) => T,
   compare?: (left: T, right: T) => boolean,
 ): T {
@@ -21,3 +22,5 @@ export function useCreateScope<T>(
 
   return useSyncExternalStoreWithSelector(connect, selectCreate, selectCreate, select, compare)
 }
+
+export { useCreateScope }

@@ -1,6 +1,6 @@
+export type { DependencyList } from "./_dependencies"
 export { batch, batch as tap } from "./batch"
 export type { Compare } from "./compare"
-export type { DependencyList } from "./dependencies"
 export type { Destructor } from "./destructor"
 export { Impulse, type ReadonlyImpulse } from "./impulse"
 export type { ImpulseOptions } from "./impulse-options"

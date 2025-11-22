@@ -1,3 +1,5 @@
-import type { EffectCallback } from "./dependencies"
+import type { EffectCallback } from "./_dependencies"
 
-export type Destructor = ReturnType<EffectCallback>
+type Destructor = ReturnType<EffectCallback>
+
+export type { Destructor }

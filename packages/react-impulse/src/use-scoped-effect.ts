@@ -1,7 +1,7 @@
-import { type DependencyList, useEffect } from "./dependencies"
+import { type DependencyList, useEffect } from "./_dependencies"
 import type { Destructor } from "./destructor"
-import type { Scope } from "./scope"
 import { subscribe } from "./subscribe"
+import type { Scope } from "./_internal/scope"
 
 /**
  * The hook is an `Impulse` version of the `React.useEffect` hook.
@@ -11,10 +11,12 @@ import { subscribe } from "./subscribe"
  *
  * @version 1.0.0
  */
-export function useScopedEffect(
+function useScopedEffect(
   effect: (scope: Scope) => Destructor,
   dependencies?: DependencyList,
 ): void {
   // biome-ignore lint/correctness/useExhaustiveDependencies: pass dependencies as is
   useEffect(() => subscribe(effect), dependencies)
 }
+
+export { useScopedEffect }

@@ -1,7 +1,7 @@
 import type { BaseImpulse } from "./base-impulse"
 import type { Scope } from "./scope"
 
-export function isImpulseFactory(isImpulse: (input: unknown) => input is BaseImpulse<unknown>) {
+function createIsImpulse(isImpulse: (input: unknown) => input is BaseImpulse<unknown>) {
   return (
     ...[inputOrScope, maybeCheck, maybeInput]:
       | [input: unknown]
@@ -20,3 +20,5 @@ export function isImpulseFactory(isImpulse: (input: unknown) => input is BaseImp
     return false
   }
 }
+
+export { createIsImpulse }

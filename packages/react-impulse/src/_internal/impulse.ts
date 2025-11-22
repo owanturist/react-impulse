@@ -1,8 +1,9 @@
+import type { Compare } from "../compare"
+
 import { BaseImpulse } from "./base-impulse"
-import type { Compare } from "./compare"
 import { STATIC_SCOPE } from "./scope"
 
-export class DirectImpulse<T> extends BaseImpulse<T> {
+class Impulse<T> extends BaseImpulse<T> {
   public constructor(
     private _value: T,
     compare: Compare<T>,
@@ -24,7 +25,9 @@ export class DirectImpulse<T> extends BaseImpulse<T> {
     return false
   }
 
-  protected _clone(value: T, compare: Compare<T>): DirectImpulse<T> {
-    return new DirectImpulse(value, compare)
+  protected _clone(value: T, compare: Compare<T>): Impulse<T> {
+    return new Impulse(value, compare)
   }
 }
+
+export { Impulse }
