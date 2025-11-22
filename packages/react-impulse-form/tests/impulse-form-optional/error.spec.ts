@@ -189,102 +189,105 @@ describe("types", () => {
   })
 })
 
-describe.each(["onTouch" as const, "onChange" as const, "onSubmit" as const, "onInit" as const])(
-  "when any validateOn (%s)",
-  (validateOn) => {
-    it("selects only the enables's error when it has an error", ({ scope }) => {
-      const form = ImpulseFormOptional(
+describe.each([
+  "onTouch" as const,
+  "onChange" as const,
+  "onSubmit" as const,
+  "onInit" as const,
+])("when any validateOn (%s)", (validateOn) => {
+  it("selects only the enables's error when it has an error", ({ scope }) => {
+    const form = ImpulseFormOptional(
+      ImpulseFormUnit(true, {
+        schema: z.boolean(),
+        error: ["custom"],
+      }),
+      ImpulseFormUnit(0, {
+        error: 123,
+      }),
+      {
+        validateOn,
+      },
+    )
+
+    const concise = {
+      enabled: ["custom"],
+      element: null,
+    }
+
+    expect(form.getError(scope)).toStrictEqual(concise)
+    expect(form.getError(scope, params._first)).toStrictEqual(concise)
+    expect(form.getError(scope, params._second)).toStrictEqual({
+      enabled: ["custom"],
+      element: 123,
+    })
+  })
+
+  it("selects the custom error regardless of the validate strategy", ({ scope }) => {
+    const form = ImpulseFormOptional(
+      ImpulseFormUnit(true, {
+        schema: z.boolean(),
+      }),
+      ImpulseFormOptional(
         ImpulseFormUnit(true, {
           schema: z.boolean(),
-          error: ["custom"],
         }),
-        ImpulseFormUnit(0, {
-          error: 123,
+        ImpulseFormUnit("0", {
+          error: true,
         }),
-        {
-          validateOn,
-        },
-      )
+      ),
+      {
+        validateOn,
+      },
+    )
 
-      const concise = {
-        enabled: ["custom"],
+    const error = {
+      enabled: null,
+      element: {
+        enabled: null,
+        element: true,
+      },
+    }
+
+    expect(form.getError(scope)).toStrictEqual(error)
+    expect(form.getError(scope, params._first)).toStrictEqual(error)
+    expect(form.getError(scope, params._second)).toStrictEqual(error)
+  })
+})
+
+describe.each([
+  "onTouch" as const,
+  "onChange" as const,
+  "onSubmit" as const,
+])("when runtime validateOn (%s)", (validateOn) => {
+  it("selects null for validating error", ({ scope }) => {
+    const form = ImpulseFormOptional(
+      ImpulseFormUnit(true, {
+        validateOn,
+        schema: z.boolean(),
+      }),
+      ImpulseFormOptional(
+        ImpulseFormUnit(true, {
+          validateOn,
+          schema: z.boolean(),
+        }),
+        ImpulseFormUnit("0", {
+          validateOn,
+          schema: z.string(),
+        }),
+      ),
+    )
+
+    expect(form.getError(scope)).toBeNull()
+    expect(form.getError(scope, params._first)).toBeNull()
+    expect(form.getError(scope, params._second)).toStrictEqual({
+      enabled: null,
+      element: {
+        enabled: null,
         element: null,
-      }
-
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
-      expect(form.getError(scope, params._second)).toStrictEqual({
-        enabled: ["custom"],
-        element: 123,
-      })
+      },
     })
-
-    it("selects the custom error regardless of the validate strategy", ({ scope }) => {
-      const form = ImpulseFormOptional(
-        ImpulseFormUnit(true, {
-          schema: z.boolean(),
-        }),
-        ImpulseFormOptional(
-          ImpulseFormUnit(true, {
-            schema: z.boolean(),
-          }),
-          ImpulseFormUnit("0", {
-            error: true,
-          }),
-        ),
-        {
-          validateOn,
-        },
-      )
-
-      const error = {
-        enabled: null,
-        element: {
-          enabled: null,
-          element: true,
-        },
-      }
-
-      expect(form.getError(scope)).toStrictEqual(error)
-      expect(form.getError(scope, params._first)).toStrictEqual(error)
-      expect(form.getError(scope, params._second)).toStrictEqual(error)
-    })
-  },
-)
-
-describe.each(["onTouch" as const, "onChange" as const, "onSubmit" as const])(
-  "when runtime validateOn (%s)",
-  (validateOn) => {
-    it("selects null for validating error", ({ scope }) => {
-      const form = ImpulseFormOptional(
-        ImpulseFormUnit(true, {
-          validateOn,
-          schema: z.boolean(),
-        }),
-        ImpulseFormOptional(
-          ImpulseFormUnit(true, {
-            validateOn,
-            schema: z.boolean(),
-          }),
-          ImpulseFormUnit("0", {
-            validateOn,
-            schema: z.string(),
-          }),
-        ),
-      )
-
-      expect(form.getError(scope)).toBeNull()
-      expect(form.getError(scope, params._first)).toBeNull()
-      expect(form.getError(scope, params._second)).toStrictEqual({
-        enabled: null,
-        element: {
-          enabled: null,
-          element: null,
-        },
-      })
-    })
-  },
-)
+  })
+})
 
 describe("when after trigger", () => {
   function setup(validateOn: ValidateStrategy) {

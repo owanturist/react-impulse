@@ -324,158 +324,161 @@ describe("types", () => {
   })
 })
 
-describe.each(["onTouch" as const, "onChange" as const, "onSubmit" as const, "onInit" as const])(
-  "when any validateOn (%s)",
-  (validateOn) => {
-    it("selects only the active's error when it has an error", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("_1", {
-          schema: z.enum(["_1"]),
-          error: ["custom"],
+describe.each([
+  "onTouch" as const,
+  "onChange" as const,
+  "onSubmit" as const,
+  "onInit" as const,
+])("when any validateOn (%s)", (validateOn) => {
+  it("selects only the active's error when it has an error", ({ scope }) => {
+    const form = ImpulseFormSwitch(
+      ImpulseFormUnit("_1", {
+        schema: z.enum(["_1"]),
+        error: ["custom"],
+      }),
+      {
+        _1: ImpulseFormUnit(0, {
+          error: 123,
         }),
-        {
-          _1: ImpulseFormUnit(0, {
-            error: 123,
-          }),
-        },
-        {
-          validateOn,
-        },
-      )
+      },
+      {
+        validateOn,
+      },
+    )
 
-      const concise = {
-        active: ["custom"],
-        branch: null,
-      }
+    const concise = {
+      active: ["custom"],
+      branch: null,
+    }
 
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
-      expect(form.getError(scope, params._second)).toStrictEqual({
-        active: ["custom"],
-        branches: {
-          _1: 123,
-        },
-      })
+    expect(form.getError(scope)).toStrictEqual(concise)
+    expect(form.getError(scope, params._first)).toStrictEqual(concise)
+    expect(form.getError(scope, params._second)).toStrictEqual({
+      active: ["custom"],
+      branches: {
+        _1: 123,
+      },
     })
+  })
 
-    it("selects the custom error regardless of the validate strategy", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("_2", {
-          schema: z.enum(["_1", "_2"]),
+  it("selects the custom error regardless of the validate strategy", ({ scope }) => {
+    const form = ImpulseFormSwitch(
+      ImpulseFormUnit("_2", {
+        schema: z.enum(["_1", "_2"]),
+      }),
+      {
+        _1: ImpulseFormUnit(0, {
+          error: 123,
         }),
-        {
-          _1: ImpulseFormUnit(0, {
-            error: 123,
+        _2: ImpulseFormSwitch(
+          ImpulseFormUnit("_3", {
+            schema: z.enum(["_3", "_4"]),
           }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("_3", {
-              schema: z.enum(["_3", "_4"]),
+          {
+            _3: ImpulseFormUnit("0", {
+              error: true,
             }),
-            {
-              _3: ImpulseFormUnit("0", {
-                error: true,
-              }),
-              _4: ImpulseFormUnit(1, {
-                error: ["one", "two"],
-              }),
-            },
-          ),
-        },
-        {
-          validateOn,
-        },
-      )
+            _4: ImpulseFormUnit(1, {
+              error: ["one", "two"],
+            }),
+          },
+        ),
+      },
+      {
+        validateOn,
+      },
+    )
 
-      const concise = {
-        active: null,
-        branch: {
-          kind: "_2",
-          value: {
-            active: null,
-            branch: {
-              kind: "_3",
-              value: true,
-            },
+    const concise = {
+      active: null,
+      branch: {
+        kind: "_2",
+        value: {
+          active: null,
+          branch: {
+            kind: "_3",
+            value: true,
           },
         },
-      }
+      },
+    }
 
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
-      expect(form.getError(scope, params._second)).toStrictEqual({
-        active: null,
-        branches: {
-          _1: 123,
-          _2: {
-            active: null,
-            branches: {
-              _3: true,
-              _4: ["one", "two"],
-            },
+    expect(form.getError(scope)).toStrictEqual(concise)
+    expect(form.getError(scope, params._first)).toStrictEqual(concise)
+    expect(form.getError(scope, params._second)).toStrictEqual({
+      active: null,
+      branches: {
+        _1: 123,
+        _2: {
+          active: null,
+          branches: {
+            _3: true,
+            _4: ["one", "two"],
           },
         },
-      })
+      },
     })
-  },
-)
+  })
+})
 
-describe.each(["onTouch" as const, "onChange" as const, "onSubmit" as const])(
-  "when runtime validateOn (%s)",
-  (validateOn) => {
-    it("selects null for validating error", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("_2", {
+describe.each([
+  "onTouch" as const,
+  "onChange" as const,
+  "onSubmit" as const,
+])("when runtime validateOn (%s)", (validateOn) => {
+  it("selects null for validating error", ({ scope }) => {
+    const form = ImpulseFormSwitch(
+      ImpulseFormUnit("_2", {
+        validateOn,
+        schema: z.enum(["_1", "_2"]),
+      }),
+      {
+        _1: ImpulseFormUnit(0, {
           validateOn,
-          schema: z.enum(["_1", "_2"]),
+          validate: (input): Result<string, number> => {
+            if (input <= 0) {
+              return ["Too small", null]
+            }
+
+            return [null, input]
+          },
         }),
-        {
-          _1: ImpulseFormUnit(0, {
+        _2: ImpulseFormSwitch(
+          ImpulseFormUnit("_3", {
             validateOn,
-            validate: (input): Result<string, number> => {
-              if (input <= 0) {
-                return ["Too small", null]
-              }
-
-              return [null, input]
-            },
+            schema: z.enum(["_3", "_4"]),
           }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("_3", {
+          {
+            _3: ImpulseFormUnit("0", {
               validateOn,
-              schema: z.enum(["_3", "_4"]),
+              schema: z.string(),
             }),
-            {
-              _3: ImpulseFormUnit("0", {
-                validateOn,
-                schema: z.string(),
-              }),
-              _4: ImpulseFormUnit(1, {
-                validateOn,
-                schema: z.number(),
-              }),
-            },
-          ),
-        },
-      )
+            _4: ImpulseFormUnit(1, {
+              validateOn,
+              schema: z.number(),
+            }),
+          },
+        ),
+      },
+    )
 
-      expect(form.getError(scope)).toBeNull()
-      expect(form.getError(scope, params._first)).toBeNull()
-      expect(form.getError(scope, params._second)).toStrictEqual({
-        active: null,
-        branches: {
-          _1: null,
-          _2: {
-            active: null,
-            branches: {
-              _3: null,
-              _4: null,
-            },
+    expect(form.getError(scope)).toBeNull()
+    expect(form.getError(scope, params._first)).toBeNull()
+    expect(form.getError(scope, params._second)).toStrictEqual({
+      active: null,
+      branches: {
+        _1: null,
+        _2: {
+          active: null,
+          branches: {
+            _3: null,
+            _4: null,
           },
         },
-      })
+      },
     })
-  },
-)
+  })
+})
 
 describe("when after trigger", () => {
   function setup(validateOn: ValidateStrategy) {

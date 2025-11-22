@@ -43,50 +43,52 @@ describe("setValidateOn(..)", () => {
     expect(value.getValidateOn(scope)).toBe("onChange")
   })
 
-  describe.each(["onInit", "onChange", "onTouch", "onSubmit"] satisfies Array<ValidateStrategy>)(
-    "when %s",
-    (validateOn) => {
-      it("marks as validated for -> onInit", ({ scope }) => {
-        const value = setup({ validateOn })
+  describe.each([
+    "onInit",
+    "onChange",
+    "onTouch",
+    "onSubmit",
+  ] satisfies Array<ValidateStrategy>)("when %s", (validateOn) => {
+    it("marks as validated for -> onInit", ({ scope }) => {
+      const value = setup({ validateOn })
 
-        value.setValidateOn("onInit")
-        expect(value.isValidated(scope)).toBe(true)
-      })
+      value.setValidateOn("onInit")
+      expect(value.isValidated(scope)).toBe(true)
+    })
 
-      it("does not mark as validated for -> onTouch when touched=false", ({ scope }) => {
-        const value = setup({ validateOn, touched: false })
+    it("does not mark as validated for -> onTouch when touched=false", ({ scope }) => {
+      const value = setup({ validateOn, touched: false })
 
-        value.setValidateOn("onTouch")
-        expect(value.isValidated(scope)).toBe(false)
-      })
+      value.setValidateOn("onTouch")
+      expect(value.isValidated(scope)).toBe(false)
+    })
 
-      it("marks as validated for -> onTouch when touched=true", ({ scope }) => {
-        const value = setup({ validateOn, touched: true })
+    it("marks as validated for -> onTouch when touched=true", ({ scope }) => {
+      const value = setup({ validateOn, touched: true })
 
-        value.setValidateOn("onTouch")
-        expect(value.isValidated(scope)).toBe(true)
-      })
+      value.setValidateOn("onTouch")
+      expect(value.isValidated(scope)).toBe(true)
+    })
 
-      it("does not mark as validated for -> onChange when not dirty", ({ scope }) => {
-        const value = setup({ validateOn, initial: "" })
+    it("does not mark as validated for -> onChange when not dirty", ({ scope }) => {
+      const value = setup({ validateOn, initial: "" })
 
-        value.setValidateOn("onChange")
-        expect(value.isValidated(scope)).toBe(false)
-      })
+      value.setValidateOn("onChange")
+      expect(value.isValidated(scope)).toBe(false)
+    })
 
-      it("marks as validated for -> onChange when dirty", ({ scope }) => {
-        const value = setup({ validateOn, initial: "x" })
+    it("marks as validated for -> onChange when dirty", ({ scope }) => {
+      const value = setup({ validateOn, initial: "x" })
 
-        value.setValidateOn("onChange")
-        expect(value.isValidated(scope)).toBe(true)
-      })
+      value.setValidateOn("onChange")
+      expect(value.isValidated(scope)).toBe(true)
+    })
 
-      it("does not mark as validated for -> onSubmit", ({ scope }) => {
-        const value = setup({ validateOn })
+    it("does not mark as validated for -> onSubmit", ({ scope }) => {
+      const value = setup({ validateOn })
 
-        value.setValidateOn("onSubmit")
-        expect(value.isValidated(scope)).toBe(false)
-      })
-    },
-  )
+      value.setValidateOn("onSubmit")
+      expect(value.isValidated(scope)).toBe(false)
+    })
+  })
 })
