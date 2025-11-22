@@ -1,4 +1,5 @@
 import type { Assertion, AsymmetricMatchersContaining, TestAPI } from "vitest"
+
 import type { Scope } from "./src"
 
 interface CustomMatchers<R> {

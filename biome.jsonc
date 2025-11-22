@@ -307,6 +307,9 @@
           "style": {
             "useExportsLast": "off" // declaration files often have exports throughout the file
           },
+          "correctness": {
+            "noUnusedImports": "off" // declaration files often have unused imports
+          },
           "nursery": {
             "noShadow": "off" // shadowing is common in declaration files
           }
