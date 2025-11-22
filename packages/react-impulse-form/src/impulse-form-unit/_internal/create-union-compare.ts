@@ -1,6 +1,6 @@
-import { isStrictEqual } from "~/tools/is-strict-equal"
+import type { Compare } from "react-impulse"
 
-import type { Compare } from "../../_internal/dependencies"
+import { isStrictEqual } from "~/tools/is-strict-equal"
 
 function createUnionCompare<TPrimary, TSecondary>(
   primary: (value: unknown) => value is TPrimary,

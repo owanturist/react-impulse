@@ -1,10 +1,11 @@
+import { type Compare, Impulse, untrack } from "react-impulse"
+
 import { hasProperty } from "~/tools/has-property"
 import { isNull } from "~/tools/is-null"
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 import { isUndefined } from "~/tools/is-undefined"
 
-import { type Compare, Impulse, untrack } from "../_internal/dependencies"
 import { VALIDATE_ON_INIT, VALIDATE_ON_TOUCH, type ValidateStrategy } from "../validate-strategy"
 
 import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer"

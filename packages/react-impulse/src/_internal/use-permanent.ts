@@ -1,4 +1,4 @@
-import { useRef } from "../_dependencies"
+import { useRef } from "react"
 
 function usePermanent<TValue>(init: () => TValue): TValue {
   /**

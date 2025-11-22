@@ -1,8 +1,9 @@
+import { batch } from "react-impulse"
+
 import type { IsEqualType } from "~/tools/is-type-equal"
 import { isUndefined } from "~/tools/is-undefined"
 import { mapValues } from "~/tools/map-values"
 
-import { batch } from "../_internal/dependencies"
 import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 

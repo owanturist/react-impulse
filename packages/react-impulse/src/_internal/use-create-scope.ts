@@ -1,4 +1,5 @@
-import { useCallback, useSyncExternalStoreWithSelector } from "../_dependencies"
+import { useCallback } from "react"
+import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector"
 
 import type { Scope } from "./scope"
 import { ScopeFactory } from "./scope-factory"

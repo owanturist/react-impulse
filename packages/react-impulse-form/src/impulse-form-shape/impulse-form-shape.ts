@@ -1,8 +1,9 @@
+import { Impulse, batch } from "react-impulse"
+
 import { isUndefined } from "~/tools/is-undefined"
 import { mapValues } from "~/tools/map-values"
 import { partitionEntries } from "~/tools/partition-entries"
 
-import { Impulse, batch } from "../_internal/dependencies"
 import { isImpulseForm } from "../impulse-form/is-impulse-form"
 
 import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"

@@ -1,7 +1,8 @@
+import { batch } from "react-impulse"
+
 import { isUndefined } from "~/tools/is-undefined"
 import { map } from "~/tools/map"
 
-import { batch } from "../_internal/dependencies"
 import type { ImpulseForm } from "../impulse-form/impulse-form"
 
 import type { ImpulseFormListErrorSetter } from "./impulse-form-list-error-setter"

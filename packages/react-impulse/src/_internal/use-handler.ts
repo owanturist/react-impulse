@@ -1,4 +1,4 @@
-import { useRef } from "../_dependencies"
+import { useRef } from "react"
 
 function useHandler<TArgs extends ReadonlyArray<unknown>, TResult>(
   handler: (...args: TArgs) => TResult,

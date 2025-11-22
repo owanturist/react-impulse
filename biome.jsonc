@@ -264,18 +264,6 @@
                   "vi": "Use vitest only in test files"
                 }
               }
-            },
-
-            "noRestrictedImports": {
-              "level": "error",
-              "options": {
-                "patterns": [
-                  {
-                    "group": ["react", "react-impulse", "use-sync-external-store/**/*"],
-                    "message": "Import dependencies from dependencies.ts. It makes the imported deps appear only ones in the bundle."
-                  }
-                ]
-              }
             }
           }
         }
@@ -287,6 +275,19 @@
       "includes": ["packages/*/src/index.ts"],
       "linter": {
         "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/_internal/**/*"],
+                    "message": "Importing from _internal is not allowed in package entrypoints."
+                  }
+                ]
+              }
+            }
+          },
           "performance": {
             "noBarrelFile": "off" // allow re-exporting from barrel files in package entrypoints
           }

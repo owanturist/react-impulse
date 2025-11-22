@@ -1,3 +1,5 @@
+import { Impulse, type ReadonlyImpulse, type Scope } from "react-impulse"
+
 import { entries } from "~/tools/entries"
 import { hasProperty } from "~/tools/has-property"
 import { isBoolean } from "~/tools/is-boolean"
@@ -9,7 +11,6 @@ import { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
 import { values } from "~/tools/values"
 
-import { Impulse, type ReadonlyImpulse, type Scope } from "../../_internal/dependencies"
 import type { GetImpulseFormParams } from "../../impulse-form/_internal/get-impulse-form-params"
 import {
   type ImpulseFormChild,

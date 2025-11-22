@@ -1,4 +1,4 @@
-import type { DependencyList } from "./_dependencies"
+import type { DependencyList } from "./dependency-list"
 import { useScopedMemo } from "./use-scoped-memo"
 import { enqueue } from "./_internal/enqueue"
 import type { Scope } from "./_internal/scope"

@@ -1,3 +1,5 @@
+import { Impulse, type Scope } from "react-impulse"
+
 import { entries } from "~/tools/entries"
 import { hasProperty } from "~/tools/has-property"
 import { isBoolean } from "~/tools/is-boolean"
@@ -11,7 +13,6 @@ import { mapValues } from "~/tools/map-values"
 import type { OmitValues } from "~/tools/omit-values"
 import { values } from "~/tools/values"
 
-import { Impulse, type Scope } from "../../_internal/dependencies"
 import { toConcise } from "../../_internal/to-concise"
 import {
   type ImpulseFormChild,

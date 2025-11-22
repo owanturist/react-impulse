@@ -1,8 +1,9 @@
+import { Impulse, type ReadonlyImpulse, type Scope } from "react-impulse"
+
 import { Emitter } from "~/tools/emitter"
 import { isNull } from "~/tools/is-null"
 import type { Lazy } from "~/tools/lazy"
 
-import { Impulse, type ReadonlyImpulse, type Scope } from "../../_internal/dependencies"
 import type { ImpulseFormParams } from "../impulse-form-params"
 
 import type { ImpulseForm } from "./impulse-form"

@@ -1,4 +1,5 @@
-import type { Scope } from "../../_internal/dependencies"
+import type { Scope } from "react-impulse"
+
 import { ImpulseForm } from "../../impulse-form/_internal/impulse-form"
 import type { ImpulseFormOptionalParams } from "../impulse-form-optional-params"
 

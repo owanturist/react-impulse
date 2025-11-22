@@ -1,6 +1,7 @@
+import type { Scope } from "react-impulse"
+
 import { mapValues } from "~/tools/map-values"
 
-import type { Scope } from "../../_internal/dependencies"
 import { ImpulseForm } from "../../impulse-form/_internal/impulse-form"
 import type { ImpulseFormMeta } from "../../impulse-form-meta"
 import type { ImpulseFormShapeFields } from "../impulse-form-shape-fields"

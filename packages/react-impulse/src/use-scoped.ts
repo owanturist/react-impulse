@@ -1,8 +1,10 @@
+import { useCallback, useDebugValue } from "react"
+
 import { isFunction } from "~/tools/is-function"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 
-import { type DependencyList, useCallback, useDebugValue } from "./_dependencies"
 import type { Compare } from "./compare"
+import type { DependencyList } from "./dependency-list"
 import type { ReadableImpulse } from "./readable-impulse"
 import { STATIC_SCOPE, type Scope } from "./_internal/scope"
 import { useCreateScope } from "./_internal/use-create-scope"

@@ -1,3 +1,5 @@
+import { Impulse, type Scope, batch } from "react-impulse"
+
 import { entries } from "~/tools/entries"
 import { isFunction } from "~/tools/is-function"
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
@@ -5,7 +7,6 @@ import { map } from "~/tools/map"
 import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
-import { Impulse, type Scope, batch } from "../../_internal/dependencies"
 import { ImpulseForm } from "../../impulse-form/_internal/impulse-form"
 import type { ImpulseFormListParams } from "../impulse-form-list-params"
 

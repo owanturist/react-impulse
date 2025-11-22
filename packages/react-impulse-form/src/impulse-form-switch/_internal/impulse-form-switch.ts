@@ -1,6 +1,7 @@
+import type { Scope } from "react-impulse"
+
 import { mapValues } from "~/tools/map-values"
 
-import type { Scope } from "../../_internal/dependencies"
 import { ImpulseForm } from "../../impulse-form/_internal/impulse-form"
 import type { ImpulseFormSwitchActiveBranch } from "../impulse-form-switch-active-branch"
 import type { ImpulseFormSwitchBranches } from "../impulse-form-switch-branches"

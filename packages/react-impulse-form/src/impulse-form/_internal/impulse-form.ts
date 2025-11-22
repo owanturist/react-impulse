@@ -1,9 +1,10 @@
+import { type ReadonlyImpulse, type Scope, batch, untrack } from "react-impulse"
+
 import { isDefined } from "~/tools/is-defined"
 import { isNull } from "~/tools/is-null"
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
 
-import { type ReadonlyImpulse, type Scope, batch, untrack } from "../../_internal/dependencies"
 import type { ImpulseFormParams } from "../impulse-form-params"
 
 import type { ImpulseFormState } from "./impulse-form-state"

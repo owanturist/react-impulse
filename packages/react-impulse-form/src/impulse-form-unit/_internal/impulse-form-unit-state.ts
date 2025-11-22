@@ -1,3 +1,5 @@
+import { type Compare, Impulse, type ReadonlyImpulse, type Scope, batch } from "react-impulse"
+
 import { identity } from "~/tools/identity"
 import { isFunction } from "~/tools/is-function"
 import { isNull } from "~/tools/is-null"
@@ -5,13 +7,6 @@ import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
 import { resolveSetter } from "~/tools/setter"
 
-import {
-  type Compare,
-  Impulse,
-  type ReadonlyImpulse,
-  type Scope,
-  batch,
-} from "../../_internal/dependencies"
 import { ImpulseFormState } from "../../impulse-form/_internal/impulse-form-state"
 import type { Result } from "../../result"
 import {

@@ -1,3 +1,5 @@
+import { Impulse, type Scope, untrack } from "react-impulse"
+
 import { concat } from "~/tools/concat"
 import { drop } from "~/tools/drop"
 import { entries } from "~/tools/entries"
@@ -10,7 +12,6 @@ import { Lazy } from "~/tools/lazy"
 import { map } from "~/tools/map"
 import { take } from "~/tools/take"
 
-import { Impulse, type Scope, untrack } from "../../_internal/dependencies"
 import { toConcise } from "../../_internal/to-concise"
 import type { GetImpulseFormParams } from "../../impulse-form/_internal/get-impulse-form-params"
 import {
