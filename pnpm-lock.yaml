@@ -73,8 +73,11 @@ importers:
         specifier: ^4.0.15
         version: 4.0.15(@types/node@20.19.25)(happy-dom@20.0.11)(jiti@2.6.1)(terser@5.44.1)
 
-  packages/react-impulse-form:
+  packages/signal-form:
     devDependencies:
+      '@owanturist/signal':
+        specifier: workspace:*
+        version: link:../signal
       '@testing-library/jest-dom':
         specifier: ^6.9.1
         version: 6.9.1
@@ -90,9 +93,6 @@ importers:
       react-dom:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)
-      react-impulse:
-        specifier: workspace:*
-        version: link:../react-impulse
       vite-tsconfig-paths:
         specifier: 6.0.0-beta.4
         version: 6.0.0-beta.4(typescript@5.9.3)(vite@7.2.7(@types/node@20.19.25)(jiti@2.6.1)(terser@5.44.1))
