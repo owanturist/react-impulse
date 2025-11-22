@@ -1,24 +1,22 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useScopedMemo } from "../src"
+import { Impulse, useScope } from "../src"
 
 describe("single impulse", () => {
   const Component: React.FC<{
     onMemo?: React.Dispatch<number>
     value: Impulse<number>
   }> = ({ onMemo, value }) => {
+    const scope = useScope()
     const [multiplier, setMultiplier] = React.useState(2)
-    const result = useScopedMemo(
-      (scope) => {
-        const x = value.getValue(scope) * multiplier
+    const result = React.useMemo(() => {
+      const x = value.getValue(scope) * multiplier
 
-        onMemo?.(x)
+      onMemo?.(x)
 
-        return x
-      },
-      [value, multiplier, onMemo],
-    )
+      return x
+    }, [scope, value, multiplier, onMemo])
 
     return (
       <>
@@ -28,7 +26,7 @@ describe("single impulse", () => {
     )
   }
 
-  it("can watch inside useScopedMemo", () => {
+  it("can watch inside React.useMemo", () => {
     const value = Impulse(1)
     const onMemo = vi.fn()
     const onRender = vi.fn()
@@ -195,10 +193,11 @@ describe("multiple impulses", () => {
     first: Impulse<number>
     second: Impulse<number>
   }> = ({ first, second }) => {
+    const scope = useScope()
     const [multiplier, setMultiplier] = React.useState(2)
-    const result = useScopedMemo(
-      (scope) => (first.getValue(scope) + second.getValue(scope)) * multiplier,
-      [first, second, multiplier],
+    const result = React.useMemo(
+      () => (first.getValue(scope) + second.getValue(scope)) * multiplier,
+      [scope, first, second, multiplier],
     )
 
     return (
@@ -240,19 +239,17 @@ describe("nested impulses", () => {
   const Component: React.FC<{
     list: Impulse<Array<Impulse<number>>>
   }> = ({ list }) => {
+    const scope = useScope()
     const [multiplier, setMultiplier] = React.useState(2)
-    const result = useScopedMemo(
-      (scope) => {
-        const x =
-          list
-            .getValue(scope)
-            .map((item) => item.getValue(scope))
-            .reduce((acc, val) => acc + val, 0) * multiplier
+    const result = React.useMemo(() => {
+      const x =
+        list
+          .getValue(scope)
+          .map((item) => item.getValue(scope))
+          .reduce((acc, val) => acc + val, 0) * multiplier
 
-        return x
-      },
-      [list, multiplier],
-    )
+      return x
+    }, [scope, list, multiplier])
 
     return (
       <>

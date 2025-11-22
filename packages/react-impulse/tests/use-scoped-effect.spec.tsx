@@ -1,26 +1,27 @@
 import { act, fireEvent, render, renderHook, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useScope, useScopedEffect, useScopedLayoutEffect } from "../src"
+import { Impulse, subscribe, useScope } from "../src"
 
 describe.each([
-  ["useScopedEffect", useScopedEffect],
-  ["useScopedLayoutEffect", useScopedLayoutEffect],
-])("running %s hook", (_, useCustomScopedEffect) => {
+  ["React.useEffect", React.useEffect],
+  ["React.useLayoutEffect", React.useLayoutEffect],
+])("running %s hook", (_, useEffect) => {
   describe("single impulse", () => {
     const Component: React.FC<{
       value: Impulse<number>
-      useEffect: typeof useScopedEffect
+      useEffect: typeof React.useEffect
       onEffect: React.Dispatch<number>
     }> = ({ onEffect, value, useEffect }) => {
       const [multiplier, setMultiplier] = React.useState(2)
 
       useEffect(
-        (scope) => {
-          const x = value.getValue(scope) * multiplier
+        () =>
+          subscribe((scope) => {
+            const x = value.getValue(scope) * multiplier
 
-          onEffect(x)
-        },
+            onEffect(x)
+          }),
         [value, multiplier, onEffect],
       )
 
@@ -33,7 +34,7 @@ describe.each([
       const value = Impulse(3)
       const onEffect = vi.fn()
 
-      render(<Component onEffect={onEffect} useEffect={useCustomScopedEffect} value={value} />)
+      render(<Component onEffect={onEffect} useEffect={useEffect} value={value} />)
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(6)
       vi.clearAllMocks()
@@ -52,7 +53,7 @@ describe.each([
 
       const { rerender } = render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useEffect={useCustomScopedEffect} onEffect={onEffect} value={value} />
+          <Component useEffect={useEffect} onEffect={onEffect} value={value} />
         </React.Profiler>,
       )
 
@@ -62,7 +63,7 @@ describe.each([
 
       rerender(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useEffect={useCustomScopedEffect} onEffect={onEffect} value={value} />
+          <Component useEffect={useEffect} onEffect={onEffect} value={value} />
         </React.Profiler>,
       )
 
@@ -87,14 +88,14 @@ describe.each([
 
       const { rerender } = render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useEffect={useCustomScopedEffect} onEffect={onEffect} value={value1} />
+          <Component useEffect={useEffect} onEffect={onEffect} value={value1} />
         </React.Profiler>,
       )
       vi.clearAllMocks()
 
       rerender(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useEffect={useCustomScopedEffect} onEffect={onEffect} value={value2} />
+          <Component useEffect={useEffect} onEffect={onEffect} value={value2} />
         </React.Profiler>,
       )
 
@@ -110,7 +111,7 @@ describe.each([
 
       const { rerender } = render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useEffect={useCustomScopedEffect} onEffect={onEffect} value={value1} />
+          <Component useEffect={useEffect} onEffect={onEffect} value={value1} />
         </React.Profiler>,
       )
       expect(value1).toHaveEmittersSize(1)
@@ -120,7 +121,7 @@ describe.each([
 
       rerender(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useEffect={useCustomScopedEffect} onEffect={onEffect} value={value2} />
+          <Component useEffect={useEffect} onEffect={onEffect} value={value2} />
         </React.Profiler>,
       )
       expect(value1).toHaveEmittersSize(0)
@@ -154,7 +155,7 @@ describe.each([
 
       render(
         <React.Profiler id="test" onRender={onRender}>
-          <Component useEffect={useCustomScopedEffect} onEffect={onEffect} value={value} />
+          <Component useEffect={useEffect} onEffect={onEffect} value={value} />
         </React.Profiler>,
       )
       vi.clearAllMocks()
@@ -182,12 +183,14 @@ describe.each([
       onEffect: React.Dispatch<number>
     }> = ({ first, second, onEffect }) => {
       const [multiplier, setMultiplier] = React.useState(2)
-      useCustomScopedEffect(
-        (scope) => {
-          const x = (first.getValue(scope) + second.getValue(scope)) * multiplier
 
-          onEffect(x)
-        },
+      useEffect(
+        () =>
+          subscribe((scope) => {
+            const x = (first.getValue(scope) + second.getValue(scope)) * multiplier
+
+            onEffect(x)
+          }),
         [first, second, multiplier, onEffect],
       )
 
@@ -232,16 +235,17 @@ describe.each([
     }> = ({ list, onEffect }) => {
       const [multiplier, setMultiplier] = React.useState(2)
 
-      useCustomScopedEffect(
-        (scope) => {
-          const x =
-            list
-              .getValue(scope)
-              .map((item) => item.getValue(scope))
-              .reduce((acc, val) => acc + val, 0) * multiplier
+      useEffect(
+        () =>
+          subscribe((scope) => {
+            const x =
+              list
+                .getValue(scope)
+                .map((item) => item.getValue(scope))
+                .reduce((acc, val) => acc + val, 0) * multiplier
 
-          onEffect(x)
-        },
+            onEffect(x)
+          }),
         [list, multiplier, onEffect],
       )
 
@@ -307,11 +311,13 @@ describe.each([
     }> = ({ value, onEffect }) => {
       const [multiplier, setMultiplier] = React.useState(2)
 
-      useCustomScopedEffect((scope) => {
-        const x = value.getValue(scope) * multiplier
+      useEffect(() =>
+        subscribe((scope) => {
+          const x = value.getValue(scope) * multiplier
 
-        onEffect(x)
-      })
+          onEffect(x)
+        }),
+      )
 
       return (
         <button type="button" data-testid="increment" onClick={() => setMultiplier((x) => x + 1)} />
@@ -385,10 +391,11 @@ describe.each([
     }> = ({ count, onEffect }) => {
       const [isVisible, setIsVisible] = React.useState(true)
 
-      useCustomScopedEffect(
-        (scope) => {
-          onEffect(count.getValue(scope))
-        },
+      useEffect(
+        () =>
+          subscribe((scope) => {
+            onEffect(count.getValue(scope))
+          }),
         [onEffect, count],
       )
 
@@ -432,10 +439,11 @@ describe.each([
     const impulse = Impulse(2)
     const { rerender } = renderHook(
       ({ left, right }) => {
-        useCustomScopedEffect(
-          (scope) => {
-            spy(left + right.getValue(scope))
-          },
+        useEffect(
+          () =>
+            subscribe((scope) => {
+              spy(left + right.getValue(scope))
+            }),
           [left, right],
         )
       },
@@ -478,10 +486,11 @@ describe.each([
     const right = Impulse(2)
     const { rerender } = renderHook(
       ({ state }) => {
-        useCustomScopedEffect(
-          (scope) => {
-            spy(state.left.getValue(scope) + state.right.getValue(scope))
-          },
+        useEffect(
+          () =>
+            subscribe((scope) => {
+              spy(state.left.getValue(scope) + state.right.getValue(scope))
+            }),
           [state],
         )
       },
@@ -515,14 +524,15 @@ describe.each([
     const counter = Impulse({ count: 2 })
     const { rerender, unmount } = renderHook(
       (props) => {
-        useCustomScopedEffect(
-          (scope) => {
-            const { count } = props.counter.getValue(scope)
+        useEffect(
+          () =>
+            subscribe((scope) => {
+              const { count } = props.counter.getValue(scope)
 
-            return () => {
-              cleanup(count * props.multiplier)
-            }
-          },
+              return () => {
+                cleanup(count * props.multiplier)
+              }
+            }),
           [props.counter, props.multiplier],
         )
       },
@@ -553,5 +563,57 @@ describe.each([
 
     counter.setValue({ count: 4 })
     expect(cleanup).not.toHaveBeenCalled()
+  })
+
+  describe("when scope coming as a dependency", () => {
+    it("reruns effect only for effect's consumers", () => {
+      const spyRender = vi.fn()
+      const spyEffect = vi.fn()
+      const impulse1 = Impulse(2)
+      const impulse2 = Impulse(3)
+
+      const { rerender } = renderHook(
+        ({ left, right }) => {
+          const scope = useScope()
+          const scopeForEffect = useScope()
+
+          useEffect(() => {
+            spyEffect(left * right.getValue(scopeForEffect))
+          }, [scopeForEffect, left, right])
+
+          spyRender(impulse2.getValue(scope))
+        },
+        {
+          initialProps: { left: 1, right: impulse1 },
+        },
+      )
+
+      expect(spyRender).toHaveBeenCalledExactlyOnceWith(3)
+      expect(spyEffect).toHaveBeenCalledExactlyOnceWith(2)
+      vi.clearAllMocks()
+
+      rerender({ left: 1, right: impulse1 })
+      expect(spyRender).toHaveBeenCalledExactlyOnceWith(3)
+      expect(spyEffect).not.toHaveBeenCalled()
+      vi.clearAllMocks()
+
+      act(() => {
+        impulse1.setValue(4)
+      })
+      expect(spyRender).toHaveBeenCalledExactlyOnceWith(3)
+      expect(spyEffect).toHaveBeenCalledExactlyOnceWith(4)
+      vi.clearAllMocks()
+
+      act(() => {
+        impulse2.setValue(5)
+      })
+      expect(spyRender).toHaveBeenCalledExactlyOnceWith(5)
+      expect(spyEffect).not.toHaveBeenCalled()
+      vi.clearAllMocks()
+
+      rerender({ left: 2, right: impulse1 })
+      expect(spyRender).toHaveBeenCalledExactlyOnceWith(5)
+      expect(spyEffect).toHaveBeenCalledExactlyOnceWith(8)
+    })
   })
 })

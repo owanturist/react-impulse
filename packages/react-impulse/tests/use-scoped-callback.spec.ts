@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
+import { useCallback } from "react"
 
-import { Impulse, useScoped, useScopedCallback } from "../src"
+import { Impulse, useScope, useScoped } from "../src"
 
 const onCallback = vi.fn<(x: number) => number>().mockImplementation((x) => x)
 
@@ -11,8 +12,11 @@ beforeEach(() => {
 describe("single Impulse", () => {
   const setup = (impulse: Impulse<number>) =>
     renderHook(
-      (count: Impulse<number>) =>
-        useScopedCallback((scope) => onCallback(count.getValue(scope) * 2), [count]),
+      (count: Impulse<number>) => {
+        const scope = useScope()
+
+        return useCallback(() => onCallback(count.getValue(scope) * 2), [scope, count])
+      },
       {
         initialProps: impulse,
       },
@@ -141,17 +145,20 @@ describe("single Impulse", () => {
 describe("conditional Impulse", () => {
   const setup = (impulse: Impulse<number>) =>
     renderHook(
-      (count: Impulse<number>) =>
-        useScopedCallback(
-          (scope, isActive: boolean) => {
+      (count: Impulse<number>) => {
+        const scope = useScope()
+
+        return useCallback(
+          (isActive: boolean) => {
             if (isActive) {
               return count.getValue(scope) * 2
             }
 
             return -1
           },
-          [count],
-        ),
+          [scope, count],
+        )
+      },
       {
         initialProps: impulse,
       },
@@ -227,9 +234,11 @@ describe("conditional Impulse", () => {
 
 describe("argument Impulse", () => {
   const setup = () =>
-    renderHook(() =>
-      useScopedCallback((scope, count: Impulse<number>) => count.getValue(scope) * 2, []),
-    )
+    renderHook(() => {
+      const scope = useScope()
+
+      return useCallback((count: Impulse<number>) => count.getValue(scope) * 2, [scope])
+    })
 
   it("attaches an Impulse when the resulting function calls", () => {
     const count = Impulse(1)
@@ -279,17 +288,22 @@ describe("argument Impulse", () => {
   })
 })
 
-it("batches the callback", () => {
+it("cannot batch the callback", () => {
   const impulse1 = Impulse(1)
   const impulse2 = Impulse(2)
   const impulse3 = Impulse(3)
-  const { result: callback } = renderHook(() =>
-    useScopedCallback((scope, diff: number) => {
-      impulse1.setValue(impulse1.getValue(scope) + diff)
-      impulse2.setValue(impulse2.getValue(scope) + diff)
-      impulse3.setValue(impulse3.getValue(scope) + diff)
-    }, []),
-  )
+  const { result: callback } = renderHook(() => {
+    const scope = useScope()
+
+    return useCallback(
+      (diff: number) => {
+        impulse1.setValue(impulse1.getValue(scope) + diff)
+        impulse2.setValue(impulse2.getValue(scope) + diff)
+        impulse3.setValue(impulse3.getValue(scope) + diff)
+      },
+      [scope],
+    )
+  })
   const spy = vi.fn()
 
   const { result } = renderHook(() =>
@@ -309,7 +323,7 @@ it("batches the callback", () => {
   })
 
   expect(result.current).toBe(9)
-  expect(spy).toHaveBeenCalledOnce()
+  expect(spy).toHaveBeenCalledTimes(3)
   vi.clearAllMocks()
 
   act(() => {
