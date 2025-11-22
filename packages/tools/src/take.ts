@@ -1,4 +1,4 @@
-export function take<T>(arr: ReadonlyArray<T>, count: number): ReadonlyArray<T> {
+function take<T>(arr: ReadonlyArray<T>, count: number): ReadonlyArray<T> {
   if (count <= 0) {
     return []
   }
@@ -9,3 +9,5 @@ export function take<T>(arr: ReadonlyArray<T>, count: number): ReadonlyArray<T> 
 
   return arr.slice(0, count)
 }
+
+export { take }

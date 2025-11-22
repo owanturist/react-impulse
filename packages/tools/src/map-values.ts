@@ -1,16 +1,16 @@
 import { entries } from "~/tools/entries"
 
-export function mapValues<TObject extends Record<string, unknown>, TResult>(
+function mapValues<TObject extends Record<string, unknown>, TResult>(
   object: TObject,
   fn: (value: TObject[typeof key], key: keyof TObject) => TResult,
 ): Record<keyof TObject, TResult>
 
-export function mapValues<TObject extends Record<string, unknown>>(
+function mapValues<TObject extends Record<string, unknown>>(
   object: TObject,
   fn: (value: TObject[typeof key], key: keyof TObject) => TObject[typeof key],
 ): TObject
 
-export function mapValues<TObject extends Record<string, unknown>, TResult>(
+function mapValues<TObject extends Record<string, unknown>, TResult>(
   object: TObject,
   fn: (value: TObject[typeof key], key: keyof TObject) => TResult,
 ): Record<keyof TObject, TResult> {
@@ -22,3 +22,5 @@ export function mapValues<TObject extends Record<string, unknown>, TResult>(
 
   return result
 }
+
+export { mapValues }

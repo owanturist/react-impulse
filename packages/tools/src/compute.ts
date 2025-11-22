@@ -1,3 +1,5 @@
-export type Compute<Obj> = unknown & {
+type Compute<Obj> = unknown & {
   [K in keyof Obj]: Obj[K]
 }
+
+export type { Compute }

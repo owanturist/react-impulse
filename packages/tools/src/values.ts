@@ -1,2 +1,3 @@
-export const values: <TObject>(object: TObject) => ReadonlyArray<TObject[keyof TObject]> =
-  Object.values
+const values: <TObject>(object: TObject) => ReadonlyArray<TObject[keyof TObject]> = Object.values
+
+export { values }

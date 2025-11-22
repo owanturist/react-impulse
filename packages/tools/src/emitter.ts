@@ -1,6 +1,6 @@
 import { map } from "~/tools/map"
 
-export class Emitter<TPayload = unknown, TResult = void> {
+class Emitter<TPayload = unknown, TResult = void> {
   private readonly _listeners: Array<(payload: TPayload) => TResult> = []
 
   public _subscribe(listener: (payload: TPayload) => TResult): VoidFunction {
@@ -19,3 +19,5 @@ export class Emitter<TPayload = unknown, TResult = void> {
     return this._listeners.length === 0
   }
 }
+
+export { Emitter }

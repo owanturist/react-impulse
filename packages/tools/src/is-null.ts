@@ -1,3 +1,5 @@
-export function isNull(value: unknown): value is null {
+function isNull(value: unknown): value is null {
   return value === null
 }
+
+export { isNull }

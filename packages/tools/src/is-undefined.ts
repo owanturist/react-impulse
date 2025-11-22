@@ -1,3 +1,5 @@
-export function isUndefined(value: unknown): value is undefined {
+function isUndefined(value: unknown): value is undefined {
   return value === undefined
 }
+
+export { isUndefined }
