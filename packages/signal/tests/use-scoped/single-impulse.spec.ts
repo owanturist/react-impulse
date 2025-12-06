@@ -233,7 +233,7 @@ describe("transform scoped Impulse's", () => {
       "inline comparator",
       ({ impulse }: WithImpulse) =>
         useScoped((scope) => factoryTuple(scope, { impulse }), [impulse], {
-          compare: (prev, next, scope) => compareTuple(prev, next, scope),
+          compare: (prev, next) => compareTuple(prev, next),
         }),
     ],
     [

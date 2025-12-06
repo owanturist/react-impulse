@@ -54,11 +54,11 @@ describe("Impulse(value, options?)", () => {
     expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
-  it("assigns custom function as compare", ({ scope }) => {
+  it("assigns custom function as compare", () => {
     const impulse = Impulse({ count: 0 }, { compare: Counter.compare })
 
     impulse.setValue({ count: 1 })
-    expect(Counter.compare).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 }, scope)
+    expect(Counter.compare).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
   it("carries the function value wrapped in an object", ({ scope }) => {

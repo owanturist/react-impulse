@@ -11,12 +11,12 @@ function createUnionCompare<TPrimary, TSecondary>(
     return isStrictEqual
   }
 
-  return (left, right, scope) => {
+  return (left, right) => {
     if (primary(left) || primary(right)) {
       return left === right
     }
 
-    return secondary(left, right, scope)
+    return secondary(left, right)
   }
 }
 

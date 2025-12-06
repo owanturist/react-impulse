@@ -6,7 +6,7 @@ import { isStrictEqual } from "~/tools/is-strict-equal"
 import type { Compare } from "./compare"
 import type { DependencyList } from "./dependency-list"
 import type { ReadableImpulse } from "./readable-impulse"
-import { STATIC_SCOPE, type Scope } from "./_internal/scope"
+import type { Scope } from "./_internal/scope"
 import { useCreateScope } from "./_internal/use-create-scope"
 import { useHandler } from "./_internal/use-handler"
 
@@ -67,7 +67,7 @@ function useScoped<TResult>(
   const compare = useHandler((prev: TResult, next: TResult) => {
     const fn = options?.compare ?? isStrictEqual
 
-    return fn(prev, next, STATIC_SCOPE)
+    return fn(prev, next)
   })
 
   const value = useCreateScope(transform, compare)

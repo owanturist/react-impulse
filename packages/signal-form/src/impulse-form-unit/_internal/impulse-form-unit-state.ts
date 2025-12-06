@@ -102,7 +102,7 @@ class ImpulseFormUnitState<TInput, TError, TOutput> extends ImpulseFormState<
     this._touchedVerbose = _touched
 
     this._dirty = this._dirtyVerbose = Impulse((scope): boolean =>
-      _isInputDirty(this._initial.getValue(scope), _input.getValue(scope), scope),
+      _isInputDirty(this._initial.getValue(scope), _input.getValue(scope)),
     )
 
     this._validateOnVerbose = _validateOn
