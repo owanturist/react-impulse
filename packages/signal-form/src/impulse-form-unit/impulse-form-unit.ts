@@ -1,4 +1,4 @@
-import { type Compare, Impulse, untrack } from "@owanturist/signal"
+import { type Compare, Impulse } from "@owanturist/signal"
 
 import { hasProperty } from "~/tools/has-property"
 import { isNull } from "~/tools/is-null"
@@ -182,23 +182,16 @@ function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
   | ImpulseFormUnit<TInput, ReadonlyArray<string>, TOutput>
   | ImpulseFormUnit<TInput, TError, TOutput> /* enforce syntax highlight */ {
   const isInputEqual = options?.isInputEqual ?? isStrictEqual
-  const isInputDirty =
-    options?.isInputDirty ?? ((left, right, scope) => !isInputEqual(left, right, scope))
+  const isInputDirty = options?.isInputDirty ?? ((left, right) => !isInputEqual(left, right))
+  const initialOrInput = options?.initial ?? input_
 
   const input = Impulse(input_, { compare: isInputEqual })
 
   const initial = Impulse({
     _explicit: Impulse(!isUndefined(options?.initial)),
-    _current: Impulse(
-      untrack((scope) => {
-        const initialOrInput = options?.initial ?? input_
-
-        return isInputEqual(initialOrInput, input_, scope) ? input_ : initialOrInput
-      }),
-      {
-        compare: isInputEqual,
-      },
-    ),
+    _current: Impulse(isInputEqual(initialOrInput, input_) ? input_ : initialOrInput, {
+      compare: isInputEqual,
+    }),
   })
 
   const touched = Impulse(options?.touched ?? false)

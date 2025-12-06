@@ -1,7 +1,6 @@
 import type { Compare } from "../compare"
 
 import { BaseImpulse } from "./base-impulse"
-import { STATIC_SCOPE } from "./scope"
 
 class Impulse<T> extends BaseImpulse<T> {
   public constructor(
@@ -16,7 +15,7 @@ class Impulse<T> extends BaseImpulse<T> {
   }
 
   protected _setter(value: T): boolean {
-    if (!this._compare(this._value, value, STATIC_SCOPE)) {
+    if (!this._compare(this._value, value)) {
       this._value = value
 
       return true
