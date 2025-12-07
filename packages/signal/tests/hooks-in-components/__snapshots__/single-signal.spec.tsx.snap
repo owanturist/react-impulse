@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`single impulse > multiple Setters / Getters 1`] = `
+exports[`single signal > multiple Setters / Getters 1`] = `
 [
   <span
     data-testid="getter"
@@ -15,7 +15,7 @@ exports[`single impulse > multiple Setters / Getters 1`] = `
 ]
 `;
 
-exports[`single impulse > multiple Setters / Getters 2`] = `
+exports[`single signal > multiple Setters / Getters 2`] = `
 [
   <span
     data-testid="getter"
@@ -30,7 +30,7 @@ exports[`single impulse > multiple Setters / Getters 2`] = `
 ]
 `;
 
-exports[`single impulse > multiple Setters / Getters 3`] = `
+exports[`single signal > multiple Setters / Getters 3`] = `
 [
   <span
     data-testid="getter"
@@ -45,7 +45,7 @@ exports[`single impulse > multiple Setters / Getters 3`] = `
 ]
 `;
 
-exports[`single impulse > multiple Setters / Getters 4`] = `
+exports[`single signal > multiple Setters / Getters 4`] = `
 [
   <span
     data-testid="getter"

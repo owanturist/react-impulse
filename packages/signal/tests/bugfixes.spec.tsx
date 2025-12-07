@@ -1,14 +1,14 @@
 import { act, fireEvent, render, renderHook, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, effect, useComputed, useMonitor } from "../src"
+import { Signal, effect, useComputed, useMonitor } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
-    first: Impulse<number>
-    second: Impulse<number>
-    useGetFirst(first: Impulse<number>): number
-    useGetSecond(second: Impulse<number>): number
+    first: Signal<number>
+    second: Signal<number>
+    useGetFirst(first: Signal<number>): number
+    useGetSecond(second: Signal<number>): number
   }
 
   const ComponentComputedBeforeEffect: React.FC<ComponentProps> = ({
@@ -52,13 +52,13 @@ describe("watching misses when defined after useEffect #140", () => {
     )
   }
 
-  const useComputedInline = (impulse: Impulse<number>) =>
-    useComputed((monitor) => impulse.read(monitor))
+  const useComputedInline = (signal: Signal<number>) =>
+    useComputed((monitor) => signal.read(monitor))
 
-  const useComputedMemoized = (impulse: Impulse<number>) =>
-    useComputed((monitor) => impulse.read(monitor), [impulse])
+  const useComputedMemoized = (signal: Signal<number>) =>
+    useComputed((monitor) => signal.read(monitor), [signal])
 
-  const useComputedShortcut = (impulse: Impulse<number>) => useComputed(impulse)
+  const useComputedShortcut = (signal: Signal<number>) => useComputed(signal)
 
   describe.each([
     ["before", ComponentComputedBeforeEffect],
@@ -74,8 +74,8 @@ describe("watching misses when defined after useEffect #140", () => {
         ["memoized useComputed", useComputedMemoized],
         ["shortcut useComputed", useComputedShortcut],
       ])("with %s as useGetSecond", (_, useGetSecond) => {
-        const first = Impulse(0)
-        const second = Impulse(5)
+        const first = Signal(0)
+        const second = Signal(5)
 
         render(
           <Component
@@ -121,7 +121,7 @@ describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321
     ["toJSON()", (value: unknown) => JSON.stringify(value)],
   ])("reacts on %s call via `effect`", (_, convert) => {
     const Component: React.FC<{
-      count: Impulse<number>
+      count: Signal<number>
     }> = ({ count }) => {
       const [value, setValue] = React.useState(() => convert(count))
 
@@ -136,7 +136,7 @@ describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321
       return <span data-testid="result">{value}</span>
     }
 
-    const count = Impulse(1)
+    const count = Signal(1)
     render(<Component count={count} />)
 
     const result = screen.getByTestId("result")
@@ -158,7 +158,7 @@ describe("return the same component type from watch #322", () => {
   )
 
   const StatefulInput: React.FC<{
-    value: Impulse<string>
+    value: Signal<string>
   }> = ({ value }) => {
     const monitor = useMonitor()
 
@@ -173,7 +173,7 @@ describe("return the same component type from watch #322", () => {
   const Input = Object.assign(StatefulInput, { stateless: StatelessInput })
 
   it("monitors the StatefulInput", () => {
-    const text = Impulse("hello")
+    const text = Signal("hello")
     render(<Input value={text} />)
 
     const first = screen.getByRole("textbox")
@@ -188,7 +188,7 @@ describe("return the same component type from watch #322", () => {
 
 describe("in StrictMode, fails due to unexpected .setValue during watch call #336", () => {
   const Button: React.FC<{
-    count: Impulse<number>
+    count: Signal<number>
   }> = ({ count }) => {
     const monitor = useMonitor()
     React.useState(0)
@@ -201,11 +201,11 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
   }
 
   it("does not fail in strict mode", () => {
-    const impulse = Impulse(0)
+    const signal = Signal(0)
 
     render(
       <React.StrictMode>
-        <Button count={impulse} />
+        <Button count={signal} />
       </React.StrictMode>,
     )
 
@@ -219,7 +219,7 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
     expect(btn).toHaveTextContent("2")
 
     act(() => {
-      impulse.update((x) => x + 1)
+      signal.update((x) => x + 1)
     })
     expect(btn).toHaveTextContent("3")
   })
@@ -228,19 +228,19 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
 describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a not reactive value #627", () => {
   it("does not enqueue a rerender when sets a not reactive value", () => {
     const counter = { count: 0 }
-    const impulse = Impulse(
+    const signal = Signal(
       () => counter.count,
       (count) => {
         counter.count = count
       },
     )
 
-    const { result } = renderHook(() => useComputed(impulse))
+    const { result } = renderHook(() => useComputed(signal))
 
     expect(result.current).toBe(0)
 
     act(() => {
-      impulse.update(1)
+      signal.update(1)
     })
 
     expect(result.current).toBe(0)
@@ -250,9 +250,9 @@ describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a n
 describe("ImpulseForm.reset() does not run subscribers #969", () => {
   it("runs the effect listeners for every derived update", ({ monitor }) => {
     const spy = vi.fn()
-    const source1 = Impulse(1)
-    const source2 = Impulse<string>()
-    const derived = Impulse((monitor) => source2.read(monitor) ?? source1.read(monitor) > 0)
+    const source1 = Signal(1)
+    const source2 = Signal<string>()
+    const derived = Signal((monitor) => source2.read(monitor) ?? source1.read(monitor) > 0)
 
     effect((monitor) => {
       const output = derived.read(monitor)

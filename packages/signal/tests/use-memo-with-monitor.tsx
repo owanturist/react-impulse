@@ -1,12 +1,12 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useMonitor } from "../src"
+import { Signal, useMonitor } from "../src"
 
-describe("single impulse", () => {
+describe("single Signal", () => {
   const Component: React.FC<{
     onMemo?: React.Dispatch<number>
-    value: Impulse<number>
+    value: Signal<number>
   }> = ({ onMemo, value }) => {
     const monitor = useMonitor()
     const [multiplier, setMultiplier] = React.useState(2)
@@ -27,7 +27,7 @@ describe("single impulse", () => {
   }
 
   it("can watch inside React.useMemo", () => {
-    const value = Impulse(1)
+    const value = Signal(1)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -56,7 +56,7 @@ describe("single impulse", () => {
   })
 
   it("does not call useMemo factory when deps not changed", () => {
-    const value = Impulse(1)
+    const value = Signal(1)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -89,9 +89,9 @@ describe("single impulse", () => {
     expect(onRender).toHaveBeenCalledOnce()
   })
 
-  it("should call useMemo factory when dep Impulse changes", () => {
-    const value1 = Impulse(1)
-    const value2 = Impulse(3)
+  it("should call useMemo factory when dep Signal changes", () => {
+    const value1 = Signal(1)
+    const value2 = Signal(3)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -112,9 +112,9 @@ describe("single impulse", () => {
     expect(onRender).toHaveBeenCalledOnce()
   })
 
-  it("should unsubscribe Impulse from useMemo when swapped", () => {
-    const value1 = Impulse(1)
-    const value2 = Impulse(3)
+  it("should unsubscribe Signal from useMemo when swapped", () => {
+    const value1 = Signal(1)
+    const value2 = Signal(3)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -160,8 +160,8 @@ describe("single impulse", () => {
     expect(value2).toHaveEmittersSize(1)
   })
 
-  it("should call useMemo factory when none-Impulse dep changes", () => {
-    const value = Impulse(3)
+  it("should call useMemo factory when none-Signal dep changes", () => {
+    const value = Signal(3)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -188,10 +188,10 @@ describe("single impulse", () => {
   })
 })
 
-describe("multiple impulses", () => {
+describe("multiple signals", () => {
   const Component: React.FC<{
-    first: Impulse<number>
-    second: Impulse<number>
+    first: Signal<number>
+    second: Signal<number>
   }> = ({ first, second }) => {
     const monitor = useMonitor()
     const [multiplier, setMultiplier] = React.useState(2)
@@ -208,9 +208,9 @@ describe("multiple impulses", () => {
     )
   }
 
-  it("can watch after both impulses", () => {
-    const first = Impulse(2)
-    const second = Impulse(3)
+  it("can watch after both signals", () => {
+    const first = Signal(2)
+    const second = Signal(3)
 
     render(<Component first={first} second={second} />)
 
@@ -235,9 +235,9 @@ describe("multiple impulses", () => {
   })
 })
 
-describe("nested impulses", () => {
+describe("nested signals", () => {
   const Component: React.FC<{
-    list: Impulse<Array<Impulse<number>>>
+    list: Signal<Array<Signal<number>>>
   }> = ({ list }) => {
     const monitor = useMonitor()
     const [multiplier, setMultiplier] = React.useState(2)
@@ -259,11 +259,11 @@ describe("nested impulses", () => {
     )
   }
 
-  it("can watch after all impulses", () => {
-    const count0 = Impulse(2)
-    const count1 = Impulse(3)
-    const count2 = Impulse(4)
-    const list = Impulse([count0, count1])
+  it("can watch after all signals", () => {
+    const count0 = Signal(2)
+    const count1 = Signal(3)
+    const count2 = Signal(4)
+    const list = Signal([count0, count1])
 
     render(<Component list={list} />)
 

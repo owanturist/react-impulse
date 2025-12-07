@@ -1,13 +1,13 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, type Monitor, useComputed, useMonitor } from "../../src"
+import { type Monitor, Signal, useComputed, useMonitor } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
-describe("scoping nested impulses", () => {
+describe("monitoring nested Signals", () => {
   abstract class AppState {
-    public abstract counts: ReadonlyArray<Impulse<number>>
+    public abstract counts: ReadonlyArray<Signal<number>>
 
     public static sum(monitor: Monitor, { counts }: AppState): number {
       return counts.reduce((acc, count) => acc + count.read(monitor), 0)
@@ -15,7 +15,7 @@ describe("scoping nested impulses", () => {
   }
 
   interface AppProps {
-    state: Impulse<AppState>
+    state: Signal<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }
@@ -40,7 +40,7 @@ describe("scoping nested impulses", () => {
             onClick={() => {
               appState.update({
                 ...state,
-                counts: [...state.counts, Impulse(0)],
+                counts: [...state.counts, Signal(0)],
               })
             }}
           />
@@ -77,12 +77,12 @@ describe("scoping nested impulses", () => {
     )
   }
 
-  const factoryLeft = (monitor: Monitor, state: Impulse<AppState>) => {
+  const factoryLeft = (monitor: Monitor, state: Signal<AppState>) => {
     const total = AppState.sum(monitor, state.read(monitor))
 
     return total > 10
   }
-  const factoryRight = (monitor: Monitor, state: Impulse<AppState>) => {
+  const factoryRight = (monitor: Monitor, state: Signal<AppState>) => {
     const total = AppState.sum(monitor, state.read(monitor))
 
     return total < 20
@@ -144,8 +144,8 @@ describe("scoping nested impulses", () => {
     ["multiple computes", MultipleComputedApp, 0],
     ["multiple memoized computes", MultipleMemoizedComputedApp, 0],
     ["monitor", MonitorApp, 1],
-  ])("handles nested Impulses with %s", (_, App, unnecessaryRerendersCount) => {
-    const state = Impulse<AppState>({
+  ])("handles nested Signals with %s", (_, App, unnecessaryRerendersCount) => {
+    const state = Signal<AppState>({
       counts: [],
     })
     const onRender = vi.fn()
@@ -227,7 +227,7 @@ describe("scoping nested impulses", () => {
     act(() => {
       state.update((current) => ({
         ...current,
-        counts: [...current.counts, Impulse(9)],
+        counts: [...current.counts, Signal(9)],
       }))
     })
     expect(onRender).toHaveBeenCalledOnce()

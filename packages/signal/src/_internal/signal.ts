@@ -1,8 +1,8 @@
 import type { Equal } from "../equal"
 
-import { BaseImpulse } from "./base-impulse"
+import { BaseSignal } from "./base-signal"
 
-class Impulse<T> extends BaseImpulse<T> {
+class Signal<T> extends BaseSignal<T> {
   public constructor(
     private _value: T,
     equals: Equal<T>,
@@ -24,9 +24,9 @@ class Impulse<T> extends BaseImpulse<T> {
     return false
   }
 
-  protected _clone(value: T, equals: Equal<T>): Impulse<T> {
-    return new Impulse(value, equals)
+  protected _clone(value: T, equals: Equal<T>): Signal<T> {
+    return new Signal(value, equals)
   }
 }
 
-export { Impulse }
+export { Signal }

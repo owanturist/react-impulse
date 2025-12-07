@@ -1,11 +1,11 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, type Monitor, batch, useComputed } from "../../src"
+import { type Monitor, Signal, batch, useComputed } from "../../src"
 import {
   Counter,
   type WithFirst,
-  type WithImpulse,
   type WithSecond,
+  type WithSignal,
   type WithSpy,
   type WithThird,
 } from "../common"
@@ -41,8 +41,8 @@ describe("multiple factory", () => {
     ],
   ])("%s", (_, useHook) => {
     const setup = () => {
-      const first = Impulse({ count: 2 })
-      const second = Impulse({ count: 3 })
+      const first = Signal({ count: 2 })
+      const second = Signal({ count: 3 })
       const { result } = renderHook(useHook, {
         initialProps: { first, second },
       })
@@ -86,11 +86,11 @@ describe("multiple factory", () => {
   })
 })
 
-describe("triggering factory for multiple impulses vs single impulse", () => {
-  const factorySingle = (monitor: Monitor, { impulse, spy }: WithImpulse & WithSpy) => {
+describe("triggering factory for multiple Signals vs single Signal", () => {
+  const factorySingle = (monitor: Monitor, { signal, spy }: WithSignal & WithSpy) => {
     spy()
 
-    return impulse.read(monitor)
+    return signal.read(monitor)
   }
 
   const factoryMultiple = (
@@ -105,15 +105,15 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
   describe.each([
     [
       "without deps",
-      ({ impulse, spy }: WithImpulse & WithSpy) =>
-        useComputed((monitor) => factorySingle(monitor, { impulse, spy })),
+      ({ signal, spy }: WithSignal & WithSpy) =>
+        useComputed((monitor) => factorySingle(monitor, { signal, spy })),
       ({ first, second, third, spy }: WithFirst & WithSecond & WithThird & WithSpy) =>
         useComputed((monitor) => factoryMultiple(monitor, { first, second, third, spy })),
     ],
     [
       "without comparator",
-      ({ impulse, spy }: WithImpulse & WithSpy) =>
-        useComputed((monitor) => factorySingle(monitor, { impulse, spy }), [impulse, spy]),
+      ({ signal, spy }: WithSignal & WithSpy) =>
+        useComputed((monitor) => factorySingle(monitor, { signal, spy }), [signal, spy]),
       ({ first, second, third, spy }: WithFirst & WithSecond & WithThird & WithSpy) =>
         useComputed(
           (monitor) => factoryMultiple(monitor, { first, second, third, spy }),
@@ -122,8 +122,8 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
     ],
     [
       "with inline comparator",
-      ({ impulse, spy }: WithImpulse & WithSpy) =>
-        useComputed((monitor) => factorySingle(monitor, { impulse, spy }), [impulse, spy], {
+      ({ signal, spy }: WithSignal & WithSpy) =>
+        useComputed((monitor) => factorySingle(monitor, { signal, spy }), [signal, spy], {
           equals: (prev, next) => Counter.equals(prev, next),
         }),
       ({ first, second, third, spy }: WithFirst & WithSecond & WithThird & WithSpy) =>
@@ -137,8 +137,8 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
     ],
     [
       "with memoized comparator",
-      ({ impulse, spy }: WithImpulse & WithSpy) =>
-        useComputed((monitor) => factorySingle(monitor, { impulse, spy }), [impulse, spy], {
+      ({ signal, spy }: WithSignal & WithSpy) =>
+        useComputed((monitor) => factorySingle(monitor, { signal, spy }), [signal, spy], {
           equals: Counter.equals,
         }),
       ({ first, second, third, spy }: WithFirst & WithSecond & WithThird & WithSpy) =>
@@ -150,14 +150,14 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
     ],
   ])("%s", (_, useSingleHook, useMultipleHook) => {
     const setup = () => {
-      const first = Impulse({ count: 1 })
-      const second = Impulse({ count: 2 })
-      const third = Impulse({ count: 3 })
+      const first = Signal({ count: 1 })
+      const second = Signal({ count: 2 })
+      const third = Signal({ count: 3 })
       const spySingle = vi.fn()
       const spyMultiple = vi.fn()
 
       const { result: resultSingle } = renderHook(useSingleHook, {
-        initialProps: { impulse: first, spy: spySingle },
+        initialProps: { signal: first, spy: spySingle },
       })
 
       const { result: resultMultiple } = renderHook(useMultipleHook, {

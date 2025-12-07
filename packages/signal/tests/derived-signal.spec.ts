@@ -2,12 +2,12 @@ import { act, renderHook } from "@testing-library/react"
 import { useState } from "react"
 
 import {
-  Impulse,
-  type ImpulseOptions,
   type Monitor,
-  type ReadableImpulse,
-  type ReadonlyImpulse,
-  type WritableImpulse,
+  type ReadableSignal,
+  type ReadonlySignal,
+  Signal,
+  type SignalOptions,
+  type WritableSignal,
   batch,
   effect,
   untracked,
@@ -18,100 +18,100 @@ import { Counter } from "./common"
 
 describe.each<{
   name: string
-  read: <T>(impulse: ReadonlyImpulse<T>, monitor: Monitor) => T
-  update: <T>(impulse: Impulse<T>, setter: T | ((currentValue: T, monitor: Monitor) => T)) => void
+  read: <T>(signal: ReadonlySignal<T>, monitor: Monitor) => T
+  update: <T>(signal: Signal<T>, setter: T | ((currentValue: T, monitor: Monitor) => T)) => void
 }>([
   {
     name: "1x read / 1x update",
-    read: (impulse, monitor) => impulse.read(monitor),
-    update: (impulse, setter) => {
-      impulse.update(setter)
+    read: (signal, monitor) => signal.read(monitor),
+    update: (signal, setter) => {
+      signal.update(setter)
     },
   },
 
   {
     name: "1x read / 2x update",
-    read: (impulse, monitor) => impulse.read(monitor),
-    update: (impulse, setter) => {
-      impulse.update(setter)
-      impulse.update(setter)
+    read: (signal, monitor) => signal.read(monitor),
+    update: (signal, setter) => {
+      signal.update(setter)
+      signal.update(setter)
     },
   },
   {
     name: "1x read / 2x batched update",
-    read: (impulse, monitor) => impulse.read(monitor),
-    update: (impulse, setter) => {
+    read: (signal, monitor) => signal.read(monitor),
+    update: (signal, setter) => {
       batch(() => {
-        impulse.update(setter)
-        impulse.update(setter)
+        signal.update(setter)
+        signal.update(setter)
       })
     },
   },
 
   {
     name: "2x read / 1x update",
-    read: (impulse, monitor) => {
-      impulse.read(monitor)
+    read: (signal, monitor) => {
+      signal.read(monitor)
 
-      return impulse.read(monitor)
+      return signal.read(monitor)
     },
-    update: (impulse, setter) => {
-      impulse.update(setter)
+    update: (signal, setter) => {
+      signal.update(setter)
     },
   },
 
   {
     name: "2x read / 2x update",
-    read: (impulse, monitor) => {
-      impulse.read(monitor)
+    read: (signal, monitor) => {
+      signal.read(monitor)
 
-      return impulse.read(monitor)
+      return signal.read(monitor)
     },
-    update: (impulse, setter) => {
-      impulse.update(setter)
-      impulse.update(setter)
+    update: (signal, setter) => {
+      signal.update(setter)
+      signal.update(setter)
     },
   },
   {
     name: "2x read / 2x batched update",
-    read: (impulse, monitor) => {
-      impulse.read(monitor)
+    read: (signal, monitor) => {
+      signal.read(monitor)
 
-      return impulse.read(monitor)
+      return signal.read(monitor)
     },
-    update: (impulse, setter) => {
+    update: (signal, setter) => {
       batch(() => {
-        impulse.update(setter)
-        impulse.update(setter)
+        signal.update(setter)
+        signal.update(setter)
       })
     },
   },
-])("Impulse(getter, options?) when $name", ({ read, update }) => {
-  it("creates a ReadonlyImpulse", () => {
-    const impulse = Impulse(() => 0)
+])("Signal(getter, options?) when $name", ({ read, update }) => {
+  it("creates a ReadonlySignal", () => {
+    const signal = Signal(() => 0)
 
-    // @ts-expect-error should be ReadonlyImpulse
-    expectTypeOf(impulse).toEqualTypeOf<Impulse<number>>()
-    expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<number>>()
+    // @ts-expect-error should be ReadonlySignal
+    expectTypeOf(signal).toEqualTypeOf<Signal<number>>()
+    expectTypeOf(signal).toEqualTypeOf<ReadonlySignal<number>>()
   })
 
   it("reads the value from the source", ({ monitor }) => {
     const initial = { count: 0 }
-    const source = Impulse(initial)
-    const impulse = Impulse((monitor) => read(source, monitor))
+    const source = Signal(initial)
+    const signal = Signal((monitor) => read(source, monitor))
 
-    expect(read(impulse, monitor)).toBe(initial)
-    expect(read(impulse, monitor)).toStrictEqual({ count: 0 })
+    expect(read(signal, monitor)).toBe(initial)
+    expect(read(signal, monitor)).toStrictEqual({ count: 0 })
 
     const next = { count: 1 }
     update(source, next)
-    expect(read(impulse, monitor)).toBe(next)
-    expect(read(impulse, monitor)).toStrictEqual({ count: 1 })
+    expect(read(signal, monitor)).toBe(next)
+    expect(read(signal, monitor)).toStrictEqual({ count: 1 })
   })
 
-  it("subscribes to Impulse source", ({ monitor }) => {
-    const source = Impulse({ count: 0 }, { equals: Counter.equals })
-    const derived = Impulse((monitor) => read(source, monitor))
+  it("subscribes to Signal source", ({ monitor }) => {
+    const source = Signal({ count: 0 }, { equals: Counter.equals })
+    const derived = Signal((monitor) => read(source, monitor))
     const spy = vi.fn()
 
     expect(source).toHaveEmittersSize(0)
@@ -139,13 +139,13 @@ describe.each<{
     expect(source).toHaveEmittersSize(1)
   })
 
-  it("cannot subscribe to none-Impulse source", () => {
+  it("cannot subscribe to none-Signal source", () => {
     let variable = 0
-    const impulse = Impulse(() => variable)
+    const signal = Signal(() => variable)
     const spy = vi.fn()
 
     effect((monitor) => {
-      spy(read(impulse, monitor))
+      spy(read(signal, monitor))
     })
     expect(spy).toHaveBeenCalledExactlyOnceWith(0)
     vi.clearAllMocks()
@@ -155,8 +155,8 @@ describe.each<{
   })
 
   it("does not emit change when derived value does not change", () => {
-    const source = Impulse(0)
-    const derived = Impulse((monitor) => read(source, monitor) > 0)
+    const source = Signal(0)
+    const derived = Signal((monitor) => read(source, monitor) > 0)
     const spy = vi.fn()
 
     const unsubscribe = effect((monitor) => {
@@ -176,9 +176,9 @@ describe.each<{
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it("observes Impulse source only after the first read", ({ monitor }) => {
-    const source = Impulse({ count: 0 }, { equals: Counter.equals })
-    const derived = Impulse((monitor) => read(source, monitor))
+  it("observes Signal source only after the first read", ({ monitor }) => {
+    const source = Signal({ count: 0 }, { equals: Counter.equals })
+    const derived = Signal((monitor) => read(source, monitor))
 
     expect(source).toHaveEmittersSize(0)
 
@@ -197,8 +197,8 @@ describe.each<{
   })
 
   it("derives the value after subsequent source.update(different) calls", ({ monitor }) => {
-    const source = Impulse(0)
-    const derived = Impulse((monitor) => ({ count: read(source, monitor) }))
+    const source = Signal(0)
+    const derived = Signal((monitor) => ({ count: read(source, monitor) }))
 
     const value0 = read(derived, monitor)
     expect(value0).toStrictEqual({ count: 0 })
@@ -218,8 +218,8 @@ describe.each<{
   it("derives the value after subsequent source.update(same) source.update(different) calls", ({
     monitor,
   }) => {
-    const source = Impulse(0)
-    const derived = Impulse((monitor) => ({ count: read(source, monitor) }))
+    const source = Signal(0)
+    const derived = Signal((monitor) => ({ count: read(source, monitor) }))
 
     const value0 = read(derived, monitor)
     expect(value0).toStrictEqual({ count: 0 })
@@ -237,8 +237,8 @@ describe.each<{
   })
 
   it("does not recalculate the value on subsequent calls", () => {
-    const source = Impulse(0)
-    const derived = Impulse((monitor) => ({ count: read(source, monitor) }))
+    const source = Signal(0)
+    const derived = Signal((monitor) => ({ count: read(source, monitor) }))
 
     const { result: first } = renderHook(() => useComputed((monitor) => read(derived, monitor)))
 
@@ -252,8 +252,8 @@ describe.each<{
   })
 
   it("does not recalculate the value on subsequent re-renders", () => {
-    const source = Impulse(0)
-    const derived = Impulse((monitor) => ({ count: read(source, monitor) }))
+    const source = Signal(0)
+    const derived = Signal((monitor) => ({ count: read(source, monitor) }))
 
     const { result: first, rerender: rerenderFirst } = renderHook(() =>
       useComputed((monitor) => read(derived, monitor)),
@@ -277,8 +277,8 @@ describe.each<{
   })
 
   it("does not recalculate the value on subsequent inner state updates", () => {
-    const source = Impulse(0)
-    const derived = Impulse((monitor) => ({ count: read(source, monitor) }))
+    const source = Signal(0)
+    const derived = Signal((monitor) => ({ count: read(source, monitor) }))
 
     const { result: first } = renderHook(() => {
       const [, force] = useState(0)
@@ -317,8 +317,8 @@ describe.each<{
   })
 
   it("does not recalculate for subsequent calls with static monitor", ({ monitor }) => {
-    const source = Impulse(0)
-    const derived = Impulse((monitor) => ({ count: read(source, monitor) }))
+    const source = Signal(0)
+    const derived = Signal((monitor) => ({ count: read(source, monitor) }))
 
     expect(read(derived, monitor)).toStrictEqual({ count: 0 })
     expect(read(derived, monitor)).toBe(read(derived, monitor))
@@ -333,8 +333,8 @@ describe.each<{
   })
 
   it("does not recalculate the value when dependency sets the same value", () => {
-    const source = Impulse(0)
-    const derived = Impulse((monitor) => ({ count: read(source, monitor) }))
+    const source = Signal(0)
+    const derived = Signal((monitor) => ({ count: read(source, monitor) }))
 
     const { result: first } = renderHook(() => useComputed((monitor) => read(derived, monitor)))
 
@@ -354,8 +354,8 @@ describe.each<{
   })
 
   it("recalculates the value on dependency change", () => {
-    const source = Impulse(0)
-    const derived = Impulse((monitor) => ({ count: read(source, monitor) }))
+    const source = Signal(0)
+    const derived = Signal((monitor) => ({ count: read(source, monitor) }))
 
     const { result: first } = renderHook(() => useComputed((monitor) => read(derived, monitor)))
 
@@ -376,8 +376,8 @@ describe.each<{
   })
 
   it("keeps source observed after changing to the same derived value", ({ monitor }) => {
-    const source = Impulse({ count: 0 })
-    const derived = Impulse((monitor) => read(source, monitor), {
+    const source = Signal({ count: 0 })
+    const derived = Signal((monitor) => read(source, monitor), {
       equals: Counter.equals,
     })
 
@@ -396,8 +396,8 @@ describe.each<{
   })
 
   it("keeps source observed after useComputed dependency change", () => {
-    const source = Impulse(1)
-    const derived = Impulse((monitor) => 2 * read(source, monitor))
+    const source = Signal(1)
+    const derived = Signal((monitor) => 2 * read(source, monitor))
 
     const { result } = renderHook(() => {
       const [count, setCount] = useState(2)
@@ -432,8 +432,8 @@ describe.each<{
   })
 
   it("keeps observing while derived value does not change", () => {
-    const source = Impulse(0)
-    const derived = Impulse((monitor) => read(source, monitor) > 0)
+    const source = Signal(0)
+    const derived = Signal((monitor) => read(source, monitor) > 0)
 
     expect(source).toHaveEmittersSize(0)
     expect(derived).toHaveEmittersSize(0)
@@ -465,12 +465,12 @@ describe.each<{
     expect(result.current).toBe(false)
   })
 
-  it("recalculates the value for nested derived impulses", () => {
-    const email = Impulse("")
-    const password = Impulse("")
-    const isEmailEmpty = Impulse((monitor) => read(email, monitor) === "")
-    const isPasswordEmpty = Impulse((monitor) => read(password, monitor) === "")
-    const isFormEmpty = Impulse((monitor) => ({
+  it("recalculates the value for nested derived Signals", () => {
+    const email = Signal("")
+    const password = Signal("")
+    const isEmailEmpty = Signal((monitor) => read(email, monitor) === "")
+    const isPasswordEmpty = Signal((monitor) => read(password, monitor) === "")
+    const isFormEmpty = Signal((monitor) => ({
       email: read(isEmailEmpty, monitor),
       password: read(isPasswordEmpty, monitor),
     }))
@@ -530,8 +530,8 @@ describe.each<{
   })
 
   it("causes a single re-render caused by dependency update", () => {
-    const source = Impulse(0)
-    const derived = Impulse((monitor) => ({ count: read(source, monitor) }))
+    const source = Signal(0)
+    const derived = Signal((monitor) => ({ count: read(source, monitor) }))
 
     const spy = vi.fn()
 
@@ -556,9 +556,9 @@ describe.each<{
   })
 
   it("do not re-subscribe to dependencies when they are not in use", () => {
-    const source = Impulse(1)
-    const condition = Impulse(false)
-    const derived = Impulse((monitor) => ({
+    const source = Signal(1)
+    const condition = Signal(false)
+    const derived = Signal((monitor) => ({
       count: read(condition, monitor) ? read(source, monitor) : 0,
     }))
 
@@ -601,9 +601,9 @@ describe.each<{
   })
 
   it("does not call equals on init", () => {
-    const source = Impulse({ count: 0 })
+    const source = Signal({ count: 0 })
 
-    Impulse((monitor) => read(source, monitor), {
+    Signal((monitor) => read(source, monitor), {
       equals: Counter.equals,
     })
 
@@ -612,8 +612,8 @@ describe.each<{
   })
 
   it("does not call equals on first read", ({ monitor }) => {
-    const source = Impulse({ count: 0 })
-    const derived = Impulse((monitor) => read(source, monitor), {
+    const source = Signal({ count: 0 })
+    const derived = Signal((monitor) => read(source, monitor), {
       equals: Counter.equals,
     })
 
@@ -623,8 +623,8 @@ describe.each<{
   })
 
   it("does not calls equals on subsequent calls when the source does not change", ({ monitor }) => {
-    const source = Impulse({ count: 0 })
-    const derived = Impulse((monitor) => read(source, monitor), {
+    const source = Signal({ count: 0 })
+    const derived = Signal((monitor) => read(source, monitor), {
       equals: Counter.equals,
     })
 
@@ -640,8 +640,8 @@ describe.each<{
   })
 
   it("does not call equals function when an unobserved source changes", ({ monitor }) => {
-    const source = Impulse({ count: 0 })
-    const derived = Impulse((monitor) => read(source, monitor), {
+    const source = Signal({ count: 0 })
+    const derived = Signal((monitor) => read(source, monitor), {
       equals: Counter.equals,
     })
 
@@ -658,8 +658,8 @@ describe.each<{
   })
 
   it("calls equals function only when an observed source setter is called", ({ monitor }) => {
-    const source = Impulse({ count: 0 })
-    const derived = Impulse((monitor) => read(source, monitor), {
+    const source = Signal({ count: 0 })
+    const derived = Signal((monitor) => read(source, monitor), {
       equals: Counter.equals,
     })
 
@@ -683,8 +683,8 @@ describe.each<{
     ["null", null],
   ])("when equals is %s", (_, equals) => {
     it("uses Object.is as equals", ({ monitor }) => {
-      const source = Impulse({ count: 0 }, { equals: Counter.equals })
-      const derived = Impulse(
+      const source = Signal({ count: 0 }, { equals: Counter.equals })
+      const derived = Signal(
         (monitor) => ({
           isMoreThanZero: read(source, monitor).count > 0,
         }),
@@ -726,8 +726,8 @@ describe.each<{
   })
 
   it("assigns custom function as equals", ({ monitor }) => {
-    const source = Impulse({ count: 0 })
-    const derived = Impulse((monitor) => read(source, monitor), {
+    const source = Signal({ count: 0 })
+    const derived = Signal((monitor) => read(source, monitor), {
       equals: Counter.equals,
     })
 
@@ -757,14 +757,14 @@ describe.each<{
   })
 })
 
-describe.concurrent("Impulse(getter) garbage collection", () => {
+describe.concurrent("Signal(getter) garbage collection", () => {
   it("cleanups immediately when source.update is called with the different value", ({
     monitor,
   }) => {
-    const source = Impulse(0)
+    const source = Signal(0)
 
     ;(() => {
-      const derived = Impulse((monitor) => ({
+      const derived = Signal((monitor) => ({
         count: source.read(monitor),
       }))
 
@@ -784,10 +784,10 @@ describe.concurrent("Impulse(getter) garbage collection", () => {
   it("cleanups the WeakRef when source.update is called with the same value", async ({
     monitor,
   }) => {
-    const source = Impulse(0)
+    const source = Signal(0)
 
     ;(() => {
-      const derived = Impulse((monitor) => ({
+      const derived = Signal((monitor) => ({
         count: source.read(monitor),
       }))
 
@@ -808,8 +808,8 @@ describe.concurrent("Impulse(getter) garbage collection", () => {
   })
 
   it("cleanups the WeakRef", async ({ monitor }) => {
-    const source = Impulse(0)
-    let derived: null | ReadonlyImpulse<Counter> = Impulse((monitor) => ({
+    const source = Signal(0)
+    let derived: null | ReadonlySignal<Counter> = Signal((monitor) => ({
       count: source.read(monitor),
     }))
 
@@ -824,10 +824,10 @@ describe.concurrent("Impulse(getter) garbage collection", () => {
   })
 
   it("cleanups the WeakRef from clojure", async ({ monitor }) => {
-    const source = Impulse(0)
+    const source = Signal(0)
 
     ;(() => {
-      const derived = Impulse((monitor) => ({
+      const derived = Signal((monitor) => ({
         count: source.read(monitor),
       }))
 
@@ -841,10 +841,10 @@ describe.concurrent("Impulse(getter) garbage collection", () => {
   })
 
   it("cleanups the WeakRef from effect", async () => {
-    const source = Impulse(0)
+    const source = Signal(0)
 
     ;(() => {
-      const derived = Impulse((monitor) => ({
+      const derived = Signal((monitor) => ({
         count: source.read(monitor),
       }))
 
@@ -869,10 +869,10 @@ describe.concurrent("Impulse(getter) garbage collection", () => {
   })
 
   it("cleanups the WeakRef from untracked", async () => {
-    const source = Impulse(0)
+    const source = Signal(0)
 
     ;(() => {
-      const derived = Impulse((monitor) => ({
+      const derived = Signal((monitor) => ({
         count: source.read(monitor),
       }))
 
@@ -886,10 +886,10 @@ describe.concurrent("Impulse(getter) garbage collection", () => {
   })
 
   it("cleanups the WeakRef from a hook", async () => {
-    const source = Impulse(0)
+    const source = Signal(0)
 
     const { result, unmount } = renderHook(() => {
-      const derived = Impulse((monitor) => ({
+      const derived = Signal((monitor) => ({
         count: source.read(monitor),
       }))
 
@@ -907,15 +907,15 @@ describe.concurrent("Impulse(getter) garbage collection", () => {
   })
 
   it("cleanups only unreachable dependencies", async ({ monitor }) => {
-    const source = Impulse(0)
-    const derived1 = Impulse((monitor) => ({
+    const source = Signal(0)
+    const derived1 = Signal((monitor) => ({
       count: source.read(monitor),
     }))
 
     expect(derived1.read(monitor)).toStrictEqual({ count: 0 })
     expect(source).toHaveEmittersSize(1)
     ;(() => {
-      const derived2 = Impulse((monitor) => ({
+      const derived2 = Signal((monitor) => ({
         count: source.read(monitor),
       }))
 
@@ -924,7 +924,7 @@ describe.concurrent("Impulse(getter) garbage collection", () => {
       expect(derived2).toHaveEmittersSize(0)
     })()
     ;(() => {
-      const derived3 = Impulse((monitor) => ({
+      const derived3 = Signal((monitor) => ({
         count: source.read(monitor),
       }))
 
@@ -938,24 +938,24 @@ describe.concurrent("Impulse(getter) garbage collection", () => {
   })
 })
 
-describe("Impulse(source)", () => {
-  it("creates an Impulse from a source", () => {
-    const source = Impulse(0)
-    const impulse = Impulse(source)
+describe("Signal(source)", () => {
+  it("creates an Signal from a source", () => {
+    const source = Signal(0)
+    const signal = Signal(source)
 
-    expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<number>>()
+    expectTypeOf(signal).toEqualTypeOf<ReadonlySignal<number>>()
   })
 
-  it("allows source as a ReadonlyImpulse", () => {
-    const source = Impulse(() => 0)
-    const impulse = Impulse(source)
+  it("allows source as a ReadonlySignal", () => {
+    const source = Signal(() => 0)
+    const signal = Signal(source)
 
-    expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<number>>()
+    expectTypeOf(signal).toEqualTypeOf<ReadonlySignal<number>>()
   })
 
-  it("allows source as a ReadableImpulse", ({ monitor }) => {
-    class Custom implements ReadableImpulse<number> {
-      public readonly counter = Impulse(0)
+  it("allows source as a ReadableSignal", ({ monitor }) => {
+    class Custom implements ReadableSignal<number> {
+      public readonly counter = Signal(0)
 
       public read(monitor: Monitor): number {
         return this.counter.read(monitor)
@@ -963,7 +963,7 @@ describe("Impulse(source)", () => {
     }
 
     const source = new Custom()
-    const derived = Impulse(source)
+    const derived = Signal(source)
 
     expect(derived.read(monitor)).toBe(0)
 
@@ -975,24 +975,24 @@ describe("Impulse(source)", () => {
   })
 })
 
-describe("Impulse(source, options)", () => {
-  it("creates an Impulse from a source", () => {
-    const source = Impulse<Counter>({ count: 0 })
-    const impulse = Impulse(source, { equals: Counter.equals })
+describe("Signal(source, options)", () => {
+  it("creates an Signal from a source", () => {
+    const source = Signal<Counter>({ count: 0 })
+    const signal = Signal(source, { equals: Counter.equals })
 
-    expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<Counter>>()
+    expectTypeOf(signal).toEqualTypeOf<ReadonlySignal<Counter>>()
   })
 
-  it("allows source as a ReadonlyImpulse", () => {
-    const source = Impulse<Counter>(() => ({ count: 0 }))
-    const impulse = Impulse(source, { equals: Counter.equals })
+  it("allows source as a ReadonlySignal", () => {
+    const source = Signal<Counter>(() => ({ count: 0 }))
+    const signal = Signal(source, { equals: Counter.equals })
 
-    expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<Counter>>()
+    expectTypeOf(signal).toEqualTypeOf<ReadonlySignal<Counter>>()
   })
 
-  it("allows source as a ReadableImpulse", ({ monitor }) => {
-    class Custom implements ReadableImpulse<Counter> {
-      public readonly counter = Impulse({ count: 0 })
+  it("allows source as a ReadableSignal", ({ monitor }) => {
+    class Custom implements ReadableSignal<Counter> {
+      public readonly counter = Signal({ count: 0 })
 
       public read(monitor: Monitor): Counter {
         return this.counter.read(monitor)
@@ -1000,7 +1000,7 @@ describe("Impulse(source, options)", () => {
     }
 
     const source = new Custom()
-    const derived = Impulse(source, { equals: Counter.equals })
+    const derived = Signal(source, { equals: Counter.equals })
 
     expect(derived.read(monitor)).toStrictEqual({ count: 0 })
     expect(Counter.equals).not.toHaveBeenCalled()
@@ -1014,41 +1014,41 @@ describe("Impulse(source, options)", () => {
   })
 })
 
-describe("Impulse(getter, setter, options?)", () => {
-  it("creates an Impulse", () => {
+describe("Signal(getter, setter, options?)", () => {
+  it("creates an Signal", () => {
     let variable = 0
-    const impulse = Impulse(
+    const signal = Signal(
       () => variable,
       (value) => {
         variable = value
       },
     )
 
-    expectTypeOf(impulse).toEqualTypeOf<Impulse<number>>()
-    expectTypeOf(impulse).toMatchTypeOf<ReadonlyImpulse<number>>()
+    expectTypeOf(signal).toEqualTypeOf<Signal<number>>()
+    expectTypeOf(signal).toMatchTypeOf<ReadonlySignal<number>>()
   })
 
-  it("allows source as a Impulse", ({ monitor }) => {
-    const source = Impulse(0)
-    const impulse = Impulse(source, () => {
+  it("allows source as a Signal", ({ monitor }) => {
+    const source = Signal(0)
+    const signal = Signal(source, () => {
       // noop
     })
 
-    expect(impulse.read(monitor)).toBe(0)
+    expect(signal.read(monitor)).toBe(0)
   })
 
-  it("allows source as a ReadonlyImpulse", ({ monitor }) => {
-    const source = Impulse(() => 0)
-    const derived = Impulse(source, () => {
+  it("allows source as a ReadonlySignal", ({ monitor }) => {
+    const source = Signal(() => 0)
+    const derived = Signal(source, () => {
       // noop
     })
 
     expect(derived.read(monitor)).toBe(0)
   })
 
-  it("allows source as a ReadableImpulse", ({ monitor }) => {
-    class Custom implements ReadableImpulse<number> {
-      public readonly counter = Impulse(0)
+  it("allows source as a ReadableSignal", ({ monitor }) => {
+    class Custom implements ReadableSignal<number> {
+      public readonly counter = Signal(0)
 
       public read(monitor: Monitor): number {
         return this.counter.read(monitor)
@@ -1056,7 +1056,7 @@ describe("Impulse(getter, setter, options?)", () => {
     }
 
     const source = new Custom()
-    const derived = Impulse(source, () => {
+    const derived = Signal(source, () => {
       // noop
     })
 
@@ -1069,52 +1069,52 @@ describe("Impulse(getter, setter, options?)", () => {
     expect(derived.read(monitor)).toBe(1)
   })
 
-  it("does not allow setter as a ReadonlyImpulse", ({ monitor }) => {
-    const destination = Impulse(() => 0)
-    // @ts-expect-error should be Impulse
-    const impulse = Impulse(() => 2, [], destination)
+  it("does not allow setter as a ReadonlySignal", ({ monitor }) => {
+    const destination = Signal(() => 0)
+    // @ts-expect-error should be Signal
+    const signal = Signal(() => 2, [], destination)
 
-    expect(impulse.read(monitor)).toBe(2)
+    expect(signal.read(monitor)).toBe(2)
   })
 
-  it("subscribes to Impulse source and back", () => {
-    const source = Impulse({ count: 0 }, { equals: Counter.equals })
-    const impulse = Impulse(
+  it("subscribes to Signal source and back", () => {
+    const source = Signal({ count: 0 }, { equals: Counter.equals })
+    const signal = Signal(
       (monitor) => source.read(monitor),
       (counter) => source.update(counter),
     )
-    const spyImpulse = vi.fn()
+    const spySignal = vi.fn()
     const spySource = vi.fn()
 
     effect((monitor) => {
-      spyImpulse(impulse.read(monitor))
+      spySignal(signal.read(monitor))
     })
     effect((monitor) => {
       spySource(source.read(monitor))
     })
 
-    expect(spyImpulse).toHaveBeenCalledExactlyOnceWith({ count: 0 })
+    expect(spySignal).toHaveBeenCalledExactlyOnceWith({ count: 0 })
     vi.clearAllMocks()
 
     source.update({ count: 1 })
-    expect(spyImpulse).toHaveBeenCalledExactlyOnceWith({ count: 1 })
+    expect(spySignal).toHaveBeenCalledExactlyOnceWith({ count: 1 })
     vi.clearAllMocks()
 
     source.update({ count: 1 })
-    expect(spyImpulse).not.toHaveBeenCalled()
+    expect(spySignal).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
-    impulse.update({ count: 1 })
+    signal.update({ count: 1 })
     expect(spySource).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
-    impulse.update({ count: 2 })
+    signal.update({ count: 2 })
     expect(spySource).toHaveBeenCalledExactlyOnceWith({ count: 2 })
   })
 
-  it("subscribes to ReadableImpulse/WritableImpulse and back", () => {
-    class Custom implements ReadableImpulse<{ count: number }>, WritableImpulse<{ count: number }> {
-      private readonly counter = Impulse(0)
+  it("subscribes to ReadableSignal/WritableSignal and back", () => {
+    class Custom implements ReadableSignal<{ count: number }>, WritableSignal<{ count: number }> {
+      private readonly counter = Signal(0)
 
       public read(monitor: Monitor): { count: number } {
         return { count: this.counter.read(monitor) }
@@ -1126,42 +1126,42 @@ describe("Impulse(getter, setter, options?)", () => {
     }
 
     const source = new Custom()
-    const impulse = Impulse(
+    const signal = Signal(
       (monitor) => source.read(monitor),
       (counter) => source.update(counter),
     )
-    const spyImpulse = vi.fn()
+    const spySignal = vi.fn()
     const spySource = vi.fn()
 
     effect((monitor) => {
-      spyImpulse(impulse.read(monitor))
+      spySignal(signal.read(monitor))
     })
     effect((monitor) => {
       spySource(source.read(monitor))
     })
 
-    expect(spyImpulse).toHaveBeenCalledExactlyOnceWith({ count: 0 })
+    expect(spySignal).toHaveBeenCalledExactlyOnceWith({ count: 0 })
     vi.clearAllMocks()
 
     source.update({ count: 1 })
-    expect(spyImpulse).toHaveBeenCalledExactlyOnceWith({ count: 1 })
+    expect(spySignal).toHaveBeenCalledExactlyOnceWith({ count: 1 })
     vi.clearAllMocks()
 
     source.update({ count: 1 })
-    expect(spyImpulse).not.toHaveBeenCalled()
+    expect(spySignal).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
-    impulse.update({ count: 1 })
+    signal.update({ count: 1 })
     expect(spySource).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
-    impulse.update({ count: 2 })
+    signal.update({ count: 2 })
     expect(spySource).toHaveBeenCalledExactlyOnceWith({ count: 2 })
   })
 
   it("assigns custom function as equals", ({ monitor }) => {
-    const source = Impulse({ count: 0 })
-    const impulse = Impulse(
+    const source = Signal({ count: 0 })
+    const signal = Signal(
       (monitor) => source.read(monitor),
       (counter) => source.update(counter),
       {
@@ -1169,40 +1169,40 @@ describe("Impulse(getter, setter, options?)", () => {
       },
     )
 
-    const value0 = impulse.read(monitor)
+    const value0 = signal.read(monitor)
 
     act(() => {
-      impulse.update({ count: 0 })
+      signal.update({ count: 0 })
     })
     expect(Counter.equals).toHaveBeenCalledExactlyOnceWith(value0, { count: 0 })
     vi.clearAllMocks()
 
-    const value1 = impulse.read(monitor)
+    const value1 = signal.read(monitor)
     expect(Counter.equals).not.toHaveBeenCalled()
     expect(value1).toBe(value0)
 
     act(() => {
-      impulse.update({ count: 1 })
+      signal.update({ count: 1 })
     })
     expect(Counter.equals).toHaveBeenCalledExactlyOnceWith(value1, { count: 1 })
     vi.clearAllMocks()
 
-    const value2 = impulse.read(monitor)
+    const value2 = signal.read(monitor)
     expect(Counter.equals).not.toHaveBeenCalled()
     expect(value2).not.toBe(value1)
     expect(value2).toStrictEqual({ count: 1 })
   })
 
   it("batches setter", () => {
-    const impulse1 = Impulse(1)
-    const impulse2 = Impulse(2)
-    const impulse3 = Impulse(3)
-    const derived = Impulse(
-      (monitor) => impulse1.read(monitor) + impulse2.read(monitor) + impulse3.read(monitor),
+    const signal1 = Signal(1)
+    const signal2 = Signal(2)
+    const signal3 = Signal(3)
+    const derived = Signal(
+      (monitor) => signal1.read(monitor) + signal2.read(monitor) + signal3.read(monitor),
       (x) => {
-        impulse1.update(x)
-        impulse2.update(x)
-        impulse3.update(x)
+        signal1.update(x)
+        signal2.update(x)
+        signal3.update(x)
       },
     )
     const spy = vi.fn()
@@ -1236,29 +1236,29 @@ describe("Impulse(getter, setter, options?)", () => {
   })
 })
 
-function setupImpulse<T>(initialValue: T, options?: ImpulseOptions<T>) {
-  const impulse = Impulse(initialValue, options)
+function setupSignal<T>(initialValue: T, options?: SignalOptions<T>) {
+  const signal = Signal(initialValue, options)
 
-  return { impulse }
+  return { signal }
 }
 
-function setupDerivedImpulseFromImpulse({
+function setupDerivedSignalFromSignal({
   getterShortcut,
   setterShortcut,
 }: {
   getterShortcut: boolean
   setterShortcut: boolean
 }) {
-  return <T>(initialValue: T, options?: ImpulseOptions<T>) => {
-    const source = Impulse(initialValue)
-    const impulse = Impulse(
+  return <T>(initialValue: T, options?: SignalOptions<T>) => {
+    const source = Signal(initialValue)
+    const signal = Signal(
       getterShortcut ? source : (monitor) => source.read(monitor),
       setterShortcut ? source : (value) => source.update(value),
       options,
     )
 
     return {
-      impulse,
+      signal,
       read: (monitor: Monitor) => source.read(monitor),
       update: (value: T) => {
         source.update(value)
@@ -1268,296 +1268,296 @@ function setupDerivedImpulseFromImpulse({
 }
 
 describe.each([
-  ["DirectImpulse", setupImpulse],
+  ["DirectSignal", setupSignal],
   [
-    "Derived Impulse from an Impulse",
-    setupDerivedImpulseFromImpulse({
+    "Derived Signal from an Signal",
+    setupDerivedSignalFromSignal({
       getterShortcut: false,
       setterShortcut: false,
     }),
   ],
   [
-    "Derived Impulse from an Impulse with getter shortcut",
-    setupDerivedImpulseFromImpulse({
+    "Derived Signal from an Signal with getter shortcut",
+    setupDerivedSignalFromSignal({
       getterShortcut: true,
       setterShortcut: false,
     }),
   ],
   [
-    "Derived Impulse from an Impulse with setter shortcut",
-    setupDerivedImpulseFromImpulse({
+    "Derived Signal from an Signal with setter shortcut",
+    setupDerivedSignalFromSignal({
       getterShortcut: false,
       setterShortcut: true,
     }),
   ],
   [
-    "Derived Impulse from an Impulse with both getter and setter shortcuts",
-    setupDerivedImpulseFromImpulse({
+    "Derived Signal from an Signal with both getter and setter shortcuts",
+    setupDerivedSignalFromSignal({
       getterShortcut: true,
       setterShortcut: true,
     }),
   ],
-])("Impulse() from %s", (_, setup) => {
-  describe("Impulse#update(value)", () => {
-    const { impulse } = setup({ count: 0 })
+])("Signal() from %s", (_, setup) => {
+  describe("Signal#update(value)", () => {
+    const { signal } = setup({ count: 0 })
 
     it("updates value", ({ monitor }) => {
       const next = { count: 1 }
-      impulse.update(next)
-      expect(impulse.read(monitor)).toBe(next)
+      signal.update(next)
+      expect(signal.read(monitor)).toBe(next)
     })
 
     it("updates with the same value", ({ monitor }) => {
       const next = { count: 1 }
-      impulse.update(next)
-      expect(impulse.read(monitor)).toBe(next)
+      signal.update(next)
+      expect(signal.read(monitor)).toBe(next)
     })
 
     it("updates with equal value", ({ monitor }) => {
-      const prev = impulse.read(monitor)
-      impulse.update(prev)
-      expect(impulse.read(monitor)).toBe(prev)
+      const prev = signal.read(monitor)
+      signal.update(prev)
+      expect(signal.read(monitor)).toBe(prev)
     })
   })
 
-  describe("Impulse#update(transform)", () => {
+  describe("Signal#update(transform)", () => {
     it("updates value", ({ monitor }) => {
-      const { impulse } = setup({ count: 0 })
+      const { signal } = setup({ count: 0 })
 
-      impulse.update(Counter.inc)
-      expect(impulse.read(monitor)).toStrictEqual({ count: 1 })
+      signal.update(Counter.inc)
+      expect(signal.read(monitor)).toStrictEqual({ count: 1 })
     })
 
     it("keeps the value", ({ monitor }) => {
       const initial = { count: 0 }
-      const { impulse } = setup(initial)
+      const { signal } = setup(initial)
 
-      impulse.update((counter) => counter)
-      expect(impulse.read(monitor)).toBe(initial)
+      signal.update((counter) => counter)
+      expect(signal.read(monitor)).toBe(initial)
     })
 
     it("updates with the same value", ({ monitor }) => {
       const initial = { count: 0 }
-      const { impulse } = setup(initial)
+      const { signal } = setup(initial)
 
-      impulse.update(Counter.clone)
-      expect(impulse.read(monitor)).not.toBe(initial)
-      expect(impulse.read(monitor)).toStrictEqual(initial)
+      signal.update(Counter.clone)
+      expect(signal.read(monitor)).not.toBe(initial)
+      expect(signal.read(monitor)).toStrictEqual(initial)
     })
 
     it("keeps the value if it is equal", ({ monitor }) => {
       const initial = { count: 0 }
-      const { impulse } = setup(initial, { equals: Counter.equals })
+      const { signal } = setup(initial, { equals: Counter.equals })
 
-      impulse.update(Counter.clone)
-      expect(impulse.read(monitor)).toBe(initial)
-      expect(impulse.read(monitor)).toStrictEqual(initial)
+      signal.update(Counter.clone)
+      expect(signal.read(monitor)).toBe(initial)
+      expect(signal.read(monitor)).toStrictEqual(initial)
     })
 
     it("updates with the equal value", ({ monitor }) => {
       const initial = { count: 0 }
-      const { impulse } = setup(initial)
+      const { signal } = setup(initial)
 
-      impulse.update(() => initial)
-      expect(impulse.read(monitor)).toBe(initial)
+      signal.update(() => initial)
+      expect(signal.read(monitor)).toBe(initial)
     })
   })
 
-  describe("Impulse#clone()", () => {
-    it("creates new Impulse", ({ monitor }) => {
-      const { impulse: impulse1 } = setup({ count: 0 })
-      const impulse2 = impulse1.clone()
+  describe("Signal#clone()", () => {
+    it("creates new Signal", ({ monitor }) => {
+      const { signal: signal1 } = setup({ count: 0 })
+      const signal2 = signal1.clone()
 
-      expect(impulse1).not.toBe(impulse2)
-      expect(impulse1.read(monitor)).toBe(impulse2.read(monitor))
+      expect(signal1).not.toBe(signal2)
+      expect(signal1.read(monitor)).toBe(signal2.read(monitor))
     })
 
     it("does not update source value when clone updates", ({ monitor }) => {
-      const { impulse: impulse1 } = setup({ count: 0 })
-      const impulse2 = impulse1.clone()
+      const { signal: signal1 } = setup({ count: 0 })
+      const signal2 = signal1.clone()
 
-      impulse2.update({ count: 1 })
+      signal2.update({ count: 1 })
 
-      expect(impulse1.read(monitor)).toStrictEqual({ count: 0 })
-      expect(impulse2.read(monitor)).toStrictEqual({ count: 1 })
+      expect(signal1.read(monitor)).toStrictEqual({ count: 0 })
+      expect(signal2.read(monitor)).toStrictEqual({ count: 1 })
     })
 
     it("does not update clone value when source updates", ({ monitor }) => {
-      const { impulse: impulse1 } = setup({ count: 0 })
-      const impulse2 = impulse1.clone()
+      const { signal: signal1 } = setup({ count: 0 })
+      const signal2 = signal1.clone()
 
-      impulse1.update({ count: 1 })
+      signal1.update({ count: 1 })
 
-      expect(impulse1.read(monitor)).toStrictEqual({ count: 1 })
-      expect(impulse2.read(monitor)).toStrictEqual({ count: 0 })
+      expect(signal1.read(monitor)).toStrictEqual({ count: 1 })
+      expect(signal2.read(monitor)).toStrictEqual({ count: 0 })
     })
 
-    it("transfers comparator from source Impulse", () => {
-      const { impulse: impulse1 } = setup({ count: 0 })
-      const impulse2 = impulse1.clone()
+    it("transfers comparator from source Signal", () => {
+      const { signal: signal1 } = setup({ count: 0 })
+      const signal2 = signal1.clone()
 
       expect(Object.is).not.toHaveBeenCalled()
-      impulse2.update({ count: 1 })
+      signal2.update({ count: 1 })
 
       expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
 
-    it("transfers custom comparator from source Impulse", () => {
-      const { impulse: impulse1 } = setup({ count: 0 }, { equals: Counter.equals })
-      const impulse2 = impulse1.clone()
+    it("transfers custom comparator from source Signal", () => {
+      const { signal: signal1 } = setup({ count: 0 }, { equals: Counter.equals })
+      const signal2 = signal1.clone()
 
       expect(Counter.equals).not.toHaveBeenCalled()
-      impulse2.update({ count: 1 })
+      signal2.update({ count: 1 })
 
       expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
   })
 
-  describe("Impulse#clone(options)", () => {
+  describe("Signal#clone(options)", () => {
     it("inherits custom comparator by empty options", () => {
-      const { impulse: impulse1 } = setup({ count: 0 }, { equals: Counter.equals })
-      const impulse2 = impulse1.clone({})
+      const { signal: signal1 } = setup({ count: 0 }, { equals: Counter.equals })
+      const signal2 = signal1.clone({})
 
       expect(Counter.equals).not.toHaveBeenCalled()
-      impulse2.update({ count: 1 })
+      signal2.update({ count: 1 })
 
       expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
 
     it("inherits custom comparator by options.equals: undefined", () => {
-      const { impulse: impulse1 } = setup({ count: 0 }, { equals: Counter.equals })
-      const impulse2 = impulse1.clone({ equals: undefined })
+      const { signal: signal1 } = setup({ count: 0 }, { equals: Counter.equals })
+      const signal2 = signal1.clone({ equals: undefined })
 
       expect(Counter.equals).not.toHaveBeenCalled()
-      impulse2.update({ count: 1 })
+      signal2.update({ count: 1 })
 
       expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
 
     it("overrides custom comparator as Object.is by options.equals: null", () => {
-      const { impulse: impulse1 } = setup({ count: 0 }, { equals: Counter.equals })
-      const impulse2 = impulse1.clone({ equals: null })
+      const { signal: signal1 } = setup({ count: 0 }, { equals: Counter.equals })
+      const signal2 = signal1.clone({ equals: null })
 
       expect(Object.is).not.toHaveBeenCalled()
-      impulse2.update({ count: 1 })
+      signal2.update({ count: 1 })
 
       expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
 
     it("overrides comparator by custom options.equals", () => {
-      const { impulse: impulse1 } = setup({ count: 0 })
-      const impulse2 = impulse1.clone({ equals: Counter.equals })
+      const { signal: signal1 } = setup({ count: 0 })
+      const signal2 = signal1.clone({ equals: Counter.equals })
 
       expect(Counter.equals).not.toHaveBeenCalled()
-      impulse2.update({ count: 1 })
+      signal2.update({ count: 1 })
 
       expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
   })
 
-  describe("Impulse#clone(transform)", () => {
-    it("creates new Impulse", ({ monitor }) => {
-      const { impulse: impulse1 } = setup({ count: 0 })
-      const impulse2 = impulse1.clone(Counter.clone)
+  describe("Signal#clone(transform)", () => {
+    it("creates new Signal", ({ monitor }) => {
+      const { signal: signal1 } = setup({ count: 0 })
+      const signal2 = signal1.clone(Counter.clone)
 
-      expect(impulse1).not.toBe(impulse2)
-      expect(impulse1.read(monitor)).not.toBe(impulse2.read(monitor))
-      expect(impulse1.read(monitor)).toStrictEqual(impulse2.read(monitor))
+      expect(signal1).not.toBe(signal2)
+      expect(signal1.read(monitor)).not.toBe(signal2.read(monitor))
+      expect(signal1.read(monitor)).toStrictEqual(signal2.read(monitor))
     })
 
     it("keeps comparator from source", () => {
-      const { impulse: impulse1 } = setup({ count: 0 }, { equals: Counter.equals })
-      const impulse2 = impulse1.clone(Counter.clone)
+      const { signal: signal1 } = setup({ count: 0 }, { equals: Counter.equals })
+      const signal2 = signal1.clone(Counter.clone)
 
       expect(Counter.equals).not.toHaveBeenCalled()
-      impulse2.update({ count: 1 })
+      signal2.update({ count: 1 })
 
       expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
 
-    it("creates new nested Impulse with clone(transform)", ({ monitor }) => {
-      const { impulse: impulse1 } = setup({
-        count: setup(0).impulse,
-        name: setup("John").impulse,
+    it("creates new nested Signal with clone(transform)", ({ monitor }) => {
+      const { signal: signal1 } = setup({
+        count: setup(0).signal,
+        name: setup("John").signal,
       })
-      const impulse2 = impulse1.clone(({ count, name }) => ({
+      const signal2 = signal1.clone(({ count, name }) => ({
         count: count.clone(),
         name: name.clone(),
       }))
 
-      expect(impulse1).not.toBe(impulse2)
-      expect(impulse1.read(monitor)).not.toBe(impulse2.read(monitor))
-      expect(impulse1.read(monitor).count).not.toBe(impulse2.read(monitor).count)
-      expect(impulse1.read(monitor).name).not.toBe(impulse2.read(monitor).name)
+      expect(signal1).not.toBe(signal2)
+      expect(signal1.read(monitor)).not.toBe(signal2.read(monitor))
+      expect(signal1.read(monitor).count).not.toBe(signal2.read(monitor).count)
+      expect(signal1.read(monitor).name).not.toBe(signal2.read(monitor).name)
       expect({
-        count: impulse1.read(monitor).count.read(monitor),
-        name: impulse1.read(monitor).name.read(monitor),
+        count: signal1.read(monitor).count.read(monitor),
+        name: signal1.read(monitor).name.read(monitor),
       }).toStrictEqual({
-        count: impulse2.read(monitor).count.read(monitor),
-        name: impulse2.read(monitor).name.read(monitor),
+        count: signal2.read(monitor).count.read(monitor),
+        name: signal2.read(monitor).name.read(monitor),
       })
 
-      // the nested impulses are independent
-      impulse1.read(monitor).count.update(1)
-      expect(impulse1.read(monitor).count.read(monitor)).toBe(1)
-      expect(impulse2.read(monitor).count.read(monitor)).toBe(0)
+      // the nested signals are independent
+      signal1.read(monitor).count.update(1)
+      expect(signal1.read(monitor).count.read(monitor)).toBe(1)
+      expect(signal2.read(monitor).count.read(monitor)).toBe(0)
 
-      impulse1.read(monitor).name.update("Doe")
-      expect(impulse1.read(monitor).name.read(monitor)).toBe("Doe")
-      expect(impulse2.read(monitor).name.read(monitor)).toBe("John")
+      signal1.read(monitor).name.update("Doe")
+      expect(signal1.read(monitor).name.read(monitor)).toBe("Doe")
+      expect(signal2.read(monitor).name.read(monitor)).toBe("John")
     })
 
-    it("creates shallow nested Impulse with clone()", ({ monitor }) => {
-      const { impulse: impulse1 } = setup({
-        count: setup(0).impulse,
-        name: setup("John").impulse,
+    it("creates shallow nested Signal with clone()", ({ monitor }) => {
+      const { signal: signal1 } = setup({
+        count: setup(0).signal,
+        name: setup("John").signal,
       })
-      const impulse2 = impulse1.clone()
+      const signal2 = signal1.clone()
 
-      expect(impulse1).not.toBe(impulse2)
-      expect(impulse1.read(monitor)).toBe(impulse2.read(monitor))
-      expect(impulse1.read(monitor).count).toBe(impulse2.read(monitor).count)
-      expect(impulse1.read(monitor).name).toBe(impulse2.read(monitor).name)
+      expect(signal1).not.toBe(signal2)
+      expect(signal1.read(monitor)).toBe(signal2.read(monitor))
+      expect(signal1.read(monitor).count).toBe(signal2.read(monitor).count)
+      expect(signal1.read(monitor).name).toBe(signal2.read(monitor).name)
       expect({
-        count: impulse1.read(monitor).count.read(monitor),
-        name: impulse1.read(monitor).name.read(monitor),
+        count: signal1.read(monitor).count.read(monitor),
+        name: signal1.read(monitor).name.read(monitor),
       }).toStrictEqual({
-        count: impulse1.read(monitor).count.read(monitor),
-        name: impulse1.read(monitor).name.read(monitor),
+        count: signal1.read(monitor).count.read(monitor),
+        name: signal1.read(monitor).name.read(monitor),
       })
 
-      // the nested impulses are dependent
-      impulse1.read(monitor).count.update(1)
-      expect(impulse1.read(monitor).count.read(monitor)).toBe(1)
-      expect(impulse2.read(monitor).count.read(monitor)).toBe(1)
+      // the nested signals are dependent
+      signal1.read(monitor).count.update(1)
+      expect(signal1.read(monitor).count.read(monitor)).toBe(1)
+      expect(signal2.read(monitor).count.read(monitor)).toBe(1)
 
-      impulse1.read(monitor).name.update("Doe")
-      expect(impulse1.read(monitor).name.read(monitor)).toBe("Doe")
-      expect(impulse2.read(monitor).name.read(monitor)).toBe("Doe")
+      signal1.read(monitor).name.update("Doe")
+      expect(signal1.read(monitor).name.read(monitor)).toBe("Doe")
+      expect(signal2.read(monitor).name.read(monitor)).toBe("Doe")
     })
   })
 
-  describe("Impulse#clone(transform, options)", () => {
-    it("creates new Impulse with custom equals", ({ monitor }) => {
-      const { impulse: impulse1 } = setup({ count: 0 })
-      const impulse2 = impulse1.clone(Counter.clone, {
+  describe("Signal#clone(transform, options)", () => {
+    it("creates new Signal with custom equals", ({ monitor }) => {
+      const { signal: signal1 } = setup({ count: 0 })
+      const signal2 = signal1.clone(Counter.clone, {
         equals: Counter.equals,
       })
 
-      expect(impulse1).not.toBe(impulse2)
-      expect(impulse1.read(monitor)).not.toBe(impulse2.read(monitor))
-      expect(impulse1.read(monitor)).toStrictEqual(impulse2.read(monitor))
+      expect(signal1).not.toBe(signal2)
+      expect(signal1.read(monitor)).not.toBe(signal2.read(monitor))
+      expect(signal1.read(monitor)).toStrictEqual(signal2.read(monitor))
 
       expect(Counter.equals).not.toHaveBeenCalled()
-      impulse2.update({ count: 1 })
+      signal2.update({ count: 1 })
 
       expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
   })
 
-  describe("Impulse#toJSON()", () => {
+  describe("Signal#toJSON()", () => {
     it("converts value to JSON", () => {
-      const { impulse } = setup({
+      const { signal } = setup({
         number: 0,
         string: "biba",
         boolean: false,
@@ -1573,24 +1573,24 @@ describe.each([
         },
       })
 
-      expect(JSON.stringify(impulse)).toMatchInlineSnapshot(
+      expect(JSON.stringify(signal)).toMatchInlineSnapshot(
         `"{"number":0,"string":"biba","boolean":false,"null":null,"array":[1,"boba",true,null,null],"object":{"number":2,"string":"baba","boolean":false,"null":null}}"`,
       )
     })
 
     it("applies replace fields", () => {
-      const { impulse } = setup({ first: 1, second: 2, third: 3 })
+      const { signal } = setup({ first: 1, second: 2, third: 3 })
 
-      expect(JSON.stringify(impulse, ["first", "third"])).toMatchInlineSnapshot(
+      expect(JSON.stringify(signal, ["first", "third"])).toMatchInlineSnapshot(
         `"{"first":1,"third":3}"`,
       )
     })
 
     it("applies replace function", () => {
-      const { impulse } = setup({ first: 1, second: 2, third: 3 })
+      const { signal } = setup({ first: 1, second: 2, third: 3 })
 
       expect(
-        JSON.stringify(impulse, (_key, value: unknown) => {
+        JSON.stringify(signal, (_key, value: unknown) => {
           if (typeof value === "number") {
             return value * 2
           }
@@ -1601,9 +1601,9 @@ describe.each([
     })
 
     it("applies spaces", () => {
-      const { impulse } = setup({ first: 1, second: 2, third: 3 })
+      const { signal } = setup({ first: 1, second: 2, third: 3 })
 
-      expect(JSON.stringify(impulse, null, 2)).toMatchInlineSnapshot(
+      expect(JSON.stringify(signal, null, 2)).toMatchInlineSnapshot(
         `
         "{
           "first": 1,
@@ -1614,13 +1614,13 @@ describe.each([
       )
     })
 
-    it("stringifies nested Impulse", () => {
-      const { impulse } = setup({
-        first: setup(1).impulse,
-        second: setup([setup("1").impulse, setup(false).impulse]).impulse,
+    it("stringifies nested Signal", () => {
+      const { signal } = setup({
+        first: setup(1).signal,
+        second: setup([setup("1").signal, setup(false).signal]).signal,
       })
 
-      expect(JSON.stringify(impulse, null, 2)).toMatchInlineSnapshot(`
+      expect(JSON.stringify(signal, null, 2)).toMatchInlineSnapshot(`
         "{
           "first": 1,
           "second": [
@@ -1632,18 +1632,18 @@ describe.each([
     })
   })
 
-  describe("Impulse#toString", () => {
+  describe("Signal#toString", () => {
     it.each([
       ["number", 1, "1"],
       ["boolean", false, "false"],
       ["null", null, "null"],
       ["undefined", undefined, "undefined"],
-      ["array", [1, 2, setup(3).impulse], "1,2,3"],
+      ["array", [1, 2, setup(3).signal], "1,2,3"],
       ["object", { first: 1 }, "[object Object]"],
     ])("converts %s value to string", (_, value, expected) => {
-      const { impulse } = setup(value)
+      const { signal } = setup(value)
 
-      expect(String(impulse)).toBe(expected)
+      expect(String(signal)).toBe(expected)
     })
   })
 })

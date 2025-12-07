@@ -1,16 +1,16 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useComputed } from "../../src"
+import { Signal, useComputed } from "../../src"
 
-describe("multiple impulses", () => {
+describe("multiple signals", () => {
   const LoginForm: React.FC<{
-    email: Impulse<string>
-    password: Impulse<string>
+    email: Signal<string>
+    password: Signal<string>
     onRender: VoidFunction
-  }> = ({ email: emailImpulse, password: passwordImpulse, onRender }) => {
-    const email = useComputed((monitor) => emailImpulse.read(monitor))
-    const password = useComputed(passwordImpulse)
+  }> = ({ email: emailSignal, password: passwordSignal, onRender }) => {
+    const email = useComputed((monitor) => emailSignal.read(monitor))
+    const password = useComputed(passwordSignal)
 
     return (
       <React.Profiler id="test" onRender={onRender}>
@@ -18,29 +18,29 @@ describe("multiple impulses", () => {
           type="email"
           data-testid="email"
           value={email}
-          onChange={(event) => emailImpulse.update(event.target.value)}
+          onChange={(event) => emailSignal.update(event.target.value)}
         />
         <input
           type="password"
           data-testid="password"
           value={password}
-          onChange={(event) => passwordImpulse.update(event.target.value)}
+          onChange={(event) => passwordSignal.update(event.target.value)}
         />
         <button
           type="button"
           data-testid="reset"
           onClick={() => {
-            emailImpulse.update("")
-            passwordImpulse.update("")
+            emailSignal.update("")
+            passwordSignal.update("")
           }}
         />
       </React.Profiler>
     )
   }
 
-  it("performs multi impulse management", () => {
-    const email = Impulse("")
-    const password = Impulse("")
+  it("performs multi signal management", () => {
+    const email = Signal("")
+    const password = Signal("")
     const onRender = vi.fn()
 
     const { container } = render(

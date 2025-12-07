@@ -1,12 +1,12 @@
 import type { Equal } from "../equal"
 
-import { BaseImpulse } from "./base-impulse"
+import { BaseSignal } from "./base-signal"
 import { enqueue } from "./enqueue"
-import { Impulse } from "./impulse"
 import { type Monitor, UNTRACKED_MONITOR, injectMonitor } from "./monitor"
 import { MonitorEmitter } from "./monitor-emitter"
+import { Signal } from "./signal"
 
-class DerivedImpulse<T> extends BaseImpulse<T> {
+class DerivedSignal<T> extends BaseSignal<T> {
   // the inner monitor proxies the setters to the outer monitor
   private readonly _monitor = new MonitorEmitter(() => {
     if (this._equals(this._value, this._getValue(UNTRACKED_MONITOR))) {
@@ -47,9 +47,9 @@ class DerivedImpulse<T> extends BaseImpulse<T> {
     return false
   }
 
-  protected _clone(value: T, equals: Equal<T>): Impulse<T> {
-    return new Impulse(value, equals)
+  protected _clone(value: T, equals: Equal<T>): Signal<T> {
+    return new Signal(value, equals)
   }
 }
 
-export { DerivedImpulse }
+export { DerivedSignal }

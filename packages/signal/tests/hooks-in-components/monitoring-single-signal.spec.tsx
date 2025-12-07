@@ -1,13 +1,13 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, type Monitor, useComputed, useMonitor } from "../../src"
+import { type Monitor, Signal, useComputed, useMonitor } from "../../src"
 
 import { CounterComponent } from "./common"
 
-describe("scoping single impulse", () => {
+describe("monitoring single Signal", () => {
   interface AppProps {
-    count: Impulse<number>
+    count: Signal<number>
     onRender: VoidFunction
     onCounterRender: VoidFunction
   }
@@ -28,12 +28,12 @@ describe("scoping single impulse", () => {
     </>
   )
 
-  const factoryLeft = (monitor: Monitor, count: Impulse<number>) => {
+  const factoryLeft = (monitor: Monitor, count: Signal<number>) => {
     const x = count.read(monitor)
 
     return x > 1
   }
-  const factoryRight = (monitor: Monitor, count: Impulse<number>) => {
+  const factoryRight = (monitor: Monitor, count: Signal<number>) => {
     const x = count.read(monitor)
 
     return x < 4
@@ -92,8 +92,8 @@ describe("scoping single impulse", () => {
     ["multiple computes", MultipleComputedApp, 0],
     ["multiple memoized computes", MultipleMemoizedComputedApp, 0],
     ["monitor", MonitoredApp, 1],
-  ])("handles single Impulse with %s", (_, App, unnecessaryRerendersCount) => {
-    const count = Impulse(0)
+  ])("handles single Signal with %s", (_, App, unnecessaryRerendersCount) => {
+    const count = Signal(0)
     const onCounterRender = vi.fn()
     const onRender = vi.fn()
 
@@ -146,10 +146,10 @@ describe("scoping single impulse", () => {
   })
 })
 
-describe("when drilling an Impulse", () => {
-  it("should not re-render of the host component when an Impulse value changes", () => {
+describe("when drilling an Signal", () => {
+  it("should not re-render of the host component when an Signal value changes", () => {
     const Host: React.FC<{
-      count: Impulse<number>
+      count: Signal<number>
       onRender: VoidFunction
       onCounterRender: VoidFunction
     }> = ({ count, onRender, onCounterRender }) => (
@@ -159,7 +159,7 @@ describe("when drilling an Impulse", () => {
       </>
     )
 
-    const count = Impulse(5)
+    const count = Signal(5)
     const onRender = vi.fn()
     const onCounterRender = vi.fn()
 

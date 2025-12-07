@@ -1,23 +1,23 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useComputed } from "../../src"
+import { Signal, useComputed } from "../../src"
 
-describe("default impulse", () => {
-  it("uses local default Impulse when nullable", () => {
+describe("default signal", () => {
+  it("uses local default Signal when nullable", () => {
     const SearchBar: React.FC<{
-      value?: Impulse<string>
-    }> = ({ value: valueImpulse }) => {
-      const [defaultValueImpulse] = React.useState(Impulse("search for me"))
+      value?: Signal<string>
+    }> = ({ value: valueSignal }) => {
+      const [defaultValueSignal] = React.useState(Signal("search for me"))
 
-      const impulse = valueImpulse ?? defaultValueImpulse
-      const value = useComputed(impulse)
+      const signal = valueSignal ?? defaultValueSignal
+      const value = useComputed(signal)
 
       return (
         <input
           type="search"
           value={value}
-          onChange={(event) => impulse.update(event.target.value)}
+          onChange={(event) => signal.update(event.target.value)}
         />
       )
     }
@@ -31,7 +31,7 @@ describe("default impulse", () => {
     fireEvent.change(input, { target: { value: "now" } })
     expect(input).toHaveValue("now")
 
-    const val = Impulse("new")
+    const val = Signal("new")
 
     rerender(<SearchBar value={val} />)
     expect(input).toHaveValue("new")
