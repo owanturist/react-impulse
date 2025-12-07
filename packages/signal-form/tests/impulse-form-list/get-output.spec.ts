@@ -1,4 +1,4 @@
-import type { Scope } from "@owanturist/signal"
+import type { Monitor } from "@owanturist/signal"
 import { z } from "zod"
 
 import { params } from "~/tools/params"
@@ -20,14 +20,14 @@ function setupElement(initial: number) {
   })
 }
 
-it("matches the type definition", ({ scope }) => {
+it("matches the type definition", ({ monitor }) => {
   const form = setup([setupElement(0)])
 
   expectTypeOf(form.getOutput).toEqualTypeOf<{
-    (scope: Scope): null | ReadonlyArray<string>
+    (monitor: Monitor): null | ReadonlyArray<string>
 
     <TResult>(
-      scope: Scope,
+      monitor: Monitor,
       select: (
         concise: null | ReadonlyArray<string>,
         verbose: ReadonlyArray<null | string>,
@@ -35,44 +35,44 @@ it("matches the type definition", ({ scope }) => {
     ): TResult
   }>()
 
-  expectTypeOf(form.getElements(scope).at(0)!.getOutput).toEqualTypeOf<{
-    (scope: Scope): null | string
+  expectTypeOf(form.getElements(monitor).at(0)!.getOutput).toEqualTypeOf<{
+    (monitor: Monitor): null | string
 
     <TResult>(
-      scope: Scope,
+      monitor: Monitor,
       select: (concise: null | string, verbose: null | string) => TResult,
     ): TResult
   }>()
 })
 
-it("returns all items when valid", ({ scope }) => {
+it("returns all items when valid", ({ monitor }) => {
   const form = setup([setupElement(1), setupElement(2), setupElement(3)])
 
-  expect(form.getOutput(scope)).toStrictEqual(["1", "2", "3"])
-  expect(form.getOutput(scope, params._first)).toStrictEqual(["1", "2", "3"])
-  expect(form.getOutput(scope, params._second)).toStrictEqual(["1", "2", "3"])
+  expect(form.getOutput(monitor)).toStrictEqual(["1", "2", "3"])
+  expect(form.getOutput(monitor, params._first)).toStrictEqual(["1", "2", "3"])
+  expect(form.getOutput(monitor, params._second)).toStrictEqual(["1", "2", "3"])
 })
 
-it("returns empty array for empty list", ({ scope }) => {
+it("returns empty array for empty list", ({ monitor }) => {
   const form = setup([])
 
-  expect(form.getOutput(scope)).toStrictEqual([])
-  expect(form.getOutput(scope, params._first)).toStrictEqual([])
-  expect(form.getOutput(scope, params._second)).toStrictEqual([])
+  expect(form.getOutput(monitor)).toStrictEqual([])
+  expect(form.getOutput(monitor, params._first)).toStrictEqual([])
+  expect(form.getOutput(monitor, params._second)).toStrictEqual([])
 })
 
-it("returns null if a single element is not valid", ({ scope }) => {
+it("returns null if a single element is not valid", ({ monitor }) => {
   const form = setup([setupElement(0)])
 
-  expect(form.getOutput(scope)).toBeNull()
-  expect(form.getOutput(scope, params._first)).toBeNull()
-  expect(form.getOutput(scope, params._second)).toStrictEqual([null])
+  expect(form.getOutput(monitor)).toBeNull()
+  expect(form.getOutput(monitor, params._first)).toBeNull()
+  expect(form.getOutput(monitor, params._second)).toStrictEqual([null])
 })
 
-it("returns null if at least one element is not valid", ({ scope }) => {
+it("returns null if at least one element is not valid", ({ monitor }) => {
   const form = setup([setupElement(1), setupElement(0), setupElement(3)])
 
-  expect(form.getOutput(scope)).toBeNull()
-  expect(form.getOutput(scope, params._first)).toBeNull()
-  expect(form.getOutput(scope, params._second)).toStrictEqual(["1", null, "3"])
+  expect(form.getOutput(monitor)).toBeNull()
+  expect(form.getOutput(monitor, params._first)).toBeNull()
+  expect(form.getOutput(monitor, params._second)).toStrictEqual(["1", null, "3"])
 })

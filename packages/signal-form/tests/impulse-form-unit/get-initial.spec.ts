@@ -3,84 +3,86 @@ import type { Setter } from "~/tools/setter"
 
 import { ImpulseFormUnit } from "../../src"
 
-it("assigns default initial", ({ scope }) => {
+it("assigns default initial", ({ monitor }) => {
   const value = ImpulseFormUnit("1")
 
-  expect(value.getInput(scope)).toBe("1")
-  expect(value.getInitial(scope)).toBe("1")
+  expect(value.getInput(monitor)).toBe("1")
+  expect(value.getInitial(monitor)).toBe("1")
 })
 
-it("selects custom initial", ({ scope }) => {
+it("selects custom initial", ({ monitor }) => {
   const value = ImpulseFormUnit("2", { initial: "1" })
 
-  expect(value.getInput(scope)).toBe("2")
-  expect(value.getInitial(scope)).toBe("1")
+  expect(value.getInput(monitor)).toBe("2")
+  expect(value.getInitial(monitor)).toBe("1")
 })
 
 it("selects unequal custom input and initial values when isInputEqual is not specified", ({
-  scope,
+  monitor,
 }) => {
   const input = { count: 0 }
   const form = ImpulseFormUnit(input, {
     initial: { count: 0 },
   })
 
-  expect(form.getInitial(scope)).not.toBe(input)
-  expect(form.getInput(scope)).not.toBe(form.getInitial(scope))
-  expect(form.getInput(scope)).toStrictEqual(form.getInitial(scope))
+  expect(form.getInitial(monitor)).not.toBe(input)
+  expect(form.getInput(monitor)).not.toBe(form.getInitial(monitor))
+  expect(form.getInput(monitor)).toStrictEqual(form.getInitial(monitor))
 })
 
-it("selects equal custom input and initial values when isInputEqual is specified", ({ scope }) => {
+it("selects equal custom input and initial values when isInputEqual is specified", ({
+  monitor,
+}) => {
   const input = { count: 0 }
   const form = ImpulseFormUnit(input, {
     initial: { count: 0 },
     isInputEqual: (left, right) => left.count === right.count,
   })
 
-  expect(form.getInitial(scope)).toBe(input)
-  expect(form.getInitial(scope)).toBe(form.getInitial(scope))
-  expect(form.getInitial(scope)).toStrictEqual(form.getInitial(scope))
+  expect(form.getInitial(monitor)).toBe(input)
+  expect(form.getInitial(monitor)).toBe(form.getInitial(monitor))
+  expect(form.getInitial(monitor)).toStrictEqual(form.getInitial(monitor))
 })
 
-it("sets initial", ({ scope }) => {
+it("sets initial", ({ monitor }) => {
   const value = ImpulseFormUnit("1")
 
   value.setInitial("2")
-  expect(value.getInput(scope)).toBe("1")
-  expect(value.getInitial(scope)).toBe("2")
+  expect(value.getInput(monitor)).toBe("1")
+  expect(value.getInitial(monitor)).toBe("2")
 
   expectTypeOf(value.setInitial).parameter(0).toEqualTypeOf<Setter<string, [string, string]>>()
 })
 
-it("updates initial", ({ scope }) => {
+it("updates initial", ({ monitor }) => {
   const value = ImpulseFormUnit(1)
 
   value.setInitial((count) => count + 1)
-  expect(value.getInput(scope)).toBe(1)
-  expect(value.getInitial(scope)).toBe(2)
+  expect(value.getInput(monitor)).toBe(1)
+  expect(value.getInitial(monitor)).toBe(2)
 })
 
-it("selects unequal initial values when isInputEqual is not specified", ({ scope }) => {
+it("selects unequal initial values when isInputEqual is not specified", ({ monitor }) => {
   const value = ImpulseFormUnit([0])
 
-  const initial0 = value.getInitial(scope)
+  const initial0 = value.getInitial(monitor)
 
   value.setInitial([0])
-  const initial1 = value.getInitial(scope)
+  const initial1 = value.getInitial(monitor)
 
   expect(initial0).not.toBe(initial1)
   expect(initial0).toStrictEqual(initial1)
 })
 
-it("selects equal initial values when isInputEqual is specified", ({ scope }) => {
+it("selects equal initial values when isInputEqual is specified", ({ monitor }) => {
   const value = ImpulseFormUnit([0], {
     isInputEqual: isShallowArrayEqual,
   })
 
-  const initial0 = value.getInitial(scope)
+  const initial0 = value.getInitial(monitor)
 
   value.setInitial([0])
-  const initial1 = value.getInitial(scope)
+  const initial1 = value.getInitial(monitor)
 
   expect(initial0).toBe(initial1)
   expect(initial0).toStrictEqual(initial1)

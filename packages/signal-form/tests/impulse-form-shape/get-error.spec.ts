@@ -4,7 +4,7 @@ import { params } from "~/tools/params"
 
 import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
 
-it("selects error", ({ scope }) => {
+it("selects error", ({ monitor }) => {
   const shape = ImpulseFormShape(
     {
       first: ImpulseFormUnit("1", { schema: z.string().max(1) }),
@@ -20,9 +20,9 @@ it("selects error", ({ scope }) => {
     { touched: true },
   )
 
-  expect(shape.getError(scope)).toBeNull()
-  expect(shape.getError(scope, params._first)).toBeNull()
-  expect(shape.getError(scope, params._second)).toStrictEqual({
+  expect(shape.getError(monitor)).toBeNull()
+  expect(shape.getError(monitor, params._first)).toBeNull()
+  expect(shape.getError(monitor, params._second)).toStrictEqual({
     first: null,
     second: null,
     third: {
@@ -34,13 +34,13 @@ it("selects error", ({ scope }) => {
   shape.setInput({
     first: "12",
   })
-  expect(shape.getError(scope)).toStrictEqual({
+  expect(shape.getError(monitor)).toStrictEqual({
     first: [expect.any(String)],
     second: null,
     third: null,
   })
-  expect(shape.getError(scope, params._first)).toStrictEqual(shape.getError(scope))
-  expect(shape.getError(scope, params._second)).toStrictEqual({
+  expect(shape.getError(monitor, params._first)).toStrictEqual(shape.getError(monitor))
+  expect(shape.getError(monitor, params._second)).toStrictEqual({
     first: [expect.any(String)],
     second: null,
     third: {
@@ -54,7 +54,7 @@ it("selects error", ({ scope }) => {
       two: ["1", "12"],
     },
   })
-  expect(shape.getError(scope)).toStrictEqual({
+  expect(shape.getError(monitor)).toStrictEqual({
     first: [expect.any(String)],
     second: null,
     third: {
@@ -62,10 +62,10 @@ it("selects error", ({ scope }) => {
       two: [expect.any(String)],
     },
   })
-  expect(shape.getError(scope, params._first)).toStrictEqual(shape.getError(scope))
-  expect(shape.getError(scope, params._second)).toStrictEqual(shape.getError(scope))
+  expect(shape.getError(monitor, params._first)).toStrictEqual(shape.getError(monitor))
+  expect(shape.getError(monitor, params._second)).toStrictEqual(shape.getError(monitor))
 
-  const error = shape.getError(scope)
+  const error = shape.getError(monitor)
 
   expectTypeOf(error).toEqualTypeOf<null | {
     readonly first: null | ReadonlyArray<string>
@@ -76,13 +76,13 @@ it("selects error", ({ scope }) => {
     }
   }>()
 
-  expectTypeOf(shape.fields.third.getError(scope)).toEqualTypeOf<null | {
+  expectTypeOf(shape.fields.third.getError(monitor)).toEqualTypeOf<null | {
     readonly one: null
     readonly two: null | ReadonlyArray<string>
   }>()
 })
 
-it("subsequently selects equal error shapes", ({ scope }) => {
+it("subsequently selects equal error shapes", ({ monitor }) => {
   const shape = ImpulseFormShape(
     {
       first: ImpulseFormUnit("1", { error: "first" }),
@@ -93,17 +93,17 @@ it("subsequently selects equal error shapes", ({ scope }) => {
     },
   )
 
-  expect(shape.getError(scope)).toStrictEqual({
+  expect(shape.getError(monitor)).toStrictEqual({
     first: "first",
     second: "second",
   })
-  expect(shape.getError(scope)).toBe(shape.getError(scope))
-  expect(shape.getError(scope)).toBe(shape.getError(scope))
-  expect(shape.getError(scope, params._first)).toBe(shape.getError(scope, params._first))
-  expect(shape.getError(scope, params._second)).toBe(shape.getError(scope, params._second))
+  expect(shape.getError(monitor)).toBe(shape.getError(monitor))
+  expect(shape.getError(monitor)).toBe(shape.getError(monitor))
+  expect(shape.getError(monitor, params._first)).toBe(shape.getError(monitor, params._first))
+  expect(shape.getError(monitor, params._second)).toBe(shape.getError(monitor, params._second))
 })
 
-it("persists unchanged error fields between changes", ({ scope }) => {
+it("persists unchanged error fields between changes", ({ monitor }) => {
   const shape = ImpulseFormShape({
     first: ImpulseFormShape({
       _0: ImpulseFormUnit("1", { error: "first" }),
@@ -115,7 +115,7 @@ it("persists unchanged error fields between changes", ({ scope }) => {
     }),
   })
 
-  const error0 = shape.getError(scope)
+  const error0 = shape.getError(monitor)
 
   expect(error0).toStrictEqual({
     first: {
@@ -134,7 +134,7 @@ it("persists unchanged error fields between changes", ({ scope }) => {
     },
   })
 
-  const error1 = shape.getError(scope)
+  const error1 = shape.getError(monitor)
 
   expect(error1).toStrictEqual({
     first: {

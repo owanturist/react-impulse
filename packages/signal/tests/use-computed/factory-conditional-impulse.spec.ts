@@ -1,41 +1,52 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, type Scope, useScoped } from "../../src"
+import { Impulse, type Monitor, useComputed } from "../../src"
 import { Counter, type WithImpulse, type WithIsActive, type WithSpy } from "../common"
 
 function factory(
-  scope: Scope,
+  monitor: Monitor,
   { impulse, isActive, spy }: WithImpulse & WithIsActive & Partial<WithSpy>,
 ) {
   spy?.()
 
-  return isActive ? impulse.read(scope) : { count: -1 }
+  return isActive ? impulse.read(monitor) : { count: -1 }
 }
 
 describe.each([
   [
     "without deps",
     ({ impulse, isActive, spy }: WithImpulse & WithIsActive & Partial<WithSpy>) =>
-      useScoped((scope) => factory(scope, { impulse, isActive, spy })),
+      useComputed((monitor) => factory(monitor, { impulse, isActive, spy })),
   ],
   [
     "without comparator",
     ({ impulse, isActive, spy }: WithImpulse & WithIsActive & Partial<WithSpy>) =>
-      useScoped((scope) => factory(scope, { impulse, isActive, spy }), [impulse, isActive, spy]),
+      useComputed(
+        (monitor) => factory(monitor, { impulse, isActive, spy }),
+        [impulse, isActive, spy],
+      ),
   ],
   [
     "with inline comparator",
     ({ impulse, isActive, spy }: WithImpulse & WithIsActive & Partial<WithSpy>) =>
-      useScoped((scope) => factory(scope, { impulse, isActive, spy }), [impulse, isActive, spy], {
-        equals: (prev, next) => Counter.equals(prev, next),
-      }),
+      useComputed(
+        (monitor) => factory(monitor, { impulse, isActive, spy }),
+        [impulse, isActive, spy],
+        {
+          equals: (prev, next) => Counter.equals(prev, next),
+        },
+      ),
   ],
   [
     "with memoized comparator",
     ({ impulse, isActive, spy }: WithImpulse & WithIsActive & Partial<WithSpy>) =>
-      useScoped((scope) => factory(scope, { impulse, isActive, spy }), [impulse, isActive, spy], {
-        equals: Counter.equals,
-      }),
+      useComputed(
+        (monitor) => factory(monitor, { impulse, isActive, spy }),
+        [impulse, isActive, spy],
+        {
+          equals: Counter.equals,
+        },
+      ),
   ],
 ])("conditional factory %s", (_, useHook) => {
   describe("when active", () => {

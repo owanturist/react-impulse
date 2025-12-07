@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useScoped } from "../../src"
+import { Impulse, useComputed } from "../../src"
 import { Counter } from "../common"
 
 import { withinNth } from "./common"
@@ -11,7 +11,7 @@ describe("single impulse", () => {
     counter: Impulse<Counter>
     onRender: VoidFunction
   }> = ({ counter, onRender }) => {
-    const { count } = useScoped(counter)
+    const { count } = useComputed(counter)
 
     return (
       <React.Profiler id="test" onRender={onRender}>

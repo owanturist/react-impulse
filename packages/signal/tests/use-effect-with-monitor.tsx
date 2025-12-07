@@ -1,7 +1,7 @@
 import { act, fireEvent, render, renderHook, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, effect, useScope } from "../src"
+import { Impulse, effect, useMonitor } from "../src"
 
 describe.each([
   ["React.useEffect", React.useEffect],
@@ -17,8 +17,8 @@ describe.each([
 
       useEffect(
         () =>
-          effect((scope) => {
-            const x = value.read(scope) * multiplier
+          effect((monitor) => {
+            const x = value.read(monitor) * multiplier
 
             onEffect(x)
           }),
@@ -186,8 +186,8 @@ describe.each([
 
       useEffect(
         () =>
-          effect((scope) => {
-            const x = (first.read(scope) + second.read(scope)) * multiplier
+          effect((monitor) => {
+            const x = (first.read(monitor) + second.read(monitor)) * multiplier
 
             onEffect(x)
           }),
@@ -237,11 +237,11 @@ describe.each([
 
       useEffect(
         () =>
-          effect((scope) => {
+          effect((monitor) => {
             const x =
               list
-                .read(scope)
-                .map((item) => item.read(scope))
+                .read(monitor)
+                .map((item) => item.read(monitor))
                 .reduce((acc, val) => acc + val, 0) * multiplier
 
             onEffect(x)
@@ -312,8 +312,8 @@ describe.each([
       const [multiplier, setMultiplier] = React.useState(2)
 
       useEffect(() =>
-        effect((scope) => {
-          const x = value.read(scope) * multiplier
+        effect((monitor) => {
+          const x = value.read(monitor) * multiplier
 
           onEffect(x)
         }),
@@ -376,11 +376,11 @@ describe.each([
     const Counter: React.FC<{
       count: Impulse<number>
     }> = ({ count }) => {
-      const scope = useScope()
+      const monitor = useMonitor()
 
       return (
         <button type="button" data-testid="count" onClick={() => count.update((x) => x + 1)}>
-          {count.read(scope)}
+          {count.read(monitor)}
         </button>
       )
     }
@@ -393,8 +393,8 @@ describe.each([
 
       useEffect(
         () =>
-          effect((scope) => {
-            onEffect(count.read(scope))
+          effect((monitor) => {
+            onEffect(count.read(monitor))
           }),
         [onEffect, count],
       )
@@ -441,8 +441,8 @@ describe.each([
       ({ left, right }) => {
         useEffect(
           () =>
-            effect((scope) => {
-              spy(left + right.read(scope))
+            effect((monitor) => {
+              spy(left + right.read(monitor))
             }),
           [left, right],
         )
@@ -488,8 +488,8 @@ describe.each([
       ({ state }) => {
         useEffect(
           () =>
-            effect((scope) => {
-              spy(state.left.read(scope) + state.right.read(scope))
+            effect((monitor) => {
+              spy(state.left.read(monitor) + state.right.read(monitor))
             }),
           [state],
         )
@@ -526,8 +526,8 @@ describe.each([
       (props) => {
         useEffect(
           () =>
-            effect((scope) => {
-              const { count } = props.counter.read(scope)
+            effect((monitor) => {
+              const { count } = props.counter.read(monitor)
 
               return () => {
                 cleanup(count * props.multiplier)
@@ -565,7 +565,7 @@ describe.each([
     expect(cleanup).not.toHaveBeenCalled()
   })
 
-  describe("when scope coming as a dependency", () => {
+  describe("when monitor coming as a dependency", () => {
     it("reruns effect only for effect's consumers", () => {
       const spyRender = vi.fn()
       const spyEffect = vi.fn()
@@ -574,14 +574,14 @@ describe.each([
 
       const { rerender } = renderHook(
         ({ left, right }) => {
-          const scope = useScope()
-          const scopeForEffect = useScope()
+          const monitor = useMonitor()
+          const monitorForEffect = useMonitor()
 
           useEffect(() => {
-            spyEffect(left * right.read(scopeForEffect))
-          }, [scopeForEffect, left, right])
+            spyEffect(left * right.read(monitorForEffect))
+          }, [monitorForEffect, left, right])
 
-          spyRender(impulse2.read(scope))
+          spyRender(impulse2.read(monitor))
         },
         {
           initialProps: { left: 1, right: impulse1 },

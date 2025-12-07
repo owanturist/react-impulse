@@ -9,27 +9,27 @@ describe("Impulse()", () => {
     expectTypeOf(impulse).toEqualTypeOf<Impulse<string | undefined>>()
   })
 
-  it("should create an impulse with undefined initial value", ({ scope }) => {
+  it("should create an impulse with undefined initial value", ({ monitor }) => {
     const impulse = Impulse<number>()
 
-    expect(impulse.read(scope)).toBeUndefined()
+    expect(impulse.read(monitor)).toBeUndefined()
   })
 
-  it("updates the impulse with a new value", ({ scope }) => {
+  it("updates the impulse with a new value", ({ monitor }) => {
     const impulse = Impulse<number>()
 
     impulse.update(1)
 
-    expect(impulse.read(scope)).toBe(1)
+    expect(impulse.read(monitor)).toBe(1)
   })
 
-  it("updates the impulse with a undefined", ({ scope }) => {
+  it("updates the impulse with a undefined", ({ monitor }) => {
     const impulse = Impulse<number>()
 
     impulse.update(1)
     impulse.update(undefined)
 
-    expect(impulse.read(scope)).toBeUndefined()
+    expect(impulse.read(monitor)).toBeUndefined()
   })
 })
 
@@ -61,7 +61,7 @@ describe("Impulse(value, options?)", () => {
     expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
-  it("carries the function value wrapped in an object", ({ scope }) => {
+  it("carries the function value wrapped in an object", ({ monitor }) => {
     const impulse = Impulse({ fn: (input: number) => input })
 
     expectTypeOf(impulse).toEqualTypeOf<
@@ -69,9 +69,9 @@ describe("Impulse(value, options?)", () => {
         fn: (input: number) => number
       }>
     >()
-    expectTypeOf(impulse.read(scope)).toEqualTypeOf<{
+    expectTypeOf(impulse.read(monitor)).toEqualTypeOf<{
       fn: (input: number) => number
     }>()
-    expect(impulse.read(scope).fn(42)).toBe(42)
+    expect(impulse.read(monitor).fn(42)).toBe(42)
   })
 })

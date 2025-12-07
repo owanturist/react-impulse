@@ -1,4 +1,4 @@
-import type { Scope } from "@owanturist/signal"
+import type { Monitor } from "@owanturist/signal"
 
 import { mapValues } from "~/tools/map-values"
 
@@ -27,8 +27,8 @@ class ImpulseFormSwitch<
     this.branches = mapValues(_state._branches, ({ _host }) => _host()) as Readonly<TBranches>
   }
 
-  public getActiveBranch(scope: Scope): undefined | ImpulseFormSwitchActiveBranch<TBranches> {
-    const result = this._state._getActiveBranch(scope)
+  public getActiveBranch(monitor: Monitor): undefined | ImpulseFormSwitchActiveBranch<TBranches> {
+    const result = this._state._getActiveBranch(monitor)
 
     if (!result) {
       return undefined

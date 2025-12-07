@@ -9,7 +9,7 @@ import type { WritableImpulse } from "./writable-impulse"
 import type { BaseImpulse } from "./_internal/base-impulse"
 import { DerivedImpulse } from "./_internal/derived-impulse"
 import { Impulse as ImpulseImpl } from "./_internal/impulse"
-import type { Scope } from "./_internal/scope"
+import type { Monitor } from "./_internal/monitor"
 
 type Impulse<T> = BaseImpulse<T>
 
@@ -24,7 +24,7 @@ type ReadonlyImpulse<T> = Omit<Impulse<T>, "update">
  *
  * @example
  * const impulse = Impulse<string>()
- * const initiallyUndefined = impulse.read(scope) === undefined
+ * const initiallyUndefined = impulse.read(monitor) === undefined
  */
 function Impulse<TValue = undefined>(): Impulse<undefined | TValue>
 
@@ -43,7 +43,7 @@ function Impulse<TValue = undefined>(): Impulse<undefined | TValue>
  * @version 1.0.0
  */
 function Impulse<TDerivedValue>(
-  getter: ReadableImpulse<TDerivedValue> | ((scope: Scope) => TDerivedValue),
+  getter: ReadableImpulse<TDerivedValue> | ((monitor: Monitor) => TDerivedValue),
   options?: ImpulseOptions<TDerivedValue>,
 ): ReadonlyImpulse<TDerivedValue>
 
@@ -63,8 +63,8 @@ function Impulse<TDerivedValue>(
  * @version 1.0.0
  */
 function Impulse<TDerivedValue>(
-  getter: ReadableImpulse<TDerivedValue> | ((scope: Scope) => TDerivedValue),
-  setter: WritableImpulse<TDerivedValue> | ((value: TDerivedValue, scope: Scope) => void),
+  getter: ReadableImpulse<TDerivedValue> | ((monitor: Monitor) => TDerivedValue),
+  setter: WritableImpulse<TDerivedValue> | ((value: TDerivedValue, monitor: Monitor) => void),
   options?: ImpulseOptions<TDerivedValue>,
 ): Impulse<TDerivedValue>
 
@@ -82,11 +82,11 @@ function Impulse<TDerivedValue>(
 function Impulse<TValue>(initialValue: TValue, options?: ImpulseOptions<TValue>): Impulse<TValue>
 
 function Impulse<T>(
-  initialValueOrReadableImpulse?: T | ReadableImpulse<T> | ((scope: Scope) => T),
+  initialValueOrReadableImpulse?: T | ReadableImpulse<T> | ((monitor: Monitor) => T),
   optionsOrWritableImpulse?:
     | ImpulseOptions<T>
     | WritableImpulse<T>
-    | ((value: T, scope: Scope) => void),
+    | ((value: T, monitor: Monitor) => void),
   optionsOrNothing?: ImpulseOptions<T>,
 ): Impulse<undefined | T> | Impulse<T> {
   const isGetterFunction = isFunction(initialValueOrReadableImpulse)
@@ -105,7 +105,7 @@ function Impulse<T>(
   return new DerivedImpulse(
     isGetterFunction
       ? initialValueOrReadableImpulse
-      : (scope) => initialValueOrReadableImpulse.read(scope),
+      : (monitor) => initialValueOrReadableImpulse.read(monitor),
     isFunction(setter) ? setter : (value) => setter?.update(value),
     derivedOptions?.equals ?? isStrictEqual,
   )

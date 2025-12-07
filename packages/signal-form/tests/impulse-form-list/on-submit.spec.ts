@@ -13,7 +13,7 @@ function setup(options?: ImpulseFormListOptions<ImpulseFormUnit<number>>) {
   const listener2 = vi.fn()
   const listener3 = vi.fn()
 
-  const elements = untracked((scope) => form.getElements(scope))
+  const elements = untracked((monitor) => form.getElements(monitor))
 
   form.onSubmit(listener0)
   elements.at(0)?.onSubmit(listener1)

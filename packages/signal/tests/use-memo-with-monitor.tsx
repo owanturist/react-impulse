@@ -1,22 +1,22 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useScope } from "../src"
+import { Impulse, useMonitor } from "../src"
 
 describe("single impulse", () => {
   const Component: React.FC<{
     onMemo?: React.Dispatch<number>
     value: Impulse<number>
   }> = ({ onMemo, value }) => {
-    const scope = useScope()
+    const monitor = useMonitor()
     const [multiplier, setMultiplier] = React.useState(2)
     const result = React.useMemo(() => {
-      const x = value.read(scope) * multiplier
+      const x = value.read(monitor) * multiplier
 
       onMemo?.(x)
 
       return x
-    }, [scope, value, multiplier, onMemo])
+    }, [monitor, value, multiplier, onMemo])
 
     return (
       <>
@@ -134,8 +134,8 @@ describe("single impulse", () => {
     )
 
     /**
-     * Not 0 because a scope cannot cleanup on every rerender,
-     * otherwise memo/effect hooks with the scope dependency will lose subscriptions too eagerly.
+     * Not 0 because a monitor cannot cleanup on every rerender,
+     * otherwise memo/effect hooks with the monitor dependency will lose subscriptions too eagerly.
      */
     expect(value1).toHaveEmittersSize(1)
     expect(value2).toHaveEmittersSize(1)
@@ -193,11 +193,11 @@ describe("multiple impulses", () => {
     first: Impulse<number>
     second: Impulse<number>
   }> = ({ first, second }) => {
-    const scope = useScope()
+    const monitor = useMonitor()
     const [multiplier, setMultiplier] = React.useState(2)
     const result = React.useMemo(
-      () => (first.read(scope) + second.read(scope)) * multiplier,
-      [scope, first, second, multiplier],
+      () => (first.read(monitor) + second.read(monitor)) * multiplier,
+      [monitor, first, second, multiplier],
     )
 
     return (
@@ -239,17 +239,17 @@ describe("nested impulses", () => {
   const Component: React.FC<{
     list: Impulse<Array<Impulse<number>>>
   }> = ({ list }) => {
-    const scope = useScope()
+    const monitor = useMonitor()
     const [multiplier, setMultiplier] = React.useState(2)
     const result = React.useMemo(() => {
       const x =
         list
-          .read(scope)
-          .map((item) => item.read(scope))
+          .read(monitor)
+          .map((item) => item.read(monitor))
           .reduce((acc, val) => acc + val, 0) * multiplier
 
       return x
-    }, [scope, list, multiplier])
+    }, [monitor, list, multiplier])
 
     return (
       <>

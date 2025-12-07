@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import React from "react"
 
-import { type Impulse, useScoped } from "../../src"
+import { type Impulse, useComputed } from "../../src"
 
 function withinNth(testId: string, position: number) {
   return within(screen.getAllByTestId(testId)[position]!)
@@ -22,7 +22,7 @@ const CounterComponent = React.memo<{
   onRender: VoidFunction
 }>(
   ({ count: countImpulse, onRender }) => {
-    const count = useScoped((scope) => countImpulse.read(scope))
+    const count = useComputed((monitor) => countImpulse.read(monitor))
 
     return (
       <React.Profiler id="test" onRender={onRender}>

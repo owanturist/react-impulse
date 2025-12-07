@@ -1,5 +1,5 @@
-import type { Scope } from "@owanturist/signal"
+import type { Monitor } from "@owanturist/signal"
 
-type ImpulseFormMeta<TValue> = (scope: Scope) => TValue
+type ImpulseFormMeta<TValue> = (monitor: Monitor) => TValue
 
 export type { ImpulseFormMeta }

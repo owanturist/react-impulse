@@ -3,7 +3,7 @@ import type { Setter } from "~/tools/setter"
 
 import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
 
-it("specifies error", ({ scope }) => {
+it("specifies error", ({ monitor }) => {
   const shape = ImpulseFormShape({
     first: ImpulseFormUnit("", { error: ["first"] }),
     second: ImpulseFormUnit(0, { error: ["second"] }),
@@ -24,7 +24,7 @@ it("specifies error", ({ scope }) => {
     fourth: ["anything"],
   })
 
-  expect(shape.getError(scope)).toStrictEqual({
+  expect(shape.getError(monitor)).toStrictEqual({
     first: ["first"],
     second: ["second"],
     third: {
@@ -38,12 +38,12 @@ it("specifies error", ({ scope }) => {
     second: undefined,
     third: null,
   })
-  expect(shape.getError(scope)).toStrictEqual({
+  expect(shape.getError(monitor)).toStrictEqual({
     first: ["another"],
     second: ["second"],
     third: null,
   })
-  expect(shape.getError(scope, params._second)).toStrictEqual({
+  expect(shape.getError(monitor, params._second)).toStrictEqual({
     first: ["another"],
     second: ["second"],
     third: {
@@ -118,7 +118,7 @@ it("specifies error", ({ scope }) => {
     }
   })
 
-  expect(shape.getError(scope)).toStrictEqual({
+  expect(shape.getError(monitor)).toStrictEqual({
     first: ["another", "1"],
     second: ["second", "2"],
     third: {
@@ -174,7 +174,7 @@ it("specifies error", ({ scope }) => {
   >()
 })
 
-it("resets all errors", ({ scope }) => {
+it("resets all errors", ({ monitor }) => {
   const shape = ImpulseFormShape({
     first: ImpulseFormUnit("", { error: ["first"] }),
     second: ImpulseFormUnit(0, { error: ["second"] }),
@@ -196,5 +196,5 @@ it("resets all errors", ({ scope }) => {
   })
 
   shape.setError(null)
-  expect(shape.getError(scope)).toBeNull()
+  expect(shape.getError(monitor)).toBeNull()
 })

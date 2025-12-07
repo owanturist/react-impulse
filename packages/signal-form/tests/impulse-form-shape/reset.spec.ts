@@ -30,11 +30,11 @@ describe.each([
   ["without arguments", (form: ImpulseForm) => form.reset()],
   ["with resetter=params._first", (form: ImpulseForm) => form.reset(params._first)],
 ])("%s", (_, reset) => {
-  it("resets the shape", ({ scope }) => {
+  it("resets the shape", ({ monitor }) => {
     const shape = setup()
 
     reset(shape)
-    const input = shape.getInput(scope)
+    const input = shape.getInput(monitor)
     expect(input).toStrictEqual({
       first: "1",
       second: 2,
@@ -44,16 +44,16 @@ describe.each([
       },
       fourth: ["anything"],
     })
-    expect(shape.getInitial(scope)).toStrictEqual(input)
-    expect(shape.isDirty(scope)).toBe(false)
+    expect(shape.getInitial(monitor)).toStrictEqual(input)
+    expect(shape.isDirty(monitor)).toBe(false)
   })
 })
 
-it("resets to initial value by consuming current original value with resetter", ({ scope }) => {
+it("resets to initial value by consuming current original value with resetter", ({ monitor }) => {
   const shape = setup()
 
   shape.reset((_, current) => current)
-  const input = shape.getInput(scope)
+  const input = shape.getInput(monitor)
   expect(input).toStrictEqual({
     first: "",
     second: 0,
@@ -63,11 +63,11 @@ it("resets to initial value by consuming current original value with resetter", 
     },
     fourth: ["anything"],
   })
-  expect(shape.getInitial(scope)).toStrictEqual(input)
-  expect(shape.isDirty(scope)).toBe(false)
+  expect(shape.getInitial(monitor)).toStrictEqual(input)
+  expect(shape.isDirty(monitor)).toBe(false)
 })
 
-it("resets to new initial value", ({ scope }) => {
+it("resets to new initial value", ({ monitor }) => {
   const shape = setup()
 
   shape.reset({
@@ -77,7 +77,7 @@ it("resets to new initial value", ({ scope }) => {
       two: undefined,
     },
   })
-  const input = shape.getInput(scope)
+  const input = shape.getInput(monitor)
   expect(input).toStrictEqual({
     first: "3",
     second: 2,
@@ -87,11 +87,11 @@ it("resets to new initial value", ({ scope }) => {
     },
     fourth: ["anything"],
   })
-  expect(shape.getInitial(scope)).toStrictEqual(input)
-  expect(shape.isDirty(scope)).toBe(false)
+  expect(shape.getInitial(monitor)).toStrictEqual(input)
+  expect(shape.isDirty(monitor)).toBe(false)
 })
 
-it("resets with callback on each field", ({ scope }) => {
+it("resets with callback on each field", ({ monitor }) => {
   const shape = setup()
 
   shape.reset((initial, current) => {
@@ -155,7 +155,7 @@ it("resets with callback on each field", ({ scope }) => {
     }
   })
 
-  const input = shape.getInput(scope)
+  const input = shape.getInput(monitor)
   expect(input).toStrictEqual({
     first: "3",
     second: 4,
@@ -165,6 +165,6 @@ it("resets with callback on each field", ({ scope }) => {
     },
     fourth: ["anything"],
   })
-  expect(shape.getInitial(scope)).toStrictEqual(input)
-  expect(shape.isDirty(scope)).toBe(false)
+  expect(shape.getInitial(monitor)).toStrictEqual(input)
+  expect(shape.isDirty(monitor)).toBe(false)
 })

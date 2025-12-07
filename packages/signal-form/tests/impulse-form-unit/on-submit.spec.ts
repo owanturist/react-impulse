@@ -28,7 +28,7 @@ describe("onSubmit(listener)", () => {
     })
   })
 
-  it("does not call the listener when the form is not valid", ({ scope }) => {
+  it("does not call the listener when the form is not valid", ({ monitor }) => {
     const form = ImpulseFormUnit("value", {
       schema: z.string().min(10),
     })
@@ -39,7 +39,7 @@ describe("onSubmit(listener)", () => {
 
     form.submit()
 
-    expect(form.isInvalid(scope)).toBe(true)
+    expect(form.isInvalid(monitor)).toBe(true)
     expect(listener).not.toHaveBeenCalled()
   })
 
@@ -172,7 +172,7 @@ describe("onSubmit(listener)", () => {
     expect(listener).not.toHaveBeenCalled()
   })
 
-  it("waits the slowest listener", async ({ scope }) => {
+  it("waits the slowest listener", async ({ monitor }) => {
     const form = ImpulseFormUnit("value")
 
     const done1 = vi.fn()
@@ -191,20 +191,20 @@ describe("onSubmit(listener)", () => {
     expect(done2).not.toHaveBeenCalled()
     expect(done3).not.toHaveBeenCalled()
     expect(allDone).not.toHaveBeenCalled()
-    expect(form.isSubmitting(scope)).toBe(true)
+    expect(form.isSubmitting(monitor)).toBe(true)
 
     await vi.advanceTimersByTimeAsync(0.25 * SLOWEST_ASYNC_MS)
     expect(done1).toHaveBeenCalledOnce()
     expect(done2).toHaveBeenCalledOnce()
     expect(done3).not.toHaveBeenCalled()
     expect(allDone).not.toHaveBeenCalled()
-    expect(form.isSubmitting(scope)).toBe(true)
+    expect(form.isSubmitting(monitor)).toBe(true)
 
     await vi.advanceTimersByTimeAsync(0.5 * SLOWEST_ASYNC_MS)
     expect(done1).toHaveBeenCalledOnce()
     expect(done2).toHaveBeenCalledOnce()
     expect(done3).toHaveBeenCalledOnce()
     expect(allDone).toHaveBeenCalledOnce()
-    expect(form.isSubmitting(scope)).toBe(false)
+    expect(form.isSubmitting(monitor)).toBe(false)
   })
 })

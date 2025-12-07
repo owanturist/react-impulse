@@ -1,4 +1,4 @@
-import type { Scope } from "@owanturist/signal"
+import type { Monitor } from "@owanturist/signal"
 import z from "zod"
 
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
@@ -60,8 +60,8 @@ describe("types", () => {
     [InitialSchema, InitialSchema]
   >
 
-  it("matches schema type for getInitial(scope)", () => {
-    expectTypeOf(form.getInitial).toEqualTypeOf<(scope: Scope) => InitialSchema>()
+  it("matches schema type for getInitial(monitor)", () => {
+    expectTypeOf(form.getInitial).toEqualTypeOf<(monitor: Monitor) => InitialSchema>()
   })
 
   it("matches setter type for setInitial(setter)", () => {
@@ -117,8 +117,8 @@ describe("types", () => {
       [ParentInitialSchema, ParentInitialSchema]
     >
 
-    it("matches schema type for getInitial(scope)", () => {
-      expectTypeOf(parent.getInitial).toEqualTypeOf<(scope: Scope) => ParentInitialSchema>()
+    it("matches schema type for getInitial(monitor)", () => {
+      expectTypeOf(parent.getInitial).toEqualTypeOf<(monitor: Monitor) => ParentInitialSchema>()
     })
 
     it("matches setter type for setInitial(setter)", () => {
@@ -127,7 +127,7 @@ describe("types", () => {
   })
 })
 
-it("initiates with children input", ({ scope }) => {
+it("initiates with children input", ({ monitor }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("_1", {
       initial: "_2",
@@ -151,7 +151,7 @@ it("initiates with children input", ({ scope }) => {
     },
   )
 
-  expect(form.getInitial(scope)).toStrictEqual({
+  expect(form.getInitial(monitor)).toStrictEqual({
     active: "_2",
     branches: {
       _1: false,
@@ -170,7 +170,7 @@ it("initiates with children input", ({ scope }) => {
   })
 })
 
-it("initiates with overridden initial", ({ scope }) => {
+it("initiates with overridden initial", ({ monitor }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("", {
       initial: "_5",
@@ -213,7 +213,7 @@ it("initiates with overridden initial", ({ scope }) => {
     },
   )
 
-  expect(form.getInitial(scope)).toStrictEqual({
+  expect(form.getInitial(monitor)).toStrictEqual({
     active: "_6",
     branches: {
       _1: true,
@@ -230,7 +230,7 @@ it("initiates with overridden initial", ({ scope }) => {
       },
     },
   })
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "",
     branches: {
       _1: true,
@@ -249,7 +249,7 @@ it("initiates with overridden initial", ({ scope }) => {
   })
 })
 
-it("sets initial", ({ scope }) => {
+it("sets initial", ({ monitor }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("", {
       initial: "_8",
@@ -277,7 +277,7 @@ it("sets initial", ({ scope }) => {
     },
   })
 
-  expect(form.getInitial(scope)).toStrictEqual({
+  expect(form.getInitial(monitor)).toStrictEqual({
     active: "_9",
     branches: {
       _1: false,
@@ -287,7 +287,7 @@ it("sets initial", ({ scope }) => {
       },
     },
   })
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "",
     branches: {
       _1: true,
@@ -299,7 +299,7 @@ it("sets initial", ({ scope }) => {
   })
 })
 
-it("sets partial initial", ({ scope }) => {
+it("sets partial initial", ({ monitor }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("", {
       initial: "_10",
@@ -325,7 +325,7 @@ it("sets partial initial", ({ scope }) => {
       },
     },
   })
-  expect(form.getInitial(scope)).toStrictEqual({
+  expect(form.getInitial(monitor)).toStrictEqual({
     active: "_10",
     branches: {
       _1: true,
@@ -335,7 +335,7 @@ it("sets partial initial", ({ scope }) => {
       },
     },
   })
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "",
     branches: {
       _1: true,
@@ -349,7 +349,7 @@ it("sets partial initial", ({ scope }) => {
   form.setInitial({
     active: "_11",
   })
-  expect(form.getInitial(scope)).toStrictEqual({
+  expect(form.getInitial(monitor)).toStrictEqual({
     active: "_11",
     branches: {
       _1: true,
@@ -359,7 +359,7 @@ it("sets partial initial", ({ scope }) => {
       },
     },
   })
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "",
     branches: {
       _1: true,
@@ -439,7 +439,7 @@ describe("using recursive setter", () => {
       },
     ],
   ])("in %s", (_, setup) => {
-    it("passes initial and input recursively to all setters", ({ scope }) => {
+    it("passes initial and input recursively to all setters", ({ monitor }) => {
       expect.assertions(26)
 
       const form = setup((initial, input) => {
@@ -608,7 +608,7 @@ describe("using recursive setter", () => {
         }
       })
 
-      expect(form.getInitial(scope)).toStrictEqual({
+      expect(form.getInitial(monitor)).toStrictEqual({
         active: "_1",
         branches: {
           _1: true,
@@ -625,7 +625,7 @@ describe("using recursive setter", () => {
           },
         },
       })
-      expect(form.getInput(scope)).toStrictEqual({
+      expect(form.getInput(monitor)).toStrictEqual({
         active: "",
         branches: {
           _1: true,
@@ -647,7 +647,7 @@ describe("using recursive setter", () => {
 })
 
 describe("stable initial value", () => {
-  it("subsequently selects equal initial", ({ scope }) => {
+  it("subsequently selects equal initial", ({ monitor }) => {
     const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2" | "_5">("_1"), {
       _1: ImpulseFormUnit(true),
       _2: ImpulseFormShape({
@@ -665,11 +665,11 @@ describe("stable initial value", () => {
       ),
     })
 
-    expect(form.getInitial(scope)).toBeInstanceOf(Object)
-    expect(form.getInitial(scope)).toBe(form.getInitial(scope))
+    expect(form.getInitial(monitor)).toBeInstanceOf(Object)
+    expect(form.getInitial(monitor)).toBe(form.getInitial(monitor))
   })
 
-  it("persists unchanged branches input between changes", ({ scope }) => {
+  it("persists unchanged branches input between changes", ({ monitor }) => {
     const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2" | "_5">("_1"), {
       _1: ImpulseFormUnit(true),
       _2: ImpulseFormShape({
@@ -687,7 +687,7 @@ describe("stable initial value", () => {
       ),
     })
 
-    const initial0 = form.getInitial(scope)
+    const initial0 = form.getInitial(monitor)
 
     form.setInitial({
       branches: {
@@ -697,7 +697,7 @@ describe("stable initial value", () => {
       },
     })
 
-    const initial1 = form.getInitial(scope)
+    const initial1 = form.getInitial(monitor)
 
     expect(initial1).not.toBe(initial0)
     expect(initial1.active).toBe(initial0.active)
@@ -706,25 +706,25 @@ describe("stable initial value", () => {
     expect(initial1.branches._5).toBe(initial0.branches._5)
   })
 
-  it("selects unequal initial values when isInputEqual is not specified", ({ scope }) => {
+  it("selects unequal initial values when isInputEqual is not specified", ({ monitor }) => {
     const form = ImpulseFormSwitch(ImpulseFormUnit("_1" as const), {
       _1: ImpulseFormUnit([0]),
     })
 
-    const initial0 = form.getInitial(scope)
+    const initial0 = form.getInitial(monitor)
 
     form.setInitial({
       branches: {
         _1: [0],
       },
     })
-    const initial1 = form.getInitial(scope)
+    const initial1 = form.getInitial(monitor)
 
     expect(initial0).not.toBe(initial1)
     expect(initial0).toStrictEqual(initial1)
   })
 
-  it("selects equal initial values when isInputEqual is specified", ({ scope }) => {
+  it("selects equal initial values when isInputEqual is specified", ({ monitor }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("", {
         schema: z.enum(["_1"]),
@@ -736,14 +736,14 @@ describe("stable initial value", () => {
       },
     )
 
-    const initial0 = form.getInitial(scope)
+    const initial0 = form.getInitial(monitor)
 
     form.setInitial({
       branches: {
         _1: [0],
       },
     })
-    const initial1 = form.getInitial(scope)
+    const initial1 = form.getInitial(monitor)
 
     expect(initial0).toBe(initial1)
     expect(initial0).toStrictEqual(initial1)

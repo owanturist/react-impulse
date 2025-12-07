@@ -1,11 +1,11 @@
 import { batch } from "./batch"
 import type { Destructor } from "./destructor"
 import type { Impulse } from "./impulse"
-import { type Scope, injectScope } from "./_internal/scope"
-import { ScopeFactory } from "./_internal/scope-factory"
+import { type Monitor, injectMonitor } from "./_internal/monitor"
+import { MonitorFactory } from "./_internal/monitor-factory"
 
 /**
- * A function that provides {@link Scope} as the first argument subscribes to changes of all {@link Impulse} instances that call the {@link Impulse.read} method inside the {@link listener}.
+ * A function that provides {@link Monitor} as the first argument subscribes to changes of all {@link Impulse} instances that call the {@link Impulse.read} method inside the {@link listener}.
  *
  * @param listener Function that will be called on each {@link Impulse} change, involved in the {@link listener} execution.
  * Calls first time synchronously when {@link effect} is called.
@@ -15,14 +15,14 @@ import { ScopeFactory } from "./_internal/scope-factory"
  *
  * @version 1.0.0
  */
-function effect(listener: (scope: Scope) => Destructor): VoidFunction {
+function effect(listener: (monitor: Monitor) => Destructor): VoidFunction {
   let dispose: Destructor
 
-  const factory = new ScopeFactory()
+  const factory = new MonitorFactory()
 
   const emit = (): void => {
     dispose?.()
-    dispose = injectScope(listener, factory.create())
+    dispose = injectMonitor(listener, factory.create())
   }
 
   const disconnect = factory.connect(emit)

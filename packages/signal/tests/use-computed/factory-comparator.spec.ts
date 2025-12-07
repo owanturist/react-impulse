@@ -1,10 +1,10 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, type Scope, useScoped } from "../../src"
+import { Impulse, type Monitor, useComputed } from "../../src"
 import { Counter, type WithEquals, type WithImpulse } from "../common"
 
-function factory(scope: Scope, { impulse }: WithImpulse) {
-  return impulse.read(scope)
+function factory(monitor: Monitor, { impulse }: WithImpulse) {
+  return impulse.read(monitor)
 }
 
 describe.each([
@@ -13,7 +13,7 @@ describe.each([
     ({ impulse, equals }: WithImpulse & WithEquals) => {
       const cmp = equals ?? Counter.equals
 
-      return useScoped((scope) => factory(scope, { impulse }), [impulse], {
+      return useComputed((monitor) => factory(monitor, { impulse }), [impulse], {
         equals: (prev, next) => cmp(prev, next),
       })
     },
@@ -21,7 +21,7 @@ describe.each([
   [
     "memoized",
     ({ impulse, equals }: WithImpulse & WithEquals) =>
-      useScoped((scope) => factory(scope, { impulse }), [impulse], {
+      useComputed((monitor) => factory(monitor, { impulse }), [impulse], {
         equals: equals ?? Counter.equals,
       }),
   ],

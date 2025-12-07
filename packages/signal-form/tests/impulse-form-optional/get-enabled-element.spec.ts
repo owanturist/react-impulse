@@ -20,7 +20,7 @@ describe("types", () => {
     _2: ImpulseFormUnit<boolean, number>
   }>
 
-  it("matches schema type for getEnabledElement(scope)", () => {
+  it("matches schema type for getEnabledElement(monitor)", () => {
     expectTypeOf(form.getEnabledElement).returns.toEqualTypeOf<undefined | EnabledElement>()
   })
 })

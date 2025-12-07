@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, type Scope, useScope, useScoped } from "../../src"
+import { Impulse, type Monitor, useComputed, useMonitor } from "../../src"
 
 import { CounterComponent } from "./common"
 
@@ -28,13 +28,13 @@ describe("scoping single impulse", () => {
     </>
   )
 
-  const factoryLeft = (scope: Scope, count: Impulse<number>) => {
-    const x = count.read(scope)
+  const factoryLeft = (monitor: Monitor, count: Impulse<number>) => {
+    const x = count.read(monitor)
 
     return x > 1
   }
-  const factoryRight = (scope: Scope, count: Impulse<number>) => {
-    const x = count.read(scope)
+  const factoryRight = (monitor: Monitor, count: Impulse<number>) => {
+    const x = count.read(monitor)
 
     return x < 4
   }
@@ -42,9 +42,9 @@ describe("scoping single impulse", () => {
   const equals = ([left1, right1]: [boolean, boolean], [left2, right2]: [boolean, boolean]) =>
     left1 === left2 && right1 === right2
 
-  const SingleScopeApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useScoped(
-      (scope) => [factoryLeft(scope, props.count), factoryRight(scope, props.count)],
+  const SingleComputedApp: React.FC<AppProps> = (props) => {
+    const [moreThanOne, lessThanFour] = useComputed(
+      (monitor) => [factoryLeft(monitor, props.count), factoryRight(monitor, props.count)],
       [props.count],
       {
         equals: (left, right) => equals(left, right),
@@ -54,9 +54,9 @@ describe("scoping single impulse", () => {
     return <GenericApp moreThanOne={moreThanOne} lessThanFour={lessThanFour} {...props} />
   }
 
-  const SingleMemoizedScopeApp: React.FC<AppProps> = (props) => {
-    const [moreThanOne, lessThanFour] = useScoped<[boolean, boolean]>(
-      (scope) => [factoryLeft(scope, props.count), factoryRight(scope, props.count)],
+  const SingleMemoizedComputedApp: React.FC<AppProps> = (props) => {
+    const [moreThanOne, lessThanFour] = useComputed<[boolean, boolean]>(
+      (monitor) => [factoryLeft(monitor, props.count), factoryRight(monitor, props.count)],
       [props.count],
       { equals },
     )
@@ -64,34 +64,34 @@ describe("scoping single impulse", () => {
     return <GenericApp moreThanOne={moreThanOne} lessThanFour={lessThanFour} {...props} />
   }
 
-  const MultipleScopesApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useScoped((scope) => factoryLeft(scope, props.count))
-    const lessThanFour = useScoped((scope) => factoryRight(scope, props.count))
+  const MultipleComputedApp: React.FC<AppProps> = (props) => {
+    const moreThanOne = useComputed((monitor) => factoryLeft(monitor, props.count))
+    const lessThanFour = useComputed((monitor) => factoryRight(monitor, props.count))
 
     return <GenericApp moreThanOne={moreThanOne} lessThanFour={lessThanFour} {...props} />
   }
 
-  const MultipleMemoizedScopesApp: React.FC<AppProps> = (props) => {
-    const moreThanOne = useScoped((scope) => factoryLeft(scope, props.count), [props.count])
-    const lessThanFour = useScoped((scope) => factoryRight(scope, props.count), [props.count])
+  const MultipleMemoizedComputedApp: React.FC<AppProps> = (props) => {
+    const moreThanOne = useComputed((monitor) => factoryLeft(monitor, props.count), [props.count])
+    const lessThanFour = useComputed((monitor) => factoryRight(monitor, props.count), [props.count])
 
     return <GenericApp moreThanOne={moreThanOne} lessThanFour={lessThanFour} {...props} />
   }
 
-  const ScopedApp: React.FC<AppProps> = (props) => {
-    const scope = useScope()
-    const moreThanOne = factoryLeft(scope, props.count)
-    const lessThanFour = factoryRight(scope, props.count)
+  const MonitoredApp: React.FC<AppProps> = (props) => {
+    const monitor = useMonitor()
+    const moreThanOne = factoryLeft(monitor, props.count)
+    const lessThanFour = factoryRight(monitor, props.count)
 
     return <GenericApp moreThanOne={moreThanOne} lessThanFour={lessThanFour} {...props} />
   }
 
   it.each([
-    ["single scope", SingleScopeApp, 0],
-    ["single memoized scope", SingleMemoizedScopeApp, 0],
-    ["multiple scopes", MultipleScopesApp, 0],
-    ["multiple memoized scopes", MultipleMemoizedScopesApp, 0],
-    ["scoped()", ScopedApp, 1],
+    ["single compute", SingleComputedApp, 0],
+    ["single memoized compute", SingleMemoizedComputedApp, 0],
+    ["multiple computes", MultipleComputedApp, 0],
+    ["multiple memoized computes", MultipleMemoizedComputedApp, 0],
+    ["monitor", MonitoredApp, 1],
   ])("handles single Impulse with %s", (_, App, unnecessaryRerendersCount) => {
     const count = Impulse(0)
     const onCounterRender = vi.fn()

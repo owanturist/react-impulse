@@ -27,12 +27,14 @@ describe("types", () => {
     readonly element: boolean
   }
 
-  it("matches schema type for isValidated(scope, select?)", ({ scope }) => {
-    expectTypeOf(form.isValidated(scope)).toEqualTypeOf<boolean>()
+  it("matches schema type for isValidated(monitor, select?)", ({ monitor }) => {
+    expectTypeOf(form.isValidated(monitor)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(form.isValidated(scope, params._first)).toEqualTypeOf<IsValidatedSchema>()
+    expectTypeOf(form.isValidated(monitor, params._first)).toEqualTypeOf<IsValidatedSchema>()
 
-    expectTypeOf(form.isValidated(scope, params._second)).toEqualTypeOf<IsValidatedVerboseSchema>()
+    expectTypeOf(
+      form.isValidated(monitor, params._second),
+    ).toEqualTypeOf<IsValidatedVerboseSchema>()
   })
 
   describe("nested", () => {
@@ -50,15 +52,15 @@ describe("types", () => {
       readonly element: IsValidatedVerboseSchema
     }
 
-    it("matches schema type for isValidated(scope, select?)", ({ scope }) => {
-      expectTypeOf(parent.isValidated(scope)).toEqualTypeOf<boolean>()
+    it("matches schema type for isValidated(monitor, select?)", ({ monitor }) => {
+      expectTypeOf(parent.isValidated(monitor)).toEqualTypeOf<boolean>()
 
       expectTypeOf(
-        parent.isValidated(scope, params._first),
+        parent.isValidated(monitor, params._first),
       ).toEqualTypeOf<ParentIsValidatedSchema>()
 
       expectTypeOf(
-        parent.isValidated(scope, params._second),
+        parent.isValidated(monitor, params._second),
       ).toEqualTypeOf<ParentIsValidatedVerboseSchema>()
     })
   })
@@ -81,12 +83,12 @@ describe("when element is initially not validated", () => {
     )
   }
 
-  it("returns false for initially invalid but not validated enabled", ({ scope }) => {
+  it("returns false for initially invalid but not validated enabled", ({ monitor }) => {
     const form = setup("")
 
-    expect(form.isValidated(scope)).toBe(false)
-    expect(form.isValidated(scope, params._first)).toBe(false)
-    expect(form.isValidated(scope, params._second)).toStrictEqual({
+    expect(form.isValidated(monitor)).toBe(false)
+    expect(form.isValidated(monitor, params._first)).toBe(false)
+    expect(form.isValidated(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: false,
@@ -98,12 +100,12 @@ describe("when element is initially not validated", () => {
     })
   })
 
-  it("returns true for initially invalid validated enabled", ({ scope }) => {
+  it("returns true for initially invalid validated enabled", ({ monitor }) => {
     const form = setup("", "onInit")
 
-    expect(form.isValidated(scope)).toBe(true)
-    expect(form.isValidated(scope, params._first)).toBe(true)
-    expect(form.isValidated(scope, params._second)).toStrictEqual({
+    expect(form.isValidated(monitor)).toBe(true)
+    expect(form.isValidated(monitor, params._first)).toBe(true)
+    expect(form.isValidated(monitor, params._second)).toStrictEqual({
       enabled: true,
       element: {
         enabled: false,
@@ -115,12 +117,12 @@ describe("when element is initially not validated", () => {
     })
   })
 
-  it("returns false for initially valid but not validated enabled", ({ scope }) => {
+  it("returns false for initially valid but not validated enabled", ({ monitor }) => {
     const form = setup("true")
 
-    expect(form.isValidated(scope)).toBe(false)
-    expect(form.isValidated(scope, params._first)).toBe(false)
-    expect(form.isValidated(scope, params._second)).toStrictEqual({
+    expect(form.isValidated(monitor)).toBe(false)
+    expect(form.isValidated(monitor, params._first)).toBe(false)
+    expect(form.isValidated(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: false,
@@ -132,15 +134,15 @@ describe("when element is initially not validated", () => {
     })
   })
 
-  it("returns false for initially valid validated enabled", ({ scope }) => {
+  it("returns false for initially valid validated enabled", ({ monitor }) => {
     const form = setup("true", "onInit")
 
-    expect(form.isValidated(scope)).toBe(false)
-    expect(form.isValidated(scope, params._first)).toStrictEqual({
+    expect(form.isValidated(monitor)).toBe(false)
+    expect(form.isValidated(monitor, params._first)).toStrictEqual({
       enabled: true,
       element: false,
     })
-    expect(form.isValidated(scope, params._second)).toStrictEqual({
+    expect(form.isValidated(monitor, params._second)).toStrictEqual({
       enabled: true,
       element: {
         enabled: false,
@@ -152,16 +154,16 @@ describe("when element is initially not validated", () => {
     })
   })
 
-  it("returns true after validating element", ({ scope }) => {
+  it("returns true after validating element", ({ monitor }) => {
     const form = setup("true", "onInit")
 
-    expect(form.isValidated(scope)).toBe(false)
+    expect(form.isValidated(monitor)).toBe(false)
 
     form.element.setTouched(true)
 
-    expect(form.isValidated(scope)).toBe(true)
-    expect(form.isValidated(scope, params._first)).toBe(true)
-    expect(form.isValidated(scope, params._second)).toStrictEqual({
+    expect(form.isValidated(monitor)).toBe(true)
+    expect(form.isValidated(monitor, params._first)).toBe(true)
+    expect(form.isValidated(monitor, params._second)).toStrictEqual({
       enabled: true,
       element: {
         enabled: true,
@@ -194,12 +196,12 @@ describe("when element is initially validated", () => {
     )
   }
 
-  it("returns false for initially invalid but not validated enabled", ({ scope }) => {
+  it("returns false for initially invalid but not validated enabled", ({ monitor }) => {
     const form = setup("")
 
-    expect(form.isValidated(scope)).toBe(false)
-    expect(form.isValidated(scope, params._first)).toBe(false)
-    expect(form.isValidated(scope, params._second)).toStrictEqual({
+    expect(form.isValidated(monitor)).toBe(false)
+    expect(form.isValidated(monitor, params._first)).toBe(false)
+    expect(form.isValidated(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: true,
@@ -211,12 +213,12 @@ describe("when element is initially validated", () => {
     })
   })
 
-  it("returns true for initially invalid validated enabled", ({ scope }) => {
+  it("returns true for initially invalid validated enabled", ({ monitor }) => {
     const form = setup("", "onInit")
 
-    expect(form.isValidated(scope)).toBe(true)
-    expect(form.isValidated(scope, params._first)).toBe(true)
-    expect(form.isValidated(scope, params._second)).toStrictEqual({
+    expect(form.isValidated(monitor)).toBe(true)
+    expect(form.isValidated(monitor, params._first)).toBe(true)
+    expect(form.isValidated(monitor, params._second)).toStrictEqual({
       enabled: true,
       element: {
         enabled: true,
@@ -228,15 +230,15 @@ describe("when element is initially validated", () => {
     })
   })
 
-  it("returns false for a initially valid but not validated enabled", ({ scope }) => {
+  it("returns false for a initially valid but not validated enabled", ({ monitor }) => {
     const form = setup("true")
 
-    expect(form.isValidated(scope)).toBe(false)
-    expect(form.isValidated(scope, params._first)).toStrictEqual({
+    expect(form.isValidated(monitor)).toBe(false)
+    expect(form.isValidated(monitor, params._first)).toStrictEqual({
       enabled: false,
       element: true,
     })
-    expect(form.isValidated(scope, params._second)).toStrictEqual({
+    expect(form.isValidated(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: true,
@@ -248,12 +250,12 @@ describe("when element is initially validated", () => {
     })
   })
 
-  it("returns true for a initially valid validated enabled", ({ scope }) => {
+  it("returns true for a initially valid validated enabled", ({ monitor }) => {
     const form = setup("true", "onInit")
 
-    expect(form.isValidated(scope)).toBe(true)
-    expect(form.isValidated(scope, params._first)).toBe(true)
-    expect(form.isValidated(scope, params._second)).toStrictEqual({
+    expect(form.isValidated(monitor)).toBe(true)
+    expect(form.isValidated(monitor, params._first)).toBe(true)
+    expect(form.isValidated(monitor, params._second)).toStrictEqual({
       enabled: true,
       element: {
         enabled: true,
@@ -265,16 +267,16 @@ describe("when element is initially validated", () => {
     })
   })
 
-  it("returns true after validating enabled", ({ scope }) => {
+  it("returns true after validating enabled", ({ monitor }) => {
     const form = setup("true")
 
-    expect(form.isValidated(scope)).toBe(false)
+    expect(form.isValidated(monitor)).toBe(false)
 
     form.enabled.setTouched(true)
 
-    expect(form.isValidated(scope)).toBe(true)
-    expect(form.isValidated(scope, params._first)).toBe(true)
-    expect(form.isValidated(scope, params._second)).toStrictEqual({
+    expect(form.isValidated(monitor)).toBe(true)
+    expect(form.isValidated(monitor, params._first)).toBe(true)
+    expect(form.isValidated(monitor, params._second)).toStrictEqual({
       enabled: true,
       element: {
         enabled: true,
@@ -288,7 +290,7 @@ describe("when element is initially validated", () => {
 })
 
 describe("stable validated value", () => {
-  it("subsequently selects equal validated", ({ scope }) => {
+  it("subsequently selects equal validated", ({ monitor }) => {
     const form = ImpulseFormOptional(
       ImpulseFormUnit(true, {
         validateOn: "onInit",
@@ -303,13 +305,15 @@ describe("stable validated value", () => {
       ),
     )
 
-    expect(form.isValidated(scope)).toBeTypeOf("boolean")
-    expect(form.isValidated(scope)).toBe(form.isValidated(scope))
+    expect(form.isValidated(monitor)).toBeTypeOf("boolean")
+    expect(form.isValidated(monitor)).toBe(form.isValidated(monitor))
 
-    expect(form.isValidated(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.isValidated(scope, params._first)).toBe(form.isValidated(scope, params._first))
+    expect(form.isValidated(monitor, params._first)).toBeInstanceOf(Object)
+    expect(form.isValidated(monitor, params._first)).toBe(form.isValidated(monitor, params._first))
 
-    expect(form.isValidated(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.isValidated(scope, params._second)).toBe(form.isValidated(scope, params._second))
+    expect(form.isValidated(monitor, params._second)).toBeInstanceOf(Object)
+    expect(form.isValidated(monitor, params._second)).toBe(
+      form.isValidated(monitor, params._second),
+    )
   })
 })

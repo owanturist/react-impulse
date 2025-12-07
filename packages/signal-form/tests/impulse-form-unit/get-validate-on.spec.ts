@@ -1,4 +1,4 @@
-import type { Scope } from "@owanturist/signal"
+import type { Monitor } from "@owanturist/signal"
 import { z } from "zod"
 
 import { params } from "~/tools/params"
@@ -11,24 +11,24 @@ import {
 } from "../../src"
 
 function getValidateOnDefault<TError, TOutput>(
-  scope: Scope,
+  monitor: Monitor,
   value: ImpulseFormUnit<string, TError, TOutput>,
 ) {
-  return value.getValidateOn(scope)
+  return value.getValidateOn(monitor)
 }
 
 function getValidateOnConcise<TError, TOutput>(
-  scope: Scope,
+  monitor: Monitor,
   value: ImpulseFormUnit<string, TError, TOutput>,
 ) {
-  return value.getValidateOn(scope, params._first)
+  return value.getValidateOn(monitor, params._first)
 }
 
 function getValidateOnVerbose<TError, TOutput>(
-  scope: Scope,
+  monitor: Monitor,
   value: ImpulseFormUnit<string, TError, TOutput>,
 ) {
-  return value.getValidateOn(scope, params._second)
+  return value.getValidateOn(monitor, params._second)
 }
 
 describe("when options: ImpulseFormUnitSchemaOptions", () => {
@@ -43,37 +43,37 @@ describe("when options: ImpulseFormUnitSchemaOptions", () => {
     const form = setup()
 
     expectTypeOf(form.getValidateOn).toEqualTypeOf<{
-      (scope: Scope): ValidateStrategy
+      (monitor: Monitor): ValidateStrategy
       <TResult>(
-        scope: Scope,
+        monitor: Monitor,
         select: (concise: ValidateStrategy, verbose: ValidateStrategy) => TResult,
       ): TResult
     }>()
   })
 
   describe.each([
-    ["(scope)", getValidateOnDefault],
-    ["(scope, (concise) => concise)", getValidateOnConcise],
-    ["(scope, (_, verbose) => verbose)", getValidateOnVerbose],
+    ["(monitor)", getValidateOnDefault],
+    ["(monitor, (concise) => concise)", getValidateOnConcise],
+    ["(monitor, (_, verbose) => verbose)", getValidateOnVerbose],
   ])("getValidateOn%s", (_, getValidateOn) => {
-    it("returns ValidateStrategy value", ({ scope }) => {
+    it("returns ValidateStrategy value", ({ monitor }) => {
       const value = setup()
 
-      expectTypeOf(getValidateOn(scope, value)).toEqualTypeOf<ValidateStrategy>()
+      expectTypeOf(getValidateOn(monitor, value)).toEqualTypeOf<ValidateStrategy>()
     })
 
-    it("defaults to onTouch", ({ scope }) => {
+    it("defaults to onTouch", ({ monitor }) => {
       const value = setup()
 
-      expect(getValidateOn(scope, value)).toBe("onTouch")
+      expect(getValidateOn(monitor, value)).toBe("onTouch")
     })
 
-    it("returns initial ValidateStrategy", ({ scope }) => {
+    it("returns initial ValidateStrategy", ({ monitor }) => {
       const value = setup({
         validateOn: "onSubmit",
       })
 
-      expect(getValidateOn(scope, value)).toBe("onSubmit")
+      expect(getValidateOn(monitor, value)).toBe("onSubmit")
     })
   })
 })
@@ -90,37 +90,37 @@ describe("when options: ImpulseFormUnitValidatedOptions", () => {
     const form = setup()
 
     expectTypeOf(form.getValidateOn).toEqualTypeOf<{
-      (scope: Scope): ValidateStrategy
+      (monitor: Monitor): ValidateStrategy
       <TResult>(
-        scope: Scope,
+        monitor: Monitor,
         select: (concise: ValidateStrategy, verbose: ValidateStrategy) => TResult,
       ): TResult
     }>()
   })
 
   describe.each([
-    ["(scope)", getValidateOnDefault],
-    ["(scope, (concise) => concise)", getValidateOnConcise],
-    ["(scope, (_, verbose) => verbose)", getValidateOnVerbose],
+    ["(monitor)", getValidateOnDefault],
+    ["(monitor, (concise) => concise)", getValidateOnConcise],
+    ["(monitor, (_, verbose) => verbose)", getValidateOnVerbose],
   ])("getValidateOn%s", (_, getValidateOn) => {
-    it("returns ValidateStrategy value", ({ scope }) => {
+    it("returns ValidateStrategy value", ({ monitor }) => {
       const value = setup()
 
-      expectTypeOf(getValidateOn(scope, value)).toEqualTypeOf<ValidateStrategy>()
+      expectTypeOf(getValidateOn(monitor, value)).toEqualTypeOf<ValidateStrategy>()
     })
 
-    it("defaults to onTouch", ({ scope }) => {
+    it("defaults to onTouch", ({ monitor }) => {
       const value = setup()
 
-      expect(getValidateOn(scope, value)).toBe("onTouch")
+      expect(getValidateOn(monitor, value)).toBe("onTouch")
     })
 
-    it("returns initial ValidateStrategy", ({ scope }) => {
+    it("returns initial ValidateStrategy", ({ monitor }) => {
       const value = setup({
         validateOn: "onSubmit",
       })
 
-      expect(getValidateOn(scope, value)).toBe("onSubmit")
+      expect(getValidateOn(monitor, value)).toBe("onSubmit")
     })
   })
 })
@@ -130,53 +130,53 @@ describe("when options: ImpulseFormUnitOptions", () => {
     const form = ImpulseFormUnit("")
 
     expectTypeOf(form.getValidateOn).toEqualTypeOf<{
-      (scope: Scope): ValidateStrategy
+      (monitor: Monitor): ValidateStrategy
       <TResult>(
-        scope: Scope,
+        monitor: Monitor,
         select: (concise: ValidateStrategy, verbose: ValidateStrategy) => TResult,
       ): TResult
     }>()
   })
 
   describe.each([
-    ["(scope)", getValidateOnDefault],
-    ["(scope, (concise) => concise)", getValidateOnConcise],
-    ["(scope, (_, verbose) => verbose)", getValidateOnVerbose],
+    ["(monitor)", getValidateOnDefault],
+    ["(monitor, (concise) => concise)", getValidateOnConcise],
+    ["(monitor, (_, verbose) => verbose)", getValidateOnVerbose],
   ])("getValidateOn%s", (_, getValidateOn) => {
-    it("returns ValidateStrategy value", ({ scope }) => {
+    it("returns ValidateStrategy value", ({ monitor }) => {
       const value = ImpulseFormUnit("")
 
-      expectTypeOf(getValidateOn(scope, value)).toEqualTypeOf<ValidateStrategy>()
+      expectTypeOf(getValidateOn(monitor, value)).toEqualTypeOf<ValidateStrategy>()
     })
 
-    it("defaults to onTouch when schema is defined", ({ scope }) => {
+    it("defaults to onTouch when schema is defined", ({ monitor }) => {
       const value = ImpulseFormUnit("", {
         schema: z.string(),
       })
 
-      expect(getValidateOn(scope, value)).toBe("onTouch")
+      expect(getValidateOn(monitor, value)).toBe("onTouch")
     })
 
-    it("defaults to onTouch when validate is defined", ({ scope }) => {
+    it("defaults to onTouch when validate is defined", ({ monitor }) => {
       const value = ImpulseFormUnit("", {
         validate: (input) => [null, input],
       })
 
-      expect(getValidateOn(scope, value)).toBe("onTouch")
+      expect(getValidateOn(monitor, value)).toBe("onTouch")
     })
 
-    it("defaults to onInit when transform is defined", ({ scope }) => {
+    it("defaults to onInit when transform is defined", ({ monitor }) => {
       const value = ImpulseFormUnit("", {
         transform: (input) => input,
       })
 
-      expect(getValidateOn(scope, value)).toBe("onInit")
+      expect(getValidateOn(monitor, value)).toBe("onInit")
     })
 
-    it("defaults to onInit when no transform/validation is defined", ({ scope }) => {
+    it("defaults to onInit when no transform/validation is defined", ({ monitor }) => {
       const value = ImpulseFormUnit("")
 
-      expect(getValidateOn(scope, value)).toBe("onInit")
+      expect(getValidateOn(monitor, value)).toBe("onInit")
     })
   })
 })

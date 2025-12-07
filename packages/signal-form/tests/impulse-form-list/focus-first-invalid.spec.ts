@@ -17,7 +17,7 @@ function setup(options?: ImpulseFormListOptions<ImpulseFormUnit<number, Readonly
   const listener1 = vi.fn()
   const listener2 = vi.fn()
 
-  const elements = untracked((scope) => form.getElements(scope))
+  const elements = untracked((monitor) => form.getElements(monitor))
 
   elements.at(0)?.onFocusWhenInvalid(listener0)
   elements.at(1)?.onFocusWhenInvalid(listener1)
@@ -77,7 +77,7 @@ it("calls the only invalid", () => {
   expect(listener2).not.toHaveBeenCalled()
 })
 
-it("does not focus invalid without listener", ({ scope }) => {
+it("does not focus invalid without listener", ({ monitor }) => {
   const form = ImpulseFormList([
     ImpulseFormUnit(1, { error: "err-1" }),
     ImpulseFormUnit(2, { error: "err-2" }),
@@ -85,7 +85,7 @@ it("does not focus invalid without listener", ({ scope }) => {
 
   const listener1 = vi.fn()
 
-  form.getElements(scope).at(1)?.onFocusWhenInvalid(listener1)
+  form.getElements(monitor).at(1)?.onFocusWhenInvalid(listener1)
 
   form.focusFirstInvalid()
   expect(listener1).toHaveBeenCalledExactlyOnceWith("err-2")
@@ -145,7 +145,7 @@ describe("with onFocusWhenInvalid()", () => {
     expect(listener0).toHaveBeenCalledExactlyOnceWith([[expect.any(String)]])
   })
 
-  it("does not call a listener when an element is invalid and has own listener", ({ scope }) => {
+  it("does not call a listener when an element is invalid and has own listener", ({ monitor }) => {
     const form = ImpulseFormList([
       ImpulseFormUnit("", {
         validateOn: "onInit",
@@ -157,7 +157,7 @@ describe("with onFocusWhenInvalid()", () => {
     const listener1 = vi.fn()
 
     form.onFocusWhenInvalid(listener0)
-    form.getElements(scope).at(0)?.onFocusWhenInvalid(listener1)
+    form.getElements(monitor).at(0)?.onFocusWhenInvalid(listener1)
     form.focusFirstInvalid()
 
     expect(listener0).not.toHaveBeenCalled()
