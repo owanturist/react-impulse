@@ -22,33 +22,33 @@ describe("types", () => {
     readonly element: boolean
   }
 
-  it("matches schema type for isDirty(scope, select?)", ({ scope }) => {
-    expectTypeOf(form.isDirty(scope)).toEqualTypeOf<boolean>()
+  it("matches schema type for isDirty(monitor, select?)", ({ monitor }) => {
+    expectTypeOf(form.isDirty(monitor)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(form.isDirty(scope, params._first)).toEqualTypeOf<FlagSchema>()
-    expectTypeOf(form.isDirty(scope, params._second)).toEqualTypeOf<FlagVerboseSchema>()
+    expectTypeOf(form.isDirty(monitor, params._first)).toEqualTypeOf<FlagSchema>()
+    expectTypeOf(form.isDirty(monitor, params._second)).toEqualTypeOf<FlagVerboseSchema>()
   })
 })
 
 describe("runtime", () => {
-  it("reflects dirtiness based on children", ({ scope }) => {
+  it("reflects dirtiness based on children", ({ monitor }) => {
     const form = ImpulseFormOptional(
       ImpulseFormUnit(true, { schema: z.boolean() }),
       ImpulseFormUnit(1, { schema: z.number() }),
     )
 
-    expect(form.isDirty(scope)).toBe(false)
+    expect(form.isDirty(monitor)).toBe(false)
 
     form.element.setInput(2)
 
-    expect(form.isDirty(scope)).toBe(true)
+    expect(form.isDirty(monitor)).toBe(true)
 
     form.reset()
 
-    expect(form.isDirty(scope)).toBe(false)
+    expect(form.isDirty(monitor)).toBe(false)
 
     form.enabled.setInput(false)
 
-    expect(form.isDirty(scope)).toBe(true)
+    expect(form.isDirty(monitor)).toBe(true)
   })
 })

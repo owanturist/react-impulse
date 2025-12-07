@@ -1,4 +1,4 @@
-import { Impulse, type Scope, batch } from "@owanturist/signal"
+import { Impulse, type Monitor, batch } from "@owanturist/signal"
 
 import { entries } from "~/tools/entries"
 import { isFunction } from "~/tools/is-function"
@@ -17,7 +17,7 @@ class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
 > {
   public static override _getState = ImpulseForm._getState
 
-  private readonly _elements = Impulse((scope) => this._state._getElements(scope), {
+  private readonly _elements = Impulse((monitor) => this._state._getElements(monitor), {
     equals: isShallowArrayEqual,
   })
 
@@ -25,26 +25,26 @@ class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
     super()
   }
 
-  public getElements(scope: Scope): ReadonlyArray<TElement>
+  public getElements(monitor: Monitor): ReadonlyArray<TElement>
   public getElements<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select: (elements: ReadonlyArray<TElement>) => TResult,
   ): TResult
   public getElements<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select: (elements: ReadonlyArray<TElement>) => TResult = params._first as typeof select,
   ): TResult {
-    return select(this._elements.read(scope))
+    return select(this._elements.read(monitor))
   }
 
   public setElements(
-    setter: Setter<ReadonlyArray<TElement>, [ReadonlyArray<TElement>, Scope]>,
+    setter: Setter<ReadonlyArray<TElement>, [ReadonlyArray<TElement>, Monitor]>,
   ): void {
-    batch((scope) => {
-      const initialElements = this._state._getInitialElements(scope)
+    batch((monitor) => {
+      const initialElements = this._state._getInitialElements(monitor)
 
       const elementsStates = map(
-        isFunction(setter) ? setter(this._elements.read(scope), scope) : setter,
+        isFunction(setter) ? setter(this._elements.read(monitor), monitor) : setter,
 
         ImpulseForm._getState,
       )
@@ -53,13 +53,13 @@ class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
 
       // detach all elements from their initial states in one go
       for (const stateElement of nextStateElements) {
-        stateElement._replaceInitial(scope, undefined, false)
+        stateElement._replaceInitial(monitor, undefined, false)
       }
 
       // attach the elements to their updated initial states
       for (const [index, stateElement] of entries(nextStateElements)) {
         stateElement._replaceInitial(
-          scope,
+          monitor,
           initialElements.at(index),
           !elementsStates.at(index)?._hasSameRootWith(stateElement),
         )

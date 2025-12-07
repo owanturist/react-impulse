@@ -1,4 +1,4 @@
-import { Impulse, type Scope, untracked } from "@owanturist/signal"
+import { Impulse, type Monitor, untracked } from "@owanturist/signal"
 
 import { concat } from "~/tools/concat"
 import { drop } from "~/tools/drop"
@@ -64,11 +64,11 @@ class ImpulseFormListState<TElement extends ImpulseForm = ImpulseForm> extends I
     })
 
     this._elements = Impulse(
-      untracked((scope) =>
+      untracked((monitor) =>
         map(elements, (element, index) => {
           const child = this._parentOf(element)
 
-          child._replaceInitial(scope, initialElements.at(index), true)
+          child._replaceInitial(monitor, initialElements.at(index), true)
 
           return child
         }),
@@ -80,46 +80,46 @@ class ImpulseFormListState<TElement extends ImpulseForm = ImpulseForm> extends I
     return new ImpulseFormListState(parent, untracked(this._elements))
   }
 
-  public _getElements(scope: Scope): ReadonlyArray<TElement> {
-    return map(this._elements.read(scope), ({ _host }) => _host() as TElement)
+  public _getElements(monitor: Monitor): ReadonlyArray<TElement> {
+    return map(this._elements.read(monitor), ({ _host }) => _host() as TElement)
   }
 
   public _getInitialElements(
-    scope: Scope,
+    monitor: Monitor,
   ): ReadonlyArray<ImpulseFormState<GetImpulseFormParams<TElement>>> {
-    return this._initialElements.read(scope)._list.read(scope)
+    return this._initialElements.read(monitor)._list.read(monitor)
   }
 
   public readonly _initial = Impulse(
-    (scope): ImpulseFormListInput<TElement> =>
-      map(this._getInitialElements(scope), ({ _initial }) => _initial.read(scope)),
+    (monitor): ImpulseFormListInput<TElement> =>
+      map(this._getInitialElements(monitor), ({ _initial }) => _initial.read(monitor)),
   )
 
   public _replaceInitial(
-    scope: Scope,
+    monitor: Monitor,
     state: undefined | ImpulseFormListState<TElement>,
     isMounting: boolean,
   ): void {
     if (state) {
-      const elements = this._elements.read(scope)
-      const initialElements = state._initialElements.read(scope)
+      const elements = this._elements.read(monitor)
+      const initialElements = state._initialElements.read(monitor)
 
       this._initialElements.update(initialElements)
 
-      for (const [index, element] of entries(initialElements._list.read(scope))) {
-        elements.at(index)?._replaceInitial(scope, element, isMounting)
+      for (const [index, element] of entries(initialElements._list.read(monitor))) {
+        elements.at(index)?._replaceInitial(monitor, element, isMounting)
       }
     }
   }
 
-  public _setInitial(scope: Scope, setter: ImpulseFormListInputSetter<TElement>): void {
+  public _setInitial(monitor: Monitor, setter: ImpulseFormListInputSetter<TElement>): void {
     const setters = isFunction(setter)
-      ? setter(this._initial.read(scope), this._input.read(scope))
+      ? setter(this._initial.read(monitor), this._input.read(monitor))
       : setter
 
-    const elements = this._elements.read(scope)
-    const initialElements = this._initialElements.read(scope)
-    const initialElementsList = initialElements._list.read(scope)
+    const elements = this._elements.read(monitor)
+    const initialElements = this._initialElements.read(monitor)
+    const initialElementsList = initialElements._list.read(monitor)
 
     const nextInitialElements = map(
       take(
@@ -137,36 +137,36 @@ class ImpulseFormListState<TElement extends ImpulseForm = ImpulseForm> extends I
 
     for (const [index, initial] of entries(setters)) {
       if (!isUndefined(initial)) {
-        nextInitialElements.at(index)?._setInitial(scope, initial)
+        nextInitialElements.at(index)?._setInitial(monitor, initial)
       }
     }
 
     for (const [index, element] of entries(nextInitialElements)) {
-      elements.at(index)?._replaceInitial(scope, element, false)
+      elements.at(index)?._replaceInitial(monitor, element, false)
     }
   }
 
   public readonly _input = Impulse(
-    (scope): ImpulseFormListInput<TElement> =>
-      map(this._elements.read(scope), ({ _input }) => _input.read(scope)),
+    (monitor): ImpulseFormListInput<TElement> =>
+      map(this._elements.read(monitor), ({ _input }) => _input.read(monitor)),
   )
 
-  public _setInput(scope: Scope, setter: ImpulseFormListInputSetter<TElement>): void {
+  public _setInput(monitor: Monitor, setter: ImpulseFormListInputSetter<TElement>): void {
     const setters = isFunction(setter)
-      ? setter(this._input.read(scope), this._initial.read(scope))
+      ? setter(this._input.read(monitor), this._initial.read(monitor))
       : setter
 
-    for (const [index, element] of entries(this._elements.read(scope))) {
+    for (const [index, element] of entries(this._elements.read(monitor))) {
       const input = setters.at(index)
 
       if (!isUndefined(input)) {
-        element._setInput(scope, input)
+        element._setInput(monitor, input)
       }
     }
   }
 
-  public readonly _error = Impulse((scope): ImpulseFormListError<TElement> => {
-    const error = map(this._elements.read(scope), ({ _error }) => _error.read(scope))
+  public readonly _error = Impulse((monitor): ImpulseFormListError<TElement> => {
+    const error = map(this._elements.read(monitor), ({ _error }) => _error.read(monitor))
 
     if (error.every(isNull)) {
       return null
@@ -176,78 +176,82 @@ class ImpulseFormListState<TElement extends ImpulseForm = ImpulseForm> extends I
   })
 
   public readonly _errorVerbose = Impulse(
-    (scope): ImpulseFormListErrorVerbose<TElement> =>
-      map(this._elements.read(scope), ({ _errorVerbose }) => _errorVerbose.read(scope)),
+    (monitor): ImpulseFormListErrorVerbose<TElement> =>
+      map(this._elements.read(monitor), ({ _errorVerbose }) => _errorVerbose.read(monitor)),
   )
 
-  public _setError(scope: Scope, setter: ImpulseFormListErrorSetter<TElement>): void {
-    const setters = isFunction(setter) ? setter(this._errorVerbose.read(scope)) : setter
+  public _setError(monitor: Monitor, setter: ImpulseFormListErrorSetter<TElement>): void {
+    const setters = isFunction(setter) ? setter(this._errorVerbose.read(monitor)) : setter
 
-    for (const [index, element] of entries(this._elements.read(scope))) {
+    for (const [index, element] of entries(this._elements.read(monitor))) {
       const error = isNull(setters) ? setters : setters.at(index)
 
       if (!isUndefined(error)) {
-        element._setError(scope, error)
+        element._setError(monitor, error)
       }
     }
   }
 
-  public readonly _validateOn = Impulse((scope): ImpulseFormListValidateOn<TElement> => {
-    const validateOn = map(this._elements.read(scope), ({ _validateOn }) => _validateOn.read(scope))
+  public readonly _validateOn = Impulse((monitor): ImpulseFormListValidateOn<TElement> => {
+    const validateOn = map(this._elements.read(monitor), ({ _validateOn }) =>
+      _validateOn.read(monitor),
+    )
 
     return toConcise(validateOn, isString, VALIDATE_ON_TOUCH)
   })
 
   public readonly _validateOnVerbose = Impulse(
-    (scope): ImpulseFormListValidateOnVerbose<TElement> =>
-      map(this._elements.read(scope), ({ _validateOnVerbose }) => _validateOnVerbose.read(scope)),
+    (monitor): ImpulseFormListValidateOnVerbose<TElement> =>
+      map(this._elements.read(monitor), ({ _validateOnVerbose }) =>
+        _validateOnVerbose.read(monitor),
+      ),
   )
 
-  public _setValidateOn(scope: Scope, setter: ImpulseFormListValidateOnSetter<TElement>): void {
-    const setters = isFunction(setter) ? setter(this._validateOnVerbose.read(scope)) : setter
+  public _setValidateOn(monitor: Monitor, setter: ImpulseFormListValidateOnSetter<TElement>): void {
+    const setters = isFunction(setter) ? setter(this._validateOnVerbose.read(monitor)) : setter
 
-    for (const [index, element] of entries(this._getInitialElements(scope))) {
+    for (const [index, element] of entries(this._getInitialElements(monitor))) {
       const validateOn = isString(setters) ? setters : setters.at(index)
 
       if (!isUndefined(validateOn)) {
-        element._setValidateOn(scope, validateOn)
+        element._setValidateOn(monitor, validateOn)
       }
     }
 
-    for (const [index, element] of entries(this._elements.read(scope))) {
+    for (const [index, element] of entries(this._elements.read(monitor))) {
       const validateOn = isString(setters) ? setters : setters.at(index)
 
       if (!isUndefined(validateOn)) {
-        element._setValidateOn(scope, validateOn)
+        element._setValidateOn(monitor, validateOn)
       }
     }
   }
 
-  public readonly _touched = Impulse((scope): ImpulseFormListFlag<TElement> => {
-    const touched = map(this._elements.read(scope), ({ _touched }) => _touched.read(scope))
+  public readonly _touched = Impulse((monitor): ImpulseFormListFlag<TElement> => {
+    const touched = map(this._elements.read(monitor), ({ _touched }) => _touched.read(monitor))
 
     return toConcise(touched, isBoolean, false)
   })
 
   public readonly _touchedVerbose = Impulse(
-    (scope): ImpulseFormListFlagVerbose<TElement> =>
-      map(this._elements.read(scope), ({ _touchedVerbose }) => _touchedVerbose.read(scope)),
+    (monitor): ImpulseFormListFlagVerbose<TElement> =>
+      map(this._elements.read(monitor), ({ _touchedVerbose }) => _touchedVerbose.read(monitor)),
   )
 
-  public _setTouched(scope: Scope, setter: ImpulseFormListFlagSetter<TElement>): void {
-    const setters = isFunction(setter) ? setter(this._touchedVerbose.read(scope)) : setter
+  public _setTouched(monitor: Monitor, setter: ImpulseFormListFlagSetter<TElement>): void {
+    const setters = isFunction(setter) ? setter(this._touchedVerbose.read(monitor)) : setter
 
-    for (const [index, element] of entries(this._elements.read(scope))) {
+    for (const [index, element] of entries(this._elements.read(monitor))) {
       const touched = isBoolean(setters) ? setters : setters.at(index)
 
       if (!isUndefined(touched)) {
-        element._setTouched(scope, touched)
+        element._setTouched(monitor, touched)
       }
     }
   }
 
-  public readonly _output = Impulse((scope): null | ImpulseFormListOutput<TElement> => {
-    const output = map(this._elements.read(scope), ({ _output }) => _output.read(scope))
+  public readonly _output = Impulse((monitor): null | ImpulseFormListOutput<TElement> => {
+    const output = map(this._elements.read(monitor), ({ _output }) => _output.read(monitor))
 
     if (output.some(isNull)) {
       return null
@@ -257,120 +261,127 @@ class ImpulseFormListState<TElement extends ImpulseForm = ImpulseForm> extends I
   })
 
   public readonly _outputVerbose = Impulse(
-    (scope): ImpulseFormListOutputVerbose<TElement> =>
-      map(this._elements.read(scope), ({ _outputVerbose }) => _outputVerbose.read(scope)),
+    (monitor): ImpulseFormListOutputVerbose<TElement> =>
+      map(this._elements.read(monitor), ({ _outputVerbose }) => _outputVerbose.read(monitor)),
   )
 
-  public readonly _valid = Impulse((scope): ImpulseFormListFlag<TElement> => {
-    const valid = map(this._elements.read(scope), ({ _valid }) => _valid.read(scope))
+  public readonly _valid = Impulse((monitor): ImpulseFormListFlag<TElement> => {
+    const valid = map(this._elements.read(monitor), ({ _valid }) => _valid.read(monitor))
 
     return toConcise(valid, isBoolean, false)
   })
 
   public readonly _validVerbose = Impulse(
-    (scope): ImpulseFormListFlagVerbose<TElement> =>
-      map(this._elements.read(scope), ({ _validVerbose }) => _validVerbose.read(scope)),
+    (monitor): ImpulseFormListFlagVerbose<TElement> =>
+      map(this._elements.read(monitor), ({ _validVerbose }) => _validVerbose.read(monitor)),
   )
 
-  public readonly _invalid = Impulse((scope): ImpulseFormListFlag<TElement> => {
-    const invalid = map(this._elements.read(scope), ({ _invalid }) => _invalid.read(scope))
+  public readonly _invalid = Impulse((monitor): ImpulseFormListFlag<TElement> => {
+    const invalid = map(this._elements.read(monitor), ({ _invalid }) => _invalid.read(monitor))
 
     return toConcise(invalid, isBoolean, false)
   })
 
   public readonly _invalidVerbose = Impulse(
-    (scope): ImpulseFormListFlagVerbose<TElement> =>
-      map(this._elements.read(scope), ({ _invalidVerbose }) => _invalidVerbose.read(scope)),
+    (monitor): ImpulseFormListFlagVerbose<TElement> =>
+      map(this._elements.read(monitor), ({ _invalidVerbose }) => _invalidVerbose.read(monitor)),
   )
 
-  public readonly _validated = Impulse((scope): ImpulseFormListFlag<TElement> => {
-    const validated = map(this._elements.read(scope), ({ _validated }) => _validated.read(scope))
+  public readonly _validated = Impulse((monitor): ImpulseFormListFlag<TElement> => {
+    const validated = map(this._elements.read(monitor), ({ _validated }) =>
+      _validated.read(monitor),
+    )
 
     return toConcise(validated, isBoolean, false)
   })
 
   public readonly _validatedVerbose = Impulse(
-    (scope): ImpulseFormListFlagVerbose<TElement> =>
-      map(this._elements.read(scope), ({ _validatedVerbose }) => _validatedVerbose.read(scope)),
+    (monitor): ImpulseFormListFlagVerbose<TElement> =>
+      map(this._elements.read(monitor), ({ _validatedVerbose }) => _validatedVerbose.read(monitor)),
   )
 
-  public _forceValidated(scope: Scope): void {
-    for (const element of this._elements.read(scope)) {
-      element._forceValidated(scope)
+  public _forceValidated(monitor: Monitor): void {
+    for (const element of this._elements.read(monitor)) {
+      element._forceValidated(monitor)
     }
   }
 
-  public readonly _dirty = Impulse((scope): ImpulseFormListFlag<TElement> => {
-    const elements = this._elements.read(scope)
-    const initialElements = this._getInitialElements(scope)
+  public readonly _dirty = Impulse((monitor): ImpulseFormListFlag<TElement> => {
+    const elements = this._elements.read(monitor)
+    const initialElements = this._getInitialElements(monitor)
 
     const dirty = concat(
       map(elements, ({ _dirty, _dirtyOn }, index) => {
         if (index >= initialElements.length) {
           // added elements are always dirty
-          return _dirtyOn.read(scope)
+          return _dirtyOn.read(monitor)
         }
 
-        return _dirty.read(scope)
+        return _dirty.read(monitor)
       }),
 
       // removed elements are always dirty
-      map(drop(initialElements, elements.length), ({ _dirtyOn }) => _dirtyOn.read(scope)),
+      map(drop(initialElements, elements.length), ({ _dirtyOn }) => _dirtyOn.read(monitor)),
     )
 
     return toConcise(dirty, isBoolean, false)
   })
 
-  public readonly _dirtyVerbose = Impulse((scope): ImpulseFormListFlagVerbose<TElement> => {
-    const elements = this._elements.read(scope)
-    const initialElements = this._getInitialElements(scope)
+  public readonly _dirtyVerbose = Impulse((monitor): ImpulseFormListFlagVerbose<TElement> => {
+    const elements = this._elements.read(monitor)
+    const initialElements = this._getInitialElements(monitor)
 
     return concat(
       map(elements, ({ _dirtyVerbose, _dirtyOnVerbose }, index) => {
         if (index >= initialElements.length) {
           // added elements are always dirty
-          return _dirtyOnVerbose.read(scope)
+          return _dirtyOnVerbose.read(monitor)
         }
 
-        return _dirtyVerbose.read(scope)
+        return _dirtyVerbose.read(monitor)
       }),
 
       // removed elements are always dirty
       map(drop(initialElements, elements.length), ({ _dirtyOnVerbose }) =>
-        _dirtyOnVerbose.read(scope),
+        _dirtyOnVerbose.read(monitor),
       ),
     )
   })
 
-  public readonly _dirtyOn = Impulse((scope): ImpulseFormListFlag<TElement> => {
-    const dirtyOn = map(this._getInitialElements(scope), ({ _dirtyOn }) => _dirtyOn.read(scope))
+  public readonly _dirtyOn = Impulse((monitor): ImpulseFormListFlag<TElement> => {
+    const dirtyOn = map(this._getInitialElements(monitor), ({ _dirtyOn }) => _dirtyOn.read(monitor))
 
     return toConcise(dirtyOn, isBoolean, false)
   })
 
   public readonly _dirtyOnVerbose = Impulse(
-    (scope): ImpulseFormListFlagVerbose<TElement> =>
-      map(this._getInitialElements(scope), ({ _dirtyOnVerbose }) => _dirtyOnVerbose.read(scope)),
+    (monitor): ImpulseFormListFlagVerbose<TElement> =>
+      map(this._getInitialElements(monitor), ({ _dirtyOnVerbose }) =>
+        _dirtyOnVerbose.read(monitor),
+      ),
   )
 
-  public _reset(scope: Scope, resetter: undefined | ImpulseFormListInputSetter<TElement>): void {
+  public _reset(
+    monitor: Monitor,
+    resetter: undefined | ImpulseFormListInputSetter<TElement>,
+  ): void {
     if (!isUndefined(resetter)) {
-      this._setInitial(scope, resetter)
+      this._setInitial(monitor, resetter)
     }
 
-    const nextElements = this._getInitialElements(scope)
+    const nextElements = this._getInitialElements(monitor)
 
     for (const element of nextElements) {
-      element._reset(scope, undefined)
+      element._reset(monitor, undefined)
     }
 
     this._elements.update(map(nextElements, (element) => this._parentOf(element)))
   }
 
   public _getChildren<TChildParams extends ImpulseFormParams>(
-    scope: Scope,
+    monitor: Monitor,
   ): ReadonlyArray<ImpulseFormChild<TChildParams, ImpulseFormListParams<TElement>>> {
-    return map(this._elements.read(scope), (element, index) => ({
+    return map(this._elements.read(monitor), (element, index) => ({
       _state: element as unknown as ImpulseFormState<TChildParams>,
       _mapToChild: (output) => output.at(index),
     }))

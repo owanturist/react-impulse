@@ -59,7 +59,7 @@ interface ImpulseFormUnitOptions<TInput, TError = null> {
    * })
    *
    * form.setInput({ count: 0 })
-   * form.getInput(scope) === initial // true
+   * form.getInput(monitor) === initial // true
    */
   readonly isInputEqual?: Equal<TInput>
 
@@ -82,7 +82,7 @@ interface ImpulseFormUnitOptions<TInput, TError = null> {
    * })
    *
    * form.setInput(" ")
-   * form.isDirty(scope) === false
+   * form.isDirty(monitor) === false
    */
   readonly isInputDirty?: Equal<TInput>
 

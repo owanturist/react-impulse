@@ -1,12 +1,12 @@
 import { renderHook } from "@testing-library/react"
 import { useCallback } from "react"
 
-import { useScoped } from "../../src"
+import { useComputed } from "../../src"
 
 describe("factory no impulses", () => {
   it.each([
-    ["inline", () => useScoped(() => 1)],
-    ["memoized", () => useScoped(() => 1, [])],
+    ["inline", () => useComputed(() => 1)],
+    ["memoized", () => useComputed(() => 1, [])],
   ])("returns %s factory result", (_, useHook) => {
     const { result } = renderHook(useHook)
 
@@ -14,10 +14,10 @@ describe("factory no impulses", () => {
   })
 
   it.each([
-    ["inline", ({ value }: { value: number }) => useScoped(() => 2 * value)],
+    ["inline", ({ value }: { value: number }) => useComputed(() => 2 * value)],
     [
       "memoized",
-      ({ value }: { value: number }) => useScoped(useCallback(() => 2 * value, [value])),
+      ({ value }: { value: number }) => useComputed(useCallback(() => 2 * value, [value])),
     ],
   ])("returns %s factory result from clojure", (_, useHook) => {
     const { result, rerender } = renderHook(useHook, {

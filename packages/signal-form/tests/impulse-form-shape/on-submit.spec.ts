@@ -119,7 +119,7 @@ describe.each<
         }),
     ],
   ])("when %s is invalid", (_, setup) => {
-    it("does not call the listener", ({ scope }) => {
+    it("does not call the listener", ({ monitor }) => {
       const form = setup()
 
       const listener = vi.fn()
@@ -128,7 +128,7 @@ describe.each<
 
       submit(form)
 
-      expect(form.isInvalid(scope)).toBe(true)
+      expect(form.isInvalid(monitor)).toBe(true)
       expect(listener).not.toHaveBeenCalled()
     })
 
@@ -299,7 +299,7 @@ describe.each<
     expect(listener).not.toHaveBeenCalled()
   })
 
-  it("waits the slowest listener", async ({ scope }) => {
+  it("waits the slowest listener", async ({ monitor }) => {
     const form = setup()
 
     const done1 = vi.fn()
@@ -318,21 +318,21 @@ describe.each<
     expect(done2).not.toHaveBeenCalled()
     expect(done3).not.toHaveBeenCalled()
     expect(allDone).not.toHaveBeenCalled()
-    expect(form.isSubmitting(scope)).toBe(true)
+    expect(form.isSubmitting(monitor)).toBe(true)
 
     await vi.advanceTimersByTimeAsync(0.25 * SLOWEST_ASYNC_MS)
     expect(done1).toHaveBeenCalledOnce()
     expect(done2).toHaveBeenCalledOnce()
     expect(done3).not.toHaveBeenCalled()
     expect(allDone).not.toHaveBeenCalled()
-    expect(form.isSubmitting(scope)).toBe(true)
+    expect(form.isSubmitting(monitor)).toBe(true)
 
     await vi.advanceTimersByTimeAsync(0.5 * SLOWEST_ASYNC_MS)
     expect(done1).toHaveBeenCalledOnce()
     expect(done2).toHaveBeenCalledOnce()
     expect(done3).toHaveBeenCalledOnce()
     expect(allDone).toHaveBeenCalledOnce()
-    expect(form.isSubmitting(scope)).toBe(false)
+    expect(form.isSubmitting(monitor)).toBe(false)
   })
 
   it("calls the listeners for each field", () => {

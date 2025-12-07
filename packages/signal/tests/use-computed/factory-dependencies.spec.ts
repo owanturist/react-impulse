@@ -1,10 +1,10 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, type Scope, useScoped } from "../../src"
+import { Impulse, type Monitor, useComputed } from "../../src"
 import { Counter, type WithImpulse, type WithSpy } from "../common"
 
-function factory(scope: Scope, { impulse, spy }: WithImpulse & WithSpy) {
-  const value = impulse.read(scope)
+function factory(monitor: Monitor, { impulse, spy }: WithImpulse & WithSpy) {
+  const value = impulse.read(monitor)
 
   spy(value)
 
@@ -16,7 +16,7 @@ describe("factory without deps", () => {
     const spy = vi.fn()
     const impulse = Impulse({ count: 1 })
 
-    const { rerender } = renderHook((props) => useScoped((scope) => factory(scope, props)), {
+    const { rerender } = renderHook((props) => useComputed((monitor) => factory(monitor, props)), {
       initialProps: { impulse, spy },
     })
 
@@ -60,9 +60,9 @@ describe.each([
   [
     "without",
     ({ impulse, spy }: WithImpulse & WithSpy) =>
-      useScoped(
-        (scope) => {
-          const value = impulse.read(scope)
+      useComputed(
+        (monitor) => {
+          const value = impulse.read(monitor)
 
           spy(value)
 
@@ -74,9 +74,9 @@ describe.each([
   [
     "with inline",
     ({ impulse, spy }: WithImpulse & WithSpy) =>
-      useScoped(
-        (scope) => {
-          const value = impulse.read(scope)
+      useComputed(
+        (monitor) => {
+          const value = impulse.read(monitor)
 
           spy(value)
 
@@ -91,9 +91,9 @@ describe.each([
   [
     "with memoized",
     ({ impulse, spy }: WithImpulse & WithSpy) =>
-      useScoped(
-        (scope) => {
-          const value = impulse.read(scope)
+      useComputed(
+        (monitor) => {
+          const value = impulse.read(monitor)
 
           spy(value)
 

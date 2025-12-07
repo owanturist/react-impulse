@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useScoped } from "../../src"
+import { Impulse, useComputed } from "../../src"
 
 describe("default impulse", () => {
   it("uses local default Impulse when nullable", () => {
@@ -11,7 +11,7 @@ describe("default impulse", () => {
       const [defaultValueImpulse] = React.useState(Impulse("search for me"))
 
       const impulse = valueImpulse ?? defaultValueImpulse
-      const value = useScoped(impulse)
+      const value = useComputed(impulse)
 
       return (
         <input

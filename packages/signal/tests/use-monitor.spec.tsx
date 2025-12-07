@@ -1,19 +1,19 @@
 import { act, render, renderHook } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useScope } from "../src"
+import { Impulse, useMonitor } from "../src"
 
-it("does not change scope value unless scoped impulse changes", () => {
+it("does not change monitor value unless monitored impulse changes", () => {
   const spy = vi.fn()
   const impulse = Impulse(1)
   const { result, rerender } = renderHook(() => {
-    const scope = useScope()
+    const monitor = useMonitor()
 
     React.useEffect(() => {
-      spy(scope)
-    }, [scope])
+      spy(monitor)
+    }, [monitor])
 
-    return impulse.read(scope)
+    return impulse.read(monitor)
   })
 
   expect(result.current).toBe(1)
@@ -31,9 +31,9 @@ it("does not change scope value unless scoped impulse changes", () => {
 })
 
 function Component({ value }: { value: Impulse<number> }) {
-  const scope = useScope()
+  const monitor = useMonitor()
 
-  return <>{value.read(scope)}</>
+  return <>{value.read(monitor)}</>
 }
 
 it("cannot unsubscribe when swapped", () => {
@@ -54,8 +54,8 @@ it("cannot unsubscribe when swapped", () => {
 
   rerender(<Component value={value2} />)
   /**
-   * Not 0 because a scope cannot cleanup on every rerender,
-   * otherwise memo/effect hooks with the scope dependency will lose subscriptions too eagerly.
+   * Not 0 because a monitor cannot cleanup on every rerender,
+   * otherwise memo/effect hooks with the monitor dependency will lose subscriptions too eagerly.
    */
   expect(value1).toHaveEmittersSize(1)
   expect(value2).toHaveEmittersSize(1)

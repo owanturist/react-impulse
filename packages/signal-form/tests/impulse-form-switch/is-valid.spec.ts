@@ -58,12 +58,12 @@ describe("types", () => {
     }
   }
 
-  it("matches schema type for isValid(scope, select?)", ({ scope }) => {
-    expectTypeOf(form.isValid(scope)).toEqualTypeOf<boolean>()
+  it("matches schema type for isValid(monitor, select?)", ({ monitor }) => {
+    expectTypeOf(form.isValid(monitor)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(form.isValid(scope, params._first)).toEqualTypeOf<IsValidSchema>()
+    expectTypeOf(form.isValid(monitor, params._first)).toEqualTypeOf<IsValidSchema>()
 
-    expectTypeOf(form.isValid(scope, params._second)).toEqualTypeOf<IsValidVerboseSchema>()
+    expectTypeOf(form.isValid(monitor, params._second)).toEqualTypeOf<IsValidVerboseSchema>()
   })
 
   describe("nested", () => {
@@ -101,20 +101,20 @@ describe("types", () => {
       }
     }
 
-    it("matches schema type for isValid(scope, select?)", ({ scope }) => {
-      expectTypeOf(parent.isValid(scope)).toEqualTypeOf<boolean>()
+    it("matches schema type for isValid(monitor, select?)", ({ monitor }) => {
+      expectTypeOf(parent.isValid(monitor)).toEqualTypeOf<boolean>()
 
-      expectTypeOf(parent.isValid(scope, params._first)).toEqualTypeOf<ParentIsValidSchema>()
+      expectTypeOf(parent.isValid(monitor, params._first)).toEqualTypeOf<ParentIsValidSchema>()
 
       expectTypeOf(
-        parent.isValid(scope, params._second),
+        parent.isValid(monitor, params._second),
       ).toEqualTypeOf<ParentIsValidVerboseSchema>()
     })
   })
 })
 
 describe("when branch is initially invalid", () => {
-  it("returns false for initially invalid active", ({ scope }) => {
+  it("returns false for initially invalid active", ({ monitor }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("", {
         schema: z.enum(["_1", "_2", "_5"]),
@@ -131,9 +131,9 @@ describe("when branch is initially invalid", () => {
       },
     )
 
-    expect(form.isValid(scope)).toBe(false)
-    expect(form.isValid(scope, params._first)).toBe(false)
-    expect(form.isValid(scope, params._second)).toStrictEqual({
+    expect(form.isValid(monitor)).toBe(false)
+    expect(form.isValid(monitor, params._first)).toBe(false)
+    expect(form.isValid(monitor, params._second)).toStrictEqual({
       active: false,
       branches: {
         _1: false,
@@ -146,7 +146,7 @@ describe("when branch is initially invalid", () => {
     })
   })
 
-  it("returns falsy for initially valid active", ({ scope }) => {
+  it("returns falsy for initially valid active", ({ monitor }) => {
     const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2" | "_5">("_1"), {
       _1: ImpulseFormUnit(0, {
         schema: z.number().min(1),
@@ -158,12 +158,12 @@ describe("when branch is initially invalid", () => {
       _5: ImpulseFormUnit(false),
     })
 
-    expect(form.isValid(scope)).toBe(false)
-    expect(form.isValid(scope, params._first)).toStrictEqual({
+    expect(form.isValid(monitor)).toBe(false)
+    expect(form.isValid(monitor, params._first)).toStrictEqual({
       active: true,
       branch: false,
     })
-    expect(form.isValid(scope, params._second)).toStrictEqual({
+    expect(form.isValid(monitor, params._second)).toStrictEqual({
       active: true,
       branches: {
         _1: false,
@@ -176,7 +176,7 @@ describe("when branch is initially invalid", () => {
     })
   })
 
-  it("returns true after switching to valid branch", ({ scope }) => {
+  it("returns true after switching to valid branch", ({ monitor }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("_1", {
         schema: z.enum(["_1", "_2"]),
@@ -194,11 +194,11 @@ describe("when branch is initially invalid", () => {
 
     form.active.setInput("_2")
 
-    expect(form.active.isValid(scope)).toBe(true)
-    expect(form.branches._2.isValid(scope)).toBe(true)
-    expect(form.isValid(scope)).toStrictEqual(true)
-    expect(form.isValid(scope, params._first)).toBe(true)
-    expect(form.isValid(scope, params._second)).toStrictEqual({
+    expect(form.active.isValid(monitor)).toBe(true)
+    expect(form.branches._2.isValid(monitor)).toBe(true)
+    expect(form.isValid(monitor)).toStrictEqual(true)
+    expect(form.isValid(monitor, params._first)).toBe(true)
+    expect(form.isValid(monitor, params._second)).toStrictEqual({
       active: true,
       branches: {
         _1: false,
@@ -212,7 +212,7 @@ describe("when branch is initially invalid", () => {
 })
 
 describe("when branch is initially valid", () => {
-  it("returns false for initially invalid active", ({ scope }) => {
+  it("returns false for initially invalid active", ({ monitor }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("", {
         schema: z.enum(["_1", "_2"]),
@@ -228,9 +228,9 @@ describe("when branch is initially valid", () => {
       },
     )
 
-    expect(form.isValid(scope)).toBe(false)
-    expect(form.isValid(scope, params._first)).toBe(false)
-    expect(form.isValid(scope, params._second)).toStrictEqual({
+    expect(form.isValid(monitor)).toBe(false)
+    expect(form.isValid(monitor, params._first)).toBe(false)
+    expect(form.isValid(monitor, params._second)).toStrictEqual({
       active: false,
       branches: {
         _1: true,
@@ -242,7 +242,7 @@ describe("when branch is initially valid", () => {
     })
   })
 
-  it("returns true for a initially valid active", ({ scope }) => {
+  it("returns true for a initially valid active", ({ monitor }) => {
     const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2">("_1"), {
       _1: ImpulseFormUnit(1, {
         schema: z.number().min(1),
@@ -253,11 +253,11 @@ describe("when branch is initially valid", () => {
       }),
     })
 
-    expect(form.active.isValid(scope)).toBe(true)
+    expect(form.active.isValid(monitor)).toBe(true)
 
-    expect(form.isValid(scope)).toBe(true)
-    expect(form.isValid(scope, params._first)).toBe(true)
-    expect(form.isValid(scope, params._second)).toStrictEqual({
+    expect(form.isValid(monitor)).toBe(true)
+    expect(form.isValid(monitor, params._first)).toBe(true)
+    expect(form.isValid(monitor, params._second)).toStrictEqual({
       active: true,
       branches: {
         _1: true,
@@ -269,7 +269,7 @@ describe("when branch is initially valid", () => {
     })
   })
 
-  it("returns falsy after switching to invalid branch", ({ scope }) => {
+  it("returns falsy after switching to invalid branch", ({ monitor }) => {
     const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2">("_2"), {
       _1: ImpulseFormUnit(0, {
         schema: z.number().min(1),
@@ -282,12 +282,12 @@ describe("when branch is initially valid", () => {
 
     form.active.setInput("_1")
 
-    expect(form.isValid(scope)).toBe(false)
-    expect(form.isValid(scope, params._first)).toStrictEqual({
+    expect(form.isValid(monitor)).toBe(false)
+    expect(form.isValid(monitor, params._first)).toStrictEqual({
       active: true,
       branch: false,
     })
-    expect(form.isValid(scope, params._second)).toStrictEqual({
+    expect(form.isValid(monitor, params._second)).toStrictEqual({
       active: true,
       branches: {
         _1: false,
@@ -299,7 +299,7 @@ describe("when branch is initially valid", () => {
     })
   })
 
-  it("returns false after making active invalid", ({ scope }) => {
+  it("returns false after making active invalid", ({ monitor }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("_1", {
         schema: z.enum(["_1", "_2"]),
@@ -317,11 +317,11 @@ describe("when branch is initially valid", () => {
 
     form.active.setInput("")
 
-    expect(form.active.isValid(scope)).toBe(false)
+    expect(form.active.isValid(monitor)).toBe(false)
 
-    expect(form.isValid(scope)).toBe(false)
-    expect(form.isValid(scope, params._first)).toBe(false)
-    expect(form.isValid(scope, params._second)).toStrictEqual({
+    expect(form.isValid(monitor)).toBe(false)
+    expect(form.isValid(monitor, params._first)).toBe(false)
+    expect(form.isValid(monitor, params._second)).toStrictEqual({
       active: false,
       branches: {
         _1: true,
@@ -334,7 +334,7 @@ describe("when branch is initially valid", () => {
   })
 })
 
-it("ignores invalid inactive branches", ({ scope }) => {
+it("ignores invalid inactive branches", ({ monitor }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("_2", {
       schema: z.enum(["_1", "_2", "_5"]),
@@ -353,11 +353,11 @@ it("ignores invalid inactive branches", ({ scope }) => {
     },
   )
 
-  expect(form.active.isValid(scope)).toBe(true)
+  expect(form.active.isValid(monitor)).toBe(true)
 
-  expect(form.isValid(scope)).toBe(true)
-  expect(form.isValid(scope, params._first)).toBe(true)
-  expect(form.isValid(scope, params._second)).toStrictEqual({
+  expect(form.isValid(monitor)).toBe(true)
+  expect(form.isValid(monitor, params._first)).toBe(true)
+  expect(form.isValid(monitor, params._second)).toStrictEqual({
     active: true,
     branches: {
       _1: false,
@@ -371,7 +371,7 @@ it("ignores invalid inactive branches", ({ scope }) => {
 })
 
 describe("stable valid value", () => {
-  it("subsequently selects equal valid", ({ scope }) => {
+  it("subsequently selects equal valid", ({ monitor }) => {
     const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2" | "_5">("_1"), {
       _1: ImpulseFormUnit(0, {
         schema: z.number().min(1),
@@ -383,13 +383,13 @@ describe("stable valid value", () => {
       _5: ImpulseFormUnit(false),
     })
 
-    expect(form.isValid(scope)).toBeTypeOf("boolean")
-    expect(form.isValid(scope)).toBe(form.isValid(scope))
+    expect(form.isValid(monitor)).toBeTypeOf("boolean")
+    expect(form.isValid(monitor)).toBe(form.isValid(monitor))
 
-    expect(form.isValid(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.isValid(scope, params._first)).toBe(form.isValid(scope, params._first))
+    expect(form.isValid(monitor, params._first)).toBeInstanceOf(Object)
+    expect(form.isValid(monitor, params._first)).toBe(form.isValid(monitor, params._first))
 
-    expect(form.isValid(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.isValid(scope, params._second)).toBe(form.isValid(scope, params._second))
+    expect(form.isValid(monitor, params._second)).toBeInstanceOf(Object)
+    expect(form.isValid(monitor, params._second)).toBe(form.isValid(monitor, params._second))
   })
 })

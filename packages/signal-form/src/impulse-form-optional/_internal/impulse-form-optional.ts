@@ -1,4 +1,4 @@
-import type { Scope } from "@owanturist/signal"
+import type { Monitor } from "@owanturist/signal"
 
 import { ImpulseForm } from "../../impulse-form/_internal/impulse-form"
 import type { ImpulseFormOptionalParams } from "../impulse-form-optional-params"
@@ -21,8 +21,8 @@ class ImpulseFormOptional<
     this.element = _state._element._host() as TElement
   }
 
-  public getEnabledElement(scope: Scope): undefined | TElement {
-    return this._state._getEnabledElement(scope)?._host() as undefined | TElement
+  public getEnabledElement(monitor: Monitor): undefined | TElement {
+    return this._state._getEnabledElement(monitor)?._host() as undefined | TElement
   }
 }
 

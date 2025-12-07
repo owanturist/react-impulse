@@ -2,7 +2,7 @@ import type { Setter } from "~/tools/setter"
 
 import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
 
-it("updates original value", ({ scope }) => {
+it("updates original value", ({ monitor }) => {
   const shape = ImpulseFormShape({
     first: ImpulseFormUnit(""),
     second: ImpulseFormUnit(0),
@@ -13,7 +13,7 @@ it("updates original value", ({ scope }) => {
     fourth: ["anything"],
   })
 
-  expect(shape.getInput(scope)).toStrictEqual({
+  expect(shape.getInput(monitor)).toStrictEqual({
     first: "",
     second: 0,
     third: {
@@ -29,7 +29,7 @@ it("updates original value", ({ scope }) => {
       two: undefined,
     },
   })
-  expect(shape.getInput(scope)).toStrictEqual({
+  expect(shape.getInput(monitor)).toStrictEqual({
     first: "",
     second: 0,
     third: {
@@ -44,7 +44,7 @@ it("updates original value", ({ scope }) => {
       two: (two) => [...two, "hi"],
     },
   })
-  expect(shape.getInput(scope)).toStrictEqual({
+  expect(shape.getInput(monitor)).toStrictEqual({
     first: "",
     second: 0,
     third: {
@@ -62,7 +62,7 @@ it("updates original value", ({ scope }) => {
       two: ["two"],
     },
   })
-  expect(shape.getInput(scope)).toStrictEqual({
+  expect(shape.getInput(monitor)).toStrictEqual({
     first: "1",
     second: 2,
     third: {
@@ -115,7 +115,7 @@ it("updates original value", ({ scope }) => {
       },
     }
   })
-  expect(shape.getInput(scope)).toStrictEqual({
+  expect(shape.getInput(monitor)).toStrictEqual({
     first: "one",
     second: 3,
     third: {
@@ -125,7 +125,7 @@ it("updates original value", ({ scope }) => {
     fourth: ["anything"],
   })
 
-  expectTypeOf(shape.getInput(scope)).toEqualTypeOf<{
+  expectTypeOf(shape.getInput(monitor)).toEqualTypeOf<{
     readonly first: string
     readonly second: number
     readonly third: {
@@ -135,12 +135,12 @@ it("updates original value", ({ scope }) => {
     readonly fourth: Array<string>
   }>()
 
-  expect(shape.fields.third.getInput(scope)).toStrictEqual({
+  expect(shape.fields.third.getInput(monitor)).toStrictEqual({
     one: false,
     two: ["two", "three"],
   })
 
-  expectTypeOf(shape.fields.third.getInput(scope)).toEqualTypeOf<{
+  expectTypeOf(shape.fields.third.getInput(monitor)).toEqualTypeOf<{
     readonly one: boolean
     readonly two: Array<string>
   }>()

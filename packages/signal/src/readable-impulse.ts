@@ -1,7 +1,7 @@
-import type { Scope } from "./_internal/scope"
+import type { Monitor } from "./_internal/monitor"
 
 interface ReadableImpulse<T> {
-  read(scope: Scope): T
+  read(monitor: Monitor): T
 }
 
 export type { ReadableImpulse }

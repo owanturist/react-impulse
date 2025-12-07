@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
 import { useCallback } from "react"
 
-import { Impulse, useScope, useScoped } from "../src"
+import { Impulse, useComputed, useMonitor } from "../src"
 
 const onCallback = vi.fn<(x: number) => number>().mockImplementation((x) => x)
 
@@ -13,9 +13,9 @@ describe("single Impulse", () => {
   const setup = (impulse: Impulse<number>) =>
     renderHook(
       (count: Impulse<number>) => {
-        const scope = useScope()
+        const monitor = useMonitor()
 
-        return useCallback(() => onCallback(count.read(scope) * 2), [scope, count])
+        return useCallback(() => onCallback(count.read(monitor) * 2), [monitor, count])
       },
       {
         initialProps: impulse,
@@ -29,7 +29,7 @@ describe("single Impulse", () => {
     expect(onCallback).not.toHaveBeenCalled()
   })
 
-  it("does not attach Impulse to a scope on init", () => {
+  it("does not attach Impulse to a monitor on init", () => {
     const count = Impulse(1)
     setup(count)
 
@@ -146,17 +146,17 @@ describe("conditional Impulse", () => {
   const setup = (impulse: Impulse<number>) =>
     renderHook(
       (count: Impulse<number>) => {
-        const scope = useScope()
+        const monitor = useMonitor()
 
         return useCallback(
           (isActive: boolean) => {
             if (isActive) {
-              return count.read(scope) * 2
+              return count.read(monitor) * 2
             }
 
             return -1
           },
-          [scope, count],
+          [monitor, count],
         )
       },
       {
@@ -235,9 +235,9 @@ describe("conditional Impulse", () => {
 describe("argument Impulse", () => {
   const setup = () =>
     renderHook(() => {
-      const scope = useScope()
+      const monitor = useMonitor()
 
-      return useCallback((count: Impulse<number>) => count.read(scope) * 2, [scope])
+      return useCallback((count: Impulse<number>) => count.read(monitor) * 2, [monitor])
     })
 
   it("attaches an Impulse when the resulting function calls", () => {
@@ -293,24 +293,24 @@ it("cannot batch the callback", () => {
   const impulse2 = Impulse(2)
   const impulse3 = Impulse(3)
   const { result: callback } = renderHook(() => {
-    const scope = useScope()
+    const monitor = useMonitor()
 
     return useCallback(
       (diff: number) => {
-        impulse1.update(impulse1.read(scope) + diff)
-        impulse2.update(impulse2.read(scope) + diff)
-        impulse3.update(impulse3.read(scope) + diff)
+        impulse1.update(impulse1.read(monitor) + diff)
+        impulse2.update(impulse2.read(monitor) + diff)
+        impulse3.update(impulse3.read(monitor) + diff)
       },
-      [scope],
+      [monitor],
     )
   })
   const spy = vi.fn()
 
   const { result } = renderHook(() =>
-    useScoped((scope) => {
+    useComputed((monitor) => {
       spy()
 
-      return impulse1.read(scope) + impulse2.read(scope) + impulse3.read(scope)
+      return impulse1.read(monitor) + impulse2.read(monitor) + impulse3.read(monitor)
     }, []),
   )
 

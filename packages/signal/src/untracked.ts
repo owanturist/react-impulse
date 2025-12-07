@@ -1,39 +1,40 @@
 import { isFunction } from "~/tools/is-function"
 
+import type { batch } from "./batch"
 import type { ReadableImpulse } from "./readable-impulse"
 import { enqueue } from "./_internal/enqueue"
-import { STATIC_SCOPE, type Scope } from "./_internal/scope"
+import { type Monitor, UNTRACKED_MONITOR } from "./_internal/monitor"
 
 /**
- * Ignores tracking any of the impulses attached to the provided Scope.
- * Acts like `batch` but returns the `factory` function result.
+ * Ignores tracking any of the impulses attached to the provided {@link Monitor}.
+ * Acts like {@link batch} but returns the {@link factory} function result.
  *
- * @param factory a function that provides `Scope` as the first argument and returns a result.
+ * @param factory a function that provides {@link Monitor} as the first argument and returns a result.
  *
- * @returns the `factory` function result.
+ * @returns the {@link factory} function result.
  *
  * @version 1.0.0
  */
-function untracked<TResult>(factory: (scope: Scope) => TResult): TResult
+function untracked<TResult>(factory: (monitor: Monitor) => TResult): TResult
 
 /**
- * Extracts the value from the provided `impulse` without tracking it.
+ * Extracts the value from the provided {@link impulse} without tracking it.
  *
- * @param impulse anything that implements the `ReadableImpulse` interface.
+ * @param impulse anything that implements the {@link ReadableImpulse} interface.
  *
- * @returns the `impulse` value.
+ * @returns the {@link impulse} value.
  *
  * @version 1.0.0
  */
 function untracked<TValue>(impulse: ReadableImpulse<TValue>): TValue
 
-function untracked<T>(factoryOrReadableImpulse: ((scope: Scope) => T) | ReadableImpulse<T>): T {
+function untracked<T>(factoryOrReadableImpulse: ((monitor: Monitor) => T) | ReadableImpulse<T>): T {
   return enqueue(() => {
     if (isFunction(factoryOrReadableImpulse)) {
-      return factoryOrReadableImpulse(STATIC_SCOPE)
+      return factoryOrReadableImpulse(UNTRACKED_MONITOR)
     }
 
-    return factoryOrReadableImpulse.read(STATIC_SCOPE)
+    return factoryOrReadableImpulse.read(UNTRACKED_MONITOR)
   })
 }
 

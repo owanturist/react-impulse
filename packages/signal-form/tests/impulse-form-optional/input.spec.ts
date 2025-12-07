@@ -1,4 +1,4 @@
-import type { Scope } from "@owanturist/signal"
+import type { Monitor } from "@owanturist/signal"
 import z from "zod"
 
 import type { Setter } from "~/tools/setter"
@@ -27,8 +27,8 @@ describe("types", () => {
     [InputSchema, InputSchema]
   >
 
-  it("matches schema type for getInput(scope)", () => {
-    expectTypeOf(form.getInput).toEqualTypeOf<(scope: Scope) => InputSchema>()
+  it("matches schema type for getInput(monitor)", () => {
+    expectTypeOf(form.getInput).toEqualTypeOf<(monitor: Monitor) => InputSchema>()
   })
 
   it("matches setter type for setInput(setter)", () => {
@@ -64,8 +64,8 @@ describe("types", () => {
       [ParentInputSchema, ParentInputSchema]
     >
 
-    it("matches schema type for getInput(scope)", () => {
-      expectTypeOf(parent.getInput).toEqualTypeOf<(scope: Scope) => ParentInputSchema>()
+    it("matches schema type for getInput(monitor)", () => {
+      expectTypeOf(parent.getInput).toEqualTypeOf<(monitor: Monitor) => ParentInputSchema>()
     })
 
     it("matches setter type for setInput(setter)", () => {
@@ -73,9 +73,9 @@ describe("types", () => {
     })
   })
 
-  it("ensures the enabled output is a boolean", ({ scope }) => {
+  it("ensures the enabled output is a boolean", ({ monitor }) => {
     const form1 = ImpulseFormOptional(ImpulseFormUnit(false), ImpulseFormUnit(0))
-    expectTypeOf(form1.enabled.getOutput(scope)).toEqualTypeOf<null | boolean>()
+    expectTypeOf(form1.enabled.getOutput(monitor)).toEqualTypeOf<null | boolean>()
 
     const form2 = ImpulseFormOptional(
       ImpulseFormUnit(1, {
@@ -83,7 +83,7 @@ describe("types", () => {
       }),
       ImpulseFormUnit(0),
     )
-    expectTypeOf(form2.enabled.getOutput(scope)).toEqualTypeOf<null | boolean>()
+    expectTypeOf(form2.enabled.getOutput(monitor)).toEqualTypeOf<null | boolean>()
 
     const form3 = ImpulseFormOptional(
       ImpulseFormUnit(1, {
@@ -92,7 +92,7 @@ describe("types", () => {
       }),
       ImpulseFormUnit(0),
     )
-    expectTypeOf(form3.enabled.getOutput(scope)).toEqualTypeOf<null | boolean>()
+    expectTypeOf(form3.enabled.getOutput(monitor)).toEqualTypeOf<null | boolean>()
 
     const form4 = ImpulseFormOptional(
       ImpulseFormUnit(1, {
@@ -100,7 +100,7 @@ describe("types", () => {
       }),
       ImpulseFormUnit(0),
     )
-    expectTypeOf(form4.enabled.getOutput(scope)).toEqualTypeOf<null | boolean>()
+    expectTypeOf(form4.enabled.getOutput(monitor)).toEqualTypeOf<null | boolean>()
 
     const form5 = ImpulseFormOptional(
       // @ts-expect-error should output boolean
@@ -109,20 +109,20 @@ describe("types", () => {
       }),
       ImpulseFormUnit(0),
     )
-    expectTypeOf(form5.enabled.getOutput(scope)).toEqualTypeOf<null | number>()
+    expectTypeOf(form5.enabled.getOutput(monitor)).toEqualTypeOf<null | number>()
   })
 })
 
-it("initiates with element input", ({ scope }) => {
+it("initiates with element input", ({ monitor }) => {
   const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit(1))
 
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     enabled: true,
     element: 1,
   })
 })
 
-it("initiates with overridden input", ({ scope }) => {
+it("initiates with overridden input", ({ monitor }) => {
   const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit(1), {
     input: {
       enabled: false,
@@ -130,13 +130,13 @@ it("initiates with overridden input", ({ scope }) => {
     },
   })
 
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     enabled: false,
     element: 2,
   })
 })
 
-it("sets input", ({ scope }) => {
+it("sets input", ({ monitor }) => {
   const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit(1))
 
   form.setInput({
@@ -144,19 +144,19 @@ it("sets input", ({ scope }) => {
     element: 5,
   })
 
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     enabled: false,
     element: 5,
   })
 })
 
-it("sets partial input", ({ scope }) => {
+it("sets partial input", ({ monitor }) => {
   const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit(1))
 
   form.setInput({
     element: 10,
   })
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     enabled: true,
     element: 10,
   })
@@ -164,7 +164,7 @@ it("sets partial input", ({ scope }) => {
   form.setInput({
     enabled: false,
   })
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     enabled: false,
     element: 10,
   })
@@ -199,7 +199,7 @@ describe("using recursive setter", () => {
       },
     ],
   ])("in %s", (_, run) => {
-    it("passes input and initial recursively to all setters", ({ scope }) => {
+    it("passes input and initial recursively to all setters", ({ monitor }) => {
       expect.assertions(8)
 
       const form = run((input, initial) => {
@@ -223,11 +223,11 @@ describe("using recursive setter", () => {
         }
       })
 
-      expect(form.getInput(scope)).toStrictEqual({
+      expect(form.getInput(monitor)).toStrictEqual({
         enabled: false,
         element: 2,
       })
-      expect(form.getInitial(scope)).toStrictEqual({
+      expect(form.getInitial(monitor)).toStrictEqual({
         enabled: true,
         element: 1,
       })
@@ -236,13 +236,13 @@ describe("using recursive setter", () => {
 })
 
 describe("stable input value", () => {
-  it("subsequently selects equal input", ({ scope }) => {
+  it("subsequently selects equal input", ({ monitor }) => {
     const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit({ a: 1 }))
 
-    const input0 = form.getInput(scope)
+    const input0 = form.getInput(monitor)
 
     form.setInput({ element: { a: 1 } })
-    const input1 = form.getInput(scope)
+    const input1 = form.getInput(monitor)
 
     expect(input0).not.toBe(input1)
     expect(input0).toStrictEqual(input1)

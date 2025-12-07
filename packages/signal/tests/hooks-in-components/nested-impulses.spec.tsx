@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useScoped } from "../../src"
+import { Impulse, useComputed } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
@@ -15,7 +15,7 @@ describe("nested impulses", () => {
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }> = ({ state, onRender, onCounterRender }) => {
-    const { counts } = useScoped(state)
+    const { counts } = useComputed(state)
 
     return (
       <>
@@ -52,7 +52,7 @@ describe("nested impulses", () => {
     )
   }
 
-  it("performs nested impulse management", ({ scope }) => {
+  it("performs nested impulse management", ({ monitor }) => {
     const impulse = Impulse<AppState>({ counts: [] })
     const onRender = vi.fn()
     const onCounterRender = vi.fn()
@@ -113,7 +113,7 @@ describe("nested impulses", () => {
 
     // double the third counter from the outside
     act(() => {
-      impulse.read(scope).counts[2]!.update((x) => 2 * x)
+      impulse.read(monitor).counts[2]!.update((x) => 2 * x)
     })
     expect(onRender).not.toHaveBeenCalled()
     expect(onCounterRender).toHaveBeenCalledOnce()
@@ -133,7 +133,7 @@ describe("nested impulses", () => {
 
     // increment all from the outside
     act(() => {
-      for (const count of impulse.read(scope).counts) {
+      for (const count of impulse.read(monitor).counts) {
         count.update((x) => x + 1)
       }
     })

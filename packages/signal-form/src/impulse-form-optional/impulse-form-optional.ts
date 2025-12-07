@@ -45,25 +45,25 @@ function ImpulseFormOptional<TEnabled extends ImpulseForm, TElement extends Impu
     ImpulseFormOptionalImpl._getState(element),
   )
 
-  batch((scope) => {
+  batch((monitor) => {
     if (!isUndefined(touched)) {
-      optional._setTouched(scope, touched)
+      optional._setTouched(monitor, touched)
     }
 
     if (!isUndefined(initial)) {
-      optional._setInitial(scope, initial)
+      optional._setInitial(monitor, initial)
     }
 
     if (!isUndefined(input)) {
-      optional._setInput(scope, input)
+      optional._setInput(monitor, input)
     }
 
     if (!isUndefined(validateOn)) {
-      optional._setValidateOn(scope, validateOn)
+      optional._setValidateOn(monitor, validateOn)
     }
 
     if (!isUndefined(error)) {
-      optional._setError(scope, error)
+      optional._setError(monitor, error)
     }
   })
 

@@ -132,52 +132,52 @@ describe("types", () => {
     [TouchedVerboseSchema]
   >
 
-  it("matches schema type for isTouched(scope, select?)", ({ scope }) => {
-    expectTypeOf(form.isTouched(scope)).toEqualTypeOf<boolean>()
+  it("matches schema type for isTouched(monitor, select?)", ({ monitor }) => {
+    expectTypeOf(form.isTouched(monitor)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(form.isTouched(scope, params._first)).toEqualTypeOf<TouchedSchema>()
+    expectTypeOf(form.isTouched(monitor, params._first)).toEqualTypeOf<TouchedSchema>()
 
-    expectTypeOf(form.isTouched(scope, params._second)).toEqualTypeOf<TouchedVerboseSchema>()
+    expectTypeOf(form.isTouched(monitor, params._second)).toEqualTypeOf<TouchedVerboseSchema>()
   })
 
   it("matches setter type for setTouched(setter)", () => {
     expectTypeOf(form.setTouched).toEqualTypeOf<(setter: TouchedSetter) => void>()
   })
 
-  it("allows passing concise value to setTouched", ({ scope }) => {
-    const touched0 = form.isTouched(scope)
-    const touched0Concise = form.isTouched(scope, params._first)
-    const touched0Verbose = form.isTouched(scope, params._second)
+  it("allows passing concise value to setTouched", ({ monitor }) => {
+    const touched0 = form.isTouched(monitor)
+    const touched0Concise = form.isTouched(monitor, params._first)
+    const touched0Verbose = form.isTouched(monitor, params._second)
 
     form.setTouched(touched0Concise)
 
-    expect(form.isTouched(scope)).toStrictEqual(touched0)
-    expect(form.isTouched(scope, params._first)).toStrictEqual(touched0Concise)
-    expect(form.isTouched(scope, params._second)).toStrictEqual(touched0Verbose)
+    expect(form.isTouched(monitor)).toStrictEqual(touched0)
+    expect(form.isTouched(monitor, params._first)).toStrictEqual(touched0Concise)
+    expect(form.isTouched(monitor, params._second)).toStrictEqual(touched0Verbose)
   })
 
-  it("allows passing verbose value to setTouched", ({ scope }) => {
-    const touched0 = form.isTouched(scope)
-    const touched0Concise = form.isTouched(scope, params._first)
-    const touched0Verbose = form.isTouched(scope, params._second)
+  it("allows passing verbose value to setTouched", ({ monitor }) => {
+    const touched0 = form.isTouched(monitor)
+    const touched0Concise = form.isTouched(monitor, params._first)
+    const touched0Verbose = form.isTouched(monitor, params._second)
 
     form.setTouched(touched0Verbose)
 
-    expect(form.isTouched(scope)).toStrictEqual(touched0)
-    expect(form.isTouched(scope, params._first)).toStrictEqual(touched0Concise)
-    expect(form.isTouched(scope, params._second)).toStrictEqual(touched0Verbose)
+    expect(form.isTouched(monitor)).toStrictEqual(touched0)
+    expect(form.isTouched(monitor, params._first)).toStrictEqual(touched0Concise)
+    expect(form.isTouched(monitor, params._second)).toStrictEqual(touched0Verbose)
   })
 
-  it("allows passing verbose value in setTouched callback", ({ scope }) => {
-    const touched0 = form.isTouched(scope)
-    const touched0Concise = form.isTouched(scope, params._first)
-    const touched0Verbose = form.isTouched(scope, params._second)
+  it("allows passing verbose value in setTouched callback", ({ monitor }) => {
+    const touched0 = form.isTouched(monitor)
+    const touched0Concise = form.isTouched(monitor, params._first)
+    const touched0Verbose = form.isTouched(monitor, params._second)
 
     form.setTouched((verbose) => verbose)
 
-    expect(form.isTouched(scope)).toStrictEqual(touched0)
-    expect(form.isTouched(scope, params._first)).toStrictEqual(touched0Concise)
-    expect(form.isTouched(scope, params._second)).toStrictEqual(touched0Verbose)
+    expect(form.isTouched(monitor)).toStrictEqual(touched0)
+    expect(form.isTouched(monitor, params._first)).toStrictEqual(touched0Concise)
+    expect(form.isTouched(monitor, params._second)).toStrictEqual(touched0Verbose)
   })
 
   it("ensures ImpulseFormSwitchOptions.touched type", () => {
@@ -277,13 +277,13 @@ describe("types", () => {
       [ParentTouchedVerboseSchema]
     >
 
-    it("matches schema type for isTouched(scope, select?)", ({ scope }) => {
-      expectTypeOf(parent.isTouched(scope)).toEqualTypeOf<boolean>()
+    it("matches schema type for isTouched(monitor, select?)", ({ monitor }) => {
+      expectTypeOf(parent.isTouched(monitor)).toEqualTypeOf<boolean>()
 
-      expectTypeOf(parent.isTouched(scope, params._first)).toEqualTypeOf<ParentTouchedSchema>()
+      expectTypeOf(parent.isTouched(monitor, params._first)).toEqualTypeOf<ParentTouchedSchema>()
 
       expectTypeOf(
-        parent.isTouched(scope, params._second),
+        parent.isTouched(monitor, params._second),
       ).toEqualTypeOf<ParentTouchedVerboseSchema>()
     })
 
@@ -291,20 +291,20 @@ describe("types", () => {
       expectTypeOf(parent.setTouched).toEqualTypeOf<(setter: ParentTouchedSetter) => void>()
     })
 
-    it("allows passing concise value to setTouched", ({ scope }) => {
-      const concise = parent.isTouched(scope, params._first)
+    it("allows passing concise value to setTouched", ({ monitor }) => {
+      const concise = parent.isTouched(monitor, params._first)
 
       parent.setTouched(concise)
 
-      expect(parent.isTouched(scope, params._first)).toStrictEqual(concise)
+      expect(parent.isTouched(monitor, params._first)).toStrictEqual(concise)
     })
 
-    it("allows passing verbose value to setTouched", ({ scope }) => {
-      const verbose = parent.isTouched(scope, params._second)
+    it("allows passing verbose value to setTouched", ({ monitor }) => {
+      const verbose = parent.isTouched(monitor, params._second)
 
       parent.setTouched(verbose)
 
-      expect(parent.isTouched(scope, params._second)).toStrictEqual(verbose)
+      expect(parent.isTouched(monitor, params._second)).toStrictEqual(verbose)
     })
 
     it("ensures ImpulseFormSwitchOptions.touched type", () => {
@@ -329,7 +329,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
 
   describe("when defining top-level concise ImpulseFormSwitchOptions.touched", () => {
     describe("when active is valid", () => {
-      it("overrides active branch's touched", ({ scope }) => {
+      it("overrides active branch's touched", ({ monitor }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("_2", {
             touched: true,
@@ -360,9 +360,9 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(touched)
-        expect(form.isTouched(scope, params._first)).toBe(touched)
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(touched)
+        expect(form.isTouched(monitor, params._first)).toBe(touched)
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: touched,
           branches: {
             _1: false,
@@ -379,7 +379,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
 
     describe("when active is invalid", () => {
-      it("overrides only the active's touched", ({ scope }) => {
+      it("overrides only the active's touched", ({ monitor }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("", {
             touched: true,
@@ -410,9 +410,9 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(touched)
-        expect(form.isTouched(scope, params._first)).toBe(touched)
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(touched)
+        expect(form.isTouched(monitor, params._first)).toBe(touched)
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: touched,
           branches: {
             _1: false,
@@ -431,7 +431,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
 
   describe("when defining ImpulseFormSwitchOptions.touched.active", () => {
     describe("when active is invalid", () => {
-      it("overrides only the active's touched", ({ scope }) => {
+      it("overrides only the active's touched", ({ monitor }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("", {
             touched: true,
@@ -464,9 +464,9 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(touched)
-        expect(form.isTouched(scope, params._first)).toBe(touched)
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(touched)
+        expect(form.isTouched(monitor, params._first)).toBe(touched)
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: touched,
           branches: {
             _1: false,
@@ -483,7 +483,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
 
     describe("when active is valid", () => {
-      it("overrides only the active's touched", ({ scope }) => {
+      it("overrides only the active's touched", ({ monitor }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("_2", {
             touched: true,
@@ -517,8 +517,8 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(true)
-        expect(form.isTouched(scope, params._first)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(true)
+        expect(form.isTouched(monitor, params._first)).toStrictEqual({
           active: touched,
           branch: {
             kind: "_2",
@@ -528,7 +528,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
             },
           },
         })
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: touched,
           branches: {
             _1: false,
@@ -547,7 +547,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
 
   describe("when defining concise ImpulseFormSwitchOptions.touched.branch", () => {
     describe("when active is invalid", () => {
-      it("does not change anything", ({ scope }) => {
+      it("does not change anything", ({ monitor }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("", {
             touched: differentTouched,
@@ -581,9 +581,9 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(differentTouched)
-        expect(form.isTouched(scope, params._first)).toBe(differentTouched)
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(differentTouched)
+        expect(form.isTouched(monitor, params._first)).toBe(differentTouched)
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: differentTouched,
           branches: {
             _1: false,
@@ -600,7 +600,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
 
     describe("when active is valid", () => {
-      it("overrides only the active branch touched", ({ scope }) => {
+      it("overrides only the active branch touched", ({ monitor }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("_2", {
             touched: differentTouched,
@@ -628,12 +628,12 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(true)
-        expect(form.isTouched(scope, params._first)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(true)
+        expect(form.isTouched(monitor, params._first)).toStrictEqual({
           active: differentTouched,
           branch: touched,
         })
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: differentTouched,
           branches: {
             _1: false,
@@ -649,7 +649,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
 
   describe("when defining detailed ImpulseFormSwitchOptions.touched.branch", () => {
     describe("when active is invalid", () => {
-      it("overrides only the target branch touched", ({ scope }) => {
+      it("overrides only the target branch touched", ({ monitor }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("", {
             touched: differentTouched,
@@ -686,9 +686,9 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(differentTouched)
-        expect(form.isTouched(scope, params._first)).toBe(differentTouched)
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(differentTouched)
+        expect(form.isTouched(monitor, params._first)).toBe(differentTouched)
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: differentTouched,
           branches: {
             _1: touched,
@@ -705,7 +705,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
 
     describe("when active is valid", () => {
-      it("overrides only the target inactive branch touched", ({ scope }) => {
+      it("overrides only the target inactive branch touched", ({ monitor }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("_2", {
             touched: false,
@@ -742,8 +742,8 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(true)
-        expect(form.isTouched(scope, params._first)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(true)
+        expect(form.isTouched(monitor, params._first)).toStrictEqual({
           active: false,
           branch: {
             kind: "_2",
@@ -753,7 +753,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
             },
           },
         })
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: false,
           branches: {
             _1: touched,
@@ -768,7 +768,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
         })
       })
 
-      it("overrides only the target active branch touched", ({ scope }) => {
+      it("overrides only the target active branch touched", ({ monitor }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("_2", {
             touched: differentTouched,
@@ -805,12 +805,12 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(true)
-        expect(form.isTouched(scope, params._first)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(true)
+        expect(form.isTouched(monitor, params._first)).toStrictEqual({
           active: differentTouched,
           branch: touched,
         })
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: differentTouched,
           branches: {
             _1: true,
@@ -825,7 +825,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
         })
       })
 
-      it("overrides nested switch", ({ scope }) => {
+      it("overrides nested switch", ({ monitor }) => {
         const form = ImpulseFormSwitch(
           ImpulseFormUnit("_2", {
             touched: true,
@@ -867,8 +867,8 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(true)
-        expect(form.isTouched(scope, params._first)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(true)
+        expect(form.isTouched(monitor, params._first)).toStrictEqual({
           active: true,
           branch: {
             kind: "_2",
@@ -878,7 +878,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
             },
           },
         })
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: true,
           branches: {
             _1: false,
@@ -896,7 +896,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
   })
 
   describe("when defining all active+branch+branches ImpulseFormSwitchOptions.touched", () => {
-    it("branch takes over branches", ({ scope }) => {
+    it("branch takes over branches", ({ monitor }) => {
       const form = ImpulseFormSwitch(
         ImpulseFormUnit("_2", {
           touched: true,
@@ -938,12 +938,12 @@ describe.each([true, false])("when touched=%s", (touched) => {
         },
       )
 
-      expect(form.isTouched(scope)).toBe(true)
-      expect(form.isTouched(scope, params._first)).toStrictEqual({
+      expect(form.isTouched(monitor)).toBe(true)
+      expect(form.isTouched(monitor, params._first)).toStrictEqual({
         active: differentTouched,
         branch: touched,
       })
-      expect(form.isTouched(scope, params._second)).toStrictEqual({
+      expect(form.isTouched(monitor, params._second)).toStrictEqual({
         active: differentTouched,
         branches: {
           _1: differentTouched,
@@ -959,7 +959,9 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
   })
 
-  it("returns the boolean as concise result when everything has the same boolean", ({ scope }) => {
+  it("returns the boolean as concise result when everything has the same boolean", ({
+    monitor,
+  }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("", {
         touched,
@@ -983,9 +985,9 @@ describe.each([true, false])("when touched=%s", (touched) => {
       },
     )
 
-    expect(form.isTouched(scope)).toBe(touched)
-    expect(form.isTouched(scope, params._first)).toBe(touched)
-    expect(form.isTouched(scope, params._second)).toStrictEqual({
+    expect(form.isTouched(monitor)).toBe(touched)
+    expect(form.isTouched(monitor, params._first)).toBe(touched)
+    expect(form.isTouched(monitor, params._second)).toStrictEqual({
       active: touched,
       branches: {
         _1: touched,
@@ -1002,7 +1004,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
 })
 
 describe("stable touched value", () => {
-  it("subsequently selects equal touched", ({ scope }) => {
+  it("subsequently selects equal touched", ({ monitor }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("_2", {
         touched: true,
@@ -1031,14 +1033,14 @@ describe("stable touched value", () => {
       },
     )
 
-    expect(form.isTouched(scope)).toBeTypeOf("boolean")
-    expect(form.isTouched(scope)).toBe(form.isTouched(scope))
+    expect(form.isTouched(monitor)).toBeTypeOf("boolean")
+    expect(form.isTouched(monitor)).toBe(form.isTouched(monitor))
 
-    expect(form.isTouched(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.isTouched(scope, params._first)).toBe(form.isTouched(scope, params._first))
+    expect(form.isTouched(monitor, params._first)).toBeInstanceOf(Object)
+    expect(form.isTouched(monitor, params._first)).toBe(form.isTouched(monitor, params._first))
 
-    expect(form.isTouched(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.isTouched(scope, params._second)).toBe(form.isTouched(scope, params._second))
+    expect(form.isTouched(monitor, params._second)).toBeInstanceOf(Object)
+    expect(form.isTouched(monitor, params._second)).toBe(form.isTouched(monitor, params._second))
   })
 })
 
@@ -1095,7 +1097,7 @@ describe("using recursive setter", () => {
       },
     ],
   ])("in %s", (_, setup) => {
-    it("passes initial and input recursively to all setters", ({ scope }) => {
+    it("passes initial and input recursively to all setters", ({ monitor }) => {
       expect.assertions(20)
 
       const form = setup(($) => {
@@ -1342,8 +1344,8 @@ describe("using recursive setter", () => {
         }
       })
 
-      expect(form.isTouched(scope)).toStrictEqual(true)
-      expect(form.isTouched(scope, params._first)).toStrictEqual({
+      expect(form.isTouched(monitor)).toStrictEqual(true)
+      expect(form.isTouched(monitor, params._first)).toStrictEqual({
         active: false,
         branch: {
           kind: "_2",
@@ -1353,7 +1355,7 @@ describe("using recursive setter", () => {
           },
         },
       })
-      expect(form.isTouched(scope, params._second)).toStrictEqual({
+      expect(form.isTouched(monitor, params._second)).toStrictEqual({
         active: false,
         branches: {
           _1: true,

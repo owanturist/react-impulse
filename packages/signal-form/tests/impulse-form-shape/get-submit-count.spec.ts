@@ -1,4 +1,4 @@
-import type { Scope } from "@owanturist/signal"
+import type { Monitor } from "@owanturist/signal"
 import { z } from "zod"
 
 import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
@@ -45,9 +45,9 @@ beforeAll(() => {
 it("matches the type signature", () => {
   const form = setupShape()()
 
-  expectTypeOf(form.getSubmitCount).toEqualTypeOf<(scope: Scope) => number>()
+  expectTypeOf(form.getSubmitCount).toEqualTypeOf<(monitor: Monitor) => number>()
 
-  expectTypeOf(form.fields._3.getSubmitCount).toEqualTypeOf<(scope: Scope) => number>()
+  expectTypeOf(form.fields._3.getSubmitCount).toEqualTypeOf<(monitor: Monitor) => number>()
 })
 
 describe.each([
@@ -130,7 +130,7 @@ describe.each([
       form.onSubmit(() => wait(SLOWEST_ASYNC_MS / 8))
     }),
   ],
-])("getSubmitCount(scope) %s", (_, setup) => {
+])("getSubmitCount(monitor) %s", (_, setup) => {
   describe.each<[string, (form: ImpulseFormShape<ShapeFields>) => Promise<unknown>]>([
     ["root", (form) => form.submit()],
     ["root.fields.<ImpulseFormUnit>", (form) => form.fields._1.submit()],
@@ -140,42 +140,42 @@ describe.each([
       (form) => form.fields._3.fields._1.submit(),
     ],
   ])("when submitting via %s.submit()", (_, submit) => {
-    it("increments sync when submits", ({ scope }) => {
+    it("increments sync when submits", ({ monitor }) => {
       const form = setup()
 
-      expect(form.getSubmitCount(scope)).toBe(0)
+      expect(form.getSubmitCount(monitor)).toBe(0)
 
       submit(form)
-      expect(form.getSubmitCount(scope)).toBe(1)
+      expect(form.getSubmitCount(monitor)).toBe(1)
 
       submit(form)
-      expect(form.getSubmitCount(scope)).toBe(2)
+      expect(form.getSubmitCount(monitor)).toBe(2)
     })
 
-    it("increments when form is invalid", ({ scope }) => {
+    it("increments when form is invalid", ({ monitor }) => {
       const form = setup()
 
-      expect(form.isInvalid(scope)).toBe(false)
+      expect(form.isInvalid(monitor)).toBe(false)
 
       submit(form)
-      expect(form.isInvalid(scope)).toBe(true)
-      expect(form.getSubmitCount(scope)).toBe(1)
+      expect(form.isInvalid(monitor)).toBe(true)
+      expect(form.getSubmitCount(monitor)).toBe(1)
     })
 
-    it("keeps the count after async is done", async ({ scope }) => {
+    it("keeps the count after async is done", async ({ monitor }) => {
       const form = setup()
 
       const allDone = vi.fn()
 
       const submits = Promise.all([submit(form), submit(form), submit(form)])
 
-      expect(form.getSubmitCount(scope)).toBe(3)
+      expect(form.getSubmitCount(monitor)).toBe(3)
       const whenDone = submits.then(allDone)
       expect(allDone).not.toHaveBeenCalled()
 
       await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
       expect(allDone).toHaveBeenCalledOnce()
-      expect(form.getSubmitCount(scope)).toBe(3)
+      expect(form.getSubmitCount(monitor)).toBe(3)
 
       await whenDone
     })

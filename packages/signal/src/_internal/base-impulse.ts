@@ -8,11 +8,11 @@ import type { ReadableImpulse } from "../readable-impulse"
 import type { WritableImpulse } from "../writable-impulse"
 
 import { enqueue } from "./enqueue"
-import { STATIC_SCOPE, type Scope, attachToScope, extractScope } from "./scope"
-import type { ScopeEmitter } from "./scope-emitter"
+import { type Monitor, UNTRACKED_MONITOR, attachToMonitor, extractMonitor } from "./monitor"
+import type { MonitorEmitter } from "./monitor-emitter"
 
 abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> {
-  protected readonly _emitters = new Set<WeakRef<ScopeEmitter>>()
+  protected readonly _emitters = new Set<WeakRef<MonitorEmitter>>()
 
   protected constructor(protected readonly _equals: Equal<T>) {}
 
@@ -32,9 +32,9 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
    * @version 1.0.0
    */
   protected toJSON(): unknown {
-    const scope = extractScope()
+    const monitor = extractMonitor()
 
-    return this.read(scope)
+    return this.read(monitor)
   }
 
   /**
@@ -44,22 +44,22 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
    * @version 1.0.0
    */
   protected toString(): string {
-    const scope = extractScope()
+    const monitor = extractMonitor()
 
-    return String(this.read(scope))
+    return String(this.read(monitor))
   }
 
   /**
    * Reads the impulse value.
    *
-   * @param scope the Scope that tracks the Impulse value changes.
+   * @param monitor the {@link Monitor} that tracks the Impulse value changes.
    *
    * @returns the impulse value.
    *
    * @version 1.0.0
    */
-  public read(scope: Scope): T {
-    attachToScope(scope, this._emitters)
+  public read(monitor: Monitor): T {
+    attachToMonitor(monitor, this._emitters)
 
     return this._getter()
   }
@@ -73,10 +73,10 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
    *
    * @version 1.0.0
    */
-  public update(valueOrTransform: T | ((currentValue: T, scope: Scope) => T)): void {
+  public update(valueOrTransform: T | ((currentValue: T, monitor: Monitor) => T)): void {
     enqueue((push) => {
       const nextValue = isFunction(valueOrTransform)
-        ? valueOrTransform(this._getter(), STATIC_SCOPE)
+        ? valueOrTransform(this._getter(), UNTRACKED_MONITOR)
         : valueOrTransform
 
       if (this._setter(nextValue)) {
@@ -108,16 +108,19 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
    *
    * @version 1.0.0
    */
-  public clone(transform: (value: T, scope: Scope) => T, options?: ImpulseOptions<T>): Impulse<T>
+  public clone(
+    transform: (value: T, monitor: Monitor) => T,
+    options?: ImpulseOptions<T>,
+  ): Impulse<T>
 
   public clone(
-    transformOrOptions?: ((value: T, scope: Scope) => T) | ImpulseOptions<T>,
+    transformOrOptions?: ((value: T, monitor: Monitor) => T) | ImpulseOptions<T>,
     maybeOptions?: ImpulseOptions<T>,
   ): Impulse<T> {
     const value = this._getter()
 
     const [clonedValue, { equals = this._equals } = {}] = isFunction(transformOrOptions)
-      ? [transformOrOptions(value, STATIC_SCOPE), maybeOptions]
+      ? [transformOrOptions(value, UNTRACKED_MONITOR), maybeOptions]
       : [value, transformOrOptions]
 
     return this._clone(clonedValue, equals ?? isStrictEqual)

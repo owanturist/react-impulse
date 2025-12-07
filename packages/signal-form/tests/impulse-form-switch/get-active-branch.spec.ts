@@ -31,7 +31,7 @@ describe("types", () => {
         }>
       }
 
-  it("matches schema type for getActiveBranch(scope)", () => {
+  it("matches schema type for getActiveBranch(monitor)", () => {
     expectTypeOf(form.getActiveBranch).returns.toEqualTypeOf<undefined | ActiveBranch>()
   })
 })

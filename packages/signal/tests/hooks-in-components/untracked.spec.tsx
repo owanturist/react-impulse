@@ -11,7 +11,7 @@ it("returns the `factory` function result without tracking impulses", () => {
   const Component: React.FC<{
     multiplier: number
   }> = ({ multiplier }) => {
-    const { count: firstCount } = untracked((scope) => first.read(scope))
+    const { count: firstCount } = untracked((monitor) => first.read(monitor))
     const { count: secondCount } = untracked(second)
     const [, rerender] = React.useState(0)
 

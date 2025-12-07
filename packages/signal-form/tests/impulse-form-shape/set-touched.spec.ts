@@ -3,7 +3,7 @@ import type { Setter } from "~/tools/setter"
 
 import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
 
-it("specifies touched", ({ scope }) => {
+it("specifies touched", ({ monitor }) => {
   const shape = ImpulseFormShape({
     first: ImpulseFormUnit(""),
     second: ImpulseFormUnit(0),
@@ -15,9 +15,9 @@ it("specifies touched", ({ scope }) => {
   })
 
   shape.setTouched(true)
-  expect(shape.isTouched(scope)).toBe(true)
-  expect(shape.isTouched(scope, params._first)).toBe(true)
-  expect(shape.isTouched(scope, params._second)).toStrictEqual({
+  expect(shape.isTouched(monitor)).toBe(true)
+  expect(shape.isTouched(monitor, params._first)).toBe(true)
+  expect(shape.isTouched(monitor, params._second)).toStrictEqual({
     first: true,
     second: true,
     third: {
@@ -27,13 +27,13 @@ it("specifies touched", ({ scope }) => {
   })
 
   shape.fields.third.setTouched(false)
-  expect(shape.isTouched(scope)).toBe(true)
-  expect(shape.isTouched(scope, params._first)).toStrictEqual({
+  expect(shape.isTouched(monitor)).toBe(true)
+  expect(shape.isTouched(monitor, params._first)).toStrictEqual({
     first: true,
     second: true,
     third: false,
   })
-  expect(shape.isTouched(scope, params._second)).toStrictEqual({
+  expect(shape.isTouched(monitor, params._second)).toStrictEqual({
     first: true,
     second: true,
     third: {
@@ -48,8 +48,8 @@ it("specifies touched", ({ scope }) => {
       two: undefined,
     },
   })
-  expect(shape.isTouched(scope)).toBe(true)
-  expect(shape.isTouched(scope, params._first)).toStrictEqual({
+  expect(shape.isTouched(monitor)).toBe(true)
+  expect(shape.isTouched(monitor, params._first)).toStrictEqual({
     first: true,
     second: true,
     third: {
@@ -57,7 +57,7 @@ it("specifies touched", ({ scope }) => {
       two: false,
     },
   })
-  expect(shape.isTouched(scope, params._second)).toStrictEqual({
+  expect(shape.isTouched(monitor, params._second)).toStrictEqual({
     first: true,
     second: true,
     third: {
@@ -93,9 +93,9 @@ it("specifies touched", ({ scope }) => {
       },
     }
   })
-  expect(shape.isTouched(scope)).toBe(true)
-  expect(shape.isTouched(scope, params._first)).toBe(true)
-  expect(shape.isTouched(scope, params._second)).toStrictEqual({
+  expect(shape.isTouched(monitor)).toBe(true)
+  expect(shape.isTouched(monitor, params._first)).toBe(true)
+  expect(shape.isTouched(monitor, params._second)).toStrictEqual({
     first: true,
     second: true,
     third: {

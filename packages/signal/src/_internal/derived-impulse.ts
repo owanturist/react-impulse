@@ -3,15 +3,15 @@ import type { Equal } from "../equal"
 import { BaseImpulse } from "./base-impulse"
 import { enqueue } from "./enqueue"
 import { Impulse } from "./impulse"
-import { STATIC_SCOPE, type Scope, injectScope } from "./scope"
-import { ScopeEmitter } from "./scope-emitter"
+import { type Monitor, UNTRACKED_MONITOR, injectMonitor } from "./monitor"
+import { MonitorEmitter } from "./monitor-emitter"
 
 class DerivedImpulse<T> extends BaseImpulse<T> {
-  // the inner scope proxies the setters to the outer scope
-  private readonly _scope = new ScopeEmitter(() => {
-    if (this._equals(this._value, this._getValue(STATIC_SCOPE))) {
+  // the inner monitor proxies the setters to the outer monitor
+  private readonly _monitor = new MonitorEmitter(() => {
+    if (this._equals(this._value, this._getValue(UNTRACKED_MONITOR))) {
       // subscribe back to the dependencies
-      injectScope(this._getValue, this._scope)
+      injectMonitor(this._getValue, this._monitor)
     } else {
       this._stale = true
       enqueue((push) => push(this._emitters))
@@ -23,15 +23,15 @@ class DerivedImpulse<T> extends BaseImpulse<T> {
   private _stale = true
 
   public constructor(
-    private readonly _getValue: (scope: Scope) => T,
-    private readonly _setValue: (value: T, scope: Scope) => void,
+    private readonly _getValue: (monitor: Monitor) => T,
+    private readonly _setValue: (value: T, monitor: Monitor) => void,
     equals: Equal<T>,
   ) {
     super(equals)
   }
 
   protected _getter(): T {
-    const value = this._getValue(this._scope)
+    const value = this._getValue(this._monitor)
 
     if (this._stale) {
       this._value = value
@@ -42,7 +42,7 @@ class DerivedImpulse<T> extends BaseImpulse<T> {
   }
 
   protected _setter(value: T): boolean {
-    this._setValue(value, STATIC_SCOPE)
+    this._setValue(value, UNTRACKED_MONITOR)
 
     return false
   }

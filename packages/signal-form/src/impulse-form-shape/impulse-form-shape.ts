@@ -45,25 +45,25 @@ function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
     mapValues(meta, (field) => Impulse(field)) as unknown as ImpulseFormShapeStateMeta<TFields>,
   )
 
-  batch((scope) => {
+  batch((monitor) => {
     if (!isUndefined(input)) {
-      state._setInput(scope, input)
+      state._setInput(monitor, input)
     }
 
     if (!isUndefined(initial)) {
-      state._setInitial(scope, initial)
+      state._setInitial(monitor, initial)
     }
 
     if (!isUndefined(touched)) {
-      state._setTouched(scope, touched)
+      state._setTouched(monitor, touched)
     }
 
     if (!isUndefined(validateOn)) {
-      state._setValidateOn(scope, validateOn)
+      state._setValidateOn(monitor, validateOn)
     }
 
     if (!isUndefined(error)) {
-      state._setError(scope, error)
+      state._setError(monitor, error)
     }
   })
 

@@ -1,4 +1,4 @@
-import type { Scope } from "@owanturist/signal"
+import type { Monitor } from "@owanturist/signal"
 
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import type { Setter } from "~/tools/setter"
@@ -30,8 +30,8 @@ describe("types", () => {
     [InitialSchema, InitialSchema]
   >
 
-  it("matches schema type for getInitial(scope)", () => {
-    expectTypeOf(form.getInitial).toEqualTypeOf<(scope: Scope) => InitialSchema>()
+  it("matches schema type for getInitial(monitor)", () => {
+    expectTypeOf(form.getInitial).toEqualTypeOf<(monitor: Monitor) => InitialSchema>()
   })
 
   it("matches setter type for setInitial(setter)", () => {
@@ -67,8 +67,8 @@ describe("types", () => {
       [ParentInitialSchema, ParentInitialSchema]
     >
 
-    it("matches schema type for getInitial(scope)", () => {
-      expectTypeOf(parent.getInitial).toEqualTypeOf<(scope: Scope) => ParentInitialSchema>()
+    it("matches schema type for getInitial(monitor)", () => {
+      expectTypeOf(parent.getInitial).toEqualTypeOf<(monitor: Monitor) => ParentInitialSchema>()
     })
 
     it("matches setter type for setInitial(setter)", () => {
@@ -77,13 +77,13 @@ describe("types", () => {
   })
 })
 
-it("initiates with element initial", ({ scope }) => {
+it("initiates with element initial", ({ monitor }) => {
   const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit(1))
 
-  expect(form.getInitial(scope)).toStrictEqual({ enabled: true, element: 1 })
+  expect(form.getInitial(monitor)).toStrictEqual({ enabled: true, element: 1 })
 })
 
-it("initiates with overridden initial", ({ scope }) => {
+it("initiates with overridden initial", ({ monitor }) => {
   const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit(1), {
     initial: {
       enabled: false,
@@ -91,10 +91,10 @@ it("initiates with overridden initial", ({ scope }) => {
     },
   })
 
-  expect(form.getInitial(scope)).toStrictEqual({ enabled: false, element: 2 })
+  expect(form.getInitial(monitor)).toStrictEqual({ enabled: false, element: 2 })
 })
 
-it("sets initial", ({ scope }) => {
+it("sets initial", ({ monitor }) => {
   const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit(1))
 
   form.setInitial({
@@ -102,13 +102,13 @@ it("sets initial", ({ scope }) => {
     element: 10,
   })
 
-  expect(form.getInitial(scope)).toStrictEqual({
+  expect(form.getInitial(monitor)).toStrictEqual({
     enabled: false,
     element: 10,
   })
 })
 
-it("sets partial initial", ({ scope }) => {
+it("sets partial initial", ({ monitor }) => {
   const form = ImpulseFormOptional(
     ImpulseFormUnit(true),
     ImpulseFormShape({
@@ -123,7 +123,7 @@ it("sets partial initial", ({ scope }) => {
     },
   })
 
-  expect(form.getInitial(scope)).toStrictEqual({
+  expect(form.getInitial(monitor)).toStrictEqual({
     enabled: true,
     element: {
       _1: 1,
@@ -161,7 +161,7 @@ describe("using recursive setter", () => {
       },
     ],
   ])("in %s", (_, run) => {
-    it("passes initial and input recursively to all setters", ({ scope }) => {
+    it("passes initial and input recursively to all setters", ({ monitor }) => {
       expect.assertions(8)
 
       const form = run((initial, input) => {
@@ -185,11 +185,11 @@ describe("using recursive setter", () => {
         }
       })
 
-      expect(form.getInitial(scope)).toStrictEqual({
+      expect(form.getInitial(monitor)).toStrictEqual({
         enabled: false,
         element: 2,
       })
-      expect(form.getInput(scope)).toStrictEqual({
+      expect(form.getInput(monitor)).toStrictEqual({
         enabled: true,
         element: 0,
       })
@@ -198,33 +198,33 @@ describe("using recursive setter", () => {
 })
 
 describe("stable input value", () => {
-  it("subsequently selects equal input", ({ scope }) => {
+  it("subsequently selects equal input", ({ monitor }) => {
     const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit({ a: 1 }))
 
-    const input0 = form.getInitial(scope)
+    const input0 = form.getInitial(monitor)
 
     form.setInitial({ element: { a: 1 } })
-    const input1 = form.getInitial(scope)
+    const input1 = form.getInitial(monitor)
 
     expect(input0).not.toBe(input1)
     expect(input0).toStrictEqual(input1)
   })
 
-  it("selects unequal initial values when isInputEqual is not specified", ({ scope }) => {
+  it("selects unequal initial values when isInputEqual is not specified", ({ monitor }) => {
     const form = ImpulseFormOptional(ImpulseFormUnit(true), ImpulseFormUnit([0]))
 
-    const initial0 = form.getInitial(scope)
+    const initial0 = form.getInitial(monitor)
 
     form.setInitial({
       element: [0],
     })
-    const initial1 = form.getInitial(scope)
+    const initial1 = form.getInitial(monitor)
 
     expect(initial0).not.toBe(initial1)
     expect(initial0).toStrictEqual(initial1)
   })
 
-  it("selects equal initial values when isInputEqual is specified", ({ scope }) => {
+  it("selects equal initial values when isInputEqual is specified", ({ monitor }) => {
     const form = ImpulseFormOptional(
       ImpulseFormUnit(false),
       ImpulseFormUnit([0], {
@@ -232,12 +232,12 @@ describe("stable input value", () => {
       }),
     )
 
-    const initial0 = form.getInitial(scope)
+    const initial0 = form.getInitial(monitor)
 
     form.setInitial({
       element: [0],
     })
-    const initial1 = form.getInitial(scope)
+    const initial1 = form.getInitial(monitor)
 
     expect(initial0).toBe(initial1)
     expect(initial0).toStrictEqual(initial1)

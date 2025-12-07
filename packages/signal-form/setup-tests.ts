@@ -6,7 +6,7 @@ const spy__object_is = vi.spyOn(Object, "is")
 beforeEach((context) => {
   spy__object_is.mockClear()
 
-  context.scope = untracked((scope) => scope)
+  context.monitor = untracked((monitor) => monitor)
 })
 
 afterAll(() => {

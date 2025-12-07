@@ -1,4 +1,4 @@
-import type { Scope } from "@owanturist/signal"
+import type { Monitor } from "@owanturist/signal"
 import z from "zod"
 
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
@@ -145,8 +145,8 @@ describe("types", () => {
     [InputSchema, InputSchema]
   >
 
-  it("matches schema type for getInput(scope)", () => {
-    expectTypeOf(form.getInput).toEqualTypeOf<(scope: Scope) => InputSchema>()
+  it("matches schema type for getInput(monitor)", () => {
+    expectTypeOf(form.getInput).toEqualTypeOf<(monitor: Monitor) => InputSchema>()
   })
 
   it("matches setter type for setInput(setter)", () => {
@@ -202,8 +202,8 @@ describe("types", () => {
       [ParentInputSchema, ParentInputSchema]
     >
 
-    it("matches schema type for getInput(scope)", () => {
-      expectTypeOf(parent.getInput).toEqualTypeOf<(scope: Scope) => ParentInputSchema>()
+    it("matches schema type for getInput(monitor)", () => {
+      expectTypeOf(parent.getInput).toEqualTypeOf<(monitor: Monitor) => ParentInputSchema>()
     })
 
     it("matches setter type for setInput(setter)", () => {
@@ -212,7 +212,7 @@ describe("types", () => {
   })
 })
 
-it("initiates with children input", ({ scope }) => {
+it("initiates with children input", ({ monitor }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("_1", {
       schema: z.enum(["_1", "_2", "_5"]),
@@ -232,7 +232,7 @@ it("initiates with children input", ({ scope }) => {
     },
   )
 
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "_1",
     branches: {
       _1: true,
@@ -251,7 +251,7 @@ it("initiates with children input", ({ scope }) => {
   })
 })
 
-it("initiates with overridden input", ({ scope }) => {
+it("initiates with overridden input", ({ monitor }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("", {
       schema: z.enum(["_1", "_2", "_5"]),
@@ -290,7 +290,7 @@ it("initiates with overridden input", ({ scope }) => {
     },
   )
 
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "_5",
     branches: {
       _1: false,
@@ -307,7 +307,7 @@ it("initiates with overridden input", ({ scope }) => {
       },
     },
   })
-  expect(form.getInitial(scope)).toStrictEqual({
+  expect(form.getInitial(monitor)).toStrictEqual({
     active: "",
     branches: {
       _1: true,
@@ -326,7 +326,7 @@ it("initiates with overridden input", ({ scope }) => {
   })
 })
 
-it("sets input", ({ scope }) => {
+it("sets input", ({ monitor }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("", {
       schema: z.enum(["_1", "_2"]),
@@ -353,7 +353,7 @@ it("sets input", ({ scope }) => {
     },
   })
 
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "_6",
     branches: {
       _1: false,
@@ -363,7 +363,7 @@ it("sets input", ({ scope }) => {
       },
     },
   })
-  expect(form.getInitial(scope)).toStrictEqual({
+  expect(form.getInitial(monitor)).toStrictEqual({
     active: "",
     branches: {
       _1: true,
@@ -375,7 +375,7 @@ it("sets input", ({ scope }) => {
   })
 })
 
-it("sets partial input", ({ scope }) => {
+it("sets partial input", ({ monitor }) => {
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("", {
       schema: z.enum(["_1", "_2"]),
@@ -398,7 +398,7 @@ it("sets partial input", ({ scope }) => {
       },
     },
   })
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "",
     branches: {
       _1: true,
@@ -408,7 +408,7 @@ it("sets partial input", ({ scope }) => {
       },
     },
   })
-  expect(form.getInitial(scope)).toStrictEqual({
+  expect(form.getInitial(monitor)).toStrictEqual({
     active: "",
     branches: {
       _1: true,
@@ -422,7 +422,7 @@ it("sets partial input", ({ scope }) => {
   form.setInput({
     active: "_7",
   })
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "_7",
     branches: {
       _1: true,
@@ -432,7 +432,7 @@ it("sets partial input", ({ scope }) => {
       },
     },
   })
-  expect(form.getInitial(scope)).toStrictEqual({
+  expect(form.getInitial(monitor)).toStrictEqual({
     active: "",
     branches: {
       _1: true,
@@ -488,7 +488,7 @@ describe("using recursive setter", () => {
       },
     ],
   ])("in %s", (_, setup) => {
-    it("passes initial and input recursively to all setters", ({ scope }) => {
+    it("passes initial and input recursively to all setters", ({ monitor }) => {
       expect.assertions(26)
 
       const form = setup((input, initial) => {
@@ -657,7 +657,7 @@ describe("using recursive setter", () => {
         }
       })
 
-      expect(form.getInput(scope)).toStrictEqual({
+      expect(form.getInput(monitor)).toStrictEqual({
         active: "_1",
         branches: {
           _1: false,
@@ -674,7 +674,7 @@ describe("using recursive setter", () => {
           },
         },
       })
-      expect(form.getInitial(scope)).toStrictEqual({
+      expect(form.getInitial(monitor)).toStrictEqual({
         active: "",
         branches: {
           _1: true,
@@ -696,7 +696,7 @@ describe("using recursive setter", () => {
 })
 
 describe("stable input value", () => {
-  it("subsequently selects equal input", ({ scope }) => {
+  it("subsequently selects equal input", ({ monitor }) => {
     const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2" | "_5">("_1"), {
       _1: ImpulseFormUnit(true),
       _2: ImpulseFormShape({
@@ -714,11 +714,11 @@ describe("stable input value", () => {
       ),
     })
 
-    expect(form.getInput(scope)).toBeInstanceOf(Object)
-    expect(form.getInput(scope)).toBe(form.getInput(scope))
+    expect(form.getInput(monitor)).toBeInstanceOf(Object)
+    expect(form.getInput(monitor)).toBe(form.getInput(monitor))
   })
 
-  it("persists unchanged branches input between changes", ({ scope }) => {
+  it("persists unchanged branches input between changes", ({ monitor }) => {
     const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2" | "_5">("_1"), {
       _1: ImpulseFormUnit(true),
       _2: ImpulseFormShape({
@@ -736,7 +736,7 @@ describe("stable input value", () => {
       ),
     })
 
-    const input0 = form.getInput(scope)
+    const input0 = form.getInput(monitor)
 
     form.setInput({
       branches: {
@@ -746,7 +746,7 @@ describe("stable input value", () => {
       },
     })
 
-    const input1 = form.getInput(scope)
+    const input1 = form.getInput(monitor)
 
     expect(input1).not.toBe(input0)
     expect(input1.active).toBe(input0.active)
@@ -755,25 +755,25 @@ describe("stable input value", () => {
     expect(input1.branches._5).toBe(input0.branches._5)
   })
 
-  it("selects unequal input values when isInputEqual is not specified", ({ scope }) => {
+  it("selects unequal input values when isInputEqual is not specified", ({ monitor }) => {
     const form = ImpulseFormSwitch(ImpulseFormUnit<"_1">("_1"), {
       _1: ImpulseFormUnit([0]),
     })
 
-    const input0 = form.getInput(scope)
+    const input0 = form.getInput(monitor)
 
     form.setInput({
       branches: {
         _1: [0],
       },
     })
-    const input1 = form.getInput(scope)
+    const input1 = form.getInput(monitor)
 
     expect(input0).not.toBe(input1)
     expect(input0).toStrictEqual(input1)
   })
 
-  it("selects equal input values when isInputEqual is specified", ({ scope }) => {
+  it("selects equal input values when isInputEqual is specified", ({ monitor }) => {
     const form = ImpulseFormSwitch(
       ImpulseFormUnit("", {
         schema: z.enum(["_1"]),
@@ -785,14 +785,14 @@ describe("stable input value", () => {
       },
     )
 
-    const input0 = form.getInput(scope)
+    const input0 = form.getInput(monitor)
 
     form.setInput({
       branches: {
         _1: [0],
       },
     })
-    const input1 = form.getInput(scope)
+    const input1 = form.getInput(monitor)
 
     expect(input0).toBe(input1)
     expect(input0).toStrictEqual(input1)

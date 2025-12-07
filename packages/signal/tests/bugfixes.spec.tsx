@@ -1,7 +1,7 @@
 import { act, fireEvent, render, renderHook, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, effect, useScope, useScoped } from "../src"
+import { Impulse, effect, useComputed, useMonitor } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -11,7 +11,7 @@ describe("watching misses when defined after useEffect #140", () => {
     useGetSecond(second: Impulse<number>): number
   }
 
-  const ComponentScopedBeforeEffect: React.FC<ComponentProps> = ({
+  const ComponentComputedBeforeEffect: React.FC<ComponentProps> = ({
     first,
     second,
     useGetFirst,
@@ -31,7 +31,7 @@ describe("watching misses when defined after useEffect #140", () => {
     )
   }
 
-  const ComponentScopedAfterEffect: React.FC<ComponentProps> = ({
+  const ComponentComputedAfterEffect: React.FC<ComponentProps> = ({
     first,
     second,
     useGetFirst,
@@ -52,26 +52,27 @@ describe("watching misses when defined after useEffect #140", () => {
     )
   }
 
-  const useScopedInline = (impulse: Impulse<number>) => useScoped((scope) => impulse.read(scope))
+  const useComputedInline = (impulse: Impulse<number>) =>
+    useComputed((monitor) => impulse.read(monitor))
 
-  const useScopedMemoized = (impulse: Impulse<number>) =>
-    useScoped((scope) => impulse.read(scope), [impulse])
+  const useComputedMemoized = (impulse: Impulse<number>) =>
+    useComputed((monitor) => impulse.read(monitor), [impulse])
 
-  const useScopedShortcut = (impulse: Impulse<number>) => useScoped(impulse)
+  const useComputedShortcut = (impulse: Impulse<number>) => useComputed(impulse)
 
   describe.each([
-    ["before", ComponentScopedBeforeEffect],
-    ["after", ComponentScopedAfterEffect],
+    ["before", ComponentComputedBeforeEffect],
+    ["after", ComponentComputedAfterEffect],
   ])("calls depending hook %s useEffect", (_, Component) => {
     describe.each([
-      ["inline useScoped", useScopedInline],
-      ["memoized useScoped", useScopedMemoized],
-      ["shortcut useScoped", useScopedShortcut],
+      ["inline useComputed", useComputedInline],
+      ["memoized useComputed", useComputedMemoized],
+      ["shortcut useComputed", useComputedShortcut],
     ])("with %s as useGetFirst", (_, useGetFirst) => {
       it.each([
-        ["inline useScoped", useScopedInline],
-        ["memoized useScoped", useScopedMemoized],
-        ["shortcut useScoped", useScopedShortcut],
+        ["inline useComputed", useComputedInline],
+        ["memoized useComputed", useComputedMemoized],
+        ["shortcut useComputed", useComputedShortcut],
       ])("with %s as useGetSecond", (_, useGetSecond) => {
         const first = Impulse(0)
         const second = Impulse(5)
@@ -159,16 +160,19 @@ describe("return the same component type from watch #322", () => {
   const StatefulInput: React.FC<{
     value: Impulse<string>
   }> = ({ value }) => {
-    const scope = useScope()
+    const monitor = useMonitor()
 
     return (
-      <StatelessInput value={value.read(scope)} onChange={(nextValue) => value.update(nextValue)} />
+      <StatelessInput
+        value={value.read(monitor)}
+        onChange={(nextValue) => value.update(nextValue)}
+      />
     )
   }
 
   const Input = Object.assign(StatefulInput, { stateless: StatelessInput })
 
-  it("scopes the StatefulInput", () => {
+  it("monitors the StatefulInput", () => {
     const text = Impulse("hello")
     render(<Input value={text} />)
 
@@ -186,12 +190,12 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
   const Button: React.FC<{
     count: Impulse<number>
   }> = ({ count }) => {
-    const scope = useScope()
+    const monitor = useMonitor()
     React.useState(0)
 
     return (
       <button type="button" onClick={() => count.update((x) => x + 1)}>
-        {count.read(scope)}
+        {count.read(monitor)}
       </button>
     )
   }
@@ -231,7 +235,7 @@ describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a n
       },
     )
 
-    const { result } = renderHook(() => useScoped(impulse))
+    const { result } = renderHook(() => useComputed(impulse))
 
     expect(result.current).toBe(0)
 
@@ -244,14 +248,14 @@ describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a n
 })
 
 describe("ImpulseForm.reset() does not run subscribers #969", () => {
-  it("runs the effect listeners for every derived update", ({ scope }) => {
+  it("runs the effect listeners for every derived update", ({ monitor }) => {
     const spy = vi.fn()
     const source1 = Impulse(1)
     const source2 = Impulse<string>()
-    const derived = Impulse((scope) => source2.read(scope) ?? source1.read(scope) > 0)
+    const derived = Impulse((monitor) => source2.read(monitor) ?? source1.read(monitor) > 0)
 
-    effect((scope) => {
-      const output = derived.read(scope)
+    effect((monitor) => {
+      const output = derived.read(monitor)
 
       spy(output)
 
@@ -262,7 +266,7 @@ describe("ImpulseForm.reset() does not run subscribers #969", () => {
 
     // initial run
     expect(spy).toHaveBeenCalledExactlyOnceWith(true)
-    expect(derived.read(scope)).toBe(true)
+    expect(derived.read(monitor)).toBe(true)
     spy.mockClear()
 
     // cause the source_2 update
@@ -272,17 +276,17 @@ describe("ImpulseForm.reset() does not run subscribers #969", () => {
     expect(spy).toHaveBeenNthCalledWith(1, false)
     // the source_2 inside the listener causes the listener run again
     expect(spy).toHaveBeenNthCalledWith(2, "error")
-    expect(derived.read(scope)).toBe("error")
+    expect(derived.read(monitor)).toBe("error")
     spy.mockClear()
 
     // source_1 is not relevant to the current derived value, so it does not cause the listener run
     source1.update(1)
     expect(spy).not.toHaveBeenCalled()
-    expect(derived.read(scope)).toBe("error")
+    expect(derived.read(monitor)).toBe("error")
 
     // enable the source_1 to derive the derived value again
     source2.update(undefined)
     expect(spy).toHaveBeenCalledExactlyOnceWith(true)
-    expect(derived.read(scope)).toBe(true)
+    expect(derived.read(monitor)).toBe(true)
   })
 })

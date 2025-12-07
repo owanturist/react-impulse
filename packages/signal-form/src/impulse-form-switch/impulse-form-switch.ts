@@ -47,25 +47,25 @@ function ImpulseFormSwitch<
     mapValues(branches, (branch) => ImpulseFormSwitchImpl._getState(branch)),
   )
 
-  batch((scope) => {
+  batch((monitor) => {
     if (!isUndefined(touched)) {
-      switcher._setTouched(scope, touched)
+      switcher._setTouched(monitor, touched)
     }
 
     if (!isUndefined(initial)) {
-      switcher._setInitial(scope, initial)
+      switcher._setInitial(monitor, initial)
     }
 
     if (!isUndefined(input)) {
-      switcher._setInput(scope, input)
+      switcher._setInput(monitor, input)
     }
 
     if (!isUndefined(validateOn)) {
-      switcher._setValidateOn(scope, validateOn)
+      switcher._setValidateOn(monitor, validateOn)
     }
 
     if (!isUndefined(error)) {
-      switcher._setError(scope, error)
+      switcher._setError(monitor, error)
     }
   })
 

@@ -1,4 +1,4 @@
-import type { Scope } from "@owanturist/signal"
+import type { Monitor } from "@owanturist/signal"
 import { z } from "zod"
 
 import { params } from "~/tools/params"
@@ -65,66 +65,66 @@ function setup(
 }
 
 function isValidatedDefault<TFields extends ImpulseFormShapeFields>(
-  scope: Scope,
+  monitor: Monitor,
   shape: ImpulseFormShape<TFields>,
 ) {
-  return shape.isValidated(scope)
+  return shape.isValidated(monitor)
 }
 
 function isValidatedConcise<TFields extends ImpulseFormShapeFields>(
-  scope: Scope,
+  monitor: Monitor,
   shape: ImpulseFormShape<TFields>,
 ) {
-  return shape.isValidated(scope, params._first)
+  return shape.isValidated(monitor, params._first)
 }
 
 function isValidatedVerbose<TFields extends ImpulseFormShapeFields>(
-  scope: Scope,
+  monitor: Monitor,
   shape: ImpulseFormShape<TFields>,
 ) {
-  return shape.isValidated(scope, params._second)
+  return shape.isValidated(monitor, params._second)
 }
 
 it("matches the type signature", () => {
   const form = setup()
 
   expectTypeOf(form.isValidated).toEqualTypeOf<{
-    (scope: Scope): boolean
+    (monitor: Monitor): boolean
 
     <TResult>(
-      scope: Scope,
+      monitor: Monitor,
       select: (concise: RootIsValidatedConcise, verbose: RootIsValidatedVerbose) => TResult,
     ): TResult
   }>()
 
   expectTypeOf(form.fields.third.isValidated).toEqualTypeOf<{
-    (scope: Scope): boolean
+    (monitor: Monitor): boolean
 
     <TResult>(
-      scope: Scope,
+      monitor: Monitor,
       select: (concise: ThirdIsValidatedConcise, verbose: ThirdIsValidatedVerbose) => TResult,
     ): TResult
   }>()
 })
 
-describe("isValidated(scope)", () => {
+describe("isValidated(monitor)", () => {
   const isValidated = isValidatedDefault
 
-  it("returns boolean value", ({ scope }) => {
+  it("returns boolean value", ({ monitor }) => {
     const shape = setup()
 
-    expectTypeOf(isValidated(scope, shape)).toBeBoolean()
-    expectTypeOf(isValidated(scope, shape.fields.third)).toBeBoolean()
+    expectTypeOf(isValidated(monitor, shape)).toBeBoolean()
+    expectTypeOf(isValidated(monitor, shape.fields.third)).toBeBoolean()
   })
 
-  it("returns false when NONE are validated", ({ scope }) => {
+  it("returns false when NONE are validated", ({ monitor }) => {
     const shape = setup()
 
-    expect(isValidated(scope, shape)).toBe(false)
-    expect(isValidated(scope, shape.fields.third)).toBe(false)
+    expect(isValidated(monitor, shape)).toBe(false)
+    expect(isValidated(monitor, shape.fields.third)).toBe(false)
   })
 
-  it("returns false when SOME are validated", ({ scope }) => {
+  it("returns false when SOME are validated", ({ monitor }) => {
     const shape = setup({
       touched: {
         first: true,
@@ -134,43 +134,43 @@ describe("isValidated(scope)", () => {
       },
     })
 
-    expect(isValidated(scope, shape)).toBe(false)
-    expect(isValidated(scope, shape.fields.third)).toBe(false)
+    expect(isValidated(monitor, shape)).toBe(false)
+    expect(isValidated(monitor, shape.fields.third)).toBe(false)
   })
 
-  it("returns true when ALL are validated", ({ scope }) => {
+  it("returns true when ALL are validated", ({ monitor }) => {
     const shape = setup({
       touched: true,
     })
 
-    expect(isValidated(scope, shape)).toBe(true)
-    expect(shape.fields.third.isValidated(scope)).toBe(true)
+    expect(isValidated(monitor, shape)).toBe(true)
+    expect(shape.fields.third.isValidated(monitor)).toBe(true)
   })
 
-  it("returns false for empty shape", ({ scope }) => {
-    expect(ImpulseFormShape({}).isValidated(scope)).toBe(false)
+  it("returns false for empty shape", ({ monitor }) => {
+    expect(ImpulseFormShape({}).isValidated(monitor)).toBe(false)
   })
 })
 
-describe("isValidated(scope, (concise) => concise)", () => {
+describe("isValidated(monitor, (concise) => concise)", () => {
   const isValidated = isValidatedConcise
 
-  it("selects concise value", ({ scope }) => {
+  it("selects concise value", ({ monitor }) => {
     const shape = setup()
 
-    expectTypeOf(isValidated(scope, shape)).toEqualTypeOf<RootIsValidatedConcise>()
+    expectTypeOf(isValidated(monitor, shape)).toEqualTypeOf<RootIsValidatedConcise>()
 
-    expectTypeOf(isValidated(scope, shape.fields.third)).toEqualTypeOf<ThirdIsValidatedConcise>()
+    expectTypeOf(isValidated(monitor, shape.fields.third)).toEqualTypeOf<ThirdIsValidatedConcise>()
   })
 
-  it("returns false when NONE are validated", ({ scope }) => {
+  it("returns false when NONE are validated", ({ monitor }) => {
     const shape = setup()
 
-    expect(isValidated(scope, shape)).toBe(false)
-    expect(isValidated(scope, shape.fields.third)).toBe(false)
+    expect(isValidated(monitor, shape)).toBe(false)
+    expect(isValidated(monitor, shape.fields.third)).toBe(false)
   })
 
-  it("returns concise object when SOME are validated", ({ scope }) => {
+  it("returns concise object when SOME are validated", ({ monitor }) => {
     const shape = setup({
       touched: {
         first: true,
@@ -180,7 +180,7 @@ describe("isValidated(scope, (concise) => concise)", () => {
       },
     })
 
-    expect(isValidated(scope, shape)).toStrictEqual({
+    expect(isValidated(monitor, shape)).toStrictEqual({
       first: true,
       second: false,
       third: {
@@ -188,41 +188,41 @@ describe("isValidated(scope, (concise) => concise)", () => {
         two: false,
       },
     })
-    expect(isValidated(scope, shape.fields.third)).toStrictEqual({
+    expect(isValidated(monitor, shape.fields.third)).toStrictEqual({
       one: true,
       two: false,
     })
   })
 
-  it("returns true when ALL are validated", ({ scope }) => {
+  it("returns true when ALL are validated", ({ monitor }) => {
     const shape = setup({
       touched: true,
     })
 
-    expect(isValidated(scope, shape)).toBe(true)
-    expect(isValidated(scope, shape.fields.third)).toBe(true)
+    expect(isValidated(monitor, shape)).toBe(true)
+    expect(isValidated(monitor, shape.fields.third)).toBe(true)
   })
 
-  it("returns false for empty shape", ({ scope }) => {
-    expect(isValidated(scope, ImpulseFormShape({}))).toBe(false)
+  it("returns false for empty shape", ({ monitor }) => {
+    expect(isValidated(monitor, ImpulseFormShape({}))).toBe(false)
   })
 })
 
-describe("isValidated(scope, (_, verbose) => verbose)", () => {
+describe("isValidated(monitor, (_, verbose) => verbose)", () => {
   const isValidated = isValidatedVerbose
 
-  it("selects verbose value", ({ scope }) => {
+  it("selects verbose value", ({ monitor }) => {
     const shape = setup()
 
-    expectTypeOf(isValidated(scope, shape)).toEqualTypeOf<RootIsValidatedVerbose>()
+    expectTypeOf(isValidated(monitor, shape)).toEqualTypeOf<RootIsValidatedVerbose>()
 
-    expectTypeOf(isValidated(scope, shape.fields.third)).toEqualTypeOf<ThirdIsValidatedVerbose>()
+    expectTypeOf(isValidated(monitor, shape.fields.third)).toEqualTypeOf<ThirdIsValidatedVerbose>()
   })
 
-  it("returns verbose object when NONE are validated", ({ scope }) => {
+  it("returns verbose object when NONE are validated", ({ monitor }) => {
     const shape = setup()
 
-    expect(isValidated(scope, shape)).toStrictEqual({
+    expect(isValidated(monitor, shape)).toStrictEqual({
       first: false,
       second: false,
       third: {
@@ -230,13 +230,13 @@ describe("isValidated(scope, (_, verbose) => verbose)", () => {
         two: false,
       },
     })
-    expect(isValidated(scope, shape.fields.third)).toStrictEqual({
+    expect(isValidated(monitor, shape.fields.third)).toStrictEqual({
       one: false,
       two: false,
     })
   })
 
-  it("returns verbose object when SOME are validated", ({ scope }) => {
+  it("returns verbose object when SOME are validated", ({ monitor }) => {
     const shape = setup({
       touched: {
         first: true,
@@ -246,7 +246,7 @@ describe("isValidated(scope, (_, verbose) => verbose)", () => {
       },
     })
 
-    expect(isValidated(scope, shape)).toStrictEqual({
+    expect(isValidated(monitor, shape)).toStrictEqual({
       first: true,
       second: false,
       third: {
@@ -254,18 +254,18 @@ describe("isValidated(scope, (_, verbose) => verbose)", () => {
         two: false,
       },
     })
-    expect(isValidated(scope, shape.fields.third)).toStrictEqual({
+    expect(isValidated(monitor, shape.fields.third)).toStrictEqual({
       one: true,
       two: false,
     })
   })
 
-  it("returns verbose object when ALL are validated", ({ scope }) => {
+  it("returns verbose object when ALL are validated", ({ monitor }) => {
     const shape = setup({
       touched: true,
     })
 
-    expect(isValidated(scope, shape)).toStrictEqual({
+    expect(isValidated(monitor, shape)).toStrictEqual({
       first: true,
       second: true,
       third: {
@@ -273,19 +273,19 @@ describe("isValidated(scope, (_, verbose) => verbose)", () => {
         two: true,
       },
     })
-    expect(isValidated(scope, shape.fields.third)).toStrictEqual({
+    expect(isValidated(monitor, shape.fields.third)).toStrictEqual({
       one: true,
       two: true,
     })
   })
 
-  it("returns an empty object for empty shape", ({ scope }) => {
-    expect(isValidated(scope, ImpulseFormShape({}))).toStrictEqual({})
+  it("returns an empty object for empty shape", ({ monitor }) => {
+    expect(isValidated(monitor, ImpulseFormShape({}))).toStrictEqual({})
   })
 })
 
 describe("isValidated(..)", () => {
-  it("overrides fields' initial value", ({ scope }) => {
+  it("overrides fields' initial value", ({ monitor }) => {
     const shape = ImpulseFormShape(
       {
         one: ImpulseFormUnit(true, {
@@ -302,6 +302,6 @@ describe("isValidated(..)", () => {
       },
     )
 
-    expect(shape.isValidated(scope)).toBe(false)
+    expect(shape.isValidated(monitor)).toBe(false)
   })
 })

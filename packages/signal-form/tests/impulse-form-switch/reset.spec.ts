@@ -44,10 +44,10 @@ function setup() {
   )
 }
 
-it("resets every initial input", ({ scope }) => {
+it("resets every initial input", ({ monitor }) => {
   const form = setup()
 
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "_1",
     branches: {
       _1: 1,
@@ -67,7 +67,7 @@ it("resets every initial input", ({ scope }) => {
 
   form.reset()
 
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "_2",
     branches: {
       _1: 0,
@@ -86,7 +86,7 @@ it("resets every initial input", ({ scope }) => {
   })
 })
 
-it("applies resetter to set initial values", ({ scope }) => {
+it("applies resetter to set initial values", ({ monitor }) => {
   const form = setup()
 
   form.reset({
@@ -104,7 +104,7 @@ it("applies resetter to set initial values", ({ scope }) => {
     },
   })
 
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "_1",
     branches: {
       _1: 123,
@@ -123,10 +123,10 @@ it("applies resetter to set initial values", ({ scope }) => {
   })
 })
 
-it("resets every touched", ({ scope }) => {
+it("resets every touched", ({ monitor }) => {
   const form = setup()
 
-  expect(form.isTouched(scope, params._second)).toStrictEqual({
+  expect(form.isTouched(monitor, params._second)).toStrictEqual({
     active: false,
     branches: {
       _1: false,
@@ -146,7 +146,7 @@ it("resets every touched", ({ scope }) => {
 
   form.reset()
 
-  expect(form.isTouched(scope, params._second)).toStrictEqual({
+  expect(form.isTouched(monitor, params._second)).toStrictEqual({
     active: false,
     branches: {
       _1: false,
@@ -165,10 +165,10 @@ it("resets every touched", ({ scope }) => {
   })
 })
 
-it("resets every error", ({ scope }) => {
+it("resets every error", ({ monitor }) => {
   const form = setup()
 
-  expect(form.getError(scope, params._second)).toStrictEqual({
+  expect(form.getError(monitor, params._second)).toStrictEqual({
     active: null,
     branches: {
       _1: ["custom error"],
@@ -188,7 +188,7 @@ it("resets every error", ({ scope }) => {
 
   form.reset()
 
-  expect(form.getError(scope, params._second)).toStrictEqual({
+  expect(form.getError(monitor, params._second)).toStrictEqual({
     active: null,
     branches: {
       _1: [expect.stringContaining("Too small")],
@@ -207,14 +207,14 @@ it("resets every error", ({ scope }) => {
   })
 })
 
-it("resets every validated", ({ scope }) => {
+it("resets every validated", ({ monitor }) => {
   const form = setup()
 
   form.setTouched({
     active: true,
   })
 
-  expect(form.isValidated(scope, params._second)).toStrictEqual({
+  expect(form.isValidated(monitor, params._second)).toStrictEqual({
     active: true,
     branches: {
       _1: true,
@@ -234,7 +234,7 @@ it("resets every validated", ({ scope }) => {
 
   form.reset()
 
-  expect(form.isValidated(scope, params._second)).toStrictEqual({
+  expect(form.isValidated(monitor, params._second)).toStrictEqual({
     active: false,
     branches: {
       _1: true,
@@ -253,7 +253,7 @@ it("resets every validated", ({ scope }) => {
   })
 })
 
-it("using recursive resetter", ({ scope }) => {
+it("using recursive resetter", ({ monitor }) => {
   expect.assertions(26)
 
   const form = ImpulseFormSwitch(
@@ -465,9 +465,9 @@ it("using recursive resetter", ({ scope }) => {
     }
   })
 
-  const initial = form.getInitial(scope)
+  const initial = form.getInitial(monitor)
 
-  expect(form.getInput(scope)).toStrictEqual(initial)
+  expect(form.getInput(monitor)).toStrictEqual(initial)
   expect(initial).toStrictEqual({
     active: "_1",
     branches: {

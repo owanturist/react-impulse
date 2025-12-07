@@ -1,4 +1,4 @@
-import type { Scope } from "@owanturist/signal"
+import type { Monitor } from "@owanturist/signal"
 import { z } from "zod"
 
 import { params } from "~/tools/params"
@@ -16,14 +16,14 @@ function setupElement(initial: number, options?: Partial<ImpulseFormUnitSchemaOp
   })
 }
 
-it("matches the type definition", ({ scope }) => {
+it("matches the type definition", ({ monitor }) => {
   const form = setup([setupElement(0)])
 
   expectTypeOf(form.isValidated).toEqualTypeOf<{
-    (scope: Scope): boolean
+    (monitor: Monitor): boolean
 
     <TResult>(
-      scope: Scope,
+      monitor: Monitor,
       select: (
         concise: boolean | ReadonlyArray<boolean>,
         verbose: ReadonlyArray<boolean>,
@@ -31,57 +31,57 @@ it("matches the type definition", ({ scope }) => {
     ): TResult
   }>()
 
-  expectTypeOf(form.getElements(scope).at(0)!.isValidated).toEqualTypeOf<{
-    (scope: Scope): boolean
+  expectTypeOf(form.getElements(monitor).at(0)!.isValidated).toEqualTypeOf<{
+    (monitor: Monitor): boolean
 
-    <TResult>(scope: Scope, select: (concise: boolean, verbose: boolean) => TResult): TResult
+    <TResult>(monitor: Monitor, select: (concise: boolean, verbose: boolean) => TResult): TResult
   }>()
 })
 
-it("returns false for empty list", ({ scope }) => {
+it("returns false for empty list", ({ monitor }) => {
   const form = setup([])
 
-  expect(form.isValidated(scope)).toBe(false)
-  expect(form.isValidated(scope, params._first)).toBe(false)
-  expect(form.isValidated(scope, params._second)).toStrictEqual([])
+  expect(form.isValidated(monitor)).toBe(false)
+  expect(form.isValidated(monitor, params._first)).toBe(false)
+  expect(form.isValidated(monitor, params._second)).toStrictEqual([])
 })
 
-it("returns false when all elements are not validated", ({ scope }) => {
+it("returns false when all elements are not validated", ({ monitor }) => {
   const form = setup([setupElement(0), setupElement(1), setupElement(2)])
 
-  expect(form.isValidated(scope)).toBe(false)
-  expect(form.isValidated(scope, params._first)).toBe(false)
-  expect(form.isValidated(scope, params._second)).toStrictEqual([false, false, false])
+  expect(form.isValidated(monitor)).toBe(false)
+  expect(form.isValidated(monitor, params._first)).toBe(false)
+  expect(form.isValidated(monitor, params._second)).toStrictEqual([false, false, false])
 })
 
-it("returns false when at least one element is not validated", ({ scope }) => {
+it("returns false when at least one element is not validated", ({ monitor }) => {
   const form = setup([
     setupElement(0, { validateOn: "onInit" }),
     setupElement(1, { validateOn: "onInit" }),
     setupElement(2),
   ])
 
-  expect(form.isValidated(scope)).toBe(false)
-  expect(form.isValidated(scope, params._first)).toStrictEqual([true, true, false])
-  expect(form.isValidated(scope, params._second)).toStrictEqual([true, true, false])
+  expect(form.isValidated(monitor)).toBe(false)
+  expect(form.isValidated(monitor, params._first)).toStrictEqual([true, true, false])
+  expect(form.isValidated(monitor, params._second)).toStrictEqual([true, true, false])
 })
 
-it("returns true when all elements are validated", ({ scope }) => {
+it("returns true when all elements are validated", ({ monitor }) => {
   const form = setup([
     setupElement(0, { validateOn: "onInit" }),
     setupElement(1, { validateOn: "onInit" }),
     setupElement(2, { validateOn: "onInit" }),
   ])
 
-  expect(form.isValidated(scope)).toBe(true)
-  expect(form.isValidated(scope, params._first)).toBe(true)
-  expect(form.isValidated(scope, params._second)).toStrictEqual([true, true, true])
+  expect(form.isValidated(monitor)).toBe(true)
+  expect(form.isValidated(monitor, params._first)).toBe(true)
+  expect(form.isValidated(monitor, params._second)).toStrictEqual([true, true, true])
 })
 
-it("returns false when at least one element has custom errors", ({ scope }) => {
+it("returns false when at least one element has custom errors", ({ monitor }) => {
   const form = setup([setupElement(0, { error: ["error"] }), setupElement(1), setupElement(2)])
 
-  expect(form.isValidated(scope)).toBe(false)
-  expect(form.isValidated(scope, params._first)).toStrictEqual([true, false, false])
-  expect(form.isValidated(scope, params._second)).toStrictEqual([true, false, false])
+  expect(form.isValidated(monitor)).toBe(false)
+  expect(form.isValidated(monitor, params._first)).toStrictEqual([true, false, false])
+  expect(form.isValidated(monitor, params._second)).toStrictEqual([true, false, false])
 })

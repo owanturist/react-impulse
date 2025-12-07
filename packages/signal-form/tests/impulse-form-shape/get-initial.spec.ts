@@ -2,7 +2,7 @@ import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 
 import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
 
-it("selects initial", ({ scope }) => {
+it("selects initial", ({ monitor }) => {
   const shape = ImpulseFormShape({
     first: ImpulseFormUnit("1", { initial: "2" }),
     second: ImpulseFormUnit(0),
@@ -13,7 +13,7 @@ it("selects initial", ({ scope }) => {
     fourth: ["anything"],
   })
 
-  const initial0 = shape.getInitial(scope)
+  const initial0 = shape.getInitial(monitor)
   expect(initial0).toStrictEqual({
     first: "2",
     second: 0,
@@ -33,7 +33,7 @@ it("selects initial", ({ scope }) => {
     }
     readonly fourth: Array<string>
   }>()
-  expectTypeOf(shape.fields.third.getInitial(scope)).toEqualTypeOf<{
+  expectTypeOf(shape.fields.third.getInitial(monitor)).toEqualTypeOf<{
     readonly one: boolean
     readonly two: Array<string>
   }>()
@@ -42,7 +42,7 @@ it("selects initial", ({ scope }) => {
     first: "12",
   })
 
-  const initial1 = shape.getInitial(scope)
+  const initial1 = shape.getInitial(monitor)
   expect(initial1).toStrictEqual({
     first: "12",
     second: 0,
@@ -58,7 +58,7 @@ it("selects initial", ({ scope }) => {
       two: ["1", "12"],
     },
   })
-  const initial2 = shape.getInitial(scope)
+  const initial2 = shape.getInitial(monitor)
   expect(initial2).toStrictEqual({
     first: "12",
     second: 0,
@@ -70,7 +70,7 @@ it("selects initial", ({ scope }) => {
   })
 })
 
-it("subsequently selects equal initial shapes", ({ scope }) => {
+it("subsequently selects equal initial shapes", ({ monitor }) => {
   const shape = ImpulseFormShape(
     {
       first: ImpulseFormUnit("1"),
@@ -84,15 +84,15 @@ it("subsequently selects equal initial shapes", ({ scope }) => {
     },
   )
 
-  expect(shape.getInitial(scope)).toStrictEqual({
+  expect(shape.getInitial(monitor)).toStrictEqual({
     first: "2",
     second: 3,
   })
-  expect(shape.getInitial(scope)).toBe(shape.getInitial(scope))
-  expect(shape.getInitial(scope)).toBe(shape.getInitial(scope))
+  expect(shape.getInitial(monitor)).toBe(shape.getInitial(monitor))
+  expect(shape.getInitial(monitor)).toBe(shape.getInitial(monitor))
 })
 
-it("persists unchanged initial fields between changes", ({ scope }) => {
+it("persists unchanged initial fields between changes", ({ monitor }) => {
   const shape = ImpulseFormShape(
     {
       first: ImpulseFormShape({
@@ -116,7 +116,7 @@ it("persists unchanged initial fields between changes", ({ scope }) => {
     },
   )
 
-  const initial0 = shape.getInitial(scope)
+  const initial0 = shape.getInitial(monitor)
   expect(initial0).toStrictEqual({
     first: {
       _1: "1_1",
@@ -134,7 +134,7 @@ it("persists unchanged initial fields between changes", ({ scope }) => {
     },
   })
 
-  const initial1 = shape.getInitial(scope)
+  const initial1 = shape.getInitial(monitor)
   expect(initial1).toStrictEqual({
     first: {
       _1: "1_1",
@@ -150,35 +150,35 @@ it("persists unchanged initial fields between changes", ({ scope }) => {
   expect(initial1.second).not.toBe(initial0.second)
 })
 
-it("selects unequal initial values when isInputEqual is not specified", ({ scope }) => {
+it("selects unequal initial values when isInputEqual is not specified", ({ monitor }) => {
   const shape = ImpulseFormShape({
     field: ImpulseFormUnit([0]),
   })
 
-  const initial0 = shape.getInitial(scope)
+  const initial0 = shape.getInitial(monitor)
 
   shape.setInitial({
     field: [0],
   })
-  const initial1 = shape.getInitial(scope)
+  const initial1 = shape.getInitial(monitor)
 
   expect(initial0).not.toBe(initial1)
   expect(initial0).toStrictEqual(initial1)
 })
 
-it("selects equal initial values when isInputEqual is specified", ({ scope }) => {
+it("selects equal initial values when isInputEqual is specified", ({ monitor }) => {
   const shape = ImpulseFormShape({
     field: ImpulseFormUnit([0], {
       isInputEqual: isShallowArrayEqual,
     }),
   })
 
-  const initial0 = shape.getInitial(scope)
+  const initial0 = shape.getInitial(monitor)
 
   shape.setInitial({
     field: [0],
   })
-  const initial1 = shape.getInitial(scope)
+  const initial1 = shape.getInitial(monitor)
 
   expect(initial0).toBe(initial1)
   expect(initial0).toStrictEqual(initial1)
