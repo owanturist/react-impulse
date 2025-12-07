@@ -42,7 +42,7 @@ describe("single Impulse", () => {
     const initial = result.current
 
     act(() => {
-      count.setValue(2)
+      count.update(2)
     })
 
     expect(result.current).toBe(initial)
@@ -55,7 +55,7 @@ describe("single Impulse", () => {
     expect(result.current()).toBe(2)
 
     act(() => {
-      count.setValue(2)
+      count.update(2)
     })
 
     expect(result.current()).toBe(4)
@@ -69,7 +69,7 @@ describe("single Impulse", () => {
     initial()
 
     act(() => {
-      count.setValue(2)
+      count.update(2)
     })
 
     expect(result.current).not.toBe(initial)
@@ -82,7 +82,7 @@ describe("single Impulse", () => {
     result.current()
 
     act(() => {
-      count.setValue(2)
+      count.update(2)
     })
 
     expect(count).toHaveEmittersSize(0)
@@ -171,7 +171,7 @@ describe("conditional Impulse", () => {
     expect(result.current(false)).toBe(-1)
 
     act(() => {
-      count.setValue(2)
+      count.update(2)
     })
 
     expect(result.current(false)).toBe(-1)
@@ -184,7 +184,7 @@ describe("conditional Impulse", () => {
     expect(result.current(true)).toBe(2)
 
     act(() => {
-      count.setValue(2)
+      count.update(2)
     })
 
     expect(result.current(true)).toBe(4)
@@ -225,7 +225,7 @@ describe("conditional Impulse", () => {
     result.current(true)
 
     act(() => {
-      count.setValue(2)
+      count.update(2)
     })
 
     expect(count).toHaveEmittersSize(0)
@@ -280,7 +280,7 @@ describe("argument Impulse", () => {
     result.current(count2)
 
     act(() => {
-      count1.setValue(3)
+      count1.update(3)
     })
 
     expect(count1).toHaveEmittersSize(0)
@@ -297,9 +297,9 @@ it("cannot batch the callback", () => {
 
     return useCallback(
       (diff: number) => {
-        impulse1.setValue(impulse1.read(scope) + diff)
-        impulse2.setValue(impulse2.read(scope) + diff)
-        impulse3.setValue(impulse3.read(scope) + diff)
+        impulse1.update(impulse1.read(scope) + diff)
+        impulse2.update(impulse2.read(scope) + diff)
+        impulse3.update(impulse3.read(scope) + diff)
       },
       [scope],
     )

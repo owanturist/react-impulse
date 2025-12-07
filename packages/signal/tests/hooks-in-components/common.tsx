@@ -31,7 +31,7 @@ const CounterComponent = React.memo<{
           <button
             type="button"
             data-testid="increment"
-            onClick={() => countImpulse.setValue(count + 1)}
+            onClick={() => countImpulse.update(count + 1)}
           />
         </div>
       </React.Profiler>

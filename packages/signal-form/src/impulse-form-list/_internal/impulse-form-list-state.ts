@@ -104,7 +104,7 @@ class ImpulseFormListState<TElement extends ImpulseForm = ImpulseForm> extends I
       const elements = this._elements.read(scope)
       const initialElements = state._initialElements.read(scope)
 
-      this._initialElements.setValue(initialElements)
+      this._initialElements.update(initialElements)
 
       for (const [index, element] of entries(initialElements._list.read(scope))) {
         elements.at(index)?._replaceInitial(scope, element, isMounting)
@@ -133,7 +133,7 @@ class ImpulseFormListState<TElement extends ImpulseForm = ImpulseForm> extends I
       (element) => element._clone(),
     )
 
-    initialElements._list.setValue(nextInitialElements)
+    initialElements._list.update(nextInitialElements)
 
     for (const [index, initial] of entries(setters)) {
       if (!isUndefined(initial)) {
@@ -364,7 +364,7 @@ class ImpulseFormListState<TElement extends ImpulseForm = ImpulseForm> extends I
       element._reset(scope, undefined)
     }
 
-    this._elements.setValue(map(nextElements, (element) => this._parentOf(element)))
+    this._elements.update(map(nextElements, (element) => this._parentOf(element)))
   }
 
   public _getChildren<TChildParams extends ImpulseFormParams>(

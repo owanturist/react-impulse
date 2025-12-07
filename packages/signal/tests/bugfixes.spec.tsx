@@ -21,11 +21,11 @@ describe("watching misses when defined after useEffect #140", () => {
     const y = useGetSecond(second)
 
     React.useEffect(() => {
-      second.setValue(x)
+      second.update(x)
     }, [second, x])
 
     return (
-      <button type="button" onClick={() => first.setValue(x + 1)}>
+      <button type="button" onClick={() => first.update(x + 1)}>
         {y}
       </button>
     )
@@ -40,13 +40,13 @@ describe("watching misses when defined after useEffect #140", () => {
     const x = useGetFirst(first)
 
     React.useEffect(() => {
-      second.setValue(x)
+      second.update(x)
     }, [second, x])
 
     const y = useGetSecond(second)
 
     return (
-      <button type="button" onClick={() => first.setValue(x + 1)}>
+      <button type="button" onClick={() => first.update(x + 1)}>
         {y}
       </button>
     )
@@ -95,7 +95,7 @@ describe("watching misses when defined after useEffect #140", () => {
         expect(button).toHaveTextContent("2")
 
         act(() => {
-          first.setValue(10)
+          first.update(10)
         })
         expect(button).toHaveTextContent("10")
 
@@ -103,7 +103,7 @@ describe("watching misses when defined after useEffect #140", () => {
         expect(button).toHaveTextContent("11")
 
         act(() => {
-          second.setValue(20)
+          second.update(20)
         })
         expect(button).toHaveTextContent("20")
 
@@ -142,7 +142,7 @@ describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321
     expect(result).toHaveTextContent("1")
 
     act(() => {
-      count.setValue(2)
+      count.update(2)
     })
     expect(result).toHaveTextContent("2")
   })
@@ -162,10 +162,7 @@ describe("return the same component type from watch #322", () => {
     const scope = useScope()
 
     return (
-      <StatelessInput
-        value={value.read(scope)}
-        onChange={(nextValue) => value.setValue(nextValue)}
-      />
+      <StatelessInput value={value.read(scope)} onChange={(nextValue) => value.update(nextValue)} />
     )
   }
 
@@ -179,7 +176,7 @@ describe("return the same component type from watch #322", () => {
     expect(first).toHaveValue("hello")
 
     act(() => {
-      text.setValue("world")
+      text.update("world")
     })
     expect(first).toHaveValue("world")
   })
@@ -193,7 +190,7 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
     React.useState(0)
 
     return (
-      <button type="button" onClick={() => count.setValue((x) => x + 1)}>
+      <button type="button" onClick={() => count.update((x) => x + 1)}>
         {count.read(scope)}
       </button>
     )
@@ -218,7 +215,7 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
     expect(btn).toHaveTextContent("2")
 
     act(() => {
-      impulse.setValue((x) => x + 1)
+      impulse.update((x) => x + 1)
     })
     expect(btn).toHaveTextContent("3")
   })
@@ -239,7 +236,7 @@ describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a n
     expect(result.current).toBe(0)
 
     act(() => {
-      impulse.setValue(1)
+      impulse.update(1)
     })
 
     expect(result.current).toBe(0)
@@ -259,7 +256,7 @@ describe("ImpulseForm.reset() does not run subscribers #969", () => {
       spy(output)
 
       if (output === false) {
-        source2.setValue("error")
+        source2.update("error")
       }
     })
 
@@ -269,7 +266,7 @@ describe("ImpulseForm.reset() does not run subscribers #969", () => {
     spy.mockClear()
 
     // cause the source_2 update
-    source1.setValue(-1)
+    source1.update(-1)
     expect(spy).toHaveBeenCalledTimes(2)
     // source_1 update causes the listener run
     expect(spy).toHaveBeenNthCalledWith(1, false)
@@ -279,12 +276,12 @@ describe("ImpulseForm.reset() does not run subscribers #969", () => {
     spy.mockClear()
 
     // source_1 is not relevant to the current derived value, so it does not cause the listener run
-    source1.setValue(1)
+    source1.update(1)
     expect(spy).not.toHaveBeenCalled()
     expect(derived.read(scope)).toBe("error")
 
     // enable the source_1 to derive the derived value again
-    source2.setValue(undefined)
+    source2.update(undefined)
     expect(spy).toHaveBeenCalledExactlyOnceWith(true)
     expect(derived.read(scope)).toBe(true)
   })

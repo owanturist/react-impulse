@@ -40,7 +40,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value.setValue(2)
+        value.update(2)
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(4)
@@ -72,7 +72,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value.setValue(3)
+        value.update(3)
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(6)
@@ -132,7 +132,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value1.setValue(10)
+        value1.update(10)
       })
 
       expect(onEffect).not.toHaveBeenCalled()
@@ -140,7 +140,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value2.setValue(5)
+        value2.update(5)
       })
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(10)
       expect(onRender).not.toHaveBeenCalled()
@@ -168,7 +168,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value.setValue(4)
+        value.update(4)
       })
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(12)
       expect(onRender).not.toHaveBeenCalled()
@@ -212,14 +212,14 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        first.setValue(4)
+        first.update(4)
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(14)
       vi.clearAllMocks()
 
       act(() => {
-        second.setValue(5)
+        second.update(5)
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(18)
@@ -271,21 +271,21 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        _0.setValue(4)
+        _0.update(4)
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(14)
       vi.clearAllMocks()
 
       act(() => {
-        _1.setValue(5)
+        _1.update(5)
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(18)
       vi.clearAllMocks()
 
       act(() => {
-        list.setValue((items) => [...items, _2])
+        list.update((items) => [...items, _2])
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(26)
@@ -293,7 +293,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        list.setValue((items) => items.slice(1))
+        list.update((items) => items.slice(1))
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(18)
@@ -364,7 +364,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value.setValue(4)
+        value.update(4)
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(8)
@@ -379,7 +379,7 @@ describe.each([
       const scope = useScope()
 
       return (
-        <button type="button" data-testid="count" onClick={() => count.setValue((x) => x + 1)}>
+        <button type="button" data-testid="count" onClick={() => count.update((x) => x + 1)}>
           {count.read(scope)}
         </button>
       )
@@ -464,13 +464,13 @@ describe.each([
     vi.clearAllMocks()
 
     act(() => {
-      impulse.setValue(3)
+      impulse.update(3)
     })
     expect(spy).toHaveBeenCalledExactlyOnceWith(5)
     vi.clearAllMocks()
 
     act(() => {
-      impulse.setValue(3)
+      impulse.update(3)
     })
     expect(spy).not.toHaveBeenCalled()
     vi.clearAllMocks()
@@ -507,13 +507,13 @@ describe.each([
     vi.clearAllMocks()
 
     act(() => {
-      left.setValue(2)
+      left.update(2)
     })
     expect(spy).toHaveBeenCalledExactlyOnceWith(4)
     vi.clearAllMocks()
 
     act(() => {
-      right.setValue(3)
+      right.update(3)
     })
     expect(spy).toHaveBeenCalledExactlyOnceWith(5)
     vi.clearAllMocks()
@@ -546,7 +546,7 @@ describe.each([
 
     expect(cleanup).not.toHaveBeenCalled()
 
-    counter.setValue({ count: 3 })
+    counter.update({ count: 3 })
     expect(cleanup).toHaveBeenCalledExactlyOnceWith(4)
     vi.clearAllMocks()
 
@@ -561,7 +561,7 @@ describe.each([
     expect(cleanup).toHaveBeenCalledExactlyOnceWith(9)
     vi.clearAllMocks()
 
-    counter.setValue({ count: 4 })
+    counter.update({ count: 4 })
     expect(cleanup).not.toHaveBeenCalled()
   })
 
@@ -598,14 +598,14 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        impulse1.setValue(4)
+        impulse1.update(4)
       })
       expect(spyRender).toHaveBeenCalledExactlyOnceWith(3)
       expect(spyEffect).toHaveBeenCalledExactlyOnceWith(4)
       vi.clearAllMocks()
 
       act(() => {
-        impulse2.setValue(5)
+        impulse2.update(5)
       })
       expect(spyRender).toHaveBeenCalledExactlyOnceWith(5)
       expect(spyEffect).not.toHaveBeenCalled()

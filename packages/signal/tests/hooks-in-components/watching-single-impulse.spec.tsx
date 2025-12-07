@@ -127,7 +127,7 @@ describe("scoping single impulse", () => {
 
     // increment from the outside
     act(() => {
-      count.setValue((x) => x + 1)
+      count.update((x) => x + 1)
     })
     expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount) // does not re-render
     expect(onCounterRender).toHaveBeenCalledOnce()
@@ -177,7 +177,7 @@ describe("when drilling an Impulse", () => {
     vi.clearAllMocks()
 
     act(() => {
-      count.setValue((x) => x * 2)
+      count.update((x) => x * 2)
     })
     expect(screen.getByTestId("count")).toHaveTextContent("12")
     expect(onRender).not.toHaveBeenCalled()

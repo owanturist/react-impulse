@@ -116,7 +116,7 @@ class ImpulseFormShapeState<
 
     for (const [key, field] of entries(this._meta)) {
       if (hasProperty(setters, key) && !isUndefined(setters[key])) {
-        field.setValue(setters[key] as TFields[typeof key])
+        field.update(setters[key] as TFields[typeof key])
       }
     }
   }

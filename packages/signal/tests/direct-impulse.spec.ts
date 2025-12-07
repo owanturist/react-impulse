@@ -18,7 +18,7 @@ describe("Impulse()", () => {
   it("updates the impulse with a new value", ({ scope }) => {
     const impulse = Impulse<number>()
 
-    impulse.setValue(1)
+    impulse.update(1)
 
     expect(impulse.read(scope)).toBe(1)
   })
@@ -26,8 +26,8 @@ describe("Impulse()", () => {
   it("updates the impulse with a undefined", ({ scope }) => {
     const impulse = Impulse<number>()
 
-    impulse.setValue(1)
-    impulse.setValue(undefined)
+    impulse.update(1)
+    impulse.update(undefined)
 
     expect(impulse.read(scope)).toBeUndefined()
   })
@@ -43,21 +43,21 @@ describe("Impulse(value, options?)", () => {
   it("assigns Object.is as default equals", () => {
     const impulse = Impulse({ count: 0 })
 
-    impulse.setValue({ count: 1 })
+    impulse.update({ count: 1 })
     expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
   it("assigns Object.is by `null` as equals", () => {
     const impulse = Impulse({ count: 0 }, { equals: null })
 
-    impulse.setValue({ count: 1 })
+    impulse.update({ count: 1 })
     expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
   it("assigns custom function as equals", () => {
     const impulse = Impulse({ count: 0 }, { equals: Counter.equals })
 
-    impulse.setValue({ count: 1 })
+    impulse.update({ count: 1 })
     expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 

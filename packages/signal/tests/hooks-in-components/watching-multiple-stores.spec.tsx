@@ -37,8 +37,8 @@ describe("scoping multiple impulses", () => {
           type="button"
           data-testid="increment-both"
           onClick={() => {
-            firstCount.setValue((x) => x + 1)
-            secondCount.setValue((x) => x + 1)
+            firstCount.update((x) => x + 1)
+            secondCount.update((x) => x + 1)
           }}
         />
       </React.Profiler>
@@ -216,8 +216,8 @@ describe("scoping multiple impulses", () => {
 
     // increment both from the outside
     act(() => {
-      firstCount.setValue((x) => x + 1)
-      secondCount.setValue((x) => x + 1)
+      firstCount.update((x) => x + 1)
+      secondCount.update((x) => x + 1)
     })
     expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
     expect(onFirstCountRender).toHaveBeenCalledOnce()

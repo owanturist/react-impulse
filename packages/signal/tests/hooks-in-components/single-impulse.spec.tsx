@@ -26,12 +26,8 @@ describe("single impulse", () => {
   }> = ({ counter, onRender }) => (
     <React.Profiler id="test" onRender={onRender}>
       <div data-testid="setter">
-        <button
-          type="button"
-          data-testid="increment"
-          onClick={() => counter.setValue(Counter.inc)}
-        />
-        <button type="button" data-testid="reset" onClick={() => counter.setValue({ count: 0 })} />
+        <button type="button" data-testid="increment" onClick={() => counter.update(Counter.inc)} />
+        <button type="button" data-testid="reset" onClick={() => counter.update({ count: 0 })} />
       </div>
     </React.Profiler>
   )
@@ -81,7 +77,7 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     // increment from the outside
-    act(() => counter.setValue(Counter.inc))
+    act(() => counter.update(Counter.inc))
     expect(onRootRender).not.toHaveBeenCalled()
     expect(onSetterRender).not.toHaveBeenCalled()
     expect(onGetterRender).toHaveBeenCalledOnce()
@@ -115,8 +111,8 @@ describe("single impulse", () => {
 
     // increment twice in a row from the outside
     act(() => {
-      counter.setValue(Counter.inc)
-      counter.setValue(Counter.inc)
+      counter.update(Counter.inc)
+      counter.update(Counter.inc)
     })
     expect(onRootRender).not.toHaveBeenCalled()
     expect(onSetterRender).not.toHaveBeenCalled()
@@ -197,7 +193,7 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     // increment from the outside
-    act(() => counter.setValue(Counter.inc))
+    act(() => counter.update(Counter.inc))
     expect(onRootRender).not.toHaveBeenCalled()
     expect(onFirstSetterRender).not.toHaveBeenCalled()
     expect(onSecondSetterRender).not.toHaveBeenCalled()
