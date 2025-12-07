@@ -57,7 +57,7 @@ describe.each([
       })
 
       act(() => {
-        impulse.setValue({ count: 2 })
+        impulse.update({ count: 2 })
       })
       expect(result.current).toStrictEqual({ count: 2 })
       expect(impulse).toHaveEmittersSize(1)
@@ -81,12 +81,12 @@ describe.each([
       expect(impulse2).toHaveEmittersSize(1)
 
       act(() => {
-        impulse2.setValue({ count: 20 })
+        impulse2.update({ count: 20 })
       })
       expect(result.current).toStrictEqual({ count: 20 })
 
       act(() => {
-        impulse1.setValue({ count: 2 })
+        impulse1.update({ count: 2 })
       })
       expect(result.current).toStrictEqual({ count: 20 })
       expect(impulse1).toHaveEmittersSize(0)
@@ -123,7 +123,7 @@ describe.each([
       })
 
       act(() => {
-        impulse.setValue({ count: 2 })
+        impulse.update({ count: 2 })
       })
       expect(result.current).toStrictEqual({ count: -1 })
       expect(impulse).toHaveEmittersSize(0)
@@ -140,7 +140,7 @@ describe.each([
       expect(impulse).toHaveEmittersSize(1)
 
       act(() => {
-        impulse.setValue({ count: 2 })
+        impulse.update({ count: 2 })
       })
       expect(result.current).toStrictEqual({ count: 2 })
       expect(impulse).toHaveEmittersSize(1)
@@ -156,7 +156,7 @@ describe.each([
       spy.mockReset()
 
       act(() => {
-        impulse.setValue(Counter.inc)
+        impulse.update(Counter.inc)
       })
       expect(spy).not.toHaveBeenCalled()
     })

@@ -13,7 +13,7 @@ import type { Scope } from "./_internal/scope"
 
 type Impulse<T> = BaseImpulse<T>
 
-type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
+type ReadonlyImpulse<T> = Omit<Impulse<T>, "update">
 
 /**
  * Creates a new Impulse without an initial value.
@@ -98,7 +98,7 @@ function Impulse<T>(
   }
 
   const [setter, derivedOptions] =
-    isFunction(optionsOrWritableImpulse) || hasProperty(optionsOrWritableImpulse, "setValue")
+    isFunction(optionsOrWritableImpulse) || hasProperty(optionsOrWritableImpulse, "update")
       ? [optionsOrWritableImpulse, optionsOrNothing]
       : [undefined, optionsOrWritableImpulse]
 
@@ -106,7 +106,7 @@ function Impulse<T>(
     isGetterFunction
       ? initialValueOrReadableImpulse
       : (scope) => initialValueOrReadableImpulse.read(scope),
-    isFunction(setter) ? setter : (value) => setter?.setValue(value),
+    isFunction(setter) ? setter : (value) => setter?.update(value),
     derivedOptions?.equals ?? isStrictEqual,
   )
 }

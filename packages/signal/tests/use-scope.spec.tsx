@@ -24,7 +24,7 @@ it("does not change scope value unless scoped impulse changes", () => {
   expect(spy).toHaveBeenCalledTimes(1)
 
   act(() => {
-    impulse.setValue(2)
+    impulse.update(2)
   })
   expect(result.current).toBe(2)
   expect(spy).toHaveBeenCalledTimes(2)
@@ -63,14 +63,14 @@ it("cannot unsubscribe when swapped", () => {
   vi.clearAllMocks()
 
   act(() => {
-    value1.setValue(10)
+    value1.update(10)
   })
 
   expect(onRender).toHaveBeenCalledOnce()
   vi.clearAllMocks()
 
   act(() => {
-    value2.setValue(5)
+    value2.update(5)
   })
   expect(onRender).toHaveBeenCalledOnce()
 

@@ -261,7 +261,7 @@ abstract class ImpulseForm<
 
   public async submit(): Promise<void> {
     batch((scope) => {
-      this._state._root._submitAttempts.setValue((count) => count + 1)
+      this._state._root._submitAttempts.update((count) => count + 1)
       this._state._root._forceValidated(scope)
     })
 
@@ -280,11 +280,11 @@ abstract class ImpulseForm<
         this._state._root._getFocusFirstInvalid(scope)?.()
       })
     } else if (promises.length > 0) {
-      this._state._root._submittingCount.setValue((count) => count + 1)
+      this._state._root._submittingCount.update((count) => count + 1)
 
       await Promise.all(promises)
 
-      this._state._root._submittingCount.setValue((count) => Math.max(0, count - 1))
+      this._state._root._submittingCount.update((count) => Math.max(0, count - 1))
     }
   }
 }

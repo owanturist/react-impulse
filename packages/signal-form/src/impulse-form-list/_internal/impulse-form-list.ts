@@ -65,7 +65,7 @@ class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
         )
       }
 
-      this._state._elements.setValue(nextStateElements)
+      this._state._elements.update(nextStateElements)
     })
   }
 }

@@ -73,7 +73,7 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
    *
    * @version 1.0.0
    */
-  public setValue(valueOrTransform: T | ((currentValue: T, scope: Scope) => T)): void {
+  public update(valueOrTransform: T | ((currentValue: T, scope: Scope) => T)): void {
     enqueue((push) => {
       const nextValue = isFunction(valueOrTransform)
         ? valueOrTransform(this._getter(), STATIC_SCOPE)

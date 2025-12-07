@@ -60,7 +60,7 @@ describe("multiple factory", () => {
       const { first, result } = setup()
 
       act(() => {
-        first.setValue(Counter.inc)
+        first.update(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -69,7 +69,7 @@ describe("multiple factory", () => {
       const { second, result } = setup()
 
       act(() => {
-        second.setValue(Counter.inc)
+        second.update(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -78,8 +78,8 @@ describe("multiple factory", () => {
       const { first, second, result } = setup()
 
       act(() => {
-        first.setValue(Counter.inc)
-        second.setValue(Counter.inc)
+        first.update(Counter.inc)
+        second.update(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 7 })
     })
@@ -188,8 +188,8 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
 
       act(() => {
         batch(() => {
-          first.setValue(Counter.inc)
-          second.setValue(Counter.inc)
+          first.update(Counter.inc)
+          second.update(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -202,8 +202,8 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
 
       act(() => {
         batch(() => {
-          first.setValue(Counter.inc)
-          third.setValue(Counter.inc)
+          first.update(Counter.inc)
+          third.update(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -217,11 +217,11 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
       act(() => {
         batch(() => {
           batch(() => {
-            first.setValue(Counter.inc)
-            second.setValue(Counter.inc)
+            first.update(Counter.inc)
+            second.update(Counter.inc)
           })
 
-          third.setValue(Counter.inc)
+          third.update(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -237,8 +237,8 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
 
       act(() => {
         batch(() => {
-          second.setValue(Counter.inc)
-          third.setValue(Counter.inc)
+          second.update(Counter.inc)
+          third.update(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 1 })

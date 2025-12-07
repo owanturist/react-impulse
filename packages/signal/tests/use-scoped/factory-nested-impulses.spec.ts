@@ -64,7 +64,7 @@ describe("nested factory", () => {
       const { first, result } = setup()
 
       act(() => {
-        first.setValue(Counter.inc)
+        first.update(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -73,7 +73,7 @@ describe("nested factory", () => {
       const { second, result } = setup()
 
       act(() => {
-        second.setValue(Counter.inc)
+        second.update(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -82,8 +82,8 @@ describe("nested factory", () => {
       const { first, second, result } = setup()
 
       act(() => {
-        first.setValue(Counter.inc)
-        second.setValue(Counter.inc)
+        first.update(Counter.inc)
+        second.update(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 7 })
     })
@@ -93,7 +93,7 @@ describe("nested factory", () => {
       const { impulse, result } = setup()
 
       act(() => {
-        impulse.setValue((current) => ({
+        impulse.update((current) => ({
           ...current,
           first: newFirst,
         }))
@@ -105,9 +105,9 @@ describe("nested factory", () => {
       const { impulse, result } = setup()
 
       act(() => {
-        impulse.setValue((current) => {
-          current.first.setValue(Counter.inc)
-          current.second.setValue(Counter.inc)
+        impulse.update((current) => {
+          current.first.update(Counter.inc)
+          current.second.update(Counter.inc)
 
           return current
         })
@@ -214,8 +214,8 @@ describe("triggering factory for nested impulses vs single impulse", () => {
 
       act(() => {
         batch(() => {
-          first.setValue(Counter.inc)
-          second.setValue(Counter.inc)
+          first.update(Counter.inc)
+          second.update(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -228,8 +228,8 @@ describe("triggering factory for nested impulses vs single impulse", () => {
 
       act(() => {
         batch(() => {
-          first.setValue(Counter.inc)
-          third.setValue(Counter.inc)
+          first.update(Counter.inc)
+          third.update(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -243,11 +243,11 @@ describe("triggering factory for nested impulses vs single impulse", () => {
       act(() => {
         batch(() => {
           batch(() => {
-            first.setValue(Counter.inc)
-            second.setValue(Counter.inc)
+            first.update(Counter.inc)
+            second.update(Counter.inc)
           })
 
-          third.setValue(Counter.inc)
+          third.update(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -263,8 +263,8 @@ describe("triggering factory for nested impulses vs single impulse", () => {
 
       act(() => {
         batch(() => {
-          second.setValue(Counter.inc)
-          third.setValue(Counter.inc)
+          second.update(Counter.inc)
+          third.update(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 1 })
@@ -273,15 +273,15 @@ describe("triggering factory for nested impulses vs single impulse", () => {
       expect(spyNested).toHaveBeenCalled()
     })
 
-    it("Impulse#setValue wraps the callback into batch", () => {
+    it("Impulse#update wraps the callback into batch", () => {
       const { second, third, impulse, spyNested, resultNested } = setup()
 
       spyNested.mockReset()
 
       act(() => {
         batch(() => {
-          second.setValue(Counter.inc)
-          third.setValue(Counter.inc)
+          second.update(Counter.inc)
+          third.update(Counter.inc)
         })
       })
 
@@ -290,9 +290,9 @@ describe("triggering factory for nested impulses vs single impulse", () => {
       spyNested.mockReset()
 
       act(() => {
-        impulse.setValue((current) => {
-          current.second.setValue(Counter.inc)
-          current.third.setValue(Counter.inc)
+        impulse.update((current) => {
+          current.second.update(Counter.inc)
+          current.third.update(Counter.inc)
 
           return current
         })

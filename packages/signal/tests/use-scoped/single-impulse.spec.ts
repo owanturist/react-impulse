@@ -95,12 +95,12 @@ describe("single factory", () => {
       expect(result.current).toStrictEqual({ count: 1 })
 
       act(() => {
-        impulse.setValue(Counter.inc)
+        impulse.update(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 2 })
 
       act(() => {
-        impulse.setValue(({ count }) => ({ count: count * 2 }))
+        impulse.update(({ count }) => ({ count: count * 2 }))
       })
       expect(result.current).toStrictEqual({ count: 4 })
     })
@@ -121,13 +121,13 @@ describe("single factory", () => {
       expect(counter2).toHaveEmittersSize(1)
 
       act(() => {
-        counter1.setValue({ count: 10 })
+        counter1.update({ count: 10 })
       })
       expect(counter1).toHaveEmittersSize(0)
       expect(counter2).toHaveEmittersSize(1)
 
       act(() => {
-        counter2.setValue({ count: 5 })
+        counter2.update({ count: 5 })
       })
 
       expect(counter1).toHaveEmittersSize(0)
@@ -167,7 +167,7 @@ describe("single factory", () => {
         expect(impulse1).toHaveEmittersSize(0)
 
         act(() => {
-          impulse1.setValue(Counter.inc)
+          impulse1.update(Counter.inc)
         })
 
         expect(impulse1.read(scope)).toStrictEqual({ count: 2 })
@@ -183,7 +183,7 @@ describe("single factory", () => {
         expect(impulse2).toHaveEmittersSize(1)
 
         act(() => {
-          impulse2.setValue(Counter.inc)
+          impulse2.update(Counter.inc)
         })
 
         expect(impulse1.read(scope)).toStrictEqual({ count: 1 })
@@ -209,7 +209,7 @@ describe("single factory", () => {
         expect(impulse2).toHaveEmittersSize(0)
 
         act(() => {
-          impulse2.setValue(Counter.inc)
+          impulse2.update(Counter.inc)
         })
 
         expect(result.current).toStrictEqual({ count: 1 })
@@ -256,7 +256,7 @@ describe("transform scoped Impulse's", () => {
     // increments 1 -> 2
     prev = result.current
     act(() => {
-      impulse.setValue(Counter.inc)
+      impulse.update(Counter.inc)
     })
     expect(result.current).toBe(prev)
     expect(result.current).toStrictEqual([false, true])
@@ -264,7 +264,7 @@ describe("transform scoped Impulse's", () => {
     // increments 2 -> 3
     prev = result.current
     act(() => {
-      impulse.setValue({ count: 3 })
+      impulse.update({ count: 3 })
     })
     expect(result.current).not.toBe(prev)
     expect(result.current).toStrictEqual([true, true])
@@ -276,7 +276,7 @@ describe("transform scoped Impulse's", () => {
     // increments 3 -> 4
     prev = result.current
     act(() => {
-      impulse.setValue({ count: 4 })
+      impulse.update({ count: 4 })
     })
     expect(result.current).toBe(prev)
     expect(result.current).toStrictEqual([true, true])
@@ -284,7 +284,7 @@ describe("transform scoped Impulse's", () => {
     // increments 4 -> 5
     prev = result.current
     act(() => {
-      impulse.setValue(Counter.inc)
+      impulse.update(Counter.inc)
     })
     expect(result.current).not.toBe(prev)
     expect(result.current).toStrictEqual([true, false])
@@ -315,7 +315,7 @@ describe("transform scoped Impulse's", () => {
     // increments 1 -> 2
     prev = result.current
     act(() => {
-      impulse.setValue(Counter.inc)
+      impulse.update(Counter.inc)
     })
     expect(result.current).not.toBe(prev)
     expect(result.current).toStrictEqual([false, true])
@@ -323,7 +323,7 @@ describe("transform scoped Impulse's", () => {
     // increments 2 -> 3
     prev = result.current
     act(() => {
-      impulse.setValue({ count: 3 })
+      impulse.update({ count: 3 })
     })
     expect(result.current).not.toBe(prev)
     expect(result.current).toStrictEqual([true, true])
@@ -335,7 +335,7 @@ describe("transform scoped Impulse's", () => {
     // increments 3 -> 4
     prev = result.current
     act(() => {
-      impulse.setValue({ count: 4 })
+      impulse.update({ count: 4 })
     })
     expect(result.current).not.toBe(prev)
     expect(result.current).toStrictEqual([true, true])
@@ -343,7 +343,7 @@ describe("transform scoped Impulse's", () => {
     // increments 4 -> 5
     prev = result.current
     act(() => {
-      impulse.setValue(Counter.inc)
+      impulse.update(Counter.inc)
     })
     expect(result.current).not.toBe(prev)
     expect(result.current).toStrictEqual([true, false])
@@ -416,7 +416,7 @@ describe("transform scoped Impulse's", () => {
       vi.clearAllMocks()
 
       act(() => {
-        impulse.setValue(Counter.clone)
+        impulse.update(Counter.clone)
       })
 
       expect(spy).not.toHaveBeenCalled()
@@ -508,7 +508,7 @@ describe("multiple Impulse#read(scope) calls", () => {
         const { impulse, spySingle, spyDouble, resultSingle, resultDouble } = setup()
 
         act(() => {
-          impulse.setValue(Counter.inc)
+          impulse.update(Counter.inc)
         })
 
         expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -520,7 +520,7 @@ describe("multiple Impulse#read(scope) calls", () => {
         const { impulse, spySingle, spyDouble, resultSingle, resultDouble } = setup()
 
         act(() => {
-          impulse.setValue(Counter.clone)
+          impulse.update(Counter.clone)
         })
 
         expect(resultSingle.current).toStrictEqual({ count: 1 })

@@ -38,7 +38,7 @@ describe("scoping nested impulses", () => {
             type="button"
             data-testid="add-counter"
             onClick={() => {
-              appState.setValue({
+              appState.update({
                 ...state,
                 counts: [...state.counts, Impulse(0)],
               })
@@ -50,7 +50,7 @@ describe("scoping nested impulses", () => {
             data-testid="reset-counters"
             onClick={() => {
               for (const count of state.counts) {
-                count.setValue(0)
+                count.update(0)
               }
             }}
           />
@@ -59,9 +59,9 @@ describe("scoping nested impulses", () => {
             type="button"
             data-testid="increment-all"
             onClick={() => {
-              appState.setValue((current) => {
+              appState.update((current) => {
                 for (const count of current.counts) {
-                  count.setValue((x) => x + 1)
+                  count.update((x) => x + 1)
                 }
 
                 return current
@@ -222,7 +222,7 @@ describe("scoping nested impulses", () => {
 
     // add fourth counter from the outside
     act(() => {
-      state.setValue((current) => ({
+      state.update((current) => ({
         ...current,
         counts: [...current.counts, Impulse(9)],
       }))

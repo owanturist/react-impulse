@@ -46,7 +46,7 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value.setValue(2)
+      value.update(2)
     })
 
     expect(node).toHaveTextContent("4")
@@ -81,7 +81,7 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value.setValue(3)
+      value.update(3)
     })
 
     expect(onMemo).toHaveBeenCalledExactlyOnceWith(6)
@@ -143,7 +143,7 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value1.setValue(10)
+      value1.update(10)
     })
 
     expect(onMemo).toHaveBeenCalledOnce()
@@ -151,7 +151,7 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value2.setValue(5)
+      value2.update(5)
     })
     expect(onMemo).toHaveBeenCalledExactlyOnceWith(10)
     expect(onRender).toHaveBeenCalledOnce()
@@ -180,7 +180,7 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value.setValue(4)
+      value.update(4)
     })
     expect(onMemo).toHaveBeenCalledExactlyOnceWith(12)
     expect(onRender).toHaveBeenCalledOnce()
@@ -221,12 +221,12 @@ describe("multiple impulses", () => {
     expect(node).toHaveTextContent("10")
 
     act(() => {
-      first.setValue(4)
+      first.update(4)
     })
     expect(node).toHaveTextContent("14")
 
     act(() => {
-      second.setValue(5)
+      second.update(5)
     })
     expect(node).toHaveTextContent("18")
 
@@ -277,24 +277,24 @@ describe("nested impulses", () => {
     expect(node).toHaveTextContent("10")
 
     act(() => {
-      count0.setValue(4)
+      count0.update(4)
     })
     expect(node).toHaveTextContent("14")
 
     act(() => {
-      count1.setValue(5)
+      count1.update(5)
     })
     expect(node).toHaveTextContent("18")
 
     act(() => {
-      list.setValue((items) => [...items, count2])
+      list.update((items) => [...items, count2])
     })
     expect(node).toHaveTextContent("26")
 
     expect(count2).toHaveEmittersSize(1)
 
     act(() => {
-      list.setValue((items) => items.slice(1))
+      list.update((items) => items.slice(1))
     })
     expect(node).toHaveTextContent("18")
 

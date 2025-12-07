@@ -17,7 +17,7 @@ describe("default impulse", () => {
         <input
           type="search"
           value={value}
-          onChange={(event) => impulse.setValue(event.target.value)}
+          onChange={(event) => impulse.update(event.target.value)}
         />
       )
     }
@@ -40,7 +40,7 @@ describe("default impulse", () => {
     expect(input).toHaveValue("what a hell")
 
     act(() => {
-      val.setValue("no way")
+      val.update("no way")
     })
     expect(input).toHaveValue("no way")
 
@@ -48,7 +48,7 @@ describe("default impulse", () => {
     expect(input).toHaveValue("now")
 
     act(() => {
-      val.setValue("but now")
+      val.update("but now")
     })
     expect(input).toHaveValue("now")
 

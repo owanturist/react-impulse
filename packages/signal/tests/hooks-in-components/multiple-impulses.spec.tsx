@@ -18,20 +18,20 @@ describe("multiple impulses", () => {
           type="email"
           data-testid="email"
           value={email}
-          onChange={(event) => emailImpulse.setValue(event.target.value)}
+          onChange={(event) => emailImpulse.update(event.target.value)}
         />
         <input
           type="password"
           data-testid="password"
           value={password}
-          onChange={(event) => passwordImpulse.setValue(event.target.value)}
+          onChange={(event) => passwordImpulse.update(event.target.value)}
         />
         <button
           type="button"
           data-testid="reset"
           onClick={() => {
-            emailImpulse.setValue("")
-            passwordImpulse.setValue("")
+            emailImpulse.update("")
+            passwordImpulse.update("")
           }}
         />
       </React.Profiler>
@@ -69,8 +69,8 @@ describe("multiple impulses", () => {
 
     // changes from the outside
     act(() => {
-      email.setValue("admin@gmail.com")
-      password.setValue("admin")
+      email.update("admin@gmail.com")
+      password.update("admin")
     })
     expect(onRender).toHaveBeenCalledOnce()
     expect(container).toMatchSnapshot()

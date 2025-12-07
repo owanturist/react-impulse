@@ -24,7 +24,7 @@ describe("nested impulses", () => {
             type="button"
             data-testid="add-counter"
             onClick={() => {
-              state.setValue((current) => ({
+              state.update((current) => ({
                 ...current,
                 counts: [...current.counts, Impulse(0)],
               }))
@@ -34,9 +34,9 @@ describe("nested impulses", () => {
             type="button"
             data-testid="reset-counters"
             onClick={() => {
-              state.setValue((current) => {
+              state.update((current) => {
                 for (const count of current.counts) {
-                  count.setValue(0)
+                  count.update(0)
                 }
 
                 return current
@@ -100,7 +100,7 @@ describe("nested impulses", () => {
 
     // add third counter from the outside
     act(() => {
-      impulse.setValue((current) => ({
+      impulse.update((current) => ({
         ...current,
         counts: [...current.counts, Impulse(3)],
       }))
@@ -113,7 +113,7 @@ describe("nested impulses", () => {
 
     // double the third counter from the outside
     act(() => {
-      impulse.read(scope).counts[2]!.setValue((x) => 2 * x)
+      impulse.read(scope).counts[2]!.update((x) => 2 * x)
     })
     expect(onRender).not.toHaveBeenCalled()
     expect(onCounterRender).toHaveBeenCalledOnce()
@@ -134,7 +134,7 @@ describe("nested impulses", () => {
     // increment all from the outside
     act(() => {
       for (const count of impulse.read(scope).counts) {
-        count.setValue((x) => x + 1)
+        count.update((x) => x + 1)
       }
     })
     expect(onRender).not.toHaveBeenCalled()

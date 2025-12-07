@@ -8,7 +8,7 @@ describe.each([
   ["not batched", (cb: VoidFunction) => cb()],
   ["batched", batch],
 ])("multiple impulses %s calls with direct impulse access", (_, execute) => {
-  it("re-renders once for Impulse#setValue calls", () => {
+  it("re-renders once for Impulse#update calls", () => {
     const onRender = vi.fn()
     const impulse1 = Impulse({ count: 1 })
     const impulse2 = Impulse({ count: 2 })
@@ -32,8 +32,8 @@ describe.each([
 
     act(() => {
       execute(() => {
-        impulse1.setValue(Counter.inc)
-        impulse2.setValue(Counter.inc)
+        impulse1.update(Counter.inc)
+        impulse2.update(Counter.inc)
       })
     })
     expect(screen.getByTestId("count")).toHaveTextContent("5")
@@ -56,8 +56,8 @@ describe.each([
             data-testid="inc"
             onClick={() => {
               execute(() => {
-                impulse1.setValue(Counter.inc)
-                impulse2.setValue(Counter.inc)
+                impulse1.update(Counter.inc)
+                impulse2.update(Counter.inc)
               })
             }}
           />
@@ -82,7 +82,7 @@ describe.each([
   ["not batched", (cb: VoidFunction) => cb()],
   ["batched", batch],
 ])("nested impulses %s calls with direct impulse access", (_, execute) => {
-  it("re-renders once for Impulse#setValue calls", () => {
+  it("re-renders once for Impulse#update calls", () => {
     const onRender = vi.fn()
     const impulse = Impulse({
       first: Impulse({ count: 1 }),
@@ -109,9 +109,9 @@ describe.each([
 
     act(() => {
       execute(() => {
-        impulse.setValue((current) => {
-          current.first.setValue(Counter.inc)
-          current.second.setValue(Counter.inc)
+        impulse.update((current) => {
+          current.first.update(Counter.inc)
+          current.second.update(Counter.inc)
 
           return current
         })
@@ -122,10 +122,10 @@ describe.each([
     vi.clearAllMocks()
 
     act(() => {
-      impulse.setValue((current) => {
+      impulse.update((current) => {
         execute(() => {
-          current.first.setValue(Counter.inc)
-          current.second.setValue(Counter.inc)
+          current.first.update(Counter.inc)
+          current.second.update(Counter.inc)
         })
 
         return current
@@ -154,9 +154,9 @@ describe.each([
             data-testid="inc-1"
             onClick={() => {
               execute(() => {
-                impulse.setValue((value) => {
-                  value.first.setValue(Counter.inc)
-                  value.second.setValue(Counter.inc)
+                impulse.update((value) => {
+                  value.first.update(Counter.inc)
+                  value.second.update(Counter.inc)
 
                   return value
                 })
@@ -167,10 +167,10 @@ describe.each([
             type="button"
             data-testid="inc-2"
             onClick={() => {
-              impulse.setValue((value) => {
+              impulse.update((value) => {
                 execute(() => {
-                  value.first.setValue(Counter.inc)
-                  value.second.setValue(Counter.inc)
+                  value.first.update(Counter.inc)
+                  value.second.update(Counter.inc)
                 })
 
                 return value
@@ -251,7 +251,7 @@ describe.each([
       return { spy, onRender, first, second, factory }
     }
 
-    it(`calls the factory ${expectedFactoryCallsForMultiple} times by Impulse#setValue calls`, () => {
+    it(`calls the factory ${expectedFactoryCallsForMultiple} times by Impulse#update calls`, () => {
       const { spy, onRender, first, second, factory } = setup()
 
       const Component: React.FC = () => {
@@ -274,8 +274,8 @@ describe.each([
 
       act(() => {
         execute(() => {
-          first.setValue(Counter.inc)
-          second.setValue(Counter.inc)
+          first.update(Counter.inc)
+          second.update(Counter.inc)
         })
       })
       expect(screen.getByTestId("count")).toHaveTextContent("5")
@@ -283,7 +283,7 @@ describe.each([
       expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForMultiple)
     })
 
-    it(`calls the factory ${expectedFactoryCallsForMultiple} times by Impulse#setValue calls`, () => {
+    it(`calls the factory ${expectedFactoryCallsForMultiple} times by Impulse#update calls`, () => {
       const { spy, onRender, first, second, factory } = setup()
 
       const Component: React.FC = () => {
@@ -296,8 +296,8 @@ describe.each([
               data-testid="inc"
               onClick={() => {
                 execute(() => {
-                  first.setValue(Counter.inc)
-                  second.setValue(Counter.inc)
+                  first.update(Counter.inc)
+                  second.update(Counter.inc)
                 })
               }}
             />
@@ -339,7 +339,7 @@ describe.each([
       return { spy, onRender, impulse, factory }
     }
 
-    it(`calls the factory ${expectedFactoryCallsForNested} times by Impulse#setValue calls`, () => {
+    it(`calls the factory ${expectedFactoryCallsForNested} times by Impulse#update calls`, () => {
       const { spy, onRender, impulse, factory } = setup()
 
       const Component: React.FC = () => {
@@ -361,9 +361,9 @@ describe.each([
 
       act(() => {
         execute(() => {
-          impulse.setValue((value) => {
-            value.first.setValue(Counter.inc)
-            value.second.setValue(Counter.inc)
+          impulse.update((value) => {
+            value.first.update(Counter.inc)
+            value.second.update(Counter.inc)
 
             return value
           })
@@ -375,10 +375,10 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        impulse.setValue((value) => {
+        impulse.update((value) => {
           execute(() => {
-            value.first.setValue(Counter.inc)
-            value.second.setValue(Counter.inc)
+            value.first.update(Counter.inc)
+            value.second.update(Counter.inc)
           })
 
           return value
@@ -389,7 +389,7 @@ describe.each([
       expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
     })
 
-    it(`calls the factory ${expectedFactoryCallsForNested} times by Impulse#setValue calls`, () => {
+    it(`calls the factory ${expectedFactoryCallsForNested} times by Impulse#update calls`, () => {
       const { spy, onRender, impulse, factory } = setup()
 
       const Component: React.FC = () => {
@@ -402,9 +402,9 @@ describe.each([
               data-testid="inc-1"
               onClick={() => {
                 execute(() => {
-                  impulse.setValue((value) => {
-                    value.first.setValue(Counter.inc)
-                    value.second.setValue(Counter.inc)
+                  impulse.update((value) => {
+                    value.first.update(Counter.inc)
+                    value.second.update(Counter.inc)
 
                     return value
                   })
@@ -415,10 +415,10 @@ describe.each([
               type="button"
               data-testid="inc-2"
               onClick={() => {
-                impulse.setValue((value) => {
+                impulse.update((value) => {
                   execute(() => {
-                    value.first.setValue(Counter.inc)
-                    value.second.setValue(Counter.inc)
+                    value.first.update(Counter.inc)
+                    value.second.update(Counter.inc)
                   })
 
                   return value
@@ -459,10 +459,10 @@ describe("when reading value during batching", () => {
     expect(source.read(scope)).toBe(1)
 
     batch((scope) => {
-      source.setValue(2)
+      source.update(2)
       spy(source.read(scope))
 
-      source.setValue(3)
+      source.update(3)
       spy(source.read(scope))
     })
 
@@ -488,13 +488,13 @@ describe("when reading derived value during batching", () => {
     expect(derived.read(scope)).toBe(1)
 
     batch((scope) => {
-      source.setValue(1)
+      source.update(1)
       expect(derived.read(scope)).toBe(1)
 
-      source.setValue(2)
+      source.update(2)
       expect(derived.read(scope)).toBe(2)
 
-      source.setValue(3)
+      source.update(3)
       expect(derived.read(scope)).toBe(3)
     })
 
@@ -516,13 +516,13 @@ describe("when reading derived value during batching", () => {
     vi.clearAllMocks()
 
     batch((scope) => {
-      source.setValue(1)
+      source.update(1)
       expect(derived.read(scope)).toBe(1)
 
-      source.setValue(2)
+      source.update(2)
       expect(derived.read(scope)).toBe(2)
 
-      source.setValue(3)
+      source.update(3)
       expect(derived.read(scope)).toBe(3)
     })
 
@@ -539,10 +539,10 @@ describe("when reading derived value during batching", () => {
     expect(derived.read(scope)).toBe(3)
 
     batch((scope) => {
-      source1.setValue(2)
+      source1.update(2)
       expect(derived.read(scope)).toBe(4)
 
-      source2.setValue(3)
+      source2.update(3)
       expect(derived.read(scope)).toBe(5)
     })
 
@@ -559,12 +559,12 @@ describe("when reading derived value during batching", () => {
     expect(derived.read(scope)).toBe(3)
 
     batch((scope) => {
-      source1.setValue(2)
-      source2.setValue(3)
+      source1.update(2)
+      source2.update(3)
       expect(derived.read(scope)).toBe(5)
 
-      source1.setValue(3)
-      source2.setValue(4)
+      source1.update(3)
+      source2.update(4)
       expect(derived.read(scope)).toBe(7)
     })
 
@@ -582,11 +582,11 @@ describe("when reading derived value during batching", () => {
     expect(derived2.read(scope)).toBe(1)
 
     batch((scope) => {
-      source.setValue(2)
+      source.update(2)
       expect(derived1.read(scope)).toBe(2)
       expect(derived2.read(scope)).toBe(2)
 
-      source.setValue(3)
+      source.update(3)
       expect(derived1.read(scope)).toBe(3)
       expect(derived2.read(scope)).toBe(3)
     })
@@ -604,10 +604,10 @@ describe("when reading derived value during batching", () => {
       expect(derivedDerived.read(scope)).toBe(1)
 
       batch((scope) => {
-        source.setValue(2)
+        source.update(2)
         expect(derivedDerived.read(scope)).toBe(2)
 
-        source.setValue(3)
+        source.update(3)
         expect(derivedDerived.read(scope)).toBe(3)
       })
 
@@ -625,15 +625,15 @@ describe("when reading derived value during batching", () => {
     const derived = Impulse(source, source)
 
     batch((scope) => {
-      derived.setValue(1)
+      derived.update(1)
       expect(source.read(scope)).toBe(1)
       expect(derived.read(scope)).toBe(1)
 
-      derived.setValue(2)
+      derived.update(2)
       expect(source.read(scope)).toBe(2)
       expect(derived.read(scope)).toBe(2)
 
-      derived.setValue(3)
+      derived.update(3)
       expect(source.read(scope)).toBe(3)
       expect(derived.read(scope)).toBe(3)
     })
@@ -652,10 +652,10 @@ describe("when reading derived value during batching", () => {
     expect(derived.read(scope)).toBe(derived.read(scope))
 
     batch((scope) => {
-      source.setValue(2)
+      source.update(2)
       expect(derived.read(scope)).toBe(derived.read(scope))
 
-      source.setValue(3)
+      source.update(3)
       expect(derived.read(scope)).toBe(derived.read(scope))
     })
 
@@ -674,7 +674,7 @@ describe("when reading derived value during batching", () => {
     const derived0 = derived.read(scope)
     expect(source0).toBe(derived0)
 
-    source.setValue(Counter.clone)
+    source.update(Counter.clone)
 
     const source1 = source.read(scope)
     expect(source1).not.toBe(source0)
@@ -684,7 +684,7 @@ describe("when reading derived value during batching", () => {
     expect(derived1).toBe(derived0)
 
     batch((scope) => {
-      source.setValue(Counter.clone)
+      source.update(Counter.clone)
 
       const source2 = source.read(scope)
       expect(source2).not.toBe(source0)
