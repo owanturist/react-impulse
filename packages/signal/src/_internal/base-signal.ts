@@ -2,16 +2,16 @@ import { isFunction } from "~/tools/is-function"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 
 import type { Equal } from "../equal"
-import type { Impulse } from "../impulse"
-import type { ImpulseOptions } from "../impulse-options"
-import type { ReadableImpulse } from "../readable-impulse"
-import type { WritableImpulse } from "../writable-impulse"
+import type { ReadableSignal } from "../readable-signal"
+import type { Signal } from "../signal"
+import type { SignalOptions } from "../signal-options"
+import type { WritableSignal } from "../writable-signal"
 
 import { enqueue } from "./enqueue"
 import { type Monitor, UNTRACKED_MONITOR, attachToMonitor, extractMonitor } from "./monitor"
 import type { MonitorEmitter } from "./monitor-emitter"
 
-abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> {
+abstract class BaseSignal<T> implements ReadableSignal<T>, WritableSignal<T> {
   protected readonly _emitters = new Set<WeakRef<MonitorEmitter>>()
 
   protected constructor(protected readonly _equals: Equal<T>) {}
@@ -20,11 +20,11 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
 
   protected abstract _setter(value: T): boolean
 
-  protected abstract _clone(value: T, equals: Equal<T>): Impulse<T>
+  protected abstract _clone(value: T, equals: Equal<T>): Signal<T>
 
   /**
    * Return the value when serializing to JSON.
-   * It does not encode an Impulse for decoding it back due to runtime parts of the class,
+   * It does not encode the instance for decoding it back due to runtime parts of the class,
    * that cannot be serialized as JSON.
    *
    * The method is protected in order to make it impossible to make the implicit call.
@@ -38,7 +38,7 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
   }
 
   /**
-   * Return the stringified value when an Impulse converts to a string.
+   * Return the stringified value when the instance converts to a string.
    *
    * The method is protected in order to make it impossible to make the implicit call.
    * @version 1.0.0
@@ -50,11 +50,11 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
   }
 
   /**
-   * Reads the impulse value.
+   * Reads the instance's value.
    *
-   * @param monitor the {@link Monitor} that tracks the Impulse value changes.
+   * @param monitor the {@link Monitor} that tracks the instance value changes.
    *
-   * @returns the impulse value.
+   * @returns the instance value.
    *
    * @version 1.0.0
    */
@@ -69,7 +69,7 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
    *
    * @param valueOrTransform either the new value or a function that transforms the current value.
    *
-   * @returns `void` to emphasize that Impulses are mutable.
+   * @returns `void` to emphasize that {@link Signal}s are mutable.
    *
    * @version 1.0.0
    */
@@ -86,37 +86,34 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
   }
 
   /**
-   * Creates a new {@link Impulse} instance out of the current one with the same value.
+   * Creates a new {@link Signal} instance out of the current one with the same value.
    *
-   * @param options optional {@link ImpulseOptions}.
-   * @param options.equal when not defined it uses the {@link ImpulseOptions.equals} function from the origin Impulse, When `null` fallbacks to {@link Object.is}.
+   * @param options optional {@link SignalOptions}.
+   * @param options.equal when not defined it uses the {@link SignalOptions.equals} function from the origin instance, When `null` fallbacks to {@link Object.is}.
    *
-   * @returns a new {@link Impulse} instance with the same value.
+   * @returns a new {@link Signal} instance with the same value.
    *
    * @version 1.0.0
    */
-  public clone(options?: ImpulseOptions<T>): Impulse<T>
+  public clone(options?: SignalOptions<T>): Signal<T>
 
   /**
-   * Creates a new {@link Impulse} instance out of the current one with the transformed value. Transforming might be handy when cloning mutable values (such as an Impulse).
+   * Creates a new {@link Signal} instance out of the current one with the transformed value. Transforming might be handy when cloning mutable values (such as a {@link Signal}).
    *
    * @param transform an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
-   * @param options optional {@link ImpulseOptions}.
-   * @param options.equal when not defined it uses the {@link ImpulseOptions.equals} function from the origin Impulse, When `null` fallbacks to {@link Object.is}.
+   * @param options optional {@link SignalOptions}.
+   * @param options.equal when not defined it uses the {@link SignalOptions.equals} function from the origin instance, When `null` fallbacks to {@link Object.is}.
    *
-   * @return a new {@link Impulse} instance with the transformed value.
+   * @return a new {@link Signal} instance with the transformed value.
    *
    * @version 1.0.0
    */
-  public clone(
-    transform: (value: T, monitor: Monitor) => T,
-    options?: ImpulseOptions<T>,
-  ): Impulse<T>
+  public clone(transform: (value: T, monitor: Monitor) => T, options?: SignalOptions<T>): Signal<T>
 
   public clone(
-    transformOrOptions?: ((value: T, monitor: Monitor) => T) | ImpulseOptions<T>,
-    maybeOptions?: ImpulseOptions<T>,
-  ): Impulse<T> {
+    transformOrOptions?: ((value: T, monitor: Monitor) => T) | SignalOptions<T>,
+    maybeOptions?: SignalOptions<T>,
+  ): Signal<T> {
     const value = this._getter()
 
     const [clonedValue, { equals = this._equals } = {}] = isFunction(transformOrOptions)
@@ -127,4 +124,4 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
   }
 }
 
-export { BaseImpulse }
+export { BaseSignal }

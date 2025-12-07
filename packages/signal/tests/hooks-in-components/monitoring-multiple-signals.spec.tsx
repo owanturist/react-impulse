@@ -1,14 +1,14 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, type Monitor, useComputed, useMonitor } from "../../src"
+import { type Monitor, Signal, useComputed, useMonitor } from "../../src"
 
 import { CounterComponent, withinNth } from "./common"
 
-describe("scoping multiple impulses", () => {
+describe("monitoring multiple signals", () => {
   interface AppProps {
-    firstCount: Impulse<number>
-    secondCount: Impulse<number>
+    firstCount: Signal<number>
+    secondCount: Signal<number>
     onRender: VoidFunction
     onFirstCounterRender: VoidFunction
     onSecondCounterRender: VoidFunction
@@ -50,8 +50,8 @@ describe("scoping multiple impulses", () => {
 
   const factoryLeft = (
     monitor: Monitor,
-    firstCount: Impulse<number>,
-    secondCount: Impulse<number>,
+    firstCount: Signal<number>,
+    secondCount: Signal<number>,
   ) => {
     const sum = firstCount.read(monitor) + secondCount.read(monitor)
 
@@ -59,8 +59,8 @@ describe("scoping multiple impulses", () => {
   }
   const factoryRight = (
     monitor: Monitor,
-    firstCount: Impulse<number>,
-    secondCount: Impulse<number>,
+    firstCount: Signal<number>,
+    secondCount: Signal<number>,
   ) => {
     const sum = firstCount.read(monitor) + secondCount.read(monitor)
 
@@ -136,9 +136,9 @@ describe("scoping multiple impulses", () => {
     ["multiple computes", MultipleComputedApp, 0],
     ["multiple memoized computes", MultipleMemoizedComputedApp, 0],
     ["monitor", MonitorApp, 1],
-  ])("handles multiple Impulses with %s", (_, App, unnecessaryRerendersCount) => {
-    const firstCount = Impulse(0)
-    const secondCount = Impulse(0)
+  ])("handles multiple Signals with %s", (_, App, unnecessaryRerendersCount) => {
+    const firstCount = Signal(0)
+    const secondCount = Signal(0)
     const onFirstCountRender = vi.fn()
     const onSecondCountRender = vi.fn()
     const onRender = vi.fn()

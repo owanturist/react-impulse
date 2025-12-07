@@ -1,12 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, type ReadableImpulse, untracked } from "../../src"
+import { type ReadableSignal, Signal, untracked } from "../../src"
 
-it("returns the `factory` function result without tracking impulses", () => {
+it("returns the `factory` function result without tracking signals", () => {
   const onRender = vi.fn()
-  const first = Impulse({ count: 1 })
-  const second = Impulse({ count: 2 })
+  const first = Signal({ count: 1 })
+  const second = Signal({ count: 2 })
 
   const Component: React.FC<{
     multiplier: number
@@ -52,24 +52,24 @@ it("returns the `factory` function result without tracking impulses", () => {
   expect(onRender).toHaveBeenCalledTimes(1)
 })
 
-it("allows to use Impulse", () => {
-  const impulse = Impulse(1)
+it("allows to use Signal", () => {
+  const signal = Signal(1)
 
-  const value = untracked(impulse)
-
-  expect(value).toBe(1)
-})
-
-it("allows to use ReadonlyImpulse", () => {
-  const impulse = Impulse(() => 1)
-
-  const value = untracked(impulse)
+  const value = untracked(signal)
 
   expect(value).toBe(1)
 })
 
-it("allows to use ReadableImpulse", () => {
-  class Custom implements ReadableImpulse<number> {
+it("allows to use ReadonlySignal", () => {
+  const signal = Signal(() => 1)
+
+  const value = untracked(signal)
+
+  expect(value).toBe(1)
+})
+
+it("allows to use ReadableSignal", () => {
+  class Custom implements ReadableSignal<number> {
     public constructor(public value: number) {}
 
     public read(): number {
@@ -77,9 +77,9 @@ it("allows to use ReadableImpulse", () => {
     }
   }
 
-  const impulse = new Custom(1)
+  const signal = new Custom(1)
 
-  expect(untracked(impulse)).toBe(1)
-  impulse.value = 2
-  expect(untracked(impulse)).toBe(2)
+  expect(untracked(signal)).toBe(1)
+  signal.value = 2
+  expect(untracked(signal)).toBe(2)
 })

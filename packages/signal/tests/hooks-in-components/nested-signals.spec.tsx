@@ -1,17 +1,17 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useComputed } from "../../src"
+import { Signal, useComputed } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
-describe("nested impulses", () => {
+describe("nested signals", () => {
   interface AppState {
-    counts: ReadonlyArray<Impulse<number>>
+    counts: ReadonlyArray<Signal<number>>
   }
 
   const App: React.FC<{
-    state: Impulse<AppState>
+    state: Signal<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }> = ({ state, onRender, onCounterRender }) => {
@@ -26,7 +26,7 @@ describe("nested impulses", () => {
             onClick={() => {
               state.update((current) => ({
                 ...current,
-                counts: [...current.counts, Impulse(0)],
+                counts: [...current.counts, Signal(0)],
               }))
             }}
           />
@@ -52,12 +52,12 @@ describe("nested impulses", () => {
     )
   }
 
-  it("performs nested impulse management", ({ monitor }) => {
-    const impulse = Impulse<AppState>({ counts: [] })
+  it("performs nested signal management", ({ monitor }) => {
+    const signal = Signal<AppState>({ counts: [] })
     const onRender = vi.fn()
     const onCounterRender = vi.fn()
 
-    render(<App state={impulse} onRender={onRender} onCounterRender={onCounterRender} />)
+    render(<App state={signal} onRender={onRender} onCounterRender={onCounterRender} />)
 
     expect(onRender).toHaveBeenCalledOnce()
     expect(onCounterRender).not.toHaveBeenCalled()
@@ -100,9 +100,9 @@ describe("nested impulses", () => {
 
     // add third counter from the outside
     act(() => {
-      impulse.update((current) => ({
+      signal.update((current) => ({
         ...current,
-        counts: [...current.counts, Impulse(3)],
+        counts: [...current.counts, Signal(3)],
       }))
     })
     expect(onRender).toHaveBeenCalledOnce()
@@ -113,7 +113,7 @@ describe("nested impulses", () => {
 
     // double the third counter from the outside
     act(() => {
-      impulse.read(monitor).counts[2]!.update((x) => 2 * x)
+      signal.read(monitor).counts[2]!.update((x) => 2 * x)
     })
     expect(onRender).not.toHaveBeenCalled()
     expect(onCounterRender).toHaveBeenCalledOnce()
@@ -133,7 +133,7 @@ describe("nested impulses", () => {
 
     // increment all from the outside
     act(() => {
-      for (const count of impulse.read(monitor).counts) {
+      for (const count of signal.read(monitor).counts) {
         count.update((x) => x + 1)
       }
     })

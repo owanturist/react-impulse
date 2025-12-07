@@ -1,8 +1,11 @@
+import type { Signal } from "../signal"
+
+import type { DerivedSignal } from "./derived-signal"
 import { type Monitor, createMonitor } from "./monitor"
 
 /**
  * Manages the lifecycle of monitor emitters, providing creation, attachment, and invalidation
- * mechanisms for reactivity tracking within the impulse system.
+ * mechanisms for reactivity tracking within the {@link Signal} system.
  *
  * @remarks
  * Each instance maintains weak references to all emitters it is attached to, ensuring proper
@@ -24,7 +27,7 @@ class MonitorEmitter {
    * Initializes and returns a new instance of the {@link MonitorEmitter} class.
    *
    * @param _emit - Callback invoked via the internal queue whenever the {@link Monitor} needs to broadcast an update.
-   * @param _derived - Indicates whether the emitter originates from a derived impulse, deferring subscription until first access.
+   * @param _derived - Indicates whether the emitter originates from a {@link DerivedSignal}, deferring subscription until first access.
    */
   public constructor(
     public readonly _emit: VoidFunction,

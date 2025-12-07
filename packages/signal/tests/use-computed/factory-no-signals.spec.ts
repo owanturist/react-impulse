@@ -3,7 +3,7 @@ import { useCallback } from "react"
 
 import { useComputed } from "../../src"
 
-describe("factory no impulses", () => {
+describe("factory no Signals", () => {
   it.each([
     ["inline", () => useComputed(() => 1)],
     ["memoized", () => useComputed(() => 1, [])],

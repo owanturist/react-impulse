@@ -1,7 +1,7 @@
 import type { Monitor } from "./_internal/monitor"
 
-interface ReadableImpulse<T> {
+interface ReadableSignal<T> {
   read(monitor: Monitor): T
 }
 
-export type { ReadableImpulse }
+export type { ReadableSignal }

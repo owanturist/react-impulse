@@ -1,14 +1,14 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useComputed } from "../../src"
+import { Signal, useComputed } from "../../src"
 import { Counter } from "../common"
 
 import { withinNth } from "./common"
 
-describe("single impulse", () => {
+describe("single signal", () => {
   const GetterComponent: React.FC<{
-    counter: Impulse<Counter>
+    counter: Signal<Counter>
     onRender: VoidFunction
   }> = ({ counter, onRender }) => {
     const { count } = useComputed(counter)
@@ -21,7 +21,7 @@ describe("single impulse", () => {
   }
 
   const SetterComponent: React.FC<{
-    counter: Impulse<Counter>
+    counter: Signal<Counter>
     onRender: VoidFunction
   }> = ({ counter, onRender }) => (
     <React.Profiler id="test" onRender={onRender}>
@@ -33,7 +33,7 @@ describe("single impulse", () => {
   )
 
   const SingleSetterSingleGetter: React.FC<{
-    counter: Impulse<Counter>
+    counter: Signal<Counter>
     onRootRender: VoidFunction
     onGetterRender: VoidFunction
     onSetterRender: VoidFunction
@@ -47,7 +47,7 @@ describe("single impulse", () => {
   )
 
   it("single Setter / Getter", () => {
-    const counter = Impulse({ count: 0 })
+    const counter = Signal({ count: 0 })
     const onRootRender = vi.fn()
     const onGetterRender = vi.fn()
     const onSetterRender = vi.fn()
@@ -121,7 +121,7 @@ describe("single impulse", () => {
   })
 
   const MultipleSetterMultipleGetter: React.FC<{
-    counter: Impulse<Counter>
+    counter: Signal<Counter>
     onRootRender: VoidFunction
     onFirstGetterRender: VoidFunction
     onSecondGetterRender: VoidFunction
@@ -145,7 +145,7 @@ describe("single impulse", () => {
   )
 
   it("multiple Setters / Getters", () => {
-    const counter = Impulse({ count: 0 })
+    const counter = Signal({ count: 0 })
     const onRootRender = vi.fn()
     const onFirstGetterRender = vi.fn()
     const onSecondGetterRender = vi.fn()

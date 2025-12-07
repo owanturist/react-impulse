@@ -1,15 +1,15 @@
 import { act, fireEvent, render, renderHook, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, effect, useMonitor } from "../src"
+import { Signal, effect, useMonitor } from "../src"
 
 describe.each([
   ["React.useEffect", React.useEffect],
   ["React.useLayoutEffect", React.useLayoutEffect],
 ])("running %s hook", (_, useEffect) => {
-  describe("single impulse", () => {
+  describe("single Signal", () => {
     const Component: React.FC<{
-      value: Impulse<number>
+      value: Signal<number>
       useEffect: typeof React.useEffect
       onEffect: React.Dispatch<number>
     }> = ({ onEffect, value, useEffect }) => {
@@ -30,8 +30,8 @@ describe.each([
       )
     }
 
-    it("runs an effect when Impulse-dependency updates", () => {
-      const value = Impulse(3)
+    it("runs an effect when Signal-dependency updates", () => {
+      const value = Signal(3)
       const onEffect = vi.fn()
 
       render(<Component onEffect={onEffect} useEffect={useEffect} value={value} />)
@@ -47,7 +47,7 @@ describe.each([
     })
 
     it("does not call useEffect factory when deps not changed", () => {
-      const value = Impulse(1)
+      const value = Signal(1)
       const onEffect = vi.fn()
       const onRender = vi.fn()
 
@@ -80,9 +80,9 @@ describe.each([
       expect(onRender).not.toHaveBeenCalled()
     })
 
-    it("should call useEffect factory when dep Impulse changes", () => {
-      const value1 = Impulse(1)
-      const value2 = Impulse(3)
+    it("should call useEffect factory when dep Signal changes", () => {
+      const value1 = Signal(1)
+      const value2 = Signal(3)
       const onEffect = vi.fn()
       const onRender = vi.fn()
 
@@ -103,9 +103,9 @@ describe.each([
       expect(onRender).toHaveBeenCalledOnce()
     })
 
-    it("should unsubscribe Impulse from useEffect when swapped", () => {
-      const value1 = Impulse(1)
-      const value2 = Impulse(3)
+    it("should unsubscribe Signal from useEffect when swapped", () => {
+      const value1 = Signal(1)
+      const value2 = Signal(3)
       const onEffect = vi.fn()
       const onRender = vi.fn()
 
@@ -148,8 +148,8 @@ describe.each([
       expect(value2).toHaveEmittersSize(1)
     })
 
-    it("should call useEffect factory when non Impulse dep changes", () => {
-      const value = Impulse(3)
+    it("should call useEffect factory when non Signal dep changes", () => {
+      const value = Signal(3)
       const onEffect = vi.fn()
       const onRender = vi.fn()
 
@@ -176,10 +176,10 @@ describe.each([
     })
   })
 
-  describe("multiple impulses", () => {
+  describe("multiple signals", () => {
     const Component: React.FC<{
-      first: Impulse<number>
-      second: Impulse<number>
+      first: Signal<number>
+      second: Signal<number>
       onEffect: React.Dispatch<number>
     }> = ({ first, second, onEffect }) => {
       const [multiplier, setMultiplier] = React.useState(2)
@@ -199,9 +199,9 @@ describe.each([
       )
     }
 
-    it("can watch after both impulses", () => {
-      const first = Impulse(2)
-      const second = Impulse(3)
+    it("can watch after both signals", () => {
+      const first = Signal(2)
+      const second = Signal(3)
       const onEffect = vi.fn()
 
       render(<Component first={first} second={second} onEffect={onEffect} />)
@@ -228,9 +228,9 @@ describe.each([
     })
   })
 
-  describe("nested impulses", () => {
+  describe("nested signals", () => {
     const Component: React.FC<{
-      list: Impulse<Array<Impulse<number>>>
+      list: Signal<Array<Signal<number>>>
       onEffect: React.Dispatch<number>
     }> = ({ list, onEffect }) => {
       const [multiplier, setMultiplier] = React.useState(2)
@@ -254,11 +254,11 @@ describe.each([
       )
     }
 
-    it("can watch after all impulses", () => {
-      const _0 = Impulse(2)
-      const _1 = Impulse(3)
-      const _2 = Impulse(4)
-      const list = Impulse([_0, _1])
+    it("can watch after all signals", () => {
+      const _0 = Signal(2)
+      const _1 = Signal(3)
+      const _2 = Signal(4)
+      const list = Signal([_0, _1])
       const onEffect = vi.fn()
 
       render(<Component list={list} onEffect={onEffect} />)
@@ -306,7 +306,7 @@ describe.each([
 
   describe("void dependency array", () => {
     const Component: React.FC<{
-      value: Impulse<number>
+      value: Signal<number>
       onEffect: React.Dispatch<number>
     }> = ({ value, onEffect }) => {
       const [multiplier, setMultiplier] = React.useState(2)
@@ -325,7 +325,7 @@ describe.each([
     }
 
     it("calls effect when rerenders", () => {
-      const value = Impulse(3)
+      const value = Signal(3)
       const onEffect = vi.fn()
 
       const { rerender } = render(<Component value={value} onEffect={onEffect} />)
@@ -340,7 +340,7 @@ describe.each([
     })
 
     it("calls effect when inner useState changes", () => {
-      const value = Impulse(3)
+      const value = Signal(3)
       const onEffect = vi.fn()
 
       render(<Component value={value} onEffect={onEffect} />)
@@ -354,8 +354,8 @@ describe.each([
       expect(value).toHaveEmittersSize(1)
     })
 
-    it("calls effect when Impulse inside an effect changes", () => {
-      const value = Impulse(3)
+    it("calls effect when Signal inside an effect changes", () => {
+      const value = Signal(3)
       const onEffect = vi.fn()
 
       render(<Component value={value} onEffect={onEffect} />)
@@ -374,7 +374,7 @@ describe.each([
 
   it("should not trigger effect when unsubscribes", () => {
     const Counter: React.FC<{
-      count: Impulse<number>
+      count: Signal<number>
     }> = ({ count }) => {
       const monitor = useMonitor()
 
@@ -386,7 +386,7 @@ describe.each([
     }
 
     const Host: React.FC<{
-      count: Impulse<number>
+      count: Signal<number>
       onEffect: React.Dispatch<number>
     }> = ({ count, onEffect }) => {
       const [isVisible, setIsVisible] = React.useState(true)
@@ -407,7 +407,7 @@ describe.each([
       )
     }
 
-    const value = Impulse(3)
+    const value = Signal(3)
     const onEffect = vi.fn()
 
     render(<Host count={value} onEffect={onEffect} />)
@@ -436,7 +436,7 @@ describe.each([
 
   it("triggers the effect when either regular or additional dependencies change", () => {
     const spy = vi.fn()
-    const impulse = Impulse(2)
+    const signal = Signal(2)
     const { rerender } = renderHook(
       ({ left, right }) => {
         useEffect(
@@ -448,42 +448,42 @@ describe.each([
         )
       },
       {
-        initialProps: { left: 1, right: impulse },
+        initialProps: { left: 1, right: signal },
       },
     )
 
     expect(spy).toHaveBeenCalledExactlyOnceWith(3)
     vi.clearAllMocks()
 
-    rerender({ left: 2, right: impulse })
+    rerender({ left: 2, right: signal })
     expect(spy).toHaveBeenCalledExactlyOnceWith(4)
     vi.clearAllMocks()
 
-    rerender({ left: 2, right: impulse })
+    rerender({ left: 2, right: signal })
     expect(spy).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
     act(() => {
-      impulse.update(3)
+      signal.update(3)
     })
     expect(spy).toHaveBeenCalledExactlyOnceWith(5)
     vi.clearAllMocks()
 
     act(() => {
-      impulse.update(3)
+      signal.update(3)
     })
     expect(spy).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
-    rerender({ left: 2, right: Impulse(4) })
+    rerender({ left: 2, right: Signal(4) })
     expect(spy).toHaveBeenCalledExactlyOnceWith(6)
     vi.clearAllMocks()
   })
 
-  it("triggers the effect when Impulses are not listened in dependencies", () => {
+  it("triggers the effect when Signals are not listened in dependencies", () => {
     const spy = vi.fn()
-    const left = Impulse(1)
-    const right = Impulse(2)
+    const left = Signal(1)
+    const right = Signal(2)
     const { rerender } = renderHook(
       ({ state }) => {
         useEffect(
@@ -521,7 +521,7 @@ describe.each([
 
   it("calls effect cleanup function", () => {
     const cleanup = vi.fn()
-    const counter = Impulse({ count: 2 })
+    const counter = Signal({ count: 2 })
     const { rerender, unmount } = renderHook(
       (props) => {
         useEffect(
@@ -569,8 +569,8 @@ describe.each([
     it("reruns effect only for effect's consumers", () => {
       const spyRender = vi.fn()
       const spyEffect = vi.fn()
-      const impulse1 = Impulse(2)
-      const impulse2 = Impulse(3)
+      const signal1 = Signal(2)
+      const signal2 = Signal(3)
 
       const { rerender } = renderHook(
         ({ left, right }) => {
@@ -581,10 +581,10 @@ describe.each([
             spyEffect(left * right.read(monitorForEffect))
           }, [monitorForEffect, left, right])
 
-          spyRender(impulse2.read(monitor))
+          spyRender(signal2.read(monitor))
         },
         {
-          initialProps: { left: 1, right: impulse1 },
+          initialProps: { left: 1, right: signal1 },
         },
       )
 
@@ -592,26 +592,26 @@ describe.each([
       expect(spyEffect).toHaveBeenCalledExactlyOnceWith(2)
       vi.clearAllMocks()
 
-      rerender({ left: 1, right: impulse1 })
+      rerender({ left: 1, right: signal1 })
       expect(spyRender).toHaveBeenCalledExactlyOnceWith(3)
       expect(spyEffect).not.toHaveBeenCalled()
       vi.clearAllMocks()
 
       act(() => {
-        impulse1.update(4)
+        signal1.update(4)
       })
       expect(spyRender).toHaveBeenCalledExactlyOnceWith(3)
       expect(spyEffect).toHaveBeenCalledExactlyOnceWith(4)
       vi.clearAllMocks()
 
       act(() => {
-        impulse2.update(5)
+        signal2.update(5)
       })
       expect(spyRender).toHaveBeenCalledExactlyOnceWith(5)
       expect(spyEffect).not.toHaveBeenCalled()
       vi.clearAllMocks()
 
-      rerender({ left: 2, right: impulse1 })
+      rerender({ left: 2, right: signal1 })
       expect(spyRender).toHaveBeenCalledExactlyOnceWith(5)
       expect(spyEffect).toHaveBeenCalledExactlyOnceWith(8)
     })

@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
 import { useCallback } from "react"
 
-import { Impulse, useComputed, useMonitor } from "../src"
+import { Signal, useComputed, useMonitor } from "../src"
 
 const onCallback = vi.fn<(x: number) => number>().mockImplementation((x) => x)
 
@@ -9,35 +9,35 @@ beforeEach(() => {
   onCallback.mockClear()
 })
 
-describe("single Impulse", () => {
-  const setup = (impulse: Impulse<number>) =>
+describe("single Signal", () => {
+  const setup = (signal: Signal<number>) =>
     renderHook(
-      (count: Impulse<number>) => {
+      (count: Signal<number>) => {
         const monitor = useMonitor()
 
         return useCallback(() => onCallback(count.read(monitor) * 2), [monitor, count])
       },
       {
-        initialProps: impulse,
+        initialProps: signal,
       },
     )
 
   it("does not run a callback on init", () => {
-    const count = Impulse(1)
+    const count = Signal(1)
     setup(count)
 
     expect(onCallback).not.toHaveBeenCalled()
   })
 
-  it("does not attach Impulse to a monitor on init", () => {
-    const count = Impulse(1)
+  it("does not attach Signal to a monitor on init", () => {
+    const count = Signal(1)
     setup(count)
 
     expect(count).toHaveEmittersSize(0)
   })
 
-  it("does not change resulting function when not attached Impulse's value changes", () => {
-    const count = Impulse(1)
+  it("does not change resulting function when not attached Signal's value changes", () => {
+    const count = Signal(1)
     const { result } = setup(count)
     const initial = result.current
 
@@ -49,7 +49,7 @@ describe("single Impulse", () => {
   })
 
   it("the resulting function returns a value", () => {
-    const count = Impulse(1)
+    const count = Signal(1)
     const { result } = setup(count)
 
     expect(result.current()).toBe(2)
@@ -61,8 +61,8 @@ describe("single Impulse", () => {
     expect(result.current()).toBe(4)
   })
 
-  it("changes resulting function when attached Impulse's value changes", () => {
-    const count = Impulse(1)
+  it("changes resulting function when attached Signal's value changes", () => {
+    const count = Signal(1)
     const { result } = setup(count)
     const initial = result.current
 
@@ -75,8 +75,8 @@ describe("single Impulse", () => {
     expect(result.current).not.toBe(initial)
   })
 
-  it("de-attaches an attached Impulse when its value changes", () => {
-    const count = Impulse(1)
+  it("de-attaches an attached Signal when its value changes", () => {
+    const count = Signal(1)
     const { result } = setup(count)
 
     result.current()
@@ -88,8 +88,8 @@ describe("single Impulse", () => {
     expect(count).toHaveEmittersSize(0)
   })
 
-  it("attach an Impulse when the resulting function calls", () => {
-    const count = Impulse(1)
+  it("attach an Signal when the resulting function calls", () => {
+    const count = Signal(1)
     const { result } = setup(count)
 
     result.current()
@@ -97,8 +97,8 @@ describe("single Impulse", () => {
     expect(count).toHaveEmittersSize(1)
   })
 
-  it("attaches an Impulse only once on the subsequent resulting function calls", () => {
-    const count = Impulse(1)
+  it("attaches an Signal only once on the subsequent resulting function calls", () => {
+    const count = Signal(1)
     const { result } = setup(count)
 
     result.current()
@@ -107,8 +107,8 @@ describe("single Impulse", () => {
     expect(count).toHaveEmittersSize(1)
   })
 
-  it("does not change resulting function with same Impulse when re-renders", () => {
-    const count = Impulse(1)
+  it("does not change resulting function with same Signal when re-renders", () => {
+    const count = Signal(1)
     const { result, rerender } = setup(count)
     const initial = result.current
 
@@ -117,12 +117,12 @@ describe("single Impulse", () => {
     expect(result.current).toBe(initial)
   })
 
-  it("changes resulting function by a new Impulse when re-renders", () => {
-    const count1 = Impulse(1)
+  it("changes resulting function by a new Signal when re-renders", () => {
+    const count1 = Signal(1)
     const { result, rerender } = setup(count1)
     const initial = result.current
 
-    const count2 = Impulse(2)
+    const count2 = Signal(2)
     rerender(count2)
 
     expect(result.current).not.toBe(initial)
@@ -130,8 +130,8 @@ describe("single Impulse", () => {
     expect(count2).toHaveEmittersSize(0)
   })
 
-  it("keeps attached Impulse when re-renders", () => {
-    const count = Impulse(1)
+  it("keeps attached Signal when re-renders", () => {
+    const count = Signal(1)
     const { result, rerender } = setup(count)
 
     result.current()
@@ -142,10 +142,10 @@ describe("single Impulse", () => {
   })
 })
 
-describe("conditional Impulse", () => {
-  const setup = (impulse: Impulse<number>) =>
+describe("conditional Signal", () => {
+  const setup = (signal: Signal<number>) =>
     renderHook(
-      (count: Impulse<number>) => {
+      (count: Signal<number>) => {
         const monitor = useMonitor()
 
         return useCallback(
@@ -160,12 +160,12 @@ describe("conditional Impulse", () => {
         )
       },
       {
-        initialProps: impulse,
+        initialProps: signal,
       },
     )
 
   it("the resulting function returns a fallback when not active", () => {
-    const count = Impulse(1)
+    const count = Signal(1)
     const { result } = setup(count)
 
     expect(result.current(false)).toBe(-1)
@@ -178,7 +178,7 @@ describe("conditional Impulse", () => {
   })
 
   it("the resulting function returns a value when active", () => {
-    const count = Impulse(1)
+    const count = Signal(1)
     const { result } = setup(count)
 
     expect(result.current(true)).toBe(2)
@@ -190,8 +190,8 @@ describe("conditional Impulse", () => {
     expect(result.current(true)).toBe(4)
   })
 
-  it("does not attach an Impulse when not active", () => {
-    const count = Impulse(1)
+  it("does not attach an Signal when not active", () => {
+    const count = Signal(1)
     const { result } = setup(count)
 
     result.current(false)
@@ -199,8 +199,8 @@ describe("conditional Impulse", () => {
     expect(count).toHaveEmittersSize(0)
   })
 
-  it("attaches an Impulse when active", () => {
-    const count = Impulse(1)
+  it("attaches an Signal when active", () => {
+    const count = Signal(1)
     const { result } = setup(count)
 
     result.current(true)
@@ -208,8 +208,8 @@ describe("conditional Impulse", () => {
     expect(count).toHaveEmittersSize(1)
   })
 
-  it("keeps an Impulse attached ones it was active", () => {
-    const count = Impulse(1)
+  it("keeps an Signal attached ones it was active", () => {
+    const count = Signal(1)
     const { result } = setup(count)
 
     result.current(true)
@@ -218,8 +218,8 @@ describe("conditional Impulse", () => {
     expect(count).toHaveEmittersSize(1)
   })
 
-  it("de-attaches an Impulse when it was active", () => {
-    const count = Impulse(1)
+  it("de-attaches an Signal when it was active", () => {
+    const count = Signal(1)
     const { result } = setup(count)
 
     result.current(true)
@@ -232,16 +232,16 @@ describe("conditional Impulse", () => {
   })
 })
 
-describe("argument Impulse", () => {
+describe("argument Signal", () => {
   const setup = () =>
     renderHook(() => {
       const monitor = useMonitor()
 
-      return useCallback((count: Impulse<number>) => count.read(monitor) * 2, [monitor])
+      return useCallback((count: Signal<number>) => count.read(monitor) * 2, [monitor])
     })
 
-  it("attaches an Impulse when the resulting function calls", () => {
-    const count = Impulse(1)
+  it("attaches an Signal when the resulting function calls", () => {
+    const count = Signal(1)
     const { result } = setup()
 
     expect(result.current(count)).toBe(2)
@@ -249,8 +249,8 @@ describe("argument Impulse", () => {
     expect(count).toHaveEmittersSize(1)
   })
 
-  it("does not attach the same Impulse twice", () => {
-    const count = Impulse(1)
+  it("does not attach the same Signal twice", () => {
+    const count = Signal(1)
     const { result } = setup()
 
     expect(result.current(count)).toBe(2)
@@ -259,9 +259,9 @@ describe("argument Impulse", () => {
     expect(count).toHaveEmittersSize(1)
   })
 
-  it("attaches multiple Impulses", () => {
-    const count1 = Impulse(1)
-    const count2 = Impulse(2)
+  it("attaches multiple Signals", () => {
+    const count1 = Signal(1)
+    const count2 = Signal(2)
     const { result } = setup()
 
     expect(result.current(count1)).toBe(2)
@@ -271,9 +271,9 @@ describe("argument Impulse", () => {
     expect(count2).toHaveEmittersSize(1)
   })
 
-  it("detaches all Impulses when any of the attached Impulse value changes", () => {
-    const count1 = Impulse(1)
-    const count2 = Impulse(2)
+  it("detaches all Signals when any of the attached Signal value changes", () => {
+    const count1 = Signal(1)
+    const count2 = Signal(2)
     const { result } = setup()
 
     result.current(count1)
@@ -289,17 +289,17 @@ describe("argument Impulse", () => {
 })
 
 it("cannot batch the callback", () => {
-  const impulse1 = Impulse(1)
-  const impulse2 = Impulse(2)
-  const impulse3 = Impulse(3)
+  const signal1 = Signal(1)
+  const signal2 = Signal(2)
+  const signal3 = Signal(3)
   const { result: callback } = renderHook(() => {
     const monitor = useMonitor()
 
     return useCallback(
       (diff: number) => {
-        impulse1.update(impulse1.read(monitor) + diff)
-        impulse2.update(impulse2.read(monitor) + diff)
-        impulse3.update(impulse3.read(monitor) + diff)
+        signal1.update(signal1.read(monitor) + diff)
+        signal2.update(signal2.read(monitor) + diff)
+        signal3.update(signal3.read(monitor) + diff)
       },
       [monitor],
     )
@@ -310,7 +310,7 @@ it("cannot batch the callback", () => {
     useComputed((monitor) => {
       spy()
 
-      return impulse1.read(monitor) + impulse2.read(monitor) + impulse3.read(monitor)
+      return signal1.read(monitor) + signal2.read(monitor) + signal3.read(monitor)
     }, []),
   )
 

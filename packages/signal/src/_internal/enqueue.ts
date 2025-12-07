@@ -1,8 +1,9 @@
+import type { DerivedSignal } from "./derived-signal"
 import type { MonitorEmitter } from "./monitor-emitter"
 
 /**
  * Orchestrates invalidation and emission of {@link MonitorEmitter}s to prevent
- * re-subscription loops while ensuring derived impulses observe the latest
+ * re-subscription loops while ensuring {@link DerivedSignal}s observe the latest
  * state before downstream updates. Derived emitters are emitted immediately to
  * leverage their comparison logic, whereas direct emitters are batched and
  * flushed later via {@link MonitorEmitQueue._process}, avoiding redundant
@@ -14,7 +15,7 @@ class MonitorEmitQueue {
   /**
    * Adds the provided emitters to the queue for later processing.
    *
-   * @remarks Invalidates each emitter immediately so that derived impulses observe the latest version,
+   * @remarks Invalidates each emitter immediately so that {@link DerivedSignal}s observe the latest version,
    * then triggers derived emitters synchronously to leverage their comparison logic, while
    * queueing non-derived emitters for deferred emission.
    *
@@ -22,10 +23,10 @@ class MonitorEmitQueue {
    */
   public readonly _push = (emitters: ReadonlySet<WeakRef<MonitorEmitter>>): void => {
     /**
-     * Calling the {@link MonitorEmitter._emit} might cause the same Impulse (host of the `emitters`)
-     * to be scheduled again for the same monitor (DerivedImpulse when source sets the comparably equal value).
-     * It causes infinite loop, where the {@link MonitorEmitter._invalidate} first unsubscribes from the source Impulse but
-     * the DerivedImpulse's {@link MonitorEmitter._emit} subscribes it back.
+     * Calling the {@link MonitorEmitter._emit} might cause the same {@link Signal} (host of the {@link emitters})
+     * to be scheduled again for the same monitor ({@link DerivedSignal} when source sets the comparably equal value).
+     * It causes infinite loop, where the {@link MonitorEmitter._invalidate} first unsubscribes from the source {@link Signal} but
+     * the {@link DerivedSignal}'s {@link MonitorEmitter._emit} subscribes it back.
      *
      * To prevent this, the _push should only iterate over the emitters present at the moment of the call.
      */
@@ -35,15 +36,15 @@ class MonitorEmitQueue {
       if (emitter) {
         /**
          * Invalidate the emitter as soon as it is scheduled
-         * so the derived impulses can read a fresh value due to version increment.
+         * so the {@link DerivedSignal}s can read a fresh value due to version increment.
          */
         emitter._invalidate()
 
         if (emitter._derived) {
           /**
-           * Emit immediately so `DerivedImpulse` utilizes the equals function to either:
+           * Emit immediately so {@link DerivedSignal}s utilize the equals function to either:
            * 1. NOT CHANGED: resubscribe to sources
-           * 2. CHANGED: marks as stale and _push's its._emitters so they end up here either emitting (DerivedImpulse) or scheduling (DirectImpulse).
+           * 2. CHANGED: marks as stale and _push's its._emitters so they end up here either emitting ({@link DerivedSignal}) or scheduling ({@link Signal}).
            */
           emitter._emit()
         } else {
