@@ -9,7 +9,7 @@ function factory(
 ) {
   spy?.()
 
-  return isActive ? impulse.getValue(scope) : { count: -1 }
+  return isActive ? impulse.read(scope) : { count: -1 }
 }
 
 describe.each([

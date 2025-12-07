@@ -34,7 +34,7 @@ class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
     scope: Scope,
     select: (elements: ReadonlyArray<TElement>) => TResult = params._first as typeof select,
   ): TResult {
-    return select(this._elements.getValue(scope))
+    return select(this._elements.read(scope))
   }
 
   public setElements(
@@ -44,7 +44,7 @@ class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
       const initialElements = this._state._getInitialElements(scope)
 
       const elementsStates = map(
-        isFunction(setter) ? setter(this._elements.getValue(scope), scope) : setter,
+        isFunction(setter) ? setter(this._elements.read(scope), scope) : setter,
 
         ImpulseForm._getState,
       )

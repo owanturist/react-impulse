@@ -12,7 +12,7 @@ function createIsImpulse(isImpulse: (input: unknown) => input is BaseImpulse<unk
     }
 
     if (isImpulse(maybeInput)) {
-      const value = maybeInput.getValue(inputOrScope as Scope)
+      const value = maybeInput.read(inputOrScope as Scope)
 
       return maybeCheck(value)
     }

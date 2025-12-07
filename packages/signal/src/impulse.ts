@@ -24,7 +24,7 @@ type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
  *
  * @example
  * const impulse = Impulse<string>()
- * const initiallyUndefined = impulse.getValue(scope) === undefined
+ * const initiallyUndefined = impulse.read(scope) === undefined
  */
 function Impulse<TValue = undefined>(): Impulse<undefined | TValue>
 
@@ -91,7 +91,7 @@ function Impulse<T>(
 ): Impulse<undefined | T> | Impulse<T> {
   const isGetterFunction = isFunction(initialValueOrReadableImpulse)
 
-  if (!(isGetterFunction || hasProperty(initialValueOrReadableImpulse, "getValue"))) {
+  if (!(isGetterFunction || hasProperty(initialValueOrReadableImpulse, "read"))) {
     const directOptions = optionsOrWritableImpulse as undefined | ImpulseOptions<undefined | T>
 
     return new ImpulseImpl(initialValueOrReadableImpulse, directOptions?.equals ?? isStrictEqual)
@@ -105,7 +105,7 @@ function Impulse<T>(
   return new DerivedImpulse(
     isGetterFunction
       ? initialValueOrReadableImpulse
-      : (scope) => initialValueOrReadableImpulse.getValue(scope),
+      : (scope) => initialValueOrReadableImpulse.read(scope),
     isFunction(setter) ? setter : (value) => setter?.setValue(value),
     derivedOptions?.equals ?? isStrictEqual,
   )

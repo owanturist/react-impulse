@@ -12,9 +12,9 @@ import {
 
 describe("nested factory", () => {
   const factory = (scope: Scope, { impulse }: WithImpulse<WithFirst & WithSecond>) => {
-    const { first, second } = impulse.getValue(scope)
+    const { first, second } = impulse.read(scope)
 
-    return Counter.merge(first.getValue(scope), second.getValue(scope))
+    return Counter.merge(first.read(scope), second.read(scope))
   }
 
   describe.each([
@@ -121,7 +121,7 @@ describe("triggering factory for nested impulses vs single impulse", () => {
   const factorySingle = (scope: Scope, { impulse, spy }: WithImpulse & WithSpy) => {
     spy()
 
-    return impulse.getValue(scope)
+    return impulse.read(scope)
   }
 
   const factoryNested = (
@@ -130,9 +130,9 @@ describe("triggering factory for nested impulses vs single impulse", () => {
   ) => {
     spy()
 
-    const { first, second, third } = impulse.getValue(scope)
+    const { first, second, third } = impulse.read(scope)
 
-    return Counter.merge(first.getValue(scope), second.getValue(scope), third.getValue(scope))
+    return Counter.merge(first.read(scope), second.read(scope), third.read(scope))
   }
 
   describe.each([

@@ -5,6 +5,7 @@ import { isStrictEqual } from "~/tools/is-strict-equal"
 
 import type { DependencyList } from "./dependency-list"
 import type { Equal } from "./equal"
+import type { Impulse } from "./impulse"
 import type { ReadableImpulse } from "./readable-impulse"
 import type { Scope } from "./_internal/scope"
 import { useCreateScope } from "./_internal/use-create-scope"
@@ -46,7 +47,7 @@ function useScoped<TValue>(impulse: ReadableImpulse<TValue>): TValue
  *
  * @template TResult the type of the `factory` result.
  *
- * @param factory a function that provides Scope as the first argument and subscribes to all Impulses calling the `Impulse#getValue` method inside the function.
+ * @param factory a function that provides {@link Scope} as the first argument and subscribes to all Impulses calling the {@link Impulse.read} method inside the function.
  * @param dependencies optional array of dependencies of the `factory` function. If not defined, the `factory` function is called on every render.
  * @param options optional {@link UseScopedOptions}.
  * @param options.equals the {@link Equal} function that determines whether or not the `factory` result is different from the previous one. Defaults to {@link Object.is}.
@@ -72,7 +73,7 @@ function useScoped<TResult>(
         return factoryOrReadableImpulse(scope)
       }
 
-      return factoryOrReadableImpulse.getValue(scope)
+      return factoryOrReadableImpulse.read(scope)
     },
     // biome-ignore lint/correctness/useExhaustiveDependencies: pass dependencies as is or factory is the only dependency
     dependencies ?? [factoryOrReadableImpulse],

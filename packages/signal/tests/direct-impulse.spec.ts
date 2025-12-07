@@ -12,7 +12,7 @@ describe("Impulse()", () => {
   it("should create an impulse with undefined initial value", ({ scope }) => {
     const impulse = Impulse<number>()
 
-    expect(impulse.getValue(scope)).toBeUndefined()
+    expect(impulse.read(scope)).toBeUndefined()
   })
 
   it("updates the impulse with a new value", ({ scope }) => {
@@ -20,7 +20,7 @@ describe("Impulse()", () => {
 
     impulse.setValue(1)
 
-    expect(impulse.getValue(scope)).toBe(1)
+    expect(impulse.read(scope)).toBe(1)
   })
 
   it("updates the impulse with a undefined", ({ scope }) => {
@@ -29,7 +29,7 @@ describe("Impulse()", () => {
     impulse.setValue(1)
     impulse.setValue(undefined)
 
-    expect(impulse.getValue(scope)).toBeUndefined()
+    expect(impulse.read(scope)).toBeUndefined()
   })
 })
 
@@ -69,9 +69,9 @@ describe("Impulse(value, options?)", () => {
         fn: (input: number) => number
       }>
     >()
-    expectTypeOf(impulse.getValue(scope)).toEqualTypeOf<{
+    expectTypeOf(impulse.read(scope)).toEqualTypeOf<{
       fn: (input: number) => number
     }>()
-    expect(impulse.getValue(scope).fn(42)).toBe(42)
+    expect(impulse.read(scope).fn(42)).toBe(42)
   })
 })

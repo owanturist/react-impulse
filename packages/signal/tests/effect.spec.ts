@@ -10,7 +10,7 @@ describe("single Impulse", () => {
     const impulse = Impulse(1)
 
     effect((scope) => {
-      spy(impulse.getValue(scope))
+      spy(impulse.read(scope))
     })
 
     expect(spy).toHaveBeenCalledExactlyOnceWith(1)
@@ -22,7 +22,7 @@ describe("single Impulse", () => {
     const impulse = Impulse(1)
 
     effect((scope) => {
-      spy(impulse.getValue(scope))
+      spy(impulse.read(scope))
     })
 
     spy.mockReset()
@@ -36,7 +36,7 @@ describe("single Impulse", () => {
     const impulse = Impulse(1)
 
     const unsubscribe = effect((scope) => {
-      const count = impulse.getValue(scope)
+      const count = impulse.read(scope)
 
       if (count === 2) {
         return
@@ -74,7 +74,7 @@ describe("single Impulse", () => {
     const impulse = Impulse(1)
 
     const unsubscribe = effect((scope) => {
-      spy(impulse.getValue(scope))
+      spy(impulse.read(scope))
     })
 
     unsubscribe()
@@ -90,7 +90,7 @@ describe("single Impulse", () => {
     const impulse = Impulse(1)
 
     const unsubscribe = effect((scope) => {
-      spy(impulse.getValue(scope))
+      spy(impulse.read(scope))
     })
 
     unsubscribe()
@@ -107,7 +107,7 @@ describe("single Impulse", () => {
     const impulse = Impulse(1)
 
     effect((scope) => {
-      spy(impulse.getValue(scope))
+      spy(impulse.read(scope))
     })
 
     spy.mockReset()
@@ -123,7 +123,7 @@ describe("single Impulse", () => {
     const impulse = Impulse(1)
 
     effect((scope) => {
-      spy(impulse.getValue(scope))
+      spy(impulse.read(scope))
     })
 
     spy.mockReset()
@@ -140,7 +140,7 @@ describe("single Impulse", () => {
     const impulse = Impulse(1)
 
     effect((scope) => {
-      spy(impulse.getValue(scope))
+      spy(impulse.read(scope))
     })
 
     spy.mockReset()
@@ -154,7 +154,7 @@ describe("single Impulse", () => {
     const impulse = Impulse({ count: 1 }, { equals: Counter.equals })
 
     effect((scope) => {
-      spy(impulse.getValue(scope))
+      spy(impulse.read(scope))
     })
 
     spy.mockReset()
@@ -175,7 +175,7 @@ describe("multiple Impulses", () => {
     const impulse2 = Impulse(2)
 
     effect((scope) => {
-      spy(impulse1.getValue(scope) + impulse2.getValue(scope))
+      spy(impulse1.read(scope) + impulse2.read(scope))
     })
 
     expect(spy).toHaveBeenCalledExactlyOnceWith(3)
@@ -189,7 +189,7 @@ describe("multiple Impulses", () => {
     const impulse2 = Impulse(2)
 
     effect((scope) => {
-      spy(impulse1.getValue(scope) + impulse2.getValue(scope))
+      spy(impulse1.read(scope) + impulse2.read(scope))
     })
 
     spy.mockReset()
@@ -209,7 +209,7 @@ describe("multiple Impulses", () => {
     const impulse2 = Impulse(2)
 
     const unsubscribe = effect((scope) => {
-      spy(impulse1.getValue(scope) + impulse2.getValue(scope))
+      spy(impulse1.read(scope) + impulse2.read(scope))
     })
 
     unsubscribe()
@@ -228,8 +228,8 @@ describe("multiple Impulses", () => {
     const impulse2 = Impulse(2)
 
     effect((scope) => {
-      if (impulse1.getValue(scope) > 1) {
-        spy(impulse1.getValue(scope) + impulse2.getValue(scope))
+      if (impulse1.read(scope) > 1) {
+        spy(impulse1.read(scope) + impulse2.read(scope))
       }
     })
     expect(impulse1).toHaveEmittersSize(1)
@@ -268,7 +268,7 @@ describe("batching against effect listener", () => {
     const impulse2 = Impulse(2)
 
     effect((scope) => {
-      spy(impulse1.getValue(scope) + impulse2.getValue(scope))
+      spy(impulse1.read(scope) + impulse2.read(scope))
     })
 
     spy.mockReset()
@@ -285,7 +285,7 @@ describe("batching against effect listener", () => {
     const impulse2 = Impulse(2)
 
     effect((scope) => {
-      spy(impulse1.getValue(scope) + impulse2.getValue(scope))
+      spy(impulse1.read(scope) + impulse2.read(scope))
     })
 
     spy.mockReset()
@@ -309,12 +309,12 @@ describe("batching against a hook", () => {
       useScoped((scope) => {
         spy()
 
-        return impulse1.getValue(scope) + impulse2.getValue(scope) + impulse3.getValue(scope)
+        return impulse1.read(scope) + impulse2.read(scope) + impulse3.read(scope)
       }, []),
     )
 
     const unsubscribe = effect((scope) => {
-      if (impulse4.getValue(scope) > 1 && impulse4.getValue(scope) < 5) {
+      if (impulse4.read(scope) > 1 && impulse4.read(scope) < 5) {
         impulse1.setValue((x) => x + 1)
         impulse2.setValue((x) => x + 1)
         impulse3.setValue((x) => x + 1)
@@ -367,12 +367,12 @@ describe("batching against a hook", () => {
       useScoped((scope) => {
         spy()
 
-        return impulse1.getValue(scope) + impulse2.getValue(scope) + impulse3.getValue(scope)
+        return impulse1.read(scope) + impulse2.read(scope) + impulse3.read(scope)
       }, []),
     )
 
     const unsubscribe = effect((scope) => {
-      if (impulse4.getValue(scope) > 1 && impulse4.getValue(scope) < 5) {
+      if (impulse4.read(scope) > 1 && impulse4.read(scope) < 5) {
         return () => {
           impulse1.setValue((x) => x + 1)
           impulse2.setValue((x) => x + 1)
@@ -436,9 +436,9 @@ describe("nested Impulses", () => {
     })
 
     effect((scope) => {
-      const { first, second } = impulse3.getValue(scope)
+      const { first, second } = impulse3.read(scope)
 
-      spy(first.getValue(scope) + second.getValue(scope))
+      spy(first.read(scope) + second.read(scope))
     })
 
     expect(impulse1).toHaveEmittersSize(1)
@@ -458,9 +458,9 @@ describe("nested Impulses", () => {
     })
 
     effect((scope) => {
-      const { first, second } = impulse3.getValue(scope)
+      const { first, second } = impulse3.read(scope)
 
-      spy(first.getValue(scope) + second.getValue(scope))
+      spy(first.read(scope) + second.read(scope))
     })
 
     spy.mockReset()

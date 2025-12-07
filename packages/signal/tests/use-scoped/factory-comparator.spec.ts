@@ -4,7 +4,7 @@ import { Impulse, type Scope, useScoped } from "../../src"
 import { Counter, type WithEquals, type WithImpulse } from "../common"
 
 function factory(scope: Scope, { impulse }: WithImpulse) {
-  return impulse.getValue(scope)
+  return impulse.read(scope)
 }
 
 describe.each([

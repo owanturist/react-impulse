@@ -9,7 +9,7 @@ describe("multiple impulses", () => {
     password: Impulse<string>
     onRender: VoidFunction
   }> = ({ email: emailImpulse, password: passwordImpulse, onRender }) => {
-    const email = useScoped((scope) => emailImpulse.getValue(scope))
+    const email = useScoped((scope) => emailImpulse.read(scope))
     const password = useScoped(passwordImpulse)
 
     return (

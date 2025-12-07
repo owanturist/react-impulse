@@ -114,7 +114,7 @@ abstract class ImpulseFormState<
     }
 
     // ignore if the focus handlers are not set
-    const error = this._onFocus._isEmpty() ? null : this._error.getValue(scope)
+    const error = this._onFocus._isEmpty() ? null : this._error.read(scope)
 
     if (isNull(error)) {
       return null

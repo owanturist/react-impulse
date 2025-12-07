@@ -113,7 +113,7 @@ describe("nested impulses", () => {
 
     // double the third counter from the outside
     act(() => {
-      impulse.getValue(scope).counts[2]!.setValue((x) => 2 * x)
+      impulse.read(scope).counts[2]!.setValue((x) => 2 * x)
     })
     expect(onRender).not.toHaveBeenCalled()
     expect(onCounterRender).toHaveBeenCalledOnce()
@@ -133,7 +133,7 @@ describe("nested impulses", () => {
 
     // increment all from the outside
     act(() => {
-      for (const count of impulse.getValue(scope).counts) {
+      for (const count of impulse.read(scope).counts) {
         count.setValue((x) => x + 1)
       }
     })

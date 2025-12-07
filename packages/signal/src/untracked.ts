@@ -33,7 +33,7 @@ function untracked<T>(factoryOrReadableImpulse: ((scope: Scope) => T) | Readable
       return factoryOrReadableImpulse(STATIC_SCOPE)
     }
 
-    return factoryOrReadableImpulse.getValue(STATIC_SCOPE)
+    return factoryOrReadableImpulse.read(STATIC_SCOPE)
   })
 }
 

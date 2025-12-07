@@ -18,7 +18,7 @@ describe.each([
       useEffect(
         () =>
           effect((scope) => {
-            const x = value.getValue(scope) * multiplier
+            const x = value.read(scope) * multiplier
 
             onEffect(x)
           }),
@@ -187,7 +187,7 @@ describe.each([
       useEffect(
         () =>
           effect((scope) => {
-            const x = (first.getValue(scope) + second.getValue(scope)) * multiplier
+            const x = (first.read(scope) + second.read(scope)) * multiplier
 
             onEffect(x)
           }),
@@ -240,8 +240,8 @@ describe.each([
           effect((scope) => {
             const x =
               list
-                .getValue(scope)
-                .map((item) => item.getValue(scope))
+                .read(scope)
+                .map((item) => item.read(scope))
                 .reduce((acc, val) => acc + val, 0) * multiplier
 
             onEffect(x)
@@ -313,7 +313,7 @@ describe.each([
 
       useEffect(() =>
         effect((scope) => {
-          const x = value.getValue(scope) * multiplier
+          const x = value.read(scope) * multiplier
 
           onEffect(x)
         }),
@@ -380,7 +380,7 @@ describe.each([
 
       return (
         <button type="button" data-testid="count" onClick={() => count.setValue((x) => x + 1)}>
-          {count.getValue(scope)}
+          {count.read(scope)}
         </button>
       )
     }
@@ -394,7 +394,7 @@ describe.each([
       useEffect(
         () =>
           effect((scope) => {
-            onEffect(count.getValue(scope))
+            onEffect(count.read(scope))
           }),
         [onEffect, count],
       )
@@ -442,7 +442,7 @@ describe.each([
         useEffect(
           () =>
             effect((scope) => {
-              spy(left + right.getValue(scope))
+              spy(left + right.read(scope))
             }),
           [left, right],
         )
@@ -489,7 +489,7 @@ describe.each([
         useEffect(
           () =>
             effect((scope) => {
-              spy(state.left.getValue(scope) + state.right.getValue(scope))
+              spy(state.left.read(scope) + state.right.read(scope))
             }),
           [state],
         )
@@ -527,7 +527,7 @@ describe.each([
         useEffect(
           () =>
             effect((scope) => {
-              const { count } = props.counter.getValue(scope)
+              const { count } = props.counter.read(scope)
 
               return () => {
                 cleanup(count * props.multiplier)
@@ -578,10 +578,10 @@ describe.each([
           const scopeForEffect = useScope()
 
           useEffect(() => {
-            spyEffect(left * right.getValue(scopeForEffect))
+            spyEffect(left * right.read(scopeForEffect))
           }, [scopeForEffect, left, right])
 
-          spyRender(impulse2.getValue(scope))
+          spyRender(impulse2.read(scope))
         },
         {
           initialProps: { left: 1, right: impulse1 },

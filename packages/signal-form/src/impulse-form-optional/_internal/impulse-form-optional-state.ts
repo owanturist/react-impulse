@@ -55,7 +55,7 @@ class ImpulseFormOptionalState<
   }
 
   private _isEnabled(scope: Scope): boolean {
-    return isTrue(this._enabled._output.getValue(scope))
+    return isTrue(this._enabled._output.read(scope))
   }
 
   public _getEnabledElement(
@@ -74,7 +74,7 @@ class ImpulseFormOptionalState<
     isConcise: (value: unknown) => value is TConcise,
     fallbackDisabled?: TConcise,
   ): TConcise | { enabled: TConcise; element: TConcise } {
-    const enabled = extract(this._enabled).getValue(scope)
+    const enabled = extract(this._enabled).read(scope)
     const enabledElement = this._getEnabledElement(scope)
 
     if (!enabledElement) {
@@ -83,7 +83,7 @@ class ImpulseFormOptionalState<
         : { enabled, element: fallbackDisabled }
     }
 
-    const element = extract(enabledElement).getValue(scope)
+    const element = extract(enabledElement).read(scope)
 
     return toConcise([enabled, element], isConcise, enabled, {
       enabled,
@@ -95,8 +95,8 @@ class ImpulseFormOptionalState<
     scope: Scope,
     extract: (form: ImpulseFormState) => ReadonlyImpulse<unknown>,
   ): ImpulseFormOptionalInput<TEnabled, TElement> {
-    const enabled = extract(this._enabled).getValue(scope)
-    const element = extract(this._element).getValue(scope)
+    const enabled = extract(this._enabled).read(scope)
+    const element = extract(this._element).read(scope)
 
     return { enabled, element } as ImpulseFormOptionalInput<TEnabled, TElement>
   }
@@ -113,7 +113,7 @@ class ImpulseFormOptionalState<
     setter: ImpulseFormOptionalInputSetter<TEnabled, TElement>,
   ): void {
     const { enabled, element } = isFunction(setter)
-      ? setter(this._initial.getValue(scope), this._input.getValue(scope))
+      ? setter(this._initial.read(scope), this._input.read(scope))
       : setter
 
     if (!isUndefined(enabled)) {
@@ -143,7 +143,7 @@ class ImpulseFormOptionalState<
 
   public _setInput(scope: Scope, setter: ImpulseFormOptionalInputSetter<TEnabled, TElement>): void {
     const { enabled, element } = isFunction(setter)
-      ? setter(this._input.getValue(scope), this._initial.getValue(scope))
+      ? setter(this._input.read(scope), this._initial.read(scope))
       : setter
 
     if (!isUndefined(enabled)) {
@@ -176,7 +176,7 @@ class ImpulseFormOptionalState<
   )
 
   public _setError(scope: Scope, setter: ImpulseFormOptionalErrorSetter<TEnabled, TElement>): void {
-    const resolved = isFunction(setter) ? setter(this._errorVerbose.getValue(scope)) : setter
+    const resolved = isFunction(setter) ? setter(this._errorVerbose.read(scope)) : setter
 
     const enabledSetter = isNull(resolved) ? resolved : resolved.enabled
 
@@ -218,7 +218,7 @@ class ImpulseFormOptionalState<
     scope: Scope,
     setter: ImpulseFormOptionalValidateOnSetter<TEnabled, TElement>,
   ): void {
-    const resolved = isFunction(setter) ? setter(this._validateOnVerbose.getValue(scope)) : setter
+    const resolved = isFunction(setter) ? setter(this._validateOnVerbose.read(scope)) : setter
 
     const [enabledSetter, elementSetter] = isString(resolved)
       ? [resolved, this._isEnabled(scope) ? resolved : undefined]
@@ -256,7 +256,7 @@ class ImpulseFormOptionalState<
     scope: Scope,
     setter: ImpulseFormOptionalFlagSetter<TEnabled, TElement>,
   ): void {
-    const resolved = isFunction(setter) ? setter(this._touchedVerbose.getValue(scope)) : setter
+    const resolved = isFunction(setter) ? setter(this._touchedVerbose.read(scope)) : setter
 
     const [enabledSetter, elementSetter] = isBoolean(resolved)
       ? [resolved, this._isEnabled(scope) ? resolved : undefined]
@@ -274,7 +274,7 @@ class ImpulseFormOptionalState<
   // O U T P U T
 
   public readonly _output = Impulse((scope): null | ImpulseFormOptionalOutput<TElement> => {
-    const enabled = this._enabled._output.getValue(scope)
+    const enabled = this._enabled._output.read(scope)
 
     if (enabled === false) {
       return undefined
@@ -284,7 +284,7 @@ class ImpulseFormOptionalState<
       return null
     }
 
-    const value = this._element._output.getValue(scope)
+    const value = this._element._output.read(scope)
 
     if (isNull(value)) {
       return null
@@ -413,7 +413,7 @@ class ImpulseFormOptionalState<
   public _getChildren<TChildParams extends ImpulseFormParams>(
     scope: Scope,
   ): ReadonlyArray<ImpulseFormChild<TChildParams, ImpulseFormOptionalParams<TEnabled, TElement>>> {
-    const enabledValue = this._enabled._output.getValue(scope)
+    const enabledValue = this._enabled._output.read(scope)
 
     const enabledChild: ImpulseFormChild<
       TChildParams,

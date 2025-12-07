@@ -49,7 +49,7 @@ describe("scoping multiple impulses", () => {
   )
 
   const factoryLeft = (scope: Scope, firstCount: Impulse<number>, secondCount: Impulse<number>) => {
-    const sum = firstCount.getValue(scope) + secondCount.getValue(scope)
+    const sum = firstCount.read(scope) + secondCount.read(scope)
 
     return sum > 2
   }
@@ -58,7 +58,7 @@ describe("scoping multiple impulses", () => {
     firstCount: Impulse<number>,
     secondCount: Impulse<number>,
   ) => {
-    const sum = firstCount.getValue(scope) + secondCount.getValue(scope)
+    const sum = firstCount.read(scope) + secondCount.read(scope)
 
     return sum < 7
   }

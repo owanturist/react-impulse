@@ -13,7 +13,7 @@ it("does not change scope value unless scoped impulse changes", () => {
       spy(scope)
     }, [scope])
 
-    return impulse.getValue(scope)
+    return impulse.read(scope)
   })
 
   expect(result.current).toBe(1)
@@ -33,7 +33,7 @@ it("does not change scope value unless scoped impulse changes", () => {
 function Component({ value }: { value: Impulse<number> }) {
   const scope = useScope()
 
-  return <>{value.getValue(scope)}</>
+  return <>{value.read(scope)}</>
 }
 
 it("cannot unsubscribe when swapped", () => {

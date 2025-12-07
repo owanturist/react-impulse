@@ -11,7 +11,7 @@ it("returns the `factory` function result without tracking impulses", () => {
   const Component: React.FC<{
     multiplier: number
   }> = ({ multiplier }) => {
-    const { count: firstCount } = untracked((scope) => first.getValue(scope))
+    const { count: firstCount } = untracked((scope) => first.read(scope))
     const { count: secondCount } = untracked(second)
     const [, rerender] = React.useState(0)
 
@@ -72,7 +72,7 @@ it("allows to use ReadableImpulse", () => {
   class Custom implements ReadableImpulse<number> {
     public constructor(public value: number) {}
 
-    public getValue(): number {
+    public read(): number {
       return this.value
     }
   }
