@@ -34,7 +34,7 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
   protected toJSON(): unknown {
     const scope = extractScope()
 
-    return this.getValue(scope)
+    return this.read(scope)
   }
 
   /**
@@ -46,11 +46,11 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
   protected toString(): string {
     const scope = extractScope()
 
-    return String(this.getValue(scope))
+    return String(this.read(scope))
   }
 
   /**
-   * Returns the impulse value.
+   * Reads the impulse value.
    *
    * @param scope the Scope that tracks the Impulse value changes.
    *
@@ -58,7 +58,7 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
    *
    * @version 1.0.0
    */
-  public getValue(scope: Scope): T {
+  public read(scope: Scope): T {
     attachToScope(scope, this._emitters)
 
     return this._getter()

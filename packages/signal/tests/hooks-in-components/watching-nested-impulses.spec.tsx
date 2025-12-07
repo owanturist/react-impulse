@@ -10,7 +10,7 @@ describe("scoping nested impulses", () => {
     public abstract counts: ReadonlyArray<Impulse<number>>
 
     public static sum(scope: Scope, { counts }: AppState): number {
-      return counts.reduce((acc, count) => acc + count.getValue(scope), 0)
+      return counts.reduce((acc, count) => acc + count.read(scope), 0)
     }
   }
 
@@ -78,12 +78,12 @@ describe("scoping nested impulses", () => {
   }
 
   const factoryLeft = (scope: Scope, state: Impulse<AppState>) => {
-    const total = AppState.sum(scope, state.getValue(scope))
+    const total = AppState.sum(scope, state.read(scope))
 
     return total > 10
   }
   const factoryRight = (scope: Scope, state: Impulse<AppState>) => {
-    const total = AppState.sum(scope, state.getValue(scope))
+    const total = AppState.sum(scope, state.read(scope))
 
     return total < 20
   }

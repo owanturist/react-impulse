@@ -30,7 +30,7 @@ describe("impulse shortcut", () => {
     class Custom implements ReadableImpulse<number> {
       public constructor(public value: number) {}
 
-      public getValue(): number {
+      public read(): number {
         return this.value
       }
     }
@@ -58,7 +58,7 @@ describe("impulse shortcut", () => {
 })
 
 describe("single factory", () => {
-  const factory = (scope: Scope, { impulse }: WithImpulse) => impulse.getValue(scope)
+  const factory = (scope: Scope, { impulse }: WithImpulse) => impulse.read(scope)
 
   describe.each([
     ["impulse shortcut", ({ impulse }: WithImpulse) => useScoped(impulse)],
@@ -170,7 +170,7 @@ describe("single factory", () => {
           impulse1.setValue(Counter.inc)
         })
 
-        expect(impulse1.getValue(scope)).toStrictEqual({ count: 2 })
+        expect(impulse1.read(scope)).toStrictEqual({ count: 2 })
         expect(result.current).toStrictEqual({ count: 10 })
         expect(impulse1).toHaveEmittersSize(0)
       })
@@ -186,7 +186,7 @@ describe("single factory", () => {
           impulse2.setValue(Counter.inc)
         })
 
-        expect(impulse1.getValue(scope)).toStrictEqual({ count: 1 })
+        expect(impulse1.read(scope)).toStrictEqual({ count: 1 })
         expect(result.current).toStrictEqual({ count: 11 })
         expect(impulse2).toHaveEmittersSize(1)
       })
@@ -224,7 +224,7 @@ describe("transform scoped Impulse's", () => {
   const isTupleEqual: Equal<[boolean, boolean]> = ([prevLeft, prevRight], [nextLeft, nextRight]) =>
     prevLeft === nextLeft && prevRight === nextRight
 
-  const factoryTuple = (scope: Scope, { impulse }: WithImpulse) => toTuple(impulse.getValue(scope))
+  const factoryTuple = (scope: Scope, { impulse }: WithImpulse) => toTuple(impulse.read(scope))
 
   it.each([
     [
@@ -350,7 +350,7 @@ describe("transform scoped Impulse's", () => {
   })
 
   describe("when Impulse's changes under factory are comparably equal with", () => {
-    const factory = (scope: Scope, { impulse }: WithImpulse) => impulse.getValue(scope)
+    const factory = (scope: Scope, { impulse }: WithImpulse) => impulse.read(scope)
 
     it.each([
       [
@@ -424,19 +424,19 @@ describe("transform scoped Impulse's", () => {
   })
 })
 
-describe("multiple Impulse#getValue(scope) calls", () => {
+describe("multiple Impulse#read(scope) calls", () => {
   const factorySingle = (scope: Scope, { impulse, spy }: WithImpulse & WithSpy) => {
     spy()
 
-    return impulse.getValue(scope)
+    return impulse.read(scope)
   }
   const factoryDouble = (scope: Scope, { impulse, spy }: WithImpulse & WithSpy) => {
     spy()
 
-    return Counter.merge(impulse.getValue(scope), impulse.getValue(scope))
+    return Counter.merge(impulse.read(scope), impulse.read(scope))
   }
 
-  describe("triggering factory for multiple Impulse#getValue(scope) calls the same as for a single", () => {
+  describe("triggering factory for multiple Impulse#read(scope) calls the same as for a single", () => {
     describe.each([
       [
         "without deps",

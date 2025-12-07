@@ -26,7 +26,7 @@ class ImpulseFormShape<TFields extends ImpulseFormShapeFields> extends ImpulseFo
     this.fields = {
       ...mapValues(_state._fields, ({ _host }) => _host()),
 
-      ...mapValues(_state._meta, (field) => (scope: Scope) => field.getValue(scope)),
+      ...mapValues(_state._meta, (field) => (scope: Scope) => field.read(scope)),
     } as {
       readonly [TField in keyof TFields]: ImpulseFormShapeField<TFields[TField]>
     }

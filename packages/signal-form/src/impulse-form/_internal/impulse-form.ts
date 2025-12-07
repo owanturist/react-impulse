@@ -29,10 +29,10 @@ function resolveGetter<TValue, TVerbose, TSelected, TFallback>(
   select: undefined | ((val: TValue, ver: TVerbose) => TSelected),
   fallback?: (val: TValue) => TFallback,
 ): TSelected | TFallback | TValue {
-  const value_ = value.getValue(scope)
+  const value_ = value.read(scope)
 
   if (select) {
-    return select(value_, verbose.getValue(scope))
+    return select(value_, verbose.read(scope))
   }
 
   if (fallback != null) {
@@ -79,7 +79,7 @@ abstract class ImpulseForm<
   }
 
   public getInitial(scope: Scope): TParams["input.schema"] {
-    return this._state._initial.getValue(scope)
+    return this._state._initial.read(scope)
   }
 
   public setInitial(setter: TParams["input.setter"]): void {
@@ -89,7 +89,7 @@ abstract class ImpulseForm<
   }
 
   public getInput(scope: Scope): TParams["input.schema"] {
-    return this._state._input.getValue(scope)
+    return this._state._input.read(scope)
   }
 
   public setInput(setter: TParams["input.setter"]): void {
@@ -245,11 +245,11 @@ abstract class ImpulseForm<
   }
 
   public getSubmitCount(scope: Scope): number {
-    return this._state._root._submitAttempts.getValue(scope)
+    return this._state._root._submitAttempts.read(scope)
   }
 
   public isSubmitting(scope: Scope): boolean {
-    return this._state._root._submittingCount.getValue(scope) > 0
+    return this._state._root._submittingCount.read(scope) > 0
   }
 
   public onSubmit(
@@ -266,7 +266,7 @@ abstract class ImpulseForm<
     })
 
     const promises = untracked((scope) => {
-      const output = this._state._root._output.getValue(scope)
+      const output = this._state._root._output.read(scope)
 
       if (!isNull(output)) {
         return this._state._root._submitWith(scope, output).filter(isDefined)

@@ -14,7 +14,7 @@ describe.each([
     const impulse2 = Impulse({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter1 = useScoped((scope) => impulse1.getValue(scope))
+      const counter1 = useScoped((scope) => impulse1.read(scope))
       const counter2 = useScoped(impulse2)
 
       return (
@@ -46,7 +46,7 @@ describe.each([
     const impulse2 = Impulse({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter1 = useScoped((scope) => impulse1.getValue(scope))
+      const counter1 = useScoped((scope) => impulse1.read(scope))
       const counter2 = useScoped(impulse2)
 
       return (
@@ -90,8 +90,8 @@ describe.each([
     })
 
     const Component: React.FC = () => {
-      const acc = useScoped((scope) => impulse.getValue(scope))
-      const counter1 = useScoped((scope) => acc.first.getValue(scope))
+      const acc = useScoped((scope) => impulse.read(scope))
+      const counter1 = useScoped((scope) => acc.first.read(scope))
       const counter2 = useScoped(acc.second)
 
       return (
@@ -144,8 +144,8 @@ describe.each([
 
     const Component: React.FC = () => {
       const acc = useScoped(impulse)
-      const counter1 = useScoped((scope) => acc.first.getValue(scope))
-      const counter2 = useScoped((scope) => acc.second.getValue(scope))
+      const counter1 = useScoped((scope) => acc.first.read(scope))
+      const counter2 = useScoped((scope) => acc.second.read(scope))
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -245,7 +245,7 @@ describe.each([
       const factory = (scope: Scope) => {
         spy()
 
-        return Counter.getCount(first.getValue(scope)) + Counter.getCount(second.getValue(scope))
+        return Counter.getCount(first.read(scope)) + Counter.getCount(second.read(scope))
       }
 
       return { spy, onRender, first, second, factory }
@@ -331,9 +331,9 @@ describe.each([
       const factory = (scope: Scope) => {
         spy()
 
-        const { first, second } = impulse.getValue(scope)
+        const { first, second } = impulse.read(scope)
 
-        return Counter.getCount(first.getValue(scope)) + Counter.getCount(second.getValue(scope))
+        return Counter.getCount(first.read(scope)) + Counter.getCount(second.read(scope))
       }
 
       return { spy, onRender, impulse, factory }
@@ -456,17 +456,17 @@ describe("when reading value during batching", () => {
     const source = Impulse(1)
     const spy = vi.fn()
 
-    expect(source.getValue(scope)).toBe(1)
+    expect(source.read(scope)).toBe(1)
 
     batch((scope) => {
       source.setValue(2)
-      spy(source.getValue(scope))
+      spy(source.read(scope))
 
       source.setValue(3)
-      spy(source.getValue(scope))
+      spy(source.read(scope))
     })
 
-    expect(source.getValue(scope)).toBe(3)
+    expect(source.read(scope)).toBe(3)
 
     expect(spy).toHaveBeenCalledTimes(2)
     expect(spy).toHaveBeenNthCalledWith(1, 2)
@@ -485,20 +485,20 @@ describe("when reading derived value during batching", () => {
     const source = Impulse(1)
     const derived = Impulse(source)
 
-    expect(derived.getValue(scope)).toBe(1)
+    expect(derived.read(scope)).toBe(1)
 
     batch((scope) => {
       source.setValue(1)
-      expect(derived.getValue(scope)).toBe(1)
+      expect(derived.read(scope)).toBe(1)
 
       source.setValue(2)
-      expect(derived.getValue(scope)).toBe(2)
+      expect(derived.read(scope)).toBe(2)
 
       source.setValue(3)
-      expect(derived.getValue(scope)).toBe(3)
+      expect(derived.read(scope)).toBe(3)
     })
 
-    expect(derived.getValue(scope)).toBe(3)
+    expect(derived.read(scope)).toBe(3)
   })
 
   it("updates derived values after source changes in effect", () => {
@@ -509,7 +509,7 @@ describe("when reading derived value during batching", () => {
     const spy = vi.fn()
 
     effect((scope) => {
-      spy(derived.getValue(scope))
+      spy(derived.read(scope))
     })
 
     expect(spy).toHaveBeenCalledExactlyOnceWith(1)
@@ -517,13 +517,13 @@ describe("when reading derived value during batching", () => {
 
     batch((scope) => {
       source.setValue(1)
-      expect(derived.getValue(scope)).toBe(1)
+      expect(derived.read(scope)).toBe(1)
 
       source.setValue(2)
-      expect(derived.getValue(scope)).toBe(2)
+      expect(derived.read(scope)).toBe(2)
 
       source.setValue(3)
-      expect(derived.getValue(scope)).toBe(3)
+      expect(derived.read(scope)).toBe(3)
     })
 
     expect(spy).toHaveBeenCalledExactlyOnceWith(3)
@@ -534,19 +534,19 @@ describe("when reading derived value during batching", () => {
 
     const source1 = Impulse(1)
     const source2 = Impulse(2)
-    const derived = Impulse((scope) => source1.getValue(scope) + source2.getValue(scope))
+    const derived = Impulse((scope) => source1.read(scope) + source2.read(scope))
 
-    expect(derived.getValue(scope)).toBe(3)
+    expect(derived.read(scope)).toBe(3)
 
     batch((scope) => {
       source1.setValue(2)
-      expect(derived.getValue(scope)).toBe(4)
+      expect(derived.read(scope)).toBe(4)
 
       source2.setValue(3)
-      expect(derived.getValue(scope)).toBe(5)
+      expect(derived.read(scope)).toBe(5)
     })
 
-    expect(derived.getValue(scope)).toBe(5)
+    expect(derived.read(scope)).toBe(5)
   })
 
   it("updates derived value after all sources change", ({ scope }) => {
@@ -554,21 +554,21 @@ describe("when reading derived value during batching", () => {
 
     const source1 = Impulse(1)
     const source2 = Impulse(2)
-    const derived = Impulse((scope) => source1.getValue(scope) + source2.getValue(scope))
+    const derived = Impulse((scope) => source1.read(scope) + source2.read(scope))
 
-    expect(derived.getValue(scope)).toBe(3)
+    expect(derived.read(scope)).toBe(3)
 
     batch((scope) => {
       source1.setValue(2)
       source2.setValue(3)
-      expect(derived.getValue(scope)).toBe(5)
+      expect(derived.read(scope)).toBe(5)
 
       source1.setValue(3)
       source2.setValue(4)
-      expect(derived.getValue(scope)).toBe(7)
+      expect(derived.read(scope)).toBe(7)
     })
 
-    expect(derived.getValue(scope)).toBe(7)
+    expect(derived.read(scope)).toBe(7)
   })
 
   it("updates derived values after source changes", ({ scope }) => {
@@ -578,21 +578,21 @@ describe("when reading derived value during batching", () => {
     const derived1 = Impulse(source)
     const derived2 = Impulse(source)
 
-    expect(derived1.getValue(scope)).toBe(1)
-    expect(derived2.getValue(scope)).toBe(1)
+    expect(derived1.read(scope)).toBe(1)
+    expect(derived2.read(scope)).toBe(1)
 
     batch((scope) => {
       source.setValue(2)
-      expect(derived1.getValue(scope)).toBe(2)
-      expect(derived2.getValue(scope)).toBe(2)
+      expect(derived1.read(scope)).toBe(2)
+      expect(derived2.read(scope)).toBe(2)
 
       source.setValue(3)
-      expect(derived1.getValue(scope)).toBe(3)
-      expect(derived2.getValue(scope)).toBe(3)
+      expect(derived1.read(scope)).toBe(3)
+      expect(derived2.read(scope)).toBe(3)
     })
 
-    expect(derived1.getValue(scope)).toBe(3)
-    expect(derived2.getValue(scope)).toBe(3)
+    expect(derived1.read(scope)).toBe(3)
+    expect(derived2.read(scope)).toBe(3)
   })
 
   it("updates chained derived values after source changes", ({ scope }) => {
@@ -601,21 +601,21 @@ describe("when reading derived value during batching", () => {
     const derivedDerived = Impulse(derived)
 
     batch((scope) => {
-      expect(derivedDerived.getValue(scope)).toBe(1)
+      expect(derivedDerived.read(scope)).toBe(1)
 
       batch((scope) => {
         source.setValue(2)
-        expect(derivedDerived.getValue(scope)).toBe(2)
+        expect(derivedDerived.read(scope)).toBe(2)
 
         source.setValue(3)
-        expect(derivedDerived.getValue(scope)).toBe(3)
+        expect(derivedDerived.read(scope)).toBe(3)
       })
 
-      expect(derivedDerived.getValue(scope)).toBe(3)
+      expect(derivedDerived.read(scope)).toBe(3)
     })
 
-    expect(derived.getValue(scope)).toBe(3)
-    expect(derivedDerived.getValue(scope)).toBe(3)
+    expect(derived.read(scope)).toBe(3)
+    expect(derivedDerived.read(scope)).toBe(3)
   })
 
   it("updates derived value after derived change", ({ scope }) => {
@@ -626,71 +626,71 @@ describe("when reading derived value during batching", () => {
 
     batch((scope) => {
       derived.setValue(1)
-      expect(source.getValue(scope)).toBe(1)
-      expect(derived.getValue(scope)).toBe(1)
+      expect(source.read(scope)).toBe(1)
+      expect(derived.read(scope)).toBe(1)
 
       derived.setValue(2)
-      expect(source.getValue(scope)).toBe(2)
-      expect(derived.getValue(scope)).toBe(2)
+      expect(source.read(scope)).toBe(2)
+      expect(derived.read(scope)).toBe(2)
 
       derived.setValue(3)
-      expect(source.getValue(scope)).toBe(3)
-      expect(derived.getValue(scope)).toBe(3)
+      expect(source.read(scope)).toBe(3)
+      expect(derived.read(scope)).toBe(3)
     })
 
-    expect(source.getValue(scope)).toBe(3)
+    expect(source.read(scope)).toBe(3)
   })
 
   it("returns the same subsequent value after a source change", ({ scope }) => {
     expect.assertions(4)
 
     const source = Impulse(1)
-    const derived = Impulse((scope) => ({ count: source.getValue(scope) }), {
+    const derived = Impulse((scope) => ({ count: source.read(scope) }), {
       equals: Counter.equals,
     })
 
-    expect(derived.getValue(scope)).toBe(derived.getValue(scope))
+    expect(derived.read(scope)).toBe(derived.read(scope))
 
     batch((scope) => {
       source.setValue(2)
-      expect(derived.getValue(scope)).toBe(derived.getValue(scope))
+      expect(derived.read(scope)).toBe(derived.read(scope))
 
       source.setValue(3)
-      expect(derived.getValue(scope)).toBe(derived.getValue(scope))
+      expect(derived.read(scope)).toBe(derived.read(scope))
     })
 
-    expect(derived.getValue(scope)).toBe(derived.getValue(scope))
+    expect(derived.read(scope)).toBe(derived.read(scope))
   })
 
   it("returns the comparably equal value after a source change", ({ scope }) => {
     expect.assertions(7)
 
     const source = Impulse({ count: 1 })
-    const derived = Impulse((scope) => source.getValue(scope), {
+    const derived = Impulse((scope) => source.read(scope), {
       equals: Counter.equals,
     })
 
-    const source0 = source.getValue(scope)
-    const derived0 = derived.getValue(scope)
+    const source0 = source.read(scope)
+    const derived0 = derived.read(scope)
     expect(source0).toBe(derived0)
 
     source.setValue(Counter.clone)
 
-    const source1 = source.getValue(scope)
+    const source1 = source.read(scope)
     expect(source1).not.toBe(source0)
     expect(source1).toStrictEqual(source0)
 
-    const derived1 = derived.getValue(scope)
+    const derived1 = derived.read(scope)
     expect(derived1).toBe(derived0)
 
     batch((scope) => {
       source.setValue(Counter.clone)
 
-      const source2 = source.getValue(scope)
+      const source2 = source.read(scope)
       expect(source2).not.toBe(source0)
       expect(source2).toStrictEqual(source0)
 
-      const derived2 = derived.getValue(scope)
+      const derived2 = derived.read(scope)
       expect(derived2).toBe(derived0)
     })
   })

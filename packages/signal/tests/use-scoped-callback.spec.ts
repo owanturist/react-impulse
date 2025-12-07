@@ -15,7 +15,7 @@ describe("single Impulse", () => {
       (count: Impulse<number>) => {
         const scope = useScope()
 
-        return useCallback(() => onCallback(count.getValue(scope) * 2), [scope, count])
+        return useCallback(() => onCallback(count.read(scope) * 2), [scope, count])
       },
       {
         initialProps: impulse,
@@ -151,7 +151,7 @@ describe("conditional Impulse", () => {
         return useCallback(
           (isActive: boolean) => {
             if (isActive) {
-              return count.getValue(scope) * 2
+              return count.read(scope) * 2
             }
 
             return -1
@@ -237,7 +237,7 @@ describe("argument Impulse", () => {
     renderHook(() => {
       const scope = useScope()
 
-      return useCallback((count: Impulse<number>) => count.getValue(scope) * 2, [scope])
+      return useCallback((count: Impulse<number>) => count.read(scope) * 2, [scope])
     })
 
   it("attaches an Impulse when the resulting function calls", () => {
@@ -297,9 +297,9 @@ it("cannot batch the callback", () => {
 
     return useCallback(
       (diff: number) => {
-        impulse1.setValue(impulse1.getValue(scope) + diff)
-        impulse2.setValue(impulse2.getValue(scope) + diff)
-        impulse3.setValue(impulse3.getValue(scope) + diff)
+        impulse1.setValue(impulse1.read(scope) + diff)
+        impulse2.setValue(impulse2.read(scope) + diff)
+        impulse3.setValue(impulse3.read(scope) + diff)
       },
       [scope],
     )
@@ -310,7 +310,7 @@ it("cannot batch the callback", () => {
     useScoped((scope) => {
       spy()
 
-      return impulse1.getValue(scope) + impulse2.getValue(scope) + impulse3.getValue(scope)
+      return impulse1.read(scope) + impulse2.read(scope) + impulse3.read(scope)
     }, []),
   )
 

@@ -70,7 +70,7 @@ class ImpulseFormSwitchState<
   }
 
   public _getActiveBranch(scope: Scope): undefined | ActiveSwitchStateBranch<TBranches> {
-    const kind = this._active._output.getValue(scope)
+    const kind = this._active._output.read(scope)
     const value = isNull(kind) ? null : this._branches[kind]
 
     return value ? { kind, value } : undefined
@@ -83,7 +83,7 @@ class ImpulseFormSwitchState<
     fallbackInvalid?: TConcise,
   ): ImpulseFormSwitchConciseParam<TKind, TBranches, TKey, TConcise> {
     const activeBranch = this._getActiveBranch(scope)
-    const activeConcise = extract(this._active).getValue(scope)
+    const activeConcise = extract(this._active).read(scope)
 
     if (!activeBranch) {
       return isConcise(activeConcise) || isUndefined(fallbackInvalid)
@@ -91,7 +91,7 @@ class ImpulseFormSwitchState<
         : { active: activeConcise, branch: fallbackInvalid }
     }
 
-    const branchConcise = extract(activeBranch.value).getValue(scope)
+    const branchConcise = extract(activeBranch.value).read(scope)
 
     if (isConcise(branchConcise) && isConcise(activeConcise) && branchConcise === activeConcise) {
       return activeConcise
@@ -112,8 +112,8 @@ class ImpulseFormSwitchState<
     scope: Scope,
     extract: (form: ImpulseFormState) => ReadonlyImpulse<unknown>,
   ): ImpulseFormSwitchVerboseParam<TKind, TBranches, TKey> {
-    const active = extract(this._active).getValue(scope)
-    const branches = mapValues(this._branches, (branch) => extract(branch).getValue(scope))
+    const active = extract(this._active).read(scope)
+    const branches = mapValues(this._branches, (branch) => extract(branch).read(scope))
 
     return { active, branches }
   }
@@ -130,8 +130,8 @@ class ImpulseFormSwitchState<
   )
 
   public _setInitial(scope: Scope, setter: ImpulseFormSwitchInputSetter<TKind, TBranches>): void {
-    const initial = Lazy(() => this._initial.getValue(scope))
-    const input = Lazy(() => this._input.getValue(scope))
+    const initial = Lazy(() => this._initial.read(scope))
+    const input = Lazy(() => this._input.read(scope))
 
     const { active, branches: branchesSetter } = isFunction(setter)
       ? setter(initial(), input())
@@ -172,8 +172,8 @@ class ImpulseFormSwitchState<
   )
 
   public _setInput(scope: Scope, setter: ImpulseFormSwitchInputSetter<TKind, TBranches>): void {
-    const initial = Lazy(() => this._initial.getValue(scope))
-    const input = Lazy(() => this._input.getValue(scope))
+    const initial = Lazy(() => this._initial.read(scope))
+    const input = Lazy(() => this._input.read(scope))
 
     const { active, branches: branchesSetter } = isFunction(setter)
       ? setter(input(), initial())
@@ -207,7 +207,7 @@ class ImpulseFormSwitchState<
   )
 
   public _setError(scope: Scope, setter: ImpulseFormSwitchErrorSetter<TKind, TBranches>): void {
-    const verbose = Lazy(() => this._errorVerbose.getValue(scope))
+    const verbose = Lazy(() => this._errorVerbose.read(scope))
     const resolved = isFunction(setter) ? setter(verbose()) : setter
 
     const [activeSetter, branchSetter, branchesSetter] = isNull(resolved)
@@ -247,7 +247,7 @@ class ImpulseFormSwitchState<
         ? activeBranch
           ? branchSetter({
               kind: activeBranch.kind,
-              value: activeBranch.value._errorVerbose.getValue(scope),
+              value: activeBranch.value._errorVerbose.read(scope),
             })
           : undefined
         : branchSetter
@@ -292,7 +292,7 @@ class ImpulseFormSwitchState<
     scope: Scope,
     setter: ImpulseFormSwitchValidateOnSetter<TKind, TBranches>,
   ): void {
-    const verbose = Lazy(() => this._validateOnVerbose.getValue(scope))
+    const verbose = Lazy(() => this._validateOnVerbose.read(scope))
     const resolved = isFunction(setter) ? setter(verbose()) : setter
 
     const [activeSetter, branchSetter, branchesSetter] = isString(resolved)
@@ -332,7 +332,7 @@ class ImpulseFormSwitchState<
         ? activeBranch
           ? branchSetter({
               kind: activeBranch.kind,
-              value: activeBranch.value._validateOnVerbose.getValue(scope),
+              value: activeBranch.value._validateOnVerbose.read(scope),
             })
           : undefined
         : branchSetter
@@ -366,7 +366,7 @@ class ImpulseFormSwitchState<
   )
 
   public _setTouched(scope: Scope, setter: ImpulseFormSwitchFlagSetter<TKind, TBranches>): void {
-    const verbose = Lazy(() => this._touchedVerbose.getValue(scope))
+    const verbose = Lazy(() => this._touchedVerbose.read(scope))
     const resolved = isFunction(setter) ? setter(verbose()) : setter
 
     const [activeSetter, branchSetter, branchesSetter] = isBoolean(resolved)
@@ -406,7 +406,7 @@ class ImpulseFormSwitchState<
         ? activeBranch
           ? branchSetter({
               kind: activeBranch.kind,
-              value: activeBranch.value._touchedVerbose.getValue(scope),
+              value: activeBranch.value._touchedVerbose.read(scope),
             })
           : undefined
         : branchSetter
@@ -436,7 +436,7 @@ class ImpulseFormSwitchState<
       return null
     }
 
-    const value = activeBranch.value._output.getValue(scope)
+    const value = activeBranch.value._output.read(scope)
 
     if (isNull(value)) {
       return null

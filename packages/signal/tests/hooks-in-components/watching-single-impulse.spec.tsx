@@ -29,12 +29,12 @@ describe("scoping single impulse", () => {
   )
 
   const factoryLeft = (scope: Scope, count: Impulse<number>) => {
-    const x = count.getValue(scope)
+    const x = count.read(scope)
 
     return x > 1
   }
   const factoryRight = (scope: Scope, count: Impulse<number>) => {
-    const x = count.getValue(scope)
+    const x = count.read(scope)
 
     return x < 4
   }

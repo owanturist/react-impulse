@@ -4,7 +4,7 @@ import { Impulse, type Scope, useScoped } from "../../src"
 import { Counter, type WithImpulse, type WithSpy } from "../common"
 
 function factory(scope: Scope, { impulse, spy }: WithImpulse & WithSpy) {
-  const value = impulse.getValue(scope)
+  const value = impulse.read(scope)
 
   spy(value)
 
@@ -62,7 +62,7 @@ describe.each([
     ({ impulse, spy }: WithImpulse & WithSpy) =>
       useScoped(
         (scope) => {
-          const value = impulse.getValue(scope)
+          const value = impulse.read(scope)
 
           spy(value)
 
@@ -76,7 +76,7 @@ describe.each([
     ({ impulse, spy }: WithImpulse & WithSpy) =>
       useScoped(
         (scope) => {
-          const value = impulse.getValue(scope)
+          const value = impulse.read(scope)
 
           spy(value)
 
@@ -93,7 +93,7 @@ describe.each([
     ({ impulse, spy }: WithImpulse & WithSpy) =>
       useScoped(
         (scope) => {
-          const value = impulse.getValue(scope)
+          const value = impulse.read(scope)
 
           spy(value)
 

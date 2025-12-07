@@ -12,7 +12,7 @@ import {
 
 describe("multiple factory", () => {
   const factory = (scope: Scope, { first, second }: WithFirst & WithSecond) =>
-    Counter.merge(first.getValue(scope), second.getValue(scope))
+    Counter.merge(first.read(scope), second.read(scope))
 
   describe.each([
     [
@@ -90,7 +90,7 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
   const factorySingle = (scope: Scope, { impulse, spy }: WithImpulse & WithSpy) => {
     spy()
 
-    return impulse.getValue(scope)
+    return impulse.read(scope)
   }
 
   const factoryMultiple = (
@@ -99,7 +99,7 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
   ) => {
     spy()
 
-    return Counter.merge(first.getValue(scope), second.getValue(scope), third.getValue(scope))
+    return Counter.merge(first.read(scope), second.read(scope), third.read(scope))
   }
 
   describe.each([

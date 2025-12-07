@@ -52,11 +52,10 @@ describe("watching misses when defined after useEffect #140", () => {
     )
   }
 
-  const useScopedInline = (impulse: Impulse<number>) =>
-    useScoped((scope) => impulse.getValue(scope))
+  const useScopedInline = (impulse: Impulse<number>) => useScoped((scope) => impulse.read(scope))
 
   const useScopedMemoized = (impulse: Impulse<number>) =>
-    useScoped((scope) => impulse.getValue(scope), [impulse])
+    useScoped((scope) => impulse.read(scope), [impulse])
 
   const useScopedShortcut = (impulse: Impulse<number>) => useScoped(impulse)
 
@@ -164,7 +163,7 @@ describe("return the same component type from watch #322", () => {
 
     return (
       <StatelessInput
-        value={value.getValue(scope)}
+        value={value.read(scope)}
         onChange={(nextValue) => value.setValue(nextValue)}
       />
     )
@@ -195,7 +194,7 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
 
     return (
       <button type="button" onClick={() => count.setValue((x) => x + 1)}>
-        {count.getValue(scope)}
+        {count.read(scope)}
       </button>
     )
   }
@@ -252,10 +251,10 @@ describe("ImpulseForm.reset() does not run subscribers #969", () => {
     const spy = vi.fn()
     const source1 = Impulse(1)
     const source2 = Impulse<string>()
-    const derived = Impulse((scope) => source2.getValue(scope) ?? source1.getValue(scope) > 0)
+    const derived = Impulse((scope) => source2.read(scope) ?? source1.read(scope) > 0)
 
     effect((scope) => {
-      const output = derived.getValue(scope)
+      const output = derived.read(scope)
 
       spy(output)
 
@@ -266,7 +265,7 @@ describe("ImpulseForm.reset() does not run subscribers #969", () => {
 
     // initial run
     expect(spy).toHaveBeenCalledExactlyOnceWith(true)
-    expect(derived.getValue(scope)).toBe(true)
+    expect(derived.read(scope)).toBe(true)
     spy.mockClear()
 
     // cause the source_2 update
@@ -276,17 +275,17 @@ describe("ImpulseForm.reset() does not run subscribers #969", () => {
     expect(spy).toHaveBeenNthCalledWith(1, false)
     // the source_2 inside the listener causes the listener run again
     expect(spy).toHaveBeenNthCalledWith(2, "error")
-    expect(derived.getValue(scope)).toBe("error")
+    expect(derived.read(scope)).toBe("error")
     spy.mockClear()
 
     // source_1 is not relevant to the current derived value, so it does not cause the listener run
     source1.setValue(1)
     expect(spy).not.toHaveBeenCalled()
-    expect(derived.getValue(scope)).toBe("error")
+    expect(derived.read(scope)).toBe("error")
 
     // enable the source_1 to derive the derived value again
     source2.setValue(undefined)
     expect(spy).toHaveBeenCalledExactlyOnceWith(true)
-    expect(derived.getValue(scope)).toBe(true)
+    expect(derived.read(scope)).toBe(true)
   })
 })

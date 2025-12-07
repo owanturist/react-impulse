@@ -11,7 +11,7 @@ describe("single impulse", () => {
     const scope = useScope()
     const [multiplier, setMultiplier] = React.useState(2)
     const result = React.useMemo(() => {
-      const x = value.getValue(scope) * multiplier
+      const x = value.read(scope) * multiplier
 
       onMemo?.(x)
 
@@ -196,7 +196,7 @@ describe("multiple impulses", () => {
     const scope = useScope()
     const [multiplier, setMultiplier] = React.useState(2)
     const result = React.useMemo(
-      () => (first.getValue(scope) + second.getValue(scope)) * multiplier,
+      () => (first.read(scope) + second.read(scope)) * multiplier,
       [scope, first, second, multiplier],
     )
 
@@ -244,8 +244,8 @@ describe("nested impulses", () => {
     const result = React.useMemo(() => {
       const x =
         list
-          .getValue(scope)
-          .map((item) => item.getValue(scope))
+          .read(scope)
+          .map((item) => item.read(scope))
           .reduce((acc, val) => acc + val, 0) * multiplier
 
       return x

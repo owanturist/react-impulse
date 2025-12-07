@@ -22,7 +22,7 @@ const CounterComponent = React.memo<{
   onRender: VoidFunction
 }>(
   ({ count: countImpulse, onRender }) => {
-    const count = useScoped((scope) => countImpulse.getValue(scope))
+    const count = useScoped((scope) => countImpulse.read(scope))
 
     return (
       <React.Profiler id="test" onRender={onRender}>
