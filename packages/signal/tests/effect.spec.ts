@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, batch, subscribe, useScoped } from "../src"
+import { Impulse, batch, effect, useScoped } from "../src"
 
 import { Counter } from "./common"
 
@@ -9,7 +9,7 @@ describe("single Impulse", () => {
     const spy = vi.fn()
     const impulse = Impulse(1)
 
-    subscribe((scope) => {
+    effect((scope) => {
       spy(impulse.getValue(scope))
     })
 
@@ -21,7 +21,7 @@ describe("single Impulse", () => {
     const spy = vi.fn()
     const impulse = Impulse(1)
 
-    subscribe((scope) => {
+    effect((scope) => {
       spy(impulse.getValue(scope))
     })
 
@@ -35,7 +35,7 @@ describe("single Impulse", () => {
     const cleanup = vi.fn()
     const impulse = Impulse(1)
 
-    const unsubscribe = subscribe((scope) => {
+    const unsubscribe = effect((scope) => {
       const count = impulse.getValue(scope)
 
       if (count === 2) {
@@ -73,7 +73,7 @@ describe("single Impulse", () => {
     const spy = vi.fn()
     const impulse = Impulse(1)
 
-    const unsubscribe = subscribe((scope) => {
+    const unsubscribe = effect((scope) => {
       spy(impulse.getValue(scope))
     })
 
@@ -89,7 +89,7 @@ describe("single Impulse", () => {
     const spy = vi.fn()
     const impulse = Impulse(1)
 
-    const unsubscribe = subscribe((scope) => {
+    const unsubscribe = effect((scope) => {
       spy(impulse.getValue(scope))
     })
 
@@ -106,7 +106,7 @@ describe("single Impulse", () => {
     const spy = vi.fn()
     const impulse = Impulse(1)
 
-    subscribe((scope) => {
+    effect((scope) => {
       spy(impulse.getValue(scope))
     })
 
@@ -122,7 +122,7 @@ describe("single Impulse", () => {
     const spy = vi.fn()
     const impulse = Impulse(1)
 
-    subscribe((scope) => {
+    effect((scope) => {
       spy(impulse.getValue(scope))
     })
 
@@ -139,7 +139,7 @@ describe("single Impulse", () => {
     const spy = vi.fn()
     const impulse = Impulse(1)
 
-    subscribe((scope) => {
+    effect((scope) => {
       spy(impulse.getValue(scope))
     })
 
@@ -153,7 +153,7 @@ describe("single Impulse", () => {
     const spy = vi.fn()
     const impulse = Impulse({ count: 1 }, { equals: Counter.equals })
 
-    subscribe((scope) => {
+    effect((scope) => {
       spy(impulse.getValue(scope))
     })
 
@@ -174,7 +174,7 @@ describe("multiple Impulses", () => {
     const impulse1 = Impulse(1)
     const impulse2 = Impulse(2)
 
-    subscribe((scope) => {
+    effect((scope) => {
       spy(impulse1.getValue(scope) + impulse2.getValue(scope))
     })
 
@@ -188,7 +188,7 @@ describe("multiple Impulses", () => {
     const impulse1 = Impulse(1)
     const impulse2 = Impulse(2)
 
-    subscribe((scope) => {
+    effect((scope) => {
       spy(impulse1.getValue(scope) + impulse2.getValue(scope))
     })
 
@@ -208,7 +208,7 @@ describe("multiple Impulses", () => {
     const impulse1 = Impulse(1)
     const impulse2 = Impulse(2)
 
-    const unsubscribe = subscribe((scope) => {
+    const unsubscribe = effect((scope) => {
       spy(impulse1.getValue(scope) + impulse2.getValue(scope))
     })
 
@@ -227,7 +227,7 @@ describe("multiple Impulses", () => {
     const impulse1 = Impulse(1)
     const impulse2 = Impulse(2)
 
-    subscribe((scope) => {
+    effect((scope) => {
       if (impulse1.getValue(scope) > 1) {
         spy(impulse1.getValue(scope) + impulse2.getValue(scope))
       }
@@ -261,13 +261,13 @@ describe("multiple Impulses", () => {
   })
 })
 
-describe("batching against subscribe listener", () => {
+describe("batching against effect listener", () => {
   it("executes listener on every Impulse update", () => {
     const spy = vi.fn()
     const impulse1 = Impulse(1)
     const impulse2 = Impulse(2)
 
-    subscribe((scope) => {
+    effect((scope) => {
       spy(impulse1.getValue(scope) + impulse2.getValue(scope))
     })
 
@@ -284,7 +284,7 @@ describe("batching against subscribe listener", () => {
     const impulse1 = Impulse(1)
     const impulse2 = Impulse(2)
 
-    subscribe((scope) => {
+    effect((scope) => {
       spy(impulse1.getValue(scope) + impulse2.getValue(scope))
     })
 
@@ -298,7 +298,7 @@ describe("batching against subscribe listener", () => {
 })
 
 describe("batching against a hook", () => {
-  it("enqueues single re-render to a hook which impulses update inside subscribe's listener", () => {
+  it("enqueues single re-render to a hook which impulses update inside effect's listener", () => {
     const impulse1 = Impulse(1)
     const impulse2 = Impulse(2)
     const impulse3 = Impulse(3)
@@ -313,7 +313,7 @@ describe("batching against a hook", () => {
       }, []),
     )
 
-    const unsubscribe = subscribe((scope) => {
+    const unsubscribe = effect((scope) => {
       if (impulse4.getValue(scope) > 1 && impulse4.getValue(scope) < 5) {
         impulse1.setValue((x) => x + 1)
         impulse2.setValue((x) => x + 1)
@@ -356,7 +356,7 @@ describe("batching against a hook", () => {
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it("enqueues single re-render to a hook which impulses update inside subscribe's cleanup", () => {
+  it("enqueues single re-render to a hook which impulses update inside effect's cleanup", () => {
     const impulse1 = Impulse(1)
     const impulse2 = Impulse(2)
     const impulse3 = Impulse(3)
@@ -371,7 +371,7 @@ describe("batching against a hook", () => {
       }, []),
     )
 
-    const unsubscribe = subscribe((scope) => {
+    const unsubscribe = effect((scope) => {
       if (impulse4.getValue(scope) > 1 && impulse4.getValue(scope) < 5) {
         return () => {
           impulse1.setValue((x) => x + 1)
@@ -435,7 +435,7 @@ describe("nested Impulses", () => {
       second: impulse2,
     })
 
-    subscribe((scope) => {
+    effect((scope) => {
       const { first, second } = impulse3.getValue(scope)
 
       spy(first.getValue(scope) + second.getValue(scope))
@@ -457,7 +457,7 @@ describe("nested Impulses", () => {
       second: impulse2,
     })
 
-    subscribe((scope) => {
+    effect((scope) => {
       const { first, second } = impulse3.getValue(scope)
 
       spy(first.getValue(scope) + second.getValue(scope))

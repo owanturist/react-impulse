@@ -1,7 +1,7 @@
 import { act, fireEvent, render, renderHook, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, subscribe, useScope } from "../src"
+import { Impulse, effect, useScope } from "../src"
 
 describe.each([
   ["React.useEffect", React.useEffect],
@@ -17,7 +17,7 @@ describe.each([
 
       useEffect(
         () =>
-          subscribe((scope) => {
+          effect((scope) => {
             const x = value.getValue(scope) * multiplier
 
             onEffect(x)
@@ -186,7 +186,7 @@ describe.each([
 
       useEffect(
         () =>
-          subscribe((scope) => {
+          effect((scope) => {
             const x = (first.getValue(scope) + second.getValue(scope)) * multiplier
 
             onEffect(x)
@@ -237,7 +237,7 @@ describe.each([
 
       useEffect(
         () =>
-          subscribe((scope) => {
+          effect((scope) => {
             const x =
               list
                 .getValue(scope)
@@ -312,7 +312,7 @@ describe.each([
       const [multiplier, setMultiplier] = React.useState(2)
 
       useEffect(() =>
-        subscribe((scope) => {
+        effect((scope) => {
           const x = value.getValue(scope) * multiplier
 
           onEffect(x)
@@ -393,7 +393,7 @@ describe.each([
 
       useEffect(
         () =>
-          subscribe((scope) => {
+          effect((scope) => {
             onEffect(count.getValue(scope))
           }),
         [onEffect, count],
@@ -441,7 +441,7 @@ describe.each([
       ({ left, right }) => {
         useEffect(
           () =>
-            subscribe((scope) => {
+            effect((scope) => {
               spy(left + right.getValue(scope))
             }),
           [left, right],
@@ -488,7 +488,7 @@ describe.each([
       ({ state }) => {
         useEffect(
           () =>
-            subscribe((scope) => {
+            effect((scope) => {
               spy(state.left.getValue(scope) + state.right.getValue(scope))
             }),
           [state],
@@ -526,7 +526,7 @@ describe.each([
       (props) => {
         useEffect(
           () =>
-            subscribe((scope) => {
+            effect((scope) => {
               const { count } = props.counter.getValue(scope)
 
               return () => {

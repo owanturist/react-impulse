@@ -9,7 +9,7 @@ import {
   type Scope,
   type WritableImpulse,
   batch,
-  subscribe,
+  effect,
   untracked,
   useScoped,
 } from "../src"
@@ -116,7 +116,7 @@ describe.each<{
 
     expect(source).toHaveEmittersSize(0)
 
-    const unsubscribe = subscribe((scope) => {
+    const unsubscribe = effect((scope) => {
       spy(getValue(derived, scope))
     })
 
@@ -144,7 +144,7 @@ describe.each<{
     const impulse = Impulse(() => variable)
     const spy = vi.fn()
 
-    subscribe((scope) => {
+    effect((scope) => {
       spy(getValue(impulse, scope))
     })
     expect(spy).toHaveBeenCalledExactlyOnceWith(0)
@@ -159,7 +159,7 @@ describe.each<{
     const derived = Impulse((scope) => getValue(source, scope) > 0)
     const spy = vi.fn()
 
-    const unsubscribe = subscribe((scope) => {
+    const unsubscribe = effect((scope) => {
       spy(getValue(derived, scope))
     })
     expect(spy).toHaveBeenCalledExactlyOnceWith(false)
@@ -840,7 +840,7 @@ describe.concurrent("Impulse(getter) garbage collection", () => {
     expect(source).toHaveEmittersSize(0)
   })
 
-  it("cleanups the WeakRef from subscribe", async () => {
+  it("cleanups the WeakRef from effect", async () => {
     const source = Impulse(0)
 
     ;(() => {
@@ -850,7 +850,7 @@ describe.concurrent("Impulse(getter) garbage collection", () => {
 
       const spy = vi.fn()
 
-      const cleanup = subscribe((scope) => {
+      const cleanup = effect((scope) => {
         spy(derived.getValue(scope))
       })
 
@@ -1086,10 +1086,10 @@ describe("Impulse(getter, setter, options?)", () => {
     const spyImpulse = vi.fn()
     const spySource = vi.fn()
 
-    subscribe((scope) => {
+    effect((scope) => {
       spyImpulse(impulse.getValue(scope))
     })
-    subscribe((scope) => {
+    effect((scope) => {
       spySource(source.getValue(scope))
     })
 
@@ -1133,10 +1133,10 @@ describe("Impulse(getter, setter, options?)", () => {
     const spyImpulse = vi.fn()
     const spySource = vi.fn()
 
-    subscribe((scope) => {
+    effect((scope) => {
       spyImpulse(impulse.getValue(scope))
     })
-    subscribe((scope) => {
+    effect((scope) => {
       spySource(source.getValue(scope))
     })
 
