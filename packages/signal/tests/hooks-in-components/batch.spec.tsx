@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, type Scope, batch, subscribe, useScoped } from "../../src"
+import { Impulse, type Scope, batch, effect, useScoped } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
@@ -501,14 +501,14 @@ describe("when reading derived value during batching", () => {
     expect(derived.getValue(scope)).toBe(3)
   })
 
-  it("updates derived values after source changes in subscribe", () => {
+  it("updates derived values after source changes in effect", () => {
     expect.assertions(5)
 
     const source = Impulse(1)
     const derived = Impulse(source)
     const spy = vi.fn()
 
-    subscribe((scope) => {
+    effect((scope) => {
       spy(derived.getValue(scope))
     })
 

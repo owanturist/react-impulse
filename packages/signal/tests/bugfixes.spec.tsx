@@ -1,7 +1,7 @@
 import { act, fireEvent, render, renderHook, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, subscribe, useScope, useScoped } from "../src"
+import { Impulse, effect, useScope, useScoped } from "../src"
 
 describe("watching misses when defined after useEffect #140", () => {
   interface ComponentProps {
@@ -119,7 +119,7 @@ describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321
   it.each([
     ["toString()", (value: unknown) => String(value)],
     ["toJSON()", (value: unknown) => JSON.stringify(value)],
-  ])("reacts on %s call via `subscribe`", (_, convert) => {
+  ])("reacts on %s call via `effect`", (_, convert) => {
     const Component: React.FC<{
       count: Impulse<number>
     }> = ({ count }) => {
@@ -127,7 +127,7 @@ describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321
 
       React.useEffect(
         () =>
-          subscribe(() => {
+          effect(() => {
             setValue(convert(count))
           }),
         [count, convert],
@@ -248,13 +248,13 @@ describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a n
 })
 
 describe("ImpulseForm.reset() does not run subscribers #969", () => {
-  it("runs the subscribe listeners for every derived update", ({ scope }) => {
+  it("runs the effect listeners for every derived update", ({ scope }) => {
     const spy = vi.fn()
     const source1 = Impulse(1)
     const source2 = Impulse<string>()
     const derived = Impulse((scope) => source2.getValue(scope) ?? source1.getValue(scope) > 0)
 
-    subscribe((scope) => {
+    effect((scope) => {
       const output = derived.getValue(scope)
 
       spy(output)

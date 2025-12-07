@@ -28,7 +28,7 @@ describe("focusFirstInvalid() when validated", () => {
     expect(spy).toHaveBeenCalledOnce()
   })
 
-  it("does not call a listener on subscribe", () => {
+  it("does not call a listener on init", () => {
     const form = setup()
     const listener = vi.fn()
 
