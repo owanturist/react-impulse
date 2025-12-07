@@ -88,7 +88,7 @@ describe("scoping nested impulses", () => {
     return total < 20
   }
 
-  const compare = ([left1, right1]: [boolean, boolean], [left2, right2]: [boolean, boolean]) =>
+  const equals = ([left1, right1]: [boolean, boolean], [left2, right2]: [boolean, boolean]) =>
     left1 === left2 && right1 === right2
 
   const SingleScopeApp: React.FC<AppProps> = (props) => {
@@ -96,7 +96,7 @@ describe("scoping nested impulses", () => {
       (scope) => [factoryLeft(scope, props.state), factoryRight(scope, props.state)],
       [props.state],
       {
-        compare: (left, right) => compare(left, right),
+        equals: (left, right) => equals(left, right),
       },
     )
 
@@ -107,7 +107,7 @@ describe("scoping nested impulses", () => {
     const [moreThanTen, lessThanTwenty] = useScoped<[boolean, boolean]>(
       (scope) => [factoryLeft(scope, props.state), factoryRight(scope, props.state)],
       [props.state],
-      { compare },
+      { equals },
     )
 
     return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />

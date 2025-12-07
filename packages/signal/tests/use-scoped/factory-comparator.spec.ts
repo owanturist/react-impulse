@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
 
 import { Impulse, type Scope, useScoped } from "../../src"
-import { Counter, type WithCompare, type WithImpulse } from "../common"
+import { Counter, type WithEquals, type WithImpulse } from "../common"
 
 function factory(scope: Scope, { impulse }: WithImpulse) {
   return impulse.getValue(scope)
@@ -10,27 +10,27 @@ function factory(scope: Scope, { impulse }: WithImpulse) {
 describe.each([
   [
     "inline",
-    ({ impulse, compare }: WithImpulse & WithCompare) => {
-      const cmp = compare ?? Counter.compare
+    ({ impulse, equals }: WithImpulse & WithEquals) => {
+      const cmp = equals ?? Counter.equals
 
       return useScoped((scope) => factory(scope, { impulse }), [impulse], {
-        compare: (prev, next) => cmp(prev, next),
+        equals: (prev, next) => cmp(prev, next),
       })
     },
   ],
   [
     "memoized",
-    ({ impulse, compare }: WithImpulse & WithCompare) =>
+    ({ impulse, equals }: WithImpulse & WithEquals) =>
       useScoped((scope) => factory(scope, { impulse }), [impulse], {
-        compare: compare ?? Counter.compare,
+        equals: equals ?? Counter.equals,
       }),
   ],
 ])("factory with %s comparator", (_, useHook) => {
-  it("swapping compare", () => {
+  it("swapping equals", () => {
     const initial = { count: 0 }
     const impulse = Impulse(initial)
 
-    const { result, rerender } = renderHook<Counter, WithImpulse & WithCompare>(useHook, {
+    const { result, rerender } = renderHook<Counter, WithImpulse & WithEquals>(useHook, {
       initialProps: { impulse },
     })
     expect(result.current).toBe(initial)
@@ -42,7 +42,7 @@ describe.each([
 
     rerender({
       impulse,
-      compare: Object.is,
+      equals: Object.is,
     })
     expect(result.current).toBe(initial)
 

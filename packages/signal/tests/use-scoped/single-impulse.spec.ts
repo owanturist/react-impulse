@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { type Compare, Impulse, type ReadableImpulse, type Scope, useScoped } from "../../src"
+import { type Equal, Impulse, type ReadableImpulse, type Scope, useScoped } from "../../src"
 import { Counter, type WithImpulse, type WithSpy } from "../common"
 
 describe("impulse shortcut", () => {
@@ -74,14 +74,14 @@ describe("single factory", () => {
       "with inline comparator",
       ({ impulse }: WithImpulse) =>
         useScoped((scope) => factory(scope, { impulse }), [impulse], {
-          compare: (prev, next) => Counter.compare(prev, next),
+          equals: (prev, next) => Counter.equals(prev, next),
         }),
     ],
     [
       "with memoized comparator",
       ({ impulse }: WithImpulse) =>
         useScoped((scope) => factory(scope, { impulse }), [impulse], {
-          compare: Counter.compare,
+          equals: Counter.equals,
         }),
     ],
   ])("%s", (_, useCounter) => {
@@ -221,10 +221,8 @@ describe("single factory", () => {
 describe("transform scoped Impulse's", () => {
   const toTuple = ({ count }: Counter): [boolean, boolean] => [count > 2, count < 5]
 
-  const compareTuple: Compare<[boolean, boolean]> = (
-    [prevLeft, prevRight],
-    [nextLeft, nextRight],
-  ) => prevLeft === nextLeft && prevRight === nextRight
+  const isTupleEqual: Equal<[boolean, boolean]> = ([prevLeft, prevRight], [nextLeft, nextRight]) =>
+    prevLeft === nextLeft && prevRight === nextRight
 
   const factoryTuple = (scope: Scope, { impulse }: WithImpulse) => toTuple(impulse.getValue(scope))
 
@@ -233,14 +231,14 @@ describe("transform scoped Impulse's", () => {
       "inline comparator",
       ({ impulse }: WithImpulse) =>
         useScoped((scope) => factoryTuple(scope, { impulse }), [impulse], {
-          compare: (prev, next) => compareTuple(prev, next),
+          equals: (prev, next) => isTupleEqual(prev, next),
         }),
     ],
     [
       "memoized comparator",
       ({ impulse }: WithImpulse) =>
         useScoped((scope) => factoryTuple(scope, { impulse }), [impulse], {
-          compare: compareTuple,
+          equals: isTupleEqual,
         }),
     ],
   ])("keeps the old value when it is comparably equal when %s", (_, useCounter) => {
@@ -298,7 +296,7 @@ describe("transform scoped Impulse's", () => {
       ({ impulse }: WithImpulse) => useScoped((scope) => factoryTuple(scope, { impulse })),
     ],
     [
-      "without compare",
+      "without equals",
       ({ impulse }: WithImpulse) =>
         useScoped((scope) => factoryTuple(scope, { impulse }), [impulse]),
     ],
@@ -387,7 +385,7 @@ describe("transform scoped Impulse's", () => {
             },
             [impulse, spy],
             {
-              compare: (prev, next) => Counter.compare(prev, next),
+              equals: (prev, next) => Counter.equals(prev, next),
             },
           ),
       ],
@@ -402,12 +400,12 @@ describe("transform scoped Impulse's", () => {
             },
             [impulse, spy],
             {
-              compare: Counter.compare,
+              equals: Counter.equals,
             },
           ),
       ],
     ])("should not trigger the factory %s", (_, useCounter) => {
-      const impulse = Impulse({ count: 1 }, { compare: Counter.compare })
+      const impulse = Impulse({ count: 1 }, { equals: Counter.equals })
       const spy = vi.fn()
 
       renderHook(useCounter, {
@@ -458,22 +456,22 @@ describe("multiple Impulse#getValue(scope) calls", () => {
         "with inline comparator",
         ({ impulse, spy }: WithImpulse & WithSpy) =>
           useScoped((scope) => factorySingle(scope, { impulse, spy }), [impulse, spy], {
-            compare: (prev, next) => Counter.compare(prev, next),
+            equals: (prev, next) => Counter.equals(prev, next),
           }),
         ({ impulse, spy }: WithImpulse & WithSpy) =>
           useScoped((scope) => factoryDouble(scope, { impulse, spy }), [impulse, spy], {
-            compare: (prev, next) => Counter.compare(prev, next),
+            equals: (prev, next) => Counter.equals(prev, next),
           }),
       ],
       [
         "with memoized comparator",
         ({ impulse, spy }: WithImpulse & WithSpy) =>
           useScoped((scope) => factorySingle(scope, { impulse, spy }), [impulse, spy], {
-            compare: Counter.compare,
+            equals: Counter.equals,
           }),
         ({ impulse, spy }: WithImpulse & WithSpy) =>
           useScoped((scope) => factoryDouble(scope, { impulse, spy }), [impulse, spy], {
-            compare: Counter.compare,
+            equals: Counter.equals,
           }),
       ],
     ])("%s", (_, useSingleHook, useDoubleHook) => {

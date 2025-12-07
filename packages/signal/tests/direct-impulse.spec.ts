@@ -34,31 +34,31 @@ describe("Impulse()", () => {
 })
 
 describe("Impulse(value, options?)", () => {
-  it("does not call compare on init", () => {
-    Impulse({ count: 0 }, { compare: Counter.compare })
+  it("does not call equals on init", () => {
+    Impulse({ count: 0 }, { equals: Counter.equals })
 
-    expect(Counter.compare).not.toHaveBeenCalled()
+    expect(Counter.equals).not.toHaveBeenCalled()
   })
 
-  it("assigns Object.is as default compare", () => {
+  it("assigns Object.is as default equals", () => {
     const impulse = Impulse({ count: 0 })
 
     impulse.setValue({ count: 1 })
     expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
-  it("assigns Object.is by `null` as compare", () => {
-    const impulse = Impulse({ count: 0 }, { compare: null })
+  it("assigns Object.is by `null` as equals", () => {
+    const impulse = Impulse({ count: 0 }, { equals: null })
 
     impulse.setValue({ count: 1 })
     expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
-  it("assigns custom function as compare", () => {
-    const impulse = Impulse({ count: 0 }, { compare: Counter.compare })
+  it("assigns custom function as equals", () => {
+    const impulse = Impulse({ count: 0 }, { equals: Counter.equals })
 
     impulse.setValue({ count: 1 })
-    expect(Counter.compare).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
+    expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
   it("carries the function value wrapped in an object", ({ scope }) => {

@@ -18,7 +18,7 @@ class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
   public static override _getState = ImpulseForm._getState
 
   private readonly _elements = Impulse((scope) => this._state._getElements(scope), {
-    compare: isShallowArrayEqual,
+    equals: isShallowArrayEqual,
   })
 
   public constructor(public readonly _state: ImpulseFormListState<TElement>) {

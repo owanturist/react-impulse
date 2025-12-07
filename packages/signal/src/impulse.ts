@@ -2,6 +2,7 @@ import { hasProperty } from "~/tools/has-property"
 import { isFunction } from "~/tools/is-function"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 
+import type { Equal } from "./equal"
 import type { ImpulseOptions } from "./impulse-options"
 import type { ReadableImpulse } from "./readable-impulse"
 import type { WritableImpulse } from "./writable-impulse"
@@ -17,56 +18,68 @@ type ReadonlyImpulse<T> = Omit<Impulse<T>, "setValue">
 /**
  * Creates a new Impulse without an initial value.
  *
- * @version 3.0.0
+ * @template TValue the type of the Impulse value.
+ *
+ * @version 1.0.0
  *
  * @example
  * const impulse = Impulse<string>()
  * const initiallyUndefined = impulse.getValue(scope) === undefined
  */
-function Impulse<T = undefined>(): Impulse<undefined | T>
+function Impulse<TValue = undefined>(): Impulse<undefined | TValue>
 
 /**
- * Creates a new derived ReadonlyImpulse.
+ * Creates a new derived {@link ReadonlyImpulse}.
  * A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes.
  *
- * @param getter either anything that implements the `ReadableImpulse` interface or a function to read the derived value from the source.
- * @param options optional `ImpulseOptions`.
- * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
+ * @template TDerivedValue the type of the derived Impulse value.
  *
- * @version 3.0.0
+ * @param getter either anything that implements the {@link ReadableImpulse} interface or a function to read the derived value from the source.
+ * @param options optional {@link ImpulseOptions}.
+ * @param options.equals the {@link Equal} function that determines whether or not a new Impulse's value replaces the current one. Defaults to {@link Object.is}.
+ *
+ * @returns a new {@link ReadonlyImpulse}.
+ *
+ * @version 1.0.0
  */
-function Impulse<T>(
-  getter: ReadableImpulse<T> | ((scope: Scope) => T),
-  options?: ImpulseOptions<T>,
-): ReadonlyImpulse<T>
+function Impulse<TDerivedValue>(
+  getter: ReadableImpulse<TDerivedValue> | ((scope: Scope) => TDerivedValue),
+  options?: ImpulseOptions<TDerivedValue>,
+): ReadonlyImpulse<TDerivedValue>
 
 /**
- * Creates a new derived Impulse.
+ * Creates a new derived {@link Impulse}.
  * A derived Impulse is an Impulse that keeps the derived value in memory and updates it whenever the source value changes.
  *
- * @param getter either anything that implements the `ReadableImpulse` interface or a function to read the derived value from the source.
- * @param setter either anything that implements the `WritableImpulse` interface or a function to write the derived value back to the source.
- * @param options optional `ImpulseOptions`.
- * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
+ * @template TDerivedValue the type of the derived Impulse value.
  *
- * @version 3.0.0
+ * @param getter either anything that implements the {@link ReadableImpulse} interface or a function to read the derived value from the source.
+ * @param setter either anything that implements the {@link WritableImpulse} interface or a function to write the derived value back to the source.
+ * @param options optional {@link ImpulseOptions}.
+ * @param options.equals the {@link Equal} function that determines whether or not a new Impulse's value replaces the current one. Defaults to {@link Object.is}.
+ *
+ * @returns a new {@link Impulse}.
+ *
+ * @version 1.0.0
  */
-function Impulse<T>(
-  getter: ReadableImpulse<T> | ((scope: Scope) => T),
-  setter: WritableImpulse<T> | ((value: T, scope: Scope) => void),
-  options?: ImpulseOptions<T>,
-): Impulse<T>
+function Impulse<TDerivedValue>(
+  getter: ReadableImpulse<TDerivedValue> | ((scope: Scope) => TDerivedValue),
+  setter: WritableImpulse<TDerivedValue> | ((value: TDerivedValue, scope: Scope) => void),
+  options?: ImpulseOptions<TDerivedValue>,
+): Impulse<TDerivedValue>
 
 /**
- * Creates a new Impulse.
+ * Creates a new {@link Impulse}.
+ *
+ * @template TValue the type of the Impulse value.
  *
  * @param initialValue the initial value.
- * @param options optional `ImpulseOptions`.
- * @param options.compare when not defined or `null` then `Object.is` applies as a fallback.
+ * @param options optional {@link ImpulseOptions}.
+ * @param options.equals the {@link Equal} function that determines whether or not a new Impulse's value replaces the current one. Defaults to {@link Object.is}.
  *
- * @version 3.0.0
+ * @version 1.0.0
  */
-function Impulse<T>(initialValue: T, options?: ImpulseOptions<T>): Impulse<T>
+function Impulse<TValue>(initialValue: TValue, options?: ImpulseOptions<TValue>): Impulse<TValue>
 
 function Impulse<T>(
   initialValueOrReadableImpulse?: T | ReadableImpulse<T> | ((scope: Scope) => T),
@@ -81,7 +94,7 @@ function Impulse<T>(
   if (!(isGetterFunction || hasProperty(initialValueOrReadableImpulse, "getValue"))) {
     const directOptions = optionsOrWritableImpulse as undefined | ImpulseOptions<undefined | T>
 
-    return new ImpulseImpl(initialValueOrReadableImpulse, directOptions?.compare ?? isStrictEqual)
+    return new ImpulseImpl(initialValueOrReadableImpulse, directOptions?.equals ?? isStrictEqual)
   }
 
   const [setter, derivedOptions] =
@@ -94,7 +107,7 @@ function Impulse<T>(
       ? initialValueOrReadableImpulse
       : (scope) => initialValueOrReadableImpulse.getValue(scope),
     isFunction(setter) ? setter : (value) => setter?.setValue(value),
-    derivedOptions?.compare ?? isStrictEqual,
+    derivedOptions?.equals ?? isStrictEqual,
   )
 }
 

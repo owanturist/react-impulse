@@ -1,4 +1,4 @@
-import type { Compare } from "../compare"
+import type { Equal } from "../equal"
 
 import { BaseImpulse } from "./base-impulse"
 import { enqueue } from "./enqueue"
@@ -9,7 +9,7 @@ import { ScopeEmitter } from "./scope-emitter"
 class DerivedImpulse<T> extends BaseImpulse<T> {
   // the inner scope proxies the setters to the outer scope
   private readonly _scope = new ScopeEmitter(() => {
-    if (this._compare(this._value, this._getValue(STATIC_SCOPE))) {
+    if (this._equals(this._value, this._getValue(STATIC_SCOPE))) {
       // subscribe back to the dependencies
       injectScope(this._getValue, this._scope)
     } else {
@@ -25,9 +25,9 @@ class DerivedImpulse<T> extends BaseImpulse<T> {
   public constructor(
     private readonly _getValue: (scope: Scope) => T,
     private readonly _setValue: (value: T, scope: Scope) => void,
-    compare: Compare<T>,
+    equals: Equal<T>,
   ) {
-    super(compare)
+    super(equals)
   }
 
   protected _getter(): T {
@@ -47,8 +47,8 @@ class DerivedImpulse<T> extends BaseImpulse<T> {
     return false
   }
 
-  protected _clone(value: T, compare: Compare<T>): Impulse<T> {
-    return new Impulse(value, compare)
+  protected _clone(value: T, equals: Equal<T>): Impulse<T> {
+    return new Impulse(value, equals)
   }
 }
 

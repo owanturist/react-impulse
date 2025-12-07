@@ -151,7 +151,7 @@ describe("single Impulse", () => {
 
   it("doesn't execute listener when Impulse value comparably the same", () => {
     const spy = vi.fn()
-    const impulse = Impulse({ count: 1 }, { compare: Counter.compare })
+    const impulse = Impulse({ count: 1 }, { equals: Counter.equals })
 
     subscribe((scope) => {
       spy(impulse.getValue(scope))

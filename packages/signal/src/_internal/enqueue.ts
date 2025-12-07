@@ -41,7 +41,7 @@ class ScopeEmitQueue {
 
         if (emitter._derived) {
           /**
-           * Emit immediately so `DerivedImpulse` utilizes the compare function to either:
+           * Emit immediately so `DerivedImpulse` utilizes the equals function to either:
            * 1. NOT CHANGED: resubscribe to sources
            * 2. CHANGED: marks as stale and _push's its._emitters so they end up here either emitting (DerivedImpulse) or scheduling (DirectImpulse).
            */

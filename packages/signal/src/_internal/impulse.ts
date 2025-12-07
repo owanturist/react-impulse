@@ -1,13 +1,13 @@
-import type { Compare } from "../compare"
+import type { Equal } from "../equal"
 
 import { BaseImpulse } from "./base-impulse"
 
 class Impulse<T> extends BaseImpulse<T> {
   public constructor(
     private _value: T,
-    compare: Compare<T>,
+    equals: Equal<T>,
   ) {
-    super(compare)
+    super(equals)
   }
 
   protected _getter(): T {
@@ -15,7 +15,7 @@ class Impulse<T> extends BaseImpulse<T> {
   }
 
   protected _setter(value: T): boolean {
-    if (!this._compare(this._value, value)) {
+    if (!this._equals(this._value, value)) {
       this._value = value
 
       return true
@@ -24,8 +24,8 @@ class Impulse<T> extends BaseImpulse<T> {
     return false
   }
 
-  protected _clone(value: T, compare: Compare<T>): Impulse<T> {
-    return new Impulse(value, compare)
+  protected _clone(value: T, equals: Equal<T>): Impulse<T> {
+    return new Impulse(value, equals)
   }
 }
 

@@ -646,7 +646,7 @@ describe("when reading derived value during batching", () => {
 
     const source = Impulse(1)
     const derived = Impulse((scope) => ({ count: source.getValue(scope) }), {
-      compare: Counter.compare,
+      equals: Counter.equals,
     })
 
     expect(derived.getValue(scope)).toBe(derived.getValue(scope))
@@ -667,7 +667,7 @@ describe("when reading derived value during batching", () => {
 
     const source = Impulse({ count: 1 })
     const derived = Impulse((scope) => source.getValue(scope), {
-      compare: Counter.compare,
+      equals: Counter.equals,
     })
 
     const source0 = source.getValue(scope)

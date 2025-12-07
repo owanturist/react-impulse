@@ -27,14 +27,14 @@ describe.each([
     "with inline comparator",
     ({ impulse, isActive, spy }: WithImpulse & WithIsActive & Partial<WithSpy>) =>
       useScoped((scope) => factory(scope, { impulse, isActive, spy }), [impulse, isActive, spy], {
-        compare: (prev, next) => Counter.compare(prev, next),
+        equals: (prev, next) => Counter.equals(prev, next),
       }),
   ],
   [
     "with memoized comparator",
     ({ impulse, isActive, spy }: WithImpulse & WithIsActive & Partial<WithSpy>) =>
       useScoped((scope) => factory(scope, { impulse, isActive, spy }), [impulse, isActive, spy], {
-        compare: Counter.compare,
+        equals: Counter.equals,
       }),
   ],
 ])("conditional factory %s", (_, useHook) => {

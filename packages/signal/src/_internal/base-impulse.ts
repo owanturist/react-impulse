@@ -1,7 +1,7 @@
 import { isFunction } from "~/tools/is-function"
 import { isStrictEqual } from "~/tools/is-strict-equal"
 
-import type { Compare } from "../compare"
+import type { Equal } from "../equal"
 import type { Impulse } from "../impulse"
 import type { ImpulseOptions } from "../impulse-options"
 import type { ReadableImpulse } from "../readable-impulse"
@@ -14,13 +14,13 @@ import type { ScopeEmitter } from "./scope-emitter"
 abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> {
   protected readonly _emitters = new Set<WeakRef<ScopeEmitter>>()
 
-  protected constructor(protected readonly _compare: Compare<T>) {}
+  protected constructor(protected readonly _equals: Equal<T>) {}
 
   protected abstract _getter(): T
 
   protected abstract _setter(value: T): boolean
 
-  protected abstract _clone(value: T, compare: Compare<T>): Impulse<T>
+  protected abstract _clone(value: T, equals: Equal<T>): Impulse<T>
 
   /**
    * Return the value when serializing to JSON.
@@ -54,6 +54,8 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
    *
    * @param scope the Scope that tracks the Impulse value changes.
    *
+   * @returns the impulse value.
+   *
    * @version 1.0.0
    */
   public getValue(scope: Scope): T {
@@ -84,21 +86,25 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
   }
 
   /**
-   * Creates a new Impulse instance out of the current one with the same value.
+   * Creates a new {@link Impulse} instance out of the current one with the same value.
    *
-   * @param options optional `ImpulseOptions`.
-   * @param options.compare when not defined it uses the `compare` function from the origin Impulse, When `null` the `Object.is` function applies to compare the values.
+   * @param options optional {@link ImpulseOptions}.
+   * @param options.equal when not defined it uses the {@link ImpulseOptions.equals} function from the origin Impulse, When `null` fallbacks to {@link Object.is}.
    *
-   * @version 2.0.0
+   * @returns a new {@link Impulse} instance with the same value.
+   *
+   * @version 1.0.0
    */
   public clone(options?: ImpulseOptions<T>): Impulse<T>
 
   /**
-   * Creates a new Impulse instance out of the current one with the transformed value. Transforming might be handy when cloning mutable values (such as an Impulse).
+   * Creates a new {@link Impulse} instance out of the current one with the transformed value. Transforming might be handy when cloning mutable values (such as an Impulse).
    *
    * @param transform an optional function that applies to the current value before cloning. It might be handy when cloning mutable values.
-   * @param options optional `ImpulseOptions`.
-   * @param options.compare when not defined it uses the `compare` function from the origin Impulse, When `null` the `Object.is` function applies to compare the values.
+   * @param options optional {@link ImpulseOptions}.
+   * @param options.equal when not defined it uses the {@link ImpulseOptions.equals} function from the origin Impulse, When `null` fallbacks to {@link Object.is}.
+   *
+   * @return a new {@link Impulse} instance with the transformed value.
    *
    * @version 1.0.0
    */
@@ -110,11 +116,11 @@ abstract class BaseImpulse<T> implements ReadableImpulse<T>, WritableImpulse<T> 
   ): Impulse<T> {
     const value = this._getter()
 
-    const [clonedValue, { compare = this._compare } = {}] = isFunction(transformOrOptions)
+    const [clonedValue, { equals = this._equals } = {}] = isFunction(transformOrOptions)
       ? [transformOrOptions(value, STATIC_SCOPE), maybeOptions]
       : [value, transformOrOptions]
 
-    return this._clone(clonedValue, compare ?? isStrictEqual)
+    return this._clone(clonedValue, equals ?? isStrictEqual)
   }
 }
 
