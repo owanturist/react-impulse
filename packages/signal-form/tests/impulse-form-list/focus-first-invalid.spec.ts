@@ -1,4 +1,4 @@
-import { untrack } from "@owanturist/signal"
+import { untracked } from "@owanturist/signal"
 import { z } from "zod"
 
 import { ImpulseFormList, type ImpulseFormListOptions, ImpulseFormUnit } from "../../src"
@@ -17,7 +17,7 @@ function setup(options?: ImpulseFormListOptions<ImpulseFormUnit<number, Readonly
   const listener1 = vi.fn()
   const listener2 = vi.fn()
 
-  const elements = untrack((scope) => form.getElements(scope))
+  const elements = untracked((scope) => form.getElements(scope))
 
   elements.at(0)?.onFocusWhenInvalid(listener0)
   elements.at(1)?.onFocusWhenInvalid(listener1)

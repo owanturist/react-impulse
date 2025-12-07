@@ -12,9 +12,9 @@ import { STATIC_SCOPE, type Scope } from "./_internal/scope"
  *
  * @returns the `factory` function result.
  *
- * @version 2.0.0
+ * @version 1.0.0
  */
-function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
+function untracked<TResult>(factory: (scope: Scope) => TResult): TResult
 
 /**
  * Extracts the value from the provided `impulse` without tracking it.
@@ -23,11 +23,11 @@ function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
  *
  * @returns the `impulse` value.
  *
- * @version 2.0.0
+ * @version 1.0.0
  */
-function untrack<TValue>(impulse: ReadableImpulse<TValue>): TValue
+function untracked<TValue>(impulse: ReadableImpulse<TValue>): TValue
 
-function untrack<T>(factoryOrReadableImpulse: ((scope: Scope) => T) | ReadableImpulse<T>): T {
+function untracked<T>(factoryOrReadableImpulse: ((scope: Scope) => T) | ReadableImpulse<T>): T {
   return enqueue(() => {
     if (isFunction(factoryOrReadableImpulse)) {
       return factoryOrReadableImpulse(STATIC_SCOPE)
@@ -37,4 +37,4 @@ function untrack<T>(factoryOrReadableImpulse: ((scope: Scope) => T) | ReadableIm
   })
 }
 
-export { untrack }
+export { untracked }
