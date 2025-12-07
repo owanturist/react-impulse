@@ -1,5 +1,4 @@
 export * from "./batch"
-export { batch as tap } from "./batch"
 export type * from "./destructor"
 export type * from "./equal"
 export * from "./impulse"
