@@ -84,7 +84,7 @@ describe.each([
         },
         [impulse, spy],
         {
-          compare: (prev, next) => Counter.compare(prev, next),
+          equals: (prev, next) => Counter.equals(prev, next),
         },
       ),
   ],
@@ -100,7 +100,7 @@ describe.each([
           return value
         },
         [impulse, spy],
-        { compare: Counter.compare },
+        { equals: Counter.equals },
       ),
   ],
 ])("factory with deps and %s comparator", (_, useCounter) => {

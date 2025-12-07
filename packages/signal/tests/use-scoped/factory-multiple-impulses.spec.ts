@@ -29,14 +29,14 @@ describe("multiple factory", () => {
       "with inline comparator",
       ({ first, second }: WithFirst & WithSecond) =>
         useScoped((scope) => factory(scope, { first, second }), [first, second], {
-          compare: (prev, next) => Counter.compare(prev, next),
+          equals: (prev, next) => Counter.equals(prev, next),
         }),
     ],
     [
       "with memoized comparator",
       ({ first, second }: WithFirst & WithSecond) =>
         useScoped((scope) => factory(scope, { first, second }), [first, second], {
-          compare: Counter.compare,
+          equals: Counter.equals,
         }),
     ],
   ])("%s", (_, useHook) => {
@@ -124,14 +124,14 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
       "with inline comparator",
       ({ impulse, spy }: WithImpulse & WithSpy) =>
         useScoped((scope) => factorySingle(scope, { impulse, spy }), [impulse, spy], {
-          compare: (prev, next) => Counter.compare(prev, next),
+          equals: (prev, next) => Counter.equals(prev, next),
         }),
       ({ first, second, third, spy }: WithFirst & WithSecond & WithThird & WithSpy) =>
         useScoped(
           (scope) => factoryMultiple(scope, { first, second, third, spy }),
           [first, second, third, spy],
           {
-            compare: (prev, next) => Counter.compare(prev, next),
+            equals: (prev, next) => Counter.equals(prev, next),
           },
         ),
     ],
@@ -139,13 +139,13 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
       "with memoized comparator",
       ({ impulse, spy }: WithImpulse & WithSpy) =>
         useScoped((scope) => factorySingle(scope, { impulse, spy }), [impulse, spy], {
-          compare: Counter.compare,
+          equals: Counter.equals,
         }),
       ({ first, second, third, spy }: WithFirst & WithSecond & WithThird & WithSpy) =>
         useScoped(
           (scope) => factoryMultiple(scope, { first, second, third, spy }),
           [first, second, third, spy],
-          { compare: Counter.compare },
+          { equals: Counter.equals },
         ),
     ],
   ])("%s", (_, useSingleHook, useMultipleHook) => {

@@ -7,7 +7,7 @@ import { usePermanent } from "./use-permanent"
 
 function useCreateScope<T>(
   transform: (scope: Scope) => T,
-  compare?: (left: T, right: T) => boolean,
+  equals?: (left: T, right: T) => boolean,
 ): T {
   const [selectCreate, connect] = usePermanent(() => {
     const factory = new ScopeFactory()
@@ -21,7 +21,7 @@ function useCreateScope<T>(
 
   const select = useCallback((create: () => Scope) => transform(create()), [transform])
 
-  return useSyncExternalStoreWithSelector(connect, selectCreate, selectCreate, select, compare)
+  return useSyncExternalStoreWithSelector(connect, selectCreate, selectCreate, select, equals)
 }
 
 export { useCreateScope }

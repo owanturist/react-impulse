@@ -6,7 +6,7 @@ import { useCreateScope } from "./_internal/use-create-scope"
 /**
  * A hook that returns a Scope.
  *
- * @version 3.0.0
+ * @version 1.0.0
  */
 function useScope(): Scope {
   return useCreateScope(identity)

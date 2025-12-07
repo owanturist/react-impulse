@@ -1,7 +1,7 @@
 export * from "./batch"
 export { batch as tap } from "./batch"
-export type * from "./compare"
 export type * from "./destructor"
+export type * from "./equal"
 export * from "./impulse"
 export type * from "./impulse-options"
 export * from "./is-derived-impulse"

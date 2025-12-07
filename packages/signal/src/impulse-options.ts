@@ -1,11 +1,18 @@
-import type { Compare } from "./compare"
+import type { Equal } from "./equal"
 
+/**
+ * The options for creating and cloning an Impulse.
+ *
+ * @template T the type of the Impulse value.
+ *
+ * @version 1.0.0
+ */
 interface ImpulseOptions<T> {
   /**
-   * The compare function determines whether or not a new Impulse's value replaces the current one.
-   * In many cases specifying the function leads to better performance because it prevents unnecessary updates.
+   * The equality function determines whether or not a new Impulse's value replaces the current one.
+   * In some cases specifying the function leads to better performance because it prevents unnecessary updates.
    */
-  readonly compare?: null | Compare<T>
+  readonly equals?: null | Equal<T>
 }
 
 export type { ImpulseOptions }

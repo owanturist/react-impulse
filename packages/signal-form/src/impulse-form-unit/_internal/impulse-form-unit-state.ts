@@ -1,4 +1,4 @@
-import { type Compare, Impulse, type ReadonlyImpulse, type Scope, batch } from "@owanturist/signal"
+import { type Equal, Impulse, type ReadonlyImpulse, type Scope, batch } from "@owanturist/signal"
 
 import { identity } from "~/tools/identity"
 import { isFunction } from "~/tools/is-function"
@@ -44,10 +44,10 @@ class ImpulseFormUnitState<TInput, TError, TOutput> extends ImpulseFormState<
     public readonly _validateOn: Impulse<ValidateStrategy>,
     public readonly _touched: Impulse<boolean>,
     private readonly _transform: Impulse<ImpulseFormUnitTransform<TInput, TError, TOutput>>,
-    private readonly _isInputDirty: Compare<TInput>,
-    private readonly _isInputEqual: Compare<TInput>,
-    private readonly _isOutputEqual: Compare<null | TOutput>,
-    private readonly _isErrorEqual: Compare<null | TError>,
+    private readonly _isInputDirty: Equal<TInput>,
+    private readonly _isInputEqual: Equal<TInput>,
+    private readonly _isOutputEqual: Equal<null | TOutput>,
+    private readonly _isErrorEqual: Equal<null | TError>,
   ) {
     super(parent)
 
@@ -73,7 +73,7 @@ class ImpulseFormUnitState<TInput, TError, TOutput> extends ImpulseFormState<
     this._initial = Impulse(
       (scope): TInput => _initialState.getValue(scope)._current.getValue(scope),
       {
-        compare: _isInputEqual,
+        equals: _isInputEqual,
       },
     )
 
@@ -84,7 +84,7 @@ class ImpulseFormUnitState<TInput, TError, TOutput> extends ImpulseFormState<
         return error
       },
       {
-        compare: _isErrorEqual,
+        equals: _isErrorEqual,
       },
     )
 
@@ -95,7 +95,7 @@ class ImpulseFormUnitState<TInput, TError, TOutput> extends ImpulseFormState<
         return output
       },
       {
-        compare: _isOutputEqual,
+        equals: _isOutputEqual,
       },
     )
 

@@ -1,13 +1,13 @@
-import type { Compare, Impulse } from "../src"
+import type { Equal, Impulse } from "../src"
 
 afterEach(() => {
-  Counter.compare.mockClear()
+  Counter.equals.mockClear()
 })
 
 export abstract class Counter {
   public abstract readonly count: number
 
-  public static compare = vi.fn((prev: Counter, next: Counter) => prev.count === next.count)
+  public static equals = vi.fn((prev: Counter, next: Counter) => prev.count === next.count)
 
   public static merge(left: Counter, right: Counter, ...rest: Array<Counter>): Counter {
     return {
@@ -32,8 +32,8 @@ export interface WithImpulse<T = Counter> {
   impulse: Impulse<T>
 }
 
-export interface WithCompare<T = Counter> {
-  compare?: null | Compare<T>
+export interface WithEquals<T = Counter> {
+  equals?: null | Equal<T>
 }
 
 export interface WithFirst<T = Counter> {

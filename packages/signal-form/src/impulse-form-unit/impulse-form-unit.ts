@@ -1,4 +1,4 @@
-import { type Compare, Impulse } from "@owanturist/signal"
+import { type Equal, Impulse } from "@owanturist/signal"
 
 import { hasProperty } from "~/tools/has-property"
 import { isNull } from "~/tools/is-null"
@@ -10,7 +10,7 @@ import { VALIDATE_ON_INIT, VALIDATE_ON_TOUCH, type ValidateStrategy } from "../v
 
 import type { ImpulseFormUnitTransformer } from "./impulse-form-unit-transformer"
 import type { ImpulseFormUnitValidator } from "./impulse-form-unit-validator"
-import { createUnionCompare } from "./_internal/create-union-compare"
+import { createIsUnionEqual } from "./_internal/create-is-union-equal"
 import type { ImpulseFormUnit as ImpulseFormUnitImpl } from "./_internal/impulse-form-unit"
 import { ImpulseFormUnitState } from "./_internal/impulse-form-unit-state"
 import {
@@ -42,7 +42,7 @@ interface ImpulseFormUnitOptions<TInput, TError = null> {
   /**
    * PERFORMANCE OPTIMIZATION
    *
-   * A compare function that determines whether the input value changes.
+   * A equality check function that determines whether the input value changes.
    * When it does, the ImpulseFormUnit#getInput returns the new value.
    * Otherwise, it returns the previous value.
    *
@@ -61,12 +61,12 @@ interface ImpulseFormUnitOptions<TInput, TError = null> {
    * form.setInput({ count: 0 })
    * form.getInput(scope) === initial // true
    */
-  readonly isInputEqual?: Compare<TInput>
+  readonly isInputEqual?: Equal<TInput>
 
   /**
    * BUSINESS LOGIC TUNING
    *
-   * A compare function that determines whether the input is dirty.
+   * A equality check function that determines whether the input is dirty.
    * When it is, the ImpulseFormUnit#isDirty returns true.
    * Fallbacks to not(isInputEqual) if not provided.
    *
@@ -84,12 +84,12 @@ interface ImpulseFormUnitOptions<TInput, TError = null> {
    * form.setInput(" ")
    * form.isDirty(scope) === false
    */
-  readonly isInputDirty?: Compare<TInput>
+  readonly isInputDirty?: Equal<TInput>
 
   /**
    * PERFORMANCE OPTIMIZATION
    *
-   * A compare function that determines whether the validation error change.
+   * A equality check function that determines whether the validation error change.
    * When it does, the ImpulseFormUnit#getError returns the new value.
    * Otherwise, it returns the previous value.
    *
@@ -99,7 +99,7 @@ interface ImpulseFormUnitOptions<TInput, TError = null> {
    * @default Object.is
    */
 
-  readonly isErrorEqual?: Compare<TError>
+  readonly isErrorEqual?: Equal<TError>
 
   /**
    * @default input
@@ -114,7 +114,7 @@ interface ImpulseFormUnitTransformedOptions<TInput, TError = null, TOutput = TIn
   /**
    * PERFORMANCE OPTIMIZATION
    *
-   * A compare function that determines whether the output value changes.
+   * A equality check function that determines whether the output value changes.
    * When it does, the ImpulseFormUnit#getOutput returns the new value.
    *
    * Useful for none primitive values such as Objects, Arrays, Date, etc.
@@ -122,7 +122,7 @@ interface ImpulseFormUnitTransformedOptions<TInput, TError = null, TOutput = TIn
    *
    * @default Object.is
    */
-  readonly isOutputEqual?: Compare<TOutput>
+  readonly isOutputEqual?: Equal<TOutput>
 }
 
 interface ImpulseFormUnitSchemaOptions<TInput, TOutput = TInput>
@@ -185,12 +185,12 @@ function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
   const isInputDirty = options?.isInputDirty ?? ((left, right) => !isInputEqual(left, right))
   const initialOrInput = options?.initial ?? input_
 
-  const input = Impulse(input_, { compare: isInputEqual })
+  const input = Impulse(input_, { equals: isInputEqual })
 
   const initial = Impulse({
     _explicit: Impulse(!isUndefined(options?.initial)),
     _current: Impulse(isInputEqual(initialOrInput, input_) ? input_ : initialOrInput, {
-      compare: isInputEqual,
+      equals: isInputEqual,
     }),
   })
 
@@ -198,8 +198,8 @@ function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
 
   if (hasProperty(options, "schema")) {
     const transform = transformFromSchema<TInput, TOutput>(options.schema)
-    const isErrorEqual = createUnionCompare(isNull, isShallowArrayEqual)
-    const isOutputEqual = createUnionCompare<null, TOutput>(
+    const isErrorEqual = createIsUnionEqual(isNull, isShallowArrayEqual)
+    const isOutputEqual = createIsUnionEqual<null, TOutput>(
       isNull,
       options.isOutputEqual ?? isStrictEqual,
     )
@@ -208,7 +208,7 @@ function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
       null,
       initial,
       input,
-      Impulse(options.error ?? null, { compare: isErrorEqual }),
+      Impulse(options.error ?? null, { equals: isErrorEqual }),
       Impulse(options.validateOn ?? VALIDATE_ON_TOUCH),
       touched,
       Impulse(transform),
@@ -219,17 +219,17 @@ function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     )._host()
   }
 
-  const isErrorEqual = createUnionCompare<null, TError>(
+  const isErrorEqual = createIsUnionEqual<null, TError>(
     isNull,
     options?.isErrorEqual ?? isStrictEqual,
   )
   const error = Impulse<null | TError>(options?.error ?? null, {
-    compare: isErrorEqual,
+    equals: isErrorEqual,
   })
 
   if (hasProperty(options, "validate")) {
     const transform = transformFromValidator(options.validate)
-    const isOutputEqual = createUnionCompare<null, TOutput>(
+    const isOutputEqual = createIsUnionEqual<null, TOutput>(
       isNull,
       options.isOutputEqual ?? isStrictEqual,
     )
@@ -251,7 +251,7 @@ function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
 
   if (hasProperty(options, "transform")) {
     const transform = transformFromTransformer(options.transform)
-    const isOutputEqual = createUnionCompare<null, TOutput>(
+    const isOutputEqual = createIsUnionEqual<null, TOutput>(
       isNull,
       options.isOutputEqual ?? isStrictEqual,
     )
@@ -281,7 +281,7 @@ function ImpulseFormUnit<TInput, TError = null, TOutput = TInput>(
     Impulse(transformFromInput as ImpulseFormUnitTransform<TInput, TError, TInput>),
     isInputDirty,
     isInputEqual,
-    createUnionCompare(isNull, isInputEqual),
+    createIsUnionEqual(isNull, isInputEqual),
     isErrorEqual,
   )._host()
 }

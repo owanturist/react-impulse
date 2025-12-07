@@ -1,12 +1,12 @@
-import type { Compare } from "@owanturist/signal"
+import type { Equal } from "@owanturist/signal"
 
 import { isStrictEqual } from "~/tools/is-strict-equal"
 
-function createUnionCompare<TPrimary, TSecondary>(
+function createIsUnionEqual<TPrimary, TSecondary>(
   primary: (value: unknown) => value is TPrimary,
-  secondary: Compare<TSecondary>,
-): Compare<TPrimary | TSecondary> {
-  // do not bother with primary compare if secondary is strict equal
+  secondary: Equal<TSecondary>,
+): Equal<TPrimary | TSecondary> {
+  // do not bother with primary check if secondary is strict equal
   if (secondary === isStrictEqual || secondary === Object.is) {
     return isStrictEqual
   }
@@ -20,4 +20,4 @@ function createUnionCompare<TPrimary, TSecondary>(
   }
 }
 
-export { createUnionCompare }
+export { createIsUnionEqual }
