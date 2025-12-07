@@ -9,7 +9,7 @@ export * from "./is-impulse"
 export type * from "./readable-impulse"
 export type * from "./scope"
 export * from "./subscribe"
-export * from "./untrack"
+export * from "./untracked"
 export type * from "./writable-impulse"
 
 // REACT HOOKS

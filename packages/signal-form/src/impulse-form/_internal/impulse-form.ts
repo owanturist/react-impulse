@@ -1,4 +1,4 @@
-import { type ReadonlyImpulse, type Scope, batch, untrack } from "@owanturist/signal"
+import { type ReadonlyImpulse, type Scope, batch, untracked } from "@owanturist/signal"
 
 import { isDefined } from "~/tools/is-defined"
 import { isNull } from "~/tools/is-null"
@@ -265,7 +265,7 @@ abstract class ImpulseForm<
       this._state._root._forceValidated(scope)
     })
 
-    const promises = untrack((scope) => {
+    const promises = untracked((scope) => {
       const output = this._state._root._output.getValue(scope)
 
       if (!isNull(output)) {

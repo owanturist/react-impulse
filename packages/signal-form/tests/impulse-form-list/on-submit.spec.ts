@@ -1,4 +1,4 @@
-import { untrack } from "@owanturist/signal"
+import { untracked } from "@owanturist/signal"
 
 import { ImpulseFormList, type ImpulseFormListOptions, ImpulseFormUnit } from "../../src"
 
@@ -13,7 +13,7 @@ function setup(options?: ImpulseFormListOptions<ImpulseFormUnit<number>>) {
   const listener2 = vi.fn()
   const listener3 = vi.fn()
 
-  const elements = untrack((scope) => form.getElements(scope))
+  const elements = untracked((scope) => form.getElements(scope))
 
   form.onSubmit(listener0)
   elements.at(0)?.onSubmit(listener1)

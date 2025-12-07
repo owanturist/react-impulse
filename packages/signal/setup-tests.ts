@@ -1,13 +1,13 @@
 import "@testing-library/jest-dom/vitest"
 
-import { untrack } from "./src"
+import { untracked } from "./src"
 
 const spy__Object_is = vi.spyOn(Object, "is")
 
 beforeEach((context) => {
   spy__Object_is.mockClear()
 
-  context.scope = untrack((scope) => scope)
+  context.scope = untracked((scope) => scope)
 })
 
 afterAll(() => {

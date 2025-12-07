@@ -1,4 +1,4 @@
-import { Impulse, type Scope, untrack } from "@owanturist/signal"
+import { Impulse, type Scope, untracked } from "@owanturist/signal"
 
 import { concat } from "~/tools/concat"
 import { drop } from "~/tools/drop"
@@ -64,7 +64,7 @@ class ImpulseFormListState<TElement extends ImpulseForm = ImpulseForm> extends I
     })
 
     this._elements = Impulse(
-      untrack((scope) =>
+      untracked((scope) =>
         map(elements, (element, index) => {
           const child = this._parentOf(element)
 
@@ -77,7 +77,7 @@ class ImpulseFormListState<TElement extends ImpulseForm = ImpulseForm> extends I
   }
 
   public _childOf(parent: null | ImpulseFormState): ImpulseFormListState<TElement> {
-    return new ImpulseFormListState(parent, untrack(this._elements))
+    return new ImpulseFormListState(parent, untracked(this._elements))
   }
 
   public _getElements(scope: Scope): ReadonlyArray<TElement> {

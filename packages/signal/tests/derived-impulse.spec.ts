@@ -10,7 +10,7 @@ import {
   type WritableImpulse,
   batch,
   subscribe,
-  untrack,
+  untracked,
   useScoped,
 } from "../src"
 
@@ -868,7 +868,7 @@ describe.concurrent("Impulse(getter) garbage collection", () => {
     expect(source).toHaveEmittersSize(0)
   })
 
-  it("cleanups the WeakRef from untrack", async () => {
+  it("cleanups the WeakRef from untracked", async () => {
     const source = Impulse(0)
 
     ;(() => {
@@ -876,7 +876,7 @@ describe.concurrent("Impulse(getter) garbage collection", () => {
         count: source.getValue(scope),
       }))
 
-      expect(untrack(derived)).toStrictEqual({ count: 0 })
+      expect(untracked(derived)).toStrictEqual({ count: 0 })
       expect(source).toHaveEmittersSize(1)
       expect(derived).toHaveEmittersSize(0)
     })()
