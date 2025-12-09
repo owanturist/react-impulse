@@ -1,0 +1,147 @@
+import { z } from "zod"
+
+import { params } from "~/tools/params"
+
+import { FormShape, FormUnit } from "../../src"
+
+it("selects value", ({ monitor }) => {
+  const shape = FormShape(
+    {
+      first: FormUnit(""),
+      second: FormUnit(0, { schema: z.number().nonnegative() }),
+      third: FormShape({
+        one: FormUnit(true),
+        two: FormUnit(["1"], {
+          schema: z.array(z.string().max(1)),
+        }),
+      }),
+      fourth: ["anything"],
+    },
+    {
+      validateOn: "onInit",
+    },
+  )
+
+  const value = shape.getOutput(monitor)
+  expect(value).toStrictEqual({
+    first: "",
+    second: 0,
+    third: {
+      one: true,
+      two: ["1"],
+    },
+    fourth: ["anything"],
+  })
+  expect(shape.getOutput(monitor, params._first)).toStrictEqual(value)
+  expect(shape.getOutput(monitor, params._second)).toStrictEqual(value)
+
+  shape.setInput({
+    second: -1,
+    third: {
+      two: ["1", "12"],
+    },
+  })
+  expect(shape.getOutput(monitor)).toBeNull()
+  expect(shape.getOutput(monitor, params._first)).toBeNull()
+  expect(shape.getOutput(monitor, params._second)).toStrictEqual({
+    first: "",
+    second: null,
+    third: {
+      one: true,
+      two: null,
+    },
+    fourth: ["anything"],
+  })
+
+  expectTypeOf(shape.getOutput(monitor)).toEqualTypeOf<null | {
+    readonly first: string
+    readonly second: number
+    readonly third: {
+      readonly one: boolean
+      readonly two: Array<string>
+    }
+    readonly fourth: Array<string>
+  }>()
+  expectTypeOf(shape.getOutput(monitor, params._first)).toEqualTypeOf<null | {
+    readonly first: string
+    readonly second: number
+    readonly third: {
+      readonly one: boolean
+      readonly two: Array<string>
+    }
+    readonly fourth: Array<string>
+  }>()
+  expectTypeOf(shape.getOutput(monitor, params._second)).toEqualTypeOf<{
+    readonly first: null | string
+    readonly second: null | number
+    readonly third: {
+      readonly one: null | boolean
+      readonly two: null | Array<string>
+    }
+    readonly fourth: Array<string>
+  }>()
+})
+
+it("subsequently selects equal output shapes", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormUnit("1"),
+    second: FormUnit(2),
+  })
+
+  expect(shape.getOutput(monitor)).toStrictEqual({
+    first: "1",
+    second: 2,
+  })
+  expect(shape.getOutput(monitor)).toBe(shape.getOutput(monitor))
+  expect(shape.getOutput(monitor)).toBe(shape.getOutput(monitor))
+  expect(shape.getOutput(monitor, params._first)).toBe(shape.getOutput(monitor, params._first))
+  expect(shape.getOutput(monitor, params._second)).toBe(shape.getOutput(monitor, params._second))
+})
+
+it("persists unchanged output fields between changes", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormShape({
+      _0: FormUnit("1"),
+      _1: FormUnit("2"),
+    }),
+    second: FormShape({
+      _3: FormUnit("3"),
+      _4: FormUnit("4"),
+    }),
+  })
+
+  const output0 = shape.getOutput(monitor)
+
+  expect(output0).toStrictEqual({
+    first: {
+      _0: "1",
+      _1: "2",
+    },
+    second: {
+      _3: "3",
+      _4: "4",
+    },
+  })
+
+  shape.setInput({
+    second: {
+      _3: "third changed",
+    },
+  })
+
+  const output1 = shape.getOutput(monitor)
+
+  expect(output1).toStrictEqual({
+    first: {
+      _0: "1",
+      _1: "2",
+    },
+    second: {
+      _3: "third changed",
+      _4: "4",
+    },
+  })
+  expect(output1).not.toBe(output0)
+  expect(output1?.first).toBe(output0?.first)
+  expect(output1?.second).not.toBe(output0?.second)
+})

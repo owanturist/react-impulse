@@ -1,0 +1,6 @@
+interface FormSwitchConciseSchema<TActive, TBranch> {
+  readonly active: TActive
+  readonly branch: TBranch
+}
+
+export type { FormSwitchConciseSchema }
