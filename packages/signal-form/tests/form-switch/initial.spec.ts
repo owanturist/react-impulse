@@ -1,0 +1,751 @@
+import type { Monitor } from "@owanturist/signal"
+import z from "zod"
+
+import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
+import type { Setter } from "~/tools/setter"
+
+import {
+  FormShape,
+  FormSwitch,
+  type FormSwitchInputSetter,
+  type FormSwitchOptions,
+  FormUnit,
+} from "../../src"
+
+describe("types", () => {
+  const active = FormUnit("", {
+    schema: z.enum(["_1", "_2"]),
+  })
+
+  const branches = {
+    _1: FormUnit(true, {
+      schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
+    }),
+    _2: FormShape({
+      _3: FormUnit("name"),
+      _4: FormUnit(18),
+    }),
+  }
+
+  const form = FormSwitch(active, branches)
+
+  interface InitialSchema {
+    readonly active: string
+    readonly branches: {
+      readonly _1: boolean
+      readonly _2: {
+        readonly _3: string
+        readonly _4: number
+      }
+    }
+  }
+
+  type InitialSetter = Setter<
+    {
+      readonly active?: Setter<string, [string, string]>
+      readonly branches?: Setter<
+        {
+          readonly _1?: Setter<boolean, [boolean, boolean]>
+          readonly _2?: Setter<
+            {
+              readonly _3?: Setter<string, [string, string]>
+              readonly _4?: Setter<number, [number, number]>
+            },
+            [InitialSchema["branches"]["_2"], InitialSchema["branches"]["_2"]]
+          >
+        },
+        [InitialSchema["branches"], InitialSchema["branches"]]
+      >
+    },
+    [InitialSchema, InitialSchema]
+  >
+
+  it("matches schema type for getInitial(monitor)", () => {
+    expectTypeOf(form.getInitial).toEqualTypeOf<(monitor: Monitor) => InitialSchema>()
+  })
+
+  it("matches setter type for setInitial(setter)", () => {
+    expectTypeOf(form.setInitial).toEqualTypeOf<(setter: InitialSetter) => void>()
+  })
+
+  it("ensures FormSwitchOptions.initial type", () => {
+    const form = FormSwitch(active, branches, {
+      initial: {
+        // @ts-expect-error should be a string
+        active: 1,
+        branches: {
+          // @ts-expect-error should be a number
+          _1: 0,
+          _2: {
+            // @ts-expect-error should be a string
+            _3: false,
+            // @ts-expect-error should be a number
+            _4: "",
+          },
+        },
+      },
+    })
+
+    expectTypeOf(form.getInitial).returns.toEqualTypeOf<InitialSchema>()
+  })
+
+  describe("nested", () => {
+    const parent = FormSwitch(FormUnit<"_6" | "_7">("_6"), {
+      _6: FormUnit(0),
+      _7: form,
+    })
+
+    interface ParentInitialSchema {
+      readonly active: "_6" | "_7"
+      readonly branches: {
+        readonly _6: number
+        readonly _7: InitialSchema
+      }
+    }
+
+    type ParentInitialSetter = Setter<
+      {
+        readonly active?: Setter<"_6" | "_7", ["_6" | "_7", "_6" | "_7"]>
+        readonly branches?: Setter<
+          {
+            readonly _6?: Setter<number, [number, number]>
+            readonly _7?: InitialSetter
+          },
+          [ParentInitialSchema["branches"], ParentInitialSchema["branches"]]
+        >
+      },
+      [ParentInitialSchema, ParentInitialSchema]
+    >
+
+    it("matches schema type for getInitial(monitor)", () => {
+      expectTypeOf(parent.getInitial).toEqualTypeOf<(monitor: Monitor) => ParentInitialSchema>()
+    })
+
+    it("matches setter type for setInitial(setter)", () => {
+      expectTypeOf(parent.setInitial).toEqualTypeOf<(setter: ParentInitialSetter) => void>()
+    })
+  })
+})
+
+it("initiates with children input", ({ monitor }) => {
+  const form = FormSwitch(
+    FormUnit("_1", {
+      initial: "_2",
+      schema: z.enum(["_1", "_2", "_5"]),
+    }),
+    {
+      _1: FormUnit(true, {
+        initial: false,
+        schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
+      }),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18, {
+          initial: 20,
+        }),
+      }),
+      _5: FormSwitch(FormUnit<"_6" | "_7">("_6"), {
+        _6: FormUnit(0),
+        _7: FormUnit("0"),
+      }),
+    },
+  )
+
+  expect(form.getInitial(monitor)).toStrictEqual({
+    active: "_2",
+    branches: {
+      _1: false,
+      _2: {
+        _3: "name",
+        _4: 20,
+      },
+      _5: {
+        active: "_6",
+        branches: {
+          _6: 0,
+          _7: "0",
+        },
+      },
+    },
+  })
+})
+
+it("initiates with overridden initial", ({ monitor }) => {
+  const form = FormSwitch(
+    FormUnit("", {
+      initial: "_5",
+      schema: z.enum(["_1", "_2", "_5"]),
+    }),
+    {
+      _1: FormUnit(true, {
+        initial: false,
+        schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
+      }),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18, {
+          initial: 20,
+        }),
+      }),
+      _5: FormSwitch(FormUnit<"_6" | "_7">("_6"), {
+        _6: FormUnit(0),
+        _7: FormUnit("0"),
+      }),
+    },
+    {
+      initial: {
+        active: "_6",
+        branches: {
+          _1: true,
+          _2: {
+            _3: "overridden",
+            _4: 100,
+          },
+          _5: {
+            active: "_7",
+            branches: {
+              _6: 1,
+              _7: "1",
+            },
+          },
+        },
+      },
+    },
+  )
+
+  expect(form.getInitial(monitor)).toStrictEqual({
+    active: "_6",
+    branches: {
+      _1: true,
+      _2: {
+        _3: "overridden",
+        _4: 100,
+      },
+      _5: {
+        active: "_7",
+        branches: {
+          _6: 1,
+          _7: "1",
+        },
+      },
+    },
+  })
+  expect(form.getInput(monitor)).toStrictEqual({
+    active: "",
+    branches: {
+      _1: true,
+      _2: {
+        _3: "name",
+        _4: 18,
+      },
+      _5: {
+        active: "_6",
+        branches: {
+          _6: 0,
+          _7: "0",
+        },
+      },
+    },
+  })
+})
+
+it("sets initial", ({ monitor }) => {
+  const form = FormSwitch(
+    FormUnit("", {
+      initial: "_8",
+      schema: z.enum(["_1", "_2"]),
+    }),
+    {
+      _1: FormUnit(true, {
+        schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
+      }),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18),
+      }),
+    },
+  )
+
+  form.setInitial({
+    active: "_9",
+    branches: {
+      _1: false,
+      _2: {
+        _3: "updated",
+        _4: 25,
+      },
+    },
+  })
+
+  expect(form.getInitial(monitor)).toStrictEqual({
+    active: "_9",
+    branches: {
+      _1: false,
+      _2: {
+        _3: "updated",
+        _4: 25,
+      },
+    },
+  })
+  expect(form.getInput(monitor)).toStrictEqual({
+    active: "",
+    branches: {
+      _1: true,
+      _2: {
+        _3: "name",
+        _4: 18,
+      },
+    },
+  })
+})
+
+it("sets partial initial", ({ monitor }) => {
+  const form = FormSwitch(
+    FormUnit("", {
+      initial: "_10",
+      schema: z.enum(["_1", "_2"]),
+    }),
+    {
+      _1: FormUnit(true, {
+        schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
+      }),
+      _2: FormShape({
+        _3: FormUnit("name", {
+          initial: "initial",
+        }),
+        _4: FormUnit(18),
+      }),
+    },
+  )
+
+  form.setInitial({
+    branches: {
+      _2: {
+        _4: 25,
+      },
+    },
+  })
+  expect(form.getInitial(monitor)).toStrictEqual({
+    active: "_10",
+    branches: {
+      _1: true,
+      _2: {
+        _3: "initial",
+        _4: 25,
+      },
+    },
+  })
+  expect(form.getInput(monitor)).toStrictEqual({
+    active: "",
+    branches: {
+      _1: true,
+      _2: {
+        _3: "name",
+        _4: 18,
+      },
+    },
+  })
+
+  form.setInitial({
+    active: "_11",
+  })
+  expect(form.getInitial(monitor)).toStrictEqual({
+    active: "_11",
+    branches: {
+      _1: true,
+      _2: {
+        _3: "initial",
+        _4: 25,
+      },
+    },
+  })
+  expect(form.getInput(monitor)).toStrictEqual({
+    active: "",
+    branches: {
+      _1: true,
+      _2: {
+        _3: "name",
+        _4: 18,
+      },
+    },
+  })
+})
+
+describe("using recursive setter", () => {
+  const active = FormUnit("", {
+    schema: z.enum(["_1", "_2", "_5"]),
+    initial: "_12",
+  })
+
+  const branches = {
+    _1: FormUnit(true, {
+      initial: false,
+      schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
+    }),
+    _2: FormShape(
+      {
+        _3: FormUnit("name", {
+          initial: "initial",
+        }),
+        _4: FormUnit(18),
+      },
+      {
+        initial: {
+          _4: 100,
+        },
+      },
+    ),
+    _5: FormSwitch(
+      FormUnit("_6", {
+        schema: z.enum(["_6", "_7"]),
+      }),
+      {
+        _6: FormUnit(0, { initial: 1 }),
+        _7: FormUnit("0"),
+      },
+      {
+        initial: {
+          active: "_7",
+          branches: {
+            _6: 2,
+          },
+        },
+      },
+    ),
+  }
+
+  function setup(options?: FormSwitchOptions<typeof active, typeof branches>) {
+    return FormSwitch(active, branches, options)
+  }
+
+  describe.each<
+    [
+      string,
+      (
+        input: FormSwitchInputSetter<typeof active, typeof branches>,
+      ) => FormSwitch<typeof active, typeof branches>,
+    ]
+  >([
+    ["FormSwitchOptions.initial", (initial) => setup({ initial })],
+
+    [
+      "FormSwitch.setInitial",
+      (setter) => {
+        const form = setup()
+
+        form.setInitial(setter)
+
+        return form
+      },
+    ],
+  ])("in %s", (_, setup) => {
+    it("passes initial and input recursively to all setters", ({ monitor }) => {
+      expect.assertions(26)
+
+      const form = setup((initial, input) => {
+        expect(initial).toStrictEqual({
+          active: "_12",
+          branches: {
+            _1: false,
+            _2: {
+              _3: "initial",
+              _4: 100,
+            },
+            _5: {
+              active: "_7",
+              branches: {
+                _6: 2,
+                _7: "0",
+              },
+            },
+          },
+        })
+        expect(input).toStrictEqual({
+          active: "",
+          branches: {
+            _1: true,
+            _2: {
+              _3: "name",
+              _4: 18,
+            },
+            _5: {
+              active: "_6",
+              branches: {
+                _6: 0,
+                _7: "0",
+              },
+            },
+          },
+        })
+
+        return {
+          active: (initialActive, inputActive) => {
+            expect(initialActive).toBe("_12")
+            expect(inputActive).toBe("")
+
+            return "_1"
+          },
+
+          branches: (initialBranches, inputBranches) => {
+            expect(initialBranches).toStrictEqual({
+              _1: false,
+              _2: {
+                _3: "initial",
+                _4: 100,
+              },
+              _5: {
+                active: "_7",
+                branches: {
+                  _6: 2,
+                  _7: "0",
+                },
+              },
+            })
+            expect(inputBranches).toStrictEqual({
+              _1: true,
+              _2: {
+                _3: "name",
+                _4: 18,
+              },
+              _5: {
+                active: "_6",
+                branches: {
+                  _6: 0,
+                  _7: "0",
+                },
+              },
+            })
+
+            return {
+              _1: (initial1, input1) => {
+                expect(initial1).toBe(false)
+                expect(input1).toBe(true)
+
+                return true
+              },
+
+              _2: (initial2, input2) => {
+                expect(initial2).toStrictEqual({
+                  _3: "initial",
+                  _4: 100,
+                })
+                expect(input2).toStrictEqual({
+                  _3: "name",
+                  _4: 18,
+                })
+
+                return {
+                  _3: (initial3, input3) => {
+                    expect(initial3).toBe("initial")
+                    expect(input3).toBe("name")
+
+                    return "updated"
+                  },
+
+                  _4: (initial4, input4) => {
+                    expect(initial4).toBe(100)
+                    expect(input4).toBe(18)
+
+                    return 30
+                  },
+                }
+              },
+
+              _5: (initial5, input5) => {
+                expect(initial5).toStrictEqual({
+                  active: "_7",
+                  branches: {
+                    _6: 2,
+                    _7: "0",
+                  },
+                })
+                expect(input5).toStrictEqual({
+                  active: "_6",
+                  branches: {
+                    _6: 0,
+                    _7: "0",
+                  },
+                })
+
+                return {
+                  active: (initialActive, inputActive) => {
+                    expect(initialActive).toBe("_7")
+                    expect(inputActive).toBe("_6")
+
+                    return "_5"
+                  },
+
+                  branches: (initialBranches, inputBranches) => {
+                    expect(initialBranches).toStrictEqual({
+                      _6: 2,
+                      _7: "0",
+                    })
+                    expect(inputBranches).toStrictEqual({
+                      _6: 0,
+                      _7: "0",
+                    })
+
+                    return {
+                      _6: (initial6, input6) => {
+                        expect(initial6).toBe(2)
+                        expect(input6).toBe(0)
+
+                        return 3
+                      },
+
+                      _7: (initial7, input7) => {
+                        expect(initial7).toBe("0")
+                        expect(input7).toBe("0")
+
+                        return "3"
+                      },
+                    }
+                  },
+                }
+              },
+            }
+          },
+        }
+      })
+
+      expect(form.getInitial(monitor)).toStrictEqual({
+        active: "_1",
+        branches: {
+          _1: true,
+          _2: {
+            _3: "updated",
+            _4: 30,
+          },
+          _5: {
+            active: "_5",
+            branches: {
+              _6: 3,
+              _7: "3",
+            },
+          },
+        },
+      })
+      expect(form.getInput(monitor)).toStrictEqual({
+        active: "",
+        branches: {
+          _1: true,
+          _2: {
+            _3: "name",
+            _4: 18,
+          },
+          _5: {
+            active: "_6",
+            branches: {
+              _6: 0,
+              _7: "0",
+            },
+          },
+        },
+      })
+    })
+  })
+})
+
+describe("stable initial value", () => {
+  it("subsequently selects equal initial", ({ monitor }) => {
+    const form = FormSwitch(FormUnit<"_1" | "_2" | "_5">("_1"), {
+      _1: FormUnit(true),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18),
+      }),
+      _5: FormSwitch(
+        FormUnit("_6", {
+          schema: z.enum(["_6", "_7"]),
+        }),
+        {
+          _6: FormUnit(0),
+          _7: FormUnit("0"),
+        },
+      ),
+    })
+
+    expect(form.getInitial(monitor)).toBeInstanceOf(Object)
+    expect(form.getInitial(monitor)).toBe(form.getInitial(monitor))
+  })
+
+  it("persists unchanged branches input between changes", ({ monitor }) => {
+    const form = FormSwitch(FormUnit<"_1" | "_2" | "_5">("_1"), {
+      _1: FormUnit(true),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18),
+      }),
+      _5: FormSwitch(
+        FormUnit("_6", {
+          schema: z.enum(["_6", "_7"]),
+        }),
+        {
+          _6: FormUnit(0),
+          _7: FormUnit("0"),
+        },
+      ),
+    })
+
+    const initial0 = form.getInitial(monitor)
+
+    form.setInitial({
+      branches: {
+        _2: {
+          _3: "updated",
+        },
+      },
+    })
+
+    const initial1 = form.getInitial(monitor)
+
+    expect(initial1).not.toBe(initial0)
+    expect(initial1.active).toBe(initial0.active)
+    expect(initial1.branches).not.toBe(initial0.branches)
+    expect(initial1.branches._2).not.toBe(initial0.branches._2)
+    expect(initial1.branches._5).toBe(initial0.branches._5)
+  })
+
+  it("selects unequal initial values when isInputEqual is not specified", ({ monitor }) => {
+    const form = FormSwitch(FormUnit("_1" as const), {
+      _1: FormUnit([0]),
+    })
+
+    const initial0 = form.getInitial(monitor)
+
+    form.setInitial({
+      branches: {
+        _1: [0],
+      },
+    })
+    const initial1 = form.getInitial(monitor)
+
+    expect(initial0).not.toBe(initial1)
+    expect(initial0).toStrictEqual(initial1)
+  })
+
+  it("selects equal initial values when isInputEqual is specified", ({ monitor }) => {
+    const form = FormSwitch(
+      FormUnit("", {
+        schema: z.enum(["_1"]),
+      }),
+      {
+        _1: FormUnit([0], {
+          isInputEqual: isShallowArrayEqual,
+        }),
+      },
+    )
+
+    const initial0 = form.getInitial(monitor)
+
+    form.setInitial({
+      branches: {
+        _1: [0],
+      },
+    })
+    const initial1 = form.getInitial(monitor)
+
+    expect(initial0).toBe(initial1)
+    expect(initial0).toStrictEqual(initial1)
+  })
+})
