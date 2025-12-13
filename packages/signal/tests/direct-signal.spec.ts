@@ -18,7 +18,7 @@ describe("Signal()", () => {
   it("updates the signal with a new value", ({ monitor }) => {
     const signal = Signal<number>()
 
-    signal.update(1)
+    signal.write(1)
 
     expect(signal.read(monitor)).toBe(1)
   })
@@ -26,8 +26,8 @@ describe("Signal()", () => {
   it("updates the signal with a undefined", ({ monitor }) => {
     const signal = Signal<number>()
 
-    signal.update(1)
-    signal.update(undefined)
+    signal.write(1)
+    signal.write(undefined)
 
     expect(signal.read(monitor)).toBeUndefined()
   })
@@ -43,21 +43,21 @@ describe("Signal(value, options?)", () => {
   it("assigns Object.is as default equals", () => {
     const signal = Signal({ count: 0 })
 
-    signal.update({ count: 1 })
+    signal.write({ count: 1 })
     expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
   it("assigns Object.is by `null` as equals", () => {
     const signal = Signal({ count: 0 }, { equals: null })
 
-    signal.update({ count: 1 })
+    signal.write({ count: 1 })
     expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
   it("assigns custom function as equals", () => {
     const signal = Signal({ count: 0 }, { equals: Counter.equals })
 
-    signal.update({ count: 1 })
+    signal.write({ count: 1 })
     expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 

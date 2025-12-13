@@ -36,7 +36,7 @@ describe.each([
     expect(result.current).toBe(initial)
 
     act(() => {
-      signal.update({ count: 0 })
+      signal.write({ count: 0 })
     })
     expect(result.current).toBe(initial)
 
@@ -47,7 +47,7 @@ describe.each([
     expect(result.current).toBe(initial)
 
     act(() => {
-      signal.update({ count: 0 })
+      signal.write({ count: 0 })
     })
     expect(result.current).not.toBe(initial)
     expect(result.current).toStrictEqual(initial)

@@ -17,7 +17,7 @@ describe("single Signal", () => {
     expect(signal).toHaveEmittersSize(1)
   })
 
-  it("executes listener on update", () => {
+  it("executes listener on write", () => {
     const spy = vi.fn()
     const signal = Signal(1)
 
@@ -26,7 +26,7 @@ describe("single Signal", () => {
     })
 
     spy.mockReset()
-    signal.update(2)
+    signal.write(2)
     expect(spy).toHaveBeenCalledExactlyOnceWith(2)
     expect(signal).toHaveEmittersSize(1)
   })
@@ -49,15 +49,15 @@ describe("single Signal", () => {
 
     expect(cleanup).not.toHaveBeenCalled()
 
-    signal.update(2)
+    signal.write(2)
     expect(cleanup).toHaveBeenCalledExactlyOnceWith(1)
     vi.clearAllMocks()
 
-    signal.update(5)
+    signal.write(5)
     expect(cleanup).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
-    signal.update(7)
+    signal.write(7)
     expect(cleanup).toHaveBeenCalledExactlyOnceWith(5)
     vi.clearAllMocks()
 
@@ -65,7 +65,7 @@ describe("single Signal", () => {
     expect(cleanup).toHaveBeenCalledExactlyOnceWith(7)
     vi.clearAllMocks()
 
-    signal.update(9)
+    signal.write(9)
     expect(cleanup).not.toHaveBeenCalled()
   })
 
@@ -80,7 +80,7 @@ describe("single Signal", () => {
     unsubscribe()
 
     spy.mockReset()
-    signal.update(2)
+    signal.write(2)
     expect(spy).not.toHaveBeenCalled()
     expect(signal).toHaveEmittersSize(0)
   })
@@ -97,12 +97,12 @@ describe("single Signal", () => {
     unsubscribe()
 
     spy.mockReset()
-    signal.update(2)
+    signal.write(2)
     expect(spy).not.toHaveBeenCalled()
     expect(signal).toHaveEmittersSize(0)
   })
 
-  it("executes listener on every Signal update", () => {
+  it("executes listener on every Signal write", () => {
     const spy = vi.fn()
     const signal = Signal(1)
 
@@ -111,8 +111,8 @@ describe("single Signal", () => {
     })
 
     spy.mockReset()
-    signal.update(2)
-    signal.update(3)
+    signal.write(2)
+    signal.write(3)
     expect(spy).toHaveBeenCalledTimes(2)
     expect(spy).toHaveBeenLastCalledWith(3)
     expect(signal).toHaveEmittersSize(1)
@@ -128,8 +128,8 @@ describe("single Signal", () => {
 
     spy.mockReset()
     batch(() => {
-      signal.update(2)
-      signal.update(3)
+      signal.write(2)
+      signal.write(3)
     })
     expect(spy).toHaveBeenCalledExactlyOnceWith(3)
     expect(signal).toHaveEmittersSize(1)
@@ -144,7 +144,7 @@ describe("single Signal", () => {
     })
 
     spy.mockReset()
-    signal.update(1)
+    signal.write(1)
     expect(spy).not.toHaveBeenCalled()
     expect(signal).toHaveEmittersSize(1)
   })
@@ -158,11 +158,11 @@ describe("single Signal", () => {
     })
 
     spy.mockReset()
-    signal.update({ count: 1 })
+    signal.write({ count: 1 })
     expect(spy).not.toHaveBeenCalled()
 
     spy.mockReset()
-    signal.update({ count: 2 })
+    signal.write({ count: 2 })
     expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 2 })
     expect(signal).toHaveEmittersSize(1)
   })
@@ -183,7 +183,7 @@ describe("multiple Signals", () => {
     expect(signal2).toHaveEmittersSize(1)
   })
 
-  it("executes listener on update", () => {
+  it("executes listener on write", () => {
     const spy = vi.fn()
     const signal1 = Signal(1)
     const signal2 = Signal(2)
@@ -193,11 +193,11 @@ describe("multiple Signals", () => {
     })
 
     spy.mockReset()
-    signal1.update(3)
+    signal1.write(3)
     expect(spy).toHaveBeenCalledExactlyOnceWith(5)
 
     spy.mockReset()
-    signal2.update(4)
+    signal2.write(4)
     expect(spy).toHaveBeenCalledExactlyOnceWith(7)
     expect(signal1).toHaveEmittersSize(1)
     expect(signal2).toHaveEmittersSize(1)
@@ -217,8 +217,8 @@ describe("multiple Signals", () => {
     expect(signal2).toHaveEmittersSize(0)
 
     spy.mockReset()
-    signal1.update(4)
-    signal2.update(5)
+    signal1.write(4)
+    signal2.write(5)
     expect(spy).not.toHaveBeenCalled()
   })
 
@@ -236,25 +236,25 @@ describe("multiple Signals", () => {
     expect(signal2).toHaveEmittersSize(0)
 
     spy.mockReset()
-    signal2.update(3)
+    signal2.write(3)
     expect(spy).not.toHaveBeenCalled()
     expect(signal1).toHaveEmittersSize(1)
     expect(signal2).toHaveEmittersSize(0)
 
     spy.mockReset()
-    signal1.update(2)
+    signal1.write(2)
     expect(spy).toHaveBeenCalledExactlyOnceWith(5)
     expect(signal1).toHaveEmittersSize(1)
     expect(signal2).toHaveEmittersSize(1)
 
     spy.mockReset()
-    signal2.update(4)
+    signal2.write(4)
     expect(spy).toHaveBeenCalledExactlyOnceWith(6)
     expect(signal1).toHaveEmittersSize(1)
     expect(signal2).toHaveEmittersSize(1)
 
     spy.mockReset()
-    signal1.update(1)
+    signal1.write(1)
     expect(spy).not.toHaveBeenCalled()
     expect(signal1).toHaveEmittersSize(1)
     expect(signal2).toHaveEmittersSize(0)
@@ -262,7 +262,7 @@ describe("multiple Signals", () => {
 })
 
 describe("batching against effect listener", () => {
-  it("executes listener on every Signal update", () => {
+  it("executes listener on every Signal write", () => {
     const spy = vi.fn()
     const signal1 = Signal(1)
     const signal2 = Signal(2)
@@ -272,8 +272,8 @@ describe("batching against effect listener", () => {
     })
 
     spy.mockReset()
-    signal1.update(2)
-    signal2.update(3)
+    signal1.write(2)
+    signal2.write(3)
     expect(spy).toHaveBeenCalledTimes(2)
     expect(spy).toHaveBeenNthCalledWith(1, 4)
     expect(spy).toHaveBeenNthCalledWith(2, 5)
@@ -290,15 +290,15 @@ describe("batching against effect listener", () => {
 
     spy.mockReset()
     batch(() => {
-      signal1.update(2)
-      signal2.update(3)
+      signal1.write(2)
+      signal2.write(3)
     })
     expect(spy).toHaveBeenCalledExactlyOnceWith(5)
   })
 })
 
 describe("batching against a hook", () => {
-  it("enqueues single re-render to a hook which signals update inside effect's listener", () => {
+  it("enqueues single re-render to a hook which signals write inside effect's listener", () => {
     const signal1 = Signal(1)
     const signal2 = Signal(2)
     const signal3 = Signal(3)
@@ -315,9 +315,9 @@ describe("batching against a hook", () => {
 
     const unsubscribe = effect((monitor) => {
       if (signal4.read(monitor) > 1 && signal4.read(monitor) < 5) {
-        signal1.update((x) => x + 1)
-        signal2.update((x) => x + 1)
-        signal3.update((x) => x + 1)
+        signal1.write((x) => x + 1)
+        signal2.write((x) => x + 1)
+        signal3.write((x) => x + 1)
       }
     })
 
@@ -326,23 +326,23 @@ describe("batching against a hook", () => {
     vi.clearAllMocks()
 
     act(() => {
-      signal4.update(1)
+      signal4.write(1)
     })
     expect(result.current).toBe(6)
     expect(spy).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
     act(() => {
-      signal4.update(2)
+      signal4.write(2)
     })
     expect(result.current).toBe(9)
     expect(spy).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     act(() => {
-      signal1.update((x) => x + 1)
-      signal2.update((x) => x + 1)
-      signal3.update((x) => x + 1)
+      signal1.write((x) => x + 1)
+      signal2.write((x) => x + 1)
+      signal3.write((x) => x + 1)
     })
     expect(result.current).toBe(12)
     expect(spy).toHaveBeenCalledTimes(3)
@@ -350,13 +350,13 @@ describe("batching against a hook", () => {
 
     unsubscribe()
     act(() => {
-      signal4.update(3)
+      signal4.write(3)
     })
     expect(result.current).toBe(12)
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it("enqueues single re-render to a hook which signals update inside effect's cleanup", () => {
+  it("enqueues single re-render to a hook which signals write inside effect's cleanup", () => {
     const signal1 = Signal(1)
     const signal2 = Signal(2)
     const signal3 = Signal(3)
@@ -374,9 +374,9 @@ describe("batching against a hook", () => {
     const unsubscribe = effect((monitor) => {
       if (signal4.read(monitor) > 1 && signal4.read(monitor) < 5) {
         return () => {
-          signal1.update((x) => x + 1)
-          signal2.update((x) => x + 1)
-          signal3.update((x) => x + 1)
+          signal1.write((x) => x + 1)
+          signal2.write((x) => x + 1)
+          signal3.write((x) => x + 1)
         }
       }
 
@@ -388,30 +388,30 @@ describe("batching against a hook", () => {
     vi.clearAllMocks()
 
     act(() => {
-      signal4.update(1)
+      signal4.write(1)
     })
     expect(result.current).toBe(6)
     expect(spy).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
     act(() => {
-      signal4.update(2)
+      signal4.write(2)
     })
     expect(result.current).toBe(6)
     expect(spy).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
     act(() => {
-      signal4.update(3)
+      signal4.write(3)
     })
     expect(result.current).toBe(9)
     expect(spy).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
     act(() => {
-      signal1.update((x) => x + 1)
-      signal2.update((x) => x + 1)
-      signal3.update((x) => x + 1)
+      signal1.write((x) => x + 1)
+      signal2.write((x) => x + 1)
+      signal3.write((x) => x + 1)
     })
     expect(result.current).toBe(12)
     expect(spy).toHaveBeenCalledTimes(3)
@@ -448,7 +448,7 @@ describe("nested Signals", () => {
     expect(spy).toHaveBeenCalledExactlyOnceWith(3)
   })
 
-  it("executes listener on update", () => {
+  it("executes listener on write", () => {
     const spy = vi.fn()
     const signal1 = Signal(1)
     const signal2 = Signal(2)
@@ -464,15 +464,15 @@ describe("nested Signals", () => {
     })
 
     spy.mockReset()
-    signal1.update(3)
+    signal1.write(3)
     expect(spy).toHaveBeenCalledExactlyOnceWith(5)
 
     spy.mockReset()
-    signal2.update(4)
+    signal2.write(4)
     expect(spy).toHaveBeenCalledExactlyOnceWith(7)
 
     spy.mockReset()
-    signal3.update({
+    signal3.write({
       first: signal2,
       second: signal1,
     })

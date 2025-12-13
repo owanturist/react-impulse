@@ -30,7 +30,7 @@ interface UseComputedOptions<TValue> {
 }
 
 /**
- * A hook reads an {@link signal} value whenever it updates but enqueues a re-render only when the resulting value is different from the previous.
+ * A hook reads an {@link signal} value whenever it writes but enqueues a re-render only when the resulting value is different from the previous.
  *
  * @template TValue the type of the {@link Signal} value.
  *

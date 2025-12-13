@@ -102,7 +102,7 @@ class FormListState<TElement extends SignalForm = SignalForm> extends SignalForm
       const elements = this._elements.read(monitor)
       const initialElements = state._initialElements.read(monitor)
 
-      this._initialElements.update(initialElements)
+      this._initialElements.write(initialElements)
 
       for (const [index, element] of entries(initialElements._list.read(monitor))) {
         elements.at(index)?._replaceInitial(monitor, element, isMounting)
@@ -131,7 +131,7 @@ class FormListState<TElement extends SignalForm = SignalForm> extends SignalForm
       (element) => element._clone(),
     )
 
-    initialElements._list.update(nextInitialElements)
+    initialElements._list.write(nextInitialElements)
 
     for (const [index, initial] of entries(setters)) {
       if (!isUndefined(initial)) {
@@ -370,7 +370,7 @@ class FormListState<TElement extends SignalForm = SignalForm> extends SignalForm
       element._reset(monitor, undefined)
     }
 
-    this._elements.update(map(nextElements, (element) => this._parentOf(element)))
+    this._elements.write(map(nextElements, (element) => this._parentOf(element)))
   }
 
   public _getChildren<TChildParams extends SignalFormParams>(

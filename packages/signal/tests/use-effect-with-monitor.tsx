@@ -40,7 +40,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value.update(2)
+        value.write(2)
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(4)
@@ -72,7 +72,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value.update(3)
+        value.write(3)
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(6)
@@ -132,7 +132,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value1.update(10)
+        value1.write(10)
       })
 
       expect(onEffect).not.toHaveBeenCalled()
@@ -140,7 +140,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value2.update(5)
+        value2.write(5)
       })
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(10)
       expect(onRender).not.toHaveBeenCalled()
@@ -168,7 +168,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value.update(4)
+        value.write(4)
       })
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(12)
       expect(onRender).not.toHaveBeenCalled()
@@ -212,14 +212,14 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        first.update(4)
+        first.write(4)
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(14)
       vi.clearAllMocks()
 
       act(() => {
-        second.update(5)
+        second.write(5)
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(18)
@@ -271,21 +271,21 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        _0.update(4)
+        _0.write(4)
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(14)
       vi.clearAllMocks()
 
       act(() => {
-        _1.update(5)
+        _1.write(5)
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(18)
       vi.clearAllMocks()
 
       act(() => {
-        list.update((items) => [...items, _2])
+        list.write((items) => [...items, _2])
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(26)
@@ -293,7 +293,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        list.update((items) => items.slice(1))
+        list.write((items) => items.slice(1))
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(18)
@@ -364,7 +364,7 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        value.update(4)
+        value.write(4)
       })
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(8)
@@ -379,7 +379,7 @@ describe.each([
       const monitor = useMonitor()
 
       return (
-        <button type="button" data-testid="count" onClick={() => count.update((x) => x + 1)}>
+        <button type="button" data-testid="count" onClick={() => count.write((x) => x + 1)}>
           {count.read(monitor)}
         </button>
       )
@@ -464,13 +464,13 @@ describe.each([
     vi.clearAllMocks()
 
     act(() => {
-      signal.update(3)
+      signal.write(3)
     })
     expect(spy).toHaveBeenCalledExactlyOnceWith(5)
     vi.clearAllMocks()
 
     act(() => {
-      signal.update(3)
+      signal.write(3)
     })
     expect(spy).not.toHaveBeenCalled()
     vi.clearAllMocks()
@@ -507,13 +507,13 @@ describe.each([
     vi.clearAllMocks()
 
     act(() => {
-      left.update(2)
+      left.write(2)
     })
     expect(spy).toHaveBeenCalledExactlyOnceWith(4)
     vi.clearAllMocks()
 
     act(() => {
-      right.update(3)
+      right.write(3)
     })
     expect(spy).toHaveBeenCalledExactlyOnceWith(5)
     vi.clearAllMocks()
@@ -546,7 +546,7 @@ describe.each([
 
     expect(cleanup).not.toHaveBeenCalled()
 
-    counter.update({ count: 3 })
+    counter.write({ count: 3 })
     expect(cleanup).toHaveBeenCalledExactlyOnceWith(4)
     vi.clearAllMocks()
 
@@ -561,7 +561,7 @@ describe.each([
     expect(cleanup).toHaveBeenCalledExactlyOnceWith(9)
     vi.clearAllMocks()
 
-    counter.update({ count: 4 })
+    counter.write({ count: 4 })
     expect(cleanup).not.toHaveBeenCalled()
   })
 
@@ -598,14 +598,14 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        signal1.update(4)
+        signal1.write(4)
       })
       expect(spyRender).toHaveBeenCalledExactlyOnceWith(3)
       expect(spyEffect).toHaveBeenCalledExactlyOnceWith(4)
       vi.clearAllMocks()
 
       act(() => {
-        signal2.update(5)
+        signal2.write(5)
       })
       expect(spyRender).toHaveBeenCalledExactlyOnceWith(5)
       expect(spyEffect).not.toHaveBeenCalled()

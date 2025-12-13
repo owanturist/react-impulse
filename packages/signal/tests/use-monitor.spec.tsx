@@ -24,7 +24,7 @@ it("does not change monitor value unless monitored signal changes", () => {
   expect(spy).toHaveBeenCalledTimes(1)
 
   act(() => {
-    signal.update(2)
+    signal.write(2)
   })
   expect(result.current).toBe(2)
   expect(spy).toHaveBeenCalledTimes(2)
@@ -63,14 +63,14 @@ it("cannot unsubscribe when swapped", () => {
   vi.clearAllMocks()
 
   act(() => {
-    value1.update(10)
+    value1.write(10)
   })
 
   expect(onRender).toHaveBeenCalledOnce()
   vi.clearAllMocks()
 
   act(() => {
-    value2.update(5)
+    value2.write(5)
   })
   expect(onRender).toHaveBeenCalledOnce()
 

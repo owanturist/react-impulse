@@ -44,7 +44,7 @@ describe("factory without deps", () => {
     spy.mockReset()
 
     act(() => {
-      signal.update(Counter.inc)
+      signal.write(Counter.inc)
     })
 
     // 1st executes factory to extract new result
@@ -136,7 +136,7 @@ describe.each([
     spy.mockReset()
 
     act(() => {
-      signal.update(Counter.inc)
+      signal.write(Counter.inc)
     })
 
     expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 2 })

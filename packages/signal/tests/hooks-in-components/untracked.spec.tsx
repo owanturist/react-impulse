@@ -30,8 +30,8 @@ it("returns the `factory` function result without tracking signals", () => {
   expect(onRender).toHaveBeenCalledTimes(1)
   vi.clearAllMocks()
 
-  first.update({ count: 2 })
-  second.update({ count: 3 })
+  first.write({ count: 2 })
+  second.write({ count: 3 })
   expect(screen.getByRole("button")).toHaveTextContent("3")
   expect(onRender).toHaveBeenCalledTimes(0)
   vi.clearAllMocks()
@@ -41,8 +41,8 @@ it("returns the `factory` function result without tracking signals", () => {
   expect(onRender).toHaveBeenCalledTimes(1)
   vi.clearAllMocks()
 
-  first.update({ count: 3 })
-  second.update({ count: 4 })
+  first.write({ count: 3 })
+  second.write({ count: 4 })
   expect(screen.getByRole("button")).toHaveTextContent("10")
   expect(onRender).toHaveBeenCalledTimes(0)
   vi.clearAllMocks()

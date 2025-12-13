@@ -37,8 +37,8 @@ describe("monitoring multiple signals", () => {
           type="button"
           data-testid="increment-both"
           onClick={() => {
-            firstCount.update((x) => x + 1)
-            secondCount.update((x) => x + 1)
+            firstCount.write((x) => x + 1)
+            secondCount.write((x) => x + 1)
           }}
         />
       </React.Profiler>
@@ -220,8 +220,8 @@ describe("monitoring multiple signals", () => {
 
     // increment both from the outside
     act(() => {
-      firstCount.update((x) => x + 1)
-      secondCount.update((x) => x + 1)
+      firstCount.write((x) => x + 1)
+      secondCount.write((x) => x + 1)
     })
     expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount)
     expect(onFirstCountRender).toHaveBeenCalledOnce()

@@ -126,7 +126,7 @@ class FormUnitState<TInput, TError, TOutput> extends SignalFormState<
       // proxies the validated setter where `false` means revalidate
       // and `true` sets the validated state to `true`
       (next, monitor) => {
-        isValidated.update(() => {
+        isValidated.write(() => {
           if (next || _transform.read(monitor)._transformer) {
             return true
           }
@@ -152,7 +152,7 @@ class FormUnitState<TInput, TError, TOutput> extends SignalFormState<
       },
     )
 
-    this._validated.update(false)
+    this._validated.write(false)
   }
 
   public _childOf(parent: null | SignalFormState): FormUnitState<TInput, TError, TOutput> {
@@ -189,13 +189,13 @@ class FormUnitState<TInput, TError, TOutput> extends SignalFormState<
       const initialState = state._initialState.read(monitor)
 
       if (_explicit.read(monitor) && isMounting) {
-        initialState._explicit.update(true)
-        initialState._current.update(_current.read(monitor))
+        initialState._explicit.write(true)
+        initialState._current.write(_current.read(monitor))
       }
 
-      this._initialState.update(initialState)
+      this._initialState.write(initialState)
     } else {
-      this._initialState.update({
+      this._initialState.write({
         _current: _current.clone(),
         _explicit: _explicit.clone(),
       })
@@ -205,23 +205,23 @@ class FormUnitState<TInput, TError, TOutput> extends SignalFormState<
   public _setInitial(monitor: Monitor, setter: FormUnitInputSetter<TInput>): void {
     const { _current, _explicit } = this._initialState.read(monitor)
 
-    _current.update((initial) =>
+    _current.write((initial) =>
       isFunction(setter) ? setter(initial, this._input.read(monitor)) : setter,
     )
 
-    _explicit.update(true)
+    _explicit.write(true)
 
-    this._validated.update(identity)
+    this._validated.write(identity)
   }
 
   // I N P U T
 
   public _setInput(monitor: Monitor, setter: FormUnitInputSetter<TInput>): void {
-    this._input.update((input) =>
+    this._input.write((input) =>
       isFunction(setter) ? setter(input, this._initial.read(monitor)) : setter,
     )
 
-    this._validated.update(identity)
+    this._validated.write(identity)
   }
 
   // E R R O R
@@ -231,7 +231,7 @@ class FormUnitState<TInput, TError, TOutput> extends SignalFormState<
   public readonly _errorVerbose: ReadonlySignal<null | TError>
 
   public _setError(_monitor: Monitor, setter: FormUnitErrorSetter<TError>): void {
-    this._customError.update((error) => resolveSetter(setter, error))
+    this._customError.write((error) => resolveSetter(setter, error))
   }
 
   // V A L I D A T E   O N
@@ -241,12 +241,12 @@ class FormUnitState<TInput, TError, TOutput> extends SignalFormState<
   public _setValidateOn(monitor: Monitor, setter: FormUnitValidateOnSetter): void {
     const before = this._validateOn.read(monitor)
 
-    this._validateOn.update(resolveSetter(setter, before))
+    this._validateOn.write(resolveSetter(setter, before))
 
     const after = this._validateOn.read(monitor)
 
     if (before !== after) {
-      this._validated.update(false)
+      this._validated.write(false)
     }
   }
 
@@ -258,8 +258,8 @@ class FormUnitState<TInput, TError, TOutput> extends SignalFormState<
     _monitor: Monitor,
     setter: FormUnitParams<TInput, TError, TOutput>["flag.setter"],
   ): void {
-    this._touched.update((touched) => resolveSetter(setter, touched))
-    this._validated.update(identity)
+    this._touched.write((touched) => resolveSetter(setter, touched))
+    this._validated.write(identity)
   }
 
   // O U T P U T
@@ -283,7 +283,7 @@ class FormUnitState<TInput, TError, TOutput> extends SignalFormState<
   public readonly _validatedVerbose: ReadonlySignal<boolean>
 
   public _forceValidated(): void {
-    this._validated.update(true)
+    this._validated.write(true)
   }
 
   // D I R T Y
@@ -303,12 +303,12 @@ class FormUnitState<TInput, TError, TOutput> extends SignalFormState<
         ? resetter(this._initial.read(monitor), this._input.read(monitor))
         : resetter
 
-    this._initialState.read(monitor)._current.update(resetValue)
-    this._input.update(resetValue)
+    this._initialState.read(monitor)._current.write(resetValue)
+    this._input.write(resetValue)
     // TODO test when reset for all below
-    this._touched.update(false)
-    this._customError.update(null)
-    this._validated.update(false)
+    this._touched.write(false)
+    this._customError.write(null)
+    this._validated.write(false)
   }
 
   // C H I L D R E N
@@ -321,8 +321,8 @@ class FormUnitState<TInput, TError, TOutput> extends SignalFormState<
 
   public _setTransform(transformer: FormUnitTransformer<TInput, TOutput>): void {
     batch(() => {
-      this._transform.update(transformFromTransformer(transformer))
-      this._validated.update(identity)
+      this._transform.write(transformFromTransformer(transformer))
+      this._validated.write(identity)
     })
   }
 }
