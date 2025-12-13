@@ -2,11 +2,11 @@
 
 module.exports = [
   {
-    name: "signal",
+    name: "react-impulse",
     ignore: ["use-sync-external-store"],
   },
   {
-    name: "signal-form",
+    name: "react-impulse-form",
     ignore: ["@owanturist/signal"],
   },
 ]

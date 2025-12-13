@@ -5,7 +5,7 @@ export default defineConfig({
     projects: ["packages/*"],
 
     coverage: {
-      include: ["packages/signal/src/**"],
+      include: ["packages/react-impulse/src/**"],
       reporter: ["text", "json"],
     },
   },
