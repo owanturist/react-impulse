@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.7/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -237,10 +237,13 @@
             "useQwikValidLexicalScope": "off", // irrelevant
             "useVueMultiWordComponentNames": "off", // irrelevant
             "useVueDefineMacrosOrder": "off", // irrelevant
+            "noEqualsToNull": "off", // == null is used to check for both null and undefined
+            "noLeakedRender": "off", // many false-positives for boolean && JSX expressions
             "noVueReservedProps": "off", // irrelevant
             "noVueReservedKeys": "off", // irrelevant
             "noVueDuplicateKeys": "off", // irrelevant
             "noVueDataObjectDeclaration": "off", // irrelevant
+            "noTernary": "off", // ternary is useful in many cases
 
             "noUnresolvedImports": "off", // handled by TS
             "noUselessUndefined": "off", // it is better to be explicit about undefined values
