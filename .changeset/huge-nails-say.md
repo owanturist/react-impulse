@@ -3,4 +3,4 @@
 "react-impulse-form": patch
 ---
 
-Update React dependencies to 19.2.0.
+Update React dependencies to 19.2.3.
