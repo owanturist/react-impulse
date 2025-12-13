@@ -112,7 +112,7 @@ class FormShapeState<TFields extends FormShapeFields = FormShapeFields> extends 
 
     for (const [key, field] of entries(this._meta)) {
       if (hasProperty(setters, key) && !isUndefined(setters[key])) {
-        field.update(setters[key] as TFields[typeof key])
+        field.write(setters[key] as TFields[typeof key])
       }
     }
   }

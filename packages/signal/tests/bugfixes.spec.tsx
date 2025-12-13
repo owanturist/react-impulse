@@ -21,11 +21,11 @@ describe("watching misses when defined after useEffect #140", () => {
     const y = useGetSecond(second)
 
     React.useEffect(() => {
-      second.update(x)
+      second.write(x)
     }, [second, x])
 
     return (
-      <button type="button" onClick={() => first.update(x + 1)}>
+      <button type="button" onClick={() => first.write(x + 1)}>
         {y}
       </button>
     )
@@ -40,13 +40,13 @@ describe("watching misses when defined after useEffect #140", () => {
     const x = useGetFirst(first)
 
     React.useEffect(() => {
-      second.update(x)
+      second.write(x)
     }, [second, x])
 
     const y = useGetSecond(second)
 
     return (
-      <button type="button" onClick={() => first.update(x + 1)}>
+      <button type="button" onClick={() => first.write(x + 1)}>
         {y}
       </button>
     )
@@ -96,7 +96,7 @@ describe("watching misses when defined after useEffect #140", () => {
         expect(button).toHaveTextContent("2")
 
         act(() => {
-          first.update(10)
+          first.write(10)
         })
         expect(button).toHaveTextContent("10")
 
@@ -104,7 +104,7 @@ describe("watching misses when defined after useEffect #140", () => {
         expect(button).toHaveTextContent("11")
 
         act(() => {
-          second.update(20)
+          second.write(20)
         })
         expect(button).toHaveTextContent("20")
 
@@ -143,7 +143,7 @@ describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321
     expect(result).toHaveTextContent("1")
 
     act(() => {
-      count.update(2)
+      count.write(2)
     })
     expect(result).toHaveTextContent("2")
   })
@@ -165,7 +165,7 @@ describe("return the same component type from watch #322", () => {
     return (
       <StatelessInput
         value={value.read(monitor)}
-        onChange={(nextValue) => value.update(nextValue)}
+        onChange={(nextValue) => value.write(nextValue)}
       />
     )
   }
@@ -180,7 +180,7 @@ describe("return the same component type from watch #322", () => {
     expect(first).toHaveValue("hello")
 
     act(() => {
-      text.update("world")
+      text.write("world")
     })
     expect(first).toHaveValue("world")
   })
@@ -194,7 +194,7 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
     React.useState(0)
 
     return (
-      <button type="button" onClick={() => count.update((x) => x + 1)}>
+      <button type="button" onClick={() => count.write((x) => x + 1)}>
         {count.read(monitor)}
       </button>
     )
@@ -219,7 +219,7 @@ describe("in StrictMode, fails due to unexpected .setValue during watch call #33
     expect(btn).toHaveTextContent("2")
 
     act(() => {
-      signal.update((x) => x + 1)
+      signal.write((x) => x + 1)
     })
     expect(btn).toHaveTextContent("3")
   })
@@ -240,7 +240,7 @@ describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a n
     expect(result.current).toBe(0)
 
     act(() => {
-      signal.update(1)
+      signal.write(1)
     })
 
     expect(result.current).toBe(0)
@@ -248,7 +248,7 @@ describe("TransmittingImpulse.setValue does not enqueue a rerender when sets a n
 })
 
 describe("ImpulseForm.reset() does not run subscribers #969", () => {
-  it("runs the effect listeners for every derived update", ({ monitor }) => {
+  it("runs the effect listeners for every derived write", ({ monitor }) => {
     const spy = vi.fn()
     const source1 = Signal(1)
     const source2 = Signal<string>()
@@ -260,7 +260,7 @@ describe("ImpulseForm.reset() does not run subscribers #969", () => {
       spy(output)
 
       if (output === false) {
-        source2.update("error")
+        source2.write("error")
       }
     })
 
@@ -269,10 +269,10 @@ describe("ImpulseForm.reset() does not run subscribers #969", () => {
     expect(derived.read(monitor)).toBe(true)
     spy.mockClear()
 
-    // cause the source_2 update
-    source1.update(-1)
+    // cause the source_2 write
+    source1.write(-1)
     expect(spy).toHaveBeenCalledTimes(2)
-    // source_1 update causes the listener run
+    // source_1 write causes the listener run
     expect(spy).toHaveBeenNthCalledWith(1, false)
     // the source_2 inside the listener causes the listener run again
     expect(spy).toHaveBeenNthCalledWith(2, "error")
@@ -280,12 +280,12 @@ describe("ImpulseForm.reset() does not run subscribers #969", () => {
     spy.mockClear()
 
     // source_1 is not relevant to the current derived value, so it does not cause the listener run
-    source1.update(1)
+    source1.write(1)
     expect(spy).not.toHaveBeenCalled()
     expect(derived.read(monitor)).toBe("error")
 
     // enable the source_1 to derive the derived value again
-    source2.update(undefined)
+    source2.write(undefined)
     expect(spy).toHaveBeenCalledExactlyOnceWith(true)
     expect(derived.read(monitor)).toBe(true)
   })

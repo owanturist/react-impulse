@@ -46,7 +46,7 @@ describe("single Signal", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value.update(2)
+      value.write(2)
     })
 
     expect(node).toHaveTextContent("4")
@@ -81,7 +81,7 @@ describe("single Signal", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value.update(3)
+      value.write(3)
     })
 
     expect(onMemo).toHaveBeenCalledExactlyOnceWith(6)
@@ -143,7 +143,7 @@ describe("single Signal", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value1.update(10)
+      value1.write(10)
     })
 
     expect(onMemo).toHaveBeenCalledOnce()
@@ -151,7 +151,7 @@ describe("single Signal", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value2.update(5)
+      value2.write(5)
     })
     expect(onMemo).toHaveBeenCalledExactlyOnceWith(10)
     expect(onRender).toHaveBeenCalledOnce()
@@ -180,7 +180,7 @@ describe("single Signal", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value.update(4)
+      value.write(4)
     })
     expect(onMemo).toHaveBeenCalledExactlyOnceWith(12)
     expect(onRender).toHaveBeenCalledOnce()
@@ -221,12 +221,12 @@ describe("multiple signals", () => {
     expect(node).toHaveTextContent("10")
 
     act(() => {
-      first.update(4)
+      first.write(4)
     })
     expect(node).toHaveTextContent("14")
 
     act(() => {
-      second.update(5)
+      second.write(5)
     })
     expect(node).toHaveTextContent("18")
 
@@ -277,24 +277,24 @@ describe("nested signals", () => {
     expect(node).toHaveTextContent("10")
 
     act(() => {
-      count0.update(4)
+      count0.write(4)
     })
     expect(node).toHaveTextContent("14")
 
     act(() => {
-      count1.update(5)
+      count1.write(5)
     })
     expect(node).toHaveTextContent("18")
 
     act(() => {
-      list.update((items) => [...items, count2])
+      list.write((items) => [...items, count2])
     })
     expect(node).toHaveTextContent("26")
 
     expect(count2).toHaveEmittersSize(1)
 
     act(() => {
-      list.update((items) => items.slice(1))
+      list.write((items) => items.slice(1))
     })
     expect(node).toHaveTextContent("18")
 

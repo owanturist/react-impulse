@@ -95,12 +95,12 @@ describe("single factory", () => {
       expect(result.current).toStrictEqual({ count: 1 })
 
       act(() => {
-        signal.update(Counter.inc)
+        signal.write(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 2 })
 
       act(() => {
-        signal.update(({ count }) => ({ count: count * 2 }))
+        signal.write(({ count }) => ({ count: count * 2 }))
       })
       expect(result.current).toStrictEqual({ count: 4 })
     })
@@ -121,13 +121,13 @@ describe("single factory", () => {
       expect(counter2).toHaveEmittersSize(1)
 
       act(() => {
-        counter1.update({ count: 10 })
+        counter1.write({ count: 10 })
       })
       expect(counter1).toHaveEmittersSize(0)
       expect(counter2).toHaveEmittersSize(1)
 
       act(() => {
-        counter2.update({ count: 5 })
+        counter2.write({ count: 5 })
       })
 
       expect(counter1).toHaveEmittersSize(0)
@@ -167,7 +167,7 @@ describe("single factory", () => {
         expect(signal1).toHaveEmittersSize(0)
 
         act(() => {
-          signal1.update(Counter.inc)
+          signal1.write(Counter.inc)
         })
 
         expect(signal1.read(monitor)).toStrictEqual({ count: 2 })
@@ -183,7 +183,7 @@ describe("single factory", () => {
         expect(signal2).toHaveEmittersSize(1)
 
         act(() => {
-          signal2.update(Counter.inc)
+          signal2.write(Counter.inc)
         })
 
         expect(signal1.read(monitor)).toStrictEqual({ count: 1 })
@@ -209,7 +209,7 @@ describe("single factory", () => {
         expect(signal2).toHaveEmittersSize(0)
 
         act(() => {
-          signal2.update(Counter.inc)
+          signal2.write(Counter.inc)
         })
 
         expect(result.current).toStrictEqual({ count: 1 })
@@ -256,7 +256,7 @@ describe("transform computed Signal's", () => {
     // increments 1 -> 2
     prev = result.current
     act(() => {
-      signal.update(Counter.inc)
+      signal.write(Counter.inc)
     })
     expect(result.current).toBe(prev)
     expect(result.current).toStrictEqual([false, true])
@@ -264,7 +264,7 @@ describe("transform computed Signal's", () => {
     // increments 2 -> 3
     prev = result.current
     act(() => {
-      signal.update({ count: 3 })
+      signal.write({ count: 3 })
     })
     expect(result.current).not.toBe(prev)
     expect(result.current).toStrictEqual([true, true])
@@ -276,7 +276,7 @@ describe("transform computed Signal's", () => {
     // increments 3 -> 4
     prev = result.current
     act(() => {
-      signal.update({ count: 4 })
+      signal.write({ count: 4 })
     })
     expect(result.current).toBe(prev)
     expect(result.current).toStrictEqual([true, true])
@@ -284,7 +284,7 @@ describe("transform computed Signal's", () => {
     // increments 4 -> 5
     prev = result.current
     act(() => {
-      signal.update(Counter.inc)
+      signal.write(Counter.inc)
     })
     expect(result.current).not.toBe(prev)
     expect(result.current).toStrictEqual([true, false])
@@ -300,7 +300,7 @@ describe("transform computed Signal's", () => {
       ({ signal }: WithSignal) =>
         useComputed((monitor) => factoryTuple(monitor, { signal }), [signal]),
     ],
-  ])("produces new value on each Signal's update %s", (_, useCounter) => {
+  ])("produces new value on each Signal's write %s", (_, useCounter) => {
     const signal = Signal({ count: 1 })
 
     const { result, rerender } = renderHook(useCounter, {
@@ -315,7 +315,7 @@ describe("transform computed Signal's", () => {
     // increments 1 -> 2
     prev = result.current
     act(() => {
-      signal.update(Counter.inc)
+      signal.write(Counter.inc)
     })
     expect(result.current).not.toBe(prev)
     expect(result.current).toStrictEqual([false, true])
@@ -323,7 +323,7 @@ describe("transform computed Signal's", () => {
     // increments 2 -> 3
     prev = result.current
     act(() => {
-      signal.update({ count: 3 })
+      signal.write({ count: 3 })
     })
     expect(result.current).not.toBe(prev)
     expect(result.current).toStrictEqual([true, true])
@@ -335,7 +335,7 @@ describe("transform computed Signal's", () => {
     // increments 3 -> 4
     prev = result.current
     act(() => {
-      signal.update({ count: 4 })
+      signal.write({ count: 4 })
     })
     expect(result.current).not.toBe(prev)
     expect(result.current).toStrictEqual([true, true])
@@ -343,7 +343,7 @@ describe("transform computed Signal's", () => {
     // increments 4 -> 5
     prev = result.current
     act(() => {
-      signal.update(Counter.inc)
+      signal.write(Counter.inc)
     })
     expect(result.current).not.toBe(prev)
     expect(result.current).toStrictEqual([true, false])
@@ -416,7 +416,7 @@ describe("transform computed Signal's", () => {
       vi.clearAllMocks()
 
       act(() => {
-        signal.update(Counter.clone)
+        signal.write(Counter.clone)
       })
 
       expect(spy).not.toHaveBeenCalled()
@@ -508,7 +508,7 @@ describe("multiple Signal#read(monitor) calls", () => {
         const { signal, spySingle, spyDouble, resultSingle, resultDouble } = setup()
 
         act(() => {
-          signal.update(Counter.inc)
+          signal.write(Counter.inc)
         })
 
         expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -520,7 +520,7 @@ describe("multiple Signal#read(monitor) calls", () => {
         const { signal, spySingle, spyDouble, resultSingle, resultDouble } = setup()
 
         act(() => {
-          signal.update(Counter.clone)
+          signal.write(Counter.clone)
         })
 
         expect(resultSingle.current).toStrictEqual({ count: 1 })

@@ -64,7 +64,7 @@ describe("nested factory", () => {
       const { first, result } = setup()
 
       act(() => {
-        first.update(Counter.inc)
+        first.write(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -73,7 +73,7 @@ describe("nested factory", () => {
       const { second, result } = setup()
 
       act(() => {
-        second.update(Counter.inc)
+        second.write(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -82,8 +82,8 @@ describe("nested factory", () => {
       const { first, second, result } = setup()
 
       act(() => {
-        first.update(Counter.inc)
-        second.update(Counter.inc)
+        first.write(Counter.inc)
+        second.write(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 7 })
     })
@@ -93,7 +93,7 @@ describe("nested factory", () => {
       const { signal, result } = setup()
 
       act(() => {
-        signal.update((current) => ({
+        signal.write((current) => ({
           ...current,
           first: newFirst,
         }))
@@ -105,9 +105,9 @@ describe("nested factory", () => {
       const { signal, result } = setup()
 
       act(() => {
-        signal.update((current) => {
-          current.first.update(Counter.inc)
-          current.second.update(Counter.inc)
+        signal.write((current) => {
+          current.first.write(Counter.inc)
+          current.second.write(Counter.inc)
 
           return current
         })
@@ -214,8 +214,8 @@ describe("triggering factory for nested Signals vs single Signal", () => {
 
       act(() => {
         batch(() => {
-          first.update(Counter.inc)
-          second.update(Counter.inc)
+          first.write(Counter.inc)
+          second.write(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -228,8 +228,8 @@ describe("triggering factory for nested Signals vs single Signal", () => {
 
       act(() => {
         batch(() => {
-          first.update(Counter.inc)
-          third.update(Counter.inc)
+          first.write(Counter.inc)
+          third.write(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -243,11 +243,11 @@ describe("triggering factory for nested Signals vs single Signal", () => {
       act(() => {
         batch(() => {
           batch(() => {
-            first.update(Counter.inc)
-            second.update(Counter.inc)
+            first.write(Counter.inc)
+            second.write(Counter.inc)
           })
 
-          third.update(Counter.inc)
+          third.write(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -263,8 +263,8 @@ describe("triggering factory for nested Signals vs single Signal", () => {
 
       act(() => {
         batch(() => {
-          second.update(Counter.inc)
-          third.update(Counter.inc)
+          second.write(Counter.inc)
+          third.write(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 1 })
@@ -273,15 +273,15 @@ describe("triggering factory for nested Signals vs single Signal", () => {
       expect(spyNested).toHaveBeenCalled()
     })
 
-    it("Signal#update wraps the callback into batch", () => {
+    it("Signal#write wraps the callback into batch", () => {
       const { second, third, signal, spyNested, resultNested } = setup()
 
       spyNested.mockReset()
 
       act(() => {
         batch(() => {
-          second.update(Counter.inc)
-          third.update(Counter.inc)
+          second.write(Counter.inc)
+          third.write(Counter.inc)
         })
       })
 
@@ -290,9 +290,9 @@ describe("triggering factory for nested Signals vs single Signal", () => {
       spyNested.mockReset()
 
       act(() => {
-        signal.update((current) => {
-          current.second.update(Counter.inc)
-          current.third.update(Counter.inc)
+        signal.write((current) => {
+          current.second.write(Counter.inc)
+          current.third.write(Counter.inc)
 
           return current
         })

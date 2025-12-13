@@ -63,7 +63,7 @@ class FormList<TElement extends SignalForm> extends SignalForm<FormListParams<TE
         )
       }
 
-      this._state._elements.update(nextStateElements)
+      this._state._elements.write(nextStateElements)
     })
   }
 }

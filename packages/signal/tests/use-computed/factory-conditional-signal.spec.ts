@@ -68,7 +68,7 @@ describe.each([
       })
 
       act(() => {
-        signal.update({ count: 2 })
+        signal.write({ count: 2 })
       })
       expect(result.current).toStrictEqual({ count: 2 })
       expect(signal).toHaveEmittersSize(1)
@@ -92,12 +92,12 @@ describe.each([
       expect(signal2).toHaveEmittersSize(1)
 
       act(() => {
-        signal2.update({ count: 20 })
+        signal2.write({ count: 20 })
       })
       expect(result.current).toStrictEqual({ count: 20 })
 
       act(() => {
-        signal1.update({ count: 2 })
+        signal1.write({ count: 2 })
       })
       expect(result.current).toStrictEqual({ count: 20 })
       expect(signal1).toHaveEmittersSize(0)
@@ -134,7 +134,7 @@ describe.each([
       })
 
       act(() => {
-        signal.update({ count: 2 })
+        signal.write({ count: 2 })
       })
       expect(result.current).toStrictEqual({ count: -1 })
       expect(signal).toHaveEmittersSize(0)
@@ -151,7 +151,7 @@ describe.each([
       expect(signal).toHaveEmittersSize(1)
 
       act(() => {
-        signal.update({ count: 2 })
+        signal.write({ count: 2 })
       })
       expect(result.current).toStrictEqual({ count: 2 })
       expect(signal).toHaveEmittersSize(1)
@@ -167,7 +167,7 @@ describe.each([
       spy.mockReset()
 
       act(() => {
-        signal.update(Counter.inc)
+        signal.write(Counter.inc)
       })
       expect(spy).not.toHaveBeenCalled()
     })

@@ -263,7 +263,7 @@ abstract class SignalForm<
 
   public async submit(): Promise<void> {
     batch((monitor) => {
-      this._state._root._submitAttempts.update((count) => count + 1)
+      this._state._root._submitAttempts.write((count) => count + 1)
       this._state._root._forceValidated(monitor)
     })
 
@@ -282,11 +282,11 @@ abstract class SignalForm<
         this._state._root._getFocusFirstInvalid(monitor)?.()
       })
     } else if (promises.length > 0) {
-      this._state._root._submittingCount.update((count) => count + 1)
+      this._state._root._submittingCount.write((count) => count + 1)
 
       await Promise.all(promises)
 
-      this._state._root._submittingCount.update((count) => Math.max(0, count - 1))
+      this._state._root._submittingCount.write((count) => Math.max(0, count - 1))
     }
   }
 }

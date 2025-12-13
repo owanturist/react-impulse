@@ -18,20 +18,20 @@ describe("multiple signals", () => {
           type="email"
           data-testid="email"
           value={email}
-          onChange={(event) => emailSignal.update(event.target.value)}
+          onChange={(event) => emailSignal.write(event.target.value)}
         />
         <input
           type="password"
           data-testid="password"
           value={password}
-          onChange={(event) => passwordSignal.update(event.target.value)}
+          onChange={(event) => passwordSignal.write(event.target.value)}
         />
         <button
           type="button"
           data-testid="reset"
           onClick={() => {
-            emailSignal.update("")
-            passwordSignal.update("")
+            emailSignal.write("")
+            passwordSignal.write("")
           }}
         />
       </React.Profiler>
@@ -69,8 +69,8 @@ describe("multiple signals", () => {
 
     // changes from the outside
     act(() => {
-      email.update("admin@gmail.com")
-      password.update("admin")
+      email.write("admin@gmail.com")
+      password.write("admin")
     })
     expect(onRender).toHaveBeenCalledOnce()
     expect(container).toMatchSnapshot()

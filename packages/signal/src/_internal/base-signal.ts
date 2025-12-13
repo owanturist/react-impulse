@@ -73,7 +73,7 @@ abstract class BaseSignal<T> implements ReadableSignal<T>, WritableSignal<T> {
    *
    * @version 1.0.0
    */
-  public update(valueOrTransform: T | ((currentValue: T, monitor: Monitor) => T)): void {
+  public write(valueOrTransform: T | ((currentValue: T, monitor: Monitor) => T)): void {
     enqueue((push) => {
       const nextValue = isFunction(valueOrTransform)
         ? valueOrTransform(this._getter(), UNTRACKED_MONITOR)

@@ -38,7 +38,7 @@ describe("monitoring nested Signals", () => {
             type="button"
             data-testid="add-counter"
             onClick={() => {
-              appState.update({
+              appState.write({
                 ...state,
                 counts: [...state.counts, Signal(0)],
               })
@@ -50,7 +50,7 @@ describe("monitoring nested Signals", () => {
             data-testid="reset-counters"
             onClick={() => {
               for (const count of state.counts) {
-                count.update(0)
+                count.write(0)
               }
             }}
           />
@@ -59,9 +59,9 @@ describe("monitoring nested Signals", () => {
             type="button"
             data-testid="increment-all"
             onClick={() => {
-              appState.update((current) => {
+              appState.write((current) => {
                 for (const count of current.counts) {
-                  count.update((x) => x + 1)
+                  count.write((x) => x + 1)
                 }
 
                 return current
@@ -225,7 +225,7 @@ describe("monitoring nested Signals", () => {
 
     // add fourth counter from the outside
     act(() => {
-      state.update((current) => ({
+      state.write((current) => ({
         ...current,
         counts: [...current.counts, Signal(9)],
       }))

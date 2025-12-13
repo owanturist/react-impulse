@@ -14,11 +14,7 @@ describe("default signal", () => {
       const value = useComputed(signal)
 
       return (
-        <input
-          type="search"
-          value={value}
-          onChange={(event) => signal.update(event.target.value)}
-        />
+        <input type="search" value={value} onChange={(event) => signal.write(event.target.value)} />
       )
     }
 
@@ -40,7 +36,7 @@ describe("default signal", () => {
     expect(input).toHaveValue("what a hell")
 
     act(() => {
-      val.update("no way")
+      val.write("no way")
     })
     expect(input).toHaveValue("no way")
 
@@ -48,7 +44,7 @@ describe("default signal", () => {
     expect(input).toHaveValue("now")
 
     act(() => {
-      val.update("but now")
+      val.write("but now")
     })
     expect(input).toHaveValue("now")
 

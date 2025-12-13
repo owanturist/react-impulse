@@ -1,5 +1,5 @@
 interface WritableSignal<T> {
-  update(value: T): void
+  write(value: T): void
 }
 
 export type { WritableSignal }

@@ -8,7 +8,7 @@ describe.each([
   ["not batched", (cb: VoidFunction) => cb()],
   ["batched", batch],
 ])("multiple signals %s calls with direct signal access", (_, execute) => {
-  it("re-renders once for Signal#update calls", () => {
+  it("re-renders once for Signal#write calls", () => {
     const onRender = vi.fn()
     const signal1 = Signal({ count: 1 })
     const signal2 = Signal({ count: 2 })
@@ -32,8 +32,8 @@ describe.each([
 
     act(() => {
       execute(() => {
-        signal1.update(Counter.inc)
-        signal2.update(Counter.inc)
+        signal1.write(Counter.inc)
+        signal2.write(Counter.inc)
       })
     })
     expect(screen.getByTestId("count")).toHaveTextContent("5")
@@ -56,8 +56,8 @@ describe.each([
             data-testid="inc"
             onClick={() => {
               execute(() => {
-                signal1.update(Counter.inc)
-                signal2.update(Counter.inc)
+                signal1.write(Counter.inc)
+                signal2.write(Counter.inc)
               })
             }}
           />
@@ -82,7 +82,7 @@ describe.each([
   ["not batched", (cb: VoidFunction) => cb()],
   ["batched", batch],
 ])("nested signals %s calls with direct signal access", (_, execute) => {
-  it("re-renders once for Signal#update calls", () => {
+  it("re-renders once for Signal#write calls", () => {
     const onRender = vi.fn()
     const signal = Signal({
       first: Signal({ count: 1 }),
@@ -109,9 +109,9 @@ describe.each([
 
     act(() => {
       execute(() => {
-        signal.update((current) => {
-          current.first.update(Counter.inc)
-          current.second.update(Counter.inc)
+        signal.write((current) => {
+          current.first.write(Counter.inc)
+          current.second.write(Counter.inc)
 
           return current
         })
@@ -122,10 +122,10 @@ describe.each([
     vi.clearAllMocks()
 
     act(() => {
-      signal.update((current) => {
+      signal.write((current) => {
         execute(() => {
-          current.first.update(Counter.inc)
-          current.second.update(Counter.inc)
+          current.first.write(Counter.inc)
+          current.second.write(Counter.inc)
         })
 
         return current
@@ -154,9 +154,9 @@ describe.each([
             data-testid="inc-1"
             onClick={() => {
               execute(() => {
-                signal.update((value) => {
-                  value.first.update(Counter.inc)
-                  value.second.update(Counter.inc)
+                signal.write((value) => {
+                  value.first.write(Counter.inc)
+                  value.second.write(Counter.inc)
 
                   return value
                 })
@@ -167,10 +167,10 @@ describe.each([
             type="button"
             data-testid="inc-2"
             onClick={() => {
-              signal.update((value) => {
+              signal.write((value) => {
                 execute(() => {
-                  value.first.update(Counter.inc)
-                  value.second.update(Counter.inc)
+                  value.first.write(Counter.inc)
+                  value.second.write(Counter.inc)
                 })
 
                 return value
@@ -251,7 +251,7 @@ describe.each([
       return { spy, onRender, first, second, factory }
     }
 
-    it(`calls the factory ${expectedFactoryCallsForMultiple} times by Signal#update calls`, () => {
+    it(`calls the factory ${expectedFactoryCallsForMultiple} times by Signal#write calls`, () => {
       const { spy, onRender, first, second, factory } = setup()
 
       const Component: React.FC = () => {
@@ -274,8 +274,8 @@ describe.each([
 
       act(() => {
         execute(() => {
-          first.update(Counter.inc)
-          second.update(Counter.inc)
+          first.write(Counter.inc)
+          second.write(Counter.inc)
         })
       })
       expect(screen.getByTestId("count")).toHaveTextContent("5")
@@ -283,7 +283,7 @@ describe.each([
       expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForMultiple)
     })
 
-    it(`calls the factory ${expectedFactoryCallsForMultiple} times by Signal#update calls`, () => {
+    it(`calls the factory ${expectedFactoryCallsForMultiple} times by Signal#write calls`, () => {
       const { spy, onRender, first, second, factory } = setup()
 
       const Component: React.FC = () => {
@@ -296,8 +296,8 @@ describe.each([
               data-testid="inc"
               onClick={() => {
                 execute(() => {
-                  first.update(Counter.inc)
-                  second.update(Counter.inc)
+                  first.write(Counter.inc)
+                  second.write(Counter.inc)
                 })
               }}
             />
@@ -339,7 +339,7 @@ describe.each([
       return { spy, onRender, signal, factory }
     }
 
-    it(`calls the factory ${expectedFactoryCallsForNested} times by Signal#update calls`, () => {
+    it(`calls the factory ${expectedFactoryCallsForNested} times by Signal#write calls`, () => {
       const { spy, onRender, signal, factory } = setup()
 
       const Component: React.FC = () => {
@@ -361,9 +361,9 @@ describe.each([
 
       act(() => {
         execute(() => {
-          signal.update((value) => {
-            value.first.update(Counter.inc)
-            value.second.update(Counter.inc)
+          signal.write((value) => {
+            value.first.write(Counter.inc)
+            value.second.write(Counter.inc)
 
             return value
           })
@@ -375,10 +375,10 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        signal.update((value) => {
+        signal.write((value) => {
           execute(() => {
-            value.first.update(Counter.inc)
-            value.second.update(Counter.inc)
+            value.first.write(Counter.inc)
+            value.second.write(Counter.inc)
           })
 
           return value
@@ -389,7 +389,7 @@ describe.each([
       expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
     })
 
-    it(`calls the factory ${expectedFactoryCallsForNested} times by Signal#update calls`, () => {
+    it(`calls the factory ${expectedFactoryCallsForNested} times by Signal#write calls`, () => {
       const { spy, onRender, signal, factory } = setup()
 
       const Component: React.FC = () => {
@@ -402,9 +402,9 @@ describe.each([
               data-testid="inc-1"
               onClick={() => {
                 execute(() => {
-                  signal.update((value) => {
-                    value.first.update(Counter.inc)
-                    value.second.update(Counter.inc)
+                  signal.write((value) => {
+                    value.first.write(Counter.inc)
+                    value.second.write(Counter.inc)
 
                     return value
                   })
@@ -415,10 +415,10 @@ describe.each([
               type="button"
               data-testid="inc-2"
               onClick={() => {
-                signal.update((value) => {
+                signal.write((value) => {
                   execute(() => {
-                    value.first.update(Counter.inc)
-                    value.second.update(Counter.inc)
+                    value.first.write(Counter.inc)
+                    value.second.write(Counter.inc)
                   })
 
                   return value
@@ -452,17 +452,17 @@ describe.each([
 })
 
 describe("when reading value during batching", () => {
-  it("returns new value right after update", ({ monitor }) => {
+  it("returns new value right after write", ({ monitor }) => {
     const source = Signal(1)
     const spy = vi.fn()
 
     expect(source.read(monitor)).toBe(1)
 
     batch((monitor) => {
-      source.update(2)
+      source.write(2)
       spy(source.read(monitor))
 
-      source.update(3)
+      source.write(3)
       spy(source.read(monitor))
     })
 
@@ -488,13 +488,13 @@ describe("when reading derived value during batching", () => {
     expect(derived.read(monitor)).toBe(1)
 
     batch((monitor) => {
-      source.update(1)
+      source.write(1)
       expect(derived.read(monitor)).toBe(1)
 
-      source.update(2)
+      source.write(2)
       expect(derived.read(monitor)).toBe(2)
 
-      source.update(3)
+      source.write(3)
       expect(derived.read(monitor)).toBe(3)
     })
 
@@ -516,13 +516,13 @@ describe("when reading derived value during batching", () => {
     vi.clearAllMocks()
 
     batch((monitor) => {
-      source.update(1)
+      source.write(1)
       expect(derived.read(monitor)).toBe(1)
 
-      source.update(2)
+      source.write(2)
       expect(derived.read(monitor)).toBe(2)
 
-      source.update(3)
+      source.write(3)
       expect(derived.read(monitor)).toBe(3)
     })
 
@@ -539,10 +539,10 @@ describe("when reading derived value during batching", () => {
     expect(derived.read(monitor)).toBe(3)
 
     batch((monitor) => {
-      source1.update(2)
+      source1.write(2)
       expect(derived.read(monitor)).toBe(4)
 
-      source2.update(3)
+      source2.write(3)
       expect(derived.read(monitor)).toBe(5)
     })
 
@@ -559,12 +559,12 @@ describe("when reading derived value during batching", () => {
     expect(derived.read(monitor)).toBe(3)
 
     batch((monitor) => {
-      source1.update(2)
-      source2.update(3)
+      source1.write(2)
+      source2.write(3)
       expect(derived.read(monitor)).toBe(5)
 
-      source1.update(3)
-      source2.update(4)
+      source1.write(3)
+      source2.write(4)
       expect(derived.read(monitor)).toBe(7)
     })
 
@@ -582,11 +582,11 @@ describe("when reading derived value during batching", () => {
     expect(derived2.read(monitor)).toBe(1)
 
     batch((monitor) => {
-      source.update(2)
+      source.write(2)
       expect(derived1.read(monitor)).toBe(2)
       expect(derived2.read(monitor)).toBe(2)
 
-      source.update(3)
+      source.write(3)
       expect(derived1.read(monitor)).toBe(3)
       expect(derived2.read(monitor)).toBe(3)
     })
@@ -604,10 +604,10 @@ describe("when reading derived value during batching", () => {
       expect(derivedDerived.read(monitor)).toBe(1)
 
       batch((monitor) => {
-        source.update(2)
+        source.write(2)
         expect(derivedDerived.read(monitor)).toBe(2)
 
-        source.update(3)
+        source.write(3)
         expect(derivedDerived.read(monitor)).toBe(3)
       })
 
@@ -625,15 +625,15 @@ describe("when reading derived value during batching", () => {
     const derived = Signal(source, source)
 
     batch((monitor) => {
-      derived.update(1)
+      derived.write(1)
       expect(source.read(monitor)).toBe(1)
       expect(derived.read(monitor)).toBe(1)
 
-      derived.update(2)
+      derived.write(2)
       expect(source.read(monitor)).toBe(2)
       expect(derived.read(monitor)).toBe(2)
 
-      derived.update(3)
+      derived.write(3)
       expect(source.read(monitor)).toBe(3)
       expect(derived.read(monitor)).toBe(3)
     })
@@ -652,10 +652,10 @@ describe("when reading derived value during batching", () => {
     expect(derived.read(monitor)).toBe(derived.read(monitor))
 
     batch((monitor) => {
-      source.update(2)
+      source.write(2)
       expect(derived.read(monitor)).toBe(derived.read(monitor))
 
-      source.update(3)
+      source.write(3)
       expect(derived.read(monitor)).toBe(derived.read(monitor))
     })
 
@@ -674,7 +674,7 @@ describe("when reading derived value during batching", () => {
     const derived0 = derived.read(monitor)
     expect(source0).toBe(derived0)
 
-    source.update(Counter.clone)
+    source.write(Counter.clone)
 
     const source1 = source.read(monitor)
     expect(source1).not.toBe(source0)
@@ -684,7 +684,7 @@ describe("when reading derived value during batching", () => {
     expect(derived1).toBe(derived0)
 
     batch((monitor) => {
-      source.update(Counter.clone)
+      source.write(Counter.clone)
 
       const source2 = source.read(monitor)
       expect(source2).not.toBe(source0)

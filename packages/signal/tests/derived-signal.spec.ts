@@ -19,74 +19,74 @@ import { Counter } from "./common"
 describe.each<{
   name: string
   read: <T>(signal: ReadonlySignal<T>, monitor: Monitor) => T
-  update: <T>(signal: Signal<T>, setter: T | ((currentValue: T, monitor: Monitor) => T)) => void
+  write: <T>(signal: Signal<T>, setter: T | ((currentValue: T, monitor: Monitor) => T)) => void
 }>([
   {
-    name: "1x read / 1x update",
+    name: "1x read / 1x write",
     read: (signal, monitor) => signal.read(monitor),
-    update: (signal, setter) => {
-      signal.update(setter)
+    write: (signal, setter) => {
+      signal.write(setter)
     },
   },
 
   {
-    name: "1x read / 2x update",
+    name: "1x read / 2x write",
     read: (signal, monitor) => signal.read(monitor),
-    update: (signal, setter) => {
-      signal.update(setter)
-      signal.update(setter)
+    write: (signal, setter) => {
+      signal.write(setter)
+      signal.write(setter)
     },
   },
   {
-    name: "1x read / 2x batched update",
+    name: "1x read / 2x batched write",
     read: (signal, monitor) => signal.read(monitor),
-    update: (signal, setter) => {
+    write: (signal, setter) => {
       batch(() => {
-        signal.update(setter)
-        signal.update(setter)
+        signal.write(setter)
+        signal.write(setter)
       })
     },
   },
 
   {
-    name: "2x read / 1x update",
+    name: "2x read / 1x write",
     read: (signal, monitor) => {
       signal.read(monitor)
 
       return signal.read(monitor)
     },
-    update: (signal, setter) => {
-      signal.update(setter)
+    write: (signal, setter) => {
+      signal.write(setter)
     },
   },
 
   {
-    name: "2x read / 2x update",
+    name: "2x read / 2x write",
     read: (signal, monitor) => {
       signal.read(monitor)
 
       return signal.read(monitor)
     },
-    update: (signal, setter) => {
-      signal.update(setter)
-      signal.update(setter)
+    write: (signal, setter) => {
+      signal.write(setter)
+      signal.write(setter)
     },
   },
   {
-    name: "2x read / 2x batched update",
+    name: "2x read / 2x batched write",
     read: (signal, monitor) => {
       signal.read(monitor)
 
       return signal.read(monitor)
     },
-    update: (signal, setter) => {
+    write: (signal, setter) => {
       batch(() => {
-        signal.update(setter)
-        signal.update(setter)
+        signal.write(setter)
+        signal.write(setter)
       })
     },
   },
-])("Signal(getter, options?) when $name", ({ read, update }) => {
+])("Signal(getter, options?) when $name", ({ read, write }) => {
   it("creates a ReadonlySignal", () => {
     const signal = Signal(() => 0)
 
@@ -104,7 +104,7 @@ describe.each<{
     expect(read(signal, monitor)).toStrictEqual({ count: 0 })
 
     const next = { count: 1 }
-    update(source, next)
+    write(source, next)
     expect(read(signal, monitor)).toBe(next)
     expect(read(signal, monitor)).toStrictEqual({ count: 1 })
   })
@@ -124,12 +124,12 @@ describe.each<{
     expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 0 })
     vi.clearAllMocks()
 
-    update(source, { count: 1 })
+    write(source, { count: 1 })
     expect(read(derived, monitor)).toStrictEqual({ count: 1 })
     expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 1 })
     vi.clearAllMocks()
 
-    update(source, { count: 1 })
+    write(source, { count: 1 })
     expect(read(derived, monitor)).toStrictEqual({ count: 1 })
     expect(spy).not.toHaveBeenCalled()
 
@@ -165,11 +165,11 @@ describe.each<{
     expect(spy).toHaveBeenCalledExactlyOnceWith(false)
     vi.clearAllMocks()
 
-    update(source, 1)
+    write(source, 1)
     expect(spy).toHaveBeenCalledExactlyOnceWith(true)
     vi.clearAllMocks()
 
-    update(source, 2)
+    write(source, 2)
     expect(spy).not.toHaveBeenCalled()
 
     unsubscribe()
@@ -182,21 +182,21 @@ describe.each<{
 
     expect(source).toHaveEmittersSize(0)
 
-    update(source, { count: 1 })
+    write(source, { count: 1 })
     expect(source).toHaveEmittersSize(0)
     expect(read(derived, monitor)).toStrictEqual({ count: 1 })
     expect(source).toHaveEmittersSize(1)
 
-    update(source, { count: 2 })
+    write(source, { count: 2 })
     expect(source).toHaveEmittersSize(0)
     expect(read(derived, monitor)).toStrictEqual({ count: 2 })
     expect(source).toHaveEmittersSize(1)
 
-    update(source, { count: 2 })
+    write(source, { count: 2 })
     expect(source).toHaveEmittersSize(1)
   })
 
-  it("derives the value after subsequent source.update(different) calls", ({ monitor }) => {
+  it("derives the value after subsequent source.write(different) calls", ({ monitor }) => {
     const source = Signal(0)
     const derived = Signal((monitor) => ({ count: read(source, monitor) }))
 
@@ -204,9 +204,9 @@ describe.each<{
     expect(value0).toStrictEqual({ count: 0 })
     expect(source).toHaveEmittersSize(1)
 
-    update(source, 1)
+    write(source, 1)
     expect(source).toHaveEmittersSize(0)
-    update(source, 2)
+    write(source, 2)
     expect(source).toHaveEmittersSize(0)
 
     const value1 = read(derived, monitor)
@@ -215,7 +215,7 @@ describe.each<{
     expect(source).toHaveEmittersSize(1)
   })
 
-  it("derives the value after subsequent source.update(same) source.update(different) calls", ({
+  it("derives the value after subsequent source.write(same) source.write(different) calls", ({
     monitor,
   }) => {
     const source = Signal(0)
@@ -225,9 +225,9 @@ describe.each<{
     expect(value0).toStrictEqual({ count: 0 })
     expect(source).toHaveEmittersSize(1)
 
-    update(source, 0)
+    write(source, 0)
     expect(source).toHaveEmittersSize(1)
-    update(source, 1)
+    write(source, 1)
     expect(source).toHaveEmittersSize(0)
 
     const value1 = read(derived, monitor)
@@ -325,7 +325,7 @@ describe.each<{
     expect(source).toHaveEmittersSize(1)
 
     act(() => {
-      update(source, 1)
+      write(source, 1)
     })
 
     expect(read(derived, monitor)).toStrictEqual({ count: 1 })
@@ -343,7 +343,7 @@ describe.each<{
     const initial = first.current
 
     act(() => {
-      update(source, 0)
+      write(source, 0)
     })
 
     expect(initial).toBe(first.current)
@@ -364,8 +364,8 @@ describe.each<{
     const initial = first.current
 
     act(() => {
-      update(source, 1)
-      update(source, 2)
+      write(source, 1)
+      write(source, 2)
     })
 
     expect(initial).not.toBe(first.current)
@@ -384,12 +384,12 @@ describe.each<{
     const value0 = read(derived, monitor)
     expect(value0).toStrictEqual({ count: 0 })
 
-    update(source, { count: 1 })
+    write(source, { count: 1 })
     const value1 = read(derived, monitor)
     expect(value1).toStrictEqual({ count: 1 })
     expect(value1).not.toBe(value0)
 
-    update(source, { count: 1 })
+    write(source, { count: 1 })
     const value2 = read(derived, monitor)
     expect(value2).toStrictEqual({ count: 1 })
     expect(value2).toBe(value1)
@@ -421,12 +421,12 @@ describe.each<{
     expect(result.current.computed).toBe(6)
 
     act(() => {
-      update(source, 2)
+      write(source, 2)
     })
     expect(result.current.computed).toBe(8)
 
     act(() => {
-      update(source, 3)
+      write(source, 3)
     })
     expect(result.current.computed).toBe(10)
   })
@@ -444,21 +444,21 @@ describe.each<{
     expect(result.current).toBe(false)
 
     act(() => {
-      update(source, 1)
+      write(source, 1)
     })
     expect(source).toHaveEmittersSize(1)
     expect(derived).toHaveEmittersSize(1)
     expect(result.current).toBe(true)
 
     act(() => {
-      update(source, 2)
+      write(source, 2)
     })
     expect(source).toHaveEmittersSize(1)
     expect(derived).toHaveEmittersSize(1)
     expect(result.current).toBe(true)
 
     act(() => {
-      update(source, 0)
+      write(source, 0)
     })
     expect(source).toHaveEmittersSize(1)
     expect(derived).toHaveEmittersSize(1)
@@ -484,7 +484,7 @@ describe.each<{
     })
 
     act(() => {
-      update(email, "t")
+      write(email, "t")
     })
     const value1 = result.current
     expect(value1).toStrictEqual({
@@ -494,13 +494,13 @@ describe.each<{
     expect(value1).not.toBe(value0)
 
     act(() => {
-      update(email, "te")
+      write(email, "te")
     })
     const value2 = result.current
     expect(value2).toBe(value1)
 
     act(() => {
-      update(password, "q")
+      write(password, "q")
     })
     const value3 = result.current
     expect(value3).toStrictEqual({
@@ -510,15 +510,15 @@ describe.each<{
     expect(value3).not.toBe(value2)
 
     act(() => {
-      update(email, "test")
-      update(password, "qwerty")
+      write(email, "test")
+      write(password, "qwerty")
     })
     const value4 = result.current
     expect(value4).toBe(value3)
 
     act(() => {
-      update(email, "")
-      update(password, "")
+      write(email, "")
+      write(password, "")
     })
 
     const value5 = result.current
@@ -529,7 +529,7 @@ describe.each<{
     expect(value5).not.toBe(value4)
   })
 
-  it("causes a single re-render caused by dependency update", () => {
+  it("causes a single re-render caused by dependency write", () => {
     const source = Signal(0)
     const derived = Signal((monitor) => ({ count: read(source, monitor) }))
 
@@ -545,12 +545,12 @@ describe.each<{
     vi.clearAllMocks()
 
     act(() => {
-      update(source, 0)
+      write(source, 0)
     })
     expect(spy).not.toHaveBeenCalled()
 
     act(() => {
-      update(source, 1)
+      write(source, 1)
     })
     expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 1 })
   })
@@ -570,14 +570,14 @@ describe.each<{
     expect(condition).toHaveEmittersSize(1)
 
     act(() => {
-      update(source, 0)
+      write(source, 0)
     })
     expect(result.current).toBe(initial)
     expect(source).toHaveEmittersSize(0)
     expect(condition).toHaveEmittersSize(1)
 
     act(() => {
-      update(condition, true)
+      write(condition, true)
     })
     expect(result.current).not.toBe(initial)
     expect(result.current).toStrictEqual({ count: 0 })
@@ -585,14 +585,14 @@ describe.each<{
     expect(condition).toHaveEmittersSize(1)
 
     act(() => {
-      update(source, 1)
+      write(source, 1)
     })
     expect(result.current).toStrictEqual({ count: 1 })
     expect(source).toHaveEmittersSize(1)
     expect(condition).toHaveEmittersSize(1)
 
     act(() => {
-      update(condition, false)
+      write(condition, false)
     })
     expect(result.current).not.toBe(initial)
     expect(result.current).toStrictEqual({ count: 0 })
@@ -646,7 +646,7 @@ describe.each<{
     })
 
     act(() => {
-      update(source, { count: 1 })
+      write(source, { count: 1 })
     })
 
     expect(Counter.equals).not.toHaveBeenCalled()
@@ -667,7 +667,7 @@ describe.each<{
     expect(Counter.equals).not.toHaveBeenCalled()
 
     act(() => {
-      update(source, { count: 1 })
+      write(source, { count: 1 })
     })
     expect(Counter.equals).toHaveBeenCalledOnce()
     vi.clearAllMocks()
@@ -697,7 +697,7 @@ describe.each<{
       vi.clearAllMocks()
 
       act(() => {
-        update(source, { count: 1 })
+        write(source, { count: 1 })
       })
       expect(Object.is).toHaveBeenCalledExactlyOnceWith(value0, {
         isMoreThanZero: true,
@@ -711,7 +711,7 @@ describe.each<{
       vi.clearAllMocks()
 
       act(() => {
-        update(source, { count: 2 })
+        write(source, { count: 2 })
       })
       expect(Object.is).toHaveBeenCalledExactlyOnceWith(value1, {
         isMoreThanZero: true,
@@ -734,7 +734,7 @@ describe.each<{
     const value0 = read(derived, monitor)
 
     act(() => {
-      update(source, { count: 0 })
+      write(source, { count: 0 })
     })
     expect(Counter.equals).toHaveBeenCalledExactlyOnceWith(value0, { count: 0 })
     vi.clearAllMocks()
@@ -745,7 +745,7 @@ describe.each<{
     expect(value0).toStrictEqual({ count: 0 })
 
     act(() => {
-      update(source, { count: 1 })
+      write(source, { count: 1 })
     })
     expect(Counter.equals).toHaveBeenCalledExactlyOnceWith(value1, { count: 1 })
     vi.clearAllMocks()
@@ -758,9 +758,7 @@ describe.each<{
 })
 
 describe.concurrent("Signal(getter) garbage collection", () => {
-  it("cleanups immediately when source.update is called with the different value", ({
-    monitor,
-  }) => {
+  it("cleanups immediately when source.write is called with the different value", ({ monitor }) => {
     const source = Signal(0)
 
     ;(() => {
@@ -777,11 +775,11 @@ describe.concurrent("Signal(getter) garbage collection", () => {
 
     expect(source).toHaveEmittersSize(1)
 
-    source.update(1)
+    source.write(1)
     expect(source).toHaveEmittersSize(0)
   })
 
-  it("cleanups the WeakRef when source.update is called with the same value", async ({
+  it("cleanups the WeakRef when source.write is called with the same value", async ({
     monitor,
   }) => {
     const source = Signal(0)
@@ -800,7 +798,7 @@ describe.concurrent("Signal(getter) garbage collection", () => {
 
     expect(source).toHaveEmittersSize(1)
 
-    source.update(0)
+    source.write(0)
     expect(source).toHaveEmittersSize(1)
 
     await global.gc?.({ execution: "async" })
@@ -968,7 +966,7 @@ describe("Signal(source)", () => {
     expect(derived.read(monitor)).toBe(0)
 
     act(() => {
-      source.counter.update(1)
+      source.counter.write(1)
     })
 
     expect(derived.read(monitor)).toBe(1)
@@ -1006,7 +1004,7 @@ describe("Signal(source, options)", () => {
     expect(Counter.equals).not.toHaveBeenCalled()
 
     act(() => {
-      source.counter.update(Counter.inc)
+      source.counter.write(Counter.inc)
     })
 
     expect(derived.read(monitor)).toStrictEqual({ count: 1 })
@@ -1063,7 +1061,7 @@ describe("Signal(getter, setter, options?)", () => {
     expect(derived.read(monitor)).toBe(0)
 
     act(() => {
-      source.counter.update(1)
+      source.counter.write(1)
     })
 
     expect(derived.read(monitor)).toBe(1)
@@ -1081,7 +1079,7 @@ describe("Signal(getter, setter, options?)", () => {
     const source = Signal({ count: 0 }, { equals: Counter.equals })
     const signal = Signal(
       (monitor) => source.read(monitor),
-      (counter) => source.update(counter),
+      (counter) => source.write(counter),
     )
     const spySignal = vi.fn()
     const spySource = vi.fn()
@@ -1096,19 +1094,19 @@ describe("Signal(getter, setter, options?)", () => {
     expect(spySignal).toHaveBeenCalledExactlyOnceWith({ count: 0 })
     vi.clearAllMocks()
 
-    source.update({ count: 1 })
+    source.write({ count: 1 })
     expect(spySignal).toHaveBeenCalledExactlyOnceWith({ count: 1 })
     vi.clearAllMocks()
 
-    source.update({ count: 1 })
+    source.write({ count: 1 })
     expect(spySignal).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
-    signal.update({ count: 1 })
+    signal.write({ count: 1 })
     expect(spySource).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
-    signal.update({ count: 2 })
+    signal.write({ count: 2 })
     expect(spySource).toHaveBeenCalledExactlyOnceWith({ count: 2 })
   })
 
@@ -1120,15 +1118,15 @@ describe("Signal(getter, setter, options?)", () => {
         return { count: this.counter.read(monitor) }
       }
 
-      public update(value: { count: number }): void {
-        this.counter.update(value.count)
+      public write(value: { count: number }): void {
+        this.counter.write(value.count)
       }
     }
 
     const source = new Custom()
     const signal = Signal(
       (monitor) => source.read(monitor),
-      (counter) => source.update(counter),
+      (counter) => source.write(counter),
     )
     const spySignal = vi.fn()
     const spySource = vi.fn()
@@ -1143,19 +1141,19 @@ describe("Signal(getter, setter, options?)", () => {
     expect(spySignal).toHaveBeenCalledExactlyOnceWith({ count: 0 })
     vi.clearAllMocks()
 
-    source.update({ count: 1 })
+    source.write({ count: 1 })
     expect(spySignal).toHaveBeenCalledExactlyOnceWith({ count: 1 })
     vi.clearAllMocks()
 
-    source.update({ count: 1 })
+    source.write({ count: 1 })
     expect(spySignal).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
-    signal.update({ count: 1 })
+    signal.write({ count: 1 })
     expect(spySource).not.toHaveBeenCalled()
     vi.clearAllMocks()
 
-    signal.update({ count: 2 })
+    signal.write({ count: 2 })
     expect(spySource).toHaveBeenCalledExactlyOnceWith({ count: 2 })
   })
 
@@ -1163,7 +1161,7 @@ describe("Signal(getter, setter, options?)", () => {
     const source = Signal({ count: 0 })
     const signal = Signal(
       (monitor) => source.read(monitor),
-      (counter) => source.update(counter),
+      (counter) => source.write(counter),
       {
         equals: Counter.equals,
       },
@@ -1172,7 +1170,7 @@ describe("Signal(getter, setter, options?)", () => {
     const value0 = signal.read(monitor)
 
     act(() => {
-      signal.update({ count: 0 })
+      signal.write({ count: 0 })
     })
     expect(Counter.equals).toHaveBeenCalledExactlyOnceWith(value0, { count: 0 })
     vi.clearAllMocks()
@@ -1182,7 +1180,7 @@ describe("Signal(getter, setter, options?)", () => {
     expect(value1).toBe(value0)
 
     act(() => {
-      signal.update({ count: 1 })
+      signal.write({ count: 1 })
     })
     expect(Counter.equals).toHaveBeenCalledExactlyOnceWith(value1, { count: 1 })
     vi.clearAllMocks()
@@ -1200,9 +1198,9 @@ describe("Signal(getter, setter, options?)", () => {
     const derived = Signal(
       (monitor) => signal1.read(monitor) + signal2.read(monitor) + signal3.read(monitor),
       (x) => {
-        signal1.update(x)
-        signal2.update(x)
-        signal3.update(x)
+        signal1.write(x)
+        signal2.write(x)
+        signal3.write(x)
       },
     )
     const spy = vi.fn()
@@ -1220,7 +1218,7 @@ describe("Signal(getter, setter, options?)", () => {
     vi.clearAllMocks()
 
     act(() => {
-      derived.update(4)
+      derived.write(4)
     })
 
     expect(result.current).toBe(12)
@@ -1228,7 +1226,7 @@ describe("Signal(getter, setter, options?)", () => {
     vi.clearAllMocks()
 
     act(() => {
-      derived.update(4)
+      derived.write(4)
     })
 
     expect(result.current).toBe(12)
@@ -1253,15 +1251,15 @@ function setupDerivedSignalFromSignal({
     const source = Signal(initialValue)
     const signal = Signal(
       getterShortcut ? source : (monitor) => source.read(monitor),
-      setterShortcut ? source : (value) => source.update(value),
+      setterShortcut ? source : (value) => source.write(value),
       options,
     )
 
     return {
       signal,
       read: (monitor: Monitor) => source.read(monitor),
-      update: (value: T) => {
-        source.update(value)
+      write: (value: T) => {
+        source.write(value)
       },
     }
   }
@@ -1298,33 +1296,33 @@ describe.each([
     }),
   ],
 ])("Signal() from %s", (_, setup) => {
-  describe("Signal#update(value)", () => {
+  describe("Signal#write(value)", () => {
     const { signal } = setup({ count: 0 })
 
     it("updates value", ({ monitor }) => {
       const next = { count: 1 }
-      signal.update(next)
+      signal.write(next)
       expect(signal.read(monitor)).toBe(next)
     })
 
     it("updates with the same value", ({ monitor }) => {
       const next = { count: 1 }
-      signal.update(next)
+      signal.write(next)
       expect(signal.read(monitor)).toBe(next)
     })
 
     it("updates with equal value", ({ monitor }) => {
       const prev = signal.read(monitor)
-      signal.update(prev)
+      signal.write(prev)
       expect(signal.read(monitor)).toBe(prev)
     })
   })
 
-  describe("Signal#update(transform)", () => {
+  describe("Signal#write(transform)", () => {
     it("updates value", ({ monitor }) => {
       const { signal } = setup({ count: 0 })
 
-      signal.update(Counter.inc)
+      signal.write(Counter.inc)
       expect(signal.read(monitor)).toStrictEqual({ count: 1 })
     })
 
@@ -1332,7 +1330,7 @@ describe.each([
       const initial = { count: 0 }
       const { signal } = setup(initial)
 
-      signal.update((counter) => counter)
+      signal.write((counter) => counter)
       expect(signal.read(monitor)).toBe(initial)
     })
 
@@ -1340,7 +1338,7 @@ describe.each([
       const initial = { count: 0 }
       const { signal } = setup(initial)
 
-      signal.update(Counter.clone)
+      signal.write(Counter.clone)
       expect(signal.read(monitor)).not.toBe(initial)
       expect(signal.read(monitor)).toStrictEqual(initial)
     })
@@ -1349,7 +1347,7 @@ describe.each([
       const initial = { count: 0 }
       const { signal } = setup(initial, { equals: Counter.equals })
 
-      signal.update(Counter.clone)
+      signal.write(Counter.clone)
       expect(signal.read(monitor)).toBe(initial)
       expect(signal.read(monitor)).toStrictEqual(initial)
     })
@@ -1358,7 +1356,7 @@ describe.each([
       const initial = { count: 0 }
       const { signal } = setup(initial)
 
-      signal.update(() => initial)
+      signal.write(() => initial)
       expect(signal.read(monitor)).toBe(initial)
     })
   })
@@ -1372,21 +1370,21 @@ describe.each([
       expect(signal1.read(monitor)).toBe(signal2.read(monitor))
     })
 
-    it("does not update source value when clone updates", ({ monitor }) => {
+    it("does not write source value when clone updates", ({ monitor }) => {
       const { signal: signal1 } = setup({ count: 0 })
       const signal2 = signal1.clone()
 
-      signal2.update({ count: 1 })
+      signal2.write({ count: 1 })
 
       expect(signal1.read(monitor)).toStrictEqual({ count: 0 })
       expect(signal2.read(monitor)).toStrictEqual({ count: 1 })
     })
 
-    it("does not update clone value when source updates", ({ monitor }) => {
+    it("does not write clone value when source updates", ({ monitor }) => {
       const { signal: signal1 } = setup({ count: 0 })
       const signal2 = signal1.clone()
 
-      signal1.update({ count: 1 })
+      signal1.write({ count: 1 })
 
       expect(signal1.read(monitor)).toStrictEqual({ count: 1 })
       expect(signal2.read(monitor)).toStrictEqual({ count: 0 })
@@ -1397,7 +1395,7 @@ describe.each([
       const signal2 = signal1.clone()
 
       expect(Object.is).not.toHaveBeenCalled()
-      signal2.update({ count: 1 })
+      signal2.write({ count: 1 })
 
       expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
@@ -1407,7 +1405,7 @@ describe.each([
       const signal2 = signal1.clone()
 
       expect(Counter.equals).not.toHaveBeenCalled()
-      signal2.update({ count: 1 })
+      signal2.write({ count: 1 })
 
       expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
@@ -1419,7 +1417,7 @@ describe.each([
       const signal2 = signal1.clone({})
 
       expect(Counter.equals).not.toHaveBeenCalled()
-      signal2.update({ count: 1 })
+      signal2.write({ count: 1 })
 
       expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
@@ -1429,7 +1427,7 @@ describe.each([
       const signal2 = signal1.clone({ equals: undefined })
 
       expect(Counter.equals).not.toHaveBeenCalled()
-      signal2.update({ count: 1 })
+      signal2.write({ count: 1 })
 
       expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
@@ -1439,7 +1437,7 @@ describe.each([
       const signal2 = signal1.clone({ equals: null })
 
       expect(Object.is).not.toHaveBeenCalled()
-      signal2.update({ count: 1 })
+      signal2.write({ count: 1 })
 
       expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
@@ -1449,7 +1447,7 @@ describe.each([
       const signal2 = signal1.clone({ equals: Counter.equals })
 
       expect(Counter.equals).not.toHaveBeenCalled()
-      signal2.update({ count: 1 })
+      signal2.write({ count: 1 })
 
       expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
@@ -1470,7 +1468,7 @@ describe.each([
       const signal2 = signal1.clone(Counter.clone)
 
       expect(Counter.equals).not.toHaveBeenCalled()
-      signal2.update({ count: 1 })
+      signal2.write({ count: 1 })
 
       expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })
@@ -1498,11 +1496,11 @@ describe.each([
       })
 
       // the nested signals are independent
-      signal1.read(monitor).count.update(1)
+      signal1.read(monitor).count.write(1)
       expect(signal1.read(monitor).count.read(monitor)).toBe(1)
       expect(signal2.read(monitor).count.read(monitor)).toBe(0)
 
-      signal1.read(monitor).name.update("Doe")
+      signal1.read(monitor).name.write("Doe")
       expect(signal1.read(monitor).name.read(monitor)).toBe("Doe")
       expect(signal2.read(monitor).name.read(monitor)).toBe("John")
     })
@@ -1527,11 +1525,11 @@ describe.each([
       })
 
       // the nested signals are dependent
-      signal1.read(monitor).count.update(1)
+      signal1.read(monitor).count.write(1)
       expect(signal1.read(monitor).count.read(monitor)).toBe(1)
       expect(signal2.read(monitor).count.read(monitor)).toBe(1)
 
-      signal1.read(monitor).name.update("Doe")
+      signal1.read(monitor).name.write("Doe")
       expect(signal1.read(monitor).name.read(monitor)).toBe("Doe")
       expect(signal2.read(monitor).name.read(monitor)).toBe("Doe")
     })
@@ -1549,7 +1547,7 @@ describe.each([
       expect(signal1.read(monitor)).toStrictEqual(signal2.read(monitor))
 
       expect(Counter.equals).not.toHaveBeenCalled()
-      signal2.update({ count: 1 })
+      signal2.write({ count: 1 })
 
       expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
     })

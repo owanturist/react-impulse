@@ -127,7 +127,7 @@ describe("monitoring single Signal", () => {
 
     // increment from the outside
     act(() => {
-      count.update((x) => x + 1)
+      count.write((x) => x + 1)
     })
     expect(onRender).toHaveBeenCalledTimes(unnecessaryRerendersCount) // does not re-render
     expect(onCounterRender).toHaveBeenCalledOnce()
@@ -177,7 +177,7 @@ describe("when drilling an Signal", () => {
     vi.clearAllMocks()
 
     act(() => {
-      count.update((x) => x * 2)
+      count.write((x) => x * 2)
     })
     expect(screen.getByTestId("count")).toHaveTextContent("12")
     expect(onRender).not.toHaveBeenCalled()

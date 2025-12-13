@@ -13,7 +13,7 @@ import { Signal as SignalImpl } from "./_internal/signal"
 
 type Signal<T> = BaseSignal<T>
 
-type ReadonlySignal<T> = Omit<Signal<T>, "update">
+type ReadonlySignal<T> = Omit<Signal<T>, "write">
 
 /**
  * Creates a new {@link Signal} without an initial value.
@@ -98,7 +98,7 @@ function Signal<T>(
   }
 
   const [setter, derivedOptions] =
-    isFunction(optionsOrWritableSignal) || hasProperty(optionsOrWritableSignal, "update")
+    isFunction(optionsOrWritableSignal) || hasProperty(optionsOrWritableSignal, "write")
       ? [optionsOrWritableSignal, optionsOrNothing]
       : [undefined, optionsOrWritableSignal]
 
@@ -106,7 +106,7 @@ function Signal<T>(
     isGetterFunction
       ? initialValueOrReadableSignal
       : (monitor) => initialValueOrReadableSignal.read(monitor),
-    isFunction(setter) ? setter : (value) => setter?.update(value),
+    isFunction(setter) ? setter : (value) => setter?.write(value),
     derivedOptions?.equals ?? isStrictEqual,
   )
 }

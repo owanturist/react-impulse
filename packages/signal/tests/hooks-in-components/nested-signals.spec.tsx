@@ -24,7 +24,7 @@ describe("nested signals", () => {
             type="button"
             data-testid="add-counter"
             onClick={() => {
-              state.update((current) => ({
+              state.write((current) => ({
                 ...current,
                 counts: [...current.counts, Signal(0)],
               }))
@@ -34,9 +34,9 @@ describe("nested signals", () => {
             type="button"
             data-testid="reset-counters"
             onClick={() => {
-              state.update((current) => {
+              state.write((current) => {
                 for (const count of current.counts) {
-                  count.update(0)
+                  count.write(0)
                 }
 
                 return current
@@ -100,7 +100,7 @@ describe("nested signals", () => {
 
     // add third counter from the outside
     act(() => {
-      signal.update((current) => ({
+      signal.write((current) => ({
         ...current,
         counts: [...current.counts, Signal(3)],
       }))
@@ -113,7 +113,7 @@ describe("nested signals", () => {
 
     // double the third counter from the outside
     act(() => {
-      signal.read(monitor).counts[2]!.update((x) => 2 * x)
+      signal.read(monitor).counts[2]!.write((x) => 2 * x)
     })
     expect(onRender).not.toHaveBeenCalled()
     expect(onCounterRender).toHaveBeenCalledOnce()
@@ -134,7 +134,7 @@ describe("nested signals", () => {
     // increment all from the outside
     act(() => {
       for (const count of signal.read(monitor).counts) {
-        count.update((x) => x + 1)
+        count.write((x) => x + 1)
       }
     })
     expect(onRender).not.toHaveBeenCalled()

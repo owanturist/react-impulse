@@ -42,7 +42,7 @@ describe("single Signal", () => {
     const initial = result.current
 
     act(() => {
-      count.update(2)
+      count.write(2)
     })
 
     expect(result.current).toBe(initial)
@@ -55,7 +55,7 @@ describe("single Signal", () => {
     expect(result.current()).toBe(2)
 
     act(() => {
-      count.update(2)
+      count.write(2)
     })
 
     expect(result.current()).toBe(4)
@@ -69,7 +69,7 @@ describe("single Signal", () => {
     initial()
 
     act(() => {
-      count.update(2)
+      count.write(2)
     })
 
     expect(result.current).not.toBe(initial)
@@ -82,7 +82,7 @@ describe("single Signal", () => {
     result.current()
 
     act(() => {
-      count.update(2)
+      count.write(2)
     })
 
     expect(count).toHaveEmittersSize(0)
@@ -171,7 +171,7 @@ describe("conditional Signal", () => {
     expect(result.current(false)).toBe(-1)
 
     act(() => {
-      count.update(2)
+      count.write(2)
     })
 
     expect(result.current(false)).toBe(-1)
@@ -184,7 +184,7 @@ describe("conditional Signal", () => {
     expect(result.current(true)).toBe(2)
 
     act(() => {
-      count.update(2)
+      count.write(2)
     })
 
     expect(result.current(true)).toBe(4)
@@ -225,7 +225,7 @@ describe("conditional Signal", () => {
     result.current(true)
 
     act(() => {
-      count.update(2)
+      count.write(2)
     })
 
     expect(count).toHaveEmittersSize(0)
@@ -280,7 +280,7 @@ describe("argument Signal", () => {
     result.current(count2)
 
     act(() => {
-      count1.update(3)
+      count1.write(3)
     })
 
     expect(count1).toHaveEmittersSize(0)
@@ -297,9 +297,9 @@ it("cannot batch the callback", () => {
 
     return useCallback(
       (diff: number) => {
-        signal1.update(signal1.read(monitor) + diff)
-        signal2.update(signal2.read(monitor) + diff)
-        signal3.update(signal3.read(monitor) + diff)
+        signal1.write(signal1.read(monitor) + diff)
+        signal2.write(signal2.read(monitor) + diff)
+        signal3.write(signal3.read(monitor) + diff)
       },
       [monitor],
     )

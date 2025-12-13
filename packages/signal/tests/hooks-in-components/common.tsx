@@ -31,7 +31,7 @@ const CounterComponent = React.memo<{
           <button
             type="button"
             data-testid="increment"
-            onClick={() => countSignal.update(count + 1)}
+            onClick={() => countSignal.write(count + 1)}
           />
         </div>
       </React.Profiler>
