@@ -2,40 +2,40 @@ import z from "zod"
 
 import { params } from "~/tools/params"
 
-import { ImpulseFormShape, ImpulseFormSwitch, ImpulseFormUnit } from "../../src"
+import { FormShape, FormSwitch, FormUnit } from "../../src"
 
 function setup() {
-  return ImpulseFormSwitch(
-    ImpulseFormUnit("_1", {
+  return FormSwitch(
+    FormUnit("_1", {
       initial: "_2",
       schema: z.enum(["_1", "_2", "_5"]),
     }),
     {
-      _1: ImpulseFormUnit(1, {
+      _1: FormUnit(1, {
         initial: 0,
         validateOn: "onInit",
         schema: z.number().min(1),
         error: ["custom error"],
       }),
 
-      _2: ImpulseFormShape({
-        _3: ImpulseFormUnit("name", {
+      _2: FormShape({
+        _3: FormUnit("name", {
           touched: true,
         }),
-        _4: ImpulseFormUnit(18, {
+        _4: FormUnit(18, {
           initial: 20,
         }),
       }),
 
-      _5: ImpulseFormSwitch(
-        ImpulseFormUnit<"_6" | "_7">("_6", {
+      _5: FormSwitch(
+        FormUnit<"_6" | "_7">("_6", {
           touched: true,
         }),
         {
-          _6: ImpulseFormUnit(0, {
+          _6: FormUnit(0, {
             error: "error",
           }),
-          _7: ImpulseFormUnit("0", {
+          _7: FormUnit("0", {
             schema: z.number(),
           }),
         },
@@ -44,10 +44,10 @@ function setup() {
   )
 }
 
-it("resets every initial input", ({ scope }) => {
+it("resets every initial input", ({ monitor }) => {
   const form = setup()
 
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "_1",
     branches: {
       _1: 1,
@@ -67,7 +67,7 @@ it("resets every initial input", ({ scope }) => {
 
   form.reset()
 
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "_2",
     branches: {
       _1: 0,
@@ -86,7 +86,7 @@ it("resets every initial input", ({ scope }) => {
   })
 })
 
-it("applies resetter to set initial values", ({ scope }) => {
+it("applies resetter to set initial values", ({ monitor }) => {
   const form = setup()
 
   form.reset({
@@ -104,7 +104,7 @@ it("applies resetter to set initial values", ({ scope }) => {
     },
   })
 
-  expect(form.getInput(scope)).toStrictEqual({
+  expect(form.getInput(monitor)).toStrictEqual({
     active: "_1",
     branches: {
       _1: 123,
@@ -123,10 +123,10 @@ it("applies resetter to set initial values", ({ scope }) => {
   })
 })
 
-it("resets every touched", ({ scope }) => {
+it("resets every touched", ({ monitor }) => {
   const form = setup()
 
-  expect(form.isTouched(scope, params._second)).toStrictEqual({
+  expect(form.isTouched(monitor, params._second)).toStrictEqual({
     active: false,
     branches: {
       _1: false,
@@ -146,7 +146,7 @@ it("resets every touched", ({ scope }) => {
 
   form.reset()
 
-  expect(form.isTouched(scope, params._second)).toStrictEqual({
+  expect(form.isTouched(monitor, params._second)).toStrictEqual({
     active: false,
     branches: {
       _1: false,
@@ -165,10 +165,10 @@ it("resets every touched", ({ scope }) => {
   })
 })
 
-it("resets every error", ({ scope }) => {
+it("resets every error", ({ monitor }) => {
   const form = setup()
 
-  expect(form.getError(scope, params._second)).toStrictEqual({
+  expect(form.getError(monitor, params._second)).toStrictEqual({
     active: null,
     branches: {
       _1: ["custom error"],
@@ -188,7 +188,7 @@ it("resets every error", ({ scope }) => {
 
   form.reset()
 
-  expect(form.getError(scope, params._second)).toStrictEqual({
+  expect(form.getError(monitor, params._second)).toStrictEqual({
     active: null,
     branches: {
       _1: [expect.stringContaining("Too small")],
@@ -207,14 +207,14 @@ it("resets every error", ({ scope }) => {
   })
 })
 
-it("resets every validated", ({ scope }) => {
+it("resets every validated", ({ monitor }) => {
   const form = setup()
 
   form.setTouched({
     active: true,
   })
 
-  expect(form.isValidated(scope, params._second)).toStrictEqual({
+  expect(form.isValidated(monitor, params._second)).toStrictEqual({
     active: true,
     branches: {
       _1: true,
@@ -234,7 +234,7 @@ it("resets every validated", ({ scope }) => {
 
   form.reset()
 
-  expect(form.isValidated(scope, params._second)).toStrictEqual({
+  expect(form.isValidated(monitor, params._second)).toStrictEqual({
     active: false,
     branches: {
       _1: true,
@@ -253,25 +253,25 @@ it("resets every validated", ({ scope }) => {
   })
 })
 
-it("using recursive resetter", ({ scope }) => {
+it("using recursive resetter", ({ monitor }) => {
   expect.assertions(26)
 
-  const form = ImpulseFormSwitch(
-    ImpulseFormUnit("", {
+  const form = FormSwitch(
+    FormUnit("", {
       schema: z.enum(["_1", "_2", "_5"]),
       initial: "_12",
     }),
     {
-      _1: ImpulseFormUnit(true, {
+      _1: FormUnit(true, {
         initial: false,
         schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
       }),
-      _2: ImpulseFormShape(
+      _2: FormShape(
         {
-          _3: ImpulseFormUnit("name", {
+          _3: FormUnit("name", {
             initial: "initial",
           }),
-          _4: ImpulseFormUnit(18),
+          _4: FormUnit(18),
         },
         {
           initial: {
@@ -279,13 +279,13 @@ it("using recursive resetter", ({ scope }) => {
           },
         },
       ),
-      _5: ImpulseFormSwitch(
-        ImpulseFormUnit("_6", {
+      _5: FormSwitch(
+        FormUnit("_6", {
           schema: z.enum(["_6", "_7"]),
         }),
         {
-          _6: ImpulseFormUnit(0, { initial: 1 }),
-          _7: ImpulseFormUnit("0"),
+          _6: FormUnit(0, { initial: 1 }),
+          _7: FormUnit("0"),
         },
         {
           initial: {
@@ -465,9 +465,9 @@ it("using recursive resetter", ({ scope }) => {
     }
   })
 
-  const initial = form.getInitial(scope)
+  const initial = form.getInitial(monitor)
 
-  expect(form.getInput(scope)).toStrictEqual(initial)
+  expect(form.getInput(monitor)).toStrictEqual(initial)
   expect(initial).toStrictEqual({
     active: "_1",
     branches: {

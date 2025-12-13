@@ -1,19 +1,19 @@
 import { act, render, renderHook } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useScope } from "../src"
+import { Signal, useMonitor } from "../src"
 
-it("does not change scope value unless scoped impulse changes", () => {
+it("does not change monitor value unless monitored signal changes", () => {
   const spy = vi.fn()
-  const impulse = Impulse(1)
+  const signal = Signal(1)
   const { result, rerender } = renderHook(() => {
-    const scope = useScope()
+    const monitor = useMonitor()
 
     React.useEffect(() => {
-      spy(scope)
-    }, [scope])
+      spy(monitor)
+    }, [monitor])
 
-    return impulse.getValue(scope)
+    return signal.read(monitor)
   })
 
   expect(result.current).toBe(1)
@@ -24,21 +24,21 @@ it("does not change scope value unless scoped impulse changes", () => {
   expect(spy).toHaveBeenCalledTimes(1)
 
   act(() => {
-    impulse.setValue(2)
+    signal.write(2)
   })
   expect(result.current).toBe(2)
   expect(spy).toHaveBeenCalledTimes(2)
 })
 
-function Component({ value }: { value: Impulse<number> }) {
-  const scope = useScope()
+function Component({ value }: { value: Signal<number> }) {
+  const monitor = useMonitor()
 
-  return <>{value.getValue(scope)}</>
+  return <>{value.read(monitor)}</>
 }
 
 it("cannot unsubscribe when swapped", () => {
-  const value1 = Impulse(1)
-  const value2 = Impulse(3)
+  const value1 = Signal(1)
+  const value2 = Signal(3)
   const onRender = vi.fn()
 
   const { rerender } = render(<Component value={value1} />, {
@@ -54,8 +54,8 @@ it("cannot unsubscribe when swapped", () => {
 
   rerender(<Component value={value2} />)
   /**
-   * Not 0 because a scope cannot cleanup on every rerender,
-   * otherwise memo/effect hooks with the scope dependency will lose subscriptions too eagerly.
+   * Not 0 because a monitor cannot cleanup on every rerender,
+   * otherwise memo/effect hooks with the monitor dependency will lose subscriptions too eagerly.
    */
   expect(value1).toHaveEmittersSize(1)
   expect(value2).toHaveEmittersSize(1)
@@ -63,14 +63,14 @@ it("cannot unsubscribe when swapped", () => {
   vi.clearAllMocks()
 
   act(() => {
-    value1.setValue(10)
+    value1.write(10)
   })
 
   expect(onRender).toHaveBeenCalledOnce()
   vi.clearAllMocks()
 
   act(() => {
-    value2.setValue(5)
+    value2.write(5)
   })
   expect(onRender).toHaveBeenCalledOnce()
 

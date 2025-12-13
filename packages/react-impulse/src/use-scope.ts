@@ -1,15 +1,17 @@
 import { identity } from "~/tools/identity"
 
-import type { Scope } from "./_internal/scope"
-import { useCreateScope } from "./_internal/use-create-scope"
+import type { Monitor } from "./_internal/scope"
+import { useCreateMonitor } from "./_internal/use-create-scope"
 
 /**
- * A hook that returns a Scope.
+ * A hook that returns a {@link Monitor}.
  *
- * @version 3.0.0
+ * @returns A {@link Monitor} instance.
+ *
+ * @version 1.0.0
  */
-function useScope(): Scope {
-  return useCreateScope(identity)
+function useMonitor(): Monitor {
+  return useCreateMonitor(identity)
 }
 
-export { useScope }
+export { useMonitor }

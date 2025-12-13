@@ -1,11 +1,11 @@
 import { isString } from "~/tools/is-string"
 
-import { Impulse, type ReadonlyImpulse, type Scope, isImpulse } from "../src"
+import { type Monitor, type ReadonlySignal, Signal, isSignal } from "../src"
 
-describe("isImpulse(input)", () => {
-  const knownCheck = (input: number | Impulse<number>) => {
-    if (isImpulse(input)) {
-      expectTypeOf(input).toEqualTypeOf<Impulse<number>>()
+describe("isSignal(input)", () => {
+  const knownCheck = (input: number | Signal<number>) => {
+    if (isSignal(input)) {
+      expectTypeOf(input).toEqualTypeOf<Signal<number>>()
 
       return true
     }
@@ -15,9 +15,9 @@ describe("isImpulse(input)", () => {
     return false
   }
 
-  const readonlyCheck = (input: number | ReadonlyImpulse<number>) => {
-    if (isImpulse(input)) {
-      expectTypeOf(input).toEqualTypeOf<ReadonlyImpulse<number>>()
+  const readonlyCheck = (input: number | ReadonlySignal<number>) => {
+    if (isSignal(input)) {
+      expectTypeOf(input).toEqualTypeOf<ReadonlySignal<number>>()
 
       return true
     }
@@ -28,8 +28,8 @@ describe("isImpulse(input)", () => {
   }
 
   const unknownCheck = (input: unknown) => {
-    if (isImpulse(input)) {
-      expectTypeOf(input).toEqualTypeOf<Impulse<unknown>>()
+    if (isSignal(input)) {
+      expectTypeOf(input).toEqualTypeOf<Signal<unknown>>()
 
       return true
     }
@@ -39,16 +39,16 @@ describe("isImpulse(input)", () => {
     return false
   }
 
-  it("returns true for Impulse", () => {
-    const impulse = Impulse(0)
-    const readonly = Impulse(() => 1)
+  it("returns true for Signal", () => {
+    const signal = Signal(0)
+    const readonly = Signal(() => 1)
 
-    expect(knownCheck(impulse)).toBe(true)
-    // @ts-expect-error should be Impulse<number>
+    expect(knownCheck(signal)).toBe(true)
+    // @ts-expect-error should be Signal<number>
     expect(knownCheck(readonly)).toBe(true)
-    expect(readonlyCheck(impulse)).toBe(true)
+    expect(readonlyCheck(signal)).toBe(true)
     expect(readonlyCheck(readonly)).toBe(true)
-    expect(unknownCheck(impulse)).toBe(true)
+    expect(unknownCheck(signal)).toBe(true)
     expect(unknownCheck(readonly)).toBe(true)
   })
 
@@ -60,95 +60,95 @@ describe("isImpulse(input)", () => {
     ["array", [1, 2, 3]],
     ["object", { count: 0 }],
   ])("returns false for %s", (_, value: unknown) => {
-    // @ts-expect-error should be Impulse<number>
+    // @ts-expect-error should be Signal<number>
     expect(knownCheck(value)).toBe(false)
     expect(unknownCheck(value)).toBe(false)
   })
 })
 
-describe("isImpulse(scope, check, value)", () => {
-  const knownCheck = (scope: Scope, impulse: string | Impulse<string>) => {
-    if (isImpulse(scope, isString, impulse)) {
-      expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
+describe("isSignal(monitor, check, value)", () => {
+  const knownCheck = (monitor: Monitor, signal: string | Signal<string>) => {
+    if (isSignal(monitor, isString, signal)) {
+      expectTypeOf(signal).toEqualTypeOf<Signal<string>>()
 
       return true
     }
 
-    expectTypeOf(impulse).toEqualTypeOf<string>()
+    expectTypeOf(signal).toEqualTypeOf<string>()
 
     return false
   }
 
-  const unionCheck = (scope: Scope, impulse: Impulse<string> | Impulse<number>) => {
-    if (isImpulse(scope, isString<string>, impulse)) {
-      expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
+  const unionCheck = (monitor: Monitor, signal: Signal<string> | Signal<number>) => {
+    if (isSignal(monitor, isString<string>, signal)) {
+      expectTypeOf(signal).toEqualTypeOf<Signal<string>>()
 
       return true
     }
 
-    expectTypeOf(impulse).toEqualTypeOf<Impulse<number>>()
+    expectTypeOf(signal).toEqualTypeOf<Signal<number>>()
 
     return false
   }
 
-  const unionValueCheck = (scope: Scope, impulse: Impulse<number | string>) => {
-    if (isImpulse(scope, isString, impulse)) {
-      expectTypeOf(impulse).toEqualTypeOf<Impulse<number | string>>()
+  const unionValueCheck = (monitor: Monitor, signal: Signal<number | string>) => {
+    if (isSignal(monitor, isString, signal)) {
+      expectTypeOf(signal).toEqualTypeOf<Signal<number | string>>()
 
       return true
     }
 
-    expectTypeOf(impulse).toEqualTypeOf<never>()
+    expectTypeOf(signal).toEqualTypeOf<never>()
 
     return false
   }
 
-  const readonlyCheck = (scope: Scope, impulse: string | ReadonlyImpulse<string>) => {
-    if (isImpulse(scope, isString, impulse)) {
-      expectTypeOf(impulse).toEqualTypeOf<ReadonlyImpulse<string>>()
+  const readonlyCheck = (monitor: Monitor, signal: string | ReadonlySignal<string>) => {
+    if (isSignal(monitor, isString, signal)) {
+      expectTypeOf(signal).toEqualTypeOf<ReadonlySignal<string>>()
 
       return true
     }
 
-    expectTypeOf(impulse).toEqualTypeOf<string>()
+    expectTypeOf(signal).toEqualTypeOf<string>()
 
     return false
   }
 
-  const unknownCheck = (scope: Scope, impulse: unknown) => {
-    if (isImpulse(scope, isString, impulse)) {
-      expectTypeOf(impulse).toEqualTypeOf<Impulse<string>>()
+  const unknownCheck = (monitor: Monitor, signal: unknown) => {
+    if (isSignal(monitor, isString, signal)) {
+      expectTypeOf(signal).toEqualTypeOf<Signal<string>>()
 
       return true
     }
 
-    expectTypeOf(impulse).toEqualTypeOf<unknown>()
+    expectTypeOf(signal).toEqualTypeOf<unknown>()
 
     return false
   }
 
-  it("returns true for Impulse with success check", ({ scope }) => {
-    const impulse = Impulse("")
-    const readonly = Impulse(() => "")
-    const union = Impulse<string | number>("")
+  it("returns true for Signal with success check", ({ monitor }) => {
+    const signal = Signal("")
+    const readonly = Signal(() => "")
+    const union = Signal<string | number>("")
 
-    expect(knownCheck(scope, impulse)).toBe(true)
-    expect(unionCheck(scope, impulse)).toBe(true)
-    expect(unionValueCheck(scope, union)).toBe(true)
-    // @ts-expect-error should be Impulse<string>
-    expect(knownCheck(scope, readonly)).toBe(true)
-    expect(readonlyCheck(scope, impulse)).toBe(true)
-    expect(readonlyCheck(scope, readonly)).toBe(true)
-    expect(unknownCheck(scope, impulse)).toBe(true)
-    expect(unknownCheck(scope, readonly)).toBe(true)
+    expect(knownCheck(monitor, signal)).toBe(true)
+    expect(unionCheck(monitor, signal)).toBe(true)
+    expect(unionValueCheck(monitor, union)).toBe(true)
+    // @ts-expect-error should be Signal<string>
+    expect(knownCheck(monitor, readonly)).toBe(true)
+    expect(readonlyCheck(monitor, signal)).toBe(true)
+    expect(readonlyCheck(monitor, readonly)).toBe(true)
+    expect(unknownCheck(monitor, signal)).toBe(true)
+    expect(unknownCheck(monitor, readonly)).toBe(true)
   })
 
-  it("returns false for Impulse with failed check", ({ scope }) => {
-    const impulse = Impulse(0)
+  it("returns false for Signal with failed check", ({ monitor }) => {
+    const signal = Signal(0)
 
-    // @ts-expect-error should be Impulse<string>
-    expect(knownCheck(scope, impulse)).toBe(false)
-    expect(unknownCheck(scope, impulse)).toBe(false)
+    // @ts-expect-error should be Signal<string>
+    expect(knownCheck(monitor, signal)).toBe(false)
+    expect(unknownCheck(monitor, signal)).toBe(false)
   })
 
   describe.each([
@@ -159,10 +159,10 @@ describe("isImpulse(scope, check, value)", () => {
     ["array", [1, 2, 3]],
     ["object", { count: 0 }],
   ])("when input is %s", (_, value) => {
-    it("returns false", ({ scope }) => {
-      // @ts-expect-error should be Impulse<string>
-      expect(knownCheck(scope, value)).toBe(false)
-      expect(unknownCheck(scope, value)).toBe(false)
+    it("returns false", ({ monitor }) => {
+      // @ts-expect-error should be Signal<string>
+      expect(knownCheck(monitor, value)).toBe(false)
+      expect(unknownCheck(monitor, value)).toBe(false)
     })
   })
 })

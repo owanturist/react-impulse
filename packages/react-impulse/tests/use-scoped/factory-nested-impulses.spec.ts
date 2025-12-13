@@ -1,57 +1,57 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, type Scope, batch, useScoped } from "../../src"
+import { type Monitor, Signal, batch, useComputed } from "../../src"
 import {
   Counter,
   type WithFirst,
-  type WithImpulse,
   type WithSecond,
+  type WithSignal,
   type WithSpy,
   type WithThird,
 } from "../common"
 
 describe("nested factory", () => {
-  const factory = (scope: Scope, { impulse }: WithImpulse<WithFirst & WithSecond>) => {
-    const { first, second } = impulse.getValue(scope)
+  const factory = (monitor: Monitor, { signal }: WithSignal<WithFirst & WithSecond>) => {
+    const { first, second } = signal.read(monitor)
 
-    return Counter.merge(first.getValue(scope), second.getValue(scope))
+    return Counter.merge(first.read(monitor), second.read(monitor))
   }
 
   describe.each([
     [
       "without deps",
-      ({ impulse }: WithImpulse<WithFirst & WithSecond>) =>
-        useScoped((scope) => factory(scope, { impulse })),
+      ({ signal }: WithSignal<WithFirst & WithSecond>) =>
+        useComputed((monitor) => factory(monitor, { signal })),
     ],
     [
       "without comparator",
-      ({ impulse }: WithImpulse<WithFirst & WithSecond>) =>
-        useScoped((scope) => factory(scope, { impulse }), [impulse]),
+      ({ signal }: WithSignal<WithFirst & WithSecond>) =>
+        useComputed((monitor) => factory(monitor, { signal }), [signal]),
     ],
     [
       "with inline comparator",
-      ({ impulse }: WithImpulse<WithFirst & WithSecond>) =>
-        useScoped((scope) => factory(scope, { impulse }), [impulse], {
-          compare: (prev, next) => Counter.compare(prev, next),
+      ({ signal }: WithSignal<WithFirst & WithSecond>) =>
+        useComputed((monitor) => factory(monitor, { signal }), [signal], {
+          equals: (prev, next) => Counter.equals(prev, next),
         }),
     ],
     [
       "with memoized comparator",
-      ({ impulse }: WithImpulse<WithFirst & WithSecond>) =>
-        useScoped((scope) => factory(scope, { impulse }), [impulse], {
-          compare: Counter.compare,
+      ({ signal }: WithSignal<WithFirst & WithSecond>) =>
+        useComputed((monitor) => factory(monitor, { signal }), [signal], {
+          equals: Counter.equals,
         }),
     ],
   ])("%s", (_, useCounter) => {
     const setup = () => {
-      const first = Impulse({ count: 2 })
-      const second = Impulse({ count: 3 })
-      const impulse = Impulse({ first, second })
+      const first = Signal({ count: 2 })
+      const second = Signal({ count: 3 })
+      const signal = Signal({ first, second })
       const { result } = renderHook(useCounter, {
-        initialProps: { impulse },
+        initialProps: { signal },
       })
 
-      return { impulse, first, second, result }
+      return { signal, first, second, result }
     }
 
     it("initiates with expected result", () => {
@@ -64,7 +64,7 @@ describe("nested factory", () => {
       const { first, result } = setup()
 
       act(() => {
-        first.setValue(Counter.inc)
+        first.write(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -73,7 +73,7 @@ describe("nested factory", () => {
       const { second, result } = setup()
 
       act(() => {
-        second.setValue(Counter.inc)
+        second.write(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -82,18 +82,18 @@ describe("nested factory", () => {
       const { first, second, result } = setup()
 
       act(() => {
-        first.setValue(Counter.inc)
-        second.setValue(Counter.inc)
+        first.write(Counter.inc)
+        second.write(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 7 })
     })
 
-    it("replaces nested impulses", () => {
-      const newFirst = Impulse({ count: 5 })
-      const { impulse, result } = setup()
+    it("replaces nested Signals", () => {
+      const newFirst = Signal({ count: 5 })
+      const { signal, result } = setup()
 
       act(() => {
-        impulse.setValue((current) => ({
+        signal.write((current) => ({
           ...current,
           first: newFirst,
         }))
@@ -101,13 +101,13 @@ describe("nested factory", () => {
       expect(result.current).toStrictEqual({ count: 8 })
     })
 
-    it("updates nested impulses", () => {
-      const { impulse, result } = setup()
+    it("updates nested Signals", () => {
+      const { signal, result } = setup()
 
       act(() => {
-        impulse.setValue((current) => {
-          current.first.setValue(Counter.inc)
-          current.second.setValue(Counter.inc)
+        signal.write((current) => {
+          current.first.write(Counter.inc)
+          current.second.write(Counter.inc)
 
           return current
         })
@@ -117,83 +117,83 @@ describe("nested factory", () => {
   })
 })
 
-describe("triggering factory for nested impulses vs single impulse", () => {
-  const factorySingle = (scope: Scope, { impulse, spy }: WithImpulse & WithSpy) => {
+describe("triggering factory for nested Signals vs single Signal", () => {
+  const factorySingle = (monitor: Monitor, { signal, spy }: WithSignal & WithSpy) => {
     spy()
 
-    return impulse.getValue(scope)
+    return signal.read(monitor)
   }
 
   const factoryNested = (
-    scope: Scope,
-    { spy, impulse }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy,
+    monitor: Monitor,
+    { spy, signal }: WithSignal<WithFirst & WithSecond & WithThird> & WithSpy,
   ) => {
     spy()
 
-    const { first, second, third } = impulse.getValue(scope)
+    const { first, second, third } = signal.read(monitor)
 
-    return Counter.merge(first.getValue(scope), second.getValue(scope), third.getValue(scope))
+    return Counter.merge(first.read(monitor), second.read(monitor), third.read(monitor))
   }
 
   describe.each([
     [
       "without deps",
-      ({ impulse, spy }: WithImpulse & WithSpy) =>
-        useScoped((scope) => factorySingle(scope, { impulse, spy })),
-      ({ spy, impulse }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy) =>
-        useScoped((scope) => factoryNested(scope, { impulse, spy })),
+      ({ signal, spy }: WithSignal & WithSpy) =>
+        useComputed((monitor) => factorySingle(monitor, { signal, spy })),
+      ({ spy, signal }: WithSignal<WithFirst & WithSecond & WithThird> & WithSpy) =>
+        useComputed((monitor) => factoryNested(monitor, { signal, spy })),
     ],
     [
       "without comparator",
-      ({ impulse, spy }: WithImpulse & WithSpy) =>
-        useScoped((scope) => factorySingle(scope, { impulse, spy }), [impulse, spy]),
-      ({ spy, impulse }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy) =>
-        useScoped((scope) => factoryNested(scope, { impulse, spy }), [impulse, spy]),
+      ({ signal, spy }: WithSignal & WithSpy) =>
+        useComputed((monitor) => factorySingle(monitor, { signal, spy }), [signal, spy]),
+      ({ spy, signal }: WithSignal<WithFirst & WithSecond & WithThird> & WithSpy) =>
+        useComputed((monitor) => factoryNested(monitor, { signal, spy }), [signal, spy]),
     ],
     [
       "with inline comparator",
-      ({ impulse, spy }: WithImpulse & WithSpy) =>
-        useScoped((scope) => factorySingle(scope, { impulse, spy }), [impulse, spy], {
-          compare: (prev, next) => Counter.compare(prev, next),
+      ({ signal, spy }: WithSignal & WithSpy) =>
+        useComputed((monitor) => factorySingle(monitor, { signal, spy }), [signal, spy], {
+          equals: (prev, next) => Counter.equals(prev, next),
         }),
-      ({ spy, impulse }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy) =>
-        useScoped((scope) => factoryNested(scope, { impulse, spy }), [impulse, spy], {
-          compare: (prev, next) => Counter.compare(prev, next),
+      ({ spy, signal }: WithSignal<WithFirst & WithSecond & WithThird> & WithSpy) =>
+        useComputed((monitor) => factoryNested(monitor, { signal, spy }), [signal, spy], {
+          equals: (prev, next) => Counter.equals(prev, next),
         }),
     ],
     [
       "with memoized comparator",
-      ({ impulse, spy }: WithImpulse & WithSpy) =>
-        useScoped((scope) => factorySingle(scope, { impulse, spy }), [impulse, spy], {
-          compare: Counter.compare,
+      ({ signal, spy }: WithSignal & WithSpy) =>
+        useComputed((monitor) => factorySingle(monitor, { signal, spy }), [signal, spy], {
+          equals: Counter.equals,
         }),
-      ({ spy, impulse }: WithImpulse<WithFirst & WithSecond & WithThird> & WithSpy) =>
-        useScoped((scope) => factoryNested(scope, { impulse, spy }), [impulse, spy], {
-          compare: Counter.compare,
+      ({ spy, signal }: WithSignal<WithFirst & WithSecond & WithThird> & WithSpy) =>
+        useComputed((monitor) => factoryNested(monitor, { signal, spy }), [signal, spy], {
+          equals: Counter.equals,
         }),
     ],
   ])("%s", (_, useSingleCounter, useNestedCounters) => {
     const setup = () => {
-      const first = Impulse({ count: 1 })
-      const second = Impulse({ count: 2 })
-      const third = Impulse({ count: 3 })
-      const impulse = Impulse({ first, second, third })
+      const first = Signal({ count: 1 })
+      const second = Signal({ count: 2 })
+      const third = Signal({ count: 3 })
+      const signal = Signal({ first, second, third })
       const spySingle = vi.fn()
       const spyNested = vi.fn()
 
       const { result: resultSingle } = renderHook(useSingleCounter, {
-        initialProps: { impulse: first, spy: spySingle },
+        initialProps: { signal: first, spy: spySingle },
       })
 
       const { result: resultNested } = renderHook(useNestedCounters, {
-        initialProps: { impulse, spy: spyNested },
+        initialProps: { signal, spy: spyNested },
       })
 
       return {
         first,
         second,
         third,
-        impulse,
+        signal,
         spySingle,
         spyNested,
         resultSingle,
@@ -214,8 +214,8 @@ describe("triggering factory for nested impulses vs single impulse", () => {
 
       act(() => {
         batch(() => {
-          first.setValue(Counter.inc)
-          second.setValue(Counter.inc)
+          first.write(Counter.inc)
+          second.write(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -228,8 +228,8 @@ describe("triggering factory for nested impulses vs single impulse", () => {
 
       act(() => {
         batch(() => {
-          first.setValue(Counter.inc)
-          third.setValue(Counter.inc)
+          first.write(Counter.inc)
+          third.write(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -243,11 +243,11 @@ describe("triggering factory for nested impulses vs single impulse", () => {
       act(() => {
         batch(() => {
           batch(() => {
-            first.setValue(Counter.inc)
-            second.setValue(Counter.inc)
+            first.write(Counter.inc)
+            second.write(Counter.inc)
           })
 
-          third.setValue(Counter.inc)
+          third.write(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -263,8 +263,8 @@ describe("triggering factory for nested impulses vs single impulse", () => {
 
       act(() => {
         batch(() => {
-          second.setValue(Counter.inc)
-          third.setValue(Counter.inc)
+          second.write(Counter.inc)
+          third.write(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 1 })
@@ -273,15 +273,15 @@ describe("triggering factory for nested impulses vs single impulse", () => {
       expect(spyNested).toHaveBeenCalled()
     })
 
-    it("Impulse#setValue wraps the callback into batch", () => {
-      const { second, third, impulse, spyNested, resultNested } = setup()
+    it("Signal#write wraps the callback into batch", () => {
+      const { second, third, signal, spyNested, resultNested } = setup()
 
       spyNested.mockReset()
 
       act(() => {
         batch(() => {
-          second.setValue(Counter.inc)
-          third.setValue(Counter.inc)
+          second.write(Counter.inc)
+          third.write(Counter.inc)
         })
       })
 
@@ -290,9 +290,9 @@ describe("triggering factory for nested impulses vs single impulse", () => {
       spyNested.mockReset()
 
       act(() => {
-        impulse.setValue((current) => {
-          current.second.setValue(Counter.inc)
-          current.third.setValue(Counter.inc)
+        signal.write((current) => {
+          current.second.write(Counter.inc)
+          current.third.write(Counter.inc)
 
           return current
         })

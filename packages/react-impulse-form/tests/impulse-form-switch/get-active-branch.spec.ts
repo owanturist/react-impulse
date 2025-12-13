@@ -1,19 +1,19 @@
 import z from "zod"
 
-import { ImpulseFormShape, ImpulseFormSwitch, ImpulseFormUnit } from "../../src"
+import { FormShape, FormSwitch, FormUnit } from "../../src"
 
 describe("types", () => {
-  const form = ImpulseFormSwitch(
-    ImpulseFormUnit("", {
+  const form = FormSwitch(
+    FormUnit("", {
       schema: z.enum(["_1", "_2"]),
     }),
     {
-      _1: ImpulseFormUnit(true, {
+      _1: FormUnit(true, {
         schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
       }),
-      _2: ImpulseFormShape({
-        _3: ImpulseFormUnit("name"),
-        _4: ImpulseFormUnit(18),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18),
       }),
     },
   )
@@ -21,17 +21,17 @@ describe("types", () => {
   type ActiveBranch =
     | {
         readonly kind: "_1"
-        readonly value: ImpulseFormUnit<boolean, ReadonlyArray<string>, "ok" | "not ok">
+        readonly value: FormUnit<boolean, ReadonlyArray<string>, "ok" | "not ok">
       }
     | {
         readonly kind: "_2"
-        readonly value: ImpulseFormShape<{
-          _3: ImpulseFormUnit<string>
-          _4: ImpulseFormUnit<number>
+        readonly value: FormShape<{
+          _3: FormUnit<string>
+          _4: FormUnit<number>
         }>
       }
 
-  it("matches schema type for getActiveBranch(scope)", () => {
+  it("matches schema type for getActiveBranch(monitor)", () => {
     expectTypeOf(form.getActiveBranch).returns.toEqualTypeOf<undefined | ActiveBranch>()
   })
 })

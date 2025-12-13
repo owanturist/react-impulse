@@ -1,19 +1,19 @@
 import type { Setter } from "~/tools/setter"
 
-import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
+import { FormShape, FormUnit } from "../../src"
 
-it("updates initial value", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormUnit(""),
-    second: ImpulseFormUnit(0),
-    third: ImpulseFormShape({
-      one: ImpulseFormUnit(true),
-      two: ImpulseFormUnit([""]),
+it("updates initial value", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormUnit(""),
+    second: FormUnit(0),
+    third: FormShape({
+      one: FormUnit(true),
+      two: FormUnit([""]),
     }),
     fourth: ["anything"],
   })
 
-  expect(shape.getInitial(scope)).toStrictEqual({
+  expect(shape.getInitial(monitor)).toStrictEqual({
     first: "",
     second: 0,
     third: {
@@ -29,7 +29,7 @@ it("updates initial value", ({ scope }) => {
       two: undefined,
     },
   })
-  expect(shape.getInitial(scope)).toStrictEqual({
+  expect(shape.getInitial(monitor)).toStrictEqual({
     first: "",
     second: 0,
     third: {
@@ -44,7 +44,7 @@ it("updates initial value", ({ scope }) => {
       two: (two) => [...two, "hi"],
     },
   })
-  expect(shape.getInitial(scope)).toStrictEqual({
+  expect(shape.getInitial(monitor)).toStrictEqual({
     first: "",
     second: 0,
     third: {
@@ -62,7 +62,7 @@ it("updates initial value", ({ scope }) => {
       two: ["two"],
     },
   })
-  expect(shape.getInitial(scope)).toStrictEqual({
+  expect(shape.getInitial(monitor)).toStrictEqual({
     first: "1",
     second: 2,
     third: {
@@ -116,7 +116,7 @@ it("updates initial value", ({ scope }) => {
     }
   })
 
-  expect(shape.getInitial(scope)).toStrictEqual({
+  expect(shape.getInitial(monitor)).toStrictEqual({
     first: "one",
     second: 3,
     third: {
@@ -126,7 +126,7 @@ it("updates initial value", ({ scope }) => {
     fourth: ["anything"],
   })
 
-  expectTypeOf(shape.getInitial(scope)).toEqualTypeOf<{
+  expectTypeOf(shape.getInitial(monitor)).toEqualTypeOf<{
     readonly first: string
     readonly second: number
     readonly third: {
@@ -136,7 +136,7 @@ it("updates initial value", ({ scope }) => {
     readonly fourth: Array<string>
   }>()
 
-  expectTypeOf(shape.fields.third.getInitial(scope)).toEqualTypeOf<{
+  expectTypeOf(shape.fields.third.getInitial(monitor)).toEqualTypeOf<{
     readonly one: boolean
     readonly two: Array<string>
   }>()
@@ -206,14 +206,14 @@ it("updates initial value", ({ scope }) => {
   >()
 })
 
-it("fields initial values are independent", ({ scope }) => {
-  const unit = ImpulseFormUnit("0")
-  const shape = ImpulseFormShape({
+it("fields initial values are independent", ({ monitor }) => {
+  const unit = FormUnit("0")
+  const shape = FormShape({
     first: unit,
     second: unit,
   })
 
-  expect(shape.getInitial(scope)).toStrictEqual({
+  expect(shape.getInitial(monitor)).toStrictEqual({
     first: "0",
     second: "0",
   })
@@ -221,7 +221,7 @@ it("fields initial values are independent", ({ scope }) => {
   shape.setInitial({
     first: "1",
   })
-  expect(shape.getInitial(scope)).toStrictEqual({
+  expect(shape.getInitial(monitor)).toStrictEqual({
     first: "1",
     second: "0",
   })

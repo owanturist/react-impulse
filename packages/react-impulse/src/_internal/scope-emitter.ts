@@ -1,30 +1,33 @@
-import { type Scope, createScope } from "./scope"
+import type { Signal } from "../impulse"
+
+import type { DerivedSignal } from "./derived-impulse"
+import { type Monitor, createMonitor } from "./scope"
 
 /**
- * Manages the lifecycle of scope emitters, providing creation, attachment, and invalidation
- * mechanisms for scoped reactivity tracking within the impulse system.
+ * Manages the lifecycle of monitor emitters, providing creation, attachment, and invalidation
+ * mechanisms for reactivity tracking within the {@link Signal} system.
  *
  * @remarks
  * Each instance maintains weak references to all emitters it is attached to, ensuring proper
- * teardown when scopes are recreated or invalidated to avoid leaking subscriptions.
+ * teardown when monitors are recreated or invalidated to avoid leaking subscriptions.
  */
-class ScopeEmitter {
+class MonitorEmitter {
   /**
-   * Maintains the collections of scope emitters this instance has been attached to, using nested
+   * Maintains the collections of monitor emitters this instance has been attached to, using nested
    * sets of weak references so that attachments can be tracked without preventing garbage collection.
    */
-  private readonly _attachedTo = new Set<Set<WeakRef<ScopeEmitter>>>()
+  private readonly _attachedTo = new Set<Set<WeakRef<MonitorEmitter>>>()
 
   /**
-   * Maintains a weak reference to the current scope emitter instance, allowing listeners to access it without preventing garbage collection.
+   * Maintains a weak reference to the current monitor emitter instance, allowing listeners to access it without preventing garbage collection.
    */
   private readonly _ref = new WeakRef(this)
 
   /**
-   * Initializes and returns a new instance of the `ScopeEmitter` class.
+   * Initializes and returns a new instance of the {@link MonitorEmitter} class.
    *
-   * @param _emit - Callback invoked via the internal queue whenever the scope needs to broadcast an update.
-   * @param _derived - Indicates whether the emitter originates from a derived impulse, deferring subscription until first access.
+   * @param _emit - Callback invoked via the internal queue whenever the {@link Monitor} needs to broadcast an update.
+   * @param _derived - Indicates whether the emitter originates from a {@link DerivedSignal}, deferring subscription until first access.
    */
   public constructor(
     public readonly _emit: VoidFunction,
@@ -32,7 +35,7 @@ class ScopeEmitter {
   ) {}
 
   /**
-   * Detaches the current scope reference from every emitter it is attached to
+   * Detaches the current {@link Monitor} reference from every emitter it is attached to
    * and clears the internal tracking set to prevent stale subscriptions.
    */
   private _detachFromAll(): void {
@@ -44,37 +47,36 @@ class ScopeEmitter {
   }
 
   /**
-   * Resets the current scope by detaching from all tracked emitters and returning
-   * a fresh scope instance bound to this emitter.
+   * Resets the current {@link Monitor} by detaching from all tracked emitters and returning a fresh {@link Monitor} instance bound to this emitter.
    *
    * @remarks
-   * A {@link Scope} is always created on a new reading cycle, so all previous subscriptions must be cleared.
+   * A {@link Monitor} is always created on a new reading cycle, so all previous subscriptions must be cleared.
    *
-   * @returns The newly created scope that references this emitter.
+   * @returns The newly created {@link Monitor} that references this emitter.
    */
-  private _renew(): Scope {
+  private _renew(): Monitor {
     this._detachFromAll()
 
-    return createScope(this)
+    return createMonitor(this)
   }
 
   /**
-   * Registers this scope emitter with the provided collection of emitters,
+   * Registers this monitor emitter with the provided collection of emitters,
    * ensuring the weak reference is tracked for future coordination or cleanup.
    *
-   * @param emitters - Set of weak references to scope emitters that this instance should join.
+   * @param emitters - Set of weak references to monitor emitters that this instance should join.
    */
-  public _attachTo(emitters: Set<WeakRef<ScopeEmitter>>): void {
+  public _attachTo(emitters: Set<WeakRef<MonitorEmitter>>): void {
     emitters.add(this._ref)
     this._attachedTo.add(emitters)
   }
 
   /**
-   * Creates a new scope associated with this emitter after clearing any existing attachments.
+   * Creates a new {@link Monitor} associated with this emitter after clearing any existing attachments.
    *
-   * @returns A fresh scope instance.
+   * @returns A fresh {@link Monitor} instance.
    */
-  public _create = (): Scope => this._renew()
+  public _create = (): Monitor => this._renew()
 
   /**
    * Resets the emitter state to ensure it detaches from all current dependencies and reinitializes its factory.
@@ -86,4 +88,4 @@ class ScopeEmitter {
   }
 }
 
-export { ScopeEmitter }
+export { MonitorEmitter }

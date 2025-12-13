@@ -1,60 +1,57 @@
-import { batch } from "react-impulse"
+import { batch } from "@owanturist/signal"
 
 import { isUndefined } from "~/tools/is-undefined"
 import { map } from "~/tools/map"
 
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-import type { ImpulseFormListErrorSetter } from "./impulse-form-list-error-setter"
-import type { ImpulseFormListFlagSetter } from "./impulse-form-list-flag-setter"
-import type { ImpulseFormListInputSetter } from "./impulse-form-list-input-setter"
-import type { ImpulseFormListValidateOnSetter } from "./impulse-form-list-validate-on-setter"
-import { ImpulseFormList as ImpulseFormListImpl } from "./_internal/impulse-form-list"
-import { ImpulseFormListState } from "./_internal/impulse-form-list-state"
+import type { FormListErrorSetter } from "./impulse-form-list-error-setter"
+import type { FormListFlagSetter } from "./impulse-form-list-flag-setter"
+import type { FormListInputSetter } from "./impulse-form-list-input-setter"
+import type { FormListValidateOnSetter } from "./impulse-form-list-validate-on-setter"
+import { FormList as FormListImpl } from "./_internal/impulse-form-list"
+import { FormListState } from "./_internal/impulse-form-list-state"
 
-type ImpulseFormList<TElement extends ImpulseForm> = ImpulseFormListImpl<TElement>
+type FormList<TElement extends SignalForm> = FormListImpl<TElement>
 
-interface ImpulseFormListOptions<TElement extends ImpulseForm> {
-  readonly input?: ImpulseFormListInputSetter<TElement>
-  readonly initial?: ImpulseFormListInputSetter<TElement>
-  readonly touched?: ImpulseFormListFlagSetter<TElement>
-  readonly validateOn?: ImpulseFormListValidateOnSetter<TElement>
-  readonly error?: ImpulseFormListErrorSetter<TElement>
+interface FormListOptions<TElement extends SignalForm> {
+  readonly input?: FormListInputSetter<TElement>
+  readonly initial?: FormListInputSetter<TElement>
+  readonly touched?: FormListFlagSetter<TElement>
+  readonly validateOn?: FormListValidateOnSetter<TElement>
+  readonly error?: FormListErrorSetter<TElement>
 }
 
-function ImpulseFormList<TElement extends ImpulseForm>(
+function FormList<TElement extends SignalForm>(
   elements: ReadonlyArray<TElement>,
-  { input, initial, touched, validateOn, error }: ImpulseFormListOptions<TElement> = {},
-): ImpulseFormList<TElement> {
-  const state = new ImpulseFormListState<TElement>(
-    null,
-    map(elements, ImpulseFormListImpl._getState),
-  )
+  { input, initial, touched, validateOn, error }: FormListOptions<TElement> = {},
+): FormList<TElement> {
+  const state = new FormListState<TElement>(null, map(elements, FormListImpl._getState))
 
-  batch((scope) => {
+  batch((monitor) => {
     if (!isUndefined(input)) {
-      state._setInput(scope, input)
+      state._setInput(monitor, input)
     }
 
     if (!isUndefined(initial)) {
-      state._setInitial(scope, initial)
+      state._setInitial(monitor, initial)
     }
 
     if (!isUndefined(touched)) {
-      state._setTouched(scope, touched)
+      state._setTouched(monitor, touched)
     }
 
     if (!isUndefined(validateOn)) {
-      state._setValidateOn(scope, validateOn)
+      state._setValidateOn(monitor, validateOn)
     }
 
     if (!isUndefined(error)) {
-      state._setError(scope, error)
+      state._setError(monitor, error)
     }
   })
 
   return state._host()
 }
 
-export type { ImpulseFormListOptions }
-export { ImpulseFormList }
+export type { FormListOptions }
+export { FormList }

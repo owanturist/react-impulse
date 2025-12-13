@@ -1,74 +1,68 @@
-import { batch } from "react-impulse"
+import { batch } from "@owanturist/signal"
 
 import type { IsEqualType } from "~/tools/is-type-equal"
 import { isUndefined } from "~/tools/is-undefined"
 
-import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetSignalFormParam } from "../impulse-form/get-impulse-form-param"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-import type { ImpulseFormOptionalErrorSetter } from "./impulse-form-optional-error-setter"
-import type { ImpulseFormOptionalFlagSetter } from "./impulse-form-optional-flag-setter"
-import type { ImpulseFormOptionalInputSetter } from "./impulse-form-optional-input-setter"
-import type { ImpulseFormOptionalValidateOnSetter } from "./impulse-form-optional-validate-on-setter"
-import { ImpulseFormOptional as ImpulseFormOptionalImpl } from "./_internal/impulse-form-optional"
-import { ImpulseFormOptionalState } from "./_internal/impulse-form-optional-state"
+import type { FormOptionalErrorSetter } from "./impulse-form-optional-error-setter"
+import type { FormOptionalFlagSetter } from "./impulse-form-optional-flag-setter"
+import type { FormOptionalInputSetter } from "./impulse-form-optional-input-setter"
+import type { FormOptionalValidateOnSetter } from "./impulse-form-optional-validate-on-setter"
+import { FormOptional as FormOptionalImpl } from "./_internal/impulse-form-optional"
+import { FormOptionalState } from "./_internal/impulse-form-optional-state"
 
-type ImpulseFormOptional<
-  TEnabled extends ImpulseForm,
-  TElement extends ImpulseForm,
-> = ImpulseFormOptionalImpl<TEnabled, TElement>
+type FormOptional<TEnabled extends SignalForm, TElement extends SignalForm> = FormOptionalImpl<
+  TEnabled,
+  TElement
+>
 
-interface ImpulseFormOptionalOptions<TEnabled extends ImpulseForm, TElement extends ImpulseForm> {
-  input?: ImpulseFormOptionalInputSetter<TEnabled, TElement>
-  initial?: ImpulseFormOptionalInputSetter<TEnabled, TElement>
-  touched?: ImpulseFormOptionalFlagSetter<TEnabled, TElement>
-  validateOn?: ImpulseFormOptionalValidateOnSetter<TEnabled, TElement>
-  error?: ImpulseFormOptionalErrorSetter<TEnabled, TElement>
+interface FormOptionalOptions<TEnabled extends SignalForm, TElement extends SignalForm> {
+  input?: FormOptionalInputSetter<TEnabled, TElement>
+  initial?: FormOptionalInputSetter<TEnabled, TElement>
+  touched?: FormOptionalFlagSetter<TEnabled, TElement>
+  validateOn?: FormOptionalValidateOnSetter<TEnabled, TElement>
+  error?: FormOptionalErrorSetter<TEnabled, TElement>
 }
 
-function ImpulseFormOptional<TEnabled extends ImpulseForm, TElement extends ImpulseForm>(
-  enabled: IsEqualType<GetImpulseFormParam<TEnabled, "output.schema">, boolean> extends true
+function FormOptional<TEnabled extends SignalForm, TElement extends SignalForm>(
+  enabled: IsEqualType<GetSignalFormParam<TEnabled, "output.schema">, boolean> extends true
     ? TEnabled
     : never,
   element: TElement,
-  {
-    input,
-    initial,
-    touched,
-    validateOn,
-    error,
-  }: ImpulseFormOptionalOptions<TEnabled, TElement> = {},
-): ImpulseFormOptional<TEnabled, TElement> {
-  const optional = new ImpulseFormOptionalState<TEnabled, TElement>(
+  { input, initial, touched, validateOn, error }: FormOptionalOptions<TEnabled, TElement> = {},
+): FormOptional<TEnabled, TElement> {
+  const optional = new FormOptionalState<TEnabled, TElement>(
     null,
-    ImpulseFormOptionalImpl._getState(enabled),
-    ImpulseFormOptionalImpl._getState(element),
+    FormOptionalImpl._getState(enabled),
+    FormOptionalImpl._getState(element),
   )
 
-  batch((scope) => {
+  batch((monitor) => {
     if (!isUndefined(touched)) {
-      optional._setTouched(scope, touched)
+      optional._setTouched(monitor, touched)
     }
 
     if (!isUndefined(initial)) {
-      optional._setInitial(scope, initial)
+      optional._setInitial(monitor, initial)
     }
 
     if (!isUndefined(input)) {
-      optional._setInput(scope, input)
+      optional._setInput(monitor, input)
     }
 
     if (!isUndefined(validateOn)) {
-      optional._setValidateOn(scope, validateOn)
+      optional._setValidateOn(monitor, validateOn)
     }
 
     if (!isUndefined(error)) {
-      optional._setError(scope, error)
+      optional._setError(monitor, error)
     }
   })
 
-  return optional._host() as ImpulseFormOptional<TEnabled, TElement>
+  return optional._host() as FormOptional<TEnabled, TElement>
 }
 
-export type { ImpulseFormOptionalOptions }
-export { ImpulseFormOptional }
+export type { FormOptionalOptions }
+export { FormOptional }

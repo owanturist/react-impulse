@@ -1,38 +1,40 @@
-import { type ReadonlyImpulse, type Scope, batch, untrack } from "react-impulse"
+import { type Monitor, type ReadonlySignal, batch, untracked } from "@owanturist/signal"
 
 import { isDefined } from "~/tools/is-defined"
 import { isNull } from "~/tools/is-null"
 import { isTrue } from "~/tools/is-true"
 import { isTruthy } from "~/tools/is-truthy"
 
-import type { ImpulseFormParams } from "../impulse-form-params"
+import type { SignalFormParams } from "../impulse-form-params"
 
-import type { ImpulseFormState } from "./impulse-form-state"
+import type { SignalFormState } from "./impulse-form-state"
 
 function resolveGetter<TValue, TVerbose, TSelected>(
-  scope: Scope,
-  value: ReadonlyImpulse<TValue>,
-  verbose: ReadonlyImpulse<TVerbose>,
+  monitor: Monitor,
+  value: ReadonlySignal<TValue>,
+  verbose: ReadonlySignal<TVerbose>,
   select: undefined | ((val: TValue, ver: TVerbose) => TSelected),
 ): TSelected | TValue
+
 function resolveGetter<TValue, TVerbose, TSelected, TFallback>(
-  scope: Scope,
-  value: ReadonlyImpulse<TValue>,
-  verbose: ReadonlyImpulse<TVerbose>,
+  monitor: Monitor,
+  value: ReadonlySignal<TValue>,
+  verbose: ReadonlySignal<TVerbose>,
   select: undefined | ((val: TValue, ver: TVerbose) => TSelected),
   fallback: (val: TValue) => TFallback,
 ): TSelected | TFallback
+
 function resolveGetter<TValue, TVerbose, TSelected, TFallback>(
-  scope: Scope,
-  value: ReadonlyImpulse<TValue>,
-  verbose: ReadonlyImpulse<TVerbose>,
+  monitor: Monitor,
+  value: ReadonlySignal<TValue>,
+  verbose: ReadonlySignal<TVerbose>,
   select: undefined | ((val: TValue, ver: TVerbose) => TSelected),
   fallback?: (val: TValue) => TFallback,
 ): TSelected | TFallback | TValue {
-  const value_ = value.getValue(scope)
+  const value_ = value.read(monitor)
 
   if (select) {
-    return select(value_, verbose.getValue(scope))
+    return select(value_, verbose.read(monitor))
   }
 
   if (fallback != null) {
@@ -42,32 +44,32 @@ function resolveGetter<TValue, TVerbose, TSelected, TFallback>(
   return value_
 }
 
-abstract class ImpulseForm<
+abstract class SignalForm<
   // biome-ignore lint/suspicious/noExplicitAny: any is the only reasonable default
-  TParams extends ImpulseFormParams = any,
+  TParams extends SignalFormParams = any,
 > {
-  protected static _getState<TFormParams extends ImpulseFormParams>({
+  protected static _getState<TFormParams extends SignalFormParams>({
     _state,
-  }: ImpulseForm<TFormParams>): ImpulseFormState<TFormParams> {
+  }: SignalForm<TFormParams>): SignalFormState<TFormParams> {
     return _state
   }
 
-  protected abstract readonly _state: ImpulseFormState<TParams>
+  protected abstract readonly _state: SignalFormState<TParams>
 
-  public clone(): ImpulseForm<TParams> {
+  public clone(): SignalForm<TParams> {
     return this._state._clone()._host()
   }
 
-  public getOutput(scope: Scope): null | TParams["output.schema"]
+  public getOutput(monitor: Monitor): null | TParams["output.schema"]
   public getOutput<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select: (
       concise: null | TParams["output.schema"],
       verbose: TParams["output.schema.verbose"],
     ) => TResult,
   ): TResult
   public getOutput<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select?: (
       concise: null | TParams["output.schema"],
       verbose: TParams["output.schema.verbose"],
@@ -75,39 +77,39 @@ abstract class ImpulseForm<
   ): null | TParams["output.schema"] | TResult {
     const { _output, _outputVerbose } = this._state
 
-    return resolveGetter(scope, _output, _outputVerbose, select)
+    return resolveGetter(monitor, _output, _outputVerbose, select)
   }
 
-  public getInitial(scope: Scope): TParams["input.schema"] {
-    return this._state._initial.getValue(scope)
+  public getInitial(monitor: Monitor): TParams["input.schema"] {
+    return this._state._initial.read(monitor)
   }
 
   public setInitial(setter: TParams["input.setter"]): void {
-    batch((scope) => {
-      this._state._setInitial(scope, setter)
+    batch((monitor) => {
+      this._state._setInitial(monitor, setter)
     })
   }
 
-  public getInput(scope: Scope): TParams["input.schema"] {
-    return this._state._input.getValue(scope)
+  public getInput(monitor: Monitor): TParams["input.schema"] {
+    return this._state._input.read(monitor)
   }
 
   public setInput(setter: TParams["input.setter"]): void {
-    batch((scope) => {
-      this._state._setInput(scope, setter)
+    batch((monitor) => {
+      this._state._setInput(monitor, setter)
     })
   }
 
-  public getError(scope: Scope): null | TParams["error.schema"]
+  public getError(monitor: Monitor): null | TParams["error.schema"]
   public getError<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select: (
       concise: null | TParams["error.schema"],
       verbose: TParams["error.schema.verbose"],
     ) => TResult,
   ): TResult
   public getError<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select?: (
       concise: null | TParams["error.schema"],
       verbose: TParams["error.schema.verbose"],
@@ -115,25 +117,25 @@ abstract class ImpulseForm<
   ): null | TParams["error.schema"] | TResult {
     const { _error, _errorVerbose } = this._state
 
-    return resolveGetter(scope, _error, _errorVerbose, select)
+    return resolveGetter(monitor, _error, _errorVerbose, select)
   }
 
   public setError(setter: TParams["error.setter"]): void {
-    batch((scope) => {
-      this._state._setError(scope, setter)
+    batch((monitor) => {
+      this._state._setError(monitor, setter)
     })
   }
 
-  public getValidateOn(scope: Scope): TParams["validateOn.schema"]
+  public getValidateOn(monitor: Monitor): TParams["validateOn.schema"]
   public getValidateOn<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select: (
       concise: TParams["validateOn.schema"],
       verbose: TParams["validateOn.schema.verbose"],
     ) => TResult,
   ): TResult
   public getValidateOn<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select?: (
       concise: TParams["validateOn.schema"],
       verbose: TParams["validateOn.schema.verbose"],
@@ -141,94 +143,94 @@ abstract class ImpulseForm<
   ): TParams["validateOn.schema"] | TResult {
     const { _validateOn, _validateOnVerbose } = this._state
 
-    return resolveGetter(scope, _validateOn, _validateOnVerbose, select)
+    return resolveGetter(monitor, _validateOn, _validateOnVerbose, select)
   }
 
   public setValidateOn(setter: TParams["validateOn.setter"]): void {
-    batch((scope) => {
-      this._state._setValidateOn(scope, setter)
+    batch((monitor) => {
+      this._state._setValidateOn(monitor, setter)
     })
   }
 
-  public isValid(scope: Scope): boolean
+  public isValid(monitor: Monitor): boolean
   public isValid<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): TResult
   public isValid<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select?: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): boolean | TResult {
     const { _valid, _validVerbose } = this._state
 
-    return resolveGetter(scope, _valid, _validVerbose, select, isTrue)
+    return resolveGetter(monitor, _valid, _validVerbose, select, isTrue)
   }
 
-  public isInvalid(scope: Scope): boolean
+  public isInvalid(monitor: Monitor): boolean
   public isInvalid<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): TResult
   public isInvalid<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select?: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): boolean | TResult {
     const { _invalid, _invalidVerbose } = this._state
 
-    return resolveGetter(scope, _invalid, _invalidVerbose, select, isTruthy)
+    return resolveGetter(monitor, _invalid, _invalidVerbose, select, isTruthy)
   }
 
-  public isValidated(scope: Scope): boolean
+  public isValidated(monitor: Monitor): boolean
   public isValidated<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): TResult
   public isValidated<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select?: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): boolean | TResult {
     const { _validated, _validatedVerbose } = this._state
 
-    return resolveGetter(scope, _validated, _validatedVerbose, select, isTrue)
+    return resolveGetter(monitor, _validated, _validatedVerbose, select, isTrue)
   }
 
-  public isDirty(scope: Scope): boolean
+  public isDirty(monitor: Monitor): boolean
   public isDirty<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): TResult
   public isDirty<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select?: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): boolean | TResult {
     const { _dirty, _dirtyVerbose } = this._state
 
-    return resolveGetter(scope, _dirty, _dirtyVerbose, select, isTruthy)
+    return resolveGetter(monitor, _dirty, _dirtyVerbose, select, isTruthy)
   }
 
-  public isTouched(scope: Scope): boolean
+  public isTouched(monitor: Monitor): boolean
   public isTouched<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): TResult
   public isTouched<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select?: (concise: TParams["flag.schema"], verbose: TParams["flag.schema.verbose"]) => TResult,
   ): boolean | TResult {
     const { _touched, _touchedVerbose } = this._state
 
-    return resolveGetter(scope, _touched, _touchedVerbose, select, isTruthy)
+    return resolveGetter(monitor, _touched, _touchedVerbose, select, isTruthy)
   }
 
   public setTouched(setter: TParams["flag.setter"]): void {
-    batch((scope) => {
-      this._state._setTouched(scope, setter)
+    batch((monitor) => {
+      this._state._setTouched(monitor, setter)
     })
   }
 
   public reset(resetter?: TParams["input.setter"]): void {
-    batch((scope) => {
-      this._state._reset(scope, resetter)
+    batch((monitor) => {
+      this._state._reset(monitor, resetter)
     })
   }
 
@@ -239,17 +241,17 @@ abstract class ImpulseForm<
   }
 
   public focusFirstInvalid(): void {
-    batch((scope) => {
-      this._state._getFocusFirstInvalid(scope)?.()
+    batch((monitor) => {
+      this._state._getFocusFirstInvalid(monitor)?.()
     })
   }
 
-  public getSubmitCount(scope: Scope): number {
-    return this._state._root._submitAttempts.getValue(scope)
+  public getSubmitCount(monitor: Monitor): number {
+    return this._state._root._submitAttempts.read(monitor)
   }
 
-  public isSubmitting(scope: Scope): boolean {
-    return this._state._root._submittingCount.getValue(scope) > 0
+  public isSubmitting(monitor: Monitor): boolean {
+    return this._state._root._submittingCount.read(monitor) > 0
   }
 
   public onSubmit(
@@ -260,33 +262,33 @@ abstract class ImpulseForm<
   }
 
   public async submit(): Promise<void> {
-    batch((scope) => {
-      this._state._root._submitAttempts.setValue((count) => count + 1)
-      this._state._root._forceValidated(scope)
+    batch((monitor) => {
+      this._state._root._submitAttempts.write((count) => count + 1)
+      this._state._root._forceValidated(monitor)
     })
 
-    const promises = untrack((scope) => {
-      const output = this._state._root._output.getValue(scope)
+    const promises = untracked((monitor) => {
+      const output = this._state._root._output.read(monitor)
 
       if (!isNull(output)) {
-        return this._state._root._submitWith(scope, output).filter(isDefined)
+        return this._state._root._submitWith(monitor, output).filter(isDefined)
       }
 
       return undefined
     })
 
     if (!promises) {
-      batch((scope) => {
-        this._state._root._getFocusFirstInvalid(scope)?.()
+      batch((monitor) => {
+        this._state._root._getFocusFirstInvalid(monitor)?.()
       })
     } else if (promises.length > 0) {
-      this._state._root._submittingCount.setValue((count) => count + 1)
+      this._state._root._submittingCount.write((count) => count + 1)
 
       await Promise.all(promises)
 
-      this._state._root._submittingCount.setValue((count) => Math.max(0, count - 1))
+      this._state._root._submittingCount.write((count) => Math.max(0, count - 1))
     }
   }
 }
 
-export { ImpulseForm }
+export { SignalForm }

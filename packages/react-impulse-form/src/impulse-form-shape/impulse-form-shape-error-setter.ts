@@ -1,12 +1,12 @@
 import type { Setter } from "~/tools/setter"
 
-import type { GetImpulseFormShapeParam } from "./get-impulse-form-shape-param"
-import type { ImpulseFormShapeErrorVerbose } from "./impulse-form-shape-error-verbose"
-import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
+import type { GetFormShapeParam } from "./get-impulse-form-shape-param"
+import type { FormShapeErrorVerbose } from "./impulse-form-shape-error-verbose"
+import type { FormShapeFields } from "./impulse-form-shape-fields"
 
-type ImpulseFormShapeErrorSetter<TFields extends ImpulseFormShapeFields> = Setter<
-  null | Partial<GetImpulseFormShapeParam<TFields, "error.setter">>,
-  [ImpulseFormShapeErrorVerbose<TFields>]
+type FormShapeErrorSetter<TFields extends FormShapeFields> = Setter<
+  null | Partial<GetFormShapeParam<TFields, "error.setter">>,
+  [FormShapeErrorVerbose<TFields>]
 >
 
-export type { ImpulseFormShapeErrorSetter }
+export type { FormShapeErrorSetter }

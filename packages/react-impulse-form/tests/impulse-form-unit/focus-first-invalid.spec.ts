@@ -1,9 +1,9 @@
 import { z } from "zod"
 
-import { ImpulseFormUnit, type ImpulseFormUnitSchemaOptions } from "../../src"
+import { FormUnit, type FormUnitSchemaOptions } from "../../src"
 
-function setup(input?: string, options?: Partial<ImpulseFormUnitSchemaOptions<string>>) {
-  return ImpulseFormUnit(input ?? "", {
+function setup(input?: string, options?: Partial<FormUnitSchemaOptions<string>>) {
+  return FormUnit(input ?? "", {
     touched: true,
     schema: z.string().min(2),
     ...options,
@@ -28,7 +28,7 @@ describe("focusFirstInvalid() when validated", () => {
     expect(spy).toHaveBeenCalledOnce()
   })
 
-  it("does not call a listener on subscribe", () => {
+  it("does not call a listener on init", () => {
     const form = setup()
     const listener = vi.fn()
 

@@ -1,4 +1,4 @@
-interface ImpulseFormParams {
+interface SignalFormParams {
   readonly "input.setter": unknown
   readonly "input.schema": unknown
 
@@ -18,4 +18,4 @@ interface ImpulseFormParams {
   readonly "error.schema.verbose": unknown
 }
 
-export type { ImpulseFormParams }
+export type { SignalFormParams }

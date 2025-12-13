@@ -1,8 +1,8 @@
 {
-  "name": "react-impulse-form",
+  "name": "@owanturist/signal-form",
   "type": "module",
-  "version": "0.15.2",
-  "description": "Type-safe declarative React form state management",
+  "version": "0.0.0",
+  "description": "Type-safe declarative form state management",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -23,16 +23,16 @@
   "author": "Anton Ovechkin <owanturist@gmail.com>",
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/owanturist/react-impulse/issues"
+    "url": "https://github.com/owanturist/signal/issues"
   },
-  "repository": "https://github.com/owanturist/react-impulse/tree/master/packages/react-impulse-form",
-  "homepage": "https://github.com/owanturist/react-impulse/packages/react-impulse-form#readme",
+  "repository": "https://github.com/owanturist/signal/tree/master/packages/signal-form",
+  "homepage": "https://github.com/owanturist/signal/packages/signal-form#readme",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsup --config ../../tsup.config.ts"
   },
   "peerDependencies": {
-    "react-impulse": "^3.0.3"
+    "@owanturist/signal": "^0.0.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -40,7 +40,7 @@
     "@types/react": "^19.2.7",
     "react": "^19.2.3",
     "react-dom": "19.2.3",
-    "react-impulse": "workspace:*",
+    "@owanturist/signal": "workspace:*",
     "vite-tsconfig-paths": "6.0.0-beta.4",
     "vitest": "^4.0.15",
     "zod": "^4.1.13"

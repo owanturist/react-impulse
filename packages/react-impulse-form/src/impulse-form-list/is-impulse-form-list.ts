@@ -1,9 +1,9 @@
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-import { ImpulseFormList } from "./_internal/impulse-form-list"
+import { FormList } from "./_internal/impulse-form-list"
 
-function isImpulseFormList(value: unknown): value is ImpulseFormList<ImpulseForm> {
-  return value instanceof ImpulseFormList
+function isFormList(value: unknown): value is FormList<SignalForm> {
+  return value instanceof FormList
 }
 
-export { isImpulseFormList }
+export { isFormList }

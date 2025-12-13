@@ -1,30 +1,25 @@
 import type { Setter } from "~/tools/setter"
 
-import {
-  ImpulseFormShape,
-  type ImpulseFormShapeOptions,
-  ImpulseFormUnit,
-  type ValidateStrategy,
-} from "../../src"
+import { FormShape, type FormShapeOptions, FormUnit, type ValidateStrategy } from "../../src"
 
 function setup(
-  options?: ImpulseFormShapeOptions<{
-    first: ImpulseFormUnit<string>
-    second: ImpulseFormUnit<number>
-    third: ImpulseFormShape<{
-      one: ImpulseFormUnit<boolean>
-      two: ImpulseFormUnit<Array<string>>
+  options?: FormShapeOptions<{
+    first: FormUnit<string>
+    second: FormUnit<number>
+    third: FormShape<{
+      one: FormUnit<boolean>
+      two: FormUnit<Array<string>>
     }>
     fourth: Array<string>
   }>,
 ) {
-  return ImpulseFormShape(
+  return FormShape(
     {
-      first: ImpulseFormUnit("", { validate: (input) => [null, input] }),
-      second: ImpulseFormUnit(0, { validate: (input) => [null, input] }),
-      third: ImpulseFormShape({
-        one: ImpulseFormUnit(true, { validate: (input) => [null, input] }),
-        two: ImpulseFormUnit([""], { validate: (input) => [null, input] }),
+      first: FormUnit("", { validate: (input) => [null, input] }),
+      second: FormUnit(0, { validate: (input) => [null, input] }),
+      third: FormShape({
+        one: FormUnit(true, { validate: (input) => [null, input] }),
+        two: FormUnit([""], { validate: (input) => [null, input] }),
       }),
       fourth: ["anything"],
     },
@@ -73,21 +68,21 @@ it("matches the type signature", () => {
 })
 
 describe("setValidateOn(..)", () => {
-  it("sets the ValidateStrategy to ALL fields", ({ scope }) => {
+  it("sets the ValidateStrategy to ALL fields", ({ monitor }) => {
     const shape = setup()
 
     shape.setValidateOn("onSubmit")
-    expect(shape.getValidateOn(scope)).toBe("onSubmit")
+    expect(shape.getValidateOn(monitor)).toBe("onSubmit")
 
     shape.fields.third.setValidateOn("onChange")
-    expect(shape.getValidateOn(scope)).toStrictEqual({
+    expect(shape.getValidateOn(monitor)).toStrictEqual({
       first: "onSubmit",
       second: "onSubmit",
       third: "onChange",
     })
   })
 
-  it("sets the ValidateStrategy to SPECIFIC fields", ({ scope }) => {
+  it("sets the ValidateStrategy to SPECIFIC fields", ({ monitor }) => {
     const shape = setup()
 
     shape.setValidateOn({
@@ -96,7 +91,7 @@ describe("setValidateOn(..)", () => {
         one: "onInit",
       },
     })
-    expect(shape.getValidateOn(scope)).toStrictEqual({
+    expect(shape.getValidateOn(monitor)).toStrictEqual({
       first: "onSubmit",
       second: "onTouch",
       third: {
@@ -109,7 +104,7 @@ describe("setValidateOn(..)", () => {
       one: undefined,
       two: "onChange",
     })
-    expect(shape.getValidateOn(scope)).toStrictEqual({
+    expect(shape.getValidateOn(monitor)).toStrictEqual({
       first: "onSubmit",
       second: "onTouch",
       third: {
@@ -119,7 +114,7 @@ describe("setValidateOn(..)", () => {
     })
   })
 
-  it("receives the current validateOn value", ({ scope }) => {
+  it("receives the current validateOn value", ({ monitor }) => {
     const shape = setup({
       validateOn: {
         first: "onInit",
@@ -177,7 +172,7 @@ describe("setValidateOn(..)", () => {
       }
     })
 
-    expect(shape.getValidateOn(scope)).toStrictEqual({
+    expect(shape.getValidateOn(monitor)).toStrictEqual({
       first: "onSubmit",
       second: "onTouch",
       third: {

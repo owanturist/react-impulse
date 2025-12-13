@@ -1,19 +1,19 @@
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 
-import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
+import { FormShape, FormUnit } from "../../src"
 
-it("selects initial", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormUnit("1", { initial: "2" }),
-    second: ImpulseFormUnit(0),
-    third: ImpulseFormShape({
-      one: ImpulseFormUnit(true, { initial: false }),
-      two: ImpulseFormUnit(["1"]),
+it("selects initial", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormUnit("1", { initial: "2" }),
+    second: FormUnit(0),
+    third: FormShape({
+      one: FormUnit(true, { initial: false }),
+      two: FormUnit(["1"]),
     }),
     fourth: ["anything"],
   })
 
-  const initial0 = shape.getInitial(scope)
+  const initial0 = shape.getInitial(monitor)
   expect(initial0).toStrictEqual({
     first: "2",
     second: 0,
@@ -33,7 +33,7 @@ it("selects initial", ({ scope }) => {
     }
     readonly fourth: Array<string>
   }>()
-  expectTypeOf(shape.fields.third.getInitial(scope)).toEqualTypeOf<{
+  expectTypeOf(shape.fields.third.getInitial(monitor)).toEqualTypeOf<{
     readonly one: boolean
     readonly two: Array<string>
   }>()
@@ -42,7 +42,7 @@ it("selects initial", ({ scope }) => {
     first: "12",
   })
 
-  const initial1 = shape.getInitial(scope)
+  const initial1 = shape.getInitial(monitor)
   expect(initial1).toStrictEqual({
     first: "12",
     second: 0,
@@ -58,7 +58,7 @@ it("selects initial", ({ scope }) => {
       two: ["1", "12"],
     },
   })
-  const initial2 = shape.getInitial(scope)
+  const initial2 = shape.getInitial(monitor)
   expect(initial2).toStrictEqual({
     first: "12",
     second: 0,
@@ -70,11 +70,11 @@ it("selects initial", ({ scope }) => {
   })
 })
 
-it("subsequently selects equal initial shapes", ({ scope }) => {
-  const shape = ImpulseFormShape(
+it("subsequently selects equal initial shapes", ({ monitor }) => {
+  const shape = FormShape(
     {
-      first: ImpulseFormUnit("1"),
-      second: ImpulseFormUnit(2),
+      first: FormUnit("1"),
+      second: FormUnit(2),
     },
     {
       initial: {
@@ -84,24 +84,24 @@ it("subsequently selects equal initial shapes", ({ scope }) => {
     },
   )
 
-  expect(shape.getInitial(scope)).toStrictEqual({
+  expect(shape.getInitial(monitor)).toStrictEqual({
     first: "2",
     second: 3,
   })
-  expect(shape.getInitial(scope)).toBe(shape.getInitial(scope))
-  expect(shape.getInitial(scope)).toBe(shape.getInitial(scope))
+  expect(shape.getInitial(monitor)).toBe(shape.getInitial(monitor))
+  expect(shape.getInitial(monitor)).toBe(shape.getInitial(monitor))
 })
 
-it("persists unchanged initial fields between changes", ({ scope }) => {
-  const shape = ImpulseFormShape(
+it("persists unchanged initial fields between changes", ({ monitor }) => {
+  const shape = FormShape(
     {
-      first: ImpulseFormShape({
-        _1: ImpulseFormUnit("1", { initial: "1_0" }),
-        _2: ImpulseFormUnit("2"),
+      first: FormShape({
+        _1: FormUnit("1", { initial: "1_0" }),
+        _2: FormUnit("2"),
       }),
-      second: ImpulseFormShape({
-        _3: ImpulseFormUnit("3"),
-        _4: ImpulseFormUnit("4"),
+      second: FormShape({
+        _3: FormUnit("3"),
+        _4: FormUnit("4"),
       }),
     },
     {
@@ -116,7 +116,7 @@ it("persists unchanged initial fields between changes", ({ scope }) => {
     },
   )
 
-  const initial0 = shape.getInitial(scope)
+  const initial0 = shape.getInitial(monitor)
   expect(initial0).toStrictEqual({
     first: {
       _1: "1_1",
@@ -134,7 +134,7 @@ it("persists unchanged initial fields between changes", ({ scope }) => {
     },
   })
 
-  const initial1 = shape.getInitial(scope)
+  const initial1 = shape.getInitial(monitor)
   expect(initial1).toStrictEqual({
     first: {
       _1: "1_1",
@@ -150,35 +150,35 @@ it("persists unchanged initial fields between changes", ({ scope }) => {
   expect(initial1.second).not.toBe(initial0.second)
 })
 
-it("selects unequal initial values when isInputEqual is not specified", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    field: ImpulseFormUnit([0]),
+it("selects unequal initial values when isInputEqual is not specified", ({ monitor }) => {
+  const shape = FormShape({
+    field: FormUnit([0]),
   })
 
-  const initial0 = shape.getInitial(scope)
+  const initial0 = shape.getInitial(monitor)
 
   shape.setInitial({
     field: [0],
   })
-  const initial1 = shape.getInitial(scope)
+  const initial1 = shape.getInitial(monitor)
 
   expect(initial0).not.toBe(initial1)
   expect(initial0).toStrictEqual(initial1)
 })
 
-it("selects equal initial values when isInputEqual is specified", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    field: ImpulseFormUnit([0], {
+it("selects equal initial values when isInputEqual is specified", ({ monitor }) => {
+  const shape = FormShape({
+    field: FormUnit([0], {
       isInputEqual: isShallowArrayEqual,
     }),
   })
 
-  const initial0 = shape.getInitial(scope)
+  const initial0 = shape.getInitial(monitor)
 
   shape.setInitial({
     field: [0],
   })
-  const initial1 = shape.getInitial(scope)
+  const initial1 = shape.getInitial(monitor)
 
   expect(initial0).toBe(initial1)
   expect(initial0).toStrictEqual(initial1)

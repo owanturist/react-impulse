@@ -1,26 +1,26 @@
 import { z } from "zod"
 
-import { ImpulseFormShape, type ImpulseFormShapeOptions, ImpulseFormUnit } from "../../src"
+import { FormShape, type FormShapeOptions, FormUnit } from "../../src"
 import { wait } from "../common"
 
 const SLOWEST_ASYNC_MS = 3000
 
 interface ValidatedShapeFields {
-  _1: ImpulseFormUnit<string, ReadonlyArray<string>>
-  _2: ImpulseFormUnit<number>
-  _3: ImpulseFormShape<{
-    _1: ImpulseFormUnit<boolean>
-    _2: ImpulseFormUnit<Array<string>, ReadonlyArray<string>>
+  _1: FormUnit<string, ReadonlyArray<string>>
+  _2: FormUnit<number>
+  _3: FormShape<{
+    _1: FormUnit<boolean>
+    _2: FormUnit<Array<string>, ReadonlyArray<string>>
   }>
   _4: Array<string>
 }
 
 interface ShapeFields {
-  _1: ImpulseFormUnit<string>
-  _2: ImpulseFormUnit<number>
-  _3: ImpulseFormShape<{
-    _1: ImpulseFormUnit<boolean>
-    _2: ImpulseFormUnit<Array<string>>
+  _1: FormUnit<string>
+  _2: FormUnit<number>
+  _3: FormShape<{
+    _1: FormUnit<boolean>
+    _2: FormUnit<Array<string>>
   }>
   _4: Array<string>
 }
@@ -37,16 +37,16 @@ interface RootValueVerbose {
   readonly _4: Array<string>
 }
 
-function setup(options?: ImpulseFormShapeOptions<ValidatedShapeFields>) {
-  return ImpulseFormShape(
+function setup(options?: FormShapeOptions<ValidatedShapeFields>) {
+  return FormShape(
     {
-      _1: ImpulseFormUnit("", {
+      _1: FormUnit("", {
         schema: z.string().max(2),
       }),
-      _2: ImpulseFormUnit(0),
-      _3: ImpulseFormShape({
-        _1: ImpulseFormUnit(true),
-        _2: ImpulseFormUnit([""], {
+      _2: FormUnit(0),
+      _3: FormShape({
+        _1: FormUnit(true),
+        _2: FormUnit([""], {
           schema: z.array(z.string().max(2)),
         }),
       }),
@@ -73,20 +73,12 @@ it("matches the type signature", () => {
 })
 
 describe.each<
-  [
-    string,
-    (
-      form: ImpulseFormShape<ValidatedShapeFields> | ImpulseFormShape<ShapeFields>,
-    ) => Promise<unknown>,
-  ]
+  [string, (form: FormShape<ValidatedShapeFields> | FormShape<ShapeFields>) => Promise<unknown>]
 >([
   ["root", (form) => form.submit()],
-  ["root.fields.<ImpulseFormUnit>", (form) => form.fields._1.submit()],
-  ["root.fields.<ImpulseFormShape>", (form) => form.fields._3.submit()],
-  [
-    "root.fields.<ImpulseFormShape>.fields.<ImpulseFormUnit>",
-    (form) => form.fields._3.fields._1.submit(),
-  ],
+  ["root.fields.<FormUnit>", (form) => form.fields._1.submit()],
+  ["root.fields.<FormShape>", (form) => form.fields._3.submit()],
+  ["root.fields.<FormShape>.fields.<FormUnit>", (form) => form.fields._3.fields._1.submit()],
 ])("onSubmit(listener) when submitting via %s", (_, submit) => {
   it("provides validated value", () => {
     const form = setup()
@@ -97,9 +89,9 @@ describe.each<
   })
 
   describe.each([
-    // TODO ["root.fields.<ImpulseFormShape>"]
+    // TODO ["root.fields.<FormShape>"]
     [
-      "root.fields.<ImpulseFormUnit>",
+      "root.fields.<FormUnit>",
       () =>
         setup({
           input: {
@@ -108,7 +100,7 @@ describe.each<
         }),
     ],
     [
-      "root.fields.<ImpulseFormShape>.fields.<ImpulseFormUnit>",
+      "root.fields.<FormShape>.fields.<FormUnit>",
       () =>
         setup({
           input: {
@@ -119,7 +111,7 @@ describe.each<
         }),
     ],
   ])("when %s is invalid", (_, setup) => {
-    it("does not call the listener", ({ scope }) => {
+    it("does not call the listener", ({ monitor }) => {
       const form = setup()
 
       const listener = vi.fn()
@@ -128,7 +120,7 @@ describe.each<
 
       submit(form)
 
-      expect(form.isInvalid(scope)).toBe(true)
+      expect(form.isInvalid(monitor)).toBe(true)
       expect(listener).not.toHaveBeenCalled()
     })
 
@@ -161,12 +153,12 @@ describe.each<
         _4: ["anything"],
       },
       () =>
-        ImpulseFormShape({
-          _1: ImpulseFormUnit("value"),
-          _2: ImpulseFormUnit(0),
-          _3: ImpulseFormShape({
-            _1: ImpulseFormUnit(true),
-            _2: ImpulseFormUnit(["value"]),
+        FormShape({
+          _1: FormUnit("value"),
+          _2: FormUnit(0),
+          _3: FormShape({
+            _1: FormUnit(true),
+            _2: FormUnit(["value"]),
           }),
           _4: ["anything"],
         }),
@@ -299,7 +291,7 @@ describe.each<
     expect(listener).not.toHaveBeenCalled()
   })
 
-  it("waits the slowest listener", async ({ scope }) => {
+  it("waits the slowest listener", async ({ monitor }) => {
     const form = setup()
 
     const done1 = vi.fn()
@@ -318,21 +310,21 @@ describe.each<
     expect(done2).not.toHaveBeenCalled()
     expect(done3).not.toHaveBeenCalled()
     expect(allDone).not.toHaveBeenCalled()
-    expect(form.isSubmitting(scope)).toBe(true)
+    expect(form.isSubmitting(monitor)).toBe(true)
 
     await vi.advanceTimersByTimeAsync(0.25 * SLOWEST_ASYNC_MS)
     expect(done1).toHaveBeenCalledOnce()
     expect(done2).toHaveBeenCalledOnce()
     expect(done3).not.toHaveBeenCalled()
     expect(allDone).not.toHaveBeenCalled()
-    expect(form.isSubmitting(scope)).toBe(true)
+    expect(form.isSubmitting(monitor)).toBe(true)
 
     await vi.advanceTimersByTimeAsync(0.5 * SLOWEST_ASYNC_MS)
     expect(done1).toHaveBeenCalledOnce()
     expect(done2).toHaveBeenCalledOnce()
     expect(done3).toHaveBeenCalledOnce()
     expect(allDone).toHaveBeenCalledOnce()
-    expect(form.isSubmitting(scope)).toBe(false)
+    expect(form.isSubmitting(monitor)).toBe(false)
   })
 
   it("calls the listeners for each field", () => {

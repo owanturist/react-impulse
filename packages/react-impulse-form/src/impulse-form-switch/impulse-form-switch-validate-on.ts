@@ -1,12 +1,12 @@
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { SignalForm } from "../impulse-form/impulse-form"
 import type { ValidateStrategy } from "../validate-strategy"
 
-import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
-import type { ImpulseFormSwitchConciseParam } from "./_internal/impulse-form-switch-concise-param"
+import type { FormSwitchBranches } from "./impulse-form-switch-branches"
+import type { FormSwitchConciseParam } from "./_internal/impulse-form-switch-concise-param"
 
-type ImpulseFormSwitchValidateOn<
-  TKind extends ImpulseForm,
-  TBranches extends ImpulseFormSwitchBranches<TKind>,
-> = ImpulseFormSwitchConciseParam<TKind, TBranches, "validateOn.schema", ValidateStrategy>
+type FormSwitchValidateOn<
+  TKind extends SignalForm,
+  TBranches extends FormSwitchBranches<TKind>,
+> = FormSwitchConciseParam<TKind, TBranches, "validateOn.schema", ValidateStrategy>
 
-export type { ImpulseFormSwitchValidateOn }
+export type { FormSwitchValidateOn }

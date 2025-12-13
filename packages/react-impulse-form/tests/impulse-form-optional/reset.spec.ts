@@ -2,33 +2,33 @@ import z from "zod"
 
 import { params } from "~/tools/params"
 
-import { ImpulseFormOptional, ImpulseFormShape, ImpulseFormUnit } from "../../src"
+import { FormOptional, FormShape, FormUnit } from "../../src"
 
 describe.each([
   ["disabled", false],
   ["enabled", true],
 ])("when %s", (_, enabled) => {
   function setup() {
-    return ImpulseFormOptional(
-      ImpulseFormUnit(true, {
+    return FormOptional(
+      FormUnit(true, {
         initial: false,
         schema: z.boolean(),
       }),
-      ImpulseFormOptional(
-        ImpulseFormUnit(enabled, {
+      FormOptional(
+        FormUnit(enabled, {
           schema: z.boolean(),
         }),
-        ImpulseFormShape({
-          _1: ImpulseFormUnit("name", {
+        FormShape({
+          _1: FormUnit("name", {
             touched: true,
           }),
-          _2: ImpulseFormUnit(18, {
+          _2: FormUnit(18, {
             initial: 20,
           }),
-          _3: ImpulseFormUnit(true, {
+          _3: FormUnit(true, {
             error: "error",
           }),
-          _4: ImpulseFormUnit("0", {
+          _4: FormUnit("0", {
             validateOn: "onInit",
             schema: z.number(),
           }),
@@ -37,10 +37,10 @@ describe.each([
     )
   }
 
-  it("resets every initial input", ({ scope }) => {
+  it("resets every initial input", ({ monitor }) => {
     const form = setup()
 
-    expect(form.getInput(scope)).toStrictEqual({
+    expect(form.getInput(monitor)).toStrictEqual({
       enabled: true,
       element: {
         enabled,
@@ -55,7 +55,7 @@ describe.each([
 
     form.reset()
 
-    expect(form.getInput(scope)).toStrictEqual({
+    expect(form.getInput(monitor)).toStrictEqual({
       enabled: false,
       element: {
         enabled,
@@ -69,7 +69,7 @@ describe.each([
     })
   })
 
-  it("applies resetter to set initial values", ({ scope }) => {
+  it("applies resetter to set initial values", ({ monitor }) => {
     const form = setup()
 
     form.reset({
@@ -82,7 +82,7 @@ describe.each([
       },
     })
 
-    expect(form.getInput(scope)).toStrictEqual({
+    expect(form.getInput(monitor)).toStrictEqual({
       enabled: true,
       element: {
         enabled,
@@ -96,10 +96,10 @@ describe.each([
     })
   })
 
-  it("resets every touched", ({ scope }) => {
+  it("resets every touched", ({ monitor }) => {
     const form = setup()
 
-    expect(form.isTouched(scope, params._second)).toStrictEqual({
+    expect(form.isTouched(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: false,
@@ -114,7 +114,7 @@ describe.each([
 
     form.reset()
 
-    expect(form.isTouched(scope, params._second)).toStrictEqual({
+    expect(form.isTouched(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: false,
@@ -128,10 +128,10 @@ describe.each([
     })
   })
 
-  it("resets every error", ({ scope }) => {
+  it("resets every error", ({ monitor }) => {
     const form = setup()
 
-    expect(form.getError(scope, params._second)).toStrictEqual({
+    expect(form.getError(monitor, params._second)).toStrictEqual({
       enabled: null,
       element: {
         enabled: null,
@@ -146,7 +146,7 @@ describe.each([
 
     form.reset()
 
-    expect(form.getError(scope, params._second)).toStrictEqual({
+    expect(form.getError(monitor, params._second)).toStrictEqual({
       enabled: null,
       element: {
         enabled: null,
@@ -160,12 +160,12 @@ describe.each([
     })
   })
 
-  it("resets every validated", ({ scope }) => {
+  it("resets every validated", ({ monitor }) => {
     const form = setup()
 
     form.enabled.setTouched(true)
 
-    expect(form.isValidated(scope, params._second)).toStrictEqual({
+    expect(form.isValidated(monitor, params._second)).toStrictEqual({
       enabled: true,
       element: {
         enabled: false,
@@ -180,7 +180,7 @@ describe.each([
 
     form.reset()
 
-    expect(form.isValidated(scope, params._second)).toStrictEqual({
+    expect(form.isValidated(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: false,
@@ -195,20 +195,20 @@ describe.each([
   })
 })
 
-it("using recursive resetter", ({ scope }) => {
+it("using recursive resetter", ({ monitor }) => {
   expect.assertions(18)
 
-  const form = ImpulseFormOptional(
-    ImpulseFormUnit(true),
-    ImpulseFormOptional(
-      ImpulseFormUnit(true, {
+  const form = FormOptional(
+    FormUnit(true),
+    FormOptional(
+      FormUnit(true, {
         initial: false,
         schema: z.boolean(),
       }),
-      ImpulseFormShape({
-        _1: ImpulseFormUnit(0, { initial: 1 }),
-        _2: ImpulseFormUnit("0"),
-        _3: ImpulseFormUnit(true, {
+      FormShape({
+        _1: FormUnit(0, { initial: 1 }),
+        _2: FormUnit("0"),
+        _3: FormUnit(true, {
           schema: z.boolean().transform((value) => (value ? "ok" : "not ok")),
         }),
       }),
@@ -322,9 +322,9 @@ it("using recursive resetter", ({ scope }) => {
     }
   })
 
-  const initial = form.getInitial(scope)
+  const initial = form.getInitial(monitor)
 
-  expect(form.getInput(scope)).toStrictEqual(initial)
+  expect(form.getInput(monitor)).toStrictEqual(initial)
   expect(initial).toStrictEqual({
     enabled: false,
     element: {

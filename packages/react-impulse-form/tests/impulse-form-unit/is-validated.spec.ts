@@ -1,227 +1,223 @@
-import type { Scope } from "react-impulse"
+import type { Monitor } from "@owanturist/signal"
 import { z } from "zod"
 
-import {
-  ImpulseFormUnit,
-  type ImpulseFormUnitSchemaOptions,
-  type ValidateStrategy,
-} from "../../src"
+import { FormUnit, type FormUnitSchemaOptions, type ValidateStrategy } from "../../src"
 
-function setup(options?: Partial<ImpulseFormUnitSchemaOptions<string, number>>) {
-  return ImpulseFormUnit("y", {
+function setup(options?: Partial<FormUnitSchemaOptions<string, number>>) {
+  return FormUnit("y", {
     schema: z.string().min(1).pipe(z.coerce.number()),
     ...options,
   })
 }
 
 function isValidatedDefault<TError, TOutput>(
-  scope: Scope,
-  value: ImpulseFormUnit<string, TError, TOutput>,
+  monitor: Monitor,
+  value: FormUnit<string, TError, TOutput>,
 ) {
-  return value.isValidated(scope)
+  return value.isValidated(monitor)
 }
 
 function isValidatedConcise<TError, TOutput>(
-  scope: Scope,
-  value: ImpulseFormUnit<string, TError, TOutput>,
+  monitor: Monitor,
+  value: FormUnit<string, TError, TOutput>,
 ) {
-  return value.isValidated(scope, (concise) => concise)
+  return value.isValidated(monitor, (concise) => concise)
 }
 
 function isValidatedVerbose<TError, TOutput>(
-  scope: Scope,
-  value: ImpulseFormUnit<string, TError, TOutput>,
+  monitor: Monitor,
+  value: FormUnit<string, TError, TOutput>,
 ) {
-  return value.isValidated(scope, (_, verbose) => verbose)
+  return value.isValidated(monitor, (_, verbose) => verbose)
 }
 
 it("matches the type signature", () => {
   const form = setup()
 
   expectTypeOf(form.isValidated).toEqualTypeOf<{
-    (scope: Scope): boolean
+    (monitor: Monitor): boolean
 
-    <TResult>(scope: Scope, select: (concise: boolean, verbose: boolean) => TResult): TResult
+    <TResult>(monitor: Monitor, select: (concise: boolean, verbose: boolean) => TResult): TResult
   }>()
 })
 
-it("returns true on init without transform, validate, or schema", ({ scope }) => {
-  const unit = ImpulseFormUnit("y")
+it("returns true on init without transform, validate, or schema", ({ monitor }) => {
+  const unit = FormUnit("y")
 
-  expect(unit.isValidated(scope)).toBe(true)
+  expect(unit.isValidated(monitor)).toBe(true)
 })
 
-it("returns true on init when transform", ({ scope }) => {
-  const unit = ImpulseFormUnit("y", {
+it("returns true on init when transform", ({ monitor }) => {
+  const unit = FormUnit("y", {
     transform: (input) => input,
   })
 
-  expect(unit.isValidated(scope)).toBe(true)
+  expect(unit.isValidated(monitor)).toBe(true)
 })
 
-it("returns false on init when validate", ({ scope }) => {
-  const unit = ImpulseFormUnit("y", {
+it("returns false on init when validate", ({ monitor }) => {
+  const unit = FormUnit("y", {
     validate: (input) => [null, input],
   })
 
-  expect(unit.isValidated(scope)).toBe(false)
+  expect(unit.isValidated(monitor)).toBe(false)
 })
 
-it("returns false on init when schema", ({ scope }) => {
-  const unit = ImpulseFormUnit("y", {
+it("returns false on init when schema", ({ monitor }) => {
+  const unit = FormUnit("y", {
     schema: z.string(),
   })
 
-  expect(unit.isValidated(scope)).toBe(false)
+  expect(unit.isValidated(monitor)).toBe(false)
 })
 
 describe.each([
-  ["(scope)", isValidatedDefault],
-  ["(scope, (concise) => concise)", isValidatedConcise],
-  ["(scope, (_, verbose) => verbose)", isValidatedVerbose],
+  ["(monitor)", isValidatedDefault],
+  ["(monitor, (concise) => concise)", isValidatedConcise],
+  ["(monitor, (_, verbose) => verbose)", isValidatedVerbose],
 ])("isValidated%s", (_, isValidated) => {
-  it("returns boolean value", ({ scope }) => {
+  it("returns boolean value", ({ monitor }) => {
     const value = setup()
 
-    expectTypeOf(isValidated(scope, value)).toBeBoolean()
+    expectTypeOf(isValidated(monitor, value)).toBeBoolean()
   })
 
   describe("when onInit", () => {
-    it("marks as validated on init", ({ scope }) => {
+    it("marks as validated on init", ({ monitor }) => {
       const value = setup({ validateOn: "onInit" })
 
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual([expect.any(String)])
+      expect(isValidated(monitor, value)).toBe(true)
+      expect(value.getError(monitor)).toStrictEqual([expect.any(String)])
     })
   })
 
   describe("when onTouch", () => {
-    it("marks as validated on init when touched=true", ({ scope }) => {
+    it("marks as validated on init when touched=true", ({ monitor }) => {
       const value = setup({ validateOn: "onTouch", touched: true })
 
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual([expect.any(String)])
+      expect(isValidated(monitor, value)).toBe(true)
+      expect(value.getError(monitor)).toStrictEqual([expect.any(String)])
     })
 
-    it("does not mark validated on setTouched(false)", ({ scope }) => {
+    it("does not mark validated on setTouched(false)", ({ monitor }) => {
       const value = setup({ validateOn: "onTouch" })
 
       value.setTouched(false)
-      expect(isValidated(scope, value)).toBe(false)
-      expect(value.getError(scope)).toBeNull()
+      expect(isValidated(monitor, value)).toBe(false)
+      expect(value.getError(monitor)).toBeNull()
     })
 
-    it("marks as validated on setTouched(true)", ({ scope }) => {
+    it("marks as validated on setTouched(true)", ({ monitor }) => {
       const value = setup({ validateOn: "onTouch" })
 
       value.setTouched(true)
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual([expect.any(String)])
+      expect(isValidated(monitor, value)).toBe(true)
+      expect(value.getError(monitor)).toStrictEqual([expect.any(String)])
     })
 
-    it("keeps validated on setTouched(false)", ({ scope }) => {
+    it("keeps validated on setTouched(false)", ({ monitor }) => {
       const value = setup({ validateOn: "onTouch", touched: true })
 
       value.setTouched(false)
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual([expect.any(String)])
+      expect(isValidated(monitor, value)).toBe(true)
+      expect(value.getError(monitor)).toStrictEqual([expect.any(String)])
     })
 
-    it("keeps validated on setValidateOn(onTouch)", ({ scope }) => {
+    it("keeps validated on setValidateOn(onTouch)", ({ monitor }) => {
       const value = setup({ touched: true, validateOn: "onTouch" })
 
       value.setTouched(false)
       value.setValidateOn("onTouch")
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual([expect.any(String)])
+      expect(isValidated(monitor, value)).toBe(true)
+      expect(value.getError(monitor)).toStrictEqual([expect.any(String)])
     })
 
-    it("does not mark as validated on change", ({ scope }) => {
+    it("does not mark as validated on change", ({ monitor }) => {
       const value = setup({ validateOn: "onTouch" })
 
       value.setInput("x")
-      expect(isValidated(scope, value)).toBe(false)
-      expect(value.getError(scope)).toBeNull()
+      expect(isValidated(monitor, value)).toBe(false)
+      expect(value.getError(monitor)).toBeNull()
     })
   })
 
   describe("when onChange", () => {
-    it("marks as validated on init when dirty", ({ scope }) => {
+    it("marks as validated on init when dirty", ({ monitor }) => {
       const value = setup({ validateOn: "onChange", initial: "x" })
 
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual([expect.any(String)])
+      expect(isValidated(monitor, value)).toBe(true)
+      expect(value.getError(monitor)).toStrictEqual([expect.any(String)])
     })
 
-    it("marks as validated on change", ({ scope }) => {
+    it("marks as validated on change", ({ monitor }) => {
       const value = setup({ validateOn: "onChange" })
 
       value.setInput("x")
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual([expect.any(String)])
+      expect(isValidated(monitor, value)).toBe(true)
+      expect(value.getError(monitor)).toStrictEqual([expect.any(String)])
     })
 
-    it("marks as validated on initial change", ({ scope }) => {
+    it("marks as validated on initial change", ({ monitor }) => {
       const value = setup({ validateOn: "onChange" })
 
       value.setInitial("x")
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual([expect.any(String)])
+      expect(isValidated(monitor, value)).toBe(true)
+      expect(value.getError(monitor)).toStrictEqual([expect.any(String)])
     })
 
-    it("does not mark as validated for the same value", ({ scope }) => {
+    it("does not mark as validated for the same value", ({ monitor }) => {
       const value = setup({ validateOn: "onChange" })
 
       value.setInput("y")
-      expect(isValidated(scope, value)).toBe(false)
-      expect(value.getError(scope)).toBeNull()
+      expect(isValidated(monitor, value)).toBe(false)
+      expect(value.getError(monitor)).toBeNull()
     })
 
-    it("keeps validated when the value changes to initial", ({ scope }) => {
+    it("keeps validated when the value changes to initial", ({ monitor }) => {
       const value = setup({ validateOn: "onChange" })
 
       value.setInput("x")
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual([expect.any(String)])
+      expect(isValidated(monitor, value)).toBe(true)
+      expect(value.getError(monitor)).toStrictEqual([expect.any(String)])
 
-      value.setInput(value.getInitial(scope))
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual([expect.any(String)])
+      value.setInput(value.getInitial(monitor))
+      expect(isValidated(monitor, value)).toBe(true)
+      expect(value.getError(monitor)).toStrictEqual([expect.any(String)])
     })
 
-    it("keeps validated on setValidateOn(onChange)", ({ scope }) => {
+    it("keeps validated on setValidateOn(onChange)", ({ monitor }) => {
       const value = setup({ initial: "x", validateOn: "onChange" })
 
-      value.setInput(value.getInitial(scope))
+      value.setInput(value.getInitial(monitor))
       value.setValidateOn("onChange")
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual([expect.any(String)])
+      expect(isValidated(monitor, value)).toBe(true)
+      expect(value.getError(monitor)).toStrictEqual([expect.any(String)])
     })
 
-    it("is not validated on touch", ({ scope }) => {
+    it("is not validated on touch", ({ monitor }) => {
       const value = setup({ validateOn: "onChange" })
 
       value.setTouched(true)
-      expect(isValidated(scope, value)).toBe(false)
-      expect(value.getError(scope)).toBeNull()
+      expect(isValidated(monitor, value)).toBe(false)
+      expect(value.getError(monitor)).toBeNull()
     })
   })
 
   describe("when onSubmit", () => {
-    it("does not mark as validated on touch", ({ scope }) => {
+    it("does not mark as validated on touch", ({ monitor }) => {
       const value = setup({ validateOn: "onSubmit" })
 
       value.setTouched(true)
-      expect(isValidated(scope, value)).toBe(false)
-      expect(value.getError(scope)).toBeNull()
+      expect(isValidated(monitor, value)).toBe(false)
+      expect(value.getError(monitor)).toBeNull()
     })
 
-    it("does not mark as validated on change", ({ scope }) => {
+    it("does not mark as validated on change", ({ monitor }) => {
       const value = setup({ validateOn: "onSubmit" })
 
       value.setInput("x")
-      expect(isValidated(scope, value)).toBe(false)
-      expect(value.getError(scope)).toBeNull()
+      expect(isValidated(monitor, value)).toBe(false)
+      expect(value.getError(monitor)).toBeNull()
     })
   })
 
@@ -230,42 +226,42 @@ describe.each([
     "onChange",
     "onSubmit",
   ] satisfies Array<ValidateStrategy>)("when %s", (validateOn) => {
-    it("does not mark as validated on init", ({ scope }) => {
+    it("does not mark as validated on init", ({ monitor }) => {
       const value = setup({ validateOn })
 
-      expect(isValidated(scope, value)).toBe(false)
-      expect(value.getError(scope)).toBeNull()
+      expect(isValidated(monitor, value)).toBe(false)
+      expect(value.getError(monitor)).toBeNull()
     })
 
-    it("marks as validated on submit", async ({ scope }) => {
+    it("marks as validated on submit", async ({ monitor }) => {
       const value = setup({ validateOn })
 
       await value.submit()
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual([expect.any(String)])
+      expect(isValidated(monitor, value)).toBe(true)
+      expect(value.getError(monitor)).toStrictEqual([expect.any(String)])
     })
 
-    it("marks as validated when initialized with custom error", ({ scope }) => {
+    it("marks as validated when initialized with custom error", ({ monitor }) => {
       const value = setup({ validateOn, error: ["error"] })
 
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual(["error"])
+      expect(isValidated(monitor, value)).toBe(true)
+      expect(value.getError(monitor)).toStrictEqual(["error"])
     })
 
-    it("marks as validated when custom error set", ({ scope }) => {
+    it("marks as validated when custom error set", ({ monitor }) => {
       const value = setup({ validateOn })
 
       value.setError(["error"])
-      expect(isValidated(scope, value)).toBe(true)
-      expect(value.getError(scope)).toStrictEqual(["error"])
+      expect(isValidated(monitor, value)).toBe(true)
+      expect(value.getError(monitor)).toStrictEqual(["error"])
     })
 
-    it("unmarks as validated when custom error is removed", ({ scope }) => {
+    it("unmarks as validated when custom error is removed", ({ monitor }) => {
       const value = setup({ validateOn, error: ["error"] })
 
       value.setError(null)
-      expect(isValidated(scope, value)).toBe(false)
-      expect(value.getError(scope)).toBeNull()
+      expect(isValidated(monitor, value)).toBe(false)
+      expect(value.getError(monitor)).toBeNull()
     })
   })
 })

@@ -1,12 +1,12 @@
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
-import { ImpulseFormSwitch } from "./_internal/impulse-form-switch"
+import type { FormSwitchBranches } from "./impulse-form-switch-branches"
+import { FormSwitch } from "./_internal/impulse-form-switch"
 
-function isImpulseFormSwitch(
+function isFormSwitch(
   anything: unknown,
-): anything is ImpulseFormSwitch<ImpulseForm, ImpulseFormSwitchBranches<ImpulseForm>> {
-  return anything instanceof ImpulseFormSwitch
+): anything is FormSwitch<SignalForm, FormSwitchBranches<SignalForm>> {
+  return anything instanceof FormSwitch
 }
 
-export { isImpulseFormSwitch }
+export { isFormSwitch }

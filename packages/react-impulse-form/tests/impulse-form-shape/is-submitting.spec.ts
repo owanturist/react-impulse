@@ -1,32 +1,32 @@
-import type { Scope } from "react-impulse"
+import type { Monitor } from "@owanturist/signal"
 import { z } from "zod"
 
-import { ImpulseFormShape, type ImpulseFormShapeOptions, ImpulseFormUnit } from "../../src"
+import { FormShape, type FormShapeOptions, FormUnit } from "../../src"
 import { wait } from "../common"
 
 const SLOWEST_ASYNC_MS = 1000
 
 interface ShapeFields {
-  _1: ImpulseFormUnit<string, ReadonlyArray<string>>
-  _2: ImpulseFormUnit<number>
-  _3: ImpulseFormShape<{
-    _1: ImpulseFormUnit<boolean>
-    _2: ImpulseFormUnit<Array<string>, ReadonlyArray<string>>
+  _1: FormUnit<string, ReadonlyArray<string>>
+  _2: FormUnit<number>
+  _3: FormShape<{
+    _1: FormUnit<boolean>
+    _2: FormUnit<Array<string>, ReadonlyArray<string>>
   }>
   _4: Array<string>
 }
 
-function setupShape(enchant?: (form: ImpulseFormShape<ShapeFields>) => void) {
-  return (options?: ImpulseFormShapeOptions<ShapeFields>) => {
-    const form = ImpulseFormShape(
+function setupShape(enchant?: (form: FormShape<ShapeFields>) => void) {
+  return (options?: FormShapeOptions<ShapeFields>) => {
+    const form = FormShape(
       {
-        _1: ImpulseFormUnit("", {
+        _1: FormUnit("", {
           schema: z.string().max(2),
         }),
-        _2: ImpulseFormUnit(0),
-        _3: ImpulseFormShape({
-          _1: ImpulseFormUnit(true),
-          _2: ImpulseFormUnit([""], {
+        _2: FormUnit(0),
+        _3: FormShape({
+          _1: FormUnit(true),
+          _2: FormUnit([""], {
             schema: z.array(z.string().max(2)),
           }),
         }),
@@ -48,9 +48,9 @@ beforeAll(() => {
 it("matches the type signature", () => {
   const form = setupShape()()
 
-  expectTypeOf(form.isSubmitting).toEqualTypeOf<(scope: Scope) => boolean>()
+  expectTypeOf(form.isSubmitting).toEqualTypeOf<(monitor: Monitor) => boolean>()
 
-  expectTypeOf(form.fields._3.isSubmitting).toEqualTypeOf<(scope: Scope) => boolean>()
+  expectTypeOf(form.fields._3.isSubmitting).toEqualTypeOf<(monitor: Monitor) => boolean>()
 })
 
 describe.each([
@@ -76,25 +76,25 @@ describe.each([
       form.fields._3.fields._2.onSubmit(vi.fn())
     }),
   ],
-])("isSubmitting(scope) %s", (_, setup) => {
-  it("returns false on initial", ({ scope }) => {
+])("isSubmitting(monitor) %s", (_, setup) => {
+  it("returns false on initial", ({ monitor }) => {
     const form = setup()
 
-    expect(form.isSubmitting(scope)).toBe(false)
+    expect(form.isSubmitting(monitor)).toBe(false)
   })
 
-  it("returns false when submitting starts", ({ scope }) => {
+  it("returns false when submitting starts", ({ monitor }) => {
     const form = setup()
 
     form.submit()
-    expect(form.isSubmitting(scope)).toBe(false)
+    expect(form.isSubmitting(monitor)).toBe(false)
   })
 
-  it("returns false when submitting finishes", async ({ scope }) => {
+  it("returns false when submitting finishes", async ({ monitor }) => {
     const form = setup()
 
     await form.submit()
-    expect(form.isSubmitting(scope)).toBe(false)
+    expect(form.isSubmitting(monitor)).toBe(false)
   })
 })
 
@@ -154,25 +154,22 @@ describe.each([
       form.onSubmit(() => wait(SLOWEST_ASYNC_MS / 8))
     }),
   ],
-])("isSubmitting(scope) %s", (_, setup) => {
-  describe.each<[string, (form: ImpulseFormShape<ShapeFields>) => Promise<unknown>]>([
+])("isSubmitting(monitor) %s", (_, setup) => {
+  describe.each<[string, (form: FormShape<ShapeFields>) => Promise<unknown>]>([
     ["root", (form) => form.submit()],
-    ["root.fields.<ImpulseFormUnit>", (form) => form.fields._1.submit()],
-    ["root.fields.<ImpulseFormShape>", (form) => form.fields._3.submit()],
-    [
-      "root.fields.<ImpulseFormShape>.fields.<ImpulseFormUnit>",
-      (form) => form.fields._3.fields._1.submit(),
-    ],
+    ["root.fields.<FormUnit>", (form) => form.fields._1.submit()],
+    ["root.fields.<FormShape>", (form) => form.fields._3.submit()],
+    ["root.fields.<FormShape>.fields.<FormUnit>", (form) => form.fields._3.fields._1.submit()],
   ])("when submitting via %s.submit()", (_, submit) => {
-    it("returns true when submitting starts", ({ scope }) => {
+    it("returns true when submitting starts", ({ monitor }) => {
       const form = setup()
 
-      expect(form.isSubmitting(scope)).toBe(false)
+      expect(form.isSubmitting(monitor)).toBe(false)
       submit(form)
-      expect(form.isSubmitting(scope)).toBe(true)
+      expect(form.isSubmitting(monitor)).toBe(true)
     })
 
-    it("returns false when submitting finishes", async ({ scope }) => {
+    it("returns false when submitting finishes", async ({ monitor }) => {
       const form = setup()
 
       const allDone = vi.fn()
@@ -180,18 +177,18 @@ describe.each([
       submit(form).then(allDone)
 
       expect(allDone).not.toHaveBeenCalled()
-      expect(form.isSubmitting(scope)).toBe(true)
+      expect(form.isSubmitting(monitor)).toBe(true)
 
       await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS - 1)
       expect(allDone).not.toHaveBeenCalled()
-      expect(form.isSubmitting(scope)).toBe(true)
+      expect(form.isSubmitting(monitor)).toBe(true)
 
       await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
       expect(allDone).toHaveBeenCalledOnce()
-      expect(form.isSubmitting(scope)).toBe(false)
+      expect(form.isSubmitting(monitor)).toBe(false)
     })
 
-    it("returns false when all submitting finish", async ({ scope }) => {
+    it("returns false when all submitting finish", async ({ monitor }) => {
       const form = setup()
 
       const firstDone = vi.fn()
@@ -205,25 +202,25 @@ describe.each([
 
       expect(firstDone).not.toHaveBeenCalled()
       expect(secondDone).not.toHaveBeenCalled()
-      expect(form.isSubmitting(scope)).toBe(true)
+      expect(form.isSubmitting(monitor)).toBe(true)
 
       await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
 
       expect(firstDone).toHaveBeenCalledOnce()
       expect(secondDone).not.toHaveBeenCalled()
-      expect(form.isSubmitting(scope)).toBe(true)
+      expect(form.isSubmitting(monitor)).toBe(true)
 
       await vi.advanceTimersByTimeAsync(SLOWEST_ASYNC_MS)
 
       expect(firstDone).toHaveBeenCalledOnce()
       expect(secondDone).toHaveBeenCalledOnce()
-      expect(form.isSubmitting(scope)).toBe(false)
+      expect(form.isSubmitting(monitor)).toBe(false)
     })
 
     describe.each([
-      // TODO ["root.fields.<ImpulseFormShape>"]
+      // TODO ["root.fields.<FormShape>"]
       [
-        "root.fields.<ImpulseFormUnit>",
+        "root.fields.<FormUnit>",
         () =>
           setup({
             input: {
@@ -232,7 +229,7 @@ describe.each([
           }),
       ],
       [
-        "root.fields.<ImpulseFormShape>.fields.<ImpulseFormUnit>",
+        "root.fields.<FormShape>.fields.<FormUnit>",
         () =>
           setup({
             input: {
@@ -243,14 +240,14 @@ describe.each([
           }),
       ],
     ])("when %s is invalid", (_, setup) => {
-      it("returns false", ({ scope }) => {
+      it("returns false", ({ monitor }) => {
         const form = setup()
 
-        expect(form.isInvalid(scope)).toBe(false)
+        expect(form.isInvalid(monitor)).toBe(false)
 
         submit(form)
-        expect(form.isInvalid(scope)).toBe(true)
-        expect(form.isSubmitting(scope)).toBe(false)
+        expect(form.isInvalid(monitor)).toBe(true)
+        expect(form.isSubmitting(monitor)).toBe(false)
       })
     })
   })

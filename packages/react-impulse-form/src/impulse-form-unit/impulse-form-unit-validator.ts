@@ -1,5 +1,5 @@
 import type { Result } from "../result"
 
-type ImpulseFormUnitValidator<TInput, TError, TOutput> = (input: TInput) => Result<TError, TOutput>
+type FormUnitValidator<TInput, TError, TOutput> = (input: TInput) => Result<TError, TOutput>
 
-export type { ImpulseFormUnitValidator }
+export type { FormUnitValidator }

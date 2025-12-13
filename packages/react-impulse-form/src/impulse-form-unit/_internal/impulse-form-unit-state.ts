@@ -1,4 +1,4 @@
-import { type Compare, Impulse, type ReadonlyImpulse, type Scope, batch } from "react-impulse"
+import { type Equal, type Monitor, type ReadonlySignal, Signal, batch } from "@owanturist/signal"
 
 import { identity } from "~/tools/identity"
 import { isFunction } from "~/tools/is-function"
@@ -7,7 +7,7 @@ import { isUndefined } from "~/tools/is-undefined"
 import { Lazy } from "~/tools/lazy"
 import { resolveSetter } from "~/tools/setter"
 
-import { ImpulseFormState } from "../../impulse-form/_internal/impulse-form-state"
+import { SignalFormState } from "../../impulse-form/_internal/impulse-form-state"
 import type { Result } from "../../result"
 import {
   VALIDATE_ON_CHANGE,
@@ -16,50 +16,47 @@ import {
   VALIDATE_ON_TOUCH,
   type ValidateStrategy,
 } from "../../validate-strategy"
-import type { ImpulseFormUnitErrorSetter } from "../impulse-form-unit-error-setter"
-import type { ImpulseFormUnitInputSetter } from "../impulse-form-unit-input-setter"
-import type { ImpulseFormUnitParams } from "../impulse-form-unit-params"
-import type { ImpulseFormUnitTransformer } from "../impulse-form-unit-transformer"
-import type { ImpulseFormUnitValidateOnSetter } from "../impulse-form-unit-validate-on-setter"
+import type { FormUnitErrorSetter } from "../impulse-form-unit-error-setter"
+import type { FormUnitInputSetter } from "../impulse-form-unit-input-setter"
+import type { FormUnitParams } from "../impulse-form-unit-params"
+import type { FormUnitTransformer } from "../impulse-form-unit-transformer"
+import type { FormUnitValidateOnSetter } from "../impulse-form-unit-validate-on-setter"
 
-import { ImpulseFormUnit } from "./impulse-form-unit"
-import {
-  type ImpulseFormUnitTransform,
-  transformFromTransformer,
-} from "./impulse-form-unit-transform"
+import { FormUnit } from "./impulse-form-unit"
+import { type FormUnitTransform, transformFromTransformer } from "./impulse-form-unit-transform"
 
-class ImpulseFormUnitState<TInput, TError, TOutput> extends ImpulseFormState<
-  ImpulseFormUnitParams<TInput, TError, TOutput>
+class FormUnitState<TInput, TError, TOutput> extends SignalFormState<
+  FormUnitParams<TInput, TError, TOutput>
 > {
-  public readonly _host = Lazy(() => new ImpulseFormUnit(this))
+  public readonly _host = Lazy(() => new FormUnit(this))
 
   public constructor(
-    parent: null | ImpulseFormState,
-    public readonly _initialState: Impulse<{
-      _explicit: Impulse<boolean>
-      _current: Impulse<TInput>
+    parent: null | SignalFormState,
+    public readonly _initialState: Signal<{
+      _explicit: Signal<boolean>
+      _current: Signal<TInput>
     }>,
-    public readonly _input: Impulse<TInput>,
-    private readonly _customError: Impulse<null | TError>,
-    public readonly _validateOn: Impulse<ValidateStrategy>,
-    public readonly _touched: Impulse<boolean>,
-    private readonly _transform: Impulse<ImpulseFormUnitTransform<TInput, TError, TOutput>>,
-    private readonly _isInputDirty: Compare<TInput>,
-    private readonly _isInputEqual: Compare<TInput>,
-    private readonly _isOutputEqual: Compare<null | TOutput>,
-    private readonly _isErrorEqual: Compare<null | TError>,
+    public readonly _input: Signal<TInput>,
+    private readonly _customError: Signal<null | TError>,
+    public readonly _validateOn: Signal<ValidateStrategy>,
+    public readonly _touched: Signal<boolean>,
+    private readonly _transform: Signal<FormUnitTransform<TInput, TError, TOutput>>,
+    private readonly _isInputDirty: Equal<TInput>,
+    private readonly _isInputEqual: Equal<TInput>,
+    private readonly _isOutputEqual: Equal<null | TOutput>,
+    private readonly _isErrorEqual: Equal<null | TError>,
   ) {
     super(parent)
 
-    const result = Impulse((scope): Result<null | TError, TOutput> => {
-      const customError = _customError.getValue(scope)
+    const result = Signal((monitor): Result<null | TError, TOutput> => {
+      const customError = _customError.read(monitor)
 
       if (!isNull(customError)) {
         return [customError, null]
       }
 
-      const input = _input.getValue(scope)
-      const transform = _transform.getValue(scope)
+      const input = _input.read(monitor)
+      const transform = _transform.read(monitor)
 
       const [error, output] = transform._validator(input)
 
@@ -67,84 +64,84 @@ class ImpulseFormUnitState<TInput, TError, TOutput> extends ImpulseFormState<
         return [null, output]
       }
 
-      return [isValidated.getValue(scope) ? error : null, null]
+      return [isValidated.read(monitor) ? error : null, null]
     })
 
-    this._initial = Impulse(
-      (scope): TInput => _initialState.getValue(scope)._current.getValue(scope),
+    this._initial = Signal(
+      (monitor): TInput => _initialState.read(monitor)._current.read(monitor),
       {
-        compare: _isInputEqual,
+        equals: _isInputEqual,
       },
     )
 
-    this._error = this._errorVerbose = Impulse(
-      (scope): null | TError => {
-        const [error] = result.getValue(scope)
+    this._error = this._errorVerbose = Signal(
+      (monitor): null | TError => {
+        const [error] = result.read(monitor)
 
         return error
       },
       {
-        compare: _isErrorEqual,
+        equals: _isErrorEqual,
       },
     )
 
-    this._output = this._outputVerbose = Impulse(
-      (scope): null | TOutput => {
-        const [, output] = result.getValue(scope)
+    this._output = this._outputVerbose = Signal(
+      (monitor): null | TOutput => {
+        const [, output] = result.read(monitor)
 
         return output
       },
       {
-        compare: _isOutputEqual,
+        equals: _isOutputEqual,
       },
     )
 
     this._touchedVerbose = _touched
 
-    this._dirty = this._dirtyVerbose = Impulse((scope): boolean =>
-      _isInputDirty(this._initial.getValue(scope), _input.getValue(scope), scope),
+    this._dirty = this._dirtyVerbose = Signal((monitor): boolean =>
+      _isInputDirty(this._initial.read(monitor), _input.read(monitor)),
     )
 
     this._validateOnVerbose = _validateOn
 
-    this._valid = this._validVerbose = Impulse((scope): boolean => {
-      const output = this._output.getValue(scope)
+    this._valid = this._validVerbose = Signal((monitor): boolean => {
+      const output = this._output.read(monitor)
 
       return !isNull(output)
     })
 
-    this._invalid = this._invalidVerbose = Impulse((scope): boolean => {
-      const error = this._error.getValue(scope)
+    this._invalid = this._invalidVerbose = Signal((monitor): boolean => {
+      const error = this._error.read(monitor)
 
       return !isNull(error)
     })
 
     // persist the validated state
-    const isValidated = Impulse(false)
+    const isValidated = Signal(false)
 
-    this._validated = this._validatedVerbose = Impulse(
+    this._validated = this._validatedVerbose = Signal(
       // mixes the validated and invalid states
-      (scope): boolean => isValidated.getValue(scope) || this._invalid.getValue(scope),
+      (monitor): boolean => isValidated.read(monitor) || this._invalid.read(monitor),
 
       // proxies the validated setter where `false` means revalidate
       // and `true` sets the validated state to `true`
-      (next, scope) => {
-        isValidated.setValue(() => {
-          if (next || _transform.getValue(scope)._transformer) {
+      (next, monitor) => {
+        isValidated.write(() => {
+          if (next || _transform.read(monitor)._transformer) {
             return true
           }
 
-          switch (_validateOn.getValue(scope)) {
+          switch (_validateOn.read(monitor)) {
             case VALIDATE_ON_INIT: {
               return true
             }
 
             case VALIDATE_ON_TOUCH: {
-              return _touched.getValue(scope)
+              return _touched.read(monitor)
             }
 
             case VALIDATE_ON_CHANGE: {
-              return this._dirty.getValue(scope)
+              return this._dirty.read(monitor)
             }
 
             case VALIDATE_ON_SUBMIT: {
@@ -155,11 +152,11 @@ class ImpulseFormUnitState<TInput, TError, TOutput> extends ImpulseFormState<
       },
     )
 
-    this._validated.setValue(false)
+    this._validated.write(false)
   }
 
-  public _childOf(parent: null | ImpulseFormState): ImpulseFormUnitState<TInput, TError, TOutput> {
-    return new ImpulseFormUnitState(
+  public _childOf(parent: null | SignalFormState): FormUnitState<TInput, TError, TOutput> {
+    return new FormUnitState(
       parent,
       this._initialState.clone(({ _current, _explicit }) => ({
         _current: _current.clone(),
@@ -179,139 +176,139 @@ class ImpulseFormUnitState<TInput, TError, TOutput> extends ImpulseFormState<
 
   // I N I T I A L
 
-  public _initial: ReadonlyImpulse<TInput>
+  public _initial: ReadonlySignal<TInput>
 
   public _replaceInitial(
-    scope: Scope,
-    state: undefined | ImpulseFormUnitState<TInput, TError, TOutput>,
+    monitor: Monitor,
+    state: undefined | FormUnitState<TInput, TError, TOutput>,
     isMounting: boolean,
   ): void {
-    const { _explicit, _current } = this._initialState.getValue(scope)
+    const { _explicit, _current } = this._initialState.read(monitor)
 
     if (state) {
-      const initialState = state._initialState.getValue(scope)
+      const initialState = state._initialState.read(monitor)
 
-      if (_explicit.getValue(scope) && isMounting) {
-        initialState._explicit.setValue(true)
-        initialState._current.setValue(_current.getValue(scope))
+      if (_explicit.read(monitor) && isMounting) {
+        initialState._explicit.write(true)
+        initialState._current.write(_current.read(monitor))
       }
 
-      this._initialState.setValue(initialState)
+      this._initialState.write(initialState)
     } else {
-      this._initialState.setValue({
+      this._initialState.write({
         _current: _current.clone(),
         _explicit: _explicit.clone(),
       })
     }
   }
 
-  public _setInitial(scope: Scope, setter: ImpulseFormUnitInputSetter<TInput>): void {
-    const { _current, _explicit } = this._initialState.getValue(scope)
+  public _setInitial(monitor: Monitor, setter: FormUnitInputSetter<TInput>): void {
+    const { _current, _explicit } = this._initialState.read(monitor)
 
-    _current.setValue((initial) =>
-      isFunction(setter) ? setter(initial, this._input.getValue(scope)) : setter,
+    _current.write((initial) =>
+      isFunction(setter) ? setter(initial, this._input.read(monitor)) : setter,
     )
 
-    _explicit.setValue(true)
+    _explicit.write(true)
 
-    this._validated.setValue(identity)
+    this._validated.write(identity)
   }
 
   // I N P U T
 
-  public _setInput(scope: Scope, setter: ImpulseFormUnitInputSetter<TInput>): void {
-    this._input.setValue((input) =>
-      isFunction(setter) ? setter(input, this._initial.getValue(scope)) : setter,
+  public _setInput(monitor: Monitor, setter: FormUnitInputSetter<TInput>): void {
+    this._input.write((input) =>
+      isFunction(setter) ? setter(input, this._initial.read(monitor)) : setter,
     )
 
-    this._validated.setValue(identity)
+    this._validated.write(identity)
   }
 
   // E R R O R
 
-  public readonly _error: ReadonlyImpulse<null | TError>
+  public readonly _error: ReadonlySignal<null | TError>
 
-  public readonly _errorVerbose: ReadonlyImpulse<null | TError>
+  public readonly _errorVerbose: ReadonlySignal<null | TError>
 
-  public _setError(_scope: Scope, setter: ImpulseFormUnitErrorSetter<TError>): void {
-    this._customError.setValue((error) => resolveSetter(setter, error))
+  public _setError(_monitor: Monitor, setter: FormUnitErrorSetter<TError>): void {
+    this._customError.write((error) => resolveSetter(setter, error))
   }
 
   // V A L I D A T E   O N
 
-  public readonly _validateOnVerbose: ReadonlyImpulse<ValidateStrategy>
+  public readonly _validateOnVerbose: ReadonlySignal<ValidateStrategy>
 
-  public _setValidateOn(scope: Scope, setter: ImpulseFormUnitValidateOnSetter): void {
-    const before = this._validateOn.getValue(scope)
+  public _setValidateOn(monitor: Monitor, setter: FormUnitValidateOnSetter): void {
+    const before = this._validateOn.read(monitor)
 
-    this._validateOn.setValue(resolveSetter(setter, before))
+    this._validateOn.write(resolveSetter(setter, before))
 
-    const after = this._validateOn.getValue(scope)
+    const after = this._validateOn.read(monitor)
 
     if (before !== after) {
-      this._validated.setValue(false)
+      this._validated.write(false)
     }
   }
 
   // T O U C H E D
 
-  public readonly _touchedVerbose: ReadonlyImpulse<boolean>
+  public readonly _touchedVerbose: ReadonlySignal<boolean>
 
   public _setTouched(
-    _scope: Scope,
-    setter: ImpulseFormUnitParams<TInput, TError, TOutput>["flag.setter"],
+    _monitor: Monitor,
+    setter: FormUnitParams<TInput, TError, TOutput>["flag.setter"],
   ): void {
-    this._touched.setValue((touched) => resolveSetter(setter, touched))
-    this._validated.setValue(identity)
+    this._touched.write((touched) => resolveSetter(setter, touched))
+    this._validated.write(identity)
   }
 
   // O U T P U T
 
-  public readonly _output: ReadonlyImpulse<null | TOutput>
-  public readonly _outputVerbose: ReadonlyImpulse<null | TOutput>
+  public readonly _output: ReadonlySignal<null | TOutput>
+  public readonly _outputVerbose: ReadonlySignal<null | TOutput>
 
   // V A L I D
 
-  public readonly _valid: ReadonlyImpulse<boolean>
-  public readonly _validVerbose: ReadonlyImpulse<boolean>
+  public readonly _valid: ReadonlySignal<boolean>
+  public readonly _validVerbose: ReadonlySignal<boolean>
 
   // I N V A L I D
 
-  public readonly _invalid: ReadonlyImpulse<boolean>
-  public readonly _invalidVerbose: ReadonlyImpulse<boolean>
+  public readonly _invalid: ReadonlySignal<boolean>
+  public readonly _invalidVerbose: ReadonlySignal<boolean>
 
   // V A L I D A T E D
 
-  public readonly _validated: Impulse<boolean>
-  public readonly _validatedVerbose: ReadonlyImpulse<boolean>
+  public readonly _validated: Signal<boolean>
+  public readonly _validatedVerbose: ReadonlySignal<boolean>
 
   public _forceValidated(): void {
-    this._validated.setValue(true)
+    this._validated.write(true)
   }
 
   // D I R T Y
 
-  public readonly _dirty: ReadonlyImpulse<boolean>
-  public readonly _dirtyVerbose: ReadonlyImpulse<boolean>
+  public readonly _dirty: ReadonlySignal<boolean>
+  public readonly _dirtyVerbose: ReadonlySignal<boolean>
 
-  public readonly _dirtyOn = Impulse(true)
+  public readonly _dirtyOn = Signal(true)
   public readonly _dirtyOnVerbose = this._dirtyOn
 
   // R E S E T
 
-  public _reset(scope: Scope, resetter: undefined | ImpulseFormUnitInputSetter<TInput>): void {
+  public _reset(monitor: Monitor, resetter: undefined | FormUnitInputSetter<TInput>): void {
     const resetValue = isUndefined(resetter)
-      ? this._initial.getValue(scope)
+      ? this._initial.read(monitor)
       : isFunction(resetter)
-        ? resetter(this._initial.getValue(scope), this._input.getValue(scope))
+        ? resetter(this._initial.read(monitor), this._input.read(monitor))
         : resetter
 
-    this._initialState.getValue(scope)._current.setValue(resetValue)
-    this._input.setValue(resetValue)
+    this._initialState.read(monitor)._current.write(resetValue)
+    this._input.write(resetValue)
     // TODO test when reset for all below
-    this._touched.setValue(false)
-    this._customError.setValue(null)
-    this._validated.setValue(false)
+    this._touched.write(false)
+    this._customError.write(null)
+    this._validated.write(false)
   }
 
   // C H I L D R E N
@@ -322,12 +319,12 @@ class ImpulseFormUnitState<TInput, TError, TOutput> extends ImpulseFormState<
 
   // C U S T O M
 
-  public _setTransform(transformer: ImpulseFormUnitTransformer<TInput, TOutput>): void {
+  public _setTransform(transformer: FormUnitTransformer<TInput, TOutput>): void {
     batch(() => {
-      this._transform.setValue(transformFromTransformer(transformer))
-      this._validated.setValue(identity)
+      this._transform.write(transformFromTransformer(transformer))
+      this._validated.write(identity)
     })
   }
 }
 
-export { ImpulseFormUnitState }
+export { FormUnitState }

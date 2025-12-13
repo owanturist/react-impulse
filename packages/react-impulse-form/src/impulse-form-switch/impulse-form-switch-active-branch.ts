@@ -1,10 +1,10 @@
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-import type { ImpulseFormSwitchBranch } from "./impulse-form-switch-branch"
-import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
+import type { FormSwitchBranch } from "./impulse-form-switch-branch"
+import type { FormSwitchBranches } from "./impulse-form-switch-branches"
 
-type ImpulseFormSwitchActiveBranch<TBranches extends ImpulseFormSwitchBranches<ImpulseForm>> = {
-  [TBranch in keyof TBranches]: ImpulseFormSwitchBranch<TBranch, TBranches[TBranch]>
+type FormSwitchActiveBranch<TBranches extends FormSwitchBranches<SignalForm>> = {
+  [TBranch in keyof TBranches]: FormSwitchBranch<TBranch, TBranches[TBranch]>
 }[keyof TBranches]
 
-export type { ImpulseFormSwitchActiveBranch }
+export type { FormSwitchActiveBranch }

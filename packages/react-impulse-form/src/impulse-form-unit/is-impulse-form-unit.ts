@@ -1,7 +1,7 @@
-import { ImpulseFormUnit } from "./_internal/impulse-form-unit"
+import { FormUnit } from "./_internal/impulse-form-unit"
 
-function isImpulseFormUnit(value: unknown): value is ImpulseFormUnit<unknown, unknown, unknown> {
-  return value instanceof ImpulseFormUnit
+function isFormUnit(value: unknown): value is FormUnit<unknown, unknown, unknown> {
+  return value instanceof FormUnit
 }
 
-export { isImpulseFormUnit }
+export { isFormUnit }

@@ -1,42 +1,40 @@
-import type { ImpulseForm } from "../impulse-form/impulse-form"
-import type { ImpulseFormParams } from "../impulse-form/impulse-form-params"
+import type { SignalForm } from "../impulse-form/impulse-form"
+import type { SignalFormParams } from "../impulse-form/impulse-form-params"
 
-import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
-import type { ImpulseFormSwitchError } from "./impulse-form-switch-error"
-import type { ImpulseFormSwitchErrorSetter } from "./impulse-form-switch-error-setter"
-import type { ImpulseFormSwitchErrorVerbose } from "./impulse-form-switch-error-verbose"
-import type { ImpulseFormSwitchFlag } from "./impulse-form-switch-flag"
-import type { ImpulseFormSwitchFlagSetter } from "./impulse-form-switch-flag-setter"
-import type { ImpulseFormSwitchFlagVerbose } from "./impulse-form-switch-flag-verbose"
-import type { ImpulseFormSwitchInput } from "./impulse-form-switch-input"
-import type { ImpulseFormSwitchInputSetter } from "./impulse-form-switch-input-setter"
-import type { ImpulseFormSwitchOutput } from "./impulse-form-switch-output"
-import type { ImpulseFormSwitchOutputVerbose } from "./impulse-form-switch-output-verbose"
-import type { ImpulseFormSwitchValidateOn } from "./impulse-form-switch-validate-on"
-import type { ImpulseFormSwitchValidateOnSetter } from "./impulse-form-switch-validate-on-setter"
-import type { ImpulseFormSwitchValidateOnVerbose } from "./impulse-form-switch-validate-on-verbose"
+import type { FormSwitchBranches } from "./impulse-form-switch-branches"
+import type { FormSwitchError } from "./impulse-form-switch-error"
+import type { FormSwitchErrorSetter } from "./impulse-form-switch-error-setter"
+import type { FormSwitchErrorVerbose } from "./impulse-form-switch-error-verbose"
+import type { FormSwitchFlag } from "./impulse-form-switch-flag"
+import type { FormSwitchFlagSetter } from "./impulse-form-switch-flag-setter"
+import type { FormSwitchFlagVerbose } from "./impulse-form-switch-flag-verbose"
+import type { FormSwitchInput } from "./impulse-form-switch-input"
+import type { FormSwitchInputSetter } from "./impulse-form-switch-input-setter"
+import type { FormSwitchOutput } from "./impulse-form-switch-output"
+import type { FormSwitchOutputVerbose } from "./impulse-form-switch-output-verbose"
+import type { FormSwitchValidateOn } from "./impulse-form-switch-validate-on"
+import type { FormSwitchValidateOnSetter } from "./impulse-form-switch-validate-on-setter"
+import type { FormSwitchValidateOnVerbose } from "./impulse-form-switch-validate-on-verbose"
 
-interface ImpulseFormSwitchParams<
-  TKind extends ImpulseForm,
-  TBranches extends ImpulseFormSwitchBranches<TKind>,
-> extends ImpulseFormParams {
-  "input.schema": ImpulseFormSwitchInput<TKind, TBranches>
-  "input.setter": ImpulseFormSwitchInputSetter<TKind, TBranches>
+interface FormSwitchParams<TKind extends SignalForm, TBranches extends FormSwitchBranches<TKind>>
+  extends SignalFormParams {
+  "input.schema": FormSwitchInput<TKind, TBranches>
+  "input.setter": FormSwitchInputSetter<TKind, TBranches>
 
-  "output.schema": ImpulseFormSwitchOutput<TKind, TBranches>
-  "output.schema.verbose": ImpulseFormSwitchOutputVerbose<TKind, TBranches>
+  "output.schema": FormSwitchOutput<TKind, TBranches>
+  "output.schema.verbose": FormSwitchOutputVerbose<TKind, TBranches>
 
-  "flag.setter": ImpulseFormSwitchFlagSetter<TKind, TBranches>
-  "flag.schema": ImpulseFormSwitchFlag<TKind, TBranches>
-  "flag.schema.verbose": ImpulseFormSwitchFlagVerbose<TKind, TBranches>
+  "flag.setter": FormSwitchFlagSetter<TKind, TBranches>
+  "flag.schema": FormSwitchFlag<TKind, TBranches>
+  "flag.schema.verbose": FormSwitchFlagVerbose<TKind, TBranches>
 
-  "validateOn.setter": ImpulseFormSwitchValidateOnSetter<TKind, TBranches>
-  "validateOn.schema": ImpulseFormSwitchValidateOn<TKind, TBranches>
-  "validateOn.schema.verbose": ImpulseFormSwitchValidateOnVerbose<TKind, TBranches>
+  "validateOn.setter": FormSwitchValidateOnSetter<TKind, TBranches>
+  "validateOn.schema": FormSwitchValidateOn<TKind, TBranches>
+  "validateOn.schema.verbose": FormSwitchValidateOnVerbose<TKind, TBranches>
 
-  "error.setter": ImpulseFormSwitchErrorSetter<TKind, TBranches>
-  "error.schema": ImpulseFormSwitchError<TKind, TBranches>
-  "error.schema.verbose": ImpulseFormSwitchErrorVerbose<TKind, TBranches>
+  "error.setter": FormSwitchErrorSetter<TKind, TBranches>
+  "error.schema": FormSwitchError<TKind, TBranches>
+  "error.schema.verbose": FormSwitchErrorVerbose<TKind, TBranches>
 }
 
-export type { ImpulseFormSwitchParams }
+export type { FormSwitchParams }

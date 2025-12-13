@@ -1,5 +1,5 @@
 import type { Setter } from "~/tools/setter"
 
-type ImpulseFormUnitFlagSetter = Setter<boolean>
+type FormUnitFlagSetter = Setter<boolean>
 
-export type { ImpulseFormUnitFlagSetter }
+export type { FormUnitFlagSetter }

@@ -1,12 +1,12 @@
-import type { Scope } from "react-impulse"
+import type { Monitor } from "@owanturist/signal"
 
 import { params } from "~/tools/params"
 
 import {
-  ImpulseFormShape,
-  type ImpulseFormShapeFields,
-  type ImpulseFormShapeOptions,
-  ImpulseFormUnit,
+  FormShape,
+  type FormShapeFields,
+  type FormShapeOptions,
+  FormUnit,
   type ValidateStrategy,
 } from "../../src"
 
@@ -32,23 +32,23 @@ type RootValidateStrategyConcise =
     }
 
 function setup(
-  options?: ImpulseFormShapeOptions<{
-    first: ImpulseFormUnit<string>
-    second: ImpulseFormUnit<number>
-    third: ImpulseFormShape<{
-      one: ImpulseFormUnit<boolean>
-      two: ImpulseFormUnit<Array<string>>
+  options?: FormShapeOptions<{
+    first: FormUnit<string>
+    second: FormUnit<number>
+    third: FormShape<{
+      one: FormUnit<boolean>
+      two: FormUnit<Array<string>>
     }>
     fourth: Array<string>
   }>,
 ) {
-  return ImpulseFormShape(
+  return FormShape(
     {
-      first: ImpulseFormUnit("", { validate: (input) => [null, input] }),
-      second: ImpulseFormUnit(0, { validate: (input) => [null, input] }),
-      third: ImpulseFormShape({
-        one: ImpulseFormUnit(true, { validate: (input) => [null, input] }),
-        two: ImpulseFormUnit([""], { validate: (input) => [null, input] }),
+      first: FormUnit("", { validate: (input) => [null, input] }),
+      second: FormUnit(0, { validate: (input) => [null, input] }),
+      third: FormShape({
+        one: FormUnit(true, { validate: (input) => [null, input] }),
+        two: FormUnit([""], { validate: (input) => [null, input] }),
       }),
       fourth: ["anything"],
     },
@@ -56,35 +56,35 @@ function setup(
   )
 }
 
-function getValidateOnDefault<TFields extends ImpulseFormShapeFields>(
-  scope: Scope,
-  shape: ImpulseFormShape<TFields>,
+function getValidateOnDefault<TFields extends FormShapeFields>(
+  monitor: Monitor,
+  shape: FormShape<TFields>,
 ) {
-  return shape.getValidateOn(scope)
+  return shape.getValidateOn(monitor)
 }
 
-function getValidateOnConcise<TFields extends ImpulseFormShapeFields>(
-  scope: Scope,
-  shape: ImpulseFormShape<TFields>,
+function getValidateOnConcise<TFields extends FormShapeFields>(
+  monitor: Monitor,
+  shape: FormShape<TFields>,
 ) {
-  return shape.getValidateOn(scope, params._first)
+  return shape.getValidateOn(monitor, params._first)
 }
 
-function getValidateOnVerbose<TFields extends ImpulseFormShapeFields>(
-  scope: Scope,
-  shape: ImpulseFormShape<TFields>,
+function getValidateOnVerbose<TFields extends FormShapeFields>(
+  monitor: Monitor,
+  shape: FormShape<TFields>,
 ) {
-  return shape.getValidateOn(scope, params._second)
+  return shape.getValidateOn(monitor, params._second)
 }
 
 it("matches the type signature", () => {
   const form = setup()
 
   expectTypeOf(form.getValidateOn).toEqualTypeOf<{
-    (scope: Scope): RootValidateStrategyConcise
+    (monitor: Monitor): RootValidateStrategyConcise
 
     <TResult>(
-      scope: Scope,
+      monitor: Monitor,
       select: (
         concise: RootValidateStrategyConcise,
         verbose: RootValidateStrategyVerbose,
@@ -93,10 +93,10 @@ it("matches the type signature", () => {
   }>()
 
   expectTypeOf(form.fields.third.getValidateOn).toEqualTypeOf<{
-    (scope: Scope): ThirdValidateStrategyConcise
+    (monitor: Monitor): ThirdValidateStrategyConcise
 
     <TResult>(
-      scope: Scope,
+      monitor: Monitor,
       select: (
         concise: ThirdValidateStrategyConcise,
         verbose: ThirdValidateStrategyVerbose,
@@ -106,29 +106,29 @@ it("matches the type signature", () => {
 })
 
 describe.each([
-  ["getValidateOn(scope)", getValidateOnDefault],
-  ["getValidateOn(scope, (concise) => concise)", getValidateOnConcise],
+  ["getValidateOn(monitor)", getValidateOnDefault],
+  ["getValidateOn(monitor, (concise) => concise)", getValidateOnConcise],
 ])("%s", (_, getValidateOn) => {
-  it("returns concise value", ({ scope }) => {
+  it("returns concise value", ({ monitor }) => {
     const shape = setup()
 
-    expectTypeOf(getValidateOn(scope, shape)).toEqualTypeOf<RootValidateStrategyConcise>()
+    expectTypeOf(getValidateOn(monitor, shape)).toEqualTypeOf<RootValidateStrategyConcise>()
 
     expectTypeOf(
-      getValidateOn(scope, shape.fields.third),
+      getValidateOn(monitor, shape.fields.third),
     ).toEqualTypeOf<ThirdValidateStrategyConcise>()
   })
 
-  it("returns ValidateStrategy when ALL fields have the SAME validateOn", ({ scope }) => {
+  it("returns ValidateStrategy when ALL fields have the SAME validateOn", ({ monitor }) => {
     const shape = setup({
       validateOn: "onSubmit",
     })
 
-    expect(getValidateOn(scope, shape)).toBe("onSubmit")
-    expect(getValidateOn(scope, shape.fields.third)).toBe("onSubmit")
+    expect(getValidateOn(monitor, shape)).toBe("onSubmit")
+    expect(getValidateOn(monitor, shape.fields.third)).toBe("onSubmit")
   })
 
-  it("returns concise object when SOME fields have DIFFERENT validateOn", ({ scope }) => {
+  it("returns concise object when SOME fields have DIFFERENT validateOn", ({ monitor }) => {
     const shape = setup({
       validateOn: {
         first: (x) => (x === "onTouch" ? "onSubmit" : "onChange"),
@@ -138,7 +138,7 @@ describe.each([
       },
     })
 
-    expect(getValidateOn(scope, shape)).toStrictEqual({
+    expect(getValidateOn(monitor, shape)).toStrictEqual({
       first: "onSubmit",
       second: "onTouch",
       third: {
@@ -146,36 +146,36 @@ describe.each([
         two: "onTouch",
       },
     })
-    expect(getValidateOn(scope, shape.fields.third)).toStrictEqual({
+    expect(getValidateOn(monitor, shape.fields.third)).toStrictEqual({
       one: "onInit",
       two: "onTouch",
     })
   })
 
-  it("returns onTouch for empty shape", ({ scope }) => {
-    expect(getValidateOn(scope, ImpulseFormShape({}))).toBe("onTouch")
+  it("returns onTouch for empty shape", ({ monitor }) => {
+    expect(getValidateOn(monitor, FormShape({}))).toBe("onTouch")
   })
 })
 
-describe("getValidateOn(scope, (_, verbose) => verbose)", () => {
+describe("getValidateOn(monitor, (_, verbose) => verbose)", () => {
   const getValidateOn = getValidateOnVerbose
 
-  it("returns verbose value", ({ scope }) => {
+  it("returns verbose value", ({ monitor }) => {
     const shape = setup()
 
-    expectTypeOf(getValidateOn(scope, shape)).toEqualTypeOf<RootValidateStrategyVerbose>()
+    expectTypeOf(getValidateOn(monitor, shape)).toEqualTypeOf<RootValidateStrategyVerbose>()
 
     expectTypeOf(
-      getValidateOn(scope, shape.fields.third),
+      getValidateOn(monitor, shape.fields.third),
     ).toEqualTypeOf<ThirdValidateStrategyVerbose>()
   })
 
-  it("returns verbose object when ALL fields have the SAME validateOn", ({ scope }) => {
+  it("returns verbose object when ALL fields have the SAME validateOn", ({ monitor }) => {
     const shape = setup({
       validateOn: "onSubmit",
     })
 
-    expect(getValidateOn(scope, shape)).toStrictEqual({
+    expect(getValidateOn(monitor, shape)).toStrictEqual({
       first: "onSubmit",
       second: "onSubmit",
       third: {
@@ -183,13 +183,13 @@ describe("getValidateOn(scope, (_, verbose) => verbose)", () => {
         two: "onSubmit",
       },
     })
-    expect(getValidateOn(scope, shape.fields.third)).toStrictEqual({
+    expect(getValidateOn(monitor, shape.fields.third)).toStrictEqual({
       one: "onSubmit",
       two: "onSubmit",
     })
   })
 
-  it("returns verbose object when SOME fields have DIFFERENT validateOn", ({ scope }) => {
+  it("returns verbose object when SOME fields have DIFFERENT validateOn", ({ monitor }) => {
     const shape = setup({
       validateOn: {
         first: (x) => (x === "onTouch" ? "onSubmit" : "onChange"),
@@ -199,7 +199,7 @@ describe("getValidateOn(scope, (_, verbose) => verbose)", () => {
       },
     })
 
-    expect(getValidateOn(scope, shape)).toStrictEqual({
+    expect(getValidateOn(monitor, shape)).toStrictEqual({
       first: "onSubmit",
       second: "onTouch",
       third: {
@@ -207,13 +207,13 @@ describe("getValidateOn(scope, (_, verbose) => verbose)", () => {
         two: "onTouch",
       },
     })
-    expect(getValidateOn(scope, shape.fields.third)).toStrictEqual({
+    expect(getValidateOn(monitor, shape.fields.third)).toStrictEqual({
       one: "onInit",
       two: "onTouch",
     })
   })
 
-  it("returns an empty object for empty shape", ({ scope }) => {
-    expect(getValidateOn(scope, ImpulseFormShape({}))).toStrictEqual({})
+  it("returns an empty object for empty shape", ({ monitor }) => {
+    expect(getValidateOn(monitor, FormShape({}))).toStrictEqual({})
   })
 })

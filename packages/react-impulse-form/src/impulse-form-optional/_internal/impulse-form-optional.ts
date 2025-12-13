@@ -1,29 +1,28 @@
-import type { Scope } from "react-impulse"
+import type { Monitor } from "@owanturist/signal"
 
-import { ImpulseForm } from "../../impulse-form/_internal/impulse-form"
-import type { ImpulseFormOptionalParams } from "../impulse-form-optional-params"
+import { SignalForm } from "../../impulse-form/_internal/impulse-form"
+import type { FormOptionalParams } from "../impulse-form-optional-params"
 
-import type { ImpulseFormOptionalState } from "./impulse-form-optional-state"
+import type { FormOptionalState } from "./impulse-form-optional-state"
 
-class ImpulseFormOptional<
-  TEnabled extends ImpulseForm,
-  TElement extends ImpulseForm,
-> extends ImpulseForm<ImpulseFormOptionalParams<TEnabled, TElement>> {
-  public static override _getState = ImpulseForm._getState
+class FormOptional<TEnabled extends SignalForm, TElement extends SignalForm> extends SignalForm<
+  FormOptionalParams<TEnabled, TElement>
+> {
+  public static override _getState = SignalForm._getState
 
   public readonly enabled: TEnabled
   public readonly element: TElement
 
-  public constructor(public readonly _state: ImpulseFormOptionalState<TEnabled, TElement>) {
+  public constructor(public readonly _state: FormOptionalState<TEnabled, TElement>) {
     super()
 
     this.enabled = _state._enabled._host() as TEnabled
     this.element = _state._element._host() as TElement
   }
 
-  public getEnabledElement(scope: Scope): undefined | TElement {
-    return this._state._getEnabledElement(scope)?._host() as undefined | TElement
+  public getEnabledElement(monitor: Monitor): undefined | TElement {
+    return this._state._getEnabledElement(monitor)?._host() as undefined | TElement
   }
 }
 
-export { ImpulseFormOptional }
+export { FormOptional }

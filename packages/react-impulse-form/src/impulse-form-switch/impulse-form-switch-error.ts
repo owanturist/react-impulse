@@ -1,11 +1,11 @@
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
-import type { ImpulseFormSwitchConciseParam } from "./_internal/impulse-form-switch-concise-param"
+import type { FormSwitchBranches } from "./impulse-form-switch-branches"
+import type { FormSwitchConciseParam } from "./_internal/impulse-form-switch-concise-param"
 
-type ImpulseFormSwitchError<
-  TKind extends ImpulseForm,
-  TBranches extends ImpulseFormSwitchBranches<TKind>,
-> = ImpulseFormSwitchConciseParam<TKind, TBranches, "error.schema", null>
+type FormSwitchError<
+  TKind extends SignalForm,
+  TBranches extends FormSwitchBranches<TKind>,
+> = FormSwitchConciseParam<TKind, TBranches, "error.schema", null>
 
-export type { ImpulseFormSwitchError }
+export type { FormSwitchError }

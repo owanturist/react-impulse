@@ -4,80 +4,80 @@ import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { params } from "~/tools/params"
 
 import {
-  ImpulseFormUnit,
-  type ImpulseFormUnitSchemaOptions,
-  type ImpulseFormUnitValidatedOptions,
+  FormUnit,
+  type FormUnitSchemaOptions,
+  type FormUnitValidatedOptions,
   type Result,
 } from "../../src"
 
-it("matches type signature", ({ scope }) => {
-  const value = ImpulseFormUnit("1", {
+it("matches type signature", ({ monitor }) => {
+  const value = FormUnit("1", {
     schema: z.string().max(1),
     validateOn: "onInit",
   })
 
-  expect(value.getOutput(scope)).toBe("1")
-  expect(value.getOutput(scope, params._first)).toBe("1")
-  expect(value.getOutput(scope, params._second)).toBe("1")
+  expect(value.getOutput(monitor)).toBe("1")
+  expect(value.getOutput(monitor, params._first)).toBe("1")
+  expect(value.getOutput(monitor, params._second)).toBe("1")
 
   value.setInput("12")
-  expect(value.getOutput(scope)).toBeNull()
-  expect(value.getOutput(scope, params._first)).toBeNull()
-  expect(value.getOutput(scope, params._second)).toBeNull()
+  expect(value.getOutput(monitor)).toBeNull()
+  expect(value.getOutput(monitor, params._first)).toBeNull()
+  expect(value.getOutput(monitor, params._second)).toBeNull()
 
-  expectTypeOf(value.getOutput(scope)).toEqualTypeOf<null | string>()
-  expectTypeOf(value.getOutput(scope, params._first)).toEqualTypeOf<null | string>()
-  expectTypeOf(value.getOutput(scope, params._second)).toEqualTypeOf<null | string>()
+  expectTypeOf(value.getOutput(monitor)).toEqualTypeOf<null | string>()
+  expectTypeOf(value.getOutput(monitor, params._first)).toEqualTypeOf<null | string>()
+  expectTypeOf(value.getOutput(monitor, params._second)).toEqualTypeOf<null | string>()
 })
 
 describe("when neither schema nor initial error are defined", () => {
   function setup() {
-    return ImpulseFormUnit<string, number>("1")
+    return FormUnit<string, number>("1")
   }
 
-  it("returns input value", ({ scope }) => {
+  it("returns input value", ({ monitor }) => {
     const value = setup()
-    const output = value.getOutput(scope)
+    const output = value.getOutput(monitor)
 
     expect(output).toBe("1")
     expectTypeOf(output).toEqualTypeOf<null | string>()
   })
 
-  it("updates via input change", ({ scope }) => {
+  it("updates via input change", ({ monitor }) => {
     const value = setup()
 
     value.setInput("2")
-    expect(value.getOutput(scope)).toBe("2")
+    expect(value.getOutput(monitor)).toBe("2")
   })
 
-  it("returns null after error is set", ({ scope }) => {
+  it("returns null after error is set", ({ monitor }) => {
     const value = setup()
 
     value.setError(2)
-    expect(value.getOutput(scope)).toBeNull()
+    expect(value.getOutput(monitor)).toBeNull()
   })
 
-  it("selects unequal output values when isInputEqual is not specified", ({ scope }) => {
-    const value = ImpulseFormUnit(["1"])
+  it("selects unequal output values when isInputEqual is not specified", ({ monitor }) => {
+    const value = FormUnit(["1"])
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
 
     value.setInput(["1"])
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
 
     expect(output0).not.toBe(output1)
     expect(output0).toStrictEqual(output1)
   })
 
-  it("selects equal output values when isInputEqual is specified", ({ scope }) => {
-    const value = ImpulseFormUnit(["1"], {
+  it("selects equal output values when isInputEqual is specified", ({ monitor }) => {
+    const value = FormUnit(["1"], {
       isInputEqual: isShallowArrayEqual,
     })
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
 
     value.setInput(["1"])
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
 
     expect(output0).toBe(output1)
     expect(output0).toStrictEqual(output1)
@@ -86,58 +86,58 @@ describe("when neither schema nor initial error are defined", () => {
 
 describe("when initial error is defined", () => {
   function setup() {
-    return ImpulseFormUnit("1", { error: 2 })
+    return FormUnit("1", { error: 2 })
   }
 
-  it("returns null", ({ scope }) => {
+  it("returns null", ({ monitor }) => {
     const value = setup()
-    const output = value.getOutput(scope)
+    const output = value.getOutput(monitor)
 
     expect(output).toBeNull()
     expectTypeOf(output).toEqualTypeOf<null | string>()
   })
 
-  it("ignores the input change", ({ scope }) => {
+  it("ignores the input change", ({ monitor }) => {
     const value = setup()
 
     value.setInput("2")
-    expect(value.getOutput(scope)).toBeNull()
+    expect(value.getOutput(monitor)).toBeNull()
   })
 
-  it("returns output after error is reset", ({ scope }) => {
+  it("returns output after error is reset", ({ monitor }) => {
     const value = setup()
 
     value.setError(null)
-    expect(value.getOutput(scope)).toBe("1")
+    expect(value.getOutput(monitor)).toBe("1")
   })
 
-  it("returns null after error is changed", ({ scope }) => {
+  it("returns null after error is changed", ({ monitor }) => {
     const value = setup()
 
     value.setError(3)
-    expect(value.getOutput(scope)).toBeNull()
+    expect(value.getOutput(monitor)).toBeNull()
   })
 
   it("selects same output value between error flips when isInputEqual is not specified", ({
-    scope,
+    monitor,
   }) => {
-    const value = ImpulseFormUnit(["1"], {
+    const value = FormUnit(["1"], {
       error: 2,
     })
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
     expect(output0).toBeNull()
 
     value.setError(null)
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
     expect(output1).not.toBeNull()
 
     value.setError(3)
-    const output2 = value.getOutput(scope)
+    const output2 = value.getOutput(monitor)
     expect(output2).toBeNull()
 
     value.setError(null)
-    const output3 = value.getOutput(scope)
+    const output3 = value.getOutput(monitor)
     expect(output3).not.toBeNull()
 
     expect(output3).toBe(output1)
@@ -148,81 +148,81 @@ describe("when initial error is defined", () => {
 describe("when transform is defined", () => {
   function setup(
     initial = "",
-    options?: Partial<ImpulseFormUnitValidatedOptions<string, number, number>>,
+    options?: Partial<FormUnitValidatedOptions<string, number, number>>,
   ) {
-    return ImpulseFormUnit(initial, {
+    return FormUnit(initial, {
       transform: (input) => input.length,
       ...options,
     })
   }
 
-  it("returns output before validation", ({ scope }) => {
+  it("returns output before validation", ({ monitor }) => {
     const value = setup("123")
-    const output = value.getOutput(scope)
+    const output = value.getOutput(monitor)
 
     expectTypeOf(output).toEqualTypeOf<null | number>()
     expect(output).toBe(3)
   })
 
-  it("returns output after validation", ({ scope }) => {
+  it("returns output after validation", ({ monitor }) => {
     const value = setup("123", { validateOn: "onInit" })
-    const output = value.getOutput(scope)
+    const output = value.getOutput(monitor)
 
     expect(output).toBe(3)
   })
 
-  it("returns null before validation when error is specified", ({ scope }) => {
+  it("returns null before validation when error is specified", ({ monitor }) => {
     const value = setup("1", { validateOn: "onInit", error: 2 })
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
     expect(output0).toBeNull()
 
     value.setError(null)
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
     expect(output1).toBe(1)
   })
 
-  it("returns null after validation when error is set", ({ scope }) => {
+  it("returns null after validation when error is set", ({ monitor }) => {
     const value = setup("1", { validateOn: "onInit" })
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
     expect(output0).toBe(1)
 
     value.setError(4)
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
     expect(output1).toBeNull()
 
     value.setError(null)
-    const output2 = value.getOutput(scope)
+    const output2 = value.getOutput(monitor)
     expect(output2).toBe(1)
   })
 
-  it("selects unequal output values when isOutputEqual is not specified", ({ scope }) => {
-    const value = ImpulseFormUnit(1, {
+  it("selects unequal output values when isOutputEqual is not specified", ({ monitor }) => {
+    const value = FormUnit(1, {
       transform: (input) => ({ isPositive: input > 0 }),
     })
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
 
     value.setInput(2)
 
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
 
     expect(output0).not.toBe(output1)
     expect(output0).toStrictEqual(output1)
   })
 
-  it("selects equal output values when isOutputEqual is specified", ({ scope }) => {
-    const value = ImpulseFormUnit(1 as number, {
+  it("selects equal output values when isOutputEqual is specified", ({ monitor }) => {
+    const value = FormUnit(1 as number, {
       transform: (input) => ({ isPositive: input > 0 }),
       isOutputEqual: (left, right) => left.isPositive === right.isPositive,
     })
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
 
     value.setInput(2)
 
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
 
     expect(output0).toBe(output1)
     expect(output0).toStrictEqual(output1)
@@ -230,96 +230,96 @@ describe("when transform is defined", () => {
 })
 
 describe("when validator is defined", () => {
-  function setup(initial = "", options?: Partial<ImpulseFormUnitValidatedOptions<string, number>>) {
-    return ImpulseFormUnit(initial, {
+  function setup(initial = "", options?: Partial<FormUnitValidatedOptions<string, number>>) {
+    return FormUnit(initial, {
       validate: (input) => (input.length > 0 ? [null, input] : [1, null]),
       ...options,
     })
   }
 
-  it("returns valid output before validation", ({ scope }) => {
+  it("returns valid output before validation", ({ monitor }) => {
     const value = setup("123")
-    const output = value.getOutput(scope)
+    const output = value.getOutput(monitor)
 
     expectTypeOf(output).toEqualTypeOf<null | string>()
     expect(output).toBe("123")
   })
 
-  it("returns null for invalid input before validation", ({ scope }) => {
+  it("returns null for invalid input before validation", ({ monitor }) => {
     const value = setup()
-    const output = value.getOutput(scope)
+    const output = value.getOutput(monitor)
 
     expect(output).toBeNull()
   })
 
-  it("returns valid output after validation", ({ scope }) => {
+  it("returns valid output after validation", ({ monitor }) => {
     const value = setup("123", { validateOn: "onInit" })
-    const output = value.getOutput(scope)
+    const output = value.getOutput(monitor)
 
     expect(output).toBe("123")
   })
 
-  it("returns null for invalid input after validation", ({ scope }) => {
+  it("returns null for invalid input after validation", ({ monitor }) => {
     const value = setup("", { validateOn: "onInit" })
-    const output = value.getOutput(scope)
+    const output = value.getOutput(monitor)
 
     expect(output).toBeNull()
   })
 
-  it("returns null for valid input before validation when error is specified", ({ scope }) => {
+  it("returns null for valid input before validation when error is specified", ({ monitor }) => {
     const value = setup("1", { validateOn: "onInit", error: 2 })
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
     expect(output0).toBeNull()
 
     value.setError(null)
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
     expect(output1).toBe("1")
   })
 
-  it("returns null for valid input after validation when error is set", ({ scope }) => {
+  it("returns null for valid input after validation when error is set", ({ monitor }) => {
     const value = setup("1", { validateOn: "onInit" })
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
     expect(output0).toBe("1")
 
     value.setError(4)
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
     expect(output1).toBeNull()
 
     value.setError(null)
-    const output2 = value.getOutput(scope)
+    const output2 = value.getOutput(monitor)
     expect(output2).toBe("1")
   })
 
-  it("selects unequal output values when isOutputEqual is not specified", ({ scope }) => {
-    const value = ImpulseFormUnit(1, {
+  it("selects unequal output values when isOutputEqual is not specified", ({ monitor }) => {
+    const value = FormUnit(1, {
       validate: (input): Result<string, { isPositive: boolean }> =>
         input > 0 ? [null, { isPositive: true }] : ["error", null],
     })
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
 
     value.setInput(2)
 
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
 
     expect(output0).not.toBe(output1)
     expect(output0).toStrictEqual(output1)
   })
 
-  it("selects equal output values when isOutputEqual is specified", ({ scope }) => {
-    const value = ImpulseFormUnit(1, {
+  it("selects equal output values when isOutputEqual is specified", ({ monitor }) => {
+    const value = FormUnit(1, {
       validate: (input): Result<string, { isPositive: boolean }> =>
         input > 0 ? [null, { isPositive: true }] : ["error", null],
       isOutputEqual: (left, right) => left.isPositive === right.isPositive,
     })
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
 
     value.setInput(2)
 
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
 
     expect(output0).toBe(output1)
     expect(output0).toStrictEqual(output1)
@@ -327,85 +327,85 @@ describe("when validator is defined", () => {
 })
 
 describe("when schema is defined", () => {
-  function setup(initial = 1, options?: Partial<ImpulseFormUnitSchemaOptions<number>>) {
-    return ImpulseFormUnit(initial, { schema: z.number().min(2), ...options })
+  function setup(initial = 1, options?: Partial<FormUnitSchemaOptions<number>>) {
+    return FormUnit(initial, { schema: z.number().min(2), ...options })
   }
 
-  it("returns valid output before validation", ({ scope }) => {
+  it("returns valid output before validation", ({ monitor }) => {
     const value = setup(3)
-    const output = value.getOutput(scope)
+    const output = value.getOutput(monitor)
 
     expectTypeOf(output).toEqualTypeOf<null | number>()
     expect(output).toBe(3)
   })
 
-  it("returns null for invalid input before validation", ({ scope }) => {
+  it("returns null for invalid input before validation", ({ monitor }) => {
     const value = setup()
-    const output = value.getOutput(scope)
+    const output = value.getOutput(monitor)
 
     expect(output).toBeNull()
   })
 
-  it("returns valid output after validation", ({ scope }) => {
+  it("returns valid output after validation", ({ monitor }) => {
     const value = setup(3, { validateOn: "onInit" })
-    const output = value.getOutput(scope)
+    const output = value.getOutput(monitor)
 
     expect(output).toBe(3)
   })
 
-  it("returns null for invalid input after validation", ({ scope }) => {
+  it("returns null for invalid input after validation", ({ monitor }) => {
     const value = setup(1, { validateOn: "onInit" })
-    const output = value.getOutput(scope)
+    const output = value.getOutput(monitor)
 
     expect(output).toBeNull()
   })
 
-  it("returns null for valid input before validation when error is specified", ({ scope }) => {
+  it("returns null for valid input before validation when error is specified", ({ monitor }) => {
     const value = setup(3, { validateOn: "onInit", error: ["custom error"] })
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
     expect(output0).toBeNull()
 
     value.setError(null)
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
     expect(output1).toBe(3)
   })
 
-  it("returns null for valid input after validation when error is set", ({ scope }) => {
+  it("returns null for valid input after validation when error is set", ({ monitor }) => {
     const value = setup(4, { validateOn: "onInit" })
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
     expect(output0).toBe(4)
 
     value.setError(["error"])
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
     expect(output1).toBeNull()
 
     value.setError(null)
-    const output2 = value.getOutput(scope)
+    const output2 = value.getOutput(monitor)
     expect(output2).toBe(4)
   })
 
-  it("selects unequal output values when isOutputEqual is not specified", ({ scope }) => {
-    const value = ImpulseFormUnit(4, {
+  it("selects unequal output values when isOutputEqual is not specified", ({ monitor }) => {
+    const value = FormUnit(4, {
       schema: z
         .number()
         .min(2)
         .transform((number) => ({ isPositive: number > 2 })),
     })
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
 
     value.setInput(8)
 
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
 
     expect(output0).not.toBe(output1)
     expect(output0).toStrictEqual(output1)
   })
 
-  it("selects equal output values when isOutputEqual is specified", ({ scope }) => {
-    const value = ImpulseFormUnit(4, {
+  it("selects equal output values when isOutputEqual is specified", ({ monitor }) => {
+    const value = FormUnit(4, {
       schema: z
         .number()
         .min(2)
@@ -413,11 +413,11 @@ describe("when schema is defined", () => {
       isOutputEqual: (left, right) => left.isPositive === right.isPositive,
     })
 
-    const output0 = value.getOutput(scope)
+    const output0 = value.getOutput(monitor)
 
     value.setInput(8)
 
-    const output1 = value.getOutput(scope)
+    const output1 = value.getOutput(monitor)
 
     expect(output0).toBe(output1)
     expect(output0).toStrictEqual(output1)
@@ -447,8 +447,8 @@ describe("when ZodLikeSchema is used", () => {
       },
     ],
   ])("when using ZodLikeSchema#safeParse() with ZodLikeError#%s", (_, error) => {
-    function setup(initial = "", options?: Partial<ImpulseFormUnitSchemaOptions<string, number>>) {
-      return ImpulseFormUnit(initial, {
+    function setup(initial = "", options?: Partial<FormUnitSchemaOptions<string, number>>) {
+      return FormUnit(initial, {
         ...options,
         schema: {
           safeParse(input: string) {
@@ -462,39 +462,39 @@ describe("when ZodLikeSchema is used", () => {
       })
     }
 
-    it("returns valid output before validation", ({ scope }) => {
+    it("returns valid output before validation", ({ monitor }) => {
       const value = setup("123")
-      const output = value.getOutput(scope)
+      const output = value.getOutput(monitor)
 
       expectTypeOf(output).toEqualTypeOf<null | number>()
       expect(output).toBe(3)
     })
 
-    it("returns null for invalid input before validation", ({ scope }) => {
+    it("returns null for invalid input before validation", ({ monitor }) => {
       const value = setup()
-      const output = value.getOutput(scope)
+      const output = value.getOutput(monitor)
 
       expect(output).toBeNull()
     })
 
-    it("returns valid output after validation", ({ scope }) => {
+    it("returns valid output after validation", ({ monitor }) => {
       const value = setup("123", { validateOn: "onInit" })
-      const output = value.getOutput(scope)
+      const output = value.getOutput(monitor)
 
       expect(output).toBe(3)
     })
 
-    it("returns null for invalid input after validation", ({ scope }) => {
+    it("returns null for invalid input after validation", ({ monitor }) => {
       const value = setup("", { validateOn: "onInit" })
-      const output = value.getOutput(scope)
+      const output = value.getOutput(monitor)
 
       expect(output).toBeNull()
     })
   })
 
   describe("when using ZodLikeSchema#parse()", () => {
-    it("returns null when throwing Error", ({ scope }) => {
-      const value = ImpulseFormUnit(1, {
+    it("returns null when throwing Error", ({ monitor }) => {
+      const value = FormUnit(1, {
         validateOn: "onInit",
         schema: {
           parse(input: number) {
@@ -507,10 +507,10 @@ describe("when ZodLikeSchema is used", () => {
         },
       })
 
-      expect(value.getOutput(scope)).toBe(1)
+      expect(value.getOutput(monitor)).toBe(1)
 
       value.setInput(-1)
-      expect(value.getOutput(scope)).toBeNull()
+      expect(value.getOutput(monitor)).toBeNull()
     })
 
     describe.each([
@@ -535,11 +535,8 @@ describe("when ZodLikeSchema is used", () => {
         },
       ],
     ])("when messages are in ZodLikeError#%s", (_, error) => {
-      function setup(
-        initial = "",
-        options?: Partial<ImpulseFormUnitSchemaOptions<string, number>>,
-      ) {
-        return ImpulseFormUnit(initial, {
+      function setup(initial = "", options?: Partial<FormUnitSchemaOptions<string, number>>) {
+        return FormUnit(initial, {
           ...options,
           schema: {
             parse(input: string) {
@@ -553,38 +550,38 @@ describe("when ZodLikeSchema is used", () => {
         })
       }
 
-      it("returns valid output before validation", ({ scope }) => {
+      it("returns valid output before validation", ({ monitor }) => {
         const value = setup("123")
-        const output = value.getOutput(scope)
+        const output = value.getOutput(monitor)
 
         expectTypeOf(output).toEqualTypeOf<null | number>()
         expect(output).toBe(3)
       })
 
-      it("returns null for invalid input before validation", ({ scope }) => {
+      it("returns null for invalid input before validation", ({ monitor }) => {
         const value = setup()
-        const output = value.getOutput(scope)
+        const output = value.getOutput(monitor)
 
         expect(output).toBeNull()
       })
 
-      it("returns valid output after validation", ({ scope }) => {
+      it("returns valid output after validation", ({ monitor }) => {
         const value = setup("123", { validateOn: "onInit" })
-        const output = value.getOutput(scope)
+        const output = value.getOutput(monitor)
 
         expect(output).toBe(3)
       })
 
-      it("returns null for invalid input after validation", ({ scope }) => {
+      it("returns null for invalid input after validation", ({ monitor }) => {
         const value = setup("", { validateOn: "onInit" })
-        const output = value.getOutput(scope)
+        const output = value.getOutput(monitor)
 
         expect(output).toBeNull()
       })
     })
 
-    it("returns null for ZodLikeIssue without the message: string property", ({ scope }) => {
-      const value = ImpulseFormUnit(1, {
+    it("returns null for ZodLikeIssue without the message: string property", ({ monitor }) => {
+      const value = FormUnit(1, {
         validateOn: "onInit",
         schema: {
           parse(input: number) {
@@ -608,14 +605,14 @@ describe("when ZodLikeSchema is used", () => {
         },
       })
 
-      expect(value.getOutput(scope)).toBe(1)
+      expect(value.getOutput(monitor)).toBe(1)
 
       value.setInput(-1)
-      expect(value.getOutput(scope)).toBeNull()
+      expect(value.getOutput(monitor)).toBeNull()
     })
 
-    it("returns null if ZodLikeError does not have errors|issues properties", ({ scope }) => {
-      const value = ImpulseFormUnit(1, {
+    it("returns null if ZodLikeError does not have errors|issues properties", ({ monitor }) => {
+      const value = FormUnit(1, {
         validateOn: "onInit",
         schema: {
           parse(value: number) {
@@ -629,14 +626,14 @@ describe("when ZodLikeSchema is used", () => {
         },
       })
 
-      expect(value.getOutput(scope)).toBe(1)
+      expect(value.getOutput(monitor)).toBe(1)
 
       value.setInput(-1)
-      expect(value.getOutput(scope)).toBeNull()
+      expect(value.getOutput(monitor)).toBeNull()
     })
 
-    it("returns null if ZodLikeError is not an object", ({ scope }) => {
-      const value = ImpulseFormUnit(1, {
+    it("returns null if ZodLikeError is not an object", ({ monitor }) => {
+      const value = FormUnit(1, {
         validateOn: "onInit",
         schema: {
           parse(input: number) {
@@ -650,14 +647,14 @@ describe("when ZodLikeSchema is used", () => {
         },
       })
 
-      expect(value.getOutput(scope)).toBe(1)
+      expect(value.getOutput(monitor)).toBe(1)
 
       value.setInput(-1)
-      expect(value.getOutput(scope)).toBeNull()
+      expect(value.getOutput(monitor)).toBeNull()
     })
 
-    it("returns null for proxied ZodSchema#parse()", ({ scope }) => {
-      const value = ImpulseFormUnit(1, {
+    it("returns null for proxied ZodSchema#parse()", ({ monitor }) => {
+      const value = FormUnit(1, {
         validateOn: "onInit",
         schema: {
           parse(input) {
@@ -666,10 +663,10 @@ describe("when ZodLikeSchema is used", () => {
         },
       })
 
-      expect(value.getOutput(scope)).toBe(1)
+      expect(value.getOutput(monitor)).toBe(1)
 
       value.setInput(-1)
-      expect(value.getOutput(scope)).toBeNull()
+      expect(value.getOutput(monitor)).toBeNull()
     })
   })
 })

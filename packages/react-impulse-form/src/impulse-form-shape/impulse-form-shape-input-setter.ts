@@ -1,12 +1,12 @@
 import type { Setter } from "~/tools/setter"
 
-import type { GetImpulseFormShapeParam } from "./get-impulse-form-shape-param"
-import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
-import type { ImpulseFormShapeInput } from "./impulse-form-shape-input"
+import type { GetFormShapeParam } from "./get-impulse-form-shape-param"
+import type { FormShapeFields } from "./impulse-form-shape-fields"
+import type { FormShapeInput } from "./impulse-form-shape-input"
 
-type ImpulseFormShapeInputSetter<TFields extends ImpulseFormShapeFields> = Setter<
-  Partial<GetImpulseFormShapeParam<TFields, "input.setter">>,
-  [ImpulseFormShapeInput<TFields>, ImpulseFormShapeInput<TFields>]
+type FormShapeInputSetter<TFields extends FormShapeFields> = Setter<
+  Partial<GetFormShapeParam<TFields, "input.setter">>,
+  [FormShapeInput<TFields>, FormShapeInput<TFields>]
 >
 
-export type { ImpulseFormShapeInputSetter }
+export type { FormShapeInputSetter }

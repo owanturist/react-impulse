@@ -1,14 +1,14 @@
-import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetSignalFormParam } from "../impulse-form/get-impulse-form-param"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-import type { ImpulseFormOptionalSchema } from "./impulse-form-optional-schema"
+import type { FormOptionalSchema } from "./impulse-form-optional-schema"
 
-type ImpulseFormOptionalInput<
-  TEnabled extends ImpulseForm,
-  TElement extends ImpulseForm,
-> = ImpulseFormOptionalSchema<
-  GetImpulseFormParam<TEnabled, "input.schema">,
-  GetImpulseFormParam<TElement, "input.schema">
+type FormOptionalInput<
+  TEnabled extends SignalForm,
+  TElement extends SignalForm,
+> = FormOptionalSchema<
+  GetSignalFormParam<TEnabled, "input.schema">,
+  GetSignalFormParam<TElement, "input.schema">
 >
 
-export type { ImpulseFormOptionalInput }
+export type { FormOptionalInput }

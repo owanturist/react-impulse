@@ -1,19 +1,19 @@
-import type { GetImpulseFormOutput } from "../../impulse-form/get-impulse-form-output"
-import type { GetImpulseFormParam } from "../../impulse-form/get-impulse-form-param"
-import type { ImpulseForm } from "../../impulse-form/impulse-form"
-import type { ImpulseFormParams } from "../../impulse-form/impulse-form-params"
-import type { ImpulseFormSwitchBranch } from "../impulse-form-switch-branch"
-import type { ImpulseFormSwitchBranches } from "../impulse-form-switch-branches"
+import type { GetSignalFormOutput } from "../../impulse-form/get-impulse-form-output"
+import type { GetSignalFormParam } from "../../impulse-form/get-impulse-form-param"
+import type { SignalForm } from "../../impulse-form/impulse-form"
+import type { SignalFormParams } from "../../impulse-form/impulse-form-params"
+import type { FormSwitchBranch } from "../impulse-form-switch-branch"
+import type { FormSwitchBranches } from "../impulse-form-switch-branches"
 
-type ImpulseFormSwitchBranchUnion<
-  TKind extends ImpulseForm,
-  TBranches extends ImpulseFormSwitchBranches<TKind>,
-  TKey extends keyof ImpulseFormParams,
+type FormSwitchBranchUnion<
+  TKind extends SignalForm,
+  TBranches extends FormSwitchBranches<TKind>,
+  TKey extends keyof SignalFormParams,
 > = {
-  [TBranch in GetImpulseFormOutput<TKind>]: ImpulseFormSwitchBranch<
+  [TBranch in GetSignalFormOutput<TKind>]: FormSwitchBranch<
     TBranch,
-    GetImpulseFormParam<TBranches[TBranch], TKey>
+    GetSignalFormParam<TBranches[TBranch], TKey>
   >
-}[GetImpulseFormOutput<TKind>]
+}[GetSignalFormOutput<TKind>]
 
-export type { ImpulseFormSwitchBranchUnion }
+export type { FormSwitchBranchUnion }

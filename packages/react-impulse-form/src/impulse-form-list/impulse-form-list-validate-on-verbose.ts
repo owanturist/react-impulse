@@ -1,8 +1,8 @@
-import type { GetImpulseFormValidateOnVerbose } from "../impulse-form/get-impulse-form-validate-on-verbose"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetSignalFormValidateOnVerbose } from "../impulse-form/get-impulse-form-validate-on-verbose"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-type ImpulseFormListValidateOnVerbose<TElement extends ImpulseForm> = ReadonlyArray<
-  GetImpulseFormValidateOnVerbose<TElement>
+type FormListValidateOnVerbose<TElement extends SignalForm> = ReadonlyArray<
+  GetSignalFormValidateOnVerbose<TElement>
 >
 
-export type { ImpulseFormListValidateOnVerbose }
+export type { FormListValidateOnVerbose }

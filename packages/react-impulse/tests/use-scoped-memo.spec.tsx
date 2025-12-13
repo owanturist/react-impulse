@@ -1,24 +1,22 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useScopedMemo } from "../src"
+import { Signal, useMonitor } from "../src"
 
-describe("single impulse", () => {
+describe("single Signal", () => {
   const Component: React.FC<{
     onMemo?: React.Dispatch<number>
-    value: Impulse<number>
+    value: Signal<number>
   }> = ({ onMemo, value }) => {
+    const monitor = useMonitor()
     const [multiplier, setMultiplier] = React.useState(2)
-    const result = useScopedMemo(
-      (scope) => {
-        const x = value.getValue(scope) * multiplier
+    const result = React.useMemo(() => {
+      const x = value.read(monitor) * multiplier
 
-        onMemo?.(x)
+      onMemo?.(x)
 
-        return x
-      },
-      [value, multiplier, onMemo],
-    )
+      return x
+    }, [monitor, value, multiplier, onMemo])
 
     return (
       <>
@@ -28,8 +26,8 @@ describe("single impulse", () => {
     )
   }
 
-  it("can watch inside useScopedMemo", () => {
-    const value = Impulse(1)
+  it("can watch inside React.useMemo", () => {
+    const value = Signal(1)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -48,7 +46,7 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value.setValue(2)
+      value.write(2)
     })
 
     expect(node).toHaveTextContent("4")
@@ -58,7 +56,7 @@ describe("single impulse", () => {
   })
 
   it("does not call useMemo factory when deps not changed", () => {
-    const value = Impulse(1)
+    const value = Signal(1)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -83,7 +81,7 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value.setValue(3)
+      value.write(3)
     })
 
     expect(onMemo).toHaveBeenCalledExactlyOnceWith(6)
@@ -91,9 +89,9 @@ describe("single impulse", () => {
     expect(onRender).toHaveBeenCalledOnce()
   })
 
-  it("should call useMemo factory when dep Impulse changes", () => {
-    const value1 = Impulse(1)
-    const value2 = Impulse(3)
+  it("should call useMemo factory when dep Signal changes", () => {
+    const value1 = Signal(1)
+    const value2 = Signal(3)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -114,9 +112,9 @@ describe("single impulse", () => {
     expect(onRender).toHaveBeenCalledOnce()
   })
 
-  it("should unsubscribe Impulse from useMemo when swapped", () => {
-    const value1 = Impulse(1)
-    const value2 = Impulse(3)
+  it("should unsubscribe Signal from useMemo when swapped", () => {
+    const value1 = Signal(1)
+    const value2 = Signal(3)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -136,8 +134,8 @@ describe("single impulse", () => {
     )
 
     /**
-     * Not 0 because a scope cannot cleanup on every rerender,
-     * otherwise memo/effect hooks with the scope dependency will lose subscriptions too eagerly.
+     * Not 0 because a monitor cannot cleanup on every rerender,
+     * otherwise memo/effect hooks with the monitor dependency will lose subscriptions too eagerly.
      */
     expect(value1).toHaveEmittersSize(1)
     expect(value2).toHaveEmittersSize(1)
@@ -145,7 +143,7 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value1.setValue(10)
+      value1.write(10)
     })
 
     expect(onMemo).toHaveBeenCalledOnce()
@@ -153,7 +151,7 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value2.setValue(5)
+      value2.write(5)
     })
     expect(onMemo).toHaveBeenCalledExactlyOnceWith(10)
     expect(onRender).toHaveBeenCalledOnce()
@@ -162,8 +160,8 @@ describe("single impulse", () => {
     expect(value2).toHaveEmittersSize(1)
   })
 
-  it("should call useMemo factory when none-Impulse dep changes", () => {
-    const value = Impulse(3)
+  it("should call useMemo factory when none-Signal dep changes", () => {
+    const value = Signal(3)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
@@ -182,7 +180,7 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     act(() => {
-      value.setValue(4)
+      value.write(4)
     })
     expect(onMemo).toHaveBeenCalledExactlyOnceWith(12)
     expect(onRender).toHaveBeenCalledOnce()
@@ -190,15 +188,16 @@ describe("single impulse", () => {
   })
 })
 
-describe("multiple impulses", () => {
+describe("multiple signals", () => {
   const Component: React.FC<{
-    first: Impulse<number>
-    second: Impulse<number>
+    first: Signal<number>
+    second: Signal<number>
   }> = ({ first, second }) => {
+    const monitor = useMonitor()
     const [multiplier, setMultiplier] = React.useState(2)
-    const result = useScopedMemo(
-      (scope) => (first.getValue(scope) + second.getValue(scope)) * multiplier,
-      [first, second, multiplier],
+    const result = React.useMemo(
+      () => (first.read(monitor) + second.read(monitor)) * multiplier,
+      [monitor, first, second, multiplier],
     )
 
     return (
@@ -209,9 +208,9 @@ describe("multiple impulses", () => {
     )
   }
 
-  it("can watch after both impulses", () => {
-    const first = Impulse(2)
-    const second = Impulse(3)
+  it("can watch after both signals", () => {
+    const first = Signal(2)
+    const second = Signal(3)
 
     render(<Component first={first} second={second} />)
 
@@ -222,12 +221,12 @@ describe("multiple impulses", () => {
     expect(node).toHaveTextContent("10")
 
     act(() => {
-      first.setValue(4)
+      first.write(4)
     })
     expect(node).toHaveTextContent("14")
 
     act(() => {
-      second.setValue(5)
+      second.write(5)
     })
     expect(node).toHaveTextContent("18")
 
@@ -236,23 +235,21 @@ describe("multiple impulses", () => {
   })
 })
 
-describe("nested impulses", () => {
+describe("nested signals", () => {
   const Component: React.FC<{
-    list: Impulse<Array<Impulse<number>>>
+    list: Signal<Array<Signal<number>>>
   }> = ({ list }) => {
+    const monitor = useMonitor()
     const [multiplier, setMultiplier] = React.useState(2)
-    const result = useScopedMemo(
-      (scope) => {
-        const x =
-          list
-            .getValue(scope)
-            .map((item) => item.getValue(scope))
-            .reduce((acc, val) => acc + val, 0) * multiplier
+    const result = React.useMemo(() => {
+      const x =
+        list
+          .read(monitor)
+          .map((item) => item.read(monitor))
+          .reduce((acc, val) => acc + val, 0) * multiplier
 
-        return x
-      },
-      [list, multiplier],
-    )
+      return x
+    }, [monitor, list, multiplier])
 
     return (
       <>
@@ -262,11 +259,11 @@ describe("nested impulses", () => {
     )
   }
 
-  it("can watch after all impulses", () => {
-    const count0 = Impulse(2)
-    const count1 = Impulse(3)
-    const count2 = Impulse(4)
-    const list = Impulse([count0, count1])
+  it("can watch after all signals", () => {
+    const count0 = Signal(2)
+    const count1 = Signal(3)
+    const count2 = Signal(4)
+    const list = Signal([count0, count1])
 
     render(<Component list={list} />)
 
@@ -280,24 +277,24 @@ describe("nested impulses", () => {
     expect(node).toHaveTextContent("10")
 
     act(() => {
-      count0.setValue(4)
+      count0.write(4)
     })
     expect(node).toHaveTextContent("14")
 
     act(() => {
-      count1.setValue(5)
+      count1.write(5)
     })
     expect(node).toHaveTextContent("18")
 
     act(() => {
-      list.setValue((items) => [...items, count2])
+      list.write((items) => [...items, count2])
     })
     expect(node).toHaveTextContent("26")
 
     expect(count2).toHaveEmittersSize(1)
 
     act(() => {
-      list.setValue((items) => items.slice(1))
+      list.write((items) => items.slice(1))
     })
     expect(node).toHaveTextContent("18")
 

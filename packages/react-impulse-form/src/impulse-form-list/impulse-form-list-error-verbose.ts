@@ -1,8 +1,8 @@
-import type { GetImpulseFormErrorVerbose } from "../impulse-form/get-impulse-form-error-verbose"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetSignalFormErrorVerbose } from "../impulse-form/get-impulse-form-error-verbose"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-type ImpulseFormListErrorVerbose<TElement extends ImpulseForm> = ReadonlyArray<
-  GetImpulseFormErrorVerbose<TElement>
+type FormListErrorVerbose<TElement extends SignalForm> = ReadonlyArray<
+  GetSignalFormErrorVerbose<TElement>
 >
 
-export type { ImpulseFormListErrorVerbose }
+export type { FormListErrorVerbose }

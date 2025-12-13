@@ -1,5 +1,5 @@
-import type { ImpulseForm } from "./impulse-form"
+import type { SignalForm } from "./impulse-form"
 
-type GetImpulseFormParams<TTarget> = TTarget extends ImpulseForm<infer TParams> ? TParams : never
+type GetSignalFormParams<TTarget> = TTarget extends SignalForm<infer TParams> ? TParams : never
 
-export type { GetImpulseFormParams }
+export type { GetSignalFormParams }

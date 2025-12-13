@@ -1,6 +1,6 @@
-interface ImpulseFormSwitchBranch<TKind, TValue> {
+interface FormSwitchBranch<TKind, TValue> {
   readonly kind: TKind
   readonly value: TValue
 }
 
-export type { ImpulseFormSwitchBranch }
+export type { FormSwitchBranch }

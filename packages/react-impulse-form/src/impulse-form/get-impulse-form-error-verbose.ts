@@ -1,9 +1,9 @@
-import type { GetImpulseFormParam } from "./get-impulse-form-param"
-import type { ImpulseForm } from "./impulse-form"
+import type { GetSignalFormParam } from "./get-impulse-form-param"
+import type { SignalForm } from "./impulse-form"
 
-type GetImpulseFormErrorVerbose<TForm extends ImpulseForm> = GetImpulseFormParam<
+type GetSignalFormErrorVerbose<TForm extends SignalForm> = GetSignalFormParam<
   TForm,
   "error.schema.verbose"
 >
 
-export type { GetImpulseFormErrorVerbose }
+export type { GetSignalFormErrorVerbose }

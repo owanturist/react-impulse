@@ -1,5 +1,5 @@
 import type { Setter } from "~/tools/setter"
 
-type ImpulseFormUnitErrorSetter<TError> = Setter<null | TError>
+type FormUnitErrorSetter<TError> = Setter<null | TError>
 
-export type { ImpulseFormUnitErrorSetter }
+export type { FormUnitErrorSetter }

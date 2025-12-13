@@ -1,18 +1,18 @@
-import type { GetImpulseFormParam } from "../../impulse-form/get-impulse-form-param"
-import type { ImpulseForm } from "../../impulse-form/impulse-form"
-import type { ImpulseFormParams } from "../../impulse-form/impulse-form-params"
-import type { ImpulseFormOptionalSchema } from "../impulse-form-optional-schema"
+import type { GetSignalFormParam } from "../../impulse-form/get-impulse-form-param"
+import type { SignalForm } from "../../impulse-form/impulse-form"
+import type { SignalFormParams } from "../../impulse-form/impulse-form-params"
+import type { FormOptionalSchema } from "../impulse-form-optional-schema"
 
-type ImpulseFormOptionalParam<
-  TEnabled extends ImpulseForm,
-  TElement extends ImpulseForm,
-  TKey extends keyof ImpulseFormParams,
+type FormOptionalParam<
+  TEnabled extends SignalForm,
+  TElement extends SignalForm,
+  TKey extends keyof SignalFormParams,
   TConcise = never,
 > =
   | TConcise
-  | ImpulseFormOptionalSchema<
-      TConcise | GetImpulseFormParam<TEnabled, TKey>,
-      TConcise | GetImpulseFormParam<TElement, TKey>
+  | FormOptionalSchema<
+      TConcise | GetSignalFormParam<TEnabled, TKey>,
+      TConcise | GetSignalFormParam<TElement, TKey>
     >
 
-export type { ImpulseFormOptionalParam }
+export type { FormOptionalParam }

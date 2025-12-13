@@ -1,13 +1,13 @@
 import type { Setter } from "~/tools/setter"
 
-import type { GetImpulseFormErrorSetter } from "../impulse-form/get-impulse-form-error-setter"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetSignalFormErrorSetter } from "../impulse-form/get-impulse-form-error-setter"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-import type { ImpulseFormListErrorVerbose } from "./impulse-form-list-error-verbose"
+import type { FormListErrorVerbose } from "./impulse-form-list-error-verbose"
 
-type ImpulseFormListErrorSetter<TElement extends ImpulseForm> = Setter<
-  null | ReadonlyArray<undefined | GetImpulseFormErrorSetter<TElement>>,
-  [ImpulseFormListErrorVerbose<TElement>]
+type FormListErrorSetter<TElement extends SignalForm> = Setter<
+  null | ReadonlyArray<undefined | GetSignalFormErrorSetter<TElement>>,
+  [FormListErrorVerbose<TElement>]
 >
 
-export type { ImpulseFormListErrorSetter }
+export type { FormListErrorSetter }

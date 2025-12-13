@@ -3,7 +3,7 @@ import tsconfigPaths from "vite-tsconfig-paths"
 import { defineProject } from "vitest/config"
 import type { ProjectConfig } from "vitest/node"
 
-console.log(`Running react-impulse-form tests against react@${React.version}`)
+console.log(`Running @owanturist/signal-form tests against react@${React.version}`)
 
 export default defineProject({
   plugins: [tsconfigPaths()],

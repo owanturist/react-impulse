@@ -1,17 +1,17 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useScoped } from "../../src"
+import { Signal, useComputed } from "../../src"
 import { Counter } from "../common"
 
 import { withinNth } from "./common"
 
-describe("single impulse", () => {
+describe("single signal", () => {
   const GetterComponent: React.FC<{
-    counter: Impulse<Counter>
+    counter: Signal<Counter>
     onRender: VoidFunction
   }> = ({ counter, onRender }) => {
-    const { count } = useScoped(counter)
+    const { count } = useComputed(counter)
 
     return (
       <React.Profiler id="test" onRender={onRender}>
@@ -21,23 +21,19 @@ describe("single impulse", () => {
   }
 
   const SetterComponent: React.FC<{
-    counter: Impulse<Counter>
+    counter: Signal<Counter>
     onRender: VoidFunction
   }> = ({ counter, onRender }) => (
     <React.Profiler id="test" onRender={onRender}>
       <div data-testid="setter">
-        <button
-          type="button"
-          data-testid="increment"
-          onClick={() => counter.setValue(Counter.inc)}
-        />
-        <button type="button" data-testid="reset" onClick={() => counter.setValue({ count: 0 })} />
+        <button type="button" data-testid="increment" onClick={() => counter.write(Counter.inc)} />
+        <button type="button" data-testid="reset" onClick={() => counter.write({ count: 0 })} />
       </div>
     </React.Profiler>
   )
 
   const SingleSetterSingleGetter: React.FC<{
-    counter: Impulse<Counter>
+    counter: Signal<Counter>
     onRootRender: VoidFunction
     onGetterRender: VoidFunction
     onSetterRender: VoidFunction
@@ -51,7 +47,7 @@ describe("single impulse", () => {
   )
 
   it("single Setter / Getter", () => {
-    const counter = Impulse({ count: 0 })
+    const counter = Signal({ count: 0 })
     const onRootRender = vi.fn()
     const onGetterRender = vi.fn()
     const onSetterRender = vi.fn()
@@ -81,7 +77,7 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     // increment from the outside
-    act(() => counter.setValue(Counter.inc))
+    act(() => counter.write(Counter.inc))
     expect(onRootRender).not.toHaveBeenCalled()
     expect(onSetterRender).not.toHaveBeenCalled()
     expect(onGetterRender).toHaveBeenCalledOnce()
@@ -115,8 +111,8 @@ describe("single impulse", () => {
 
     // increment twice in a row from the outside
     act(() => {
-      counter.setValue(Counter.inc)
-      counter.setValue(Counter.inc)
+      counter.write(Counter.inc)
+      counter.write(Counter.inc)
     })
     expect(onRootRender).not.toHaveBeenCalled()
     expect(onSetterRender).not.toHaveBeenCalled()
@@ -125,7 +121,7 @@ describe("single impulse", () => {
   })
 
   const MultipleSetterMultipleGetter: React.FC<{
-    counter: Impulse<Counter>
+    counter: Signal<Counter>
     onRootRender: VoidFunction
     onFirstGetterRender: VoidFunction
     onSecondGetterRender: VoidFunction
@@ -149,7 +145,7 @@ describe("single impulse", () => {
   )
 
   it("multiple Setters / Getters", () => {
-    const counter = Impulse({ count: 0 })
+    const counter = Signal({ count: 0 })
     const onRootRender = vi.fn()
     const onFirstGetterRender = vi.fn()
     const onSecondGetterRender = vi.fn()
@@ -197,7 +193,7 @@ describe("single impulse", () => {
     vi.clearAllMocks()
 
     // increment from the outside
-    act(() => counter.setValue(Counter.inc))
+    act(() => counter.write(Counter.inc))
     expect(onRootRender).not.toHaveBeenCalled()
     expect(onFirstSetterRender).not.toHaveBeenCalled()
     expect(onSecondSetterRender).not.toHaveBeenCalled()

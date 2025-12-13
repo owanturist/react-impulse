@@ -1,67 +1,62 @@
-import type { Scope } from "react-impulse"
+import type { Monitor } from "@owanturist/signal"
 import { z } from "zod"
 
-import { ImpulseFormList, ImpulseFormUnit } from "../../src"
+import { FormList, FormUnit } from "../../src"
 
-it("matches the type definition", ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormUnit(0, {
+it("matches the type definition", ({ monitor }) => {
+  const form = FormList([
+    FormUnit(0, {
       schema: z.number().transform((x) => x.toFixed(0)),
     }),
   ])
 
-  expect(form.getElements(scope)).toHaveLength(1)
+  expect(form.getElements(monitor)).toHaveLength(1)
 
-  expectTypeOf(form.getInitial).toEqualTypeOf<(scope: Scope) => ReadonlyArray<number>>()
+  expectTypeOf(form.getInitial).toEqualTypeOf<(monitor: Monitor) => ReadonlyArray<number>>()
 
-  expectTypeOf(form.getElements(scope).at(0)!.getInitial).toEqualTypeOf<(scope: Scope) => number>()
+  expectTypeOf(form.getElements(monitor).at(0)!.getInitial).toEqualTypeOf<
+    (monitor: Monitor) => number
+  >()
 })
 
-it("matches the nested type definition", ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormList<ImpulseFormUnit<number, ReadonlyArray<string>, string>>([
-      ImpulseFormUnit(0, {
+it("matches the nested type definition", ({ monitor }) => {
+  const form = FormList([
+    FormList<FormUnit<number, ReadonlyArray<string>, string>>([
+      FormUnit(0, {
         schema: z.number().transform((x) => x.toFixed(0)),
       }),
     ]),
   ])
 
-  expect(form.getElements(scope)).toHaveLength(1)
+  expect(form.getElements(monitor)).toHaveLength(1)
 
   expectTypeOf(form.getInitial).toEqualTypeOf<
-    (scope: Scope) => ReadonlyArray<ReadonlyArray<number>>
+    (monitor: Monitor) => ReadonlyArray<ReadonlyArray<number>>
   >()
 
-  expectTypeOf(form.getElements(scope).at(0)!.getInitial).toEqualTypeOf<
-    (scope: Scope) => ReadonlyArray<number>
+  expectTypeOf(form.getElements(monitor).at(0)!.getInitial).toEqualTypeOf<
+    (monitor: Monitor) => ReadonlyArray<number>
   >()
 
-  expectTypeOf(form.getElements(scope).at(0)!.getElements(scope).at(0)!.getInitial).toEqualTypeOf<
-    (scope: Scope) => number
-  >()
+  expectTypeOf(
+    form.getElements(monitor).at(0)!.getElements(monitor).at(0)!.getInitial,
+  ).toEqualTypeOf<(monitor: Monitor) => number>()
 })
 
-it("returns empty array for empty list", ({ scope }) => {
-  const form = ImpulseFormList([])
+it("returns empty array for empty list", ({ monitor }) => {
+  const form = FormList([])
 
-  expect(form.getInitial(scope)).toStrictEqual([])
+  expect(form.getInitial(monitor)).toStrictEqual([])
 })
 
-it("returns an array of original values", ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormUnit(0, { initial: 3 }),
-    ImpulseFormUnit(1),
-    ImpulseFormUnit(2, { initial: 4 }),
-  ])
+it("returns an array of original values", ({ monitor }) => {
+  const form = FormList([FormUnit(0, { initial: 3 }), FormUnit(1), FormUnit(2, { initial: 4 })])
 
-  expect(form.getInitial(scope)).toStrictEqual([3, 1, 4])
+  expect(form.getInitial(monitor)).toStrictEqual([3, 1, 4])
 })
 
-it("returns nested list's values", ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormList([ImpulseFormUnit(1)]),
-    ImpulseFormList([ImpulseFormUnit(2), ImpulseFormUnit(3)]),
-  ])
+it("returns nested list's values", ({ monitor }) => {
+  const form = FormList([FormList([FormUnit(1)]), FormList([FormUnit(2), FormUnit(3)])])
 
-  expect(form.getInitial(scope)).toStrictEqual([[1], [2, 3]])
+  expect(form.getInitial(monitor)).toStrictEqual([[1], [2, 3]])
 })

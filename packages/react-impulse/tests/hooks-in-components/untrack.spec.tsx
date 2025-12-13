@@ -1,18 +1,18 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, type ReadableImpulse, untrack } from "../../src"
+import { type ReadableSignal, Signal, untracked } from "../../src"
 
-it("returns the `factory` function result without tracking impulses", () => {
+it("returns the `factory` function result without tracking signals", () => {
   const onRender = vi.fn()
-  const first = Impulse({ count: 1 })
-  const second = Impulse({ count: 2 })
+  const first = Signal({ count: 1 })
+  const second = Signal({ count: 2 })
 
   const Component: React.FC<{
     multiplier: number
   }> = ({ multiplier }) => {
-    const { count: firstCount } = untrack((scope) => first.getValue(scope))
-    const { count: secondCount } = untrack(second)
+    const { count: firstCount } = untracked((monitor) => first.read(monitor))
+    const { count: secondCount } = untracked(second)
     const [, rerender] = React.useState(0)
 
     return (
@@ -30,8 +30,8 @@ it("returns the `factory` function result without tracking impulses", () => {
   expect(onRender).toHaveBeenCalledTimes(1)
   vi.clearAllMocks()
 
-  first.setValue({ count: 2 })
-  second.setValue({ count: 3 })
+  first.write({ count: 2 })
+  second.write({ count: 3 })
   expect(screen.getByRole("button")).toHaveTextContent("3")
   expect(onRender).toHaveBeenCalledTimes(0)
   vi.clearAllMocks()
@@ -41,8 +41,8 @@ it("returns the `factory` function result without tracking impulses", () => {
   expect(onRender).toHaveBeenCalledTimes(1)
   vi.clearAllMocks()
 
-  first.setValue({ count: 3 })
-  second.setValue({ count: 4 })
+  first.write({ count: 3 })
+  second.write({ count: 4 })
   expect(screen.getByRole("button")).toHaveTextContent("10")
   expect(onRender).toHaveBeenCalledTimes(0)
   vi.clearAllMocks()
@@ -52,34 +52,34 @@ it("returns the `factory` function result without tracking impulses", () => {
   expect(onRender).toHaveBeenCalledTimes(1)
 })
 
-it("allows to use Impulse", () => {
-  const impulse = Impulse(1)
+it("allows to use Signal", () => {
+  const signal = Signal(1)
 
-  const value = untrack(impulse)
-
-  expect(value).toBe(1)
-})
-
-it("allows to use ReadonlyImpulse", () => {
-  const impulse = Impulse(() => 1)
-
-  const value = untrack(impulse)
+  const value = untracked(signal)
 
   expect(value).toBe(1)
 })
 
-it("allows to use ReadableImpulse", () => {
-  class Custom implements ReadableImpulse<number> {
+it("allows to use ReadonlySignal", () => {
+  const signal = Signal(() => 1)
+
+  const value = untracked(signal)
+
+  expect(value).toBe(1)
+})
+
+it("allows to use ReadableSignal", () => {
+  class Custom implements ReadableSignal<number> {
     public constructor(public value: number) {}
 
-    public getValue(): number {
+    public read(): number {
       return this.value
     }
   }
 
-  const impulse = new Custom(1)
+  const signal = new Custom(1)
 
-  expect(untrack(impulse)).toBe(1)
-  impulse.value = 2
-  expect(untrack(impulse)).toBe(2)
+  expect(untracked(signal)).toBe(1)
+  signal.value = 2
+  expect(untracked(signal)).toBe(2)
 })

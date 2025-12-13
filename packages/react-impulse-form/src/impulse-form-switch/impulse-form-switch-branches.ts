@@ -1,9 +1,9 @@
-import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetSignalFormParam } from "../impulse-form/get-impulse-form-param"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-type ImpulseFormSwitchBranches<TKind extends ImpulseForm> =
-  GetImpulseFormParam<TKind, "output.schema"> extends string
-    ? Record<GetImpulseFormParam<TKind, "output.schema">, ImpulseForm>
+type FormSwitchBranches<TKind extends SignalForm> =
+  GetSignalFormParam<TKind, "output.schema"> extends string
+    ? Record<GetSignalFormParam<TKind, "output.schema">, SignalForm>
     : never
 
-export type { ImpulseFormSwitchBranches }
+export type { FormSwitchBranches }

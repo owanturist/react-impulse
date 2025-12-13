@@ -2,20 +2,20 @@ import z from "zod"
 
 import { params } from "~/tools/params"
 
-import { ImpulseFormShape, ImpulseFormSwitch, ImpulseFormUnit } from "../../src"
+import { FormShape, FormSwitch, FormUnit } from "../../src"
 
 describe("types", () => {
-  const form = ImpulseFormSwitch(
-    ImpulseFormUnit("_1", {
+  const form = FormSwitch(
+    FormUnit("_1", {
       schema: z.enum(["_1", "_2"]),
     }),
     {
-      _1: ImpulseFormUnit(true, {
+      _1: FormUnit(true, {
         schema: z.boolean().transform((value): string => (value ? "ok" : "not ok")),
       }),
-      _2: ImpulseFormShape({
-        _3: ImpulseFormUnit("name"),
-        _4: ImpulseFormUnit(18),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18),
       }),
     },
   )
@@ -52,17 +52,17 @@ describe("types", () => {
     }
   }
 
-  it("matches schema type for isDirty(scope, select?)", ({ scope }) => {
-    expectTypeOf(form.isDirty(scope)).toEqualTypeOf<boolean>()
+  it("matches schema type for isDirty(monitor, select?)", ({ monitor }) => {
+    expectTypeOf(form.isDirty(monitor)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(form.isDirty(scope, params._first)).toEqualTypeOf<IsDirtySchema>()
+    expectTypeOf(form.isDirty(monitor, params._first)).toEqualTypeOf<IsDirtySchema>()
 
-    expectTypeOf(form.isDirty(scope, params._second)).toEqualTypeOf<IsDirtyVerboseSchema>()
+    expectTypeOf(form.isDirty(monitor, params._second)).toEqualTypeOf<IsDirtyVerboseSchema>()
   })
 
   describe("nested", () => {
-    const parent = ImpulseFormSwitch(ImpulseFormUnit<"_6" | "_7">("_6"), {
-      _6: ImpulseFormUnit(0),
+    const parent = FormSwitch(FormUnit<"_6" | "_7">("_6"), {
+      _6: FormUnit(0),
       _7: form,
     })
 
@@ -90,35 +90,35 @@ describe("types", () => {
       }
     }
 
-    it("matches schema type for isDirty(scope, select?)", ({ scope }) => {
-      expectTypeOf(parent.isDirty(scope)).toEqualTypeOf<boolean>()
+    it("matches schema type for isDirty(monitor, select?)", ({ monitor }) => {
+      expectTypeOf(parent.isDirty(monitor)).toEqualTypeOf<boolean>()
 
-      expectTypeOf(parent.isDirty(scope, params._first)).toEqualTypeOf<ParentIsDirtySchema>()
+      expectTypeOf(parent.isDirty(monitor, params._first)).toEqualTypeOf<ParentIsDirtySchema>()
 
       expectTypeOf(
-        parent.isDirty(scope, params._second),
+        parent.isDirty(monitor, params._second),
       ).toEqualTypeOf<ParentIsDirtyVerboseSchema>()
     })
   })
 })
 
-it("returns false for initially pristine invalid active", ({ scope }) => {
-  const form = ImpulseFormSwitch(
-    ImpulseFormUnit("", {
+it("returns false for initially pristine invalid active", ({ monitor }) => {
+  const form = FormSwitch(
+    FormUnit("", {
       schema: z.enum(["_1", "_2"]),
     }),
     {
-      _1: ImpulseFormUnit(0),
-      _2: ImpulseFormShape({
-        _3: ImpulseFormUnit("name"),
-        _4: ImpulseFormUnit(18),
+      _1: FormUnit(0),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18),
       }),
     },
   )
 
-  expect(form.isDirty(scope)).toBe(false)
-  expect(form.isDirty(scope, params._first)).toBe(false)
-  expect(form.isDirty(scope, params._second)).toStrictEqual({
+  expect(form.isDirty(monitor)).toBe(false)
+  expect(form.isDirty(monitor, params._first)).toBe(false)
+  expect(form.isDirty(monitor, params._second)).toStrictEqual({
     active: false,
     branches: {
       _1: false,
@@ -130,24 +130,24 @@ it("returns false for initially pristine invalid active", ({ scope }) => {
   })
 })
 
-it("returns true for initially dirty invalid active", ({ scope }) => {
-  const form = ImpulseFormSwitch(
-    ImpulseFormUnit("", {
+it("returns true for initially dirty invalid active", ({ monitor }) => {
+  const form = FormSwitch(
+    FormUnit("", {
       initial: "1",
       schema: z.enum(["_1", "_2"]),
     }),
     {
-      _1: ImpulseFormUnit(0),
-      _2: ImpulseFormShape({
-        _3: ImpulseFormUnit("name"),
-        _4: ImpulseFormUnit(18),
+      _1: FormUnit(0),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18),
       }),
     },
   )
 
-  expect(form.isDirty(scope)).toBe(true)
-  expect(form.isDirty(scope, params._first)).toBe(true)
-  expect(form.isDirty(scope, params._second)).toStrictEqual({
+  expect(form.isDirty(monitor)).toBe(true)
+  expect(form.isDirty(monitor, params._first)).toBe(true)
+  expect(form.isDirty(monitor, params._second)).toStrictEqual({
     active: true,
     branches: {
       _1: false,
@@ -159,18 +159,18 @@ it("returns true for initially dirty invalid active", ({ scope }) => {
   })
 })
 
-it("returns false for initially pristine branch", ({ scope }) => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2">("_1"), {
-    _1: ImpulseFormUnit(0),
-    _2: ImpulseFormShape({
-      _3: ImpulseFormUnit("name"),
-      _4: ImpulseFormUnit(18),
+it("returns false for initially pristine branch", ({ monitor }) => {
+  const form = FormSwitch(FormUnit<"_1" | "_2">("_1"), {
+    _1: FormUnit(0),
+    _2: FormShape({
+      _3: FormUnit("name"),
+      _4: FormUnit(18),
     }),
   })
 
-  expect(form.isDirty(scope)).toBe(false)
-  expect(form.isDirty(scope, params._first)).toBe(false)
-  expect(form.isDirty(scope, params._second)).toStrictEqual({
+  expect(form.isDirty(monitor)).toBe(false)
+  expect(form.isDirty(monitor, params._first)).toBe(false)
+  expect(form.isDirty(monitor, params._second)).toStrictEqual({
     active: false,
     branches: {
       _1: false,
@@ -182,26 +182,26 @@ it("returns false for initially pristine branch", ({ scope }) => {
   })
 })
 
-it("returns truthy for initially dirty active", ({ scope }) => {
-  const form = ImpulseFormSwitch(
-    ImpulseFormUnit<"_1" | "_2">("_1", {
+it("returns truthy for initially dirty active", ({ monitor }) => {
+  const form = FormSwitch(
+    FormUnit<"_1" | "_2">("_1", {
       initial: "_2",
     }),
     {
-      _1: ImpulseFormUnit(0),
-      _2: ImpulseFormShape({
-        _3: ImpulseFormUnit("name"),
-        _4: ImpulseFormUnit(18),
+      _1: FormUnit(0),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18),
       }),
     },
   )
 
-  expect(form.isDirty(scope)).toBe(true)
-  expect(form.isDirty(scope, params._first)).toStrictEqual({
+  expect(form.isDirty(monitor)).toBe(true)
+  expect(form.isDirty(monitor, params._first)).toStrictEqual({
     active: true,
     branch: false,
   })
-  expect(form.isDirty(scope, params._second)).toStrictEqual({
+  expect(form.isDirty(monitor, params._second)).toStrictEqual({
     active: true,
     branches: {
       _1: false,
@@ -213,17 +213,17 @@ it("returns truthy for initially dirty active", ({ scope }) => {
   })
 })
 
-it("returns true after switching from pristine to dirty branch", ({ scope }) => {
-  const form = ImpulseFormSwitch(
-    ImpulseFormUnit("_1", {
+it("returns true after switching from pristine to dirty branch", ({ monitor }) => {
+  const form = FormSwitch(
+    FormUnit("_1", {
       schema: z.enum(["_1", "_2"]),
     }),
     {
-      _1: ImpulseFormUnit(0),
-      _2: ImpulseFormShape(
+      _1: FormUnit(0),
+      _2: FormShape(
         {
-          _3: ImpulseFormUnit("name"),
-          _4: ImpulseFormUnit(18),
+          _3: FormUnit("name"),
+          _4: FormUnit(18),
         },
         {
           initial: {
@@ -237,9 +237,9 @@ it("returns true after switching from pristine to dirty branch", ({ scope }) => 
 
   form.active.setInput("_2")
 
-  expect(form.isDirty(scope)).toBe(true)
-  expect(form.isDirty(scope, params._first)).toStrictEqual(true)
-  expect(form.isDirty(scope, params._second)).toStrictEqual({
+  expect(form.isDirty(monitor)).toBe(true)
+  expect(form.isDirty(monitor, params._first)).toStrictEqual(true)
+  expect(form.isDirty(monitor, params._second)).toStrictEqual({
     active: true,
     branches: {
       _1: false,
@@ -251,17 +251,17 @@ it("returns true after switching from pristine to dirty branch", ({ scope }) => 
   })
 })
 
-it("returns truthy after switching from dirty to pristine branch", ({ scope }) => {
-  const form = ImpulseFormSwitch(
-    ImpulseFormUnit("_2", {
+it("returns truthy after switching from dirty to pristine branch", ({ monitor }) => {
+  const form = FormSwitch(
+    FormUnit("_2", {
       schema: z.enum(["_1", "_2"]),
     }),
     {
-      _1: ImpulseFormUnit(0),
-      _2: ImpulseFormShape(
+      _1: FormUnit(0),
+      _2: FormShape(
         {
-          _3: ImpulseFormUnit("name"),
-          _4: ImpulseFormUnit(18),
+          _3: FormUnit("name"),
+          _4: FormUnit(18),
         },
         {
           initial: {
@@ -275,12 +275,12 @@ it("returns truthy after switching from dirty to pristine branch", ({ scope }) =
 
   form.active.setInput("_1")
 
-  expect(form.isDirty(scope)).toBe(true)
-  expect(form.isDirty(scope, params._first)).toStrictEqual({
+  expect(form.isDirty(monitor)).toBe(true)
+  expect(form.isDirty(monitor, params._first)).toStrictEqual({
     active: true,
     branch: false,
   })
-  expect(form.isDirty(scope, params._second)).toStrictEqual({
+  expect(form.isDirty(monitor, params._second)).toStrictEqual({
     active: true,
     branches: {
       _1: false,
@@ -292,19 +292,19 @@ it("returns truthy after switching from dirty to pristine branch", ({ scope }) =
   })
 })
 
-it("returns truthy for initially dirty branch", ({ scope }) => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2">("_2"), {
-    _1: ImpulseFormUnit(1),
-    _2: ImpulseFormShape({
-      _3: ImpulseFormUnit("name", {
+it("returns truthy for initially dirty branch", ({ monitor }) => {
+  const form = FormSwitch(FormUnit<"_1" | "_2">("_2"), {
+    _1: FormUnit(1),
+    _2: FormShape({
+      _3: FormUnit("name", {
         initial: "",
       }),
-      _4: ImpulseFormUnit(18),
+      _4: FormUnit(18),
     }),
   })
 
-  expect(form.isDirty(scope)).toBe(true)
-  expect(form.isDirty(scope, params._first)).toStrictEqual({
+  expect(form.isDirty(monitor)).toBe(true)
+  expect(form.isDirty(monitor, params._first)).toStrictEqual({
     active: false,
     branch: {
       kind: "_2",
@@ -314,7 +314,7 @@ it("returns truthy for initially dirty branch", ({ scope }) => {
       },
     },
   })
-  expect(form.isDirty(scope, params._second)).toStrictEqual({
+  expect(form.isDirty(monitor, params._second)).toStrictEqual({
     active: false,
     branches: {
       _1: false,
@@ -326,23 +326,23 @@ it("returns truthy for initially dirty branch", ({ scope }) => {
   })
 })
 
-it("ignores an inactive dirty branch", ({ scope }) => {
-  const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2" | "_5">("_2"), {
-    _1: ImpulseFormUnit(1, {
+it("ignores an inactive dirty branch", ({ monitor }) => {
+  const form = FormSwitch(FormUnit<"_1" | "_2" | "_5">("_2"), {
+    _1: FormUnit(1, {
       initial: 0,
     }),
-    _2: ImpulseFormShape({
-      _3: ImpulseFormUnit("name"),
-      _4: ImpulseFormUnit(18),
+    _2: FormShape({
+      _3: FormUnit("name"),
+      _4: FormUnit(18),
     }),
-    _5: ImpulseFormUnit("value", {
+    _5: FormUnit("value", {
       initial: "",
     }),
   })
 
-  expect(form.isDirty(scope)).toBe(false)
-  expect(form.isDirty(scope, params._first)).toStrictEqual(false)
-  expect(form.isDirty(scope, params._second)).toStrictEqual({
+  expect(form.isDirty(monitor)).toBe(false)
+  expect(form.isDirty(monitor, params._first)).toStrictEqual(false)
+  expect(form.isDirty(monitor, params._second)).toStrictEqual({
     active: false,
     branches: {
       _1: true,
@@ -356,27 +356,27 @@ it("ignores an inactive dirty branch", ({ scope }) => {
 })
 
 describe("stable dirty value", () => {
-  it("subsequently selects equal dirty", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit<"_1" | "_2">("_1", {
+  it("subsequently selects equal dirty", ({ monitor }) => {
+    const form = FormSwitch(
+      FormUnit<"_1" | "_2">("_1", {
         initial: "_2",
       }),
       {
-        _1: ImpulseFormUnit(0),
-        _2: ImpulseFormShape({
-          _3: ImpulseFormUnit("name"),
-          _4: ImpulseFormUnit(18),
+        _1: FormUnit(0),
+        _2: FormShape({
+          _3: FormUnit("name"),
+          _4: FormUnit(18),
         }),
       },
     )
 
-    expect(form.isDirty(scope)).toBeTypeOf("boolean")
-    expect(form.isDirty(scope)).toBe(form.isDirty(scope))
+    expect(form.isDirty(monitor)).toBeTypeOf("boolean")
+    expect(form.isDirty(monitor)).toBe(form.isDirty(monitor))
 
-    expect(form.isDirty(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.isDirty(scope, params._first)).toBe(form.isDirty(scope, params._first))
+    expect(form.isDirty(monitor, params._first)).toBeInstanceOf(Object)
+    expect(form.isDirty(monitor, params._first)).toBe(form.isDirty(monitor, params._first))
 
-    expect(form.isDirty(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.isDirty(scope, params._second)).toBe(form.isDirty(scope, params._second))
+    expect(form.isDirty(monitor, params._second)).toBeInstanceOf(Object)
+    expect(form.isDirty(monitor, params._second)).toBe(form.isDirty(monitor, params._second))
   })
 })

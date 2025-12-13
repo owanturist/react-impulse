@@ -1,21 +1,21 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, type Scope, useScope, useScoped } from "../../src"
+import { type Monitor, Signal, useComputed, useMonitor } from "../../src"
 
 import { CounterComponent, expectCounts, withinNth } from "./common"
 
-describe("scoping nested impulses", () => {
+describe("monitoring nested Signals", () => {
   abstract class AppState {
-    public abstract counts: ReadonlyArray<Impulse<number>>
+    public abstract counts: ReadonlyArray<Signal<number>>
 
-    public static sum(scope: Scope, { counts }: AppState): number {
-      return counts.reduce((acc, count) => acc + count.getValue(scope), 0)
+    public static sum(monitor: Monitor, { counts }: AppState): number {
+      return counts.reduce((acc, count) => acc + count.read(monitor), 0)
     }
   }
 
   interface AppProps {
-    state: Impulse<AppState>
+    state: Signal<AppState>
     onRender: VoidFunction
     onCounterRender: React.Dispatch<number>
   }
@@ -26,7 +26,7 @@ describe("scoping nested impulses", () => {
       lessThanTwenty: boolean
     } & AppProps
   > = ({ moreThanTen, lessThanTwenty, state: appState, onRender, onCounterRender }) => {
-    const state = useScoped(appState)
+    const state = useComputed(appState)
 
     return (
       <>
@@ -38,9 +38,9 @@ describe("scoping nested impulses", () => {
             type="button"
             data-testid="add-counter"
             onClick={() => {
-              appState.setValue({
+              appState.write({
                 ...state,
-                counts: [...state.counts, Impulse(0)],
+                counts: [...state.counts, Signal(0)],
               })
             }}
           />
@@ -50,7 +50,7 @@ describe("scoping nested impulses", () => {
             data-testid="reset-counters"
             onClick={() => {
               for (const count of state.counts) {
-                count.setValue(0)
+                count.write(0)
               }
             }}
           />
@@ -59,9 +59,9 @@ describe("scoping nested impulses", () => {
             type="button"
             data-testid="increment-all"
             onClick={() => {
-              appState.setValue((current) => {
+              appState.write((current) => {
                 for (const count of current.counts) {
-                  count.setValue((x) => x + 1)
+                  count.write((x) => x + 1)
                 }
 
                 return current
@@ -77,72 +77,75 @@ describe("scoping nested impulses", () => {
     )
   }
 
-  const factoryLeft = (scope: Scope, state: Impulse<AppState>) => {
-    const total = AppState.sum(scope, state.getValue(scope))
+  const factoryLeft = (monitor: Monitor, state: Signal<AppState>) => {
+    const total = AppState.sum(monitor, state.read(monitor))
 
     return total > 10
   }
-  const factoryRight = (scope: Scope, state: Impulse<AppState>) => {
-    const total = AppState.sum(scope, state.getValue(scope))
+  const factoryRight = (monitor: Monitor, state: Signal<AppState>) => {
+    const total = AppState.sum(monitor, state.read(monitor))
 
     return total < 20
   }
 
-  const compare = ([left1, right1]: [boolean, boolean], [left2, right2]: [boolean, boolean]) =>
+  const equals = ([left1, right1]: [boolean, boolean], [left2, right2]: [boolean, boolean]) =>
     left1 === left2 && right1 === right2
 
-  const SingleScopeApp: React.FC<AppProps> = (props) => {
-    const [moreThanTen, lessThanTwenty] = useScoped(
-      (scope) => [factoryLeft(scope, props.state), factoryRight(scope, props.state)],
+  const SingleComputedApp: React.FC<AppProps> = (props) => {
+    const [moreThanTen, lessThanTwenty] = useComputed(
+      (monitor) => [factoryLeft(monitor, props.state), factoryRight(monitor, props.state)],
       [props.state],
       {
-        compare: (left, right) => compare(left, right),
+        equals: (left, right) => equals(left, right),
       },
     )
 
     return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />
   }
 
-  const SingleMemoizedScopeApp: React.FC<AppProps> = (props) => {
-    const [moreThanTen, lessThanTwenty] = useScoped<[boolean, boolean]>(
-      (scope) => [factoryLeft(scope, props.state), factoryRight(scope, props.state)],
+  const SingleMemoizedComputedApp: React.FC<AppProps> = (props) => {
+    const [moreThanTen, lessThanTwenty] = useComputed<[boolean, boolean]>(
+      (monitor) => [factoryLeft(monitor, props.state), factoryRight(monitor, props.state)],
       [props.state],
-      { compare },
+      { equals },
     )
 
     return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />
   }
 
-  const MultipleScopesApp: React.FC<AppProps> = (props) => {
-    const moreThanTen = useScoped((scope) => factoryLeft(scope, props.state))
-    const lessThanTwenty = useScoped((scope) => factoryRight(scope, props.state))
+  const MultipleComputedApp: React.FC<AppProps> = (props) => {
+    const moreThanTen = useComputed((monitor) => factoryLeft(monitor, props.state))
+    const lessThanTwenty = useComputed((monitor) => factoryRight(monitor, props.state))
 
     return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />
   }
 
-  const MultipleMemoizedScopesApp: React.FC<AppProps> = (props) => {
-    const moreThanTen = useScoped((scope) => factoryLeft(scope, props.state), [props.state])
-    const lessThanTwenty = useScoped((scope) => factoryRight(scope, props.state), [props.state])
+  const MultipleMemoizedComputedApp: React.FC<AppProps> = (props) => {
+    const moreThanTen = useComputed((monitor) => factoryLeft(monitor, props.state), [props.state])
+    const lessThanTwenty = useComputed(
+      (monitor) => factoryRight(monitor, props.state),
+      [props.state],
+    )
 
     return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />
   }
 
-  const ScopedApp: React.FC<AppProps> = (props) => {
-    const scope = useScope()
-    const moreThanTen = factoryLeft(scope, props.state)
-    const lessThanTwenty = factoryRight(scope, props.state)
+  const MonitorApp: React.FC<AppProps> = (props) => {
+    const monitor = useMonitor()
+    const moreThanTen = factoryLeft(monitor, props.state)
+    const lessThanTwenty = factoryRight(monitor, props.state)
 
     return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />
   }
 
   it.each([
-    ["single scope", SingleScopeApp, 0],
-    ["single memoized scope", SingleMemoizedScopeApp, 0],
-    ["multiple scopes", MultipleScopesApp, 0],
-    ["multiple memoized scopes", MultipleMemoizedScopesApp, 0],
-    ["scoped()", ScopedApp, 1],
-  ])("handles nested Impulses with %s", (_, App, unnecessaryRerendersCount) => {
-    const state = Impulse<AppState>({
+    ["single compute", SingleComputedApp, 0],
+    ["single memoized compute", SingleMemoizedComputedApp, 0],
+    ["multiple computes", MultipleComputedApp, 0],
+    ["multiple memoized computes", MultipleMemoizedComputedApp, 0],
+    ["monitor", MonitorApp, 1],
+  ])("handles nested Signals with %s", (_, App, unnecessaryRerendersCount) => {
+    const state = Signal<AppState>({
       counts: [],
     })
     const onRender = vi.fn()
@@ -222,9 +225,9 @@ describe("scoping nested impulses", () => {
 
     // add fourth counter from the outside
     act(() => {
-      state.setValue((current) => ({
+      state.write((current) => ({
         ...current,
-        counts: [...current.counts, Impulse(9)],
+        counts: [...current.counts, Signal(9)],
       }))
     })
     expect(onRender).toHaveBeenCalledOnce()

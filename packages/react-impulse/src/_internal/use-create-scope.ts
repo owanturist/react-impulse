@@ -1,16 +1,16 @@
 import { useCallback } from "react"
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector"
 
-import type { Scope } from "./scope"
-import { ScopeFactory } from "./scope-factory"
+import type { Monitor } from "./scope"
+import { MonitorFactory } from "./scope-factory"
 import { usePermanent } from "./use-permanent"
 
-function useCreateScope<T>(
-  transform: (scope: Scope) => T,
-  compare?: (left: T, right: T) => boolean,
+function useCreateMonitor<T>(
+  transform: (monitor: Monitor) => T,
+  equals?: (left: T, right: T) => boolean,
 ): T {
-  const [selectCreate, connect] = usePermanent(() => {
-    const factory = new ScopeFactory()
+  const [selectCreateMonitor, connect] = usePermanent(() => {
+    const factory = new MonitorFactory()
 
     return [
       //
@@ -19,9 +19,15 @@ function useCreateScope<T>(
     ]
   })
 
-  const select = useCallback((create: () => Scope) => transform(create()), [transform])
+  const select = useCallback((create: () => Monitor) => transform(create()), [transform])
 
-  return useSyncExternalStoreWithSelector(connect, selectCreate, selectCreate, select, compare)
+  return useSyncExternalStoreWithSelector(
+    connect,
+    selectCreateMonitor,
+    selectCreateMonitor,
+    select,
+    equals,
+  )
 }
 
-export { useCreateScope }
+export { useCreateMonitor }

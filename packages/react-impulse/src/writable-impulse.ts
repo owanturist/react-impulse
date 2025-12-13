@@ -1,5 +1,5 @@
-interface WritableImpulse<T> {
-  setValue(value: T): void
+interface WritableSignal<T> {
+  write(value: T): void
 }
 
-export type { WritableImpulse }
+export type { WritableSignal }

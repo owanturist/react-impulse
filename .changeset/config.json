@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@2.3.0/schema.json",
-  "changelog": ["@changesets/changelog-github", { "repo": "owanturist/react-impulse" }],
+  "changelog": ["@changesets/changelog-github", { "repo": "owanturist/signal" }],
   "access": "public",
   "baseBranch": "master",
   "commit": false,

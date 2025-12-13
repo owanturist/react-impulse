@@ -2,16 +2,16 @@ import { z } from "zod"
 
 import { params } from "~/tools/params"
 
-import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
+import { FormShape, FormUnit } from "../../src"
 
-it("selects value", ({ scope }) => {
-  const shape = ImpulseFormShape(
+it("selects value", ({ monitor }) => {
+  const shape = FormShape(
     {
-      first: ImpulseFormUnit(""),
-      second: ImpulseFormUnit(0, { schema: z.number().nonnegative() }),
-      third: ImpulseFormShape({
-        one: ImpulseFormUnit(true),
-        two: ImpulseFormUnit(["1"], {
+      first: FormUnit(""),
+      second: FormUnit(0, { schema: z.number().nonnegative() }),
+      third: FormShape({
+        one: FormUnit(true),
+        two: FormUnit(["1"], {
           schema: z.array(z.string().max(1)),
         }),
       }),
@@ -22,7 +22,7 @@ it("selects value", ({ scope }) => {
     },
   )
 
-  const value = shape.getOutput(scope)
+  const value = shape.getOutput(monitor)
   expect(value).toStrictEqual({
     first: "",
     second: 0,
@@ -32,8 +32,8 @@ it("selects value", ({ scope }) => {
     },
     fourth: ["anything"],
   })
-  expect(shape.getOutput(scope, params._first)).toStrictEqual(value)
-  expect(shape.getOutput(scope, params._second)).toStrictEqual(value)
+  expect(shape.getOutput(monitor, params._first)).toStrictEqual(value)
+  expect(shape.getOutput(monitor, params._second)).toStrictEqual(value)
 
   shape.setInput({
     second: -1,
@@ -41,9 +41,9 @@ it("selects value", ({ scope }) => {
       two: ["1", "12"],
     },
   })
-  expect(shape.getOutput(scope)).toBeNull()
-  expect(shape.getOutput(scope, params._first)).toBeNull()
-  expect(shape.getOutput(scope, params._second)).toStrictEqual({
+  expect(shape.getOutput(monitor)).toBeNull()
+  expect(shape.getOutput(monitor, params._first)).toBeNull()
+  expect(shape.getOutput(monitor, params._second)).toStrictEqual({
     first: "",
     second: null,
     third: {
@@ -53,7 +53,7 @@ it("selects value", ({ scope }) => {
     fourth: ["anything"],
   })
 
-  expectTypeOf(shape.getOutput(scope)).toEqualTypeOf<null | {
+  expectTypeOf(shape.getOutput(monitor)).toEqualTypeOf<null | {
     readonly first: string
     readonly second: number
     readonly third: {
@@ -62,7 +62,7 @@ it("selects value", ({ scope }) => {
     }
     readonly fourth: Array<string>
   }>()
-  expectTypeOf(shape.getOutput(scope, params._first)).toEqualTypeOf<null | {
+  expectTypeOf(shape.getOutput(monitor, params._first)).toEqualTypeOf<null | {
     readonly first: string
     readonly second: number
     readonly third: {
@@ -71,7 +71,7 @@ it("selects value", ({ scope }) => {
     }
     readonly fourth: Array<string>
   }>()
-  expectTypeOf(shape.getOutput(scope, params._second)).toEqualTypeOf<{
+  expectTypeOf(shape.getOutput(monitor, params._second)).toEqualTypeOf<{
     readonly first: null | string
     readonly second: null | number
     readonly third: {
@@ -82,35 +82,35 @@ it("selects value", ({ scope }) => {
   }>()
 })
 
-it("subsequently selects equal output shapes", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormUnit("1"),
-    second: ImpulseFormUnit(2),
+it("subsequently selects equal output shapes", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormUnit("1"),
+    second: FormUnit(2),
   })
 
-  expect(shape.getOutput(scope)).toStrictEqual({
+  expect(shape.getOutput(monitor)).toStrictEqual({
     first: "1",
     second: 2,
   })
-  expect(shape.getOutput(scope)).toBe(shape.getOutput(scope))
-  expect(shape.getOutput(scope)).toBe(shape.getOutput(scope))
-  expect(shape.getOutput(scope, params._first)).toBe(shape.getOutput(scope, params._first))
-  expect(shape.getOutput(scope, params._second)).toBe(shape.getOutput(scope, params._second))
+  expect(shape.getOutput(monitor)).toBe(shape.getOutput(monitor))
+  expect(shape.getOutput(monitor)).toBe(shape.getOutput(monitor))
+  expect(shape.getOutput(monitor, params._first)).toBe(shape.getOutput(monitor, params._first))
+  expect(shape.getOutput(monitor, params._second)).toBe(shape.getOutput(monitor, params._second))
 })
 
-it("persists unchanged output fields between changes", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormShape({
-      _0: ImpulseFormUnit("1"),
-      _1: ImpulseFormUnit("2"),
+it("persists unchanged output fields between changes", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormShape({
+      _0: FormUnit("1"),
+      _1: FormUnit("2"),
     }),
-    second: ImpulseFormShape({
-      _3: ImpulseFormUnit("3"),
-      _4: ImpulseFormUnit("4"),
+    second: FormShape({
+      _3: FormUnit("3"),
+      _4: FormUnit("4"),
     }),
   })
 
-  const output0 = shape.getOutput(scope)
+  const output0 = shape.getOutput(monitor)
 
   expect(output0).toStrictEqual({
     first: {
@@ -129,7 +129,7 @@ it("persists unchanged output fields between changes", ({ scope }) => {
     },
   })
 
-  const output1 = shape.getOutput(scope)
+  const output1 = shape.getOutput(monitor)
 
   expect(output1).toStrictEqual({
     first: {

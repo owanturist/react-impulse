@@ -1,9 +1,6 @@
-import type { GetImpulseFormParam } from "./get-impulse-form-param"
-import type { ImpulseForm } from "./impulse-form"
+import type { GetSignalFormParam } from "./get-impulse-form-param"
+import type { SignalForm } from "./impulse-form"
 
-type GetImpulseFormInputSetter<TForm extends ImpulseForm> = GetImpulseFormParam<
-  TForm,
-  "input.setter"
->
+type GetSignalFormInputSetter<TForm extends SignalForm> = GetSignalFormParam<TForm, "input.setter">
 
-export type { GetImpulseFormInputSetter }
+export type { GetSignalFormInputSetter }

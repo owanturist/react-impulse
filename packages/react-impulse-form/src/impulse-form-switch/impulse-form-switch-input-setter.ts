@@ -1,30 +1,30 @@
 import type { Setter } from "~/tools/setter"
 
-import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetSignalFormParam } from "../impulse-form/get-impulse-form-param"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-import type { GetImpulseFormSwitchBranchesParam } from "./get-impulse-form-switch-branches-param"
-import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
-import type { ImpulseFormSwitchInput } from "./impulse-form-switch-input"
-import type { ImpulseFormSwitchVerboseSchema } from "./impulse-form-switch-verbose-schema"
+import type { GetFormSwitchBranchesParam } from "./get-impulse-form-switch-branches-param"
+import type { FormSwitchBranches } from "./impulse-form-switch-branches"
+import type { FormSwitchInput } from "./impulse-form-switch-input"
+import type { FormSwitchVerboseSchema } from "./impulse-form-switch-verbose-schema"
 
-type ImpulseFormSwitchInputSetter<
-  TKind extends ImpulseForm,
-  TBranches extends ImpulseFormSwitchBranches<TKind>,
+type FormSwitchInputSetter<
+  TKind extends SignalForm,
+  TBranches extends FormSwitchBranches<TKind>,
 > = Setter<
   Partial<
-    ImpulseFormSwitchVerboseSchema<
-      GetImpulseFormParam<TKind, "input.setter">,
+    FormSwitchVerboseSchema<
+      GetSignalFormParam<TKind, "input.setter">,
       Setter<
-        Partial<GetImpulseFormSwitchBranchesParam<TBranches, "input.setter">>,
+        Partial<GetFormSwitchBranchesParam<TBranches, "input.setter">>,
         [
-          GetImpulseFormSwitchBranchesParam<TBranches, "input.schema">,
-          GetImpulseFormSwitchBranchesParam<TBranches, "input.schema">,
+          GetFormSwitchBranchesParam<TBranches, "input.schema">,
+          GetFormSwitchBranchesParam<TBranches, "input.schema">,
         ]
       >
     >
   >,
-  [ImpulseFormSwitchInput<TKind, TBranches>, ImpulseFormSwitchInput<TKind, TBranches>]
+  [FormSwitchInput<TKind, TBranches>, FormSwitchInput<TKind, TBranches>]
 >
 
-export type { ImpulseFormSwitchInputSetter }
+export type { FormSwitchInputSetter }

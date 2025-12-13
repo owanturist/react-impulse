@@ -1,162 +1,173 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, type Scope, useScoped } from "../../src"
-import { Counter, type WithImpulse, type WithIsActive, type WithSpy } from "../common"
+import { type Monitor, Signal, useComputed } from "../../src"
+import { Counter, type WithIsActive, type WithSignal, type WithSpy } from "../common"
 
 function factory(
-  scope: Scope,
-  { impulse, isActive, spy }: WithImpulse & WithIsActive & Partial<WithSpy>,
+  monitor: Monitor,
+  { signal, isActive, spy }: WithSignal & WithIsActive & Partial<WithSpy>,
 ) {
   spy?.()
 
-  return isActive ? impulse.getValue(scope) : { count: -1 }
+  return isActive ? signal.read(monitor) : { count: -1 }
 }
 
 describe.each([
   [
     "without deps",
-    ({ impulse, isActive, spy }: WithImpulse & WithIsActive & Partial<WithSpy>) =>
-      useScoped((scope) => factory(scope, { impulse, isActive, spy })),
+    ({ signal, isActive, spy }: WithSignal & WithIsActive & Partial<WithSpy>) =>
+      useComputed((monitor) => factory(monitor, { signal, isActive, spy })),
   ],
   [
     "without comparator",
-    ({ impulse, isActive, spy }: WithImpulse & WithIsActive & Partial<WithSpy>) =>
-      useScoped((scope) => factory(scope, { impulse, isActive, spy }), [impulse, isActive, spy]),
+    ({ signal, isActive, spy }: WithSignal & WithIsActive & Partial<WithSpy>) =>
+      useComputed(
+        (monitor) => factory(monitor, { signal, isActive, spy }),
+        [signal, isActive, spy],
+      ),
   ],
   [
     "with inline comparator",
-    ({ impulse, isActive, spy }: WithImpulse & WithIsActive & Partial<WithSpy>) =>
-      useScoped((scope) => factory(scope, { impulse, isActive, spy }), [impulse, isActive, spy], {
-        compare: (prev, next) => Counter.compare(prev, next),
-      }),
+    ({ signal, isActive, spy }: WithSignal & WithIsActive & Partial<WithSpy>) =>
+      useComputed(
+        (monitor) => factory(monitor, { signal, isActive, spy }),
+        [signal, isActive, spy],
+        {
+          equals: (prev, next) => Counter.equals(prev, next),
+        },
+      ),
   ],
   [
     "with memoized comparator",
-    ({ impulse, isActive, spy }: WithImpulse & WithIsActive & Partial<WithSpy>) =>
-      useScoped((scope) => factory(scope, { impulse, isActive, spy }), [impulse, isActive, spy], {
-        compare: Counter.compare,
-      }),
+    ({ signal, isActive, spy }: WithSignal & WithIsActive & Partial<WithSpy>) =>
+      useComputed(
+        (monitor) => factory(monitor, { signal, isActive, spy }),
+        [signal, isActive, spy],
+        {
+          equals: Counter.equals,
+        },
+      ),
   ],
 ])("conditional factory %s", (_, useHook) => {
   describe("when active", () => {
-    it("should return Impulse's value on init", () => {
-      const impulse = Impulse({ count: 1 })
+    it("should return Signal's value on init", () => {
+      const signal = Signal({ count: 1 })
       const { result } = renderHook(useHook, {
-        initialProps: { impulse, isActive: true },
+        initialProps: { signal, isActive: true },
       })
 
       expect(result.current).toStrictEqual({ count: 1 })
-      expect(impulse).toHaveEmittersSize(1)
+      expect(signal).toHaveEmittersSize(1)
     })
 
-    it("should return updated Impulse's value", () => {
-      const impulse = Impulse({ count: 1 })
+    it("should return updated Signal's value", () => {
+      const signal = Signal({ count: 1 })
 
       const { result } = renderHook(useHook, {
-        initialProps: { impulse, isActive: true },
+        initialProps: { signal, isActive: true },
       })
 
       act(() => {
-        impulse.setValue({ count: 2 })
+        signal.write({ count: 2 })
       })
       expect(result.current).toStrictEqual({ count: 2 })
-      expect(impulse).toHaveEmittersSize(1)
+      expect(signal).toHaveEmittersSize(1)
     })
 
-    it("should return replaced Impulse's value", () => {
-      const impulse1 = Impulse({ count: 1 })
-      const impulse2 = Impulse({ count: 10 })
+    it("should return replaced Signal's value", () => {
+      const signal1 = Signal({ count: 1 })
+      const signal2 = Signal({ count: 10 })
 
       const { result, rerender } = renderHook(useHook, {
-        initialProps: { impulse: impulse1, isActive: true },
+        initialProps: { signal: signal1, isActive: true },
       })
-      expect(impulse1).toHaveEmittersSize(1)
-      expect(impulse2).toHaveEmittersSize(0)
+      expect(signal1).toHaveEmittersSize(1)
+      expect(signal2).toHaveEmittersSize(0)
 
       act(() => {
-        rerender({ impulse: impulse2, isActive: true })
+        rerender({ signal: signal2, isActive: true })
       })
       expect(result.current).toStrictEqual({ count: 10 })
-      expect(impulse1).toHaveEmittersSize(0)
-      expect(impulse2).toHaveEmittersSize(1)
+      expect(signal1).toHaveEmittersSize(0)
+      expect(signal2).toHaveEmittersSize(1)
 
       act(() => {
-        impulse2.setValue({ count: 20 })
+        signal2.write({ count: 20 })
       })
       expect(result.current).toStrictEqual({ count: 20 })
 
       act(() => {
-        impulse1.setValue({ count: 2 })
+        signal1.write({ count: 2 })
       })
       expect(result.current).toStrictEqual({ count: 20 })
-      expect(impulse1).toHaveEmittersSize(0)
-      expect(impulse2).toHaveEmittersSize(1)
+      expect(signal1).toHaveEmittersSize(0)
+      expect(signal2).toHaveEmittersSize(1)
     })
 
     it("should return fallback value when turns inactive", () => {
-      const impulse = Impulse({ count: 1 })
+      const signal = Signal({ count: 1 })
       const { result, rerender } = renderHook(useHook, {
-        initialProps: { impulse, isActive: true },
+        initialProps: { signal, isActive: true },
       })
 
-      rerender({ impulse, isActive: false })
+      rerender({ signal, isActive: false })
       expect(result.current).toStrictEqual({ count: -1 })
-      expect(impulse).toHaveEmittersSize(0)
+      expect(signal).toHaveEmittersSize(0)
     })
   })
 
   describe("when inactive", () => {
     it("should return fallback value when inactive", () => {
-      const impulse = Impulse({ count: 1 })
+      const signal = Signal({ count: 1 })
       const { result } = renderHook(useHook, {
-        initialProps: { impulse, isActive: false },
+        initialProps: { signal, isActive: false },
       })
 
       expect(result.current).toStrictEqual({ count: -1 })
-      expect(impulse).toHaveEmittersSize(0)
+      expect(signal).toHaveEmittersSize(0)
     })
 
-    it("should return fallback value when inactive when impulse updates", () => {
-      const impulse = Impulse({ count: 1 })
+    it("should return fallback value when inactive when signal updates", () => {
+      const signal = Signal({ count: 1 })
       const { result } = renderHook(useHook, {
-        initialProps: { impulse, isActive: false },
+        initialProps: { signal, isActive: false },
       })
 
       act(() => {
-        impulse.setValue({ count: 2 })
+        signal.write({ count: 2 })
       })
       expect(result.current).toStrictEqual({ count: -1 })
-      expect(impulse).toHaveEmittersSize(0)
+      expect(signal).toHaveEmittersSize(0)
     })
 
-    it("should return Impulse's value when turns active", () => {
-      const impulse = Impulse({ count: 1 })
+    it("should return Signal's value when turns active", () => {
+      const signal = Signal({ count: 1 })
       const { result, rerender } = renderHook(useHook, {
-        initialProps: { impulse, isActive: false },
+        initialProps: { signal, isActive: false },
       })
 
-      rerender({ impulse, isActive: true })
+      rerender({ signal, isActive: true })
       expect(result.current).toStrictEqual({ count: 1 })
-      expect(impulse).toHaveEmittersSize(1)
+      expect(signal).toHaveEmittersSize(1)
 
       act(() => {
-        impulse.setValue({ count: 2 })
+        signal.write({ count: 2 })
       })
       expect(result.current).toStrictEqual({ count: 2 })
-      expect(impulse).toHaveEmittersSize(1)
+      expect(signal).toHaveEmittersSize(1)
     })
 
-    it("should not trigger the factory when the impulse updates", () => {
+    it("should not trigger the factory when the signal updates", () => {
       const spy = vi.fn()
-      const impulse = Impulse({ count: 1 })
+      const signal = Signal({ count: 1 })
       renderHook(useHook, {
-        initialProps: { impulse, isActive: false, spy },
+        initialProps: { signal, isActive: false, spy },
       })
 
       spy.mockReset()
 
       act(() => {
-        impulse.setValue(Counter.inc)
+        signal.write(Counter.inc)
       })
       expect(spy).not.toHaveBeenCalled()
     })

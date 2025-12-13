@@ -7,7 +7,7 @@ module.exports = [
   },
   {
     name: "react-impulse-form",
-    ignore: ["react-impulse"],
+    ignore: ["@owanturist/signal"],
   },
 ]
   .flatMap((config) => [".js", ".cjs"].map((ext) => ({ ...config, ext })))
