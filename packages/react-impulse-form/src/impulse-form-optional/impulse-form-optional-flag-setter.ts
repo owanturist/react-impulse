@@ -1,23 +1,20 @@
 import type { Setter } from "~/tools/setter"
 
-import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetSignalFormParam } from "../impulse-form/get-impulse-form-param"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-import type { ImpulseFormOptionalFlagVerbose } from "./impulse-form-optional-flag-verbose"
-import type { ImpulseFormOptionalSchema } from "./impulse-form-optional-schema"
+import type { FormOptionalFlagVerbose } from "./impulse-form-optional-flag-verbose"
+import type { FormOptionalSchema } from "./impulse-form-optional-schema"
 
-type ImpulseFormOptionalFlagSetter<
-  TEnabled extends ImpulseForm,
-  TElement extends ImpulseForm,
-> = Setter<
+type FormOptionalFlagSetter<TEnabled extends SignalForm, TElement extends SignalForm> = Setter<
   | boolean
   | Partial<
-      ImpulseFormOptionalSchema<
-        GetImpulseFormParam<TEnabled, "flag.setter">,
-        GetImpulseFormParam<TElement, "flag.setter">
+      FormOptionalSchema<
+        GetSignalFormParam<TEnabled, "flag.setter">,
+        GetSignalFormParam<TElement, "flag.setter">
       >
     >,
-  [ImpulseFormOptionalFlagVerbose<TEnabled, TElement>]
+  [FormOptionalFlagVerbose<TEnabled, TElement>]
 >
 
-export type { ImpulseFormOptionalFlagSetter }
+export type { FormOptionalFlagSetter }

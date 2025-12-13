@@ -1,21 +1,21 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, type Scope, batch, subscribe, useScoped } from "../../src"
+import { type Monitor, Signal, batch, effect, useComputed } from "../../src"
 import { Counter } from "../common"
 
 describe.each([
   ["not batched", (cb: VoidFunction) => cb()],
   ["batched", batch],
-])("multiple impulses %s calls with direct impulse access", (_, execute) => {
-  it("re-renders once for Impulse#setValue calls", () => {
+])("multiple signals %s calls with direct signal access", (_, execute) => {
+  it("re-renders once for Signal#write calls", () => {
     const onRender = vi.fn()
-    const impulse1 = Impulse({ count: 1 })
-    const impulse2 = Impulse({ count: 2 })
+    const signal1 = Signal({ count: 1 })
+    const signal2 = Signal({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter1 = useScoped((scope) => impulse1.getValue(scope))
-      const counter2 = useScoped(impulse2)
+      const counter1 = useComputed((monitor) => signal1.read(monitor))
+      const counter2 = useComputed(signal2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -32,22 +32,22 @@ describe.each([
 
     act(() => {
       execute(() => {
-        impulse1.setValue(Counter.inc)
-        impulse2.setValue(Counter.inc)
+        signal1.write(Counter.inc)
+        signal2.write(Counter.inc)
       })
     })
     expect(screen.getByTestId("count")).toHaveTextContent("5")
     expect(onRender).toHaveBeenCalledOnce()
   })
 
-  it("re-renders once for multiple useScoped", () => {
+  it("re-renders once for multiple useComputed", () => {
     const onRender = vi.fn()
-    const impulse1 = Impulse({ count: 1 })
-    const impulse2 = Impulse({ count: 2 })
+    const signal1 = Signal({ count: 1 })
+    const signal2 = Signal({ count: 2 })
 
     const Component: React.FC = () => {
-      const counter1 = useScoped((scope) => impulse1.getValue(scope))
-      const counter2 = useScoped(impulse2)
+      const counter1 = useComputed((monitor) => signal1.read(monitor))
+      const counter2 = useComputed(signal2)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -56,8 +56,8 @@ describe.each([
             data-testid="inc"
             onClick={() => {
               execute(() => {
-                impulse1.setValue(Counter.inc)
-                impulse2.setValue(Counter.inc)
+                signal1.write(Counter.inc)
+                signal2.write(Counter.inc)
               })
             }}
           />
@@ -81,18 +81,18 @@ describe.each([
 describe.each([
   ["not batched", (cb: VoidFunction) => cb()],
   ["batched", batch],
-])("nested impulses %s calls with direct impulse access", (_, execute) => {
-  it("re-renders once for Impulse#setValue calls", () => {
+])("nested signals %s calls with direct signal access", (_, execute) => {
+  it("re-renders once for Signal#write calls", () => {
     const onRender = vi.fn()
-    const impulse = Impulse({
-      first: Impulse({ count: 1 }),
-      second: Impulse({ count: 2 }),
+    const signal = Signal({
+      first: Signal({ count: 1 }),
+      second: Signal({ count: 2 }),
     })
 
     const Component: React.FC = () => {
-      const acc = useScoped((scope) => impulse.getValue(scope))
-      const counter1 = useScoped((scope) => acc.first.getValue(scope))
-      const counter2 = useScoped(acc.second)
+      const acc = useComputed((monitor) => signal.read(monitor))
+      const counter1 = useComputed((monitor) => acc.first.read(monitor))
+      const counter2 = useComputed(acc.second)
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -109,9 +109,9 @@ describe.each([
 
     act(() => {
       execute(() => {
-        impulse.setValue((current) => {
-          current.first.setValue(Counter.inc)
-          current.second.setValue(Counter.inc)
+        signal.write((current) => {
+          current.first.write(Counter.inc)
+          current.second.write(Counter.inc)
 
           return current
         })
@@ -122,10 +122,10 @@ describe.each([
     vi.clearAllMocks()
 
     act(() => {
-      impulse.setValue((current) => {
+      signal.write((current) => {
         execute(() => {
-          current.first.setValue(Counter.inc)
-          current.second.setValue(Counter.inc)
+          current.first.write(Counter.inc)
+          current.second.write(Counter.inc)
         })
 
         return current
@@ -135,17 +135,17 @@ describe.each([
     expect(onRender).toHaveBeenCalledOnce()
   })
 
-  it("re-renders once for multiple useScoped", () => {
+  it("re-renders once for multiple useComputed", () => {
     const onRender = vi.fn()
-    const impulse = Impulse({
-      first: Impulse({ count: 1 }),
-      second: Impulse({ count: 2 }),
+    const signal = Signal({
+      first: Signal({ count: 1 }),
+      second: Signal({ count: 2 }),
     })
 
     const Component: React.FC = () => {
-      const acc = useScoped(impulse)
-      const counter1 = useScoped((scope) => acc.first.getValue(scope))
-      const counter2 = useScoped((scope) => acc.second.getValue(scope))
+      const acc = useComputed(signal)
+      const counter1 = useComputed((monitor) => acc.first.read(monitor))
+      const counter2 = useComputed((monitor) => acc.second.read(monitor))
 
       return (
         <React.Profiler id="test" onRender={onRender}>
@@ -154,9 +154,9 @@ describe.each([
             data-testid="inc-1"
             onClick={() => {
               execute(() => {
-                impulse.setValue((value) => {
-                  value.first.setValue(Counter.inc)
-                  value.second.setValue(Counter.inc)
+                signal.write((value) => {
+                  value.first.write(Counter.inc)
+                  value.second.write(Counter.inc)
 
                   return value
                 })
@@ -167,10 +167,10 @@ describe.each([
             type="button"
             data-testid="inc-2"
             onClick={() => {
-              impulse.setValue((value) => {
+              signal.write((value) => {
                 execute(() => {
-                  value.first.setValue(Counter.inc)
-                  value.second.setValue(Counter.inc)
+                  value.first.write(Counter.inc)
+                  value.second.write(Counter.inc)
                 })
 
                 return value
@@ -205,30 +205,30 @@ describe.each([
     expectedFactoryCallsForMultiple: 3,
     expectedFactoryCallsForNested: 2,
     execute: (cb: VoidFunction) => cb(),
-    useCount: (factory: (scope: Scope) => number) => useScoped((scope) => factory(scope)),
+    useCount: (factory: (monitor: Monitor) => number) => useComputed((monitor) => factory(monitor)),
   },
   {
     name: "with batching for inline factory",
     expectedFactoryCallsForMultiple: 2,
     expectedFactoryCallsForNested: 2,
     execute: batch,
-    useCount: (factory: (scope: Scope) => number) => useScoped((scope) => factory(scope)),
+    useCount: (factory: (monitor: Monitor) => number) => useComputed((monitor) => factory(monitor)),
   },
   {
     name: "no batching for memoized factory",
     expectedFactoryCallsForMultiple: 2,
     expectedFactoryCallsForNested: 1,
     execute: (cb: VoidFunction) => cb(),
-    useCount: (factory: (scope: Scope) => number) =>
-      useScoped(React.useCallback((scope: Scope) => factory(scope), [factory])),
+    useCount: (factory: (monitor: Monitor) => number) =>
+      useComputed(React.useCallback((monitor: Monitor) => factory(monitor), [factory])),
   },
   {
     name: "with batching for memoized factory",
     expectedFactoryCallsForMultiple: 1,
     expectedFactoryCallsForNested: 1,
     execute: batch,
-    useCount: (factory: (scope: Scope) => number) =>
-      useScoped(React.useCallback((scope: Scope) => factory(scope), [factory])),
+    useCount: (factory: (monitor: Monitor) => number) =>
+      useComputed(React.useCallback((monitor: Monitor) => factory(monitor), [factory])),
   },
 ])("when $name", ({
   expectedFactoryCallsForMultiple,
@@ -236,22 +236,22 @@ describe.each([
   execute,
   useCount,
 }) => {
-  describe("for multiple impulses", () => {
+  describe("for multiple signals", () => {
     const setup = () => {
       const spy = vi.fn()
       const onRender = vi.fn()
-      const first = Impulse({ count: 1 })
-      const second = Impulse({ count: 2 })
-      const factory = (scope: Scope) => {
+      const first = Signal({ count: 1 })
+      const second = Signal({ count: 2 })
+      const factory = (monitor: Monitor) => {
         spy()
 
-        return Counter.getCount(first.getValue(scope)) + Counter.getCount(second.getValue(scope))
+        return Counter.getCount(first.read(monitor)) + Counter.getCount(second.read(monitor))
       }
 
       return { spy, onRender, first, second, factory }
     }
 
-    it(`calls the factory ${expectedFactoryCallsForMultiple} times by Impulse#setValue calls`, () => {
+    it(`calls the factory ${expectedFactoryCallsForMultiple} times by Signal#write calls`, () => {
       const { spy, onRender, first, second, factory } = setup()
 
       const Component: React.FC = () => {
@@ -274,8 +274,8 @@ describe.each([
 
       act(() => {
         execute(() => {
-          first.setValue(Counter.inc)
-          second.setValue(Counter.inc)
+          first.write(Counter.inc)
+          second.write(Counter.inc)
         })
       })
       expect(screen.getByTestId("count")).toHaveTextContent("5")
@@ -283,7 +283,7 @@ describe.each([
       expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForMultiple)
     })
 
-    it(`calls the factory ${expectedFactoryCallsForMultiple} times by Impulse#setValue calls`, () => {
+    it(`calls the factory ${expectedFactoryCallsForMultiple} times by Signal#write calls`, () => {
       const { spy, onRender, first, second, factory } = setup()
 
       const Component: React.FC = () => {
@@ -296,8 +296,8 @@ describe.each([
               data-testid="inc"
               onClick={() => {
                 execute(() => {
-                  first.setValue(Counter.inc)
-                  second.setValue(Counter.inc)
+                  first.write(Counter.inc)
+                  second.write(Counter.inc)
                 })
               }}
             />
@@ -320,27 +320,27 @@ describe.each([
     })
   })
 
-  describe("for nested impulses", () => {
+  describe("for nested signals", () => {
     const setup = () => {
       const spy = vi.fn()
       const onRender = vi.fn()
-      const impulse = Impulse({
-        first: Impulse({ count: 1 }),
-        second: Impulse({ count: 2 }),
+      const signal = Signal({
+        first: Signal({ count: 1 }),
+        second: Signal({ count: 2 }),
       })
-      const factory = (scope: Scope) => {
+      const factory = (monitor: Monitor) => {
         spy()
 
-        const { first, second } = impulse.getValue(scope)
+        const { first, second } = signal.read(monitor)
 
-        return Counter.getCount(first.getValue(scope)) + Counter.getCount(second.getValue(scope))
+        return Counter.getCount(first.read(monitor)) + Counter.getCount(second.read(monitor))
       }
 
-      return { spy, onRender, impulse, factory }
+      return { spy, onRender, signal, factory }
     }
 
-    it(`calls the factory ${expectedFactoryCallsForNested} times by Impulse#setValue calls`, () => {
-      const { spy, onRender, impulse, factory } = setup()
+    it(`calls the factory ${expectedFactoryCallsForNested} times by Signal#write calls`, () => {
+      const { spy, onRender, signal, factory } = setup()
 
       const Component: React.FC = () => {
         const count = useCount(factory)
@@ -361,9 +361,9 @@ describe.each([
 
       act(() => {
         execute(() => {
-          impulse.setValue((value) => {
-            value.first.setValue(Counter.inc)
-            value.second.setValue(Counter.inc)
+          signal.write((value) => {
+            value.first.write(Counter.inc)
+            value.second.write(Counter.inc)
 
             return value
           })
@@ -375,10 +375,10 @@ describe.each([
       vi.clearAllMocks()
 
       act(() => {
-        impulse.setValue((value) => {
+        signal.write((value) => {
           execute(() => {
-            value.first.setValue(Counter.inc)
-            value.second.setValue(Counter.inc)
+            value.first.write(Counter.inc)
+            value.second.write(Counter.inc)
           })
 
           return value
@@ -389,8 +389,8 @@ describe.each([
       expect(spy).toHaveBeenCalledTimes(expectedFactoryCallsForNested)
     })
 
-    it(`calls the factory ${expectedFactoryCallsForNested} times by Impulse#setValue calls`, () => {
-      const { spy, onRender, impulse, factory } = setup()
+    it(`calls the factory ${expectedFactoryCallsForNested} times by Signal#write calls`, () => {
+      const { spy, onRender, signal, factory } = setup()
 
       const Component: React.FC = () => {
         const count = useCount(factory)
@@ -402,9 +402,9 @@ describe.each([
               data-testid="inc-1"
               onClick={() => {
                 execute(() => {
-                  impulse.setValue((value) => {
-                    value.first.setValue(Counter.inc)
-                    value.second.setValue(Counter.inc)
+                  signal.write((value) => {
+                    value.first.write(Counter.inc)
+                    value.second.write(Counter.inc)
 
                     return value
                   })
@@ -415,10 +415,10 @@ describe.each([
               type="button"
               data-testid="inc-2"
               onClick={() => {
-                impulse.setValue((value) => {
+                signal.write((value) => {
                   execute(() => {
-                    value.first.setValue(Counter.inc)
-                    value.second.setValue(Counter.inc)
+                    value.first.write(Counter.inc)
+                    value.second.write(Counter.inc)
                   })
 
                   return value
@@ -452,21 +452,21 @@ describe.each([
 })
 
 describe("when reading value during batching", () => {
-  it("returns new value right after update", ({ scope }) => {
-    const source = Impulse(1)
+  it("returns new value right after write", ({ monitor }) => {
+    const source = Signal(1)
     const spy = vi.fn()
 
-    expect(source.getValue(scope)).toBe(1)
+    expect(source.read(monitor)).toBe(1)
 
-    batch((scope) => {
-      source.setValue(2)
-      spy(source.getValue(scope))
+    batch((monitor) => {
+      source.write(2)
+      spy(source.read(monitor))
 
-      source.setValue(3)
-      spy(source.getValue(scope))
+      source.write(3)
+      spy(source.read(monitor))
     })
 
-    expect(source.getValue(scope)).toBe(3)
+    expect(source.read(monitor)).toBe(3)
 
     expect(spy).toHaveBeenCalledTimes(2)
     expect(spy).toHaveBeenNthCalledWith(1, 2)
@@ -476,221 +476,221 @@ describe("when reading value during batching", () => {
 
 /**
  * bugfix: DerivedImpulse does not update it's value when batching #893
- * @link https://github.com/owanturist/react-impulse/issues/893
+ * @link https://github.com/owanturist/react-signal/issues/893
  */
 describe("when reading derived value during batching", () => {
-  it("updates derived value after source changes", ({ scope }) => {
+  it("updates derived value after source changes", ({ monitor }) => {
     expect.assertions(5)
 
-    const source = Impulse(1)
-    const derived = Impulse(source)
+    const source = Signal(1)
+    const derived = Signal(source)
 
-    expect(derived.getValue(scope)).toBe(1)
+    expect(derived.read(monitor)).toBe(1)
 
-    batch((scope) => {
-      source.setValue(1)
-      expect(derived.getValue(scope)).toBe(1)
+    batch((monitor) => {
+      source.write(1)
+      expect(derived.read(monitor)).toBe(1)
 
-      source.setValue(2)
-      expect(derived.getValue(scope)).toBe(2)
+      source.write(2)
+      expect(derived.read(monitor)).toBe(2)
 
-      source.setValue(3)
-      expect(derived.getValue(scope)).toBe(3)
+      source.write(3)
+      expect(derived.read(monitor)).toBe(3)
     })
 
-    expect(derived.getValue(scope)).toBe(3)
+    expect(derived.read(monitor)).toBe(3)
   })
 
-  it("updates derived values after source changes in subscribe", () => {
+  it("updates derived values after source changes in effect", () => {
     expect.assertions(5)
 
-    const source = Impulse(1)
-    const derived = Impulse(source)
+    const source = Signal(1)
+    const derived = Signal(source)
     const spy = vi.fn()
 
-    subscribe((scope) => {
-      spy(derived.getValue(scope))
+    effect((monitor) => {
+      spy(derived.read(monitor))
     })
 
     expect(spy).toHaveBeenCalledExactlyOnceWith(1)
     vi.clearAllMocks()
 
-    batch((scope) => {
-      source.setValue(1)
-      expect(derived.getValue(scope)).toBe(1)
+    batch((monitor) => {
+      source.write(1)
+      expect(derived.read(monitor)).toBe(1)
 
-      source.setValue(2)
-      expect(derived.getValue(scope)).toBe(2)
+      source.write(2)
+      expect(derived.read(monitor)).toBe(2)
 
-      source.setValue(3)
-      expect(derived.getValue(scope)).toBe(3)
+      source.write(3)
+      expect(derived.read(monitor)).toBe(3)
     })
 
     expect(spy).toHaveBeenCalledExactlyOnceWith(3)
   })
 
-  it("updates derived value after some sources change", ({ scope }) => {
+  it("updates derived value after some sources change", ({ monitor }) => {
     expect.assertions(4)
 
-    const source1 = Impulse(1)
-    const source2 = Impulse(2)
-    const derived = Impulse((scope) => source1.getValue(scope) + source2.getValue(scope))
+    const source1 = Signal(1)
+    const source2 = Signal(2)
+    const derived = Signal((monitor) => source1.read(monitor) + source2.read(monitor))
 
-    expect(derived.getValue(scope)).toBe(3)
+    expect(derived.read(monitor)).toBe(3)
 
-    batch((scope) => {
-      source1.setValue(2)
-      expect(derived.getValue(scope)).toBe(4)
+    batch((monitor) => {
+      source1.write(2)
+      expect(derived.read(monitor)).toBe(4)
 
-      source2.setValue(3)
-      expect(derived.getValue(scope)).toBe(5)
+      source2.write(3)
+      expect(derived.read(monitor)).toBe(5)
     })
 
-    expect(derived.getValue(scope)).toBe(5)
+    expect(derived.read(monitor)).toBe(5)
   })
 
-  it("updates derived value after all sources change", ({ scope }) => {
+  it("updates derived value after all sources change", ({ monitor }) => {
     expect.assertions(4)
 
-    const source1 = Impulse(1)
-    const source2 = Impulse(2)
-    const derived = Impulse((scope) => source1.getValue(scope) + source2.getValue(scope))
+    const source1 = Signal(1)
+    const source2 = Signal(2)
+    const derived = Signal((monitor) => source1.read(monitor) + source2.read(monitor))
 
-    expect(derived.getValue(scope)).toBe(3)
+    expect(derived.read(monitor)).toBe(3)
 
-    batch((scope) => {
-      source1.setValue(2)
-      source2.setValue(3)
-      expect(derived.getValue(scope)).toBe(5)
+    batch((monitor) => {
+      source1.write(2)
+      source2.write(3)
+      expect(derived.read(monitor)).toBe(5)
 
-      source1.setValue(3)
-      source2.setValue(4)
-      expect(derived.getValue(scope)).toBe(7)
+      source1.write(3)
+      source2.write(4)
+      expect(derived.read(monitor)).toBe(7)
     })
 
-    expect(derived.getValue(scope)).toBe(7)
+    expect(derived.read(monitor)).toBe(7)
   })
 
-  it("updates derived values after source changes", ({ scope }) => {
+  it("updates derived values after source changes", ({ monitor }) => {
     expect.assertions(8)
 
-    const source = Impulse(1)
-    const derived1 = Impulse(source)
-    const derived2 = Impulse(source)
+    const source = Signal(1)
+    const derived1 = Signal(source)
+    const derived2 = Signal(source)
 
-    expect(derived1.getValue(scope)).toBe(1)
-    expect(derived2.getValue(scope)).toBe(1)
+    expect(derived1.read(monitor)).toBe(1)
+    expect(derived2.read(monitor)).toBe(1)
 
-    batch((scope) => {
-      source.setValue(2)
-      expect(derived1.getValue(scope)).toBe(2)
-      expect(derived2.getValue(scope)).toBe(2)
+    batch((monitor) => {
+      source.write(2)
+      expect(derived1.read(monitor)).toBe(2)
+      expect(derived2.read(monitor)).toBe(2)
 
-      source.setValue(3)
-      expect(derived1.getValue(scope)).toBe(3)
-      expect(derived2.getValue(scope)).toBe(3)
+      source.write(3)
+      expect(derived1.read(monitor)).toBe(3)
+      expect(derived2.read(monitor)).toBe(3)
     })
 
-    expect(derived1.getValue(scope)).toBe(3)
-    expect(derived2.getValue(scope)).toBe(3)
+    expect(derived1.read(monitor)).toBe(3)
+    expect(derived2.read(monitor)).toBe(3)
   })
 
-  it("updates chained derived values after source changes", ({ scope }) => {
-    const source = Impulse(1)
-    const derived = Impulse(source)
-    const derivedDerived = Impulse(derived)
+  it("updates chained derived values after source changes", ({ monitor }) => {
+    const source = Signal(1)
+    const derived = Signal(source)
+    const derivedDerived = Signal(derived)
 
-    batch((scope) => {
-      expect(derivedDerived.getValue(scope)).toBe(1)
+    batch((monitor) => {
+      expect(derivedDerived.read(monitor)).toBe(1)
 
-      batch((scope) => {
-        source.setValue(2)
-        expect(derivedDerived.getValue(scope)).toBe(2)
+      batch((monitor) => {
+        source.write(2)
+        expect(derivedDerived.read(monitor)).toBe(2)
 
-        source.setValue(3)
-        expect(derivedDerived.getValue(scope)).toBe(3)
+        source.write(3)
+        expect(derivedDerived.read(monitor)).toBe(3)
       })
 
-      expect(derivedDerived.getValue(scope)).toBe(3)
+      expect(derivedDerived.read(monitor)).toBe(3)
     })
 
-    expect(derived.getValue(scope)).toBe(3)
-    expect(derivedDerived.getValue(scope)).toBe(3)
+    expect(derived.read(monitor)).toBe(3)
+    expect(derivedDerived.read(monitor)).toBe(3)
   })
 
-  it("updates derived value after derived change", ({ scope }) => {
+  it("updates derived value after derived change", ({ monitor }) => {
     expect.assertions(7)
 
-    const source = Impulse(1)
-    const derived = Impulse(source, source)
+    const source = Signal(1)
+    const derived = Signal(source, source)
 
-    batch((scope) => {
-      derived.setValue(1)
-      expect(source.getValue(scope)).toBe(1)
-      expect(derived.getValue(scope)).toBe(1)
+    batch((monitor) => {
+      derived.write(1)
+      expect(source.read(monitor)).toBe(1)
+      expect(derived.read(monitor)).toBe(1)
 
-      derived.setValue(2)
-      expect(source.getValue(scope)).toBe(2)
-      expect(derived.getValue(scope)).toBe(2)
+      derived.write(2)
+      expect(source.read(monitor)).toBe(2)
+      expect(derived.read(monitor)).toBe(2)
 
-      derived.setValue(3)
-      expect(source.getValue(scope)).toBe(3)
-      expect(derived.getValue(scope)).toBe(3)
+      derived.write(3)
+      expect(source.read(monitor)).toBe(3)
+      expect(derived.read(monitor)).toBe(3)
     })
 
-    expect(source.getValue(scope)).toBe(3)
+    expect(source.read(monitor)).toBe(3)
   })
 
-  it("returns the same subsequent value after a source change", ({ scope }) => {
+  it("returns the same subsequent value after a source change", ({ monitor }) => {
     expect.assertions(4)
 
-    const source = Impulse(1)
-    const derived = Impulse((scope) => ({ count: source.getValue(scope) }), {
-      compare: Counter.compare,
+    const source = Signal(1)
+    const derived = Signal((monitor) => ({ count: source.read(monitor) }), {
+      equals: Counter.equals,
     })
 
-    expect(derived.getValue(scope)).toBe(derived.getValue(scope))
+    expect(derived.read(monitor)).toBe(derived.read(monitor))
 
-    batch((scope) => {
-      source.setValue(2)
-      expect(derived.getValue(scope)).toBe(derived.getValue(scope))
+    batch((monitor) => {
+      source.write(2)
+      expect(derived.read(monitor)).toBe(derived.read(monitor))
 
-      source.setValue(3)
-      expect(derived.getValue(scope)).toBe(derived.getValue(scope))
+      source.write(3)
+      expect(derived.read(monitor)).toBe(derived.read(monitor))
     })
 
-    expect(derived.getValue(scope)).toBe(derived.getValue(scope))
+    expect(derived.read(monitor)).toBe(derived.read(monitor))
   })
 
-  it("returns the comparably equal value after a source change", ({ scope }) => {
+  it("returns the comparably equal value after a source change", ({ monitor }) => {
     expect.assertions(7)
 
-    const source = Impulse({ count: 1 })
-    const derived = Impulse((scope) => source.getValue(scope), {
-      compare: Counter.compare,
+    const source = Signal({ count: 1 })
+    const derived = Signal((monitor) => source.read(monitor), {
+      equals: Counter.equals,
     })
 
-    const source0 = source.getValue(scope)
-    const derived0 = derived.getValue(scope)
+    const source0 = source.read(monitor)
+    const derived0 = derived.read(monitor)
     expect(source0).toBe(derived0)
 
-    source.setValue(Counter.clone)
+    source.write(Counter.clone)
 
-    const source1 = source.getValue(scope)
+    const source1 = source.read(monitor)
     expect(source1).not.toBe(source0)
     expect(source1).toStrictEqual(source0)
 
-    const derived1 = derived.getValue(scope)
+    const derived1 = derived.read(monitor)
     expect(derived1).toBe(derived0)
 
-    batch((scope) => {
-      source.setValue(Counter.clone)
+    batch((monitor) => {
+      source.write(Counter.clone)
 
-      const source2 = source.getValue(scope)
+      const source2 = source.read(monitor)
       expect(source2).not.toBe(source0)
       expect(source2).toStrictEqual(source0)
 
-      const derived2 = derived.getValue(scope)
+      const derived2 = derived.read(monitor)
       expect(derived2).toBe(derived0)
     })
   })

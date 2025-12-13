@@ -1,43 +1,43 @@
 import z from "zod"
 
-import { ImpulseFormUnit } from "../../src"
+import { FormUnit } from "../../src"
 
-it("sets the transformer", ({ scope }) => {
-  const unit = ImpulseFormUnit("hi")
+it("sets the transformer", ({ monitor }) => {
+  const unit = FormUnit("hi")
 
-  expect(unit.getOutput(scope)).toBe("hi")
+  expect(unit.getOutput(monitor)).toBe("hi")
 
   unit.setTransform((input) => `${input}.`)
-  expect(unit.getOutput(scope)).toBe("hi.")
+  expect(unit.getOutput(monitor)).toBe("hi.")
 })
 
-it("overrides a transformer", ({ scope }) => {
-  const unit = ImpulseFormUnit("hi", {
+it("overrides a transformer", ({ monitor }) => {
+  const unit = FormUnit("hi", {
     transform: (input) => `${input}.`,
   })
 
-  expect(unit.getOutput(scope)).toBe("hi.")
+  expect(unit.getOutput(monitor)).toBe("hi.")
 
   unit.setTransform((input) => `${input}!`)
-  expect(unit.getOutput(scope)).toBe("hi!")
+  expect(unit.getOutput(monitor)).toBe("hi!")
 
   unit.setTransform((input) => `${input}?`)
-  expect(unit.getOutput(scope)).toBe("hi?")
+  expect(unit.getOutput(monitor)).toBe("hi?")
 })
 
-it("overrides schema", ({ scope }) => {
-  const unit = ImpulseFormUnit("hi", {
+it("overrides schema", ({ monitor }) => {
+  const unit = FormUnit("hi", {
     schema: z.string().transform((input) => input.length),
   })
 
-  expect(unit.getOutput(scope)).toBe(2)
+  expect(unit.getOutput(monitor)).toBe(2)
 
   unit.setTransform((input) => input.length + 1)
-  expect(unit.getOutput(scope)).toBe(3)
+  expect(unit.getOutput(monitor)).toBe(3)
 })
 
-it("overrides validate", ({ scope }) => {
-  const unit = ImpulseFormUnit<string, string, number>("hi", {
+it("overrides validate", ({ monitor }) => {
+  const unit = FormUnit<string, string, number>("hi", {
     validate: (input) => {
       if (input.length === 0) {
         return ["Input is too short", null]
@@ -47,8 +47,8 @@ it("overrides validate", ({ scope }) => {
     },
   })
 
-  expect(unit.getOutput(scope)).toBe(2)
+  expect(unit.getOutput(monitor)).toBe(2)
 
   unit.setTransform((input) => input.length + 1)
-  expect(unit.getOutput(scope)).toBe(3)
+  expect(unit.getOutput(monitor)).toBe(3)
 })

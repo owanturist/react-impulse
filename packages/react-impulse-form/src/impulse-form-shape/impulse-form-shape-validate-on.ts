@@ -1,10 +1,10 @@
 import type { ValidateStrategy } from "../validate-strategy"
 
-import type { GetImpulseFormShapeParam } from "./get-impulse-form-shape-param"
-import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
+import type { GetFormShapeParam } from "./get-impulse-form-shape-param"
+import type { FormShapeFields } from "./impulse-form-shape-fields"
 
-type ImpulseFormShapeValidateOn<TFields extends ImpulseFormShapeFields> =
+type FormShapeValidateOn<TFields extends FormShapeFields> =
   | ValidateStrategy
-  | GetImpulseFormShapeParam<TFields, "validateOn.schema">
+  | GetFormShapeParam<TFields, "validateOn.schema">
 
-export type { ImpulseFormShapeValidateOn }
+export type { FormShapeValidateOn }

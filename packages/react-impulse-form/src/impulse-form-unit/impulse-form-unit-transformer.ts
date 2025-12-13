@@ -1,3 +1,3 @@
-type ImpulseFormUnitTransformer<TInput, TOutput> = (input: TInput) => TOutput
+type FormUnitTransformer<TInput, TOutput> = (input: TInput) => TOutput
 
-export type { ImpulseFormUnitTransformer }
+export type { FormUnitTransformer }

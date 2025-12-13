@@ -1,40 +1,42 @@
 import { isFunction } from "~/tools/is-function"
 
-import type { ReadableImpulse } from "./readable-impulse"
+import type { batch } from "./batch"
+import type { Signal } from "./impulse"
+import type { ReadableSignal } from "./readable-impulse"
 import { enqueue } from "./_internal/enqueue"
-import { STATIC_SCOPE, type Scope } from "./_internal/scope"
+import { type Monitor, UNTRACKED_MONITOR } from "./_internal/scope"
 
 /**
- * Ignores tracking any of the impulses attached to the provided Scope.
- * Acts like `batch` but returns the `factory` function result.
+ * Ignores tracking any of the {@link Signal} attached to the provided {@link Monitor}.
+ * Acts like {@link batch} but returns the {@link factory} function result.
  *
- * @param factory a function that provides `Scope` as the first argument and returns a result.
+ * @param factory a function that provides {@link Monitor} as the first argument and returns a result.
  *
- * @returns the `factory` function result.
+ * @returns the {@link factory} function result.
  *
- * @version 2.0.0
+ * @version 1.0.0
  */
-function untrack<TResult>(factory: (scope: Scope) => TResult): TResult
+function untracked<TResult>(factory: (monitor: Monitor) => TResult): TResult
 
 /**
- * Extracts the value from the provided `impulse` without tracking it.
+ * Extracts the value from the provided {@link signal} without tracking it.
  *
- * @param impulse anything that implements the `ReadableImpulse` interface.
+ * @param signal anything that implements the {@link ReadableSignal} interface.
  *
- * @returns the `impulse` value.
+ * @returns the {@link signal} value.
  *
- * @version 2.0.0
+ * @version 1.0.0
  */
-function untrack<TValue>(impulse: ReadableImpulse<TValue>): TValue
+function untracked<TValue>(signal: ReadableSignal<TValue>): TValue
 
-function untrack<T>(factoryOrReadableImpulse: ((scope: Scope) => T) | ReadableImpulse<T>): T {
+function untracked<T>(factoryOrReadableSignal: ((monitor: Monitor) => T) | ReadableSignal<T>): T {
   return enqueue(() => {
-    if (isFunction(factoryOrReadableImpulse)) {
-      return factoryOrReadableImpulse(STATIC_SCOPE)
+    if (isFunction(factoryOrReadableSignal)) {
+      return factoryOrReadableSignal(UNTRACKED_MONITOR)
     }
 
-    return factoryOrReadableImpulse.getValue(STATIC_SCOPE)
+    return factoryOrReadableSignal.read(UNTRACKED_MONITOR)
   })
 }
 
-export { untrack }
+export { untracked }

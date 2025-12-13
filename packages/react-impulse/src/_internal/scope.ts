@@ -1,40 +1,43 @@
-import type { ScopeEmitter } from "./scope-emitter"
+import type { MonitorEmitter } from "./scope-emitter"
 
-const SCOPE_KEY = Symbol("scope")
+const MONITOR_KEY = Symbol("monitor")
 
-interface Scope {
-  readonly [SCOPE_KEY]: null | ScopeEmitter
+interface Monitor {
+  readonly [MONITOR_KEY]: null | MonitorEmitter
 }
 
-const STATIC_SCOPE = {
-  [SCOPE_KEY]: null,
-} satisfies Scope
+const UNTRACKED_MONITOR = {
+  [MONITOR_KEY]: null,
+} satisfies Monitor
 
-function createScope(emitter: ScopeEmitter): Scope {
+function createMonitor(emitter: MonitorEmitter): Monitor {
   return {
-    [SCOPE_KEY]: emitter,
+    [MONITOR_KEY]: emitter,
   }
 }
 
-function attachToScope(scope: Scope, emitters: Set<WeakRef<ScopeEmitter>>): void {
-  scope[SCOPE_KEY]?._attachTo(emitters)
+function attachToMonitor(monitor: Monitor, emitters: Set<WeakRef<MonitorEmitter>>): void {
+  monitor[MONITOR_KEY]?._attachTo(emitters)
 }
 
-let implicitScope: Scope = STATIC_SCOPE
+let implicitMonitor: Monitor = UNTRACKED_MONITOR
 
-function injectScope<TResult>(execute: (passedScope: Scope) => TResult, scope: Scope): TResult {
-  const prevScope = implicitScope
+function injectMonitor<TResult>(
+  execute: (_monitor: Monitor) => TResult,
+  monitor: Monitor,
+): TResult {
+  const prevMonitor = implicitMonitor
 
-  implicitScope = scope
-  const result = execute(scope)
-  implicitScope = prevScope
+  implicitMonitor = monitor
+  const result = execute(monitor)
+  implicitMonitor = prevMonitor
 
   return result
 }
 
-function extractScope(): Scope {
-  return implicitScope
+function extractMonitor(): Monitor {
+  return implicitMonitor
 }
 
-export type { Scope }
-export { STATIC_SCOPE, createScope, attachToScope, injectScope, extractScope }
+export type { Monitor }
+export { UNTRACKED_MONITOR, createMonitor, attachToMonitor, injectMonitor, extractMonitor }

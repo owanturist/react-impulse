@@ -1,13 +1,13 @@
 import type { Setter } from "~/tools/setter"
 
-import type { GetImpulseFormFlagSetter } from "../impulse-form/get-impulse-form-flag-setter"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetSignalFormFlagSetter } from "../impulse-form/get-impulse-form-flag-setter"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-import type { ImpulseFormListFlagVerbose } from "./impulse-form-list-flag-verbose"
+import type { FormListFlagVerbose } from "./impulse-form-list-flag-verbose"
 
-type ImpulseFormListFlagSetter<TElement extends ImpulseForm> = Setter<
-  boolean | ReadonlyArray<undefined | GetImpulseFormFlagSetter<TElement>>,
-  [ImpulseFormListFlagVerbose<TElement>]
+type FormListFlagSetter<TElement extends SignalForm> = Setter<
+  boolean | ReadonlyArray<undefined | GetSignalFormFlagSetter<TElement>>,
+  [FormListFlagVerbose<TElement>]
 >
 
-export type { ImpulseFormListFlagSetter }
+export type { FormListFlagSetter }

@@ -1,8 +1,8 @@
-import type { GetImpulseFormFlagVerbose } from "../impulse-form/get-impulse-form-flag-verbose"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetSignalFormFlagVerbose } from "../impulse-form/get-impulse-form-flag-verbose"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-type ImpulseFormListFlagVerbose<TElement extends ImpulseForm> = ReadonlyArray<
-  GetImpulseFormFlagVerbose<TElement>
+type FormListFlagVerbose<TElement extends SignalForm> = ReadonlyArray<
+  GetSignalFormFlagVerbose<TElement>
 >
 
-export type { ImpulseFormListFlagVerbose }
+export type { FormListFlagVerbose }

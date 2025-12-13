@@ -1,13 +1,13 @@
 import "@testing-library/jest-dom/vitest"
 
-import { untrack } from "./src"
+import { untracked } from "./src"
 
 const spy__Object_is = vi.spyOn(Object, "is")
 
 beforeEach((context) => {
   spy__Object_is.mockClear()
 
-  context.scope = untrack((scope) => scope)
+  context.monitor = untracked((monitor) => monitor)
 })
 
 afterAll(() => {
@@ -25,7 +25,7 @@ function hasProperty<TKey extends PropertyKey>(
   return typeof input === "object" && input != null && key in input
 }
 
-function getImpulseEmitters(input: unknown): null | Set<WeakRef<WeakKey>> {
+function getEmitters(input: unknown): null | Set<WeakRef<WeakKey>> {
   if (hasProperty(input, "_emitters") && isSet<WeakRef<WeakKey>>(input._emitters)) {
     return input._emitters
   }
@@ -39,12 +39,12 @@ function getImpulseEmitters(input: unknown): null | Set<WeakRef<WeakKey>> {
 
 expect.extend({
   toHaveEmittersSize(received: unknown, size: number) {
-    const emitters = getImpulseEmitters(received)
+    const emitters = getEmitters(received)
 
     if (emitters == null) {
       return {
         pass: false,
-        message: () => `expected ${this.utils.printReceived(received)} to be an Impulse`,
+        message: () => `expected ${this.utils.printReceived(received)} to be a Signal`,
       }
     }
 

@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { ImpulseFormUnit } from "../../src"
+import { FormUnit } from "../../src"
 import { wait } from "../common"
 
 const SLOWEST_ASYNC_MS = 3000
@@ -10,7 +10,7 @@ beforeAll(() => {
 })
 
 it("matches the type signature", () => {
-  const form = ImpulseFormUnit("value")
+  const form = FormUnit("value")
 
   expectTypeOf(form.onSubmit).toEqualTypeOf<
     (listener: (value: string) => void | Promise<unknown>) => VoidFunction
@@ -19,7 +19,7 @@ it("matches the type signature", () => {
 
 describe("onSubmit(listener)", () => {
   it("provides validated value", () => {
-    const form = ImpulseFormUnit("value", {
+    const form = FormUnit("value", {
       schema: z.string().min(2),
     })
 
@@ -28,8 +28,8 @@ describe("onSubmit(listener)", () => {
     })
   })
 
-  it("does not call the listener when the form is not valid", ({ scope }) => {
-    const form = ImpulseFormUnit("value", {
+  it("does not call the listener when the form is not valid", ({ monitor }) => {
+    const form = FormUnit("value", {
       schema: z.string().min(10),
     })
 
@@ -39,12 +39,12 @@ describe("onSubmit(listener)", () => {
 
     form.submit()
 
-    expect(form.isInvalid(scope)).toBe(true)
+    expect(form.isInvalid(monitor)).toBe(true)
     expect(listener).not.toHaveBeenCalled()
   })
 
   it("calls the focus listener when the form is not valid", () => {
-    const form = ImpulseFormUnit("value", {
+    const form = FormUnit("value", {
       schema: z.string().min(10),
     })
 
@@ -60,12 +60,12 @@ describe("onSubmit(listener)", () => {
   })
 
   it.each([
-    ["schema is not defined", "value", () => ImpulseFormUnit("value")],
+    ["schema is not defined", "value", () => FormUnit("value")],
     [
       "schema is defined and value is valid",
       1234,
       () =>
-        ImpulseFormUnit("1234", {
+        FormUnit("1234", {
           schema: z.string().pipe(z.coerce.number()),
         }),
     ],
@@ -84,7 +84,7 @@ describe("onSubmit(listener)", () => {
   })
 
   it("calls all listeners", () => {
-    const form = ImpulseFormUnit("value")
+    const form = FormUnit("value")
 
     const listener1 = vi.fn()
     const listener2 = vi.fn()
@@ -99,7 +99,7 @@ describe("onSubmit(listener)", () => {
   })
 
   it("subscribes the same listener only once", () => {
-    const form = ImpulseFormUnit("value")
+    const form = FormUnit("value")
 
     const listener = vi.fn()
 
@@ -112,7 +112,7 @@ describe("onSubmit(listener)", () => {
   })
 
   it("calls a listener on every submit", () => {
-    const form = ImpulseFormUnit("value")
+    const form = FormUnit("value")
 
     const listener = vi.fn()
 
@@ -126,7 +126,7 @@ describe("onSubmit(listener)", () => {
   })
 
   it("does not call a listener after it is unsubscribed", () => {
-    const form = ImpulseFormUnit("value")
+    const form = FormUnit("value")
 
     const listener = vi.fn()
 
@@ -145,7 +145,7 @@ describe("onSubmit(listener)", () => {
   })
 
   it("unsubscribes the same listener as many times as it's been subscribed", () => {
-    const form = ImpulseFormUnit("value")
+    const form = FormUnit("value")
 
     const listener = vi.fn()
 
@@ -172,8 +172,8 @@ describe("onSubmit(listener)", () => {
     expect(listener).not.toHaveBeenCalled()
   })
 
-  it("waits the slowest listener", async ({ scope }) => {
-    const form = ImpulseFormUnit("value")
+  it("waits the slowest listener", async ({ monitor }) => {
+    const form = FormUnit("value")
 
     const done1 = vi.fn()
     const done2 = vi.fn()
@@ -191,20 +191,20 @@ describe("onSubmit(listener)", () => {
     expect(done2).not.toHaveBeenCalled()
     expect(done3).not.toHaveBeenCalled()
     expect(allDone).not.toHaveBeenCalled()
-    expect(form.isSubmitting(scope)).toBe(true)
+    expect(form.isSubmitting(monitor)).toBe(true)
 
     await vi.advanceTimersByTimeAsync(0.25 * SLOWEST_ASYNC_MS)
     expect(done1).toHaveBeenCalledOnce()
     expect(done2).toHaveBeenCalledOnce()
     expect(done3).not.toHaveBeenCalled()
     expect(allDone).not.toHaveBeenCalled()
-    expect(form.isSubmitting(scope)).toBe(true)
+    expect(form.isSubmitting(monitor)).toBe(true)
 
     await vi.advanceTimersByTimeAsync(0.5 * SLOWEST_ASYNC_MS)
     expect(done1).toHaveBeenCalledOnce()
     expect(done2).toHaveBeenCalledOnce()
     expect(done3).toHaveBeenCalledOnce()
     expect(allDone).toHaveBeenCalledOnce()
-    expect(form.isSubmitting(scope)).toBe(false)
+    expect(form.isSubmitting(monitor)).toBe(false)
   })
 })

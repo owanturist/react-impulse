@@ -1,22 +1,28 @@
 import { batch } from "./batch"
 import type { Destructor } from "./destructor"
-import { type Scope, injectScope } from "./_internal/scope"
-import { ScopeFactory } from "./_internal/scope-factory"
+import type { Signal } from "./impulse"
+import { type Monitor, injectMonitor } from "./_internal/scope"
+import { MonitorFactory } from "./_internal/scope-factory"
 
 /**
- * A function that provides `Scope` as the first argument subscribes to changes of all `Impulse` instances that call the `Impulse#getValue` method inside the `listener`.
+ * A function that provides {@link Monitor} as the first argument subscribes to changes of all {@link Signal} instances that call the {@link Signal.read} method inside the {@link listener}.
  *
- * @param listener function that will be called on each `Impulse` change, involved in the `listener` execution. Calls first time synchronously when `subscribe` is called. If `listener` returns a function then it will be called before the next `listener` call.
- * @returns cleanup function that unsubscribes the `listener`
+ * @param listener Function that will be called on each {@link Signal} change, involved in the {@link listener} execution.
+ * Calls first time synchronously when {@link effect} is called.
+ * If {@link listener} returns a function then it will be called before the next {@link listener} call.
+ *
+ * @returns Dispose function that unsubscribes the {@link listener} from all involved {@link Signal} instances.
+ *
+ * @version 1.0.0
  */
-function subscribe(listener: (scope: Scope) => Destructor): VoidFunction {
-  let cleanup: Destructor
+function effect(listener: (monitor: Monitor) => Destructor): VoidFunction {
+  let dispose: Destructor
 
-  const factory = new ScopeFactory()
+  const factory = new MonitorFactory()
 
   const emit = (): void => {
-    cleanup?.()
-    cleanup = injectScope(listener, factory.create())
+    dispose?.()
+    dispose = injectMonitor(listener, factory.create())
   }
 
   const disconnect = factory.connect(emit)
@@ -26,9 +32,9 @@ function subscribe(listener: (scope: Scope) => Destructor): VoidFunction {
   return () => {
     batch(() => {
       disconnect()
-      cleanup?.()
+      dispose?.()
     })
   }
 }
 
-export { subscribe }
+export { effect }

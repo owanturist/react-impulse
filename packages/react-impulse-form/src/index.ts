@@ -1,7 +1,7 @@
 export type * from "./result"
 export * from "./validate-strategy"
 
-// IMPULSE FORM
+// SIGNAL FORM
 
 export type * from "./impulse-form/get-impulse-form-error"
 export type * from "./impulse-form/get-impulse-form-error-setter"
@@ -21,7 +21,7 @@ export type * from "./impulse-form/impulse-form"
 export type * from "./impulse-form/impulse-form-params"
 export * from "./impulse-form/is-impulse-form"
 
-// IMPULSE FORM UNIT
+// FORM UNIT
 
 export * from "./impulse-form-unit/impulse-form-unit"
 export type * from "./impulse-form-unit/impulse-form-unit-error-setter"
@@ -34,7 +34,7 @@ export type * from "./impulse-form-unit/impulse-form-unit-validator"
 export * from "./impulse-form-unit/is-impulse-form-unit"
 export type * from "./impulse-form-unit/zod-like-schema"
 
-// IMPULSE FORM SHAPE
+// FORM SHAPE
 
 export type * from "./impulse-form-shape/get-impulse-form-shape-param"
 export * from "./impulse-form-shape/impulse-form-shape"
@@ -55,11 +55,11 @@ export type * from "./impulse-form-shape/impulse-form-shape-validate-on-setter"
 export type * from "./impulse-form-shape/impulse-form-shape-validate-on-verbose"
 export * from "./impulse-form-shape/is-impulse-form-shape"
 
-// IMPULSE FORM META
+// FORM META
 
 export type * from "./impulse-form-meta"
 
-// IMPULSE FORM LIST
+// FORM LIST
 
 export * from "./impulse-form-list/impulse-form-list"
 export type * from "./impulse-form-list/impulse-form-list-error"
@@ -78,7 +78,7 @@ export type * from "./impulse-form-list/impulse-form-list-validate-on-setter"
 export type * from "./impulse-form-list/impulse-form-list-validate-on-verbose"
 export * from "./impulse-form-list/is-impulse-form-list"
 
-// IMPULSE FORM OPTIONAL
+// FORM OPTIONAL
 
 export * from "./impulse-form-optional/impulse-form-optional"
 export type * from "./impulse-form-optional/impulse-form-optional-error"
@@ -98,7 +98,7 @@ export type * from "./impulse-form-optional/impulse-form-optional-validate-on-se
 export type * from "./impulse-form-optional/impulse-form-optional-validate-on-verbose"
 export * from "./impulse-form-optional/is-impulse-form-optional"
 
-// IMPULSE FORM SWITCH
+// FORM SWITCH
 
 export type * from "./impulse-form-switch/get-impulse-form-switch-branches-param"
 export * from "./impulse-form-switch/impulse-form-switch"

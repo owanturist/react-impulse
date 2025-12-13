@@ -1,5 +1,5 @@
-import type { Scope } from "react-impulse"
+import type { Monitor } from "@owanturist/signal"
 
-type ImpulseFormMeta<TValue> = (scope: Scope) => TValue
+type FormMeta<TValue> = (monitor: Monitor) => TValue
 
-export type { ImpulseFormMeta }
+export type { FormMeta }

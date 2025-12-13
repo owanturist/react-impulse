@@ -1,17 +1,17 @@
-import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
+import { FormShape, FormUnit } from "../../src"
 
-it("selects input", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormUnit("1"),
-    second: ImpulseFormUnit(0),
-    third: ImpulseFormShape({
-      one: ImpulseFormUnit(true),
-      two: ImpulseFormUnit(["1"]),
+it("selects input", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormUnit("1"),
+    second: FormUnit(0),
+    third: FormShape({
+      one: FormUnit(true),
+      two: FormUnit(["1"]),
     }),
     fourth: ["anything"],
   })
 
-  const input0 = shape.getInput(scope)
+  const input0 = shape.getInput(monitor)
   expect(input0).toStrictEqual({
     first: "1",
     second: 0,
@@ -31,7 +31,7 @@ it("selects input", ({ scope }) => {
     }
     readonly fourth: Array<string>
   }>()
-  expectTypeOf(shape.fields.third.getInput(scope)).toEqualTypeOf<{
+  expectTypeOf(shape.fields.third.getInput(monitor)).toEqualTypeOf<{
     readonly one: boolean
     readonly two: Array<string>
   }>()
@@ -39,7 +39,7 @@ it("selects input", ({ scope }) => {
   shape.setInput({
     first: "12",
   })
-  const input1 = shape.getInput(scope)
+  const input1 = shape.getInput(monitor)
   expect(input1).toStrictEqual({
     first: "12",
     second: 0,
@@ -55,7 +55,7 @@ it("selects input", ({ scope }) => {
       two: ["1", "12"],
     },
   })
-  const input2 = shape.getInput(scope)
+  const input2 = shape.getInput(monitor)
   expect(input2).toStrictEqual({
     first: "12",
     second: 0,
@@ -67,32 +67,32 @@ it("selects input", ({ scope }) => {
   })
 })
 
-it("subsequently selects equal input shapes", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormUnit("1"),
-    second: ImpulseFormUnit(2),
+it("subsequently selects equal input shapes", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormUnit("1"),
+    second: FormUnit(2),
   })
 
-  expect(shape.getInput(scope)).toStrictEqual({
+  expect(shape.getInput(monitor)).toStrictEqual({
     first: "1",
     second: 2,
   })
-  expect(shape.getInput(scope)).toBe(shape.getInput(scope))
+  expect(shape.getInput(monitor)).toBe(shape.getInput(monitor))
 })
 
-it("persists unchanged input fields between changes", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormShape({
-      _1: ImpulseFormUnit("1"),
-      _2: ImpulseFormUnit("2"),
+it("persists unchanged input fields between changes", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormShape({
+      _1: FormUnit("1"),
+      _2: FormUnit("2"),
     }),
-    second: ImpulseFormShape({
-      _3: ImpulseFormUnit("3"),
-      _4: ImpulseFormUnit("4"),
+    second: FormShape({
+      _3: FormUnit("3"),
+      _4: FormUnit("4"),
     }),
   })
 
-  const input0 = shape.getInput(scope)
+  const input0 = shape.getInput(monitor)
   expect(input0).toStrictEqual({
     first: {
       _1: "1",
@@ -110,7 +110,7 @@ it("persists unchanged input fields between changes", ({ scope }) => {
     },
   })
 
-  const input1 = shape.getInput(scope)
+  const input1 = shape.getInput(monitor)
   expect(input1).toStrictEqual({
     first: {
       _1: "1",

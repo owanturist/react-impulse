@@ -1,4 +1,4 @@
-import { Impulse, type ReadonlyImpulse, type Scope } from "react-impulse"
+import { type Monitor, type ReadableSignal, Signal } from "@owanturist/signal"
 
 import { entries } from "~/tools/entries"
 import { hasProperty } from "~/tools/has-property"
@@ -11,57 +11,57 @@ import { Lazy } from "~/tools/lazy"
 import { mapValues } from "~/tools/map-values"
 import { values } from "~/tools/values"
 
-import type { GetImpulseFormParams } from "../../impulse-form/_internal/get-impulse-form-params"
+import type { GetSignalFormParams } from "../../impulse-form/_internal/get-impulse-form-params"
 import {
-  type ImpulseFormChild,
-  ImpulseFormState,
+  type SignalFormChild,
+  SignalFormState,
 } from "../../impulse-form/_internal/impulse-form-state"
-import type { ImpulseForm } from "../../impulse-form/impulse-form"
-import type { ImpulseFormParams } from "../../impulse-form/impulse-form-params"
+import type { SignalForm } from "../../impulse-form/impulse-form"
+import type { SignalFormParams } from "../../impulse-form/impulse-form-params"
 import type { ValidateStrategy } from "../../validate-strategy"
-import type { ImpulseFormSwitchBranch } from "../impulse-form-switch-branch"
-import type { ImpulseFormSwitchBranches } from "../impulse-form-switch-branches"
-import type { ImpulseFormSwitchError } from "../impulse-form-switch-error"
-import type { ImpulseFormSwitchErrorSetter } from "../impulse-form-switch-error-setter"
-import type { ImpulseFormSwitchErrorVerbose } from "../impulse-form-switch-error-verbose"
-import type { ImpulseFormSwitchFlag } from "../impulse-form-switch-flag"
-import type { ImpulseFormSwitchFlagSetter } from "../impulse-form-switch-flag-setter"
-import type { ImpulseFormSwitchFlagVerbose } from "../impulse-form-switch-flag-verbose"
-import type { ImpulseFormSwitchInput } from "../impulse-form-switch-input"
-import type { ImpulseFormSwitchInputSetter } from "../impulse-form-switch-input-setter"
-import type { ImpulseFormSwitchOutput } from "../impulse-form-switch-output"
-import type { ImpulseFormSwitchOutputVerbose } from "../impulse-form-switch-output-verbose"
-import type { ImpulseFormSwitchParams } from "../impulse-form-switch-params"
-import type { ImpulseFormSwitchValidateOn } from "../impulse-form-switch-validate-on"
-import type { ImpulseFormSwitchValidateOnSetter } from "../impulse-form-switch-validate-on-setter"
-import type { ImpulseFormSwitchValidateOnVerbose } from "../impulse-form-switch-validate-on-verbose"
+import type { FormSwitchBranch } from "../impulse-form-switch-branch"
+import type { FormSwitchBranches } from "../impulse-form-switch-branches"
+import type { FormSwitchError } from "../impulse-form-switch-error"
+import type { FormSwitchErrorSetter } from "../impulse-form-switch-error-setter"
+import type { FormSwitchErrorVerbose } from "../impulse-form-switch-error-verbose"
+import type { FormSwitchFlag } from "../impulse-form-switch-flag"
+import type { FormSwitchFlagSetter } from "../impulse-form-switch-flag-setter"
+import type { FormSwitchFlagVerbose } from "../impulse-form-switch-flag-verbose"
+import type { FormSwitchInput } from "../impulse-form-switch-input"
+import type { FormSwitchInputSetter } from "../impulse-form-switch-input-setter"
+import type { FormSwitchOutput } from "../impulse-form-switch-output"
+import type { FormSwitchOutputVerbose } from "../impulse-form-switch-output-verbose"
+import type { FormSwitchParams } from "../impulse-form-switch-params"
+import type { FormSwitchValidateOn } from "../impulse-form-switch-validate-on"
+import type { FormSwitchValidateOnSetter } from "../impulse-form-switch-validate-on-setter"
+import type { FormSwitchValidateOnVerbose } from "../impulse-form-switch-validate-on-verbose"
 
-import { ImpulseFormSwitch } from "./impulse-form-switch"
-import type { ImpulseFormSwitchConciseParam } from "./impulse-form-switch-concise-param"
-import type { ImpulseFormSwitchVerboseParam } from "./impulse-form-switch-verbose-param"
+import { FormSwitch } from "./impulse-form-switch"
+import type { FormSwitchConciseParam } from "./impulse-form-switch-concise-param"
+import type { FormSwitchVerboseParam } from "./impulse-form-switch-verbose-param"
 
-type ImpulseFormSwitchStateBranches<TBranches> = {
-  [TBranch in keyof TBranches]: ImpulseFormState<GetImpulseFormParams<TBranches[TBranch]>>
+type FormSwitchStateBranches<TBranches> = {
+  [TBranch in keyof TBranches]: SignalFormState<GetSignalFormParams<TBranches[TBranch]>>
 }
 
-type ActiveSwitchStateBranch<TBranches> = ImpulseFormSwitchBranch<
+type ActiveSwitchStateBranch<TBranches> = FormSwitchBranch<
   keyof TBranches,
-  ImpulseFormSwitchStateBranches<TBranches>[keyof TBranches]
+  FormSwitchStateBranches<TBranches>[keyof TBranches]
 >
 
-class ImpulseFormSwitchState<
-  TKind extends ImpulseForm,
-  TBranches extends ImpulseFormSwitchBranches<TKind>,
-> extends ImpulseFormState<ImpulseFormSwitchParams<TKind, TBranches>> {
-  public readonly _host = Lazy(() => new ImpulseFormSwitch(this))
+class FormSwitchState<
+  TKind extends SignalForm,
+  TBranches extends FormSwitchBranches<TKind>,
+> extends SignalFormState<FormSwitchParams<TKind, TBranches>> {
+  public readonly _host = Lazy(() => new FormSwitch(this))
 
-  public readonly _active: ImpulseFormState<GetImpulseFormParams<TKind>>
-  public readonly _branches: ImpulseFormSwitchStateBranches<TBranches>
+  public readonly _active: SignalFormState<GetSignalFormParams<TKind>>
+  public readonly _branches: FormSwitchStateBranches<TBranches>
 
   public constructor(
-    parent: null | ImpulseFormState,
-    active: ImpulseFormState<GetImpulseFormParams<TKind>>,
-    branches: ImpulseFormSwitchStateBranches<TBranches>,
+    parent: null | SignalFormState,
+    active: SignalFormState<GetSignalFormParams<TKind>>,
+    branches: FormSwitchStateBranches<TBranches>,
   ) {
     super(parent)
 
@@ -69,21 +69,21 @@ class ImpulseFormSwitchState<
     this._branches = mapValues(branches, (branch) => this._parentOf(branch))
   }
 
-  public _getActiveBranch(scope: Scope): undefined | ActiveSwitchStateBranch<TBranches> {
-    const kind = this._active._output.getValue(scope)
+  public _getActiveBranch(monitor: Monitor): undefined | ActiveSwitchStateBranch<TBranches> {
+    const kind = this._active._output.read(monitor)
     const value = isNull(kind) ? null : this._branches[kind]
 
     return value ? { kind, value } : undefined
   }
 
-  private _toConcise<TKey extends keyof ImpulseFormParams, TConcise>(
-    scope: Scope,
-    extract: (form: ImpulseFormState) => ReadonlyImpulse<TConcise>,
+  private _toConcise<TKey extends keyof SignalFormParams, TConcise>(
+    monitor: Monitor,
+    extract: (form: SignalFormState) => ReadableSignal<TConcise>,
     isConcise: (value: unknown) => value is TConcise,
     fallbackInvalid?: TConcise,
-  ): ImpulseFormSwitchConciseParam<TKind, TBranches, TKey, TConcise> {
-    const activeBranch = this._getActiveBranch(scope)
-    const activeConcise = extract(this._active).getValue(scope)
+  ): FormSwitchConciseParam<TKind, TBranches, TKey, TConcise> {
+    const activeBranch = this._getActiveBranch(monitor)
+    const activeConcise = extract(this._active).read(monitor)
 
     if (!activeBranch) {
       return isConcise(activeConcise) || isUndefined(fallbackInvalid)
@@ -91,7 +91,7 @@ class ImpulseFormSwitchState<
         : { active: activeConcise, branch: fallbackInvalid }
     }
 
-    const branchConcise = extract(activeBranch.value).getValue(scope)
+    const branchConcise = extract(activeBranch.value).read(monitor)
 
     if (isConcise(branchConcise) && isConcise(activeConcise) && branchConcise === activeConcise) {
       return activeConcise
@@ -108,37 +108,37 @@ class ImpulseFormSwitchState<
     }
   }
 
-  private _toVerbose<TKey extends keyof ImpulseFormParams>(
-    scope: Scope,
-    extract: (form: ImpulseFormState) => ReadonlyImpulse<unknown>,
-  ): ImpulseFormSwitchVerboseParam<TKind, TBranches, TKey> {
-    const active = extract(this._active).getValue(scope)
-    const branches = mapValues(this._branches, (branch) => extract(branch).getValue(scope))
+  private _toVerbose<TKey extends keyof SignalFormParams>(
+    monitor: Monitor,
+    extract: (form: SignalFormState) => ReadableSignal<unknown>,
+  ): FormSwitchVerboseParam<TKind, TBranches, TKey> {
+    const active = extract(this._active).read(monitor)
+    const branches = mapValues(this._branches, (branch) => extract(branch).read(monitor))
 
     return { active, branches }
   }
 
-  public _childOf(parent: null | ImpulseFormState): ImpulseFormSwitchState<TKind, TBranches> {
-    return new ImpulseFormSwitchState(parent, this._active, this._branches)
+  public _childOf(parent: null | SignalFormState): FormSwitchState<TKind, TBranches> {
+    return new FormSwitchState(parent, this._active, this._branches)
   }
 
   // I N I T I A L
 
-  public readonly _initial = Impulse(
-    (scope): ImpulseFormSwitchInput<TKind, TBranches> =>
-      this._toVerbose<"input.schema">(scope, ({ _initial }) => _initial),
+  public readonly _initial = Signal(
+    (monitor): FormSwitchInput<TKind, TBranches> =>
+      this._toVerbose<"input.schema">(monitor, ({ _initial }) => _initial),
   )
 
-  public _setInitial(scope: Scope, setter: ImpulseFormSwitchInputSetter<TKind, TBranches>): void {
-    const initial = Lazy(() => this._initial.getValue(scope))
-    const input = Lazy(() => this._input.getValue(scope))
+  public _setInitial(monitor: Monitor, setter: FormSwitchInputSetter<TKind, TBranches>): void {
+    const initial = Lazy(() => this._initial.read(monitor))
+    const input = Lazy(() => this._input.read(monitor))
 
     const { active, branches: branchesSetter } = isFunction(setter)
       ? setter(initial(), input())
       : setter
 
     if (!isUndefined(active)) {
-      this._active._setInitial(scope, active)
+      this._active._setInitial(monitor, active)
     }
 
     const branches = isFunction(branchesSetter)
@@ -147,40 +147,40 @@ class ImpulseFormSwitchState<
 
     for (const [kind, branch] of entries(this._branches)) {
       if (hasProperty(branches, kind) && !isUndefined(branches[kind])) {
-        branch._setInitial(scope, branches[kind])
+        branch._setInitial(monitor, branches[kind])
       }
     }
   }
 
   public _replaceInitial(
-    scope: Scope,
-    state: undefined | ImpulseFormSwitchState<TKind, TBranches>,
+    monitor: Monitor,
+    state: undefined | FormSwitchState<TKind, TBranches>,
     isMounting: boolean,
   ): void {
-    this._active._replaceInitial(scope, state?._active, isMounting)
+    this._active._replaceInitial(monitor, state?._active, isMounting)
 
     for (const [key, branch] of entries(this._branches)) {
-      branch._replaceInitial(scope, state?._branches[key], isMounting)
+      branch._replaceInitial(monitor, state?._branches[key], isMounting)
     }
   }
 
   // I N P U T
 
-  public readonly _input = Impulse(
-    (scope): ImpulseFormSwitchInput<TKind, TBranches> =>
-      this._toVerbose<"input.schema">(scope, ({ _input }) => _input),
+  public readonly _input = Signal(
+    (monitor): FormSwitchInput<TKind, TBranches> =>
+      this._toVerbose<"input.schema">(monitor, ({ _input }) => _input),
   )
 
-  public _setInput(scope: Scope, setter: ImpulseFormSwitchInputSetter<TKind, TBranches>): void {
-    const initial = Lazy(() => this._initial.getValue(scope))
-    const input = Lazy(() => this._input.getValue(scope))
+  public _setInput(monitor: Monitor, setter: FormSwitchInputSetter<TKind, TBranches>): void {
+    const initial = Lazy(() => this._initial.read(monitor))
+    const input = Lazy(() => this._input.read(monitor))
 
     const { active, branches: branchesSetter } = isFunction(setter)
       ? setter(input(), initial())
       : setter
 
     if (!isUndefined(active)) {
-      this._active._setInput(scope, active)
+      this._active._setInput(monitor, active)
     }
 
     const branches = isFunction(branchesSetter)
@@ -189,25 +189,25 @@ class ImpulseFormSwitchState<
 
     for (const [kind, branch] of entries(this._branches)) {
       if (hasProperty(branches, kind) && !isUndefined(branches[kind])) {
-        branch._setInput(scope, branches[kind])
+        branch._setInput(monitor, branches[kind])
       }
     }
   }
 
   // E R R O R
 
-  public readonly _error = Impulse(
-    (scope): ImpulseFormSwitchError<TKind, TBranches> =>
-      this._toConcise<"error.schema", null>(scope, ({ _error }) => _error, isNull, null),
+  public readonly _error = Signal(
+    (monitor): FormSwitchError<TKind, TBranches> =>
+      this._toConcise<"error.schema", null>(monitor, ({ _error }) => _error, isNull, null),
   )
 
-  public readonly _errorVerbose = Impulse(
-    (scope): ImpulseFormSwitchErrorVerbose<TKind, TBranches> =>
-      this._toVerbose<"error.schema.verbose">(scope, ({ _errorVerbose }) => _errorVerbose),
+  public readonly _errorVerbose = Signal(
+    (monitor): FormSwitchErrorVerbose<TKind, TBranches> =>
+      this._toVerbose<"error.schema.verbose">(monitor, ({ _errorVerbose }) => _errorVerbose),
   )
 
-  public _setError(scope: Scope, setter: ImpulseFormSwitchErrorSetter<TKind, TBranches>): void {
-    const verbose = Lazy(() => this._errorVerbose.getValue(scope))
+  public _setError(monitor: Monitor, setter: FormSwitchErrorSetter<TKind, TBranches>): void {
+    const verbose = Lazy(() => this._errorVerbose.read(monitor))
     const resolved = isFunction(setter) ? setter(verbose()) : setter
 
     const [activeSetter, branchSetter, branchesSetter] = isNull(resolved)
@@ -225,7 +225,7 @@ class ImpulseFormSwitchState<
         ]
 
     if (!isUndefined(activeSetter)) {
-      this._active._setError(scope, activeSetter)
+      this._active._setError(monitor, activeSetter)
     }
 
     for (const [kind, branch] of entries(this._branches)) {
@@ -236,34 +236,31 @@ class ImpulseFormSwitchState<
           : undefined
 
       if (!isUndefined(resolvedBranchSetter)) {
-        branch._setError(scope, resolvedBranchSetter)
+        branch._setError(monitor, resolvedBranchSetter)
       }
     }
 
     if (!isUndefined(branchSetter)) {
-      const activeBranch = this._getActiveBranch(scope)
+      const activeBranch = this._getActiveBranch(monitor)
 
       const activeBranchSetter = isFunction(branchSetter)
         ? activeBranch
           ? branchSetter({
               kind: activeBranch.kind,
-              value: activeBranch.value._errorVerbose.getValue(scope),
+              value: activeBranch.value._errorVerbose.read(monitor),
             })
           : undefined
         : branchSetter
 
       if (isNull(activeBranchSetter)) {
-        activeBranch?.value._setError(scope, activeBranchSetter)
+        activeBranch?.value._setError(monitor, activeBranchSetter)
       } else if (!isUndefined(activeBranchSetter)) {
-        const { kind, value } = activeBranchSetter as ImpulseFormSwitchBranch<
-          keyof TBranches,
-          unknown
-        >
+        const { kind, value } = activeBranchSetter as FormSwitchBranch<keyof TBranches, unknown>
 
         const targetBranch = hasProperty(this._branches, kind) ? this._branches[kind] : undefined
 
         if (targetBranch) {
-          targetBranch._setError(scope, value)
+          targetBranch._setError(monitor, value)
         }
       }
     }
@@ -271,28 +268,28 @@ class ImpulseFormSwitchState<
 
   // V A L I D A T E   O N
 
-  public readonly _validateOn = Impulse(
-    (scope): ImpulseFormSwitchValidateOn<TKind, TBranches> =>
+  public readonly _validateOn = Signal(
+    (monitor): FormSwitchValidateOn<TKind, TBranches> =>
       this._toConcise<"validateOn.schema", ValidateStrategy>(
-        scope,
+        monitor,
         ({ _validateOn }) => _validateOn,
         isString as (value: unknown) => value is ValidateStrategy,
       ),
   )
 
-  public readonly _validateOnVerbose = Impulse(
-    (scope): ImpulseFormSwitchValidateOnVerbose<TKind, TBranches> =>
+  public readonly _validateOnVerbose = Signal(
+    (monitor): FormSwitchValidateOnVerbose<TKind, TBranches> =>
       this._toVerbose<"validateOn.schema.verbose">(
-        scope,
+        monitor,
         ({ _validateOnVerbose }) => _validateOnVerbose,
       ),
   )
 
   public _setValidateOn(
-    scope: Scope,
-    setter: ImpulseFormSwitchValidateOnSetter<TKind, TBranches>,
+    monitor: Monitor,
+    setter: FormSwitchValidateOnSetter<TKind, TBranches>,
   ): void {
-    const verbose = Lazy(() => this._validateOnVerbose.getValue(scope))
+    const verbose = Lazy(() => this._validateOnVerbose.read(monitor))
     const resolved = isFunction(setter) ? setter(verbose()) : setter
 
     const [activeSetter, branchSetter, branchesSetter] = isString(resolved)
@@ -310,7 +307,7 @@ class ImpulseFormSwitchState<
         ]
 
     if (!isUndefined(activeSetter)) {
-      this._active._setValidateOn(scope, activeSetter)
+      this._active._setValidateOn(monitor, activeSetter)
     }
 
     for (const [kind, branch] of entries(this._branches)) {
@@ -321,33 +318,30 @@ class ImpulseFormSwitchState<
           : undefined
 
       if (!isUndefined(resolvedBranchSetter)) {
-        branch._setValidateOn(scope, resolvedBranchSetter)
+        branch._setValidateOn(monitor, resolvedBranchSetter)
       }
     }
 
     if (!isUndefined(branchSetter)) {
-      const activeBranch = this._getActiveBranch(scope)
+      const activeBranch = this._getActiveBranch(monitor)
 
       const activeBranchSetter = isFunction(branchSetter)
         ? activeBranch
           ? branchSetter({
               kind: activeBranch.kind,
-              value: activeBranch.value._validateOnVerbose.getValue(scope),
+              value: activeBranch.value._validateOnVerbose.read(monitor),
             })
           : undefined
         : branchSetter
 
       if (isString(activeBranchSetter)) {
-        activeBranch?.value._setValidateOn(scope, activeBranchSetter)
+        activeBranch?.value._setValidateOn(monitor, activeBranchSetter)
       } else if (!isUndefined(activeBranchSetter)) {
-        const { kind, value } = activeBranchSetter as ImpulseFormSwitchBranch<
-          keyof TBranches,
-          unknown
-        >
+        const { kind, value } = activeBranchSetter as FormSwitchBranch<keyof TBranches, unknown>
         const targetBranch = hasProperty(this._branches, kind) ? this._branches[kind] : undefined
 
         if (targetBranch) {
-          targetBranch._setValidateOn(scope, value)
+          targetBranch._setValidateOn(monitor, value)
         }
       }
     }
@@ -355,18 +349,18 @@ class ImpulseFormSwitchState<
 
   // T O U C H E D
 
-  public readonly _touched = Impulse(
-    (scope): ImpulseFormSwitchFlag<TKind, TBranches> =>
-      this._toConcise<"flag.schema", boolean>(scope, ({ _touched }) => _touched, isBoolean),
+  public readonly _touched = Signal(
+    (monitor): FormSwitchFlag<TKind, TBranches> =>
+      this._toConcise<"flag.schema", boolean>(monitor, ({ _touched }) => _touched, isBoolean),
   )
 
-  public readonly _touchedVerbose = Impulse(
-    (scope): ImpulseFormSwitchFlagVerbose<TKind, TBranches> =>
-      this._toVerbose<"flag.schema.verbose">(scope, ({ _touchedVerbose }) => _touchedVerbose),
+  public readonly _touchedVerbose = Signal(
+    (monitor): FormSwitchFlagVerbose<TKind, TBranches> =>
+      this._toVerbose<"flag.schema.verbose">(monitor, ({ _touchedVerbose }) => _touchedVerbose),
   )
 
-  public _setTouched(scope: Scope, setter: ImpulseFormSwitchFlagSetter<TKind, TBranches>): void {
-    const verbose = Lazy(() => this._touchedVerbose.getValue(scope))
+  public _setTouched(monitor: Monitor, setter: FormSwitchFlagSetter<TKind, TBranches>): void {
+    const verbose = Lazy(() => this._touchedVerbose.read(monitor))
     const resolved = isFunction(setter) ? setter(verbose()) : setter
 
     const [activeSetter, branchSetter, branchesSetter] = isBoolean(resolved)
@@ -384,7 +378,7 @@ class ImpulseFormSwitchState<
         ]
 
     if (!isUndefined(activeSetter)) {
-      this._active._setTouched(scope, activeSetter)
+      this._active._setTouched(monitor, activeSetter)
     }
 
     for (const [kind, branch] of entries(this._branches)) {
@@ -395,33 +389,30 @@ class ImpulseFormSwitchState<
           : undefined
 
       if (!isUndefined(resolvedBranchSetter)) {
-        branch._setTouched(scope, resolvedBranchSetter)
+        branch._setTouched(monitor, resolvedBranchSetter)
       }
     }
 
     if (!isUndefined(branchSetter)) {
-      const activeBranch = this._getActiveBranch(scope)
+      const activeBranch = this._getActiveBranch(monitor)
 
       const activeBranchSetter = isFunction(branchSetter)
         ? activeBranch
           ? branchSetter({
               kind: activeBranch.kind,
-              value: activeBranch.value._touchedVerbose.getValue(scope),
+              value: activeBranch.value._touchedVerbose.read(monitor),
             })
           : undefined
         : branchSetter
 
       if (isBoolean(activeBranchSetter)) {
-        activeBranch?.value._setTouched(scope, activeBranchSetter)
+        activeBranch?.value._setTouched(monitor, activeBranchSetter)
       } else if (!isUndefined(activeBranchSetter)) {
-        const { kind, value } = activeBranchSetter as ImpulseFormSwitchBranch<
-          keyof TBranches,
-          unknown
-        >
+        const { kind, value } = activeBranchSetter as FormSwitchBranch<keyof TBranches, unknown>
         const targetBranch = hasProperty(this._branches, kind) ? this._branches[kind] : undefined
 
         if (targetBranch) {
-          targetBranch._setTouched(scope, value)
+          targetBranch._setTouched(monitor, value)
         }
       }
     }
@@ -429,14 +420,14 @@ class ImpulseFormSwitchState<
 
   // O U T P U T
 
-  public readonly _output = Impulse((scope): null | ImpulseFormSwitchOutput<TKind, TBranches> => {
-    const activeBranch = this._getActiveBranch(scope)
+  public readonly _output = Signal((monitor): null | FormSwitchOutput<TKind, TBranches> => {
+    const activeBranch = this._getActiveBranch(monitor)
 
     if (!activeBranch) {
       return null
     }
 
-    const value = activeBranch.value._output.getValue(scope)
+    const value = activeBranch.value._output.read(monitor)
 
     if (isNull(value)) {
       return null
@@ -448,102 +439,102 @@ class ImpulseFormSwitchState<
     }
   })
 
-  public readonly _outputVerbose = Impulse(
-    (scope): ImpulseFormSwitchOutputVerbose<TKind, TBranches> =>
-      this._toVerbose(scope, ({ _output }) => _output),
+  public readonly _outputVerbose = Signal(
+    (monitor): FormSwitchOutputVerbose<TKind, TBranches> =>
+      this._toVerbose(monitor, ({ _output }) => _output),
   )
 
   // V A L I D
 
-  public readonly _valid = Impulse(
-    (scope): ImpulseFormSwitchFlag<TKind, TBranches> =>
-      this._toConcise<"flag.schema", boolean>(scope, ({ _valid }) => _valid, isBoolean),
+  public readonly _valid = Signal(
+    (monitor): FormSwitchFlag<TKind, TBranches> =>
+      this._toConcise<"flag.schema", boolean>(monitor, ({ _valid }) => _valid, isBoolean),
   )
 
-  public readonly _validVerbose = Impulse(
-    (scope): ImpulseFormSwitchFlagVerbose<TKind, TBranches> =>
-      this._toVerbose<"flag.schema.verbose">(scope, ({ _validVerbose }) => _validVerbose),
+  public readonly _validVerbose = Signal(
+    (monitor): FormSwitchFlagVerbose<TKind, TBranches> =>
+      this._toVerbose<"flag.schema.verbose">(monitor, ({ _validVerbose }) => _validVerbose),
   )
 
   // I N V A L I D
 
-  public readonly _invalid = Impulse(
-    (scope): ImpulseFormSwitchFlag<TKind, TBranches> =>
-      this._toConcise<"flag.schema", boolean>(scope, ({ _invalid }) => _invalid, isBoolean),
+  public readonly _invalid = Signal(
+    (monitor): FormSwitchFlag<TKind, TBranches> =>
+      this._toConcise<"flag.schema", boolean>(monitor, ({ _invalid }) => _invalid, isBoolean),
   )
 
-  public readonly _invalidVerbose = Impulse(
-    (scope): ImpulseFormSwitchFlagVerbose<TKind, TBranches> =>
-      this._toVerbose<"flag.schema.verbose">(scope, ({ _invalidVerbose }) => _invalidVerbose),
+  public readonly _invalidVerbose = Signal(
+    (monitor): FormSwitchFlagVerbose<TKind, TBranches> =>
+      this._toVerbose<"flag.schema.verbose">(monitor, ({ _invalidVerbose }) => _invalidVerbose),
   )
 
   // V A L I D A T E D
 
-  public readonly _validated = Impulse(
-    (scope): ImpulseFormSwitchFlag<TKind, TBranches> =>
-      this._toConcise<"flag.schema", boolean>(scope, ({ _validated }) => _validated, isBoolean),
+  public readonly _validated = Signal(
+    (monitor): FormSwitchFlag<TKind, TBranches> =>
+      this._toConcise<"flag.schema", boolean>(monitor, ({ _validated }) => _validated, isBoolean),
   )
 
-  public readonly _validatedVerbose = Impulse(
-    (scope): ImpulseFormSwitchFlagVerbose<TKind, TBranches> =>
-      this._toVerbose<"flag.schema.verbose">(scope, ({ _validatedVerbose }) => _validatedVerbose),
+  public readonly _validatedVerbose = Signal(
+    (monitor): FormSwitchFlagVerbose<TKind, TBranches> =>
+      this._toVerbose<"flag.schema.verbose">(monitor, ({ _validatedVerbose }) => _validatedVerbose),
   )
 
-  public _forceValidated(scope: Scope): void {
-    this._active._forceValidated(scope)
-    this._getActiveBranch(scope)?.value._forceValidated(scope)
+  public _forceValidated(monitor: Monitor): void {
+    this._active._forceValidated(monitor)
+    this._getActiveBranch(monitor)?.value._forceValidated(monitor)
   }
 
   // D I R T Y
 
-  public readonly _dirty = Impulse(
-    (scope): ImpulseFormSwitchFlag<TKind, TBranches> =>
-      this._toConcise<"flag.schema", boolean>(scope, ({ _dirty }) => _dirty, isBoolean),
+  public readonly _dirty = Signal(
+    (monitor): FormSwitchFlag<TKind, TBranches> =>
+      this._toConcise<"flag.schema", boolean>(monitor, ({ _dirty }) => _dirty, isBoolean),
   )
 
-  public readonly _dirtyVerbose = Impulse(
-    (scope): ImpulseFormSwitchFlagVerbose<TKind, TBranches> =>
-      this._toVerbose<"flag.schema.verbose">(scope, ({ _dirtyVerbose }) => _dirtyVerbose),
+  public readonly _dirtyVerbose = Signal(
+    (monitor): FormSwitchFlagVerbose<TKind, TBranches> =>
+      this._toVerbose<"flag.schema.verbose">(monitor, ({ _dirtyVerbose }) => _dirtyVerbose),
   )
 
-  public readonly _dirtyOn = Impulse(
-    (scope): ImpulseFormSwitchFlag<TKind, TBranches> =>
-      this._toConcise<"flag.schema", boolean>(scope, ({ _dirtyOn }) => _dirtyOn, isBoolean),
+  public readonly _dirtyOn = Signal(
+    (monitor): FormSwitchFlag<TKind, TBranches> =>
+      this._toConcise<"flag.schema", boolean>(monitor, ({ _dirtyOn }) => _dirtyOn, isBoolean),
   )
 
-  public readonly _dirtyOnVerbose = Impulse(
-    (scope): ImpulseFormSwitchFlagVerbose<TKind, TBranches> =>
-      this._toVerbose<"flag.schema.verbose">(scope, ({ _dirtyOnVerbose }) => _dirtyOnVerbose),
+  public readonly _dirtyOnVerbose = Signal(
+    (monitor): FormSwitchFlagVerbose<TKind, TBranches> =>
+      this._toVerbose<"flag.schema.verbose">(monitor, ({ _dirtyOnVerbose }) => _dirtyOnVerbose),
   )
 
   // R E S E T
 
   public _reset(
-    scope: Scope,
-    resetter: undefined | ImpulseFormSwitchInputSetter<TKind, TBranches>,
+    monitor: Monitor,
+    resetter: undefined | FormSwitchInputSetter<TKind, TBranches>,
   ): void {
     if (!isUndefined(resetter)) {
-      this._setInitial(scope, resetter)
+      this._setInitial(monitor, resetter)
     }
 
-    this._active._reset(scope, undefined)
+    this._active._reset(monitor, undefined)
 
     for (const branch of values(this._branches)) {
-      branch._reset(scope, undefined)
+      branch._reset(monitor, undefined)
     }
   }
 
   // C H I L D R E N
 
-  public _getChildren<TChildParams extends ImpulseFormParams>(
-    scope: Scope,
-  ): ReadonlyArray<ImpulseFormChild<TChildParams, ImpulseFormSwitchParams<TKind, TBranches>>> {
-    const activeChild: ImpulseFormChild<TChildParams, ImpulseFormSwitchParams<TKind, TBranches>> = {
-      _state: this._active as unknown as ImpulseFormState<TChildParams>,
+  public _getChildren<TChildParams extends SignalFormParams>(
+    monitor: Monitor,
+  ): ReadonlyArray<SignalFormChild<TChildParams, FormSwitchParams<TKind, TBranches>>> {
+    const activeChild: SignalFormChild<TChildParams, FormSwitchParams<TKind, TBranches>> = {
+      _state: this._active as unknown as SignalFormState<TChildParams>,
       _mapToChild: (output) => output.kind,
     }
 
-    const activeBranch = this._getActiveBranch(scope)
+    const activeBranch = this._getActiveBranch(monitor)
 
     if (!activeBranch) {
       return [activeChild]
@@ -552,11 +543,11 @@ class ImpulseFormSwitchState<
     return [
       activeChild,
       {
-        _state: activeBranch.value as unknown as ImpulseFormState<TChildParams>,
+        _state: activeBranch.value as unknown as SignalFormState<TChildParams>,
         _mapToChild: (output) => output.value,
       },
     ]
   }
 }
 
-export { ImpulseFormSwitchState }
+export { FormSwitchState }

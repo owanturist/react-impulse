@@ -1,18 +1,18 @@
 import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
-import { ImpulseFormShape, ImpulseFormUnit } from "../../src"
+import { FormShape, FormUnit } from "../../src"
 
-it("specifies error", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormUnit("", { error: ["first"] }),
-    second: ImpulseFormUnit(0, { error: ["second"] }),
-    third: ImpulseFormShape(
+it("specifies error", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormUnit("", { error: ["first"] }),
+    second: FormUnit(0, { error: ["second"] }),
+    third: FormShape(
       {
-        one: ImpulseFormUnit(true, {
+        one: FormUnit(true, {
           validate: (input) => (input ? [null, input] : ["must be true", null]),
         }),
-        two: ImpulseFormUnit([""], { error: "an error" }),
+        two: FormUnit([""], { error: "an error" }),
       },
       {
         error: {
@@ -24,7 +24,7 @@ it("specifies error", ({ scope }) => {
     fourth: ["anything"],
   })
 
-  expect(shape.getError(scope)).toStrictEqual({
+  expect(shape.getError(monitor)).toStrictEqual({
     first: ["first"],
     second: ["second"],
     third: {
@@ -38,12 +38,12 @@ it("specifies error", ({ scope }) => {
     second: undefined,
     third: null,
   })
-  expect(shape.getError(scope)).toStrictEqual({
+  expect(shape.getError(monitor)).toStrictEqual({
     first: ["another"],
     second: ["second"],
     third: null,
   })
-  expect(shape.getError(scope, params._second)).toStrictEqual({
+  expect(shape.getError(monitor, params._second)).toStrictEqual({
     first: ["another"],
     second: ["second"],
     third: {
@@ -118,7 +118,7 @@ it("specifies error", ({ scope }) => {
     }
   })
 
-  expect(shape.getError(scope)).toStrictEqual({
+  expect(shape.getError(monitor)).toStrictEqual({
     first: ["another", "1"],
     second: ["second", "2"],
     third: {
@@ -174,16 +174,16 @@ it("specifies error", ({ scope }) => {
   >()
 })
 
-it("resets all errors", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormUnit("", { error: ["first"] }),
-    second: ImpulseFormUnit(0, { error: ["second"] }),
-    third: ImpulseFormShape(
+it("resets all errors", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormUnit("", { error: ["first"] }),
+    second: FormUnit(0, { error: ["second"] }),
+    third: FormShape(
       {
-        one: ImpulseFormUnit(true, {
+        one: FormUnit(true, {
           validate: (input) => (input ? [null, input] : [1, null]),
         }),
-        two: ImpulseFormUnit([""], { error: "an error" }),
+        two: FormUnit([""], { error: "an error" }),
       },
       {
         error: {
@@ -196,5 +196,5 @@ it("resets all errors", ({ scope }) => {
   })
 
   shape.setError(null)
-  expect(shape.getError(scope)).toBeNull()
+  expect(shape.getError(monitor)).toBeNull()
 })

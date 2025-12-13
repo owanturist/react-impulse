@@ -1,14 +1,13 @@
-import type { Compare } from "../compare"
+import type { Equal } from "../compare"
 
-import { BaseImpulse } from "./base-impulse"
-import { STATIC_SCOPE } from "./scope"
+import { BaseSignal } from "./base-impulse"
 
-class Impulse<T> extends BaseImpulse<T> {
+class Signal<T> extends BaseSignal<T> {
   public constructor(
     private _value: T,
-    compare: Compare<T>,
+    equals: Equal<T>,
   ) {
-    super(compare)
+    super(equals)
   }
 
   protected _getter(): T {
@@ -16,7 +15,7 @@ class Impulse<T> extends BaseImpulse<T> {
   }
 
   protected _setter(value: T): boolean {
-    if (!this._compare(this._value, value, STATIC_SCOPE)) {
+    if (!this._equals(this._value, value)) {
       this._value = value
 
       return true
@@ -25,9 +24,9 @@ class Impulse<T> extends BaseImpulse<T> {
     return false
   }
 
-  protected _clone(value: T, compare: Compare<T>): Impulse<T> {
-    return new Impulse(value, compare)
+  protected _clone(value: T, equals: Equal<T>): Signal<T> {
+    return new Signal(value, equals)
   }
 }
 
-export { Impulse }
+export { Signal }

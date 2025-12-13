@@ -1,77 +1,77 @@
-import { Impulse } from "../src"
+import { Signal } from "../src"
 
 import { Counter } from "./common"
 
-describe("Impulse()", () => {
-  it("creates an Impulse of undefined | T type", () => {
-    const impulse = Impulse<string>()
+describe("Signal()", () => {
+  it("creates an Signal of undefined | T type", () => {
+    const signal = Signal<string>()
 
-    expectTypeOf(impulse).toEqualTypeOf<Impulse<string | undefined>>()
+    expectTypeOf(signal).toEqualTypeOf<Signal<string | undefined>>()
   })
 
-  it("should create an impulse with undefined initial value", ({ scope }) => {
-    const impulse = Impulse<number>()
+  it("should create an signal with undefined initial value", ({ monitor }) => {
+    const signal = Signal<number>()
 
-    expect(impulse.getValue(scope)).toBeUndefined()
+    expect(signal.read(monitor)).toBeUndefined()
   })
 
-  it("updates the impulse with a new value", ({ scope }) => {
-    const impulse = Impulse<number>()
+  it("updates the signal with a new value", ({ monitor }) => {
+    const signal = Signal<number>()
 
-    impulse.setValue(1)
+    signal.write(1)
 
-    expect(impulse.getValue(scope)).toBe(1)
+    expect(signal.read(monitor)).toBe(1)
   })
 
-  it("updates the impulse with a undefined", ({ scope }) => {
-    const impulse = Impulse<number>()
+  it("updates the signal with a undefined", ({ monitor }) => {
+    const signal = Signal<number>()
 
-    impulse.setValue(1)
-    impulse.setValue(undefined)
+    signal.write(1)
+    signal.write(undefined)
 
-    expect(impulse.getValue(scope)).toBeUndefined()
+    expect(signal.read(monitor)).toBeUndefined()
   })
 })
 
-describe("Impulse(value, options?)", () => {
-  it("does not call compare on init", () => {
-    Impulse({ count: 0 }, { compare: Counter.compare })
+describe("Signal(value, options?)", () => {
+  it("does not call equals on init", () => {
+    Signal({ count: 0 }, { equals: Counter.equals })
 
-    expect(Counter.compare).not.toHaveBeenCalled()
+    expect(Counter.equals).not.toHaveBeenCalled()
   })
 
-  it("assigns Object.is as default compare", () => {
-    const impulse = Impulse({ count: 0 })
+  it("assigns Object.is as default equals", () => {
+    const signal = Signal({ count: 0 })
 
-    impulse.setValue({ count: 1 })
+    signal.write({ count: 1 })
     expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
-  it("assigns Object.is by `null` as compare", () => {
-    const impulse = Impulse({ count: 0 }, { compare: null })
+  it("assigns Object.is by `null` as equals", () => {
+    const signal = Signal({ count: 0 }, { equals: null })
 
-    impulse.setValue({ count: 1 })
+    signal.write({ count: 1 })
     expect(Object.is).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
-  it("assigns custom function as compare", ({ scope }) => {
-    const impulse = Impulse({ count: 0 }, { compare: Counter.compare })
+  it("assigns custom function as equals", () => {
+    const signal = Signal({ count: 0 }, { equals: Counter.equals })
 
-    impulse.setValue({ count: 1 })
-    expect(Counter.compare).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 }, scope)
+    signal.write({ count: 1 })
+    expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
   })
 
-  it("carries the function value wrapped in an object", ({ scope }) => {
-    const impulse = Impulse({ fn: (input: number) => input })
+  it("carries the function value wrapped in an object", ({ monitor }) => {
+    const signal = Signal({ fn: (input: number) => input })
 
-    expectTypeOf(impulse).toEqualTypeOf<
-      Impulse<{
+    expectTypeOf(signal).toEqualTypeOf<
+      Signal<{
         fn: (input: number) => number
       }>
     >()
-    expectTypeOf(impulse.getValue(scope)).toEqualTypeOf<{
+    expectTypeOf(signal.read(monitor)).toEqualTypeOf<{
       fn: (input: number) => number
     }>()
-    expect(impulse.getValue(scope).fn(42)).toBe(42)
+    expect(signal.read(monitor).fn(42)).toBe(42)
   })
 })

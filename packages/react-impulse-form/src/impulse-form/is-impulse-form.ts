@@ -1,7 +1,7 @@
-import { ImpulseForm } from "./_internal/impulse-form"
+import { SignalForm } from "./_internal/impulse-form"
 
-function isImpulseForm(value: unknown): value is ImpulseForm {
-  return value instanceof ImpulseForm
+function isSignalForm(value: unknown): value is SignalForm {
+  return value instanceof SignalForm
 }
 
-export { isImpulseForm }
+export { isSignalForm }

@@ -1,8 +1,8 @@
-import type { GetImpulseFormOutputVerbose } from "../impulse-form/get-impulse-form-output-verbose"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetSignalFormOutputVerbose } from "../impulse-form/get-impulse-form-output-verbose"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-type ImpulseFormListOutputVerbose<TElement extends ImpulseForm> = ReadonlyArray<
-  GetImpulseFormOutputVerbose<TElement>
+type FormListOutputVerbose<TElement extends SignalForm> = ReadonlyArray<
+  GetSignalFormOutputVerbose<TElement>
 >
 
-export type { ImpulseFormListOutputVerbose }
+export type { FormListOutputVerbose }

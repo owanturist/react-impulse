@@ -1,12 +1,14 @@
-import type { Scope } from "./_internal/scope"
-
 /**
- * A function that compares two values and returns `true` if they are equal.
- * Depending on the type of the values it might be reasonable to use
- * a custom compare function such as shallow-equal or deep-equal.
+ * The equality check function.
+ *
+ *
+ * @template T the type of values to compare.
+ * @param left the first value to compare.
+ * @param right the second value to compare.
+ * @returns `true` if the two values are considered equal, otherwise `false`.
  *
  * @version 1.0.0
  */
-type Compare<T> = (left: T, right: T, scope: Scope) => boolean
+type Equal<T> = (left: T, right: T) => boolean
 
-export type { Compare }
+export type { Equal }

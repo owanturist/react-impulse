@@ -1,9 +1,6 @@
-import type { GetImpulseFormShapeParam } from "./get-impulse-form-shape-param"
-import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
+import type { GetFormShapeParam } from "./get-impulse-form-shape-param"
+import type { FormShapeFields } from "./impulse-form-shape-fields"
 
-type ImpulseFormShapeInput<TFields extends ImpulseFormShapeFields> = GetImpulseFormShapeParam<
-  TFields,
-  "input.schema"
->
+type FormShapeInput<TFields extends FormShapeFields> = GetFormShapeParam<TFields, "input.schema">
 
-export type { ImpulseFormShapeInput }
+export type { FormShapeInput }

@@ -1,6 +1,6 @@
-import type { GetImpulseFormParam } from "./get-impulse-form-param"
-import type { ImpulseForm } from "./impulse-form"
+import type { GetSignalFormParam } from "./get-impulse-form-param"
+import type { SignalForm } from "./impulse-form"
 
-type GetImpulseFormFlag<TForm extends ImpulseForm> = GetImpulseFormParam<TForm, "flag.schema">
+type GetSignalFormFlag<TForm extends SignalForm> = GetSignalFormParam<TForm, "flag.schema">
 
-export type { GetImpulseFormFlag }
+export type { GetSignalFormFlag }

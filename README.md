@@ -1,6 +1,6 @@
-# Welcome to the `react-impulse` monorepo!
+# Welcome to the `@owanturist/signal` monorepo!
 
 Below are links to the various packages in this monorepo:
 
-- [`react-impulse`](./packages/react-impulse/README.md)
-- [`react-impulse-form`](./packages/react-impulse-form/README.md)
+- [`@owanturist/signal`](./packages/react-impulse/README.md)
+- [`@owanturist/signal-form`](./packages/react-impulse-form/README.md)

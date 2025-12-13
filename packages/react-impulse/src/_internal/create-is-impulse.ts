@@ -1,18 +1,18 @@
-import type { BaseImpulse } from "./base-impulse"
-import type { Scope } from "./scope"
+import type { BaseSignal } from "./base-impulse"
+import type { Monitor } from "./scope"
 
-function createIsImpulse(isImpulse: (input: unknown) => input is BaseImpulse<unknown>) {
+function createIsSignal(isSignal: (input: unknown) => input is BaseSignal<unknown>) {
   return (
-    ...[inputOrScope, maybeCheck, maybeInput]:
+    ...[inputOrMonitor, maybeCheck, maybeInput]:
       | [input: unknown]
-      | [scope: Scope, check: (input: unknown) => boolean, input: unknown]
+      | [monitor: Monitor, check: (input: unknown) => boolean, input: unknown]
   ): boolean => {
     if (!maybeCheck) {
-      return isImpulse(inputOrScope)
+      return isSignal(inputOrMonitor)
     }
 
-    if (isImpulse(maybeInput)) {
-      const value = maybeInput.getValue(inputOrScope as Scope)
+    if (isSignal(maybeInput)) {
+      const value = maybeInput.read(inputOrMonitor as Monitor)
 
       return maybeCheck(value)
     }
@@ -21,4 +21,4 @@ function createIsImpulse(isImpulse: (input: unknown) => input is BaseImpulse<unk
   }
 }
 
-export { createIsImpulse }
+export { createIsSignal }

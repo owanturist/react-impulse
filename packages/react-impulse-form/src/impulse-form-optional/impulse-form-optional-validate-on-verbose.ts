@@ -1,10 +1,10 @@
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-import type { ImpulseFormOptionalParam } from "./_internal/impulse-form-optional-param"
+import type { FormOptionalParam } from "./_internal/impulse-form-optional-param"
 
-type ImpulseFormOptionalValidateOnVerbose<
-  TEnabled extends ImpulseForm,
-  TElement extends ImpulseForm,
-> = ImpulseFormOptionalParam<TEnabled, TElement, "validateOn.schema.verbose">
+type FormOptionalValidateOnVerbose<
+  TEnabled extends SignalForm,
+  TElement extends SignalForm,
+> = FormOptionalParam<TEnabled, TElement, "validateOn.schema.verbose">
 
-export type { ImpulseFormOptionalValidateOnVerbose }
+export type { FormOptionalValidateOnVerbose }

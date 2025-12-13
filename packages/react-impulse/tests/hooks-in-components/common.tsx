@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import React from "react"
 
-import { type Impulse, useScoped } from "../../src"
+import { type Signal, useComputed } from "../../src"
 
 function withinNth(testId: string, position: number) {
   return within(screen.getAllByTestId(testId)[position]!)
@@ -18,11 +18,11 @@ function expectCounts(expecting: ReadonlyArray<number>): void {
 }
 
 const CounterComponent = React.memo<{
-  count: Impulse<number>
+  count: Signal<number>
   onRender: VoidFunction
 }>(
-  ({ count: countImpulse, onRender }) => {
-    const count = useScoped((scope) => countImpulse.getValue(scope))
+  ({ count: countSignal, onRender }) => {
+    const count = useComputed((monitor) => countSignal.read(monitor))
 
     return (
       <React.Profiler id="test" onRender={onRender}>
@@ -31,7 +31,7 @@ const CounterComponent = React.memo<{
           <button
             type="button"
             data-testid="increment"
-            onClick={() => countImpulse.setValue(count + 1)}
+            onClick={() => countSignal.write(count + 1)}
           />
         </div>
       </React.Profiler>

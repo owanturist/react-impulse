@@ -3,22 +3,22 @@ import z from "zod"
 import { isShallowArrayEqual } from "~/tools/is-shallow-array-equal"
 import { params } from "~/tools/params"
 
-import { ImpulseFormShape, ImpulseFormSwitch, ImpulseFormUnit } from "../../src"
+import { FormShape, FormSwitch, FormUnit } from "../../src"
 
 describe("types", () => {
-  const form = ImpulseFormSwitch(
-    ImpulseFormUnit("", {
+  const form = FormSwitch(
+    FormUnit("", {
       schema: z.enum(["_1", "_2", "_5"]),
     }),
     {
-      _1: ImpulseFormUnit(true, {
+      _1: FormUnit(true, {
         schema: z.boolean().transform((value): string => (value ? "ok" : "not ok")),
       }),
-      _2: ImpulseFormShape({
-        _3: ImpulseFormUnit("name"),
-        _4: ImpulseFormUnit(18),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18),
       }),
-      _5: ImpulseFormUnit("excluded"),
+      _5: FormUnit("excluded"),
     },
   )
 
@@ -51,22 +51,22 @@ describe("types", () => {
     }
   }
 
-  it("matches schema type for getOutput(scope, select?)", ({ scope }) => {
-    expectTypeOf(form.getOutput(scope)).toEqualTypeOf<null | OutputSchema>()
+  it("matches schema type for getOutput(monitor, select?)", ({ monitor }) => {
+    expectTypeOf(form.getOutput(monitor)).toEqualTypeOf<null | OutputSchema>()
 
-    expectTypeOf(form.getOutput(scope, params._first)).toEqualTypeOf<null | OutputSchema>()
+    expectTypeOf(form.getOutput(monitor, params._first)).toEqualTypeOf<null | OutputSchema>()
 
-    expectTypeOf(form.getOutput(scope, params._second)).toEqualTypeOf<OutputVerboseSchema>()
+    expectTypeOf(form.getOutput(monitor, params._second)).toEqualTypeOf<OutputVerboseSchema>()
   })
 
   describe("nested", () => {
-    const parent = ImpulseFormSwitch(
-      ImpulseFormUnit("", {
+    const parent = FormSwitch(
+      FormUnit("", {
         schema: z.enum(["_6", "_7"]),
       }),
       {
         _6: form,
-        _7: ImpulseFormUnit("0"),
+        _7: FormUnit("0"),
       },
     )
 
@@ -88,41 +88,41 @@ describe("types", () => {
       }
     }
 
-    it("matches schema type for getOutput(scope, select?)", ({ scope }) => {
-      expectTypeOf(parent.getOutput(scope)).toEqualTypeOf<null | ParentOutputSchema>()
+    it("matches schema type for getOutput(monitor, select?)", ({ monitor }) => {
+      expectTypeOf(parent.getOutput(monitor)).toEqualTypeOf<null | ParentOutputSchema>()
 
       expectTypeOf(
-        parent.getOutput(scope, params._first),
+        parent.getOutput(monitor, params._first),
       ).toEqualTypeOf<null | ParentOutputSchema>()
 
       expectTypeOf(
-        parent.getOutput(scope, params._second),
+        parent.getOutput(monitor, params._second),
       ).toEqualTypeOf<ParentOutputVerboseSchema>()
     })
   })
 })
 
 describe("when branch is initially invalid", () => {
-  it("returns null for initially invalid active", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("", {
+  it("returns null for initially invalid active", ({ monitor }) => {
+    const form = FormSwitch(
+      FormUnit("", {
         schema: z.enum(["_1", "_2", "_5"]),
       }),
       {
-        _1: ImpulseFormUnit(0, {
+        _1: FormUnit(0, {
           schema: z.number().min(1),
         }),
-        _2: ImpulseFormShape({
-          _3: ImpulseFormUnit("name"),
-          _4: ImpulseFormUnit(18),
+        _2: FormShape({
+          _3: FormUnit("name"),
+          _4: FormUnit(18),
         }),
-        _5: ImpulseFormUnit(false),
+        _5: FormUnit(false),
       },
     )
 
-    expect(form.getOutput(scope)).toBeNull()
-    expect(form.getOutput(scope, params._first)).toBeNull()
-    expect(form.getOutput(scope, params._second)).toStrictEqual({
+    expect(form.getOutput(monitor)).toBeNull()
+    expect(form.getOutput(monitor, params._first)).toBeNull()
+    expect(form.getOutput(monitor, params._second)).toStrictEqual({
       active: null,
       branches: {
         _1: null,
@@ -135,21 +135,21 @@ describe("when branch is initially invalid", () => {
     })
   })
 
-  it("returns null for initially valid active", ({ scope }) => {
-    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2" | "_5">("_1"), {
-      _1: ImpulseFormUnit(0, {
+  it("returns null for initially valid active", ({ monitor }) => {
+    const form = FormSwitch(FormUnit<"_1" | "_2" | "_5">("_1"), {
+      _1: FormUnit(0, {
         schema: z.number().min(1),
       }),
-      _2: ImpulseFormShape({
-        _3: ImpulseFormUnit("name"),
-        _4: ImpulseFormUnit(18),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18),
       }),
-      _5: ImpulseFormUnit(false),
+      _5: FormUnit(false),
     })
 
-    expect(form.getOutput(scope)).toBeNull()
-    expect(form.getOutput(scope, params._first)).toBeNull()
-    expect(form.getOutput(scope, params._second)).toStrictEqual({
+    expect(form.getOutput(monitor)).toBeNull()
+    expect(form.getOutput(monitor, params._first)).toBeNull()
+    expect(form.getOutput(monitor, params._second)).toStrictEqual({
       active: "_1",
       branches: {
         _1: null,
@@ -162,44 +162,44 @@ describe("when branch is initially invalid", () => {
     })
   })
 
-  it("returns output after switching to valid branch", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_1", {
+  it("returns output after switching to valid branch", ({ monitor }) => {
+    const form = FormSwitch(
+      FormUnit("_1", {
         schema: z.enum(["_1", "_2"]),
       }),
       {
-        _1: ImpulseFormUnit(0, {
+        _1: FormUnit(0, {
           schema: z.number().min(1),
         }),
-        _2: ImpulseFormShape({
-          _3: ImpulseFormUnit("name"),
-          _4: ImpulseFormUnit(18),
+        _2: FormShape({
+          _3: FormUnit("name"),
+          _4: FormUnit(18),
         }),
       },
     )
 
     form.active.setInput("_2")
 
-    expect(form.active.getOutput(scope)).toBe("_2")
-    expect(form.branches._2.getOutput(scope)).toStrictEqual({
+    expect(form.active.getOutput(monitor)).toBe("_2")
+    expect(form.branches._2.getOutput(monitor)).toStrictEqual({
       _3: "name",
       _4: 18,
     })
-    expect(form.getOutput(scope)).toStrictEqual({
+    expect(form.getOutput(monitor)).toStrictEqual({
       kind: "_2",
       value: {
         _3: "name",
         _4: 18,
       },
     })
-    expect(form.getOutput(scope, params._first)).toStrictEqual({
+    expect(form.getOutput(monitor, params._first)).toStrictEqual({
       kind: "_2",
       value: {
         _3: "name",
         _4: 18,
       },
     })
-    expect(form.getOutput(scope, params._second)).toStrictEqual({
+    expect(form.getOutput(monitor, params._second)).toStrictEqual({
       active: "_2",
       branches: {
         _1: null,
@@ -213,25 +213,25 @@ describe("when branch is initially invalid", () => {
 })
 
 describe("when branch is initially valid", () => {
-  it("returns null for initially invalid active", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("", {
+  it("returns null for initially invalid active", ({ monitor }) => {
+    const form = FormSwitch(
+      FormUnit("", {
         schema: z.enum(["_1", "_2"]),
       }),
       {
-        _1: ImpulseFormUnit(1, {
+        _1: FormUnit(1, {
           schema: z.number().min(1),
         }),
-        _2: ImpulseFormShape({
-          _3: ImpulseFormUnit("name"),
-          _4: ImpulseFormUnit(18),
+        _2: FormShape({
+          _3: FormUnit("name"),
+          _4: FormUnit(18),
         }),
       },
     )
 
-    expect(form.getOutput(scope)).toBeNull()
-    expect(form.getOutput(scope, params._first)).toBeNull()
-    expect(form.getOutput(scope, params._second)).toStrictEqual({
+    expect(form.getOutput(monitor)).toBeNull()
+    expect(form.getOutput(monitor, params._first)).toBeNull()
+    expect(form.getOutput(monitor, params._second)).toStrictEqual({
       active: null,
       branches: {
         _1: 1,
@@ -243,27 +243,27 @@ describe("when branch is initially valid", () => {
     })
   })
 
-  it("returns output for a initially valid active", ({ scope }) => {
-    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2">("_1"), {
-      _1: ImpulseFormUnit(1, {
+  it("returns output for a initially valid active", ({ monitor }) => {
+    const form = FormSwitch(FormUnit<"_1" | "_2">("_1"), {
+      _1: FormUnit(1, {
         schema: z.number().min(1),
       }),
-      _2: ImpulseFormShape({
-        _3: ImpulseFormUnit("name"),
-        _4: ImpulseFormUnit(18),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18),
       }),
     })
 
-    expect(form.active.getOutput(scope)).toBe("_1")
+    expect(form.active.getOutput(monitor)).toBe("_1")
 
     const concise = {
       kind: "_1",
       value: 1,
     }
 
-    expect(form.getOutput(scope)).toStrictEqual(concise)
-    expect(form.getOutput(scope, params._first)).toStrictEqual(concise)
-    expect(form.getOutput(scope, params._second)).toStrictEqual({
+    expect(form.getOutput(monitor)).toStrictEqual(concise)
+    expect(form.getOutput(monitor, params._first)).toStrictEqual(concise)
+    expect(form.getOutput(monitor, params._second)).toStrictEqual({
       active: "_1",
       branches: {
         _1: 1,
@@ -275,22 +275,22 @@ describe("when branch is initially valid", () => {
     })
   })
 
-  it("returns null after switching to invalid branch", ({ scope }) => {
-    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1" | "_2">("_2"), {
-      _1: ImpulseFormUnit(0, {
+  it("returns null after switching to invalid branch", ({ monitor }) => {
+    const form = FormSwitch(FormUnit<"_1" | "_2">("_2"), {
+      _1: FormUnit(0, {
         schema: z.number().min(1),
       }),
-      _2: ImpulseFormShape({
-        _3: ImpulseFormUnit("name"),
-        _4: ImpulseFormUnit(18),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18),
       }),
     })
 
     form.active.setInput("_1")
 
-    expect(form.getOutput(scope)).toBeNull()
-    expect(form.getOutput(scope, params._first)).toBeNull()
-    expect(form.getOutput(scope, params._second)).toStrictEqual({
+    expect(form.getOutput(monitor)).toBeNull()
+    expect(form.getOutput(monitor, params._first)).toBeNull()
+    expect(form.getOutput(monitor, params._second)).toStrictEqual({
       active: "_1",
       branches: {
         _1: null,
@@ -302,29 +302,29 @@ describe("when branch is initially valid", () => {
     })
   })
 
-  it("returns null after making active invalid", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_1", {
+  it("returns null after making active invalid", ({ monitor }) => {
+    const form = FormSwitch(
+      FormUnit("_1", {
         schema: z.enum(["_1", "_2"]),
       }),
       {
-        _1: ImpulseFormUnit(1, {
+        _1: FormUnit(1, {
           schema: z.number().min(1),
         }),
-        _2: ImpulseFormShape({
-          _3: ImpulseFormUnit("name"),
-          _4: ImpulseFormUnit(18),
+        _2: FormShape({
+          _3: FormUnit("name"),
+          _4: FormUnit(18),
         }),
       },
     )
 
     form.active.setInput("")
 
-    expect(form.active.getOutput(scope)).toBeNull()
+    expect(form.active.getOutput(monitor)).toBeNull()
 
-    expect(form.getOutput(scope)).toBeNull()
-    expect(form.getOutput(scope, params._first)).toBeNull()
-    expect(form.getOutput(scope, params._second)).toStrictEqual({
+    expect(form.getOutput(monitor)).toBeNull()
+    expect(form.getOutput(monitor, params._first)).toBeNull()
+    expect(form.getOutput(monitor, params._second)).toStrictEqual({
       active: null,
       branches: {
         _1: 1,
@@ -337,26 +337,26 @@ describe("when branch is initially valid", () => {
   })
 })
 
-it("ignores invalid inactive branches", ({ scope }) => {
-  const form = ImpulseFormSwitch(
-    ImpulseFormUnit("_2", {
+it("ignores invalid inactive branches", ({ monitor }) => {
+  const form = FormSwitch(
+    FormUnit("_2", {
       schema: z.enum(["_1", "_2", "_5"]),
     }),
     {
-      _1: ImpulseFormUnit(0, {
+      _1: FormUnit(0, {
         schema: z.number().min(1),
       }),
-      _2: ImpulseFormShape({
-        _3: ImpulseFormUnit("name"),
-        _4: ImpulseFormUnit(18),
+      _2: FormShape({
+        _3: FormUnit("name"),
+        _4: FormUnit(18),
       }),
-      _5: ImpulseFormUnit("", {
+      _5: FormUnit("", {
         schema: z.string().min(1),
       }),
     },
   )
 
-  expect(form.active.getOutput(scope)).toBe("_2")
+  expect(form.active.getOutput(monitor)).toBe("_2")
 
   const concise = {
     kind: "_2",
@@ -366,9 +366,9 @@ it("ignores invalid inactive branches", ({ scope }) => {
     },
   }
 
-  expect(form.getOutput(scope)).toStrictEqual(concise)
-  expect(form.getOutput(scope, params._first)).toStrictEqual(concise)
-  expect(form.getOutput(scope, params._second)).toStrictEqual({
+  expect(form.getOutput(monitor)).toStrictEqual(concise)
+  expect(form.getOutput(monitor, params._first)).toStrictEqual(concise)
+  expect(form.getOutput(monitor, params._second)).toStrictEqual({
     active: "_2",
     branches: {
       _1: null,
@@ -382,62 +382,62 @@ it("ignores invalid inactive branches", ({ scope }) => {
 })
 
 describe("stable output value", () => {
-  it("subsequently selects equal output", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_2", {
+  it("subsequently selects equal output", ({ monitor }) => {
+    const form = FormSwitch(
+      FormUnit("_2", {
         schema: z.enum(["_1", "_2"]),
       }),
       {
-        _1: ImpulseFormUnit(1, {
+        _1: FormUnit(1, {
           schema: z.number().min(1),
         }),
-        _2: ImpulseFormShape({
-          _3: ImpulseFormUnit("name"),
-          _4: ImpulseFormUnit(18),
+        _2: FormShape({
+          _3: FormUnit("name"),
+          _4: FormUnit(18),
         }),
       },
     )
 
-    expect(form.getOutput(scope)).toBeInstanceOf(Object)
-    expect(form.getOutput(scope)).toBe(form.getOutput(scope))
+    expect(form.getOutput(monitor)).toBeInstanceOf(Object)
+    expect(form.getOutput(monitor)).toBe(form.getOutput(monitor))
   })
 
-  it("selects unequal output values when isOutputEqual is not specified", ({ scope }) => {
-    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1">("_1"), {
-      _1: ImpulseFormUnit(1, {
+  it("selects unequal output values when isOutputEqual is not specified", ({ monitor }) => {
+    const form = FormSwitch(FormUnit<"_1">("_1"), {
+      _1: FormUnit(1, {
         transform: (size) => Array.from({ length: Math.max(1, size) }, (_, index) => index),
       }),
     })
 
-    const output0 = form.getOutput(scope)
+    const output0 = form.getOutput(monitor)
 
     form.setInput({
       branches: {
         _1: 0,
       },
     })
-    const output1 = form.getOutput(scope)
+    const output1 = form.getOutput(monitor)
 
     expect(output0).not.toBe(output1)
     expect(output0).toStrictEqual(output1)
   })
 
-  it("selects equal output values when isOutputEqual is specified", ({ scope }) => {
-    const form = ImpulseFormSwitch(ImpulseFormUnit<"_1">("_1"), {
-      _1: ImpulseFormUnit(1 as number, {
+  it("selects equal output values when isOutputEqual is specified", ({ monitor }) => {
+    const form = FormSwitch(FormUnit<"_1">("_1"), {
+      _1: FormUnit(1 as number, {
         isOutputEqual: isShallowArrayEqual,
         transform: (size) => Array.from({ length: Math.max(1, size) }, (_, index) => index),
       }),
     })
 
-    const output0 = form.getOutput(scope)
+    const output0 = form.getOutput(monitor)
 
     form.setInput({
       branches: {
         _1: 0,
       },
     })
-    const output1 = form.getOutput(scope)
+    const output1 = form.getOutput(monitor)
 
     expect(output0).toBe(output1)
     expect(output0).toStrictEqual(output1)

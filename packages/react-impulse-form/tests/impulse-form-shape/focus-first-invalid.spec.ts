@@ -1,31 +1,31 @@
 import { z } from "zod"
 
-import { ImpulseFormShape, type ImpulseFormShapeOptions, ImpulseFormUnit } from "../../src"
+import { FormShape, type FormShapeOptions, FormUnit } from "../../src"
 
 function setup(
-  options?: ImpulseFormShapeOptions<{
-    _1: ImpulseFormUnit<string, ReadonlyArray<string>>
-    _2: ImpulseFormUnit<number, ReadonlyArray<string>>
-    _3: ImpulseFormShape<{
-      _1: ImpulseFormUnit<undefined | boolean, ReadonlyArray<string>, boolean>
-      _2: ImpulseFormUnit<Array<string>, ReadonlyArray<string>>
+  options?: FormShapeOptions<{
+    _1: FormUnit<string, ReadonlyArray<string>>
+    _2: FormUnit<number, ReadonlyArray<string>>
+    _3: FormShape<{
+      _1: FormUnit<undefined | boolean, ReadonlyArray<string>, boolean>
+      _2: FormUnit<Array<string>, ReadonlyArray<string>>
     }>
     _4: Array<string>
   }>,
 ) {
-  const form = ImpulseFormShape(
+  const form = FormShape(
     {
-      _1: ImpulseFormUnit("", {
+      _1: FormUnit("", {
         schema: z.string().min(2),
       }),
-      _2: ImpulseFormUnit(0, {
+      _2: FormUnit(0, {
         schema: z.number().min(1),
       }),
-      _3: ImpulseFormShape({
-        _1: ImpulseFormUnit<undefined | boolean>(undefined, {
+      _3: FormShape({
+        _1: FormUnit<undefined | boolean>(undefined, {
           schema: z.boolean(),
         }),
-        _2: ImpulseFormUnit([""], {
+        _2: FormUnit([""], {
           schema: z.array(z.string()).min(2),
         }),
       }),
@@ -161,7 +161,7 @@ describe("fields.*.focusFirstInvalid()", () => {
 
 describe("with onFocusWhenInvalid()", () => {
   it("does nothing when fields are empty", () => {
-    const form = ImpulseFormShape({})
+    const form = FormShape({})
     const listener0 = vi.fn()
 
     form.onFocusWhenInvalid(listener0)
@@ -170,8 +170,8 @@ describe("with onFocusWhenInvalid()", () => {
   })
 
   it("does not call a listener when fields are not validated", () => {
-    const form = ImpulseFormShape({
-      _1: ImpulseFormUnit("", {
+    const form = FormShape({
+      _1: FormUnit("", {
         schema: z.string(),
       }),
     })
@@ -184,8 +184,8 @@ describe("with onFocusWhenInvalid()", () => {
   })
 
   it("does not call a listener when fields are valid", () => {
-    const form = ImpulseFormShape({
-      _1: ImpulseFormUnit("valid", {
+    const form = FormShape({
+      _1: FormUnit("valid", {
         validateOn: "onInit",
         schema: z.string().min(2),
       }),
@@ -199,8 +199,8 @@ describe("with onFocusWhenInvalid()", () => {
   })
 
   it("calls a listener when a field is not valid", () => {
-    const form = ImpulseFormShape({
-      _1: ImpulseFormUnit("", {
+    const form = FormShape({
+      _1: FormUnit("", {
         validateOn: "onInit",
         schema: z.string().min(2),
       }),
@@ -216,8 +216,8 @@ describe("with onFocusWhenInvalid()", () => {
   })
 
   it("does not call a listener when a field is invalid and has own listener", () => {
-    const form = ImpulseFormShape({
-      _1: ImpulseFormUnit("", {
+    const form = FormShape({
+      _1: FormUnit("", {
         validateOn: "onInit",
         schema: z.string().min(2),
       }),

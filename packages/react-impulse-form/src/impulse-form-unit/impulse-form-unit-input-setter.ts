@@ -1,5 +1,5 @@
 import type { Setter } from "~/tools/setter"
 
-type ImpulseFormUnitInputSetter<TInput> = Setter<TInput, [TInput, TInput]>
+type FormUnitInputSetter<TInput> = Setter<TInput, [TInput, TInput]>
 
-export type { ImpulseFormUnitInputSetter }
+export type { FormUnitInputSetter }

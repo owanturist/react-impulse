@@ -1,25 +1,25 @@
-import type { Scope } from "react-impulse"
+import type { Monitor } from "@owanturist/signal"
 
 import { mapValues } from "~/tools/map-values"
 
-import { ImpulseForm } from "../../impulse-form/_internal/impulse-form"
-import type { ImpulseFormSwitchActiveBranch } from "../impulse-form-switch-active-branch"
-import type { ImpulseFormSwitchBranches } from "../impulse-form-switch-branches"
-import type { ImpulseFormSwitchParams } from "../impulse-form-switch-params"
+import { SignalForm } from "../../impulse-form/_internal/impulse-form"
+import type { FormSwitchActiveBranch } from "../impulse-form-switch-active-branch"
+import type { FormSwitchBranches } from "../impulse-form-switch-branches"
+import type { FormSwitchParams } from "../impulse-form-switch-params"
 
-import type { ImpulseFormSwitchState } from "./impulse-form-switch-state"
+import type { FormSwitchState } from "./impulse-form-switch-state"
 
-class ImpulseFormSwitch<
-  TKind extends ImpulseForm,
-  TBranches extends ImpulseFormSwitchBranches<TKind>,
-> extends ImpulseForm<ImpulseFormSwitchParams<TKind, TBranches>> {
-  public static override _getState = ImpulseForm._getState
+class FormSwitch<
+  TKind extends SignalForm,
+  TBranches extends FormSwitchBranches<TKind>,
+> extends SignalForm<FormSwitchParams<TKind, TBranches>> {
+  public static override _getState = SignalForm._getState
 
   public readonly active: TKind
 
   public readonly branches: Readonly<TBranches>
 
-  public constructor(public readonly _state: ImpulseFormSwitchState<TKind, TBranches>) {
+  public constructor(public readonly _state: FormSwitchState<TKind, TBranches>) {
     super()
 
     this.active = _state._active._host() as TKind
@@ -27,8 +27,8 @@ class ImpulseFormSwitch<
     this.branches = mapValues(_state._branches, ({ _host }) => _host()) as Readonly<TBranches>
   }
 
-  public getActiveBranch(scope: Scope): undefined | ImpulseFormSwitchActiveBranch<TBranches> {
-    const result = this._state._getActiveBranch(scope)
+  public getActiveBranch(monitor: Monitor): undefined | FormSwitchActiveBranch<TBranches> {
+    const result = this._state._getActiveBranch(monitor)
 
     if (!result) {
       return undefined
@@ -37,8 +37,8 @@ class ImpulseFormSwitch<
     return {
       kind: result.kind,
       value: result.value._host(),
-    } as ImpulseFormSwitchActiveBranch<TBranches>
+    } as FormSwitchActiveBranch<TBranches>
   }
 }
 
-export { ImpulseFormSwitch }
+export { FormSwitch }

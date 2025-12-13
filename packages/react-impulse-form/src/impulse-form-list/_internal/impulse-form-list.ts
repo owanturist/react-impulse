@@ -1,4 +1,4 @@
-import { Impulse, type Scope, batch } from "react-impulse"
+import { type Monitor, Signal, batch } from "@owanturist/signal"
 
 import { entries } from "~/tools/entries"
 import { isFunction } from "~/tools/is-function"
@@ -7,67 +7,65 @@ import { map } from "~/tools/map"
 import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
-import { ImpulseForm } from "../../impulse-form/_internal/impulse-form"
-import type { ImpulseFormListParams } from "../impulse-form-list-params"
+import { SignalForm } from "../../impulse-form/_internal/impulse-form"
+import type { FormListParams } from "../impulse-form-list-params"
 
-import type { ImpulseFormListState } from "./impulse-form-list-state"
+import type { FormListState } from "./impulse-form-list-state"
 
-class ImpulseFormList<TElement extends ImpulseForm> extends ImpulseForm<
-  ImpulseFormListParams<TElement>
-> {
-  public static override _getState = ImpulseForm._getState
+class FormList<TElement extends SignalForm> extends SignalForm<FormListParams<TElement>> {
+  public static override _getState = SignalForm._getState
 
-  private readonly _elements = Impulse((scope) => this._state._getElements(scope), {
-    compare: isShallowArrayEqual,
+  private readonly _elements = Signal((monitor) => this._state._getElements(monitor), {
+    equals: isShallowArrayEqual,
   })
 
-  public constructor(public readonly _state: ImpulseFormListState<TElement>) {
+  public constructor(public readonly _state: FormListState<TElement>) {
     super()
   }
 
-  public getElements(scope: Scope): ReadonlyArray<TElement>
+  public getElements(monitor: Monitor): ReadonlyArray<TElement>
   public getElements<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select: (elements: ReadonlyArray<TElement>) => TResult,
   ): TResult
   public getElements<TResult>(
-    scope: Scope,
+    monitor: Monitor,
     select: (elements: ReadonlyArray<TElement>) => TResult = params._first as typeof select,
   ): TResult {
-    return select(this._elements.getValue(scope))
+    return select(this._elements.read(monitor))
   }
 
   public setElements(
-    setter: Setter<ReadonlyArray<TElement>, [ReadonlyArray<TElement>, Scope]>,
+    setter: Setter<ReadonlyArray<TElement>, [ReadonlyArray<TElement>, Monitor]>,
   ): void {
-    batch((scope) => {
-      const initialElements = this._state._getInitialElements(scope)
+    batch((monitor) => {
+      const initialElements = this._state._getInitialElements(monitor)
 
       const elementsStates = map(
-        isFunction(setter) ? setter(this._elements.getValue(scope), scope) : setter,
+        isFunction(setter) ? setter(this._elements.read(monitor), monitor) : setter,
 
-        ImpulseForm._getState,
+        SignalForm._getState,
       )
 
       const nextStateElements = map(elementsStates, (element) => this._state._parentOf(element))
 
       // detach all elements from their initial states in one go
       for (const stateElement of nextStateElements) {
-        stateElement._replaceInitial(scope, undefined, false)
+        stateElement._replaceInitial(monitor, undefined, false)
       }
 
       // attach the elements to their updated initial states
       for (const [index, stateElement] of entries(nextStateElements)) {
         stateElement._replaceInitial(
-          scope,
+          monitor,
           initialElements.at(index),
           !elementsStates.at(index)?._hasSameRootWith(stateElement),
         )
       }
 
-      this._state._elements.setValue(nextStateElements)
+      this._state._elements.write(nextStateElements)
     })
   }
 }
 
-export { ImpulseFormList }
+export { FormList }

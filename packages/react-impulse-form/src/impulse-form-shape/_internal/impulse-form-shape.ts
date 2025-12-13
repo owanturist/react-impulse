@@ -1,36 +1,34 @@
-import type { Scope } from "react-impulse"
+import type { Monitor } from "@owanturist/signal"
 
 import { mapValues } from "~/tools/map-values"
 
-import { ImpulseForm } from "../../impulse-form/_internal/impulse-form"
-import type { ImpulseFormMeta } from "../../impulse-form-meta"
-import type { ImpulseFormShapeFields } from "../impulse-form-shape-fields"
-import type { ImpulseFormShapeParams } from "../impulse-form-shape-params"
+import { SignalForm } from "../../impulse-form/_internal/impulse-form"
+import type { FormMeta } from "../../impulse-form-meta"
+import type { FormShapeFields } from "../impulse-form-shape-fields"
+import type { FormShapeParams } from "../impulse-form-shape-params"
 
-import type { ImpulseFormShapeState } from "./impulse-form-shape-state"
+import type { FormShapeState } from "./impulse-form-shape-state"
 
-type ImpulseFormShapeField<TField> = TField extends ImpulseForm ? TField : ImpulseFormMeta<TField>
+type FormShapeField<TField> = TField extends SignalForm ? TField : FormMeta<TField>
 
-class ImpulseFormShape<TFields extends ImpulseFormShapeFields> extends ImpulseForm<
-  ImpulseFormShapeParams<TFields>
-> {
-  public static override _getState = ImpulseForm._getState
+class FormShape<TFields extends FormShapeFields> extends SignalForm<FormShapeParams<TFields>> {
+  public static override _getState = SignalForm._getState
 
   public readonly fields: {
-    readonly [TField in keyof TFields]: ImpulseFormShapeField<TFields[TField]>
+    readonly [TField in keyof TFields]: FormShapeField<TFields[TField]>
   }
 
-  public constructor(public readonly _state: ImpulseFormShapeState<TFields>) {
+  public constructor(public readonly _state: FormShapeState<TFields>) {
     super()
 
     this.fields = {
       ...mapValues(_state._fields, ({ _host }) => _host()),
 
-      ...mapValues(_state._meta, (field) => (scope: Scope) => field.getValue(scope)),
+      ...mapValues(_state._meta, (field) => (monitor: Monitor) => field.read(monitor)),
     } as {
-      readonly [TField in keyof TFields]: ImpulseFormShapeField<TFields[TField]>
+      readonly [TField in keyof TFields]: FormShapeField<TFields[TField]>
     }
   }
 }
 
-export { ImpulseFormShape }
+export { FormShape }

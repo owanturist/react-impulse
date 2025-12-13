@@ -1,16 +1,16 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 
-import { Impulse, useScoped } from "../../src"
+import { Signal, useComputed } from "../../src"
 
-describe("multiple impulses", () => {
+describe("multiple signals", () => {
   const LoginForm: React.FC<{
-    email: Impulse<string>
-    password: Impulse<string>
+    email: Signal<string>
+    password: Signal<string>
     onRender: VoidFunction
-  }> = ({ email: emailImpulse, password: passwordImpulse, onRender }) => {
-    const email = useScoped((scope) => emailImpulse.getValue(scope))
-    const password = useScoped(passwordImpulse)
+  }> = ({ email: emailSignal, password: passwordSignal, onRender }) => {
+    const email = useComputed((monitor) => emailSignal.read(monitor))
+    const password = useComputed(passwordSignal)
 
     return (
       <React.Profiler id="test" onRender={onRender}>
@@ -18,29 +18,29 @@ describe("multiple impulses", () => {
           type="email"
           data-testid="email"
           value={email}
-          onChange={(event) => emailImpulse.setValue(event.target.value)}
+          onChange={(event) => emailSignal.write(event.target.value)}
         />
         <input
           type="password"
           data-testid="password"
           value={password}
-          onChange={(event) => passwordImpulse.setValue(event.target.value)}
+          onChange={(event) => passwordSignal.write(event.target.value)}
         />
         <button
           type="button"
           data-testid="reset"
           onClick={() => {
-            emailImpulse.setValue("")
-            passwordImpulse.setValue("")
+            emailSignal.write("")
+            passwordSignal.write("")
           }}
         />
       </React.Profiler>
     )
   }
 
-  it("performs multi impulse management", () => {
-    const email = Impulse("")
-    const password = Impulse("")
+  it("performs multi signal management", () => {
+    const email = Signal("")
+    const password = Signal("")
     const onRender = vi.fn()
 
     const { container } = render(
@@ -69,8 +69,8 @@ describe("multiple impulses", () => {
 
     // changes from the outside
     act(() => {
-      email.setValue("admin@gmail.com")
-      password.setValue("admin")
+      email.write("admin@gmail.com")
+      password.write("admin")
     })
     expect(onRender).toHaveBeenCalledOnce()
     expect(container).toMatchSnapshot()

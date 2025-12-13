@@ -1,14 +1,14 @@
-import { untrack } from "react-impulse"
+import { untracked } from "@owanturist/signal"
 import { z } from "zod"
 
-import { ImpulseFormList, type ImpulseFormListOptions, ImpulseFormUnit } from "../../src"
+import { FormList, type FormListOptions, FormUnit } from "../../src"
 
-function setup(options?: ImpulseFormListOptions<ImpulseFormUnit<number, ReadonlyArray<string>>>) {
-  const form = ImpulseFormList(
+function setup(options?: FormListOptions<FormUnit<number, ReadonlyArray<string>>>) {
+  const form = FormList(
     [
-      ImpulseFormUnit(0, { schema: z.number() }),
-      ImpulseFormUnit(1, { schema: z.number() }),
-      ImpulseFormUnit(2, { schema: z.number() }),
+      FormUnit(0, { schema: z.number() }),
+      FormUnit(1, { schema: z.number() }),
+      FormUnit(2, { schema: z.number() }),
     ],
     options,
   )
@@ -17,7 +17,7 @@ function setup(options?: ImpulseFormListOptions<ImpulseFormUnit<number, Readonly
   const listener1 = vi.fn()
   const listener2 = vi.fn()
 
-  const elements = untrack((scope) => form.getElements(scope))
+  const elements = untracked((monitor) => form.getElements(monitor))
 
   elements.at(0)?.onFocusWhenInvalid(listener0)
   elements.at(1)?.onFocusWhenInvalid(listener1)
@@ -77,15 +77,12 @@ it("calls the only invalid", () => {
   expect(listener2).not.toHaveBeenCalled()
 })
 
-it("does not focus invalid without listener", ({ scope }) => {
-  const form = ImpulseFormList([
-    ImpulseFormUnit(1, { error: "err-1" }),
-    ImpulseFormUnit(2, { error: "err-2" }),
-  ])
+it("does not focus invalid without listener", ({ monitor }) => {
+  const form = FormList([FormUnit(1, { error: "err-1" }), FormUnit(2, { error: "err-2" })])
 
   const listener1 = vi.fn()
 
-  form.getElements(scope).at(1)?.onFocusWhenInvalid(listener1)
+  form.getElements(monitor).at(1)?.onFocusWhenInvalid(listener1)
 
   form.focusFirstInvalid()
   expect(listener1).toHaveBeenCalledExactlyOnceWith("err-2")
@@ -93,7 +90,7 @@ it("does not focus invalid without listener", ({ scope }) => {
 
 describe("with onFocusWhenInvalid()", () => {
   it("does nothing when elements are empty", () => {
-    const form = ImpulseFormList([])
+    const form = FormList([])
     const listener0 = vi.fn()
 
     form.onFocusWhenInvalid(listener0)
@@ -102,8 +99,8 @@ describe("with onFocusWhenInvalid()", () => {
   })
 
   it("does not call a listener when elements are not validated", () => {
-    const form = ImpulseFormList([
-      ImpulseFormUnit("", {
+    const form = FormList([
+      FormUnit("", {
         schema: z.string(),
       }),
     ])
@@ -116,8 +113,8 @@ describe("with onFocusWhenInvalid()", () => {
   })
 
   it("does not call a listener when elements are valid", () => {
-    const form = ImpulseFormList([
-      ImpulseFormUnit("valid", {
+    const form = FormList([
+      FormUnit("valid", {
         validateOn: "onInit",
         schema: z.string().min(2),
       }),
@@ -131,8 +128,8 @@ describe("with onFocusWhenInvalid()", () => {
   })
 
   it("calls a listener when an element is not valid", () => {
-    const form = ImpulseFormList([
-      ImpulseFormUnit("", {
+    const form = FormList([
+      FormUnit("", {
         validateOn: "onInit",
         schema: z.string().min(2),
       }),
@@ -145,9 +142,9 @@ describe("with onFocusWhenInvalid()", () => {
     expect(listener0).toHaveBeenCalledExactlyOnceWith([[expect.any(String)]])
   })
 
-  it("does not call a listener when an element is invalid and has own listener", ({ scope }) => {
-    const form = ImpulseFormList([
-      ImpulseFormUnit("", {
+  it("does not call a listener when an element is invalid and has own listener", ({ monitor }) => {
+    const form = FormList([
+      FormUnit("", {
         validateOn: "onInit",
         schema: z.string().min(2),
       }),
@@ -157,7 +154,7 @@ describe("with onFocusWhenInvalid()", () => {
     const listener1 = vi.fn()
 
     form.onFocusWhenInvalid(listener0)
-    form.getElements(scope).at(0)?.onFocusWhenInvalid(listener1)
+    form.getElements(monitor).at(0)?.onFocusWhenInvalid(listener1)
     form.focusFirstInvalid()
 
     expect(listener0).not.toHaveBeenCalled()

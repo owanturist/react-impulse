@@ -1,53 +1,53 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, type Scope, useScoped } from "../../src"
-import { Counter, type WithCompare, type WithImpulse } from "../common"
+import { type Monitor, Signal, useComputed } from "../../src"
+import { Counter, type WithEquals, type WithSignal } from "../common"
 
-function factory(scope: Scope, { impulse }: WithImpulse) {
-  return impulse.getValue(scope)
+function factory(monitor: Monitor, { signal }: WithSignal) {
+  return signal.read(monitor)
 }
 
 describe.each([
   [
     "inline",
-    ({ impulse, compare }: WithImpulse & WithCompare) => {
-      const cmp = compare ?? Counter.compare
+    ({ signal, equals }: WithSignal & WithEquals) => {
+      const cmp = equals ?? Counter.equals
 
-      return useScoped((scope) => factory(scope, { impulse }), [impulse], {
-        compare: (prev, next, scope) => cmp(prev, next, scope),
+      return useComputed((monitor) => factory(monitor, { signal }), [signal], {
+        equals: (prev, next) => cmp(prev, next),
       })
     },
   ],
   [
     "memoized",
-    ({ impulse, compare }: WithImpulse & WithCompare) =>
-      useScoped((scope) => factory(scope, { impulse }), [impulse], {
-        compare: compare ?? Counter.compare,
+    ({ signal, equals }: WithSignal & WithEquals) =>
+      useComputed((monitor) => factory(monitor, { signal }), [signal], {
+        equals: equals ?? Counter.equals,
       }),
   ],
 ])("factory with %s comparator", (_, useHook) => {
-  it("swapping compare", () => {
+  it("swapping equals", () => {
     const initial = { count: 0 }
-    const impulse = Impulse(initial)
+    const signal = Signal(initial)
 
-    const { result, rerender } = renderHook<Counter, WithImpulse & WithCompare>(useHook, {
-      initialProps: { impulse },
+    const { result, rerender } = renderHook<Counter, WithSignal & WithEquals>(useHook, {
+      initialProps: { signal },
     })
     expect(result.current).toBe(initial)
 
     act(() => {
-      impulse.setValue({ count: 0 })
+      signal.write({ count: 0 })
     })
     expect(result.current).toBe(initial)
 
     rerender({
-      impulse,
-      compare: Object.is,
+      signal,
+      equals: Object.is,
     })
     expect(result.current).toBe(initial)
 
     act(() => {
-      impulse.setValue({ count: 0 })
+      signal.write({ count: 0 })
     })
     expect(result.current).not.toBe(initial)
     expect(result.current).toStrictEqual(initial)

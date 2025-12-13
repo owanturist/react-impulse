@@ -1,21 +1,21 @@
-import type { GetImpulseFormParam } from "../../impulse-form/get-impulse-form-param"
-import type { ImpulseForm } from "../../impulse-form/impulse-form"
-import type { ImpulseFormParams } from "../../impulse-form/impulse-form-params"
-import type { ImpulseFormSwitchBranches } from "../impulse-form-switch-branches"
-import type { ImpulseFormSwitchConciseSchema } from "../impulse-form-switch-concise-schema"
+import type { GetSignalFormParam } from "../../impulse-form/get-impulse-form-param"
+import type { SignalForm } from "../../impulse-form/impulse-form"
+import type { SignalFormParams } from "../../impulse-form/impulse-form-params"
+import type { FormSwitchBranches } from "../impulse-form-switch-branches"
+import type { FormSwitchConciseSchema } from "../impulse-form-switch-concise-schema"
 
-import type { ImpulseFormSwitchBranchUnion } from "./impulse-form-switch-branch-union"
+import type { FormSwitchBranchUnion } from "./impulse-form-switch-branch-union"
 
-type ImpulseFormSwitchConciseParam<
-  TKind extends ImpulseForm,
-  TBranches extends ImpulseFormSwitchBranches<TKind>,
-  TKey extends keyof ImpulseFormParams,
+type FormSwitchConciseParam<
+  TKind extends SignalForm,
+  TBranches extends FormSwitchBranches<TKind>,
+  TKey extends keyof SignalFormParams,
   TConcise,
 > =
   | TConcise
-  | ImpulseFormSwitchConciseSchema<
-      TConcise | GetImpulseFormParam<TKind, TKey>,
-      TConcise | ImpulseFormSwitchBranchUnion<TKind, TBranches, TKey>
+  | FormSwitchConciseSchema<
+      TConcise | GetSignalFormParam<TKind, TKey>,
+      TConcise | FormSwitchBranchUnion<TKind, TBranches, TKey>
     >
 
-export type { ImpulseFormSwitchConciseParam }
+export type { FormSwitchConciseParam }

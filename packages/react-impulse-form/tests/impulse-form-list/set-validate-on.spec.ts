@@ -1,9 +1,9 @@
 import type { Setter } from "~/tools/setter"
 
-import { ImpulseFormList, ImpulseFormUnit, type ValidateStrategy } from "../../src"
+import { FormList, FormUnit, type ValidateStrategy } from "../../src"
 
-it("matches the type definition", ({ scope }) => {
-  const form = ImpulseFormList([ImpulseFormUnit(0)])
+it("matches the type definition", ({ monitor }) => {
+  const form = FormList([FormUnit(0)])
 
   expectTypeOf(form.setValidateOn).toEqualTypeOf<
     (
@@ -14,17 +14,17 @@ it("matches the type definition", ({ scope }) => {
     ) => void
   >()
 
-  expectTypeOf(form.getElements(scope).at(0)!.setValidateOn).toEqualTypeOf<
+  expectTypeOf(form.getElements(monitor).at(0)!.setValidateOn).toEqualTypeOf<
     (setter: Setter<ValidateStrategy>) => void
   >()
 })
 
-it("changes all items", ({ scope }) => {
-  const form = ImpulseFormList([ImpulseFormUnit(0), ImpulseFormUnit(1), ImpulseFormUnit(2)])
+it("changes all items", ({ monitor }) => {
+  const form = FormList([FormUnit(0), FormUnit(1), FormUnit(2)])
 
   form.setValidateOn("onInit")
-  expect(form.getValidateOn(scope)).toBe("onInit")
+  expect(form.getValidateOn(monitor)).toBe("onInit")
 
   form.setValidateOn("onSubmit")
-  expect(form.getValidateOn(scope)).toBe("onSubmit")
+  expect(form.getValidateOn(monitor)).toBe("onSubmit")
 })

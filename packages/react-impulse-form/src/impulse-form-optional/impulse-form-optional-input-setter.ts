@@ -1,22 +1,19 @@
 import type { Setter } from "~/tools/setter"
 
-import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetSignalFormParam } from "../impulse-form/get-impulse-form-param"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-import type { ImpulseFormOptionalInput } from "./impulse-form-optional-input"
-import type { ImpulseFormOptionalSchema } from "./impulse-form-optional-schema"
+import type { FormOptionalInput } from "./impulse-form-optional-input"
+import type { FormOptionalSchema } from "./impulse-form-optional-schema"
 
-type ImpulseFormOptionalInputSetter<
-  TEnabled extends ImpulseForm,
-  TElement extends ImpulseForm,
-> = Setter<
+type FormOptionalInputSetter<TEnabled extends SignalForm, TElement extends SignalForm> = Setter<
   Partial<
-    ImpulseFormOptionalSchema<
-      GetImpulseFormParam<TEnabled, "input.setter">,
-      GetImpulseFormParam<TElement, "input.setter">
+    FormOptionalSchema<
+      GetSignalFormParam<TEnabled, "input.setter">,
+      GetSignalFormParam<TElement, "input.setter">
     >
   >,
-  [ImpulseFormOptionalInput<TEnabled, TElement>, ImpulseFormOptionalInput<TEnabled, TElement>]
+  [FormOptionalInput<TEnabled, TElement>, FormOptionalInput<TEnabled, TElement>]
 >
 
-export type { ImpulseFormOptionalInputSetter }
+export type { FormOptionalInputSetter }

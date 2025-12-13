@@ -1,8 +1,6 @@
-import type { GetImpulseFormError } from "../impulse-form/get-impulse-form-error"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetSignalFormError } from "../impulse-form/get-impulse-form-error"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-type ImpulseFormListError<TElement extends ImpulseForm> = null | ReadonlyArray<
-  GetImpulseFormError<TElement>
->
+type FormListError<TElement extends SignalForm> = null | ReadonlyArray<GetSignalFormError<TElement>>
 
-export type { ImpulseFormListError }
+export type { FormListError }

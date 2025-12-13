@@ -1,46 +1,46 @@
 import type { Setter } from "~/tools/setter"
 
-import type { GetImpulseFormParam } from "../impulse-form/get-impulse-form-param"
-import type { ImpulseForm } from "../impulse-form/impulse-form"
+import type { GetSignalFormParam } from "../impulse-form/get-impulse-form-param"
+import type { SignalForm } from "../impulse-form/impulse-form"
 
-import type { GetImpulseFormSwitchBranchesParam } from "./get-impulse-form-switch-branches-param"
-import type { ImpulseFormSwitchBranches } from "./impulse-form-switch-branches"
-import type { ImpulseFormSwitchConciseSchema } from "./impulse-form-switch-concise-schema"
-import type { ImpulseFormSwitchErrorVerbose } from "./impulse-form-switch-error-verbose"
-import type { ImpulseFormSwitchVerboseSchema } from "./impulse-form-switch-verbose-schema"
-import type { ImpulseFormSwitchBranchUnion } from "./_internal/impulse-form-switch-branch-union"
+import type { GetFormSwitchBranchesParam } from "./get-impulse-form-switch-branches-param"
+import type { FormSwitchBranches } from "./impulse-form-switch-branches"
+import type { FormSwitchConciseSchema } from "./impulse-form-switch-concise-schema"
+import type { FormSwitchErrorVerbose } from "./impulse-form-switch-error-verbose"
+import type { FormSwitchVerboseSchema } from "./impulse-form-switch-verbose-schema"
+import type { FormSwitchBranchUnion } from "./_internal/impulse-form-switch-branch-union"
 
-type ImpulseFormSwitchErrorSetter<
-  TKind extends ImpulseForm,
-  TBranches extends ImpulseFormSwitchBranches<TKind>,
+type FormSwitchErrorSetter<
+  TKind extends SignalForm,
+  TBranches extends FormSwitchBranches<TKind>,
 > = Setter<
   // concise
   | null
 
   // concise details
   | Partial<
-      ImpulseFormSwitchConciseSchema<
-        GetImpulseFormParam<TKind, "error.setter">,
+      FormSwitchConciseSchema<
+        GetSignalFormParam<TKind, "error.setter">,
         Setter<
-          null | ImpulseFormSwitchBranchUnion<TKind, TBranches, "error.setter">,
-          [ImpulseFormSwitchBranchUnion<TKind, TBranches, "error.schema.verbose">]
+          null | FormSwitchBranchUnion<TKind, TBranches, "error.setter">,
+          [FormSwitchBranchUnion<TKind, TBranches, "error.schema.verbose">]
         >
       >
     >
 
   // verbose
   | Partial<
-      ImpulseFormSwitchVerboseSchema<
-        GetImpulseFormParam<TKind, "error.setter">,
+      FormSwitchVerboseSchema<
+        GetSignalFormParam<TKind, "error.setter">,
         Setter<
-          null | Partial<GetImpulseFormSwitchBranchesParam<TBranches, "error.setter">>,
-          [GetImpulseFormSwitchBranchesParam<TBranches, "error.schema.verbose">]
+          null | Partial<GetFormSwitchBranchesParam<TBranches, "error.setter">>,
+          [GetFormSwitchBranchesParam<TBranches, "error.schema.verbose">]
         >
       >
     >,
   [
     // the only argument is the verbose schema
-    ImpulseFormSwitchErrorVerbose<TKind, TBranches>,
+    FormSwitchErrorVerbose<TKind, TBranches>,
   ]
 >
-export type { ImpulseFormSwitchErrorSetter }
+export type { FormSwitchErrorSetter }

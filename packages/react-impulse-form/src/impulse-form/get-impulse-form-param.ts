@@ -1,9 +1,9 @@
-import type { ImpulseFormParams } from "./impulse-form-params"
-import type { GetImpulseFormParams } from "./_internal/get-impulse-form-params"
+import type { SignalFormParams } from "./impulse-form-params"
+import type { GetSignalFormParams } from "./_internal/get-impulse-form-params"
 
-type GetImpulseFormParam<
+type GetSignalFormParam<
   TTarget,
-  TKey extends keyof ImpulseFormParams,
-> = GetImpulseFormParams<TTarget>[TKey]
+  TKey extends keyof SignalFormParams,
+> = GetSignalFormParams<TTarget>[TKey]
 
-export type { GetImpulseFormParam }
+export type { GetSignalFormParam }

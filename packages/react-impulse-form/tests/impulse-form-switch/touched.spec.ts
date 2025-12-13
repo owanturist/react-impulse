@@ -4,30 +4,30 @@ import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
 import {
-  ImpulseFormShape,
-  ImpulseFormSwitch,
-  type ImpulseFormSwitchFlagSetter,
-  type ImpulseFormSwitchOptions,
-  ImpulseFormUnit,
+  FormShape,
+  FormSwitch,
+  type FormSwitchFlagSetter,
+  type FormSwitchOptions,
+  FormUnit,
 } from "../../src"
 
 describe("types", () => {
-  const active = ImpulseFormUnit("", {
+  const active = FormUnit("", {
     schema: z.enum(["_1", "_2", "_5"]),
   })
 
   const branches = {
-    _1: ImpulseFormUnit(true, {
+    _1: FormUnit(true, {
       schema: z.boolean().transform((value): string => (value ? "ok" : "not ok")),
     }),
-    _2: ImpulseFormShape({
-      _3: ImpulseFormUnit("name"),
-      _4: ImpulseFormUnit(18),
+    _2: FormShape({
+      _3: FormUnit("name"),
+      _4: FormUnit(18),
     }),
-    _5: ImpulseFormUnit("excluded"),
+    _5: FormUnit("excluded"),
   }
 
-  const form = ImpulseFormSwitch(active, branches)
+  const form = FormSwitch(active, branches)
 
   type TouchedSchema =
     | boolean
@@ -132,56 +132,56 @@ describe("types", () => {
     [TouchedVerboseSchema]
   >
 
-  it("matches schema type for isTouched(scope, select?)", ({ scope }) => {
-    expectTypeOf(form.isTouched(scope)).toEqualTypeOf<boolean>()
+  it("matches schema type for isTouched(monitor, select?)", ({ monitor }) => {
+    expectTypeOf(form.isTouched(monitor)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(form.isTouched(scope, params._first)).toEqualTypeOf<TouchedSchema>()
+    expectTypeOf(form.isTouched(monitor, params._first)).toEqualTypeOf<TouchedSchema>()
 
-    expectTypeOf(form.isTouched(scope, params._second)).toEqualTypeOf<TouchedVerboseSchema>()
+    expectTypeOf(form.isTouched(monitor, params._second)).toEqualTypeOf<TouchedVerboseSchema>()
   })
 
   it("matches setter type for setTouched(setter)", () => {
     expectTypeOf(form.setTouched).toEqualTypeOf<(setter: TouchedSetter) => void>()
   })
 
-  it("allows passing concise value to setTouched", ({ scope }) => {
-    const touched0 = form.isTouched(scope)
-    const touched0Concise = form.isTouched(scope, params._first)
-    const touched0Verbose = form.isTouched(scope, params._second)
+  it("allows passing concise value to setTouched", ({ monitor }) => {
+    const touched0 = form.isTouched(monitor)
+    const touched0Concise = form.isTouched(monitor, params._first)
+    const touched0Verbose = form.isTouched(monitor, params._second)
 
     form.setTouched(touched0Concise)
 
-    expect(form.isTouched(scope)).toStrictEqual(touched0)
-    expect(form.isTouched(scope, params._first)).toStrictEqual(touched0Concise)
-    expect(form.isTouched(scope, params._second)).toStrictEqual(touched0Verbose)
+    expect(form.isTouched(monitor)).toStrictEqual(touched0)
+    expect(form.isTouched(monitor, params._first)).toStrictEqual(touched0Concise)
+    expect(form.isTouched(monitor, params._second)).toStrictEqual(touched0Verbose)
   })
 
-  it("allows passing verbose value to setTouched", ({ scope }) => {
-    const touched0 = form.isTouched(scope)
-    const touched0Concise = form.isTouched(scope, params._first)
-    const touched0Verbose = form.isTouched(scope, params._second)
+  it("allows passing verbose value to setTouched", ({ monitor }) => {
+    const touched0 = form.isTouched(monitor)
+    const touched0Concise = form.isTouched(monitor, params._first)
+    const touched0Verbose = form.isTouched(monitor, params._second)
 
     form.setTouched(touched0Verbose)
 
-    expect(form.isTouched(scope)).toStrictEqual(touched0)
-    expect(form.isTouched(scope, params._first)).toStrictEqual(touched0Concise)
-    expect(form.isTouched(scope, params._second)).toStrictEqual(touched0Verbose)
+    expect(form.isTouched(monitor)).toStrictEqual(touched0)
+    expect(form.isTouched(monitor, params._first)).toStrictEqual(touched0Concise)
+    expect(form.isTouched(monitor, params._second)).toStrictEqual(touched0Verbose)
   })
 
-  it("allows passing verbose value in setTouched callback", ({ scope }) => {
-    const touched0 = form.isTouched(scope)
-    const touched0Concise = form.isTouched(scope, params._first)
-    const touched0Verbose = form.isTouched(scope, params._second)
+  it("allows passing verbose value in setTouched callback", ({ monitor }) => {
+    const touched0 = form.isTouched(monitor)
+    const touched0Concise = form.isTouched(monitor, params._first)
+    const touched0Verbose = form.isTouched(monitor, params._second)
 
     form.setTouched((verbose) => verbose)
 
-    expect(form.isTouched(scope)).toStrictEqual(touched0)
-    expect(form.isTouched(scope, params._first)).toStrictEqual(touched0Concise)
-    expect(form.isTouched(scope, params._second)).toStrictEqual(touched0Verbose)
+    expect(form.isTouched(monitor)).toStrictEqual(touched0)
+    expect(form.isTouched(monitor, params._first)).toStrictEqual(touched0Concise)
+    expect(form.isTouched(monitor, params._second)).toStrictEqual(touched0Verbose)
   })
 
-  it("ensures ImpulseFormSwitchOptions.touched type", () => {
-    const form = ImpulseFormSwitch(active, branches, {
+  it("ensures FormSwitchOptions.touched type", () => {
+    const form = FormSwitch(active, branches, {
       touched: {
         // @ts-expect-error should be boolean
         active: "",
@@ -202,16 +202,16 @@ describe("types", () => {
   })
 
   describe("nested", () => {
-    const active = ImpulseFormUnit("", {
+    const active = FormUnit("", {
       schema: z.enum(["_6", "_7"]),
     })
 
     const branches = {
       _6: form,
-      _7: ImpulseFormUnit("0"),
+      _7: FormUnit("0"),
     }
 
-    const parent = ImpulseFormSwitch(active, branches)
+    const parent = FormSwitch(active, branches)
 
     type ParentTouchedSchema =
       | boolean
@@ -277,13 +277,13 @@ describe("types", () => {
       [ParentTouchedVerboseSchema]
     >
 
-    it("matches schema type for isTouched(scope, select?)", ({ scope }) => {
-      expectTypeOf(parent.isTouched(scope)).toEqualTypeOf<boolean>()
+    it("matches schema type for isTouched(monitor, select?)", ({ monitor }) => {
+      expectTypeOf(parent.isTouched(monitor)).toEqualTypeOf<boolean>()
 
-      expectTypeOf(parent.isTouched(scope, params._first)).toEqualTypeOf<ParentTouchedSchema>()
+      expectTypeOf(parent.isTouched(monitor, params._first)).toEqualTypeOf<ParentTouchedSchema>()
 
       expectTypeOf(
-        parent.isTouched(scope, params._second),
+        parent.isTouched(monitor, params._second),
       ).toEqualTypeOf<ParentTouchedVerboseSchema>()
     })
 
@@ -291,24 +291,24 @@ describe("types", () => {
       expectTypeOf(parent.setTouched).toEqualTypeOf<(setter: ParentTouchedSetter) => void>()
     })
 
-    it("allows passing concise value to setTouched", ({ scope }) => {
-      const concise = parent.isTouched(scope, params._first)
+    it("allows passing concise value to setTouched", ({ monitor }) => {
+      const concise = parent.isTouched(monitor, params._first)
 
       parent.setTouched(concise)
 
-      expect(parent.isTouched(scope, params._first)).toStrictEqual(concise)
+      expect(parent.isTouched(monitor, params._first)).toStrictEqual(concise)
     })
 
-    it("allows passing verbose value to setTouched", ({ scope }) => {
-      const verbose = parent.isTouched(scope, params._second)
+    it("allows passing verbose value to setTouched", ({ monitor }) => {
+      const verbose = parent.isTouched(monitor, params._second)
 
       parent.setTouched(verbose)
 
-      expect(parent.isTouched(scope, params._second)).toStrictEqual(verbose)
+      expect(parent.isTouched(monitor, params._second)).toStrictEqual(verbose)
     })
 
-    it("ensures ImpulseFormSwitchOptions.touched type", () => {
-      const parent = ImpulseFormSwitch(active, branches, {
+    it("ensures FormSwitchOptions.touched type", () => {
+      const parent = FormSwitch(active, branches, {
         touched: {
           // @ts-expect-error should be boolean
           active: 1,
@@ -327,29 +327,29 @@ describe("types", () => {
 describe.each([true, false])("when touched=%s", (touched) => {
   const differentTouched = !touched
 
-  describe("when defining top-level concise ImpulseFormSwitchOptions.touched", () => {
+  describe("when defining top-level concise FormSwitchOptions.touched", () => {
     describe("when active is valid", () => {
-      it("overrides active branch's touched", ({ scope }) => {
-        const form = ImpulseFormSwitch(
-          ImpulseFormUnit("_2", {
+      it("overrides active branch's touched", ({ monitor }) => {
+        const form = FormSwitch(
+          FormUnit("_2", {
             touched: true,
             schema: z.enum(["_1", "_2"]),
           }),
           {
-            _1: ImpulseFormUnit(0, {
+            _1: FormUnit(0, {
               touched: false,
               schema: z.number(),
             }),
-            _2: ImpulseFormSwitch(
-              ImpulseFormUnit("_3", {
+            _2: FormSwitch(
+              FormUnit("_3", {
                 schema: z.enum(["_3", "_4"]),
               }),
               {
-                _3: ImpulseFormUnit("0", {
+                _3: FormUnit("0", {
                   touched: true,
                   schema: z.string(),
                 }),
-                _4: ImpulseFormUnit(1, {
+                _4: FormUnit(1, {
                   schema: z.number(),
                 }),
               },
@@ -360,9 +360,9 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(touched)
-        expect(form.isTouched(scope, params._first)).toBe(touched)
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(touched)
+        expect(form.isTouched(monitor, params._first)).toBe(touched)
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: touched,
           branches: {
             _1: false,
@@ -379,27 +379,27 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
 
     describe("when active is invalid", () => {
-      it("overrides only the active's touched", ({ scope }) => {
-        const form = ImpulseFormSwitch(
-          ImpulseFormUnit("", {
+      it("overrides only the active's touched", ({ monitor }) => {
+        const form = FormSwitch(
+          FormUnit("", {
             touched: true,
             schema: z.enum(["_1", "_2"]),
           }),
           {
-            _1: ImpulseFormUnit(0, {
+            _1: FormUnit(0, {
               touched: false,
               schema: z.number(),
             }),
-            _2: ImpulseFormSwitch(
-              ImpulseFormUnit("_3", {
+            _2: FormSwitch(
+              FormUnit("_3", {
                 schema: z.enum(["_3", "_4"]),
               }),
               {
-                _3: ImpulseFormUnit("0", {
+                _3: FormUnit("0", {
                   touched: true,
                   schema: z.string(),
                 }),
-                _4: ImpulseFormUnit(1, {
+                _4: FormUnit(1, {
                   schema: z.number(),
                 }),
               },
@@ -410,9 +410,9 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(touched)
-        expect(form.isTouched(scope, params._first)).toBe(touched)
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(touched)
+        expect(form.isTouched(monitor, params._first)).toBe(touched)
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: touched,
           branches: {
             _1: false,
@@ -429,29 +429,29 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
   })
 
-  describe("when defining ImpulseFormSwitchOptions.touched.active", () => {
+  describe("when defining FormSwitchOptions.touched.active", () => {
     describe("when active is invalid", () => {
-      it("overrides only the active's touched", ({ scope }) => {
-        const form = ImpulseFormSwitch(
-          ImpulseFormUnit("", {
+      it("overrides only the active's touched", ({ monitor }) => {
+        const form = FormSwitch(
+          FormUnit("", {
             touched: true,
             schema: z.enum(["_1", "_2"]),
           }),
           {
-            _1: ImpulseFormUnit(0, {
+            _1: FormUnit(0, {
               touched: false,
               schema: z.number(),
             }),
-            _2: ImpulseFormSwitch(
-              ImpulseFormUnit("_3", {
+            _2: FormSwitch(
+              FormUnit("_3", {
                 schema: z.enum(["_3", "_4"]),
               }),
               {
-                _3: ImpulseFormUnit("0", {
+                _3: FormUnit("0", {
                   touched: true,
                   schema: z.string(),
                 }),
-                _4: ImpulseFormUnit(1, {
+                _4: FormUnit(1, {
                   schema: z.number(),
                 }),
               },
@@ -464,9 +464,9 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(touched)
-        expect(form.isTouched(scope, params._first)).toBe(touched)
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(touched)
+        expect(form.isTouched(monitor, params._first)).toBe(touched)
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: touched,
           branches: {
             _1: false,
@@ -483,27 +483,27 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
 
     describe("when active is valid", () => {
-      it("overrides only the active's touched", ({ scope }) => {
-        const form = ImpulseFormSwitch(
-          ImpulseFormUnit("_2", {
+      it("overrides only the active's touched", ({ monitor }) => {
+        const form = FormSwitch(
+          FormUnit("_2", {
             touched: true,
             schema: z.enum(["_1", "_2"]),
           }),
           {
-            _1: ImpulseFormUnit(0, {
+            _1: FormUnit(0, {
               touched: false,
               schema: z.number(),
             }),
-            _2: ImpulseFormSwitch(
-              ImpulseFormUnit("_3", {
+            _2: FormSwitch(
+              FormUnit("_3", {
                 touched: true,
                 schema: z.enum(["_3", "_4"]),
               }),
               {
-                _3: ImpulseFormUnit("0", {
+                _3: FormUnit("0", {
                   schema: z.string(),
                 }),
-                _4: ImpulseFormUnit(1, {
+                _4: FormUnit(1, {
                   touched: false,
                   schema: z.number(),
                 }),
@@ -517,8 +517,8 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(true)
-        expect(form.isTouched(scope, params._first)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(true)
+        expect(form.isTouched(monitor, params._first)).toStrictEqual({
           active: touched,
           branch: {
             kind: "_2",
@@ -528,7 +528,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
             },
           },
         })
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: touched,
           branches: {
             _1: false,
@@ -545,30 +545,30 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
   })
 
-  describe("when defining concise ImpulseFormSwitchOptions.touched.branch", () => {
+  describe("when defining concise FormSwitchOptions.touched.branch", () => {
     describe("when active is invalid", () => {
-      it("does not change anything", ({ scope }) => {
-        const form = ImpulseFormSwitch(
-          ImpulseFormUnit("", {
+      it("does not change anything", ({ monitor }) => {
+        const form = FormSwitch(
+          FormUnit("", {
             touched: differentTouched,
             schema: z.enum(["_1", "_2"]),
           }),
           {
-            _1: ImpulseFormUnit(0, {
+            _1: FormUnit(0, {
               touched: false,
               schema: z.number(),
             }),
-            _2: ImpulseFormSwitch(
-              ImpulseFormUnit("_3", {
+            _2: FormSwitch(
+              FormUnit("_3", {
                 touched: true,
                 schema: z.enum(["_3", "_4"]),
               }),
               {
-                _3: ImpulseFormUnit("0", {
+                _3: FormUnit("0", {
                   touched: true,
                   schema: z.string(),
                 }),
-                _4: ImpulseFormUnit(1, {
+                _4: FormUnit(1, {
                   schema: z.number(),
                 }),
               },
@@ -581,9 +581,9 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(differentTouched)
-        expect(form.isTouched(scope, params._first)).toBe(differentTouched)
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(differentTouched)
+        expect(form.isTouched(monitor, params._first)).toBe(differentTouched)
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: differentTouched,
           branches: {
             _1: false,
@@ -600,22 +600,22 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
 
     describe("when active is valid", () => {
-      it("overrides only the active branch touched", ({ scope }) => {
-        const form = ImpulseFormSwitch(
-          ImpulseFormUnit("_2", {
+      it("overrides only the active branch touched", ({ monitor }) => {
+        const form = FormSwitch(
+          FormUnit("_2", {
             touched: differentTouched,
             schema: z.enum(["_1", "_2"]),
           }),
           {
-            _1: ImpulseFormUnit(0, {
+            _1: FormUnit(0, {
               touched: false,
               schema: z.number(),
             }),
-            _2: ImpulseFormShape({
-              _3: ImpulseFormUnit("0", {
+            _2: FormShape({
+              _3: FormUnit("0", {
                 schema: z.string(),
               }),
-              _4: ImpulseFormUnit(1, {
+              _4: FormUnit(1, {
                 touched: true,
                 schema: z.number(),
               }),
@@ -628,12 +628,12 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(true)
-        expect(form.isTouched(scope, params._first)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(true)
+        expect(form.isTouched(monitor, params._first)).toStrictEqual({
           active: differentTouched,
           branch: touched,
         })
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: differentTouched,
           branches: {
             _1: false,
@@ -647,29 +647,29 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
   })
 
-  describe("when defining detailed ImpulseFormSwitchOptions.touched.branch", () => {
+  describe("when defining detailed FormSwitchOptions.touched.branch", () => {
     describe("when active is invalid", () => {
-      it("overrides only the target branch touched", ({ scope }) => {
-        const form = ImpulseFormSwitch(
-          ImpulseFormUnit("", {
+      it("overrides only the target branch touched", ({ monitor }) => {
+        const form = FormSwitch(
+          FormUnit("", {
             touched: differentTouched,
             schema: z.enum(["_1", "_2"]),
           }),
           {
-            _1: ImpulseFormUnit(0, {
+            _1: FormUnit(0, {
               touched: true,
               schema: z.number(),
             }),
-            _2: ImpulseFormSwitch(
-              ImpulseFormUnit("_3", {
+            _2: FormSwitch(
+              FormUnit("_3", {
                 schema: z.enum(["_3", "_4"]),
               }),
               {
-                _3: ImpulseFormUnit("0", {
+                _3: FormUnit("0", {
                   touched: true,
                   schema: z.string(),
                 }),
-                _4: ImpulseFormUnit(1, {
+                _4: FormUnit(1, {
                   touched: false,
                   schema: z.number(),
                 }),
@@ -686,9 +686,9 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(differentTouched)
-        expect(form.isTouched(scope, params._first)).toBe(differentTouched)
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(differentTouched)
+        expect(form.isTouched(monitor, params._first)).toBe(differentTouched)
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: differentTouched,
           branches: {
             _1: touched,
@@ -705,27 +705,27 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
 
     describe("when active is valid", () => {
-      it("overrides only the target inactive branch touched", ({ scope }) => {
-        const form = ImpulseFormSwitch(
-          ImpulseFormUnit("_2", {
+      it("overrides only the target inactive branch touched", ({ monitor }) => {
+        const form = FormSwitch(
+          FormUnit("_2", {
             touched: false,
             schema: z.enum(["_1", "_2"]),
           }),
           {
-            _1: ImpulseFormUnit(0, {
+            _1: FormUnit(0, {
               touched: true,
               schema: z.number(),
             }),
-            _2: ImpulseFormSwitch(
-              ImpulseFormUnit("_3", {
+            _2: FormSwitch(
+              FormUnit("_3", {
                 schema: z.enum(["_3", "_4"]),
               }),
               {
-                _3: ImpulseFormUnit("0", {
+                _3: FormUnit("0", {
                   touched: true,
                   schema: z.string(),
                 }),
-                _4: ImpulseFormUnit(1, {
+                _4: FormUnit(1, {
                   touched: false,
                   schema: z.number(),
                 }),
@@ -742,8 +742,8 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(true)
-        expect(form.isTouched(scope, params._first)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(true)
+        expect(form.isTouched(monitor, params._first)).toStrictEqual({
           active: false,
           branch: {
             kind: "_2",
@@ -753,7 +753,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
             },
           },
         })
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: false,
           branches: {
             _1: touched,
@@ -768,27 +768,27 @@ describe.each([true, false])("when touched=%s", (touched) => {
         })
       })
 
-      it("overrides only the target active branch touched", ({ scope }) => {
-        const form = ImpulseFormSwitch(
-          ImpulseFormUnit("_2", {
+      it("overrides only the target active branch touched", ({ monitor }) => {
+        const form = FormSwitch(
+          FormUnit("_2", {
             touched: differentTouched,
             schema: z.enum(["_1", "_2"]),
           }),
           {
-            _1: ImpulseFormUnit(0, {
+            _1: FormUnit(0, {
               touched: true,
               schema: z.number(),
             }),
-            _2: ImpulseFormSwitch(
-              ImpulseFormUnit("_3", {
+            _2: FormSwitch(
+              FormUnit("_3", {
                 schema: z.enum(["_3", "_4"]),
               }),
               {
-                _3: ImpulseFormUnit("0", {
+                _3: FormUnit("0", {
                   touched: true,
                   schema: z.string(),
                 }),
-                _4: ImpulseFormUnit(1, {
+                _4: FormUnit(1, {
                   touched: false,
                   schema: z.number(),
                 }),
@@ -805,12 +805,12 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(true)
-        expect(form.isTouched(scope, params._first)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(true)
+        expect(form.isTouched(monitor, params._first)).toStrictEqual({
           active: differentTouched,
           branch: touched,
         })
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: differentTouched,
           branches: {
             _1: true,
@@ -825,27 +825,27 @@ describe.each([true, false])("when touched=%s", (touched) => {
         })
       })
 
-      it("overrides nested switch", ({ scope }) => {
-        const form = ImpulseFormSwitch(
-          ImpulseFormUnit("_2", {
+      it("overrides nested switch", ({ monitor }) => {
+        const form = FormSwitch(
+          FormUnit("_2", {
             touched: true,
             schema: z.enum(["_1", "_2"]),
           }),
           {
-            _1: ImpulseFormUnit(0, {
+            _1: FormUnit(0, {
               touched: false,
               schema: z.number(),
             }),
-            _2: ImpulseFormSwitch(
-              ImpulseFormUnit("_3", {
+            _2: FormSwitch(
+              FormUnit("_3", {
                 schema: z.enum(["_3", "_4"]),
               }),
               {
-                _3: ImpulseFormUnit("0", {
+                _3: FormUnit("0", {
                   touched: true,
                   schema: z.string(),
                 }),
-                _4: ImpulseFormUnit(1, {
+                _4: FormUnit(1, {
                   touched: false,
                   schema: z.number(),
                 }),
@@ -867,8 +867,8 @@ describe.each([true, false])("when touched=%s", (touched) => {
           },
         )
 
-        expect(form.isTouched(scope)).toBe(true)
-        expect(form.isTouched(scope, params._first)).toStrictEqual({
+        expect(form.isTouched(monitor)).toBe(true)
+        expect(form.isTouched(monitor, params._first)).toStrictEqual({
           active: true,
           branch: {
             kind: "_2",
@@ -878,7 +878,7 @@ describe.each([true, false])("when touched=%s", (touched) => {
             },
           },
         })
-        expect(form.isTouched(scope, params._second)).toStrictEqual({
+        expect(form.isTouched(monitor, params._second)).toStrictEqual({
           active: true,
           branches: {
             _1: false,
@@ -895,28 +895,28 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
   })
 
-  describe("when defining all active+branch+branches ImpulseFormSwitchOptions.touched", () => {
-    it("branch takes over branches", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("_2", {
+  describe("when defining all active+branch+branches FormSwitchOptions.touched", () => {
+    it("branch takes over branches", ({ monitor }) => {
+      const form = FormSwitch(
+        FormUnit("_2", {
           touched: true,
           schema: z.enum(["_1", "_2"]),
         }),
         {
-          _1: ImpulseFormUnit(0, {
+          _1: FormUnit(0, {
             touched: true,
             schema: z.number(),
           }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("_3", {
+          _2: FormSwitch(
+            FormUnit("_3", {
               schema: z.enum(["_3", "_4"]),
             }),
             {
-              _3: ImpulseFormUnit("0", {
+              _3: FormUnit("0", {
                 touched: true,
                 schema: z.string(),
               }),
-              _4: ImpulseFormUnit(1, {
+              _4: FormUnit(1, {
                 touched: false,
                 schema: z.number(),
               }),
@@ -938,12 +938,12 @@ describe.each([true, false])("when touched=%s", (touched) => {
         },
       )
 
-      expect(form.isTouched(scope)).toBe(true)
-      expect(form.isTouched(scope, params._first)).toStrictEqual({
+      expect(form.isTouched(monitor)).toBe(true)
+      expect(form.isTouched(monitor, params._first)).toStrictEqual({
         active: differentTouched,
         branch: touched,
       })
-      expect(form.isTouched(scope, params._second)).toStrictEqual({
+      expect(form.isTouched(monitor, params._second)).toStrictEqual({
         active: differentTouched,
         branches: {
           _1: differentTouched,
@@ -959,33 +959,35 @@ describe.each([true, false])("when touched=%s", (touched) => {
     })
   })
 
-  it("returns the boolean as concise result when everything has the same boolean", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("", {
+  it("returns the boolean as concise result when everything has the same boolean", ({
+    monitor,
+  }) => {
+    const form = FormSwitch(
+      FormUnit("", {
         touched,
         schema: z.enum(["_1", "_2"]),
       }),
       {
-        _1: ImpulseFormUnit(0, { touched, schema: z.number() }),
-        _2: ImpulseFormSwitch(
-          ImpulseFormUnit("", {
+        _1: FormUnit(0, { touched, schema: z.number() }),
+        _2: FormSwitch(
+          FormUnit("", {
             touched,
             schema: z.enum(["_3", "_4"]),
           }),
           {
-            _3: ImpulseFormUnit("0", {
+            _3: FormUnit("0", {
               touched,
               schema: z.string(),
             }),
-            _4: ImpulseFormUnit(1, { touched, schema: z.number() }),
+            _4: FormUnit(1, { touched, schema: z.number() }),
           },
         ),
       },
     )
 
-    expect(form.isTouched(scope)).toBe(touched)
-    expect(form.isTouched(scope, params._first)).toBe(touched)
-    expect(form.isTouched(scope, params._second)).toStrictEqual({
+    expect(form.isTouched(monitor)).toBe(touched)
+    expect(form.isTouched(monitor, params._first)).toBe(touched)
+    expect(form.isTouched(monitor, params._second)).toStrictEqual({
       active: touched,
       branches: {
         _1: touched,
@@ -1002,27 +1004,27 @@ describe.each([true, false])("when touched=%s", (touched) => {
 })
 
 describe("stable touched value", () => {
-  it("subsequently selects equal touched", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_2", {
+  it("subsequently selects equal touched", ({ monitor }) => {
+    const form = FormSwitch(
+      FormUnit("_2", {
         touched: true,
         schema: z.enum(["_1", "_2"]),
       }),
       {
-        _1: ImpulseFormUnit(0, {
+        _1: FormUnit(0, {
           touched: false,
           schema: z.number(),
         }),
-        _2: ImpulseFormSwitch(
-          ImpulseFormUnit("_3", {
+        _2: FormSwitch(
+          FormUnit("_3", {
             schema: z.enum(["_3", "_4"]),
           }),
           {
-            _3: ImpulseFormUnit("0", {
+            _3: FormUnit("0", {
               touched: true,
               schema: z.string(),
             }),
-            _4: ImpulseFormUnit(1, {
+            _4: FormUnit(1, {
               touched: false,
               schema: z.number(),
             }),
@@ -1031,38 +1033,38 @@ describe("stable touched value", () => {
       },
     )
 
-    expect(form.isTouched(scope)).toBeTypeOf("boolean")
-    expect(form.isTouched(scope)).toBe(form.isTouched(scope))
+    expect(form.isTouched(monitor)).toBeTypeOf("boolean")
+    expect(form.isTouched(monitor)).toBe(form.isTouched(monitor))
 
-    expect(form.isTouched(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.isTouched(scope, params._first)).toBe(form.isTouched(scope, params._first))
+    expect(form.isTouched(monitor, params._first)).toBeInstanceOf(Object)
+    expect(form.isTouched(monitor, params._first)).toBe(form.isTouched(monitor, params._first))
 
-    expect(form.isTouched(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.isTouched(scope, params._second)).toBe(form.isTouched(scope, params._second))
+    expect(form.isTouched(monitor, params._second)).toBeInstanceOf(Object)
+    expect(form.isTouched(monitor, params._second)).toBe(form.isTouched(monitor, params._second))
   })
 })
 
 describe("using recursive setter", () => {
-  const active = ImpulseFormUnit("_2", {
+  const active = FormUnit("_2", {
     touched: true,
     schema: z.enum(["_1", "_2"]),
   })
 
   const branches = {
-    _1: ImpulseFormUnit(0, {
+    _1: FormUnit(0, {
       touched: false,
       schema: z.number(),
     }),
-    _2: ImpulseFormSwitch(
-      ImpulseFormUnit("_3", {
+    _2: FormSwitch(
+      FormUnit("_3", {
         schema: z.enum(["_3", "_4"]),
       }),
       {
-        _3: ImpulseFormUnit("0", {
+        _3: FormUnit("0", {
           touched: true,
           schema: z.string(),
         }),
-        _4: ImpulseFormUnit(1, {
+        _4: FormUnit(1, {
           touched: false,
           schema: z.number(),
         }),
@@ -1070,22 +1072,22 @@ describe("using recursive setter", () => {
     ),
   }
 
-  function setup(options?: ImpulseFormSwitchOptions<typeof active, typeof branches>) {
-    return ImpulseFormSwitch(active, branches, options)
+  function setup(options?: FormSwitchOptions<typeof active, typeof branches>) {
+    return FormSwitch(active, branches, options)
   }
 
   describe.each<
     [
       string,
       (
-        input: ImpulseFormSwitchFlagSetter<typeof active, typeof branches>,
-      ) => ImpulseFormSwitch<typeof active, typeof branches>,
+        input: FormSwitchFlagSetter<typeof active, typeof branches>,
+      ) => FormSwitch<typeof active, typeof branches>,
     ]
   >([
-    ["ImpulseFormSwitchOptions.touched", (touched) => setup({ touched })],
+    ["FormSwitchOptions.touched", (touched) => setup({ touched })],
 
     [
-      "ImpulseFormSwitch.setTouched",
+      "FormSwitch.setTouched",
       (setter) => {
         const form = setup()
 
@@ -1095,7 +1097,7 @@ describe("using recursive setter", () => {
       },
     ],
   ])("in %s", (_, setup) => {
-    it("passes initial and input recursively to all setters", ({ scope }) => {
+    it("passes initial and input recursively to all setters", ({ monitor }) => {
       expect.assertions(20)
 
       const form = setup(($) => {
@@ -1342,8 +1344,8 @@ describe("using recursive setter", () => {
         }
       })
 
-      expect(form.isTouched(scope)).toStrictEqual(true)
-      expect(form.isTouched(scope, params._first)).toStrictEqual({
+      expect(form.isTouched(monitor)).toStrictEqual(true)
+      expect(form.isTouched(monitor, params._first)).toStrictEqual({
         active: false,
         branch: {
           kind: "_2",
@@ -1353,7 +1355,7 @@ describe("using recursive setter", () => {
           },
         },
       })
-      expect(form.isTouched(scope, params._second)).toStrictEqual({
+      expect(form.isTouched(monitor, params._second)).toStrictEqual({
         active: false,
         branches: {
           _1: true,

@@ -1,8 +1,8 @@
-import type { GetImpulseFormShapeParam } from "./get-impulse-form-shape-param"
-import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
+import type { GetFormShapeParam } from "./get-impulse-form-shape-param"
+import type { FormShapeFields } from "./impulse-form-shape-fields"
 
-type ImpulseFormShapeFlag<TFields extends ImpulseFormShapeFields> =
+type FormShapeFlag<TFields extends FormShapeFields> =
   | boolean
-  | GetImpulseFormShapeParam<TFields, "flag.schema">
+  | GetFormShapeParam<TFields, "flag.schema">
 
-export type { ImpulseFormShapeFlag }
+export type { FormShapeFlag }

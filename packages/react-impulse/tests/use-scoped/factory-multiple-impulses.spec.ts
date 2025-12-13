@@ -1,48 +1,48 @@
 import { act, renderHook } from "@testing-library/react"
 
-import { Impulse, type Scope, batch, useScoped } from "../../src"
+import { type Monitor, Signal, batch, useComputed } from "../../src"
 import {
   Counter,
   type WithFirst,
-  type WithImpulse,
   type WithSecond,
+  type WithSignal,
   type WithSpy,
   type WithThird,
 } from "../common"
 
 describe("multiple factory", () => {
-  const factory = (scope: Scope, { first, second }: WithFirst & WithSecond) =>
-    Counter.merge(first.getValue(scope), second.getValue(scope))
+  const factory = (monitor: Monitor, { first, second }: WithFirst & WithSecond) =>
+    Counter.merge(first.read(monitor), second.read(monitor))
 
   describe.each([
     [
       "without deps",
       ({ first, second }: WithFirst & WithSecond) =>
-        useScoped((scope) => factory(scope, { first, second })),
+        useComputed((monitor) => factory(monitor, { first, second })),
     ],
     [
       "without comparator",
       ({ first, second }: WithFirst & WithSecond) =>
-        useScoped((scope) => factory(scope, { first, second }), [first, second]),
+        useComputed((monitor) => factory(monitor, { first, second }), [first, second]),
     ],
     [
       "with inline comparator",
       ({ first, second }: WithFirst & WithSecond) =>
-        useScoped((scope) => factory(scope, { first, second }), [first, second], {
-          compare: (prev, next) => Counter.compare(prev, next),
+        useComputed((monitor) => factory(monitor, { first, second }), [first, second], {
+          equals: (prev, next) => Counter.equals(prev, next),
         }),
     ],
     [
       "with memoized comparator",
       ({ first, second }: WithFirst & WithSecond) =>
-        useScoped((scope) => factory(scope, { first, second }), [first, second], {
-          compare: Counter.compare,
+        useComputed((monitor) => factory(monitor, { first, second }), [first, second], {
+          equals: Counter.equals,
         }),
     ],
   ])("%s", (_, useHook) => {
     const setup = () => {
-      const first = Impulse({ count: 2 })
-      const second = Impulse({ count: 3 })
+      const first = Signal({ count: 2 })
+      const second = Signal({ count: 3 })
       const { result } = renderHook(useHook, {
         initialProps: { first, second },
       })
@@ -60,7 +60,7 @@ describe("multiple factory", () => {
       const { first, result } = setup()
 
       act(() => {
-        first.setValue(Counter.inc)
+        first.write(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -69,7 +69,7 @@ describe("multiple factory", () => {
       const { second, result } = setup()
 
       act(() => {
-        second.setValue(Counter.inc)
+        second.write(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 6 })
     })
@@ -78,86 +78,86 @@ describe("multiple factory", () => {
       const { first, second, result } = setup()
 
       act(() => {
-        first.setValue(Counter.inc)
-        second.setValue(Counter.inc)
+        first.write(Counter.inc)
+        second.write(Counter.inc)
       })
       expect(result.current).toStrictEqual({ count: 7 })
     })
   })
 })
 
-describe("triggering factory for multiple impulses vs single impulse", () => {
-  const factorySingle = (scope: Scope, { impulse, spy }: WithImpulse & WithSpy) => {
+describe("triggering factory for multiple Signals vs single Signal", () => {
+  const factorySingle = (monitor: Monitor, { signal, spy }: WithSignal & WithSpy) => {
     spy()
 
-    return impulse.getValue(scope)
+    return signal.read(monitor)
   }
 
   const factoryMultiple = (
-    scope: Scope,
+    monitor: Monitor,
     { spy, first, second, third }: WithFirst & WithSecond & WithThird & WithSpy,
   ) => {
     spy()
 
-    return Counter.merge(first.getValue(scope), second.getValue(scope), third.getValue(scope))
+    return Counter.merge(first.read(monitor), second.read(monitor), third.read(monitor))
   }
 
   describe.each([
     [
       "without deps",
-      ({ impulse, spy }: WithImpulse & WithSpy) =>
-        useScoped((scope) => factorySingle(scope, { impulse, spy })),
+      ({ signal, spy }: WithSignal & WithSpy) =>
+        useComputed((monitor) => factorySingle(monitor, { signal, spy })),
       ({ first, second, third, spy }: WithFirst & WithSecond & WithThird & WithSpy) =>
-        useScoped((scope) => factoryMultiple(scope, { first, second, third, spy })),
+        useComputed((monitor) => factoryMultiple(monitor, { first, second, third, spy })),
     ],
     [
       "without comparator",
-      ({ impulse, spy }: WithImpulse & WithSpy) =>
-        useScoped((scope) => factorySingle(scope, { impulse, spy }), [impulse, spy]),
+      ({ signal, spy }: WithSignal & WithSpy) =>
+        useComputed((monitor) => factorySingle(monitor, { signal, spy }), [signal, spy]),
       ({ first, second, third, spy }: WithFirst & WithSecond & WithThird & WithSpy) =>
-        useScoped(
-          (scope) => factoryMultiple(scope, { first, second, third, spy }),
+        useComputed(
+          (monitor) => factoryMultiple(monitor, { first, second, third, spy }),
           [first, second, third, spy],
         ),
     ],
     [
       "with inline comparator",
-      ({ impulse, spy }: WithImpulse & WithSpy) =>
-        useScoped((scope) => factorySingle(scope, { impulse, spy }), [impulse, spy], {
-          compare: (prev, next) => Counter.compare(prev, next),
+      ({ signal, spy }: WithSignal & WithSpy) =>
+        useComputed((monitor) => factorySingle(monitor, { signal, spy }), [signal, spy], {
+          equals: (prev, next) => Counter.equals(prev, next),
         }),
       ({ first, second, third, spy }: WithFirst & WithSecond & WithThird & WithSpy) =>
-        useScoped(
-          (scope) => factoryMultiple(scope, { first, second, third, spy }),
+        useComputed(
+          (monitor) => factoryMultiple(monitor, { first, second, third, spy }),
           [first, second, third, spy],
           {
-            compare: (prev, next) => Counter.compare(prev, next),
+            equals: (prev, next) => Counter.equals(prev, next),
           },
         ),
     ],
     [
       "with memoized comparator",
-      ({ impulse, spy }: WithImpulse & WithSpy) =>
-        useScoped((scope) => factorySingle(scope, { impulse, spy }), [impulse, spy], {
-          compare: Counter.compare,
+      ({ signal, spy }: WithSignal & WithSpy) =>
+        useComputed((monitor) => factorySingle(monitor, { signal, spy }), [signal, spy], {
+          equals: Counter.equals,
         }),
       ({ first, second, third, spy }: WithFirst & WithSecond & WithThird & WithSpy) =>
-        useScoped(
-          (scope) => factoryMultiple(scope, { first, second, third, spy }),
+        useComputed(
+          (monitor) => factoryMultiple(monitor, { first, second, third, spy }),
           [first, second, third, spy],
-          { compare: Counter.compare },
+          { equals: Counter.equals },
         ),
     ],
   ])("%s", (_, useSingleHook, useMultipleHook) => {
     const setup = () => {
-      const first = Impulse({ count: 1 })
-      const second = Impulse({ count: 2 })
-      const third = Impulse({ count: 3 })
+      const first = Signal({ count: 1 })
+      const second = Signal({ count: 2 })
+      const third = Signal({ count: 3 })
       const spySingle = vi.fn()
       const spyMultiple = vi.fn()
 
       const { result: resultSingle } = renderHook(useSingleHook, {
-        initialProps: { impulse: first, spy: spySingle },
+        initialProps: { signal: first, spy: spySingle },
       })
 
       const { result: resultMultiple } = renderHook(useMultipleHook, {
@@ -188,8 +188,8 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
 
       act(() => {
         batch(() => {
-          first.setValue(Counter.inc)
-          second.setValue(Counter.inc)
+          first.write(Counter.inc)
+          second.write(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -202,8 +202,8 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
 
       act(() => {
         batch(() => {
-          first.setValue(Counter.inc)
-          third.setValue(Counter.inc)
+          first.write(Counter.inc)
+          third.write(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -217,11 +217,11 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
       act(() => {
         batch(() => {
           batch(() => {
-            first.setValue(Counter.inc)
-            second.setValue(Counter.inc)
+            first.write(Counter.inc)
+            second.write(Counter.inc)
           })
 
-          third.setValue(Counter.inc)
+          third.write(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 2 })
@@ -237,8 +237,8 @@ describe("triggering factory for multiple impulses vs single impulse", () => {
 
       act(() => {
         batch(() => {
-          second.setValue(Counter.inc)
-          third.setValue(Counter.inc)
+          second.write(Counter.inc)
+          third.write(Counter.inc)
         })
       })
       expect(resultSingle.current).toStrictEqual({ count: 1 })

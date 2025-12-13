@@ -3,24 +3,24 @@ import { z } from "zod"
 import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
-import { ImpulseFormShape, ImpulseFormUnit, type ValidateStrategy } from "../../src"
+import { FormShape, FormUnit, type ValidateStrategy } from "../../src"
 
-it("composes ImpulseFormShape from ImpulseFormUnit", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormUnit(""),
-    second: ImpulseFormUnit(0),
-    third: ImpulseFormUnit([false]),
+it("composes FormShape from FormUnit", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormUnit(""),
+    second: FormUnit(0),
+    third: FormUnit([false]),
   })
 
   expectTypeOf(shape).toEqualTypeOf<
-    ImpulseFormShape<{
-      first: ImpulseFormUnit<string>
-      second: ImpulseFormUnit<number>
-      third: ImpulseFormUnit<Array<boolean>>
+    FormShape<{
+      first: FormUnit<string>
+      second: FormUnit<number>
+      third: FormUnit<Array<boolean>>
     }>
   >()
 
-  const input = shape.getInput(scope)
+  const input = shape.getInput(monitor)
 
   expectTypeOf(input).toEqualTypeOf<{
     readonly first: string
@@ -33,7 +33,7 @@ it("composes ImpulseFormShape from ImpulseFormUnit", ({ scope }) => {
     third: [false],
   })
 
-  const value = shape.getOutput(scope)
+  const value = shape.getOutput(monitor)
 
   expectTypeOf(value).toEqualTypeOf<null | {
     readonly first: string
@@ -47,12 +47,12 @@ it("composes ImpulseFormShape from ImpulseFormUnit", ({ scope }) => {
   })
 })
 
-it("composes ImpulseFormShape from ImpulseFormUnit with schema", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormUnit("", {
+it("composes FormShape from FormUnit with schema", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormUnit("", {
       schema: z.string().min(1).pipe(z.coerce.boolean()),
     }),
-    second: ImpulseFormUnit(0, {
+    second: FormUnit(0, {
       schema: z
         .number()
         .min(100)
@@ -61,13 +61,13 @@ it("composes ImpulseFormShape from ImpulseFormUnit with schema", ({ scope }) => 
   })
 
   expectTypeOf(shape).toEqualTypeOf<
-    ImpulseFormShape<{
-      first: ImpulseFormUnit<string, ReadonlyArray<string>, boolean>
-      second: ImpulseFormUnit<number, ReadonlyArray<string>, string>
+    FormShape<{
+      first: FormUnit<string, ReadonlyArray<string>, boolean>
+      second: FormUnit<number, ReadonlyArray<string>, string>
     }>
   >()
 
-  const value = shape.getOutput(scope)
+  const value = shape.getOutput(monitor)
 
   expectTypeOf(value).toEqualTypeOf<null | {
     readonly first: boolean
@@ -76,32 +76,32 @@ it("composes ImpulseFormShape from ImpulseFormUnit with schema", ({ scope }) => 
   expect(value).toBeNull()
 })
 
-it("gives direct access to the fields", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormUnit(""),
-    second: ImpulseFormUnit(0),
+it("gives direct access to the fields", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormUnit(""),
+    second: FormUnit(0),
   })
 
-  expect(shape.fields.first.getInput(scope)).toBe("")
-  expect(shape.fields.second.getInput(scope)).toBe(0)
+  expect(shape.fields.first.getInput(monitor)).toBe("")
+  expect(shape.fields.second.getInput(monitor)).toBe(0)
 })
 
-it("allows to specify none-form fields", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    first: ImpulseFormUnit(""),
+it("allows to specify none-form fields", ({ monitor }) => {
+  const shape = FormShape({
+    first: FormUnit(""),
     id: 123,
     name: "john",
   })
 
   expectTypeOf(shape).toEqualTypeOf<
-    ImpulseFormShape<{
-      first: ImpulseFormUnit<string>
+    FormShape<{
+      first: FormUnit<string>
       id: number
       name: string
     }>
   >()
 
-  const input = shape.getInput(scope)
+  const input = shape.getInput(monitor)
   expectTypeOf(input).toEqualTypeOf<{
     readonly first: string
     readonly id: number
@@ -113,7 +113,7 @@ it("allows to specify none-form fields", ({ scope }) => {
     name: "john",
   })
 
-  const value = shape.getOutput(scope)
+  const value = shape.getOutput(monitor)
   expectTypeOf(value).toEqualTypeOf<null | {
     readonly first: string
     readonly id: number
@@ -125,19 +125,19 @@ it("allows to specify none-form fields", ({ scope }) => {
     name: "john",
   })
 
-  expect(shape.fields.id(scope)).toBe(123)
-  expect(shape.fields.name(scope)).toBe("john")
+  expect(shape.fields.id(monitor)).toBe(123)
+  expect(shape.fields.name(monitor)).toBe("john")
 })
 
-describe("ImpulseFormShapeOptions.touched", () => {
-  it("specifies initial touched", ({ scope }) => {
-    const shape = ImpulseFormShape(
+describe("FormShapeOptions.touched", () => {
+  it("specifies initial touched", ({ monitor }) => {
+    const shape = FormShape(
       {
-        first: ImpulseFormUnit(""),
-        second: ImpulseFormUnit(0),
-        third: ImpulseFormShape({
-          one: ImpulseFormUnit(true),
-          two: ImpulseFormUnit([""]),
+        first: FormUnit(""),
+        second: FormUnit(0),
+        third: FormShape({
+          one: FormUnit(true),
+          two: FormUnit([""]),
         }),
         fourth: ["anything"],
       },
@@ -149,7 +149,7 @@ describe("ImpulseFormShapeOptions.touched", () => {
       },
     )
 
-    expect(shape.isTouched(scope, params._second)).toStrictEqual({
+    expect(shape.isTouched(monitor, params._second)).toStrictEqual({
       first: true,
       second: false,
       third: {
@@ -159,15 +159,15 @@ describe("ImpulseFormShapeOptions.touched", () => {
     })
   })
 
-  it("gets current touched from setters", ({ scope }) => {
-    const shape = ImpulseFormShape(
+  it("gets current touched from setters", ({ monitor }) => {
+    const shape = FormShape(
       {
-        first: ImpulseFormUnit("", { touched: true }),
-        second: ImpulseFormUnit(0),
-        third: ImpulseFormShape(
+        first: FormUnit("", { touched: true }),
+        second: FormUnit(0),
+        third: FormShape(
           {
-            one: ImpulseFormUnit(true),
-            two: ImpulseFormUnit([""]),
+            one: FormUnit(true),
+            two: FormUnit([""]),
           },
           {
             touched: true,
@@ -238,7 +238,7 @@ describe("ImpulseFormShapeOptions.touched", () => {
       },
     )
 
-    expect(shape.isTouched(scope, params._second)).toStrictEqual({
+    expect(shape.isTouched(monitor, params._second)).toStrictEqual({
       first: false,
       second: true,
       third: {
@@ -249,15 +249,15 @@ describe("ImpulseFormShapeOptions.touched", () => {
   })
 })
 
-describe("ImpulseFormShapeOptions.error", () => {
-  it("specifies initial error", ({ scope }) => {
-    const shape = ImpulseFormShape(
+describe("FormShapeOptions.error", () => {
+  it("specifies initial error", ({ monitor }) => {
+    const shape = FormShape(
       {
-        first: ImpulseFormUnit("", { schema: z.string() }),
-        second: ImpulseFormUnit(0),
-        third: ImpulseFormShape({
-          one: ImpulseFormUnit(true, { error: ["some"] }),
-          two: ImpulseFormUnit([""]),
+        first: FormUnit("", { schema: z.string() }),
+        second: FormUnit(0),
+        third: FormShape({
+          one: FormUnit(true, { error: ["some"] }),
+          two: FormUnit([""]),
         }),
         fourth: ["anything"],
       },
@@ -269,7 +269,7 @@ describe("ImpulseFormShapeOptions.error", () => {
       },
     )
 
-    expect(shape.getError(scope, params._second)).toStrictEqual({
+    expect(shape.getError(monitor, params._second)).toStrictEqual({
       first: ["another"],
       second: null,
       third: {
@@ -279,17 +279,17 @@ describe("ImpulseFormShapeOptions.error", () => {
     })
   })
 
-  it("gets current error from setters", ({ scope }) => {
-    const shape = ImpulseFormShape(
+  it("gets current error from setters", ({ monitor }) => {
+    const shape = FormShape(
       {
-        first: ImpulseFormUnit("", { error: 1 }),
-        second: ImpulseFormUnit(0, {
+        first: FormUnit("", { error: 1 }),
+        second: FormUnit(0, {
           validate: (input) => (input > 0 ? [null, input] : ["must be positive", null]),
         }),
-        third: ImpulseFormShape(
+        third: FormShape(
           {
-            one: ImpulseFormUnit(true, { schema: z.boolean() }),
-            two: ImpulseFormUnit([""], { schema: z.array(z.string()) }),
+            one: FormUnit(true, { schema: z.boolean() }),
+            two: FormUnit([""], { schema: z.array(z.string()) }),
           },
           {
             error: {
@@ -363,7 +363,7 @@ describe("ImpulseFormShapeOptions.error", () => {
       },
     )
 
-    expect(shape.getError(scope, params._second)).toStrictEqual({
+    expect(shape.getError(monitor, params._second)).toStrictEqual({
       first: 2,
       second: "2",
       third: {
@@ -374,15 +374,15 @@ describe("ImpulseFormShapeOptions.error", () => {
   })
 })
 
-describe("ImpulseFormShapeOptions.initial", () => {
-  it("specifies initial value", ({ scope }) => {
-    const shape = ImpulseFormShape(
+describe("FormShapeOptions.initial", () => {
+  it("specifies initial value", ({ monitor }) => {
+    const shape = FormShape(
       {
-        first: ImpulseFormUnit(""),
-        second: ImpulseFormUnit(0),
-        third: ImpulseFormShape({
-          one: ImpulseFormUnit(true),
-          two: ImpulseFormUnit([""]),
+        first: FormUnit(""),
+        second: FormUnit(0),
+        third: FormShape({
+          one: FormUnit(true),
+          two: FormUnit([""]),
         }),
         fourth: ["anything"],
       },
@@ -396,7 +396,7 @@ describe("ImpulseFormShapeOptions.initial", () => {
       },
     )
 
-    expect(shape.getInitial(scope)).toStrictEqual({
+    expect(shape.getInitial(monitor)).toStrictEqual({
       first: "1",
       second: 0,
       third: {
@@ -405,7 +405,7 @@ describe("ImpulseFormShapeOptions.initial", () => {
       },
       fourth: ["anything"],
     })
-    expect(shape.getInput(scope)).toStrictEqual({
+    expect(shape.getInput(monitor)).toStrictEqual({
       first: "",
       second: 0,
       third: {
@@ -416,14 +416,14 @@ describe("ImpulseFormShapeOptions.initial", () => {
     })
   })
 
-  it("gets current initial value from setters", ({ scope }) => {
-    const shape = ImpulseFormShape(
+  it("gets current initial value from setters", ({ monitor }) => {
+    const shape = FormShape(
       {
-        first: ImpulseFormUnit("", { initial: "1" }),
-        second: ImpulseFormUnit(0),
-        third: ImpulseFormShape({
-          one: ImpulseFormUnit(true, { initial: false }),
-          two: ImpulseFormUnit([""], { initial: ["two"] }),
+        first: FormUnit("", { initial: "1" }),
+        second: FormUnit(0),
+        third: FormShape({
+          one: FormUnit(true, { initial: false }),
+          two: FormUnit([""], { initial: ["two"] }),
         }),
         fourth: ["anything"],
       },
@@ -491,7 +491,7 @@ describe("ImpulseFormShapeOptions.initial", () => {
       },
     )
 
-    expect(shape.getInitial(scope)).toStrictEqual({
+    expect(shape.getInitial(monitor)).toStrictEqual({
       first: "1-first",
       second: 2,
       third: {
@@ -503,15 +503,15 @@ describe("ImpulseFormShapeOptions.initial", () => {
   })
 })
 
-describe("ImpulseFormShapeOptions.input", () => {
-  it("specifies initial value", ({ scope }) => {
-    const shape = ImpulseFormShape(
+describe("FormShapeOptions.input", () => {
+  it("specifies initial value", ({ monitor }) => {
+    const shape = FormShape(
       {
-        first: ImpulseFormUnit(""),
-        second: ImpulseFormUnit(0),
-        third: ImpulseFormShape({
-          one: ImpulseFormUnit(true),
-          two: ImpulseFormUnit([""]),
+        first: FormUnit(""),
+        second: FormUnit(0),
+        third: FormShape({
+          one: FormUnit(true),
+          two: FormUnit([""]),
         }),
         fourth: ["anything"],
       },
@@ -525,7 +525,7 @@ describe("ImpulseFormShapeOptions.input", () => {
       },
     )
 
-    expect(shape.getInitial(scope)).toStrictEqual({
+    expect(shape.getInitial(monitor)).toStrictEqual({
       first: "",
       second: 0,
       third: {
@@ -534,7 +534,7 @@ describe("ImpulseFormShapeOptions.input", () => {
       },
       fourth: ["anything"],
     })
-    expect(shape.getInput(scope)).toStrictEqual({
+    expect(shape.getInput(monitor)).toStrictEqual({
       first: "1",
       second: 0,
       third: {
@@ -545,14 +545,14 @@ describe("ImpulseFormShapeOptions.input", () => {
     })
   })
 
-  it("gets current initial value from setters", ({ scope }) => {
-    const shape = ImpulseFormShape(
+  it("gets current initial value from setters", ({ monitor }) => {
+    const shape = FormShape(
       {
-        first: ImpulseFormUnit("1"),
-        second: ImpulseFormUnit(0),
-        third: ImpulseFormShape({
-          one: ImpulseFormUnit(false),
-          two: ImpulseFormUnit(["two"]),
+        first: FormUnit("1"),
+        second: FormUnit(0),
+        third: FormShape({
+          one: FormUnit(false),
+          two: FormUnit(["two"]),
         }),
         fourth: ["anything"],
       },
@@ -620,7 +620,7 @@ describe("ImpulseFormShapeOptions.input", () => {
       },
     )
 
-    expect(shape.getInput(scope)).toStrictEqual({
+    expect(shape.getInput(monitor)).toStrictEqual({
       first: "1-first",
       second: 2,
       third: {
@@ -631,14 +631,14 @@ describe("ImpulseFormShapeOptions.input", () => {
     })
   })
 
-  it("does not override the initial value", ({ scope }) => {
-    const shape = ImpulseFormShape(
+  it("does not override the initial value", ({ monitor }) => {
+    const shape = FormShape(
       {
-        first: ImpulseFormUnit(""),
-        second: ImpulseFormUnit(0),
-        third: ImpulseFormShape({
-          one: ImpulseFormUnit(true),
-          two: ImpulseFormUnit([""]),
+        first: FormUnit(""),
+        second: FormUnit(0),
+        third: FormShape({
+          one: FormUnit(true),
+          two: FormUnit([""]),
         }),
         fourth: ["anything"],
       },
@@ -652,7 +652,7 @@ describe("ImpulseFormShapeOptions.input", () => {
       },
     )
 
-    expect(shape.getInitial(scope)).toStrictEqual({
+    expect(shape.getInitial(monitor)).toStrictEqual({
       first: "",
       second: 0,
       third: {
@@ -664,15 +664,15 @@ describe("ImpulseFormShapeOptions.input", () => {
   })
 })
 
-describe("ImpulseFormShapeOptions.validateOn", () => {
-  it("specifies initial validateOn", ({ scope }) => {
-    const shape = ImpulseFormShape(
+describe("FormShapeOptions.validateOn", () => {
+  it("specifies initial validateOn", ({ monitor }) => {
+    const shape = FormShape(
       {
-        first: ImpulseFormUnit("", { schema: z.string() }),
-        second: ImpulseFormUnit(0, { validate: (input) => [null, input] }),
-        third: ImpulseFormShape({
-          one: ImpulseFormUnit(true, { error: ["some"] }),
-          two: ImpulseFormUnit([""]),
+        first: FormUnit("", { schema: z.string() }),
+        second: FormUnit(0, { validate: (input) => [null, input] }),
+        third: FormShape({
+          one: FormUnit(true, { error: ["some"] }),
+          two: FormUnit([""]),
         }),
         fourth: ["anything"],
       },
@@ -684,7 +684,7 @@ describe("ImpulseFormShapeOptions.validateOn", () => {
       },
     )
 
-    expect(shape.getValidateOn(scope, params._second)).toStrictEqual({
+    expect(shape.getValidateOn(monitor, params._second)).toStrictEqual({
       first: "onInit",
       second: "onTouch",
       third: {
@@ -694,20 +694,20 @@ describe("ImpulseFormShapeOptions.validateOn", () => {
     })
   })
 
-  it("gets current validateOn from setters", ({ scope }) => {
-    const shape = ImpulseFormShape(
+  it("gets current validateOn from setters", ({ monitor }) => {
+    const shape = FormShape(
       {
-        first: ImpulseFormUnit("", {
+        first: FormUnit("", {
           validateOn: "onChange",
           schema: z.string(),
         }),
-        second: ImpulseFormUnit(0, {
+        second: FormUnit(0, {
           validate: (input) => (input > 0 ? [null, input] : ["must be positive", null]),
         }),
-        third: ImpulseFormShape(
+        third: FormShape(
           {
-            one: ImpulseFormUnit(true, { schema: z.boolean() }),
-            two: ImpulseFormUnit([""], { schema: z.array(z.string()) }),
+            one: FormUnit(true, { schema: z.boolean() }),
+            two: FormUnit([""], { schema: z.array(z.string()) }),
           },
           {
             validateOn: {
@@ -781,7 +781,7 @@ describe("ImpulseFormShapeOptions.validateOn", () => {
       },
     )
 
-    expect(shape.getValidateOn(scope, params._second)).toStrictEqual({
+    expect(shape.getValidateOn(monitor, params._second)).toStrictEqual({
       first: "onTouch",
       second: "onSubmit",
       third: {
@@ -794,12 +794,12 @@ describe("ImpulseFormShapeOptions.validateOn", () => {
 
 it("follows the options type", () => {
   expectTypeOf(
-    ImpulseFormShape<{
-      first: ImpulseFormUnit<string>
-      second: ImpulseFormUnit<number>
-      third: ImpulseFormShape<{
-        one: ImpulseFormUnit<boolean>
-        two: ImpulseFormUnit<Array<string>>
+    FormShape<{
+      first: FormUnit<string>
+      second: FormUnit<number>
+      third: FormShape<{
+        one: FormUnit<boolean>
+        two: FormUnit<Array<string>>
       }>
       fourth: Array<string>
     }>,
@@ -928,12 +928,12 @@ it("follows the options type", () => {
     >()
 })
 
-it("clones the fields", ({ scope }) => {
-  const shape = ImpulseFormShape({
-    one: ImpulseFormUnit("1"),
-    two: ImpulseFormUnit(2),
+it("clones the fields", ({ monitor }) => {
+  const shape = FormShape({
+    one: FormUnit("1"),
+    two: FormUnit(2),
   })
-  const root = ImpulseFormShape({
+  const root = FormShape({
     first: shape,
     second: shape,
   })
@@ -949,7 +949,7 @@ it("clones the fields", ({ scope }) => {
 
   root.fields.first.fields.one.setTouched(true)
 
-  expect(root.isTouched(scope, (_, verbose) => verbose)).toStrictEqual({
+  expect(root.isTouched(monitor, (_, verbose) => verbose)).toStrictEqual({
     first: {
       one: true,
       two: false,

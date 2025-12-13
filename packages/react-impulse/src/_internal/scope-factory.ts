@@ -1,26 +1,26 @@
 import { noop } from "~/tools/noop"
 
 import { enqueue } from "./enqueue"
-import type { Scope } from "./scope"
-import { ScopeEmitter } from "./scope-emitter"
+import type { Monitor } from "./scope"
+import { MonitorEmitter } from "./scope-emitter"
 
 /**
- * Factory responsible for creating and managing {@link Scope} instances through a shared
- * internal {@link ScopeEmitter}. Use {@link ScopeFactory.create} to obtain a constructor for
- * new scopes, and {@link ScopeFactory.connect} to subscribe an invalidation callback that
+ * Factory responsible for creating and managing {@link Monitor} instances through a shared
+ * internal {@link MonitorEmitter}. Use {@link MonitorFactory.create} to obtain a constructor for
+ * new monitors, and {@link MonitorFactory.connect} to subscribe an invalidation callback that
  * will be invoked when the factory requests an emission.
  */
-class ScopeFactory {
+class MonitorFactory {
   private _emit = noop
 
-  private readonly _emitter = new ScopeEmitter(() => {
+  private readonly _emitter = new MonitorEmitter(() => {
     enqueue(this._emit)
   }, false)
 
   /**
-   * Registers an emission callback for the scope emitter and returns a disposer.
+   * Registers an emission callback for the monitor emitter and returns a disposer.
    *
-   * @param emit - Callback to invoke when the scope emits changes.
+   * @param emit - Callback to invoke when the monitor emits changes.
    *
    * @returns A cleanup function that invalidates the underlying emitter when invoked.
    */
@@ -34,13 +34,13 @@ class ScopeFactory {
   }
 
   /**
-   * Retrieves the factory function used to instantiate new {@link Scope} objects.
+   * Retrieves the factory function used to instantiate new {@link Monitor} objects.
    *
-   * @returns A function that creates and returns a fresh {@link Scope}.
+   * @returns A function that creates and returns a fresh {@link Monitor}.
    */
-  public get create(): () => Scope {
+  public get create(): () => Monitor {
     return this._emitter._create
   }
 }
 
-export { ScopeFactory }
+export { MonitorFactory }

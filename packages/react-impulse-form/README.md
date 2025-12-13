@@ -1,1 +1,1 @@
-# `react-impulse-form`
+# `@owanturist/signal-form`

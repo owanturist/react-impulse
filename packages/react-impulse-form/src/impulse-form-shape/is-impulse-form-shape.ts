@@ -1,8 +1,8 @@
-import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
-import { ImpulseFormShape } from "./_internal/impulse-form-shape"
+import type { FormShapeFields } from "./impulse-form-shape-fields"
+import { FormShape } from "./_internal/impulse-form-shape"
 
-function isImpulseFormShape(value: unknown): value is ImpulseFormShape<ImpulseFormShapeFields> {
-  return value instanceof ImpulseFormShape
+function isFormShape(value: unknown): value is FormShape<FormShapeFields> {
+  return value instanceof FormShape
 }
 
-export { isImpulseFormShape }
+export { isFormShape }

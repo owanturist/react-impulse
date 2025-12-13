@@ -2,13 +2,13 @@ import z from "zod"
 
 import { params } from "~/tools/params"
 
-import { ImpulseFormOptional, ImpulseFormShape, ImpulseFormUnit } from "../../src"
+import { FormOptional, FormShape, FormUnit } from "../../src"
 
 describe("types", () => {
-  const enabled = ImpulseFormUnit(true)
-  const element = ImpulseFormUnit(0)
+  const enabled = FormUnit(true)
+  const element = FormUnit(0)
 
-  const form = ImpulseFormOptional(enabled, element)
+  const form = FormOptional(enabled, element)
 
   type IsInvalidSchema =
     | boolean
@@ -22,16 +22,16 @@ describe("types", () => {
     readonly element: boolean
   }
 
-  it("matches schema type for isInvalid(scope, select?)", ({ scope }) => {
-    expectTypeOf(form.isInvalid(scope)).toEqualTypeOf<boolean>()
+  it("matches schema type for isInvalid(monitor, select?)", ({ monitor }) => {
+    expectTypeOf(form.isInvalid(monitor)).toEqualTypeOf<boolean>()
 
-    expectTypeOf(form.isInvalid(scope, params._first)).toEqualTypeOf<IsInvalidSchema>()
+    expectTypeOf(form.isInvalid(monitor, params._first)).toEqualTypeOf<IsInvalidSchema>()
 
-    expectTypeOf(form.isInvalid(scope, params._second)).toEqualTypeOf<IsInvalidVerboseSchema>()
+    expectTypeOf(form.isInvalid(monitor, params._second)).toEqualTypeOf<IsInvalidVerboseSchema>()
   })
 
   describe("nested", () => {
-    const parent = ImpulseFormOptional(ImpulseFormUnit(true), form)
+    const parent = FormOptional(FormUnit(true), form)
 
     type ParentIsInvalidSchema =
       | boolean
@@ -45,38 +45,38 @@ describe("types", () => {
       readonly element: IsInvalidVerboseSchema
     }
 
-    it("matches schema type for isInvalid(scope, select?)", ({ scope }) => {
-      expectTypeOf(parent.isInvalid(scope)).toEqualTypeOf<boolean>()
+    it("matches schema type for isInvalid(monitor, select?)", ({ monitor }) => {
+      expectTypeOf(parent.isInvalid(monitor)).toEqualTypeOf<boolean>()
 
-      expectTypeOf(parent.isInvalid(scope, params._first)).toEqualTypeOf<ParentIsInvalidSchema>()
+      expectTypeOf(parent.isInvalid(monitor, params._first)).toEqualTypeOf<ParentIsInvalidSchema>()
 
       expectTypeOf(
-        parent.isInvalid(scope, params._second),
+        parent.isInvalid(monitor, params._second),
       ).toEqualTypeOf<ParentIsInvalidVerboseSchema>()
     })
   })
 })
 
 describe("when element is initially invalid", () => {
-  it("returns false for initially invalid but not validated enabled", ({ scope }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit("", {
+  it("returns false for initially invalid but not validated enabled", ({ monitor }) => {
+    const form = FormOptional(
+      FormUnit("", {
         schema: z.boolean(),
       }),
-      ImpulseFormOptional(
-        ImpulseFormUnit("", {
+      FormOptional(
+        FormUnit("", {
           schema: z.boolean(),
         }),
-        ImpulseFormShape({
-          _1: ImpulseFormUnit("name"),
-          _2: ImpulseFormUnit(18),
+        FormShape({
+          _1: FormUnit("name"),
+          _2: FormUnit(18),
         }),
       ),
     )
 
-    expect(form.isInvalid(scope)).toBe(false)
-    expect(form.isInvalid(scope, params._first)).toBe(false)
-    expect(form.isInvalid(scope, params._second)).toStrictEqual({
+    expect(form.isInvalid(monitor)).toBe(false)
+    expect(form.isInvalid(monitor, params._first)).toBe(false)
+    expect(form.isInvalid(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: false,
@@ -88,26 +88,26 @@ describe("when element is initially invalid", () => {
     })
   })
 
-  it("returns true for initially invalid validated enabled", ({ scope }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit("", {
+  it("returns true for initially invalid validated enabled", ({ monitor }) => {
+    const form = FormOptional(
+      FormUnit("", {
         validateOn: "onInit",
         schema: z.boolean(),
       }),
-      ImpulseFormOptional(
-        ImpulseFormUnit("", {
+      FormOptional(
+        FormUnit("", {
           schema: z.boolean(),
         }),
-        ImpulseFormShape({
-          _1: ImpulseFormUnit("name"),
-          _2: ImpulseFormUnit(18),
+        FormShape({
+          _1: FormUnit("name"),
+          _2: FormUnit(18),
         }),
       ),
     )
 
-    expect(form.isInvalid(scope)).toBe(true)
-    expect(form.isInvalid(scope, params._first)).toBe(true)
-    expect(form.isInvalid(scope, params._second)).toStrictEqual({
+    expect(form.isInvalid(monitor)).toBe(true)
+    expect(form.isInvalid(monitor, params._first)).toBe(true)
+    expect(form.isInvalid(monitor, params._second)).toStrictEqual({
       enabled: true,
       element: {
         enabled: false,
@@ -119,25 +119,25 @@ describe("when element is initially invalid", () => {
     })
   })
 
-  it("returns false for initially valid but not validated enabled", ({ scope }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit(true, {
+  it("returns false for initially valid but not validated enabled", ({ monitor }) => {
+    const form = FormOptional(
+      FormUnit(true, {
         schema: z.boolean(),
       }),
-      ImpulseFormOptional(
-        ImpulseFormUnit("", {
+      FormOptional(
+        FormUnit("", {
           schema: z.boolean(),
         }),
-        ImpulseFormShape({
-          _1: ImpulseFormUnit("name"),
-          _2: ImpulseFormUnit(18),
+        FormShape({
+          _1: FormUnit("name"),
+          _2: FormUnit(18),
         }),
       ),
     )
 
-    expect(form.isInvalid(scope)).toBe(false)
-    expect(form.isInvalid(scope, params._first)).toBe(false)
-    expect(form.isInvalid(scope, params._second)).toStrictEqual({
+    expect(form.isInvalid(monitor)).toBe(false)
+    expect(form.isInvalid(monitor, params._first)).toBe(false)
+    expect(form.isInvalid(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: false,
@@ -149,30 +149,30 @@ describe("when element is initially invalid", () => {
     })
   })
 
-  it("returns true for initially valid validated enabled", ({ scope }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit(true, {
+  it("returns true for initially valid validated enabled", ({ monitor }) => {
+    const form = FormOptional(
+      FormUnit(true, {
         validateOn: "onInit",
         schema: z.boolean(),
       }),
-      ImpulseFormOptional(
-        ImpulseFormUnit("", {
+      FormOptional(
+        FormUnit("", {
           validateOn: "onInit",
           schema: z.boolean(),
         }),
-        ImpulseFormShape({
-          _1: ImpulseFormUnit("name"),
-          _2: ImpulseFormUnit(18),
+        FormShape({
+          _1: FormUnit("name"),
+          _2: FormUnit(18),
         }),
       ),
     )
 
-    expect(form.isInvalid(scope)).toBe(true)
-    expect(form.isInvalid(scope, params._first)).toStrictEqual({
+    expect(form.isInvalid(monitor)).toBe(true)
+    expect(form.isInvalid(monitor, params._first)).toStrictEqual({
       enabled: false,
       element: true,
     })
-    expect(form.isInvalid(scope, params._second)).toStrictEqual({
+    expect(form.isInvalid(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: true,
@@ -184,29 +184,29 @@ describe("when element is initially invalid", () => {
     })
   })
 
-  it("returns false after disabling initially valid validated enabled", ({ scope }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit(true, {
+  it("returns false after disabling initially valid validated enabled", ({ monitor }) => {
+    const form = FormOptional(
+      FormUnit(true, {
         validateOn: "onInit",
         schema: z.boolean(),
       }),
-      ImpulseFormOptional(
-        ImpulseFormUnit("", {
+      FormOptional(
+        FormUnit("", {
           validateOn: "onInit",
           schema: z.boolean(),
         }),
-        ImpulseFormShape({
-          _1: ImpulseFormUnit("name"),
-          _2: ImpulseFormUnit(18),
+        FormShape({
+          _1: FormUnit("name"),
+          _2: FormUnit(18),
         }),
       ),
     )
 
     form.enabled.setInput(false)
 
-    expect(form.isInvalid(scope)).toBe(false)
-    expect(form.isInvalid(scope, params._first)).toBe(false)
-    expect(form.isInvalid(scope, params._second)).toStrictEqual({
+    expect(form.isInvalid(monitor)).toBe(false)
+    expect(form.isInvalid(monitor, params._first)).toBe(false)
+    expect(form.isInvalid(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: true,
@@ -218,32 +218,32 @@ describe("when element is initially invalid", () => {
     })
   })
 
-  it("returns true after enabling initially valid validated enabled", ({ scope }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit(false, {
+  it("returns true after enabling initially valid validated enabled", ({ monitor }) => {
+    const form = FormOptional(
+      FormUnit(false, {
         validateOn: "onInit",
         schema: z.boolean(),
       }),
-      ImpulseFormOptional(
-        ImpulseFormUnit("", {
+      FormOptional(
+        FormUnit("", {
           validateOn: "onInit",
           schema: z.boolean(),
         }),
-        ImpulseFormShape({
-          _1: ImpulseFormUnit("name"),
-          _2: ImpulseFormUnit(18),
+        FormShape({
+          _1: FormUnit("name"),
+          _2: FormUnit(18),
         }),
       ),
     )
 
     form.enabled.setInput(true)
 
-    expect(form.isInvalid(scope)).toBe(true)
-    expect(form.isInvalid(scope, params._first)).toStrictEqual({
+    expect(form.isInvalid(monitor)).toBe(true)
+    expect(form.isInvalid(monitor, params._first)).toStrictEqual({
       enabled: false,
       element: true,
     })
-    expect(form.isInvalid(scope, params._second)).toStrictEqual({
+    expect(form.isInvalid(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: true,
@@ -255,30 +255,30 @@ describe("when element is initially invalid", () => {
     })
   })
 
-  it("returns true after making element valid", ({ scope }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit(true, {
+  it("returns true after making element valid", ({ monitor }) => {
+    const form = FormOptional(
+      FormUnit(true, {
         validateOn: "onInit",
         schema: z.boolean(),
       }),
-      ImpulseFormOptional(
-        ImpulseFormUnit("", {
+      FormOptional(
+        FormUnit("", {
           validateOn: "onInit",
           schema: z.string().nonempty().pipe(z.coerce.boolean()),
         }),
-        ImpulseFormShape({
-          _1: ImpulseFormUnit("name"),
-          _2: ImpulseFormUnit(18),
+        FormShape({
+          _1: FormUnit("name"),
+          _2: FormUnit(18),
         }),
       ),
     )
-    expect(form.isInvalid(scope)).toBe(true)
+    expect(form.isInvalid(monitor)).toBe(true)
 
     form.element.enabled.setInput("true")
 
-    expect(form.isInvalid(scope)).toBe(false)
-    expect(form.isInvalid(scope, params._first)).toBe(false)
-    expect(form.isInvalid(scope, params._second)).toStrictEqual({
+    expect(form.isInvalid(monitor)).toBe(false)
+    expect(form.isInvalid(monitor, params._first)).toBe(false)
+    expect(form.isInvalid(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: false,
@@ -292,23 +292,23 @@ describe("when element is initially invalid", () => {
 })
 
 describe("when element is initially valid", () => {
-  it("returns false for initially invalid but not validated enabled", ({ scope }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit("", {
+  it("returns false for initially invalid but not validated enabled", ({ monitor }) => {
+    const form = FormOptional(
+      FormUnit("", {
         schema: z.boolean(),
       }),
-      ImpulseFormOptional(
-        ImpulseFormUnit(true),
-        ImpulseFormShape({
-          _1: ImpulseFormUnit("name"),
-          _2: ImpulseFormUnit(18),
+      FormOptional(
+        FormUnit(true),
+        FormShape({
+          _1: FormUnit("name"),
+          _2: FormUnit(18),
         }),
       ),
     )
 
-    expect(form.isInvalid(scope)).toBe(false)
-    expect(form.isInvalid(scope, params._first)).toBe(false)
-    expect(form.isInvalid(scope, params._second)).toStrictEqual({
+    expect(form.isInvalid(monitor)).toBe(false)
+    expect(form.isInvalid(monitor, params._first)).toBe(false)
+    expect(form.isInvalid(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: false,
@@ -320,24 +320,24 @@ describe("when element is initially valid", () => {
     })
   })
 
-  it("returns true for initially invalid validated enabled", ({ scope }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit("", {
+  it("returns true for initially invalid validated enabled", ({ monitor }) => {
+    const form = FormOptional(
+      FormUnit("", {
         validateOn: "onInit",
         schema: z.boolean(),
       }),
-      ImpulseFormOptional(
-        ImpulseFormUnit(true),
-        ImpulseFormShape({
-          _1: ImpulseFormUnit("name"),
-          _2: ImpulseFormUnit(18),
+      FormOptional(
+        FormUnit(true),
+        FormShape({
+          _1: FormUnit("name"),
+          _2: FormUnit(18),
         }),
       ),
     )
 
-    expect(form.isInvalid(scope)).toBe(true)
-    expect(form.isInvalid(scope, params._first)).toBe(true)
-    expect(form.isInvalid(scope, params._second)).toStrictEqual({
+    expect(form.isInvalid(monitor)).toBe(true)
+    expect(form.isInvalid(monitor, params._first)).toBe(true)
+    expect(form.isInvalid(monitor, params._second)).toStrictEqual({
       enabled: true,
       element: {
         enabled: false,
@@ -353,26 +353,26 @@ describe("when element is initially valid", () => {
     ["and validated", "onInit" as const],
     ["but not validated", "onSubmit" as const],
   ])("when enabled is initially valid %s", (_, validateOn) => {
-    it("returns false", ({ scope }) => {
-      const form = ImpulseFormOptional(
-        ImpulseFormUnit(true, {
+    it("returns false", ({ monitor }) => {
+      const form = FormOptional(
+        FormUnit(true, {
           validateOn,
           schema: z.boolean(),
         }),
-        ImpulseFormOptional(
-          ImpulseFormUnit(true),
-          ImpulseFormShape({
-            _1: ImpulseFormUnit("name"),
-            _2: ImpulseFormUnit(18),
+        FormOptional(
+          FormUnit(true),
+          FormShape({
+            _1: FormUnit("name"),
+            _2: FormUnit(18),
           }),
         ),
       )
 
-      expect(form.enabled.isInvalid(scope)).toBe(false)
+      expect(form.enabled.isInvalid(monitor)).toBe(false)
 
-      expect(form.isInvalid(scope)).toBe(false)
-      expect(form.isInvalid(scope, params._first)).toBe(false)
-      expect(form.isInvalid(scope, params._second)).toStrictEqual({
+      expect(form.isInvalid(monitor)).toBe(false)
+      expect(form.isInvalid(monitor, params._first)).toBe(false)
+      expect(form.isInvalid(monitor, params._second)).toStrictEqual({
         enabled: false,
         element: {
           enabled: false,
@@ -385,31 +385,31 @@ describe("when element is initially valid", () => {
     })
   })
 
-  it("returns true after making element invalid", ({ scope }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit(true),
-      ImpulseFormOptional(
-        ImpulseFormUnit("true", {
+  it("returns true after making element invalid", ({ monitor }) => {
+    const form = FormOptional(
+      FormUnit(true),
+      FormOptional(
+        FormUnit("true", {
           validateOn: "onInit",
           schema: z.string().nonempty().pipe(z.coerce.boolean()),
         }),
-        ImpulseFormShape({
-          _1: ImpulseFormUnit("name"),
-          _2: ImpulseFormUnit(18),
+        FormShape({
+          _1: FormUnit("name"),
+          _2: FormUnit(18),
         }),
       ),
     )
 
-    expect(form.isInvalid(scope)).toBe(false)
+    expect(form.isInvalid(monitor)).toBe(false)
 
     form.element.enabled.setInput("")
 
-    expect(form.isInvalid(scope)).toBe(true)
-    expect(form.isInvalid(scope, params._first)).toStrictEqual({
+    expect(form.isInvalid(monitor)).toBe(true)
+    expect(form.isInvalid(monitor, params._first)).toStrictEqual({
       enabled: false,
       element: true,
     })
-    expect(form.isInvalid(scope, params._second)).toStrictEqual({
+    expect(form.isInvalid(monitor, params._second)).toStrictEqual({
       enabled: false,
       element: {
         enabled: true,
@@ -421,28 +421,28 @@ describe("when element is initially valid", () => {
     })
   })
 
-  it("returns true after making active invalid", ({ scope }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit("true", {
+  it("returns true after making active invalid", ({ monitor }) => {
+    const form = FormOptional(
+      FormUnit("true", {
         validateOn: "onInit",
         schema: z.string().nonempty().pipe(z.coerce.boolean()),
       }),
-      ImpulseFormOptional(
-        ImpulseFormUnit(true),
-        ImpulseFormShape({
-          _1: ImpulseFormUnit("name"),
-          _2: ImpulseFormUnit(18),
+      FormOptional(
+        FormUnit(true),
+        FormShape({
+          _1: FormUnit("name"),
+          _2: FormUnit(18),
         }),
       ),
     )
 
-    expect(form.isInvalid(scope)).toBe(false)
+    expect(form.isInvalid(monitor)).toBe(false)
 
     form.enabled.setInput("")
 
-    expect(form.isInvalid(scope)).toBe(true)
-    expect(form.isInvalid(scope, params._first)).toBe(true)
-    expect(form.isInvalid(scope, params._second)).toStrictEqual({
+    expect(form.isInvalid(monitor)).toBe(true)
+    expect(form.isInvalid(monitor, params._first)).toBe(true)
+    expect(form.isInvalid(monitor, params._second)).toStrictEqual({
       enabled: true,
       element: {
         enabled: false,
@@ -456,14 +456,14 @@ describe("when element is initially valid", () => {
 })
 
 describe("stable invalid value", () => {
-  it("subsequently selects equal invalid", ({ scope }) => {
-    const form = ImpulseFormOptional(
-      ImpulseFormUnit(true),
-      ImpulseFormOptional(
-        ImpulseFormUnit(true),
-        ImpulseFormShape({
-          _1: ImpulseFormUnit("name"),
-          _2: ImpulseFormUnit(18, {
+  it("subsequently selects equal invalid", ({ monitor }) => {
+    const form = FormOptional(
+      FormUnit(true),
+      FormOptional(
+        FormUnit(true),
+        FormShape({
+          _1: FormUnit("name"),
+          _2: FormUnit(18, {
             validateOn: "onInit",
             schema: z.number().min(100),
           }),
@@ -471,13 +471,13 @@ describe("stable invalid value", () => {
       ),
     )
 
-    expect(form.isInvalid(scope)).toBeTypeOf("boolean")
-    expect(form.isInvalid(scope)).toBe(form.isInvalid(scope))
+    expect(form.isInvalid(monitor)).toBeTypeOf("boolean")
+    expect(form.isInvalid(monitor)).toBe(form.isInvalid(monitor))
 
-    expect(form.isInvalid(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.isInvalid(scope, params._first)).toBe(form.isInvalid(scope, params._first))
+    expect(form.isInvalid(monitor, params._first)).toBeInstanceOf(Object)
+    expect(form.isInvalid(monitor, params._first)).toBe(form.isInvalid(monitor, params._first))
 
-    expect(form.isInvalid(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.isInvalid(scope, params._second)).toBe(form.isInvalid(scope, params._second))
+    expect(form.isInvalid(monitor, params._second)).toBeInstanceOf(Object)
+    expect(form.isInvalid(monitor, params._second)).toBe(form.isInvalid(monitor, params._second))
   })
 })

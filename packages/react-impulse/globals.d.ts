@@ -1,6 +1,6 @@
 import type { Assertion, AsymmetricMatchersContaining, TestAPI } from "vitest"
 
-import type { Scope } from "./src"
+import type { Monitor } from "./src"
 
 interface CustomMatchers<R> {
   toHaveEmittersSize(size: number): R
@@ -12,7 +12,7 @@ declare module "vitest" {
   interface AsymmetricMatchersContaining extends CustomMatchers {}
 
   export interface TestContext {
-    scope: Scope
+    monitor: Monitor
   }
 
   declare const it: TestAPI<TestContext>

@@ -1,19 +1,16 @@
-import { untrack } from "react-impulse"
+import { untracked } from "@owanturist/signal"
 
-import { ImpulseFormList, type ImpulseFormListOptions, ImpulseFormUnit } from "../../src"
+import { FormList, type FormListOptions, FormUnit } from "../../src"
 
-function setup(options?: ImpulseFormListOptions<ImpulseFormUnit<number>>) {
-  const form = ImpulseFormList(
-    [ImpulseFormUnit(1), ImpulseFormUnit(2), ImpulseFormUnit(3)],
-    options,
-  )
+function setup(options?: FormListOptions<FormUnit<number>>) {
+  const form = FormList([FormUnit(1), FormUnit(2), FormUnit(3)], options)
 
   const listener0 = vi.fn()
   const listener1 = vi.fn()
   const listener2 = vi.fn()
   const listener3 = vi.fn()
 
-  const elements = untrack((scope) => form.getElements(scope))
+  const elements = untracked((monitor) => form.getElements(monitor))
 
   form.onSubmit(listener0)
   elements.at(0)?.onSubmit(listener1)

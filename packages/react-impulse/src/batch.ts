@@ -1,16 +1,18 @@
+import type { Signal } from "./impulse"
 import { enqueue } from "./_internal/enqueue"
-import { STATIC_SCOPE, type Scope } from "./_internal/scope"
+import { type Monitor, UNTRACKED_MONITOR } from "./_internal/scope"
 
 /**
- * A helper to optimize multiple Impulse updates.
+ * A helper to optimize multiple {@link Signal}s updates.
  *
- * @param execute a function that executes multiple `Impulse#setValue` calls at ones. It provides `Scope` to the `execute` function so it is useful when an async operation accesses the Impulses' values.
+ * @param execute a function that executes multiple {@link Signal.write} calls at ones.
+ * It provides {@link Monitor} to the {@link execute} function so it is useful when an async operation accesses the {@link Signal}s' values.
  *
  * @version 1.0.0
  */
-function batch(execute: (scope: Scope) => void): void {
+function batch(execute: (monitor: Monitor) => void): void {
   enqueue(() => {
-    execute(STATIC_SCOPE)
+    execute(UNTRACKED_MONITOR)
   })
 }
 

@@ -1,9 +1,9 @@
-import type { GetImpulseFormParam } from "./get-impulse-form-param"
-import type { ImpulseForm } from "./impulse-form"
+import type { GetSignalFormParam } from "./get-impulse-form-param"
+import type { SignalForm } from "./impulse-form"
 
-type GetImpulseFormValidateOnVerbose<TForm extends ImpulseForm> = GetImpulseFormParam<
+type GetSignalFormValidateOnVerbose<TForm extends SignalForm> = GetSignalFormParam<
   TForm,
   "validateOn.schema.verbose"
 >
 
-export type { GetImpulseFormValidateOnVerbose }
+export type { GetSignalFormValidateOnVerbose }

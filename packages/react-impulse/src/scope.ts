@@ -1,1 +1,1 @@
-export type { Scope } from "./_internal/scope"
+export type { Monitor } from "./_internal/scope"

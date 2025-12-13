@@ -1,74 +1,71 @@
-import { Impulse, batch } from "react-impulse"
+import { Signal, batch } from "@owanturist/signal"
 
 import { isUndefined } from "~/tools/is-undefined"
 import { mapValues } from "~/tools/map-values"
 import { partitionEntries } from "~/tools/partition-entries"
 
-import { isImpulseForm } from "../impulse-form/is-impulse-form"
+import { isSignalForm } from "../impulse-form/is-impulse-form"
 
-import type { ImpulseFormShapeErrorSetter } from "./impulse-form-shape-error-setter"
-import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
-import type { ImpulseFormShapeFlagSetter } from "./impulse-form-shape-flag-setter"
-import type { ImpulseFormShapeInputSetter } from "./impulse-form-shape-input-setter"
-import type { ImpulseFormShapeValidateOnSetter } from "./impulse-form-shape-validate-on-setter"
-import { ImpulseFormShape as ImpulseFormShapeImpl } from "./_internal/impulse-form-shape"
+import type { FormShapeErrorSetter } from "./impulse-form-shape-error-setter"
+import type { FormShapeFields } from "./impulse-form-shape-fields"
+import type { FormShapeFlagSetter } from "./impulse-form-shape-flag-setter"
+import type { FormShapeInputSetter } from "./impulse-form-shape-input-setter"
+import type { FormShapeValidateOnSetter } from "./impulse-form-shape-validate-on-setter"
+import { FormShape as FormShapeImpl } from "./_internal/impulse-form-shape"
 import {
-  ImpulseFormShapeState,
-  type ImpulseFormShapeStateFields,
-  type ImpulseFormShapeStateMeta,
+  FormShapeState,
+  type FormShapeStateFields,
+  type FormShapeStateMeta,
 } from "./_internal/impulse-form-shape-state"
 
-type ImpulseFormShape<TFields extends ImpulseFormShapeFields> = ImpulseFormShapeImpl<TFields>
+type FormShape<TFields extends FormShapeFields> = FormShapeImpl<TFields>
 
-interface ImpulseFormShapeOptions<TFields extends ImpulseFormShapeFields> {
-  readonly input?: ImpulseFormShapeInputSetter<TFields>
-  readonly initial?: ImpulseFormShapeInputSetter<TFields>
-  readonly touched?: ImpulseFormShapeFlagSetter<TFields>
-  readonly validateOn?: ImpulseFormShapeValidateOnSetter<TFields>
-  readonly error?: ImpulseFormShapeErrorSetter<TFields>
+interface FormShapeOptions<TFields extends FormShapeFields> {
+  readonly input?: FormShapeInputSetter<TFields>
+  readonly initial?: FormShapeInputSetter<TFields>
+  readonly touched?: FormShapeFlagSetter<TFields>
+  readonly validateOn?: FormShapeValidateOnSetter<TFields>
+  readonly error?: FormShapeErrorSetter<TFields>
 }
 
-function ImpulseFormShape<TFields extends ImpulseFormShapeFields>(
+function FormShape<TFields extends FormShapeFields>(
   fields: TFields,
-  { input, initial, touched, validateOn, error }: ImpulseFormShapeOptions<TFields> = {},
-): ImpulseFormShape<TFields> {
-  const [forms, meta] = partitionEntries(fields, isImpulseForm)
+  { input, initial, touched, validateOn, error }: FormShapeOptions<TFields> = {},
+): FormShape<TFields> {
+  const [forms, meta] = partitionEntries(fields, isSignalForm)
 
-  const state = new ImpulseFormShapeState(
+  const state = new FormShapeState(
     null,
 
-    mapValues(
-      forms,
-      ImpulseFormShapeImpl._getState,
-    ) as unknown as ImpulseFormShapeStateFields<TFields>,
+    mapValues(forms, FormShapeImpl._getState) as unknown as FormShapeStateFields<TFields>,
 
-    mapValues(meta, (field) => Impulse(field)) as unknown as ImpulseFormShapeStateMeta<TFields>,
+    mapValues(meta, (field) => Signal(field)) as unknown as FormShapeStateMeta<TFields>,
   )
 
-  batch((scope) => {
+  batch((monitor) => {
     if (!isUndefined(input)) {
-      state._setInput(scope, input)
+      state._setInput(monitor, input)
     }
 
     if (!isUndefined(initial)) {
-      state._setInitial(scope, initial)
+      state._setInitial(monitor, initial)
     }
 
     if (!isUndefined(touched)) {
-      state._setTouched(scope, touched)
+      state._setTouched(monitor, touched)
     }
 
     if (!isUndefined(validateOn)) {
-      state._setValidateOn(scope, validateOn)
+      state._setValidateOn(monitor, validateOn)
     }
 
     if (!isUndefined(error)) {
-      state._setError(scope, error)
+      state._setError(monitor, error)
     }
   })
 
   return state._host()
 }
 
-export type { ImpulseFormShapeOptions }
-export { ImpulseFormShape }
+export type { FormShapeOptions }
+export { FormShape }

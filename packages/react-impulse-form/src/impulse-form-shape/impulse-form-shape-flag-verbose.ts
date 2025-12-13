@@ -1,9 +1,9 @@
-import type { GetImpulseFormShapeParam } from "./get-impulse-form-shape-param"
-import type { ImpulseFormShapeFields } from "./impulse-form-shape-fields"
+import type { GetFormShapeParam } from "./get-impulse-form-shape-param"
+import type { FormShapeFields } from "./impulse-form-shape-fields"
 
-type ImpulseFormShapeFlagVerbose<TFields extends ImpulseFormShapeFields> = GetImpulseFormShapeParam<
+type FormShapeFlagVerbose<TFields extends FormShapeFields> = GetFormShapeParam<
   TFields,
   "flag.schema.verbose"
 >
 
-export type { ImpulseFormShapeFlagVerbose }
+export type { FormShapeFlagVerbose }

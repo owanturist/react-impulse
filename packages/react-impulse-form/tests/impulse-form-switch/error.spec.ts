@@ -4,22 +4,22 @@ import { params } from "~/tools/params"
 import type { Setter } from "~/tools/setter"
 
 import {
-  ImpulseFormShape,
-  ImpulseFormSwitch,
-  type ImpulseFormSwitchErrorSetter,
-  type ImpulseFormSwitchOptions,
-  ImpulseFormUnit,
+  FormShape,
+  FormSwitch,
+  type FormSwitchErrorSetter,
+  type FormSwitchOptions,
+  FormUnit,
   type Result,
   type ValidateStrategy,
 } from "../../src"
 
 describe("types", () => {
-  const active = ImpulseFormUnit("", {
+  const active = FormUnit("", {
     schema: z.enum(["_1", "_2", "_5"]),
   })
 
   const branches = {
-    _1: ImpulseFormUnit(true, {
+    _1: FormUnit(true, {
       validate: (input): Result<string, number> => {
         if (input) {
           return [null, 18]
@@ -28,18 +28,18 @@ describe("types", () => {
         return ["Invalid input", null]
       },
     }),
-    _2: ImpulseFormShape({
-      _3: ImpulseFormUnit("name", {
+    _2: FormShape({
+      _3: FormUnit("name", {
         error: 123,
       }),
-      _4: ImpulseFormUnit(18),
+      _4: FormUnit(18),
     }),
-    _5: ImpulseFormUnit("excluded", {
+    _5: FormUnit("excluded", {
       transform: (input) => input.trim(),
     }),
   }
 
-  const form = ImpulseFormSwitch(active, branches)
+  const form = FormSwitch(active, branches)
 
   type ErrorSchema = null | {
     readonly active: null | ReadonlyArray<string>
@@ -137,54 +137,54 @@ describe("types", () => {
     [ErrorVerboseSchema]
   >
 
-  it("matches schema type for getError(scope, select?)", ({ scope }) => {
-    expectTypeOf(form.getError(scope)).toEqualTypeOf<ErrorSchema>()
+  it("matches schema type for getError(monitor, select?)", ({ monitor }) => {
+    expectTypeOf(form.getError(monitor)).toEqualTypeOf<ErrorSchema>()
 
-    expectTypeOf(form.getError(scope, params._first)).toEqualTypeOf<ErrorSchema>()
+    expectTypeOf(form.getError(monitor, params._first)).toEqualTypeOf<ErrorSchema>()
 
-    expectTypeOf(form.getError(scope, params._second)).toEqualTypeOf<ErrorVerboseSchema>()
+    expectTypeOf(form.getError(monitor, params._second)).toEqualTypeOf<ErrorVerboseSchema>()
   })
 
   it("matches setter type for setError(setter)", () => {
     expectTypeOf(form.setError).toEqualTypeOf<(setter: ErrorOnSetter) => void>()
   })
 
-  it("allows passing concise value to setError", ({ scope }) => {
-    const error0 = form.getError(scope)
-    const error0Concise = form.getError(scope, params._first)
+  it("allows passing concise value to setError", ({ monitor }) => {
+    const error0 = form.getError(monitor)
+    const error0Concise = form.getError(monitor, params._first)
 
     form.setError(error0Concise)
 
-    expect(form.getError(scope)).toStrictEqual(error0)
-    expect(form.getError(scope, params._first)).toStrictEqual(error0Concise)
+    expect(form.getError(monitor)).toStrictEqual(error0)
+    expect(form.getError(monitor, params._first)).toStrictEqual(error0Concise)
   })
 
-  it("allows passing verbose value to setError", ({ scope }) => {
-    const error0 = form.getError(scope)
-    const error0Concise = form.getError(scope, params._first)
-    const error0Verbose = form.getError(scope, params._second)
+  it("allows passing verbose value to setError", ({ monitor }) => {
+    const error0 = form.getError(monitor)
+    const error0Concise = form.getError(monitor, params._first)
+    const error0Verbose = form.getError(monitor, params._second)
 
     form.setError(error0Verbose)
 
-    expect(form.getError(scope)).toStrictEqual(error0)
-    expect(form.getError(scope, params._first)).toStrictEqual(error0Concise)
-    expect(form.getError(scope, params._second)).toStrictEqual(error0Verbose)
+    expect(form.getError(monitor)).toStrictEqual(error0)
+    expect(form.getError(monitor, params._first)).toStrictEqual(error0Concise)
+    expect(form.getError(monitor, params._second)).toStrictEqual(error0Verbose)
   })
 
-  it("allows passing verbose value in setError callback", ({ scope }) => {
-    const error0 = form.getError(scope)
-    const error0Concise = form.getError(scope, params._first)
-    const error0Verbose = form.getError(scope, params._second)
+  it("allows passing verbose value in setError callback", ({ monitor }) => {
+    const error0 = form.getError(monitor)
+    const error0Concise = form.getError(monitor, params._first)
+    const error0Verbose = form.getError(monitor, params._second)
 
     form.setError((verbose) => verbose)
 
-    expect(form.getError(scope)).toStrictEqual(error0)
-    expect(form.getError(scope, params._first)).toStrictEqual(error0Concise)
-    expect(form.getError(scope, params._second)).toStrictEqual(error0Verbose)
+    expect(form.getError(monitor)).toStrictEqual(error0)
+    expect(form.getError(monitor, params._first)).toStrictEqual(error0Concise)
+    expect(form.getError(monitor, params._second)).toStrictEqual(error0Verbose)
   })
 
-  it("ensures ImpulseFormSwitchOptions.error type", () => {
-    const form = ImpulseFormSwitch(active, branches, {
+  it("ensures FormSwitchOptions.error type", () => {
+    const form = FormSwitch(active, branches, {
       error: {
         // @ts-expect-error should be ReadonlyArray<string>
         active: "",
@@ -205,18 +205,18 @@ describe("types", () => {
   })
 
   describe("nested", () => {
-    const active = ImpulseFormUnit("", {
+    const active = FormUnit("", {
       schema: z.enum(["_6", "_7"]),
     })
 
     const branches = {
       _6: form,
-      _7: ImpulseFormUnit("0", {
+      _7: FormUnit("0", {
         error: 0,
       }),
     }
 
-    const parent = ImpulseFormSwitch(active, branches)
+    const parent = FormSwitch(active, branches)
 
     type ParentErrorSchema = null | {
       readonly active: null | ReadonlyArray<string>
@@ -279,36 +279,38 @@ describe("types", () => {
       [ParentErrorVerboseSchema]
     >
 
-    it("matches schema type for getError(scope, select?)", ({ scope }) => {
-      expectTypeOf(parent.getError(scope)).toEqualTypeOf<ParentErrorSchema>()
+    it("matches schema type for getError(monitor, select?)", ({ monitor }) => {
+      expectTypeOf(parent.getError(monitor)).toEqualTypeOf<ParentErrorSchema>()
 
-      expectTypeOf(parent.getError(scope, params._first)).toEqualTypeOf<ParentErrorSchema>()
+      expectTypeOf(parent.getError(monitor, params._first)).toEqualTypeOf<ParentErrorSchema>()
 
-      expectTypeOf(parent.getError(scope, params._second)).toEqualTypeOf<ParentErrorVerboseSchema>()
+      expectTypeOf(
+        parent.getError(monitor, params._second),
+      ).toEqualTypeOf<ParentErrorVerboseSchema>()
     })
 
     it("matches setter type for setError(setter)", () => {
       expectTypeOf(parent.setError).toEqualTypeOf<(setter: ParentErrorSetter) => void>()
     })
 
-    it("allows passing concise value to setError", ({ scope }) => {
-      const concise = parent.getError(scope, params._first)
+    it("allows passing concise value to setError", ({ monitor }) => {
+      const concise = parent.getError(monitor, params._first)
 
       parent.setError(concise)
 
-      expect(parent.getError(scope, params._first)).toStrictEqual(concise)
+      expect(parent.getError(monitor, params._first)).toStrictEqual(concise)
     })
 
-    it("allows passing verbose value to setError", ({ scope }) => {
-      const verbose = parent.getError(scope, params._second)
+    it("allows passing verbose value to setError", ({ monitor }) => {
+      const verbose = parent.getError(monitor, params._second)
 
       parent.setError(verbose)
 
-      expect(parent.getError(scope, params._second)).toStrictEqual(verbose)
+      expect(parent.getError(monitor, params._second)).toStrictEqual(verbose)
     })
 
-    it("ensures ImpulseFormSwitchOptions.error type", () => {
-      const parent = ImpulseFormSwitch(active, branches, {
+    it("ensures FormSwitchOptions.error type", () => {
+      const parent = FormSwitch(active, branches, {
         error: {
           // @ts-expect-error should be ReadonlyArray<string>
           active: 1,
@@ -330,14 +332,14 @@ describe.each([
   "onSubmit" as const,
   "onInit" as const,
 ])("when any validateOn (%s)", (validateOn) => {
-  it("selects only the active's error when it has an error", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_1", {
+  it("selects only the active's error when it has an error", ({ monitor }) => {
+    const form = FormSwitch(
+      FormUnit("_1", {
         schema: z.enum(["_1"]),
         error: ["custom"],
       }),
       {
-        _1: ImpulseFormUnit(0, {
+        _1: FormUnit(0, {
           error: 123,
         }),
       },
@@ -351,9 +353,9 @@ describe.each([
       branch: null,
     }
 
-    expect(form.getError(scope)).toStrictEqual(concise)
-    expect(form.getError(scope, params._first)).toStrictEqual(concise)
-    expect(form.getError(scope, params._second)).toStrictEqual({
+    expect(form.getError(monitor)).toStrictEqual(concise)
+    expect(form.getError(monitor, params._first)).toStrictEqual(concise)
+    expect(form.getError(monitor, params._second)).toStrictEqual({
       active: ["custom"],
       branches: {
         _1: 123,
@@ -361,24 +363,24 @@ describe.each([
     })
   })
 
-  it("selects the custom error regardless of the validate strategy", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_2", {
+  it("selects the custom error regardless of the validate strategy", ({ monitor }) => {
+    const form = FormSwitch(
+      FormUnit("_2", {
         schema: z.enum(["_1", "_2"]),
       }),
       {
-        _1: ImpulseFormUnit(0, {
+        _1: FormUnit(0, {
           error: 123,
         }),
-        _2: ImpulseFormSwitch(
-          ImpulseFormUnit("_3", {
+        _2: FormSwitch(
+          FormUnit("_3", {
             schema: z.enum(["_3", "_4"]),
           }),
           {
-            _3: ImpulseFormUnit("0", {
+            _3: FormUnit("0", {
               error: true,
             }),
-            _4: ImpulseFormUnit(1, {
+            _4: FormUnit(1, {
               error: ["one", "two"],
             }),
           },
@@ -403,9 +405,9 @@ describe.each([
       },
     }
 
-    expect(form.getError(scope)).toStrictEqual(concise)
-    expect(form.getError(scope, params._first)).toStrictEqual(concise)
-    expect(form.getError(scope, params._second)).toStrictEqual({
+    expect(form.getError(monitor)).toStrictEqual(concise)
+    expect(form.getError(monitor, params._first)).toStrictEqual(concise)
+    expect(form.getError(monitor, params._second)).toStrictEqual({
       active: null,
       branches: {
         _1: 123,
@@ -426,14 +428,14 @@ describe.each([
   "onChange" as const,
   "onSubmit" as const,
 ])("when runtime validateOn (%s)", (validateOn) => {
-  it("selects null for validating error", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_2", {
+  it("selects null for validating error", ({ monitor }) => {
+    const form = FormSwitch(
+      FormUnit("_2", {
         validateOn,
         schema: z.enum(["_1", "_2"]),
       }),
       {
-        _1: ImpulseFormUnit(0, {
+        _1: FormUnit(0, {
           validateOn,
           validate: (input): Result<string, number> => {
             if (input <= 0) {
@@ -443,17 +445,17 @@ describe.each([
             return [null, input]
           },
         }),
-        _2: ImpulseFormSwitch(
-          ImpulseFormUnit("_3", {
+        _2: FormSwitch(
+          FormUnit("_3", {
             validateOn,
             schema: z.enum(["_3", "_4"]),
           }),
           {
-            _3: ImpulseFormUnit("0", {
+            _3: FormUnit("0", {
               validateOn,
               schema: z.string(),
             }),
-            _4: ImpulseFormUnit(1, {
+            _4: FormUnit(1, {
               validateOn,
               schema: z.number(),
             }),
@@ -462,9 +464,9 @@ describe.each([
       },
     )
 
-    expect(form.getError(scope)).toBeNull()
-    expect(form.getError(scope, params._first)).toBeNull()
-    expect(form.getError(scope, params._second)).toStrictEqual({
+    expect(form.getError(monitor)).toBeNull()
+    expect(form.getError(monitor, params._first)).toBeNull()
+    expect(form.getError(monitor, params._second)).toStrictEqual({
       active: null,
       branches: {
         _1: null,
@@ -482,13 +484,13 @@ describe.each([
 
 describe("when after trigger", () => {
   function setup(validateOn: ValidateStrategy) {
-    return ImpulseFormSwitch(
-      ImpulseFormUnit("_2", {
+    return FormSwitch(
+      FormUnit("_2", {
         validateOn,
         schema: z.enum(["_1", "_2"]),
       }),
       {
-        _1: ImpulseFormUnit(-10, {
+        _1: FormUnit(-10, {
           validateOn,
           validate: (input): Result<string, number> => {
             if (input <= 0) {
@@ -498,17 +500,17 @@ describe("when after trigger", () => {
             return [null, input]
           },
         }),
-        _2: ImpulseFormSwitch(
-          ImpulseFormUnit("_3", {
+        _2: FormSwitch(
+          FormUnit("_3", {
             validateOn,
             schema: z.enum(["_3", "_4"]),
           }),
           {
-            _3: ImpulseFormUnit("0", {
+            _3: FormUnit("0", {
               validateOn,
               schema: z.number(),
             }),
-            _4: ImpulseFormUnit(1, {
+            _4: FormUnit(1, {
               validateOn,
               schema: z.string(),
             }),
@@ -621,7 +623,9 @@ describe("when after trigger", () => {
     ],
   ])("when validateOn=%s", (validateOn, verbose, trigger) => {
     describe("when active is valid", () => {
-      it("selects active's branch validating errors when units become dirty", async ({ scope }) => {
+      it("selects active's branch validating errors when units become dirty", async ({
+        monitor,
+      }) => {
         const form = setup(validateOn)
 
         await trigger?.(form)
@@ -640,44 +644,44 @@ describe("when after trigger", () => {
           },
         }
 
-        expect(form.getError(scope)).toStrictEqual(concise)
-        expect(form.getError(scope, params._first)).toStrictEqual(concise)
-        expect(form.getError(scope, params._second)).toStrictEqual(verbose)
+        expect(form.getError(monitor)).toStrictEqual(concise)
+        expect(form.getError(monitor, params._first)).toStrictEqual(concise)
+        expect(form.getError(monitor, params._second)).toStrictEqual(verbose)
       })
     })
   })
 })
 
-describe("when defining top-level concise ImpulseFormSwitchOptions.error", () => {
+describe("when defining top-level concise FormSwitchOptions.error", () => {
   const validateOn = "onInit" as const
 
   describe("when active is valid", () => {
-    it("overrides active branch's error", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("_2", {
+    it("overrides active branch's error", ({ monitor }) => {
+      const form = FormSwitch(
+        FormUnit("_2", {
           validateOn,
           error: ["custom"],
           schema: z.enum(["_1", "_2"]),
         }),
         {
-          _1: ImpulseFormUnit(0, {
+          _1: FormUnit(0, {
             validateOn,
             error: ["custom_1"],
             schema: z.number(),
           }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("_3", {
+          _2: FormSwitch(
+            FormUnit("_3", {
               validateOn,
               error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
-              _3: ImpulseFormUnit("0", {
+              _3: FormUnit("0", {
                 validateOn,
                 error: ["custom_3"],
                 schema: z.string(),
               }),
-              _4: ImpulseFormUnit(1, {
+              _4: FormUnit(1, {
                 validateOn,
                 error: ["custom_4"],
                 schema: z.string(),
@@ -690,9 +694,9 @@ describe("when defining top-level concise ImpulseFormSwitchOptions.error", () =>
         },
       )
 
-      expect(form.getError(scope)).toBeNull()
-      expect(form.getError(scope, params._first)).toBeNull()
-      expect(form.getError(scope, params._second)).toStrictEqual({
+      expect(form.getError(monitor)).toBeNull()
+      expect(form.getError(monitor, params._first)).toBeNull()
+      expect(form.getError(monitor, params._second)).toStrictEqual({
         active: null,
         branches: {
           _1: ["custom_1"],
@@ -709,32 +713,32 @@ describe("when defining top-level concise ImpulseFormSwitchOptions.error", () =>
   })
 
   describe("when active is invalid", () => {
-    it("overrides only the active's error", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("", {
+    it("overrides only the active's error", ({ monitor }) => {
+      const form = FormSwitch(
+        FormUnit("", {
           validateOn,
           error: ["custom"],
           schema: z.enum(["_1", "_2"]),
         }),
         {
-          _1: ImpulseFormUnit(0, {
+          _1: FormUnit(0, {
             validateOn,
             error: ["custom_1"],
             schema: z.number(),
           }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("_3", {
+          _2: FormSwitch(
+            FormUnit("_3", {
               validateOn,
               error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
-              _3: ImpulseFormUnit("0", {
+              _3: FormUnit("0", {
                 validateOn,
                 error: ["custom_3"],
                 schema: z.string(),
               }),
-              _4: ImpulseFormUnit(1, {
+              _4: FormUnit(1, {
                 validateOn,
                 error: ["custom_4"],
                 schema: z.string(),
@@ -752,9 +756,9 @@ describe("when defining top-level concise ImpulseFormSwitchOptions.error", () =>
         branch: null,
       }
 
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
-      expect(form.getError(scope, params._second)).toStrictEqual({
+      expect(form.getError(monitor)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._first)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._second)).toStrictEqual({
         active: [expect.stringContaining("Invalid option")],
         branches: {
           _1: ["custom_1"],
@@ -771,36 +775,36 @@ describe("when defining top-level concise ImpulseFormSwitchOptions.error", () =>
   })
 })
 
-describe("when defining ImpulseFormSwitchOptions.error.active", () => {
+describe("when defining FormSwitchOptions.error.active", () => {
   const validateOn = "onInit" as const
 
   describe("when active is invalid", () => {
-    it("overrides only the active's error", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("", {
+    it("overrides only the active's error", ({ monitor }) => {
+      const form = FormSwitch(
+        FormUnit("", {
           validateOn,
           error: ["custom"],
           schema: z.enum(["_1", "_2"]),
         }),
         {
-          _1: ImpulseFormUnit(0, {
+          _1: FormUnit(0, {
             validateOn,
             error: ["custom_1"],
             schema: z.number(),
           }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("_3", {
+          _2: FormSwitch(
+            FormUnit("_3", {
               validateOn,
               error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
-              _3: ImpulseFormUnit("0", {
+              _3: FormUnit("0", {
                 validateOn,
                 error: ["custom_3"],
                 schema: z.string(),
               }),
-              _4: ImpulseFormUnit(1, {
+              _4: FormUnit(1, {
                 validateOn,
                 error: ["custom_4"],
                 schema: z.string(),
@@ -820,9 +824,9 @@ describe("when defining ImpulseFormSwitchOptions.error.active", () => {
         branch: null,
       }
 
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
-      expect(form.getError(scope, params._second)).toStrictEqual({
+      expect(form.getError(monitor)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._first)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._second)).toStrictEqual({
         active: [expect.stringContaining("Invalid option")],
         branches: {
           _1: ["custom_1"],
@@ -839,32 +843,32 @@ describe("when defining ImpulseFormSwitchOptions.error.active", () => {
   })
 
   describe("when active is valid", () => {
-    it("overrides only the active's error", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("_2", {
+    it("overrides only the active's error", ({ monitor }) => {
+      const form = FormSwitch(
+        FormUnit("_2", {
           validateOn,
           error: ["custom"],
           schema: z.enum(["_1", "_2"]),
         }),
         {
-          _1: ImpulseFormUnit(0, {
+          _1: FormUnit(0, {
             validateOn,
             error: ["custom_1"],
             schema: z.number(),
           }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("_3", {
+          _2: FormSwitch(
+            FormUnit("_3", {
               validateOn,
               error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
-              _3: ImpulseFormUnit("0", {
+              _3: FormUnit("0", {
                 validateOn,
                 error: ["custom_3"],
                 schema: z.string(),
               }),
-              _4: ImpulseFormUnit(1, {
+              _4: FormUnit(1, {
                 validateOn,
                 error: ["custom_4"],
                 schema: z.string(),
@@ -890,9 +894,9 @@ describe("when defining ImpulseFormSwitchOptions.error.active", () => {
         },
       }
 
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
-      expect(form.getError(scope, params._second)).toStrictEqual({
+      expect(form.getError(monitor)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._first)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._second)).toStrictEqual({
         active: null,
         branches: {
           _1: ["custom_1"],
@@ -909,36 +913,36 @@ describe("when defining ImpulseFormSwitchOptions.error.active", () => {
   })
 })
 
-describe("when defining concise ImpulseFormSwitchOptions.error.branch", () => {
+describe("when defining concise FormSwitchOptions.error.branch", () => {
   const validateOn = "onInit" as const
 
   describe("when active is invalid", () => {
-    it("does not change anything", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("", {
+    it("does not change anything", ({ monitor }) => {
+      const form = FormSwitch(
+        FormUnit("", {
           validateOn,
           error: ["custom"],
           schema: z.enum(["_1", "_2"]),
         }),
         {
-          _1: ImpulseFormUnit(0, {
+          _1: FormUnit(0, {
             validateOn,
             error: ["custom_1"],
             schema: z.number(),
           }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("_3", {
+          _2: FormSwitch(
+            FormUnit("_3", {
               validateOn,
               error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
-              _3: ImpulseFormUnit("0", {
+              _3: FormUnit("0", {
                 validateOn,
                 error: ["custom_3"],
                 schema: z.string(),
               }),
-              _4: ImpulseFormUnit(1, {
+              _4: FormUnit(1, {
                 validateOn,
                 error: ["custom_4"],
                 schema: z.string(),
@@ -958,9 +962,9 @@ describe("when defining concise ImpulseFormSwitchOptions.error.branch", () => {
         branch: null,
       }
 
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
-      expect(form.getError(scope, params._second)).toStrictEqual({
+      expect(form.getError(monitor)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._first)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._second)).toStrictEqual({
         active: ["custom"],
         branches: {
           _1: ["custom_1"],
@@ -977,31 +981,31 @@ describe("when defining concise ImpulseFormSwitchOptions.error.branch", () => {
   })
 
   describe("when active is valid", () => {
-    it("overrides only the active branch error", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("_2", {
+    it("overrides only the active branch error", ({ monitor }) => {
+      const form = FormSwitch(
+        FormUnit("_2", {
           validateOn,
           schema: z.enum(["_1", "_2"]),
         }),
         {
-          _1: ImpulseFormUnit(0, {
+          _1: FormUnit(0, {
             validateOn,
             error: ["custom_1"],
             schema: z.number(),
           }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("_3", {
+          _2: FormSwitch(
+            FormUnit("_3", {
               validateOn,
               error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
-              _3: ImpulseFormUnit("0", {
+              _3: FormUnit("0", {
                 validateOn,
                 error: ["custom_3"],
                 schema: z.string(),
               }),
-              _4: ImpulseFormUnit(1, {
+              _4: FormUnit(1, {
                 validateOn,
                 error: ["custom_4"],
                 schema: z.string(),
@@ -1016,9 +1020,9 @@ describe("when defining concise ImpulseFormSwitchOptions.error.branch", () => {
         },
       )
 
-      expect(form.getError(scope)).toBeNull()
-      expect(form.getError(scope, params._first)).toBeNull()
-      expect(form.getError(scope, params._second)).toStrictEqual({
+      expect(form.getError(monitor)).toBeNull()
+      expect(form.getError(monitor, params._first)).toBeNull()
+      expect(form.getError(monitor, params._second)).toStrictEqual({
         active: null,
         branches: {
           _1: ["custom_1"],
@@ -1035,36 +1039,36 @@ describe("when defining concise ImpulseFormSwitchOptions.error.branch", () => {
   })
 })
 
-describe("when defining detailed ImpulseFormSwitchOptions.error.branch", () => {
+describe("when defining detailed FormSwitchOptions.error.branch", () => {
   const validateOn = "onInit" as const
 
   describe("when active is invalid", () => {
-    it("overrides only the target branch error", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("", {
+    it("overrides only the target branch error", ({ monitor }) => {
+      const form = FormSwitch(
+        FormUnit("", {
           validateOn,
           error: ["custom"],
           schema: z.enum(["_1", "_2"]),
         }),
         {
-          _1: ImpulseFormUnit(0, {
+          _1: FormUnit(0, {
             validateOn,
             error: ["custom_1"],
             schema: z.number(),
           }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("_3", {
+          _2: FormSwitch(
+            FormUnit("_3", {
               validateOn,
               error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
-              _3: ImpulseFormUnit("0", {
+              _3: FormUnit("0", {
                 validateOn,
                 error: ["custom_3"],
                 schema: z.string(),
               }),
-              _4: ImpulseFormUnit(1, {
+              _4: FormUnit(1, {
                 validateOn,
                 error: ["custom_4"],
                 schema: z.string(),
@@ -1087,9 +1091,9 @@ describe("when defining detailed ImpulseFormSwitchOptions.error.branch", () => {
         branch: null,
       }
 
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
-      expect(form.getError(scope, params._second)).toStrictEqual({
+      expect(form.getError(monitor)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._first)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._second)).toStrictEqual({
         active: ["custom"],
         branches: {
           _1: null,
@@ -1106,31 +1110,31 @@ describe("when defining detailed ImpulseFormSwitchOptions.error.branch", () => {
   })
 
   describe("when active is valid", () => {
-    it("overrides only the target inactive branch error", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("_2", {
+    it("overrides only the target inactive branch error", ({ monitor }) => {
+      const form = FormSwitch(
+        FormUnit("_2", {
           validateOn,
           schema: z.enum(["_1", "_2"]),
         }),
         {
-          _1: ImpulseFormUnit(0, {
+          _1: FormUnit(0, {
             validateOn,
             error: ["custom_1"],
             schema: z.number(),
           }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("_3", {
+          _2: FormSwitch(
+            FormUnit("_3", {
               validateOn,
               error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
-              _3: ImpulseFormUnit("0", {
+              _3: FormUnit("0", {
                 validateOn,
                 error: ["custom_3"],
                 schema: z.string(),
               }),
-              _4: ImpulseFormUnit(1, {
+              _4: FormUnit(1, {
                 validateOn,
                 error: ["custom_4"],
                 schema: z.string(),
@@ -1159,9 +1163,9 @@ describe("when defining detailed ImpulseFormSwitchOptions.error.branch", () => {
         },
       }
 
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
-      expect(form.getError(scope, params._second)).toStrictEqual({
+      expect(form.getError(monitor)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._first)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._second)).toStrictEqual({
         active: null,
         branches: {
           _1: null,
@@ -1176,31 +1180,31 @@ describe("when defining detailed ImpulseFormSwitchOptions.error.branch", () => {
       })
     })
 
-    it("overrides only the target active branch error", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("_2", {
+    it("overrides only the target active branch error", ({ monitor }) => {
+      const form = FormSwitch(
+        FormUnit("_2", {
           validateOn,
           schema: z.enum(["_1", "_2"]),
         }),
         {
-          _1: ImpulseFormUnit(0, {
+          _1: FormUnit(0, {
             validateOn,
             error: ["custom_1"],
             schema: z.number(),
           }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("_3", {
+          _2: FormSwitch(
+            FormUnit("_3", {
               validateOn,
               error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
-              _3: ImpulseFormUnit("0", {
+              _3: FormUnit("0", {
                 validateOn,
                 error: ["custom_3"],
                 schema: z.string(),
               }),
-              _4: ImpulseFormUnit(1, {
+              _4: FormUnit(1, {
                 validateOn,
                 error: ["custom_4"],
                 schema: z.string(),
@@ -1218,9 +1222,9 @@ describe("when defining detailed ImpulseFormSwitchOptions.error.branch", () => {
         },
       )
 
-      expect(form.getError(scope)).toBeNull()
-      expect(form.getError(scope, params._first)).toBeNull()
-      expect(form.getError(scope, params._second)).toStrictEqual({
+      expect(form.getError(monitor)).toBeNull()
+      expect(form.getError(monitor, params._first)).toBeNull()
+      expect(form.getError(monitor, params._second)).toStrictEqual({
         active: null,
         branches: {
           _1: ["custom_1"],
@@ -1235,31 +1239,31 @@ describe("when defining detailed ImpulseFormSwitchOptions.error.branch", () => {
       })
     })
 
-    it("overrides nested switch", ({ scope }) => {
-      const form = ImpulseFormSwitch(
-        ImpulseFormUnit("_2", {
+    it("overrides nested switch", ({ monitor }) => {
+      const form = FormSwitch(
+        FormUnit("_2", {
           validateOn,
           schema: z.enum(["_1", "_2"]),
         }),
         {
-          _1: ImpulseFormUnit(0, {
+          _1: FormUnit(0, {
             validateOn,
             error: ["custom_1"],
             schema: z.number(),
           }),
-          _2: ImpulseFormSwitch(
-            ImpulseFormUnit("_3", {
+          _2: FormSwitch(
+            FormUnit("_3", {
               validateOn,
               error: ["custom_2"],
               schema: z.enum(["_3", "_4"]),
             }),
             {
-              _3: ImpulseFormUnit("0", {
+              _3: FormUnit("0", {
                 validateOn,
                 error: ["custom_3"],
                 schema: z.string(),
               }),
-              _4: ImpulseFormUnit(1, {
+              _4: FormUnit(1, {
                 validateOn,
                 error: ["custom_4"],
                 schema: z.string(),
@@ -1297,9 +1301,9 @@ describe("when defining detailed ImpulseFormSwitchOptions.error.branch", () => {
         },
       }
 
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
-      expect(form.getError(scope, params._second)).toStrictEqual({
+      expect(form.getError(monitor)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._first)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._second)).toStrictEqual({
         active: null,
         branches: {
           _1: ["custom_1"],
@@ -1316,34 +1320,34 @@ describe("when defining detailed ImpulseFormSwitchOptions.error.branch", () => {
   })
 })
 
-describe("when defining all active+branch+branches ImpulseFormSwitchOptions.error", () => {
+describe("when defining all active+branch+branches FormSwitchOptions.error", () => {
   const validateOn = "onInit" as const
 
-  it("branch takes over branches", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_1", {
+  it("branch takes over branches", ({ monitor }) => {
+    const form = FormSwitch(
+      FormUnit("_1", {
         validateOn,
         schema: z.enum(["_1", "_2"]),
       }),
       {
-        _1: ImpulseFormUnit(0, {
+        _1: FormUnit(0, {
           validateOn,
           error: ["custom_1"],
           schema: z.number(),
         }),
-        _2: ImpulseFormSwitch(
-          ImpulseFormUnit("_3", {
+        _2: FormSwitch(
+          FormUnit("_3", {
             validateOn,
             error: ["custom_2"],
             schema: z.enum(["_3", "_4"]),
           }),
           {
-            _3: ImpulseFormUnit("0", {
+            _3: FormUnit("0", {
               validateOn,
               error: ["custom_3"],
               schema: z.string(),
             }),
-            _4: ImpulseFormUnit(1, {
+            _4: FormUnit(1, {
               validateOn,
               error: ["custom_4"],
               schema: z.string(),
@@ -1374,9 +1378,9 @@ describe("when defining all active+branch+branches ImpulseFormSwitchOptions.erro
       },
     }
 
-    expect(form.getError(scope)).toStrictEqual(concise)
-    expect(form.getError(scope, params._first)).toStrictEqual(concise)
-    expect(form.getError(scope, params._second)).toStrictEqual({
+    expect(form.getError(monitor)).toStrictEqual(concise)
+    expect(form.getError(monitor, params._first)).toStrictEqual(concise)
+    expect(form.getError(monitor, params._second)).toStrictEqual({
       active: null,
       branches: {
         _1: ["new_1"],
@@ -1395,30 +1399,30 @@ describe("when defining all active+branch+branches ImpulseFormSwitchOptions.erro
 describe("stable error value", () => {
   const validateOn = "onInit" as const
 
-  it("subsequently selects equal error", ({ scope }) => {
-    const form = ImpulseFormSwitch(
-      ImpulseFormUnit("_1", {
+  it("subsequently selects equal error", ({ monitor }) => {
+    const form = FormSwitch(
+      FormUnit("_1", {
         validateOn,
         schema: z.enum(["_1", "_2"]),
       }),
       {
-        _1: ImpulseFormUnit(0, {
+        _1: FormUnit(0, {
           validateOn,
           error: ["custom_1"],
           schema: z.number(),
         }),
-        _2: ImpulseFormSwitch(
-          ImpulseFormUnit("_3", {
+        _2: FormSwitch(
+          FormUnit("_3", {
             validateOn,
             schema: z.enum(["_3", "_4"]),
           }),
           {
-            _3: ImpulseFormUnit("0", {
+            _3: FormUnit("0", {
               validateOn,
               error: ["custom_3"],
               schema: z.string(),
             }),
-            _4: ImpulseFormUnit(1, {
+            _4: FormUnit(1, {
               validateOn,
               error: ["custom_4"],
               schema: z.string(),
@@ -1428,27 +1432,27 @@ describe("stable error value", () => {
       },
     )
 
-    expect(form.getError(scope)).toBeInstanceOf(Object)
-    expect(form.getError(scope)).toBe(form.getError(scope))
+    expect(form.getError(monitor)).toBeInstanceOf(Object)
+    expect(form.getError(monitor)).toBe(form.getError(monitor))
 
-    expect(form.getError(scope, params._first)).toBeInstanceOf(Object)
-    expect(form.getError(scope, params._first)).toBe(form.getError(scope, params._first))
+    expect(form.getError(monitor, params._first)).toBeInstanceOf(Object)
+    expect(form.getError(monitor, params._first)).toBe(form.getError(monitor, params._first))
 
-    expect(form.getError(scope, params._second)).toBeInstanceOf(Object)
-    expect(form.getError(scope, params._second)).toBe(form.getError(scope, params._second))
+    expect(form.getError(monitor, params._second)).toBeInstanceOf(Object)
+    expect(form.getError(monitor, params._second)).toBe(form.getError(monitor, params._second))
   })
 })
 
 describe("using recursive setter", () => {
   const validateOn = "onInit" as const
 
-  const active = ImpulseFormUnit("_2", {
+  const active = FormUnit("_2", {
     validateOn,
     schema: z.enum(["_1", "_2"]),
   })
 
   const branches = {
-    _1: ImpulseFormUnit(0, {
+    _1: FormUnit(0, {
       validateOn,
       validate: (input): Result<string, number> => {
         if (input <= 0) {
@@ -1458,36 +1462,36 @@ describe("using recursive setter", () => {
         return [null, input]
       },
     }),
-    _2: ImpulseFormSwitch(
-      ImpulseFormUnit("_3", {
+    _2: FormSwitch(
+      FormUnit("_3", {
         validateOn,
         schema: z.enum(["_3", "_4"]),
       }),
       {
-        _3: ImpulseFormUnit("0", {
+        _3: FormUnit("0", {
           error: true,
         }),
-        _4: ImpulseFormUnit<number, number>(1),
+        _4: FormUnit<number, number>(1),
       },
     ),
   }
 
-  function setup(options?: ImpulseFormSwitchOptions<typeof active, typeof branches>) {
-    return ImpulseFormSwitch(active, branches, options)
+  function setup(options?: FormSwitchOptions<typeof active, typeof branches>) {
+    return FormSwitch(active, branches, options)
   }
 
   describe.each<
     [
       string,
       (
-        input: ImpulseFormSwitchErrorSetter<typeof active, typeof branches>,
-      ) => ImpulseFormSwitch<typeof active, typeof branches>,
+        input: FormSwitchErrorSetter<typeof active, typeof branches>,
+      ) => FormSwitch<typeof active, typeof branches>,
     ]
   >([
-    ["ImpulseFormSwitchOptions.error", (error) => setup({ error })],
+    ["FormSwitchOptions.error", (error) => setup({ error })],
 
     [
-      "ImpulseFormSwitch.setError",
+      "FormSwitch.setError",
       (setter) => {
         const form = setup()
 
@@ -1497,7 +1501,7 @@ describe("using recursive setter", () => {
       },
     ],
   ])("in %s", (_, setup) => {
-    it("passes initial and input recursively to all setters", ({ scope }) => {
+    it("passes initial and input recursively to all setters", ({ monitor }) => {
       expect.assertions(20)
 
       const form = setup(($) => {
@@ -1755,9 +1759,9 @@ describe("using recursive setter", () => {
         },
       }
 
-      expect(form.getError(scope)).toStrictEqual(concise)
-      expect(form.getError(scope, params._first)).toStrictEqual(concise)
-      expect(form.getError(scope, params._second)).toStrictEqual({
+      expect(form.getError(monitor)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._first)).toStrictEqual(concise)
+      expect(form.getError(monitor, params._second)).toStrictEqual({
         active: null,
         branches: {
           _1: "Too short",
