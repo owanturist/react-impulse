@@ -1,5 +1,32 @@
 # react-impulse-form
 
+## 0.15.2
+
+### Patch Changes
+
+- [#1008](https://github.com/owanturist/react-impulse/pull/1008) [`f795ba1`](https://github.com/owanturist/react-impulse/commit/f795ba117b13ecbcc047453ef000cb8f82ff094e) Thanks [@owanturist](https://github.com/owanturist)! - Refactor internal source code structure to improve consistency and maintainability:
+
+  - Move implementation details to `_internal` directories to clearly separate public API from internal logic.
+  - Update `biome.jsonc` to enforce public API boundaries:
+    - Prevent package entry points (`index.ts`) from directly importing from `_internal`.
+    - Enable `noUnusedImports` rule with autofix.
+  - Remove `dependencies.ts` pattern and allow direct imports of dependencies.
+
+- [#992](https://github.com/owanturist/react-impulse/pull/992) [`1a1c634`](https://github.com/owanturist/react-impulse/commit/1a1c634901c90c2106d8c62b6db23b1514d04d19) Thanks [@owanturist](https://github.com/owanturist)! - Update React dependencies to 19.2.3.
+
+- [#1005](https://github.com/owanturist/react-impulse/pull/1005) [`5d1175f`](https://github.com/owanturist/react-impulse/commit/5d1175f34c5795dab831bc5bad2b21e3c98c0054) Thanks [@owanturist](https://github.com/owanturist)! - Replace prettier and eslint by [biome](http://biomejs.dev/).
+
+- [#1000](https://github.com/owanturist/react-impulse/pull/1000) [`e91b86e`](https://github.com/owanturist/react-impulse/commit/e91b86e608a0d98446dfef49f453714398ce551e) Thanks [@owanturist](https://github.com/owanturist)! - Refactor scope emitter architecture to eliminate version tracking and improve derived impulse synchronization. The new implementation uses a stale flag mechanism in `DerivedImpulse` instead of version comparison, streamlining invalidation logic and reducing overhead. The `ScopeEmitter` now leverages a `ScopeFactory` pattern with lazy scope creation, ensuring that derived impulses maintain consistent state across reads while properly invalidating when dependencies change. Additionally, the `_setter` signature has been simplified to return a boolean flag indicating whether emission is needed, centralizing the queue push logic in `BaseImpulse#setValue`.
+
+  **Internal Changes:**
+
+  - Replaced version tracking (`_version`) with stale flag (`_stale`) in `DerivedImpulse`
+  - Introduced `ScopeFactory` class for managing scope creation and emission lifecycle
+  - Simplified `_setter` signature to return `void | true` instead of accepting queue parameter
+  - Moved `Emitter` class from `react-impulse-form` to shared `tools` package
+  - Enhanced `map` utility to accept both arrays and iterables
+  - Removed obsolete `uniq` utility in favor of native `Set`
+
 ## 0.15.1
 
 ### Patch Changes
@@ -29,6 +56,7 @@
   Many real-world forms have optional sections that can be enabled or disabled based on user choices (for example, a billing address that's different from shipping address, optional contact information, or conditional form fields). `ImpulseFormOptional` models this pattern as a single, strongly-typed form whose element is conditionally active based on an enabled/disabled boolean flag.
 
   ## What it is
+
   - A wrapper with an `enabled` boolean form and an `element` form that's conditionally active.
   - The `element` can be any `ImpulseForm` (e.g., `ImpulseFormUnit`, `ImpulseFormList`, `ImpulseFormShape`, or a nested `ImpulseFormSwitch`). Future `ImpulseForm` types will work out of the box.
   - The `enabled` form must output a boolean value (enforced by types).
@@ -36,6 +64,7 @@
   - When `enabled` is `true`, the form returns the element's output and validity depends on the element.
 
   ## API
+
   - Factory: `ImpulseFormOptional(enabled, element, options?)`
     - `enabled` must be a form that outputs a boolean value
     - `element` can be any `ImpulseForm`
@@ -46,11 +75,13 @@
     - `.element` — the conditionally active form. Access its fields as usual, e.g. `form.element.setInput("value")` or `form.element.fields.name.setInput("John")`.
 
   ## Output behavior
+
   - When `enabled` is `false`: returns `undefined` (element is inactive)
   - When `enabled` is `true` and `element` is valid: returns element's output value
   - When `enabled` is `true` and `element` is invalid: returns `null`
 
   ## Validity behavior
+
   - When `enabled` is `false`: form is considered valid regardless of element state
   - When `enabled` is `true`: validity depends on both enabled and element forms
   - Supports concise (`boolean`) and verbose (`{ enabled: boolean, element: boolean }`) validity selection
@@ -58,12 +89,12 @@
   ## Example
 
   ```ts
-  import z from "zod"
+  import z from "zod";
   import {
     ImpulseFormUnit,
     ImpulseFormShape,
     ImpulseFormOptional,
-  } from "react-impulse-form"
+  } from "react-impulse-form";
 
   const form = ImpulseFormOptional(
     ImpulseFormUnit(false), // enabled/disabled toggle
@@ -71,37 +102,38 @@
       street: ImpulseFormUnit("", { schema: z.string().min(1) }),
       city: ImpulseFormUnit("", { schema: z.string().min(1) }),
       zipCode: ImpulseFormUnit("", { schema: z.string().regex(/^\d{5}$/) }),
-    }),
-  )
+    })
+  );
 
   // Initially disabled - form is valid and returns undefined
-  console.log(form.getOutput(scope)) // undefined
-  console.log(form.isValid(scope)) // true
+  console.log(form.getOutput(scope)); // undefined
+  console.log(form.isValid(scope)); // true
 
   // Enable the optional section
-  form.enabled.setInput(true)
-  console.log(form.getOutput(scope)) // null (element is invalid)
-  console.log(form.isValid(scope)) // false
+  form.enabled.setInput(true);
+  console.log(form.getOutput(scope)); // null (element is invalid)
+  console.log(form.isValid(scope)); // false
 
   // Fill in the address
   form.element.setInput({
     street: "123 Main St",
     city: "Springfield",
     zipCode: "12345",
-  })
+  });
 
   // Now the form is valid and returns the address
-  console.log(form.getOutput(scope))
+  console.log(form.getOutput(scope));
   // { street: "123 Main St", city: "Springfield", zipCode: "12345" }
-  console.log(form.isValid(scope)) // true
+  console.log(form.isValid(scope)); // true
 
   // Disable again - form becomes valid regardless of content
-  form.enabled.setInput(false)
-  console.log(form.getOutput(scope)) // undefined
-  console.log(form.isValid(scope)) // true
+  form.enabled.setInput(false);
+  console.log(form.getOutput(scope)); // undefined
+  console.log(form.isValid(scope)); // true
   ```
 
   ## Key benefits
+
   - Single source of truth for conditional form sections.
   - Type-safe enabled/disabled semantics with automatic output handling.
   - Composable: element can be any `ImpulseForm` (units, lists, shapes, switches) for arbitrarily nested conditional logic.
@@ -132,6 +164,7 @@
 - [#929](https://github.com/owanturist/react-impulse/pull/929) [`93bdad4`](https://github.com/owanturist/react-impulse/commit/93bdad461d7a361bd2485136fcfb4c17881332da) Thanks [@owanturist](https://github.com/owanturist)! - Bump peer dependency `react-impulse` to `^3.0.3`.
 
 - [#918](https://github.com/owanturist/react-impulse/pull/918) [`79e91fa`](https://github.com/owanturist/react-impulse/commit/79e91fa5a710c35215d403ad6d7206c87a9024a1) Thanks [@owanturist](https://github.com/owanturist)! - Refactor `ImpulseForm` class architecture for better maintainability and type safety
+
   - Added overloaded signatures with optional `select` parameter to `isValid()` and `isInvalid()` methods for consistent API with other flag methods
   - Simplified internal architecture by delegating all operations to `_state: ImpulseFormState<TParams>`
 
@@ -142,11 +175,13 @@
   Many real-world forms have conditional sections (for example, switching between an "individual" and a "business" profile, or changing the contact method). `ImpulseFormSwitch` models this pattern as a single, strongly-typed form whose active branch is chosen by a discriminant value.
 
   ## What it is
+
   - A wrapper with an `active` discriminant and a `branches` map.
   - Branches can be any `ImpulseForm` (e.g., `ImpulseFormUnit`, `ImpulseFormList`, `ImpulseFormShape`, or a nested `ImpulseFormSwitch`). Future `ImpulseForm` types will work out of the box.
   - Keys of `branches` must exhaustively cover the possible values of `active` (enforced by types).
 
   ## API
+
   - Factory: `ImpulseFormSwitch(active, branches, options?)`
     - `options` may set per-branch `input`, `initial`, `touched`, `validateOn`, and `error`.
   - Type guard: `isImpulseFormSwitch(value)`.
@@ -157,12 +192,12 @@
   ## Example
 
   ```ts
-  import z from "zod"
+  import z from "zod";
   import {
     ImpulseFormUnit,
     ImpulseFormShape,
     ImpulseFormSwitch,
-  } from "react-impulse-form"
+  } from "react-impulse-form";
 
   const form = ImpulseFormSwitch(
     ImpulseFormUnit("individual", {
@@ -178,19 +213,20 @@
         companyName: ImpulseFormUnit(""),
         vatNumber: ImpulseFormUnit(""),
       }),
-    },
-  )
+    }
+  );
 
   // Switch active branch and update fields
-  form.active.setInput("business")
-  form.branches.business.fields.companyName.setInput("ACME LLC")
+  form.active.setInput("business");
+  form.branches.business.fields.companyName.setInput("ACME LLC");
 
   // Read concise output for the current active branch
-  const output = form.getOutput(scope)
+  const output = form.getOutput(scope);
   // => { kind: "business", value: { companyName: "ACME LLC", vatNumber: "" } }
   ```
 
   ## Key benefits
+
   - Single source of truth for conditional forms.
   - Exhaustive, compile-time-checked mapping from the discriminant to branches.
   - Composable: branches can be any `ImpulseForm` (units, lists, shapes, or other switches) for arbitrarily nested flows.
@@ -198,7 +234,7 @@
 - [#918](https://github.com/owanturist/react-impulse/pull/918) [`79e91fa`](https://github.com/owanturist/react-impulse/commit/79e91fa5a710c35215d403ad6d7206c87a9024a1) Thanks [@owanturist](https://github.com/owanturist)! - Introduce `type ImpulseFormMeta<T>` for reactive static fields in `ImpulseFormShape`:
 
   ```typescript
-  export type ImpulseFormMeta<T> = (scope: Scope) => T
+  export type ImpulseFormMeta<T> = (scope: Scope) => T;
   ```
 
   This change makes non-`ImpulseForm` fields in `ImpulseFormShape` reactive, enabling proper resetting of `ImpulseFormList` elements that include meta fields.
@@ -210,16 +246,16 @@
     id: ImpulseFormUnit(0),
     name: ImpulseFormUnit(""),
     metaField: "some value", // Now reactive
-  })
+  });
   ```
 
   However, accessing meta field values now requires a scope:
 
   ```typescript
-  const value = shape.fields.metaField(scope)
+  const value = shape.fields.metaField(scope);
 
   // instead of
-  const value = shape.fields.metaField
+  const value = shape.fields.metaField;
   ```
 
   ***
@@ -267,6 +303,7 @@
   Rename `ImpulseForm#focusFirstInvalidValue` to `ImpulseForm#focusFirstInvalid`.
 
 - [#862](https://github.com/owanturist/react-impulse/pull/862) [`821639a`](https://github.com/owanturist/react-impulse/commit/821639a2a201898f223306854d48005d61bf7533) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
+
   - Merge `ImpulseFormValue.of` fabric and `ImpulseFormValue` type into a single `ImpulseFormUnit` definition.
   - Merge `ImpulseFormList.of` fabric and `ImpulseFormList` type into a single `ImpulseFormList` definition.
   - Merge `ImpulseFormShape.of` fabric and `ImpulseFormShape` type into a single `ImpulseFormShape` definition.
@@ -276,6 +313,7 @@
   The changes were made to align the `react-impulse` API with the `react-impulse-form` API, which already has a single definition for `Impulse`.
 
 - [#862](https://github.com/owanturist/react-impulse/pull/862) [`821639a`](https://github.com/owanturist/react-impulse/commit/821639a2a201898f223306854d48005d61bf7533) Thanks [@owanturist](https://github.com/owanturist)! - - Introduce new `isImpulseFormUnit` high order function to check if a value is an instance of `ImpulseFormUnit`.
+
   - Introduce new `isImpulseFormList` high order function to check if a value is an instance of `ImpulseFormList`.
   - Introduce new `isImpulseFormShape` high order function to check if a value is an instance of `ImpulseFormShape`.
 
@@ -304,13 +342,14 @@
   This change was made to provide a more flexible and type-safe way to handle errors in the `ImpulseFormValue` class. By allowing users to specify a custom error type, we can better accommodate different use cases and improve the overall usability of the library.
 
   #### Migration Guide
+
   1. Specify the `TError` as `ReadonlyArray<string>` when creating an `ImpulseFormValue` with `schema`:
 
      ```ts
      const form: ImpulseFormValue<
        string,
        ReadonlyArray<string>
-     > = ImpulseFormValue.of("", { schema: z.string() })
+     > = ImpulseFormValue.of("", { schema: z.string() });
      ```
 
   2. Specify custom error type when creating an `ImpulseFormValue` with `validate`:
@@ -318,9 +357,9 @@
      ```ts
      const form: ImpulseFormValue<string, string> = ImpulseFormValue.of("", {
        validate: (value) => {
-         return value.length > 0 ? [null, value] : ["Value is required", null]
+         return value.length > 0 ? [null, value] : ["Value is required", null];
        },
-     })
+     });
      ```
 
 - [#855](https://github.com/owanturist/react-impulse/pull/855) [`00d5240`](https://github.com/owanturist/react-impulse/commit/00d52409fbcc201887c03cd92ad2e412c8a0f598) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
@@ -332,25 +371,26 @@
   This change was made to decouple the library from React, allowing it to be used in any JavaScript environment without being tied to a specific framework.
 
   #### Migration Guide
+
   1. Replace use of `useImpulseForm` by combining `ImpulseFormValue#onSubmit` and `React.useEffect` hook:
 
      ```ts
-     const form = ImpulseFormValue.of("")
+     const form = ImpulseFormValue.of("");
 
      // before
      useImpulseForm(form, {
        onSubmit: (values, itself) => {
-         console.log(values, itself)
+         console.log(values, itself);
        },
-     })
+     });
 
      // after
      React.useEffect(() => {
        // the method returns cleanup function
        return form.onSubmit((values) => {
-         console.log(values, form)
-       })
-     }, [form])
+         console.log(values, form);
+       });
+     }, [form]);
      ```
 
   2. Replace use of `useImpulseFormValue` by combining `ImpulseFormValue#onFocusWhenInvalid` and `React.useEffect` hook:
@@ -386,6 +426,7 @@
 ### Minor Changes
 
 - [#813](https://github.com/owanturist/react-impulse/pull/813) [`0983fb0`](https://github.com/owanturist/react-impulse/commit/0983fb04e4dc99f382c46abca597a8687d491940) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
+
   - Added support for React 19
   - Dropped support for React 16 and React 17
   - Updated minimum peer dependency to React 18.0.0
@@ -432,7 +473,7 @@
   ```ts
   export type Result<TError, TData> = [TError] extends [never]
     ? [null, TData]
-    : [TError, null] | [null, TData]
+    : [TError, null] | [null, TData];
   ```
 
 ### Patch Changes
@@ -451,10 +492,10 @@
   ```ts
   const form = ImpulseFormValue.of("", {
     isInputDirty: (left, right) => left.trim() !== right.trim(),
-  })
+  });
 
-  form.setInput(" ")
-  form.isDirty(scope) === false
+  form.setInput(" ");
+  form.isDirty(scope) === false;
   ```
 
   ***
@@ -466,14 +507,17 @@
 ### Minor Changes
 
 - [#743](https://github.com/owanturist/react-impulse/pull/743) [`bdbe810`](https://github.com/owanturist/react-impulse/commit/bdbe810e84bddcb4176d1235cd31e45a449b2041) Thanks [@owanturist](https://github.com/owanturist)! - 1. `ImpulseForm#setInitialValue` receives two parameters in the callback:
+
   - initial value
   - current (original) value
+
   1. `ImpulseForm#setOriginalValue` receives two parameters in the callback:
      - current (original) value
      - initial value
   1. `ImpulseFormList#reset` and `ImpulseFormList#isDirty` work correctly for removed/added items (Resolves #694)
 
 - [#748](https://github.com/owanturist/react-impulse/pull/748) [`fae44ab`](https://github.com/owanturist/react-impulse/commit/fae44ab46696fbc6c734d6939a5b917fa1cf82ca) Thanks [@owanturist](https://github.com/owanturist)! - Rename all entries of `value` to `output`, `originalValue` to `input`, and `initialValue` to `initial`
+
   1. `ImpulseForm`:
      1. `ImpulseFormParams['value.schema']` -> `ImpulseFormParams['output.schema']`
      2. `ImpulseFormParams['value.schema.verbose']` -> `ImpulseFormParams['output.schema.verbose']`
@@ -522,13 +566,16 @@
 ### Minor Changes
 
 - [#671](https://github.com/owanturist/react-impulse/pull/671) [`9cf128c`](https://github.com/owanturist/react-impulse/commit/9cf128c769ac99c14cf4f14dd2abb50a2f632ce3) Thanks [@owanturist](https://github.com/owanturist)! - Breaking change:
+
   - Rename `ImpulseFormValueOptions.compare` to `ImpulseFormValueOptions.isOriginalValueEqual`
   - `ImpulseFormValue#setOriginalValue` does not reset errors on call anymore. Call `ImpulseFormValue#setErrors([])` manually when needed.
 
 - [#674](https://github.com/owanturist/react-impulse/pull/674) [`8f7d9e2`](https://github.com/owanturist/react-impulse/commit/8f7d9e2f3787bf3f7ff1fe49d9ae7711862210f0) Thanks [@owanturist](https://github.com/owanturist)! - Breaking changes:
+
   - `ImpulseFormShape#isValidated`, `ImpulseFormShape#isDirty`, and `ImpulseFormShape#isTouched` return `false` for empty shapes.
 
   Introduced:
+
   - `ImpulseFormList` class.
 
 ## 0.2.0
@@ -536,39 +583,40 @@
 ### Minor Changes
 
 - [#661](https://github.com/owanturist/react-impulse/pull/661) [`01f1f56`](https://github.com/owanturist/react-impulse/commit/01f1f562b759844632d6d7fbd22b0dfb1555470e) Thanks [@owanturist](https://github.com/owanturist)! - Introduce:
+
   - ```ts
     abstract class ImpulseForm {
-      isSubmitting(scope: Scope): boolean
+      isSubmitting(scope: Scope): boolean;
 
-      getSubmitCount(scope: Scope): number
+      getSubmitCount(scope: Scope): number;
 
       onSubmit(
-        listener: (value: TParams["value.schema"]) => void | Promise<unknown>,
-      ): VoidFunction
+        listener: (value: TParams["value.schema"]) => void | Promise<unknown>
+      ): VoidFunction;
 
-      submit(): Promise<void>
+      submit(): Promise<void>;
 
-      focusFirstInvalidValue(): void
+      focusFirstInvalidValue(): void;
 
-      isValidated(scope: Scope): boolean
+      isValidated(scope: Scope): boolean;
       isValidated<TResult>(
         scope: Scope,
         select: (
           concise: TParams["flag.schema"],
-          verbose: TParams["flag.schema.verbose"],
-        ) => TResult,
-      ): TResult
+          verbose: TParams["flag.schema.verbose"]
+        ) => TResult
+      ): TResult;
 
-      getValidateOn(scope: Scope): TParams["validateOn.schema"]
+      getValidateOn(scope: Scope): TParams["validateOn.schema"];
       getValidateOn<TResult>(
         scope: Scope,
         select: (
           concise: TParams["validateOn.schema"],
-          verbose: TParams["validateOn.schema.verbose"],
-        ) => TResult,
-      ): TResult
+          verbose: TParams["validateOn.schema.verbose"]
+        ) => TResult
+      ): TResult;
 
-      setValidateOn(setter: TParams["validateOn.setter"]): void
+      setValidateOn(setter: TParams["validateOn.setter"]): void;
     }
     ```
 
@@ -577,18 +625,20 @@
   - ```ts
     class ImpulseFormValue {
       onFocusWhenInvalid(
-        onFocus: (errors: ReadonlyArray<string>) => void,
-      ): VoidFunction
+        onFocus: (errors: ReadonlyArray<string>) => void
+      ): VoidFunction;
     }
     ```
 
   Extended:
+
   - ```diff
     -ImpulseFormValue#setSchema(schema: Schema): void
     +ImpulseFormValue#setSchema(schema: Schema | null): void
     ```
 
   Breaking changes:
+
   - use `ImpulseForm#submit`, `ImpulseForm#getSubmitCount`, `ImpulseForm#isSubmitting` instead
 
     ```diff

@@ -1,5 +1,46 @@
 # react-impulse
 
+## 3.1.3
+
+### Patch Changes
+
+- [#1008](https://github.com/owanturist/react-impulse/pull/1008) [`f795ba1`](https://github.com/owanturist/react-impulse/commit/f795ba117b13ecbcc047453ef000cb8f82ff094e) Thanks [@owanturist](https://github.com/owanturist)! - Refactor internal source code structure to improve consistency and maintainability:
+
+  - Move implementation details to `_internal` directories to clearly separate public API from internal logic.
+  - Update `biome.jsonc` to enforce public API boundaries:
+    - Prevent package entry points (`index.ts`) from directly importing from `_internal`.
+    - Enable `noUnusedImports` rule with autofix.
+  - Remove `dependencies.ts` pattern and allow direct imports of dependencies.
+
+- [#1003](https://github.com/owanturist/react-impulse/pull/1003) [`516f568`](https://github.com/owanturist/react-impulse/commit/516f568e8eba7c2a51ec2b578ff3ec44964b9b52) Thanks [@owanturist](https://github.com/owanturist)! - Extract `ScopeEmitQueue` and `enqueue` function from `scope-emitter.ts` into a dedicated `enqueue.ts` module, and move `ScopeFactory` into its own `scope-factory.ts` file. This reorganization improves code modularity by separating concerns: the queue management logic is isolated from the emitter lifecycle, while the factory gets its own dedicated space. Additionally, simplifies the `ScopeEmitter` constructor by accepting the `_emit` callback directly instead of wrapping it internally, reducing unnecessary closures.
+
+- [#992](https://github.com/owanturist/react-impulse/pull/992) [`1a1c634`](https://github.com/owanturist/react-impulse/commit/1a1c634901c90c2106d8c62b6db23b1514d04d19) Thanks [@owanturist](https://github.com/owanturist)! - Update React dependencies to 19.2.3.
+
+- [#995](https://github.com/owanturist/react-impulse/pull/995) [`1adbd7c`](https://github.com/owanturist/react-impulse/commit/1adbd7c07b74349c49cfb7e463e18813565175e4) Thanks [@owanturist](https://github.com/owanturist)! - Create scope for `useScopedMemo`/`useScopedCallback` the same way as for `useScope`, so those hooks become aliases for:
+
+  ```ts
+  const scope = useScope();
+
+  // useScopedMemo is an alias for
+  React.useMemo(() => impulse.getValue(scope), [scope]);
+
+  // useScopedCallback is an alias for
+  React.useCallback((impulse) => impulse.getValue(scope), [scope]);
+  ```
+
+- [#1005](https://github.com/owanturist/react-impulse/pull/1005) [`5d1175f`](https://github.com/owanturist/react-impulse/commit/5d1175f34c5795dab831bc5bad2b21e3c98c0054) Thanks [@owanturist](https://github.com/owanturist)! - Replace prettier and eslint by [biome](http://biomejs.dev/).
+
+- [#1000](https://github.com/owanturist/react-impulse/pull/1000) [`e91b86e`](https://github.com/owanturist/react-impulse/commit/e91b86e608a0d98446dfef49f453714398ce551e) Thanks [@owanturist](https://github.com/owanturist)! - Refactor scope emitter architecture to eliminate version tracking and improve derived impulse synchronization. The new implementation uses a stale flag mechanism in `DerivedImpulse` instead of version comparison, streamlining invalidation logic and reducing overhead. The `ScopeEmitter` now leverages a `ScopeFactory` pattern with lazy scope creation, ensuring that derived impulses maintain consistent state across reads while properly invalidating when dependencies change. Additionally, the `_setter` signature has been simplified to return a boolean flag indicating whether emission is needed, centralizing the queue push logic in `BaseImpulse#setValue`.
+
+  **Internal Changes:**
+
+  - Replaced version tracking (`_version`) with stale flag (`_stale`) in `DerivedImpulse`
+  - Introduced `ScopeFactory` class for managing scope creation and emission lifecycle
+  - Simplified `_setter` signature to return `void | true` instead of accepting queue parameter
+  - Moved `Emitter` class from `react-impulse-form` to shared `tools` package
+  - Enhanced `map` utility to accept both arrays and iterables
+  - Removed obsolete `uniq` utility in favor of native `Set`
+
 ## 3.1.2
 
 ### Patch Changes
@@ -70,37 +111,41 @@
 ### Major Changes
 
 - [#846](https://github.com/owanturist/react-impulse/pull/846) [`03f4967`](https://github.com/owanturist/react-impulse/commit/03f49673a262ec42ed165914c38f75a0a62af07e) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
+
   - The `Impulse.of` static method was removed and replaced with the `Impulse` function providing the same signature.
   - The `Impulse.isImpulse` static method was removed and replaced with the `isImpulse` function providing the same signature.
 
   #### Rationale
 
   The changes aim to simplify and modernize the API of `react-impulse` while improving its usability and consistency:
+
   - **Removal of `Impulse.of`**: By replacing the static `Impulse.of` method with the `Impulse` function, the API becomes more intuitive. This change also reduces redundancy, as the `Impulse` function now serves as the sole entry point for creating impulses and defining types.
   - **Standalone `isImpulse` function**: Moving `isImpulse` from a static method to a standalone function makes it possible to tree shake when unused.
 
   These changes collectively enhance the developer experience, reduce cognitive load, and make the library easier to learn and use.
 
   #### Migration Guide
+
   - Replace `Impulse.of()` calls with `Impulse()`:
+
     - **Creating an impulse without an initial value**:
 
       ```ts
       // Before
-      const empty = Impulse.of()
+      const empty = Impulse.of();
 
       // After
-      const empty = Impulse()
+      const empty = Impulse();
       ```
 
     - **Creating an impulse with an initial value**:
 
       ```ts
       // Before
-      const count = Impulse.of(0)
+      const count = Impulse.of(0);
 
       // After
-      const count = Impulse(0)
+      const count = Impulse(0);
       ```
 
     - **Creating a derived impulse**:
@@ -109,14 +154,14 @@
       // Before
       const writable = Impulse.of(
         (scope) => count.getValue(scope),
-        (value, scope) => count.setValue(value, scope),
-      )
+        (value, scope) => count.setValue(value, scope)
+      );
 
       // After
       const writable = Impulse(
         (scope) => count.getValue(scope),
-        (value, scope) => count.setValue(value, scope),
-      )
+        (value, scope) => count.setValue(value, scope)
+      );
       ```
 
   - Replace `Impulse.isImpulse` calls with `isImpulse`:
@@ -128,7 +173,7 @@
     }
 
     // After
-    import { isImpulse } from "react-impulse"
+    import { isImpulse } from "react-impulse";
 
     if (isImpulse(something)) {
       // ...
@@ -148,34 +193,35 @@
   This change is purely syntactic - all functionality previously available with `Impulse.transmit` remains fully supported through `Impulse` with identical behavior. Your derived impulses will continue to work exactly as before with the new API.
 
   #### Migration Guide
+
   - For `Impulse.transmit(getter, [setter])`, replace with `Impulse(getter, [setter])`:
 
     ```ts
-    const source = Impulse(1)
+    const source = Impulse(1);
 
     // Before
     const derived = Impulse.transmit(
       (scope) => ({ count: source.getValue(scope) }),
-      (next) => source.setValue(next.count),
-    )
+      (next) => source.setValue(next.count)
+    );
 
     // After
     const derived = Impulse(
       (scope) => ({ count: source.getValue(scope) }),
-      (next) => source.setValue(next.count),
-    )
+      (next) => source.setValue(next.count)
+    );
     ```
 
   - For `Impulse(Function, [options])`, wrap the `Function` in an object:
 
     ```ts
     // Before
-    const sorting = Impulse((left: number, right: number) => left - right)
+    const sorting = Impulse((left: number, right: number) => left - right);
 
     // After
     const sorting = Impulse({
       fn: (scope) => (left: number, right: number) => left - right,
-    })
+    });
     ```
 
   - For `TransmittingImpulseOptions` replace with `ImpulseOptions`.
@@ -189,20 +235,22 @@
   Removing this hook simplifies the API by encouraging direct use of standard React hooks with `Impulse()` factory. This approach provides more explicit control over when Impulses are created and how they're stored in your components, leading to more predictable behavior across renders and better integration with other React patterns.
 
   #### Migration Guide
+
   - Replace `useImpulse` with `useState` or `useRef`:
 
     ```tsx
     // Before
-    const impulse = useImpulse(0)
+    const impulse = useImpulse(0);
 
     // After with useState
-    const [impulse] = useState(() => Impulse(0))
+    const [impulse] = useState(() => Impulse(0));
 
     // After with useRef
-    const impulseRef = useRef(Impulse(0))
+    const impulseRef = useRef(Impulse(0));
     ```
 
 - [#813](https://github.com/owanturist/react-impulse/pull/813) [`0983fb0`](https://github.com/owanturist/react-impulse/commit/0983fb04e4dc99f382c46abca597a8687d491940) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
+
   - Added support for React 19
   - Dropped support for React 16 and React 17
   - Updated minimum peer dependency to React 18.0.0
@@ -220,6 +268,7 @@
   All functionality previously provided by `useTransmittingImpulse` can be achieved through the composition of `Impulse()`, `useEffect`, and `useScopedEffect`. These replacements give you more precise control over dependency tracking and rendering optimization.
 
   #### Migration Guide
+
   - For immutable dependencies (not Impulses), replace with `Impulse(value)` + effects:
 
     ```ts
@@ -227,20 +276,20 @@
     const impulse = useTransmittingImpulse(
       (query) => ({ query }),
       [query],
-      (params) => setRouterParams(params),
-    )
+      (params) => setRouterParams(params)
+    );
 
     // After
-    const impulse = Impulse({ query }) // Create Impulse with initial value
+    const impulse = Impulse({ query }); // Create Impulse with initial value
 
     // Update Impulse when dependencies change
-    useEffect(() => impulse.setValue({ query }), [impulse, query])
+    useEffect(() => impulse.setValue({ query }), [impulse, query]);
 
     // Apply changes from Impulse to external state
     useScopedEffect(
       (scope) => setRouterParams(impulse.getValue(scope)),
-      [impulse, setRouterParams],
-    )
+      [impulse, setRouterParams]
+    );
     ```
 
   - For mutable dependencies (other Impulses), replace with `Impulse(getter, [setter])`:
@@ -250,16 +299,16 @@
     const impulse = useTransmittingImpulse(
       (scope) => ({ count: count.getValue(scope) }),
       [count],
-      (next) => count.setValue(next.count),
-    )
+      (next) => count.setValue(next.count)
+    );
 
     // After
     const counter = useMemo(() => {
       return Impulse(
         (scope) => ({ count: count.getValue(scope) }), // Derived getter
-        (next) => count.setValue(next.count), // Optional setter
-      )
-    }, [count])
+        (next) => count.setValue(next.count) // Optional setter
+      );
+    }, [count]);
     ```
 
 - [#805](https://github.com/owanturist/react-impulse/pull/805) [`4f4a632`](https://github.com/owanturist/react-impulse/commit/4f4a6320d676761a8e68da0b54c50aaf53adb5e1) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
@@ -274,12 +323,12 @@
 
   ```ts
   // Before
-  const count = Impulse(0)
-  const doubled = count.getValue(scope, (value) => value * 2)
+  const count = Impulse(0);
+  const doubled = count.getValue(scope, (value) => value * 2);
 
   // After
-  const count = Impulse(0)
-  const doubled = count.getValue(scope) * 2
+  const count = Impulse(0);
+  const doubled = count.getValue(scope) * 2;
   ```
 
   Apply transformations directly to the returned value instead of passing a selector function. This pattern works consistently across all code paths, including conditional logic and complex transformations.
@@ -291,12 +340,12 @@
   ```ts
   // Before
   const formatted = data.getValue(scope, (value) =>
-    value ? formatValue(value).toUpperCase() : "N/A",
-  )
+    value ? formatValue(value).toUpperCase() : "N/A"
+  );
 
   // After
-  const value = data.getValue(scope)
-  const formatted = value ? formatValue(value).toUpperCase() : "N/A"
+  const value = data.getValue(scope);
+  const formatted = value ? formatValue(value).toUpperCase() : "N/A";
   ```
 
 - [#807](https://github.com/owanturist/react-impulse/pull/807) [`db602c7`](https://github.com/owanturist/react-impulse/commit/db602c7c9601b9a261cfaa1006a57f2a8f61aa68) Thanks [@owanturist](https://github.com/owanturist)! - **BREAKING CHANGES**
@@ -306,6 +355,7 @@
   #### Rationale
 
   Replacing the `scoped` HOC with hooks offers several advantages:
+
   1. **Simplified API**: Direct hook usage creates a flatter, more intuitive API compared to higher-order components.
   2. **Better TypeScript integration**: Hooks provide cleaner type inference than HOCs, eliminating the need for special prop types.
 
@@ -314,25 +364,26 @@
   All functionality previously provided by the `scoped` HOC can be achieved through the `useScope()` and `useScoped()` hooks, giving you more direct control over scope handling.
 
   #### Migration Guide
+
   - Replace `scoped` with `useScope()` or `useScoped()`:
 
     ```tsx
     // Before
     const Counter = scoped(({ scope, count }) => (
       <div>{count.getValue(scope)}</div>
-    ))
+    ));
 
     // After (using useScope)
     const Counter = ({ count }) => {
-      const scope = useScope()
-      return <div>{count.getValue(scope)}</div>
-    }
+      const scope = useScope();
+      return <div>{count.getValue(scope)}</div>;
+    };
 
     // OR (using useScoped)
     const Counter = ({ count }) => {
-      const value = useScoped(count)
-      return <div>{value}</div>
-    }
+      const value = useScoped(count);
+      return <div>{value}</div>;
+    };
     ```
 
   - Replace `scoped.memo` with `useScope()` + `React.memo`:
@@ -341,14 +392,14 @@
     // Before
     const MemoizedCounter = scoped.memo(({ scope, count }) => (
       <div>{count.getValue(scope)}</div>
-    ))
+    ));
 
     // After
     const Counter = ({ count }) => {
-      const scope = useScope()
-      return <div>{count.getValue(scope)}</div>
-    }
-    const MemoizedCounter = React.memo(Counter)
+      const scope = useScope();
+      return <div>{count.getValue(scope)}</div>;
+    };
+    const MemoizedCounter = React.memo(Counter);
     ```
 
   - Replace `scoped.forwardRef` with `useScope()` + `React.forwardRef`:
@@ -357,13 +408,13 @@
     // Before
     const ForwardedInput = scoped.forwardRef(({ scope, value }, ref) => (
       <input ref={ref} value={value.getValue(scope)} />
-    ))
+    ));
 
     // After
     const ForwardedInput = React.forwardRef(({ value }, ref) => {
-      const scope = useScope()
-      return <input ref={ref} value={value.getValue(scope)} />
-    })
+      const scope = useScope();
+      return <input ref={ref} value={value.getValue(scope)} />;
+    });
     ```
 
 ### Minor Changes
@@ -393,13 +444,13 @@
   This hook replaces the removed `scoped` HOC and is especially useful when multiple `Impulse` instances need to read their states within the same scope.
 
   ```tsx
-  import { Impulse, useScope } from "react-impulse"
+  import { Impulse, useScope } from "react-impulse";
 
   const Form: React.FC<{
-    username: Impulse<string>
-    password: Impulse<string>
+    username: Impulse<string>;
+    password: Impulse<string>;
   }> = ({ username, password }) => {
-    const scope = useScope()
+    const scope = useScope();
 
     return (
       <form>
@@ -414,23 +465,24 @@
           onChange={(e) => password.setValue(e.target.value)}
         />
       </form>
-    )
-  }
+    );
+  };
   ```
 
 - [#805](https://github.com/owanturist/react-impulse/pull/805) [`4f4a632`](https://github.com/owanturist/react-impulse/commit/4f4a6320d676761a8e68da0b54c50aaf53adb5e1) Thanks [@owanturist](https://github.com/owanturist)! - Added `ReadableImpulse` and `WritableImpulse` Interfaces.
 
   ```ts
   interface ReadableImpulse<T> {
-    getValue(scope: Scope): T
+    getValue(scope: Scope): T;
   }
 
   interface WritableImpulse<T> {
-    setValue(value: T): void
+    setValue(value: T): void;
   }
   ```
 
   These interfaces allow more flexible usage patterns and third-party integrations. The following APIs now accept anything that implements these interfaces, not just Impulse instances:
+
   - ```dart
     function useScoped<TValue>(impulse: ReadableImpulse<TValue>): TValue
     ```
@@ -460,36 +512,36 @@
   Before:
 
   ```ts
-  const source = Impulse(0)
+  const source = Impulse(0);
   const derived = Impulse((scope) => ({
     count: source.getValue(scope),
-  }))
+  }));
 
-  const value1 = derived.getValue(scope) // { count: 0 }
-  const value2 = derived.getValue(scope) // { count: 0 }
-  console.log(value1 === value2) // false
+  const value1 = derived.getValue(scope); // { count: 0 }
+  const value2 = derived.getValue(scope); // { count: 0 }
+  console.log(value1 === value2); // false
 
-  source.setValue(scope, 1)
-  const value3 = derived.getValue(scope) // { count: 1 }
+  source.setValue(scope, 1);
+  const value3 = derived.getValue(scope); // { count: 1 }
 
-  console.log(value2 === value3) // false
+  console.log(value2 === value3); // false
   ```
 
   After:
 
   ```ts
-  const source = Impulse(0)
+  const source = Impulse(0);
   const derived = Impulse((scope) => ({
     count: source.getValue(scope),
-  }))
+  }));
 
-  const value1 = derived.getValue(scope) // { count: 0 }
-  const value2 = derived.getValue(scope) // { count: 0 }
-  console.log(value1 === value2) // true
+  const value1 = derived.getValue(scope); // { count: 0 }
+  const value2 = derived.getValue(scope); // { count: 0 }
+  console.log(value1 === value2); // true
 
-  source.setValue(scope, 1)
-  const value3 = derived.getValue(scope) // { count: 1 }
-  console.log(value2 === value3) // false
+  source.setValue(scope, 1);
+  const value3 = derived.getValue(scope); // { count: 1 }
+  console.log(value2 === value3); // false
   ```
 
 - [#809](https://github.com/owanturist/react-impulse/pull/809) [`6d1e4a3`](https://github.com/owanturist/react-impulse/commit/6d1e4a3b6be16e242aa10a7c758ade8c900dca27) Thanks [@owanturist](https://github.com/owanturist)! - Removed the internal `DerivedImpulse._replaceGetter` and `Impulse._emit` methods, which was previously used for internal implementation details of derived impulses.
@@ -549,48 +601,49 @@
 ### Major Changes
 
 - d2bf7d0: The `Scope` became an explicit argument for all methods, hooks and functions that read or potentially read an Impulse value. To reflect this change, the following renames were made:
+
   - `useImpulseCallback` -> `useScopedCallback`
     ```ts
     function useScopedCallback<TArgs extends ReadonlyArray<unknown>, TResult>(
       callback: (scope: Scope, ...args: TArgs) => TResult,
-      dependencies: DependencyList,
-    ): (...args: TArgs) => TResult
+      dependencies: DependencyList
+    ): (...args: TArgs) => TResult;
     ```
   - `useImpulseMemo` -> `useScopedMemo`
     ```ts
     function useScopedMemo<TResult>(
       factory: (scope: Scope) => TResult,
-      dependencies: DependencyList,
-    ): TResult
+      dependencies: DependencyList
+    ): TResult;
     ```
   - `useImpulseEffect` -> `useScopedEffect`
     ```ts
     function useScopedEffect(
       effect: (scope: Scope) => Destructor,
-      dependencies?: DependencyList,
-    ): void
+      dependencies?: DependencyList
+    ): void;
     ```
   - `useImpulseLayoutEffect` -> `useScopedLayoutEffect`
     ```ts
     function useScopedLayoutEffect(
       effect: (scope: Scope) => Destructor,
-      dependencies?: DependencyList,
-    ): void
+      dependencies?: DependencyList
+    ): void;
     ```
   - `useWatchImpulse` -> `useScoped`
     ```ts
-    function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue
+    function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue;
     function useScoped<TResult>(
       factory: (scope: Scope) => TResult,
       dependencies?: DependencyList,
-      options?: UseScopedOptions<TResult>,
-    ): TResult
+      options?: UseScopedOptions<TResult>
+    ): TResult;
     ```
   - `watch` -> `scoped`
     ```ts
     export function scoped<TProps>(
-      component: FC<PropsWithScope<TProps>>,
-    ): FC<PropsWithoutScope<TProps>>
+      component: FC<PropsWithScope<TProps>>
+    ): FC<PropsWithoutScope<TProps>>;
     ```
 
 - d6fb9b0: Introduce optional dependencies argument for `useScoped`:
@@ -606,43 +659,43 @@
   It works the same way as `useEffect` dependencies argument - if the dependencies are not defined, the `factory` will be called on every render. Otherwise, it will be called only when the dependencies change.
 
   ```ts
-  const impulse = useImpulse(0)
+  const impulse = useImpulse(0);
 
   // before
   const count = useScoped(
     useCallback(
       (scope) => {
-        return impulse.getValue(scope)
+        return impulse.getValue(scope);
       },
-      [impulse],
-    ),
-  )
+      [impulse]
+    )
+  );
 
   // now
   const count = useScoped(
     (scope) => {
-      return impulse.getValue(scope)
+      return impulse.getValue(scope);
     },
-    [impulse],
-  )
+    [impulse]
+  );
   ```
 
 - 232d0c1: Introduce [`ImpulseOptions`](./#impulseoptions) and [`UseScopedOptions`](./useScopedoptions) as a replacement for raw `compare` argument:
 
   ```ts
   // before
-  const impulse_1 = Impulse.of({ count: 0 }, shallowEqual)
-  const impulse_2 = impulse_1.clone((x) => x, shallowEqual)
-  const impulse_3 = useImpulse({ count: 0 }, shallowEqual)
-  const value = useScoped((scope) => impulse_2.getValue(scope), shallowEqual)
+  const impulse_1 = Impulse.of({ count: 0 }, shallowEqual);
+  const impulse_2 = impulse_1.clone((x) => x, shallowEqual);
+  const impulse_3 = useImpulse({ count: 0 }, shallowEqual);
+  const value = useScoped((scope) => impulse_2.getValue(scope), shallowEqual);
 
   // now
-  const impulse_1 = Impulse.of({ count: 0 }, { compare: shallowEqual })
-  const impulse_2 = impulse_1.clone((x) => x, { compare: shallowEqual })
-  const impulse_3 = useImpulse({ count: 0 }, { compare: shallowEqual })
+  const impulse_1 = Impulse.of({ count: 0 }, { compare: shallowEqual });
+  const impulse_2 = impulse_1.clone((x) => x, { compare: shallowEqual });
+  const impulse_3 = useImpulse({ count: 0 }, { compare: shallowEqual });
   const value = useScoped((scope) => impulse_2.getValue(scope), {
     compare: shallowEqual,
-  })
+  });
   ```
 
   The overall functionality is the same, but now it opens up a possibility to add more options in the future and helps TypeScript to distinguish options from other arguments (it was a problem with `compare` and other function arguments).
@@ -693,7 +746,7 @@
 - 94da9b6: Extends `useScoped` hook API with a shortcut for reading an `Impulse` value:
 
   ```ts
-  function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue
+  function useScoped<TValue>(impulse: ReadonlyImpulse<TValue>): TValue;
   ```
 
   So now you it takes less code to read an `Impulse` value:
@@ -710,8 +763,8 @@
   ```ts
   function subscribe<T>(
     impulse: Impulse<T>,
-    listener: (value: T) => void | VoidFunction,
-  ): void
+    listener: (value: T) => void | VoidFunction
+  ): void;
   ```
 
 - 4095b1a: Introduce [`useScopedCallback`](./#usescopedcallback).
@@ -743,25 +796,26 @@
 - d45e64a: Pass the `Scope` as 3rd argument to `Compare` function. Useful if it needs to compare values from impulses.
 
   ```ts
-  type Compare<T> = (left: T, right: T, scope: Scope) => boolean
+  type Compare<T> = (left: T, right: T, scope: Scope) => boolean;
   ```
 
 - 6e39e72: The `useScopedEffect` and `useScopedLayoutEffect` hooks do not enqueue a host component re-render when only scoped Impulses' values change.
 
   ```ts
-  const count = useImpulse(1)
+  const count = useImpulse(1);
 
   useScopedEffect(
     (scope) => {
-      console.log(count.getVAlue(scope))
+      console.log(count.getVAlue(scope));
     },
-    [count],
-  )
+    [count]
+  );
   ```
 
   The effect above depends only on the `count` Impulse. The `useScopedEffect` hook used to trigger the host component's rerender, but now on `count.setValue(2)` the effect runs, and the host component does not re-render.
 
 - 919f387: Introduce transmitting Impulse.
+
   - `Impulse.transmit` static method that creates a new transmitting Impulse. A transmitting Impulse is an Impulse that does not have its own value but reads it from an external source and writes it back to the source when the value changes. An external source is usually another Impulse or other Impulses.
 
     ```dart
@@ -851,18 +905,18 @@
 - 18d3fa2: 🚀 feat: extends `Impulse.of` and `useImpulse` signature with an optional value type, the same way as `useState` does.
 
   ```ts
-  const count = Impulse.of(0) // Impulse<number>
-  const optionalCount = Impulse.of<number>() // Impulse<number | undefined>
+  const count = Impulse.of(0); // Impulse<number>
+  const optionalCount = Impulse.of<number>(); // Impulse<number | undefined>
 
   // same for useImpulse
-  const count = useImpulse(0) // number
-  const optionalCount = useImpulse<number>() // number | undefined
+  const count = useImpulse(0); // number
+  const optionalCount = useImpulse<number>(); // number | undefined
   ```
 
   before the changes you had to provide both the optional value initial (`undefined`) value and type explicitly:
 
   ```ts
-  const optionalCount = Impulse.of<number | undefined>(undefined) // Impulse<number | undefined>
+  const optionalCount = Impulse.of<number | undefined>(undefined); // Impulse<number | undefined>
   ```
 
 ## 1.1.1
