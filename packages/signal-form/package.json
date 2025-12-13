@@ -29,7 +29,7 @@
   "homepage": "https://github.com/owanturist/signal/packages/signal-form#readme",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "tsup --config ../../tsup.config.ts"
+    "build": "tsup src/index.ts --config ../../tsup.config.ts"
   },
   "peerDependencies": {
     "@owanturist/signal": "^0.0.0"

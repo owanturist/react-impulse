@@ -1,5 +1,3 @@
-import "@testing-library/jest-dom/vitest"
-
 import { untracked } from "./src"
 
 const spy__Object_is = vi.spyOn(Object, "is")

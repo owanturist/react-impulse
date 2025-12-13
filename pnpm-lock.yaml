@@ -43,29 +43,7 @@ importers:
         version: 4.0.15(@types/node@20.19.25)(happy-dom@20.0.11)(jiti@2.6.1)(terser@5.44.1)
 
   packages/signal:
-    dependencies:
-      use-sync-external-store:
-        specifier: ^1.6.0
-        version: 1.6.0(react@19.2.3)
     devDependencies:
-      '@testing-library/jest-dom':
-        specifier: ^6.9.1
-        version: 6.9.1
-      '@testing-library/react':
-        specifier: ^16.3.0
-        version: 16.3.0(@testing-library/dom@10.4.0)(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@types/react':
-        specifier: ^19.2.7
-        version: 19.2.7
-      '@types/use-sync-external-store':
-        specifier: ^1.5.0
-        version: 1.5.0
-      react:
-        specifier: ^19.2.3
-        version: 19.2.3
-      react-dom:
-        specifier: 19.2.3
-        version: 19.2.3(react@19.2.3)
       vite-tsconfig-paths:
         specifier: 6.0.0-beta.4
         version: 6.0.0-beta.4(typescript@5.9.3)(vite@7.2.7(@types/node@20.19.25)(jiti@2.6.1)(terser@5.44.1))
@@ -102,6 +80,37 @@ importers:
       zod:
         specifier: ^4.1.13
         version: 4.1.13
+
+  packages/signal-react:
+    dependencies:
+      use-sync-external-store:
+        specifier: ^1.6.0
+        version: 1.6.0(react@19.2.3)
+    devDependencies:
+      '@testing-library/jest-dom':
+        specifier: ^6.9.1
+        version: 6.9.1
+      '@testing-library/react':
+        specifier: ^16.3.0
+        version: 16.3.0(@testing-library/dom@10.4.0)(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@types/react':
+        specifier: ^19.2.7
+        version: 19.2.7
+      '@types/use-sync-external-store':
+        specifier: ^1.5.0
+        version: 1.5.0
+      react:
+        specifier: ^19.2.3
+        version: 19.2.3
+      react-dom:
+        specifier: 19.2.3
+        version: 19.2.3(react@19.2.3)
+      vite-tsconfig-paths:
+        specifier: 6.0.0-beta.4
+        version: 6.0.0-beta.4(typescript@5.9.3)(vite@7.2.7(@types/node@20.19.25)(jiti@2.6.1)(terser@5.44.1))
+      vitest:
+        specifier: ^4.0.15
+        version: 4.0.15(@types/node@20.19.25)(happy-dom@20.0.11)(jiti@2.6.1)(terser@5.44.1)
 
   packages/tools:
     devDependencies:

@@ -1,8 +1,8 @@
 import { noop } from "~/tools/noop"
 
-import { enqueue } from "./enqueue"
-import type { Monitor } from "./monitor"
-import { MonitorEmitter } from "./monitor-emitter"
+import { enqueue } from "./_internal/enqueue"
+import type { Monitor } from "./_internal/monitor"
+import { MonitorEmitter } from "./_internal/monitor-emitter"
 
 /**
  * Factory responsible for creating and managing {@link Monitor} instances through a shared
