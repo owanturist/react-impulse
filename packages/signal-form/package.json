@@ -41,7 +41,7 @@
     "react": "^19.2.3",
     "react-dom": "19.2.3",
     "@owanturist/signal": "workspace:*",
-    "vite-tsconfig-paths": "6.0.0-beta.4",
+    "vite-tsconfig-paths": "6.0.3",
     "vitest": "^4.0.15",
     "zod": "^4.1.13"
   }
