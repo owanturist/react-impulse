@@ -1,3 +1,5 @@
+import { Counter } from "~/tools/testing/counter"
+
 import {
   type Monitor,
   type ReadableSignal,
@@ -9,8 +11,6 @@ import {
   effect,
   untracked,
 } from "../src"
-
-import { Counter } from "./common"
 
 describe.each<{
   name: string

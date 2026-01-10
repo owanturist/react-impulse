@@ -87,6 +87,9 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0(react@19.2.3)
     devDependencies:
+      '@owanturist/signal':
+        specifier: workspace:*
+        version: link:../signal
       '@testing-library/jest-dom':
         specifier: ^6.9.1
         version: 6.9.1

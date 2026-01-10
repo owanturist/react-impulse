@@ -1,0 +1,61 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`single signal > multiple Setters / Getters 1`] = `
+[
+  <span
+    data-testid="getter"
+  >
+    0
+  </span>,
+  <span
+    data-testid="getter"
+  >
+    0
+  </span>,
+]
+`;
+
+exports[`single signal > multiple Setters / Getters 2`] = `
+[
+  <span
+    data-testid="getter"
+  >
+    1
+  </span>,
+  <span
+    data-testid="getter"
+  >
+    1
+  </span>,
+]
+`;
+
+exports[`single signal > multiple Setters / Getters 3`] = `
+[
+  <span
+    data-testid="getter"
+  >
+    2
+  </span>,
+  <span
+    data-testid="getter"
+  >
+    2
+  </span>,
+]
+`;
+
+exports[`single signal > multiple Setters / Getters 4`] = `
+[
+  <span
+    data-testid="getter"
+  >
+    3
+  </span>,
+  <span
+    data-testid="getter"
+  >
+    3
+  </span>,
+]
+`;

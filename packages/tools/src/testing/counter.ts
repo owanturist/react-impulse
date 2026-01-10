@@ -1,10 +1,8 @@
-import type { Equal, Signal } from "../src"
-
 afterEach(() => {
   Counter.equals.mockClear()
 })
 
-export abstract class Counter {
+abstract class Counter {
   public abstract readonly count: number
 
   public static equals = vi.fn((prev: Counter, next: Counter) => prev.count === next.count)
@@ -28,34 +26,4 @@ export abstract class Counter {
   }
 }
 
-export interface WithSignal<T = Counter> {
-  signal: Signal<T>
-}
-
-export interface WithEquals<T = Counter> {
-  equals?: null | Equal<T>
-}
-
-export interface WithFirst<T = Counter> {
-  first: Signal<T>
-}
-
-export interface WithSecond<T = Counter> {
-  second: Signal<T>
-}
-
-export interface WithThird<T = Counter> {
-  third: Signal<T>
-}
-
-export interface WithSpy {
-  spy(...args: Array<unknown>): void
-}
-
-export interface WithListener {
-  listener: VoidFunction
-}
-
-export interface WithIsActive {
-  isActive: boolean
-}
+export { Counter }

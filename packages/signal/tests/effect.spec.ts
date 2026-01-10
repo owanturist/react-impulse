@@ -1,6 +1,6 @@
-import { Signal, batch, effect } from "../src"
+import { Counter } from "~/tools/testing/counter"
 
-import { Counter } from "./common"
+import { Signal, batch, effect } from "../src"
 
 describe("single Signal", () => {
   it("executes listener on init", () => {
