@@ -296,7 +296,7 @@
 
     // dev env setup
     {
-      "includes": ["./*.{js,ts}", "./packages/*/*.{js,ts}"],
+      "includes": ["./*.{mjs,ts}", "./packages/*/*.{js,ts}"],
       "linter": {
         "rules": {
           "style": {

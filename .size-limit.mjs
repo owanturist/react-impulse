@@ -1,6 +1,4 @@
-"use strict"
-
-module.exports = [
+export default [
   {
     name: "signal",
     ignore: ["use-sync-external-store"],
