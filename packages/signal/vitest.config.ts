@@ -9,7 +9,6 @@ export default defineProject({
     globals: true,
     isolate: true,
     execArgv: ["--expose-gc"],
-    environment: "happy-dom",
     setupFiles: "./setup-tests.ts",
   } satisfies ProjectConfig,
 })

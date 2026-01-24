@@ -8,7 +8,6 @@ export default defineProject({
   test: {
     globals: true,
     isolate: false,
-    environment: "happy-dom",
     setupFiles: "./setup-tests.ts",
   } satisfies ProjectConfig,
 })
