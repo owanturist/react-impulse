@@ -1,6 +1,6 @@
 import { type Monitor, Signal } from "@owanturist/signal"
 import { act, fireEvent, render, screen } from "@testing-library/react"
-import React from "react"
+import { type FC, Profiler } from "react"
 
 import { useComputed, useMonitor } from "../../src"
 
@@ -13,17 +13,17 @@ describe("monitoring single Signal", () => {
     onCounterRender: VoidFunction
   }
 
-  const GenericApp: React.FC<
+  const GenericApp: FC<
     {
       moreThanOne: boolean
       lessThanFour: boolean
     } & AppProps
   > = ({ moreThanOne, lessThanFour, count, onRender, onCounterRender }) => (
     <>
-      <React.Profiler id="test" onRender={onRender}>
+      <Profiler id="test" onRender={onRender}>
         {moreThanOne && <span>more than one</span>}
         {lessThanFour && <span>less than four</span>}
-      </React.Profiler>
+      </Profiler>
 
       <CounterComponent count={count} onRender={onCounterRender} />
     </>
@@ -43,7 +43,7 @@ describe("monitoring single Signal", () => {
   const equals = ([left1, right1]: [boolean, boolean], [left2, right2]: [boolean, boolean]) =>
     left1 === left2 && right1 === right2
 
-  const SingleComputedApp: React.FC<AppProps> = (props) => {
+  const SingleComputedApp: FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useComputed(
       (monitor) => [factoryLeft(monitor, props.count), factoryRight(monitor, props.count)],
       [props.count],
@@ -55,7 +55,7 @@ describe("monitoring single Signal", () => {
     return <GenericApp moreThanOne={moreThanOne} lessThanFour={lessThanFour} {...props} />
   }
 
-  const SingleMemoizedComputedApp: React.FC<AppProps> = (props) => {
+  const SingleMemoizedComputedApp: FC<AppProps> = (props) => {
     const [moreThanOne, lessThanFour] = useComputed<[boolean, boolean]>(
       (monitor) => [factoryLeft(monitor, props.count), factoryRight(monitor, props.count)],
       [props.count],
@@ -65,21 +65,21 @@ describe("monitoring single Signal", () => {
     return <GenericApp moreThanOne={moreThanOne} lessThanFour={lessThanFour} {...props} />
   }
 
-  const MultipleComputedApp: React.FC<AppProps> = (props) => {
+  const MultipleComputedApp: FC<AppProps> = (props) => {
     const moreThanOne = useComputed((monitor) => factoryLeft(monitor, props.count))
     const lessThanFour = useComputed((monitor) => factoryRight(monitor, props.count))
 
     return <GenericApp moreThanOne={moreThanOne} lessThanFour={lessThanFour} {...props} />
   }
 
-  const MultipleMemoizedComputedApp: React.FC<AppProps> = (props) => {
+  const MultipleMemoizedComputedApp: FC<AppProps> = (props) => {
     const moreThanOne = useComputed((monitor) => factoryLeft(monitor, props.count), [props.count])
     const lessThanFour = useComputed((monitor) => factoryRight(monitor, props.count), [props.count])
 
     return <GenericApp moreThanOne={moreThanOne} lessThanFour={lessThanFour} {...props} />
   }
 
-  const MonitoredApp: React.FC<AppProps> = (props) => {
+  const MonitoredApp: FC<AppProps> = (props) => {
     const monitor = useMonitor()
     const moreThanOne = factoryLeft(monitor, props.count)
     const lessThanFour = factoryRight(monitor, props.count)
@@ -149,13 +149,13 @@ describe("monitoring single Signal", () => {
 
 describe("when drilling an Signal", () => {
   it("should not re-render of the host component when an Signal value changes", () => {
-    const Host: React.FC<{
+    const Host: FC<{
       count: Signal<number>
       onRender: VoidFunction
       onCounterRender: VoidFunction
     }> = ({ count, onRender, onCounterRender }) => (
       <>
-        <React.Profiler id="test" onRender={onRender} />
+        <Profiler id="test" onRender={onRender} />
         <CounterComponent count={count} onRender={onCounterRender} />
       </>
     )

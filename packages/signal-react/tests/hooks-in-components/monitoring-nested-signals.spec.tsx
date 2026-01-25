@@ -1,6 +1,6 @@
 import { type Monitor, Signal } from "@owanturist/signal"
 import { act, fireEvent, render, screen } from "@testing-library/react"
-import React from "react"
+import { type Dispatch, type FC, Profiler } from "react"
 
 import { useComputed, useMonitor } from "../../src"
 
@@ -18,10 +18,10 @@ describe("monitoring nested Signals", () => {
   interface AppProps {
     state: Signal<AppState>
     onRender: VoidFunction
-    onCounterRender: React.Dispatch<number>
+    onCounterRender: Dispatch<number>
   }
 
-  const GenericApp: React.FC<
+  const GenericApp: FC<
     {
       moreThanTen: boolean
       lessThanTwenty: boolean
@@ -31,7 +31,7 @@ describe("monitoring nested Signals", () => {
 
     return (
       <>
-        <React.Profiler id="test" onRender={onRender}>
+        <Profiler id="test" onRender={onRender}>
           {moreThanTen && <span>more than ten</span>}
           {lessThanTwenty && <span>less than twenty</span>}
 
@@ -69,7 +69,7 @@ describe("monitoring nested Signals", () => {
               })
             }}
           />
-        </React.Profiler>
+        </Profiler>
 
         {state.counts.map((count, index) => (
           <CounterComponent key={index} count={count} onRender={() => onCounterRender(index)} />
@@ -92,7 +92,7 @@ describe("monitoring nested Signals", () => {
   const equals = ([left1, right1]: [boolean, boolean], [left2, right2]: [boolean, boolean]) =>
     left1 === left2 && right1 === right2
 
-  const SingleComputedApp: React.FC<AppProps> = (props) => {
+  const SingleComputedApp: FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useComputed(
       (monitor) => [factoryLeft(monitor, props.state), factoryRight(monitor, props.state)],
       [props.state],
@@ -104,7 +104,7 @@ describe("monitoring nested Signals", () => {
     return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />
   }
 
-  const SingleMemoizedComputedApp: React.FC<AppProps> = (props) => {
+  const SingleMemoizedComputedApp: FC<AppProps> = (props) => {
     const [moreThanTen, lessThanTwenty] = useComputed<[boolean, boolean]>(
       (monitor) => [factoryLeft(monitor, props.state), factoryRight(monitor, props.state)],
       [props.state],
@@ -114,14 +114,14 @@ describe("monitoring nested Signals", () => {
     return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />
   }
 
-  const MultipleComputedApp: React.FC<AppProps> = (props) => {
+  const MultipleComputedApp: FC<AppProps> = (props) => {
     const moreThanTen = useComputed((monitor) => factoryLeft(monitor, props.state))
     const lessThanTwenty = useComputed((monitor) => factoryRight(monitor, props.state))
 
     return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />
   }
 
-  const MultipleMemoizedComputedApp: React.FC<AppProps> = (props) => {
+  const MultipleMemoizedComputedApp: FC<AppProps> = (props) => {
     const moreThanTen = useComputed((monitor) => factoryLeft(monitor, props.state), [props.state])
     const lessThanTwenty = useComputed(
       (monitor) => factoryRight(monitor, props.state),
@@ -131,7 +131,7 @@ describe("monitoring nested Signals", () => {
     return <GenericApp moreThanTen={moreThanTen} lessThanTwenty={lessThanTwenty} {...props} />
   }
 
-  const MonitorApp: React.FC<AppProps> = (props) => {
+  const MonitorApp: FC<AppProps> = (props) => {
     const monitor = useMonitor()
     const moreThanTen = factoryLeft(monitor, props.state)
     const lessThanTwenty = factoryRight(monitor, props.state)

@@ -1,17 +1,17 @@
 import { Signal } from "@owanturist/signal"
 import { act, fireEvent, render, screen } from "@testing-library/react"
-import React from "react"
+import { type Dispatch, type FC, Profiler, useMemo, useState } from "react"
 
 import { useMonitor } from "../src"
 
 describe("single Signal", () => {
-  const Component: React.FC<{
-    onMemo?: React.Dispatch<number>
+  const Component: FC<{
+    onMemo?: Dispatch<number>
     value: Signal<number>
   }> = ({ onMemo, value }) => {
     const monitor = useMonitor()
-    const [multiplier, setMultiplier] = React.useState(2)
-    const result = React.useMemo(() => {
+    const [multiplier, setMultiplier] = useState(2)
+    const result = useMemo(() => {
       const x = value.read(monitor) * multiplier
 
       onMemo?.(x)
@@ -27,15 +27,15 @@ describe("single Signal", () => {
     )
   }
 
-  it("can watch inside React.useMemo", () => {
+  it("can watch inside useMemo", () => {
     const value = Signal(1)
     const onMemo = vi.fn()
     const onRender = vi.fn()
 
     render(
-      <React.Profiler id="test" onRender={onRender}>
+      <Profiler id="test" onRender={onRender}>
         <Component onMemo={onMemo} value={value} />
-      </React.Profiler>,
+      </Profiler>,
     )
 
     const node = screen.getByTestId("value")
@@ -62,9 +62,9 @@ describe("single Signal", () => {
     const onRender = vi.fn()
 
     const { rerender } = render(
-      <React.Profiler id="test" onRender={onRender}>
+      <Profiler id="test" onRender={onRender}>
         <Component onMemo={onMemo} value={value} />
-      </React.Profiler>,
+      </Profiler>,
     )
 
     expect(onMemo).toHaveBeenCalledExactlyOnceWith(2)
@@ -72,9 +72,9 @@ describe("single Signal", () => {
     vi.clearAllMocks()
 
     rerender(
-      <React.Profiler id="test" onRender={onRender}>
+      <Profiler id="test" onRender={onRender}>
         <Component onMemo={onMemo} value={value} />
-      </React.Profiler>,
+      </Profiler>,
     )
 
     expect(onMemo).not.toHaveBeenCalled()
@@ -97,16 +97,16 @@ describe("single Signal", () => {
     const onRender = vi.fn()
 
     const { rerender } = render(
-      <React.Profiler id="test" onRender={onRender}>
+      <Profiler id="test" onRender={onRender}>
         <Component onMemo={onMemo} value={value1} />
-      </React.Profiler>,
+      </Profiler>,
     )
     vi.clearAllMocks()
 
     rerender(
-      <React.Profiler id="test" onRender={onRender}>
+      <Profiler id="test" onRender={onRender}>
         <Component onMemo={onMemo} value={value2} />
-      </React.Profiler>,
+      </Profiler>,
     )
 
     expect(onMemo).toHaveBeenCalledExactlyOnceWith(6)
@@ -120,18 +120,18 @@ describe("single Signal", () => {
     const onRender = vi.fn()
 
     const { rerender } = render(
-      <React.Profiler id="test" onRender={onRender}>
+      <Profiler id="test" onRender={onRender}>
         <Component onMemo={onMemo} value={value1} />
-      </React.Profiler>,
+      </Profiler>,
     )
 
     expect(value1).toHaveEmittersSize(1)
     expect(value2).toHaveEmittersSize(0)
 
     rerender(
-      <React.Profiler id="test" onRender={onRender}>
+      <Profiler id="test" onRender={onRender}>
         <Component onMemo={onMemo} value={value2} />
-      </React.Profiler>,
+      </Profiler>,
     )
 
     /**
@@ -167,9 +167,9 @@ describe("single Signal", () => {
     const onRender = vi.fn()
 
     render(
-      <React.Profiler id="test" onRender={onRender}>
+      <Profiler id="test" onRender={onRender}>
         <Component onMemo={onMemo} value={value} />
-      </React.Profiler>,
+      </Profiler>,
     )
     vi.clearAllMocks()
 
@@ -190,13 +190,13 @@ describe("single Signal", () => {
 })
 
 describe("multiple signals", () => {
-  const Component: React.FC<{
+  const Component: FC<{
     first: Signal<number>
     second: Signal<number>
   }> = ({ first, second }) => {
     const monitor = useMonitor()
-    const [multiplier, setMultiplier] = React.useState(2)
-    const result = React.useMemo(
+    const [multiplier, setMultiplier] = useState(2)
+    const result = useMemo(
       () => (first.read(monitor) + second.read(monitor)) * multiplier,
       [monitor, first, second, multiplier],
     )
@@ -237,12 +237,12 @@ describe("multiple signals", () => {
 })
 
 describe("nested signals", () => {
-  const Component: React.FC<{
+  const Component: FC<{
     list: Signal<Array<Signal<number>>>
   }> = ({ list }) => {
     const monitor = useMonitor()
-    const [multiplier, setMultiplier] = React.useState(2)
-    const result = React.useMemo(() => {
+    const [multiplier, setMultiplier] = useState(2)
+    const result = useMemo(() => {
       const x =
         list
           .read(monitor)

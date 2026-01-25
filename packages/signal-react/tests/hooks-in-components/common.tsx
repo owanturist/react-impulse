@@ -1,6 +1,6 @@
 import type { Signal } from "@owanturist/signal"
 import { screen, within } from "@testing-library/react"
-import React from "react"
+import { Profiler, memo } from "react"
 
 import { useComputed } from "../../src"
 
@@ -18,7 +18,7 @@ function expectCounts(expecting: ReadonlyArray<number>): void {
   }
 }
 
-const CounterComponent = React.memo<{
+const CounterComponent = memo<{
   count: Signal<number>
   onRender: VoidFunction
 }>(
@@ -26,7 +26,7 @@ const CounterComponent = React.memo<{
     const count = useComputed((monitor) => countSignal.read(monitor))
 
     return (
-      <React.Profiler id="test" onRender={onRender}>
+      <Profiler id="test" onRender={onRender}>
         <div data-testid="counter">
           <span data-testid="count">{count}</span>
           <button
@@ -35,7 +35,7 @@ const CounterComponent = React.memo<{
             onClick={() => countSignal.write(count + 1)}
           />
         </div>
-      </React.Profiler>
+      </Profiler>
     )
   },
   (prevProps, nextProps) => prevProps.count === nextProps.count,

@@ -1,20 +1,20 @@
 import { Signal, effect } from "@owanturist/signal"
 import { act, fireEvent, render, renderHook, screen } from "@testing-library/react"
-import React from "react"
+import { type Dispatch, type FC, Profiler, useEffect, useLayoutEffect, useState } from "react"
 
 import { useMonitor } from "../src"
 
 describe.each([
-  ["React.useEffect", React.useEffect],
-  ["React.useLayoutEffect", React.useLayoutEffect],
+  ["useEffect", useEffect],
+  ["useLayoutEffect", useLayoutEffect],
 ])("running %s hook", (_, useEffect) => {
   describe("single Signal", () => {
-    const Component: React.FC<{
+    const Component: FC<{
       value: Signal<number>
-      useEffect: typeof React.useEffect
-      onEffect: React.Dispatch<number>
+      useEffect: typeof useEffect
+      onEffect: Dispatch<number>
     }> = ({ onEffect, value, useEffect }) => {
-      const [multiplier, setMultiplier] = React.useState(2)
+      const [multiplier, setMultiplier] = useState(2)
 
       useEffect(
         () =>
@@ -53,9 +53,9 @@ describe.each([
       const onRender = vi.fn()
 
       const { rerender } = render(
-        <React.Profiler id="test" onRender={onRender}>
+        <Profiler id="test" onRender={onRender}>
           <Component useEffect={useEffect} onEffect={onEffect} value={value} />
-        </React.Profiler>,
+        </Profiler>,
       )
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(2)
@@ -63,9 +63,9 @@ describe.each([
       vi.clearAllMocks()
 
       rerender(
-        <React.Profiler id="test" onRender={onRender}>
+        <Profiler id="test" onRender={onRender}>
           <Component useEffect={useEffect} onEffect={onEffect} value={value} />
-        </React.Profiler>,
+        </Profiler>,
       )
 
       expect(onEffect).not.toHaveBeenCalled()
@@ -88,16 +88,16 @@ describe.each([
       const onRender = vi.fn()
 
       const { rerender } = render(
-        <React.Profiler id="test" onRender={onRender}>
+        <Profiler id="test" onRender={onRender}>
           <Component useEffect={useEffect} onEffect={onEffect} value={value1} />
-        </React.Profiler>,
+        </Profiler>,
       )
       vi.clearAllMocks()
 
       rerender(
-        <React.Profiler id="test" onRender={onRender}>
+        <Profiler id="test" onRender={onRender}>
           <Component useEffect={useEffect} onEffect={onEffect} value={value2} />
-        </React.Profiler>,
+        </Profiler>,
       )
 
       expect(onEffect).toHaveBeenCalledExactlyOnceWith(6)
@@ -111,9 +111,9 @@ describe.each([
       const onRender = vi.fn()
 
       const { rerender } = render(
-        <React.Profiler id="test" onRender={onRender}>
+        <Profiler id="test" onRender={onRender}>
           <Component useEffect={useEffect} onEffect={onEffect} value={value1} />
-        </React.Profiler>,
+        </Profiler>,
       )
       expect(value1).toHaveEmittersSize(1)
       expect(value2).toHaveEmittersSize(0)
@@ -121,9 +121,9 @@ describe.each([
       vi.clearAllMocks()
 
       rerender(
-        <React.Profiler id="test" onRender={onRender}>
+        <Profiler id="test" onRender={onRender}>
           <Component useEffect={useEffect} onEffect={onEffect} value={value2} />
-        </React.Profiler>,
+        </Profiler>,
       )
       expect(value1).toHaveEmittersSize(0)
       expect(value2).toHaveEmittersSize(1)
@@ -155,9 +155,9 @@ describe.each([
       const onRender = vi.fn()
 
       render(
-        <React.Profiler id="test" onRender={onRender}>
+        <Profiler id="test" onRender={onRender}>
           <Component useEffect={useEffect} onEffect={onEffect} value={value} />
-        </React.Profiler>,
+        </Profiler>,
       )
       vi.clearAllMocks()
 
@@ -178,12 +178,12 @@ describe.each([
   })
 
   describe("multiple signals", () => {
-    const Component: React.FC<{
+    const Component: FC<{
       first: Signal<number>
       second: Signal<number>
-      onEffect: React.Dispatch<number>
+      onEffect: Dispatch<number>
     }> = ({ first, second, onEffect }) => {
-      const [multiplier, setMultiplier] = React.useState(2)
+      const [multiplier, setMultiplier] = useState(2)
 
       useEffect(
         () =>
@@ -230,11 +230,11 @@ describe.each([
   })
 
   describe("nested signals", () => {
-    const Component: React.FC<{
+    const Component: FC<{
       list: Signal<Array<Signal<number>>>
-      onEffect: React.Dispatch<number>
+      onEffect: Dispatch<number>
     }> = ({ list, onEffect }) => {
-      const [multiplier, setMultiplier] = React.useState(2)
+      const [multiplier, setMultiplier] = useState(2)
 
       useEffect(
         () =>
@@ -306,11 +306,11 @@ describe.each([
   })
 
   describe("void dependency array", () => {
-    const Component: React.FC<{
+    const Component: FC<{
       value: Signal<number>
-      onEffect: React.Dispatch<number>
+      onEffect: Dispatch<number>
     }> = ({ value, onEffect }) => {
-      const [multiplier, setMultiplier] = React.useState(2)
+      const [multiplier, setMultiplier] = useState(2)
 
       useEffect(() =>
         effect((monitor) => {
@@ -374,7 +374,7 @@ describe.each([
   })
 
   it("should not trigger effect when unsubscribes", () => {
-    const Counter: React.FC<{
+    const Counter: FC<{
       count: Signal<number>
     }> = ({ count }) => {
       const monitor = useMonitor()
@@ -386,11 +386,11 @@ describe.each([
       )
     }
 
-    const Host: React.FC<{
+    const Host: FC<{
       count: Signal<number>
-      onEffect: React.Dispatch<number>
+      onEffect: Dispatch<number>
     }> = ({ count, onEffect }) => {
-      const [isVisible, setIsVisible] = React.useState(true)
+      const [isVisible, setIsVisible] = useState(true)
 
       useEffect(
         () =>

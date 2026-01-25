@@ -1,6 +1,6 @@
 import { Signal } from "@owanturist/signal"
 import { act, fireEvent, render, screen } from "@testing-library/react"
-import React from "react"
+import { type FC, Profiler } from "react"
 
 import { Counter } from "~/tools/testing/counter"
 
@@ -9,39 +9,39 @@ import { useComputed } from "../../src"
 import { withinNth } from "./common"
 
 describe("single signal", () => {
-  const GetterComponent: React.FC<{
+  const GetterComponent: FC<{
     counter: Signal<Counter>
     onRender: VoidFunction
   }> = ({ counter, onRender }) => {
     const { count } = useComputed(counter)
 
     return (
-      <React.Profiler id="test" onRender={onRender}>
+      <Profiler id="test" onRender={onRender}>
         <span data-testid="getter">{count}</span>
-      </React.Profiler>
+      </Profiler>
     )
   }
 
-  const SetterComponent: React.FC<{
+  const SetterComponent: FC<{
     counter: Signal<Counter>
     onRender: VoidFunction
   }> = ({ counter, onRender }) => (
-    <React.Profiler id="test" onRender={onRender}>
+    <Profiler id="test" onRender={onRender}>
       <div data-testid="setter">
         <button type="button" data-testid="increment" onClick={() => counter.write(Counter.inc)} />
         <button type="button" data-testid="reset" onClick={() => counter.write({ count: 0 })} />
       </div>
-    </React.Profiler>
+    </Profiler>
   )
 
-  const SingleSetterSingleGetter: React.FC<{
+  const SingleSetterSingleGetter: FC<{
     counter: Signal<Counter>
     onRootRender: VoidFunction
     onGetterRender: VoidFunction
     onSetterRender: VoidFunction
   }> = ({ counter, onRootRender, onGetterRender, onSetterRender }) => (
     <>
-      <React.Profiler id="test" onRender={onRootRender} />
+      <Profiler id="test" onRender={onRootRender} />
 
       <GetterComponent counter={counter} onRender={onGetterRender} />
       <SetterComponent counter={counter} onRender={onSetterRender} />
@@ -122,7 +122,7 @@ describe("single signal", () => {
     expect(screen.getByTestId("getter")).toHaveTextContent("4")
   })
 
-  const MultipleSetterMultipleGetter: React.FC<{
+  const MultipleSetterMultipleGetter: FC<{
     counter: Signal<Counter>
     onRootRender: VoidFunction
     onFirstGetterRender: VoidFunction
@@ -138,7 +138,7 @@ describe("single signal", () => {
     onSecondSetterRender,
   }) => (
     <>
-      <React.Profiler id="test" onRender={onRootRender} />
+      <Profiler id="test" onRender={onRootRender} />
       <GetterComponent counter={counter} onRender={onFirstGetterRender} />
       <GetterComponent counter={counter} onRender={onSecondGetterRender} />
       <SetterComponent counter={counter} onRender={onFirstSetterRender} />

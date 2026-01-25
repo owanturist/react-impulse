@@ -1,18 +1,18 @@
 import { type ReadableSignal, Signal, untracked } from "@owanturist/signal"
 import { fireEvent, render, screen } from "@testing-library/react"
-import React from "react"
+import { type FC, Profiler, useState } from "react"
 
 it("returns the `factory` function result without tracking signals", () => {
   const onRender = vi.fn()
   const first = Signal({ count: 1 })
   const second = Signal({ count: 2 })
 
-  const Component: React.FC<{
+  const Component: FC<{
     multiplier: number
   }> = ({ multiplier }) => {
     const { count: firstCount } = untracked((monitor) => first.read(monitor))
     const { count: secondCount } = untracked(second)
-    const [, rerender] = React.useState(0)
+    const [, rerender] = useState(0)
 
     return (
       <button type="button" onClick={() => rerender((x) => x + 1)}>
@@ -22,7 +22,7 @@ it("returns the `factory` function result without tracking signals", () => {
   }
 
   const { rerender } = render(<Component multiplier={1} />, {
-    wrapper: (props) => <React.Profiler id="test" onRender={onRender} {...props} />,
+    wrapper: (props) => <Profiler id="test" onRender={onRender} {...props} />,
   })
 
   expect(screen.getByRole("button")).toHaveTextContent("3")

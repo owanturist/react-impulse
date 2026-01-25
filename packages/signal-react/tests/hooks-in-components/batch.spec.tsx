@@ -1,6 +1,6 @@
 import { type Monitor, Signal, batch, effect } from "@owanturist/signal"
 import { act, fireEvent, render, screen } from "@testing-library/react"
-import React from "react"
+import { type FC, Profiler, useCallback } from "react"
 
 import { Counter } from "~/tools/testing/counter"
 
@@ -15,14 +15,14 @@ describe.each([
     const signal1 = Signal({ count: 1 })
     const signal2 = Signal({ count: 2 })
 
-    const Component: React.FC = () => {
+    const Component: FC = () => {
       const counter1 = useComputed((monitor) => signal1.read(monitor))
       const counter2 = useComputed(signal2)
 
       return (
-        <React.Profiler id="test" onRender={onRender}>
+        <Profiler id="test" onRender={onRender}>
           <span data-testid="count">{counter1.count + counter2.count}</span>
-        </React.Profiler>
+        </Profiler>
       )
     }
 
@@ -47,12 +47,12 @@ describe.each([
     const signal1 = Signal({ count: 1 })
     const signal2 = Signal({ count: 2 })
 
-    const Component: React.FC = () => {
+    const Component: FC = () => {
       const counter1 = useComputed((monitor) => signal1.read(monitor))
       const counter2 = useComputed(signal2)
 
       return (
-        <React.Profiler id="test" onRender={onRender}>
+        <Profiler id="test" onRender={onRender}>
           <button
             type="button"
             data-testid="inc"
@@ -64,7 +64,7 @@ describe.each([
             }}
           />
           <span data-testid="count">{counter1.count + counter2.count}</span>
-        </React.Profiler>
+        </Profiler>
       )
     }
 
@@ -91,15 +91,15 @@ describe.each([
       second: Signal({ count: 2 }),
     })
 
-    const Component: React.FC = () => {
+    const Component: FC = () => {
       const acc = useComputed((monitor) => signal.read(monitor))
       const counter1 = useComputed((monitor) => acc.first.read(monitor))
       const counter2 = useComputed(acc.second)
 
       return (
-        <React.Profiler id="test" onRender={onRender}>
+        <Profiler id="test" onRender={onRender}>
           <span data-testid="count">{counter1.count + counter2.count}</span>
-        </React.Profiler>
+        </Profiler>
       )
     }
 
@@ -144,13 +144,13 @@ describe.each([
       second: Signal({ count: 2 }),
     })
 
-    const Component: React.FC = () => {
+    const Component: FC = () => {
       const acc = useComputed(signal)
       const counter1 = useComputed((monitor) => acc.first.read(monitor))
       const counter2 = useComputed((monitor) => acc.second.read(monitor))
 
       return (
-        <React.Profiler id="test" onRender={onRender}>
+        <Profiler id="test" onRender={onRender}>
           <button
             type="button"
             data-testid="inc-1"
@@ -180,7 +180,7 @@ describe.each([
             }}
           />
           <span data-testid="count">{counter1.count + counter2.count}</span>
-        </React.Profiler>
+        </Profiler>
       )
     }
 
@@ -222,7 +222,7 @@ describe.each([
     expectedFactoryCallsForNested: 1,
     execute: (cb: VoidFunction) => cb(),
     useCount: (factory: (monitor: Monitor) => number) =>
-      useComputed(React.useCallback((monitor: Monitor) => factory(monitor), [factory])),
+      useComputed(useCallback((monitor: Monitor) => factory(monitor), [factory])),
   },
   {
     name: "with batching for memoized factory",
@@ -230,7 +230,7 @@ describe.each([
     expectedFactoryCallsForNested: 1,
     execute: batch,
     useCount: (factory: (monitor: Monitor) => number) =>
-      useComputed(React.useCallback((monitor: Monitor) => factory(monitor), [factory])),
+      useComputed(useCallback((monitor: Monitor) => factory(monitor), [factory])),
   },
 ])("when $name", ({
   expectedFactoryCallsForMultiple,
@@ -256,13 +256,13 @@ describe.each([
     it(`calls the factory ${expectedFactoryCallsForMultiple} times by Signal#write calls`, () => {
       const { spy, onRender, first, second, factory } = setup()
 
-      const Component: React.FC = () => {
+      const Component: FC = () => {
         const count = useCount(factory)
 
         return (
-          <React.Profiler id="test" onRender={onRender}>
+          <Profiler id="test" onRender={onRender}>
             <span data-testid="count">{count}</span>
-          </React.Profiler>
+          </Profiler>
         )
       }
 
@@ -288,11 +288,11 @@ describe.each([
     it(`calls the factory ${expectedFactoryCallsForMultiple} times by Signal#write calls`, () => {
       const { spy, onRender, first, second, factory } = setup()
 
-      const Component: React.FC = () => {
+      const Component: FC = () => {
         const count = useCount(factory)
 
         return (
-          <React.Profiler id="test" onRender={onRender}>
+          <Profiler id="test" onRender={onRender}>
             <button
               type="button"
               data-testid="inc"
@@ -304,7 +304,7 @@ describe.each([
               }}
             />
             <span data-testid="count">{count}</span>
-          </React.Profiler>
+          </Profiler>
         )
       }
 
@@ -344,13 +344,13 @@ describe.each([
     it(`calls the factory ${expectedFactoryCallsForNested} times by Signal#write calls`, () => {
       const { spy, onRender, signal, factory } = setup()
 
-      const Component: React.FC = () => {
+      const Component: FC = () => {
         const count = useCount(factory)
 
         return (
-          <React.Profiler id="test" onRender={onRender}>
+          <Profiler id="test" onRender={onRender}>
             <span data-testid="count">{count}</span>
-          </React.Profiler>
+          </Profiler>
         )
       }
 
@@ -394,11 +394,11 @@ describe.each([
     it(`calls the factory ${expectedFactoryCallsForNested} times by Signal#write calls`, () => {
       const { spy, onRender, signal, factory } = setup()
 
-      const Component: React.FC = () => {
+      const Component: FC = () => {
         const count = useCount(factory)
 
         return (
-          <React.Profiler id="test" onRender={onRender}>
+          <Profiler id="test" onRender={onRender}>
             <button
               type="button"
               data-testid="inc-1"
@@ -428,7 +428,7 @@ describe.each([
               }}
             />
             <span data-testid="count">{count}</span>
-          </React.Profiler>
+          </Profiler>
         )
       }
 

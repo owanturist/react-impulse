@@ -1,11 +1,11 @@
 import { Signal } from "@owanturist/signal"
 import { act, fireEvent, render, screen } from "@testing-library/react"
-import React from "react"
+import { type FC, Profiler } from "react"
 
 import { useComputed } from "../../src"
 
 describe("multiple signals", () => {
-  const LoginForm: React.FC<{
+  const LoginForm: FC<{
     email: Signal<string>
     password: Signal<string>
     onRender: VoidFunction
@@ -14,7 +14,7 @@ describe("multiple signals", () => {
     const password = useComputed(passwordSignal)
 
     return (
-      <React.Profiler id="test" onRender={onRender}>
+      <Profiler id="test" onRender={onRender}>
         <input
           type="email"
           data-testid="email"
@@ -35,7 +35,7 @@ describe("multiple signals", () => {
             passwordSignal.write("")
           }}
         />
-      </React.Profiler>
+      </Profiler>
     )
   }
 

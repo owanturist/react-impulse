@@ -1,15 +1,15 @@
 import { Signal } from "@owanturist/signal"
 import { act, fireEvent, render, screen } from "@testing-library/react"
-import React from "react"
+import { type FC, useState } from "react"
 
 import { useComputed } from "../../src"
 
 describe("default signal", () => {
   it("uses local default Signal when nullable", () => {
-    const SearchBar: React.FC<{
+    const SearchBar: FC<{
       value?: Signal<string>
     }> = ({ value: valueSignal }) => {
-      const [defaultValueSignal] = React.useState(Signal("search for me"))
+      const [defaultValueSignal] = useState(Signal("search for me"))
 
       const signal = valueSignal ?? defaultValueSignal
       const value = useComputed(signal)

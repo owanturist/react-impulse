@@ -20,7 +20,7 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitReturns": true,
     "downlevelIteration": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "types": ["vitest/globals"],
     "verbatimModuleSyntax": true,
     "noImplicitOverride": true,

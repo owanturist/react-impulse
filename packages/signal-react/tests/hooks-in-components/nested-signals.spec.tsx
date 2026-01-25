@@ -1,6 +1,6 @@
 import { Signal } from "@owanturist/signal"
 import { act, fireEvent, render, screen } from "@testing-library/react"
-import React from "react"
+import { type Dispatch, type FC, Profiler } from "react"
 
 import { useComputed } from "../../src"
 
@@ -11,16 +11,16 @@ describe("nested signals", () => {
     counts: ReadonlyArray<Signal<number>>
   }
 
-  const App: React.FC<{
+  const App: FC<{
     state: Signal<AppState>
     onRender: VoidFunction
-    onCounterRender: React.Dispatch<number>
+    onCounterRender: Dispatch<number>
   }> = ({ state, onRender, onCounterRender }) => {
     const { counts } = useComputed(state)
 
     return (
       <>
-        <React.Profiler id="test" onRender={onRender}>
+        <Profiler id="test" onRender={onRender}>
           <button
             type="button"
             data-testid="add-counter"
@@ -44,7 +44,7 @@ describe("nested signals", () => {
               })
             }}
           />
-        </React.Profiler>
+        </Profiler>
 
         {counts.map((count, index) => (
           <CounterComponent key={index} count={count} onRender={() => onCounterRender(index)} />

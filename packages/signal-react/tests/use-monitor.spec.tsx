@@ -1,6 +1,6 @@
 import { Signal } from "@owanturist/signal"
 import { act, render, renderHook } from "@testing-library/react"
-import React from "react"
+import { Profiler, useEffect } from "react"
 
 import { useMonitor } from "../src"
 
@@ -10,7 +10,7 @@ it("does not change monitor value unless monitored signal changes", () => {
   const { result, rerender } = renderHook(() => {
     const monitor = useMonitor()
 
-    React.useEffect(() => {
+    useEffect(() => {
       spy(monitor)
     }, [monitor])
 
@@ -44,9 +44,9 @@ it("cannot unsubscribe when swapped", () => {
 
   const { rerender } = render(<Component value={value1} />, {
     wrapper: ({ children }) => (
-      <React.Profiler id="test" onRender={onRender}>
+      <Profiler id="test" onRender={onRender}>
         {children}
-      </React.Profiler>
+      </Profiler>
     ),
   })
 
