@@ -5,7 +5,7 @@ export default defineConfig({
     projects: ["packages/*"],
 
     coverage: {
-      include: ["packages/signal/src/**"],
+      include: ["packages/{signal,signal-react}/src/**"],
       reporter: ["text", "json"],
     },
   },
