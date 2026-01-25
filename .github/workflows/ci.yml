@@ -103,7 +103,7 @@ jobs:
         run: pnpm build
 
       - name: Install react@${{ matrix.version }}
-        run: pnpm add -D --filter ./packages/* react@${{ matrix.version }} react-dom@${{ matrix.version }} @types/react@${{ matrix.version }}
+        run: pnpm add -D --filter signal-react react@${{ matrix.version }} @types/react@${{ matrix.version }}
 
       - name: Test against react@${{ matrix.version }}
         run: pnpm test:run
@@ -128,16 +128,16 @@ jobs:
         uses: ./.github/actions/setup-env
 
       - name: Install @owanturist/signal v${{ matrix.version }}
-        run: pnpm add -D --filter ./packages/signal-form @owanturist/signal@${{ matrix.version }}
+        run: pnpm add -D --filter signal-form --filter signal-react @owanturist/signal@${{ matrix.version }}
 
       - name: Build
         run: pnpm build
 
       - name: Test against @owanturist/signal v${{ matrix.version }}
-        run: pnpm test:run --project signal-form
+        run: pnpm test:run --project @owanturist/signal-form --project @owanturist/signal-react
 
       - name: Typecheck against @owanturist/signal v${{ matrix.version }}
-        run: pnpm run --filter ./packages/signal-form typecheck
+        run: pnpm run --filter signal-form --filter signal-react typecheck
 
   size-limit:
     name: Size Limit

@@ -36,17 +36,17 @@
     "use-sync-external-store": "^1.6.0"
   },
   "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0",
-    "@owanturist/signal": "^0.0.0"
+    "@owanturist/signal": "^0.0.0",
+    "react": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
+    "@owanturist/signal": "workspace:*",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@types/react": "^19.2.7",
     "@types/use-sync-external-store": "^1.5.0",
+    "happy-dom": "^20.3.7",
     "react": "^19.2.3",
-    "react-dom": "19.2.3",
-    "@owanturist/signal": "workspace:*",
     "vite-tsconfig-paths": "6.0.0-beta.4",
     "vitest": "^4.0.15"
   }
