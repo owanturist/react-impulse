@@ -1,7 +1,6 @@
 export default [
   {
     name: "signal",
-    files: ["index", "monitor-factory"],
   },
   {
     name: "signal-form",
@@ -13,10 +12,9 @@ export default [
   },
 ]
   .flatMap((config) => [".js", ".cjs"].map((ext) => ({ ...config, ext })))
-  .flatMap(({ files = ["index"], ...config }) => files.map((file) => ({ ...config, file })))
-  .map(({ name, file, ignore, ext }) => ({
-    name: `${name}/${file}${ext}`,
-    path: `packages/${name}/dist/${file}${ext}`,
+  .map(({ name, ignore, ext }) => ({
+    name: `${name}/*${ext}`,
+    path: `packages/${name}/dist/*${ext}`,
     gzip: true,
     ignore,
   }))
