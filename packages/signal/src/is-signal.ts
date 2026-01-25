@@ -7,21 +7,21 @@ const isSignal = createIsSignal((input) => input instanceof BaseSignal) as {
   /**
    * A function to check whether or not the input is a {@link Signal}.
    *
-   * @version 3.0.0
+   * @version 1.0.0
    */
   <T, Unknown = unknown>(input: Unknown | Signal<T>): input is Signal<T>
 
   /**
    * A function to check whether or not the input is a {@link Signal}.
    *
-   * @version 3.0.0
+   * @version 1.0.0
    */
   <T, Unknown = unknown>(input: Unknown | ReadonlySignal<T>): input is ReadonlySignal<T>
 
   /**
    * A function to check whether or not a {@link Signal} value passes the {@link check}.
    *
-   * @version 3.0.0
+   * @version 1.0.0
    */
   <T, Unknown = unknown>(
     monitor: Monitor,
@@ -32,7 +32,7 @@ const isSignal = createIsSignal((input) => input instanceof BaseSignal) as {
   /**
    * A function to check whether or not a {@link Signal} value passes the {@link check}.
    *
-   * @version 3.0.0
+   * @version 1.0.0
    */
   <T, Unknown = unknown>(
     monitor: Monitor,

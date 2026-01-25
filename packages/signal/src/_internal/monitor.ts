@@ -2,6 +2,9 @@ import type { MonitorEmitter } from "./monitor-emitter"
 
 const MONITOR_KEY = Symbol("monitor")
 
+/**
+ * @version 1.0.0
+ */
 interface Monitor {
   readonly [MONITOR_KEY]: null | MonitorEmitter
 }
