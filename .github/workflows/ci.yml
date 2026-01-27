@@ -72,17 +72,14 @@ jobs:
       - name: Build
         run: pnpm build:minified
 
-      - name: Cleanup src folders to make sure the tests do not use source files
+      - name: Replace source files by dist files
         run: |
-          rm -rf packages/signal/src/*
-          rm -rf packages/signal-form/src/*
-          rm -rf packages/signal-react/src/*
-
-      - name: Copy dist/*${{ matrix.ext }} as src/*
-        run: |
-          cp packages/signal/dist/*${{ matrix.ext }}* packages/signal/src/
-          cp packages/signal-form/dist/*${{ matrix.ext }}* packages/signal-form/src/
-          cp packages/signal-react/dist/*${{ matrix.ext }}* packages/signal-react/src/
+          for pkg in signal signal-form signal-react; do
+            rm -rf packages/$pkg/src/*
+            find packages/$pkg/dist -name "*${{ matrix.ext }}" | while read f; do
+              cp "$f" "packages/$pkg/src/$(basename "$f" ${{ matrix.ext }}).js"
+            done
+          done
 
       - name: Test
         run: pnpm test:run
