@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        filename: [index.js, index.cjs]
+        ext: [.js, .cjs]
 
     steps:
       - name: Checkout repository
@@ -76,11 +76,13 @@ jobs:
         run: |
           rm -rf packages/signal/src/*
           rm -rf packages/signal-form/src/*
+          rm -rf packages/signal-react/src/*
 
-      - name: Copy dist/${{ matrix.filename }} as src/index.ts
+      - name: Copy dist/*${{ matrix.ext }} as src/*
         run: |
-          cp packages/signal/dist/${{ matrix.filename }} packages/signal/src/index.ts
-          cp packages/signal-form/dist/${{ matrix.filename }} packages/signal-form/src/index.ts
+          cp packages/signal/dist/*${{ matrix.ext }}* packages/signal/src/
+          cp packages/signal-form/dist/*${{ matrix.ext }}* packages/signal-form/src/
+          cp packages/signal-react/dist/*${{ matrix.ext }}* packages/signal-react/src/
 
       - name: Test
         run: pnpm test:run
