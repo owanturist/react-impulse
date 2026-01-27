@@ -105,7 +105,7 @@ jobs:
         run: pnpm build
 
       - name: Install react@${{ matrix.version }}
-        run: pnpm add -D --filter signal-react react@${{ matrix.version }} @types/react@${{ matrix.version }}
+        run: pnpm add -D --filter signal-react react@${{ matrix.version }} @types/react@${{ matrix.version }} react-dom@${{ matrix.version }}
 
       - name: Test against react@${{ matrix.version }}
         run: pnpm test:run
