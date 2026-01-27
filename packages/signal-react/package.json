@@ -47,6 +47,7 @@
     "@types/use-sync-external-store": "^1.5.0",
     "happy-dom": "^20.3.7",
     "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "vite-tsconfig-paths": "6.0.0-beta.4",
     "vitest": "^4.0.15"
   }
