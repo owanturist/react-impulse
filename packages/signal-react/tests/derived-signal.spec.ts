@@ -148,7 +148,7 @@ describe.each<{
       const [count, setCount] = useState(2)
 
       return {
-        computed: useComputed((monitor) => read(derived, monitor) + count, [count, read]),
+        computed: useComputed((monitor) => read(derived, monitor) + count, [count]),
         setCount,
       }
     })

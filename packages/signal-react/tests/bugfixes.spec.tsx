@@ -131,7 +131,7 @@ describe("use Impulse#getValue() in Impulse#toJSON() and Impulse#toString() #321
           effect(() => {
             setValue(convert(count))
           }),
-        [count, convert],
+        [count],
       )
 
       return <span data-testid="result">{value}</span>
