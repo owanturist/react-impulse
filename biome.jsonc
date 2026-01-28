@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+  "$schema": "node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -128,8 +128,8 @@
       "linter": {
         "rules": {
           "complexity": {
-            "noExcessiveLinesPerFunction": "warn", // it should indicate potential for refactoring, but not too strict
-            "noExcessiveCognitiveComplexity": "warn", // it should indicate potential for refactoring, but not too strict
+            "noExcessiveLinesPerFunction": "info", // it should indicate potential for refactoring, but not too strict
+            "noExcessiveCognitiveComplexity": "info", // it should indicate potential for refactoring, but not too strict
             "noVoid": "warn" // using void is sometimes useful, e.g. in void Promise
           },
 
@@ -210,7 +210,6 @@
                   { "name": "useInsertionEffect", "closureIndex": 0, "dependenciesIndex": 1 },
                   { "name": "useCallback", "closureIndex": 0, "dependenciesIndex": 1 },
                   { "name": "useMemo", "closureIndex": 0, "dependenciesIndex": 1 },
-
                   { "name": "useComputed", "closureIndex": 0, "dependenciesIndex": 1 }
                 ]
               }
@@ -244,7 +243,13 @@
             "noUnresolvedImports": "off", // handled by TS
             "noUselessUndefined": "off", // it is better to be explicit about undefined values
             "useExplicitType": "off", // it is too much noise to enforce explicit types everywhere, even none module-public exports
-            "useMaxParams": "off" // common...
+            "useMaxParams": "off", // common...
+            "useAwaitThenable": "off", // false-positives
+            "noJsxPropsBind": "off", // it is madness to follow this rule
+
+            "useDestructuring": "info",
+            "noExcessiveLinesPerFile": "info",
+            "noMultiAssign": "info"
           }
         }
       }
@@ -353,7 +358,9 @@
           "nursery": {
             "noJsxLiterals": "off", // jsx literals are fine in tests
             "noShadow": "off", // shadowing is fine in tests
-            "noIncrementDecrement": "off" // increment/decrement is fine in tests
+            "noIncrementDecrement": "off", // increment/decrement is fine in tests
+            "noExcessiveLinesPerFile": "off", // tests files can be long
+            "noExcessiveClassesPerFile": "off" // test files can have many test classes
           }
         }
       }
