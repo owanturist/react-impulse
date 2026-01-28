@@ -6,7 +6,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "vite-tsconfig-paths": "6.0.0-beta.4",
+    "vite-tsconfig-paths": "6.0.5",
     "vitest": "^4.0.15"
   }
 }
