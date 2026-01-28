@@ -1,0 +1,206 @@
+import { Signal } from "@owanturist/signal"
+import { act, fireEvent, render, screen } from "@testing-library/react"
+import { type FC, Profiler } from "react"
+
+import { Counter } from "~/tools/testing/counter"
+
+import { useComputed } from "../../src"
+
+import { withinNth } from "./common"
+
+describe("single signal", () => {
+  const GetterComponent: FC<{
+    counter: Signal<Counter>
+    onRender: VoidFunction
+  }> = ({ counter, onRender }) => {
+    const { count } = useComputed(counter)
+
+    return (
+      <Profiler id="test" onRender={onRender}>
+        <span data-testid="getter">{count}</span>
+      </Profiler>
+    )
+  }
+
+  const SetterComponent: FC<{
+    counter: Signal<Counter>
+    onRender: VoidFunction
+  }> = ({ counter, onRender }) => (
+    <Profiler id="test" onRender={onRender}>
+      <div data-testid="setter">
+        <button type="button" data-testid="increment" onClick={() => counter.write(Counter.inc)} />
+        <button type="button" data-testid="reset" onClick={() => counter.write({ count: 0 })} />
+      </div>
+    </Profiler>
+  )
+
+  const SingleSetterSingleGetter: FC<{
+    counter: Signal<Counter>
+    onRootRender: VoidFunction
+    onGetterRender: VoidFunction
+    onSetterRender: VoidFunction
+  }> = ({ counter, onRootRender, onGetterRender, onSetterRender }) => (
+    <>
+      <Profiler id="test" onRender={onRootRender} />
+
+      <GetterComponent counter={counter} onRender={onGetterRender} />
+      <SetterComponent counter={counter} onRender={onSetterRender} />
+    </>
+  )
+
+  it("single Setter / Getter", () => {
+    const counter = Signal({ count: 0 })
+    const onRootRender = vi.fn()
+    const onGetterRender = vi.fn()
+    const onSetterRender = vi.fn()
+
+    render(
+      <SingleSetterSingleGetter
+        counter={counter}
+        onRootRender={onRootRender}
+        onGetterRender={onGetterRender}
+        onSetterRender={onSetterRender}
+      />,
+    )
+
+    // check initial value
+    expect(onRootRender).toHaveBeenCalledOnce()
+    expect(onSetterRender).toHaveBeenCalledOnce()
+    expect(onGetterRender).toHaveBeenCalledOnce()
+    expect(screen.getByTestId("getter")).toHaveTextContent("0")
+    vi.clearAllMocks()
+
+    // increment by from the component
+    fireEvent.click(screen.getByTestId("increment"))
+    expect(onRootRender).not.toHaveBeenCalled()
+    expect(onSetterRender).not.toHaveBeenCalled()
+    expect(onGetterRender).toHaveBeenCalledOnce()
+    expect(screen.getByTestId("getter")).toHaveTextContent("1")
+    vi.clearAllMocks()
+
+    // increment from the outside
+    act(() => counter.write(Counter.inc))
+    expect(onRootRender).not.toHaveBeenCalled()
+    expect(onSetterRender).not.toHaveBeenCalled()
+    expect(onGetterRender).toHaveBeenCalledOnce()
+    expect(screen.getByTestId("getter")).toHaveTextContent("2")
+    vi.clearAllMocks()
+
+    // reset from the component
+    fireEvent.click(screen.getByTestId("reset"))
+    expect(onRootRender).not.toHaveBeenCalled()
+    expect(onSetterRender).not.toHaveBeenCalled()
+    expect(onGetterRender).toHaveBeenCalledOnce()
+    expect(screen.getByTestId("getter")).toHaveTextContent("0")
+    vi.clearAllMocks()
+
+    // reset second time in a row
+    fireEvent.click(screen.getByTestId("reset"))
+    expect(onRootRender).not.toHaveBeenCalled()
+    expect(onSetterRender).not.toHaveBeenCalled()
+    expect(onGetterRender).toHaveBeenCalledOnce()
+    expect(screen.getByTestId("getter")).toHaveTextContent("0")
+    vi.clearAllMocks()
+
+    // increment twice in a row
+    fireEvent.click(screen.getByTestId("increment"))
+    fireEvent.click(screen.getByTestId("increment"))
+    expect(onRootRender).not.toHaveBeenCalled()
+    expect(onSetterRender).not.toHaveBeenCalled()
+    expect(onGetterRender).toHaveBeenCalledTimes(2)
+    expect(screen.getByTestId("getter")).toHaveTextContent("2")
+    vi.clearAllMocks()
+
+    // increment twice in a row from the outside
+    act(() => {
+      counter.write(Counter.inc)
+      counter.write(Counter.inc)
+    })
+    expect(onRootRender).not.toHaveBeenCalled()
+    expect(onSetterRender).not.toHaveBeenCalled()
+    expect(onGetterRender).toHaveBeenCalledOnce()
+    expect(screen.getByTestId("getter")).toHaveTextContent("4")
+  })
+
+  const MultipleSetterMultipleGetter: FC<{
+    counter: Signal<Counter>
+    onRootRender: VoidFunction
+    onFirstGetterRender: VoidFunction
+    onSecondGetterRender: VoidFunction
+    onFirstSetterRender: VoidFunction
+    onSecondSetterRender: VoidFunction
+  }> = ({
+    counter,
+    onRootRender,
+    onFirstGetterRender,
+    onSecondGetterRender,
+    onFirstSetterRender,
+    onSecondSetterRender,
+  }) => (
+    <>
+      <Profiler id="test" onRender={onRootRender} />
+      <GetterComponent counter={counter} onRender={onFirstGetterRender} />
+      <GetterComponent counter={counter} onRender={onSecondGetterRender} />
+      <SetterComponent counter={counter} onRender={onFirstSetterRender} />
+      <SetterComponent counter={counter} onRender={onSecondSetterRender} />
+    </>
+  )
+
+  it("multiple Setters / Getters", () => {
+    const counter = Signal({ count: 0 })
+    const onRootRender = vi.fn()
+    const onFirstGetterRender = vi.fn()
+    const onSecondGetterRender = vi.fn()
+    const onFirstSetterRender = vi.fn()
+    const onSecondSetterRender = vi.fn()
+
+    render(
+      <MultipleSetterMultipleGetter
+        counter={counter}
+        onRootRender={onRootRender}
+        onFirstGetterRender={onFirstGetterRender}
+        onSecondGetterRender={onSecondGetterRender}
+        onFirstSetterRender={onFirstSetterRender}
+        onSecondSetterRender={onSecondSetterRender}
+      />,
+    )
+
+    // check initial value
+    expect(onRootRender).toHaveBeenCalledOnce()
+    expect(onFirstSetterRender).toHaveBeenCalledOnce()
+    expect(onSecondSetterRender).toHaveBeenCalledOnce()
+    expect(onFirstGetterRender).toHaveBeenCalledOnce()
+    expect(onSecondGetterRender).toHaveBeenCalledOnce()
+    expect(screen.getAllByTestId("getter")).toMatchSnapshot()
+    vi.clearAllMocks()
+
+    // increment from the first component
+    fireEvent.click(withinNth("setter", 0).getByTestId("increment"))
+    expect(onRootRender).not.toHaveBeenCalled()
+    expect(onFirstSetterRender).not.toHaveBeenCalled()
+    expect(onSecondSetterRender).not.toHaveBeenCalled()
+    expect(onFirstGetterRender).toHaveBeenCalledOnce()
+    expect(onSecondGetterRender).toHaveBeenCalledOnce()
+    expect(screen.getAllByTestId("getter")).toMatchSnapshot()
+    vi.clearAllMocks()
+
+    // increment from the second component
+    fireEvent.click(withinNth("setter", 1).getByTestId("increment"))
+    expect(onRootRender).not.toHaveBeenCalled()
+    expect(onFirstSetterRender).not.toHaveBeenCalled()
+    expect(onSecondSetterRender).not.toHaveBeenCalled()
+    expect(onFirstGetterRender).toHaveBeenCalledOnce()
+    expect(onSecondGetterRender).toHaveBeenCalledOnce()
+    expect(screen.getAllByTestId("getter")).toMatchSnapshot()
+    vi.clearAllMocks()
+
+    // increment from the outside
+    act(() => counter.write(Counter.inc))
+    expect(onRootRender).not.toHaveBeenCalled()
+    expect(onFirstSetterRender).not.toHaveBeenCalled()
+    expect(onSecondSetterRender).not.toHaveBeenCalled()
+    expect(onFirstGetterRender).toHaveBeenCalledOnce()
+    expect(onSecondGetterRender).toHaveBeenCalledOnce()
+    expect(screen.getAllByTestId("getter")).toMatchSnapshot()
+  })
+})

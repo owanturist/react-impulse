@@ -1,8 +1,8 @@
 import { batch } from "./batch"
 import type { Destructor } from "./destructor"
+import { MonitorFactory } from "./monitor-factory"
 import type { Signal } from "./signal"
 import { type Monitor, injectMonitor } from "./_internal/monitor"
-import { MonitorFactory } from "./_internal/monitor-factory"
 
 /**
  * A function that provides {@link Monitor} as the first argument subscribes to changes of all {@link Signal} instances that call the {@link Signal.read} method inside the {@link listener}.

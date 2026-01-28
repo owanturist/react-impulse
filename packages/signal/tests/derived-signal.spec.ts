@@ -1,5 +1,4 @@
-import { act, renderHook } from "@testing-library/react"
-import { useState } from "react"
+import { Counter } from "~/tools/testing/counter"
 
 import {
   type Monitor,
@@ -11,10 +10,7 @@ import {
   batch,
   effect,
   untracked,
-  useComputed,
 } from "../src"
-
-import { Counter } from "./common"
 
 describe.each<{
   name: string
@@ -240,80 +236,21 @@ describe.each<{
     const source = Signal(0)
     const derived = Signal((monitor) => ({ count: read(source, monitor) }))
 
-    const { result: first } = renderHook(() => useComputed((monitor) => read(derived, monitor)))
+    let first: unknown = null
+    let second: unknown = null
 
-    const { result: second } = renderHook(() => useComputed((monitor) => read(derived, monitor)))
+    effect((monitor) => {
+      first = read(derived, monitor)
+    })
+    effect((monitor) => {
+      second = read(derived, monitor)
+    })
 
     expect(source).toHaveEmittersSize(1)
 
-    const initial = first.current
-    expect(first.current).toBe(second.current)
+    const initial = first
+    expect(first).toBe(second)
     expect(initial).toStrictEqual({ count: 0 })
-  })
-
-  it("does not recalculate the value on subsequent re-renders", () => {
-    const source = Signal(0)
-    const derived = Signal((monitor) => ({ count: read(source, monitor) }))
-
-    const { result: first, rerender: rerenderFirst } = renderHook(() =>
-      useComputed((monitor) => read(derived, monitor)),
-    )
-
-    const { result: second, rerender: rerenderSecond } = renderHook(() =>
-      useComputed((monitor) => read(derived, monitor)),
-    )
-
-    expect(source).toHaveEmittersSize(1)
-
-    const initial = first.current
-
-    rerenderFirst()
-    rerenderSecond()
-
-    expect(initial).toBe(first.current)
-    expect(initial).toBe(second.current)
-
-    expect(source).toHaveEmittersSize(1)
-  })
-
-  it("does not recalculate the value on subsequent inner state updates", () => {
-    const source = Signal(0)
-    const derived = Signal((monitor) => ({ count: read(source, monitor) }))
-
-    const { result: first } = renderHook(() => {
-      const [, force] = useState(0)
-
-      return {
-        force,
-        counter: useComputed((monitor) => read(derived, monitor)),
-      }
-    })
-
-    const { result: second } = renderHook(() => {
-      const [, force] = useState(0)
-
-      return {
-        force,
-        counter: useComputed((monitor) => read(derived, monitor)),
-      }
-    })
-
-    expect(source).toHaveEmittersSize(1)
-
-    const initial = first.current.counter
-
-    act(() => {
-      first.current.force((prev) => prev + 1)
-    })
-
-    act(() => {
-      second.current.force((prev) => prev + 1)
-    })
-
-    expect(initial).toBe(first.current.counter)
-    expect(initial).toBe(second.current.counter)
-
-    expect(source).toHaveEmittersSize(1)
   })
 
   it("does not recalculate for subsequent calls with static monitor", ({ monitor }) => {
@@ -324,9 +261,7 @@ describe.each<{
     expect(read(derived, monitor)).toBe(read(derived, monitor))
     expect(source).toHaveEmittersSize(1)
 
-    act(() => {
-      write(source, 1)
-    })
+    write(source, 1)
 
     expect(read(derived, monitor)).toStrictEqual({ count: 1 })
     expect(source).toHaveEmittersSize(1)
@@ -336,20 +271,24 @@ describe.each<{
     const source = Signal(0)
     const derived = Signal((monitor) => ({ count: read(source, monitor) }))
 
-    const { result: first } = renderHook(() => useComputed((monitor) => read(derived, monitor)))
+    let first: unknown = null
+    let second: unknown = null
 
-    const { result: second } = renderHook(() => useComputed((monitor) => read(derived, monitor)))
-
-    const initial = first.current
-
-    act(() => {
-      write(source, 0)
+    effect((monitor) => {
+      first = read(derived, monitor)
+    })
+    effect((monitor) => {
+      second = read(derived, monitor)
     })
 
-    expect(initial).toBe(first.current)
-    expect(initial).toBe(second.current)
-    expect(first.current).toBe(second.current)
-    expect(first.current).toStrictEqual({ count: 0 })
+    const initial = first
+
+    write(source, 0)
+
+    expect(initial).toBe(first)
+    expect(initial).toBe(second)
+    expect(first).toBe(second)
+    expect(first).toStrictEqual({ count: 0 })
     expect(source).toHaveEmittersSize(1)
   })
 
@@ -357,21 +296,25 @@ describe.each<{
     const source = Signal(0)
     const derived = Signal((monitor) => ({ count: read(source, monitor) }))
 
-    const { result: first } = renderHook(() => useComputed((monitor) => read(derived, monitor)))
+    let first: unknown = null
+    let second: unknown = null
 
-    const { result: second } = renderHook(() => useComputed((monitor) => read(derived, monitor)))
-
-    const initial = first.current
-
-    act(() => {
-      write(source, 1)
-      write(source, 2)
+    effect((monitor) => {
+      first = read(derived, monitor)
+    })
+    effect((monitor) => {
+      second = read(derived, monitor)
     })
 
-    expect(initial).not.toBe(first.current)
-    expect(initial).not.toBe(second.current)
-    expect(first.current).toBe(second.current)
-    expect(first.current).toStrictEqual({ count: 2 })
+    const initial = first
+
+    write(source, 1)
+    write(source, 2)
+
+    expect(initial).not.toBe(first)
+    expect(initial).not.toBe(second)
+    expect(first).toBe(second)
+    expect(first).toStrictEqual({ count: 2 })
     expect(source).toHaveEmittersSize(1)
   })
 
@@ -395,42 +338,6 @@ describe.each<{
     expect(value2).toBe(value1)
   })
 
-  it("keeps source observed after useComputed dependency change", () => {
-    const source = Signal(1)
-    const derived = Signal((monitor) => 2 * read(source, monitor))
-
-    const { result } = renderHook(() => {
-      const [count, setCount] = useState(2)
-
-      return {
-        computed: useComputed((monitor) => read(derived, monitor) + count, [count, read]),
-        setCount,
-      }
-    })
-
-    expect(result.current.computed).toBe(4)
-
-    act(() => {
-      result.current.setCount(3)
-    })
-    expect(result.current.computed).toBe(5)
-
-    act(() => {
-      result.current.setCount(4)
-    })
-    expect(result.current.computed).toBe(6)
-
-    act(() => {
-      write(source, 2)
-    })
-    expect(result.current.computed).toBe(8)
-
-    act(() => {
-      write(source, 3)
-    })
-    expect(result.current.computed).toBe(10)
-  })
-
   it("keeps observing while derived value does not change", () => {
     const source = Signal(0)
     const derived = Signal((monitor) => read(source, monitor) > 0)
@@ -438,31 +345,29 @@ describe.each<{
     expect(source).toHaveEmittersSize(0)
     expect(derived).toHaveEmittersSize(0)
 
-    const { result } = renderHook(() => useComputed((monitor) => read(derived, monitor)))
-    expect(source).toHaveEmittersSize(1)
-    expect(derived).toHaveEmittersSize(1)
-    expect(result.current).toBe(false)
-
-    act(() => {
-      write(source, 1)
+    let result: unknown = null
+    effect((monitor) => {
+      result = read(derived, monitor)
     })
-    expect(source).toHaveEmittersSize(1)
-    expect(derived).toHaveEmittersSize(1)
-    expect(result.current).toBe(true)
 
-    act(() => {
-      write(source, 2)
-    })
     expect(source).toHaveEmittersSize(1)
     expect(derived).toHaveEmittersSize(1)
-    expect(result.current).toBe(true)
+    expect(result).toBe(false)
 
-    act(() => {
-      write(source, 0)
-    })
+    write(source, 1)
     expect(source).toHaveEmittersSize(1)
     expect(derived).toHaveEmittersSize(1)
-    expect(result.current).toBe(false)
+    expect(result).toBe(true)
+
+    write(source, 2)
+    expect(source).toHaveEmittersSize(1)
+    expect(derived).toHaveEmittersSize(1)
+    expect(result).toBe(true)
+
+    write(source, 0)
+    expect(source).toHaveEmittersSize(1)
+    expect(derived).toHaveEmittersSize(1)
+    expect(result).toBe(false)
   })
 
   it("recalculates the value for nested derived Signals", () => {
@@ -475,84 +380,51 @@ describe.each<{
       password: read(isPasswordEmpty, monitor),
     }))
 
-    const { result } = renderHook(() => useComputed((monitor) => read(isFormEmpty, monitor)))
+    let result: unknown = null
+    effect((monitor) => {
+      result = read(isFormEmpty, monitor)
+    })
 
-    const value0 = result.current
+    const value0 = result
     expect(value0).toStrictEqual({
       email: true,
       password: true,
     })
 
-    act(() => {
-      write(email, "t")
-    })
-    const value1 = result.current
+    write(email, "t")
+    const value1 = result
     expect(value1).toStrictEqual({
       email: false,
       password: true,
     })
     expect(value1).not.toBe(value0)
 
-    act(() => {
-      write(email, "te")
-    })
-    const value2 = result.current
+    write(email, "te")
+    const value2 = result
     expect(value2).toBe(value1)
 
-    act(() => {
-      write(password, "q")
-    })
-    const value3 = result.current
+    write(password, "q")
+    const value3 = result
     expect(value3).toStrictEqual({
       email: false,
       password: false,
     })
     expect(value3).not.toBe(value2)
 
-    act(() => {
-      write(email, "test")
-      write(password, "qwerty")
-    })
-    const value4 = result.current
+    write(email, "test")
+    write(password, "qwerty")
+    const value4 = result
     expect(value4).toBe(value3)
 
-    act(() => {
-      write(email, "")
-      write(password, "")
-    })
+    write(email, "")
+    write(password, "")
 
-    const value5 = result.current
+    const value5 = result
     expect(value5).toStrictEqual({
       email: true,
       password: true,
     })
     expect(value5).not.toBe(value4)
-  })
-
-  it("causes a single re-render caused by dependency write", () => {
-    const source = Signal(0)
-    const derived = Signal((monitor) => ({ count: read(source, monitor) }))
-
-    const spy = vi.fn()
-
-    renderHook(() => {
-      const counter = useComputed((monitor) => read(derived, monitor))
-
-      spy(counter)
-    })
-
-    expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 0 })
-    vi.clearAllMocks()
-
-    act(() => {
-      write(source, 0)
-    })
-    expect(spy).not.toHaveBeenCalled()
-
-    act(() => {
-      write(source, 1)
-    })
-    expect(spy).toHaveBeenCalledExactlyOnceWith({ count: 1 })
   })
 
   it("do not re-subscribe to dependencies when they are not in use", () => {
@@ -562,40 +434,35 @@ describe.each<{
       count: read(condition, monitor) ? read(source, monitor) : 0,
     }))
 
-    const { result } = renderHook(() => useComputed((monitor) => read(derived, monitor)))
+    let result: unknown = null
+    effect((monitor) => {
+      result = read(derived, monitor)
+    })
 
-    const initial = result.current
+    const initial = result
     expect(initial).toStrictEqual({ count: 0 })
     expect(source).toHaveEmittersSize(0)
     expect(condition).toHaveEmittersSize(1)
 
-    act(() => {
-      write(source, 0)
-    })
-    expect(result.current).toBe(initial)
+    write(source, 0)
+    expect(result).toBe(initial)
     expect(source).toHaveEmittersSize(0)
     expect(condition).toHaveEmittersSize(1)
 
-    act(() => {
-      write(condition, true)
-    })
-    expect(result.current).not.toBe(initial)
-    expect(result.current).toStrictEqual({ count: 0 })
+    write(condition, true)
+    expect(result).not.toBe(initial)
+    expect(result).toStrictEqual({ count: 0 })
     expect(source).toHaveEmittersSize(1)
     expect(condition).toHaveEmittersSize(1)
 
-    act(() => {
-      write(source, 1)
-    })
-    expect(result.current).toStrictEqual({ count: 1 })
+    write(source, 1)
+    expect(result).toStrictEqual({ count: 1 })
     expect(source).toHaveEmittersSize(1)
     expect(condition).toHaveEmittersSize(1)
 
-    act(() => {
-      write(condition, false)
-    })
-    expect(result.current).not.toBe(initial)
-    expect(result.current).toStrictEqual({ count: 0 })
+    write(condition, false)
+    expect(result).not.toBe(initial)
+    expect(result).toStrictEqual({ count: 0 })
     expect(source).toHaveEmittersSize(0)
     expect(condition).toHaveEmittersSize(1)
   })
@@ -645,9 +512,7 @@ describe.each<{
       equals: Counter.equals,
     })
 
-    act(() => {
-      write(source, { count: 1 })
-    })
+    write(source, { count: 1 })
 
     expect(Counter.equals).not.toHaveBeenCalled()
     expect(source).toHaveEmittersSize(0)
@@ -666,9 +531,7 @@ describe.each<{
     expect(read(derived, monitor)).toStrictEqual({ count: 0 })
     expect(Counter.equals).not.toHaveBeenCalled()
 
-    act(() => {
-      write(source, { count: 1 })
-    })
+    write(source, { count: 1 })
     expect(Counter.equals).toHaveBeenCalledOnce()
     vi.clearAllMocks()
 
@@ -696,9 +559,7 @@ describe.each<{
       expect(value0).toStrictEqual({ isMoreThanZero: false })
       vi.clearAllMocks()
 
-      act(() => {
-        write(source, { count: 1 })
-      })
+      write(source, { count: 1 })
       expect(Object.is).toHaveBeenCalledExactlyOnceWith(value0, {
         isMoreThanZero: true,
       })
@@ -710,9 +571,7 @@ describe.each<{
       expect(value1).toStrictEqual({ isMoreThanZero: true })
       vi.clearAllMocks()
 
-      act(() => {
-        write(source, { count: 2 })
-      })
+      write(source, { count: 2 })
       expect(Object.is).toHaveBeenCalledExactlyOnceWith(value1, {
         isMoreThanZero: true,
       })
@@ -733,9 +592,7 @@ describe.each<{
 
     const value0 = read(derived, monitor)
 
-    act(() => {
-      write(source, { count: 0 })
-    })
+    write(source, { count: 0 })
     expect(Counter.equals).toHaveBeenCalledExactlyOnceWith(value0, { count: 0 })
     vi.clearAllMocks()
 
@@ -744,9 +601,7 @@ describe.each<{
     expect(value0).toBe(value1)
     expect(value0).toStrictEqual({ count: 0 })
 
-    act(() => {
-      write(source, { count: 1 })
-    })
+    write(source, { count: 1 })
     expect(Counter.equals).toHaveBeenCalledExactlyOnceWith(value1, { count: 1 })
     vi.clearAllMocks()
 
@@ -883,27 +738,6 @@ describe.concurrent("Signal(getter) garbage collection", () => {
     expect(source).toHaveEmittersSize(0)
   })
 
-  it("cleanups the WeakRef from a hook", async () => {
-    const source = Signal(0)
-
-    const { result, unmount } = renderHook(() => {
-      const derived = Signal((monitor) => ({
-        count: source.read(monitor),
-      }))
-
-      return useComputed(derived)
-    })
-
-    expect(result.current).toStrictEqual({ count: 0 })
-    expect(source).toHaveEmittersSize(1)
-
-    unmount()
-    expect(source).toHaveEmittersSize(1)
-
-    await global.gc?.({ execution: "async" })
-    expect(source).toHaveEmittersSize(0)
-  })
-
   it("cleanups only unreachable dependencies", async ({ monitor }) => {
     const source = Signal(0)
     const derived1 = Signal((monitor) => ({
@@ -965,9 +799,7 @@ describe("Signal(source)", () => {
 
     expect(derived.read(monitor)).toBe(0)
 
-    act(() => {
-      source.counter.write(1)
-    })
+    source.counter.write(1)
 
     expect(derived.read(monitor)).toBe(1)
   })
@@ -1003,9 +835,7 @@ describe("Signal(source, options)", () => {
     expect(derived.read(monitor)).toStrictEqual({ count: 0 })
     expect(Counter.equals).not.toHaveBeenCalled()
 
-    act(() => {
-      source.counter.write(Counter.inc)
-    })
+    source.counter.write(Counter.inc)
 
     expect(derived.read(monitor)).toStrictEqual({ count: 1 })
     expect(Counter.equals).toHaveBeenCalledExactlyOnceWith({ count: 0 }, { count: 1 })
@@ -1060,9 +890,7 @@ describe("Signal(getter, setter, options?)", () => {
 
     expect(derived.read(monitor)).toBe(0)
 
-    act(() => {
-      source.counter.write(1)
-    })
+    source.counter.write(1)
 
     expect(derived.read(monitor)).toBe(1)
   })
@@ -1169,9 +997,7 @@ describe("Signal(getter, setter, options?)", () => {
 
     const value0 = signal.read(monitor)
 
-    act(() => {
-      signal.write({ count: 0 })
-    })
+    signal.write({ count: 0 })
     expect(Counter.equals).toHaveBeenCalledExactlyOnceWith(value0, { count: 0 })
     vi.clearAllMocks()
 
@@ -1179,9 +1005,7 @@ describe("Signal(getter, setter, options?)", () => {
     expect(Counter.equals).not.toHaveBeenCalled()
     expect(value1).toBe(value0)
 
-    act(() => {
-      signal.write({ count: 1 })
-    })
+    signal.write({ count: 1 })
     expect(Counter.equals).toHaveBeenCalledExactlyOnceWith(value1, { count: 1 })
     vi.clearAllMocks()
 
@@ -1205,31 +1029,20 @@ describe("Signal(getter, setter, options?)", () => {
     )
     const spy = vi.fn()
 
-    const { result } = renderHook(() =>
-      useComputed((monitor) => {
-        spy()
-
-        return derived.read(monitor)
-      }, []),
-    )
-
-    expect(result.current).toBe(6)
-    expect(spy).toHaveBeenCalledOnce()
-    vi.clearAllMocks()
-
-    act(() => {
-      derived.write(4)
+    effect((monitor) => {
+      spy(derived.read(monitor))
     })
 
-    expect(result.current).toBe(12)
-    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenCalledExactlyOnceWith(6)
     vi.clearAllMocks()
 
-    act(() => {
-      derived.write(4)
-    })
+    derived.write(4)
 
-    expect(result.current).toBe(12)
+    expect(spy).toHaveBeenCalledExactlyOnceWith(12)
+    vi.clearAllMocks()
+
+    derived.write(4)
+
     expect(spy).not.toHaveBeenCalled()
   })
 })

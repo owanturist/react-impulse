@@ -1,6 +1,6 @@
-import { Signal } from "../src"
+import { Counter } from "~/tools/testing/counter"
 
-import { Counter } from "./common"
+import { Signal } from "../src"
 
 describe("Signal()", () => {
   it("creates an Signal of undefined | T type", () => {

@@ -1,9 +1,6 @@
-import React from "react"
 import tsconfigPaths from "vite-tsconfig-paths"
 import { defineProject } from "vitest/config"
 import type { ProjectConfig } from "vitest/node"
-
-console.log(`Running @owanturist/signal-form tests against react@${React.version}`)
 
 export default defineProject({
   plugins: [tsconfigPaths()],
@@ -11,7 +8,6 @@ export default defineProject({
   test: {
     globals: true,
     isolate: false,
-    environment: "happy-dom",
     setupFiles: "./setup-tests.ts",
   } satisfies ProjectConfig,
 })

@@ -1,0 +1,54 @@
+{
+  "name": "@owanturist/signal-react",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "The clean and natural React state management",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
+  "keywords": [
+    "react",
+    "react-hooks",
+    "state",
+    "state-management",
+    "store"
+  ],
+  "author": "Anton Ovechkin <owanturist@gmail.com>",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/owanturist/signal/issues"
+  },
+  "repository": "https://github.com/owanturist/signal/tree/master/packages/signal-react",
+  "homepage": "https://github.com/owanturist/signal/packages/signal-react#readme",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsup src/index.ts --config ../../tsup.config.ts"
+  },
+  "dependencies": {
+    "use-sync-external-store": "^1.6.0"
+  },
+  "peerDependencies": {
+    "@owanturist/signal": "^0.0.0",
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@owanturist/signal": "workspace:*",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^19.2.7",
+    "@types/use-sync-external-store": "^1.5.0",
+    "happy-dom": "^20.3.7",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "vite-tsconfig-paths": "6.0.0-beta.4",
+    "vitest": "^4.0.15"
+  }
+}

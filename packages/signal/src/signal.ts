@@ -11,8 +11,14 @@ import { DerivedSignal } from "./_internal/derived-signal"
 import type { Monitor } from "./_internal/monitor"
 import { Signal as SignalImpl } from "./_internal/signal"
 
+/**
+ * @version 1.0.0
+ */
 type Signal<T> = BaseSignal<T>
 
+/**
+ * @version 1.0.0
+ */
 type ReadonlySignal<T> = Omit<Signal<T>, "write">
 
 /**

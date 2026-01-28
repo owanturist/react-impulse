@@ -252,7 +252,7 @@
 
     // source code setup
     {
-      "includes": ["**/src/**/*", "!**/__tests__/**/*"],
+      "includes": ["**/src/**/*", "!**/__tests__/**/*", "!**/tools/src/testing/**/*"],
       "linter": {
         "rules": {
           "style": {
@@ -296,7 +296,7 @@
 
     // dev env setup
     {
-      "includes": ["./*.{js,ts}", "./packages/*/*.{js,ts}"],
+      "includes": ["./*.{mjs,ts}", "./packages/*/*.{js,ts}"],
       "linter": {
         "rules": {
           "style": {
@@ -361,7 +361,7 @@
 
     // public packages test env setup
     {
-      "includes": ["packages/react-*/tests/**/*.{ts,tsx}"],
+      "includes": ["packages/signal*/tests/**/*.{ts,tsx}"],
       "linter": {
         "rules": {
           "style": {
