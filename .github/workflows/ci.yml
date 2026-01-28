@@ -58,9 +58,6 @@ jobs:
   test-dist:
     name: Run tests against dist files
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        ext: [.js, .cjs]
 
     steps:
       - name: Checkout repository
@@ -76,8 +73,8 @@ jobs:
         run: |
           for pkg in signal signal-form signal-react; do
             rm -rf packages/$pkg/src/*
-            find packages/$pkg/dist -name "*${{ matrix.ext }}" | while read f; do
-              cp "$f" "packages/$pkg/src/$(basename "$f" ${{ matrix.ext }}).js"
+            find packages/$pkg/dist -name "*.js" | while read f; do
+              cp "$f" "packages/$pkg/src/$(basename "$f" .js).js"
             done
           done
 
