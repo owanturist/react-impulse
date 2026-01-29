@@ -2,4 +2,4 @@
 "@owanturist/signal": minor
 ---
 
-Initial release of @owanturist/signal package
+Initial release of `@owanturist/signal` package.
