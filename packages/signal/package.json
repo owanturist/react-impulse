@@ -1,7 +1,7 @@
 {
   "name": "@owanturist/signal",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The clean and natural state management",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
