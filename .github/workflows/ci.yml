@@ -61,7 +61,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup environment
         uses: ./.github/actions/setup-env
@@ -90,7 +90,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup environment
         uses: ./.github/actions/setup-env
@@ -118,7 +118,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup environment
         uses: ./.github/actions/setup-env
@@ -142,7 +142,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup environment
         uses: ./.github/actions/setup-env
@@ -161,10 +161,13 @@ jobs:
     # prevents this action from running on forks and only on pushes
     if: ${{ github.repository_owner == 'owanturist' && github.event_name == 'push' }}
     concurrency: ${{ github.workflow }}-${{ github.ref }}
+    permissions:
+      id-token: write # Required for npm Trusted Publishers OIDC
+      contents: write # Required for changesets to commit and push
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
           fetch-depth: 0
@@ -188,4 +191,3 @@ jobs:
           publish: pnpm run publish --tag=${{ github.ref_name == 'master' && 'latest' || github.ref_name == 'next' && 'next' || github.ref_name == 'alpha' && 'alpha' || github.ref_name == 'beta' && 'beta' || ' ' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

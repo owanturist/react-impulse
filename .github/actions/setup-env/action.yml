@@ -1,4 +1,5 @@
 name: Setup environment
+description: Setup Node.js and install dependencies using pnpm
 
 runs:
   using: composite
@@ -6,10 +7,11 @@ runs:
     - name: Install pnpm
       uses: pnpm/action-setup@v2
 
-    - name: Install Node
-      uses: actions/setup-node@v3
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        node-version-file: .nvmrc
+        node-version-file: ".nvmrc"
+        registry-url: "https://registry.npmjs.org"
         cache: "pnpm"
 
     - name: Install dependencies
