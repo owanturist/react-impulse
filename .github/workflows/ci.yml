@@ -184,6 +184,13 @@ jobs:
         with:
           commit_message: "Change .changeset `baseBranch` to ${{ github.ref_name }}"
           file_pattern: ".changeset/config.json"
+    
+      - name: Test npm publish auth
+        run: |
+          cd packages/signal
+          npm publish --dry-run --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
