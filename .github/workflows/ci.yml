@@ -184,6 +184,13 @@ jobs:
         with:
           commit_message: "Change .changeset `baseBranch` to ${{ github.ref_name }}"
           file_pattern: ".changeset/config.json"
+
+      - name: Test pnpm publish auth
+        run: |
+          cd packages/signal
+          pnpm publish --dry-run --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
       - name: Build packages
         run: pnpm build:minified
