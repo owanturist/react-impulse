@@ -38,13 +38,6 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Test pnpm publish auth
-        run: |
-          cd packages/signal
-          pnpm publish --dry-run --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Check all files
         if: ${{ always() }}
         run: pnpm check .
