@@ -185,11 +185,13 @@ jobs:
           commit_message: "Change .changeset `baseBranch` to ${{ github.ref_name }}"
           file_pattern: ".changeset/config.json"
 
+      - name: Build packages
+        run: pnpm build:minified
+
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
         with:
-          publish: pnpm build:minified && pnpm publish -r --tag=${{ github.ref_name == 'master' && 'latest' || github.ref_name == 'next' && 'next' || github.ref_name == 'alpha' && 'alpha' || github.ref_name == 'beta' && 'beta' || ' ' }}
+          publish: pnpm --recursive publish --provenance --tag=${{ github.ref_name == 'master' && 'latest' || github.ref_name == 'next' && 'next' || github.ref_name == 'alpha' && 'alpha' || github.ref_name == 'beta' && 'beta' || ' ' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
