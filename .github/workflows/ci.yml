@@ -188,14 +188,6 @@ jobs:
       - name: Build packages
         run: pnpm build:minified
 
-      # Prevent changesets/action from creating its own .npmrc which breaks OIDC
-      # See: https://github.com/changesets/action/issues/515
-      - name: Setup npm authentication for OIDC
-        run: |
-          npm --version
-          echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > ~/.npmrc
-          cat ~/.npmrc
-
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
         with:
