@@ -188,6 +188,12 @@ jobs:
       - name: Build packages
         run: pnpm build:minified
 
+      # Create user .npmrc without auth so changesets doesn't add its own token config
+      # This allows npm to use OIDC for authentication
+      # See: https://github.com/orgs/community/discussions/176761
+      - name: Setup .npmrc for OIDC
+        run: echo "# Using npm OIDC for auth" > ~/.npmrc
+
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
         with:
