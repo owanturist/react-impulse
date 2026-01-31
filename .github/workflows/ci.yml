@@ -189,7 +189,6 @@ jobs:
         run: pnpm build:minified
 
       # Create user .npmrc with empty auth token so changesets doesn't add its own
-      # Empty token makes npm fall back to OIDC authentication
       # See: https://github.com/orgs/community/discussions/176761
       - name: Setup .npmrc for OIDC
         run: echo "//registry.npmjs.org/:_authToken=" > ~/.npmrc
@@ -201,3 +200,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+          # Unset token auth from setup-node so npm uses OIDC
+          NODE_AUTH_TOKEN: ""
+          NPM_CONFIG_USERCONFIG: ""
