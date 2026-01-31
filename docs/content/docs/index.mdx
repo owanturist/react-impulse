@@ -1,0 +1,106 @@
+---
+title: Introduction
+description: A lightweight, fine-grained reactive state management library for JavaScript and React
+---
+
+# @owanturist/signal
+
+A lightweight, fine-grained reactive state management library for JavaScript and React applications.
+
+## Why Signals?
+
+Signals provide a simple yet powerful primitive for reactive state management:
+
+- **Fine-grained reactivity** - Only components that depend on changed values re-render
+- **Automatic dependency tracking** - No need to manually specify dependencies
+- **Predictable updates** - Synchronous by default, with batching when needed
+- **Lightweight** - Minimal API surface with no external dependencies
+- **Type-safe** - Full TypeScript support with excellent type inference
+
+## Core Concepts
+
+The library is built around a few key concepts:
+
+### Signals
+
+A **Signal** holds a reactive value that can be read and written. When the value changes, all dependent computations are automatically notified.
+
+```ts
+import { Signal } from "@owanturist/signal";
+
+const count = Signal(0);
+
+// Read the current value
+console.log(count.get()); // 0
+
+// Update the value
+count.set(1);
+console.log(count.get()); // 1
+```
+
+### Derived Signals
+
+Create computed values that automatically update when their dependencies change:
+
+```ts
+const count = Signal(0);
+const doubled = Signal.derive(() => count.get() * 2);
+
+console.log(doubled.get()); // 0
+count.set(5);
+console.log(doubled.get()); // 10
+```
+
+### Effects
+
+Run side effects when signal values change:
+
+```ts
+import { Signal, effect } from "@owanturist/signal";
+
+const name = Signal("World");
+
+effect(() => {
+  console.log(`Hello, ${name.get()}!`);
+});
+// Logs: "Hello, World!"
+
+name.set("Signals");
+// Logs: "Hello, Signals!"
+```
+
+## Packages
+
+The library is split into focused packages:
+
+| Package | Description |
+|---------|-------------|
+| `@owanturist/signal` | Core signal primitives |
+| `@owanturist/signal-react` | React hooks integration |
+| `@owanturist/signal-form` | Type-safe form state management |
+
+## Quick Example
+
+Here's a complete example using signals with React:
+
+```tsx
+import { Signal, effect } from "@owanturist/signal";
+import { useComputed } from "@owanturist/signal-react";
+
+const count = Signal(0);
+
+function Counter() {
+  const value = useComputed(() => count.get());
+
+  return (
+    <div>
+      <p>Count: {value}</p>
+      <button onClick={() => count.set(count.get() + 1)}>
+        Increment
+      </button>
+    </div>
+  );
+}
+```
+
+Ready to get started? Check out the [Getting Started](/docs/getting-started) guide.

@@ -1,0 +1,229 @@
+---
+title: Derived Signals
+description: Creating computed values that automatically update
+---
+
+# Derived Signals
+
+Derived signals compute their value from other signals and automatically update when dependencies change.
+
+## Creating Derived Signals
+
+Use `Signal.derive()` to create a computed signal:
+
+```ts
+import { Signal } from "@owanturist/signal";
+
+const count = Signal(0);
+const doubled = Signal.derive(() => count.get() * 2);
+
+console.log(doubled.get()); // 0
+
+count.set(5);
+console.log(doubled.get()); // 10
+```
+
+## Automatic Dependency Tracking
+
+Derived signals automatically track which signals they depend on:
+
+```ts
+const firstName = Signal("John");
+const lastName = Signal("Doe");
+const showFullName = Signal(true);
+
+// Dependencies are tracked dynamically
+const displayName = Signal.derive(() => {
+  if (showFullName.get()) {
+    // Depends on: showFullName, firstName, lastName
+    return `${firstName.get()} ${lastName.get()}`;
+  }
+  // Depends on: showFullName, firstName only
+  return firstName.get();
+});
+
+showFullName.set(false);
+lastName.set("Smith"); // Does NOT trigger update (not a dependency anymore)
+firstName.set("Jane"); // Triggers update
+```
+
+## Chaining Derived Signals
+
+Derived signals can depend on other derived signals:
+
+```ts
+const price = Signal(100);
+const quantity = Signal(2);
+const taxRate = Signal(0.1);
+
+const subtotal = Signal.derive(() => price.get() * quantity.get());
+const tax = Signal.derive(() => subtotal.get() * taxRate.get());
+const total = Signal.derive(() => subtotal.get() + tax.get());
+
+console.log(total.get()); // 220
+
+price.set(150);
+console.log(total.get()); // 330
+```
+
+## Lazy Evaluation
+
+Derived signals are computed lazily - they only recalculate when read:
+
+```ts
+const count = Signal(0);
+
+const expensive = Signal.derive(() => {
+  console.log("Computing...");
+  return count.get() * 2;
+});
+
+count.set(1);
+count.set(2);
+count.set(3);
+// No "Computing..." logged yet
+
+console.log(expensive.get()); // "Computing..." then 6
+console.log(expensive.get()); // 6 (cached, no recomputation)
+```
+
+## With Custom Equality
+
+Derived signals can use custom equality to control when dependents update:
+
+```ts
+const users = Signal([
+  { id: 1, name: "Alice" },
+  { id: 2, name: "Bob" },
+]);
+
+// Only update when names actually change
+const names = Signal.derive(
+  () => users.get().map(u => u.name),
+  {
+    equal: (prev, next) =>
+      prev.length === next.length &&
+      prev.every((name, i) => name === next[i]),
+  }
+);
+```
+
+## Common Patterns
+
+### Filtering and Mapping
+
+```ts
+const items = Signal([1, 2, 3, 4, 5]);
+const filter = Signal<"all" | "even" | "odd">("all");
+
+const filteredItems = Signal.derive(() => {
+  const all = items.get();
+  switch (filter.get()) {
+    case "even":
+      return all.filter(n => n % 2 === 0);
+    case "odd":
+      return all.filter(n => n % 2 !== 0);
+    default:
+      return all;
+  }
+});
+```
+
+### Combining Multiple Sources
+
+```ts
+const searchQuery = Signal("");
+const sortOrder = Signal<"asc" | "desc">("asc");
+const products = Signal<Product[]>([]);
+
+const displayedProducts = Signal.derive(() => {
+  const query = searchQuery.get().toLowerCase();
+  const order = sortOrder.get();
+
+  return products
+    .get()
+    .filter(p => p.name.toLowerCase().includes(query))
+    .sort((a, b) => {
+      const cmp = a.name.localeCompare(b.name);
+      return order === "asc" ? cmp : -cmp;
+    });
+});
+```
+
+### Async-Like Patterns
+
+While signals are synchronous, you can model loading states:
+
+```ts
+type AsyncState<T> =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "success"; data: T }
+  | { status: "error"; error: Error };
+
+const userState = Signal<AsyncState<User>>({ status: "idle" });
+
+const isLoading = Signal.derive(() => userState.get().status === "loading");
+
+const userData = Signal.derive(() => {
+  const state = userState.get();
+  return state.status === "success" ? state.data : null;
+});
+
+async function loadUser(id: string) {
+  userState.set({ status: "loading" });
+  try {
+    const data = await fetchUser(id);
+    userState.set({ status: "success", data });
+  } catch (error) {
+    userState.set({ status: "error", error: error as Error });
+  }
+}
+```
+
+## Performance Considerations
+
+### Avoid Expensive Computations
+
+If a derived signal performs expensive computations, consider caching or memoization:
+
+```ts
+// If the computation is expensive, the derived signal will
+// only recompute when dependencies change
+const expensiveResult = Signal.derive(() => {
+  return computeExpensiveThing(data.get());
+});
+```
+
+### Granular Dependencies
+
+Create focused derived signals instead of monolithic ones:
+
+```ts
+// Less optimal - everything re-renders on any change
+const userDisplay = Signal.derive(() => ({
+  name: user.get().name,
+  avatar: user.get().avatar,
+  status: user.get().status,
+}));
+
+// More optimal - components can subscribe to just what they need
+const userName = Signal.derive(() => user.get().name);
+const userAvatar = Signal.derive(() => user.get().avatar);
+const userStatus = Signal.derive(() => user.get().status);
+```
+
+## Read-Only by Design
+
+Derived signals are always read-only:
+
+```ts
+const count = Signal(0);
+const doubled = Signal.derive(() => count.get() * 2);
+
+// This would be a TypeScript error:
+// doubled.set(10); // Error: Property 'set' does not exist
+
+// To change doubled, update its source:
+count.set(5); // doubled is now 10
+```

@@ -1,0 +1,245 @@
+---
+title: untracked
+description: API reference for the untracked function
+---
+
+# untracked
+
+The `untracked` function reads signal values without creating reactive dependencies.
+
+## Function Signatures
+
+```ts
+function untracked<T>(fn: () => T): T;
+function untracked<T>(signal: ReadableSignal<T>): T;
+```
+
+## Parameters
+
+### Callback Form
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `fn` | `() => T` | Function to execute without tracking |
+
+### Signal Form
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `signal` | `ReadableSignal<T>` | Signal to read without tracking |
+
+## Returns
+
+Returns the value from the callback or signal.
+
+## Examples
+
+### Basic Usage
+
+```ts
+import { Signal, effect, untracked } from "@owanturist/signal";
+
+const count = Signal(0);
+const multiplier = Signal(2);
+
+effect(() => {
+  // count is tracked
+  // multiplier is NOT tracked
+  const result = count.get() * untracked(() => multiplier.get());
+  console.log(result);
+});
+// Logs: 0
+
+count.set(5);
+// Logs: 10
+
+multiplier.set(3);
+// Nothing logged (multiplier not tracked)
+
+count.set(5);
+// Logs: 15 (uses current multiplier value)
+```
+
+### Signal Shorthand
+
+```ts
+const count = Signal(0);
+const config = Signal({ multiplier: 2 });
+
+effect(() => {
+  // Equivalent to: untracked(() => config.get())
+  const { multiplier } = untracked(config);
+  console.log(count.get() * multiplier);
+});
+```
+
+### In Derived Signals
+
+```ts
+const items = Signal([1, 2, 3]);
+const sortOrder = Signal<"asc" | "desc">("asc");
+
+// Only re-computes when items change, not when sortOrder changes
+const sortedItems = Signal.derive(() => {
+  const order = untracked(() => sortOrder.get());
+  const arr = [...items.get()];
+
+  return order === "asc"
+    ? arr.sort((a, b) => a - b)
+    : arr.sort((a, b) => b - a);
+});
+```
+
+## Use Cases
+
+### Configuration Values
+
+Read configuration that shouldn't trigger re-runs:
+
+```ts
+const data = Signal<Item[]>([]);
+const pageSize = Signal(10);
+
+effect(() => {
+  // Re-fetch when data changes, not when pageSize changes
+  const size = untracked(() => pageSize.get());
+  displayItems(data.get().slice(0, size));
+});
+```
+
+### Logging and Debugging
+
+```ts
+const requestId = Signal(0);
+const response = Signal<Response | null>(null);
+
+effect(() => {
+  const res = response.get();
+  if (res) {
+    // Don't track requestId - just for logging
+    console.log(`Request ${untracked(requestId)} completed:`, res);
+  }
+});
+```
+
+### Conditional Dependencies
+
+```ts
+const mode = Signal<"simple" | "advanced">("simple");
+const basicConfig = Signal({ threshold: 10 });
+const advancedConfig = Signal({ threshold: 5, precision: 2 });
+
+effect(() => {
+  // Always track mode
+  if (mode.get() === "simple") {
+    // Only track basicConfig in simple mode
+    process(basicConfig.get());
+  } else {
+    // Only track advancedConfig in advanced mode
+    process(advancedConfig.get());
+  }
+});
+```
+
+### Avoiding Unnecessary Re-renders
+
+```ts
+const items = Signal<Item[]>([]);
+const selectedId = Signal<string | null>(null);
+
+// This derived signal only updates when items change
+const itemsWithSelection = Signal.derive(() => {
+  const selected = untracked(() => selectedId.get());
+  return items.get().map((item) => ({
+    ...item,
+    isSelected: item.id === selected,
+  }));
+});
+
+// To get current selection state, read both:
+effect(() => {
+  const currentItems = items.get();
+  const currentSelection = selectedId.get();
+  render(currentItems, currentSelection);
+});
+```
+
+### One-Time Reads
+
+```ts
+const initialValue = Signal(100);
+const currentValue = Signal(0);
+
+effect(() => {
+  // Read initial value once (on first run only)
+  const initial = untracked(() => initialValue.get());
+  const current = currentValue.get();
+
+  console.log(`Changed by ${current - initial}`);
+});
+```
+
+## Nested Untracked
+
+Untracked calls can be nested:
+
+```ts
+const a = Signal(1);
+const b = Signal(2);
+const c = Signal(3);
+
+effect(() => {
+  const aVal = a.get(); // tracked
+
+  const result = untracked(() => {
+    const bVal = b.get(); // not tracked
+    const cVal = untracked(() => c.get()); // also not tracked
+    return bVal + cVal;
+  });
+
+  console.log(aVal + result);
+});
+
+a.set(10); // Effect re-runs
+b.set(20); // No re-run
+c.set(30); // No re-run
+```
+
+## Common Mistakes
+
+### Tracking Still Happens Outside untracked
+
+```ts
+const a = Signal(1);
+const b = Signal(2);
+
+effect(() => {
+  const aVal = a.get(); // This IS tracked!
+  const bVal = untracked(() => b.get()); // This is not tracked
+  console.log(aVal + bVal);
+});
+```
+
+### Stale Values
+
+Since untracked values aren't dependencies, they can become stale:
+
+```ts
+const count = Signal(0);
+const label = Signal("Count");
+
+effect(() => {
+  // label might be stale
+  const lbl = untracked(() => label.get());
+  console.log(`${lbl}: ${count.get()}`);
+});
+
+label.set("Value"); // Effect doesn't re-run
+count.set(1); // Logs: "Value: 1" (label was updated)
+```
+
+## See Also
+
+- [Signals](/docs/concepts/signals)
+- [Effects](/docs/concepts/effects)
+- [effect()](/docs/api/effect)

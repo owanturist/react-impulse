@@ -1,0 +1,181 @@
+---
+title: Getting Started
+description: Install and start using @owanturist/signal in your project
+---
+
+# Getting Started
+
+Learn how to install and start using `@owanturist/signal` in your project.
+
+## Installation
+
+Install the core package using your preferred package manager:
+
+```bash tab="npm"
+npm install @owanturist/signal
+```
+
+```bash tab="pnpm"
+pnpm add @owanturist/signal
+```
+
+```bash tab="yarn"
+yarn add @owanturist/signal
+```
+
+For React applications, also install the React integration:
+
+```bash tab="npm"
+npm install @owanturist/signal-react
+```
+
+```bash tab="pnpm"
+pnpm add @owanturist/signal-react
+```
+
+```bash tab="yarn"
+yarn add @owanturist/signal-react
+```
+
+## Basic Usage
+
+### Creating a Signal
+
+Use the `Signal` function to create a reactive value:
+
+```ts
+import { Signal } from "@owanturist/signal";
+
+// Create a signal with an initial value
+const count = Signal(0);
+
+// Read the value
+console.log(count.get()); // 0
+
+// Write a new value
+count.set(1);
+console.log(count.get()); // 1
+
+// Update based on previous value
+count.set(count.get() + 1);
+console.log(count.get()); // 2
+```
+
+### Creating Derived Signals
+
+Derived signals automatically compute their value based on other signals:
+
+```ts
+const firstName = Signal("John");
+const lastName = Signal("Doe");
+
+// This signal automatically updates when firstName or lastName changes
+const fullName = Signal.derive(() => `${firstName.get()} ${lastName.get()}`);
+
+console.log(fullName.get()); // "John Doe"
+
+firstName.set("Jane");
+console.log(fullName.get()); // "Jane Doe"
+```
+
+### Using Effects
+
+Effects run side effects when their dependencies change:
+
+```ts
+import { Signal, effect } from "@owanturist/signal";
+
+const temperature = Signal(20);
+
+// This effect runs immediately and whenever temperature changes
+const cleanup = effect(() => {
+  console.log(`Current temperature: ${temperature.get()}°C`);
+});
+
+temperature.set(25); // Logs: "Current temperature: 25°C"
+temperature.set(30); // Logs: "Current temperature: 30°C"
+
+// Stop the effect when no longer needed
+cleanup();
+temperature.set(35); // No log - effect has been cleaned up
+```
+
+## React Integration
+
+### Using Signals in Components
+
+Use the `useComputed` hook to read signal values in React components:
+
+```tsx
+import { Signal } from "@owanturist/signal";
+import { useComputed } from "@owanturist/signal-react";
+
+// Create signals outside of components
+const count = Signal(0);
+
+function Counter() {
+  // useComputed subscribes to signals and triggers re-renders
+  const value = useComputed(() => count.get());
+
+  return (
+    <div>
+      <p>Count: {value}</p>
+      <button onClick={() => count.set(count.get() + 1)}>
+        Increment
+      </button>
+      <button onClick={() => count.set(count.get() - 1)}>
+        Decrement
+      </button>
+    </div>
+  );
+}
+```
+
+### Batching Updates
+
+When updating multiple signals, use `batch` to avoid unnecessary re-renders:
+
+```tsx
+import { Signal, batch } from "@owanturist/signal";
+
+const firstName = Signal("John");
+const lastName = Signal("Doe");
+const age = Signal(30);
+
+function updateUser(first: string, last: string, newAge: number) {
+  // Without batch: 3 separate updates, 3 re-renders
+  // With batch: 1 combined update, 1 re-render
+  batch(() => {
+    firstName.set(first);
+    lastName.set(last);
+    age.set(newAge);
+  });
+}
+```
+
+## TypeScript Support
+
+The library provides full TypeScript support with excellent type inference:
+
+```ts
+import { Signal, type ReadableSignal, type WritableSignal } from "@owanturist/signal";
+
+// Type is inferred as WritableSignal<number>
+const count = Signal(0);
+
+// Explicit typing for function parameters
+function double(signal: ReadableSignal<number>): ReadableSignal<number> {
+  return Signal.derive(() => signal.get() * 2);
+}
+
+const doubled = double(count);
+```
+
+## Next Steps
+
+Now that you understand the basics, explore:
+
+- [Signals](/docs/concepts/signals) - Deep dive into signal types and options
+- [Derived Signals](/docs/concepts/derived) - Learn about computed values
+- [Effects](/docs/concepts/effects) - Side effects and cleanup patterns
+- [API Reference](/docs/api/signal) - Complete API documentation

@@ -1,0 +1,308 @@
+---
+title: effect
+description: API reference for the effect function
+---
+
+# effect
+
+The `effect` function creates a reactive effect that runs whenever its signal dependencies change.
+
+## Function Signature
+
+```ts
+function effect(fn: () => void | Destructor): Destructor;
+
+type Destructor = () => void;
+```
+
+## Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `fn` | `() => void \| Destructor` | Effect function that may return a cleanup callback |
+
+## Returns
+
+Returns a `Destructor` function that stops the effect when called.
+
+## Examples
+
+### Basic Effect
+
+```ts
+import { Signal, effect } from "@owanturist/signal";
+
+const count = Signal(0);
+
+effect(() => {
+  console.log(`Count: ${count.get()}`);
+});
+// Immediately logs: "Count: 0"
+
+count.set(1);
+// Logs: "Count: 1"
+```
+
+### Stopping an Effect
+
+```ts
+const count = Signal(0);
+
+const stop = effect(() => {
+  console.log(count.get());
+});
+// Logs: 0
+
+count.set(1);
+// Logs: 1
+
+stop(); // Dispose the effect
+
+count.set(2);
+// Nothing logged
+```
+
+### Effect with Cleanup
+
+The effect function can return a cleanup callback:
+
+```ts
+import { Signal, effect } from "@owanturist/signal";
+
+const interval = Signal(1000);
+
+effect(() => {
+  const ms = interval.get();
+  const id = setInterval(() => {
+    console.log("tick");
+  }, ms);
+
+  // Cleanup runs before re-execution and on disposal
+  return () => {
+    clearInterval(id);
+  };
+});
+
+// Change interval - old interval is cleared, new one started
+interval.set(500);
+```
+
+### DOM Event Listeners
+
+```ts
+const handler = Signal((e: MouseEvent) => {
+  console.log("clicked", e.clientX, e.clientY);
+});
+
+effect(() => {
+  const fn = handler.get();
+  document.addEventListener("click", fn);
+
+  return () => {
+    document.removeEventListener("click", fn);
+  };
+});
+```
+
+### Subscriptions
+
+```ts
+const userId = Signal("user-123");
+
+effect(() => {
+  const id = userId.get();
+  const unsubscribe = database.subscribe(`users/${id}`, (user) => {
+    console.log("User updated:", user);
+  });
+
+  return unsubscribe;
+});
+```
+
+## Dependency Tracking
+
+Effects automatically track signal dependencies:
+
+```ts
+const a = Signal(1);
+const b = Signal(2);
+const useA = Signal(true);
+
+effect(() => {
+  if (useA.get()) {
+    console.log("A:", a.get());
+  } else {
+    console.log("B:", b.get());
+  }
+});
+// Logs: "A: 1"
+
+b.set(10);
+// Nothing logged (b is not a current dependency)
+
+useA.set(false);
+// Logs: "B: 10"
+
+a.set(100);
+// Nothing logged (a is no longer a dependency)
+```
+
+## Timing
+
+Effects run synchronously after signal updates:
+
+```ts
+const count = Signal(0);
+
+effect(() => {
+  console.log("effect:", count.get());
+});
+// Logs: "effect: 0"
+
+console.log("before set");
+count.set(1);
+console.log("after set");
+
+// Output order:
+// "effect: 0"
+// "before set"
+// "effect: 1"
+// "after set"
+```
+
+## Conditional Effects
+
+Effects only run when their tracked dependencies change:
+
+```ts
+const enabled = Signal(false);
+const count = Signal(0);
+
+effect(() => {
+  if (!enabled.get()) {
+    return; // Early return - count is not tracked
+  }
+  console.log("Count:", count.get());
+});
+
+count.set(1); // No log (enabled is false, count not tracked)
+
+enabled.set(true);
+// Logs: "Count: 1"
+
+count.set(2);
+// Logs: "Count: 2"
+```
+
+## Cleanup Timing
+
+The cleanup function runs:
+
+1. **Before re-execution** - When dependencies change
+2. **On disposal** - When `stop()` is called
+
+```ts
+const source = Signal("initial");
+
+const stop = effect(() => {
+  const value = source.get();
+  console.log("setup:", value);
+
+  return () => {
+    console.log("cleanup:", value);
+  };
+});
+// Logs: "setup: initial"
+
+source.set("updated");
+// Logs: "cleanup: initial"
+// Logs: "setup: updated"
+
+stop();
+// Logs: "cleanup: updated"
+```
+
+## Error Handling
+
+If an effect throws, it won't prevent other effects from running:
+
+```ts
+const count = Signal(0);
+
+effect(() => {
+  if (count.get() === 1) {
+    throw new Error("Oops!");
+  }
+  console.log("effect 1:", count.get());
+});
+
+effect(() => {
+  console.log("effect 2:", count.get());
+});
+
+count.set(1);
+// effect 1 throws
+// effect 2 still logs: "effect 2: 1"
+```
+
+## Best Practices
+
+### Single Responsibility
+
+Each effect should do one thing:
+
+```ts
+// Good
+effect(() => {
+  document.title = `Count: ${count.get()}`;
+});
+
+effect(() => {
+  localStorage.setItem("count", String(count.get()));
+});
+
+// Less ideal
+effect(() => {
+  document.title = `Count: ${count.get()}`;
+  localStorage.setItem("count", String(count.get()));
+});
+```
+
+### Always Clean Up Resources
+
+```ts
+effect(() => {
+  const ws = new WebSocket(url.get());
+
+  ws.onmessage = (e) => {
+    handleMessage(e.data);
+  };
+
+  return () => {
+    ws.close();
+  };
+});
+```
+
+### Avoid Circular Dependencies
+
+```ts
+// BAD: Creates infinite loop
+const count = Signal(0);
+effect(() => {
+  count.set(count.get() + 1);
+});
+
+// GOOD: Use separate signals
+const source = Signal(0);
+const derived = Signal(0);
+effect(() => {
+  derived.set(source.get() + 1);
+});
+```
+
+## See Also
+
+- [Effects Concept](/docs/concepts/effects)
+- [batch()](/docs/api/batch)
+- [untracked()](/docs/api/untracked)

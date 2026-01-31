@@ -1,0 +1,201 @@
+---
+title: Signal
+description: API reference for the Signal function and signal types
+---
+
+# Signal
+
+The `Signal` function creates reactive signals that hold values and notify dependents when changed.
+
+## Function Signature
+
+```ts
+function Signal<T>(initialValue: T, options?: SignalOptions<T>): WritableSignal<T>;
+
+function Signal.derive<T>(compute: () => T, options?: SignalOptions<T>): ReadableSignal<T>;
+```
+
+## Parameters
+
+### `Signal(initialValue, options?)`
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `initialValue` | `T` | The initial value of the signal |
+| `options` | `SignalOptions<T>` | Optional configuration |
+
+### `Signal.derive(compute, options?)`
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `compute` | `() => T` | Function that computes the derived value |
+| `options` | `SignalOptions<T>` | Optional configuration |
+
+## Options
+
+```ts
+interface SignalOptions<T> {
+  equal?: Equal<T>;
+}
+
+type Equal<T> = (prev: T, next: T) => boolean;
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `equal` | `(prev: T, next: T) => boolean` | `Object.is` | Custom equality function |
+
+## Return Types
+
+### WritableSignal\<T\>
+
+```ts
+interface WritableSignal<T> extends ReadableSignal<T> {
+  set(value: T): void;
+}
+```
+
+### ReadableSignal\<T\>
+
+```ts
+interface ReadableSignal<T> {
+  get(): T;
+  get(monitor: Monitor): T;
+}
+```
+
+## Examples
+
+### Basic Usage
+
+```ts
+import { Signal } from "@owanturist/signal";
+
+// Create a writable signal
+const count = Signal(0);
+
+// Read the value
+console.log(count.get()); // 0
+
+// Write a new value
+count.set(1);
+console.log(count.get()); // 1
+```
+
+### Derived Signals
+
+```ts
+const price = Signal(100);
+const quantity = Signal(2);
+
+const total = Signal.derive(() => price.get() * quantity.get());
+
+console.log(total.get()); // 200
+
+price.set(150);
+console.log(total.get()); // 300
+```
+
+### Custom Equality
+
+```ts
+interface Point {
+  x: number;
+  y: number;
+}
+
+const position = Signal<Point>(
+  { x: 0, y: 0 },
+  {
+    equal: (a, b) => a.x === b.x && a.y === b.y,
+  }
+);
+
+position.set({ x: 0, y: 0 }); // No update (equal)
+position.set({ x: 1, y: 0 }); // Update triggered
+```
+
+### Type Inference
+
+```ts
+// Type is inferred as WritableSignal<number>
+const count = Signal(0);
+
+// Type is inferred as WritableSignal<string>
+const name = Signal("Alice");
+
+// Explicit type for complex types
+const user = Signal<User | null>(null);
+
+// Derived signal type is inferred
+const doubled = Signal.derive(() => count.get() * 2);
+// Type: ReadableSignal<number>
+```
+
+## Type Guards
+
+### isSignal
+
+```ts
+function isSignal(value: unknown): value is ReadableSignal<unknown>;
+```
+
+Check if a value is any type of signal:
+
+```ts
+import { Signal, isSignal } from "@owanturist/signal";
+
+const count = Signal(0);
+const derived = Signal.derive(() => count.get() * 2);
+
+isSignal(count); // true
+isSignal(derived); // true
+isSignal(42); // false
+isSignal({ get: () => 0 }); // false
+```
+
+### isDerivedSignal
+
+```ts
+function isDerivedSignal(value: unknown): value is ReadableSignal<unknown>;
+```
+
+Check if a value is a derived (computed) signal:
+
+```ts
+import { Signal, isDerivedSignal } from "@owanturist/signal";
+
+const count = Signal(0);
+const derived = Signal.derive(() => count.get() * 2);
+
+isDerivedSignal(count); // false
+isDerivedSignal(derived); // true
+```
+
+## Related Types
+
+### ReadonlySignal
+
+A type alias for signals without the `set` method:
+
+```ts
+type ReadonlySignal<T> = Omit<WritableSignal<T>, "set">;
+```
+
+Useful for exposing read-only views:
+
+```ts
+import { Signal, type ReadonlySignal } from "@owanturist/signal";
+
+const _count = Signal(0);
+
+// Expose as read-only
+export const count: ReadonlySignal<number> = _count;
+```
+
+## See Also
+
+- [Signals Concept](/docs/concepts/signals)
+- [Derived Signals](/docs/concepts/derived)
+- [batch()](/docs/api/batch)
+- [effect()](/docs/api/effect)

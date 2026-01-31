@@ -25,3 +25,7 @@ yarn-error.log*
 lerna-debug.log*
 
 cypress/videos
+
+# docs
+docs/.next
+docs/.source

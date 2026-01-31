@@ -1,0 +1,250 @@
+---
+title: MonitorFactory
+description: API reference for the MonitorFactory class
+---
+
+# MonitorFactory
+
+`MonitorFactory` is an advanced API for creating custom monitors that track signal dependencies. This is primarily used for building framework integrations.
+
+## Import
+
+```ts
+import { MonitorFactory } from "@owanturist/signal/monitor-factory";
+```
+
+Note: `MonitorFactory` is exported from a separate entrypoint, not the main package.
+
+## Class Definition
+
+```ts
+class MonitorFactory {
+  constructor(onChange: () => void);
+  create(): Monitor;
+  dispose(): void;
+}
+```
+
+## Constructor
+
+```ts
+new MonitorFactory(onChange: () => void)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `onChange` | `() => void` | Callback invoked when any tracked signal changes |
+
+## Methods
+
+### create()
+
+```ts
+create(): Monitor
+```
+
+Creates a new `Monitor` instance for tracking signal reads.
+
+**Returns:** A `Monitor` object that can be passed to `signal.get(monitor)`.
+
+### dispose()
+
+```ts
+dispose(): void
+```
+
+Cleans up all subscriptions and stops tracking. After calling `dispose()`, the `onChange` callback will no longer be invoked.
+
+## Monitor Interface
+
+```ts
+interface Monitor {
+  // Internal interface used by signals
+}
+```
+
+The `Monitor` type is opaque - you pass it to `signal.get()` to track dependencies.
+
+## Examples
+
+### Basic Usage
+
+```ts
+import { Signal } from "@owanturist/signal";
+import { MonitorFactory } from "@owanturist/signal/monitor-factory";
+
+const count = Signal(0);
+
+const factory = new MonitorFactory(() => {
+  console.log("A tracked signal changed!");
+});
+
+// Create a monitor and track reads
+const monitor = factory.create();
+const value = count.get(monitor);
+
+console.log(value); // 0
+
+count.set(1);
+// Logs: "A tracked signal changed!"
+
+// Clean up when done
+factory.dispose();
+
+count.set(2);
+// Nothing logged (disposed)
+```
+
+### Building a Custom Hook
+
+Here's how you might use `MonitorFactory` to build a React hook:
+
+```tsx
+import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { MonitorFactory } from "@owanturist/signal/monitor-factory";
+
+function useSignalValue<T>(compute: () => T): T {
+  const store = useMemo(() => {
+    let currentValue: T;
+    let factory: MonitorFactory | null = null;
+    const listeners = new Set<() => void>();
+
+    const subscribe = (listener: () => void) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    };
+
+    const getSnapshot = () => {
+      if (factory === null) {
+        factory = new MonitorFactory(() => {
+          // Re-compute and notify listeners
+          const monitor = factory!.create();
+          currentValue = compute();
+          listeners.forEach((l) => l());
+        });
+      }
+
+      const monitor = factory.create();
+      currentValue = compute();
+      return currentValue;
+    };
+
+    return { subscribe, getSnapshot };
+  }, [compute]);
+
+  return useSyncExternalStore(store.subscribe, store.getSnapshot);
+}
+```
+
+### Multiple Monitors
+
+A single factory can create multiple monitors for different tracking scopes:
+
+```ts
+const a = Signal(1);
+const b = Signal(2);
+
+const factory = new MonitorFactory(() => {
+  console.log("Changed!");
+});
+
+// First read scope
+const monitor1 = factory.create();
+a.get(monitor1);
+
+// Second read scope
+const monitor2 = factory.create();
+b.get(monitor2);
+
+// Both a and b are now tracked
+a.set(10); // Logs: "Changed!"
+b.set(20); // Logs: "Changed!"
+```
+
+## Use Cases
+
+### Framework Integration
+
+`MonitorFactory` is the building block for integrating signals with UI frameworks:
+
+- React hooks (`useComputed`, `useMonitor`)
+- Vue composables
+- Svelte stores
+- Custom rendering systems
+
+### Custom Reactive Systems
+
+Build custom reactive primitives:
+
+```ts
+function createWatcher<T>(
+  compute: () => T,
+  callback: (value: T) => void
+): () => void {
+  const factory = new MonitorFactory(() => {
+    const monitor = factory.create();
+    const value = compute();
+    callback(value);
+  });
+
+  // Initial run
+  const monitor = factory.create();
+  const value = compute();
+  callback(value);
+
+  // Return cleanup function
+  return () => factory.dispose();
+}
+
+// Usage
+const count = Signal(0);
+const stop = createWatcher(
+  () => count.get() * 2,
+  (doubled) => console.log("Doubled:", doubled)
+);
+// Logs: "Doubled: 0"
+
+count.set(5);
+// Logs: "Doubled: 10"
+
+stop();
+```
+
+### Testing
+
+Useful for testing signal reactivity:
+
+```ts
+function trackDependencies<T>(compute: () => T): {
+  value: T;
+  changeCount: number;
+} {
+  let changeCount = 0;
+
+  const factory = new MonitorFactory(() => {
+    changeCount++;
+  });
+
+  const monitor = factory.create();
+  const value = compute();
+
+  return {
+    value,
+    get changeCount() {
+      return changeCount;
+    },
+  };
+}
+```
+
+## Important Notes
+
+1. **Memory management**: Always call `dispose()` when the factory is no longer needed
+2. **Single callback**: One factory has one `onChange` callback for all tracked signals
+3. **Synchronous**: The `onChange` callback is invoked synchronously when signals change
+4. **Advanced API**: Most users should use `effect()` or framework-specific hooks instead
+
+## See Also
+
+- [effect()](/docs/api/effect)
+- [Signals](/docs/concepts/signals)

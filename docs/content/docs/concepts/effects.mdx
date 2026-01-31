@@ -1,0 +1,305 @@
+---
+title: Effects
+description: Running side effects in response to signal changes
+---
+
+# Effects
+
+Effects let you run side effects in response to signal changes. They automatically track dependencies and re-run when those dependencies change.
+
+## Creating Effects
+
+Use the `effect` function to create a reactive effect:
+
+```ts
+import { Signal, effect } from "@owanturist/signal";
+
+const count = Signal(0);
+
+effect(() => {
+  console.log(`Count is: ${count.get()}`);
+});
+// Immediately logs: "Count is: 0"
+
+count.set(1);
+// Logs: "Count is: 1"
+
+count.set(2);
+// Logs: "Count is: 2"
+```
+
+## Cleanup
+
+Effects return a cleanup function to stop the effect:
+
+```ts
+const count = Signal(0);
+
+const cleanup = effect(() => {
+  console.log(count.get());
+});
+
+count.set(1); // Logs: 1
+
+cleanup(); // Stop the effect
+
+count.set(2); // Nothing logged
+```
+
+## Effect Cleanup Callbacks
+
+Effects can return a cleanup callback that runs before each re-execution and when the effect is disposed:
+
+```ts
+import { Signal, effect } from "@owanturist/signal";
+
+const userId = Signal("user-1");
+
+effect(() => {
+  const id = userId.get();
+  const subscription = subscribeToUser(id);
+
+  // This cleanup runs:
+  // 1. Before the effect re-runs (when userId changes)
+  // 2. When the effect is disposed
+  return () => {
+    subscription.unsubscribe();
+  };
+});
+```
+
+### Practical Cleanup Example
+
+```ts
+const isActive = Signal(true);
+
+effect(() => {
+  if (!isActive.get()) return;
+
+  const interval = setInterval(() => {
+    console.log("Tick");
+  }, 1000);
+
+  return () => {
+    clearInterval(interval);
+  };
+});
+
+// Later: stop the interval
+isActive.set(false);
+```
+
+## Dependency Tracking
+
+Effects automatically track which signals they read:
+
+```ts
+const a = Signal(1);
+const b = Signal(2);
+const useB = Signal(true);
+
+effect(() => {
+  if (useB.get()) {
+    console.log(a.get() + b.get()); // Depends on: useB, a, b
+  } else {
+    console.log(a.get()); // Depends on: useB, a
+  }
+});
+
+useB.set(false);
+b.set(100); // Effect does NOT re-run (b is no longer a dependency)
+```
+
+## Avoiding Infinite Loops
+
+Be careful not to create effects that update signals they depend on:
+
+```ts
+// DANGER: Infinite loop!
+const count = Signal(0);
+
+effect(() => {
+  count.set(count.get() + 1); // Reads and writes count
+});
+```
+
+If you need to update a signal based on another, use a derived signal or separate the read and write:
+
+```ts
+// Safe: separate signals
+const source = Signal(0);
+const derived = Signal(0);
+
+effect(() => {
+  derived.set(source.get() * 2);
+});
+
+source.set(5); // derived becomes 10
+```
+
+## Reading Without Tracking
+
+Use `untracked` to read a signal without creating a dependency:
+
+```ts
+import { Signal, effect, untracked } from "@owanturist/signal";
+
+const count = Signal(0);
+const multiplier = Signal(2);
+
+effect(() => {
+  // Only count is tracked
+  const result = count.get() * untracked(() => multiplier.get());
+  console.log(result);
+});
+
+count.set(5); // Effect runs, logs: 10
+multiplier.set(3); // Effect does NOT run
+count.set(5); // Effect runs, logs: 15 (uses current multiplier)
+```
+
+## Effects with Batching
+
+When multiple signals update, effects run once after all updates:
+
+```ts
+import { Signal, effect, batch } from "@owanturist/signal";
+
+const firstName = Signal("John");
+const lastName = Signal("Doe");
+
+effect(() => {
+  console.log(`${firstName.get()} ${lastName.get()}`);
+});
+// Logs: "John Doe"
+
+batch(() => {
+  firstName.set("Jane");
+  lastName.set("Smith");
+});
+// Logs once: "Jane Smith" (not twice)
+```
+
+## Common Patterns
+
+### DOM Updates
+
+```ts
+const theme = Signal<"light" | "dark">("light");
+
+effect(() => {
+  document.body.classList.toggle("dark", theme.get() === "dark");
+});
+```
+
+### Local Storage Sync
+
+```ts
+const settings = Signal(loadFromStorage());
+
+effect(() => {
+  localStorage.setItem("settings", JSON.stringify(settings.get()));
+});
+```
+
+### Logging and Debugging
+
+```ts
+const state = Signal({ count: 0, name: "test" });
+
+// Development-only logging
+if (process.env.NODE_ENV === "development") {
+  effect(() => {
+    console.log("State changed:", state.get());
+  });
+}
+```
+
+### Event Listeners
+
+```ts
+const handler = Signal<(e: KeyboardEvent) => void>(() => {});
+
+effect(() => {
+  const fn = handler.get();
+  window.addEventListener("keydown", fn);
+
+  return () => {
+    window.removeEventListener("keydown", fn);
+  };
+});
+```
+
+## Effects vs Derived Signals
+
+Choose the right tool:
+
+| Use Case | Tool |
+|----------|------|
+| Computing a value from other signals | `Signal.derive()` |
+| Side effects (DOM, network, logging) | `effect()` |
+| Transforming data | `Signal.derive()` |
+| Syncing with external systems | `effect()` |
+
+```ts
+// Derived: computing a value
+const total = Signal.derive(() => price.get() * quantity.get());
+
+// Effect: side effect
+effect(() => {
+  analytics.track("cart_updated", { total: total.get() });
+});
+```
+
+## Best Practices
+
+### Keep Effects Focused
+
+Each effect should do one thing:
+
+```ts
+// Good: separate concerns
+effect(() => {
+  updateDOM(state.get());
+});
+
+effect(() => {
+  saveToStorage(state.get());
+});
+
+// Avoid: mixed concerns
+effect(() => {
+  updateDOM(state.get());
+  saveToStorage(state.get());
+  sendAnalytics(state.get());
+});
+```
+
+### Always Clean Up Resources
+
+When creating subscriptions, timers, or event listeners, always return a cleanup function:
+
+```ts
+effect(() => {
+  const timer = setTimeout(() => {
+    doSomething();
+  }, 1000);
+
+  return () => clearTimeout(timer);
+});
+```
+
+### Avoid Heavy Computations
+
+Effects run synchronously. For heavy work, consider:
+
+```ts
+effect(() => {
+  const data = largeDataset.get();
+
+  // Defer heavy work
+  requestIdleCallback(() => {
+    processHeavyData(data);
+  });
+});
+```

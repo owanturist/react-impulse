@@ -1,0 +1,244 @@
+---
+title: Signals
+description: Understanding Signal, ReadableSignal, and WritableSignal
+---
+
+# Signals
+
+Signals are the core building block of reactive state management. They hold values that can be read and observed for changes.
+
+## Signal Types
+
+The library provides three signal types:
+
+| Type | Description |
+|------|-------------|
+| `WritableSignal<T>` | A signal that can be read and written |
+| `ReadableSignal<T>` | A signal that can only be read |
+| `ReadonlySignal<T>` | Type alias for a signal without the `set` method |
+
+### WritableSignal
+
+Created with `Signal()`, writable signals allow both reading and writing:
+
+```ts
+import { Signal, type WritableSignal } from "@owanturist/signal";
+
+const count: WritableSignal<number> = Signal(0);
+
+// Read
+const value = count.get();
+
+// Write
+count.set(1);
+```
+
+### ReadableSignal
+
+Derived signals and readonly views implement `ReadableSignal`:
+
+```ts
+import { Signal, type ReadableSignal } from "@owanturist/signal";
+
+const count = Signal(0);
+const doubled: ReadableSignal<number> = Signal.derive(() => count.get() * 2);
+
+// Can read
+console.log(doubled.get()); // 0
+
+// Cannot write - no set method
+// doubled.set(10); // Error: Property 'set' does not exist
+```
+
+## Creating Signals
+
+### Basic Creation
+
+```ts
+import { Signal } from "@owanturist/signal";
+
+// With initial value (type inferred)
+const count = Signal(0);
+const name = Signal("Alice");
+const items = Signal<string[]>([]);
+
+// With explicit type
+const maybeUser = Signal<User | null>(null);
+```
+
+### With Options
+
+Signals accept an options object for customization:
+
+```ts
+import { Signal } from "@owanturist/signal";
+
+const count = Signal(0, {
+  // Custom equality function
+  equal: (prev, next) => prev === next,
+});
+```
+
+#### Custom Equality
+
+By default, signals use `Object.is` for equality comparison. You can provide a custom equality function:
+
+```ts
+// Deep equality for objects
+const user = Signal(
+  { name: "Alice", age: 30 },
+  {
+    equal: (prev, next) =>
+      prev.name === next.name && prev.age === next.age,
+  }
+);
+
+// Setting the same values won't trigger updates
+user.set({ name: "Alice", age: 30 }); // No update - values are equal
+user.set({ name: "Bob", age: 30 }); // Update - name changed
+```
+
+## Reading Signal Values
+
+### The `get` Method
+
+Use `get()` to read the current value:
+
+```ts
+const count = Signal(5);
+console.log(count.get()); // 5
+```
+
+### Tracking vs Non-Tracking
+
+When called inside a reactive context (derived signal or effect), `get()` automatically tracks the signal as a dependency:
+
+```ts
+import { Signal, effect } from "@owanturist/signal";
+
+const count = Signal(0);
+
+// count is tracked as a dependency
+effect(() => {
+  console.log(count.get()); // Re-runs when count changes
+});
+```
+
+To read without tracking, use `untracked`:
+
+```ts
+import { Signal, effect, untracked } from "@owanturist/signal";
+
+const count = Signal(0);
+const multiplier = Signal(2);
+
+effect(() => {
+  // count is tracked, multiplier is not
+  const result = count.get() * untracked(() => multiplier.get());
+  console.log(result);
+});
+
+count.set(5); // Effect re-runs
+multiplier.set(3); // Effect does NOT re-run
+```
+
+## Writing Signal Values
+
+### The `set` Method
+
+Use `set()` to update the value:
+
+```ts
+const count = Signal(0);
+
+count.set(1);
+count.set(count.get() + 1);
+```
+
+### Conditional Updates
+
+Updates only trigger when the new value is different (according to the equality function):
+
+```ts
+const count = Signal(0);
+
+count.set(0); // No update - same value
+count.set(1); // Update - different value
+```
+
+## Type Guards
+
+The library provides type guards to check signal types:
+
+```ts
+import { Signal, isSignal, isDerivedSignal } from "@owanturist/signal";
+
+const writable = Signal(0);
+const derived = Signal.derive(() => writable.get() * 2);
+
+isSignal(writable); // true
+isSignal(derived); // true
+isSignal(42); // false
+
+isDerivedSignal(writable); // false
+isDerivedSignal(derived); // true
+```
+
+## Best Practices
+
+### Keep Signals at the Right Level
+
+Create signals at the appropriate scope:
+
+```ts
+// Global/module level - shared state
+const theme = Signal<"light" | "dark">("light");
+
+// Component level - local state
+function createCounter() {
+  const count = Signal(0);
+  return {
+    count: count as ReadableSignal<number>,
+    increment: () => count.set(count.get() + 1),
+  };
+}
+```
+
+### Expose Read-Only Views
+
+When exposing signals from modules, consider returning `ReadableSignal`:
+
+```ts
+import { Signal, type ReadableSignal } from "@owanturist/signal";
+
+const _count = Signal(0);
+
+// Expose read-only view
+export const count: ReadableSignal<number> = _count;
+
+// Expose controlled mutations
+export function increment() {
+  _count.set(_count.get() + 1);
+}
+```
+
+### Avoid Reading in Loops
+
+Reading signals in loops can cause unnecessary re-renders:
+
+```ts
+// Bad - reads count on every iteration
+effect(() => {
+  for (let i = 0; i < 100; i++) {
+    doSomething(count.get());
+  }
+});
+
+// Good - read once
+effect(() => {
+  const value = count.get();
+  for (let i = 0; i < 100; i++) {
+    doSomething(value);
+  }
+});
+```

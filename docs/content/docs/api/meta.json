@@ -1,0 +1,4 @@
+{
+  "title": "API Reference",
+  "pages": ["signal", "batch", "effect", "untracked", "monitor-factory"]
+}
