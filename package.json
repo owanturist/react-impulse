@@ -6,6 +6,8 @@
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
     "cs": "changeset",
+    "version": "changeset version",
+    "release": "pnpm --recursive publish --access=public && changeset tag",
     "size": "size-limit",
     "test": "vitest",
     "test:run": "pnpm test --run --reporter=dot",
@@ -21,7 +23,7 @@
     "build:minified": "pnpm build --env.NODE_ENV=production --minify=terser"
   },
   "engines": {
-    "node": ">=22.14.0"
+    "node": ">=24.13.0"
   },
   "packageManager": "pnpm@10.6.5",
   "repository": {

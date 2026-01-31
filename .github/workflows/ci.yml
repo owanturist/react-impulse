@@ -188,18 +188,11 @@ jobs:
       - name: Build packages
         run: pnpm build:minified
 
-      # Create user .npmrc with empty auth token so changesets doesn't add its own
-      # See: https://github.com/orgs/community/discussions/176761
-      - name: Setup .npmrc for OIDC
-        run: echo "//registry.npmjs.org/:_authToken=" > ~/.npmrc
-
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
         with:
-          publish: pnpm --recursive publish --provenance --tag=${{ github.ref_name == 'master' && 'latest' || github.ref_name == 'next' && 'next' || github.ref_name == 'alpha' && 'alpha' || github.ref_name == 'beta' && 'beta' || ' ' }}
+          version: pnpm run version
+          publish: pnpm run release -- --tag=${{ github.ref_name == 'master' && 'latest' || github.ref_name == 'next' && 'next' || github.ref_name == 'alpha' && 'alpha' || github.ref_name == 'beta' && 'beta' || ' ' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
-          # Unset token auth from setup-node so npm uses OIDC
-          NODE_AUTH_TOKEN: ""
-          NPM_CONFIG_USERCONFIG: ""
