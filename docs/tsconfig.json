@@ -9,13 +9,9 @@
     "incremental": true,
     "verbatimModuleSyntax": false,
     "types": [],
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "plugins": [{ "name": "next" }],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/app/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"]

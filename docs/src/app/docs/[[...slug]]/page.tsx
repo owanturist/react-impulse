@@ -3,7 +3,7 @@ import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/page
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
-import { source } from "@/app/source"
+import { source } from "@/source"
 
 interface PageProps {
   params: Promise<{ slug?: Array<string> }>

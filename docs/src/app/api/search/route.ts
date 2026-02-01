@@ -1,6 +1,6 @@
 import { createFromSource } from "fumadocs-core/search/server"
 
-import { source } from "@/app/source"
+import { source } from "@/source"
 
 export const revalidate = false
 
