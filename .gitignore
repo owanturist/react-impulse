@@ -29,3 +29,4 @@ cypress/videos
 # docs
 docs/.next
 docs/.source
+docs/next-env.d.ts
