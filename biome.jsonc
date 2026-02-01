@@ -318,11 +318,12 @@
 
     // docs env setup
     {
-      "includes": ["./docs/**/*.{ts,tsx,m?js,jsx}"],
+      "includes": ["docs/**/*.{ts,tsx,mjs,jsx}"],
       "linter": {
         "rules": {
           "style": {
-            "noDefaultExport": "off" // docs use default exports
+            "noDefaultExport": "off", // docs use default exports
+            "useComponentExportOnlyModules": "off" // docs might export non-component modules from roots
           }
         }
       }

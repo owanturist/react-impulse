@@ -1,9 +1,9 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs"
-import type { ReactNode } from "react"
+import type { PropsWithChildren } from "react"
 
 import { source } from "@/app/source"
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function Layout({ children }: PropsWithChildren) {
   return (
     <DocsLayout
       tree={source.pageTree}

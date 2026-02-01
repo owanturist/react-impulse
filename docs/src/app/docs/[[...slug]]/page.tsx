@@ -1,5 +1,6 @@
 import defaultMdxComponents from "fumadocs-ui/mdx"
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/page"
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { source } from "@/app/source"
@@ -11,29 +12,33 @@ interface PageProps {
 export default async function Page(props: PageProps) {
   const params = await props.params
   const page = source.getPage(params.slug)
-  if (!page) notFound()
+  if (!page) {
+    return notFound()
+  }
 
-  const MDX = page.data.body
+  const MarkdownX = page.data.body
 
   return (
     <DocsPage toc={page.data.toc}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <MDX components={{ ...defaultMdxComponents }} />
+        <MarkdownX components={defaultMdxComponents} />
       </DocsBody>
     </DocsPage>
   )
 }
 
-export async function generateStaticParams() {
+export function generateStaticParams() {
   return source.generateParams()
 }
 
-export async function generateMetadata(props: PageProps) {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params
   const page = source.getPage(params.slug)
-  if (!page) notFound()
+  if (!page) {
+    return notFound()
+  }
 
   return {
     title: page.data.title,
