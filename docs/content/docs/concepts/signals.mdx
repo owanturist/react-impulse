@@ -209,7 +209,7 @@ The library provides several types for working with signals:
 | Type | Description |
 |------|-------------|
 | `Signal<T>` | A signal that can be read and written |
-| `ReadonlySignal<T>` | A signal without the `write` method (returned by derived signals) |
+| `ReadonlySignal<T>` | A signal without the `write` method (e.g., derived signals created without a setter) |
 | `ReadableSignal<T>` | Interface for anything that can be read with a Monitor |
 | `WritableSignal<T>` | Interface for anything that can be written to |
 
