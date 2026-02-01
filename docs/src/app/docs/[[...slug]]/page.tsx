@@ -19,7 +19,13 @@ export default async function Page(props: PageProps) {
   const MarkdownX = page.data.body
 
   return (
-    <DocsPage toc={page.data.toc}>
+    <DocsPage
+      tableOfContent={{
+        // Animate the TOC with nice floating indication
+        style: "clerk",
+      }}
+      toc={page.data.toc}
+    >
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
