@@ -159,8 +159,8 @@ const celsius = Signal(0)
 const fahrenheit = Signal(
   // Getter: compute fahrenheit from celsius
   (monitor) => celsius.read(monitor) * 9/5 + 32,
-  // Setter: when fahrenheit is written, update celsius
-  (value) => celsius.write((value - 32) * 5/9)
+  // Setter: receives value and monitor (monitor unused here)
+  (value, _monitor) => celsius.write((value - 32) * 5/9)
 )
 
 effect((monitor) => {
@@ -172,7 +172,7 @@ fahrenheit.write(212)
 // logs: "100C = 212F"
 ```
 
-The setter function receives the new value and should update the source signals. The getter then recomputes based on the updated sources.
+The setter function receives the new value and a monitor (for reading other signals if needed), and should update the source signals. The getter then recomputes based on the updated sources.
 
 ## Custom Equality
 

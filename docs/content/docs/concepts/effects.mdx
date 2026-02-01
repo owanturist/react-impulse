@@ -31,7 +31,7 @@ Here's what happens step by step:
 2. `count.read(monitor)` returns the value AND registers this monitor with the signal
 3. Later, `count.write(1)` updates the value and notifies all watching monitors
 4. The effect's monitor triggers a re-run
-5. The effect executes again with the same monitor (dependencies are re-tracked)
+5. The effect executes again with a fresh monitor (dependencies are re-tracked)
 
 ## Why Effects Exist
 
@@ -160,8 +160,8 @@ const multiplier = Signal(2)
 
 effect((monitor) => {
   // count is tracked
-  // multiplier is NOT tracked
-  const result = count.read(monitor) * untracked((m) => multiplier.read(m))
+  // multiplier is NOT tracked (using the shorthand form)
+  const result = count.read(monitor) * untracked(multiplier)
   console.log(result)
 })
 

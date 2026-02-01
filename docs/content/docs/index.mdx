@@ -19,23 +19,24 @@ Signals provide a simple yet powerful primitive for reactive state management:
 
 ## Core Concepts
 
-The library is built around a few key concepts:
+The library is built around two key concepts that work together: **Signals** hold values, and **Monitors** track who is reading them.
 
 ### Signals
 
-A **Signal** holds a reactive value that can be read and written. When the value changes, all dependent computations are automatically notified.
+A **Signal** holds a reactive value that can be read and written. When the value changes, all dependent computations are automatically notified through the Monitor system.
 
 ```ts
-import { Signal } from "@owanturist/signal";
+import { Signal, effect } from "@owanturist/signal"
 
-const count = Signal(0);
+const count = Signal(0)
 
-// Read the current value
-console.log(count.get()); // 0
+// Read the value inside an effect (which provides a monitor)
+effect((monitor) => {
+  console.log(count.read(monitor)) // 0
+})
 
 // Update the value
-count.set(1);
-console.log(count.get()); // 1
+count.write(1) // Effect re-runs, logs: 1
 ```
 
 ### Derived Signals
@@ -43,12 +44,14 @@ console.log(count.get()); // 1
 Create computed values that automatically update when their dependencies change:
 
 ```ts
-const count = Signal(0);
-const doubled = Signal.derive(() => count.get() * 2);
+const count = Signal(0)
+const doubled = Signal((monitor) => count.read(monitor) * 2)
 
-console.log(doubled.get()); // 0
-count.set(5);
-console.log(doubled.get()); // 10
+effect((monitor) => {
+  console.log(doubled.read(monitor)) // 0
+})
+
+count.write(5) // Effect logs: 10
 ```
 
 ### Effects
@@ -56,16 +59,16 @@ console.log(doubled.get()); // 10
 Run side effects when signal values change:
 
 ```ts
-import { Signal, effect } from "@owanturist/signal";
+import { Signal, effect } from "@owanturist/signal"
 
-const name = Signal("World");
+const name = Signal("World")
 
-effect(() => {
-  console.log(`Hello, ${name.get()}!`);
-});
+effect((monitor) => {
+  console.log(`Hello, ${name.read(monitor)}!`)
+})
 // Logs: "Hello, World!"
 
-name.set("Signals");
+name.write("Signals")
 // Logs: "Hello, Signals!"
 ```
 
@@ -84,22 +87,22 @@ The library is split into focused packages:
 Here's a complete example using signals with React:
 
 ```tsx
-import { Signal, effect } from "@owanturist/signal";
-import { useComputed } from "@owanturist/signal-react";
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
 
-const count = Signal(0);
+const count = Signal(0)
 
 function Counter() {
-  const value = useComputed(() => count.get());
+  const value = useComputed((monitor) => count.read(monitor))
 
   return (
     <div>
       <p>Count: {value}</p>
-      <button onClick={() => count.set(count.get() + 1)}>
+      <button onClick={() => count.write((c) => c + 1)}>
         Increment
       </button>
     </div>
-  );
+  )
 }
 ```
 
