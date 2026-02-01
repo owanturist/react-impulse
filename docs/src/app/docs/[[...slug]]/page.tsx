@@ -1,23 +1,19 @@
-import { source } from "@/app/source";
-import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-} from "fumadocs-ui/page";
-import { notFound } from "next/navigation";
-import defaultMdxComponents from "fumadocs-ui/mdx";
+import defaultMdxComponents from "fumadocs-ui/mdx"
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/page"
+import { notFound } from "next/navigation"
+
+import { source } from "@/app/source"
 
 interface PageProps {
-  params: Promise<{ slug?: Array<string> }>;
+  params: Promise<{ slug?: Array<string> }>
 }
 
 export default async function Page(props: PageProps) {
-  const params = await props.params;
-  const page = source.getPage(params.slug);
-  if (!page) notFound();
+  const params = await props.params
+  const page = source.getPage(params.slug)
+  if (!page) notFound()
 
-  const MDX = page.data.body;
+  const MDX = page.data.body
 
   return (
     <DocsPage toc={page.data.toc}>
@@ -27,20 +23,20 @@ export default async function Page(props: PageProps) {
         <MDX components={{ ...defaultMdxComponents }} />
       </DocsBody>
     </DocsPage>
-  );
+  )
 }
 
 export async function generateStaticParams() {
-  return source.generateParams();
+  return source.generateParams()
 }
 
 export async function generateMetadata(props: PageProps) {
-  const params = await props.params;
-  const page = source.getPage(params.slug);
-  if (!page) notFound();
+  const params = await props.params
+  const page = source.getPage(params.slug)
+  if (!page) notFound()
 
   return {
     title: page.data.title,
     description: page.data.description,
-  };
+  }
 }

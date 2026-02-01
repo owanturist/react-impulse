@@ -140,6 +140,7 @@
           "style": {
             "noParameterProperties": "off", // parameter properties are encouraged in this codebase
             "noNestedTernary": "off", // sometimes nested ternary improves code conciseness and readability
+            "noImplicitBoolean": "off", // implicit boolean is encouraged in this codebase
             "useDefaultSwitchClause": "off", // having default clause prevents TS exhaustiveness checks
             "useConsistentCurlyBraces": {
               "fix": "safe", // allow autofix
@@ -310,6 +311,18 @@
           },
           "suspicious": {
             "noConsole": "off" // devtools often use console
+          }
+        }
+      }
+    },
+
+    // docs env setup
+    {
+      "includes": ["./docs/**/*.{ts,tsx,m?js,jsx}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off" // docs use default exports
           }
         }
       }

@@ -1,4 +1,11 @@
 {
   "title": "Documentation",
-  "pages": ["index", "getting-started", "---Concepts---", "...concepts", "---API Reference---", "...api"]
+  "pages": [
+    "index",
+    "getting-started",
+    "---Concepts---",
+    "...concepts",
+    "---API Reference---",
+    "...api"
+  ]
 }

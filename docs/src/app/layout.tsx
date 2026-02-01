@@ -1,6 +1,6 @@
-import "./styles.css";
-import { RootProvider } from "fumadocs-ui/provider/next";
-import type { ReactNode } from "react";
+import "./styles.css"
+import { RootProvider } from "fumadocs-ui/provider/next"
+import type { ReactNode } from "react"
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
@@ -17,5 +17,5 @@ export default function Layout({ children }: { children: ReactNode }) {
         </RootProvider>
       </body>
     </html>
-  );
+  )
 }
