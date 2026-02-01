@@ -10,7 +10,7 @@ description: API reference for the MonitorFactory class
 ## Import
 
 ```ts
-import { MonitorFactory } from "@owanturist/signal/monitor-factory";
+import { MonitorFactory } from "@owanturist/signal/monitor-factory"
 ```
 
 Note: `MonitorFactory` is exported from a separate entrypoint, not the main package.
@@ -19,41 +19,44 @@ Note: `MonitorFactory` is exported from a separate entrypoint, not the main pack
 
 ```ts
 class MonitorFactory {
-  constructor(onChange: () => void);
-  create(): Monitor;
-  dispose(): void;
+  public get create(): () => Monitor
+  public connect(emit: VoidFunction): VoidFunction
 }
 ```
 
 ## Constructor
 
 ```ts
-new MonitorFactory(onChange: () => void)
+new MonitorFactory()
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `onChange` | `() => void` | Callback invoked when any tracked signal changes |
+The constructor takes no parameters.
 
 ## Methods
 
-### create()
+### create (getter)
 
 ```ts
-create(): Monitor
+public get create(): () => Monitor
 ```
 
-Creates a new `Monitor` instance for tracking signal reads.
+Returns a factory function that creates new `Monitor` instances for tracking signal reads.
 
-**Returns:** A `Monitor` object that can be passed to `signal.get(monitor)`.
+**Returns:** A function `() => Monitor` that creates fresh Monitor instances.
 
-### dispose()
+### connect(emit)
 
 ```ts
-dispose(): void
+public connect(emit: VoidFunction): VoidFunction
 ```
 
-Cleans up all subscriptions and stops tracking. After calling `dispose()`, the `onChange` callback will no longer be invoked.
+Registers an emission callback that will be invoked when any tracked signal changes.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `emit` | `VoidFunction` | Callback invoked when any tracked signal changes |
+
+**Returns:** A cleanup function that invalidates the underlying emitter when invoked.
 
 ## Monitor Interface
 
@@ -63,36 +66,39 @@ interface Monitor {
 }
 ```
 
-The `Monitor` type is opaque - you pass it to `signal.get()` to track dependencies.
+The `Monitor` type is opaque - you pass it to `signal.read()` to track dependencies.
 
 ## Examples
 
 ### Basic Usage
 
 ```ts
-import { Signal } from "@owanturist/signal";
-import { MonitorFactory } from "@owanturist/signal/monitor-factory";
+import { Signal } from "@owanturist/signal"
+import { MonitorFactory } from "@owanturist/signal/monitor-factory"
 
-const count = Signal(0);
+const count = Signal(0)
 
-const factory = new MonitorFactory(() => {
-  console.log("A tracked signal changed!");
-});
+const factory = new MonitorFactory()
+
+// Connect a callback to be notified of changes
+const disconnect = factory.connect(() => {
+  console.log("A tracked signal changed!")
+})
 
 // Create a monitor and track reads
-const monitor = factory.create();
-const value = count.get(monitor);
+const monitor = factory.create()
+const value = count.read(monitor)
 
-console.log(value); // 0
+console.log(value) // 0
 
-count.set(1);
+count.write(1)
 // Logs: "A tracked signal changed!"
 
 // Clean up when done
-factory.dispose();
+disconnect()
 
-count.set(2);
-// Nothing logged (disposed)
+count.write(2)
+// Nothing logged (disconnected)
 ```
 
 ### Building a Custom Hook
@@ -100,39 +106,40 @@ count.set(2);
 Here's how you might use `MonitorFactory` to build a React hook:
 
 ```tsx
-import { useCallback, useMemo, useSyncExternalStore } from "react";
-import { MonitorFactory } from "@owanturist/signal/monitor-factory";
+import { useCallback, useMemo, useSyncExternalStore } from "react"
+import { MonitorFactory } from "@owanturist/signal/monitor-factory"
 
-function useSignalValue<T>(compute: () => T): T {
+function useSignalValue<T>(compute: (monitor: Monitor) => T): T {
   const store = useMemo(() => {
-    let currentValue: T;
-    let factory: MonitorFactory | null = null;
-    const listeners = new Set<() => void>();
+    let currentValue: T
+    let factory: MonitorFactory | null = null
+    const listeners = new Set<() => void>()
 
     const subscribe = (listener: () => void) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    };
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    }
 
     const getSnapshot = () => {
       if (factory === null) {
-        factory = new MonitorFactory(() => {
+        factory = new MonitorFactory()
+        factory.connect(() => {
           // Re-compute and notify listeners
-          const monitor = factory!.create();
-          currentValue = compute();
-          listeners.forEach((l) => l());
-        });
+          const monitor = factory!.create()
+          currentValue = compute(monitor)
+          listeners.forEach((l) => l())
+        })
       }
 
-      const monitor = factory.create();
-      currentValue = compute();
-      return currentValue;
-    };
+      const monitor = factory.create()
+      currentValue = compute(monitor)
+      return currentValue
+    }
 
-    return { subscribe, getSnapshot };
-  }, [compute]);
+    return { subscribe, getSnapshot }
+  }, [compute])
 
-  return useSyncExternalStore(store.subscribe, store.getSnapshot);
+  return useSyncExternalStore(store.subscribe, store.getSnapshot)
 }
 ```
 
@@ -141,24 +148,27 @@ function useSignalValue<T>(compute: () => T): T {
 A single factory can create multiple monitors for different tracking scopes:
 
 ```ts
-const a = Signal(1);
-const b = Signal(2);
+const a = Signal(1)
+const b = Signal(2)
 
-const factory = new MonitorFactory(() => {
-  console.log("Changed!");
-});
+const factory = new MonitorFactory()
+const disconnect = factory.connect(() => {
+  console.log("Changed!")
+})
 
 // First read scope
-const monitor1 = factory.create();
-a.get(monitor1);
+const monitor1 = factory.create()
+a.read(monitor1)
 
 // Second read scope
-const monitor2 = factory.create();
-b.get(monitor2);
+const monitor2 = factory.create()
+b.read(monitor2)
 
 // Both a and b are now tracked
-a.set(10); // Logs: "Changed!"
-b.set(20); // Logs: "Changed!"
+a.write(10) // Logs: "Changed!"
+b.write(20) // Logs: "Changed!"
+
+disconnect()
 ```
 
 ## Use Cases
@@ -178,36 +188,38 @@ Build custom reactive primitives:
 
 ```ts
 function createWatcher<T>(
-  compute: () => T,
+  compute: (monitor: Monitor) => T,
   callback: (value: T) => void
 ): () => void {
-  const factory = new MonitorFactory(() => {
-    const monitor = factory.create();
-    const value = compute();
-    callback(value);
-  });
+  const factory = new MonitorFactory()
+
+  const disconnect = factory.connect(() => {
+    const monitor = factory.create()
+    const value = compute(monitor)
+    callback(value)
+  })
 
   // Initial run
-  const monitor = factory.create();
-  const value = compute();
-  callback(value);
+  const monitor = factory.create()
+  const value = compute(monitor)
+  callback(value)
 
   // Return cleanup function
-  return () => factory.dispose();
+  return disconnect
 }
 
 // Usage
-const count = Signal(0);
+const count = Signal(0)
 const stop = createWatcher(
-  () => count.get() * 2,
+  (monitor) => count.read(monitor) * 2,
   (doubled) => console.log("Doubled:", doubled)
-);
+)
 // Logs: "Doubled: 0"
 
-count.set(5);
+count.write(5)
 // Logs: "Doubled: 10"
 
-stop();
+stop()
 ```
 
 ### Testing
@@ -215,33 +227,36 @@ stop();
 Useful for testing signal reactivity:
 
 ```ts
-function trackDependencies<T>(compute: () => T): {
-  value: T;
-  changeCount: number;
+function trackDependencies<T>(compute: (monitor: Monitor) => T): {
+  value: T
+  changeCount: number
+  disconnect: () => void
 } {
-  let changeCount = 0;
+  let changeCount = 0
 
-  const factory = new MonitorFactory(() => {
-    changeCount++;
-  });
+  const factory = new MonitorFactory()
+  const disconnect = factory.connect(() => {
+    changeCount++
+  })
 
-  const monitor = factory.create();
-  const value = compute();
+  const monitor = factory.create()
+  const value = compute(monitor)
 
   return {
     value,
     get changeCount() {
-      return changeCount;
+      return changeCount
     },
-  };
+    disconnect,
+  }
 }
 ```
 
 ## Important Notes
 
-1. **Memory management**: Always call `dispose()` when the factory is no longer needed
-2. **Single callback**: One factory has one `onChange` callback for all tracked signals
-3. **Synchronous**: The `onChange` callback is invoked synchronously when signals change
+1. **Memory management**: Always call the disconnect function returned by `connect()` when the factory is no longer needed
+2. **Single callback**: One factory has one `connect` callback for all tracked signals
+3. **Synchronous**: The `emit` callback is invoked synchronously when signals change
 4. **Advanced API**: Most users should use `effect()` or framework-specific hooks instead
 
 ## See Also

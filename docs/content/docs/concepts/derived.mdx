@@ -1,229 +1,336 @@
 ---
 title: Derived Signals
-description: Creating computed values that automatically update
+description: Computing values that automatically stay in sync with their sources
 ---
 
 # Derived Signals
 
-Derived signals compute their value from other signals and automatically update when dependencies change.
+Derived signals compute their value from other signals. They use the same Monitor pattern to track dependencies, and they automatically recompute when those dependencies change.
 
 ## Creating Derived Signals
 
-Use `Signal.derive()` to create a computed signal:
+Pass a function to `Signal()` instead of a value. The function receives a monitor:
 
 ```ts
-import { Signal } from "@owanturist/signal";
+import { Signal, effect } from "@owanturist/signal"
 
-const count = Signal(0);
-const doubled = Signal.derive(() => count.get() * 2);
+const count = Signal(0)
+const doubled = Signal((monitor) => count.read(monitor) * 2)
 
-console.log(doubled.get()); // 0
+effect((monitor) => {
+  console.log(doubled.read(monitor)) // 0
+})
 
-count.set(5);
-console.log(doubled.get()); // 10
+count.write(5)
+// Effect logs: 10
 ```
 
-## Automatic Dependency Tracking
+## How Derived Signals Use Monitors
 
-Derived signals automatically track which signals they depend on:
+A derived signal works just like an effect - it receives a monitor and reads signals through it. This establishes the dependency chain:
 
 ```ts
-const firstName = Signal("John");
-const lastName = Signal("Doe");
-const showFullName = Signal(true);
+const firstName = Signal("John")
+const lastName = Signal("Doe")
 
-// Dependencies are tracked dynamically
-const displayName = Signal.derive(() => {
-  if (showFullName.get()) {
-    // Depends on: showFullName, firstName, lastName
-    return `${firstName.get()} ${lastName.get()}`;
+// The derived signal's monitor watches firstName and lastName
+const fullName = Signal((monitor) => {
+  return `${firstName.read(monitor)} ${lastName.read(monitor)}`
+})
+
+// When you read fullName, your monitor watches fullName
+effect((monitor) => {
+  console.log(fullName.read(monitor))
+})
+```
+
+The flow of notifications:
+1. `firstName.write("Jane")` - firstName notifies fullName's monitor
+2. fullName marks itself as needing recomputation
+3. fullName notifies the effect's monitor
+4. The effect re-runs and reads the new fullName value
+
+## Dynamic Dependency Tracking
+
+Just like effects, derived signals track dependencies dynamically based on what gets read:
+
+```ts
+const showFullName = Signal(true)
+const firstName = Signal("John")
+const lastName = Signal("Doe")
+
+const displayName = Signal((monitor) => {
+  if (showFullName.read(monitor)) {
+    // Dependencies: showFullName, firstName, lastName
+    return `${firstName.read(monitor)} ${lastName.read(monitor)}`
   }
-  // Depends on: showFullName, firstName only
-  return firstName.get();
-});
+  // Dependencies: showFullName, firstName only
+  return firstName.read(monitor)
+})
 
-showFullName.set(false);
-lastName.set("Smith"); // Does NOT trigger update (not a dependency anymore)
-firstName.set("Jane"); // Triggers update
+showFullName.write(false)
+lastName.write("Smith") // Does NOT trigger recomputation
+firstName.write("Jane") // Triggers recomputation
 ```
+
+When `showFullName` becomes `false`, the derived signal no longer reads `lastName`, so changes to it are ignored until `showFullName` becomes `true` again.
 
 ## Chaining Derived Signals
 
-Derived signals can depend on other derived signals:
+Derived signals can depend on other derived signals, forming computation chains:
 
 ```ts
-const price = Signal(100);
-const quantity = Signal(2);
-const taxRate = Signal(0.1);
+const price = Signal(100)
+const quantity = Signal(2)
+const taxRate = Signal(0.1)
 
-const subtotal = Signal.derive(() => price.get() * quantity.get());
-const tax = Signal.derive(() => subtotal.get() * taxRate.get());
-const total = Signal.derive(() => subtotal.get() + tax.get());
+const subtotal = Signal((monitor) => {
+  return price.read(monitor) * quantity.read(monitor)
+})
 
-console.log(total.get()); // 220
+const tax = Signal((monitor) => {
+  return subtotal.read(monitor) * taxRate.read(monitor)
+})
 
-price.set(150);
-console.log(total.get()); // 330
+const total = Signal((monitor) => {
+  return subtotal.read(monitor) + tax.read(monitor)
+})
+
+effect((monitor) => {
+  console.log(`Total: $${total.read(monitor)}`) // Total: $220
+})
+
+price.write(150)
+// Effect logs: Total: $330
 ```
+
+Each derived signal has its own monitor. When `price` changes:
+1. `subtotal` recomputes (it watches `price`)
+2. `tax` recomputes (it watches `subtotal`)
+3. `total` recomputes (it watches both `subtotal` and `tax`)
+4. The effect re-runs (it watches `total`)
 
 ## Lazy Evaluation
 
-Derived signals are computed lazily - they only recalculate when read:
+Derived signals are lazy - they only compute when actually read:
 
 ```ts
-const count = Signal(0);
+const count = Signal(0)
 
-const expensive = Signal.derive(() => {
-  console.log("Computing...");
-  return count.get() * 2;
-});
+const expensive = Signal((monitor) => {
+  console.log("Computing...")
+  return count.read(monitor) * 2
+})
 
-count.set(1);
-count.set(2);
-count.set(3);
-// No "Computing..." logged yet
+count.write(1)
+count.write(2)
+count.write(3)
+// No "Computing..." logged yet - nobody has read the signal
 
-console.log(expensive.get()); // "Computing..." then 6
-console.log(expensive.get()); // 6 (cached, no recomputation)
+effect((monitor) => {
+  console.log(expensive.read(monitor))
+})
+// Now it logs: "Computing..." then "6"
 ```
 
-## With Custom Equality
+This means unused derived signals have zero cost. They only do work when their value is needed.
 
-Derived signals can use custom equality to control when dependents update:
+## Memoization
+
+Once computed, the value is cached until dependencies change:
+
+```ts
+effect((monitor) => {
+  console.log(expensive.read(monitor)) // "Computing..." then 6
+  console.log(expensive.read(monitor)) // 6 (no recomputation)
+  console.log(expensive.read(monitor)) // 6 (no recomputation)
+})
+```
+
+Reading the same derived signal multiple times in one execution only computes once.
+
+## Bidirectional Derived Signals
+
+You can create derived signals that can be written to by providing both a getter and setter:
+
+```ts
+const celsius = Signal(0)
+
+const fahrenheit = Signal(
+  // Getter: compute fahrenheit from celsius
+  (monitor) => celsius.read(monitor) * 9/5 + 32,
+  // Setter: when fahrenheit is written, update celsius
+  (value) => celsius.write((value - 32) * 5/9)
+)
+
+effect((monitor) => {
+  console.log(`${celsius.read(monitor)}C = ${fahrenheit.read(monitor)}F`)
+})
+// logs: "0C = 32F"
+
+fahrenheit.write(212)
+// logs: "100C = 212F"
+```
+
+The setter function receives the new value and should update the source signals. The getter then recomputes based on the updated sources.
+
+## Custom Equality
+
+Derived signals can use custom equality to prevent unnecessary updates downstream:
 
 ```ts
 const users = Signal([
   { id: 1, name: "Alice" },
   { id: 2, name: "Bob" },
-]);
+])
 
-// Only update when names actually change
-const names = Signal.derive(
-  () => users.get().map(u => u.name),
+const names = Signal(
+  (monitor) => users.read(monitor).map(u => u.name),
   {
-    equal: (prev, next) =>
+    equals: (prev, next) =>
       prev.length === next.length &&
       prev.every((name, i) => name === next[i]),
   }
-);
+)
 ```
+
+Even if the `users` array reference changes, if the names are the same, watchers of `names` won't be notified.
 
 ## Common Patterns
 
 ### Filtering and Mapping
 
 ```ts
-const items = Signal([1, 2, 3, 4, 5]);
-const filter = Signal<"all" | "even" | "odd">("all");
+const items = Signal([1, 2, 3, 4, 5])
+const filter = Signal<"all" | "even" | "odd">("all")
 
-const filteredItems = Signal.derive(() => {
-  const all = items.get();
-  switch (filter.get()) {
+const filteredItems = Signal((monitor) => {
+  const all = items.read(monitor)
+  switch (filter.read(monitor)) {
     case "even":
-      return all.filter(n => n % 2 === 0);
+      return all.filter(n => n % 2 === 0)
     case "odd":
-      return all.filter(n => n % 2 !== 0);
-    default:
-      return all;
+      return all.filter(n => n % 2 !== 0)
+    case "all":
+      return all
   }
-});
+})
 ```
 
 ### Combining Multiple Sources
 
 ```ts
-const searchQuery = Signal("");
-const sortOrder = Signal<"asc" | "desc">("asc");
-const products = Signal<Product[]>([]);
+const searchQuery = Signal("")
+const sortOrder = Signal<"asc" | "desc">("asc")
+const products = Signal<Product[]>([])
 
-const displayedProducts = Signal.derive(() => {
-  const query = searchQuery.get().toLowerCase();
-  const order = sortOrder.get();
+const displayedProducts = Signal((monitor) => {
+  const query = searchQuery.read(monitor).toLowerCase()
+  const order = sortOrder.read(monitor)
 
   return products
-    .get()
+    .read(monitor)
     .filter(p => p.name.toLowerCase().includes(query))
     .sort((a, b) => {
-      const cmp = a.name.localeCompare(b.name);
-      return order === "asc" ? cmp : -cmp;
-    });
-});
+      const cmp = a.name.localeCompare(b.name)
+      return order === "asc" ? cmp : -cmp
+    })
+})
 ```
 
-### Async-Like Patterns
+### Async State Patterns
 
-While signals are synchronous, you can model loading states:
+While signals are synchronous, you can model async states:
 
 ```ts
 type AsyncState<T> =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "success"; data: T }
-  | { status: "error"; error: Error };
+  | { status: "error"; error: Error }
 
-const userState = Signal<AsyncState<User>>({ status: "idle" });
+const userState = Signal<AsyncState<User>>({ status: "idle" })
 
-const isLoading = Signal.derive(() => userState.get().status === "loading");
+// Derived helpers
+const isLoading = Signal((monitor) =>
+  userState.read(monitor).status === "loading"
+)
 
-const userData = Signal.derive(() => {
-  const state = userState.get();
-  return state.status === "success" ? state.data : null;
-});
+const userData = Signal((monitor) => {
+  const state = userState.read(monitor)
+  return state.status === "success" ? state.data : null
+})
 
+// Async loader
 async function loadUser(id: string) {
-  userState.set({ status: "loading" });
+  userState.write({ status: "loading" })
   try {
-    const data = await fetchUser(id);
-    userState.set({ status: "success", data });
+    const data = await fetchUser(id)
+    userState.write({ status: "success", data })
   } catch (error) {
-    userState.set({ status: "error", error: error as Error });
+    userState.write({ status: "error", error: error as Error })
   }
 }
 ```
 
-## Performance Considerations
+## Performance Tips
 
-### Avoid Expensive Computations
-
-If a derived signal performs expensive computations, consider caching or memoization:
-
-```ts
-// If the computation is expensive, the derived signal will
-// only recompute when dependencies change
-const expensiveResult = Signal.derive(() => {
-  return computeExpensiveThing(data.get());
-});
-```
-
-### Granular Dependencies
+### Granular Derived Signals
 
 Create focused derived signals instead of monolithic ones:
 
 ```ts
-// Less optimal - everything re-renders on any change
-const userDisplay = Signal.derive(() => ({
-  name: user.get().name,
-  avatar: user.get().avatar,
-  status: user.get().status,
-}));
+// Less optimal - any user change triggers all watchers
+const userDisplay = Signal((monitor) => ({
+  name: user.read(monitor).name,
+  avatar: user.read(monitor).avatar,
+  status: user.read(monitor).status,
+}))
 
-// More optimal - components can subscribe to just what they need
-const userName = Signal.derive(() => user.get().name);
-const userAvatar = Signal.derive(() => user.get().avatar);
-const userStatus = Signal.derive(() => user.get().status);
+// More optimal - watchers can subscribe to just what they need
+const userName = Signal((monitor) => user.read(monitor).name)
+const userAvatar = Signal((monitor) => user.read(monitor).avatar)
+const userStatus = Signal((monitor) => user.read(monitor).status)
 ```
 
-## Read-Only by Design
+Components can then watch only the specific derived signal they care about.
 
-Derived signals are always read-only:
+### Use Custom Equality
+
+When a derived signal produces objects or arrays, custom equality can prevent cascading updates:
 
 ```ts
-const count = Signal(0);
-const doubled = Signal.derive(() => count.get() * 2);
+const coords = Signal((monitor) => ({
+  x: xSignal.read(monitor),
+  y: ySignal.read(monitor),
+}), {
+  equals: (a, b) => a.x === b.x && a.y === b.y,
+})
+```
 
-// This would be a TypeScript error:
-// doubled.set(10); // Error: Property 'set' does not exist
+## Read-Only by Default
+
+Derived signals without a setter are read-only:
+
+```ts
+const count = Signal(0)
+const doubled = Signal((monitor) => count.read(monitor) * 2)
+
+// TypeScript error: Property 'write' does not exist
+// doubled.write(10)
 
 // To change doubled, update its source:
-count.set(5); // doubled is now 10
+count.write(5) // doubled is now 10
 ```
+
+## Summary
+
+Derived signals extend the Monitor pattern to computed values:
+
+- They receive a monitor and read source signals through it
+- Dependencies are tracked automatically and dynamically
+- They're lazy (computed on demand) and memoized (cached until invalidated)
+- They form chains that propagate changes efficiently
+- Optional setters enable bidirectional bindings
+
+Think of derived signals as formulas in a spreadsheet - they express relationships between values, and the system keeps everything in sync automatically.

@@ -1,254 +1,303 @@
 ---
 title: Effects
-description: Running side effects in response to signal changes
+description: Running side effects that respond to signal changes
 ---
 
 # Effects
 
-Effects let you run side effects in response to signal changes. They automatically track dependencies and re-run when those dependencies change.
+Effects are where the Monitor pattern meets the outside world. While signals and derived signals are about managing data, effects are about doing things in response to data changes - updating the DOM, making network requests, logging, and other side effects.
 
-## Creating Effects
+## The Effect-Monitor Connection
 
-Use the `effect` function to create a reactive effect:
+When you create an effect, it receives a monitor. This is the same Monitor pattern used throughout the library:
 
 ```ts
-import { Signal, effect } from "@owanturist/signal";
+import { Signal, effect } from "@owanturist/signal"
 
-const count = Signal(0);
+const count = Signal(0)
 
-effect(() => {
-  console.log(`Count is: ${count.get()}`);
-});
+effect((monitor) => {
+  // Pass the monitor to .read() - this registers the effect as a watcher
+  console.log(`Count is: ${count.read(monitor)}`)
+})
 // Immediately logs: "Count is: 0"
 
-count.set(1);
-// Logs: "Count is: 1"
-
-count.set(2);
-// Logs: "Count is: 2"
+count.write(1)
+// The effect re-runs, logs: "Count is: 1"
 ```
 
-## Cleanup
+Here's what happens step by step:
+1. The effect runs immediately with a fresh monitor
+2. `count.read(monitor)` returns the value AND registers this monitor with the signal
+3. Later, `count.write(1)` updates the value and notifies all watching monitors
+4. The effect's monitor triggers a re-run
+5. The effect executes again with the same monitor (dependencies are re-tracked)
 
-Effects return a cleanup function to stop the effect:
+## Why Effects Exist
+
+Signals and derived signals are pure - they just hold or compute values. But applications need to interact with the outside world:
+
+- Update the DOM
+- Save to localStorage
+- Send analytics events
+- Start or stop timers
+- Subscribe to external services
+
+Effects bridge this gap. They let you run impure code in response to signal changes while still benefiting from automatic dependency tracking.
+
+## Stopping Effects
+
+Effects return a stop function:
 
 ```ts
-const count = Signal(0);
+const count = Signal(0)
 
-const cleanup = effect(() => {
-  console.log(count.get());
-});
+const stop = effect((monitor) => {
+  console.log(count.read(monitor))
+})
+// Logs: 0
 
-count.set(1); // Logs: 1
+count.write(1) // Logs: 1
+count.write(2) // Logs: 2
 
-cleanup(); // Stop the effect
+stop() // Disconnect the effect
 
-count.set(2); // Nothing logged
+count.write(3) // Nothing logged - effect is stopped
 ```
 
-## Effect Cleanup Callbacks
+When you call `stop()`, the effect's monitor is unregistered from all signals. Changes no longer trigger re-runs.
 
-Effects can return a cleanup callback that runs before each re-execution and when the effect is disposed:
+## Cleanup Callbacks
+
+Effects can return a cleanup function that runs before each re-execution and when the effect stops:
 
 ```ts
-import { Signal, effect } from "@owanturist/signal";
+const userId = Signal("user-1")
 
-const userId = Signal("user-1");
+effect((monitor) => {
+  const id = userId.read(monitor)
+  const subscription = subscribeToUser(id)
 
-effect(() => {
-  const id = userId.get();
-  const subscription = subscribeToUser(id);
-
-  // This cleanup runs:
-  // 1. Before the effect re-runs (when userId changes)
-  // 2. When the effect is disposed
+  // Cleanup runs:
+  // 1. Before re-running (when userId changes)
+  // 2. When the effect is stopped
   return () => {
-    subscription.unsubscribe();
-  };
-});
+    subscription.unsubscribe()
+  }
+})
 ```
 
-### Practical Cleanup Example
+This is essential for preventing resource leaks. Without cleanup, changing `userId` would create new subscriptions without closing old ones.
+
+### Practical Cleanup Examples
+
+**Timers:**
 
 ```ts
-const isActive = Signal(true);
+const isActive = Signal(true)
 
-effect(() => {
-  if (!isActive.get()) return;
+effect((monitor) => {
+  if (!isActive.read(monitor)) return
 
   const interval = setInterval(() => {
-    console.log("Tick");
-  }, 1000);
+    console.log("Tick")
+  }, 1000)
 
-  return () => {
-    clearInterval(interval);
-  };
-});
+  return () => clearInterval(interval)
+})
 
-// Later: stop the interval
-isActive.set(false);
+isActive.write(false) // Cleanup runs, interval stops
 ```
 
-## Dependency Tracking
-
-Effects automatically track which signals they read:
+**Event listeners:**
 
 ```ts
-const a = Signal(1);
-const b = Signal(2);
-const useB = Signal(true);
+const handler = Signal<(e: KeyboardEvent) => void>(() => {})
 
-effect(() => {
-  if (useB.get()) {
-    console.log(a.get() + b.get()); // Depends on: useB, a, b
+effect((monitor) => {
+  const fn = handler.read(monitor)
+  window.addEventListener("keydown", fn)
+
+  return () => window.removeEventListener("keydown", fn)
+})
+```
+
+## Dynamic Dependencies
+
+Just like derived signals, effects track dependencies dynamically:
+
+```ts
+const a = Signal(1)
+const b = Signal(2)
+const useB = Signal(true)
+
+effect((monitor) => {
+  if (useB.read(monitor)) {
+    // Dependencies: useB, a, b
+    console.log(a.read(monitor) + b.read(monitor))
   } else {
-    console.log(a.get()); // Depends on: useB, a
+    // Dependencies: useB, a only
+    console.log(a.read(monitor))
   }
-});
+})
 
-useB.set(false);
-b.set(100); // Effect does NOT re-run (b is no longer a dependency)
+useB.write(false)
+b.write(100) // Effect does NOT re-run - b is no longer watched
+a.write(5)   // Effect re-runs
 ```
 
-## Avoiding Infinite Loops
-
-Be careful not to create effects that update signals they depend on:
-
-```ts
-// DANGER: Infinite loop!
-const count = Signal(0);
-
-effect(() => {
-  count.set(count.get() + 1); // Reads and writes count
-});
-```
-
-If you need to update a signal based on another, use a derived signal or separate the read and write:
-
-```ts
-// Safe: separate signals
-const source = Signal(0);
-const derived = Signal(0);
-
-effect(() => {
-  derived.set(source.get() * 2);
-});
-
-source.set(5); // derived becomes 10
-```
+The monitor tracks exactly what signals were read on the last run. When `useB` becomes false, the effect no longer reads `b`, so its monitor is unregistered from `b`.
 
 ## Reading Without Tracking
 
-Use `untracked` to read a signal without creating a dependency:
+Use `untracked` to read a signal without establishing a dependency:
 
 ```ts
-import { Signal, effect, untracked } from "@owanturist/signal";
+import { Signal, effect, untracked } from "@owanturist/signal"
 
-const count = Signal(0);
-const multiplier = Signal(2);
+const count = Signal(0)
+const multiplier = Signal(2)
 
-effect(() => {
-  // Only count is tracked
-  const result = count.get() * untracked(() => multiplier.get());
-  console.log(result);
-});
+effect((monitor) => {
+  // count is tracked
+  // multiplier is NOT tracked
+  const result = count.read(monitor) * untracked((m) => multiplier.read(m))
+  console.log(result)
+})
 
-count.set(5); // Effect runs, logs: 10
-multiplier.set(3); // Effect does NOT run
-count.set(5); // Effect runs, logs: 15 (uses current multiplier)
+count.write(5)       // Effect runs, logs: 10
+multiplier.write(3)  // Effect does NOT run
+count.write(5)       // Effect runs, logs: 15 (uses current multiplier value)
 ```
 
-## Effects with Batching
+The effect ignores changes to `multiplier`, but still uses its current value when `count` triggers a re-run.
 
-When multiple signals update, effects run once after all updates:
+## Batching Multiple Updates
+
+When you update multiple signals, you might want effects to run once after all updates rather than after each one. Use `batch`:
 
 ```ts
-import { Signal, effect, batch } from "@owanturist/signal";
+import { Signal, effect, batch } from "@owanturist/signal"
 
-const firstName = Signal("John");
-const lastName = Signal("Doe");
+const firstName = Signal("John")
+const lastName = Signal("Doe")
 
-effect(() => {
-  console.log(`${firstName.get()} ${lastName.get()}`);
-});
+effect((monitor) => {
+  console.log(`${firstName.read(monitor)} ${lastName.read(monitor)}`)
+})
 // Logs: "John Doe"
 
 batch(() => {
-  firstName.set("Jane");
-  lastName.set("Smith");
-});
-// Logs once: "Jane Smith" (not twice)
+  firstName.write("Jane")
+  lastName.write("Smith")
+})
+// Logs once: "Jane Smith"
 ```
+
+Without batching, the effect would run twice - once for each signal update. With batching, all updates are collected and effects run once at the end.
+
+## Avoiding Infinite Loops
+
+Be careful not to write to signals that the effect reads:
+
+```ts
+// DANGER: Infinite loop!
+const count = Signal(0)
+
+effect((monitor) => {
+  count.write(count.read(monitor) + 1)
+})
+```
+
+The effect reads `count`, then writes to it, which triggers the effect again, forever.
+
+If you need to update one signal based on another, use separate signals:
+
+```ts
+// Safe: reading and writing different signals
+const source = Signal(0)
+const derived = Signal(0)
+
+effect((monitor) => {
+  derived.write(source.read(monitor) * 2)
+})
+
+source.write(5) // derived becomes 10
+```
+
+Or better yet, use a derived signal instead of an effect.
+
+## Effects vs Derived Signals
+
+Choose the right tool for the job:
+
+| Use Case | Tool |
+|----------|------|
+| Computing a value from other signals | Derived signal |
+| Transforming or filtering data | Derived signal |
+| Side effects (DOM, network, logging) | Effect |
+| Syncing with external systems | Effect |
+
+```ts
+// Derived signal: computing a value
+const total = Signal((monitor) => {
+  return price.read(monitor) * quantity.read(monitor)
+})
+
+// Effect: doing something with that value
+effect((monitor) => {
+  analytics.track("cart_updated", { total: total.read(monitor) })
+})
+```
+
+Effects are for actions. Derived signals are for values.
 
 ## Common Patterns
 
 ### DOM Updates
 
 ```ts
-const theme = Signal<"light" | "dark">("light");
+const theme = Signal<"light" | "dark">("light")
 
-effect(() => {
-  document.body.classList.toggle("dark", theme.get() === "dark");
-});
+effect((monitor) => {
+  document.body.classList.toggle("dark", theme.read(monitor) === "dark")
+})
 ```
 
 ### Local Storage Sync
 
 ```ts
-const settings = Signal(loadFromStorage());
+const settings = Signal(loadFromStorage())
 
-effect(() => {
-  localStorage.setItem("settings", JSON.stringify(settings.get()));
-});
+effect((monitor) => {
+  localStorage.setItem("settings", JSON.stringify(settings.read(monitor)))
+})
 ```
 
-### Logging and Debugging
+### Debugging
 
 ```ts
-const state = Signal({ count: 0, name: "test" });
-
-// Development-only logging
 if (process.env.NODE_ENV === "development") {
-  effect(() => {
-    console.log("State changed:", state.get());
-  });
+  effect((monitor) => {
+    console.log("State changed:", state.read(monitor))
+  })
 }
 ```
 
-### Event Listeners
+### Conditional Effects
 
 ```ts
-const handler = Signal<(e: KeyboardEvent) => void>(() => {});
+const isConnected = Signal(false)
+const messages = Signal<Message[]>([])
 
-effect(() => {
-  const fn = handler.get();
-  window.addEventListener("keydown", fn);
+effect((monitor) => {
+  if (!isConnected.read(monitor)) {
+    return // No dependencies on messages when disconnected
+  }
 
-  return () => {
-    window.removeEventListener("keydown", fn);
-  };
-});
-```
-
-## Effects vs Derived Signals
-
-Choose the right tool:
-
-| Use Case | Tool |
-|----------|------|
-| Computing a value from other signals | `Signal.derive()` |
-| Side effects (DOM, network, logging) | `effect()` |
-| Transforming data | `Signal.derive()` |
-| Syncing with external systems | `effect()` |
-
-```ts
-// Derived: computing a value
-const total = Signal.derive(() => price.get() * quantity.get());
-
-// Effect: side effect
-effect(() => {
-  analytics.track("cart_updated", { total: total.get() });
-});
+  const msgs = messages.read(monitor)
+  sendToServer(msgs)
+})
 ```
 
 ## Best Practices
@@ -259,47 +308,76 @@ Each effect should do one thing:
 
 ```ts
 // Good: separate concerns
-effect(() => {
-  updateDOM(state.get());
-});
+effect((monitor) => {
+  updateDOM(state.read(monitor))
+})
 
-effect(() => {
-  saveToStorage(state.get());
-});
+effect((monitor) => {
+  saveToStorage(state.read(monitor))
+})
 
 // Avoid: mixed concerns
-effect(() => {
-  updateDOM(state.get());
-  saveToStorage(state.get());
-  sendAnalytics(state.get());
-});
+effect((monitor) => {
+  const s = state.read(monitor)
+  updateDOM(s)
+  saveToStorage(s)
+  sendAnalytics(s)
+})
 ```
 
-### Always Clean Up Resources
+Separate effects are easier to reason about, test, and maintain.
 
-When creating subscriptions, timers, or event listeners, always return a cleanup function:
+### Always Return Cleanup Functions
+
+When creating resources, always clean them up:
 
 ```ts
-effect(() => {
+effect((monitor) => {
   const timer = setTimeout(() => {
-    doSomething();
-  }, 1000);
+    doSomething()
+  }, config.read(monitor).delay)
 
-  return () => clearTimeout(timer);
-});
+  return () => clearTimeout(timer)
+})
 ```
 
-### Avoid Heavy Computations
+### Defer Heavy Work
 
-Effects run synchronously. For heavy work, consider:
+Effects run synchronously. For expensive operations, defer the work:
 
 ```ts
-effect(() => {
-  const data = largeDataset.get();
+effect((monitor) => {
+  const data = largeDataset.read(monitor)
 
-  // Defer heavy work
   requestIdleCallback(() => {
-    processHeavyData(data);
-  });
-});
+    processHeavyData(data)
+  })
+})
 ```
+
+### Use Batching for Related Updates
+
+When updating multiple related signals, batch them:
+
+```ts
+function resetForm() {
+  batch(() => {
+    name.write("")
+    email.write("")
+    message.write("")
+    errors.write([])
+  })
+}
+```
+
+## Summary
+
+Effects complete the reactive picture:
+
+- They receive a monitor just like derived signals
+- Dependencies are tracked automatically through `.read(monitor)`
+- They re-run when watched signals change
+- Cleanup functions prevent resource leaks
+- Batching prevents excessive re-runs
+
+The Monitor is the thread that connects everything - signals know who is reading them, and can notify exactly the right effects and derived signals when values change.

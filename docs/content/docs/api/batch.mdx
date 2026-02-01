@@ -10,63 +10,62 @@ The `batch` function groups multiple signal updates into a single notification, 
 ## Function Signature
 
 ```ts
-function batch<T>(fn: () => T): T;
+function batch(execute: (monitor: Monitor) => void): void
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `fn` | `() => T` | Function containing signal updates to batch |
+| `execute` | `(monitor: Monitor) => void` | Function containing signal updates to batch. Receives an untracked Monitor. |
 
 ## Returns
 
-Returns the value returned by the callback function.
+Returns `void`. Use `untracked()` if you need to return a value.
 
 ## Examples
 
 ### Basic Usage
 
 ```ts
-import { Signal, batch, effect } from "@owanturist/signal";
+import { Signal, batch, effect } from "@owanturist/signal"
 
-const firstName = Signal("John");
-const lastName = Signal("Doe");
+const firstName = Signal("John")
+const lastName = Signal("Doe")
 
-effect(() => {
-  console.log(`${firstName.get()} ${lastName.get()}`);
-});
+effect((monitor) => {
+  console.log(`${firstName.read(monitor)} ${lastName.read(monitor)}`)
+})
 // Logs: "John Doe"
 
 // Without batch: 2 updates, 2 effect runs
-firstName.set("Jane");
+firstName.write("Jane")
 // Logs: "Jane Doe"
-lastName.set("Smith");
+lastName.write("Smith")
 // Logs: "Jane Smith"
 
 // With batch: 2 updates, 1 effect run
 batch(() => {
-  firstName.set("Bob");
-  lastName.set("Wilson");
-});
+  firstName.write("Bob")
+  lastName.write("Wilson")
+})
 // Logs once: "Bob Wilson"
 ```
 
-### Returning Values
+### Reading Values During Batch
+
+The `batch` callback receives an untracked Monitor for reading values:
 
 ```ts
-import { Signal, batch } from "@owanturist/signal";
+import { Signal, batch } from "@owanturist/signal"
 
-const count = Signal(0);
+const count = Signal(0)
 
-const result = batch(() => {
-  count.set(1);
-  count.set(2);
-  count.set(3);
-  return count.get();
-});
-
-console.log(result); // 3
+batch((monitor) => {
+  // Read current value without tracking
+  const current = count.read(monitor)
+  count.write(current + 1)
+})
 ```
 
 ### Nested Batches
@@ -74,26 +73,26 @@ console.log(result); // 3
 Batches can be nested. Updates are deferred until the outermost batch completes:
 
 ```ts
-import { Signal, batch, effect } from "@owanturist/signal";
+import { Signal, batch, effect } from "@owanturist/signal"
 
-const a = Signal(0);
-const b = Signal(0);
+const a = Signal(0)
+const b = Signal(0)
 
-effect(() => {
-  console.log(`a=${a.get()}, b=${b.get()}`);
-});
+effect((monitor) => {
+  console.log(`a=${a.read(monitor)}, b=${b.read(monitor)}`)
+})
 // Logs: "a=0, b=0"
 
 batch(() => {
-  a.set(1);
+  a.write(1)
 
   batch(() => {
-    b.set(1);
-  });
+    b.write(1)
+  })
   // Inner batch completes, but still inside outer batch
 
-  a.set(2);
-});
+  a.write(2)
+})
 // Logs once: "a=2, b=1"
 ```
 
@@ -102,20 +101,22 @@ batch(() => {
 Derived signals are updated after all batched changes:
 
 ```ts
-import { Signal, batch } from "@owanturist/signal";
+import { Signal, batch, effect } from "@owanturist/signal"
 
-const price = Signal(100);
-const quantity = Signal(1);
-const total = Signal.derive(() => price.get() * quantity.get());
+const price = Signal(100)
+const quantity = Signal(1)
+const total = Signal((monitor) => price.read(monitor) * quantity.read(monitor))
 
-console.log(total.get()); // 100
+effect((monitor) => {
+  console.log(total.read(monitor))
+})
+// Logs: 100
 
 batch(() => {
-  price.set(200);
-  quantity.set(3);
-});
-
-console.log(total.get()); // 600
+  price.write(200)
+  quantity.write(3)
+})
+// Logs: 600 (not 200 or 300)
 ```
 
 ## When to Use batch
@@ -124,69 +125,69 @@ console.log(total.get()); // 600
 
 ```ts
 interface User {
-  firstName: string;
-  lastName: string;
-  email: string;
+  firstName: string
+  lastName: string
+  email: string
 }
 
-const firstName = Signal("");
-const lastName = Signal("");
-const email = Signal("");
+const firstName = Signal("")
+const lastName = Signal("")
+const email = Signal("")
 
 function updateUser(user: User) {
   batch(() => {
-    firstName.set(user.firstName);
-    lastName.set(user.lastName);
-    email.set(user.email);
-  });
+    firstName.write(user.firstName)
+    lastName.write(user.lastName)
+    email.write(user.email)
+  })
 }
 ```
 
 ### Form Resets
 
 ```ts
-const name = Signal("");
-const email = Signal("");
-const message = Signal("");
-const errors = Signal<string[]>([]);
+const name = Signal("")
+const email = Signal("")
+const message = Signal("")
+const errors = Signal<string[]>([])
 
 function resetForm() {
   batch(() => {
-    name.set("");
-    email.set("");
-    message.set("");
-    errors.set([]);
-  });
+    name.write("")
+    email.write("")
+    message.write("")
+    errors.write([])
+  })
 }
 ```
 
 ### State Machines
 
 ```ts
-type Status = "idle" | "loading" | "success" | "error";
+type Status = "idle" | "loading" | "success" | "error"
 
-const status = Signal<Status>("idle");
-const data = Signal<Data | null>(null);
-const error = Signal<Error | null>(null);
+const status = Signal<Status>("idle")
+const data = Signal<Data | null>(null)
+const error = Signal<Error | null>(null)
 
 async function fetchData() {
   batch(() => {
-    status.set("loading");
-    data.set(null);
-    error.set(null);
-  });
+    status.write("loading")
+    data.write(null)
+    error.write(null)
+  })
 
   try {
-    const result = await api.getData();
+    const result = await api.getData()
     batch(() => {
-      status.set("success");
-      data.set(result);
-    });
+      status.write("success")
+      data.write(result)
+    })
   } catch (e) {
     batch(() => {
-      status.set("error");
-      error.set(e as Error);
-    });
+      status.write("error")
+      error.write(e as Error)
+    })
   }
 }
 ```
@@ -210,3 +211,4 @@ Batch is NOT necessary when:
 - [Signals](/docs/concepts/signals)
 - [Effects](/docs/concepts/effects)
 - [effect()](/docs/api/effect)
+- [untracked()](/docs/api/untracked)

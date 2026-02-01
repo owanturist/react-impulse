@@ -7,12 +7,30 @@ description: API reference for the Signal function and signal types
 
 The `Signal` function creates reactive signals that hold values and notify dependents when changed.
 
-## Function Signature
+## Function Signatures
 
 ```ts
-function Signal<T>(initialValue: T, options?: SignalOptions<T>): WritableSignal<T>;
+// Creates a Signal without initial value
+function Signal<TValue = undefined>(): Signal<undefined | TValue>
 
-function Signal.derive<T>(compute: () => T, options?: SignalOptions<T>): ReadableSignal<T>;
+// Creates a Signal with initial value
+function Signal<TValue>(
+  initialValue: TValue,
+  options?: SignalOptions<TValue>
+): Signal<TValue>
+
+// Creates a read-only derived Signal from a getter
+function Signal<TDerivedValue>(
+  getter: ReadableSignal<TDerivedValue> | ((monitor: Monitor) => TDerivedValue),
+  options?: SignalOptions<TDerivedValue>
+): ReadonlySignal<TDerivedValue>
+
+// Creates a derived Signal with getter and setter (bidirectional)
+function Signal<TDerivedValue>(
+  getter: ReadableSignal<TDerivedValue> | ((monitor: Monitor) => TDerivedValue),
+  setter: WritableSignal<TDerivedValue> | ((value: TDerivedValue, monitor: Monitor) => void),
+  options?: SignalOptions<TDerivedValue>
+): Signal<TDerivedValue>
 ```
 
 ## Parameters
@@ -24,112 +42,224 @@ function Signal.derive<T>(compute: () => T, options?: SignalOptions<T>): Readabl
 | `initialValue` | `T` | The initial value of the signal |
 | `options` | `SignalOptions<T>` | Optional configuration |
 
-### `Signal.derive(compute, options?)`
+### `Signal(getter, options?)` - Read-only Derived
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `compute` | `() => T` | Function that computes the derived value |
+| `getter` | `ReadableSignal<T> \| (monitor: Monitor) => T` | Function or ReadableSignal to compute the derived value |
+| `options` | `SignalOptions<T>` | Optional configuration |
+
+### `Signal(getter, setter, options?)` - Bidirectional Derived
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `getter` | `ReadableSignal<T> \| (monitor: Monitor) => T` | Function or ReadableSignal to compute the derived value |
+| `setter` | `WritableSignal<T> \| (value: T, monitor: Monitor) => void` | Function or WritableSignal to write back to the source |
 | `options` | `SignalOptions<T>` | Optional configuration |
 
 ## Options
 
 ```ts
 interface SignalOptions<T> {
-  equal?: Equal<T>;
+  equals?: null | Equal<T>
 }
 
-type Equal<T> = (prev: T, next: T) => boolean;
+type Equal<T> = (left: T, right: T) => boolean
 ```
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `equal` | `(prev: T, next: T) => boolean` | `Object.is` | Custom equality function |
+| `equals` | `null \| (left: T, right: T) => boolean` | `Object.is` | Custom equality function. Pass `null` to use default `Object.is` |
 
-## Return Types
+## Signal Types
 
-### WritableSignal\<T\>
+### Signal\<T\>
+
+A writable signal with both read and write capabilities:
 
 ```ts
-interface WritableSignal<T> extends ReadableSignal<T> {
-  set(value: T): void;
+interface Signal<T> {
+  read(monitor: Monitor): T
+  write(value: T | ((currentValue: T, monitor: Monitor) => T)): void
+  clone(options?: SignalOptions<T>): Signal<T>
+  clone(transform: (value: T, monitor: Monitor) => T, options?: SignalOptions<T>): Signal<T>
 }
+```
+
+### ReadonlySignal\<T\>
+
+A signal without write capability:
+
+```ts
+type ReadonlySignal<T> = Omit<Signal<T>, "write">
 ```
 
 ### ReadableSignal\<T\>
 
+Interface for anything that can be read with a Monitor:
+
 ```ts
 interface ReadableSignal<T> {
-  get(): T;
-  get(monitor: Monitor): T;
+  read(monitor: Monitor): T
 }
 ```
+
+### WritableSignal\<T\>
+
+Interface for anything that can be written to:
+
+```ts
+interface WritableSignal<T> {
+  write(value: T): void
+}
+```
+
+## Signal Methods
+
+### read(monitor)
+
+```ts
+read(monitor: Monitor): T
+```
+
+Reads the signal's value and tracks it as a dependency via the provided Monitor.
+
+### write(valueOrTransform)
+
+```ts
+write(value: T): void
+write(transform: (currentValue: T, monitor: Monitor) => T): void
+```
+
+Updates the signal's value. Can accept either a direct value or a transform function.
+
+### clone(options?)
+
+```ts
+clone(options?: SignalOptions<T>): Signal<T>
+clone(transform: (value: T, monitor: Monitor) => T, options?: SignalOptions<T>): Signal<T>
+```
+
+Creates a new Signal instance with the same (or transformed) value. Useful for cloning mutable values.
 
 ## Examples
 
 ### Basic Usage
 
 ```ts
-import { Signal } from "@owanturist/signal";
+import { Signal, effect } from "@owanturist/signal"
 
 // Create a writable signal
-const count = Signal(0);
+const count = Signal(0)
 
-// Read the value
-console.log(count.get()); // 0
+effect((monitor) => {
+  console.log(count.read(monitor)) // 0
+})
 
 // Write a new value
-count.set(1);
-console.log(count.get()); // 1
+count.write(1) // logs: 1
 ```
 
-### Derived Signals
+### Using Transform Function
 
 ```ts
-const price = Signal(100);
-const quantity = Signal(2);
+const count = Signal(0)
 
-const total = Signal.derive(() => price.get() * quantity.get());
+// Increment using transform function
+count.write((current) => current + 1)
 
-console.log(total.get()); // 200
+// The transform receives the current value and a monitor
+count.write((current, monitor) => {
+  // Can read other signals here without tracking
+  return current + 1
+})
+```
 
-price.set(150);
-console.log(total.get()); // 300
+### Derived Signals (Read-only)
+
+```ts
+const price = Signal(100)
+const quantity = Signal(2)
+
+// Derived signal automatically tracks dependencies
+const total = Signal((monitor) => price.read(monitor) * quantity.read(monitor))
+
+effect((monitor) => {
+  console.log(total.read(monitor)) // 200
+})
+
+price.write(150) // logs: 300
+```
+
+### Derived Signals (Bidirectional)
+
+```ts
+const celsius = Signal(0)
+
+// Two-way derived signal
+const fahrenheit = Signal(
+  (monitor) => celsius.read(monitor) * 9/5 + 32,
+  (value) => celsius.write((value - 32) * 5/9)
+)
+
+effect((monitor) => {
+  console.log(`${celsius.read(monitor)}°C = ${fahrenheit.read(monitor)}°F`)
+})
+// logs: "0°C = 32°F"
+
+fahrenheit.write(212) // logs: "100°C = 212°F"
 ```
 
 ### Custom Equality
 
 ```ts
 interface Point {
-  x: number;
-  y: number;
+  x: number
+  y: number
 }
 
 const position = Signal<Point>(
   { x: 0, y: 0 },
   {
-    equal: (a, b) => a.x === b.x && a.y === b.y,
+    equals: (a, b) => a.x === b.x && a.y === b.y,
   }
-);
+)
 
-position.set({ x: 0, y: 0 }); // No update (equal)
-position.set({ x: 1, y: 0 }); // Update triggered
+position.write({ x: 0, y: 0 }) // No update (equal)
+position.write({ x: 1, y: 0 }) // Update triggered
+```
+
+### Cloning Signals
+
+```ts
+const original = Signal({ count: 0 })
+const clone = original.clone()
+
+// Clone is independent
+clone.write({ count: 1 })
+effect((monitor) => {
+  console.log(original.read(monitor)) // { count: 0 }
+  console.log(clone.read(monitor))    // { count: 1 }
+})
+
+// Clone with transformation
+const doubled = original.clone((value) => ({ count: value.count * 2 }))
 ```
 
 ### Type Inference
 
 ```ts
-// Type is inferred as WritableSignal<number>
-const count = Signal(0);
+// Type is inferred as Signal<number>
+const count = Signal(0)
 
-// Type is inferred as WritableSignal<string>
-const name = Signal("Alice");
+// Type is inferred as Signal<string>
+const name = Signal("Alice")
 
 // Explicit type for complex types
-const user = Signal<User | null>(null);
+const user = Signal<User | null>(null)
 
-// Derived signal type is inferred
-const doubled = Signal.derive(() => count.get() * 2);
-// Type: ReadableSignal<number>
+// Derived signal type is inferred as ReadonlySignal<number>
+const doubled = Signal((monitor) => count.read(monitor) * 2)
 ```
 
 ## Type Guards
@@ -137,60 +267,48 @@ const doubled = Signal.derive(() => count.get() * 2);
 ### isSignal
 
 ```ts
-function isSignal(value: unknown): value is ReadableSignal<unknown>;
+function isSignal<T>(input: unknown): input is Signal<T>
+function isSignal<T>(
+  monitor: Monitor,
+  check: (value: unknown) => value is T,
+  input: unknown
+): input is Signal<T>
 ```
 
 Check if a value is any type of signal:
 
 ```ts
-import { Signal, isSignal } from "@owanturist/signal";
+import { Signal, isSignal } from "@owanturist/signal"
 
-const count = Signal(0);
-const derived = Signal.derive(() => count.get() * 2);
+const count = Signal(0)
+const derived = Signal((monitor) => count.read(monitor) * 2)
 
-isSignal(count); // true
-isSignal(derived); // true
-isSignal(42); // false
-isSignal({ get: () => 0 }); // false
+isSignal(count)    // true
+isSignal(derived)  // true
+isSignal(42)       // false
 ```
 
 ### isDerivedSignal
 
 ```ts
-function isDerivedSignal(value: unknown): value is ReadableSignal<unknown>;
+function isDerivedSignal<T>(input: unknown): input is Signal<T>
+function isDerivedSignal<T>(
+  monitor: Monitor,
+  check: (value: unknown) => value is T,
+  input: unknown
+): input is Signal<T>
 ```
 
-Check if a value is a derived (computed) signal:
+Check if a value is a derived signal:
 
 ```ts
-import { Signal, isDerivedSignal } from "@owanturist/signal";
+import { Signal, isDerivedSignal } from "@owanturist/signal"
 
-const count = Signal(0);
-const derived = Signal.derive(() => count.get() * 2);
+const count = Signal(0)
+const derived = Signal((monitor) => count.read(monitor) * 2)
 
-isDerivedSignal(count); // false
-isDerivedSignal(derived); // true
-```
-
-## Related Types
-
-### ReadonlySignal
-
-A type alias for signals without the `set` method:
-
-```ts
-type ReadonlySignal<T> = Omit<WritableSignal<T>, "set">;
-```
-
-Useful for exposing read-only views:
-
-```ts
-import { Signal, type ReadonlySignal } from "@owanturist/signal";
-
-const _count = Signal(0);
-
-// Expose as read-only
-export const count: ReadonlySignal<number> = _count;
+isDerivedSignal(count)   // false
+isDerivedSignal(derived) // true
 ```
 
 ## See Also
