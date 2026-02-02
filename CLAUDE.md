@@ -120,19 +120,44 @@ Uses Changesets for versioning. Add changesets with `pnpm cs` before opening PRs
 
 The following skills are available in [`.claude/skills/`](.claude/skills/):
 
+### Development Skills
+
 | Skill | Description |
 |-------|-------------|
+| [vitest](.claude/skills/vitest/SKILL.md) | Vitest testing framework - Jest-compatible API, mocking, coverage, fixtures |
+| [typescript-advanced-types](.claude/skills/typescript-advanced-types/SKILL.md) | Advanced TypeScript type system - generics, conditional types, mapped types |
+| [typescript-react-reviewer](.claude/skills/typescript-react-reviewer/SKILL.md) | Code reviewer for TypeScript + React 19 - anti-patterns, state management |
+| [tdd-workflow](.claude/skills/tdd-workflow/SKILL.md) | Test-Driven Development workflow - RED-GREEN-REFACTOR cycle |
+| [code-quality](.claude/skills/code-quality/SKILL.md) | Code correctness rules, avoiding over-engineering |
+| [performance](.claude/skills/performance/SKILL.md) | Web performance optimization - Core Web Vitals, loading speed |
 | [biome](.claude/skills/biome/SKILL.md) | Fast all-in-one linting/formatting toolchain (100x faster than ESLint) |
+| [creating-changesets](.claude/skills/creating-changesets/SKILL.md) | Changesets workflow - version bumps, release notes, semver decisions |
+
+### Utility Skills
+
+| Skill | Description |
+|-------|-------------|
+| [skill-creator](.claude/skills/skill-creator/SKILL.md) | Create new skills with proper structure and packaging |
 | [install-skill](.claude/skills/install-skill/SKILL.md) | Install skills from GitHub using `npx skills add` |
 | [find-skills](.claude/skills/find-skills/SKILL.md) | Discover and install agent skills from the open ecosystem |
+| [verify-skills](.claude/skills/verify-skills/SKILL.md) | Verify all skills are documented in CLAUDE.md |
+| [api-documentation-generator](.claude/skills/api-documentation-generator/SKILL.md) | Generate comprehensive API documentation from code |
+
+### Marketing Skills
+
+| Skill | Description |
+|-------|-------------|
 | [copywriting](.claude/skills/copywriting/SKILL.md) | Expert conversion copywriting for marketing pages |
 | [product-marketing-context](.claude/skills/product-marketing-context/SKILL.md) | Create/maintain product marketing context document |
-| [api-documentation-generator](.claude/skills/api-documentation-generator/SKILL.md) | Generate comprehensive API documentation from code |
 
 ### Skill Usage
 
 - **Install a skill:** `/install-skill owner/repo@skill`
 - **Find skills:** `/find-skills [query]` or browse https://skills.sh/
+- **Run tests:** `/vitest` for Vitest testing guidance
+- **Code review:** `/typescript-react-reviewer` for React code review
+- **TDD workflow:** `/tdd-workflow` for test-driven development
+- **Changesets:** `/creating-changesets` for version bumps and release notes
 - **Biome reference:** `/biome` for Biome configuration guidance (project already uses Biome via `pnpm check:fix`)
 
 ### Copywriting Resources
