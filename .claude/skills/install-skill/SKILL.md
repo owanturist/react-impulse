@@ -25,3 +25,8 @@ npx skills add $ARGUMENTS --agent claude-code -y
 find .claude/skills -maxdepth 1 -type l -delete
 mv .agents/skills/* .claude/skills/ && rm -rf .agents
 ```
+
+3. Update `CLAUDE.md` to document the new skill:
+   - Add a row to the "Available Skills" table with the skill name, link to its SKILL.md, and description
+   - If the skill has reference files, add them to a relevant section (e.g., "Copywriting Resources")
+   - Read the installed skill's SKILL.md to get the correct description

@@ -2,12 +2,27 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Prerequisites
+
+- **Node.js:** >=24.13.0
+- **pnpm:** 10.6.5 (enforced via `only-allow`)
+
 ## Project Overview
 
-A pnpm monorepo containing state management and form management libraries for React:
-- `@owanturist/signal` - Core signal-based state management
-- `@owanturist/signal-react` - React hooks integration (useMonitor, useComputed)
-- `@owanturist/signal-form` - Type-safe declarative form state management
+A pnpm monorepo containing signal-based state management and form management libraries for React:
+
+| Package | Description |
+|---------|-------------|
+| `@owanturist/signal` | Core signal-based reactive state management with automatic dependency tracking |
+| `@owanturist/signal-react` | React hooks integration (`useMonitor`, `useComputed`) using `useSyncExternalStore` |
+| `@owanturist/signal-form` | Type-safe declarative form state management with validation support |
+
+**Key Features:**
+- Automatic dependency tracking via Monitor system
+- Batched updates to prevent unnecessary re-renders
+- Memory-safe subscriptions using WeakRef
+- Zod-like schema validation support in forms
+- React 18 and 19 compatibility
 
 ## Common Commands
 
@@ -21,6 +36,10 @@ pnpm test:coverage        # Run tests with coverage
 pnpm check:fix            # Fix linting and formatting issues
 pnpm typecheck            # Type check all packages
 pnpm size                 # Check bundle sizes
+pnpm cs                   # Add changesets for versioning
+pnpm docs:dev             # Run documentation site in dev mode
+pnpm docs:build           # Build documentation site
+pnpm docs:preview         # Preview production docs build
 ```
 
 To run a single test file:
@@ -33,22 +52,52 @@ pnpm vitest run packages/signal/tests/signal.test.ts
 ### Package Structure
 ```
 packages/
-├── signal/           # Core: Signal, WritableSignal, ReadableSignal, batch, effect
+├── signal/           # Core: Signal, WritableSignal, ReadableSignal, batch, effect, untracked
 ├── signal-react/     # React: useMonitor, useComputed hooks
 ├── signal-form/      # Forms: FormUnit, FormShape, FormList, FormOptional, FormSwitch
 └── tools/            # Internal utilities and type guards (private)
 ```
 
+### Core Concepts
+
+**Signal Package (`@owanturist/signal`):**
+- `Signal<T>(value)` - Create writable signal with initial value
+- `Signal<T>(getter)` - Create derived read-only signal
+- `Signal<T>(getter, setter)` - Create bidirectional derived signal
+- `effect(listener)` - Create reactive side effects
+- `batch(execute)` - Batch multiple signal updates
+- `untracked(fn)` - Read signals without creating dependencies
+- `isSignal()`, `isDerivedSignal()` - Type guards
+- Subpath export: `@owanturist/signal/monitor-factory` for advanced monitor usage
+
+**React Package (`@owanturist/signal-react`):**
+- `useMonitor()` - Get Monitor instance for manual signal tracking
+- `useComputed(signal)` - Read signal value with automatic re-renders
+- `useComputed(factory, deps?, options?)` - Compute derived values from signals
+- `DependencyList` - Type for dependency arrays
+
+**Form Package (`@owanturist/signal-form`):**
+- `FormUnit(input, options)` - Single value with validation/transformation
+- `FormShape(fields, options)` - Object/dictionary of forms
+- `FormList(elements, options)` - Dynamic array of forms
+- `FormOptional(enabled, element)` - Conditional form field
+- `FormSwitch(kind, branches)` - Discriminated union form selection
+- `ValidateStrategy` - Validation timing (`"onTouch"` | `"onChange"` | `"onSubmit"` | `"onInit"`)
+- Type guards: `isSignalForm()`, `isFormUnit()`, `isFormShape()`, `isFormList()`, `isFormOptional()`, `isFormSwitch()`
+
 ### Build System
 - **tsup** for bundling (dual CJS/ESM output with declarations)
+- **Terser** for production minification
 - Internal properties matching `^_[^_]\w+[^_]$` are mangled in production builds
-- Each package has its own `tsup` build command
+- Each package has its own `tsup` build command extending root config
 
 ### Key Patterns
 - `_internal/` directories contain implementation details not exported publicly
-- Package entrypoints cannot import from `_internal` modules
+- Package entrypoints cannot import from `_internal` modules (enforced by Biome)
 - Tests must import from `../src` only
 - `useComputed` hook has exhaustive dependency checking configured
+- WeakRef used for memory-safe signal subscriptions
+- Test files located in `packages/*/tests/` directories
 
 ## Code Standards
 
@@ -57,15 +106,49 @@ packages/
 - Use `Array<T>` syntax over `T[]`
 - Double quotes, 2-space indentation, trailing commas
 - No default switch clauses (enables TypeScript exhaustiveness checks)
+- Strict TypeScript with `noUncheckedIndexedAccess`, `noImplicitReturns`
 
 ## React Support
 
-Tests run against React 18.0.0 and 19.0.0 for compatibility.
+Tests run against React 18.0.0 and 19.0.0 for compatibility. The `signal-react` package uses `use-sync-external-store` for React 18+ external store subscription.
 
 ## Release Process
 
 Uses Changesets for versioning. Add changesets with `pnpm cs` before opening PRs.
 
-## Skill Installation
+## Available Skills
 
-Use `/install-skill owner/repo@skill` to install skills locally. This handles symlink removal and proper file organization automatically.
+The following skills are available in [`.claude/skills/`](.claude/skills/):
+
+| Skill | Description |
+|-------|-------------|
+| [biome](.claude/skills/biome/SKILL.md) | Fast all-in-one linting/formatting toolchain (100x faster than ESLint) |
+| [install-skill](.claude/skills/install-skill/SKILL.md) | Install skills from GitHub using `npx skills add` |
+| [find-skills](.claude/skills/find-skills/SKILL.md) | Discover and install agent skills from the open ecosystem |
+| [copywriting](.claude/skills/copywriting/SKILL.md) | Expert conversion copywriting for marketing pages |
+| [product-marketing-context](.claude/skills/product-marketing-context/SKILL.md) | Create/maintain product marketing context document |
+| [api-documentation-generator](.claude/skills/api-documentation-generator/SKILL.md) | Generate comprehensive API documentation from code |
+
+### Skill Usage
+
+- **Install a skill:** `/install-skill owner/repo@skill`
+- **Find skills:** `/find-skills [query]` or browse https://skills.sh/
+- **Biome reference:** `/biome` for Biome configuration guidance (project already uses Biome via `pnpm check:fix`)
+
+### Copywriting Resources
+
+The copywriting skill includes reference materials:
+- [Copy Frameworks](.claude/skills/copywriting/references/copy-frameworks.md) - Headline formulas and page structure templates
+- [Natural Transitions](.claude/skills/copywriting/references/natural-transitions.md) - Transitional phrases for content flow
+
+## Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `biome.jsonc` | Linting, formatting, and code quality rules |
+| `tsconfig.json` | Shared TypeScript configuration |
+| `tsup.config.ts` | Shared bundler configuration |
+| `vite.config.ts` | Root Vitest configuration for monorepo testing |
+| `.size-limit.mjs` | Bundle size checking configuration |
+| `pnpm-workspace.yaml` | Workspace package definitions |
+| `.claude/settings.local.json` | Local Claude Code permissions |
