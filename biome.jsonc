@@ -229,25 +229,28 @@
           },
 
           "nursery": {
-            "useQwikMethodUsage": "off", // irrelevant
-            "useQwikValidLexicalScope": "off", // irrelevant
-            "useVueMultiWordComponentNames": "off", // irrelevant
-            "useVueDefineMacrosOrder": "off", // irrelevant
+            // Framework-specific rules (irrelevant for this React project)
+            "useQwikMethodUsage": "off",
+            "useQwikValidLexicalScope": "off",
+            "useVueMultiWordComponentNames": "off",
+            "useVueDefineMacrosOrder": "off",
+            "noVueReservedProps": "off",
+            "noVueReservedKeys": "off",
+            "noVueDuplicateKeys": "off",
+            "noVueDataObjectDeclaration": "off",
+
+            // Project-specific overrides
             "noEqualsToNull": "off", // == null is used to check for both null and undefined
             "noLeakedRender": "off", // many false-positives for boolean && JSX expressions
-            "noVueReservedProps": "off", // irrelevant
-            "noVueReservedKeys": "off", // irrelevant
-            "noVueDuplicateKeys": "off", // irrelevant
-            "noVueDataObjectDeclaration": "off", // irrelevant
             "noTernary": "off", // ternary is useful in many cases
-
             "noUnresolvedImports": "off", // handled by TS
-            "noUselessUndefined": "off", // it is better to be explicit about undefined values
-            "useExplicitType": "off", // it is too much noise to enforce explicit types everywhere, even none module-public exports
-            "useMaxParams": "off", // common...
+            "noUselessUndefined": "off", // explicit undefined values improve readability
+            "useExplicitType": "off", // too noisy for non-public exports
+            "useMaxParams": "off", // common pattern in this codebase
             "useAwaitThenable": "off", // false-positives
-            "noJsxPropsBind": "off", // it is madness to follow this rule
+            "noJsxPropsBind": "off", // impractical to follow
 
+            // Informational hints
             "useDestructuring": "info",
             "noExcessiveLinesPerFile": "info",
             "noMultiAssign": "info"
