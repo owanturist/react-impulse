@@ -65,3 +65,7 @@ Tests run against React 18.0.0 and 19.0.0 for compatibility.
 ## Release Process
 
 Uses Changesets for versioning. Add changesets with `pnpm cs` before opening PRs.
+
+## Skill Installation
+
+Use `/install-skill owner/repo@skill` to install skills locally. This handles symlink removal and proper file organization automatically.
