@@ -1,5 +1,35 @@
 @import "tailwindcss";
 @import "fumadocs-ui/css/solar.css";
 @import "fumadocs-ui/css/preset.css";
+@import "fumadocs-twoslash/twoslash.css";
 
 @source "../../../node_modules/fumadocs-ui/dist/**/*.js";
+
+/* hide the trailing empty line */
+.twoslash {
+  .line:last-child:empty {
+    @apply hidden;
+  }
+}
+
+@layer components {
+  .typedef {
+    @apply pl-2 border-l border-fd-border;
+
+    > ul {
+      @apply pl-0! list-none!;
+    }
+
+    > ul:has(+ hr) {
+      @apply mb-0!;
+    }
+
+    > ul > li + li::before {
+      @apply content-[''] my-2 block border-t border-fd-border border-dashed;
+    }
+
+    > ul + hr {
+      @apply my-0!;
+    }
+  }
+}

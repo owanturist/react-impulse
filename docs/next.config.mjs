@@ -7,6 +7,7 @@ const config = {
   reactStrictMode: true,
   output: "export",
   distDir: "dist",
+  serverExternalPackages: ["typescript", "twoslash"],
 }
 
 export default withMDX(config)

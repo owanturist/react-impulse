@@ -1,0 +1,13 @@
+import { Popup, PopupContent, PopupTrigger } from "fumadocs-twoslash/ui"
+import { TypeTable } from "fumadocs-ui/components/type-table"
+import defaultComponents from "fumadocs-ui/mdx"
+
+export const MDXComponents = {
+  ...defaultComponents,
+  // biome-ignore-start lint/style/useNamingConvention: components must be PascalCase
+  Popup,
+  PopupContent,
+  PopupTrigger,
+  TypeTable,
+  // biome-ignore-end lint/style/useNamingConvention: components must be PascalCase
+}
