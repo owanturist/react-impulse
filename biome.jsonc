@@ -326,7 +326,8 @@
         "rules": {
           "style": {
             "noDefaultExport": "off", // docs use default exports
-            "useComponentExportOnlyModules": "off" // docs might export non-component modules from roots
+            "useComponentExportOnlyModules": "off", // docs might export non-component modules from roots
+            "useExportsLast": "off" // nextjs expects exports throughout the file
           }
         }
       }

@@ -1,9 +1,8 @@
 import { source } from "@/source"
 
-// biome-ignore lint/style/useExportsLast: Next.js requires static export const for route segment config
 export const revalidate = false
 
-function GET() {
+export function GET() {
   const pages = source.getPages()
 
   const lines = [
@@ -28,4 +27,3 @@ function GET() {
   return new Response(lines.join("\n"))
 }
 
-export { GET }

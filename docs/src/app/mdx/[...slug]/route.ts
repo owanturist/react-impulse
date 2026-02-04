@@ -3,7 +3,6 @@ import { notFound } from "next/navigation"
 import { getLLMText } from "@/lib/get-llm-text"
 import { source } from "@/source"
 
-// biome-ignore lint/style/useExportsLast: Next.js requires static export const for route segment config
 export const revalidate = false
 
 const DOCS_PREFIX = "docs"
@@ -12,7 +11,7 @@ interface RouteProps {
   params: Promise<{ slug: Array<string> }>
 }
 
-async function GET(_req: Request, props: RouteProps) {
+export async function GET(_req: Request, props: RouteProps) {
   const { slug } = await props.params
   const [first, ...rest] = slug
   if (first !== DOCS_PREFIX) {
@@ -29,10 +28,9 @@ async function GET(_req: Request, props: RouteProps) {
   })
 }
 
-function generateStaticParams() {
+export function generateStaticParams() {
   return source.generateParams().map((params) => ({
     slug: [DOCS_PREFIX, ...params.slug],
   }))
 }
 
-export { GET, generateStaticParams }
