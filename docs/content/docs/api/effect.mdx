@@ -3,11 +3,9 @@ title: effect
 description: API reference for the effect function
 ---
 
-# effect
-
 The `effect` function creates a reactive effect that runs whenever its signal dependencies change.
 
-## Function Signature
+## `effect(listener){:dart}` [#effect]
 
 ```ts
 function effect(listener: (monitor: Monitor) => Destructor): VoidFunction
@@ -15,21 +13,19 @@ function effect(listener: (monitor: Monitor) => Destructor): VoidFunction
 type Destructor = void | (() => void)
 ```
 
-## Parameters
+Creates an effect that runs immediately and re-runs when dependencies change.
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `listener` | `(monitor: Monitor) => Destructor` | Effect function that receives a Monitor and may return a cleanup callback |
+<section className="typedef">
 
-## Returns
+- `@param listener: (monitor: Monitor) => Destructor{:dart}` Effect function that receives a Monitor and may return a cleanup callback. The cleanup runs before re-execution and when the effect stops.
 
-Returns a `VoidFunction` that stops the effect when called.
+---
 
-## Examples
+- `@returns VoidFunction{:dart}` A function that stops the effect when called.
 
-### Basic Effect
+</section>
 
-```ts
+```ts twoslash tab="Basic"
 import { Signal, effect } from "@owanturist/signal"
 
 const count = Signal(0)
@@ -43,9 +39,9 @@ count.write(1)
 // Logs: "Count: 1"
 ```
 
-### Stopping an Effect
+```ts twoslash tab="Stopping"
+import { Signal, effect } from "@owanturist/signal"
 
-```ts
 const count = Signal(0)
 
 const stop = effect((monitor) => {
@@ -56,17 +52,13 @@ const stop = effect((monitor) => {
 count.write(1)
 // Logs: 1
 
-stop() // Dispose the effect
+stop()
 
 count.write(2)
 // Nothing logged
 ```
 
-### Effect with Cleanup
-
-The effect function can return a cleanup callback:
-
-```ts
+```ts twoslash tab="Cleanup"
 import { Signal, effect } from "@owanturist/signal"
 
 const interval = Signal(1000)
@@ -77,19 +69,15 @@ effect((monitor) => {
     console.log("tick")
   }, ms)
 
-  // Cleanup runs before re-execution and on disposal
   return () => {
     clearInterval(id)
   }
 })
-
-// Change interval - old interval is cleared, new one started
-interval.write(500)
 ```
 
-### DOM Event Listeners
+```ts twoslash tab="Event Listeners"
+import { Signal, effect } from "@owanturist/signal"
 
-```ts
 const handler = Signal((e: MouseEvent) => {
   console.log("clicked", e.clientX, e.clientY)
 })
@@ -104,26 +92,13 @@ effect((monitor) => {
 })
 ```
 
-### Subscriptions
-
-```ts
-const userId = Signal("user-123")
-
-effect((monitor) => {
-  const id = userId.read(monitor)
-  const unsubscribe = database.subscribe(`users/${id}`, (user) => {
-    console.log("User updated:", user)
-  })
-
-  return unsubscribe
-})
-```
-
 ## Dependency Tracking
 
 Effects automatically track signal dependencies through the Monitor:
 
-```ts
+```ts twoslash
+import { Signal, effect } from "@owanturist/signal"
+
 const a = Signal(1)
 const b = Signal(2)
 const useA = Signal(true)
@@ -151,7 +126,9 @@ a.write(100)
 
 Effects run synchronously after signal updates:
 
-```ts
+```ts twoslash
+import { Signal, effect } from "@owanturist/signal"
+
 const count = Signal(0)
 
 effect((monitor) => {
@@ -170,38 +147,16 @@ console.log("after write")
 // "after write"
 ```
 
-## Conditional Effects
-
-Effects only run when their tracked dependencies change:
-
-```ts
-const enabled = Signal(false)
-const count = Signal(0)
-
-effect((monitor) => {
-  if (!enabled.read(monitor)) {
-    return // Early return - count is not tracked
-  }
-  console.log("Count:", count.read(monitor))
-})
-
-count.write(1) // No log (enabled is false, count not tracked)
-
-enabled.write(true)
-// Logs: "Count: 1"
-
-count.write(2)
-// Logs: "Count: 2"
-```
-
 ## Cleanup Timing
 
-The cleanup function runs:
+The cleanup function runs at two specific times:
 
 1. **Before re-execution** - When dependencies change
 2. **On disposal** - When `stop()` is called
 
-```ts
+```ts twoslash
+import { Signal, effect } from "@owanturist/signal"
+
 const source = Signal("initial")
 
 const stop = effect((monitor) => {
@@ -224,9 +179,11 @@ stop()
 
 ## Error Handling
 
-If an effect throws, it won't prevent other effects from running:
+If an effect throws, other effects continue to run:
 
-```ts
+```ts twoslash
+import { Signal, effect } from "@owanturist/signal"
+
 const count = Signal(0)
 
 effect((monitor) => {
@@ -245,65 +202,9 @@ count.write(1)
 // effect 2 still logs: "effect 2: 1"
 ```
 
-## Best Practices
-
-### Single Responsibility
-
-Each effect should do one thing:
-
-```ts
-// Good
-effect((monitor) => {
-  document.title = `Count: ${count.read(monitor)}`
-})
-
-effect((monitor) => {
-  localStorage.setItem("count", String(count.read(monitor)))
-})
-
-// Less ideal
-effect((monitor) => {
-  const value = count.read(monitor)
-  document.title = `Count: ${value}`
-  localStorage.setItem("count", String(value))
-})
-```
-
-### Always Clean Up Resources
-
-```ts
-effect((monitor) => {
-  const ws = new WebSocket(url.read(monitor))
-
-  ws.onmessage = (e) => {
-    handleMessage(e.data)
-  }
-
-  return () => {
-    ws.close()
-  }
-})
-```
-
-### Avoid Circular Dependencies
-
-```ts
-// BAD: Creates infinite loop
-const count = Signal(0)
-effect((monitor) => {
-  count.write(count.read(monitor) + 1)
-})
-
-// GOOD: Use separate signals
-const source = Signal(0)
-const derived = Signal(0)
-effect((monitor) => {
-  derived.write(source.read(monitor) + 1)
-})
-```
-
 ## See Also
 
-- [Effects Concept](/docs/concepts/effects)
-- [batch()](/docs/api/batch)
-- [untracked()](/docs/api/untracked)
+- [Effects](/docs/concepts/effects) - Conceptual explanation
+- [Resource Cleanup](/docs/guides/cleanup) - Cleanup patterns
+- [batch](/docs/api/batch) - Batching updates
+- [untracked](/docs/api/untracked) - Reading without tracking

@@ -3,8 +3,6 @@ title: Derived Signals
 description: Computing values that automatically stay in sync with their sources
 ---
 
-# Derived Signals
-
 Derived signals compute their value from other signals. They use the same Monitor pattern to track dependencies, and they automatically recompute when those dependencies change.
 
 ## Creating Derived Signals
@@ -179,134 +177,27 @@ The setter function receives the new value and a monitor (for reading other sign
 Derived signals can use custom equality to prevent unnecessary updates downstream:
 
 ```ts
-const users = Signal([
+interface User {
+  id: number
+  name: string
+}
+
+const users = Signal<User[]>([
   { id: 1, name: "Alice" },
   { id: 2, name: "Bob" },
 ])
 
 const names = Signal(
-  (monitor) => users.read(monitor).map(u => u.name),
+  (monitor) => users.read(monitor).map((u) => u.name),
   {
     equals: (prev, next) =>
       prev.length === next.length &&
       prev.every((name, i) => name === next[i]),
-  }
+  },
 )
 ```
 
 Even if the `users` array reference changes, if the names are the same, watchers of `names` won't be notified.
-
-## Common Patterns
-
-### Filtering and Mapping
-
-```ts
-const items = Signal([1, 2, 3, 4, 5])
-const filter = Signal<"all" | "even" | "odd">("all")
-
-const filteredItems = Signal((monitor) => {
-  const all = items.read(monitor)
-  switch (filter.read(monitor)) {
-    case "even":
-      return all.filter(n => n % 2 === 0)
-    case "odd":
-      return all.filter(n => n % 2 !== 0)
-    case "all":
-      return all
-  }
-})
-```
-
-### Combining Multiple Sources
-
-```ts
-const searchQuery = Signal("")
-const sortOrder = Signal<"asc" | "desc">("asc")
-const products = Signal<Product[]>([])
-
-const displayedProducts = Signal((monitor) => {
-  const query = searchQuery.read(monitor).toLowerCase()
-  const order = sortOrder.read(monitor)
-
-  return products
-    .read(monitor)
-    .filter(p => p.name.toLowerCase().includes(query))
-    .sort((a, b) => {
-      const cmp = a.name.localeCompare(b.name)
-      return order === "asc" ? cmp : -cmp
-    })
-})
-```
-
-### Async State Patterns
-
-While signals are synchronous, you can model async states:
-
-```ts
-type AsyncState<T> =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "success"; data: T }
-  | { status: "error"; error: Error }
-
-const userState = Signal<AsyncState<User>>({ status: "idle" })
-
-// Derived helpers
-const isLoading = Signal((monitor) =>
-  userState.read(monitor).status === "loading"
-)
-
-const userData = Signal((monitor) => {
-  const state = userState.read(monitor)
-  return state.status === "success" ? state.data : null
-})
-
-// Async loader
-async function loadUser(id: string) {
-  userState.write({ status: "loading" })
-  try {
-    const data = await fetchUser(id)
-    userState.write({ status: "success", data })
-  } catch (error) {
-    userState.write({ status: "error", error: error as Error })
-  }
-}
-```
-
-## Performance Tips
-
-### Granular Derived Signals
-
-Create focused derived signals instead of monolithic ones:
-
-```ts
-// Less optimal - any user change triggers all watchers
-const userDisplay = Signal((monitor) => ({
-  name: user.read(monitor).name,
-  avatar: user.read(monitor).avatar,
-  status: user.read(monitor).status,
-}))
-
-// More optimal - watchers can subscribe to just what they need
-const userName = Signal((monitor) => user.read(monitor).name)
-const userAvatar = Signal((monitor) => user.read(monitor).avatar)
-const userStatus = Signal((monitor) => user.read(monitor).status)
-```
-
-Components can then watch only the specific derived signal they care about.
-
-### Use Custom Equality
-
-When a derived signal produces objects or arrays, custom equality can prevent cascading updates:
-
-```ts
-const coords = Signal((monitor) => ({
-  x: xSignal.read(monitor),
-  y: ySignal.read(monitor),
-}), {
-  equals: (a, b) => a.x === b.x && a.y === b.y,
-})
-```
 
 ## Read-Only by Default
 
@@ -334,3 +225,10 @@ Derived signals extend the Monitor pattern to computed values:
 - Optional setters enable bidirectional bindings
 
 Think of derived signals as formulas in a spreadsheet - they express relationships between values, and the system keeps everything in sync automatically.
+
+## See Also
+
+- [Signal API Reference](/docs/api/signal) - Complete API documentation
+- [Signals and Monitors](/docs/concepts/signals) - Core reactive primitives
+- [Common Patterns](/docs/guides/common-patterns) - Practical usage patterns
+- [Performance Optimization](/docs/guides/performance) - Optimization techniques

@@ -3,140 +3,143 @@ title: Getting Started
 description: Install and start using @owanturist/signal in your project
 ---
 
-# Getting Started
-
-Learn how to install and start using `@owanturist/signal` in your project.
+This tutorial walks you through installing the library and building your first reactive application with signals.
 
 ## Installation
 
 Install the core package using your preferred package manager:
 
-```bash tab="npm"
-npm install @owanturist/signal
-```
-
-```bash tab="pnpm"
-pnpm add @owanturist/signal
-```
-
-```bash tab="yarn"
-yarn add @owanturist/signal
+```package-install
+@owanturist/signal
 ```
 
 For React applications, also install the React integration:
 
-```bash tab="npm"
-npm install @owanturist/signal-react
+```package-install
+@owanturist/signal-react
 ```
 
-```bash tab="pnpm"
-pnpm add @owanturist/signal-react
-```
+## Creating Your First Signal
 
-```bash tab="yarn"
-yarn add @owanturist/signal-react
-```
-
-## Basic Usage
-
-### Creating a Signal
-
-Use the `Signal` function to create a reactive value:
+Let's start with the basics. A signal holds a value that can change over time.
 
 ```ts
 import { Signal, effect } from "@owanturist/signal"
 
-// Create a signal with an initial value
 const count = Signal(0)
-
-// Read and react to changes using an effect
-effect((monitor) => {
-  console.log(count.read(monitor)) // 0
-})
-
-// Write a new value
-count.write(1) // Effect logs: 1
-
-// Update based on previous value
-count.write((current) => current + 1) // Effect logs: 2
 ```
 
-### Creating Derived Signals
+You've created a signal with an initial value of `0`. To see it in action, create an effect that reads the signal:
 
-Derived signals automatically compute their value based on other signals:
+```ts
+effect((monitor) => {
+  console.log(count.read(monitor))
+})
+```
+
+You should see `0` logged to the console. The effect runs immediately when created.
+
+Now update the signal:
+
+```ts
+count.write(1)
+```
+
+Notice that the effect runs again and logs `1`. The effect automatically re-runs because it read `count` through a monitor, which established a dependency.
+
+## Updating Based on Previous Value
+
+You can update a signal using a transform function:
+
+```ts
+count.write((current) => current + 1)
+```
+
+This pattern is useful when you need the current value to compute the new one.
+
+## Creating Derived Signals
+
+Derived signals compute their value from other signals:
 
 ```ts
 const firstName = Signal("John")
 const lastName = Signal("Doe")
 
-// This signal automatically updates when firstName or lastName changes
 const fullName = Signal((monitor) => {
   return `${firstName.read(monitor)} ${lastName.read(monitor)}`
 })
-
-effect((monitor) => {
-  console.log(fullName.read(monitor)) // "John Doe"
-})
-
-firstName.write("Jane") // Effect logs: "Jane Doe"
 ```
 
-### Using Effects
+The `fullName` signal automatically updates whenever `firstName` or `lastName` changes. You don't need to manually track dependencies.
 
-Effects run side effects when their dependencies change:
+Let's verify this works:
 
 ```ts
-import { Signal, effect } from "@owanturist/signal"
+effect((monitor) => {
+  console.log(fullName.read(monitor))
+})
+// Logs: "John Doe"
 
+firstName.write("Jane")
+// Logs: "Jane Doe"
+```
+
+## Using Effects for Side Effects
+
+Effects run code in response to signal changes. They're useful for syncing with external systems:
+
+```ts
 const temperature = Signal(20)
 
-// This effect runs immediately and whenever temperature changes
 const stop = effect((monitor) => {
   console.log(`Current temperature: ${temperature.read(monitor)}°C`)
 })
+// Logs: "Current temperature: 20°C"
 
-temperature.write(25) // Logs: "Current temperature: 25°C"
-temperature.write(30) // Logs: "Current temperature: 30°C"
+temperature.write(25)
+// Logs: "Current temperature: 25°C"
 
-// Stop the effect when no longer needed
-stop()
-temperature.write(35) // No log - effect has been stopped
+temperature.write(30)
+// Logs: "Current temperature: 30°C"
 ```
 
-## React Integration
+When you no longer need the effect, call the stop function:
 
-### Using Signals in Components
+```ts
+stop()
 
-Use the `useComputed` hook to read signal values in React components:
+temperature.write(35)
+// Nothing logged - the effect has stopped
+```
+
+## Integrating with React
+
+The `useComputed` hook connects signals to React components:
 
 ```tsx
 import { Signal } from "@owanturist/signal"
 import { useComputed } from "@owanturist/signal-react"
 
-// Create signals outside of components
 const count = Signal(0)
 
 function Counter() {
-  // useComputed subscribes to signals and triggers re-renders
   const value = useComputed((monitor) => count.read(monitor))
 
   return (
     <div>
       <p>Count: {value}</p>
-      <button onClick={() => count.write((c) => c + 1)}>
-        Increment
-      </button>
-      <button onClick={() => count.write((c) => c - 1)}>
-        Decrement
-      </button>
+      <button onClick={() => count.write((c) => c + 1)}>Increment</button>
+      <button onClick={() => count.write((c) => c - 1)}>Decrement</button>
     </div>
   )
 }
 ```
 
-### Batching Updates
+The component re-renders only when `count` changes. If you have multiple signals, the component subscribes to exactly the ones it reads.
 
-When updating multiple signals, use `batch` to avoid unnecessary re-renders:
+## Batching Updates
+
+When updating multiple signals, you can batch them to prevent intermediate re-renders:
 
 ```tsx
 import { Signal, batch } from "@owanturist/signal"
@@ -146,8 +149,6 @@ const lastName = Signal("Doe")
 const age = Signal(30)
 
 function updateUser(first: string, last: string, newAge: number) {
-  // Without batch: 3 separate updates, 3 re-renders
-  // With batch: 1 combined update, 1 re-render
   batch(() => {
     firstName.write(first)
     lastName.write(last)
@@ -156,9 +157,11 @@ function updateUser(first: string, last: string, newAge: number) {
 }
 ```
 
+Without batching, each write would trigger effects and re-renders. With batching, all updates happen atomically, and effects run once at the end.
+
 ## TypeScript Support
 
-The library provides full TypeScript support with excellent type inference:
+The library has full TypeScript support with type inference:
 
 ```ts
 import { Signal, type ReadonlySignal } from "@owanturist/signal"
@@ -166,19 +169,31 @@ import { Signal, type ReadonlySignal } from "@owanturist/signal"
 // Type is inferred as Signal<number>
 const count = Signal(0)
 
-// Explicit typing for function parameters
+// Explicit typing for complex types
+const user = Signal<User | null>(null)
+
+// Function parameter typing
 function double(signal: ReadonlySignal<number>): ReadonlySignal<number> {
   return Signal((monitor) => signal.read(monitor) * 2)
 }
-
-const doubled = double(count)
 ```
+
+## What You've Learned
+
+You now know how to:
+
+- Create signals with initial values
+- Read signals through monitors to establish dependencies
+- Update signals directly or with transform functions
+- Create derived signals that compute values automatically
+- Use effects for side effects
+- Integrate signals with React components
+- Batch updates to prevent intermediate renders
 
 ## Next Steps
 
-Now that you understand the basics, explore:
-
-- [Signals and Monitors](/docs/concepts/signals) - Deep dive into the core reactive pattern
-- [Derived Signals](/docs/concepts/derived) - Learn about computed values
+- [Signals and Monitors](/docs/concepts/signals) - Understand the core reactive pattern in depth
+- [Derived Signals](/docs/concepts/derived) - Learn about computed values and chaining
 - [Effects](/docs/concepts/effects) - Side effects and cleanup patterns
+- [React Integration](/docs/concepts/react-integration) - How signals work with React
 - [API Reference](/docs/api/signal) - Complete API documentation

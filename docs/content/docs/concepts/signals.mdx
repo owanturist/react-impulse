@@ -3,8 +3,6 @@ title: Signals and Monitors
 description: Understanding the core reactive primitives and how they work together
 ---
 
-# Signals and Monitors
-
 At the heart of this library are two concepts that work together to create reactive applications: **Signals** hold values, and **Monitors** track who is reading them. Understanding their relationship is key to using the library effectively.
 
 ## The Core Idea
@@ -96,7 +94,7 @@ count.write(5)                    // Set directly
 count.write((current) => current + 1)  // Transform: count is now 6
 ```
 
-## How Dependency Tracking Works
+## Dynamic Dependency Tracking
 
 The beauty of the Monitor system is that dependencies are tracked **dynamically** based on what actually gets read:
 
@@ -119,44 +117,6 @@ effect((monitor) => {
 When `showDetails` is `false`, changing `details` does nothing - the effect didn't read it on the last run, so no monitor is watching it.
 
 This happens automatically. You don't need to declare dependencies upfront. The system figures it out based on what your code actually reads.
-
-## Creating Signals
-
-### Basic Signals
-
-```ts
-import { Signal } from "@owanturist/signal"
-
-// With initial value (type inferred)
-const count = Signal(0)
-const name = Signal("Alice")
-const items = Signal<string[]>([])
-
-// With explicit type annotation
-const user = Signal<User | null>(null)
-
-// Without initial value (starts as undefined)
-const pending = Signal<string>()
-```
-
-### Custom Equality
-
-By default, signals use `Object.is` to determine if a value has changed. You can customize this:
-
-```ts
-const position = Signal(
-  { x: 0, y: 0 },
-  {
-    equals: (prev, next) => prev.x === next.x && prev.y === next.y,
-  }
-)
-
-// This won't trigger updates - values are equal
-position.write({ x: 0, y: 0 })
-
-// This will trigger updates
-position.write({ x: 10, y: 0 })
-```
 
 ## Derived Signals
 
@@ -202,65 +162,6 @@ multiplier.write(3)  // Effect does NOT run
 count.write(5)       // Effect runs, logs: 15 (picks up new multiplier)
 ```
 
-## Signal Types
-
-The library provides several types for working with signals:
-
-| Type | Description |
-|------|-------------|
-| `Signal<T>` | A signal that can be read and written |
-| `ReadonlySignal<T>` | A signal without the `write` method (e.g., derived signals created without a setter) |
-| `ReadableSignal<T>` | Interface for anything that can be read with a Monitor |
-| `WritableSignal<T>` | Interface for anything that can be written to |
-
-### Exposing Read-Only Views
-
-A common pattern is to expose signals as read-only to prevent external code from modifying them:
-
-```ts
-import { Signal, type ReadonlySignal } from "@owanturist/signal"
-
-const _count = Signal(0)
-
-// External code can read but not write
-export const count: ReadonlySignal<number> = _count
-
-// Controlled mutations only through functions
-export function increment() {
-  _count.write((c) => c + 1)
-}
-```
-
-## Cloning Signals
-
-Signals can be cloned to create independent copies:
-
-```ts
-const original = Signal({ count: 0 })
-const clone = original.clone()
-
-clone.write({ count: 1 })
-
-effect((monitor) => {
-  console.log(original.read(monitor)) // { count: 0 }
-  console.log(clone.read(monitor))    // { count: 1 }
-})
-```
-
-## Type Guards
-
-```ts
-import { Signal, isSignal, isDerivedSignal } from "@owanturist/signal"
-
-const writable = Signal(0)
-const derived = Signal((monitor) => writable.read(monitor) * 2)
-
-isSignal(writable)        // true
-isSignal(derived)         // true
-isDerivedSignal(writable) // false
-isDerivedSignal(derived)  // true
-```
-
 ## Summary
 
 The Signal + Monitor pattern is the foundation of reactivity in this library:
@@ -272,3 +173,9 @@ The Signal + Monitor pattern is the foundation of reactivity in this library:
 - Dependencies are tracked dynamically based on actual code execution
 
 This design gives you fine-grained control over reactivity while keeping the mental model simple: pass a monitor when reading, and the system handles the rest.
+
+## See Also
+
+- [Signal API Reference](/docs/api/signal) - Complete API documentation
+- [Derived Signals](/docs/concepts/derived) - Computing values from signals
+- [Effects](/docs/concepts/effects) - Side effects and cleanup

@@ -1,0 +1,199 @@
+---
+title: Common Patterns
+description: Practical patterns for working with signals and derived values
+---
+
+This guide shows common patterns for filtering, mapping, and combining signals in real applications.
+
+## Filtering and Mapping Data
+
+Filter and transform collections based on signal state:
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+const items = Signal([1, 2, 3, 4, 5])
+const filter = Signal<"all" | "even" | "odd">("all")
+
+const filteredItems = Signal((monitor) => {
+  const all = items.read(monitor)
+  switch (filter.read(monitor)) {
+    case "even":
+      return all.filter((n) => n % 2 === 0)
+    case "odd":
+      return all.filter((n) => n % 2 !== 0)
+    case "all":
+      return all
+  }
+})
+
+effect((monitor) => {
+  console.log(filteredItems.read(monitor))
+})
+// [1, 2, 3, 4, 5]
+
+filter.write("even")
+// [2, 4]
+```
+
+## Combining Multiple Sources
+
+Combine search, sort, and filter operations in a single derived signal:
+
+```ts
+import { Signal } from "@owanturist/signal"
+
+interface Product {
+  name: string
+  price: number
+}
+
+const searchQuery = Signal("")
+const sortOrder = Signal<"asc" | "desc">("asc")
+const products = Signal<Product[]>([])
+
+const displayedProducts = Signal((monitor) => {
+  const query = searchQuery.read(monitor).toLowerCase()
+  const order = sortOrder.read(monitor)
+
+  return products
+    .read(monitor)
+    .filter((p) => p.name.toLowerCase().includes(query))
+    .sort((a, b) => {
+      const cmp = a.name.localeCompare(b.name)
+      return order === "asc" ? cmp : -cmp
+    })
+})
+```
+
+## Modeling Async State
+
+Model loading, success, and error states with discriminated unions:
+
+```ts
+import { Signal } from "@owanturist/signal"
+
+type AsyncState<T> =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "success"; data: T }
+  | { status: "error"; error: Error }
+
+interface User {
+  id: string
+  name: string
+}
+
+const userState = Signal<AsyncState<User>>({ status: "idle" })
+
+// Create derived helpers for common checks
+const isLoading = Signal((monitor) => userState.read(monitor).status === "loading")
+
+const userData = Signal((monitor) => {
+  const state = userState.read(monitor)
+  return state.status === "success" ? state.data : null
+})
+
+// Load data and update state
+async function loadUser(id: string) {
+  userState.write({ status: "loading" })
+  try {
+    const response = await fetch(`/api/users/${id}`)
+    const data = await response.json()
+    userState.write({ status: "success", data })
+  } catch (error) {
+    userState.write({ status: "error", error: error as Error })
+  }
+}
+```
+
+## DOM Updates
+
+Update the DOM in response to signal changes:
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+const theme = Signal<"light" | "dark">("light")
+
+effect((monitor) => {
+  document.body.classList.toggle("dark", theme.read(monitor) === "dark")
+})
+```
+
+## Local Storage Sync
+
+Keep signal state synchronized with localStorage:
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+function loadFromStorage(): Settings {
+  const stored = localStorage.getItem("settings")
+  return stored ? JSON.parse(stored) : defaultSettings
+}
+
+interface Settings {
+  theme: "light" | "dark"
+  fontSize: number
+}
+
+const defaultSettings: Settings = { theme: "light", fontSize: 14 }
+const settings = Signal(loadFromStorage())
+
+effect((monitor) => {
+  localStorage.setItem("settings", JSON.stringify(settings.read(monitor)))
+})
+```
+
+## Debugging Signal Changes
+
+Log signal changes during development:
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+const state = Signal({ count: 0 })
+
+if (process.env.NODE_ENV === "development") {
+  effect((monitor) => {
+    console.log("State changed:", state.read(monitor))
+  })
+}
+```
+
+## Conditional Effects
+
+Run effects only when certain conditions are met:
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+interface Message {
+  id: string
+  text: string
+}
+
+const isConnected = Signal(false)
+const messages = Signal<Message[]>([])
+
+effect((monitor) => {
+  if (!isConnected.read(monitor)) {
+    return // No dependencies on messages when disconnected
+  }
+
+  const msgs = messages.read(monitor)
+  sendToServer(msgs)
+})
+
+function sendToServer(messages: Message[]) {
+  // Send messages to server
+}
+```
+
+## See Also
+
+- [Signals and Monitors](/docs/concepts/signals) - Core concepts
+- [Derived Signals](/docs/concepts/derived) - How derived signals work
+- [Effects](/docs/concepts/effects) - Effect fundamentals
+- [Performance Optimization](/docs/guides/performance) - Performance tips

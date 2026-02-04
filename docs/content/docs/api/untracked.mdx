@@ -3,40 +3,27 @@ title: untracked
 description: API reference for the untracked function
 ---
 
-# untracked
-
 The `untracked` function reads signal values without creating reactive dependencies.
 
-## Function Signatures
+## `untracked(factory){:dart}` [#factory]
 
 ```ts
 function untracked<TResult>(factory: (monitor: Monitor) => TResult): TResult
-function untracked<TValue>(signal: ReadableSignal<TValue>): TValue
 ```
 
-## Parameters
+Executes a function with an untracked Monitor, allowing signal reads that don't establish dependencies.
 
-### Factory Form
+<section className="typedef">
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `factory` | `(monitor: Monitor) => TResult` | Function to execute without tracking. Receives an untracked Monitor. |
+- `@param factory: (monitor: Monitor) => TResult{:dart}` Function to execute without tracking. Receives an untracked Monitor.
 
-### Signal Form
+---
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `signal` | `ReadableSignal<TValue>` | Signal to read without tracking |
+- `@returns TResult{:dart}` The return value of the factory function.
 
-## Returns
+</section>
 
-Returns the value from the factory or signal.
-
-## Examples
-
-### Basic Usage
-
-```ts
+```ts twoslash tab="Example"
 import { Signal, effect, untracked } from "@owanturist/signal"
 
 const count = Signal(0)
@@ -60,22 +47,39 @@ count.write(5)
 // Logs: 15 (uses current multiplier value)
 ```
 
-### Signal Shorthand
+## `untracked(signal){:dart}` [#signal]
 
 ```ts
+function untracked<TValue>(signal: ReadableSignal<TValue>): TValue
+```
+
+Reads a signal's value without establishing a dependency. Shorthand for `untracked((m) => signal.read(m)){:ts}`.
+
+<section className="typedef">
+
+- `@param signal: ReadableSignal<TValue>{:dart}` Signal to read without tracking.
+
+---
+
+- `@returns TValue{:dart}` The current value of the signal.
+
+</section>
+
+```ts twoslash tab="Example"
+import { Signal, effect, untracked } from "@owanturist/signal"
+
 const count = Signal(0)
 const config = Signal({ multiplier: 2 })
 
 effect((monitor) => {
-  // Equivalent to: untracked((m) => config.read(m))
   const { multiplier } = untracked(config)
   console.log(count.read(monitor) * multiplier)
 })
 ```
 
-### In Derived Signals
+```ts twoslash tab="In Derived"
+import { Signal, untracked } from "@owanturist/signal"
 
-```ts
 const items = Signal([1, 2, 3])
 const sortOrder = Signal<"asc" | "desc">("asc")
 
@@ -84,98 +88,7 @@ const sortedItems = Signal((monitor) => {
   const order = untracked((m) => sortOrder.read(m))
   const arr = [...items.read(monitor)]
 
-  return order === "asc"
-    ? arr.sort((a, b) => a - b)
-    : arr.sort((a, b) => b - a)
-})
-```
-
-## Use Cases
-
-### Configuration Values
-
-Read configuration that shouldn't trigger re-runs:
-
-```ts
-const data = Signal<Item[]>([])
-const pageSize = Signal(10)
-
-effect((monitor) => {
-  // Re-run when data changes, not when pageSize changes
-  const size = untracked((m) => pageSize.read(m))
-  displayItems(data.read(monitor).slice(0, size))
-})
-```
-
-### Logging and Debugging
-
-```ts
-const requestId = Signal(0)
-const response = Signal<Response | null>(null)
-
-effect((monitor) => {
-  const res = response.read(monitor)
-  if (res) {
-    // Don't track requestId - just for logging
-    console.log(`Request ${untracked(requestId)} completed:`, res)
-  }
-})
-```
-
-### Conditional Dependencies
-
-```ts
-const mode = Signal<"simple" | "advanced">("simple")
-const basicConfig = Signal({ threshold: 10 })
-const advancedConfig = Signal({ threshold: 5, precision: 2 })
-
-effect((monitor) => {
-  // Always track mode
-  if (mode.read(monitor) === "simple") {
-    // Only track basicConfig in simple mode
-    process(basicConfig.read(monitor))
-  } else {
-    // Only track advancedConfig in advanced mode
-    process(advancedConfig.read(monitor))
-  }
-})
-```
-
-### Avoiding Unnecessary Re-renders
-
-```ts
-const items = Signal<Item[]>([])
-const selectedId = Signal<string | null>(null)
-
-// This derived signal only updates when items change
-const itemsWithSelection = Signal((monitor) => {
-  const selected = untracked((m) => selectedId.read(m))
-  return items.read(monitor).map((item) => ({
-    ...item,
-    isSelected: item.id === selected,
-  }))
-})
-
-// To get current selection state, read both:
-effect((monitor) => {
-  const currentItems = items.read(monitor)
-  const currentSelection = selectedId.read(monitor)
-  render(currentItems, currentSelection)
-})
-```
-
-### One-Time Reads
-
-```ts
-const initialValue = Signal(100)
-const currentValue = Signal(0)
-
-effect((monitor) => {
-  // Read initial value once (on first run only)
-  const initial = untracked((m) => initialValue.read(m))
-  const current = currentValue.read(monitor)
-
-  console.log(`Changed by ${current - initial}`)
+  return order === "asc" ? arr.sort((a, b) => a - b) : arr.sort((a, b) => b - a)
 })
 ```
 
@@ -183,7 +96,9 @@ effect((monitor) => {
 
 Untracked calls can be nested:
 
-```ts
+```ts twoslash
+import { Signal, effect, untracked } from "@owanturist/signal"
+
 const a = Signal(1)
 const b = Signal(2)
 const c = Signal(3)
@@ -209,12 +124,16 @@ c.write(30) // No re-run
 
 ### Tracking Still Happens Outside untracked
 
-```ts
+Reads outside the `untracked` call are still tracked:
+
+```ts twoslash
+import { Signal, effect, untracked } from "@owanturist/signal"
+
 const a = Signal(1)
 const b = Signal(2)
 
 effect((monitor) => {
-  const aVal = a.read(monitor) // This IS tracked!
+  const aVal = a.read(monitor) // This IS tracked
   const bVal = untracked((m) => b.read(m)) // This is not tracked
   console.log(aVal + bVal)
 })
@@ -224,7 +143,9 @@ effect((monitor) => {
 
 Since untracked values aren't dependencies, they can become stale:
 
-```ts
+```ts twoslash
+import { Signal, effect, untracked } from "@owanturist/signal"
+
 const count = Signal(0)
 const label = Signal("Count")
 
@@ -240,7 +161,6 @@ count.write(1) // Logs: "Value: 1" (label was updated)
 
 ## See Also
 
-- [Signals](/docs/concepts/signals)
-- [Effects](/docs/concepts/effects)
-- [effect()](/docs/api/effect)
-- [batch()](/docs/api/batch)
+- [Signals and Monitors](/docs/concepts/signals) - Core concepts
+- [Effects](/docs/concepts/effects) - Effect fundamentals
+- [batch](/docs/api/batch) - Batching updates

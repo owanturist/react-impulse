@@ -3,61 +3,189 @@ title: Signal
 description: API reference for the Signal function and signal types
 ---
 
-# Signal
-
 The `Signal` function creates reactive signals that hold values and notify dependents when changed.
 
-## Function Signatures
+## `Signal(){:dart}` [#empty-factory]
 
 ```ts
-// Creates a Signal without initial value
 function Signal<TValue = undefined>(): Signal<undefined | TValue>
+```
 
-// Creates a Signal with initial value
+Creates a writable signal without an initial value.
+
+<section className="typedef">
+
+- `@returns Signal<undefined | TValue>{:dart}` A writable signal initialized to `undefined{:ts}`.
+
+</section>
+
+```ts twoslash tab="Example"
+import { Signal } from "@owanturist/signal"
+
+const pending = Signal<string>()
+//    ^?
+```
+
+## `Signal(initialValue, options?){:dart}` [#value-factory]
+
+```ts
 function Signal<TValue>(
   initialValue: TValue,
-  options?: SignalOptions<TValue>
+  options?: SignalOptions<TValue>,
 ): Signal<TValue>
+```
 
-// Creates a read-only derived Signal from a getter
+Creates a writable signal with an initial value.
+
+<section className="typedef">
+
+- `@param initialValue: TValue{:dart}` The initial value of the signal.
+
+- `@param options?: SignalOptions<TValue>{:dart}` Optional configuration.
+
+---
+
+- `@returns Signal<TValue>{:dart}` A writable signal.
+
+</section>
+
+```ts twoslash tab="Primitive"
+import { Signal, effect } from "@owanturist/signal"
+
+const count = Signal(0)
+//    ^?
+
+effect((monitor) => {
+  console.log(count.read(monitor))
+})
+
+count.write(1)
+```
+
+```ts twoslash tab="Object"
+import { Signal } from "@owanturist/signal"
+
+interface User {
+  id: string
+  name: string
+}
+
+const user = Signal<User | null>(null)
+//    ^?
+```
+
+```ts twoslash tab="Custom Equality"
+import { Signal } from "@owanturist/signal"
+
+interface Point {
+  x: number
+  y: number
+}
+
+const position = Signal<Point>(
+  { x: 0, y: 0 },
+  {
+    equals: (a, b) => a.x === b.x && a.y === b.y,
+  },
+)
+
+position.write({ x: 0, y: 0 }) // No update (equal)
+position.write({ x: 1, y: 0 }) // Update triggered
+```
+
+## `Signal(getter, options?){:dart}` [#derived-readonly]
+
+```ts
 function Signal<TDerivedValue>(
   getter: ReadableSignal<TDerivedValue> | ((monitor: Monitor) => TDerivedValue),
-  options?: SignalOptions<TDerivedValue>
+  options?: SignalOptions<TDerivedValue>,
 ): ReadonlySignal<TDerivedValue>
+```
 
-// Creates a derived Signal with getter and setter (bidirectional)
+Creates a read-only derived signal from a getter function or another signal.
+
+<section className="typedef">
+
+- `@param getter: ReadableSignal<TDerivedValue> | ((monitor: Monitor) => TDerivedValue){:dart}` A function that computes the derived value, or a `ReadableSignal{:dart}` to mirror.
+
+- `@param options?: SignalOptions<TDerivedValue>{:dart}` Optional configuration.
+
+---
+
+- `@returns ReadonlySignal<TDerivedValue>{:dart}` A read-only signal that recomputes when dependencies change.
+
+</section>
+
+```ts twoslash tab="Function Getter"
+import { Signal, effect } from "@owanturist/signal"
+
+const price = Signal(100)
+const quantity = Signal(2)
+
+const total = Signal((monitor) => price.read(monitor) * quantity.read(monitor))
+//    ^?
+
+effect((monitor) => {
+  console.log(total.read(monitor)) // 200
+})
+
+price.write(150) // logs: 300
+```
+
+```ts twoslash tab="Signal Getter"
+import { Signal } from "@owanturist/signal"
+
+const source = Signal(42)
+const mirror = Signal(source)
+//    ^?
+```
+
+## `Signal(getter, setter, options?){:dart}` [#derived-bidirectional]
+
+```ts
 function Signal<TDerivedValue>(
   getter: ReadableSignal<TDerivedValue> | ((monitor: Monitor) => TDerivedValue),
   setter: WritableSignal<TDerivedValue> | ((value: TDerivedValue, monitor: Monitor) => void),
-  options?: SignalOptions<TDerivedValue>
+  options?: SignalOptions<TDerivedValue>,
 ): Signal<TDerivedValue>
 ```
 
-## Parameters
+Creates a bidirectional derived signal with both getter and setter.
 
-### `Signal(initialValue, options?)`
+<section className="typedef">
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `initialValue` | `T` | The initial value of the signal |
-| `options` | `SignalOptions<T>` | Optional configuration |
+- `@param getter: ReadableSignal<TDerivedValue> | ((monitor: Monitor) => TDerivedValue){:dart}` A function that computes the derived value, or a `ReadableSignal{:dart}` to mirror.
 
-### `Signal(getter, options?)` - Read-only Derived
+- `@param setter: WritableSignal<TDerivedValue> | ((value: TDerivedValue, monitor: Monitor) => void){:dart}` A function to write back to source signals, or a `WritableSignal{:dart}` to write to.
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `getter` | `ReadableSignal<T> \| (monitor: Monitor) => T` | Function or ReadableSignal to compute the derived value |
-| `options` | `SignalOptions<T>` | Optional configuration |
+- `@param options?: SignalOptions<TDerivedValue>{:dart}` Optional configuration.
 
-### `Signal(getter, setter, options?)` - Bidirectional Derived
+---
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `getter` | `ReadableSignal<T> \| (monitor: Monitor) => T` | Function or ReadableSignal to compute the derived value |
-| `setter` | `WritableSignal<T> \| (value: T, monitor: Monitor) => void` | Function or WritableSignal to write back to the source |
-| `options` | `SignalOptions<T>` | Optional configuration |
+- `@returns Signal<TDerivedValue>{:dart}` A writable signal that syncs with its sources.
 
-## Options
+</section>
+
+```ts twoslash tab="Example"
+import { Signal, effect } from "@owanturist/signal"
+
+const celsius = Signal(0)
+
+const fahrenheit = Signal(
+  (monitor) => celsius.read(monitor) * (9 / 5) + 32,
+  (value) => celsius.write((value - 32) * (5 / 9)),
+)
+
+effect((monitor) => {
+  console.log(`${celsius.read(monitor)}C = ${fahrenheit.read(monitor)}F`)
+})
+// logs: "0C = 32F"
+
+fahrenheit.write(212)
+// logs: "100C = 212F"
+```
+
+## `SignalOptions<T>{:dart}` [#options]
 
 ```ts
 interface SignalOptions<T> {
@@ -67,15 +195,13 @@ interface SignalOptions<T> {
 type Equal<T> = (left: T, right: T) => boolean
 ```
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `equals` | `null \| (left: T, right: T) => boolean` | `Object.is` | Custom equality function. Pass `null` to use default `Object.is` |
+<section className="typedef">
 
-## Signal Types
+- `@param equals?: null | Equal<T>{:dart}` Custom equality function to determine if a value has changed. Pass `null{:ts}` to use the default `Object.is{:ts}`. When the function returns `true{:ts}`, watchers are not notified.
 
-### Signal\<T\>
+</section>
 
-A writable signal with both read and write capabilities:
+## `Signal<T>{:dart}` [#signal-type]
 
 ```ts
 interface Signal<T> {
@@ -86,17 +212,17 @@ interface Signal<T> {
 }
 ```
 
-### ReadonlySignal\<T\>
+A writable signal with read, write, and clone capabilities.
 
-A signal without write capability:
+## `ReadonlySignal<T>{:dart}` [#readonly-signal-type]
 
 ```ts
 type ReadonlySignal<T> = Omit<Signal<T>, "write">
 ```
 
-### ReadableSignal\<T\>
+A signal without write capability. Derived signals without a setter return this type.
 
-Interface for anything that can be read with a Monitor:
+## `ReadableSignal<T>{:dart}` [#readable-signal-type]
 
 ```ts
 interface ReadableSignal<T> {
@@ -104,9 +230,9 @@ interface ReadableSignal<T> {
 }
 ```
 
-### WritableSignal\<T\>
+Interface for anything that can be read with a Monitor.
 
-Interface for anything that can be written to:
+## `WritableSignal<T>{:dart}` [#writable-signal-type]
 
 ```ts
 interface WritableSignal<T> {
@@ -114,206 +240,179 @@ interface WritableSignal<T> {
 }
 ```
 
-## Signal Methods
+Interface for anything that can be written to.
 
-### read(monitor)
+## `signal.read(monitor){:dart}` [#read]
 
 ```ts
 read(monitor: Monitor): T
 ```
 
-Reads the signal's value and tracks it as a dependency via the provided Monitor.
+Reads the signal's value and registers the monitor as a watcher.
 
-### write(valueOrTransform)
+<section className="typedef">
+
+- `@param monitor: Monitor{:dart}` The monitor to register as a dependency watcher.
+
+---
+
+- `@returns T{:dart}` The current value of the signal.
+
+</section>
+
+## `signal.write(valueOrTransform){:dart}` [#write]
 
 ```ts
 write(value: T): void
 write(transform: (currentValue: T, monitor: Monitor) => T): void
 ```
 
-Updates the signal's value. Can accept either a direct value or a transform function.
+Updates the signal's value and notifies all watching monitors.
 
-### clone(options?)
+<section className="typedef">
+
+- `@param value: T{:dart}` The new value to set.
+
+- `@param transform: (currentValue: T, monitor: Monitor) => T{:dart}` A function that receives the current value and returns the new value. The monitor parameter allows reading other signals without tracking.
+
+</section>
+
+```ts twoslash tab="Direct"
+import { Signal } from "@owanturist/signal"
+
+const count = Signal(0)
+
+count.write(5)
+```
+
+```ts twoslash tab="Transform"
+import { Signal } from "@owanturist/signal"
+
+const count = Signal(0)
+
+count.write((current) => current + 1)
+```
+
+## `signal.clone(options?){:dart}` [#clone]
 
 ```ts
 clone(options?: SignalOptions<T>): Signal<T>
 clone(transform: (value: T, monitor: Monitor) => T, options?: SignalOptions<T>): Signal<T>
 ```
 
-Creates a new Signal instance with the same (or transformed) value. Useful for cloning mutable values.
+Creates a new independent signal with the same (or transformed) value.
 
-## Examples
+<section className="typedef">
 
-### Basic Usage
+- `@param transform?: (value: T, monitor: Monitor) => T{:dart}` Optional function to transform the value during cloning.
 
-```ts
+- `@param options?: SignalOptions<T>{:dart}` Optional configuration for the new signal.
+
+---
+
+- `@returns Signal<T>{:dart}` A new independent signal.
+
+</section>
+
+```ts twoslash tab="Basic"
 import { Signal, effect } from "@owanturist/signal"
 
-// Create a writable signal
-const count = Signal(0)
-
-effect((monitor) => {
-  console.log(count.read(monitor)) // 0
-})
-
-// Write a new value
-count.write(1) // logs: 1
-```
-
-### Using Transform Function
-
-```ts
-const count = Signal(0)
-
-// Increment using transform function
-count.write((current) => current + 1)
-
-// The transform receives the current value and a monitor
-count.write((current, monitor) => {
-  // Can read other signals here without tracking
-  return current + 1
-})
-```
-
-### Derived Signals (Read-only)
-
-```ts
-const price = Signal(100)
-const quantity = Signal(2)
-
-// Derived signal automatically tracks dependencies
-const total = Signal((monitor) => price.read(monitor) * quantity.read(monitor))
-
-effect((monitor) => {
-  console.log(total.read(monitor)) // 200
-})
-
-price.write(150) // logs: 300
-```
-
-### Derived Signals (Bidirectional)
-
-```ts
-const celsius = Signal(0)
-
-// Two-way derived signal
-const fahrenheit = Signal(
-  (monitor) => celsius.read(monitor) * 9/5 + 32,
-  (value) => celsius.write((value - 32) * 5/9)
-)
-
-effect((monitor) => {
-  console.log(`${celsius.read(monitor)}°C = ${fahrenheit.read(monitor)}°F`)
-})
-// logs: "0°C = 32°F"
-
-fahrenheit.write(212) // logs: "100°C = 212°F"
-```
-
-### Custom Equality
-
-```ts
-interface Point {
-  x: number
-  y: number
-}
-
-const position = Signal<Point>(
-  { x: 0, y: 0 },
-  {
-    equals: (a, b) => a.x === b.x && a.y === b.y,
-  }
-)
-
-position.write({ x: 0, y: 0 }) // No update (equal)
-position.write({ x: 1, y: 0 }) // Update triggered
-```
-
-### Cloning Signals
-
-```ts
 const original = Signal({ count: 0 })
 const clone = original.clone()
 
-// Clone is independent
 clone.write({ count: 1 })
+
 effect((monitor) => {
   console.log(original.read(monitor)) // { count: 0 }
-  console.log(clone.read(monitor))    // { count: 1 }
+  console.log(clone.read(monitor)) // { count: 1 }
 })
+```
 
-// Clone with transformation
+```ts twoslash tab="With Transform"
+import { Signal } from "@owanturist/signal"
+
+const original = Signal({ count: 5 })
 const doubled = original.clone((value) => ({ count: value.count * 2 }))
 ```
 
-### Type Inference
-
-```ts
-// Type is inferred as Signal<number>
-const count = Signal(0)
-
-// Type is inferred as Signal<string>
-const name = Signal("Alice")
-
-// Explicit type for complex types
-const user = Signal<User | null>(null)
-
-// Derived signal type is inferred as ReadonlySignal<number>
-const doubled = Signal((monitor) => count.read(monitor) * 2)
-```
-
-## Type Guards
-
-### isSignal
+## `isSignal(input){:dart}` [#is-signal]
 
 ```ts
 function isSignal<T>(input: unknown): input is Signal<T>
 function isSignal<T>(
   monitor: Monitor,
   check: (value: unknown) => value is T,
-  input: unknown
+  input: unknown,
 ): input is Signal<T>
 ```
 
-Check if a value is any type of signal:
+Type guard to check if a value is a signal.
 
-```ts
+<section className="typedef">
+
+- `@param input: unknown{:dart}` The value to check.
+
+- `@param monitor?: Monitor{:dart}` Optional monitor for checking the signal's value type.
+
+- `@param check?: (value: unknown) => value is T{:dart}` Optional type guard for the signal's value.
+
+---
+
+- `@returns boolean{:dart}` `true{:ts}` if the input is a signal.
+
+</section>
+
+```ts twoslash
 import { Signal, isSignal } from "@owanturist/signal"
 
 const count = Signal(0)
 const derived = Signal((monitor) => count.read(monitor) * 2)
 
-isSignal(count)    // true
-isSignal(derived)  // true
-isSignal(42)       // false
+isSignal(count) // true
+isSignal(derived) // true
+isSignal(42) // false
 ```
 
-### isDerivedSignal
+## `isDerivedSignal(input){:dart}` [#is-derived-signal]
 
 ```ts
 function isDerivedSignal<T>(input: unknown): input is Signal<T>
 function isDerivedSignal<T>(
   monitor: Monitor,
   check: (value: unknown) => value is T,
-  input: unknown
+  input: unknown,
 ): input is Signal<T>
 ```
 
-Check if a value is a derived signal:
+Type guard to check if a value is a derived signal.
 
-```ts
+<section className="typedef">
+
+- `@param input: unknown{:dart}` The value to check.
+
+- `@param monitor?: Monitor{:dart}` Optional monitor for checking the signal's value type.
+
+- `@param check?: (value: unknown) => value is T{:dart}` Optional type guard for the signal's value.
+
+---
+
+- `@returns boolean{:dart}` `true{:ts}` if the input is a derived signal.
+
+</section>
+
+```ts twoslash
 import { Signal, isDerivedSignal } from "@owanturist/signal"
 
 const count = Signal(0)
 const derived = Signal((monitor) => count.read(monitor) * 2)
 
-isDerivedSignal(count)   // false
+isDerivedSignal(count) // false
 isDerivedSignal(derived) // true
 ```
 
 ## See Also
 
-- [Signals Concept](/docs/concepts/signals)
-- [Derived Signals](/docs/concepts/derived)
-- [batch()](/docs/api/batch)
-- [effect()](/docs/api/effect)
+- [Signals and Monitors](/docs/concepts/signals) - Core concepts
+- [Derived Signals](/docs/concepts/derived) - Computed values
+- [batch](/docs/api/batch) - Batching updates
+- [effect](/docs/api/effect) - Side effects

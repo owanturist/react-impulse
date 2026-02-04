@@ -3,8 +3,6 @@ title: MonitorFactory
 description: API reference for the MonitorFactory class
 ---
 
-# MonitorFactory
-
 `MonitorFactory` is an advanced API for creating custom monitors that track signal dependencies. This is primarily used for building framework integrations.
 
 ## Import
@@ -13,38 +11,35 @@ description: API reference for the MonitorFactory class
 import { MonitorFactory } from "@owanturist/signal/monitor-factory"
 ```
 
-Note: `MonitorFactory` is exported from a separate entrypoint, not the main package.
+<Callout>
+  `MonitorFactory` is exported from a separate entrypoint, not the main package.
+</Callout>
 
-## Class Definition
+## `new MonitorFactory(){:dart}` [#constructor]
 
 ```ts
 class MonitorFactory {
-  public get create(): () => Monitor
-  public connect(emit: VoidFunction): VoidFunction
+  constructor()
 }
 ```
 
-## Constructor
+Creates a new MonitorFactory instance.
 
-```ts
-new MonitorFactory()
-```
-
-The constructor takes no parameters.
-
-## Methods
-
-### create (getter)
+## `factory.create{:dart}` [#create]
 
 ```ts
 public get create(): () => Monitor
 ```
 
-Returns a factory function that creates new `Monitor` instances for tracking signal reads.
+Returns a factory function that creates new Monitor instances for tracking signal reads.
 
-**Returns:** A function `() => Monitor` that creates fresh Monitor instances.
+<section className="typedef">
 
-### connect(emit)
+- `@returns () => Monitor{:dart}` A function that creates fresh Monitor instances.
+
+</section>
+
+## `factory.connect(emit){:dart}` [#connect]
 
 ```ts
 public connect(emit: VoidFunction): VoidFunction
@@ -52,27 +47,29 @@ public connect(emit: VoidFunction): VoidFunction
 
 Registers an emission callback that will be invoked when any tracked signal changes.
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `emit` | `VoidFunction` | Callback invoked when any tracked signal changes |
+<section className="typedef">
 
-**Returns:** A cleanup function that invalidates the underlying emitter when invoked.
+- `@param emit: VoidFunction{:dart}` Callback invoked when any tracked signal changes.
 
-## Monitor Interface
+---
+
+- `@returns VoidFunction{:dart}` A cleanup function that invalidates the underlying emitter when invoked.
+
+</section>
+
+## `Monitor{:dart}` [#monitor]
 
 ```ts
 interface Monitor {
-  // Internal interface used by signals
+  // Opaque type used internally by signals
 }
 ```
 
-The `Monitor` type is opaque - you pass it to `signal.read()` to track dependencies.
+The `Monitor` type is opaque. You pass it to `signal.read(monitor)` to track dependencies.
 
 ## Examples
 
-### Basic Usage
-
-```ts
+```ts twoslash tab="Basic"
 import { Signal } from "@owanturist/signal"
 import { MonitorFactory } from "@owanturist/signal/monitor-factory"
 
@@ -80,12 +77,10 @@ const count = Signal(0)
 
 const factory = new MonitorFactory()
 
-// Connect a callback to be notified of changes
 const disconnect = factory.connect(() => {
   console.log("A tracked signal changed!")
 })
 
-// Create a monitor and track reads
 const monitor = factory.create()
 const value = count.read(monitor)
 
@@ -94,19 +89,16 @@ console.log(value) // 0
 count.write(1)
 // Logs: "A tracked signal changed!"
 
-// Clean up when done
 disconnect()
 
 count.write(2)
 // Nothing logged (disconnected)
 ```
 
-### Building a Custom Hook
-
-Here's how you might use `MonitorFactory` to build a React hook:
-
-```tsx
+```tsx twoslash tab="React Hook"
+// @noErrors
 import { useCallback, useMemo, useSyncExternalStore } from "react"
+import type { Monitor } from "@owanturist/signal"
 import { MonitorFactory } from "@owanturist/signal/monitor-factory"
 
 function useSignalValue<T>(compute: (monitor: Monitor) => T): T {
@@ -124,7 +116,6 @@ function useSignalValue<T>(compute: (monitor: Monitor) => T): T {
       if (factory === null) {
         factory = new MonitorFactory()
         factory.connect(() => {
-          // Re-compute and notify listeners
           const monitor = factory!.create()
           currentValue = compute(monitor)
           listeners.forEach((l) => l())
@@ -143,11 +134,10 @@ function useSignalValue<T>(compute: (monitor: Monitor) => T): T {
 }
 ```
 
-### Multiple Monitors
+```ts twoslash tab="Multiple Monitors"
+import { Signal } from "@owanturist/signal"
+import { MonitorFactory } from "@owanturist/signal/monitor-factory"
 
-A single factory can create multiple monitors for different tracking scopes:
-
-```ts
 const a = Signal(1)
 const b = Signal(2)
 
@@ -156,11 +146,9 @@ const disconnect = factory.connect(() => {
   console.log("Changed!")
 })
 
-// First read scope
 const monitor1 = factory.create()
 a.read(monitor1)
 
-// Second read scope
 const monitor2 = factory.create()
 b.read(monitor2)
 
@@ -171,25 +159,14 @@ b.write(20) // Logs: "Changed!"
 disconnect()
 ```
 
-## Use Cases
+```ts twoslash tab="Custom Watcher"
+import type { Monitor } from "@owanturist/signal"
+import { Signal } from "@owanturist/signal"
+import { MonitorFactory } from "@owanturist/signal/monitor-factory"
 
-### Framework Integration
-
-`MonitorFactory` is the building block for integrating signals with UI frameworks:
-
-- React hooks (`useComputed`, `useMonitor`)
-- Vue composables
-- Svelte stores
-- Custom rendering systems
-
-### Custom Reactive Systems
-
-Build custom reactive primitives:
-
-```ts
 function createWatcher<T>(
   compute: (monitor: Monitor) => T,
-  callback: (value: T) => void
+  callback: (value: T) => void,
 ): () => void {
   const factory = new MonitorFactory()
 
@@ -204,15 +181,13 @@ function createWatcher<T>(
   const value = compute(monitor)
   callback(value)
 
-  // Return cleanup function
   return disconnect
 }
 
-// Usage
 const count = Signal(0)
 const stop = createWatcher(
   (monitor) => count.read(monitor) * 2,
-  (doubled) => console.log("Doubled:", doubled)
+  (doubled) => console.log("Doubled:", doubled),
 )
 // Logs: "Doubled: 0"
 
@@ -222,44 +197,15 @@ count.write(5)
 stop()
 ```
 
-### Testing
-
-Useful for testing signal reactivity:
-
-```ts
-function trackDependencies<T>(compute: (monitor: Monitor) => T): {
-  value: T
-  changeCount: number
-  disconnect: () => void
-} {
-  let changeCount = 0
-
-  const factory = new MonitorFactory()
-  const disconnect = factory.connect(() => {
-    changeCount++
-  })
-
-  const monitor = factory.create()
-  const value = compute(monitor)
-
-  return {
-    value,
-    get changeCount() {
-      return changeCount
-    },
-    disconnect,
-  }
-}
-```
-
 ## Important Notes
 
-1. **Memory management**: Always call the disconnect function returned by `connect()` when the factory is no longer needed
-2. **Single callback**: One factory has one `connect` callback for all tracked signals
-3. **Synchronous**: The `emit` callback is invoked synchronously when signals change
-4. **Advanced API**: Most users should use `effect()` or framework-specific hooks instead
+1. **Memory management** - Always call the disconnect function returned by `connect()` when the factory is no longer needed
+2. **Single callback** - One factory has one `connect` callback for all tracked signals
+3. **Synchronous** - The `emit` callback is invoked synchronously when signals change
+4. **Advanced API** - Most users should use `effect()` or framework-specific hooks instead
 
 ## See Also
 
-- [effect()](/docs/api/effect)
-- [Signals](/docs/concepts/signals)
+- [effect](/docs/api/effect) - High-level effect API
+- [useMonitor](/docs/api/use-monitor) - React hook for monitor access
+- [Signals and Monitors](/docs/concepts/signals) - Core concepts

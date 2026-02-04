@@ -1,0 +1,120 @@
+---
+title: useMonitor
+description: API reference for the useMonitor hook
+---
+
+The `useMonitor` hook provides direct access to a Monitor instance for advanced signal reading scenarios.
+
+## `useMonitor(){:dart}` [#use-monitor]
+
+```ts
+function useMonitor(): Monitor
+```
+
+Returns a Monitor instance that can be used to read signals. The component subscribes to all signals read through this monitor.
+
+<section className="typedef">
+
+- `@returns Monitor{:dart}` A Monitor instance for reading signals. The monitor is stable across renders.
+
+</section>
+
+```tsx tab="Example"
+import { Signal, type Monitor } from "@owanturist/signal"
+import { useMonitor } from "@owanturist/signal-react"
+
+const count = Signal(0)
+
+function Counter() {
+  const monitor = useMonitor()
+  const value = count.read(monitor)
+
+  return <div>Count: {value}</div>
+}
+```
+
+## Monitor Interface
+
+```ts
+interface Monitor {
+  // Opaque type used internally by signals
+}
+```
+
+The `Monitor` type is intentionally opaque. You pass it to `signal.read(monitor)` to track dependencies. The monitor handles subscription management internally.
+
+## When to Use
+
+<Callout type="warn">
+  Most applications should use `useComputed` instead of `useMonitor`. Only use `useMonitor` when you need direct monitor access for advanced patterns.
+</Callout>
+
+Use `useMonitor` when:
+
+- Building custom hooks that need low-level monitor access
+- Integrating with third-party libraries that expect a monitor
+- Implementing patterns not covered by `useComputed`
+
+## Building Custom Hooks
+
+Use `useMonitor` as a building block for custom signal-reading hooks:
+
+```tsx
+import { Signal, type Monitor } from "@owanturist/signal"
+import { useMonitor } from "@owanturist/signal-react"
+
+const count = Signal(0)
+
+function useSignalValue<T>(read: (monitor: Monitor) => T): T {
+  const monitor = useMonitor()
+  return read(monitor)
+}
+
+function Counter() {
+  const value = useSignalValue((monitor) => count.read(monitor))
+
+  return <div>Count: {value}</div>
+}
+```
+
+## Comparison with useComputed
+
+| Feature | `useMonitor` | `useComputed` |
+|---------|-------------|---------------|
+| Returns | `Monitor` | Computed value |
+| Memoization | None | Optional via dependencies |
+| Custom equality | None | Supported via options |
+| Use case | Advanced patterns | Most applications |
+
+```tsx tab="useMonitor"
+import { Signal } from "@owanturist/signal"
+import { useMonitor } from "@owanturist/signal-react"
+
+const count = Signal(0)
+
+function Counter() {
+  const monitor = useMonitor()
+  const value = count.read(monitor)
+
+  return <div>{value}</div>
+}
+```
+
+```tsx tab="useComputed (preferred)"
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+const count = Signal(0)
+
+function Counter() {
+  const value = useComputed(count)
+
+  return <div>{value}</div>
+}
+```
+
+## See Also
+
+- [useComputed](/docs/api/use-computed) - High-level hook for reading signals
+- [MonitorFactory](/docs/api/monitor-factory) - Creating custom monitors outside React
+- [React Integration](/docs/concepts/react-integration) - How signals work with React

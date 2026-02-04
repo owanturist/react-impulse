@@ -1,0 +1,229 @@
+---
+title: Batching Updates
+description: Grouping signal updates to prevent unnecessary re-renders
+---
+
+This guide covers when and how to batch signal updates to prevent intermediate re-renders.
+
+## When to Use Batching
+
+Batch signal updates when you need to:
+
+1. Update multiple related signals atomically
+2. Prevent effects from seeing intermediate states
+3. Reduce the number of effect executions
+
+## Basic Batching
+
+Without batching, each signal write triggers effects immediately:
+
+```ts
+import { Signal, batch, effect } from "@owanturist/signal"
+
+const firstName = Signal("John")
+const lastName = Signal("Doe")
+
+effect((monitor) => {
+  console.log(`${firstName.read(monitor)} ${lastName.read(monitor)}`)
+})
+// Logs: "John Doe"
+
+// Without batch: 2 updates, 2 effect runs
+firstName.write("Jane")
+// Logs: "Jane Doe"
+lastName.write("Smith")
+// Logs: "Jane Smith"
+```
+
+With batching, effects run once after all updates:
+
+```ts
+// With batch: 2 updates, 1 effect run
+batch(() => {
+  firstName.write("Bob")
+  lastName.write("Wilson")
+})
+// Logs once: "Bob Wilson"
+```
+
+## Reading During Batch
+
+The `batch` callback receives an untracked Monitor for reading values:
+
+```ts
+import { Signal, batch } from "@owanturist/signal"
+
+const count = Signal(0)
+
+batch((monitor) => {
+  // Read current value without tracking
+  const current = count.read(monitor)
+  count.write(current + 1)
+})
+```
+
+## Updating Related State
+
+Batch updates when changing multiple signals that represent related state:
+
+```ts
+import { Signal, batch } from "@owanturist/signal"
+
+interface User {
+  firstName: string
+  lastName: string
+  email: string
+}
+
+const firstName = Signal("")
+const lastName = Signal("")
+const email = Signal("")
+
+function updateUser(user: User) {
+  batch(() => {
+    firstName.write(user.firstName)
+    lastName.write(user.lastName)
+    email.write(user.email)
+  })
+}
+```
+
+## Form Resets
+
+Reset all form fields at once to prevent intermediate validation states:
+
+```ts
+import { Signal, batch } from "@owanturist/signal"
+
+const name = Signal("")
+const email = Signal("")
+const message = Signal("")
+const errors = Signal<string[]>([])
+
+function resetForm() {
+  batch(() => {
+    name.write("")
+    email.write("")
+    message.write("")
+    errors.write([])
+  })
+}
+```
+
+## State Machine Transitions
+
+Update status and data signals together during state transitions:
+
+```ts
+import { Signal, batch } from "@owanturist/signal"
+
+type Status = "idle" | "loading" | "success" | "error"
+
+interface Data {
+  id: string
+  value: number
+}
+
+const status = Signal<Status>("idle")
+const data = Signal<Data | null>(null)
+const error = Signal<Error | null>(null)
+
+async function fetchData() {
+  batch(() => {
+    status.write("loading")
+    data.write(null)
+    error.write(null)
+  })
+
+  try {
+    const result = await api.getData()
+    batch(() => {
+      status.write("success")
+      data.write(result)
+    })
+  } catch (e) {
+    batch(() => {
+      status.write("error")
+      error.write(e as Error)
+    })
+  }
+}
+
+const api = {
+  getData: async (): Promise<Data> => ({ id: "1", value: 42 }),
+}
+```
+
+## Nested Batches
+
+Batches can be nested. Updates are deferred until the outermost batch completes:
+
+```ts
+import { Signal, batch, effect } from "@owanturist/signal"
+
+const a = Signal(0)
+const b = Signal(0)
+
+effect((monitor) => {
+  console.log(`a=${a.read(monitor)}, b=${b.read(monitor)}`)
+})
+// Logs: "a=0, b=0"
+
+batch(() => {
+  a.write(1)
+
+  batch(() => {
+    b.write(1)
+  })
+  // Inner batch completes, but still inside outer batch
+
+  a.write(2)
+})
+// Logs once: "a=2, b=1"
+```
+
+## With Derived Signals
+
+Derived signals are recomputed after all batched changes, so they see the final state:
+
+```ts
+import { Signal, batch, effect } from "@owanturist/signal"
+
+const price = Signal(100)
+const quantity = Signal(1)
+const total = Signal((monitor) => price.read(monitor) * quantity.read(monitor))
+
+effect((monitor) => {
+  console.log(total.read(monitor))
+})
+// Logs: 100
+
+batch(() => {
+  price.write(200)
+  quantity.write(3)
+})
+// Logs: 600 (not 200 or 300)
+```
+
+## When Not to Batch
+
+Batching is unnecessary when:
+
+- Updating a single signal
+- Updates are independent and don't need to be atomic
+- You want intermediate states to be observable for debugging
+
+```ts
+import { Signal } from "@owanturist/signal"
+
+const count = Signal(0)
+
+// No batch needed for single update
+count.write((c) => c + 1)
+```
+
+## See Also
+
+- [batch API](/docs/api/batch) - Complete API reference
+- [Effects](/docs/concepts/effects) - How effects respond to changes
+- [Performance Optimization](/docs/guides/performance) - More optimization techniques

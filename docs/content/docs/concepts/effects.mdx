@@ -3,8 +3,6 @@ title: Effects
 description: Running side effects that respond to signal changes
 ---
 
-# Effects
-
 Effects are where the Monitor pattern meets the outside world. While signals and derived signals are about managing data, effects are about doing things in response to data changes - updating the DOM, making network requests, logging, and other side effects.
 
 ## The Effect-Monitor Connection
@@ -88,39 +86,6 @@ effect((monitor) => {
 ```
 
 This is essential for preventing resource leaks. Without cleanup, changing `userId` would create new subscriptions without closing old ones.
-
-### Practical Cleanup Examples
-
-**Timers:**
-
-```ts
-const isActive = Signal(true)
-
-effect((monitor) => {
-  if (!isActive.read(monitor)) return
-
-  const interval = setInterval(() => {
-    console.log("Tick")
-  }, 1000)
-
-  return () => clearInterval(interval)
-})
-
-isActive.write(false) // Cleanup runs, interval stops
-```
-
-**Event listeners:**
-
-```ts
-const handler = Signal<(e: KeyboardEvent) => void>(() => {})
-
-effect((monitor) => {
-  const fn = handler.read(monitor)
-  window.addEventListener("keydown", fn)
-
-  return () => window.removeEventListener("keydown", fn)
-})
-```
 
 ## Dynamic Dependencies
 
@@ -252,124 +217,6 @@ effect((monitor) => {
 
 Effects are for actions. Derived signals are for values.
 
-## Common Patterns
-
-### DOM Updates
-
-```ts
-const theme = Signal<"light" | "dark">("light")
-
-effect((monitor) => {
-  document.body.classList.toggle("dark", theme.read(monitor) === "dark")
-})
-```
-
-### Local Storage Sync
-
-```ts
-const settings = Signal(loadFromStorage())
-
-effect((monitor) => {
-  localStorage.setItem("settings", JSON.stringify(settings.read(monitor)))
-})
-```
-
-### Debugging
-
-```ts
-if (process.env.NODE_ENV === "development") {
-  effect((monitor) => {
-    console.log("State changed:", state.read(monitor))
-  })
-}
-```
-
-### Conditional Effects
-
-```ts
-const isConnected = Signal(false)
-const messages = Signal<Message[]>([])
-
-effect((monitor) => {
-  if (!isConnected.read(monitor)) {
-    return // No dependencies on messages when disconnected
-  }
-
-  const msgs = messages.read(monitor)
-  sendToServer(msgs)
-})
-```
-
-## Best Practices
-
-### Keep Effects Focused
-
-Each effect should do one thing:
-
-```ts
-// Good: separate concerns
-effect((monitor) => {
-  updateDOM(state.read(monitor))
-})
-
-effect((monitor) => {
-  saveToStorage(state.read(monitor))
-})
-
-// Avoid: mixed concerns
-effect((monitor) => {
-  const s = state.read(monitor)
-  updateDOM(s)
-  saveToStorage(s)
-  sendAnalytics(s)
-})
-```
-
-Separate effects are easier to reason about, test, and maintain.
-
-### Always Return Cleanup Functions
-
-When creating resources, always clean them up:
-
-```ts
-effect((monitor) => {
-  const timer = setTimeout(() => {
-    doSomething()
-  }, config.read(monitor).delay)
-
-  return () => clearTimeout(timer)
-})
-```
-
-### Defer Heavy Work
-
-Effects run synchronously. For expensive operations, defer the work:
-
-```ts
-effect((monitor) => {
-  const data = largeDataset.read(monitor)
-
-  requestIdleCallback(() => {
-    processHeavyData(data)
-  })
-})
-```
-
-### Use Batching for Related Updates
-
-When updating multiple related signals, batch them:
-
-```ts
-function resetForm() {
-  batch(() => {
-    name.write("")
-    email.write("")
-    message.write("")
-    errors.write([])
-  })
-}
-```
-
 ## Summary
 
 Effects complete the reactive picture:
@@ -381,3 +228,10 @@ Effects complete the reactive picture:
 - Batching prevents excessive re-runs
 
 The Monitor is the thread that connects everything - signals know who is reading them, and can notify exactly the right effects and derived signals when values change.
+
+## See Also
+
+- [effect API Reference](/docs/api/effect) - Complete API documentation
+- [Signals and Monitors](/docs/concepts/signals) - Core reactive primitives
+- [Resource Cleanup](/docs/guides/cleanup) - Cleanup patterns in detail
+- [Batching Updates](/docs/guides/batching) - Batching guide

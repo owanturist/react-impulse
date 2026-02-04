@@ -1,0 +1,176 @@
+---
+title: Performance Optimization
+description: Techniques for optimizing signal-based applications
+---
+
+This guide covers techniques for optimizing performance in signal-based applications.
+
+## Create Granular Derived Signals
+
+Create focused derived signals instead of monolithic ones. This allows watchers to subscribe to only the data they need:
+
+```ts
+import { Signal } from "@owanturist/signal"
+
+interface User {
+  name: string
+  avatar: string
+  status: "online" | "offline"
+}
+
+const user = Signal<User>({ name: "Alice", avatar: "/alice.png", status: "online" })
+
+// Less optimal: Any user change triggers all watchers
+const userDisplay = Signal((monitor) => ({
+  name: user.read(monitor).name,
+  avatar: user.read(monitor).avatar,
+  status: user.read(monitor).status,
+}))
+
+// More optimal: Watchers subscribe to just what they need
+const userName = Signal((monitor) => user.read(monitor).name)
+const userAvatar = Signal((monitor) => user.read(monitor).avatar)
+const userStatus = Signal((monitor) => user.read(monitor).status)
+```
+
+Components can then watch only the specific derived signal they care about, reducing unnecessary re-renders.
+
+## Use Custom Equality Functions
+
+When a derived signal produces objects or arrays, custom equality prevents cascading updates when the structural content hasn't changed:
+
+```ts
+import { Signal } from "@owanturist/signal"
+
+interface Coordinates {
+  x: number
+  y: number
+}
+
+const xSignal = Signal(0)
+const ySignal = Signal(0)
+
+// Without custom equality: New object triggers updates even if values are same
+const coordsBad = Signal((monitor) => ({
+  x: xSignal.read(monitor),
+  y: ySignal.read(monitor),
+}))
+
+// With custom equality: Updates only when actual values change
+const coordsGood = Signal(
+  (monitor) => ({
+    x: xSignal.read(monitor),
+    y: ySignal.read(monitor),
+  }),
+  {
+    equals: (a, b) => a.x === b.x && a.y === b.y,
+  },
+)
+```
+
+## Leverage Lazy Evaluation
+
+Derived signals only compute when read. Take advantage of this by deferring expensive computations:
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+const rawData = Signal<number[]>([])
+
+// This expensive computation only runs when someone reads processedData
+const processedData = Signal((monitor) => {
+  const data = rawData.read(monitor)
+  return expensiveTransformation(data)
+})
+
+// No computation happens until this effect runs
+effect((monitor) => {
+  console.log(processedData.read(monitor).length)
+})
+
+function expensiveTransformation(data: number[]): number[] {
+  // Complex processing
+  return data.map((x) => x * 2)
+}
+```
+
+## Batch Related Updates
+
+When updating multiple signals, batch them to prevent intermediate effect runs:
+
+```ts
+import { Signal, batch, effect } from "@owanturist/signal"
+
+const firstName = Signal("John")
+const lastName = Signal("Doe")
+const age = Signal(30)
+
+effect((monitor) => {
+  console.log(`${firstName.read(monitor)} ${lastName.read(monitor)}, ${age.read(monitor)}`)
+})
+
+// Without batch: 3 effect runs
+firstName.write("Jane")
+lastName.write("Smith")
+age.write(25)
+
+// With batch: 1 effect run
+batch(() => {
+  firstName.write("Bob")
+  lastName.write("Wilson")
+  age.write(35)
+})
+```
+
+## Use untracked for Non-Reactive Reads
+
+When you need to read a signal's value without establishing a dependency, use `untracked`:
+
+```ts
+import { Signal, effect, untracked } from "@owanturist/signal"
+
+const items = Signal([1, 2, 3])
+const pageSize = Signal(10)
+
+effect((monitor) => {
+  // Re-run when items change, not when pageSize changes
+  const size = untracked(pageSize)
+  displayItems(items.read(monitor).slice(0, size))
+})
+
+function displayItems(items: number[]) {
+  console.log(items)
+}
+```
+
+## Avoid Recomputing Derived Values
+
+Read derived signals multiple times without triggering recomputation. The value is cached:
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+const count = Signal(0)
+
+const expensive = Signal((monitor) => {
+  console.log("Computing...")
+  return count.read(monitor) * 2
+})
+
+effect((monitor) => {
+  // "Computing..." logged only once per dependency change
+  console.log(expensive.read(monitor))
+  console.log(expensive.read(monitor))
+  console.log(expensive.read(monitor))
+})
+```
+
+## Profile Before Optimizing
+
+Only optimize when you have evidence of a performance problem. The signal system is designed to be efficient by default. Premature optimization can make code harder to maintain.
+
+## See Also
+
+- [Derived Signals](/docs/concepts/derived) - How derived signals work
+- [Batching Updates](/docs/guides/batching) - Detailed batching guide
+- [untracked API](/docs/api/untracked) - Reading without tracking

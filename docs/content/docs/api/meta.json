@@ -1,4 +1,13 @@
 {
   "title": "API Reference",
-  "pages": ["signal", "batch", "effect", "untracked", "monitor-factory"]
+  "pages": [
+    "signal",
+    "batch",
+    "effect",
+    "untracked",
+    "monitor-factory",
+    "---React---",
+    "use-computed",
+    "use-monitor"
+  ]
 }

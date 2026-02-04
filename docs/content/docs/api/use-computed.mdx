@@ -1,0 +1,205 @@
+---
+title: useComputed
+description: API reference for the useComputed hook
+---
+
+The `useComputed` hook reads signal values in React components and triggers re-renders when those values change.
+
+## `useComputed(signal){:dart}` [#signal-shortcut]
+
+```ts
+function useComputed<TValue>(signal: ReadableSignal<TValue>): TValue
+```
+
+Reads a signal's value and subscribes the component to changes.
+
+<section className="typedef">
+
+- `@param signal: ReadableSignal<TValue>{:dart}` A signal to read from.
+
+---
+
+- `@returns TValue{:dart}` The current value of the signal.
+
+</section>
+
+```tsx tab="Example"
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+const count = Signal(0)
+
+function Counter() {
+  const value = useComputed(count)
+
+  return <div>Count: {value}</div>
+}
+```
+
+## `useComputed(compute, dependencies?, options?){:dart}` [#factory]
+
+```ts
+function useComputed<TResult>(
+  compute: (monitor: Monitor) => TResult,
+  dependencies?: DependencyList,
+  options?: UseComputedOptions<TResult>,
+): TResult
+```
+
+Executes a compute function that can read multiple signals and subscribes the component to all signals read within the function.
+
+<section className="typedef">
+
+- `@param compute: (monitor: Monitor) => TResult{:dart}` A function that receives a Monitor and returns a computed value. All signals read via `signal.read(monitor)` inside this function become dependencies.
+
+- `@param dependencies?: DependencyList{:dart}` Optional array of React dependencies. When provided, the compute function is memoized and only recreated when dependencies change. When omitted, the compute function runs on every render.
+
+  <Callout>
+    For stable compute functions that don't depend on React props or state, pass an empty array `[]` to prevent unnecessary recreations.
+  </Callout>
+
+- `@param options?.equals?: null | Equal<TResult>{:dart}` Custom equality function to determine if the computed result has changed. Defaults to `Object.is{:ts}`. Pass `null{:ts}` to use the default.
+
+---
+
+- `@returns TResult{:dart}` The result of the compute function.
+
+</section>
+
+```tsx tab="Basic"
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+const firstName = Signal("John")
+const lastName = Signal("Doe")
+
+function FullName() {
+  const fullName = useComputed((monitor) => {
+    return `${firstName.read(monitor)} ${lastName.read(monitor)}`
+  }, [])
+
+  return <div>{fullName}</div>
+}
+```
+
+```tsx tab="With Props"
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+const items = Signal<string[]>([])
+
+function FilteredList({ filter }: { filter: string }) {
+  const filtered = useComputed(
+    (monitor) => {
+      return items.read(monitor).filter((item) => item.includes(filter))
+    },
+    [filter], // Recreate when filter prop changes
+  )
+
+  return (
+    <ul>
+      {filtered.map((item, i) => (
+        <li key={i}>{item}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+```tsx tab="Custom Equality"
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+interface Position {
+  x: number
+  y: number
+}
+
+const position = Signal<Position>({ x: 0, y: 0 })
+
+function Cursor() {
+  const pos = useComputed((monitor) => position.read(monitor), [], {
+    equals: (a, b) => a.x === b.x && a.y === b.y,
+  })
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: pos.x,
+        top: pos.y,
+      }}
+    />
+  )
+}
+```
+
+## `UseComputedOptions<TValue>{:dart}` [#options]
+
+```ts
+interface UseComputedOptions<TValue> {
+  readonly equals?: null | Equal<TValue>
+}
+
+type Equal<T> = (left: T, right: T) => boolean
+```
+
+<section className="typedef">
+
+- `@param equals?: null | Equal<TValue>{:dart}` Custom equality function to compare the previous and next computed values. When the function returns `true{:ts}`, the component does not re-render. Defaults to `Object.is{:ts}`.
+
+</section>
+
+## `DependencyList{:dart}` [#dependency-list]
+
+```ts
+type DependencyList = ReadonlyArray<unknown>
+```
+
+Standard React dependency array type. The compute function is memoized and only recreated when values in this array change (compared by reference).
+
+## Behavior
+
+### Automatic Dependency Tracking
+
+When you call `signal.read(monitor)` inside the compute function, that signal becomes a dependency. The component re-renders when any dependency changes:
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+const a = Signal(1)
+const b = Signal(2)
+const useB = Signal(true)
+
+function Component() {
+  const value = useComputed((monitor) => {
+    if (useB.read(monitor)) {
+      return a.read(monitor) + b.read(monitor)
+    }
+    return a.read(monitor)
+  }, [])
+
+  return <div>{value}</div>
+}
+```
+
+When `useB` is `true{:ts}`, the component depends on `a`, `b`, and `useB`. When `useB` becomes `false{:ts}`, the component only depends on `a` and `useB`.
+
+### Render Optimization
+
+The hook uses React's `useSyncExternalStore` internally, which ensures:
+
+- Consistent reads during concurrent rendering
+- No tearing between renders
+- Automatic subscription management
+
+### Debug Value
+
+The computed value is exposed to React DevTools via `useDebugValue`, making it easy to inspect signal values during debugging.
+
+## See Also
+
+- [useMonitor](/docs/api/use-monitor) - Low-level monitor access
+- [React Integration](/docs/concepts/react-integration) - How signals work with React
+- [Using Signals in React Components](/docs/guides/react-components) - Practical patterns

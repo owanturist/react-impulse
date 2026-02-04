@@ -3,31 +3,27 @@ title: batch
 description: API reference for the batch function
 ---
 
-# batch
-
 The `batch` function groups multiple signal updates into a single notification, preventing unnecessary intermediate re-renders.
 
-## Function Signature
+## `batch(execute){:dart}` [#batch]
 
 ```ts
 function batch(execute: (monitor: Monitor) => void): void
 ```
 
-## Parameters
+Executes a function that updates signals, deferring notifications until the function completes.
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `execute` | `(monitor: Monitor) => void` | Function containing signal updates to batch. Receives an untracked Monitor. |
+<section className="typedef">
 
-## Returns
+- `@param execute: (monitor: Monitor) => void{:dart}` Function containing signal updates to batch. Receives an untracked Monitor for reading values without establishing dependencies.
 
-Returns `void`. Use `untracked()` if you need to return a value.
+---
 
-## Examples
+- `@returns void{:dart}` Returns nothing. Use `untracked(){:ts}` if you need to return a value from reading signals.
 
-### Basic Usage
+</section>
 
-```ts
+```ts twoslash tab="Basic"
 import { Signal, batch, effect } from "@owanturist/signal"
 
 const firstName = Signal("John")
@@ -38,41 +34,25 @@ effect((monitor) => {
 })
 // Logs: "John Doe"
 
-// Without batch: 2 updates, 2 effect runs
-firstName.write("Jane")
-// Logs: "Jane Doe"
-lastName.write("Smith")
-// Logs: "Jane Smith"
-
-// With batch: 2 updates, 1 effect run
 batch(() => {
-  firstName.write("Bob")
-  lastName.write("Wilson")
+  firstName.write("Jane")
+  lastName.write("Smith")
 })
-// Logs once: "Bob Wilson"
+// Logs once: "Jane Smith"
 ```
 
-### Reading Values During Batch
-
-The `batch` callback receives an untracked Monitor for reading values:
-
-```ts
+```ts twoslash tab="Reading Values"
 import { Signal, batch } from "@owanturist/signal"
 
 const count = Signal(0)
 
 batch((monitor) => {
-  // Read current value without tracking
   const current = count.read(monitor)
   count.write(current + 1)
 })
 ```
 
-### Nested Batches
-
-Batches can be nested. Updates are deferred until the outermost batch completes:
-
-```ts
+```ts twoslash tab="Nested"
 import { Signal, batch, effect } from "@owanturist/signal"
 
 const a = Signal(0)
@@ -89,18 +69,13 @@ batch(() => {
   batch(() => {
     b.write(1)
   })
-  // Inner batch completes, but still inside outer batch
 
   a.write(2)
 })
 // Logs once: "a=2, b=1"
 ```
 
-### With Derived Signals
-
-Derived signals are updated after all batched changes:
-
-```ts
+```ts twoslash tab="With Derived"
 import { Signal, batch, effect } from "@owanturist/signal"
 
 const price = Signal(100)
@@ -119,96 +94,8 @@ batch(() => {
 // Logs: 600 (not 200 or 300)
 ```
 
-## When to Use batch
-
-### Updating Related State
-
-```ts
-interface User {
-  firstName: string
-  lastName: string
-  email: string
-}
-
-const firstName = Signal("")
-const lastName = Signal("")
-const email = Signal("")
-
-function updateUser(user: User) {
-  batch(() => {
-    firstName.write(user.firstName)
-    lastName.write(user.lastName)
-    email.write(user.email)
-  })
-}
-```
-
-### Form Resets
-
-```ts
-const name = Signal("")
-const email = Signal("")
-const message = Signal("")
-const errors = Signal<string[]>([])
-
-function resetForm() {
-  batch(() => {
-    name.write("")
-    email.write("")
-    message.write("")
-    errors.write([])
-  })
-}
-```
-
-### State Machines
-
-```ts
-type Status = "idle" | "loading" | "success" | "error"
-
-const status = Signal<Status>("idle")
-const data = Signal<Data | null>(null)
-const error = Signal<Error | null>(null)
-
-async function fetchData() {
-  batch(() => {
-    status.write("loading")
-    data.write(null)
-    error.write(null)
-  })
-
-  try {
-    const result = await api.getData()
-    batch(() => {
-      status.write("success")
-      data.write(result)
-    })
-  } catch (e) {
-    batch(() => {
-      status.write("error")
-      error.write(e as Error)
-    })
-  }
-}
-```
-
-## Performance Considerations
-
-Batch is useful when:
-
-1. **Multiple signals update together** - Prevents intermediate states from triggering effects
-2. **Updates are logically related** - Keeps state consistent
-3. **Performance is critical** - Reduces the number of effect executions
-
-Batch is NOT necessary when:
-
-1. Updating a single signal
-2. Updates are independent and don't need to be atomic
-3. You want intermediate states to be observable
-
 ## See Also
 
-- [Signals](/docs/concepts/signals)
-- [Effects](/docs/concepts/effects)
-- [effect()](/docs/api/effect)
-- [untracked()](/docs/api/untracked)
+- [Batching Updates](/docs/guides/batching) - Detailed guide with patterns
+- [effect](/docs/api/effect) - Creating reactive effects
+- [untracked](/docs/api/untracked) - Reading without tracking
