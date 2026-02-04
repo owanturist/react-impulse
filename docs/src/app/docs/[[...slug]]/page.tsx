@@ -49,5 +49,10 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   return {
     title: page.data.title,
     description: page.data.description,
+    alternates: {
+      types: {
+        "text/markdown": `/mdx${page.url}`,
+      },
+    },
   }
 }
