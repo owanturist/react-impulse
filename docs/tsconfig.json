@@ -11,7 +11,7 @@
     "types": [],
     "plugins": [{ "name": "next" }],
     "paths": {
-      "@/*": ["./src/app/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"]

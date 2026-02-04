@@ -26,4 +26,3 @@ export function GET() {
 
   return new Response(lines.join("\n"))
 }
-

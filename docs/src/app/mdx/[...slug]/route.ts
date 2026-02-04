@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 
-import { getLLMText } from "@/lib/get-llm-text"
 import { source } from "@/source"
+import { getLLMText } from "@/tools/get-llm-text"
 
 export const revalidate = false
 
@@ -11,8 +11,8 @@ interface RouteProps {
   params: Promise<{ slug: Array<string> }>
 }
 
-export async function GET(_req: Request, props: RouteProps) {
-  const { slug } = await props.params
+export async function GET(_req: Request, { params }: RouteProps) {
+  const { slug } = await params
   const [first, ...rest] = slug
   if (first !== DOCS_PREFIX) {
     return notFound()
@@ -33,4 +33,3 @@ export function generateStaticParams() {
     slug: [DOCS_PREFIX, ...params.slug],
   }))
 }
-

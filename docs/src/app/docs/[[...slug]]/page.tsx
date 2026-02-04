@@ -9,9 +9,9 @@ interface PageProps {
   params: Promise<{ slug?: Array<string> }>
 }
 
-export default async function Page(props: PageProps) {
-  const params = await props.params
-  const page = source.getPage(params.slug)
+export default async function Page({ params }: PageProps) {
+  const { slug } = await params
+  const page = source.getPage(slug)
   if (!page) {
     return notFound()
   }

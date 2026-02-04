@@ -1,5 +1,5 @@
-import { getLLMText } from "@/lib/get-llm-text"
 import { source } from "@/source"
+import { getLLMText } from "@/tools/get-llm-text"
 
 export const revalidate = false
 
@@ -8,4 +8,3 @@ export async function GET() {
 
   return new Response(scanned.join("\n\n"))
 }
-
