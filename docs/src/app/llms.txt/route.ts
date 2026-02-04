@@ -12,11 +12,10 @@ export function GET() {
     "",
     "## Docs",
     "",
-    ...pages.map((page) => {
-      const llmPath = `/mdx${page.url}`
-      const description = page.data.description ? `: ${page.data.description}` : ""
+    ...pages.map(({ data, url }) => {
+      const description = data.description ? `: ${data.description}` : ""
 
-      return `- [${page.data.title}](${llmPath})${description}`
+      return `- [${data.title}](${url}.mdx)${description}`
     }),
     "",
     "## Full documentation",

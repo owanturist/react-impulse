@@ -11,6 +11,7 @@ interface PageProps {
 
 export default async function Page({ params }: PageProps) {
   const { slug } = await params
+
   const page = source.getPage(slug)
   if (!page) {
     return notFound()
@@ -39,9 +40,11 @@ export function generateStaticParams() {
   return source.generateParams()
 }
 
-export async function generateMetadata(props: PageProps): Promise<Metadata> {
-  const params = await props.params
-  const page = source.getPage(params.slug)
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params
+
+  const page = source.getPage(slug)
+
   if (!page) {
     return notFound()
   }
@@ -51,7 +54,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     description: page.data.description,
     alternates: {
       types: {
-        "text/markdown": `/mdx${page.url}`,
+        "text/markdown": `${page.url}.mdx`,
       },
     },
   }
