@@ -99,6 +99,17 @@ packages/
 - WeakRef used for memory-safe signal subscriptions
 - Test files located in `packages/*/tests/` directories
 
+## Documentation Standards
+
+All documentation content in `docs/content/` **must** follow the [Diataxis framework](.claude/skills/writing-documentation-with-diataxis/SKILL.md). Every documentation page must clearly belong to one of the four Diataxis types:
+
+- **Tutorials** -- learning-oriented, guide the reader through doing something step-by-step
+- **How-to guides** -- task-oriented, provide steps to solve a specific problem
+- **Reference** -- information-oriented, describe the API surface accurately and completely
+- **Explanation** -- understanding-oriented, clarify concepts and provide context
+
+Do not mix types within a single page. When writing or reviewing documentation, use the Diataxis compass to classify content: (1) does it inform action or cognition? (2) does it serve acquisition or application? See the [writing-documentation-with-diataxis](.claude/skills/writing-documentation-with-diataxis/SKILL.md) skill for detailed guidance.
+
 ## Code Standards
 
 - **Biome** for linting and formatting (not ESLint/Prettier)
@@ -144,6 +155,7 @@ The following skills are available in [`.claude/skills/`](.claude/skills/):
 | [find-skills](.claude/skills/find-skills/SKILL.md) | Discover and install agent skills from the open ecosystem |
 | [verify-skills](.claude/skills/verify-skills/SKILL.md) | Verify all skills are documented in CLAUDE.md |
 | [api-documentation-generator](.claude/skills/api-documentation-generator/SKILL.md) | Generate comprehensive API documentation from code |
+| [writing-documentation-with-diataxis](.claude/skills/writing-documentation-with-diataxis/SKILL.md) | Diataxis framework for technical docs - tutorials, how-to guides, reference, explanations |
 
 ### Marketing Skills
 
