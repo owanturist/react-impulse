@@ -11,11 +11,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A pnpm monorepo containing signal-based state management and form management libraries for React:
 
-| Package | Description |
-|---------|-------------|
-| `@owanturist/signal` | Core signal-based reactive state management with automatic dependency tracking |
+| Package                    | Description                                                                        |
+| -------------------------- | ---------------------------------------------------------------------------------- |
+| `@owanturist/signal`       | Core signal-based reactive state management with automatic dependency tracking     |
 | `@owanturist/signal-react` | React hooks integration (`useMonitor`, `useComputed`) using `useSyncExternalStore` |
-| `@owanturist/signal-form` | Type-safe declarative form state management with validation support |
+| `@owanturist/signal-form`  | Type-safe declarative form state management with validation support                |
 
 **Key Features:**
 - Automatic dependency tracking via Monitor system
@@ -205,35 +205,35 @@ The following skills are available in [`.claude/skills/`](.claude/skills/):
 
 ### Development Skills
 
-| Skill | Description |
-|-------|-------------|
-| [vitest](.claude/skills/vitest/SKILL.md) | Vitest testing framework - Jest-compatible API, mocking, coverage, fixtures |
-| [typescript-advanced-types](.claude/skills/typescript-advanced-types/SKILL.md) | Advanced TypeScript type system - generics, conditional types, mapped types |
-| [typescript-react-reviewer](.claude/skills/typescript-react-reviewer/SKILL.md) | Code reviewer for TypeScript + React 19 - anti-patterns, state management |
-| [tdd-workflow](.claude/skills/tdd-workflow/SKILL.md) | Test-Driven Development workflow - RED-GREEN-REFACTOR cycle |
-| [code-quality](.claude/skills/code-quality/SKILL.md) | Code correctness rules, avoiding over-engineering |
-| [performance](.claude/skills/performance/SKILL.md) | Web performance optimization - Core Web Vitals, loading speed |
-| [biome](.claude/skills/biome/SKILL.md) | Fast all-in-one linting/formatting toolchain (100x faster than ESLint) |
-| [creating-changesets](.claude/skills/creating-changesets/SKILL.md) | Changesets workflow - version bumps, release notes, semver decisions |
-| [fumadocs](.claude/skills/fumadocs/SKILL.md) | Fumadocs documentation framework - layouts, MDX, source API, theming, components |
-| [twoslash](.claude/skills/twoslash/SKILL.md) | Twoslash markup for TypeScript code samples - type queries, completions, errors, cut markers |
+| Skill                                                                          | Description                                                                                  |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| [vitest](.claude/skills/vitest/SKILL.md)                                       | Vitest testing framework - Jest-compatible API, mocking, coverage, fixtures                  |
+| [typescript-advanced-types](.claude/skills/typescript-advanced-types/SKILL.md) | Advanced TypeScript type system - generics, conditional types, mapped types                  |
+| [typescript-react-reviewer](.claude/skills/typescript-react-reviewer/SKILL.md) | Code reviewer for TypeScript + React 19 - anti-patterns, state management                    |
+| [tdd-workflow](.claude/skills/tdd-workflow/SKILL.md)                           | Test-Driven Development workflow - RED-GREEN-REFACTOR cycle                                  |
+| [code-quality](.claude/skills/code-quality/SKILL.md)                           | Code correctness rules, avoiding over-engineering                                            |
+| [performance](.claude/skills/performance/SKILL.md)                             | Web performance optimization - Core Web Vitals, loading speed                                |
+| [biome](.claude/skills/biome/SKILL.md)                                         | Fast all-in-one linting/formatting toolchain (100x faster than ESLint)                       |
+| [creating-changesets](.claude/skills/creating-changesets/SKILL.md)             | Changesets workflow - version bumps, release notes, semver decisions                         |
+| [fumadocs](.claude/skills/fumadocs/SKILL.md)                                   | Fumadocs documentation framework - layouts, MDX, source API, theming, components             |
+| [twoslash](.claude/skills/twoslash/SKILL.md)                                   | Twoslash markup for TypeScript code samples - type queries, completions, errors, cut markers |
 
 ### Utility Skills
 
-| Skill | Description |
-|-------|-------------|
-| [skill-creator](.claude/skills/skill-creator/SKILL.md) | Create new skills with proper structure and packaging |
-| [install-skill](.claude/skills/install-skill/SKILL.md) | Install skills from GitHub using `npx skills add` |
-| [find-skills](.claude/skills/find-skills/SKILL.md) | Discover and install agent skills from the open ecosystem |
-| [verify-skills](.claude/skills/verify-skills/SKILL.md) | Verify all skills are documented in CLAUDE.md |
-| [api-documentation-generator](.claude/skills/api-documentation-generator/SKILL.md) | Generate comprehensive API documentation from code |
+| Skill                                                                                              | Description                                                                               |
+| -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| [skill-creator](.claude/skills/skill-creator/SKILL.md)                                             | Create new skills with proper structure and packaging                                     |
+| [install-skill](.claude/skills/install-skill/SKILL.md)                                             | Install skills from GitHub using `npx skills add`                                         |
+| [find-skills](.claude/skills/find-skills/SKILL.md)                                                 | Discover and install agent skills from the open ecosystem                                 |
+| [verify-skills](.claude/skills/verify-skills/SKILL.md)                                             | Verify all skills are documented in CLAUDE.md                                             |
+| [api-documentation-generator](.claude/skills/api-documentation-generator/SKILL.md)                 | Generate comprehensive API documentation from code                                        |
 | [writing-documentation-with-diataxis](.claude/skills/writing-documentation-with-diataxis/SKILL.md) | Diataxis framework for technical docs - tutorials, how-to guides, reference, explanations |
 
 ### Marketing Skills
 
-| Skill | Description |
-|-------|-------------|
-| [copywriting](.claude/skills/copywriting/SKILL.md) | Expert conversion copywriting for marketing pages |
+| Skill                                                                          | Description                                        |
+| ------------------------------------------------------------------------------ | -------------------------------------------------- |
+| [copywriting](.claude/skills/copywriting/SKILL.md)                             | Expert conversion copywriting for marketing pages  |
 | [product-marketing-context](.claude/skills/product-marketing-context/SKILL.md) | Create/maintain product marketing context document |
 
 ### Skill Usage
@@ -254,12 +254,12 @@ The copywriting skill includes reference materials:
 
 ## Configuration Files
 
-| File | Purpose |
-|------|---------|
-| `biome.jsonc` | Linting, formatting, and code quality rules |
-| `tsconfig.json` | Shared TypeScript configuration |
-| `tsup.config.ts` | Shared bundler configuration |
-| `vite.config.ts` | Root Vitest configuration for monorepo testing |
-| `.size-limit.mjs` | Bundle size checking configuration |
-| `pnpm-workspace.yaml` | Workspace package definitions |
-| `.claude/settings.local.json` | Local Claude Code permissions |
+| File                          | Purpose                                        |
+| ----------------------------- | ---------------------------------------------- |
+| `biome.jsonc`                 | Linting, formatting, and code quality rules    |
+| `tsconfig.json`               | Shared TypeScript configuration                |
+| `tsup.config.ts`              | Shared bundler configuration                   |
+| `vite.config.ts`              | Root Vitest configuration for monorepo testing |
+| `.size-limit.mjs`             | Bundle size checking configuration             |
+| `pnpm-workspace.yaml`         | Workspace package definitions                  |
+| `.claude/settings.local.json` | Local Claude Code permissions                  |
