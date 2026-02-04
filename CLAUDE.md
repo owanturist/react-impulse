@@ -132,6 +132,8 @@ The following skills are available in [`.claude/skills/`](.claude/skills/):
 | [performance](.claude/skills/performance/SKILL.md) | Web performance optimization - Core Web Vitals, loading speed |
 | [biome](.claude/skills/biome/SKILL.md) | Fast all-in-one linting/formatting toolchain (100x faster than ESLint) |
 | [creating-changesets](.claude/skills/creating-changesets/SKILL.md) | Changesets workflow - version bumps, release notes, semver decisions |
+| [fumadocs](.claude/skills/fumadocs/SKILL.md) | Fumadocs documentation framework - layouts, MDX, source API, theming, components |
+| [twoslash](.claude/skills/twoslash/SKILL.md) | Twoslash markup for TypeScript code samples - type queries, completions, errors, cut markers |
 
 ### Utility Skills
 
