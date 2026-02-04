@@ -110,6 +110,78 @@ All documentation content in `docs/content/` **must** follow the [Diataxis frame
 
 Do not mix types within a single page. When writing or reviewing documentation, use the Diataxis compass to classify content: (1) does it inform action or cognition? (2) does it serve acquisition or application? See the [writing-documentation-with-diataxis](.claude/skills/writing-documentation-with-diataxis/SKILL.md) skill for detailed guidance.
 
+### API Reference docs/ Style Guide
+
+API reference pages use these conventions. For fumadocs MDX syntax details see the [fumadocs skill](.claude/skills/fumadocs/SKILL.md); for twoslash annotations see the [twoslash skill](.claude/skills/twoslash/SKILL.md).
+
+**Frontmatter:**
+- Every page needs `title` and `description` in YAML frontmatter
+- The `title` renders as the page heading; do **not** add a separate `# h1`
+
+**Page structure:**
+- Each API entry gets an `##` heading with the signature in inline code and a custom anchor: `` ## `Signal(initialValue, options?){:dart}` [#signal-factory] ``
+- Custom anchors use the fumadocs `[#custom-id]` syntax (appended to the heading)
+- A fenced code block with the full TypeScript signature immediately follows the heading
+- A short prose description follows the signature block
+- Parameters and return value are listed inside `<section className="typedef">` ... `</section>`
+
+**Inside `<section className="typedef">` (mimics JSDoc conventions):**
+- Parameters are unordered list items prefixed with `@param`: `` - `@param name: Type{:dart}` Description ``
+- Nested option fields use dot notation: `` - `@param options?.compare?: null | Compare{:dart}` ``
+- A horizontal rule `---` separates parameters from the return value
+- Return value uses `@returns`: `` - `@returns Type{:dart}` Description ``
+
+**Inline code language hints** (requires `inline: "tailing-curly-colon"` in rehypeCode config)**:**
+- Use `` `Type{:dart}` `` for parameter/return signatures in prose (Dart-like highlighting for readable type annotations)
+- Use `` `expression{:ts}` `` for inline TypeScript expressions in prose
+- The `{:lang}` suffix is stripped from rendered output
+
+**Tabbed code blocks:**
+- Add `tab="Tab Name"` to consecutive fenced code blocks to group them into tabs: `` ```ts twoslash tab="Primitive" ``
+- Tabs are created implicitly by consecutive fenced blocks with `tab` attributes -- no `<Tabs>`/`<Tab>` JSX wrapper needed
+- Use twoslash annotations (`^?`, `// ---cut---`, etc.) for type-checked examples
+
+**Callouts:**
+- `<Callout>` for informational notes (default type is `info`)
+- `<Callout type="warn">` for warnings
+- Other types available: `error`, `success`, `idea`
+- Place callouts inside the relevant `@param` list item when they relate to a specific parameter
+
+**Shiki code annotations (transformers):**
+- `// [!code ++]` / `// [!code --]` to highlight added/removed lines
+- `// [!code highlight]` to highlight important lines
+- `// [!code focus]` to focus on specific lines
+- `// [!code word:Text]` to highlight specific words
+
+**Code block meta options:**
+- `` ```ts title="signal.ts" `` to add a filename header
+- `` ```ts lineNumbers `` or `` ```ts lineNumbers=4 `` to show line numbers (optionally starting at N)
+- `` ```package-install `` to auto-generate npm/pnpm/yarn/bun tabbed install commands
+
+**Twoslash in code blocks:**
+- Add `twoslash` meta to fenced blocks for type-checked examples: `` ```ts twoslash ``
+- `^?` under a variable to show its inferred type inline
+- `// ---cut---` to hide setup code above the cut line
+- `// @filename: utils.ts` to create virtual multi-file examples with imports
+- `// @errors: 2304` to expect and display specific TS errors
+- `// @showEmit` / `// @showEmittedFile: index.d.ts` to display compiled output
+- Compiler flags can be overridden per block: `// @target: esnext`, `// @strict: false`
+
+**Heading modifiers:**
+- `## Heading [#custom-id]` for custom anchor IDs
+- `## Heading [!toc]` to hide a heading from the table of contents
+
+**Available MDX components** (registered in this project):
+- `<Callout>` -- alert boxes (`info`, `warn`, `error`, `success`, `idea`)
+- `<Tabs>`/`<Tab>` -- explicit tabbed content when code-block tabs aren't sufficient
+- `<Accordion>`/`<Accordions>` -- collapsible sections; supports `id` prop for deep linking via URL hash
+- `<Steps>` -- numbered step-by-step procedural content (also available as CSS class `fd-steps`)
+- `<Files>`/`<Folder>`/`<File>` -- file tree visualization
+- `<ImageZoom>` -- click-to-zoom images for detailed diagrams
+- `<Cards>`/`<Card>` -- grouped link cards for navigation
+- `<include>./shared.mdx</include>` -- include reusable MDX fragments (fumadocs-mdx only)
+- Twoslash popup components (`Popup`, `PopupContent`, `PopupTrigger`) are pre-configured for interactive type hovers
+
 ## Code Standards
 
 - **Biome** for linting and formatting (not ESLint/Prettier)
