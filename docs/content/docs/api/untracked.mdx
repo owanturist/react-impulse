@@ -120,47 +120,9 @@ b.write(20) // No re-run
 c.write(30) // No re-run
 ```
 
-## Common Mistakes
-
-### Tracking Still Happens Outside untracked
-
-Reads outside the `untracked` call are still tracked:
-
-```ts twoslash
-import { Signal, effect, untracked } from "@owanturist/signal"
-
-const a = Signal(1)
-const b = Signal(2)
-
-effect((monitor) => {
-  const aVal = a.read(monitor) // This IS tracked
-  const bVal = untracked((m) => b.read(m)) // This is not tracked
-  console.log(aVal + bVal)
-})
-```
-
-### Stale Values
-
-Since untracked values aren't dependencies, they can become stale:
-
-```ts twoslash
-import { Signal, effect, untracked } from "@owanturist/signal"
-
-const count = Signal(0)
-const label = Signal("Count")
-
-effect((monitor) => {
-  // label might be stale
-  const lbl = untracked((m) => label.read(m))
-  console.log(`${lbl}: ${count.read(monitor)}`)
-})
-
-label.write("Value") // Effect doesn't re-run
-count.write(1) // Logs: "Value: 1" (label was updated)
-```
-
 ## See Also
 
 - [Signals and Monitors](/docs/concepts/signals) - Core concepts
 - [Effects](/docs/concepts/effects) - Effect fundamentals
 - [batch](/docs/api/batch) - Batching updates
+- [Common Patterns](/docs/guides/common-patterns#avoiding-common-mistakes-with-untracked) - Common mistakes with untracked

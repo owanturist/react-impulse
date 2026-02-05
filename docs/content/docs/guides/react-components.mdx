@@ -150,29 +150,27 @@ function LoginButton() {
 }
 ```
 
-## Building Custom Hooks with useMonitor
+## Using useMonitor for Direct Access
 
-Use `useMonitor` for advanced scenarios where you need direct access to the Monitor:
+The `useMonitor` hook provides direct access to a Monitor instance. This is useful when you need to read signals imperatively within a component:
 
 ```tsx
-import { Signal, type Monitor } from "@owanturist/signal"
+import { Signal } from "@owanturist/signal"
 import { useMonitor } from "@owanturist/signal-react"
-import { useSyncExternalStore } from "react"
 
 const count = Signal(0)
 
-// Custom hook that tracks signal reads
-function useSignalSnapshot<T>(read: (monitor: Monitor) => T): T {
-  const monitor = useMonitor()
-  return read(monitor)
-}
-
 function Counter() {
-  const value = useSignalSnapshot((monitor) => count.read(monitor))
+  const monitor = useMonitor()
+  const value = count.read(monitor)
 
   return <div>Count: {value}</div>
 }
 ```
+
+<Callout type="warn">
+  For most use cases, prefer `useComputed` over `useMonitor`. The `useComputed` hook provides memoization and custom equality options that `useMonitor` does not.
+</Callout>
 
 ## Handling Dynamic Signal Lists
 

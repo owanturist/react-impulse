@@ -132,6 +132,36 @@ Use **signals** when:
 - You want automatic fine-grained updates
 - You need to access state outside React (effects, event handlers)
 
+## Dynamic Dependency Tracking in Components
+
+When you call `signal.read(monitor)` inside the compute function, that signal becomes a dependency. The component re-renders when any dependency changes:
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+const a = Signal(1)
+const b = Signal(2)
+const useB = Signal(true)
+
+function Component() {
+  const value = useComputed((monitor) => {
+    if (useB.read(monitor)) {
+      return a.read(monitor) + b.read(monitor)
+    }
+    return a.read(monitor)
+  }, [])
+
+  return <div>{value}</div>
+}
+```
+
+When `useB` is `true`, the component depends on `a`, `b`, and `useB`. When `useB` becomes `false`, the component only depends on `a` and `useB`. Dependencies are re-evaluated on every render based on which signals were actually read.
+
+## Debug Support
+
+The computed value is exposed to React DevTools via `useDebugValue`, making it easy to inspect signal values during debugging.
+
 ## Memory Safety
 
 The signal-react integration uses WeakRef internally for subscriptions. This means:

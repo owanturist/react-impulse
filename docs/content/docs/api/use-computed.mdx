@@ -158,46 +158,6 @@ type DependencyList = ReadonlyArray<unknown>
 
 Standard React dependency array type. The compute function is memoized and only recreated when values in this array change (compared by reference).
 
-## Behavior
-
-### Automatic Dependency Tracking
-
-When you call `signal.read(monitor)` inside the compute function, that signal becomes a dependency. The component re-renders when any dependency changes:
-
-```tsx
-import { Signal } from "@owanturist/signal"
-import { useComputed } from "@owanturist/signal-react"
-
-const a = Signal(1)
-const b = Signal(2)
-const useB = Signal(true)
-
-function Component() {
-  const value = useComputed((monitor) => {
-    if (useB.read(monitor)) {
-      return a.read(monitor) + b.read(monitor)
-    }
-    return a.read(monitor)
-  }, [])
-
-  return <div>{value}</div>
-}
-```
-
-When `useB` is `true{:ts}`, the component depends on `a`, `b`, and `useB`. When `useB` becomes `false{:ts}`, the component only depends on `a` and `useB`.
-
-### Render Optimization
-
-The hook uses React's `useSyncExternalStore` internally, which ensures:
-
-- Consistent reads during concurrent rendering
-- No tearing between renders
-- Automatic subscription management
-
-### Debug Value
-
-The computed value is exposed to React DevTools via `useDebugValue`, making it easy to inspect signal values during debugging.
-
 ## See Also
 
 - [useMonitor](/docs/api/use-monitor) - Low-level monitor access

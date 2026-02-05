@@ -3,13 +3,13 @@ title: Introduction
 description: A lightweight, fine-grained reactive state management library for JavaScript and React
 ---
 
-Signal is a reactive state management library built around a simple idea: **Signals** hold values, and **Monitors** track who is reading them. This two-part design enables automatic dependency tracking with minimal overhead.
+Signal is a reactive state management library built around a simple idea: **Signals** hold values, and **Monitors** track who is reading them. This two-part design enables automatic dependency tracking.
 
 ## The Problem
 
 Modern UI frameworks need to know when to re-render. React solves this with explicit dependency arrays (`useEffect`, `useMemo`, `useCallback`), which are error-prone and tedious. Global state managers often trigger re-renders for any state change, requiring manual optimization.
 
-Signal takes a different approach: dependencies are tracked automatically based on what your code actually reads. No dependency arrays to maintain. No selectors to write. Components subscribe to exactly what they use.
+Signal takes a different approach: dependencies are tracked automatically based on what your code actually reads. This eliminates the need to maintain dependency arrays or write selectors. Components subscribe to exactly what they use.
 
 ## How It Works
 
@@ -58,7 +58,7 @@ function Counter() {
 }
 ```
 
-The component automatically re-renders when `count` changes. No dependency arrays. No selectors. No boilerplate.
+The component automatically re-renders when `count` changes.
 
 ## Next Steps
 

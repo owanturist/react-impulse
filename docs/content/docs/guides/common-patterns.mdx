@@ -191,9 +191,49 @@ function sendToServer(messages: Message[]) {
 }
 ```
 
+## Avoiding Common Mistakes with untracked
+
+### Tracking Still Happens Outside untracked
+
+Reads outside the `untracked` call are still tracked:
+
+```ts
+import { Signal, effect, untracked } from "@owanturist/signal"
+
+const a = Signal(1)
+const b = Signal(2)
+
+effect((monitor) => {
+  const aVal = a.read(monitor) // This IS tracked
+  const bVal = untracked((m) => b.read(m)) // This is not tracked
+  console.log(aVal + bVal)
+})
+```
+
+### Stale Values with untracked
+
+Since untracked values aren't dependencies, they can become stale:
+
+```ts
+import { Signal, effect, untracked } from "@owanturist/signal"
+
+const count = Signal(0)
+const label = Signal("Count")
+
+effect((monitor) => {
+  // label might be stale
+  const lbl = untracked((m) => label.read(m))
+  console.log(`${lbl}: ${count.read(monitor)}`)
+})
+
+label.write("Value") // Effect doesn't re-run
+count.write(1) // Logs: "Value: 1" (label was updated)
+```
+
 ## See Also
 
 - [Signals and Monitors](/docs/concepts/signals) - Core concepts
 - [Derived Signals](/docs/concepts/derived) - How derived signals work
 - [Effects](/docs/concepts/effects) - Effect fundamentals
 - [Performance Optimization](/docs/guides/performance) - Performance tips
+- [untracked API](/docs/api/untracked) - Complete API reference

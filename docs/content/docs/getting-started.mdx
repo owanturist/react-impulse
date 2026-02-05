@@ -178,6 +178,55 @@ function double(signal: ReadonlySignal<number>): ReadonlySignal<number> {
 }
 ```
 
+## Try It Yourself
+
+Now that you understand the basics, try these exercises to reinforce your learning:
+
+### Exercise 1: Temperature Converter
+
+Create two signals `celsius` and `fahrenheit` where updating one automatically updates the other using derived signals with setters.
+
+<details>
+<summary>Hint</summary>
+
+Use a bidirectional derived signal:
+
+```ts
+const celsius = Signal(0)
+const fahrenheit = Signal(
+  (monitor) => celsius.read(monitor) * 9/5 + 32,
+  (value) => celsius.write((value - 32) * 5/9)
+)
+```
+
+</details>
+
+### Exercise 2: Todo List
+
+Create a `todos` signal containing an array of todo items. Add a derived signal `completedCount` that counts how many todos are completed.
+
+### Exercise 3: Debounced Search
+
+Create an effect that logs search queries, but only after the user stops typing for 300ms. Use cleanup functions to cancel pending timeouts.
+
+<details>
+<summary>Hint</summary>
+
+The cleanup function should clear the timeout:
+
+```ts
+effect((monitor) => {
+  const query = searchQuery.read(monitor)
+  const timeoutId = setTimeout(() => {
+    console.log("Searching for:", query)
+  }, 300)
+
+  return () => clearTimeout(timeoutId)
+})
+```
+
+</details>
+
 ## What You've Learned
 
 You now know how to:
