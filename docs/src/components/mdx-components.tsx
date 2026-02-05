@@ -1,3 +1,4 @@
+import { Accordion, Accordions } from "fumadocs-ui/components/accordion"
 import { Popup, PopupContent, PopupTrigger } from "fumadocs-twoslash/ui"
 import { TypeTable } from "fumadocs-ui/components/type-table"
 import defaultComponents from "fumadocs-ui/mdx"
@@ -5,6 +6,8 @@ import defaultComponents from "fumadocs-ui/mdx"
 export const MDXComponents = {
   ...defaultComponents,
   // biome-ignore-start lint/style/useNamingConvention: components must be PascalCase
+  Accordion,
+  Accordions,
   Popup,
   PopupContent,
   PopupTrigger,

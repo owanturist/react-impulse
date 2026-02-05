@@ -186,8 +186,8 @@ Now that you understand the basics, try these exercises to reinforce your learni
 
 Create two signals `celsius` and `fahrenheit` where updating one automatically updates the other using derived signals with setters.
 
-<details>
-<summary>Hint</summary>
+<Accordions>
+  <Accordion id="exercise-1-hint" title="Hint">
 
 Use a bidirectional derived signal:
 
@@ -199,7 +199,8 @@ const fahrenheit = Signal(
 )
 ```
 
-</details>
+  </Accordion>
+</Accordions>
 
 ### Exercise 2: Todo List
 
@@ -209,8 +210,8 @@ Create a `todos` signal containing an array of todo items. Add a derived signal 
 
 Create an effect that logs search queries, but only after the user stops typing for 300ms. Use cleanup functions to cancel pending timeouts.
 
-<details>
-<summary>Hint</summary>
+<Accordions>
+  <Accordion id="exercise-3-hint" title="Hint">
 
 The cleanup function should clear the timeout:
 
@@ -225,7 +226,8 @@ effect((monitor) => {
 })
 ```
 
-</details>
+  </Accordion>
+</Accordions>
 
 ## What You've Learned
 
@@ -241,8 +243,9 @@ You now know how to:
 
 ## Next Steps
 
-- [Signals and Monitors](/docs/concepts/signals) - Understand the core reactive pattern in depth
-- [Derived Signals](/docs/concepts/derived) - Learn about computed values and chaining
-- [Effects](/docs/concepts/effects) - Side effects and cleanup patterns
-- [React Integration](/docs/concepts/react-integration) - How signals work with React
-- [API Reference](/docs/api/signal) - Complete API documentation
+<Cards>
+  <Card title="Derived Signals" description="Learn about computed values and chaining" href="/docs/concepts/derived" />
+  <Card title="Effects" description="Side effects and cleanup patterns" href="/docs/concepts/effects" />
+  <Card title="React Integration" description="How signals work with React" href="/docs/concepts/react-integration" />
+  <Card title="API Reference" description="Complete API documentation" href="/docs/api/signal" />
+</Cards>
