@@ -1,0 +1,258 @@
+---
+title: Signals, Monitors, and Reactivity
+description: Understanding the core reactive primitives and how they work together
+---
+
+At the heart of this library are three concepts that work together: **Signals** hold values, **Monitors** track who is reading them, and **Effects** run code when values change.
+
+## The Core Idea
+
+A Signal is a container for a value that can change over time. The **Monitor** makes it reactive by tracking who is reading the signal.
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+const count = Signal(0)
+
+effect((monitor) => {
+  console.log(count.read(monitor)) // 0
+})
+
+count.write(1) // Effect re-runs, logs: 1
+```
+
+When you call `count.read(monitor)`, two things happen:
+1. The signal returns its current value
+2. The signal records that this monitor is interested in its value
+
+Later, when `count.write(1)` changes the value, the signal notifies all monitors that previously read it. Those monitors then trigger their associated code to re-run.
+
+## Why Monitors Exist
+
+The Monitor solves dependency tracking by making it **explicit** and **scoped**:
+
+```ts
+const theme = Signal("light")
+const fontSize = Signal(14)
+
+effect((monitor) => {
+  // This monitor now "watches" theme
+  document.body.className = theme.read(monitor)
+})
+
+effect((monitor) => {
+  // This monitor now "watches" fontSize
+  document.body.style.fontSize = `${fontSize.read(monitor)}px`
+})
+
+theme.write("dark")    // Only the first effect re-runs
+fontSize.write(16)     // Only the second effect re-runs
+```
+
+Each effect gets its own monitor. When `theme` changes, it only notifies the monitors that actually read it.
+
+## The Read-Write Cycle
+
+Signals have two fundamental operations:
+
+```ts
+const name = Signal("Alice")
+
+effect((monitor) => {
+  // Reading: requires a monitor
+  const value = name.read(monitor)
+  console.log(`Hello, ${value}`)
+})
+
+// Writing: doesn't need a monitor
+name.write("Bob")
+
+// Writing with a transform function
+const count = Signal(0)
+count.write((current) => current + 1)
+```
+
+## Dynamic Dependency Tracking
+
+Dependencies are tracked **dynamically** based on what actually gets read:
+
+```ts
+const showDetails = Signal(false)
+const summary = Signal("Brief info")
+const details = Signal("Full details here...")
+
+effect((monitor) => {
+  if (showDetails.read(monitor)) {
+    console.log(details.read(monitor))
+  } else {
+    console.log(summary.read(monitor))
+  }
+})
+```
+
+When `showDetails` is `false`, changing `details` does nothing - the effect didn't read it on the last run.
+
+## Derived Signals
+
+Signals can compute their value from other signals:
+
+```ts
+const price = Signal(100)
+const quantity = Signal(2)
+
+// Derived signal - computes its value from others
+const total = Signal((monitor) => price.read(monitor) * quantity.read(monitor))
+
+effect((monitor) => {
+  console.log(`Total: $${total.read(monitor)}`) // Total: $200
+})
+
+price.write(150) // Effect logs: Total: $300
+```
+
+### Chaining Derived Signals
+
+Derived signals can depend on other derived signals:
+
+```ts
+const price = Signal(100)
+const quantity = Signal(2)
+const taxRate = Signal(0.1)
+
+const subtotal = Signal((monitor) => price.read(monitor) * quantity.read(monitor))
+const tax = Signal((monitor) => subtotal.read(monitor) * taxRate.read(monitor))
+const total = Signal((monitor) => subtotal.read(monitor) + tax.read(monitor))
+
+effect((monitor) => {
+  console.log(`Total: $${total.read(monitor)}`) // Total: $220
+})
+```
+
+### Lazy Evaluation and Memoization
+
+Derived signals only compute when read, and values are cached:
+
+```ts
+const count = Signal(0)
+
+const expensive = Signal((monitor) => {
+  console.log("Computing...")
+  return count.read(monitor) * 2
+})
+
+count.write(1)
+count.write(2)
+count.write(3)
+// No "Computing..." logged yet
+
+effect((monitor) => {
+  console.log(expensive.read(monitor)) // Now: "Computing..." then "6"
+  console.log(expensive.read(monitor)) // Just "6" (cached)
+})
+```
+
+### Bidirectional Derived Signals
+
+Create derived signals that can be written to:
+
+```ts
+const celsius = Signal(0)
+
+const fahrenheit = Signal(
+  (monitor) => celsius.read(monitor) * 9/5 + 32,
+  (value) => celsius.write((value - 32) * 5/9)
+)
+
+fahrenheit.write(212) // celsius becomes 100
+```
+
+## Effects
+
+Effects run side effects in response to signal changes:
+
+```ts
+const userId = Signal("user-1")
+
+const stop = effect((monitor) => {
+  const id = userId.read(monitor)
+  const subscription = subscribeToUser(id)
+
+  // Cleanup runs before re-execution and when stopped
+  return () => {
+    subscription.unsubscribe()
+  }
+})
+
+stop() // Disconnect the effect
+```
+
+### Effects vs Derived Signals
+
+| Use Case | Tool |
+|----------|------|
+| Computing a value from other signals | Derived signal |
+| Transforming or filtering data | Derived signal |
+| Side effects (DOM, network, logging) | Effect |
+| Syncing with external systems | Effect |
+
+Effects are for **actions**. Derived signals are for **values**.
+
+## Reading Without Tracking
+
+Use `untracked` to read a signal without establishing a dependency:
+
+```ts
+import { Signal, effect, untracked } from "@owanturist/signal"
+
+const count = Signal(0)
+const multiplier = Signal(2)
+
+effect((monitor) => {
+  // count is tracked, multiplier is NOT
+  const result = count.read(monitor) * untracked(multiplier)
+  console.log(result)
+})
+
+count.write(5)       // Effect runs
+multiplier.write(3)  // Effect does NOT run
+```
+
+## Batching Updates
+
+Group multiple updates to prevent intermediate effect runs:
+
+```ts
+import { Signal, effect, batch } from "@owanturist/signal"
+
+const firstName = Signal("John")
+const lastName = Signal("Doe")
+
+effect((monitor) => {
+  console.log(`${firstName.read(monitor)} ${lastName.read(monitor)}`)
+})
+
+batch(() => {
+  firstName.write("Jane")
+  lastName.write("Smith")
+})
+// Logs once: "Jane Smith"
+```
+
+## Summary
+
+| Concept | Purpose |
+|---------|---------|
+| Signal | Holds a value that can change |
+| Monitor | Tracks which signals have been read |
+| Derived Signal | Computes a value from other signals |
+| Effect | Runs side effects when signals change |
+| `batch()` | Groups updates to prevent intermediate runs |
+| `untracked()` | Reads without creating dependencies |
+
+## See Also
+
+<Cards>
+  <Card title="Signal API Reference" description="Complete API documentation" href="/docs/api/signal" />
+  <Card title="effect API Reference" description="Side effects and cleanup" href="/docs/api/effect" />
+  <Card title="React Integration" description="Using signals in React" href="/docs/concepts/react-integration" />
+</Cards>

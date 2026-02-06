@@ -1,0 +1,173 @@
+---
+title: Optimization
+description: Batching updates and performance techniques for signal-based applications
+---
+
+This guide covers techniques for optimizing performance in signal-based applications.
+
+## Batching Updates
+
+When updating multiple signals, batch them to prevent intermediate effect runs:
+
+```ts
+import { Signal, batch, effect } from "@owanturist/signal"
+
+const firstName = Signal("John")
+const lastName = Signal("Doe")
+
+effect((monitor) => {
+  console.log(`${firstName.read(monitor)} ${lastName.read(monitor)}`)
+})
+// Logs: "John Doe"
+
+// Without batch: 2 effect runs
+firstName.write("Jane") // Logs: "Jane Doe"
+lastName.write("Smith") // Logs: "Jane Smith"
+
+// With batch: 1 effect run
+batch(() => {
+  firstName.write("Bob")
+  lastName.write("Wilson")
+})
+// Logs once: "Bob Wilson"
+```
+
+### When to Batch
+
+Batch signal updates when you need to:
+
+1. Update multiple related signals atomically
+2. Prevent effects from seeing intermediate states
+3. Reduce the number of effect executions
+
+### Reading During Batch
+
+The `batch` callback receives an untracked Monitor:
+
+```ts
+const count = Signal(0)
+
+batch((monitor) => {
+  const current = count.read(monitor)
+  count.write(current + 1)
+})
+```
+
+### Nested Batches
+
+Batches can be nested. Updates are deferred until the outermost batch completes:
+
+```ts
+batch(() => {
+  a.write(1)
+  batch(() => {
+    b.write(1)
+  })
+  a.write(2)
+})
+// Effects run once after outermost batch
+```
+
+## Granular Derived Signals
+
+Create focused derived signals instead of monolithic ones:
+
+```ts
+interface User {
+  name: string
+  avatar: string
+  status: "online" | "offline"
+}
+
+const user = Signal<User>({ name: "Alice", avatar: "/alice.png", status: "online" })
+
+// Less optimal: Any user change triggers all watchers
+const userDisplay = Signal((monitor) => ({
+  name: user.read(monitor).name,
+  avatar: user.read(monitor).avatar,
+  status: user.read(monitor).status,
+}))
+
+// More optimal: Watchers subscribe to just what they need
+const userName = Signal((monitor) => user.read(monitor).name)
+const userAvatar = Signal((monitor) => user.read(monitor).avatar)
+const userStatus = Signal((monitor) => user.read(monitor).status)
+```
+
+## Custom Equality Functions
+
+When a derived signal produces objects or arrays, custom equality prevents cascading updates:
+
+```ts
+interface Coordinates {
+  x: number
+  y: number
+}
+
+const xSignal = Signal(0)
+const ySignal = Signal(0)
+
+// Without custom equality: New object triggers updates even if values are same
+const coordsBad = Signal((monitor) => ({
+  x: xSignal.read(monitor),
+  y: ySignal.read(monitor),
+}))
+
+// With custom equality: Updates only when actual values change
+const coordsGood = Signal(
+  (monitor) => ({
+    x: xSignal.read(monitor),
+    y: ySignal.read(monitor),
+  }),
+  {
+    equals: (a, b) => a.x === b.x && a.y === b.y,
+  },
+)
+```
+
+## Lazy Evaluation
+
+Derived signals only compute when read. Take advantage of this by deferring expensive computations:
+
+```ts
+const rawData = Signal<number[]>([])
+
+// Only runs when someone reads processedData
+const processedData = Signal((monitor) => {
+  const data = rawData.read(monitor)
+  return expensiveTransformation(data)
+})
+```
+
+## Reading Without Tracking
+
+Use `untracked` when you need a signal's value without establishing a dependency:
+
+```ts
+import { Signal, effect, untracked } from "@owanturist/signal"
+
+const items = Signal([1, 2, 3])
+const pageSize = Signal(10)
+
+effect((monitor) => {
+  // Re-run when items change, not when pageSize changes
+  const size = untracked(pageSize)
+  displayItems(items.read(monitor).slice(0, size))
+})
+```
+
+## When Not to Optimize
+
+The signal system is designed to be efficient by default. Only optimize when you have evidence of a performance problem:
+
+- Single signal updates don't need batching
+- Simple derived signals rarely need custom equality
+- Profile before optimizing
+
+## See Also
+
+<Cards>
+  <Card title="batch API" description="Complete API reference" href="/docs/api/batch" />
+  <Card title="untracked API" description="Reading without tracking" href="/docs/api/untracked" />
+  <Card title="Fundamentals" description="Core concepts" href="/docs/concepts/fundamentals" />
+</Cards>

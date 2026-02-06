@@ -3,13 +3,13 @@ title: React Integration
 description: Understanding how signals integrate with React's rendering model
 ---
 
-This page explains why signals work well with React and how the `@owanturist/signal-react` package bridges the two systems.
+This page explains why signals work well with React and how the `@owanturist/signal-react` package bridges the two systems. For core signal concepts, see [Signals, Monitors, and Reactivity](/docs/concepts/fundamentals).
 
 ## Why Signals in React?
 
 React's built-in state primitives (`useState`, `useReducer`) use a coarse-grained update model: when state changes, the entire component and its children re-render. You can optimize this with `memo`, `useMemo`, and `useCallback`, but it requires manual work.
 
-Signals offer fine-grained reactivity. Only components that actually read a changed signal re-render, automatically. No manual memoization needed.
+Signals offer fine-grained reactivity. Only components that actually read a changed signal re-render, automatically:
 
 ```tsx
 import { Signal } from "@owanturist/signal"
@@ -31,36 +31,25 @@ function LastNameDisplay() {
 }
 ```
 
-When `firstName` changes, only `FirstNameDisplay` re-renders. `LastNameDisplay` is unaffected because it doesn't read `firstName`.
+When `firstName` changes, only `FirstNameDisplay` re-renders.
 
 ## The useSyncExternalStore Bridge
 
-React 18 introduced `useSyncExternalStore`, a hook specifically designed for integrating external state management with React's concurrent rendering. The `@owanturist/signal-react` package uses this hook internally.
-
-### Why useSyncExternalStore?
-
-Before React 18, integrating external state with React was error-prone. During concurrent rendering, components could read inconsistent state (a problem called "tearing"). `useSyncExternalStore` solves this by:
-
-1. **Ensuring consistent reads** - All components see the same state value during a render pass
-2. **Automatic subscription** - React manages subscribe/unsubscribe lifecycle
-3. **Server rendering support** - Works correctly during SSR
-
-### How It Works
+React 18 introduced `useSyncExternalStore` for safe external state integration with concurrent rendering. The `@owanturist/signal-react` package uses it internally.
 
 When you call `useComputed(signal)`:
 
-1. A `MonitorFactory` creates a Monitor for tracking reads
+1. A Monitor is created to track signal reads
 2. The compute function runs, reading signals through the Monitor
 3. Each signal records the Monitor as a subscriber
 4. When any signal changes, it notifies the Monitor
-5. The Monitor triggers React's subscription callback
-6. `useSyncExternalStore` schedules a re-render
+5. `useSyncExternalStore` schedules a re-render
 
 This happens automatically. You write simple code, and the library handles React integration.
 
-## The Monitor Pattern in Components
+## Using Monitors in Components
 
-The Monitor is the key abstraction that makes automatic dependency tracking work. In React components, the `useComputed` hook provides a Monitor to your compute function:
+The `useComputed` hook provides a Monitor to your compute function:
 
 ```tsx
 import { Signal } from "@owanturist/signal"
@@ -72,7 +61,6 @@ const c = Signal(3)
 
 function Sum() {
   const total = useComputed((monitor) => {
-    // Reading a, b, c establishes them as dependencies
     return a.read(monitor) + b.read(monitor) + c.read(monitor)
   }, [])
 
@@ -80,12 +68,9 @@ function Sum() {
 }
 ```
 
-The Monitor tracks exactly which signals were read during the last execution. If your compute function conditionally reads signals, the dependencies update automatically:
+Dependencies are tracked dynamically. If your compute function conditionally reads signals, the subscriptions update automatically:
 
 ```tsx
-import { Signal } from "@owanturist/signal"
-import { useComputed } from "@owanturist/signal-react"
-
 const showDetails = Signal(false)
 const summary = Signal("Brief")
 const details = Signal("Full details...")
@@ -102,7 +87,7 @@ function Content() {
 }
 ```
 
-When `showDetails` is `false`, changing `details` does not trigger a re-render. The component only subscribes to signals it actually reads.
+When `showDetails` is `false`, changing `details` does not trigger a re-render.
 
 ## Design Trade-offs
 
@@ -181,7 +166,7 @@ The signal-react integration uses WeakRef internally for subscriptions. This mea
 ## See Also
 
 <Cards>
+  <Card title="Fundamentals" description="Core signal concepts" href="/docs/concepts/fundamentals" />
   <Card title="useComputed API" description="Complete hook reference" href="/docs/api/use-computed" />
-  <Card title="useMonitor API" description="Low-level monitor access" href="/docs/api/use-monitor" />
-  <Card title="Using Signals in React Components" description="Practical patterns" href="/docs/guides/react-components" />
+  <Card title="React Components Guide" description="Practical patterns" href="/docs/guides/react-components" />
 </Cards>

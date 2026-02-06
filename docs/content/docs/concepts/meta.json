@@ -1,4 +1,4 @@
 {
   "title": "Concepts",
-  "pages": ["signals", "derived", "effects", "react-integration"]
+  "pages": ["fundamentals", "react-integration"]
 }

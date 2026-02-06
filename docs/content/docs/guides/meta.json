@@ -1,4 +1,4 @@
 {
   "title": "How-to Guides",
-  "pages": ["common-patterns", "react-components", "performance", "cleanup", "batching"]
+  "pages": ["react-components", "optimization", "cleanup"]
 }
