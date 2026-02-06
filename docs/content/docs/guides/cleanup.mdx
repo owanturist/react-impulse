@@ -157,7 +157,7 @@ const database = {
 The cleanup function runs at two specific times:
 
 1. **Before re-execution** - When a dependency changes and the effect is about to re-run
-2. **On disposal** - When `stop()` is called on the effect
+2. **On disposal** - When `stop(){:ts}` is called on the effect
 
 ```ts
 import { Signal, effect } from "@owanturist/signal"

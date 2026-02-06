@@ -23,7 +23,8 @@
     "build:minified": "pnpm build --env.NODE_ENV=production --minify=terser",
     "docs:build": "pnpm --filter docs build",
     "docs:dev": "pnpm --filter docs dev",
-    "docs:preview": "pnpm --filter docs preview"
+    "docs:preview": "pnpm --filter docs preview",
+    "docs": "pnpm docs:build && pnpm docs:preview"
   },
   "engines": {
     "node": ">=24.13.0"

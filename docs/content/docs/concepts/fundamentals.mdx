@@ -21,11 +21,11 @@ effect((monitor) => {
 count.write(1) // Effect re-runs, logs: 1
 ```
 
-When you call `count.read(monitor)`, two things happen:
+When you call `count.read(monitor){:ts}`, two things happen:
 1. The signal returns its current value
 2. The signal records that this monitor is interested in its value
 
-Later, when `count.write(1)` changes the value, the signal notifies all monitors that previously read it. Those monitors then trigger their associated code to re-run.
+Later, when `count.write(1){:ts}` changes the value, the signal notifies all monitors that previously read it. Those monitors then trigger their associated code to re-run.
 
 ## Why Monitors Exist
 
@@ -50,6 +50,92 @@ fontSize.write(16)     // Only the second effect re-runs
 ```
 
 Each effect gets its own monitor. When `theme` changes, it only notifies the monitors that actually read it.
+
+### Why Explicit Monitors?
+
+You might wonder why `read(monitor){:ts}` requires passing a monitor explicitly rather than tracking dependencies implicitly behind the scenes.
+
+Many reactive systems hide tracking from the user. Read functions take no arguments, and the system figures out the context automatically. This looks clean at first.
+
+However, this implicitness causes real-world problems. Consider a custom data structure that uses signals internally:
+
+```ts
+class UserProfile {
+  private name = Signal("Alice")
+  private age = Signal(30)
+
+  // With implicit tracking, this method hides the signal reads
+  getDisplayName() {
+    return `${this.name.read()} (${this.age.read()})`
+  }
+}
+```
+
+When you call `profile.getDisplayName(){:ts}` from a component, will it track dependencies? It depends on whether an implicit tracking context exists at that moment. If yes, updates work. If no, the UI silently stops reacting—with no error or warning. The bug is invisible until users report that "the name doesn't update anymore."
+
+With explicit monitors, the API makes tracking requirements clear:
+
+```ts twoslash
+import { Signal, type Monitor } from "@owanturist/signal"
+// ---cut---
+class UserProfile {
+  private name = Signal("Alice")
+  private age = Signal(30)
+
+  // The monitor parameter makes it obvious: this method tracks dependencies
+  getDisplayName(monitor: Monitor) {
+    return `${this.name.read(monitor)} (${this.age.read(monitor)})`
+  }
+}
+```
+
+Now TypeScript enforces correct usage. If a function needs to track dependencies, it must receive a monitor. If it doesn't need tracking, use `untracked`. There's no ambiguity, no silent fallbacks, and no hidden behavior.
+
+### Fine-Grained vs Coarse-Grained Reactivity
+
+Traditional state management broadcasts all changes to all consumers, requiring filtering at consumption time. Signals invert this: dependency graphs are precise, and notifications target only actual dependents.
+
+- **Coarse-grained**: A global state container notifies all subscribers on any change; consumers must filter for relevance.
+- **Fine-grained**: Individual Signal containers notify only direct dependents; no filtering required.
+
+Consider the difference in granularity:
+
+```ts twoslash tab="Coarse (single container)"
+import { Signal, effect } from "@owanturist/signal"
+// ---cut---
+// Single container: broadcast on any field change
+const state = Signal({
+  name: "Alice",
+  age: 30,
+})
+
+effect((monitor) => {
+  // Re-runs on ANY field change, even if we only care about name
+  console.log(state.read(monitor).name)
+})
+
+state.write((s) => ({ ...s, age: 31 })) // Effect re-runs unnecessarily
+```
+
+```ts twoslash tab="Fine (separate signals)"
+import { Signal, effect } from "@owanturist/signal"
+// ---cut---
+// Separate containers: targeted notifications per field
+const user = {
+  name: Signal("Alice"),
+  age: Signal(30),
+}
+
+effect((monitor) => {
+  // Only re-runs when name changes
+  console.log(user.name.read(monitor))
+})
+
+user.age.write(31) // Effect does NOT re-run (age not read)
+user.name.write("Bob") // Effect re-runs
+```
+
+In the fine-grained case, updating `user.age` notifies only monitors that read `user.age`, not those reading `user.name`. This precision eliminates wasted work without requiring any filtering logic in your effects.
 
 ## The Read-Write Cycle
 
@@ -90,7 +176,7 @@ effect((monitor) => {
 })
 ```
 
-When `showDetails` is `false`, changing `details` does nothing - the effect didn't read it on the last run.
+When `showDetails` is `false{:ts}`, changing `details` does nothing - the effect didn't read it on the last run.
 
 ## Derived Signals
 

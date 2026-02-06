@@ -230,7 +230,40 @@ interface ReadableSignal<T> {
 }
 ```
 
-Interface for anything that can be read with a Monitor.
+Interface for anything that can be read with a Monitor. By implementing this minimal interface on your own classes, you unlock:
+
+- **`useComputed(yourClass){:ts}`** — use your class directly in React components
+- **`untracked(yourClass){:ts}`** — get snapshot values without tracking
+- **`Signal(yourClass){:ts}`** — use as the getter of a derived signal
+
+```ts twoslash
+import { Signal, untracked, type Monitor, type ReadableSignal } from "@owanturist/signal"
+// @noErrors: 2307 2304
+import { useComputed } from "@owanturist/signal-react"
+
+class Counter implements ReadableSignal<number> {
+  private readonly count = Signal(0)
+
+  read(monitor: Monitor): number {
+    return this.count.read(monitor)
+  }
+}
+
+const counter = new Counter()
+
+// Pass directly to useComputed in React
+const value = useComputed(counter)
+
+// Pass directly to untracked for snapshots
+const snapshot = untracked(counter)
+
+const target = Signal(0)
+// Use as the getter of a derived signal
+const routed = Signal(counter, target)
+
+routed.read(monitor) // calls counter.read(monitor)
+routed.write(10) // calls target.write(10)
+```
 
 ## `WritableSignal<T>{:dart}` [#writable-signal-type]
 
@@ -240,7 +273,31 @@ interface WritableSignal<T> {
 }
 ```
 
-Interface for anything that can be written to.
+Interface for anything that can be written to. By implementing this minimal interface on your own classes, you can use them as **setter targets** for bidirectional derived signals:
+
+- **`Signal(getter, yourClass){:ts}`** — use as the setter of a derived signal
+
+```ts twoslash
+import { Signal, type WritableSignal } from "@owanturist/signal"
+// @noErrors: 2304
+
+class Counter implements WritableSignal<number> {
+  private readonly count = Signal(0)
+
+  write(value: number): void {
+    this.count.write(value)
+  }
+}
+
+const counter = new Counter()
+const source = Signal(5)
+
+// Use as the setter of a derived signal
+const routed = Signal(source, counter)
+
+routed.read(monitor) // calls source.read(monitor)
+routed.write(10) // calls counter.write(10)
+```
 
 ## `signal.read(monitor){:dart}` [#read]
 

@@ -37,7 +37,7 @@ When `firstName` changes, only `FirstNameDisplay` re-renders.
 
 React 18 introduced `useSyncExternalStore` for safe external state integration with concurrent rendering. The `@owanturist/signal-react` package uses it internally.
 
-When you call `useComputed(signal)`:
+When you call `useComputed(signal){:ts}`:
 
 1. A Monitor is created to track signal reads
 2. The compute function runs, reading signals through the Monitor
@@ -119,7 +119,7 @@ Use **signals** when:
 
 ## Dynamic Dependency Tracking in Components
 
-When you call `signal.read(monitor)` inside the compute function, that signal becomes a dependency. The component re-renders when any dependency changes:
+When you call `signal.read(monitor){:ts}` inside the compute function, that signal becomes a dependency. The component re-renders when any dependency changes:
 
 ```tsx
 import { Signal } from "@owanturist/signal"

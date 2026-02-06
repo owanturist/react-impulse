@@ -50,12 +50,12 @@ Executes a compute function that can read multiple signals and subscribes the co
 
 <section className="typedef">
 
-- `@param compute: (monitor: Monitor) => TResult{:dart}` A function that receives a Monitor and returns a computed value. All signals read via `signal.read(monitor)` inside this function become dependencies.
+- `@param compute: (monitor: Monitor) => TResult{:dart}` A function that receives a Monitor and returns a computed value. All signals read via `signal.read(monitor){:ts}` inside this function become dependencies.
 
 - `@param dependencies?: DependencyList{:dart}` Optional array of React dependencies. When provided, the compute function is memoized and only recreated when dependencies change. When omitted, the compute function runs on every render.
 
   <Callout>
-    For stable compute functions that don't depend on React props or state, pass an empty array `[]` to prevent unnecessary recreations.
+    For stable compute functions that don't depend on React props or state, pass an empty array `[]{:ts}` to prevent unnecessary recreations.
   </Callout>
 
 - `@param options?.equals?: null | Equal<TResult>{:dart}` Custom equality function to determine if the computed result has changed. Defaults to `Object.is{:ts}`. Pass `null{:ts}` to use the default.

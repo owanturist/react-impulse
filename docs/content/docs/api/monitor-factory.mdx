@@ -65,7 +65,7 @@ interface Monitor {
 }
 ```
 
-The `Monitor` type is opaque. You pass it to `signal.read(monitor)` to track dependencies.
+The `Monitor` type is opaque. You pass it to `signal.read(monitor){:ts}` to track dependencies.
 
 ## Examples
 
@@ -199,7 +199,7 @@ stop()
 
 ## Important Notes
 
-1. **Memory management** - Always call the disconnect function returned by `connect()` when the factory is no longer needed
+1. **Memory management** - Always call the disconnect function returned by `connect(){:ts}` when the factory is no longer needed
 2. **Single callback** - One factory has one `connect` callback for all tracked signals
 3. **Synchronous** - The `emit` callback is invoked synchronously when signals change
 4. **Advanced API** - Most users should use `effect()` or framework-specific hooks instead
