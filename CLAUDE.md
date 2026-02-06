@@ -68,7 +68,7 @@ packages/
 - `batch(execute)` - Batch multiple signal updates
 - `untracked(fn)` - Read signals without creating dependencies
 - `isSignal()`, `isDerivedSignal()` - Type guards
-- Subpath export: `@owanturist/signal/monitor-factory` for advanced monitor usage
+- Subpath export: `@owanturist/signal/monitor-factory` exposes `MonitorFactory` - an internal integration API used by `signal-react` to track signal reads and subscribe to changes. Not documented publicly.
 
 **React Package (`@owanturist/signal-react`):**
 - `useMonitor()` - Get Monitor instance for manual signal tracking

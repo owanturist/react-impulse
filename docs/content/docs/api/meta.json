@@ -5,7 +5,6 @@
     "batch",
     "effect",
     "untracked",
-    "monitor-factory",
     "---React---",
     "use-computed",
     "use-monitor"
