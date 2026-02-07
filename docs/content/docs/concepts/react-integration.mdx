@@ -89,6 +89,123 @@ function Content() {
 
 When `showDetails` is `false`, changing `details` does not trigger a re-render.
 
+## Sharing State Across Components
+
+Create signals in a parent component and pass them down via props or context. This avoids global state and makes testing easier:
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+import { createContext, useContext, useMemo, useState } from "react"
+
+interface User {
+  id: string
+  name: string
+}
+
+const UserContext = createContext<{
+  user: Signal<User | null>
+  isLoggedIn: Signal<boolean>
+} | null>(null)
+
+function useUserContext() {
+  const ctx = useContext(UserContext)
+  if (!ctx) throw new Error("Missing UserContext")
+  return ctx
+}
+
+function App() {
+  const [user] = useState(() => Signal<User | null>(null))
+  const isLoggedIn = useMemo(
+    () => Signal((monitor) => user.read(monitor) !== null),
+    [user],
+  )
+
+  return (
+    <UserContext value={{ user, isLoggedIn }}>
+      <UserProfile />
+      <LoginStatus />
+      <LoginButton />
+    </UserContext>
+  )
+}
+
+function UserProfile() {
+  const { user } = useUserContext()
+  const currentUser = useComputed(user)
+
+  if (!currentUser) {
+    return <div>Please log in</div>
+  }
+
+  return <div>Welcome, {currentUser.name}!</div>
+}
+
+function LoginStatus() {
+  const { isLoggedIn } = useUserContext()
+  const loggedIn = useComputed(isLoggedIn)
+
+  return <div>{loggedIn ? "Logged in" : "Logged out"}</div>
+}
+
+function LoginButton() {
+  const { user } = useUserContext()
+
+  return (
+    <button
+      onClick={() => {
+        user.write({ id: "1", name: "Alice" })
+      }}
+    >
+      Log In
+    </button>
+  )
+}
+```
+
+The writable `user` signal is created once in `App` with `useState{:ts}`, and the derived `isLoggedIn` is created with `useMemo{:ts}`. Both are passed down via context. When `user` changes, only `UserProfile` and `LoginStatus` re-render — `App` itself does not, because the context value (the signal references) stays stable.
+
+## Dynamic Signal Collections
+
+Signals inside data structures enable fine-grained updates for individual items in a collection:
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+import { useState } from "react"
+
+interface Todo {
+  id: string
+  text: string
+  completed: Signal<boolean>
+}
+
+function TodoList({ todos }: { todos: Signal<Todo[]> }) {
+  const items = useComputed(todos)
+
+  return (
+    <ul>
+      {items.map((todo) => (
+        <TodoItem key={todo.id} todo={todo} />
+      ))}
+    </ul>
+  )
+}
+
+function TodoItem({ todo }: { todo: Todo }) {
+  const completed = useComputed(todo.completed)
+
+  return (
+    <li style={{ textDecoration: completed ? "line-through" : "none" }}>
+      {todo.text}
+      <button onClick={() => todo.completed.write((c) => !c)}>Toggle</button>
+    </li>
+  )
+}
+```
+
+Toggling a single todo only re-renders its `TodoItem` component. The `TodoList` only re-renders when items are added or removed.
+
 ## Design Trade-offs
 
 ### Signals vs Context
@@ -168,5 +285,5 @@ The signal-react integration uses WeakRef internally for subscriptions. This mea
 <Cards>
   <Card title="Fundamentals" description="Core signal concepts" href="/docs/concepts/fundamentals" />
   <Card title="useComputed API" description="Complete hook reference" href="/docs/api/use-computed" />
-  <Card title="React Components Guide" description="Practical patterns" href="/docs/guides/react-components" />
+  <Card title="useMonitor API" description="Direct monitor access" href="/docs/api/use-monitor" />
 </Cards>

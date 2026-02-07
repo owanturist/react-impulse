@@ -158,9 +158,88 @@ type DependencyList = ReadonlyArray<unknown>
 
 Standard React dependency array type. The compute function is memoized and only recreated when values in this array change (compared by reference).
 
+## Creating Signals Inside Components [#creating-signals]
+
+Signals hold state and must be stored in permanent storage such as `useState{:ts}` (ignoring the setter) or `useRef{:ts}`:
+
+
+```tsx tab="Good"
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+import { useState, useRef } from "react"
+
+// Permanent storage via useState (setter is unused)
+function GoodCounter() {
+  const [count] = useState(() => Signal(0))
+  const value = useComputed(count)
+  return <div>{value}</div>
+}
+
+// Also good: Permanent storage via useRef
+function AlsoGoodCounter() {
+  const { current: count } = useRef(Signal(0))
+  const value = useComputed(count)
+  return <div>{value}</div>
+}
+```
+
+```tsx tab="Bad"
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+// Creates new signal on every render
+function BadCounter() {
+  const count = Signal(0) // New signal every render!
+  const value = useComputed(count)
+  return <div>{value}</div>
+}
+```
+
+Derived signals are different — they don't store state, so `useMemo{:ts}` is the right choice:
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+import { useState, useMemo } from "react"
+
+function DoubleCounter() {
+  const [count] = useState(() => Signal(0))
+  const doubled = useMemo(() => Signal((monitor) => count.read(monitor) * 2), [count])
+  const value = useComputed(doubled)
+  return <div>{value}</div>
+}
+```
+
+## Optimizing with Dependency Arrays [#dependency-arrays]
+
+The dependency array controls when the compute function is *executed*. Without a dependency array, the compute function executes on every re-render. When a dependency array is provided, the compute function only re-executes when one of the listed dependencies changes.
+
+<Callout>
+  The `useComputed` hook should be configured as a target for the exhaustive dependencies lint rule in your project. In Biome, add it to the [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) hooks option. In ESLint, use the `additionalHooks` option of [`react-hooks/exhaustive-deps`](https://react.dev/reference/eslint-plugin-react-hooks/lints/exhaustive-deps). When configured, signals referenced in the compute function must be listed in the dependency array — just like props and state in native React hooks.
+</Callout>
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+import { useState } from "react"
+
+function ItemCount() {
+  const [data] = useState(() => Signal<string[]>([]))
+
+  // Executes on every re-render (no dependency array)
+  const items = useComputed((monitor) => data.read(monitor))
+
+  // Only re-executes when `data` reference changes
+  const items = useComputed((monitor) => data.read(monitor), [data])
+
+  const items = useComputed(data) // Shortcut for the above
+
+  return <div>{items.length}</div>
+}
+```
+
 ## See Also
 
 <Cards>
   <Card title="React Integration" description="How signals work with React" href="/docs/concepts/react-integration" />
-  <Card title="Signals in React" description="Practical patterns" href="/docs/guides/react-components" />
 </Cards>
