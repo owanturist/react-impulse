@@ -1,0 +1,144 @@
+---
+title: untracked
+description: API reference for the untracked function
+---
+
+The `untracked` function reads signal values without creating reactive dependencies.
+
+## When to Use [#when-to-use]
+
+The primary purpose of a Monitor is to provide reactivity: when a value is read within a tracked context, future changes trigger reactions (re-renders, effect re-runs). However, there are many scenarios where reactivity is unnecessary—where only the current value matters, and future updates are irrelevant.
+
+Use `untracked` for:
+
+- **User interactions**: Click handlers, keyboard events, or other UI interactions that only need the value at the moment of the event. The handler runs once and doesn't need to re-run when signals change.
+
+- **Async operations**: Reading a value to initiate a network request or other async process. Future changes to that signal are irrelevant to the already-started operation.
+
+- **Initialization**: Extracting a value once to initialize state or compute a payload, with no need to react to subsequent updates.
+
+- **One-off computations**: Any logic that needs a snapshot of the current value but should not establish ongoing reactivity—for example, logging current state or computing a derived value for an external system.
+
+Using `untracked` in these situations avoids unnecessary dependency tracking. Even if you used a tracked monitor in these cases, the application would function correctly—there would simply be redundant tracking overhead without impacting business logic.
+
+## `untracked(factory){:dart}` [#factory]
+
+```ts
+function untracked<TResult>(factory: (monitor: Monitor) => TResult): TResult
+```
+
+Executes a function with an untracked Monitor, allowing signal reads that don't establish dependencies.
+
+<section className="typedef">
+
+- `@param factory: (monitor: Monitor) => TResult{:dart}` Function to execute without tracking. Receives an untracked Monitor.
+
+---
+
+- `@returns TResult{:dart}` The return value of the factory function.
+
+</section>
+
+```ts twoslash tab="Example"
+import { Signal, effect, untracked } from "@owanturist/signal"
+
+const count = Signal(0)
+const multiplier = Signal(2)
+
+effect((monitor) => {
+  // count is tracked
+  // multiplier is NOT tracked
+  const result = count.read(monitor) * untracked((m) => multiplier.read(m))
+  console.log(result)
+})
+// Logs: 0
+
+count.write(5)
+// Logs: 10
+
+multiplier.write(3)
+// Nothing logged (multiplier not tracked)
+
+count.write(5)
+// Logs: 15 (uses current multiplier value)
+```
+
+## `untracked(signal){:dart}` [#signal]
+
+```ts
+function untracked<TValue>(signal: ReadableSignal<TValue>): TValue
+```
+
+Reads a signal's value without establishing a dependency. Shorthand for `untracked((m) => signal.read(m)){:ts}`.
+
+<section className="typedef">
+
+- `@param signal: ReadableSignal<TValue>{:dart}` Signal to read without tracking.
+
+---
+
+- `@returns TValue{:dart}` The current value of the signal.
+
+</section>
+
+```ts twoslash tab="Example"
+import { Signal, effect, untracked } from "@owanturist/signal"
+
+const count = Signal(0)
+const config = Signal({ multiplier: 2 })
+
+effect((monitor) => {
+  const { multiplier } = untracked(config)
+  console.log(count.read(monitor) * multiplier)
+})
+```
+
+```ts twoslash tab="In Derived"
+import { Signal, untracked } from "@owanturist/signal"
+
+const items = Signal([1, 2, 3])
+const sortOrder = Signal<"asc" | "desc">("asc")
+
+// Only re-computes when items change, not when sortOrder changes
+const sortedItems = Signal((monitor) => {
+  const order = untracked((m) => sortOrder.read(m))
+  const arr = [...items.read(monitor)]
+
+  return order === "asc" ? arr.sort((a, b) => a - b) : arr.sort((a, b) => b - a)
+})
+```
+
+## Nested Untracked
+
+Untracked calls can be nested:
+
+```ts twoslash
+import { Signal, effect, untracked } from "@owanturist/signal"
+
+const a = Signal(1)
+const b = Signal(2)
+const c = Signal(3)
+
+effect((monitor) => {
+  const aVal = a.read(monitor) // tracked
+
+  const result = untracked((m) => {
+    const bVal = b.read(m) // not tracked
+    const cVal = untracked((m2) => c.read(m2)) // also not tracked
+    return bVal + cVal
+  })
+
+  console.log(aVal + result)
+})
+
+a.write(10) // Effect re-runs
+b.write(20) // No re-run
+c.write(30) // No re-run
+```
+
+## See Also
+
+<Cards>
+  <Card title="Fundamentals" description="Core signal concepts" href="/docs/concepts/fundamentals" />
+  <Card title="batch" description="Batching updates" href="/docs/api/batch" />
+</Cards>
