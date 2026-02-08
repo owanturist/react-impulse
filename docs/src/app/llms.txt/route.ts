@@ -15,7 +15,7 @@ export function GET() {
     ...pages.map(({ data, url }) => {
       const description = data.description ? `: ${data.description}` : ""
 
-      return `- [${data.title}](${url}.mdx)${description}`
+      return `- [${data.title}](${url}.md)${description}`
     }),
     "",
     "## Full documentation",

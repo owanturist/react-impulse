@@ -13,14 +13,14 @@ export async function GET(_req: Request, { params }: RouteProps) {
   const { path } = await params
   const joined = path.join("/")
 
-  if (!joined.endsWith(".mdx")) {
+  if (!joined.endsWith(".md")) {
     return notFound()
   }
 
-  // "docs/api/signal.mdx" → strip "docs/" prefix and ".mdx" suffix → ["api", "signal"]
-  // "docs.mdx" → strip "docs" prefix and ".mdx" suffix → []
+  // "docs/api/signal.md" → strip "docs/" prefix and ".md" suffix → ["api", "signal"]
+  // "docs.md" → strip "docs" prefix and ".md" suffix → []
   const slug = joined
-    .replace(/(^docs|\.mdx$)/g, "")
+    .replace(/(^docs|\.md$)/g, "")
     .split("/")
     .filter(Boolean)
 
@@ -37,8 +37,8 @@ export async function GET(_req: Request, { params }: RouteProps) {
 
 export function generateStaticParams() {
   return source.getPages().map((page) => ({
-    // page.url is "/docs/signal" → path becomes ["docs", "signal.mdx"]
-    // page.url is "/docs" (index) → path becomes ["docs.mdx"]
-    path: `${page.url.slice(1)}.mdx`.split("/"),
+    // page.url is "/docs/signal" → path becomes ["docs", "signal.md"]
+    // page.url is "/docs" (index) → path becomes ["docs.md"]
+    path: `${page.url.slice(1)}.md`.split("/"),
   }))
 }

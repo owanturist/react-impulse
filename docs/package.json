@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postbuild": "cp -r dist/mdx/* dist/ && rm -rf dist/mdx",
+    "postbuild": "cp -r dist/md/* dist/ && rm -rf dist/md",
     "start": "next start",
     "preview": "npx serve dist"
   },

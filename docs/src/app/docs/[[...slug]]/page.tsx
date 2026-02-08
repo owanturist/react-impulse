@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: page.data.description,
     alternates: {
       types: {
-        "text/markdown": `${page.url}.mdx`,
+        "text/markdown": `${page.url}.md`,
       },
     },
   }
