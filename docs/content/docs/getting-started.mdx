@@ -1,0 +1,250 @@
+---
+title: Getting Started
+description: Install and start using @owanturist/signal in your project
+---
+
+This tutorial walks you through installing the library and building your first reactive application with signals.
+
+## Installation
+
+Install the core package using your preferred package manager:
+
+```package-install
+@owanturist/signal
+```
+
+For React applications, also install the React integration:
+
+```package-install
+@owanturist/signal-react
+```
+
+## Creating Your First Signal
+
+Let's start with the basics. A signal holds a value that can change over time.
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+const count = Signal(0)
+```
+
+You've created a signal with an initial value of `0`. To see it in action, create an effect that reads the signal:
+
+```ts
+effect((monitor) => {
+  console.log(count.read(monitor))
+})
+```
+
+You should see `0` logged to the console. The effect runs immediately when created.
+
+Now update the signal:
+
+```ts
+count.write(1)
+```
+
+Notice that the effect runs again and logs `1`. The effect automatically re-runs because it read `count` through a monitor, which established a dependency.
+
+## Updating Based on Previous Value
+
+You can update a signal using a transform function:
+
+```ts
+count.write((current) => current + 1)
+```
+
+This pattern is useful when you need the current value to compute the new one.
+
+## Creating Derived Signals
+
+Derived signals compute their value from other signals:
+
+```ts
+const firstName = Signal("John")
+const lastName = Signal("Doe")
+
+const fullName = Signal((monitor) => {
+  return `${firstName.read(monitor)} ${lastName.read(monitor)}`
+})
+```
+
+The `fullName` signal automatically updates whenever `firstName` or `lastName` changes. You don't need to manually track dependencies.
+
+Let's verify this works:
+
+```ts
+effect((monitor) => {
+  console.log(fullName.read(monitor))
+})
+// Logs: "John Doe"
+
+firstName.write("Jane")
+// Logs: "Jane Doe"
+```
+
+## Using Effects for Side Effects
+
+Effects run code in response to signal changes. They're useful for syncing with external systems:
+
+```ts
+const temperature = Signal(20)
+
+const stop = effect((monitor) => {
+  console.log(`Current temperature: ${temperature.read(monitor)}°C`)
+})
+// Logs: "Current temperature: 20°C"
+
+temperature.write(25)
+// Logs: "Current temperature: 25°C"
+
+temperature.write(30)
+// Logs: "Current temperature: 30°C"
+```
+
+When you no longer need the effect, call the stop function:
+
+```ts
+stop()
+
+temperature.write(35)
+// Nothing logged - the effect has stopped
+```
+
+## Integrating with React
+
+The `useComputed` hook connects signals to React components:
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+const count = Signal(0)
+
+function Counter() {
+  const value = useComputed((monitor) => count.read(monitor))
+
+  return (
+    <div>
+      <p>Count: {value}</p>
+      <button onClick={() => count.write((c) => c + 1)}>Increment</button>
+      <button onClick={() => count.write((c) => c - 1)}>Decrement</button>
+    </div>
+  )
+}
+```
+
+The component re-renders only when `count` changes. If you have multiple signals, the component subscribes to exactly the ones it reads.
+
+## Batching Updates
+
+When updating multiple signals, you can batch them to prevent intermediate re-renders:
+
+```tsx
+import { Signal, batch } from "@owanturist/signal"
+
+const firstName = Signal("John")
+const lastName = Signal("Doe")
+const age = Signal(30)
+
+function updateUser(first: string, last: string, newAge: number) {
+  batch(() => {
+    firstName.write(first)
+    lastName.write(last)
+    age.write(newAge)
+  })
+}
+```
+
+Without batching, each write would trigger effects and re-renders. With batching, all updates happen atomically, and effects run once at the end.
+
+## TypeScript Support
+
+The library has full TypeScript support with type inference:
+
+```ts
+import { Signal, type ReadonlySignal } from "@owanturist/signal"
+
+// Type is inferred as Signal<number>
+const count = Signal(0)
+
+// Explicit typing for complex types
+const user = Signal<User | null>(null)
+
+// Function parameter typing
+function double(signal: ReadonlySignal<number>): ReadonlySignal<number> {
+  return Signal((monitor) => signal.read(monitor) * 2)
+}
+```
+
+## Try It Yourself
+
+Now that you understand the basics, try these exercises to reinforce your learning:
+
+### Exercise 1: Temperature Converter
+
+Create two signals `celsius` and `fahrenheit` where updating one automatically updates the other using derived signals with setters.
+
+<Accordions>
+  <Accordion id="exercise-1-hint" title="Hint">
+
+Use a bidirectional derived signal:
+
+```ts
+const celsius = Signal(0)
+const fahrenheit = Signal(
+  (monitor) => celsius.read(monitor) * 9/5 + 32,
+  (value) => celsius.write((value - 32) * 5/9)
+)
+```
+
+  </Accordion>
+</Accordions>
+
+### Exercise 2: Todo List
+
+Create a `todos` signal containing an array of todo items. Add a derived signal `completedCount` that counts how many todos are completed.
+
+### Exercise 3: Debounced Search
+
+Create an effect that logs search queries, but only after the user stops typing for 300ms. Use cleanup functions to cancel pending timeouts.
+
+<Accordions>
+  <Accordion id="exercise-3-hint" title="Hint">
+
+The cleanup function should clear the timeout:
+
+```ts
+effect((monitor) => {
+  const query = searchQuery.read(monitor)
+  const timeoutId = setTimeout(() => {
+    console.log("Searching for:", query)
+  }, 300)
+
+  return () => clearTimeout(timeoutId)
+})
+```
+
+  </Accordion>
+</Accordions>
+
+## What You've Learned
+
+You now know how to:
+
+- Create signals with initial values
+- Read signals through monitors to establish dependencies
+- Update signals directly or with transform functions
+- Create derived signals that compute values automatically
+- Use effects for side effects
+- Integrate signals with React components
+- Batch updates to prevent intermediate renders
+
+## Next Steps
+
+<Cards>
+  <Card title="Fundamentals" description="Core concepts: signals, monitors, effects" href="/docs/concepts/fundamentals" />
+  <Card title="React Integration" description="How signals work with React" href="/docs/concepts/react-integration" />
+  <Card title="API" description="Complete API documentation" href="/docs/api/signal" />
+</Cards>

@@ -1,0 +1,69 @@
+---
+title: Introduction
+description: A lightweight, fine-grained reactive state management library for JavaScript and React
+---
+
+Signal is a reactive state management library built around a simple idea: **Signals** hold values, and **Monitors** track who is reading them. This two-part design enables automatic dependency tracking.
+
+## The Problem
+
+Modern UI frameworks need to know when to re-render. React solves this with explicit dependency arrays (`useEffect`, `useMemo`, `useCallback`), which are error-prone and tedious. Global state managers often trigger re-renders for any state change, requiring manual optimization.
+
+Signal takes a different approach: dependencies are tracked automatically based on what your code actually reads. This eliminates the need to maintain dependency arrays or write selectors. Components subscribe to exactly what they use.
+
+## How It Works
+
+When you read a signal, you pass a Monitor. The signal records that this monitor cares about its value:
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+const count = Signal(0)
+
+effect((monitor) => {
+  // The signal records: "this monitor watches me"
+  console.log(count.read(monitor))
+})
+```
+
+Later, when the signal's value changes, it notifies only the monitors that read it. Effects re-run. Derived values recompute. React components re-render. All automatically.
+
+## The Packages
+
+| Package | Purpose |
+|---------|---------|
+| `@owanturist/signal` | Core reactive primitives for any JavaScript environment |
+| `@owanturist/signal-react` | React integration via `useComputed` and `useMonitor` hooks |
+| `@owanturist/signal-form` | Type-safe form state management with validation |
+
+## A Quick Example
+
+Here's a React component using signals:
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+const count = Signal(0)
+
+function Counter() {
+  const value = useComputed((monitor) => count.read(monitor))
+
+  return (
+    <div>
+      <p>Count: {value}</p>
+      <button onClick={() => count.write((c) => c + 1)}>Increment</button>
+    </div>
+  )
+}
+```
+
+The component automatically re-renders when `count` changes.
+
+## Next Steps
+
+<Cards>
+  <Card title="Getting Started" description="Installation and first steps" href="/docs/getting-started" />
+  <Card title="Fundamentals" description="Understand the core pattern" href="/docs/concepts/fundamentals" />
+  <Card title="API" description="Complete documentation" href="/docs/api/signal" />
+</Cards>

@@ -1,0 +1,210 @@
+---
+title: effect
+description: API reference for the effect function
+---
+
+The `effect` function creates a reactive effect that runs whenever its signal dependencies change.
+
+## `effect(listener){:dart}` [#effect]
+
+```ts
+function effect(listener: (monitor: Monitor) => Destructor): VoidFunction
+
+type Destructor = void | (() => void)
+```
+
+Creates an effect that runs immediately and re-runs when dependencies change.
+
+<section className="typedef">
+
+- `@param listener: (monitor: Monitor) => Destructor{:dart}` Effect function that receives a Monitor and may return a cleanup callback. The cleanup runs before re-execution and when the effect stops.
+
+---
+
+- `@returns VoidFunction{:dart}` A function that stops the effect when called.
+
+</section>
+
+```ts twoslash tab="Basic"
+import { Signal, effect } from "@owanturist/signal"
+
+const count = Signal(0)
+
+effect((monitor) => {
+  console.log(`Count: ${count.read(monitor)}`)
+})
+// Immediately logs: "Count: 0"
+
+count.write(1)
+// Logs: "Count: 1"
+```
+
+```ts twoslash tab="Stopping"
+import { Signal, effect } from "@owanturist/signal"
+
+const count = Signal(0)
+
+const stop = effect((monitor) => {
+  console.log(count.read(monitor))
+})
+// Logs: 0
+
+count.write(1)
+// Logs: 1
+
+stop()
+
+count.write(2)
+// Nothing logged
+```
+
+```ts twoslash tab="Cleanup"
+import { Signal, effect } from "@owanturist/signal"
+
+const interval = Signal(1000)
+
+effect((monitor) => {
+  const ms = interval.read(monitor)
+  const id = setInterval(() => {
+    console.log("tick")
+  }, ms)
+
+  return () => {
+    clearInterval(id)
+  }
+})
+```
+
+```ts twoslash tab="Event Listeners"
+import { Signal, effect } from "@owanturist/signal"
+
+const handler = Signal((e: MouseEvent) => {
+  console.log("clicked", e.clientX, e.clientY)
+})
+
+effect((monitor) => {
+  const fn = handler.read(monitor)
+  document.addEventListener("click", fn)
+
+  return () => {
+    document.removeEventListener("click", fn)
+  }
+})
+```
+
+## Dependency Tracking
+
+Effects automatically track signal dependencies through the Monitor:
+
+```ts twoslash
+import { Signal, effect } from "@owanturist/signal"
+
+const a = Signal(1)
+const b = Signal(2)
+const useA = Signal(true)
+
+effect((monitor) => {
+  if (useA.read(monitor)) {
+    console.log("A:", a.read(monitor))
+  } else {
+    console.log("B:", b.read(monitor))
+  }
+})
+// Logs: "A: 1"
+
+b.write(10)
+// Nothing logged (b is not a current dependency)
+
+useA.write(false)
+// Logs: "B: 10"
+
+a.write(100)
+// Nothing logged (a is no longer a dependency)
+```
+
+## Timing
+
+Effects run synchronously after signal updates:
+
+```ts twoslash
+import { Signal, effect } from "@owanturist/signal"
+
+const count = Signal(0)
+
+effect((monitor) => {
+  console.log("effect:", count.read(monitor))
+})
+// Logs: "effect: 0"
+
+console.log("before write")
+count.write(1)
+console.log("after write")
+
+// Output order:
+// "effect: 0"
+// "before write"
+// "effect: 1"
+// "after write"
+```
+
+## Cleanup Timing
+
+The cleanup function runs at two specific times:
+
+1. **Before re-execution** - When dependencies change
+2. **On disposal** - When `stop(){:ts}` is called
+
+```ts twoslash
+import { Signal, effect } from "@owanturist/signal"
+
+const source = Signal("initial")
+
+const stop = effect((monitor) => {
+  const value = source.read(monitor)
+  console.log("setup:", value)
+
+  return () => {
+    console.log("cleanup:", value)
+  }
+})
+// Logs: "setup: initial"
+
+source.write("updated")
+// Logs: "cleanup: initial"
+// Logs: "setup: updated"
+
+stop()
+// Logs: "cleanup: updated"
+```
+
+## Error Handling
+
+If an effect throws, other effects continue to run:
+
+```ts twoslash
+import { Signal, effect } from "@owanturist/signal"
+
+const count = Signal(0)
+
+effect((monitor) => {
+  if (count.read(monitor) === 1) {
+    throw new Error("Oops!")
+  }
+  console.log("effect 1:", count.read(monitor))
+})
+
+effect((monitor) => {
+  console.log("effect 2:", count.read(monitor))
+})
+
+count.write(1)
+// effect 1 throws
+// effect 2 still logs: "effect 2: 1"
+```
+
+## See Also
+
+<Cards>
+  <Card title="Core Reactivity" description="Core signal concepts" href="/docs/concepts/fundamentals" />
+  <Card title="batch" description="Batching updates" href="/docs/api/batch" />
+</Cards>

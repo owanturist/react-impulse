@@ -1,0 +1,21 @@
+@supports (view-transition-name: root) {
+  ::view-transition-old(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+  ::view-transition-new(root) {
+    mix-blend-mode: normal;
+    animation: clip 0.5s ease-in;
+    filter: blur(0);
+  }
+  @keyframes clip {
+    from {
+      clip-path: circle(0% at var(--theme-toggle-x) var(--theme-toggle-y));
+      filter: blur(8px);
+    }
+    to {
+      clip-path: circle(150% at var(--theme-toggle-x) var(--theme-toggle-y));
+      filter: blur(0);
+    }
+  }
+}

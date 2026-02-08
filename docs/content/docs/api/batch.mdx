@@ -1,0 +1,102 @@
+---
+title: batch
+description: API reference for the batch function
+---
+
+The `batch` function groups multiple signal updates into a single notification, preventing unnecessary intermediate re-renders.
+
+## `batch(execute){:dart}` [#batch]
+
+```ts
+function batch(execute: (monitor: Monitor) => void): void
+```
+
+Executes a function that updates signals, deferring notifications until the function completes.
+
+<section className="typedef">
+
+- `@param execute: (monitor: Monitor) => void{:dart}` Function containing signal updates to batch. Receives an untracked Monitor for reading values without establishing dependencies.
+
+---
+
+- `@returns void{:dart}` Returns nothing. Use `untracked(){:ts}` if you need to return a value from reading signals.
+
+</section>
+
+```ts twoslash tab="Basic"
+import { Signal, batch, effect } from "@owanturist/signal"
+
+const firstName = Signal("John")
+const lastName = Signal("Doe")
+
+effect((monitor) => {
+  console.log(`${firstName.read(monitor)} ${lastName.read(monitor)}`)
+})
+// Logs: "John Doe"
+
+batch(() => {
+  firstName.write("Jane")
+  lastName.write("Smith")
+})
+// Logs once: "Jane Smith"
+```
+
+```ts twoslash tab="Reading Values"
+import { Signal, batch } from "@owanturist/signal"
+
+const count = Signal(0)
+
+batch((monitor) => {
+  const current = count.read(monitor)
+  count.write(current + 1)
+})
+```
+
+```ts twoslash tab="Nested"
+import { Signal, batch, effect } from "@owanturist/signal"
+
+const a = Signal(0)
+const b = Signal(0)
+
+effect((monitor) => {
+  console.log(`a=${a.read(monitor)}, b=${b.read(monitor)}`)
+})
+// Logs: "a=0, b=0"
+
+batch(() => {
+  a.write(1)
+
+  batch(() => {
+    b.write(1)
+  })
+
+  a.write(2)
+})
+// Logs once: "a=2, b=1"
+```
+
+```ts twoslash tab="With Derived"
+import { Signal, batch, effect } from "@owanturist/signal"
+
+const price = Signal(100)
+const quantity = Signal(1)
+const total = Signal((monitor) => price.read(monitor) * quantity.read(monitor))
+
+effect((monitor) => {
+  console.log(total.read(monitor))
+})
+// Logs: 100
+
+batch(() => {
+  price.write(200)
+  quantity.write(3)
+})
+// Logs: 600 (not 200 or 300)
+```
+
+## See Also
+
+<Cards>
+  <Card title="untracked" description="Reading without tracking" href="/docs/api/untracked" />
+  <Card title="Core Reactivity" description="Batching and performance concepts" href="/docs/concepts/fundamentals" />
+</Cards>

@@ -1,0 +1,289 @@
+---
+title: React Integration
+description: How signals integrate with React's rendering model
+---
+
+This page explains why signals work well with React and how the `@owanturist/signal-react` package bridges the two systems. For core signal concepts, see [Core Reactivity](/docs/concepts/fundamentals).
+
+## Why Signals in React?
+
+React's built-in state primitives (`useState`, `useReducer`) use a coarse-grained update model: when state changes, the entire component and its children re-render. You can optimize this with `memo`, `useMemo`, and `useCallback`, but it requires manual work.
+
+Signals offer fine-grained reactivity. Only components that actually read a changed signal re-render, automatically:
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+const firstName = Signal("John")
+const lastName = Signal("Doe")
+
+function FirstNameDisplay() {
+  const first = useComputed(firstName)
+  // Only re-renders when firstName changes
+  return <span>{first}</span>
+}
+
+function LastNameDisplay() {
+  const last = useComputed(lastName)
+  // Only re-renders when lastName changes
+  return <span>{last}</span>
+}
+```
+
+When `firstName` changes, only `FirstNameDisplay` re-renders.
+
+## The useSyncExternalStore Bridge
+
+React 18 introduced `useSyncExternalStore` for safe external state integration with concurrent rendering. The `@owanturist/signal-react` package uses it internally.
+
+When you call `useComputed(signal){:ts}`:
+
+1. A Monitor is created to track signal reads
+2. The compute function runs, reading signals through the Monitor
+3. Each signal records the Monitor as a subscriber
+4. When any signal changes, it notifies the Monitor
+5. `useSyncExternalStore` schedules a re-render
+
+This happens automatically. You write simple code, and the library handles React integration.
+
+## Using Monitors in Components
+
+The `useComputed` hook provides a Monitor to your compute function:
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+const a = Signal(1)
+const b = Signal(2)
+const c = Signal(3)
+
+function Sum() {
+  const total = useComputed((monitor) => {
+    return a.read(monitor) + b.read(monitor) + c.read(monitor)
+  }, [])
+
+  return <div>Total: {total}</div>
+}
+```
+
+Dependencies are tracked dynamically. If your compute function conditionally reads signals, the subscriptions update automatically:
+
+```tsx
+const showDetails = Signal(false)
+const summary = Signal("Brief")
+const details = Signal("Full details...")
+
+function Content() {
+  const text = useComputed((monitor) => {
+    if (showDetails.read(monitor)) {
+      return details.read(monitor)
+    }
+    return summary.read(monitor)
+  }, [])
+
+  return <div>{text}</div>
+}
+```
+
+When `showDetails` is `false`, changing `details` does not trigger a re-render.
+
+## Sharing State Across Components
+
+Create signals in a parent component and pass them down via props or context. This avoids global state and makes testing easier:
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+import { createContext, useContext, useMemo, useState } from "react"
+
+interface User {
+  id: string
+  name: string
+}
+
+const UserContext = createContext<{
+  user: Signal<User | null>
+  isLoggedIn: Signal<boolean>
+} | null>(null)
+
+function useUserContext() {
+  const ctx = useContext(UserContext)
+  if (!ctx) throw new Error("Missing UserContext")
+  return ctx
+}
+
+function App() {
+  const [user] = useState(() => Signal<User | null>(null))
+  const isLoggedIn = useMemo(
+    () => Signal((monitor) => user.read(monitor) !== null),
+    [user],
+  )
+
+  return (
+    <UserContext value={{ user, isLoggedIn }}>
+      <UserProfile />
+      <LoginStatus />
+      <LoginButton />
+    </UserContext>
+  )
+}
+
+function UserProfile() {
+  const { user } = useUserContext()
+  const currentUser = useComputed(user)
+
+  if (!currentUser) {
+    return <div>Please log in</div>
+  }
+
+  return <div>Welcome, {currentUser.name}!</div>
+}
+
+function LoginStatus() {
+  const { isLoggedIn } = useUserContext()
+  const loggedIn = useComputed(isLoggedIn)
+
+  return <div>{loggedIn ? "Logged in" : "Logged out"}</div>
+}
+
+function LoginButton() {
+  const { user } = useUserContext()
+
+  return (
+    <button
+      onClick={() => {
+        user.write({ id: "1", name: "Alice" })
+      }}
+    >
+      Log In
+    </button>
+  )
+}
+```
+
+The writable `user` signal is created once in `App` with `useState{:ts}`, and the derived `isLoggedIn` is created with `useMemo{:ts}`. Both are passed down via context. When `user` changes, only `UserProfile` and `LoginStatus` re-render — `App` itself does not, because the context value (the signal references) stays stable.
+
+## Dynamic Signal Collections
+
+Signals inside data structures enable fine-grained updates for individual items in a collection:
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+import { useState } from "react"
+
+interface Todo {
+  id: string
+  text: string
+  completed: Signal<boolean>
+}
+
+function TodoList({ todos }: { todos: Signal<Todo[]> }) {
+  const items = useComputed(todos)
+
+  return (
+    <ul>
+      {items.map((todo) => (
+        <TodoItem key={todo.id} todo={todo} />
+      ))}
+    </ul>
+  )
+}
+
+function TodoItem({ todo }: { todo: Todo }) {
+  const completed = useComputed(todo.completed)
+
+  return (
+    <li style={{ textDecoration: completed ? "line-through" : "none" }}>
+      {todo.text}
+      <button onClick={() => todo.completed.write((c) => !c)}>Toggle</button>
+    </li>
+  )
+}
+```
+
+Toggling a single todo only re-renders its `TodoItem` component. The `TodoList` only re-renders when items are added or removed.
+
+## Design Trade-offs
+
+### Signals vs Context
+
+React Context is built-in and familiar, but has limitations:
+
+| Aspect | Signals | Context |
+|--------|---------|---------|
+| Update granularity | Fine-grained (only readers re-render) | Coarse-grained (all consumers re-render) |
+| Subscription | Automatic based on reads | Must wrap with Consumer or useContext |
+| Computed values | Built-in derived signals | Requires manual memoization |
+| External access | Works outside React | React-only |
+
+Signals work well alongside Context. Use Context for dependency injection (passing down signal instances) and signals for reactive state.
+
+### When to Use Signals vs useState
+
+Use **useState** when:
+- State is truly local to one component
+- State doesn't need to be shared
+- You want to keep things simple for small components
+
+Use **signals** when:
+- State is shared across multiple components
+- You need computed values that depend on multiple pieces of state
+- You want automatic fine-grained updates
+- You need to access state outside React (effects, event handlers)
+
+## Dynamic Dependency Tracking in Components
+
+When you call `signal.read(monitor){:ts}` inside the compute function, that signal becomes a dependency. The component re-renders when any dependency changes:
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+const a = Signal(1)
+const b = Signal(2)
+const useB = Signal(true)
+
+function Component() {
+  const value = useComputed((monitor) => {
+    if (useB.read(monitor)) {
+      return a.read(monitor) + b.read(monitor)
+    }
+    return a.read(monitor)
+  }, [])
+
+  return <div>{value}</div>
+}
+```
+
+When `useB` is `true`, the component depends on `a`, `b`, and `useB`. When `useB` becomes `false`, the component only depends on `a` and `useB`. Dependencies are re-evaluated on every render based on which signals were actually read.
+
+## Debug Support
+
+The computed value is exposed to React DevTools via `useDebugValue`, making it easy to inspect signal values during debugging.
+
+## Memory Safety
+
+The signal-react integration uses WeakRef internally for subscriptions. This means:
+
+- Components that unmount are automatically cleaned up
+- No manual subscription management needed
+- No memory leaks from forgotten unsubscribes
+
+## Summary
+
+- Signals provide fine-grained reactivity that complements React's rendering model
+- `useSyncExternalStore` ensures safe integration with concurrent rendering
+- The Monitor pattern enables automatic dependency tracking
+- `useComputed` is the primary hook for reading signals in components
+- Signals can coexist with React's built-in state when appropriate
+
+## See Also
+
+<Cards>
+  <Card title="Fundamentals" description="Core signal concepts" href="/docs/concepts/fundamentals" />
+  <Card title="useComputed API" description="Complete hook reference" href="/docs/api/use-computed" />
+  <Card title="useMonitor API" description="Direct monitor access" href="/docs/api/use-monitor" />
+</Cards>

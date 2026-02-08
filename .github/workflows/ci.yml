@@ -35,8 +35,11 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
-      - name: Build
+      - name: Build packages
         run: pnpm build
+
+      - name: Build docs
+        run: pnpm docs:build
 
       - name: Check all files
         if: ${{ always() }}
