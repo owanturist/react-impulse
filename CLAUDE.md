@@ -2,6 +2,49 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Work Delegation (MANDATORY)
+
+**NEVER do non-trivial work directly in the main thread/context window.** Always delegate to a subagent or an agent team. The main context window is for orchestration, planning, and coordination only.
+
+### Decision Tree
+
+```
+Is the task trivial (single file read, quick lookup, one-line fix)?
+├── YES → Do it in the main context window
+└── NO → Does the task require inter-agent communication or collaboration?
+    ├── YES → Use an Agent Team (TeamCreate)
+    │   Best for:
+    │   • Research & review from multiple angles simultaneously
+    │   • New modules/features where teammates each own a separate piece
+    │   • Debugging with competing hypotheses tested in parallel
+    │   • Cross-layer coordination (frontend + backend + tests)
+    └── NO → Use a Subagent (Task tool)
+        Best for:
+        • Focused tasks where only the result matters
+        • Research, search, and exploration
+        • Independent code changes that don't need coordination
+        • Running tests, builds, or validations
+```
+
+### Available Subagent Types
+
+| Subagent Type        | Tools Available                          | Use For                                                          |
+| -------------------- | ---------------------------------------- | ---------------------------------------------------------------- |
+| `Bash`               | Bash only                                | Git operations, command execution, terminal tasks                |
+| `general-purpose`    | All tools                                | Multi-step tasks, code changes, complex research                 |
+| `Explore`            | All except Task, Edit, Write, NotebookEdit | Codebase exploration, file search, keyword search, code reading |
+| `Plan`               | All except Task, Edit, Write, NotebookEdit | Designing implementation plans, architecture decisions          |
+
+### Agent Teams vs Subagents
+
+| Aspect            | Subagents                                    | Agent Teams                                       |
+| :---------------- | :------------------------------------------- | :------------------------------------------------ |
+| **Context**       | Own window; results return to caller         | Own window; fully independent                     |
+| **Communication** | Report results back to main agent only       | Teammates message each other directly             |
+| **Coordination**  | Main agent manages all work                  | Shared task list with self-coordination           |
+| **Best for**      | Focused tasks where only the result matters  | Complex work requiring discussion & collaboration |
+| **Token cost**    | Lower: results summarized back               | Higher: each teammate is a separate instance      |
+
 ## Prerequisites
 
 - **Node.js:** >=24.13.0
