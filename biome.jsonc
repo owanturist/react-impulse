@@ -404,6 +404,18 @@
           }
         }
       }
+    },
+
+    // docs app
+    {
+      "includes": ["docs/src/**/*.{ts,tsx}"],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "noJsxLiterals": "off" // landing page and docs components use literal strings
+          }
+        }
+      }
     }
   ]
 }

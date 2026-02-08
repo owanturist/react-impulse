@@ -1,12 +1,4 @@
 {
   "title": "API",
-  "pages": [
-    "signal",
-    "batch",
-    "effect",
-    "untracked",
-    "---React---",
-    "use-computed",
-    "use-monitor"
-  ]
+  "pages": ["signal", "batch", "effect", "untracked", "---React---", "use-computed", "use-monitor"]
 }
