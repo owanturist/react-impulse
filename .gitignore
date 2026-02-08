@@ -9,6 +9,9 @@ node_modules
 coverage
 .nyc_output
 
+# typescript
+*.tsbuildinfo
+
 # production
 dist
 changeset-status.json
