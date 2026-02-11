@@ -2,7 +2,7 @@ import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock"
 import { Tab, Tabs } from "fumadocs-ui/components/tabs"
 import { HomeLayout } from "fumadocs-ui/layouts/home"
 
-import { ThemeToggle } from "@/components/theme-toggle"
+import { ThemeSwitcher } from "@/components/theme-switcher"
 
 export default function HomePage() {
   return (
@@ -18,7 +18,7 @@ export default function HomePage() {
       ]}
       themeSwitch={{
         mode: "light-dark-system",
-        component: <ThemeToggle className="p-1" />,
+        component: <ThemeSwitcher className="p-1" />,
       }}
     >
       <div className="prose">

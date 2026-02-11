@@ -31,24 +31,19 @@ function normalizeTheme(theme: string): string {
   return theme
 }
 
-export function ThemeToggle({ className }: { className?: string }) {
+export function ThemeSwitcher({ className }: { className?: string }) {
   const { theme = "system", setTheme } = useTheme()
   const isMounted = useIsMounted()
 
   return (
-    <div
-      className={cx(
-        "inline-flex items-center gap-0.5 rounded-full border *:rounded-full",
-        className,
-      )}
-    >
+    <div className={cx("inline-flex items-center gap-0.5 rounded-full border", className)}>
       {THEMES.map((variant) => {
         const Icon = THEME_TO_ICON[variant]
 
         return (
           <label
             key={variant}
-            className="transform-content size-6.5 cursor-pointer p-1.5 text-fd-muted-foreground outline-none hover:bg-fd-accent has-checked:bg-fd-accent has-checked:text-fd-accent-foreground has-focus-visible:ring-2 has-focus-visible:ring-fd-ring"
+            className="transform-content size-6.5 cursor-pointer rounded-full p-1.5 text-fd-muted-foreground outline-none hover:bg-fd-accent has-checked:bg-fd-accent has-checked:text-fd-accent-foreground has-focus-visible:ring-2 has-focus-visible:ring-fd-ring"
           >
             <input
               aria-label={THEME_TO_LABEL[variant]}
