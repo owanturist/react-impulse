@@ -5,10 +5,27 @@
 
 @source "../../node_modules/fumadocs-ui/dist/**/*.js";
 
-/* hide the trailing empty line */
 .twoslash {
+  /* hide the trailing empty line */
   .line:last-child:empty {
     @apply hidden;
+  }
+
+  /* remove the multiline frame */
+  figure {
+    @apply bg-transparent shadow-none border-none;
+
+    [role="region"] {
+      @apply p-0;
+    }
+
+    pre .line {
+      @apply p-0!;
+    }
+
+    button {
+      @apply hidden;
+    }
   }
 }
 

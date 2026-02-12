@@ -1,5 +1,3 @@
-@reference "../../styles.css";
-
 @supports (view-transition-name: root) {
   ::view-transition-old(root) {
     @apply animate-none mix-blend-normal;

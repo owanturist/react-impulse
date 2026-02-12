@@ -1,0 +1,25 @@
+```ts twoslash
+import { Signal } from "@owanturist/signal"
+
+// ---cut---
+const greeting = Signal("Hello")
+//    ^^^^^^^^
+
+const profile = {
+//    ^^^^^^^
+  name: Signal("Astrid"),
+  age: Signal(30),
+}
+
+const guests = Signal([{
+//    ^^^^^^
+  email: Signal("astrid@example.com"),
+  rsvp: Signal(true),
+}])
+
+const temperature = Signal(0)
+//    ^^^^^^^^^^^
+
+const isBelowZero = Signal((monitor) => temperature.read(monitor) < 0)
+//    ^^^^^^^^^^^
+```
