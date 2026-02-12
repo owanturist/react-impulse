@@ -1,0 +1,175 @@
+---
+title: Signals Across Frameworks
+description: How @owanturist/signal compares to signals in Angular, Solid, Preact, Vue, Svelte, and Qwik
+---
+
+Signals are a proven reactive pattern. Angular, Solid, Preact, Vue, Svelte, and Qwik each implement them differently. React is the notable exception — it has no built-in signal primitive. This library brings signals to React with a small, framework-agnostic core and a thin React bridge.
+
+<Callout>
+This is a technical API comparison. Ecosystem maturity, community size, and production track record are separate considerations where established frameworks have significant advantages.
+</Callout>
+
+## API at a Glance
+
+| Dimension | @owanturist/signal | Angular | Solid.js | Preact | Vue 3 | Svelte 5 | Qwik |
+|---|---|---|---|---|---|---|---|
+| **Creation** | `Signal(value)`, `Signal(fn)`, `Signal(get, set)` | `signal(value)`, `computed(fn)`, `linkedSignal()` | `createSignal(value)` returns `[get, set]` tuple | `signal(value)` returns object | `ref(value)`, `reactive(obj)` | `$state(value)` compiler directive | `useSignal(value)`, `useStore(obj)` |
+| **Reading** | `signal.read(monitor)` — explicit Monitor | `sig()` — getter call | `count()` — getter call | `.value` property | `.value` (ref) or direct access (reactive) | Plain variable access (compiler) | `.value` or direct access (store) |
+| **Writing** | `signal.write(value)` or `signal.write(fn)` | `.set(v)`, `.update(fn)` | `setCount(v)` or `setCount(fn)` | `.value = x` | `.value = x` or direct mutation | Assignment `x = v` | `.value = x` or mutation |
+| **Derived (read-only)** | `Signal(monitor => ...)` — lazy, glitch-free | `computed(fn)` — lazy, memoized | `createMemo(fn)` | `computed(fn)` | `computed(fn)` | `$derived(expr)` / `$derived.by(fn)` | `useComputed$(fn)` |
+| **Bidirectional derived** | `Signal(getter, setter)` | No | No | No | `computed({ get, set })` | No | No |
+| **Effects** | `effect(monitor => ...)` — synchronous, returns dispose | `effect()` — async (microtask) | `createEffect()` — scheduled post-render | `effect(fn)` — synchronous, returns dispose | `watchEffect(fn)`, `watch()` — async microtask | `$effect(fn)` — post-DOM | `useTask$(fn)` with explicit `track()` |
+| **Batching** | `batch(fn)` — explicit | Implicit (change detection) | `batch(fn)` + auto in handlers | `batch(fn)` | Implicit async queue | Implicit (microtask) | Implicit (async scheduler) |
+| **Dependency tracking** | Explicit — Monitor parameter | Implicit/automatic | Implicit/automatic | Implicit/automatic | Implicit (Proxy-based) | Hybrid compiler + runtime | Auto in computed, explicit `track()` in tasks |
+| **Custom equality** | `{ equals: fn }` | `{ equal: fn }` | `{ equals: false \| fn }` | No | No | No | No |
+| **Nested signals** | First-class — signals as values compose naturally | Awkward — `outer()()` double-call | Possible but tuple pattern adds friction | Not idiomatic — `.value.value` | Auto-unwrap of ref inside reactive; deep reactivity | Via classes and `.svelte.ts` modules | Not idiomatic — `.value.value` |
+| **Untracked reads** | `untracked(fn)` or `untracked(signal)` | `untracked(fn)` | `untrack(fn)` | `.peek()` per signal | No direct equivalent | `untrack(fn)` | `untrack(fn)` |
+
+
+## Reading and Writing
+
+There are four main patterns across the ecosystem for accessing signal values:
+
+**Getter call** (Angular, Solid):
+
+```ts
+// Angular
+const count = signal(0)
+count()          // read
+count.set(1)     // write
+
+// Solid
+const [count, setCount] = createSignal(0)
+count()          // read
+setCount(1)      // write
+```
+
+**Property access** (Preact, Vue, Qwik):
+
+```ts
+// Preact / Qwik
+const count = signal(0)
+count.value      // read
+count.value = 1  // write
+
+// Vue
+const count = ref(0)
+count.value      // read
+count.value = 1  // write
+```
+
+**Plain variable** (Svelte 5):
+
+```svelte
+let count = $state(0)
+count            // read
+count = 1        // write
+```
+
+**Explicit Monitor** (this library):
+
+```ts
+const count = Signal(0)
+count.read(monitor)  // read — monitor tracks the dependency
+count.write(1)       // write
+```
+
+Every other framework uses implicit tracking — calling the getter or accessing the property automatically registers the dependency. This library makes tracking explicit through the Monitor parameter. The tradeoff is more verbosity for more visibility into what your code depends on.
+
+## Derived Signals
+
+Most frameworks provide read-only derived/computed values. Only this library and Vue support bidirectional derived signals — a computed value that can also be written to, propagating the write back to its sources.
+
+**Read-only derived** (this library):
+
+```ts
+const count = Signal(0)
+const doubled = Signal((monitor) => count.read(monitor) * 2)
+
+doubled.read() // 0 — follows count automatically
+```
+
+**Bidirectional derived** (this library):
+
+```ts
+const celsius = Signal(0)
+const fahrenheit = Signal(
+  (monitor) => celsius.read(monitor) * 9 / 5 + 32,
+  (value) => celsius.write((value - 32) * 5 / 9),
+)
+
+fahrenheit.write(212) // celsius is now 100
+```
+
+**Bidirectional derived** (Vue):
+
+```ts
+const celsius = ref(0)
+const fahrenheit = computed({
+  get: () => celsius.value * 9 / 5 + 32,
+  set: (value) => { celsius.value = (value - 32) * 5 / 9 },
+})
+
+fahrenheit.value = 212 // celsius is now 100
+```
+
+## The Monitor Pattern
+
+This is the most distinctive design choice in the library. Every other signal library — and the TC39 Signals proposal — uses implicit dependency tracking: reading a signal inside a reactive context automatically subscribes to it. This library takes the opposite approach: a Monitor object must be explicitly passed to `.read()`.
+
+**What this enables:**
+
+- Dependency relationships are visible in the code — you can trace what a computation depends on by following the Monitor parameter
+- Controlled subscriptions — a Monitor always mediates reads, but not every Monitor subscribes. Inside `batch()` or `untracked()`, the Monitor is inert
+- Composable outside frameworks — any function can accept a Monitor parameter and participate in reactivity, with no framework context required
+- Testable — Monitor usage can be inspected in tests
+
+**The tradeoff:**
+
+- More verbose — every reactive read requires passing the Monitor
+- Steeper learning curve — the Monitor concept is unfamiliar
+- Against ecosystem conventions — every other framework and the TC39 proposal use implicit tracking
+- Every composable function must accept and forward Monitor
+
+<Callout>
+The explicit Monitor pattern is a deliberate design choice, not an implementation limitation. It prioritizes visibility and composability over brevity.
+</Callout>
+
+## Composability
+
+Signals holding other signals — nested composition — is a natural fit in this library because signals are plain values. A `Signal<Array<Signal<string>>>` works without special syntax.
+
+**This library** — first-class nesting:
+
+```ts
+const items = Signal([Signal("first"), Signal("second")])
+
+effect((monitor) => {
+  // subscribes to the list AND each item
+  for (const item of items.read(monitor)) {
+    console.log(item.read(monitor))
+  }
+})
+```
+
+In contrast:
+
+- **Vue**: deep reactivity handles nested objects automatically via Proxies, but nesting `ref()` inside `reactive()` auto-unwraps — which is convenient but can obscure what is reactive
+- **Angular/Solid**: nesting signals requires double-calling (`outer()()`) or destructuring tuples, which is awkward
+- **Preact/Qwik**: `.value.value` chains are unidiomatic
+
+## What This Library Does Not Do
+
+This library intentionally omits several features found in other signal implementations:
+
+- **No compiler magic** — There is no build step that transforms variable access into reactive subscriptions. Svelte's `$state` and `$derived` runes eliminate ceremony at the cost of a compiler. This library works with standard JavaScript.
+
+- **No JSX auto-unwrapping** — Preact signals render directly in JSX with DOM-level updates, bypassing component re-renders entirely. This library requires explicit `.read()` calls inside components.
+
+- **No resumability** — Qwik serializes signals into HTML so the client resumes without replaying hydration. This library runs in a standard client-side React environment.
+
+- **No implicit scheduling** — Angular and Vue batch updates implicitly through their change detection and async queue systems. This library requires explicit `batch()` calls when you need to group multiple writes.
+
+- **Immutable data by default** — Signals compare values by reference equality. Mutating an object in place and calling `.write()` with the same reference is a no-op unless you override with `equals: () => false`. This matches React's own model — `useState`, `useMemo`, props comparison, and context all rely on the same immutability assumption — so signals and React coexist without friction.
+
+Some of these follow from constraints React itself imposes; others are conscious choices favoring explicitness and a small API surface. The library leans into those constraints rather than fighting them.

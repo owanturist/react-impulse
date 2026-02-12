@@ -34,6 +34,9 @@ export default function HomePage() {
             A tiny, type-safe reactive state library. Track dependencies automatically. Update only
             what changed.
           </p>
+          <p className="text-fd-muted-foreground text-sm">
+            Angular, Solid, and Preact have signals built in. React doesn&apos;t — until now.
+          </p>
           <div className="mt-4 w-full text-left">
             <DynamicCodeBlock
               lang="bash"
