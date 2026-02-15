@@ -1,0 +1,18 @@
+```tsx
+const user = Signal({
+  name: "Astrid",
+  age: 30,
+})
+
+function Name() {
+  // re-renders when any field changes
+  const { name } = useComputed((monitor) => user.read(monitor))
+
+  console.log("Name render")
+
+  return <span>{name}</span>
+}
+
+user.write((prev) => ({ ...prev, age: 31 }))
+// Console: "Name render"  - even though name didn't change
+```

@@ -1,0 +1,31 @@
+```tsx
+interface Props {
+  // 🚀 signal prop: only Child re-renders
+  name: Signal<string>
+}
+
+function Grandparent({ name }: Props) {
+  console.log("Grandparent render")
+
+  return <Parent name={name} />
+}
+
+function Parent({ name }: Props) {
+  console.log("Parent render")
+
+  return <Child name={name} />
+}
+
+function Child({ name }: Props) {
+  const monitor = useMonitor()
+
+  console.log("Child render")
+
+  return <span>{name.read(monitor)}</span>
+}
+
+const name = Signal("Astrid")
+
+name.write("Astrid 🌟")
+// Console: "Child render"
+```

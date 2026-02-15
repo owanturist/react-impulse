@@ -1,0 +1,27 @@
+```ts
+const guests = Signal<ReadonlyArray<{
+  email: Signal<string>
+  name: Signal<string>
+}>>([])
+
+effect((monitor) => {
+  console.log("Guests:", guests.read(monitor).length)
+})
+
+effect((monitor) => {
+  const first = guests.read(monitor).at(0)
+  if (first) {
+    console.log(first.name.read(monitor), first.email.read(monitor))
+  }
+})
+
+guests.write((list) => [
+  ...list,
+  { email: Signal(""), name: Signal("Astrid") },
+])
+// Console: "Guests: 1"
+// Console: "Astrid "
+
+guests.read().at(0)?.email.write("astrid@example.com")
+// Console: "Astrid astrid@example.com"
+```

@@ -1,0 +1,19 @@
+```tsx
+import { Signal, effect } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+// one signal, shared across environments
+const counter = Signal(0)
+
+// vanilla JS - updates the document title
+effect((monitor) => {
+  document.title = `Count: ${counter.read(monitor)}`
+})
+
+// React - renders the same signal
+function Counter() {
+  const value = useComputed((monitor) => counter.read(monitor))
+
+  return <button onClick={() => counter.write((count) => count + 1)}>{value}</button>
+}
+```

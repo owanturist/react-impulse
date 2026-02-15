@@ -1,0 +1,31 @@
+```tsx
+interface Props {
+  // plain string prop: every layer re-renders
+  name: string
+}
+
+function Grandparent({ name }: Props) {
+  console.log("Grandparent render")
+
+  return <Parent name={name} />
+}
+
+function Parent({ name }: Props) {
+  console.log("Parent render")
+
+  return <Child name={name} />
+}
+
+function Child({ name }: Props) {
+  console.log("Child render")
+
+  return <span>{name}</span>
+}
+
+const [name, setName] = useState("Astrid")
+
+setName("Astrid 🌟")
+// Console: "Grandparent render"
+// Console: "Parent render"
+// Console: "Child render"
+```

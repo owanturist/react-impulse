@@ -1,0 +1,12 @@
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+const counter = Signal(0)
+
+function Counter() {
+  const value = useComputed((monitor) => counter.read(monitor))
+
+  return <button onClick={() => counter.write((count) => count + 1)}>{value}</button>
+}
+```

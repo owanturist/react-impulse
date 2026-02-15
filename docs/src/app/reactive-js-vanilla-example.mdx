@@ -1,0 +1,11 @@
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+const counter = Signal(0)
+
+effect((monitor) => {
+  document.title = `Count: ${counter.read(monitor)}`
+})
+
+counter.write((count) => count + 1)
+```
