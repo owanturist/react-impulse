@@ -8,6 +8,7 @@ export const MDXComponents = {
   // biome-ignore-start lint/style/useNamingConvention: components must be PascalCase
   Accordion,
   Accordions,
+
   Popup,
   PopupContent,
   PopupTrigger,
