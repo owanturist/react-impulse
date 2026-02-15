@@ -1,6 +1,6 @@
 ---
-title: Signals Across Frameworks
-description: How @owanturist/signal draws from signals in Angular, Solid, Preact, Vue, Svelte, and Qwik
+title: Design Decisions
+description: Why @owanturist/signal's API is shaped the way it is — informed by signals in Angular, Solid, Preact, Vue, Svelte, and Qwik
 ---
 
 Signals are a proven reactive pattern. Angular, Solid, Preact, Vue, Svelte, and Qwik each implement them differently, but the core idea is the same: a value that notifies its dependents when it changes. React is the exception — it has no built-in signal primitive. This library brings signals to React with a small, framework-agnostic core and a thin React bridge.

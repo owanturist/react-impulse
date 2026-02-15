@@ -1,4 +1,4 @@
 {
   "title": "Concepts",
-  "pages": ["fundamentals", "react-integration", "comparison"]
+  "pages": ["fundamentals", "react-integration", "design-decisions"]
 }
