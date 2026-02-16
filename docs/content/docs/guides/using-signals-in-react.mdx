@@ -1,0 +1,363 @@
+---
+title: Using Signals in React
+description: Patterns for creating, passing, and reading signals in React components and hooks
+---
+
+The library is unopinionated about how you distribute signals through your application. There are no built-in providers, store hooks, or singleton patterns. Anything that works in React works with signals: component state, props, context, module scope. This guide covers the common patterns for creating signals inside components and passing them around.
+
+## Creating Signals in Components [#creating-in-components]
+
+### Writable Signals: Stable Storage [#writable-stable-storage]
+
+Writable signals must persist across re-renders. Store them in `useState{:ts}` (ignoring the setter) or `useRef{:ts}`:
+
+```tsx tab="useState"
+import { Signal } from "@owanturist/signal"
+import { useState } from "react"
+
+function SearchPage() {
+  const [query] = useState(() => Signal(""))
+
+  return (
+    <div>
+      <SearchInput query={query} />
+      <SearchResults query={query} />
+    </div>
+  )
+}
+```
+
+```tsx tab="useRef"
+import { Signal } from "@owanturist/signal"
+import { useRef } from "react"
+
+function SearchPage() {
+  const { current: query } = useRef(Signal(""))
+
+  return (
+    <div>
+      <SearchInput query={query} />
+      <SearchResults query={query} />
+    </div>
+  )
+}
+```
+
+<Callout type="idea">
+If you find `useState{:ts}`-with-ignored-setter verbose, a small `usePermanent` helper can clean things up. The React docs describe this [ref initialization pattern](https://react.dev/reference/react/useRef#avoiding-recreating-the-ref-contents):
+
+```ts
+function usePermanent<T>(init: () => T): T {
+  const ref = useRef<null | { value: T }>(null)
+
+  ref.current ??= { value: init() }
+
+  return ref.current.value
+}
+
+// usage
+const query = usePermanent(() => Signal(""))
+```
+</Callout>
+
+When a component manages several related signals, group them in a single `useState{:ts}` call to keep declarations tidy:
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useState } from "react"
+
+function ProductPage() {
+  const [{ query, categories, priceRange }] = useState(() => ({
+    query: Signal(""),
+    categories: Signal<Set<string>>(new Set()),
+    priceRange: Signal({ min: Signal(0), max: Signal(500) }),
+  }))
+
+  return (
+    <div>
+      <SearchInput query={query} />
+      <CategoryPicker categories={categories} />
+      <PriceSlider range={priceRange} />
+      <ProductGrid query={query} categories={categories} priceRange={priceRange} />
+    </div>
+  )
+}
+```
+
+<Callout type="warn">
+Never create a writable signal as a bare variable in the component body. This creates a brand new signal on every render, discarding all previous state and subscriptions:
+
+```tsx
+function Broken() {
+  const query = Signal("") // New signal every render!
+  // ...
+}
+```
+</Callout>
+
+<Callout>
+You might wonder about `useMemo{:ts}` -- it is **not** suitable for writable signals. React [treats `useMemo` as a performance optimization](https://react.dev/reference/react/useMemo#caveats), not a semantic guarantee: the framework may discard cached values and recalculate them at any time (e.g. when a component unmounts and remounts during offscreen rendering). If the cached value is a writable signal, dropping it means losing all accumulated state. Stick with `useState{:ts}` or `useRef{:ts}` for writable signals -- React guarantees these survive for the component's lifetime.
+</Callout>
+
+### Derived Signals [#derived-signals]
+
+#### From External Sources [#derived-from-external]
+
+When the source signal arrives from outside the component -- through props or context -- its reference may change between renders. Use `useMemo{:ts}` so the derived signal recreates when the source does:
+
+```tsx
+import { Signal, ReadableSignal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+import { useMemo } from "react"
+
+function PriceTag({ price }: { price: ReadableSignal<number> }) {
+  const formatted = useMemo(
+    () => Signal((monitor) => `$${price.read(monitor).toFixed(2)}`),
+    [price],
+  )
+
+  const label = useComputed(formatted)
+
+  return <span className="price">{label}</span>
+}
+```
+
+#### Co-created with Source [#derived-co-created]
+
+When the source and derived signal are created together inside the same component, the source reference never changes. Both can live in stable storage:
+
+```tsx
+import { Signal } from "@owanturist/signal"
+import { useState } from "react"
+
+function ShoppingCart() {
+  const [{ items, totalPrice }] = useState(() => {
+    const items = Signal<Array<{ name: string; price: number }>>([])
+
+    const totalPrice = Signal((monitor) =>
+      items.read(monitor).reduce((sum, item) => sum + item.price, 0),
+    )
+
+    return { items, totalPrice }
+  })
+
+  return (
+    <div>
+      <CartItemList items={items} />
+      <CartSummary total={totalPrice} />
+    </div>
+  )
+}
+```
+
+Because `items` is created in the same initializer and its reference never changes, the derived `totalPrice` does not need `useMemo{:ts}`.
+
+#### Adding Non-Signal Dependencies [#derived-extra-deps]
+
+When a derived signal depends on both a signal and a React value (props, local state), use `useMemo{:ts}` even if the source signal is stable. The derivation must recalculate whenever the React value changes:
+
+```tsx
+import { Signal, ReadableSignal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+import { useState, useMemo } from "react"
+
+function TransactionAmount({ amount }: { amount: ReadableSignal<number> }) {
+  const [locale, setLocale] = useState("en-US")
+
+  const display = useMemo(
+    () =>
+      Signal((monitor) =>
+        new Intl.NumberFormat(locale, {
+          style: "currency",
+          currency: "USD",
+        }).format(amount.read(monitor)),
+      ),
+    [locale, amount],
+  )
+
+  const text = useComputed(display)
+
+  return (
+    <div>
+      <p>{text}</p>
+      <button onClick={() => setLocale("de-DE")}>Switch to German</button>
+    </div>
+  )
+}
+```
+
+## Receiving Signals via Props [#via-props]
+
+Type props with `ReadableSignal<T>{:dart}` to accept both writable and derived signals -- the reading API is the same.
+
+```tsx tab="useComputed shorthand"
+import { ReadableSignal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+function NotificationBadge({
+  count,
+}: {
+  count: ReadableSignal<number>
+}) {
+  const value = useComputed(count)
+
+  if (value === 0) return null
+
+  return <span className="badge">{value > 99 ? "99+" : value}</span>
+}
+```
+
+```tsx tab="useComputed factory"
+import { ReadableSignal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+function ProgressBar({
+  completed,
+  total,
+}: {
+  completed: ReadableSignal<number>
+  total: ReadableSignal<number>
+}) {
+  const percentage = useComputed(
+    (monitor) => {
+      const t = total.read(monitor)
+      return t === 0 ? 0 : Math.round((completed.read(monitor) / t) * 100)
+    },
+    [completed, total],
+  )
+
+  return (
+    <div className="progress-track">
+      <div className="progress-fill" style={{ width: `${percentage}%` }} />
+      <span>{percentage}%</span>
+    </div>
+  )
+}
+```
+
+A component only subscribes when it calls `.read(monitor){:ts}` or `useComputed{:ts}`. Passing a signal further down without reading it does not cause re-renders:
+
+```tsx
+import { ReadableSignal } from "@owanturist/signal"
+
+function DashboardLayout({
+  notifications,
+}: {
+  notifications: ReadableSignal<number>
+}) {
+  // This component never reads the signal, so it never
+  // re-renders when the notification count changes.
+  return (
+    <header>
+      <h1>Dashboard</h1>
+      <NotificationBadge count={notifications} />
+    </header>
+  )
+}
+```
+
+## Receiving Signals via Context [#via-context]
+
+Signal references are stable -- updating a value does not change the reference -- so context values holding signals never trigger consumer re-renders on their own.
+
+```tsx
+import { Signal, ReadableSignal, WritableSignal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+import { createContext, useContext, useState, useMemo } from "react"
+
+// --- Context definition ---
+
+interface AppSettings {
+  darkMode: WritableSignal<boolean>
+  fontSize: WritableSignal<number>
+  cssVariables: ReadableSignal<Record<string, string>>
+}
+
+const SettingsContext = createContext<AppSettings | null>(null)
+
+function useSettings(): AppSettings {
+  const ctx = useContext(SettingsContext)
+  if (!ctx) throw new Error("useSettings must be used within SettingsProvider")
+  return ctx
+}
+
+// --- Provider ---
+
+function SettingsProvider({ children }: { children: React.ReactNode }) {
+  const [settings] = useState<AppSettings>(() => {
+    const darkMode = Signal(false)
+    const fontSize = Signal(16)
+
+    const cssVariables = Signal((monitor): Record<string, string> => ({
+      "--bg": darkMode.read(monitor) ? "#1a1a2e" : "#ffffff",
+      "--text": darkMode.read(monitor) ? "#e0e0e0" : "#1a1a1a",
+      "--font-size": `${fontSize.read(monitor)}px`,
+    }))
+
+    return { darkMode, fontSize, cssVariables }
+  })
+
+  return (
+    <SettingsContext value={settings}>
+      {children}
+    </SettingsContext>
+  )
+}
+
+// --- Consumer that reads ---
+
+function ArticleBody() {
+  const { cssVariables } = useSettings()
+  const vars = useComputed(cssVariables)
+
+  return (
+    <article style={vars}>
+      <p>The article body picks up theme changes automatically.</p>
+    </article>
+  )
+}
+
+// --- Consumer that writes ---
+
+function SettingsPanel() {
+  const { darkMode, fontSize } = useSettings()
+  const isDark = useComputed(darkMode)
+  const size = useComputed(fontSize)
+
+  return (
+    <div>
+      <label>
+        <input
+          type="checkbox"
+          checked={isDark}
+          onChange={() => darkMode.write((prev) => !prev)}
+        />
+        Dark mode
+      </label>
+
+      <label>
+        Font size: {size}px
+        <input
+          type="range"
+          min={12}
+          max={24}
+          value={size}
+          onChange={(event) => fontSize.write(Number(event.target.value))}
+        />
+      </label>
+    </div>
+  )
+}
+```
+
+<Callout type="idea">
+Use `ReadableSignal<T>{:dart}` in context type definitions for signals that consumers should never write to. In the example above, `cssVariables` is typed as `ReadableSignal{:dart}` because it is derived from the other two signals.
+</Callout>
+
+## See Also [#see-also]
+
+<Cards>
+  <Card title="How Signals Work in React" description="How signals integrate with React's rendering model" href="/docs/concepts/how-signals-work-in-react" />
+  <Card title="useComputed" description="Hook API reference" href="/docs/api/use-computed" />
+  <Card title="useMonitor" description="Direct monitor access" href="/docs/api/use-monitor" />
+</Cards>

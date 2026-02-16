@@ -298,7 +298,7 @@ function Counter() {
 When `count` changes, only `Counter` re-renders—not its parent or siblings.
 
 <Callout>
-`effect` also works inside `useEffect` because React's `useEffect` callbacks run outside the render phase. See [React Integration](/docs/concepts/react-integration) for details.
+`effect` also works inside `useEffect` because React's `useEffect` callbacks run outside the render phase. See [How Signals Work in React](/docs/concepts/how-signals-work-in-react) for details.
 </Callout>
 
 ### Effects vs Derived Signals
@@ -370,5 +370,5 @@ batch(() => {
 <Cards>
   <Card title="Signal API" description="Complete API documentation" href="/docs/api/signal" />
   <Card title="effect API" description="Side effects and cleanup" href="/docs/api/effect" />
-  <Card title="React Integration" description="Using signals in React" href="/docs/concepts/react-integration" />
+  <Card title="How Signals Work in React" description="Using signals in React" href="/docs/concepts/how-signals-work-in-react" />
 </Cards>

@@ -1,5 +1,5 @@
 ---
-title: React Integration
+title: How Signals Work in React
 description: How signals integrate with React's rendering model
 ---
 
@@ -89,9 +89,9 @@ function Content() {
 
 When `showDetails` is `false`, changing `details` does not trigger a re-render.
 
-## Sharing State Across Components
+## Sharing State Across Components [#sharing-state]
 
-Create signals in a parent component and pass them down via props or context. This avoids global state and makes testing easier:
+Signals are plain objects -- pass them via props or context like any other value. The library has no built-in providers or store hooks:
 
 ```tsx
 import { Signal } from "@owanturist/signal"
@@ -163,7 +163,9 @@ function LoginButton() {
 }
 ```
 
-The writable `user` signal is created once in `App` with `useState{:ts}`, and the derived `isLoggedIn` is created with `useMemo{:ts}`. Both are passed down via context. When `user` changes, only `UserProfile` and `LoginStatus` re-render — `App` itself does not, because the context value (the signal references) stays stable.
+The writable `user` signal is created once in `App` with `useState{:ts}`, and the derived `isLoggedIn` is created with `useMemo{:ts}`. Both are passed down via context. When `user` changes, only `UserProfile` and `LoginStatus` re-render -- `App` itself does not, because the context value (the signal references) stays stable.
+
+See [Using Signals in React](/docs/guides/using-signals-in-react) for more patterns including props, context, and creating signals inside components.
 
 ## Dynamic Signal Collections
 
