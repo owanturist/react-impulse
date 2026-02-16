@@ -1,4 +1,8 @@
 {
   "title": "Guides",
-  "pages": ["using-signals-in-react"]
+  "pages": [
+    "using-signals-in-react",
+    "reading-and-writing-signals",
+    "side-effects"
+  ]
 }

@@ -1,0 +1,116 @@
+---
+title: Reading and Writing Signals
+description: Patterns for reading signal values with and without tracking, writing updates, and batching changes
+---
+
+This guide covers the essential patterns for interacting with signal values: reading with dependency tracking, writing updates, selectively opting out of tracking, and grouping multiple writes into a single notification.
+
+## Reading Signal Values [#reading]
+
+To read a signal's current value and subscribe to future changes, pass a Monitor to `.read(){:ts}`. The monitor records the dependency so that your effect or derived signal re-runs when the value changes.
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+const count = Signal(0)
+
+effect((monitor) => {
+  // count is now tracked by this effect's monitor
+  console.log(count.read(monitor))
+})
+
+count.write(1) // Effect re-runs, logs: 1
+```
+
+Each monitor tracks its own set of dependencies independently. Changing a signal only notifies monitors that actually read it.
+
+## Writing Signal Values [#writing]
+
+To update a writable signal, call `.write(){:ts}` with either a replacement value or a transform function:
+
+```ts
+import { Signal } from "@owanturist/signal"
+
+const count = Signal(0)
+
+// Replace with a specific value
+count.write(42)
+
+// Transform the current value
+count.write((current) => current + 1)
+```
+
+Use the transform function form when the new value depends on the current one. This avoids stale-value bugs when multiple writes happen in sequence.
+
+## Reading Without Tracking [#untracked]
+
+Use `untracked()` to read a signal's current value without establishing a dependency. The effect or derived signal will not re-run when the untracked signal changes.
+
+```ts
+import { Signal, effect, untracked } from "@owanturist/signal"
+
+const count = Signal(0)
+const multiplier = Signal(2)
+
+effect((monitor) => {
+  // count is tracked, multiplier is NOT
+  const result = count.read(monitor) * untracked(multiplier)
+  console.log(result)
+})
+
+count.write(5)       // Effect runs
+multiplier.write(3)  // Effect does NOT run
+```
+
+Common scenarios for `untracked()`:
+
+- **Event handlers** that only need the value at the moment of the event
+- **Async operations** where future changes are irrelevant to the already-started operation
+- **Initialization** that extracts a value once without ongoing reactivity
+
+See the [untracked API reference](/docs/api/untracked) for the full API surface including the factory overload and nested usage.
+
+## Batching Updates [#batching]
+
+Use `batch()` to group multiple signal writes into a single notification. Without batching, each `.write(){:ts}` call immediately notifies all dependent monitors. With `batch()`, notifications are deferred until the function completes.
+
+```ts
+import { Signal, effect, batch } from "@owanturist/signal"
+
+const firstName = Signal("John")
+const lastName = Signal("Doe")
+
+effect((monitor) => {
+  console.log(`${firstName.read(monitor)} ${lastName.read(monitor)}`)
+})
+
+batch(() => {
+  firstName.write("Jane")
+  lastName.write("Smith")
+})
+// Logs once: "Jane Smith"
+```
+
+Use `batch()` when updating multiple related signals together to avoid intermediate states and redundant effect executions. Batches can also be nested -- the outermost batch controls when notifications fire.
+
+See the [batch API reference](/docs/api/batch) for advanced patterns including reading values inside a batch and nested batching.
+
+## Choosing Between Effects and Derived Signals [#effects-vs-derived]
+
+| Use Case | Tool |
+|----------|------|
+| Computing a value from other signals | Derived signal |
+| Transforming or filtering data | Derived signal |
+| Side effects (DOM, network, logging) | `effect` |
+| Syncing with external systems | `effect` |
+
+Effects are for **actions**. Derived signals are for **values**.
+
+## See Also [#see-also]
+
+<Cards>
+  <Card title="Signal API" description="Complete Signal API reference" href="/docs/api/signal" />
+  <Card title="batch API" description="Batching updates API reference" href="/docs/api/batch" />
+  <Card title="untracked API" description="Untracked reads API reference" href="/docs/api/untracked" />
+  <Card title="Side Effects" description="Running side effects with effect()" href="/docs/guides/side-effects" />
+</Cards>

@@ -1,0 +1,167 @@
+---
+title: Side Effects
+description: How to run side effects in response to signal changes using the effect function
+---
+
+The `effect` function connects signal changes to external systems like the DOM, network requests, or third-party services. This guide shows how to create effects, clean up resources, and integrate with React's lifecycle.
+
+## Creating an Effect [#creating]
+
+To create an effect, pass a listener function to `effect`. The listener receives a `Monitor{:dart}` for tracking signal dependencies. It runs immediately on creation, then re-runs whenever any tracked signal changes. The returned function stops the effect.
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+const count = Signal(0)
+
+const stop = effect((monitor) => {
+  console.log(`Count: ${count.read(monitor)}`)
+})
+// Logs immediately: "Count: 0"
+
+count.write(1)
+// Logs: "Count: 1"
+
+stop() // Disconnect the effect
+```
+
+## Cleaning Up Resources [#cleanup]
+
+Return a function from the listener to clean up before the next re-execution and when the effect stops. Use this to release subscriptions, clear timers, or remove event listeners.
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+const userId = Signal("user-1")
+
+const stop = effect((monitor) => {
+  const id = userId.read(monitor)
+  const subscription = subscribeToUser(id)
+
+  return () => {
+    subscription.unsubscribe()
+  }
+})
+
+// When userId changes, cleanup runs first, then the effect re-runs
+// with the new id and a fresh subscription.
+
+stop() // Cleanup runs, then the effect disconnects
+```
+
+### Timer Cleanup [#timer-cleanup]
+
+To restart a timer whenever a signal changes, clear the previous interval in the cleanup function:
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+const interval = Signal(1000)
+
+effect((monitor) => {
+  const ms = interval.read(monitor)
+  const id = setInterval(() => console.log("tick"), ms)
+
+  return () => clearInterval(id)
+})
+```
+
+### DOM Event Cleanup [#dom-cleanup]
+
+To swap event listeners when a handler signal changes, remove the old listener in cleanup:
+
+```ts
+import { Signal, effect } from "@owanturist/signal"
+
+const handler = Signal((e: MouseEvent) => {
+  console.log("clicked", e.clientX, e.clientY)
+})
+
+effect((monitor) => {
+  const fn = handler.read(monitor)
+  document.addEventListener("click", fn)
+
+  return () => document.removeEventListener("click", fn)
+})
+```
+
+## Using effect in React [#react]
+
+To use `effect` inside a React component, wrap it in `useEffect` so its lifecycle is tied to the component. Return the stop function as the `useEffect` cleanup:
+
+```tsx
+import { Signal, effect } from "@owanturist/signal"
+import { useEffect } from "react"
+
+const notifications = Signal(0)
+
+function NotificationLogger() {
+  useEffect(() => {
+    const stop = effect((monitor) => {
+      console.log(`Notifications: ${notifications.read(monitor)}`)
+    })
+
+    return stop
+  }, [])
+
+  return null
+}
+```
+
+<Callout>
+`effect` works inside `useEffect` because React runs effect callbacks outside the render phase. See [How Signals Work in React](/docs/concepts/how-signals-work-in-react) for details on why this is safe.
+</Callout>
+
+## Common Pitfalls [#pitfalls]
+
+### Forgetting Cleanup [#forgetting-cleanup]
+
+If an effect creates subscriptions, timers, or event listeners without returning a cleanup function, those resources leak when the effect re-runs or stops. Always return a cleanup function when you allocate resources:
+
+```ts
+// Bad - timer is never cleared
+effect((monitor) => {
+  const ms = interval.read(monitor)
+  setInterval(() => console.log("tick"), ms) // [!code --]
+})
+
+// Good - timer is cleared before re-run and on stop
+effect((monitor) => {
+  const ms = interval.read(monitor)
+  const id = setInterval(() => console.log("tick"), ms) // [!code ++]
+  return () => clearInterval(id) // [!code ++]
+})
+```
+
+### Creating Effects During Render [#render-effects]
+
+Never call `effect` directly in a component body. Effects created during render run on every re-render, stacking up duplicate listeners. Place effects inside `useEffect` or at module scope:
+
+```tsx
+// Bad - new effect on every render
+function Broken() {
+  effect((monitor) => { // [!code --]
+    console.log(count.read(monitor)) // [!code --]
+  }) // [!code --]
+  return null
+}
+
+// Good - effect tied to component lifecycle
+function Fixed() {
+  useEffect(() => { // [!code ++]
+    const stop = effect((monitor) => { // [!code ++]
+      console.log(count.read(monitor)) // [!code ++]
+    }) // [!code ++]
+    return stop // [!code ++]
+  }, []) // [!code ++]
+  return null
+}
+```
+
+## See Also [#see-also]
+
+<Cards>
+  <Card title="effect API" description="Complete effect API reference" href="/docs/api/effect" />
+  <Card title="Reading and Writing Signals" description="Patterns for signal reads, writes, and batching" href="/docs/guides/reading-and-writing-signals" />
+  <Card title="Using Signals in React" description="Signal patterns for React components" href="/docs/guides/using-signals-in-react" />
+</Cards>
