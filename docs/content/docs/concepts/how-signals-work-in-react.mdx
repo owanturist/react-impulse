@@ -91,90 +91,53 @@ When `showDetails` is `false`, changing `details` does not trigger a re-render.
 
 ## Sharing State Across Components [#sharing-state]
 
-Signals are plain objects -- pass them via props or context like any other value. The library has no built-in providers or store hooks:
+Signal references are stable -- updating a value does not change the reference. Pass them via props or context like any other value. Only components that read a signal re-render when it changes.
 
 ```tsx
-import { Signal } from "@owanturist/signal"
+import { Signal, ReadableSignal } from "@owanturist/signal"
 import { useComputed } from "@owanturist/signal-react"
-import { createContext, useContext, useMemo, useState } from "react"
+import { useState } from "react"
 
-interface User {
-  id: string
-  name: string
-}
-
-const UserContext = createContext<{
-  user: Signal<User | null>
-  isLoggedIn: Signal<boolean>
-} | null>(null)
-
-function useUserContext() {
-  const ctx = useContext(UserContext)
-  if (!ctx) throw new Error("Missing UserContext")
-  return ctx
-}
-
-function App() {
-  const [user] = useState(() => Signal<User | null>(null))
-  const isLoggedIn = useMemo(
-    () => Signal((monitor) => user.read(monitor) !== null),
-    [user],
-  )
+function SearchPage() {
+  const [query] = useState(() => Signal(""))
 
   return (
-    <UserContext value={{ user, isLoggedIn }}>
-      <UserProfile />
-      <LoginStatus />
-      <LoginButton />
-    </UserContext>
+    <div>
+      <SearchInput query={query} />
+      <SearchResults query={query} />
+    </div>
   )
 }
 
-function UserProfile() {
-  const { user } = useUserContext()
-  const currentUser = useComputed(user)
-
-  if (!currentUser) {
-    return <div>Please log in</div>
-  }
-
-  return <div>Welcome, {currentUser.name}!</div>
-}
-
-function LoginStatus() {
-  const { isLoggedIn } = useUserContext()
-  const loggedIn = useComputed(isLoggedIn)
-
-  return <div>{loggedIn ? "Logged in" : "Logged out"}</div>
-}
-
-function LoginButton() {
-  const { user } = useUserContext()
+function SearchInput({ query }: { query: Signal<string> }) {
+  const value = useComputed(query)
 
   return (
-    <button
-      onClick={() => {
-        user.write({ id: "1", name: "Alice" })
-      }}
-    >
-      Log In
-    </button>
+    <input
+      value={value}
+      onChange={({ target }) => query.write(target.value)}
+    />
   )
+}
+
+function SearchResults({ query }: { query: ReadableSignal<string> }) {
+  const value = useComputed(query)
+
+  return <p>Results for "{value}"</p>
 }
 ```
 
-The writable `user` signal is created once in `App` with `useState{:ts}`, and the derived `isLoggedIn` is created with `useMemo{:ts}`. Both are passed down via context. When `user` changes, only `UserProfile` and `LoginStatus` re-render -- `App` itself does not, because the context value (the signal references) stays stable.
+The `SearchPage` component creates the signal and passes it down. Both children subscribe independently -- typing in the input updates the results without re-rendering `SearchPage`.
 
 See [Using Signals in React](/docs/guides/using-signals-in-react) for more patterns including props, context, and creating signals inside components.
 
 ## Dynamic Signal Collections
 
-Signals inside data structures enable fine-grained updates for individual items in a collection:
+Signals compose naturally inside data structures. When each item holds its own signal, updates to one item only re-render the component reading that signal -- the list itself only re-renders when items are added or removed.
 
 ```tsx
 import { Signal } from "@owanturist/signal"
 import { useComputed } from "@owanturist/signal-react"
-import { useState } from "react"
 
 interface Todo {
   id: string
@@ -200,13 +163,13 @@ function TodoItem({ todo }: { todo: Todo }) {
   return (
     <li style={{ textDecoration: completed ? "line-through" : "none" }}>
       {todo.text}
-      <button onClick={() => todo.completed.write((c) => !c)}>Toggle</button>
+      <button onClick={() => todo.completed.write(!completed)}>Toggle</button>
     </li>
   )
 }
 ```
 
-Toggling a single todo only re-renders its `TodoItem` component. The `TodoList` only re-renders when items are added or removed.
+Toggling `todo.completed` only re-renders that `TodoItem`. The parent list is unaffected.
 
 ## Design Trade-offs
 
@@ -273,14 +236,6 @@ The signal-react integration uses WeakRef internally for subscriptions. This mea
 - Components that unmount are automatically cleaned up
 - No manual subscription management needed
 - No memory leaks from forgotten unsubscribes
-
-## Summary
-
-- Signals provide fine-grained reactivity that complements React's rendering model
-- `useSyncExternalStore` ensures safe integration with concurrent rendering
-- The Monitor pattern enables automatic dependency tracking
-- `useComputed` is the primary hook for reading signals in components
-- Signals can coexist with React's built-in state when appropriate
 
 ## See Also
 

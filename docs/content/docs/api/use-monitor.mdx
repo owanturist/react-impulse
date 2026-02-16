@@ -3,7 +3,7 @@ title: useMonitor
 description: API reference for the useMonitor hook
 ---
 
-The `useMonitor` hook provides direct access to a Monitor instance for advanced signal reading scenarios.
+The `useMonitor` hook provides direct access to a Monitor instance for reading signals in components.
 
 ## `useMonitor(){:dart}` [#use-monitor]
 
@@ -43,75 +43,16 @@ interface Monitor {
 
 The `Monitor` type is intentionally opaque. You pass it to `signal.read(monitor){:ts}` to track dependencies. The monitor handles subscription management internally.
 
-## When to Use
-
-<Callout type="warn">
-  Most applications should use `useComputed` instead of `useMonitor`. Only use `useMonitor` when you need direct monitor access for advanced patterns.
-</Callout>
-
-Use `useMonitor` when:
-
-- Building custom hooks that need low-level monitor access
-- Integrating with third-party libraries that expect a monitor
-- Implementing patterns not covered by `useComputed`
-
-## Building Custom Hooks
-
-Use `useMonitor` as a building block for custom signal-reading hooks:
-
-```tsx
-import { Signal, type Monitor } from "@owanturist/signal"
-import { useMonitor } from "@owanturist/signal-react"
-
-const count = Signal(0)
-
-function useSignalValue<T>(read: (monitor: Monitor) => T): T {
-  const monitor = useMonitor()
-  return read(monitor)
-}
-
-function Counter() {
-  const value = useSignalValue((monitor) => count.read(monitor))
-
-  return <div>Count: {value}</div>
-}
-```
-
 ## Comparison with useComputed
+
+The `useMonitor` hook is the simpler primitive — it returns a Monitor and leaves reading and rendering logic to you. The `useComputed` hook builds on top of it, adding memoization, dependency arrays, and custom equality checks.
 
 | Feature | `useMonitor` | `useComputed` |
 |---------|-------------|---------------|
 | Returns | `Monitor` | Computed value |
-| Memoization | None | Optional via dependencies |
+| Memoization | None | Optional via dependency array |
 | Custom equality | None | Supported via options |
-| Use case | Advanced patterns | Most applications |
-
-```tsx tab="useMonitor"
-import { Signal } from "@owanturist/signal"
-import { useMonitor } from "@owanturist/signal-react"
-
-const count = Signal(0)
-
-function Counter() {
-  const monitor = useMonitor()
-  const value = count.read(monitor)
-
-  return <div>{value}</div>
-}
-```
-
-```tsx tab="useComputed (preferred)"
-import { Signal } from "@owanturist/signal"
-import { useComputed } from "@owanturist/signal-react"
-
-const count = Signal(0)
-
-function Counter() {
-  const value = useComputed(count)
-
-  return <div>{value}</div>
-}
-```
+| Complexity | Minimal | Higher, with built-in optimizations |
 
 ## See Also
 

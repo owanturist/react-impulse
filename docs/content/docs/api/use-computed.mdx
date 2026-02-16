@@ -164,12 +164,12 @@ Writable signals need stable storage (`useState{:ts}` or `useRef{:ts}`) to survi
 
 See [Using Signals in React](/docs/guides/using-signals-in-react#creating-in-components) for detailed patterns and examples.
 
-## Optimizing with Dependency Arrays [#dependency-arrays]
+## Dependency Array Behavior [#dependency-arrays]
 
-The dependency array controls when the compute function is *executed*. Without a dependency array, the compute function executes on every re-render. When a dependency array is provided, the compute function only re-executes when one of the listed dependencies changes.
+Without a dependency array, the compute function executes on every re-render. When a dependency array is provided, the compute function only re-executes when one of the listed dependencies changes (compared by reference).
 
 <Callout>
-  The `useComputed` hook should be configured as a target for the exhaustive dependencies lint rule in your project. In Biome, add it to the [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) hooks option. In ESLint, use the `additionalHooks` option of [`react-hooks/exhaustive-deps`](https://react.dev/reference/eslint-plugin-react-hooks/lints/exhaustive-deps). When configured, signals referenced in the compute function must be listed in the dependency array — just like props and state in native React hooks.
+  The `useComputed{:ts}` hook supports exhaustive dependency lint rules. See [Biome and ESLint](/docs/guides/biome-and-eslint) for setup instructions.
 </Callout>
 
 ```tsx

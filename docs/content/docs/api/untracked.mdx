@@ -7,19 +7,9 @@ The `untracked` function reads signal values without creating reactive dependenc
 
 ## When to Use [#when-to-use]
 
-The primary purpose of a Monitor is to provide reactivity: when a value is read within a tracked context, future changes trigger reactions (re-renders, effect re-runs). However, there are many scenarios where reactivity is unnecessary—where only the current value matters, and future updates are irrelevant.
+Reads a signal's value without establishing a reactive dependency. Useful when you need a snapshot of the current value without subscribing to future changes — for example, in event handlers, async operations, or one-off computations.
 
-Use `untracked` for:
-
-- **User interactions**: Click handlers, keyboard events, or other UI interactions that only need the value at the moment of the event. The handler runs once and doesn't need to re-run when signals change.
-
-- **Async operations**: Reading a value to initiate a network request or other async process. Future changes to that signal are irrelevant to the already-started operation.
-
-- **Initialization**: Extracting a value once to initialize state or compute a payload, with no need to react to subsequent updates.
-
-- **One-off computations**: Any logic that needs a snapshot of the current value but should not establish ongoing reactivity—for example, logging current state or computing a derived value for an external system.
-
-Using `untracked` in these situations avoids unnecessary dependency tracking. Even if you used a tracked monitor in these cases, the application would function correctly—there would simply be redundant tracking overhead without impacting business logic.
+See [Reading and Writing Signals](/docs/guides/reading-and-writing-signals#untracked) for common patterns.
 
 ## `untracked(factory){:dart}` [#factory]
 

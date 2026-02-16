@@ -1,0 +1,56 @@
+---
+title: Biome and ESLint
+description: How to configure Biome and ESLint to enforce exhaustive dependency arrays for useComputed
+---
+
+The `useComputed` hook accepts an optional dependency array, similar to React's built-in hooks like `useMemo{:ts}` and `useEffect{:ts}`. Linters can catch missing dependencies automatically when configured to recognize `useComputed`.
+
+## Biome
+
+Add `useComputed` to Biome's `useExhaustiveDependencies` rule in your `biome.jsonc` (or `biome.json`):
+
+```jsonc title="biome.jsonc"
+{
+  "linter": {
+    "rules": {
+      "correctness": {
+        "useExhaustiveDependencies": {
+          "level": "error",
+          "options": {
+            "hooks": [
+              { "name": "useComputed", "closureIndex": 0, "dependenciesIndex": 1 }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+- `closureIndex: 0` tells Biome that the first argument is the closure whose dependencies should be tracked.
+- `dependenciesIndex: 1` tells Biome that the second argument is the dependency array.
+
+See the [Biome `useExhaustiveDependencies` documentation](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) for the full list of options.
+
+## ESLint
+
+Add `useComputed` to the `additionalHooks` option of the `react-hooks/exhaustive-deps` rule in your ESLint config:
+
+```json title=".eslintrc.json"
+{
+  "rules": {
+    "react-hooks/exhaustive-deps": ["warn", {
+      "additionalHooks": "(useComputed)"
+    }]
+  }
+}
+```
+
+The `additionalHooks` option accepts a regex pattern, so you can combine multiple hooks in a single expression:
+
+```json
+"additionalHooks": "(useComputed|useCustomHook)"
+```
+
+See the [ESLint `exhaustive-deps` documentation](https://react.dev/reference/eslint-plugin-react-hooks/lints/exhaustive-deps) for more details.

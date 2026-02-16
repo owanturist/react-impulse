@@ -67,7 +67,7 @@ A single `Signal(){:ts}` factory covers all three roles — writable, derived, a
 How do you get the current value out of a signal?
 
 ```ts title="@owanturist/signal"
-import { Signal } from "@owanturist/signal"
+import { Signal, effect, untracked } from "@owanturist/signal"
 
 const count = Signal(5)
 
@@ -76,8 +76,8 @@ effect((monitor) => {
   console.log(count.read(monitor)) // 5
 })
 
-// Outside — read without a monitor
-console.log(count.read()) // 5
+// Outside — read without tracking
+console.log(untracked(count)) // 5
 ```
 
 ```ts tab="Angular"
