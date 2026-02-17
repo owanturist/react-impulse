@@ -1,4 +1,4 @@
 {
   "title": "Concepts",
-  "pages": ["fundamentals", "how-signals-work-in-react", "design-decisions"]
+  "pages": ["fundamentals", "how-signals-work-in-react", "design-decisions", "comparison"]
 }
