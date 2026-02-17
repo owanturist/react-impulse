@@ -700,6 +700,26 @@ All five libraries support TypeScript, but the ergonomics differ:
 
 - **XState v5** — The `setup(){:ts}` API provides good type safety for context, events, and actions. More verbose than atom-based libraries due to the machine structure, but the types catch invalid transitions at compile time.
 
+## Learning Curve [#learning-curve]
+
+Learning curve depends on two factors: how many concepts you need to learn before writing productive code, and how familiar those concepts are from existing React and JavaScript knowledge.
+
+- **Zustand** — Flattest learning curve. `create()` returns a hook; call it with a selector. If you know React hooks and plain objects, you already know Zustand. The mental model is "a global `useState` with selectors."
+
+- **Jotai** — Low barrier. Atoms look like signals: `atom(0)` for primitive, `atom((get) => ...)` for derived. The `get` parameter maps to React's `useMemo` intuition. The only new concept is that atoms are config descriptors whose values live in an implicit store.
+
+- **`@owanturist/signal`** — Small API surface, but the [`Monitor`](/docs/concepts/how-signals-work-in-react) parameter is a genuinely novel concept — no other mainstream library uses explicit dependency-tracking tokens passed at the call site. Once you understand that `signal.read(monitor)` both returns a value and registers a dependency, everything else follows a single coherent pattern. The [getting-started guide](/docs/getting-started) introduces concepts in a natural progression: [`Signal`](/docs/api/signal) → [read/write](/docs/guides/reading-and-writing-signals) → [derived signals](/docs/api/signal#derived-readonly) → [`effect`](/docs/api/effect) → [`batch`](/docs/api/batch) → [`useComputed`](/docs/api/use-computed).
+
+- **Redux** — Steepest boilerplate curve. Even with Redux Toolkit reducing ceremony, you must learn slices, reducers, actions, dispatch, the store, `<Provider>`, and pre-typed hooks before a single value reaches a component. The concepts themselves aren't complex, but the indirection (action → reducer → store → selector → component) takes time to internalize. The payoff is a predictable, auditable architecture for large teams.
+
+- **XState v5** — Steepest conceptual curve. Before writing any working code, you need to understand finite state machines: states, transitions, events, context, guards, and actions. This is a paradigm shift from data-centric state management. The `setup()` API helps with TypeScript, but the machine definition language is substantial. The payoff is that impossible states become unrepresentable.
+
+Zustand and Jotai are the fastest to get started with. `@owanturist/signal` requires learning the Monitor concept but rewards that investment with a small, consistent API. Redux and XState have the longest ramp-up, but their structure pays dividends in complex applications where predictability and explicit modeling matter.
+
+<Callout>
+Learning curve is not the same as long-term productivity. A library that takes longer to learn may save more time over the life of a project by preventing bugs or reducing cognitive load in complex state flows.
+</Callout>
+
 ## Bundle Size [#bundle-size]
 
 | Library | Packages | Gzipped Size |
