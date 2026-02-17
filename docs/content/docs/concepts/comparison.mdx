@@ -200,17 +200,28 @@ See [Using Signals in React](/docs/guides/using-signals-in-react) for detailed p
 
 ## Defining and Updating State [#defining-state]
 
-```ts title="@owanturist/signal"
+```tsx title="@owanturist/signal"
 import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
 
 const count = Signal(0)
 
-count.write(5)
-count.write((prev) => prev + 1)
+function Counter() {
+  const value = useComputed(count)
+
+  return (
+    <div>
+      <span>{value}</span>
+      <button onClick={() => count.write(5)}>Set 5</button>
+      <button onClick={() => count.write((prev) => prev + 1)}>+</button>
+    </div>
+  )
+}
 ```
 
-```ts tab="Redux"
+```tsx tab="Redux"
 import { createSlice, configureStore } from "@reduxjs/toolkit"
+import { Provider, useSelector, useDispatch } from "react-redux"
 
 const counterSlice = createSlice({
   name: "counter",
@@ -225,11 +236,31 @@ const store = configureStore({
   reducer: { counter: counterSlice.reducer },
 })
 
-store.dispatch(counterSlice.actions.set(5))
-store.dispatch(counterSlice.actions.increment())
+type RootState = ReturnType<typeof store.getState>
+
+function Counter() {
+  const value = useSelector((state: RootState) => state.counter.count)
+  const dispatch = useDispatch()
+
+  return (
+    <div>
+      <span>{value}</span>
+      <button onClick={() => dispatch(counterSlice.actions.set(5))}>Set 5</button>
+      <button onClick={() => dispatch(counterSlice.actions.increment())}>+</button>
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <Provider store={store}>
+      <Counter />
+    </Provider>
+  )
+}
 ```
 
-```ts tab="Zustand"
+```tsx tab="Zustand"
 import { create } from "zustand"
 
 const useCounter = create<{
@@ -241,17 +272,44 @@ const useCounter = create<{
   set: (n) => set({ count: n }),
   increment: () => set((state) => ({ count: state.count + 1 })),
 }))
+
+function Counter() {
+  const value = useCounter((state) => state.count)
+  const set = useCounter((state) => state.set)
+  const increment = useCounter((state) => state.increment)
+
+  return (
+    <div>
+      <span>{value}</span>
+      <button onClick={() => set(5)}>Set 5</button>
+      <button onClick={increment}>+</button>
+    </div>
+  )
+}
 ```
 
-```ts tab="Jotai"
-import { atom } from "jotai"
+```tsx tab="Jotai"
+import { atom, useAtomValue, useSetAtom } from "jotai"
 
 const countAtom = atom(0)
-// Updates happen via useSetAtom() in components
+
+function Counter() {
+  const value = useAtomValue(countAtom)
+  const setCount = useSetAtom(countAtom)
+
+  return (
+    <div>
+      <span>{value}</span>
+      <button onClick={() => setCount(5)}>Set 5</button>
+      <button onClick={() => setCount((prev) => prev + 1)}>+</button>
+    </div>
+  )
+}
 ```
 
-```ts tab="XState v5"
+```tsx tab="XState v5"
 import { setup, assign } from "xstate"
+import { useActorRef, useSelector } from "@xstate/react"
 
 const counterMachine = setup({
   types: {
@@ -271,13 +329,37 @@ const counterMachine = setup({
     },
   },
 })
+
+function Counter() {
+  const actorRef = useActorRef(counterMachine)
+  const value = useSelector(actorRef, (s) => s.context.count)
+
+  return (
+    <div>
+      <span>{value}</span>
+      <button onClick={() => actorRef.send({ type: "set", value: 5 })}>Set 5</button>
+      <button onClick={() => actorRef.send({ type: "increment" })}>+</button>
+    </div>
+  )
+}
 ```
 
-Redux and XState require the most ceremony — slices, reducers, event types, and machine definitions. This ceremony pays off in large applications where traceability and explicit state transitions matter. Zustand collapses state and actions into a single object. Jotai and `@owanturist/signal` are the most concise — a single function call creates a reactive value.
+Every library ends up in a React component, but the path there varies. Redux requires the most ceremony — slices, reducers, a store, typed hooks, and a `<Provider>` — before a component can read or write a value. XState is similar: machine definitions, event types, and `useActorRef(){:ts}` + `useSelector(){:ts}` in the component. Zustand collapses state and actions into a single `create(){:ts}` call, and the resulting hook works without a provider. Jotai and `@owanturist/signal` are the most concise — a single function call creates a reactive value, and a single hook reads it.
 
 ## Reading State in React [#reading-in-react]
 
-```tsx title="@owanturist/signal"
+```tsx title="@owanturist/signal — useMonitor"
+import { useMonitor } from "@owanturist/signal-react"
+
+function Counter() {
+  const monitor = useMonitor()
+  const value = count.read(monitor)
+  const doubled = count.read(monitor) * 2
+  return <p>{value} / {doubled}</p>
+}
+```
+
+```tsx tab="useComputed"
 import { useComputed } from "@owanturist/signal-react"
 
 function Counter() {
@@ -349,15 +431,112 @@ function Counter() {
 }
 ```
 
-All five libraries use external stores subscribed via hooks — none rely on React context for state delivery. The main differences are in how you select state slices and how updates are triggered. Redux, Zustand, and XState use selector functions. Jotai selects at the atom level. `@owanturist/signal` uses `useComputed(){:ts}` with either a signal reference or a monitor-based computation.
+All five libraries use external stores subscribed via hooks — none rely on React context for state delivery. The main differences are in how you select state slices and how updates are triggered. Redux, Zustand, and XState use selector functions. Jotai selects at the atom level. `@owanturist/signal` offers two hooks — `useMonitor(){:ts}` returns a monitor for reading signals directly in the render body, while `useComputed(){:ts}` accepts a signal reference or a factory function for memoized derivations.
 
 ## Re-render Optimization [#re-render-optimization]
 
+```tsx title="@owanturist/signal"
+import { Signal } from "@owanturist/signal"
+import { useComputed } from "@owanturist/signal-react"
+
+const firstName = Signal("John")
+const lastName = Signal("Doe")
+
+function FullName() {
+  // Subscribes to both firstName and lastName
+  const full = useComputed((monitor) => {
+    return `${firstName.read(monitor)} ${lastName.read(monitor)}`
+  }, [])
+
+  return <span>{full}</span>
+}
+
+function FirstNameOnly() {
+  // Subscribes to firstName only — lastName changes never cause re-renders
+  const first = useComputed(firstName)
+  return <span>{first}</span>
+}
+```
+
+```tsx tab="Redux"
+import { useSelector } from "react-redux"
+
+function FullName() {
+  // Selector runs on EVERY store dispatch, even unrelated ones
+  const full = useSelector(
+    (state: RootState) => `${state.user.firstName} ${state.user.lastName}`,
+  )
+  return <span>{full}</span>
+}
+
+function FirstNameOnly() {
+  // Still runs on every dispatch — only skips re-render if result unchanged
+  const first = useSelector((state: RootState) => state.user.firstName)
+  return <span>{first}</span>
+}
+```
+
+```tsx tab="Zustand"
+import { useUserStore } from "./store"
+
+function FullName() {
+  // Selector runs on every store update
+  const full = useUserStore(
+    (state) => `${state.firstName} ${state.lastName}`,
+  )
+  return <span>{full}</span>
+}
+
+function FirstNameOnly() {
+  const first = useUserStore((state) => state.firstName)
+  return <span>{first}</span>
+}
+```
+
+```tsx tab="Jotai"
+import { atom, useAtomValue } from "jotai"
+
+const firstNameAtom = atom("John")
+const lastNameAtom = atom("Doe")
+const fullNameAtom = atom(
+  (get) => `${get(firstNameAtom)} ${get(lastNameAtom)}`,
+)
+
+function FullName() {
+  // Subscribes to fullNameAtom — re-renders only when it changes
+  const full = useAtomValue(fullNameAtom)
+  return <span>{full}</span>
+}
+
+function FirstNameOnly() {
+  // Subscribes to firstNameAtom only
+  const first = useAtomValue(firstNameAtom)
+  return <span>{first}</span>
+}
+```
+
+```tsx tab="XState v5"
+import { useSelector } from "@xstate/react"
+
+function FullName({ actorRef }: { actorRef: ActorRefFrom<typeof userMachine> }) {
+  const full = useSelector(
+    actorRef,
+    (s) => `${s.context.firstName} ${s.context.lastName}`,
+  )
+  return <span>{full}</span>
+}
+
+function FirstNameOnly({ actorRef }: { actorRef: ActorRefFrom<typeof userMachine> }) {
+  const first = useSelector(actorRef, (s) => s.context.firstName)
+  return <span>{first}</span>
+}
+```
+
 Re-render behavior is where these libraries diverge most:
 
-- **`@owanturist/signal`** — The Monitor tracks which signals each `useComputed(){:ts}` call reads. Dependencies are dynamic — if a conditional branch skips reading a signal, that signal won't cause re-renders. No selectors or memoization needed.
+- **`@owanturist/signal`** — The Monitor tracks exactly which signals each `useComputed(){:ts}` call reads. The compute function only re-runs when one of those specific signals changes — writes to unrelated signals are invisible. Dependencies are dynamic: if a conditional branch skips reading a signal, that signal won't cause re-renders. On top of that, each signal can define a custom `equals{:ts}` option that prevents propagation at the source — if a write produces a value equal to the current one, no subscribers are notified at all. `useComputed(){:ts}` then applies its own `equals{:ts}` as a second gate: if the compute result hasn't changed, no re-render is enqueued.
 
-- **Redux** — Components re-render when `useSelector(){:ts}` returns a new reference. Uses `===` by default. For derived values, you need `createSelector(){:ts}` from reselect to memoize computations and avoid re-renders from structurally identical results.
+- **Redux** — The selector function passed to `useSelector(){:ts}` runs on **every** store dispatch, regardless of which slice changed. Re-renders are skipped only when the result passes the equality check (`===` by default, customizable via `useSelector(selector, equalityFn){:ts}`). The selector computation cost is paid unconditionally. For derived values, `createSelector(){:ts}` from reselect adds memoization to avoid recomputing when inputs haven't changed.
 
 - **Zustand** — Similar to Redux — selectors with `===` comparison. `useShallow(){:ts}` adds shallow comparison for object/array selectors. Zustand also supports transient updates via `subscribe(){:ts}` for high-frequency changes that bypass React entirely.
 
@@ -365,7 +544,7 @@ Re-render behavior is where these libraries diverge most:
 
 - **XState v5** — `useSelector(){:ts}` selects specific state slices, re-rendering only when the selected value changes. The machine structure naturally constrains which state transitions are possible, reducing unexpected updates.
 
-Jotai and `@owanturist/signal` provide the finest granularity out of the box. Redux and Zustand require careful selector design to avoid over-rendering. XState's structured approach sidesteps the problem differently — by making state transitions explicit.
+Jotai and `@owanturist/signal` provide the finest granularity out of the box — compute functions only run when their actual dependencies change. Redux and Zustand selectors run on every dispatch, relying on equality checks to prevent unnecessary re-renders. `@owanturist/signal` adds a unique two-level equality system: signal-level `equals{:ts}` prevents propagation at the source, and `useComputed(){:ts}`-level `equals{:ts}` prevents re-renders from identical results. XState's structured approach sidesteps the problem differently — by making state transitions explicit.
 
 ## Derived State and Composition [#derived-state]
 
@@ -412,7 +591,7 @@ Jotai and `@owanturist/signal` handle derived state most naturally — derived a
 
 ## Middleware, Devtools, and Ecosystem [#ecosystem]
 
-Redux has the most mature ecosystem of any React state library. Redux DevTools provides time-travel debugging, action replay, and state diffing. RTK Query handles data fetching and caching. Middleware like thunks and sagas cover async workflows. If ecosystem breadth and battle-tested tooling are priorities, Redux is hard to beat.
+Redux has the most mature ecosystem of any React state library. Redux DevTools provides time-travel debugging, action replay, and state diffing. Redux Toolkit Query handles data fetching and caching. Middleware like thunks and sagas cover async workflows. If ecosystem breadth and battle-tested tooling are priorities, Redux is hard to beat.
 
 Zustand offers a lean middleware system — `persist{:ts}` for localStorage, `devtools{:ts}` for Redux DevTools integration, `immer{:ts}` for mutable update syntax. It strikes a balance between simplicity and extensibility.
 
@@ -428,11 +607,92 @@ If your team relies on devtools for debugging state changes, consider Redux or Z
 
 ## TypeScript Experience [#typescript]
 
+```ts title="@owanturist/signal"
+import { Signal } from "@owanturist/signal"
+
+// Full inference — no type annotations needed
+const count = Signal(0)               // WritableSignal<number>
+const name = Signal("Alice")          // WritableSignal<string>
+const doubled = Signal((monitor) =>   // ReadableSignal<number>
+  count.read(monitor) * 2,
+)
+```
+
+```ts tab="Redux"
+import { configureStore, createSlice } from "@reduxjs/toolkit"
+
+const userSlice = createSlice({
+  name: "user",
+  initialState: { name: "Alice", age: 30 },
+  reducers: {
+    setName: (state, action: PayloadAction<string>) => {
+      state.name = action.payload
+    },
+  },
+})
+
+const store = configureStore({ reducer: { user: userSlice.reducer } })
+
+// Manual type definitions required
+type RootState = ReturnType<typeof store.getState>
+type AppDispatch = typeof store.dispatch
+
+// Pre-typed hooks to avoid repeating RootState everywhere
+const useAppSelector = useSelector.withTypes<RootState>()
+const useAppDispatch = useDispatch.withTypes<AppDispatch>()
+```
+
+```ts tab="Zustand"
+import { create } from "zustand"
+
+// Type parameter required on create<T>() for full type safety
+const useStore = create<{
+  name: string
+  age: number
+  setName: (name: string) => void
+}>((set) => ({
+  name: "Alice",
+  age: 30,
+  setName: (name) => set({ name }),
+}))
+```
+
+```ts tab="Jotai"
+import { atom } from "jotai"
+
+// Full inference — similar to signals
+const nameAtom = atom("Alice")              // PrimitiveAtom<string>
+const ageAtom = atom(30)                    // PrimitiveAtom<number>
+const greetingAtom = atom(                  // Atom<string>
+  (get) => `Hello, ${get(nameAtom)}!`,
+)
+```
+
+```ts tab="XState v5"
+import { setup, assign } from "xstate"
+
+// Types defined in setup() — verbose but catches invalid transitions
+const userMachine = setup({
+  types: {
+    context: {} as { name: string; age: number },
+    events: {} as
+      | { type: "setName"; name: string }
+      | { type: "incrementAge" },
+  },
+}).createMachine({
+  context: { name: "Alice", age: 30 },
+  on: {
+    setName: { actions: assign({ name: ({ event }) => event.name }) },
+    incrementAge: { actions: assign({ age: ({ context }) => context.age + 1 }) },
+  },
+})
+```
+
 All five libraries support TypeScript, but the ergonomics differ:
 
 - **`@owanturist/signal`** — Full inference. `Signal(0){:ts}` infers `WritableSignal<number>{:dart}`. Derived signals infer their return type. Rarely needs annotations.
 
-- **Redux** — Good inference within slices, but requires manual `RootState{:dart}` and `AppDispatch{:dart}` type definitions. Typed hooks (`useAppSelector{:ts}`, `useAppDispatch{:ts}`) are a common pattern to avoid repeating these types.
+- **Redux** — Good inference within slices, but requires manual `RootState{:dart}` and `AppDispatch{:dart}` type definitions. `useSelector(){:ts}` is context-based — it reads from whichever `<Provider>` wraps the component, but TypeScript cannot infer the store shape from React context. You must create pre-typed hooks via `useSelector.withTypes<RootState>(){:ts}` (or the older `TypedUseSelectorHook{:dart}` pattern) and use them everywhere. Multiple stores compound the problem: each needs its own `RootState{:dart}` and its own typed hooks, with no mechanism for TypeScript to resolve which store applies from context alone.
 
 - **Zustand** — Requires an interface or type parameter on `create<T>(){:ts}` for full type safety. Selectors and actions infer types from the store definition.
 
@@ -454,7 +714,7 @@ Zustand is the smallest. `@owanturist/signal` and Jotai sit in a similar range. 
 
 ## Framework Independence [#framework-independence]
 
-The core `@owanturist/signal` package has zero dependencies and works in any JavaScript environment — Node.js, Deno, browsers, or edge runtimes. Only `@owanturist/signal-react` introduces a React dependency.
+The core `@owanturist/signal` package has zero dependencies and works in any JavaScript environment — Node.js, Deno, browsers, or edge runtimes (Cloudflare Workers, Vercel Edge Functions, etc.). Only `@owanturist/signal-react` introduces a React peer dependency.
 
 ```ts title="Vanilla JavaScript"
 import { Signal, effect } from "@owanturist/signal"
@@ -469,7 +729,7 @@ effect((monitor) => {
 count.write(5) // logs "doubled: 10"
 ```
 
-Redux's core is also framework-agnostic, though RTK and react-redux are React-specific. Zustand and Jotai are React-first but offer `/vanilla` subpath exports. XState is fully framework-agnostic with official bindings for React, Vue, Svelte, and Solid.
+Redux's core is also framework-agnostic, though Redux Toolkit and react-redux are React-specific. Zustand and Jotai are React-first but offer `/vanilla` subpath exports. XState is fully framework-agnostic with official bindings for React, Vue, Svelte, and Solid.
 
 ## When to Choose What [#when-to-choose]
 
