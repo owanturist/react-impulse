@@ -155,29 +155,36 @@ Do not mix types within a single page. When writing or reviewing documentation, 
 
 ### Writing Style
 
-**Em dashes:**
-- Use ` — ` (space, em dash, space) in prose — never use `--`
-- Example: "Batches can be nested — the outermost batch controls when notifications fire."
+**Dashes:**
+- Use ` - ` (space, hyphen, space) in prose — never use `--` and never use `—` (em dash)
+- Example: "Batches can be nested - the outermost batch controls when notifications fire."
 
 **Capitalization:**
 - `Signal` is always capitalized in prose, whether referring to the concept or the class
 - `React` is always capitalized
 - API names (`useMonitor`, `useComputed`, `FormUnit`, etc.) must never appear as plain text in prose — always format them as inline code with the `{:ts}` language hint: `` `useMonitor{:ts}` ``
-- Package names (`@reduxjs/toolkit`, `@owanturist/signal`, etc.) are plain strings — format as inline code with **no** language hint: `` `@reduxjs/toolkit` ``. Never use `{:ts}` on a package name.
 
-**Inline code language hints (`{:ts}` vs `{:dart}`) in prose:**
-- Use `{:ts}` for TypeScript expressions with unambiguous syntax:
-  - Function or method calls (have parentheses): `Signal(0){:ts}`, `count.read(monitor){:ts}`
-  - Generic type expressions: `Signal<string>{:ts}`, `WritableSignal<number>{:ts}`
-  - Operators, assignments, literals: `Object.is{:ts}`, `.value = x{:ts}`, `true{:ts}`
-- Use `{:dart}` for everything else:
-  - Plain names (no parentheses, no generics): `Signal{:dart}`, `batch{:dart}`, `Monitor{:dart}`, `useState{:dart}`
-  - JSX elements: `<Counter />{:dart}`, `<Provider>{:dart}`
-- Note: in `<section className="typedef">` API reference sections, always use `{:dart}` for all `@param` and `@returns` type annotations (existing convention, unchanged).
+**Canonical terminology:**
+- Use **"consumer"** for the thing that depends on a signal and re-runs or re-renders when it changes — aligned with Angular and the Reactive Streams spec
+- Do not use "watcher", "dependent", "subscriber", or "observer" for this concept
+- Effects, derived signals, `useComputed{:ts}`, and `useMonitor{:ts}` are all types of consumers
+- Use **"derived signal"** (not "computed signal" or "read-only signal") when referring to signals created from other signals in prose — "computed" is acceptable only when comparing to other frameworks that use that term
+
+**Hyphenation:**
+- Always hyphenate: `re-run`, `re-runs`, `re-render`, `re-renders`, `re-compute` — never write `rerun`, `rerender`, `recompute`
+
+**Tone by page type:**
+- **Guides and tutorials** — conversational, second-person ("you"), imperative ("call `batch(){:ts}`"), contractions allowed ("don't", "you've")
+- **API reference** — formal, third-person or impersonal ("the function returns…"), no contractions, imperative only for step instructions
 
 ### API Reference docs/ Style Guide
 
 API reference pages use these conventions. For fumadocs MDX syntax details see the [fumadocs skill](.claude/skills/fumadocs/SKILL.md); for twoslash annotations see the [twoslash skill](.claude/skills/twoslash/SKILL.md).
+
+**Page intro:**
+- Every API reference page must open with a single sentence describing the API before the first `##` heading
+- The intro goes between the frontmatter and the first `##` heading
+- Keep it to one sentence — the `##` headings and parameter docs carry the detail
 
 **Frontmatter:**
 - Every page needs `title` and `description` in YAML frontmatter
@@ -211,6 +218,7 @@ API reference pages use these conventions. For fumadocs MDX syntax details see t
 - `<Callout type="warn">` for warnings
 - Other types available: `error`, `success`, `idea`
 - Place callouts inside the relevant `@param` list item when they relate to a specific parameter
+- In guide pages, pitfalls, gotchas, and common mistakes must use `<Callout type="warn">` — never describe them in plain prose
 
 **Shiki code annotations (transformers):**
 - `// [!code ++]` / `// [!code --]` to highlight added/removed lines

@@ -116,7 +116,9 @@ The `effect{:dart}` function works inside `useEffect{:dart}` because React runs 
 
 ### Forgetting Cleanup [#forgetting-cleanup]
 
+<Callout type="warn">
 If an effect creates subscriptions, timers, or event listeners without returning a cleanup function, those resources leak when the effect re-runs or stops. Always return a cleanup function when you allocate resources:
+</Callout>
 
 ```ts
 // Bad - timer is never cleared
@@ -135,7 +137,9 @@ effect((monitor) => {
 
 ### Creating Effects During Render [#render-effects]
 
+<Callout type="warn">
 Never call `effect{:dart}` directly in a component body. Effects created during render run on every re-render, stacking up duplicate listeners. Place effects inside `useEffect{:dart}` or at module scope:
+</Callout>
 
 ```tsx
 // Bad - new effect on every render

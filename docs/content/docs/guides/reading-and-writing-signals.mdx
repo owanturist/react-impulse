@@ -91,7 +91,7 @@ batch(() => {
 // Logs once: "Jane Smith"
 ```
 
-Use `batch(){:ts}` when updating multiple related signals together to avoid intermediate states and redundant effect executions. Batches can also be nested — the outermost batch controls when notifications fire.
+Use `batch(){:ts}` when updating multiple related signals together to avoid intermediate states and redundant effect executions. Batches can also be nested - the outermost batch controls when notifications fire.
 
 See the [batch API reference](/docs/api/batch) for advanced patterns including reading values inside a batch and nested batching.
 

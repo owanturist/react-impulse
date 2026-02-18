@@ -103,7 +103,7 @@ You might wonder about `useMemo{:dart}` -- it is **not** suitable for writable s
 
 #### From External Sources [#derived-from-external]
 
-When the source signal arrives from outside the component — through props or context — its reference may change between renders. Use `useMemo{:dart}` so the derived signal recreates when the source does:
+When the source signal arrives from outside the component - through props or context - its reference may change between renders. Use `useMemo{:dart}` so the derived signal recreates when the source does:
 
 ```tsx
 import { Signal, ReadableSignal } from "@owanturist/signal"
@@ -258,7 +258,7 @@ function DashboardLayout({
 
 ## Receiving Signals via Context [#via-context]
 
-Signal references are stable — updating a value does not change the reference — so context values holding signals never trigger consumer re-renders on their own.
+Signal references are stable - updating a value does not change the reference - so context values holding signals never trigger consumer re-renders on their own.
 
 ```tsx
 import { Signal, ReadableSignal, WritableSignal } from "@owanturist/signal"
