@@ -44,7 +44,7 @@ Use the transform function form when the new value depends on the current one. T
 
 ## Reading Without Tracking [#untracked]
 
-Use `untracked()` to read a signal's current value without establishing a dependency. The effect or derived signal will not re-run when the untracked signal changes.
+Use `untracked(){:ts}` to read a signal's current value without establishing a dependency. The effect or derived signal will not re-run when the untracked signal changes.
 
 ```ts
 import { Signal, effect, untracked } from "@owanturist/signal"
@@ -62,7 +62,7 @@ count.write(5)       // Effect runs
 multiplier.write(3)  // Effect does NOT run
 ```
 
-Common scenarios for `untracked()`:
+Common scenarios for `untracked(){:ts}`:
 
 - **Event handlers** that only need the value at the moment of the event
 - **Async operations** where future changes are irrelevant to the already-started operation
@@ -72,7 +72,7 @@ See the [untracked API reference](/docs/api/untracked) for the full API surface 
 
 ## Batching Updates [#batching]
 
-Use `batch()` to group multiple signal writes into a single notification. Without batching, each `.write(){:ts}` call immediately notifies all dependent monitors. With `batch()`, notifications are deferred until the function completes.
+Use `batch(){:ts}` to group multiple signal writes into a single notification. Without batching, each `.write(){:ts}` call immediately notifies all dependent monitors. With `batch(){:ts}`, notifications are deferred until the function completes.
 
 ```ts
 import { Signal, effect, batch } from "@owanturist/signal"
@@ -91,7 +91,7 @@ batch(() => {
 // Logs once: "Jane Smith"
 ```
 
-Use `batch()` when updating multiple related signals together to avoid intermediate states and redundant effect executions. Batches can also be nested -- the outermost batch controls when notifications fire.
+Use `batch(){:ts}` when updating multiple related signals together to avoid intermediate states and redundant effect executions. Batches can also be nested — the outermost batch controls when notifications fire.
 
 See the [batch API reference](/docs/api/batch) for advanced patterns including reading values inside a batch and nested batching.
 
@@ -101,8 +101,8 @@ See the [batch API reference](/docs/api/batch) for advanced patterns including r
 |----------|------|
 | Computing a value from other signals | Derived signal |
 | Transforming or filtering data | Derived signal |
-| Side effects (DOM, network, logging) | `effect` |
-| Syncing with external systems | `effect` |
+| Side effects (DOM, network, logging) | `effect{:dart}` |
+| Syncing with external systems | `effect{:dart}` |
 
 Effects are for **actions**. Derived signals are for **values**.
 

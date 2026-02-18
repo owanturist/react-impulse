@@ -7,7 +7,7 @@ Signal is a reactive state management library built around a simple idea: **Sign
 
 ## The Problem
 
-Modern UI frameworks need to know when to re-render. React solves this with explicit dependency arrays (`useEffect`, `useMemo`, `useCallback`), which are error-prone and tedious. Global state managers often trigger re-renders for any state change, requiring manual optimization.
+Modern UI frameworks need to know when to re-render. React solves this with explicit dependency arrays (`useEffect{:dart}`, `useMemo{:dart}`, `useCallback{:dart}`), which are error-prone and tedious. Global state managers often trigger re-renders for any state change, requiring manual optimization.
 
 Signal takes a different approach: dependencies are tracked automatically based on what your code actually reads. This eliminates the need to maintain dependency arrays or write selectors. Components subscribe to exactly what they use.
 

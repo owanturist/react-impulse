@@ -3,7 +3,7 @@ title: useMonitor
 description: API reference for the useMonitor hook
 ---
 
-The `useMonitor` hook provides direct access to a Monitor instance for reading signals in components.
+The `useMonitor{:dart}` hook provides direct access to a Monitor instance for reading signals in components.
 
 ## `useMonitor(){:dart}` [#use-monitor]
 
@@ -41,15 +41,15 @@ interface Monitor {
 }
 ```
 
-The `Monitor` type is intentionally opaque. You pass it to `signal.read(monitor){:ts}` to track dependencies. The monitor handles subscription management internally.
+The `Monitor{:dart}` type is intentionally opaque. You pass it to `signal.read(monitor){:ts}` to track dependencies. The monitor handles subscription management internally.
 
 ## Comparison with useComputed
 
-The `useMonitor` hook is the simpler primitive — it returns a Monitor and leaves reading and rendering logic to you. The `useComputed` hook builds on top of it, adding memoization, dependency arrays, and custom equality checks.
+The `useMonitor{:dart}` hook is the simpler primitive — it returns a Monitor and leaves reading and rendering logic to you. The `useComputed{:dart}` hook builds on top of it, adding memoization, dependency arrays, and custom equality checks.
 
-| Feature | `useMonitor` | `useComputed` |
+| Feature | `useMonitor{:dart}` | `useComputed{:dart}` |
 |---------|-------------|---------------|
-| Returns | `Monitor` | Computed value |
+| Returns | `Monitor{:dart}` | Computed value |
 | Memoization | None | Optional via dependency array |
 | Custom equality | None | Supported via options |
 | Complexity | Minimal | Higher, with built-in optimizations |

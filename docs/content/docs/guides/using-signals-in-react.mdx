@@ -9,7 +9,7 @@ The library is unopinionated about how you distribute signals through your appli
 
 ### Writable Signals: Stable Storage [#writable-stable-storage]
 
-Writable signals must persist across re-renders. Store them in `useState{:ts}` (ignoring the setter) or `useRef{:ts}`:
+Writable signals must persist across re-renders. Store them in `useState{:dart}` (ignoring the setter) or `useRef{:dart}`:
 
 ```tsx tab="useState"
 import { Signal } from "@owanturist/signal"
@@ -44,7 +44,7 @@ function SearchPage() {
 ```
 
 <Callout type="idea">
-If you find `useState{:ts}`-with-ignored-setter verbose, a small `usePermanent` helper can clean things up. The React docs describe this [ref initialization pattern](https://react.dev/reference/react/useRef#avoiding-recreating-the-ref-contents):
+If you find `useState{:dart}`-with-ignored-setter verbose, a small `usePermanent` helper can clean things up. The React docs describe this [ref initialization pattern](https://react.dev/reference/react/useRef#avoiding-recreating-the-ref-contents):
 
 ```ts
 function usePermanent<T>(init: () => T): T {
@@ -60,7 +60,7 @@ const query = usePermanent(() => Signal(""))
 ```
 </Callout>
 
-When a component manages several related signals, group them in a single `useState{:ts}` call to keep declarations tidy:
+When a component manages several related signals, group them in a single `useState{:dart}` call to keep declarations tidy:
 
 ```tsx
 import { Signal } from "@owanturist/signal"
@@ -96,14 +96,14 @@ function Broken() {
 </Callout>
 
 <Callout>
-You might wonder about `useMemo{:ts}` -- it is **not** suitable for writable signals. React [treats `useMemo` as a performance optimization](https://react.dev/reference/react/useMemo#caveats), not a semantic guarantee: the framework may discard cached values and recalculate them at any time (e.g. when a component unmounts and remounts during offscreen rendering). If the cached value is a writable signal, dropping it means losing all accumulated state. Stick with `useState{:ts}` or `useRef{:ts}` for writable signals -- React guarantees these survive for the component's lifetime.
+You might wonder about `useMemo{:dart}` -- it is **not** suitable for writable signals. React [treats `useMemo` as a performance optimization](https://react.dev/reference/react/useMemo#caveats), not a semantic guarantee: the framework may discard cached values and recalculate them at any time (e.g. when a component unmounts and remounts during offscreen rendering). If the cached value is a writable signal, dropping it means losing all accumulated state. Stick with `useState{:dart}` or `useRef{:dart}` for writable signals -- React guarantees these survive for the component's lifetime.
 </Callout>
 
 ### Derived Signals [#derived-signals]
 
 #### From External Sources [#derived-from-external]
 
-When the source signal arrives from outside the component -- through props or context -- its reference may change between renders. Use `useMemo{:ts}` so the derived signal recreates when the source does:
+When the source signal arrives from outside the component — through props or context — its reference may change between renders. Use `useMemo{:dart}` so the derived signal recreates when the source does:
 
 ```tsx
 import { Signal, ReadableSignal } from "@owanturist/signal"
@@ -150,11 +150,11 @@ function ShoppingCart() {
 }
 ```
 
-Because `items` is created in the same initializer and its reference never changes, the derived `totalPrice` does not need `useMemo{:ts}`.
+Because `items` is created in the same initializer and its reference never changes, the derived `totalPrice` does not need `useMemo{:dart}`.
 
 #### Adding Non-Signal Dependencies [#derived-extra-deps]
 
-When a derived signal depends on both a signal and a React value (props, local state), use `useMemo{:ts}` even if the source signal is stable. The derivation must recalculate whenever the React value changes:
+When a derived signal depends on both a signal and a React value (props, local state), use `useMemo{:dart}` even if the source signal is stable. The derivation must recalculate whenever the React value changes:
 
 ```tsx
 import { Signal, ReadableSignal } from "@owanturist/signal"
@@ -188,7 +188,7 @@ function TransactionAmount({ amount }: { amount: ReadableSignal<number> }) {
 
 ## Receiving Signals via Props [#via-props]
 
-Type props with `ReadableSignal<T>{:dart}` to accept both writable and derived signals -- the reading API is the same.
+Type props with `ReadableSignal<T>{:ts}` to accept both writable and derived signals -- the reading API is the same.
 
 ```tsx tab="useComputed shorthand"
 import { ReadableSignal } from "@owanturist/signal"
@@ -235,7 +235,7 @@ function ProgressBar({
 }
 ```
 
-A component only subscribes when it calls `.read(monitor){:ts}` or `useComputed{:ts}`. Passing a signal further down without reading it does not cause re-renders:
+A component only subscribes when it calls `.read(monitor){:ts}` or `useComputed{:dart}`. Passing a signal further down without reading it does not cause re-renders:
 
 ```tsx
 import { ReadableSignal } from "@owanturist/signal"
@@ -258,7 +258,7 @@ function DashboardLayout({
 
 ## Receiving Signals via Context [#via-context]
 
-Signal references are stable -- updating a value does not change the reference -- so context values holding signals never trigger consumer re-renders on their own.
+Signal references are stable — updating a value does not change the reference — so context values holding signals never trigger consumer re-renders on their own.
 
 ```tsx
 import { Signal, ReadableSignal, WritableSignal } from "@owanturist/signal"
@@ -351,7 +351,7 @@ function SettingsPanel() {
 ```
 
 <Callout type="idea">
-Use `ReadableSignal<T>{:dart}` in context type definitions for signals that consumers should never write to. In the example above, `cssVariables` is typed as `ReadableSignal{:dart}` because it is derived from the other two signals.
+Use `ReadableSignal<T>{:ts}` in context type definitions for signals that consumers should never write to. In the example above, `cssVariables` is typed as `ReadableSignal{:dart}` because it is derived from the other two signals.
 </Callout>
 
 ## See Also [#see-also]

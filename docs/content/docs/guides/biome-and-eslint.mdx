@@ -3,11 +3,11 @@ title: Biome and ESLint
 description: How to configure Biome and ESLint to enforce exhaustive dependency arrays for useComputed
 ---
 
-The `useComputed` hook accepts an optional dependency array, similar to React's built-in hooks like `useMemo{:ts}` and `useEffect{:ts}`. Linters can catch missing dependencies automatically when configured to recognize `useComputed`.
+The `useComputed{:dart}` hook accepts an optional dependency array, similar to React's built-in hooks like `useMemo{:dart}` and `useEffect{:dart}`. Linters can catch missing dependencies automatically when configured to recognize `useComputed{:dart}`.
 
 ## Biome
 
-Add `useComputed` to Biome's `useExhaustiveDependencies` rule in your `biome.jsonc` (or `biome.json`):
+Add `useComputed{:dart}` to Biome's `useExhaustiveDependencies` rule in your `biome.jsonc` (or `biome.json`):
 
 ```jsonc title="biome.jsonc"
 {
@@ -35,12 +35,12 @@ See the [Biome `useExhaustiveDependencies` documentation](https://biomejs.dev/li
 
 ## ESLint
 
-Add `useComputed` to the `additionalHooks` option of the `react-hooks/exhaustive-deps` rule in your ESLint config:
+Add `useComputed{:dart}` to the `additionalHooks` option of the `react-hooks/exhaustive-deps` rule in your ESLint config:
 
 ```json title=".eslintrc.json"
 {
   "rules": {
-    "react-hooks/exhaustive-deps": ["warn", {
+    "react-hooks/exhaustive-deps": ["error", {
       "additionalHooks": "(useComputed)"
     }]
   }

@@ -60,7 +60,7 @@ const count = useSignal(0)
 const doubled = useComputed$(() => count.value * 2)
 ```
 
-A single `Signal(){:ts}` factory covers all three roles — writable, derived, and bidirectional derived. The first argument determines which kind you get: a plain value creates a writable signal, a function creates a derived one. Most other frameworks use separate functions (`signal{:ts}` + `computed{:ts}`, `createSignal{:ts}` + `createMemo{:ts}`) — two names for what is conceptually a single operation.
+A single `Signal(){:ts}` factory covers all three roles — writable, derived, and bidirectional derived. The first argument determines which kind you get: a plain value creates a writable signal, a function creates a derived one. Most other frameworks use separate functions (`signal{:dart}` + `computed{:dart}`, `createSignal{:dart}` + `createMemo{:dart}`) — two names for what is conceptually a single operation.
 
 ## Reading Values
 
@@ -116,7 +116,7 @@ const count = useSignal(5)
 console.log(count.value) // 5
 ```
 
-Every other framework uses implicit tracking — calling the getter or accessing a property automatically registers the dependency. This library makes tracking explicit through the `Monitor{:ts}` parameter — you can always trace a computation's dependencies. The tradeoff is extra syntax in exchange for explicit dependency tracking.
+Every other framework uses implicit tracking — calling the getter or accessing a property automatically registers the dependency. This library makes tracking explicit through the `Monitor{:dart}` parameter — you can always trace a computation's dependencies. The tradeoff is extra syntax in exchange for explicit dependency tracking.
 
 ## Writing Values
 
@@ -627,7 +627,7 @@ Both `untracked(fn){:ts}` for arbitrary code and `untracked(signal){:ts}` for a 
 
 This library omits several features found in other signal libraries:
 
-- **No compiler magic** — There is no build step that transforms variable access into reactive subscriptions. Svelte's `$state{:ts}` and `$derived{:ts}` runes eliminate boilerplate but require a compiler step. This library runs in any standard JavaScript environment without a build step.
+- **No compiler magic** — There is no build step that transforms variable access into reactive subscriptions. Svelte's `$state{:dart}` and `$derived{:dart}` runes eliminate boilerplate but require a compiler step. This library runs in any standard JavaScript environment without a build step.
 
 - **No JSX auto-unwrapping** — Preact signals can update the DOM directly from JSX, bypassing component re-renders. This library requires `.read(){:ts}` calls inside components, though you can build thin wrapper components that accept a signal as a prop and subscribe to it — effectively achieving fine-grained updates scoped to a small subtree.
 
@@ -635,6 +635,6 @@ This library omits several features found in other signal libraries:
 
 - **No implicit scheduling** — Angular and Vue batch updates implicitly through their change detection and async queue systems. This library requires explicit `batch(){:ts}` calls when you need to group multiple writes.
 
-- **Immutable data by default** — Signals compare values by reference equality. Mutating an object in place and passing the same reference to `.write(){:ts}` is a no-op unless you set `equals: () => false{:ts}`. This matches React's model — `useState{:ts}`, `useMemo{:ts}`, props, and context all assume immutability — so signals integrate naturally into React's update model.
+- **Immutable data by default** — Signals compare values by reference equality. Mutating an object in place and passing the same reference to `.write(){:ts}` is a no-op unless you set `equals: () => false{:ts}`. This matches React's model — `useState{:dart}`, `useMemo{:dart}`, props, and context all assume immutability — so signals integrate naturally into React's update model.
 
 Some of these follow from React's constraints; others are deliberate choices favoring explicitness and minimal surface area. Every framework on this page has tackled real problems with approaches worth understanding. This library draws from those approaches and adapts them for React.

@@ -3,7 +3,7 @@ title: useComputed
 description: API reference for the useComputed hook
 ---
 
-The `useComputed` hook reads signal values in React components and triggers re-renders when those values change.
+The `useComputed{:dart}` hook reads signal values in React components and triggers re-renders when those values change.
 
 ## `useComputed(signal){:dart}` [#signal-shortcut]
 
@@ -160,7 +160,7 @@ Standard React dependency array type. The compute function is memoized and only 
 
 ## Creating Signals Inside Components [#creating-signals]
 
-Writable signals need stable storage (`useState{:ts}` or `useRef{:ts}`) to survive re-renders. Derived signals use `useMemo{:ts}` when their source may change.
+Writable signals need stable storage (`useState{:dart}` or `useRef{:dart}`) to survive re-renders. Derived signals use `useMemo{:dart}` when their source may change.
 
 See [Using Signals in React](/docs/guides/using-signals-in-react#creating-in-components) for detailed patterns and examples.
 
@@ -169,7 +169,7 @@ See [Using Signals in React](/docs/guides/using-signals-in-react#creating-in-com
 Without a dependency array, the compute function executes on every re-render. When a dependency array is provided, the compute function only re-executes when one of the listed dependencies changes (compared by reference).
 
 <Callout>
-  The `useComputed{:ts}` hook supports exhaustive dependency lint rules. See [Biome and ESLint](/docs/guides/biome-and-eslint) for setup instructions.
+  The `useComputed{:dart}` hook supports exhaustive dependency lint rules. See [Biome and ESLint](/docs/guides/biome-and-eslint) for setup instructions.
 </Callout>
 
 ```tsx

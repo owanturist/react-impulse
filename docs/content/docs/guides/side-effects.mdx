@@ -3,11 +3,11 @@ title: Side Effects
 description: How to run side effects in response to signal changes using the effect function
 ---
 
-The `effect` function connects signal changes to external systems like the DOM, network requests, or third-party services. This guide shows how to create effects, clean up resources, and integrate with React's lifecycle.
+The `effect{:dart}` function connects signal changes to external systems like the DOM, network requests, or third-party services. This guide shows how to create effects, clean up resources, and integrate with React's lifecycle.
 
 ## Creating an Effect [#creating]
 
-To create an effect, pass a listener function to `effect`. The listener receives a `Monitor{:dart}` for tracking signal dependencies. It runs immediately on creation, then re-runs whenever any tracked signal changes. The returned function stops the effect.
+To create an effect, pass a listener function to `effect{:dart}`. The listener receives a `Monitor{:dart}` for tracking signal dependencies. It runs immediately on creation, then re-runs whenever any tracked signal changes. The returned function stops the effect.
 
 ```ts
 import { Signal, effect } from "@owanturist/signal"
@@ -87,7 +87,7 @@ effect((monitor) => {
 
 ## Using effect in React [#react]
 
-To use `effect` inside a React component, wrap it in `useEffect` so its lifecycle is tied to the component. Return the stop function as the `useEffect` cleanup:
+To use `effect{:dart}` inside a React component, wrap it in `useEffect{:dart}` so its lifecycle is tied to the component. Return the stop function as the `useEffect{:dart}` cleanup:
 
 ```tsx
 import { Signal, effect } from "@owanturist/signal"
@@ -109,7 +109,7 @@ function NotificationLogger() {
 ```
 
 <Callout>
-The `effect` function works inside `useEffect` because React runs effect callbacks outside the render phase. See [How Signals Work in React](/docs/concepts/how-signals-work-in-react) for details on why this is safe.
+The `effect{:dart}` function works inside `useEffect{:dart}` because React runs effect callbacks outside the render phase. See [How Signals Work in React](/docs/concepts/how-signals-work-in-react) for details on why this is safe.
 </Callout>
 
 ## Common Pitfalls [#pitfalls]
@@ -135,7 +135,7 @@ effect((monitor) => {
 
 ### Creating Effects During Render [#render-effects]
 
-Never call `effect` directly in a component body. Effects created during render run on every re-render, stacking up duplicate listeners. Place effects inside `useEffect` or at module scope:
+Never call `effect{:dart}` directly in a component body. Effects created during render run on every re-render, stacking up duplicate listeners. Place effects inside `useEffect{:dart}` or at module scope:
 
 ```tsx
 // Bad - new effect on every render

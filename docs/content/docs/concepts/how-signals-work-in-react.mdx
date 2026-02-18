@@ -7,7 +7,7 @@ This page explains why signals work well with React and how the `@owanturist/sig
 
 ## Why Signals in React?
 
-React's built-in state primitives (`useState`, `useReducer`) use a coarse-grained update model: when state changes, the entire component and its children re-render. You can optimize this with `memo`, `useMemo`, and `useCallback`, but it requires manual work.
+React's built-in state primitives (`useState{:dart}`, `useReducer{:dart}`) use a coarse-grained update model: when state changes, the entire component and its children re-render. You can optimize this with `memo{:dart}`, `useMemo{:dart}`, and `useCallback{:dart}`, but it requires manual work.
 
 Signals offer fine-grained reactivity. Only components that actually read a changed signal re-render, automatically:
 
@@ -49,7 +49,7 @@ This happens automatically. You write simple code, and the library handles React
 
 ## Using Monitors in Components
 
-The `useComputed` hook provides a Monitor to your compute function:
+The `useComputed{:dart}` hook provides a `Monitor{:dart}` to your compute function:
 
 ```tsx
 import { Signal } from "@owanturist/signal"
@@ -91,7 +91,7 @@ When `showDetails` is `false`, changing `details` does not trigger a re-render.
 
 ## Sharing State Across Components [#sharing-state]
 
-Signal references are stable -- updating a value does not change the reference. Pass them via props or context like any other value. Only components that read a signal re-render when it changes.
+Signal references are stable — updating a value does not change the reference. Pass them via props or context like any other value. Only components that read a signal re-render when it changes.
 
 ```tsx
 import { Signal, ReadableSignal } from "@owanturist/signal"

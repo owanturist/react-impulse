@@ -153,6 +153,28 @@ All documentation content in `docs/content/` **must** follow the [Diataxis frame
 
 Do not mix types within a single page. When writing or reviewing documentation, use the Diataxis compass to classify content: (1) does it inform action or cognition? (2) does it serve acquisition or application? See the [writing-documentation-with-diataxis](.claude/skills/writing-documentation-with-diataxis/SKILL.md) skill for detailed guidance.
 
+### Writing Style
+
+**Em dashes:**
+- Use ` — ` (space, em dash, space) in prose — never use `--`
+- Example: "Batches can be nested — the outermost batch controls when notifications fire."
+
+**Capitalization:**
+- `Signal` is always capitalized in prose, whether referring to the concept or the class
+- `React` is always capitalized
+- API names (`useMonitor`, `useComputed`, `FormUnit`, etc.) must never appear as plain text in prose — always format them as inline code with the `{:ts}` language hint: `` `useMonitor{:ts}` ``
+- Package names (`@reduxjs/toolkit`, `@owanturist/signal`, etc.) are plain strings — format as inline code with **no** language hint: `` `@reduxjs/toolkit` ``. Never use `{:ts}` on a package name.
+
+**Inline code language hints (`{:ts}` vs `{:dart}`) in prose:**
+- Use `{:ts}` for TypeScript expressions with unambiguous syntax:
+  - Function or method calls (have parentheses): `Signal(0){:ts}`, `count.read(monitor){:ts}`
+  - Generic type expressions: `Signal<string>{:ts}`, `WritableSignal<number>{:ts}`
+  - Operators, assignments, literals: `Object.is{:ts}`, `.value = x{:ts}`, `true{:ts}`
+- Use `{:dart}` for everything else:
+  - Plain names (no parentheses, no generics): `Signal{:dart}`, `batch{:dart}`, `Monitor{:dart}`, `useState{:dart}`
+  - JSX elements: `<Counter />{:dart}`, `<Provider>{:dart}`
+- Note: in `<section className="typedef">` API reference sections, always use `{:dart}` for all `@param` and `@returns` type annotations (existing convention, unchanged).
+
 ### API Reference docs/ Style Guide
 
 API reference pages use these conventions. For fumadocs MDX syntax details see the [fumadocs skill](.claude/skills/fumadocs/SKILL.md); for twoslash annotations see the [twoslash skill](.claude/skills/twoslash/SKILL.md).

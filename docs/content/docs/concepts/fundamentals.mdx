@@ -3,11 +3,11 @@ title: Core Reactivity
 description: Signals, monitors, effects, and how they work together
 ---
 
-At the heart of this library are two primitives: **Signals** hold values, and **Monitors** track who is reading them. Different tools—`effect`, `useMonitor`, `useComputed`—bridge these primitives to your environment.
+At the heart of this library are two primitives: **Signals** hold values, and **Monitors** track who is reading them. Different tools—`effect{:dart}`, `useMonitor{:dart}`, `useComputed{:dart}`—bridge these primitives to your environment.
 
 ## The Core Idea
 
-A Signal is a container for a value that can change over time. The **Monitor** makes it reactive by tracking who is reading the signal.
+A Signal is a container for a value that can change over time. The **`Monitor{:dart}`** makes it reactive by tracking who is reading the signal.
 
 ```ts
 import { Signal, effect } from "@owanturist/signal"
@@ -23,13 +23,13 @@ count.write(1) // Effect re-runs, logs: 1
 
 When you call `count.read(monitor){:ts}`, two things happen:
 1. The signal returns its current value
-2. The signal records that this monitor is interested in its value
+2. The signal records that this `Monitor{:dart}` is interested in its value
 
 Later, when `count.write(1){:ts}` changes the value, the signal notifies all monitors that previously read it. Those monitors then trigger their associated code to re-run.
 
 ## Why Monitors Exist
 
-The Monitor solves dependency tracking by making it **explicit** and **scoped**:
+The `Monitor{:dart}` solves dependency tracking by making it **explicit** and **scoped**:
 
 ```ts
 const theme = Signal("light")
@@ -49,11 +49,11 @@ theme.write("dark")    // Only the first effect re-runs
 fontSize.write(16)     // Only the second effect re-runs
 ```
 
-Each effect gets its own monitor. When `theme` changes, it only notifies the monitors that actually read it.
+Each effect gets its own `Monitor{:dart}`. When `theme` changes, it only notifies the monitors that actually read it.
 
 ### Why Explicit Monitors?
 
-You might wonder why `read(monitor){:ts}` requires passing a monitor explicitly rather than tracking dependencies implicitly behind the scenes.
+You might wonder why `read(monitor){:ts}` requires passing a `Monitor{:dart}` explicitly rather than tracking dependencies implicitly behind the scenes.
 
 Many reactive systems hide tracking from the user. Read functions take no arguments, and the system figures out the context automatically. This looks clean at first.
 
@@ -89,7 +89,7 @@ class UserProfile {
 }
 ```
 
-Now TypeScript enforces correct usage. If a function needs to track dependencies, it must receive a monitor. If it doesn't need tracking, use `untracked`. There's no ambiguity, no silent fallbacks, and no hidden behavior.
+Now TypeScript enforces correct usage. If a function needs to track dependencies, it must receive a `Monitor{:dart}`. If it doesn't need tracking, use `untracked{:dart}`. There's no ambiguity, no silent fallbacks, and no hidden behavior.
 
 ### Fine-Grained vs Coarse-Grained Reactivity
 

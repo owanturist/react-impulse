@@ -134,7 +134,7 @@ function Counter() {
 const CounterContext = createActorContext(counterMachine) // [!code highlight]
 ```
 
-Redux is the only library that _requires_ a `<Provider>` — components cannot access the store without it. Zustand and Jotai work without providers; their hooks connect to module-level stores directly. XState offers both patterns: `useActorRef(){:ts}` for component-local actors and `createActorContext(){:ts}` for shared access via a Provider. `@owanturist/signal` is the most flexible — signals are plain values that work as module globals, component state via `useState{:ts}`, props, or context, with no library infrastructure at all.
+Redux is the only library that _requires_ a `<Provider>{:dart}` — components cannot access the store without it. Zustand and Jotai work without providers; their hooks connect to module-level stores directly. XState offers both patterns: `useActorRef(){:ts}` for component-local actors and `createActorContext(){:ts}` for shared access via a Provider. `@owanturist/signal` is the most flexible — signals are plain values that work as module globals, component state via `useState{:dart}`, props, or context, with no library infrastructure at all.
 
 ### Passing State Through Components [#passing-state]
 
@@ -211,7 +211,7 @@ function CounterBadge({ actorRef }: { actorRef: ActorRefFrom<typeof counterMachi
 }
 ```
 
-Redux, Zustand, and Jotai give every component implicit access to shared state — any descendant can reach into the store without receiving anything via props. XState works the same way with `createActorContext(){:ts}`, or you can pass `actorRef{:ts}` explicitly as a prop. `@owanturist/signal` uses explicit passing via props or context — the component tree shows the data flow. The key insight: passing a signal as a prop without reading it creates no subscription and no re-render. Intermediate components are transparent pass-throughs.
+Redux, Zustand, and Jotai give every component implicit access to shared state — any descendant can reach into the store without receiving anything via props. XState works the same way with `createActorContext(){:ts}`, or you can pass `actorRef{:dart}` explicitly as a prop. `@owanturist/signal` uses explicit passing via props or context — the component tree shows the data flow. The key insight: passing a signal as a prop without reading it creates no subscription and no re-render. Intermediate components are transparent pass-throughs.
 
 ### Scoping and Isolation [#scoping-isolation]
 
@@ -223,7 +223,7 @@ State isolation strategies differ significantly:
 
 - **Zustand** — One store per `create(){:ts}` call. Multiple independent stores for different domains (auth, cart, UI) is the standard pattern. For per-subtree isolation, a `createStore(){:ts}` + context pattern is available but rarely needed.
 
-- **Jotai** — `<Provider>` creates an isolated atom scope where atoms have independent values. Useful for testing, modals, and repeated widgets that each need their own state. Atoms resolve to the nearest Provider; without one, they use the global store.
+- **Jotai** — `<Provider>{:dart}` creates an isolated atom scope where atoms have independent values. Useful for testing, modals, and repeated widgets that each need their own state. Atoms resolve to the nearest Provider; without one, they use the global store.
 
 - **XState** — `useActorRef(){:ts}` scopes an actor to the component that creates it. `createActorContext(){:ts}` scopes to its Provider subtree — each Provider instance creates a fresh, independent actor.
 
@@ -399,7 +399,7 @@ function Counter() {
 }
 ```
 
-Every library ends up in a React component, but the setup cost varies significantly. Redux requires the most ceremony — slices, reducers, a store, typed hooks, and a `<Provider>` — before a component can read or write a value; XState demands a similar investment in machine definitions and event types. Zustand collapses state and actions into a single `create(){:ts}` call with no provider required, while Jotai and `@owanturist/signal` are the most concise — one function call creates a reactive value. All five libraries subscribe via hooks, not React context: Redux, Zustand, and XState use selector functions; Jotai selects at the atom level; `@owanturist/signal` offers two hooks — `useMonitor(){:ts}` returns a monitor for reading signals directly in the render body, and `useComputed(){:ts}` accepts a signal reference or factory function for memoized derivations.
+Every library ends up in a React component, but the setup cost varies significantly. Redux requires the most ceremony — slices, reducers, a store, typed hooks, and a `<Provider>{:dart}` — before a component can read or write a value; XState demands a similar investment in machine definitions and event types. Zustand collapses state and actions into a single `create(){:ts}` call with no provider required, while Jotai and `@owanturist/signal` are the most concise — one function call creates a reactive value. All five libraries subscribe via hooks, not React context: Redux, Zustand, and XState use selector functions; Jotai selects at the atom level; `@owanturist/signal` offers two hooks — `useMonitor(){:ts}` returns a monitor for reading signals directly in the render body, and `useComputed(){:ts}` accepts a signal reference or factory function for memoized derivations.
 
 ## Re-render Optimization [#re-render-optimization]
 
@@ -502,7 +502,7 @@ function FirstNameOnly({ actorRef }: { actorRef: ActorRefFrom<typeof userMachine
 
 Re-render behavior is where these libraries diverge most:
 
-- **`@owanturist/signal`** — The Monitor tracks exactly which signals each `useComputed(){:ts}` call reads. The compute function only re-runs when one of those specific signals changes — writes to unrelated signals are invisible. Dependencies are dynamic: if a conditional branch skips reading a signal, that signal won't cause re-renders. On top of that, each signal can define a custom `equals{:ts}` option that prevents propagation at the source — if a write produces a value equal to the current one, no subscribers are notified at all. `useComputed(){:ts}` then applies its own `equals{:ts}` as a second gate: if the compute result hasn't changed, no re-render is enqueued.
+- **`@owanturist/signal`** — The Monitor tracks exactly which signals each `useComputed(){:ts}` call reads. The compute function only re-runs when one of those specific signals changes — writes to unrelated signals are invisible. Dependencies are dynamic: if a conditional branch skips reading a signal, that signal won't cause re-renders. On top of that, each signal can define a custom `equals{:dart}` option that prevents propagation at the source — if a write produces a value equal to the current one, no subscribers are notified at all. `useComputed(){:ts}` then applies its own `equals{:dart}` as a second gate: if the compute result hasn't changed, no re-render is enqueued.
 
 - **Redux** — The selector function passed to `useSelector(){:ts}` runs on **every** store dispatch, regardless of which slice changed. Re-renders are skipped only when the result passes the equality check (`===` by default, customizable via `useSelector(selector, equalityFn){:ts}`). The selector computation cost is paid unconditionally. For derived values, `createSelector(){:ts}` from reselect adds memoization to avoid recomputing when inputs haven't changed.
 
@@ -512,7 +512,7 @@ Re-render behavior is where these libraries diverge most:
 
 - **XState** — `useSelector(){:ts}` selects specific state slices, re-rendering only when the selected value changes. The machine structure naturally constrains which state transitions are possible, reducing unexpected updates.
 
-Jotai and `@owanturist/signal` provide the finest granularity out of the box — compute functions only run when their actual dependencies change. Redux and Zustand selectors run on every dispatch, relying on equality checks to prevent unnecessary re-renders. `@owanturist/signal` adds a unique two-level equality system: signal-level `equals{:ts}` prevents propagation at the source, and `useComputed(){:ts}`-level `equals{:ts}` prevents re-renders from identical results. XState's structured approach sidesteps the problem differently — by making state transitions explicit.
+Jotai and `@owanturist/signal` provide the finest granularity out of the box — compute functions only run when their actual dependencies change. Redux and Zustand selectors run on every dispatch, relying on equality checks to prevent unnecessary re-renders. `@owanturist/signal` adds a unique two-level equality system: signal-level `equals{:dart}` prevents propagation at the source, and `useComputed(){:ts}`-level `equals{:dart}` prevents re-renders from identical results. XState's structured approach sidesteps the problem differently — by making state transitions explicit.
 
 ## Derived State and Composition [#derived-state]
 
@@ -561,7 +561,7 @@ Jotai and `@owanturist/signal` handle derived state most naturally — derived a
 
 Redux has the most mature ecosystem of any React state library. Redux DevTools provides time-travel debugging, action replay, and state diffing. Redux Toolkit Query handles data fetching and caching. Middleware like thunks and sagas cover async workflows. If ecosystem breadth and battle-tested tooling are priorities, Redux is hard to beat.
 
-Zustand offers a lean middleware system — `persist{:ts}` for localStorage, `devtools{:ts}` for Redux DevTools integration, `immer{:ts}` for mutable update syntax. It strikes a balance between simplicity and extensibility.
+Zustand offers a lean middleware system — `persist{:dart}` for localStorage, `devtools{:dart}` for Redux DevTools integration, `immer{:dart}` for mutable update syntax. It strikes a balance between simplicity and extensibility.
 
 Jotai provides `jotai-devtools`, Suspense integration, and utilities like `atomWithStorage(){:ts}` for persistence. Its atom model integrates well with React's concurrent features.
 
@@ -660,7 +660,7 @@ All five libraries support TypeScript, but the ergonomics differ:
 
 - **`@owanturist/signal`** — Full inference. `Signal(0){:ts}` infers `WritableSignal<number>{:dart}`. Derived signals infer their return type. Rarely needs annotations.
 
-- **Redux** — Good inference within slices, but requires manual `RootState{:dart}` and `AppDispatch{:dart}` type definitions. `useSelector(){:ts}` is context-based — it reads from whichever `<Provider>` wraps the component, but TypeScript cannot infer the store shape from React context. You must create pre-typed hooks via `useSelector.withTypes<RootState>(){:ts}` (or the older `TypedUseSelectorHook{:dart}` pattern) and use them everywhere. Multiple stores compound the problem: each needs its own `RootState{:dart}` and its own typed hooks, with no mechanism for TypeScript to resolve which store applies from context alone.
+- **Redux** — Good inference within slices, but requires manual `RootState{:dart}` and `AppDispatch{:dart}` type definitions. `useSelector(){:ts}` is context-based — it reads from whichever `<Provider>{:dart}` wraps the component, but TypeScript cannot infer the store shape from React context. You must create pre-typed hooks via `useSelector.withTypes<RootState>(){:ts}` (or the older `TypedUseSelectorHook{:dart}` pattern) and use them everywhere. Multiple stores compound the problem: each needs its own `RootState{:dart}` and its own typed hooks, with no mechanism for TypeScript to resolve which store applies from context alone.
 
 - **Zustand** — Requires an interface or type parameter on `create<T>(){:ts}` for full type safety. Selectors and actions infer types from the store definition.
 
@@ -672,15 +672,15 @@ All five libraries support TypeScript, but the ergonomics differ:
 
 Learning curve depends on two factors: how many concepts you need to learn before writing productive code, and how familiar those concepts are from existing React and JavaScript knowledge.
 
-- **Zustand** — Flattest learning curve. `create()` returns a hook; call it with a selector. If you know React hooks and plain objects, you already know Zustand. The mental model is "a global `useState` with selectors."
+- **Zustand** — Flattest learning curve. `create(){:ts}` returns a hook; call it with a selector. If you know React hooks and plain objects, you already know Zustand. The mental model is "a global `useState{:dart}` with selectors."
 
-- **Jotai** — Low barrier. Atoms look like signals: `atom(0)` for primitive, `atom((get) => ...)` for derived. The `get` parameter maps to React's `useMemo` intuition. The only new concept is that atoms are config descriptors whose values live in an implicit store.
+- **Jotai** — Low barrier. Atoms look like signals: `atom(0){:ts}` for primitive, `atom((get) => ...){:ts}` for derived. The `get{:dart}` parameter maps to React's `useMemo` intuition. The only new concept is that atoms are config descriptors whose values live in an implicit store.
 
-- **`@owanturist/signal`** — Small API surface, but the [`Monitor`](/docs/concepts/how-signals-work-in-react) parameter is a genuinely novel concept — no other mainstream library uses explicit dependency-tracking tokens passed at the call site. Once you understand that `signal.read(monitor)` both returns a value and registers a dependency, everything else follows a single coherent pattern. The [getting-started guide](/docs/getting-started) introduces concepts in a natural progression: [`Signal`](/docs/api/signal) → [read/write](/docs/guides/reading-and-writing-signals) → [derived signals](/docs/api/signal#derived-readonly) → [`effect`](/docs/api/effect) → [`batch`](/docs/api/batch) → [`useComputed`](/docs/api/use-computed).
+- **`@owanturist/signal`** — Small API surface, but the [`Monitor`](/docs/concepts/how-signals-work-in-react) parameter is a genuinely novel concept — no other mainstream library uses explicit dependency-tracking tokens passed at the call site. Once you understand that `signal.read(monitor){:ts}` both returns a value and registers a dependency, everything else follows a single coherent pattern. The [getting-started guide](/docs/getting-started) introduces concepts in a natural progression: [`Signal`](/docs/api/signal) → [read/write](/docs/guides/reading-and-writing-signals) → [derived signals](/docs/api/signal#derived-readonly) → [`effect`](/docs/api/effect) → [`batch`](/docs/api/batch) → [`useComputed`](/docs/api/use-computed).
 
-- **Redux** — Steepest boilerplate curve. Even with Redux Toolkit reducing ceremony, you must learn slices, reducers, actions, dispatch, the store, `<Provider>`, and pre-typed hooks before a single value reaches a component. The concepts themselves aren't complex, but the indirection (action → reducer → store → selector → component) takes time to internalize. The payoff is a predictable, auditable architecture for large teams.
+- **Redux** — Steepest boilerplate curve. Even with Redux Toolkit reducing ceremony, you must learn slices, reducers, actions, dispatch, the store, `<Provider>{:dart}`, and pre-typed hooks before a single value reaches a component. The concepts themselves aren't complex, but the indirection (action → reducer → store → selector → component) takes time to internalize. The payoff is a predictable, auditable architecture for large teams.
 
-- **XState** — Steepest conceptual curve. Before writing any working code, you need to understand finite state machines: states, transitions, events, context, guards, and actions. This is a paradigm shift from data-centric state management. The `setup()` API helps with TypeScript, but the machine definition language is substantial. The payoff is that impossible states become unrepresentable.
+- **XState** — Steepest conceptual curve. Before writing any working code, you need to understand finite state machines: states, transitions, events, context, guards, and actions. This is a paradigm shift from data-centric state management. The `setup(){:ts}` API helps with TypeScript, but the machine definition language is substantial. The payoff is that impossible states become unrepresentable.
 
 Zustand and Jotai are the fastest to get started with. `@owanturist/signal` requires learning the Monitor concept but rewards that investment with a small, consistent API. Redux and XState have the longest ramp-up, but their structure pays dividends in complex applications where predictability and explicit modeling matter.
 
