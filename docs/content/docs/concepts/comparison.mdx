@@ -21,7 +21,7 @@ These libraries differ fundamentally in how they think about state:
 
 - **Jotai** — Atomic state with bottom-up composition. Break state into small independent atoms that compose into derived atoms. Conceptually close to signals — both track dependencies between reactive units.
 
-- **XState v5** — Finite state machines and statecharts. State transitions are explicit and visual. Best suited for complex workflows where modeling possible states prevents bugs that data-centric approaches miss.
+- **XState** — Finite state machines and statecharts. State transitions are explicit and visual. Best suited for complex workflows where modeling possible states prevents bugs that data-centric approaches miss.
 
 ## State Ownership and Distribution [#state-distribution]
 
@@ -66,7 +66,10 @@ function App() {
 import { create } from "zustand"
 
 // Module scope — returns a self-contained hook
-const useCounter = create<{ count: number; increment: () => void }>((set) => ({
+const useCounter = create<{
+  count: number;
+  increment: () => void
+}>((set) => ({
   count: 0,
   increment: () => set((state) => ({ count: state.count + 1 })),
 }))
@@ -91,7 +94,7 @@ function Counter() {
 }
 ```
 
-```tsx tab="XState v5"
+```tsx tab="XState"
 import { useActorRef, useSelector } from "@xstate/react"
 import { createActorContext } from "@xstate/react"
 
@@ -162,7 +165,7 @@ function CounterBadge() {
 }
 ```
 
-```tsx tab="XState v5"
+```tsx tab="XState"
 import { CounterContext } from "./counterContext"
 
 // Shared: descendants use context hooks
@@ -192,7 +195,7 @@ State isolation strategies differ significantly:
 
 - **Jotai** — `<Provider>` creates an isolated atom scope where atoms have independent values. Useful for testing, modals, and repeated widgets that each need their own state. Atoms resolve to the nearest Provider; without one, they use the global store.
 
-- **XState v5** — `useActorRef(){:ts}` scopes an actor to the component that creates it. `createActorContext(){:ts}` scopes to its Provider subtree — each Provider instance creates a fresh, independent actor.
+- **XState** — `useActorRef(){:ts}` scopes an actor to the component that creates it. `createActorContext(){:ts}` scopes to its Provider subtree — each Provider instance creates a fresh, independent actor.
 
 <Callout type="idea">
 See [Using Signals in React](/docs/guides/using-signals-in-react) for detailed patterns on creating signals in components, passing them as props, and distributing them via context.
@@ -307,7 +310,7 @@ function Counter() {
 }
 ```
 
-```tsx tab="XState v5"
+```tsx tab="XState"
 import { setup, assign } from "xstate"
 import { useActorRef, useSelector } from "@xstate/react"
 
@@ -415,7 +418,7 @@ function Counter() {
 }
 ```
 
-```tsx tab="XState v5"
+```tsx tab="XState"
 import { useActorRef, useSelector } from "@xstate/react"
 
 function Counter() {
@@ -515,7 +518,7 @@ function FirstNameOnly() {
 }
 ```
 
-```tsx tab="XState v5"
+```tsx tab="XState"
 import { useSelector } from "@xstate/react"
 
 function FullName({ actorRef }: { actorRef: ActorRefFrom<typeof userMachine> }) {
@@ -542,7 +545,7 @@ Re-render behavior is where these libraries diverge most:
 
 - **Jotai** — Atom-level subscriptions. Components only re-render when consumed atoms change. `useSetAtom(){:ts}` subscribes to nothing — write-only access without re-renders. Closest to signals in granularity.
 
-- **XState v5** — `useSelector(){:ts}` selects specific state slices, re-rendering only when the selected value changes. The machine structure naturally constrains which state transitions are possible, reducing unexpected updates.
+- **XState** — `useSelector(){:ts}` selects specific state slices, re-rendering only when the selected value changes. The machine structure naturally constrains which state transitions are possible, reducing unexpected updates.
 
 Jotai and `@owanturist/signal` provide the finest granularity out of the box — compute functions only run when their actual dependencies change. Redux and Zustand selectors run on every dispatch, relying on equality checks to prevent unnecessary re-renders. `@owanturist/signal` adds a unique two-level equality system: signal-level `equals{:ts}` prevents propagation at the source, and `useComputed(){:ts}`-level `equals{:ts}` prevents re-renders from identical results. XState's structured approach sidesteps the problem differently — by making state transitions explicit.
 
@@ -580,7 +583,7 @@ const doubledAtom = atom((get) => get(countAtom) * 2)
 const quadrupledAtom = atom((get) => get(doubledAtom) * 2)
 ```
 
-```ts tab="XState v5"
+```ts tab="XState"
 // XState has no built-in derived state.
 // Use selector functions on state snapshots:
 const selectDoubled = (state) => state.context.count * 2
@@ -668,7 +671,7 @@ const greetingAtom = atom(                  // Atom<string>
 )
 ```
 
-```ts tab="XState v5"
+```ts tab="XState"
 import { setup, assign } from "xstate"
 
 // Types defined in setup() — verbose but catches invalid transitions
@@ -698,7 +701,7 @@ All five libraries support TypeScript, but the ergonomics differ:
 
 - **Jotai** — Excellent inference, similar to signals. `atom(0){:ts}` infers `PrimitiveAtom<number>{:dart}`. Derived atoms auto-infer. Annotations are rarely needed.
 
-- **XState v5** — The `setup(){:ts}` API provides good type safety for context, events, and actions. More verbose than atom-based libraries due to the machine structure, but the types catch invalid transitions at compile time.
+- **XState** — The `setup(){:ts}` API provides good type safety for context, events, and actions. More verbose than atom-based libraries due to the machine structure, but the types catch invalid transitions at compile time.
 
 ## Learning Curve [#learning-curve]
 
@@ -712,7 +715,7 @@ Learning curve depends on two factors: how many concepts you need to learn befor
 
 - **Redux** — Steepest boilerplate curve. Even with Redux Toolkit reducing ceremony, you must learn slices, reducers, actions, dispatch, the store, `<Provider>`, and pre-typed hooks before a single value reaches a component. The concepts themselves aren't complex, but the indirection (action → reducer → store → selector → component) takes time to internalize. The payoff is a predictable, auditable architecture for large teams.
 
-- **XState v5** — Steepest conceptual curve. Before writing any working code, you need to understand finite state machines: states, transitions, events, context, guards, and actions. This is a paradigm shift from data-centric state management. The `setup()` API helps with TypeScript, but the machine definition language is substantial. The payoff is that impossible states become unrepresentable.
+- **XState** — Steepest conceptual curve. Before writing any working code, you need to understand finite state machines: states, transitions, events, context, guards, and actions. This is a paradigm shift from data-centric state management. The `setup()` API helps with TypeScript, but the machine definition language is substantial. The payoff is that impossible states become unrepresentable.
 
 Zustand and Jotai are the fastest to get started with. `@owanturist/signal` requires learning the Monitor concept but rewards that investment with a small, consistent API. Redux and XState have the longest ramp-up, but their structure pays dividends in complex applications where predictability and explicit modeling matter.
 
@@ -728,7 +731,7 @@ Learning curve is not the same as long-term productivity. A library that takes l
 | `@owanturist/signal` | `signal` + `signal-react` | ~2.6 kB |
 | Jotai | `jotai` | ~3.6 kB |
 | Redux | `@reduxjs/toolkit` + `react-redux` | ~15 kB |
-| XState v5 | `xstate` + `@xstate/react` | ~17 kB |
+| XState | `xstate` + `@xstate/react` | ~17 kB |
 
 Zustand is the smallest. `@owanturist/signal` and Jotai sit in a similar range. Redux and XState are significantly larger, though both provide substantially more built-in functionality. Bundle size rarely determines library choice on its own, but it matters for applications targeting constrained environments or strict performance budgets.
 
@@ -761,7 +764,7 @@ Redux's core is also framework-agnostic, though Redux Toolkit and react-redux ar
 
 **Choose Jotai when** you want atomic state composition with excellent React integration. Jotai's model is conceptually similar to signals — if you prefer implicit dependency tracking and tight Suspense integration, Jotai is worth evaluating.
 
-**Choose XState v5 when** your state has complex transitions, guards, and side effects that benefit from visual modeling. State machines prevent entire categories of bugs by making impossible states unrepresentable.
+**Choose XState when** your state has complex transitions, guards, and side effects that benefit from visual modeling. State machines prevent entire categories of bugs by making impossible states unrepresentable.
 
 ## See Also [#see-also]
 
